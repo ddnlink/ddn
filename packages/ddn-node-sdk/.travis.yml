@@ -1,0 +1,21 @@
+os:
+  - linux
+language: node_js
+env:
+  - CXX=g++-4.8
+node_js:
+  - "6.0.0"
+  - "7"
+notifications:
+  recipients:
+    - huo.ding@qq.com
+    - xingxing@qq.com
+  email:
+    on_success: change
+    on_failure: always
+addons:
+  apt:
+    sources:
+      - ubuntu-toolchain-r-test
+    packages:
+      - g++-4.8
