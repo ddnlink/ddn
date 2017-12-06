@@ -24,7 +24,7 @@ var sha256 = require('fast-sha256')
 var RIPEMD160 = require('ripemd160')
 var base58check = require('./base58check')
 
-const NORMAL_PREFIX = 'A' // A
+const NORMAL_PREFIX = 'D' // D
 
 module.exports = {
   isAddress: function (address) {
@@ -35,7 +35,7 @@ module.exports = {
       if (!base58check.decodeUnsafe(address.slice(1))) {
         return false
       }
-      if (['A'].indexOf(address[0]) == -1) {
+      if (['D'].indexOf(address[0]) == -1) {
         return false
       }
     }
@@ -49,7 +49,7 @@ module.exports = {
     if (!base58check.decodeUnsafe(address.slice(1))) {
       return false
     }
-    if (['A'].indexOf(address[0]) == -1) {
+    if (['D'].indexOf(address[0]) == -1) {
       return false
     }
     return true
