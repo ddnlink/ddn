@@ -1,0 +1,48 @@
+{
+  "port": 7000,
+  "address": "0.0.0.0",
+  "serveHttpAPI": true,
+  "serveHttpWallet": true,
+  "version": "0.1.1",
+  "fileLogLevel": "info",
+  "consoleLogLevel": "log",
+  "sharePort": true,
+  "api": {
+    "access": {
+      "whiteList": []
+    }
+  },
+  "peers": {
+    "list": [],
+    "blackList": [],
+    "options": {
+      "timeout": 20000
+    }
+  },
+  "forging": {
+    "secret": [
+    ],
+    "access": {
+      "whiteList": [
+        "127.0.0.1"
+      ]
+    }
+  },
+  "loading": {
+    "verifyOnLoading": true,
+    "loadPerIteration": 5000
+  },
+  "ssl": {
+    "enabled": false,
+    "options": {
+      "port": 443,
+      "address": "0.0.0.0",
+      "key": "./ssl/server.key",
+      "cert": "./ssl/server.crt"
+    }
+  },
+  "dapp": {
+    "autoexec": [
+    ]
+  }
+}

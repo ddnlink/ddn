@@ -1,0 +1,44 @@
+{
+  "name": "ebookcoin-cli",
+  "preferGlobal": true,
+  "version": "2.0.0",
+  "description": "Command line interface to manage ebookchain",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 0"
+  },
+  "keywords": [
+    "ebookcoin",
+    "blockchain",
+    "cli"
+  ],
+  "bin": {
+    "ebookcoin-cli": "./bin/ebookcoin-cli"
+  },
+  "author": "HuoDing <hd@qq.com>",
+  "license": "MIT",
+  "dependencies": {
+    "ebookcoin-js": "*",
+    "async": "1.5.2",
+    "bitcore-mnemonic": "1.0.1",
+    "browserify-bignum": "1.3.0-2",
+    "bytebuffer": "^4.0.0",
+    "commander": "^2.8.1",
+    "crypto-browserify": "^3.9.14",
+    "fs-extra": "0.30.0",
+    "gift": "0.6.1",
+    "inquirer": "^3.3.0",
+    "js-nacl": "0.6.0",
+    "request": "^2.62.0",
+    "rmdir": "^1.1.0",
+    "valid-url": "1.0.9"
+  },
+  "bugs": {
+    "url": "https://github.com/Ebookcoin/ebookcoin-cli/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Ebookcoin/ebookcoin-cli.git"
+  },
+  "homepage": "https://github.com/Ebookcoin/ebookcoin-cli"
+}
