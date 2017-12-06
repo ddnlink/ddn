@@ -1,6 +1,6 @@
-# Ebookcoin Client
+# Ebookchain Client
 
-A command line interface to manage [Ebookchain](https://github.com/Ebookcoin) blockchain apps.
+A command line interface to manage [Ebookchain](https://github.com/Ebookchain) blockchain apps.
 
 ## Installation
 
@@ -8,15 +8,15 @@ A command line interface to manage [Ebookchain](https://github.com/Ebookcoin) bl
 最新的dapps系列子命令要求node版本号为v8.4.0以上
 
 ```
-npm install -g ebookcoin-cli
+npm install -g ebookchain-cli
 ```
 
 ## Usage
 
 ```
-./bin/ebookcoin-cli --help
+./bin/ebookchain-cli --help
 
-  Usage: ebookcoin-cli [options] [command]
+  Usage: ebookchain-cli [options] [command]
 
 
   Commands:
@@ -65,4 +65,4 @@ npm install -g ebookcoin-cli
 
 ## Documents
 
-[ebookcoin-docs](https://github.com/Ebookcoin/docs)
+[ebookchain-docs](https://github.com/Ebookchain/docs)

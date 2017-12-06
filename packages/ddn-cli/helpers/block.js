@@ -63,7 +63,7 @@ module.exports = {
 		if (accountsFile && fs.existsSync(accountsFile)) {
 			var lines = fs.readFileSync(accountsFile, 'utf8').split('\n');
 			for (var i in lines) {
-				var parts = lines[i].split('\t');
+				var parts = lines[i].split('  ');
 				if (parts.length != 2) {
 					console.error('Invalid recipient balance format');
 					process.exit(1);

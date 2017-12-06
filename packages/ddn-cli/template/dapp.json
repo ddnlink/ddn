@@ -1,10 +1,10 @@
 {
-  "name": "ebookcoin-dapp-helloworld",
-  "link": "https://github.com/AschPlatform/ebookcoin-dapp-helloworld/archive/master.zip",
+  "name": "ebookchain-dapp-helloworld",
+  "link": "git+http://git.ebookchain.net/ebookchain-dapp-helloworld/archive/master.zip",
   "category": 1,
-  "description": "A hello world demo for ebookcoin dapp",
-  "tags": "ebookcoin,dapp,demo",
-  "icon": "http://o7dyh3w0x.bkt.clouddn.com/hello.png",
+  "description": "A hello world demo for ebookchain dapp",
+  "tags": "ebookchain,dapp,demo",
+  "icon": "http://asd.bkt.clouddn.com/hello.png",
   "type": 0,
   "delegates": [
     "a518e4390512e43d71503a02c9912413db6a9ffac4cbefdcd25b8fa2a1d5ca27",

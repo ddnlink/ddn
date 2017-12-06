@@ -1,6 +1,6 @@
 var fs = require('fs');
 var crypto = require('crypto');
-var ebookcoinJS = require('ebookcoin-js');
+var ebookchainJS = require('ebookchain-js');
 var Api = require('../helpers/api.js');
 var blockHelper = require('../helpers/block.js');
 var cryptoLib = require('../lib/crypto.js');
@@ -193,7 +193,7 @@ function sendMoney(options) {
   // getApi().put('/api/transactions/', params, function (err, result) {
   //   console.log(err || result);
   // });
-  var trs = ebookcoinJS.transaction.createTransaction(
+  var trs = ebookchainJS.transaction.createTransaction(
     options.to,
     Number(options.amount),
     options.message,
@@ -206,7 +206,7 @@ function sendMoney(options) {
 }
 
 function sendAsset(options) {
-  var trs = ebookcoinJS.uia.createTransfer(
+  var trs = ebookchainJS.uia.createTransfer(
     options.currency,
     options.amount,
     options.to,
@@ -228,7 +228,7 @@ function registerDelegate(options) {
   // getApi().put('/api/delegates/', params, function (err, result) {
   //   console.log(err || result);
   // });
-  var trs = ebookcoinJS.delegate.createDelegate(
+  var trs = ebookchainJS.delegate.createDelegate(
     options.username,
     options.secret,
     options.secondSecret
@@ -242,7 +242,7 @@ function vote(secret, publicKeys, op, secondSecret) {
   var votes = publicKeys.split(',').map(function (el) {
     return op + el;
   });
-  var trs = ebookcoinJS.vote.createVote(
+  var trs = ebookchainJS.vote.createVote(
     votes,
     secret,
     secondSecret
@@ -292,7 +292,7 @@ function downvote(options) {
 }
 
 function setSecondSecret(options) {
-  var trs = ebookcoinJS.signature.createSignature(options.secret, options.secondSecret);
+  var trs = ebookchainJS.signature.createSignature(options.secret, options.secondSecret);
   getApi().broadcastTransaction(trs, function (err, result) {
     console.log(err || result.transactionId)
   });
@@ -304,21 +304,21 @@ function registerDapp(options) {
     return;
   }
   var dapp = JSON.parse(fs.readFileSync(options.metafile, 'utf8'));
-  var trs = ebookcoinJS.dapp.createDApp(dapp, options.secret, options.secondSecret);
+  var trs = ebookchainJS.dapp.createDApp(dapp, options.secret, options.secondSecret);
   getApi().broadcastTransaction(trs, function (err, result) {
     console.log(err || result.transactionId)
   });
 }
 
 function deposit(options) {
-  var trs = ebookcoinJS.transfer.createInTransfer(options.dapp, options.currency, options.amount, options.secret, options.secondSecret)
+  var trs = ebookchainJS.transfer.createInTransfer(options.dapp, options.currency, options.amount, options.secret, options.secondSecret)
   getApi().broadcastTransaction(trs, function (err, result) {
     console.log(err || result.transactionId)
   });
 }
 
 function dappTransaction(options) {
-  var trs = ebookcoinJS.dapp.createInnerTransaction({
+  var trs = ebookchainJS.dapp.createInnerTransaction({
     fee: options.fee,
     type: Number(options.type),
     args: options.args
@@ -329,7 +329,7 @@ function dappTransaction(options) {
 }
 
 function lock(options) {
-  var trs = ebookcoinJS.transaction.createLock(options.height, options.secret, options.secondSecret)
+  var trs = ebookchainJS.transaction.createLock(options.height, options.secret, options.secondSecret)
   getApi().broadcastTransaction(trs, function (err, result) {
     console.log(err || result.transactionId)
   });
@@ -354,7 +354,7 @@ function getTransactionBytes(options) {
     console.log('Invalid transaction format')
     return
   }
-  console.log(ebookcoinJS.crypto.getBytes(trs, true, true).toString('hex'))
+  console.log(ebookchainJS.crypto.getBytes(trs, true, true).toString('hex'))
 }
 
 function getTransactionId(options) {
@@ -364,7 +364,7 @@ function getTransactionId(options) {
     console.log('Invalid transaction format')
     return
   }
-  console.log(ebookcoinJS.crypto.getId(trs))
+  console.log(ebookchainJS.crypto.getId(trs))
 }
 
 function getBlockPayloadHash(options) {
@@ -376,7 +376,7 @@ function getBlockPayloadHash(options) {
   }
   var payloadHash = crypto.createHash('sha256');
   for (let i = 0; i < block.transactions.length; ++i) {
-    payloadHash.update(ebookcoinJS.crypto.getBytes(block.transactions[i]))
+    payloadHash.update(ebookchainJS.crypto.getBytes(block.transactions[i]))
   }
   console.log(payloadHash.digest().toString('hex'))
 }
@@ -403,7 +403,7 @@ function getBlockId(options) {
 }
 
 function verifyBytes(options) {
-  console.log(ebookcoinJS.crypto.verifyBytes(options.bytes, options.signature, options.publicKey))
+  console.log(ebookchainJS.crypto.verifyBytes(options.bytes, options.signature, options.publicKey))
 }
 
 module.exports = function(program) {
@@ -568,7 +568,7 @@ module.exports = function(program) {
   program
     .command("listdiffvotes")
     .description("list the votes each other")
-    .option("-u, --username <username>", "", process.env.EBOOKCOIN_USER)
+    .option("-u, --username <username>", "", process.env.EBOOKCHAIN_USER)
     .action(listdiffvotes);
 
   program

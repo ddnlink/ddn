@@ -6,7 +6,7 @@ var blockHelper = require("../helpers/block.js");
 var cryptoLib = require("../lib/crypto.js");
 var dappHelper = require("../helpers/dapp.js");
 var Api = require('../helpers/api.js');
-var EbookcoinUtils = require('ebookcoin-js').utils;
+var EbookchainUtils = require('ebookchain-js').utils;
 
 var globalOptions;
 
@@ -32,6 +32,22 @@ function genGenesisBlock(options) {
 	});
 	writeFileSync("./genesisBlock.json", newBlockInfo.block);
 	
+	var logFile = "./genGenesisBlock.log";
+	writeFileSync(logFile, "genesis account:\n");
+	appendFileSync(logFile, genesisAccount);
+	appendFileSync(logFile, "\ndelegates secrets:\n");
+	appendFileSync(logFile, delegateSecrets);
+	console.log('New genesis block and related account has been created, please see the two file: genesisBlock.json and genGenesisBlock.log');
+}
+
+function genMine(options) {
+	var genesisAccount = accountHelper.account(cryptoLib.generateSecret());
+	var newBlockInfo = blockHelper.new(genesisAccount, null, options.file);
+	var delegateSecrets = newBlockInfo.delegates.map(function (i) {
+		return i.secret;
+	});
+	writeFileSync("./genesisBlock.json", newBlockInfo.block);
+
 	var logFile = "./genGenesisBlock.log";
 	writeFileSync(logFile, "genesis account:\n");
 	appendFileSync(logFile, genesisAccount);
@@ -159,8 +175,8 @@ function delegatestat() {
 						d.balance / 100000000,
 						b ? b.height : '',
 						b ? b.id : '',
-						EbookcoinUtils.format.fullTimestamp(b ? b.timestamp : ''),
-						EbookcoinUtils.format.timeAgo(b ? b.timestamp : ''));
+						EbookchainUtils.format.fullTimestamp(b ? b.timestamp : ''),
+						EbookchainUtils.format.timeAgo(b ? b.timestamp : ''));
 			}
 		});
 	});
