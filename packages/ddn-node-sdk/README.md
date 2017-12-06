@@ -1,9 +1,9 @@
-# Ebookcoin Javascript Library
+# Ebookchain Javascript Library
 
 ## Install
 
 ```
-npm install ebookcoin-js --save
+npm install ebookchain-js --save
 ```
 
 ## Import
@@ -11,21 +11,21 @@ npm install ebookcoin-js --save
 CommonJS
 
 ```
-var EbookcoinJS = require('ebookcoin-js');
+var EbookchainJS = require('ebookchain-js');
 ```
 
 Front end
 
 ```
-<script type="text/javascript" src="/ebookcoin.js"></script>
+<script type="text/javascript" src="/ebookchain.js"></script>
 # or
-<script type="text/javascript" src="/ebookcoin.min.js"></script>
+<script type="text/javascript" src="/ebookchain.min.js"></script>
 
-console.log(window.EbookcoinJS)
+console.log(window.EbookchainJS)
 ```
 
 
 
 ## Usage
 
-Please reference the [ebookcoin http interface documents](https://github.com/Ebookcoin/docs/blob/master/ebookcoin_http_interface.md)
+Please reference the [ebookchain http interface documents](https://github.com/Ebookchain/docs/blob/master/ebookchain_http_interface.md)

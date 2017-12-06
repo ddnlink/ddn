@@ -1,1 +1,1 @@
-window.EbookcoinJS = EbookcoinJS = require('./index.js');
+window.EbookchainJS = EbookchainJS = require('./index.js');

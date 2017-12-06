@@ -1,28 +1,28 @@
 var Buffer = require("buffer/").Buffer;
 var crypto_lib = require("crypto-browserify");
 var should = require("should");
-var ebookcoin = require("../index.js");
+var ebookchain = require("../index.js");
 
-describe("Ebookcoin JS", function () {
+describe("Ebookchain JS", function () {
 
 	it("should be ok", function () {
-		(ebookcoin).should.be.ok;
+		(ebookchain).should.be.ok;
 	});
 
 	it("should be object", function () {
-		(ebookcoin).should.be.type("object");
+		(ebookchain).should.be.type("object");
 	});
 
 	it("should have properties", function () {
 		var properties = ["transaction", "signature", "vote", "delegate", "dapp", "crypto"];
 
 		properties.forEach(function (property) {
-			(ebookcoin).should.have.property(property);
+			(ebookchain).should.have.property(property);
 		});
 	});
 
 	describe("crypto.js", function () {
-		var crypto = ebookcoin.crypto;
+		var crypto = ebookchain.crypto;
 
 		it("should be ok", function () {
 			(crypto).should.be.ok;
@@ -310,7 +310,7 @@ describe("Ebookcoin JS", function () {
 	});
 
 	describe("dapp.js", function () {
-		var dapp = ebookcoin.dapp;
+		var dapp = ebookchain.dapp;
 
 		it("should be object", function () {
 			(dapp).should.be.type("object");
@@ -325,11 +325,11 @@ describe("Ebookcoin JS", function () {
 			var trs = null;
 
 			var options = {
-				"name": "ebookcoin-dapp-cctime",
-				"link": "https://github.com/Ebookcoin/ebookcoin-dapp-cctime/archive/master.zip",
+				"name": "ebookchain-dapp-cctime",
+				"link": "https://github.com/Ebookchain/ebookchain-dapp-cctime/archive/master.zip",
 				"category": 1,
 				"description": "Decentralized news channel",
-				"tags": "ebookcoin,dapp,demo,cctime",
+				"tags": "ebookchain,dapp,demo,cctime",
 				"icon": "http://o7dyh3w0x.bkt.clouddn.com/hello.png",
 				"type": 0,
 				"delegates": [
@@ -357,8 +357,8 @@ describe("Ebookcoin JS", function () {
 			});
 
 			describe("returned dapp", function () {
-				var keys = ebookcoin.crypto.getKeys("secret");
-				var secondKeys = ebookcoin.crypto.getKeys("secret 2");
+				var keys = ebookchain.crypto.getKeys("secret");
+				var secondKeys = ebookchain.crypto.getKeys("secret 2");
 
 				it("should be object", function () {
 					(trs).should.be.type("object");
@@ -463,39 +463,39 @@ describe("Ebookcoin JS", function () {
 				});
 
 				it("should be signed correctly", function () {
-					var result = ebookcoin.crypto.verify(trs);
+					var result = ebookchain.crypto.verify(trs);
 					(result).should.be.ok;
 				});
 
 				it("should not be signed correctly now", function () {
 					trs.amount = 10000;
-					var result = ebookcoin.crypto.verify(trs);
+					var result = ebookchain.crypto.verify(trs);
 					(result).should.be.not.ok;
 				});
 
 				it("should be second signed correctly", function () {
 					trs.amount = 0;
-					var result = ebookcoin.crypto.verifySecondSignature(trs, secondKeys.publicKey);
+					var result = ebookchain.crypto.verifySecondSignature(trs, secondKeys.publicKey);
 					(result).should.be.ok;
 				});
 
 				it("should not be second signed correctly now", function () {
 					trs.amount = 10000;
-					var result = ebookcoin.crypto.verifySecondSignature(trs, secondKeys.publicKey);
+					var result = ebookchain.crypto.verifySecondSignature(trs, secondKeys.publicKey);
 					(result).should.be.not.ok;
 				});
 
 				it("should be ok to verify bytes", function () {
 					var data1 = 'a1b2c3d4'
 					var secret = 'secret1'
-					var keys = ebookcoin.crypto.getKeys(secret)
-					var signature = ebookcoin.crypto.signBytes(data1, keys)
-					var result = ebookcoin.crypto.verifyBytes(data1, signature, keys.publicKey)
+					var keys = ebookchain.crypto.getKeys(secret)
+					var signature = ebookchain.crypto.signBytes(data1, keys)
+					var result = ebookchain.crypto.verifyBytes(data1, signature, keys.publicKey)
 					result.should.be.ok
 
 					var data2 = new Buffer('a1b2c3d4', 'hex')
-					signature = ebookcoin.crypto.signBytes(data2, keys)
-					result = ebookcoin.crypto.verifyBytes(data2, signature, keys.publicKey)
+					signature = ebookchain.crypto.signBytes(data2, keys)
+					result = ebookchain.crypto.verifyBytes(data2, signature, keys.publicKey)
 					result.should.be.ok
 				})
 			});
@@ -503,7 +503,7 @@ describe("Ebookcoin JS", function () {
 	});
 
 	describe("delegate.js", function () {
-		var delegate = ebookcoin.delegate;
+		var delegate = ebookchain.delegate;
 
 		it("should be ok", function () {
 			(delegate).should.be.ok;
@@ -534,8 +534,8 @@ describe("Ebookcoin JS", function () {
 			});
 
 			describe("returned delegate", function () {
-				var keys = ebookcoin.crypto.getKeys("secret");
-				var secondKeys = ebookcoin.crypto.getKeys("secret 2");
+				var keys = ebookchain.crypto.getKeys("secret");
+				var secondKeys = ebookchain.crypto.getKeys("secret 2");
 
 				it("should be ok", function () {
 					(trs).should.be.ok;
@@ -603,24 +603,24 @@ describe("Ebookcoin JS", function () {
 				})
 
 				it("should be signed correctly", function () {
-					var result = ebookcoin.crypto.verify(trs, keys.publicKey);
+					var result = ebookchain.crypto.verify(trs, keys.publicKey);
 					(result).should.be.ok;
 				});
 
 				it("should be second signed correctly", function () {
-					var result = ebookcoin.crypto.verifySecondSignature(trs, secondKeys.publicKey);
+					var result = ebookchain.crypto.verifySecondSignature(trs, secondKeys.publicKey);
 					(result).should.be.ok;
 				});
 
 				it("should not be signed correctly now", function () {
 					trs.amount = 100;
-					var result = ebookcoin.crypto.verify(trs, keys.publicKey);
+					var result = ebookchain.crypto.verify(trs, keys.publicKey);
 					(result).should.be.not.ok;
 				});
 
 				it("should not be second signed correctly now", function () {
 					trs.amount = 100;
-					var result = ebookcoin.crypto.verify(trs, secondKeys.publicKey);
+					var result = ebookchain.crypto.verify(trs, secondKeys.publicKey);
 					(result).should.be.not.ok;
 				});
 
@@ -645,7 +645,7 @@ describe("Ebookcoin JS", function () {
 	});
 
 	describe("signature.js", function () {
-		var signature = ebookcoin.signature;
+		var signature = ebookchain.signature;
 		it("should be ok", function () {
 			(signature).should.be.ok;
 		});
@@ -880,7 +880,7 @@ describe("Ebookcoin JS", function () {
 	});
 
 	describe("transaction.js", function () {
-		var transaction = ebookcoin.transaction;
+		var transaction = ebookchain.transaction;
 
 		it("should be object", function () {
 			(transaction).should.be.type("object");
@@ -961,13 +961,13 @@ describe("Ebookcoin JS", function () {
 				});
 
 				it("should be signed correctly", function () {
-					var result = ebookcoin.crypto.verify(trs);
+					var result = ebookchain.crypto.verify(trs);
 					(result).should.be.ok;
 				});
 
 				it("should not be signed correctly now", function () {
 					trs.amount = 10000;
-					var result = ebookcoin.crypto.verify(trs);
+					var result = ebookchain.crypto.verify(trs);
 					(result).should.be.not.ok;
 				});
 			});
@@ -977,7 +977,7 @@ describe("Ebookcoin JS", function () {
 			var createTransaction = transaction.createTransaction;
 			var trs = null;
 			var secondSecret = "second secret";
-			var keys = ebookcoin.crypto.getKeys(secondSecret);
+			var keys = ebookchain.crypto.getKeys(secondSecret);
 
 			it("should be a function", function () {
 				(createTransaction).should.be.type("function");
@@ -1058,24 +1058,24 @@ describe("Ebookcoin JS", function () {
 				});
 
 				it("should be signed correctly", function () {
-					var result = ebookcoin.crypto.verify(trs);
+					var result = ebookchain.crypto.verify(trs);
 					(result).should.be.ok;
 				});
 
 				it("should be second signed correctly", function () {
-					var result = ebookcoin.crypto.verifySecondSignature(trs, keys.publicKey);
+					var result = ebookchain.crypto.verifySecondSignature(trs, keys.publicKey);
 					(result).should.be.ok;
 				});
 
 				it("should not be signed correctly now", function () {
 					trs.amount = 10000;
-					var result = ebookcoin.crypto.verify(trs);
+					var result = ebookchain.crypto.verify(trs);
 					(result).should.be.not.ok;
 				});
 
 				it("should not be second signed correctly now", function () {
 					trs.amount = 10000;
-					var result = ebookcoin.crypto.verifySecondSignature(trs, keys.publicKey);
+					var result = ebookchain.crypto.verifySecondSignature(trs, keys.publicKey);
 					(result).should.be.not.ok;
 				});
 			});
@@ -1086,7 +1086,7 @@ describe("Ebookcoin JS", function () {
 	});
 
 	describe("vote.js", function () {
-		var vote = ebookcoin.vote;
+		var vote = ebookchain.vote;
 
 		it("should be ok", function () {
 			(vote).should.be.ok;
@@ -1103,7 +1103,7 @@ describe("Ebookcoin JS", function () {
 		describe("#createVote", function () {
 			var createVote = vote.createVote,
 				vt = null,
-				publicKey = ebookcoin.crypto.getKeys("secret").publicKey,
+				publicKey = ebookchain.crypto.getKeys("secret").publicKey,
 				publicKeys = ["+" + publicKey];
 
 			it("should be ok", function () {
@@ -1180,24 +1180,24 @@ describe("Ebookcoin JS", function () {
 				});
 
 				it("should be signed correctly", function () {
-					var result = ebookcoin.crypto.verify(vt);
+					var result = ebookchain.crypto.verify(vt);
 					(result).should.be.ok;
 				});
 
 				it("should be second signed correctly", function () {
-					var result = ebookcoin.crypto.verifySecondSignature(vt, ebookcoin.crypto.getKeys("second secret").publicKey);
+					var result = ebookchain.crypto.verifySecondSignature(vt, ebookchain.crypto.getKeys("second secret").publicKey);
 					(result).should.be.ok;
 				});
 
 				it("should not be signed correctly now", function () {
 					vt.amount = 100;
-					var result = ebookcoin.crypto.verify(vt);
+					var result = ebookchain.crypto.verify(vt);
 					(result).should.be.not.ok;
 				});
 
 				it("should not be second signed correctly now", function () {
 					vt.amount = 100;
-					var result = ebookcoin.crypto.verifySecondSignature(vt, ebookcoin.crypto.getKeys("second secret").publicKey);
+					var result = ebookchain.crypto.verifySecondSignature(vt, ebookchain.crypto.getKeys("second secret").publicKey);
 					(result).should.be.not.ok;
 				});
 
@@ -1247,9 +1247,9 @@ describe("Ebookcoin JS", function () {
 
 	describe('crypto sha256 and address', function () {
 		it('should be equal to the expected address', function () {
-			ebookcoin.crypto.getAddress('7a91b9bfc0ea185bf3ade9d264da273f7fe19bf71008210b1d7239c82dd3ad20').should.be.equal('AFbYJhiJb3DXzHy5ZP24mKw21M2dCBJCXP')
+			ebookchain.crypto.getAddress('7a91b9bfc0ea185bf3ade9d264da273f7fe19bf71008210b1d7239c82dd3ad20').should.be.equal('AFbYJhiJb3DXzHy5ZP24mKw21M2dCBJCXP')
 			var publicKeyBuffer = new Buffer('7a91b9bfc0ea185bf3ade9d264da273f7fe19bf71008210b1d7239c82dd3ad20', 'hex')
-			ebookcoin.crypto.getAddress(publicKeyBuffer).should.be.equal('AFbYJhiJb3DXzHy5ZP24mKw21M2dCBJCXP')
+			ebookchain.crypto.getAddress(publicKeyBuffer).should.be.equal('AFbYJhiJb3DXzHy5ZP24mKw21M2dCBJCXP')
 		})
 	})
 

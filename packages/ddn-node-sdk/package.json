@@ -1,17 +1,17 @@
 {
-  "name": "ebookcoin-js",
+  "name": "ebookchain-js",
   "version": "2.0.0",
-  "description": "ebookcoin javascript library",
+  "description": "ebookchain javascript library",
   "main": "index.js",
   "directories": {
     "test": "test"
   },
   "scripts": {
     "test": "mocha test",
-    "build": "browserify build.js -o ebookcoin.js && uglifyjs ebookcoin.js > ebookcoin.min.js"
+    "build": "browserify build.js -o ebookchain.js && uglifyjs ebookchain.js > ebookchain.min.js"
   },
   "keywords": [
-    "ebookcoin",
+    "ebookchain",
     "js",
     "library"
   ],

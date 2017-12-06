@@ -21,7 +21,7 @@ function createInTransfer(dappId, currency, amount, secret, secondSecret) {
 		}
 	};
 
-	if (currency === 'XAS') {
+	if (currency === 'DDN') {
 		transaction.amount = Number(amount)
 	} else {
 		transaction.asset.inTransfer.amount = String(amount)
