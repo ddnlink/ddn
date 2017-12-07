@@ -219,7 +219,7 @@ function getBytes(transaction, skipSignature, skipSecondSignature) {
 			break;
 		case 15:
 			var bb = new ByteBuffer(1, true)
-			var asset = transaction.asset.uiaTransfer
+			var asset = transaction.asset.article
 			bb.writeString(asset.fileHash)
 			bb.writeString(asset.title ? asset.title : "")
 			bb.writeString(asset.description ? asset.description : "")
@@ -227,6 +227,26 @@ function getBytes(transaction, skipSignature, skipSecondSignature) {
 			bb.flip()
 			assetBytes = toLocalBuffer(bb)
 			break;
+		case 16:
+			var bb = new ByteBuffer(1, true);
+			var asset = transaction.asset.outputs
+			for (var i = 0; i < asset.outputs.length; i++) {
+				var output = outputs[i]
+		
+				if (/^[0-9]{1,20}$/g.test(output.recipientId)) {
+				  var recipient = bignum(output.recipientId).toBuffer({ size: 8 });
+				  for (var i = 0; i < 8; i++) {
+					bb.writeByte(recipient[i] || 0);
+				  }
+				} else {
+				  bb.writeString(output.recipientId);
+				}
+		
+				bb.writeLong(output.amount);
+			  }
+			  bb.flip();
+			  assetBytes = toLocalBuffer(bb)
+			  break;
 	}
 	if (transaction.__assetBytes__) {
 		assetBytes = transaction.__assetBytes__;

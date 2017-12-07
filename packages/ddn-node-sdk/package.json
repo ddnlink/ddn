@@ -15,7 +15,7 @@
     "js",
     "library"
   ],
-  "author": "huo.ding@qq.com",
+  "author": "",
   "license": "MIT",
   "dependencies": {
     "JSONStream": "^1.3.1",
