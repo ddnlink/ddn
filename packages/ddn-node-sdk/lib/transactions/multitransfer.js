@@ -11,7 +11,7 @@ function createMultiTransfer(outputs, secret, secondSecret) {
   if (!outputs || outputs.length == 0) {
     throw new Error('Invalid fileHash format')
   }
-  var fee = (Math.floor(bytes.length / 200) + 1) * 0.1 * constants.coin
+  var fee = constants.fees.multitransfer
   var amount = 0
   var recipientId = []    
   for(var i = 0; i < data.length; i++) {

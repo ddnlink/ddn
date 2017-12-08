@@ -9,6 +9,8 @@ module.exports = {
 	uia: require("./lib/transactions/uia.js"),
 	storage: require("./lib/transactions/storage.js"),
 	article: require("./lib/transactions/article.js"),	
+	username: require("./lib/transactions/username.js"),
+	domain: require("./lib/transactions/domain.js"),			
 	multitransfer: require("./lib/transactions/multitransfer.js"),		
 	options: require("./lib/options.js"),
 	utils: {

@@ -4,28 +4,29 @@ var constants = require("../constants.js")
 var slots = require("../time/slots.js")
 var options = require('../options')
 
-function createArticle(fileHash, fileName, title, description, secret, secondSecret) {
+function createDomain(name, address, secret, secondSecret) {
 	var keys = crypto.getKeys(secret)
   var bytes =  null
 
-  if (!fileHash || fileHash.length == 0) {
-    throw new Error('Invalid fileHash format')
+  if (!name || name.length == 0) {
+    throw new Error('Invalid name format')
   }
-  var fee = constants.fees.article
+  if (!address || address.length == 0) {
+    throw new Error('Invalid name format')
+  }
+  var fee = constants.fees.domain
   
 	var transaction = {
-		type: 15,
+		type: 18,
 		amount: 0,
 		fee: fee,
 		recipientId: null,
 		senderPublicKey: keys.publicKey,
 		timestamp: slots.getTime() - options.get('clientDriftSeconds'),
 		asset: {
-			article: {
-				fileHash: fileHash,
-				title: title,
-				description: description,
-				fileName: fileName,
+			domain: {
+				name: name,
+				address: address
 			}
 		},
 	}
@@ -41,5 +42,5 @@ function createArticle(fileHash, fileName, title, description, secret, secondSec
 }
 
 module.exports = {
-	createArticle : createArticle
+	createDomain : createDomain
 }
