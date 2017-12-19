@@ -8,8 +8,8 @@ function getEpochTime(time) {
 }
 
 function beginEpochTime() {
-	// var d = new Date(Date.UTC(2017, 11, 20, 12, 20, 20, 20))
-	var d = new Date(Date.UTC(2017, 10, 20, 12, 20, 20, 20));
+	var d = new Date(Date.UTC(2017, 11, 20, 4, 0, 0, 0))
+	// var d = new Date(Date.UTC(2017, 10, 20, 12, 20, 20, 20));
 	
 	return d;
 }
