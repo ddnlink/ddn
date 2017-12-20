@@ -44,7 +44,9 @@ function createMultiTransfer(outputs, secret, secondSecret) {
 		senderPublicKey: keys.publicKey,
 		timestamp: slots.getTime() - options.get('clientDriftSeconds'),
 		asset: {
-			outputs: outputs
+			output: {
+				outputs: outputs
+			}
 		},
 	}
 
