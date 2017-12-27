@@ -8,6 +8,7 @@ function createVote(keyList, secret, secondSecret) {
 
 	var transaction = {
 		type: 3,
+		nethash: options.get('nethash'),
 		amount: 0,
 		fee: constants.fees.vote,
 		recipientId: null,
