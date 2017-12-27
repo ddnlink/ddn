@@ -4,6 +4,7 @@ var cryptoLib = require('../lib/crypto.js');
 var transactionsLib = require('../lib/transactions.js');
 var accounts = require('./account.js');
 var ByteBuffer = require('bytebuffer');
+var config = require('../options')
 
 var sender = accounts.account(cryptoLib.generateSecret());
 
@@ -70,6 +71,7 @@ module.exports = {
 				}
 				var trs = {
 					type: 0,
+					nethash: config.nethash,
 					amount: Number(parts[1]) * 100000000,
 					fee: 0,
 					timestamp: 0,
@@ -89,6 +91,7 @@ module.exports = {
 		} else {
 			var balanceTransaction = {
 				type: 0,
+				nethash: config.nethash,
 				amount: 10000000000000000,
 				fee: 0,
 				timestamp: 0,
@@ -116,6 +119,7 @@ module.exports = {
 
 			var transaction = {
 				type: 2,
+				nethash: config.nethash,
 				amount: 0,
 				fee: 0,
 				timestamp: 0,
@@ -144,6 +148,7 @@ module.exports = {
 
 		var voteTransaction = {
 			type: 3,
+			nethash: config.nethash,
 			amount: 0,
 			fee: 0,
 			timestamp: 0,

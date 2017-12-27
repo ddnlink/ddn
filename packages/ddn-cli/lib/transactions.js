@@ -63,9 +63,10 @@ function getTransactionBytes(trs, skipSignature) {
 		assetSize = 0;
 	}
 
-	var bb = new ByteBuffer(1 + 4 + 32 + 32 + 8 + 8 + 64 + 64 + assetSize, true);
+	var bb = new ByteBuffer(1 + 4 + 8 + 32 + 32 + 8 + 8 + 64 + 64 + assetSize, true);
 	bb.writeByte(trs.type);
 	bb.writeInt(trs.timestamp);
+    bb.writeString(trs.nethash);
 
 	var senderPublicKeyBuffer = new Buffer(trs.senderPublicKey, 'hex');
 	for (var i = 0; i < senderPublicKeyBuffer.length; i++) {

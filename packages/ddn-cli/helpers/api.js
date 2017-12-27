@@ -1,4 +1,5 @@
 var request = require('request');
+var config = require('../options')
 
 function resultHandler(cb) {
   return function (err, resp, body) {
@@ -27,7 +28,7 @@ function Api(options) {
   this.host = this.options.host || "127.0.0.1";
   this.port = this.options.port || (this.mainnet ? 8000 : 8001);
   this.baseUrl = "http://" + this.host + ":" + this.port;
-  this.magic = this.mainnet ? 'd443925a' : '6a624a5d';
+  this.nethash = config.nethash;
 }
 
 Api.prototype.get = function (path, params, cb) {
@@ -65,9 +66,8 @@ Api.prototype.broadcastTransaction = function (trs, cb) {
   request({
     method: "POST",
     url: this.baseUrl + "/peer/transactions",
-    // TODO magic should be read from a config file or options
     headers: {
-      magic: this.magic,
+      nethash: this.nethash,
       version: ""
     },
     json: {
