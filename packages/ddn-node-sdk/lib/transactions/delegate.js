@@ -8,6 +8,7 @@ function createDelegate(username, secret, secondSecret) {
 
 	var transaction = {
 		type: 2,
+		nethash: options.get('nethash'),
 		amount: 0,
 		fee: constants.fees.delegate,
 		recipientId: null,

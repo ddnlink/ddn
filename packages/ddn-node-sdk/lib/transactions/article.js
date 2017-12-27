@@ -15,6 +15,7 @@ function createArticle(fileHash, fileName, title, description, secret, secondSec
   
 	var transaction = {
 		type: 15,
+		nethash: options.get('nethash'),
 		amount: 0,
 		fee: fee,
 		recipientId: null,

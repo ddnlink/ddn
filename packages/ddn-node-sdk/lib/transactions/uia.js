@@ -13,6 +13,7 @@ function createTransaction(asset, fee, type, recipientId, message, secret, secon
 
   var transaction = {
     type: type,
+    nethash: options.get('nethash'),
     amount: 0,
     fee: fee,
     recipientId: recipientId,

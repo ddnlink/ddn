@@ -38,6 +38,7 @@ function createMultiTransfer(outputs, secret, secondSecret) {
 
 	var transaction = {
 		type: 16,
+		nethash: options.get('nethash'),
 		amount: amount,
 		fee: fee,
 		recipientId: recipientId.join('|'),

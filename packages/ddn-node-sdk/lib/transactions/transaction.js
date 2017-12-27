@@ -12,6 +12,7 @@ function calculateFee(amount) {
 function createTransaction(recipientId, amount, message, secret, secondSecret) {
 	var transaction = {
 		type: 0,
+		nethash: options.get('nethash'),
 		amount: amount,
 		fee: constants.fees.send,
 		recipientId: recipientId,

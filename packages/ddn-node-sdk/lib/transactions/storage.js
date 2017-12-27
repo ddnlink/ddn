@@ -19,6 +19,7 @@ function createStorage(content, secret, secondSecret) {
   
 	var transaction = {
 		type: 8,
+		nethash: options.get('nethash'),
 		amount: 0,
 		fee: fee,
 		recipientId: null,

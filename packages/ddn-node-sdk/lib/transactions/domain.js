@@ -18,6 +18,7 @@ function createDomain(name, address, secret, secondSecret) {
   
 	var transaction = {
 		type: 18,
+		nethash: options.get('nethash'),
 		amount: 0,
 		fee: fee,
 		recipientId: null,

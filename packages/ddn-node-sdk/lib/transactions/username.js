@@ -15,6 +15,7 @@ function createUsername(name, secret, secondSecret) {
   
 	var transaction = {
 		type: 17,
+		nethash: options.get('nethash'),
 		amount: 0,
 		fee: fee,
 		recipientId: null,

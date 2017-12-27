@@ -19,6 +19,7 @@ function createSignature(secret, secondSecret) {
 	var signature = newSignature(secondSecret);
 	var transaction = {
 		type: 1,
+		nethash: options.get('nethash'),
 		amount: 0,
 		fee: constants.fees.secondsignature,
 		recipientId: null,

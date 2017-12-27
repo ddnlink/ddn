@@ -8,6 +8,7 @@ function createInTransfer(dappId, currency, amount, secret, secondSecret) {
 
 	var transaction = {
 		type: 6,
+		nethash: options.get('nethash'),
 		amount: 0,
 		fee: constants.fees.send,
 		recipientId: null,

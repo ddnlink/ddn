@@ -1,5 +1,6 @@
 var optionMap = {
-  clientDriftSeconds: 5
+  clientDriftSeconds: 5,
+  nethash: '0ab796cd'
 }
 
 module.exports = {
