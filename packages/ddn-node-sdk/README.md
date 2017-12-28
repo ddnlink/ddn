@@ -12,6 +12,7 @@ CommonJS
 
 ```
 var EbookchainJS = require('ebookchain-js');
+EbookchainJS.options.set('nethash','aaaaaa')
 ```
 
 Front end
@@ -20,7 +21,7 @@ Front end
 <script type="text/javascript" src="/ebookchain.js"></script>
 # or
 <script type="text/javascript" src="/ebookchain.min.js"></script>
-
+window.EbookchainJS.options.set('nethash','aaaaaa')
 console.log(window.EbookchainJS)
 ```
 
