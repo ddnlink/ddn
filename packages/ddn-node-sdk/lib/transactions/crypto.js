@@ -260,7 +260,7 @@ function getBytes(transaction, skipSignature, skipSecondSignature) {
 	var bb = new ByteBuffer(1, true);
 	bb.writeByte(transaction.type);
 	bb.writeInt(transaction.timestamp);
-    bb.writeString(trs.nethash);
+    bb.writeString(transaction.nethash);
 
 	var senderPublicKeyBuffer = new Buffer(transaction.senderPublicKey, "hex");
 	for (var i = 0; i < senderPublicKeyBuffer.length; i++) {
