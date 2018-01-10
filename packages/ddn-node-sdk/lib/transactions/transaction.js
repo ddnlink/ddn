@@ -39,6 +39,7 @@ function createLock(height, secret, secondSecret) {
 	var transaction = {
 		type: 100,
 		amount: 0,
+		nethash: options.get('nethash'),
 		fee: 10000000,
 		recipientId: null,
 		args: [ String(height) ],
