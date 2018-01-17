@@ -14,8 +14,8 @@ function createMultiTransfer(outputs, secret, secondSecret) {
   var fee = constants.fees.multitransfer
   var amount = 0
   var recipientId = []    
-  for(var i = 0; i < data.length; i++) {
-	var output = data[i]
+  for(var i = 0; i < outputs.length; i++) {
+	var output = outputs[i]
 	if (!output.recipientId || !output.amount) {
 	  return cb("output recipient or amount null");        
 	}
