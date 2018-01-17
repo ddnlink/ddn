@@ -3,6 +3,7 @@ var crypto = require("./crypto.js")
 var constants = require("../constants.js")
 var slots = require("../time/slots.js")
 var options = require('../options')
+var addressHelper = require('../address.js')
 
 function createMultiTransfer(outputs, secret, secondSecret) {
 	var keys = crypto.getKeys(secret)
