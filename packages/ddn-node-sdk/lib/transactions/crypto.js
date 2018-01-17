@@ -229,7 +229,7 @@ function getBytes(transaction, skipSignature, skipSecondSignature) {
 			break;
 		case 16:
 			var bb = new ByteBuffer(1, true);
-			var asset = transaction.asset.outputs
+			var asset = transaction.asset.output
 			for (var i = 0; i < asset.outputs.length; i++) {
 				var output = outputs[i]
 		
