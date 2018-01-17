@@ -11,7 +11,8 @@ function createMultiTransfer(outputs, secret, secondSecret) {
 
   if (!outputs || outputs.length == 0) {
     throw new Error('Invalid fileHash format')
-  }
+	}
+	var sender = addressHelper.generateBase58CheckAddress(keys.publicKey)
   var fee = constants.fees.multitransfer
   var amount = 0
   var recipientId = []    
@@ -29,7 +30,7 @@ function createMultiTransfer(outputs, secret, secondSecret) {
 	  return cb("Invalid output amount");
 	}
 
-	if (output.recipientId == sender.address) {
+	if (output.recipientId == sender) {
 	  return cb("Invalid output recipientId, cannot be your self");
 	}
 
