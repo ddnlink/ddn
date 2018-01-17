@@ -231,7 +231,7 @@ function getBytes(transaction, skipSignature, skipSecondSignature) {
 			var bb = new ByteBuffer(1, true);
 			var asset = transaction.asset.output
 			for (var i = 0; i < asset.outputs.length; i++) {
-				var output = outputs[i]
+				var output = asset.outputs[i]
 		
 				if (/^[0-9]{1,20}$/g.test(output.recipientId)) {
 				  var recipient = bignum(output.recipientId).toBuffer({ size: 8 });
