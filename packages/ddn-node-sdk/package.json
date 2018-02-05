@@ -1,17 +1,17 @@
 {
-  "name": "ebookchain-js",
+  "name": "ddn-js",
   "version": "2.0.2",
-  "description": "ebookchain javascript library",
+  "description": "DDN javascript library",
   "main": "index.js",
   "directories": {
     "test": "test"
   },
   "scripts": {
     "test": "mocha test",
-    "build": "browserify build.js -o ebookchain.js && uglifyjs ebookchain.js > ebookchain.min.js"
+    "build": "browserify build.js -o ddn.js && uglifyjs ddn.js > ddn.min.js"
   },
   "keywords": [
-    "ebookchain",
+    "ddn",
     "js",
     "library"
   ],

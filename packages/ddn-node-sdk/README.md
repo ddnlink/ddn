@@ -1,9 +1,9 @@
-# Ebookchain Javascript Library
+# DDN Javascript Library
 
 ## Install
 
 ```
-npm install ebookchain-js --save
+npm install ddn-js --save
 ```
 
 ## Import
@@ -11,22 +11,22 @@ npm install ebookchain-js --save
 CommonJS
 
 ```
-var EbookchainJS = require('ebookchain-js');
-EbookchainJS.options.set('nethash','aaaaaa')
+var DdnJS = require('ddn-js');
+DdnJS.options.set('nethash','aaaaaa')
 ```
 
 Front end
 
 ```
-<script type="text/javascript" src="/ebookchain.js"></script>
+<script type="text/javascript" src="/ddn.js"></script>
 # or
-<script type="text/javascript" src="/ebookchain.min.js"></script>
-window.EbookchainJS.options.set('nethash','aaaaaa')
-console.log(window.EbookchainJS)
+<script type="text/javascript" src="/ddn.min.js"></script>
+window.DdnJS.options.set('nethash','aaaaaa')
+console.log(window.DdnJS)
 ```
 
 
 
 ## Usage
 
-Please reference the [ebookchain http interface documents](https://github.com/Ebookchain/docs/blob/master/ebookchain_http_interface.md)
+Please reference the [ddn http interface documents](https://github.com/DDNlink/docs/blob/master/ddn_http_interface.md)

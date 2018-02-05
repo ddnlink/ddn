@@ -1,7 +1,7 @@
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
-window.EbookchainJS = require('./index.js');
-window.EbookchainJS.options.set('nethash','b11fa2f2')
-//window.EbookchainJS.options.set('nethash','0ab796cd')
+window.DdnJS = require('./index.js');
+window.DdnJS.options.set('nethash','b11fa2f2')
+//window.DdnJS.options.set('nethash','0ab796cd') // 测试网络
 },{"./index.js":2}],2:[function(require,module,exports){
 module.exports = {
 	crypto : require("./lib/transactions/crypto.js"),
@@ -695,9 +695,9 @@ function getBytes(transaction, skipSignature, skipSecondSignature) {
 			break;
 		case 16:
 			var bb = new ByteBuffer(1, true);
-			var asset = transaction.asset.outputs
+			var asset = transaction.asset.output
 			for (var i = 0; i < asset.outputs.length; i++) {
-				var output = outputs[i]
+				var output = asset.outputs[i]
 		
 				if (/^[0-9]{1,20}$/g.test(output.recipientId)) {
 				  var recipient = bignum(output.recipientId).toBuffer({ size: 8 });
@@ -1113,6 +1113,7 @@ var crypto = require("./crypto.js")
 var constants = require("../constants.js")
 var slots = require("../time/slots.js")
 var options = require('../options')
+var addressHelper = require('../address.js')
 
 function createMultiTransfer(outputs, secret, secondSecret) {
 	var keys = crypto.getKeys(secret)
@@ -1120,12 +1121,13 @@ function createMultiTransfer(outputs, secret, secondSecret) {
 
   if (!outputs || outputs.length == 0) {
     throw new Error('Invalid fileHash format')
-  }
+	}
+	var sender = addressHelper.generateBase58CheckAddress(keys.publicKey)
   var fee = constants.fees.multitransfer
   var amount = 0
   var recipientId = []    
-  for(var i = 0; i < data.length; i++) {
-	var output = data[i]
+  for(var i = 0; i < outputs.length; i++) {
+	var output = outputs[i]
 	if (!output.recipientId || !output.amount) {
 	  return cb("output recipient or amount null");        
 	}
@@ -1138,7 +1140,7 @@ function createMultiTransfer(outputs, secret, secondSecret) {
 	  return cb("Invalid output amount");
 	}
 
-	if (output.recipientId == sender.address) {
+	if (output.recipientId == sender) {
 	  return cb("Invalid output recipientId, cannot be your self");
 	}
 
@@ -1175,7 +1177,7 @@ module.exports = {
 	createMultiTransfer : createMultiTransfer
 }
 
-},{"../constants.js":7,"../options":8,"../time/slots.js":10,"./crypto.js":12,"bytebuffer":28}],17:[function(require,module,exports){
+},{"../address.js":3,"../constants.js":7,"../options":8,"../time/slots.js":10,"./crypto.js":12,"bytebuffer":28}],17:[function(require,module,exports){
 var crypto = require("./crypto.js")
 var constants = require("../constants.js")
 var slots = require("../time/slots.js")
