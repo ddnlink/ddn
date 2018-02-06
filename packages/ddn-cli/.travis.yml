@@ -9,7 +9,6 @@ node_js:
 notifications:
   recipients:
     - huo.ding@qq.com
-    - xingxing@qq.com
   email:
     on_success: change
     on_failure: always

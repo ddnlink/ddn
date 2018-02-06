@@ -6,7 +6,7 @@ var blockHelper = require("../helpers/block.js");
 var cryptoLib = require("../lib/crypto.js");
 var dappHelper = require("../helpers/dapp.js");
 var Api = require('../helpers/api.js');
-var EbookchainUtils = require('ebookchain-js').utils;
+var EbookchainUtils = require('ddn-js').utils;
 
 var globalOptions;
 

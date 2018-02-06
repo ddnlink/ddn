@@ -1,6 +1,6 @@
-# Ebookchain Client
+# DDN Client
 
-A command line interface to manage [Ebookchain](https://github.com/Ebookchain) blockchain apps.
+A command line tool to manage [DDN](https://github.com/ddnlink) blockchain apps.
 
 ## Installation
 
@@ -8,15 +8,15 @@ A command line interface to manage [Ebookchain](https://github.com/Ebookchain) b
 最新的dapps系列子命令要求node版本号为v8.4.0以上
 
 ```
-npm install -g ebookchain-cli
+npm install -g ddn-cli
 ```
 
 ## Usage
 
 ```
-./bin/ebookchain-cli --help
+./bin/ddn-cli --help
 
-  Usage: ebookchain-cli [options] [command]
+  Usage: ddn-cli [options] [command]
 
 
   Commands:
@@ -65,4 +65,4 @@ npm install -g ebookchain-cli
 
 ## Documents
 
-[ebookchain-docs](https://github.com/Ebookchain/docs)
+[ddn-docs](https://github.com/ddnlink/docs)
