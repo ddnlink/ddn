@@ -5,7 +5,7 @@ var slots = require("../time/slots.js")
 var options = require('../options')
 
 function createArticle(fileHash, fileName, title, description, secret, secondSecret) {
-	var keys = crypto.getKeys(secret)
+  var keys = crypto.getKeys(secret)
   var bytes =  null
 
   if (!fileHash || fileHash.length == 0) {
@@ -37,6 +37,7 @@ function createArticle(fileHash, fileName, title, description, secret, secondSec
 		var secondKeys = crypto.getKeys(secondSecret)
 		crypto.secondSign(transaction, secondKeys)
 	}
+
 	transaction.id = crypto.getId(transaction)
 	return transaction
 }

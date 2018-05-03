@@ -38,7 +38,7 @@ function createTransaction(asset, fee, type, recipientId, message, secret, secon
 module.exports = {
   createIssuer: function (name, desc, secret, secondSecret) {
     var asset = {
-      uiaIssuer: {
+      aobIssuer: {
         name: name,
         desc: desc
       }
@@ -50,7 +50,7 @@ module.exports = {
 
   createAsset: function (name, desc, maximum, precision, strategy, allowWriteoff, allowWhitelist, allowBlacklist, secret, secondSecret) {
     var asset = {
-      uiaAsset: {
+      aobAsset: {
         name: name,
         desc: desc,
         maximum: maximum,
@@ -68,7 +68,7 @@ module.exports = {
 
   createFlags: function (currency, flagType, flag, secret, secondSecret) {
     var asset = {
-      uiaFlags: {
+      aobFlags: {
         currency: currency,
         flagType: flagType,
         flag: flag
@@ -80,7 +80,7 @@ module.exports = {
 
   createAcl: function (currency, operator, flag, list, secret, secondSecret) {
     var asset = {
-      uiaAcl: {
+      aobAcl: {
         currency: currency,
         operator: operator,
         flag: flag,
@@ -93,7 +93,7 @@ module.exports = {
 
   createIssue: function (currency, amount, secret, secondSecret) {
     var asset = {
-      uiaIssue: {
+      aobIssue: {
         currency: currency,
         amount: amount
       }
@@ -104,7 +104,7 @@ module.exports = {
 
   createTransfer: function (currency, amount, recipientId, message, secret, secondSecret) {
     var asset = {
-      uiaTransfer: {
+      aobTransfer: {
         currency: currency,
         amount: amount
       }

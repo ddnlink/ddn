@@ -11,7 +11,7 @@ module.exports = {
 	signature : require("./lib/transactions/signature.js"),
 	transaction : require("./lib/transactions/transaction.js"),
 	vote : require("./lib/transactions/vote.js"),
-	uia: require("./lib/transactions/uia.js"),
+	aob: require("./lib/transactions/aob.js"),
 	storage: require("./lib/transactions/storage.js"),
 	article: require("./lib/transactions/article.js"),	
 	username: require("./lib/transactions/username.js"),
@@ -23,7 +23,7 @@ module.exports = {
 		format: require("./lib/time/format.js")
 	}
 }
-},{"./lib/options.js":8,"./lib/time/format.js":9,"./lib/time/slots.js":10,"./lib/transactions/article.js":11,"./lib/transactions/crypto.js":12,"./lib/transactions/dapp.js":13,"./lib/transactions/delegate.js":14,"./lib/transactions/domain.js":15,"./lib/transactions/multitransfer.js":16,"./lib/transactions/signature.js":17,"./lib/transactions/storage.js":18,"./lib/transactions/transaction.js":19,"./lib/transactions/transfer.js":20,"./lib/transactions/uia.js":21,"./lib/transactions/username.js":22,"./lib/transactions/vote.js":23}],3:[function(require,module,exports){
+},{"./lib/options.js":8,"./lib/time/format.js":9,"./lib/time/slots.js":10,"./lib/transactions/article.js":11,"./lib/transactions/crypto.js":12,"./lib/transactions/dapp.js":13,"./lib/transactions/delegate.js":14,"./lib/transactions/domain.js":15,"./lib/transactions/multitransfer.js":16,"./lib/transactions/signature.js":17,"./lib/transactions/storage.js":18,"./lib/transactions/transaction.js":19,"./lib/transactions/transfer.js":20,"./lib/transactions/aob.js":21,"./lib/transactions/username.js":22,"./lib/transactions/vote.js":23}],3:[function(require,module,exports){
 (function (Buffer){
 var sha256 = require('fast-sha256')
 var RIPEMD160 = require('ripemd160')
@@ -624,7 +624,7 @@ function getBytes(transaction, skipSignature, skipSecondSignature) {
 			break;
 		case 9:
 			var bb = new ByteBuffer(1, true)
-			var asset = transaction.asset.uiaIssuer
+			var asset = transaction.asset.aobIssuer
 			bb.writeString(asset.name)
 			bb.writeString(asset.desc)
 			bb.flip()
@@ -632,7 +632,7 @@ function getBytes(transaction, skipSignature, skipSecondSignature) {
 			break;
 		case 10:
 			var bb = new ByteBuffer(1, true)
-			var asset = transaction.asset.uiaAsset
+			var asset = transaction.asset.aobAsset
 			bb.writeString(asset.name)
 			bb.writeString(asset.desc)
 			bb.writeString(asset.maximum)
@@ -648,7 +648,7 @@ function getBytes(transaction, skipSignature, skipSecondSignature) {
 			break;
 		case 11:
 			var bb = new ByteBuffer(1, true)
-			var asset = transaction.asset.uiaFlags
+			var asset = transaction.asset.aobFlags
 			bb.writeString(asset.currency)
 			bb.writeByte(asset.flagType)
 			bb.writeByte(asset.flag)
@@ -657,7 +657,7 @@ function getBytes(transaction, skipSignature, skipSecondSignature) {
 			break;
 		case 12:
 			var bb = new ByteBuffer(1, true)
-			var asset = transaction.asset.uiaAcl
+			var asset = transaction.asset.aobAcl
 			bb.writeString(asset.currency)
 			bb.writeString(asset.operator)
 			bb.writeByte(asset.flag)
@@ -669,7 +669,7 @@ function getBytes(transaction, skipSignature, skipSecondSignature) {
 			break;
 		case 13:
 			var bb = new ByteBuffer(1, true)
-			var asset = transaction.asset.uiaIssue
+			var asset = transaction.asset.aobIssue
 			bb.writeString(asset.currency)
 			bb.writeString(asset.amount)
 			bb.flip()
@@ -677,7 +677,7 @@ function getBytes(transaction, skipSignature, skipSecondSignature) {
 			break;
 		case 14:
 			var bb = new ByteBuffer(1, true)
-			var asset = transaction.asset.uiaTransfer
+			var asset = transaction.asset.aobTransfer
 			bb.writeString(asset.currency)
 			bb.writeString(asset.amount)
 			bb.flip()
@@ -1466,7 +1466,7 @@ function createTransaction(asset, fee, type, recipientId, message, secret, secon
 module.exports = {
   createIssuer: function (name, desc, secret, secondSecret) {
     var asset = {
-      uiaIssuer: {
+      aobIssuer: {
         name: name,
         desc: desc
       }
@@ -1478,7 +1478,7 @@ module.exports = {
 
   createAsset: function (name, desc, maximum, precision, strategy, allowWriteoff, allowWhitelist, allowBlacklist, secret, secondSecret) {
     var asset = {
-      uiaAsset: {
+      aobAsset: {
         name: name,
         desc: desc,
         maximum: maximum,
@@ -1496,7 +1496,7 @@ module.exports = {
 
   createFlags: function (currency, flagType, flag, secret, secondSecret) {
     var asset = {
-      uiaFlags: {
+      aobFlags: {
         currency: currency,
         flagType: flagType,
         flag: flag
@@ -1508,7 +1508,7 @@ module.exports = {
 
   createAcl: function (currency, operator, flag, list, secret, secondSecret) {
     var asset = {
-      uiaAcl: {
+      aobAcl: {
         currency: currency,
         operator: operator,
         flag: flag,
@@ -1521,7 +1521,7 @@ module.exports = {
 
   createIssue: function (currency, amount, secret, secondSecret) {
     var asset = {
-      uiaIssue: {
+      aobIssue: {
         currency: currency,
         amount: amount
       }
@@ -1532,7 +1532,7 @@ module.exports = {
 
   createTransfer: function (currency, amount, recipientId, message, secret, secondSecret) {
     var asset = {
-      uiaTransfer: {
+      aobTransfer: {
         currency: currency,
         amount: amount
       }

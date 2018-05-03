@@ -158,7 +158,7 @@ function getBytes(transaction, skipSignature, skipSecondSignature) {
 			break;
 		case 9:
 			var bb = new ByteBuffer(1, true)
-			var asset = transaction.asset.uiaIssuer
+			var asset = transaction.asset.aobIssuer
 			bb.writeString(asset.name)
 			bb.writeString(asset.desc)
 			bb.flip()
@@ -166,7 +166,7 @@ function getBytes(transaction, skipSignature, skipSecondSignature) {
 			break;
 		case 10:
 			var bb = new ByteBuffer(1, true)
-			var asset = transaction.asset.uiaAsset
+			var asset = transaction.asset.aobAsset
 			bb.writeString(asset.name)
 			bb.writeString(asset.desc)
 			bb.writeString(asset.maximum)
@@ -182,7 +182,7 @@ function getBytes(transaction, skipSignature, skipSecondSignature) {
 			break;
 		case 11:
 			var bb = new ByteBuffer(1, true)
-			var asset = transaction.asset.uiaFlags
+			var asset = transaction.asset.aobFlags
 			bb.writeString(asset.currency)
 			bb.writeByte(asset.flagType)
 			bb.writeByte(asset.flag)
@@ -191,7 +191,7 @@ function getBytes(transaction, skipSignature, skipSecondSignature) {
 			break;
 		case 12:
 			var bb = new ByteBuffer(1, true)
-			var asset = transaction.asset.uiaAcl
+			var asset = transaction.asset.aobAcl
 			bb.writeString(asset.currency)
 			bb.writeString(asset.operator)
 			bb.writeByte(asset.flag)
@@ -203,7 +203,7 @@ function getBytes(transaction, skipSignature, skipSecondSignature) {
 			break;
 		case 13:
 			var bb = new ByteBuffer(1, true)
-			var asset = transaction.asset.uiaIssue
+			var asset = transaction.asset.aobIssue
 			bb.writeString(asset.currency)
 			bb.writeString(asset.amount)
 			bb.flip()
@@ -211,7 +211,7 @@ function getBytes(transaction, skipSignature, skipSecondSignature) {
 			break;
 		case 14:
 			var bb = new ByteBuffer(1, true)
-			var asset = transaction.asset.uiaTransfer
+			var asset = transaction.asset.aobTransfer
 			bb.writeString(asset.currency)
 			bb.writeString(asset.amount)
 			bb.flip()

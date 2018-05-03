@@ -6,7 +6,7 @@ module.exports = {
 	signature : require("./lib/transactions/signature.js"),
 	transaction : require("./lib/transactions/transaction.js"),
 	vote : require("./lib/transactions/vote.js"),
-	uia: require("./lib/transactions/uia.js"),
+	aob: require("./lib/transactions/aob.js"),
 	storage: require("./lib/transactions/storage.js"),
 	article: require("./lib/transactions/article.js"),	
 	username: require("./lib/transactions/username.js"),
