@@ -247,6 +247,21 @@ function getBytes(transaction, skipSignature, skipSecondSignature) {
 			  bb.flip();
 			  assetBytes = toLocalBuffer(bb)
 			  break;
+		case 20:
+			var bb = new ByteBuffer(1, true)
+			const asset = trs.asset.evidence;
+			bb.writeString(asset.ipid);
+			bb.writeString(asset.title);
+			bb.writeString(asset.hash);
+			bb.writeString(asset.tags);
+			bb.writeString(asset.author);
+			bb.writeString(asset.url);
+			bb.writeInt(asset.size ? asset.size : '');
+			bb.writeString(asset.type);
+			
+			bb.flip()
+			assetBytes = toLocalBuffer(bb)
+			break;
 	}
 	if (transaction.__assetBytes__) {
 		assetBytes = transaction.__assetBytes__;
