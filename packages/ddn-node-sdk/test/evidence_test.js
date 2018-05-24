@@ -27,7 +27,9 @@ describe("DDN evidence.js", function () {
                 ipid: "IPIDasdf20180501221md",
 				title: "Evidencetitle",
 				hash: "contenthash",
-				author: "author1",
+                author: "author1",
+                url: "dat://helloworld/index.html",
+                tags: "test, article",
 				size: 12,
 				type: "html"
             }

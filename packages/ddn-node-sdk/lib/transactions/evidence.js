@@ -36,10 +36,12 @@ function createEvidence(evidence, secret, secondSecret) {
 			evidence: {
 				ipid: evidence.ipid,
 				title: evidence.title,
-				hash: evidence.description,
+				hash: evidence.hash,
 				author: evidence.author,
 				size: evidence.size,
-				type: evidence.type
+				type: evidence.type,
+				url: evidence.url,
+				tags: evidence.tags
 			}
 		}
 	};
