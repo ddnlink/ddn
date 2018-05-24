@@ -1,4 +1,4 @@
-(function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
+(function(){function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s}return e})()({1:[function(require,module,exports){
 window.DdnJS = require('./index.js');
 window.DdnJS.options.set('nethash','b11fa2f2')
 //window.DdnJS.options.set('nethash','0ab796cd') // 测试网络
@@ -13,7 +13,8 @@ module.exports = {
 	vote : require("./lib/transactions/vote.js"),
 	aob: require("./lib/transactions/aob.js"),
 	storage: require("./lib/transactions/storage.js"),
-	article: require("./lib/transactions/article.js"),	
+	article: require("./lib/transactions/article.js"),
+	evidence: require("./lib/transactions/evidence.js"),	
 	username: require("./lib/transactions/username.js"),
 	domain: require("./lib/transactions/domain.js"),			
 	multitransfer: require("./lib/transactions/multitransfer.js"),		
@@ -23,7 +24,7 @@ module.exports = {
 		format: require("./lib/time/format.js")
 	}
 }
-},{"./lib/options.js":8,"./lib/time/format.js":9,"./lib/time/slots.js":10,"./lib/transactions/article.js":11,"./lib/transactions/crypto.js":12,"./lib/transactions/dapp.js":13,"./lib/transactions/delegate.js":14,"./lib/transactions/domain.js":15,"./lib/transactions/multitransfer.js":16,"./lib/transactions/signature.js":17,"./lib/transactions/storage.js":18,"./lib/transactions/transaction.js":19,"./lib/transactions/transfer.js":20,"./lib/transactions/aob.js":21,"./lib/transactions/username.js":22,"./lib/transactions/vote.js":23}],3:[function(require,module,exports){
+},{"./lib/options.js":8,"./lib/time/format.js":9,"./lib/time/slots.js":10,"./lib/transactions/aob.js":11,"./lib/transactions/article.js":12,"./lib/transactions/crypto.js":13,"./lib/transactions/dapp.js":14,"./lib/transactions/delegate.js":15,"./lib/transactions/domain.js":16,"./lib/transactions/evidence.js":17,"./lib/transactions/multitransfer.js":18,"./lib/transactions/signature.js":19,"./lib/transactions/storage.js":20,"./lib/transactions/transaction.js":21,"./lib/transactions/transfer.js":22,"./lib/transactions/username.js":23,"./lib/transactions/vote.js":24}],3:[function(require,module,exports){
 (function (Buffer){
 var sha256 = require('fast-sha256')
 var RIPEMD160 = require('ripemd160')
@@ -70,7 +71,7 @@ module.exports = {
   },
 }
 }).call(this,require("buffer").Buffer)
-},{"./base58check":6,"buffer":27,"fast-sha256":31,"ripemd160":53}],4:[function(require,module,exports){
+},{"./base58check":6,"buffer":28,"fast-sha256":32,"ripemd160":55}],4:[function(require,module,exports){
 (function (Buffer){
 // base-x encoding
 // Forked from https://github.com/cryptocoinjs/bs58
@@ -163,7 +164,7 @@ module.exports = function base (ALPHABET) {
 }
 
 }).call(this,require("buffer").Buffer)
-},{"buffer":27}],5:[function(require,module,exports){
+},{"buffer":28}],5:[function(require,module,exports){
 var basex = require('./base-x.js')
 var ALPHABET = '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz'
 
@@ -224,12 +225,13 @@ module.exports = {
 }
 
 }).call(this,require("buffer").Buffer)
-},{"./bs58.js":5,"buffer":27,"fast-sha256":31}],7:[function(require,module,exports){
+},{"./bs58.js":5,"buffer":28,"fast-sha256":32}],7:[function(require,module,exports){
 module.exports = {
   fees:{
     send: 10000000,
     vote: 10000000,
-    article: 10000000,    
+    article: 10000000,   
+    evidence: 10000000, // fixme 
     username: 10000000,
     multitransfer: 10000000,
     domain: 10000000,
@@ -421,8 +423,125 @@ var constants = require("../constants.js")
 var slots = require("../time/slots.js")
 var options = require('../options')
 
+function getClientFixedTime() {
+  return slots.getTime() - options.get('clientDriftSeconds')
+}
+
+function createTransaction(asset, fee, type, recipientId, message, secret, secondSecret) {
+  var keys = crypto.getKeys(secret)
+
+  var transaction = {
+    type: type,
+    nethash: options.get('nethash'),
+    amount: 0,
+    fee: fee,
+    recipientId: recipientId,
+    senderPublicKey: keys.publicKey,
+    timestamp: getClientFixedTime(),
+    message: message,
+    asset: asset
+  }
+
+  crypto.sign(transaction, keys)
+
+  if (secondSecret) {
+    var secondKeys = crypto.getKeys(secondSecret)
+    crypto.secondSign(transaction, secondKeys)
+  }
+
+  transaction.id = crypto.getId(transaction)
+
+  return transaction
+}
+
+module.exports = {
+  createIssuer: function (name, desc, secret, secondSecret) {
+    var asset = {
+      aobIssuer: {
+        name: name,
+        desc: desc
+      }
+    }
+    //var fee = (100 + (Math.floor(bytes.length / 200) + 1) * 0.1) * constants.coin
+    var fee = 100 * constants.coin
+    return createTransaction(asset, fee, 9, null, null, secret, secondSecret)
+  },
+
+  createAsset: function (name, desc, maximum, precision, strategy, allowWriteoff, allowWhitelist, allowBlacklist, secret, secondSecret) {
+    var asset = {
+      aobAsset: {
+        name: name,
+        desc: desc,
+        maximum: maximum,
+        precision: precision,
+        strategy: strategy,
+        allowBlacklist: allowBlacklist,
+        allowWhitelist: allowWhitelist,
+        allowWriteoff: allowWriteoff
+      }
+    }
+    // var fee = (500 + (Math.floor(bytes.length / 200) + 1) * 0.1) * constants.coin
+    var fee = 500 * constants.coin
+    return createTransaction(asset, fee, 10, null, null, secret, secondSecret)
+  },
+
+  createFlags: function (currency, flagType, flag, secret, secondSecret) {
+    var asset = {
+      aobFlags: {
+        currency: currency,
+        flagType: flagType,
+        flag: flag
+      }
+    }
+    var fee = 0.1 * constants.coin
+    return createTransaction(asset, fee, 11, null, null, secret, secondSecret)
+  },
+
+  createAcl: function (currency, operator, flag, list, secret, secondSecret) {
+    var asset = {
+      aobAcl: {
+        currency: currency,
+        operator: operator,
+        flag: flag,
+        list: list
+      }
+    }
+    var fee = 0.2 * constants.coin
+    return createTransaction(asset, fee, 12, null, null, secret, secondSecret)
+  },
+
+  createIssue: function (currency, amount, secret, secondSecret) {
+    var asset = {
+      aobIssue: {
+        currency: currency,
+        amount: amount
+      }
+    }
+    var fee = 0.1 * constants.coin
+    return createTransaction(asset, fee, 13, null, null, secret, secondSecret)
+  },
+
+  createTransfer: function (currency, amount, recipientId, message, secret, secondSecret) {
+    var asset = {
+      aobTransfer: {
+        currency: currency,
+        amount: amount
+      }
+    }
+    var fee = 0.1 * constants.coin
+    return createTransaction(asset, fee, 14, recipientId, message, secret, secondSecret)
+  },
+}
+
+},{"../constants.js":7,"../options":8,"../time/slots.js":10,"./crypto.js":13,"bytebuffer":29}],12:[function(require,module,exports){
+var ByteBuffer = require('bytebuffer')
+var crypto = require("./crypto.js")
+var constants = require("../constants.js")
+var slots = require("../time/slots.js")
+var options = require('../options')
+
 function createArticle(fileHash, fileName, title, description, secret, secondSecret) {
-	var keys = crypto.getKeys(secret)
+  var keys = crypto.getKeys(secret)
   var bytes =  null
 
   if (!fileHash || fileHash.length == 0) {
@@ -454,6 +573,7 @@ function createArticle(fileHash, fileName, title, description, secret, secondSec
 		var secondKeys = crypto.getKeys(secondSecret)
 		crypto.secondSign(transaction, secondKeys)
 	}
+
 	transaction.id = crypto.getId(transaction)
 	return transaction
 }
@@ -462,7 +582,7 @@ module.exports = {
 	createArticle : createArticle
 }
 
-},{"../constants.js":7,"../options":8,"../time/slots.js":10,"./crypto.js":12,"bytebuffer":28}],12:[function(require,module,exports){
+},{"../constants.js":7,"../options":8,"../time/slots.js":10,"./crypto.js":13,"bytebuffer":29}],13:[function(require,module,exports){
 (function (Buffer){
 var sha256 = require("fast-sha256");
 var addressHelper = require('../address.js')
@@ -929,7 +1049,7 @@ module.exports = {
 }
 
 }).call(this,require("buffer").Buffer)
-},{"../address.js":3,"browserify-bignum":26,"buffer":27,"buffer/":27,"bytebuffer":28,"fast-sha256":31,"tweetnacl":57}],13:[function(require,module,exports){
+},{"../address.js":3,"browserify-bignum":27,"buffer":28,"buffer/":28,"bytebuffer":29,"fast-sha256":32,"tweetnacl":58}],14:[function(require,module,exports){
 (function (Buffer){
 var ByteBuffer = require('bytebuffer')
 var crypto = require("./crypto.js")
@@ -1018,7 +1138,7 @@ module.exports = {
 }
 
 }).call(this,require("buffer").Buffer)
-},{"../constants.js":7,"../options.js":8,"../time/slots.js":10,"./crypto.js":12,"buffer":27,"bytebuffer":28}],14:[function(require,module,exports){
+},{"../constants.js":7,"../options.js":8,"../time/slots.js":10,"./crypto.js":13,"buffer":28,"bytebuffer":29}],15:[function(require,module,exports){
 var crypto = require("./crypto.js")
 var constants = require("../constants.js")
 var slots = require("../time/slots.js")
@@ -1058,7 +1178,7 @@ module.exports = {
 	createDelegate : createDelegate
 }
 
-},{"../constants.js":7,"../options":8,"../time/slots.js":10,"./crypto.js":12}],15:[function(require,module,exports){
+},{"../constants.js":7,"../options":8,"../time/slots.js":10,"./crypto.js":13}],16:[function(require,module,exports){
 var ByteBuffer = require('bytebuffer')
 var crypto = require("./crypto.js")
 var constants = require("../constants.js")
@@ -1107,7 +1227,69 @@ module.exports = {
 	createDomain : createDomain
 }
 
-},{"../constants.js":7,"../options":8,"../time/slots.js":10,"./crypto.js":12,"bytebuffer":28}],16:[function(require,module,exports){
+},{"../constants.js":7,"../options":8,"../time/slots.js":10,"./crypto.js":13,"bytebuffer":29}],17:[function(require,module,exports){
+var ByteBuffer = require('bytebuffer');
+var crypto = require('./crypto.js');
+var constants = require('../constants.js');
+var slots = require('../time/slots.js');
+var options = require('../options');
+
+/**
+ * Create evidence transaction
+ * @param {Evidence} evidence object {ipid: ipid, title: title, tags: tags, hash: hash, type: type, size: size, url: url}
+ * @param {*} secret 
+ * @param {*} secondSecret 
+ */
+function createEvidence(evidence, secret, secondSecret) {
+	var keys = crypto.getKeys(secret);
+	var bytes = null;
+
+	if (typeof evidence !== 'object') {
+		throw new Error('The first argument should be a object!');
+	}
+
+	if (!evidence.ipid || evidence.ipid.length == 0) {
+		throw new Error('Invalid ipid format');
+	}
+
+	var fee = constants.fees.evidence;
+
+	var transaction = {
+		type: 20,
+		nethash: options.get('nethash'),
+		amount: 0,
+		fee: fee,
+		recipientId: null,
+		senderPublicKey: keys.publicKey,
+		timestamp: slots.getTime() - options.get('clientDriftSeconds'),
+		asset: {
+			evidence: {
+				ipid: evidence.ipid,
+				title: evidence.title,
+				hash: evidence.description,
+				author: evidence.author,
+				size: evidence.size,
+				type: evidence.type
+			}
+		}
+	};
+
+	crypto.sign(transaction, keys);
+
+	if (secondSecret) {
+		var secondKeys = crypto.getKeys(secondSecret);
+		crypto.secondSign(transaction, secondKeys);
+	}
+
+	transaction.id = crypto.getId(transaction);
+	return transaction;
+}
+
+module.exports = {
+	createEvidence: createEvidence
+};
+
+},{"../constants.js":7,"../options":8,"../time/slots.js":10,"./crypto.js":13,"bytebuffer":29}],18:[function(require,module,exports){
 var ByteBuffer = require('bytebuffer')
 var crypto = require("./crypto.js")
 var constants = require("../constants.js")
@@ -1177,7 +1359,7 @@ module.exports = {
 	createMultiTransfer : createMultiTransfer
 }
 
-},{"../address.js":3,"../constants.js":7,"../options":8,"../time/slots.js":10,"./crypto.js":12,"bytebuffer":28}],17:[function(require,module,exports){
+},{"../address.js":3,"../constants.js":7,"../options":8,"../time/slots.js":10,"./crypto.js":13,"bytebuffer":29}],19:[function(require,module,exports){
 var crypto = require("./crypto.js")
 var constants = require("../constants.js")
 var slots = require("../time/slots.js")
@@ -1220,7 +1402,7 @@ module.exports = {
 	createSignature: createSignature
 }
 
-},{"../constants.js":7,"../options":8,"../time/slots.js":10,"./crypto.js":12}],18:[function(require,module,exports){
+},{"../constants.js":7,"../options":8,"../time/slots.js":10,"./crypto.js":13}],20:[function(require,module,exports){
 var ByteBuffer = require('bytebuffer')
 var crypto = require("./crypto.js")
 var constants = require("../constants.js")
@@ -1271,7 +1453,7 @@ module.exports = {
 	createStorage : createStorage
 }
 
-},{"../constants.js":7,"../options":8,"../time/slots.js":10,"./crypto.js":12,"bytebuffer":28}],19:[function(require,module,exports){
+},{"../constants.js":7,"../options":8,"../time/slots.js":10,"./crypto.js":13,"bytebuffer":29}],21:[function(require,module,exports){
 var crypto = require("./crypto.js")
 var constants = require("../constants.js")
 var slots = require("../time/slots.js")
@@ -1340,7 +1522,7 @@ module.exports = {
 	calculateFee: calculateFee,
 	createLock: createLock
 }
-},{"../constants.js":7,"../options":8,"../time/slots.js":10,"./crypto.js":12}],20:[function(require,module,exports){
+},{"../constants.js":7,"../options":8,"../time/slots.js":10,"./crypto.js":13}],22:[function(require,module,exports){
 var crypto = require("./crypto.js")
 var constants = require("../constants.js")
 var slots = require("../time/slots.js")
@@ -1425,124 +1607,7 @@ module.exports = {
 	createOutTransfer: createOutTransfer,
 	signOutTransfer: signOutTransfer
 }
-},{"../constants.js":7,"../options":8,"../time/slots.js":10,"./crypto.js":12}],21:[function(require,module,exports){
-var ByteBuffer = require('bytebuffer')
-var crypto = require("./crypto.js")
-var constants = require("../constants.js")
-var slots = require("../time/slots.js")
-var options = require('../options')
-
-function getClientFixedTime() {
-  return slots.getTime() - options.get('clientDriftSeconds')
-}
-
-function createTransaction(asset, fee, type, recipientId, message, secret, secondSecret) {
-  var keys = crypto.getKeys(secret)
-
-  var transaction = {
-    type: type,
-    nethash: options.get('nethash'),
-    amount: 0,
-    fee: fee,
-    recipientId: recipientId,
-    senderPublicKey: keys.publicKey,
-    timestamp: getClientFixedTime(),
-    message: message,
-    asset: asset
-  }
-
-  crypto.sign(transaction, keys)
-
-  if (secondSecret) {
-    var secondKeys = crypto.getKeys(secondSecret)
-    crypto.secondSign(transaction, secondKeys)
-  }
-
-  transaction.id = crypto.getId(transaction)
-
-  return transaction
-}
-
-module.exports = {
-  createIssuer: function (name, desc, secret, secondSecret) {
-    var asset = {
-      aobIssuer: {
-        name: name,
-        desc: desc
-      }
-    }
-    //var fee = (100 + (Math.floor(bytes.length / 200) + 1) * 0.1) * constants.coin
-    var fee = 100 * constants.coin
-    return createTransaction(asset, fee, 9, null, null, secret, secondSecret)
-  },
-
-  createAsset: function (name, desc, maximum, precision, strategy, allowWriteoff, allowWhitelist, allowBlacklist, secret, secondSecret) {
-    var asset = {
-      aobAsset: {
-        name: name,
-        desc: desc,
-        maximum: maximum,
-        precision: precision,
-        strategy: strategy,
-        allowBlacklist: allowBlacklist,
-        allowWhitelist: allowWhitelist,
-        allowWriteoff: allowWriteoff
-      }
-    }
-    // var fee = (500 + (Math.floor(bytes.length / 200) + 1) * 0.1) * constants.coin
-    var fee = 500 * constants.coin
-    return createTransaction(asset, fee, 10, null, null, secret, secondSecret)
-  },
-
-  createFlags: function (currency, flagType, flag, secret, secondSecret) {
-    var asset = {
-      aobFlags: {
-        currency: currency,
-        flagType: flagType,
-        flag: flag
-      }
-    }
-    var fee = 0.1 * constants.coin
-    return createTransaction(asset, fee, 11, null, null, secret, secondSecret)
-  },
-
-  createAcl: function (currency, operator, flag, list, secret, secondSecret) {
-    var asset = {
-      aobAcl: {
-        currency: currency,
-        operator: operator,
-        flag: flag,
-        list: list
-      }
-    }
-    var fee = 0.2 * constants.coin
-    return createTransaction(asset, fee, 12, null, null, secret, secondSecret)
-  },
-
-  createIssue: function (currency, amount, secret, secondSecret) {
-    var asset = {
-      aobIssue: {
-        currency: currency,
-        amount: amount
-      }
-    }
-    var fee = 0.1 * constants.coin
-    return createTransaction(asset, fee, 13, null, null, secret, secondSecret)
-  },
-
-  createTransfer: function (currency, amount, recipientId, message, secret, secondSecret) {
-    var asset = {
-      aobTransfer: {
-        currency: currency,
-        amount: amount
-      }
-    }
-    var fee = 0.1 * constants.coin
-    return createTransaction(asset, fee, 14, recipientId, message, secret, secondSecret)
-  },
-}
-
-},{"../constants.js":7,"../options":8,"../time/slots.js":10,"./crypto.js":12,"bytebuffer":28}],22:[function(require,module,exports){
+},{"../constants.js":7,"../options":8,"../time/slots.js":10,"./crypto.js":13}],23:[function(require,module,exports){
 var ByteBuffer = require('bytebuffer')
 var crypto = require("./crypto.js")
 var constants = require("../constants.js")
@@ -1587,7 +1652,7 @@ module.exports = {
 	createUsername : createUsername
 }
 
-},{"../constants.js":7,"../options":8,"../time/slots.js":10,"./crypto.js":12,"bytebuffer":28}],23:[function(require,module,exports){
+},{"../constants.js":7,"../options":8,"../time/slots.js":10,"./crypto.js":13,"bytebuffer":29}],24:[function(require,module,exports){
 var crypto = require("./crypto.js")
 var constants = require("../constants.js")
 var slots = require("../time/slots.js")
@@ -1627,7 +1692,7 @@ module.exports = {
 	createVote: createVote
 }
 
-},{"../constants.js":7,"../options":8,"../time/slots.js":10,"./crypto.js":12}],24:[function(require,module,exports){
+},{"../constants.js":7,"../options":8,"../time/slots.js":10,"./crypto.js":13}],25:[function(require,module,exports){
 'use strict'
 
 exports.byteLength = byteLength
@@ -1644,6 +1709,8 @@ for (var i = 0, len = code.length; i < len; ++i) {
   revLookup[code.charCodeAt(i)] = i
 }
 
+// Support decoding URL-safe base64 strings, as Node.js does.
+// See: https://en.wikipedia.org/wiki/Base64#URL_applications
 revLookup['-'.charCodeAt(0)] = 62
 revLookup['_'.charCodeAt(0)] = 63
 
@@ -1705,7 +1772,7 @@ function encodeChunk (uint8, start, end) {
   var tmp
   var output = []
   for (var i = start; i < end; i += 3) {
-    tmp = (uint8[i] << 16) + (uint8[i + 1] << 8) + (uint8[i + 2])
+    tmp = ((uint8[i] << 16) & 0xFF0000) + ((uint8[i + 1] << 8) & 0xFF00) + (uint8[i + 2] & 0xFF)
     output.push(tripletToBase64(tmp))
   }
   return output.join('')
@@ -1743,9 +1810,9 @@ function fromByteArray (uint8) {
   return parts.join('')
 }
 
-},{}],25:[function(require,module,exports){
-
 },{}],26:[function(require,module,exports){
+
+},{}],27:[function(require,module,exports){
 (function (Buffer){
 /* bignumber.js v1.3.0 https://github.com/MikeMcl/bignumber.js/LICENCE */
 
@@ -3863,7 +3930,7 @@ P['valueOf'] = function () {
 module.exports = BigNumber;
 
 }).call(this,require("buffer").Buffer)
-},{"buffer":27}],27:[function(require,module,exports){
+},{"buffer":28}],28:[function(require,module,exports){
 (function (global){
 /*!
  * The buffer module from node.js, for the browser.
@@ -5656,7 +5723,7 @@ function isnan (val) {
 }
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"base64-js":24,"ieee754":33,"isarray":36}],28:[function(require,module,exports){
+},{"base64-js":25,"ieee754":34,"isarray":37}],29:[function(require,module,exports){
 /*
  Copyright 2013-2014 Daniel Wirtz <dcode@dcode.io>
 
@@ -9404,7 +9471,7 @@ function isnan (val) {
     return ByteBuffer;
 });
 
-},{"long":37}],29:[function(require,module,exports){
+},{"long":38}],30:[function(require,module,exports){
 (function (Buffer){
 // Copyright Joyent, Inc. and other Node contributors.
 //
@@ -9515,7 +9582,7 @@ function objectToString(o) {
 }
 
 }).call(this,{"isBuffer":require("../../is-buffer/index.js")})
-},{"../../is-buffer/index.js":35}],30:[function(require,module,exports){
+},{"../../is-buffer/index.js":36}],31:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -9819,7 +9886,7 @@ function isUndefined(arg) {
   return arg === void 0;
 }
 
-},{}],31:[function(require,module,exports){
+},{}],32:[function(require,module,exports){
 (function (root, factory) {
     // Hack to make all exports of this module sha256 function object properties.
     var exports = {};
@@ -10195,7 +10262,7 @@ function pbkdf2(password, salt, iterations, dkLen) {
 exports.pbkdf2 = pbkdf2;
 });
 
-},{}],32:[function(require,module,exports){
+},{}],33:[function(require,module,exports){
 (function (Buffer){
 'use strict'
 var Transform = require('stream').Transform
@@ -10282,7 +10349,7 @@ HashBase.prototype._digest = function () {
 module.exports = HashBase
 
 }).call(this,require("buffer").Buffer)
-},{"buffer":27,"inherits":34,"stream":55}],33:[function(require,module,exports){
+},{"buffer":28,"inherits":35,"stream":57}],34:[function(require,module,exports){
 exports.read = function (buffer, offset, isLE, mLen, nBytes) {
   var e, m
   var eLen = nBytes * 8 - mLen - 1
@@ -10368,7 +10435,7 @@ exports.write = function (buffer, value, offset, isLE, mLen, nBytes) {
   buffer[offset + i - d] |= s * 128
 }
 
-},{}],34:[function(require,module,exports){
+},{}],35:[function(require,module,exports){
 if (typeof Object.create === 'function') {
   // implementation from standard node.js 'util' module
   module.exports = function inherits(ctor, superCtor) {
@@ -10393,7 +10460,7 @@ if (typeof Object.create === 'function') {
   }
 }
 
-},{}],35:[function(require,module,exports){
+},{}],36:[function(require,module,exports){
 /*!
  * Determine if an object is a Buffer
  *
@@ -10416,14 +10483,14 @@ function isSlowBuffer (obj) {
   return typeof obj.readFloatLE === 'function' && typeof obj.slice === 'function' && isBuffer(obj.slice(0, 0))
 }
 
-},{}],36:[function(require,module,exports){
+},{}],37:[function(require,module,exports){
 var toString = {}.toString;
 
 module.exports = Array.isArray || function (arr) {
   return toString.call(arr) == '[object Array]';
 };
 
-},{}],37:[function(require,module,exports){
+},{}],38:[function(require,module,exports){
 /*
  Copyright 2013 Daniel Wirtz <dcode@dcode.io>
  Copyright 2009 The Closure Library Authors. All Rights Reserved.
@@ -11634,16 +11701,16 @@ module.exports = Array.isArray || function (arr) {
     return Long;
 });
 
-},{}],38:[function(require,module,exports){
+},{}],39:[function(require,module,exports){
 (function (process){
 'use strict';
 
 if (!process.version ||
     process.version.indexOf('v0.') === 0 ||
     process.version.indexOf('v1.') === 0 && process.version.indexOf('v1.8.') !== 0) {
-  module.exports = nextTick;
+  module.exports = { nextTick: nextTick };
 } else {
-  module.exports = process.nextTick;
+  module.exports = process
 }
 
 function nextTick(fn, arg1, arg2, arg3) {
@@ -11680,8 +11747,9 @@ function nextTick(fn, arg1, arg2, arg3) {
   }
 }
 
+
 }).call(this,require('_process'))
-},{"_process":39}],39:[function(require,module,exports){
+},{"_process":40}],40:[function(require,module,exports){
 // shim for using process in browser
 var process = module.exports = {};
 
@@ -11867,10 +11935,10 @@ process.chdir = function (dir) {
 };
 process.umask = function() { return 0; };
 
-},{}],40:[function(require,module,exports){
+},{}],41:[function(require,module,exports){
 module.exports = require('./lib/_stream_duplex.js');
 
-},{"./lib/_stream_duplex.js":41}],41:[function(require,module,exports){
+},{"./lib/_stream_duplex.js":42}],42:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -11901,7 +11969,7 @@ module.exports = require('./lib/_stream_duplex.js');
 
 /*<replacement>*/
 
-var processNextTick = require('process-nextick-args');
+var pna = require('process-nextick-args');
 /*</replacement>*/
 
 /*<replacement>*/
@@ -11955,7 +12023,7 @@ function onend() {
 
   // no more data can be written.
   // But allow more writes to happen in this tick.
-  processNextTick(onEndNT, this);
+  pna.nextTick(onEndNT, this);
 }
 
 function onEndNT(self) {
@@ -11987,7 +12055,7 @@ Duplex.prototype._destroy = function (err, cb) {
   this.push(null);
   this.end();
 
-  processNextTick(cb, err);
+  pna.nextTick(cb, err);
 };
 
 function forEach(xs, f) {
@@ -11995,7 +12063,7 @@ function forEach(xs, f) {
     f(xs[i], i);
   }
 }
-},{"./_stream_readable":43,"./_stream_writable":45,"core-util-is":29,"inherits":34,"process-nextick-args":38}],42:[function(require,module,exports){
+},{"./_stream_readable":44,"./_stream_writable":46,"core-util-is":30,"inherits":35,"process-nextick-args":39}],43:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -12043,7 +12111,7 @@ function PassThrough(options) {
 PassThrough.prototype._transform = function (chunk, encoding, cb) {
   cb(null, chunk);
 };
-},{"./_stream_transform":44,"core-util-is":29,"inherits":34}],43:[function(require,module,exports){
+},{"./_stream_transform":45,"core-util-is":30,"inherits":35}],44:[function(require,module,exports){
 (function (process,global){
 // Copyright Joyent, Inc. and other Node contributors.
 //
@@ -12070,7 +12138,7 @@ PassThrough.prototype._transform = function (chunk, encoding, cb) {
 
 /*<replacement>*/
 
-var processNextTick = require('process-nextick-args');
+var pna = require('process-nextick-args');
 /*</replacement>*/
 
 module.exports = Readable;
@@ -12097,9 +12165,8 @@ var EElistenerCount = function (emitter, type) {
 var Stream = require('./internal/streams/stream');
 /*</replacement>*/
 
-// TODO(bmeurer): Change this back to const once hole checks are
-// properly optimized away early in Ignition+TurboFan.
 /*<replacement>*/
+
 var Buffer = require('safe-buffer').Buffer;
 var OurUint8Array = global.Uint8Array || function () {};
 function _uint8ArrayToBuffer(chunk) {
@@ -12108,6 +12175,7 @@ function _uint8ArrayToBuffer(chunk) {
 function _isUint8Array(obj) {
   return Buffer.isBuffer(obj) || obj instanceof OurUint8Array;
 }
+
 /*</replacement>*/
 
 /*<replacement>*/
@@ -12136,15 +12204,13 @@ var kProxyEvents = ['error', 'close', 'destroy', 'pause', 'resume'];
 function prependListener(emitter, event, fn) {
   // Sadly this is not cacheable as some libraries bundle their own
   // event emitter implementation with them.
-  if (typeof emitter.prependListener === 'function') {
-    return emitter.prependListener(event, fn);
-  } else {
-    // This is a hack to make sure that our error handler is attached before any
-    // userland ones.  NEVER DO THIS. This is here only because this code needs
-    // to continue to work with older versions of Node.js that do not include
-    // the prependListener() method. The goal is to eventually remove this hack.
-    if (!emitter._events || !emitter._events[event]) emitter.on(event, fn);else if (isArray(emitter._events[event])) emitter._events[event].unshift(fn);else emitter._events[event] = [fn, emitter._events[event]];
-  }
+  if (typeof emitter.prependListener === 'function') return emitter.prependListener(event, fn);
+
+  // This is a hack to make sure that our error handler is attached before any
+  // userland ones.  NEVER DO THIS. This is here only because this code needs
+  // to continue to work with older versions of Node.js that do not include
+  // the prependListener() method. The goal is to eventually remove this hack.
+  if (!emitter._events || !emitter._events[event]) emitter.on(event, fn);else if (isArray(emitter._events[event])) emitter._events[event].unshift(fn);else emitter._events[event] = [fn, emitter._events[event]];
 }
 
 function ReadableState(options, stream) {
@@ -12152,17 +12218,26 @@ function ReadableState(options, stream) {
 
   options = options || {};
 
+  // Duplex streams are both readable and writable, but share
+  // the same options object.
+  // However, some cases require setting options to different
+  // values for the readable and the writable sides of the duplex stream.
+  // These options can be provided separately as readableXXX and writableXXX.
+  var isDuplex = stream instanceof Duplex;
+
   // object stream flag. Used to make read(n) ignore n and to
   // make all the buffer merging and length checks go away
   this.objectMode = !!options.objectMode;
 
-  if (stream instanceof Duplex) this.objectMode = this.objectMode || !!options.readableObjectMode;
+  if (isDuplex) this.objectMode = this.objectMode || !!options.readableObjectMode;
 
   // the point at which it stops calling _read() to fill the buffer
   // Note: 0 is a valid value, means "don't call _read preemptively ever"
   var hwm = options.highWaterMark;
+  var readableHwm = options.readableHighWaterMark;
   var defaultHwm = this.objectMode ? 16 : 16 * 1024;
-  this.highWaterMark = hwm || hwm === 0 ? hwm : defaultHwm;
+
+  if (hwm || hwm === 0) this.highWaterMark = hwm;else if (isDuplex && (readableHwm || readableHwm === 0)) this.highWaterMark = readableHwm;else this.highWaterMark = defaultHwm;
 
   // cast to ints.
   this.highWaterMark = Math.floor(this.highWaterMark);
@@ -12535,7 +12610,7 @@ function emitReadable(stream) {
   if (!state.emittedReadable) {
     debug('emitReadable', state.flowing);
     state.emittedReadable = true;
-    if (state.sync) processNextTick(emitReadable_, stream);else emitReadable_(stream);
+    if (state.sync) pna.nextTick(emitReadable_, stream);else emitReadable_(stream);
   }
 }
 
@@ -12554,7 +12629,7 @@ function emitReadable_(stream) {
 function maybeReadMore(stream, state) {
   if (!state.readingMore) {
     state.readingMore = true;
-    processNextTick(maybeReadMore_, stream, state);
+    pna.nextTick(maybeReadMore_, stream, state);
   }
 }
 
@@ -12599,7 +12674,7 @@ Readable.prototype.pipe = function (dest, pipeOpts) {
   var doEnd = (!pipeOpts || pipeOpts.end !== false) && dest !== process.stdout && dest !== process.stderr;
 
   var endFn = doEnd ? onend : unpipe;
-  if (state.endEmitted) processNextTick(endFn);else src.once('end', endFn);
+  if (state.endEmitted) pna.nextTick(endFn);else src.once('end', endFn);
 
   dest.on('unpipe', onunpipe);
   function onunpipe(readable, unpipeInfo) {
@@ -12789,7 +12864,7 @@ Readable.prototype.on = function (ev, fn) {
       state.readableListening = state.needReadable = true;
       state.emittedReadable = false;
       if (!state.reading) {
-        processNextTick(nReadingNextTick, this);
+        pna.nextTick(nReadingNextTick, this);
       } else if (state.length) {
         emitReadable(this);
       }
@@ -12820,7 +12895,7 @@ Readable.prototype.resume = function () {
 function resume(stream, state) {
   if (!state.resumeScheduled) {
     state.resumeScheduled = true;
-    processNextTick(resume_, stream, state);
+    pna.nextTick(resume_, stream, state);
   }
 }
 
@@ -12857,18 +12932,19 @@ function flow(stream) {
 // This is *not* part of the readable stream interface.
 // It is an ugly unfortunate mess of history.
 Readable.prototype.wrap = function (stream) {
+  var _this = this;
+
   var state = this._readableState;
   var paused = false;
 
-  var self = this;
   stream.on('end', function () {
     debug('wrapped end');
     if (state.decoder && !state.ended) {
       var chunk = state.decoder.end();
-      if (chunk && chunk.length) self.push(chunk);
+      if (chunk && chunk.length) _this.push(chunk);
     }
 
-    self.push(null);
+    _this.push(null);
   });
 
   stream.on('data', function (chunk) {
@@ -12878,7 +12954,7 @@ Readable.prototype.wrap = function (stream) {
     // don't skip over falsy values in objectMode
     if (state.objectMode && (chunk === null || chunk === undefined)) return;else if (!state.objectMode && (!chunk || !chunk.length)) return;
 
-    var ret = self.push(chunk);
+    var ret = _this.push(chunk);
     if (!ret) {
       paused = true;
       stream.pause();
@@ -12899,12 +12975,12 @@ Readable.prototype.wrap = function (stream) {
 
   // proxy certain important events.
   for (var n = 0; n < kProxyEvents.length; n++) {
-    stream.on(kProxyEvents[n], self.emit.bind(self, kProxyEvents[n]));
+    stream.on(kProxyEvents[n], this.emit.bind(this, kProxyEvents[n]));
   }
 
   // when we try to consume some more bytes, simply unpause the
   // underlying stream.
-  self._read = function (n) {
+  this._read = function (n) {
     debug('wrapped _read', n);
     if (paused) {
       paused = false;
@@ -12912,7 +12988,7 @@ Readable.prototype.wrap = function (stream) {
     }
   };
 
-  return self;
+  return this;
 };
 
 // exposed for testing purposes only.
@@ -13027,7 +13103,7 @@ function endReadable(stream) {
 
   if (!state.endEmitted) {
     state.ended = true;
-    processNextTick(endReadableNT, state, stream);
+    pna.nextTick(endReadableNT, state, stream);
   }
 }
 
@@ -13053,7 +13129,7 @@ function indexOf(xs, x) {
   return -1;
 }
 }).call(this,require('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./_stream_duplex":41,"./internal/streams/BufferList":46,"./internal/streams/destroy":47,"./internal/streams/stream":48,"_process":39,"core-util-is":29,"events":30,"inherits":34,"isarray":36,"process-nextick-args":38,"safe-buffer":54,"string_decoder/":56,"util":25}],44:[function(require,module,exports){
+},{"./_stream_duplex":42,"./internal/streams/BufferList":47,"./internal/streams/destroy":48,"./internal/streams/stream":49,"_process":40,"core-util-is":30,"events":31,"inherits":35,"isarray":37,"process-nextick-args":39,"safe-buffer":56,"string_decoder/":50,"util":26}],45:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -13130,39 +13206,28 @@ util.inherits = require('inherits');
 
 util.inherits(Transform, Duplex);
 
-function TransformState(stream) {
-  this.afterTransform = function (er, data) {
-    return afterTransform(stream, er, data);
-  };
-
-  this.needTransform = false;
-  this.transforming = false;
-  this.writecb = null;
-  this.writechunk = null;
-  this.writeencoding = null;
-}
-
-function afterTransform(stream, er, data) {
-  var ts = stream._transformState;
+function afterTransform(er, data) {
+  var ts = this._transformState;
   ts.transforming = false;
 
   var cb = ts.writecb;
 
   if (!cb) {
-    return stream.emit('error', new Error('write callback called multiple times'));
+    return this.emit('error', new Error('write callback called multiple times'));
   }
 
   ts.writechunk = null;
   ts.writecb = null;
 
-  if (data !== null && data !== undefined) stream.push(data);
+  if (data != null) // single equals check for both `null` and `undefined`
+    this.push(data);
 
   cb(er);
 
-  var rs = stream._readableState;
+  var rs = this._readableState;
   rs.reading = false;
   if (rs.needReadable || rs.length < rs.highWaterMark) {
-    stream._read(rs.highWaterMark);
+    this._read(rs.highWaterMark);
   }
 }
 
@@ -13171,9 +13236,14 @@ function Transform(options) {
 
   Duplex.call(this, options);
 
-  this._transformState = new TransformState(this);
-
-  var stream = this;
+  this._transformState = {
+    afterTransform: afterTransform.bind(this),
+    needTransform: false,
+    transforming: false,
+    writecb: null,
+    writechunk: null,
+    writeencoding: null
+  };
 
   // start out asking for a readable event once data is transformed.
   this._readableState.needReadable = true;
@@ -13190,11 +13260,19 @@ function Transform(options) {
   }
 
   // When the writable side finishes, then flush out anything remaining.
-  this.once('prefinish', function () {
-    if (typeof this._flush === 'function') this._flush(function (er, data) {
-      done(stream, er, data);
-    });else done(stream);
-  });
+  this.on('prefinish', prefinish);
+}
+
+function prefinish() {
+  var _this = this;
+
+  if (typeof this._flush === 'function') {
+    this._flush(function (er, data) {
+      done(_this, er, data);
+    });
+  } else {
+    done(this, null, null);
+  }
 }
 
 Transform.prototype.push = function (chunk, encoding) {
@@ -13244,31 +13322,29 @@ Transform.prototype._read = function (n) {
 };
 
 Transform.prototype._destroy = function (err, cb) {
-  var _this = this;
+  var _this2 = this;
 
   Duplex.prototype._destroy.call(this, err, function (err2) {
     cb(err2);
-    _this.emit('close');
+    _this2.emit('close');
   });
 };
 
 function done(stream, er, data) {
   if (er) return stream.emit('error', er);
 
-  if (data !== null && data !== undefined) stream.push(data);
+  if (data != null) // single equals check for both `null` and `undefined`
+    stream.push(data);
 
   // if there's nothing in the write buffer, then that means
   // that nothing more will ever be provided
-  var ws = stream._writableState;
-  var ts = stream._transformState;
+  if (stream._writableState.length) throw new Error('Calling transform done when ws.length != 0');
 
-  if (ws.length) throw new Error('Calling transform done when ws.length != 0');
-
-  if (ts.transforming) throw new Error('Calling transform done when still transforming');
+  if (stream._transformState.transforming) throw new Error('Calling transform done when still transforming');
 
   return stream.push(null);
 }
-},{"./_stream_duplex":41,"core-util-is":29,"inherits":34}],45:[function(require,module,exports){
+},{"./_stream_duplex":42,"core-util-is":30,"inherits":35}],46:[function(require,module,exports){
 (function (process,global){
 // Copyright Joyent, Inc. and other Node contributors.
 //
@@ -13299,7 +13375,7 @@ function done(stream, er, data) {
 
 /*<replacement>*/
 
-var processNextTick = require('process-nextick-args');
+var pna = require('process-nextick-args');
 /*</replacement>*/
 
 module.exports = Writable;
@@ -13326,7 +13402,7 @@ function CorkedRequest(state) {
 /* </replacement> */
 
 /*<replacement>*/
-var asyncWrite = !process.browser && ['v0.10', 'v0.9.'].indexOf(process.version.slice(0, 5)) > -1 ? setImmediate : processNextTick;
+var asyncWrite = !process.browser && ['v0.10', 'v0.9.'].indexOf(process.version.slice(0, 5)) > -1 ? setImmediate : pna.nextTick;
 /*</replacement>*/
 
 /*<replacement>*/
@@ -13351,6 +13427,7 @@ var Stream = require('./internal/streams/stream');
 /*</replacement>*/
 
 /*<replacement>*/
+
 var Buffer = require('safe-buffer').Buffer;
 var OurUint8Array = global.Uint8Array || function () {};
 function _uint8ArrayToBuffer(chunk) {
@@ -13359,6 +13436,7 @@ function _uint8ArrayToBuffer(chunk) {
 function _isUint8Array(obj) {
   return Buffer.isBuffer(obj) || obj instanceof OurUint8Array;
 }
+
 /*</replacement>*/
 
 var destroyImpl = require('./internal/streams/destroy');
@@ -13372,18 +13450,27 @@ function WritableState(options, stream) {
 
   options = options || {};
 
+  // Duplex streams are both readable and writable, but share
+  // the same options object.
+  // However, some cases require setting options to different
+  // values for the readable and the writable sides of the duplex stream.
+  // These options can be provided separately as readableXXX and writableXXX.
+  var isDuplex = stream instanceof Duplex;
+
   // object stream flag to indicate whether or not this stream
   // contains buffers or objects.
   this.objectMode = !!options.objectMode;
 
-  if (stream instanceof Duplex) this.objectMode = this.objectMode || !!options.writableObjectMode;
+  if (isDuplex) this.objectMode = this.objectMode || !!options.writableObjectMode;
 
   // the point at which write() starts returning false
   // Note: 0 is a valid value, means that we always return false if
   // the entire buffer is not flushed immediately on write()
   var hwm = options.highWaterMark;
+  var writableHwm = options.writableHighWaterMark;
   var defaultHwm = this.objectMode ? 16 : 16 * 1024;
-  this.highWaterMark = hwm || hwm === 0 ? hwm : defaultHwm;
+
+  if (hwm || hwm === 0) this.highWaterMark = hwm;else if (isDuplex && (writableHwm || writableHwm === 0)) this.highWaterMark = writableHwm;else this.highWaterMark = defaultHwm;
 
   // cast to ints.
   this.highWaterMark = Math.floor(this.highWaterMark);
@@ -13497,6 +13584,7 @@ if (typeof Symbol === 'function' && Symbol.hasInstance && typeof Function.protot
   Object.defineProperty(Writable, Symbol.hasInstance, {
     value: function (object) {
       if (realHasInstance.call(this, object)) return true;
+      if (this !== Writable) return false;
 
       return object && object._writableState instanceof WritableState;
     }
@@ -13548,7 +13636,7 @@ function writeAfterEnd(stream, cb) {
   var er = new Error('write after end');
   // TODO: defer error events consistently everywhere, not just the cb
   stream.emit('error', er);
-  processNextTick(cb, er);
+  pna.nextTick(cb, er);
 }
 
 // Checks that a user-supplied chunk is valid, especially for the particular
@@ -13565,7 +13653,7 @@ function validChunk(stream, state, chunk, cb) {
   }
   if (er) {
     stream.emit('error', er);
-    processNextTick(cb, er);
+    pna.nextTick(cb, er);
     valid = false;
   }
   return valid;
@@ -13574,7 +13662,7 @@ function validChunk(stream, state, chunk, cb) {
 Writable.prototype.write = function (chunk, encoding, cb) {
   var state = this._writableState;
   var ret = false;
-  var isBuf = _isUint8Array(chunk) && !state.objectMode;
+  var isBuf = !state.objectMode && _isUint8Array(chunk);
 
   if (isBuf && !Buffer.isBuffer(chunk)) {
     chunk = _uint8ArrayToBuffer(chunk);
@@ -13685,10 +13773,10 @@ function onwriteError(stream, state, sync, er, cb) {
   if (sync) {
     // defer the callback if we are being called synchronously
     // to avoid piling up things on the stack
-    processNextTick(cb, er);
+    pna.nextTick(cb, er);
     // this can emit finish, and it will always happen
     // after error
-    processNextTick(finishMaybe, stream, state);
+    pna.nextTick(finishMaybe, stream, state);
     stream._writableState.errorEmitted = true;
     stream.emit('error', er);
   } else {
@@ -13786,6 +13874,7 @@ function clearBuffer(stream, state) {
     } else {
       state.corkedRequestsFree = new CorkedRequest(state);
     }
+    state.bufferedRequestCount = 0;
   } else {
     // Slow case, write chunks one-by-one
     while (entry) {
@@ -13796,6 +13885,7 @@ function clearBuffer(stream, state) {
 
       doWrite(stream, state, false, len, chunk, encoding, cb);
       entry = entry.next;
+      state.bufferedRequestCount--;
       // if we didn't call the onwrite immediately, then
       // it means that we need to wait until it does.
       // also, that means that the chunk and cb are currently
@@ -13808,7 +13898,6 @@ function clearBuffer(stream, state) {
     if (entry === null) state.lastBufferedRequest = null;
   }
 
-  state.bufferedRequestCount = 0;
   state.bufferedRequest = entry;
   state.bufferProcessing = false;
 }
@@ -13862,7 +13951,7 @@ function prefinish(stream, state) {
     if (typeof stream._final === 'function') {
       state.pendingcb++;
       state.finalCalled = true;
-      processNextTick(callFinal, stream, state);
+      pna.nextTick(callFinal, stream, state);
     } else {
       state.prefinished = true;
       stream.emit('prefinish');
@@ -13886,7 +13975,7 @@ function endWritable(stream, state, cb) {
   state.ending = true;
   finishMaybe(stream, state);
   if (cb) {
-    if (state.finished) processNextTick(cb);else stream.once('finish', cb);
+    if (state.finished) pna.nextTick(cb);else stream.once('finish', cb);
   }
   state.ended = true;
   stream.writable = false;
@@ -13935,15 +14024,13 @@ Writable.prototype._destroy = function (err, cb) {
   cb(err);
 };
 }).call(this,require('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./_stream_duplex":41,"./internal/streams/destroy":47,"./internal/streams/stream":48,"_process":39,"core-util-is":29,"inherits":34,"process-nextick-args":38,"safe-buffer":54,"util-deprecate":58}],46:[function(require,module,exports){
+},{"./_stream_duplex":42,"./internal/streams/destroy":48,"./internal/streams/stream":49,"_process":40,"core-util-is":30,"inherits":35,"process-nextick-args":39,"safe-buffer":56,"util-deprecate":59}],47:[function(require,module,exports){
 'use strict';
-
-/*<replacement>*/
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 var Buffer = require('safe-buffer').Buffer;
-/*</replacement>*/
+var util = require('util');
 
 function copyBuffer(src, target, offset) {
   src.copy(target, offset);
@@ -14010,12 +14097,19 @@ module.exports = function () {
 
   return BufferList;
 }();
-},{"safe-buffer":54}],47:[function(require,module,exports){
+
+if (util && util.inspect && util.inspect.custom) {
+  module.exports.prototype[util.inspect.custom] = function () {
+    var obj = util.inspect({ length: this.length });
+    return this.constructor.name + ' ' + obj;
+  };
+}
+},{"safe-buffer":56,"util":26}],48:[function(require,module,exports){
 'use strict';
 
 /*<replacement>*/
 
-var processNextTick = require('process-nextick-args');
+var pna = require('process-nextick-args');
 /*</replacement>*/
 
 // undocumented cb() API, needed for core, not for public API
@@ -14029,9 +14123,9 @@ function destroy(err, cb) {
     if (cb) {
       cb(err);
     } else if (err && (!this._writableState || !this._writableState.errorEmitted)) {
-      processNextTick(emitErrorNT, this, err);
+      pna.nextTick(emitErrorNT, this, err);
     }
-    return;
+    return this;
   }
 
   // we set destroyed to true before firing error callbacks in order
@@ -14048,7 +14142,7 @@ function destroy(err, cb) {
 
   this._destroy(err || null, function (err) {
     if (!cb && err) {
-      processNextTick(emitErrorNT, _this, err);
+      pna.nextTick(emitErrorNT, _this, err);
       if (_this._writableState) {
         _this._writableState.errorEmitted = true;
       }
@@ -14056,6 +14150,8 @@ function destroy(err, cb) {
       cb(err);
     }
   });
+
+  return this;
 }
 
 function undestroy() {
@@ -14083,13 +14179,286 @@ module.exports = {
   destroy: destroy,
   undestroy: undestroy
 };
-},{"process-nextick-args":38}],48:[function(require,module,exports){
+},{"process-nextick-args":39}],49:[function(require,module,exports){
 module.exports = require('events').EventEmitter;
 
-},{"events":30}],49:[function(require,module,exports){
+},{"events":31}],50:[function(require,module,exports){
+'use strict';
+
+var Buffer = require('safe-buffer').Buffer;
+
+var isEncoding = Buffer.isEncoding || function (encoding) {
+  encoding = '' + encoding;
+  switch (encoding && encoding.toLowerCase()) {
+    case 'hex':case 'utf8':case 'utf-8':case 'ascii':case 'binary':case 'base64':case 'ucs2':case 'ucs-2':case 'utf16le':case 'utf-16le':case 'raw':
+      return true;
+    default:
+      return false;
+  }
+};
+
+function _normalizeEncoding(enc) {
+  if (!enc) return 'utf8';
+  var retried;
+  while (true) {
+    switch (enc) {
+      case 'utf8':
+      case 'utf-8':
+        return 'utf8';
+      case 'ucs2':
+      case 'ucs-2':
+      case 'utf16le':
+      case 'utf-16le':
+        return 'utf16le';
+      case 'latin1':
+      case 'binary':
+        return 'latin1';
+      case 'base64':
+      case 'ascii':
+      case 'hex':
+        return enc;
+      default:
+        if (retried) return; // undefined
+        enc = ('' + enc).toLowerCase();
+        retried = true;
+    }
+  }
+};
+
+// Do not cache `Buffer.isEncoding` when checking encoding names as some
+// modules monkey-patch it to support additional encodings
+function normalizeEncoding(enc) {
+  var nenc = _normalizeEncoding(enc);
+  if (typeof nenc !== 'string' && (Buffer.isEncoding === isEncoding || !isEncoding(enc))) throw new Error('Unknown encoding: ' + enc);
+  return nenc || enc;
+}
+
+// StringDecoder provides an interface for efficiently splitting a series of
+// buffers into a series of JS strings without breaking apart multi-byte
+// characters.
+exports.StringDecoder = StringDecoder;
+function StringDecoder(encoding) {
+  this.encoding = normalizeEncoding(encoding);
+  var nb;
+  switch (this.encoding) {
+    case 'utf16le':
+      this.text = utf16Text;
+      this.end = utf16End;
+      nb = 4;
+      break;
+    case 'utf8':
+      this.fillLast = utf8FillLast;
+      nb = 4;
+      break;
+    case 'base64':
+      this.text = base64Text;
+      this.end = base64End;
+      nb = 3;
+      break;
+    default:
+      this.write = simpleWrite;
+      this.end = simpleEnd;
+      return;
+  }
+  this.lastNeed = 0;
+  this.lastTotal = 0;
+  this.lastChar = Buffer.allocUnsafe(nb);
+}
+
+StringDecoder.prototype.write = function (buf) {
+  if (buf.length === 0) return '';
+  var r;
+  var i;
+  if (this.lastNeed) {
+    r = this.fillLast(buf);
+    if (r === undefined) return '';
+    i = this.lastNeed;
+    this.lastNeed = 0;
+  } else {
+    i = 0;
+  }
+  if (i < buf.length) return r ? r + this.text(buf, i) : this.text(buf, i);
+  return r || '';
+};
+
+StringDecoder.prototype.end = utf8End;
+
+// Returns only complete characters in a Buffer
+StringDecoder.prototype.text = utf8Text;
+
+// Attempts to complete a partial non-UTF-8 character using bytes from a Buffer
+StringDecoder.prototype.fillLast = function (buf) {
+  if (this.lastNeed <= buf.length) {
+    buf.copy(this.lastChar, this.lastTotal - this.lastNeed, 0, this.lastNeed);
+    return this.lastChar.toString(this.encoding, 0, this.lastTotal);
+  }
+  buf.copy(this.lastChar, this.lastTotal - this.lastNeed, 0, buf.length);
+  this.lastNeed -= buf.length;
+};
+
+// Checks the type of a UTF-8 byte, whether it's ASCII, a leading byte, or a
+// continuation byte.
+function utf8CheckByte(byte) {
+  if (byte <= 0x7F) return 0;else if (byte >> 5 === 0x06) return 2;else if (byte >> 4 === 0x0E) return 3;else if (byte >> 3 === 0x1E) return 4;
+  return -1;
+}
+
+// Checks at most 3 bytes at the end of a Buffer in order to detect an
+// incomplete multi-byte UTF-8 character. The total number of bytes (2, 3, or 4)
+// needed to complete the UTF-8 character (if applicable) are returned.
+function utf8CheckIncomplete(self, buf, i) {
+  var j = buf.length - 1;
+  if (j < i) return 0;
+  var nb = utf8CheckByte(buf[j]);
+  if (nb >= 0) {
+    if (nb > 0) self.lastNeed = nb - 1;
+    return nb;
+  }
+  if (--j < i) return 0;
+  nb = utf8CheckByte(buf[j]);
+  if (nb >= 0) {
+    if (nb > 0) self.lastNeed = nb - 2;
+    return nb;
+  }
+  if (--j < i) return 0;
+  nb = utf8CheckByte(buf[j]);
+  if (nb >= 0) {
+    if (nb > 0) {
+      if (nb === 2) nb = 0;else self.lastNeed = nb - 3;
+    }
+    return nb;
+  }
+  return 0;
+}
+
+// Validates as many continuation bytes for a multi-byte UTF-8 character as
+// needed or are available. If we see a non-continuation byte where we expect
+// one, we "replace" the validated continuation bytes we've seen so far with
+// UTF-8 replacement characters ('\ufffd'), to match v8's UTF-8 decoding
+// behavior. The continuation byte check is included three times in the case
+// where all of the continuation bytes for a character exist in the same buffer.
+// It is also done this way as a slight performance increase instead of using a
+// loop.
+function utf8CheckExtraBytes(self, buf, p) {
+  if ((buf[0] & 0xC0) !== 0x80) {
+    self.lastNeed = 0;
+    return '\ufffd'.repeat(p);
+  }
+  if (self.lastNeed > 1 && buf.length > 1) {
+    if ((buf[1] & 0xC0) !== 0x80) {
+      self.lastNeed = 1;
+      return '\ufffd'.repeat(p + 1);
+    }
+    if (self.lastNeed > 2 && buf.length > 2) {
+      if ((buf[2] & 0xC0) !== 0x80) {
+        self.lastNeed = 2;
+        return '\ufffd'.repeat(p + 2);
+      }
+    }
+  }
+}
+
+// Attempts to complete a multi-byte UTF-8 character using bytes from a Buffer.
+function utf8FillLast(buf) {
+  var p = this.lastTotal - this.lastNeed;
+  var r = utf8CheckExtraBytes(this, buf, p);
+  if (r !== undefined) return r;
+  if (this.lastNeed <= buf.length) {
+    buf.copy(this.lastChar, p, 0, this.lastNeed);
+    return this.lastChar.toString(this.encoding, 0, this.lastTotal);
+  }
+  buf.copy(this.lastChar, p, 0, buf.length);
+  this.lastNeed -= buf.length;
+}
+
+// Returns all complete UTF-8 characters in a Buffer. If the Buffer ended on a
+// partial character, the character's bytes are buffered until the required
+// number of bytes are available.
+function utf8Text(buf, i) {
+  var total = utf8CheckIncomplete(this, buf, i);
+  if (!this.lastNeed) return buf.toString('utf8', i);
+  this.lastTotal = total;
+  var end = buf.length - (total - this.lastNeed);
+  buf.copy(this.lastChar, 0, end);
+  return buf.toString('utf8', i, end);
+}
+
+// For UTF-8, a replacement character for each buffered byte of a (partial)
+// character needs to be added to the output.
+function utf8End(buf) {
+  var r = buf && buf.length ? this.write(buf) : '';
+  if (this.lastNeed) return r + '\ufffd'.repeat(this.lastTotal - this.lastNeed);
+  return r;
+}
+
+// UTF-16LE typically needs two bytes per character, but even if we have an even
+// number of bytes available, we need to check if we end on a leading/high
+// surrogate. In that case, we need to wait for the next two bytes in order to
+// decode the last character properly.
+function utf16Text(buf, i) {
+  if ((buf.length - i) % 2 === 0) {
+    var r = buf.toString('utf16le', i);
+    if (r) {
+      var c = r.charCodeAt(r.length - 1);
+      if (c >= 0xD800 && c <= 0xDBFF) {
+        this.lastNeed = 2;
+        this.lastTotal = 4;
+        this.lastChar[0] = buf[buf.length - 2];
+        this.lastChar[1] = buf[buf.length - 1];
+        return r.slice(0, -1);
+      }
+    }
+    return r;
+  }
+  this.lastNeed = 1;
+  this.lastTotal = 2;
+  this.lastChar[0] = buf[buf.length - 1];
+  return buf.toString('utf16le', i, buf.length - 1);
+}
+
+// For UTF-16LE we do not explicitly append special replacement characters if we
+// end on a partial character, we simply let v8 handle that.
+function utf16End(buf) {
+  var r = buf && buf.length ? this.write(buf) : '';
+  if (this.lastNeed) {
+    var end = this.lastTotal - this.lastNeed;
+    return r + this.lastChar.toString('utf16le', 0, end);
+  }
+  return r;
+}
+
+function base64Text(buf, i) {
+  var n = (buf.length - i) % 3;
+  if (n === 0) return buf.toString('base64', i);
+  this.lastNeed = 3 - n;
+  this.lastTotal = 3;
+  if (n === 1) {
+    this.lastChar[0] = buf[buf.length - 1];
+  } else {
+    this.lastChar[0] = buf[buf.length - 2];
+    this.lastChar[1] = buf[buf.length - 1];
+  }
+  return buf.toString('base64', i, buf.length - n);
+}
+
+function base64End(buf) {
+  var r = buf && buf.length ? this.write(buf) : '';
+  if (this.lastNeed) return r + this.lastChar.toString('base64', 0, 3 - this.lastNeed);
+  return r;
+}
+
+// Pass bytes on through for single-byte encodings (e.g. ascii, latin1, hex)
+function simpleWrite(buf) {
+  return buf.toString(this.encoding);
+}
+
+function simpleEnd(buf) {
+  return buf && buf.length ? this.write(buf) : '';
+}
+},{"safe-buffer":56}],51:[function(require,module,exports){
 module.exports = require('./readable').PassThrough
 
-},{"./readable":50}],50:[function(require,module,exports){
+},{"./readable":52}],52:[function(require,module,exports){
 exports = module.exports = require('./lib/_stream_readable.js');
 exports.Stream = exports;
 exports.Readable = exports;
@@ -14098,13 +14467,13 @@ exports.Duplex = require('./lib/_stream_duplex.js');
 exports.Transform = require('./lib/_stream_transform.js');
 exports.PassThrough = require('./lib/_stream_passthrough.js');
 
-},{"./lib/_stream_duplex.js":41,"./lib/_stream_passthrough.js":42,"./lib/_stream_readable.js":43,"./lib/_stream_transform.js":44,"./lib/_stream_writable.js":45}],51:[function(require,module,exports){
+},{"./lib/_stream_duplex.js":42,"./lib/_stream_passthrough.js":43,"./lib/_stream_readable.js":44,"./lib/_stream_transform.js":45,"./lib/_stream_writable.js":46}],53:[function(require,module,exports){
 module.exports = require('./readable').Transform
 
-},{"./readable":50}],52:[function(require,module,exports){
+},{"./readable":52}],54:[function(require,module,exports){
 module.exports = require('./lib/_stream_writable.js');
 
-},{"./lib/_stream_writable.js":45}],53:[function(require,module,exports){
+},{"./lib/_stream_writable.js":46}],55:[function(require,module,exports){
 (function (Buffer){
 'use strict'
 var inherits = require('inherits')
@@ -14399,7 +14768,7 @@ function fn5 (a, b, c, d, e, m, k, s) {
 module.exports = RIPEMD160
 
 }).call(this,require("buffer").Buffer)
-},{"buffer":27,"hash-base":32,"inherits":34}],54:[function(require,module,exports){
+},{"buffer":28,"hash-base":33,"inherits":35}],56:[function(require,module,exports){
 /* eslint-disable node/no-deprecated-api */
 var buffer = require('buffer')
 var Buffer = buffer.Buffer
@@ -14463,7 +14832,7 @@ SafeBuffer.allocUnsafeSlow = function (size) {
   return buffer.SlowBuffer(size)
 }
 
-},{"buffer":27}],55:[function(require,module,exports){
+},{"buffer":28}],57:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -14592,280 +14961,7 @@ Stream.prototype.pipe = function(dest, options) {
   return dest;
 };
 
-},{"events":30,"inherits":34,"readable-stream/duplex.js":40,"readable-stream/passthrough.js":49,"readable-stream/readable.js":50,"readable-stream/transform.js":51,"readable-stream/writable.js":52}],56:[function(require,module,exports){
-'use strict';
-
-var Buffer = require('safe-buffer').Buffer;
-
-var isEncoding = Buffer.isEncoding || function (encoding) {
-  encoding = '' + encoding;
-  switch (encoding && encoding.toLowerCase()) {
-    case 'hex':case 'utf8':case 'utf-8':case 'ascii':case 'binary':case 'base64':case 'ucs2':case 'ucs-2':case 'utf16le':case 'utf-16le':case 'raw':
-      return true;
-    default:
-      return false;
-  }
-};
-
-function _normalizeEncoding(enc) {
-  if (!enc) return 'utf8';
-  var retried;
-  while (true) {
-    switch (enc) {
-      case 'utf8':
-      case 'utf-8':
-        return 'utf8';
-      case 'ucs2':
-      case 'ucs-2':
-      case 'utf16le':
-      case 'utf-16le':
-        return 'utf16le';
-      case 'latin1':
-      case 'binary':
-        return 'latin1';
-      case 'base64':
-      case 'ascii':
-      case 'hex':
-        return enc;
-      default:
-        if (retried) return; // undefined
-        enc = ('' + enc).toLowerCase();
-        retried = true;
-    }
-  }
-};
-
-// Do not cache `Buffer.isEncoding` when checking encoding names as some
-// modules monkey-patch it to support additional encodings
-function normalizeEncoding(enc) {
-  var nenc = _normalizeEncoding(enc);
-  if (typeof nenc !== 'string' && (Buffer.isEncoding === isEncoding || !isEncoding(enc))) throw new Error('Unknown encoding: ' + enc);
-  return nenc || enc;
-}
-
-// StringDecoder provides an interface for efficiently splitting a series of
-// buffers into a series of JS strings without breaking apart multi-byte
-// characters.
-exports.StringDecoder = StringDecoder;
-function StringDecoder(encoding) {
-  this.encoding = normalizeEncoding(encoding);
-  var nb;
-  switch (this.encoding) {
-    case 'utf16le':
-      this.text = utf16Text;
-      this.end = utf16End;
-      nb = 4;
-      break;
-    case 'utf8':
-      this.fillLast = utf8FillLast;
-      nb = 4;
-      break;
-    case 'base64':
-      this.text = base64Text;
-      this.end = base64End;
-      nb = 3;
-      break;
-    default:
-      this.write = simpleWrite;
-      this.end = simpleEnd;
-      return;
-  }
-  this.lastNeed = 0;
-  this.lastTotal = 0;
-  this.lastChar = Buffer.allocUnsafe(nb);
-}
-
-StringDecoder.prototype.write = function (buf) {
-  if (buf.length === 0) return '';
-  var r;
-  var i;
-  if (this.lastNeed) {
-    r = this.fillLast(buf);
-    if (r === undefined) return '';
-    i = this.lastNeed;
-    this.lastNeed = 0;
-  } else {
-    i = 0;
-  }
-  if (i < buf.length) return r ? r + this.text(buf, i) : this.text(buf, i);
-  return r || '';
-};
-
-StringDecoder.prototype.end = utf8End;
-
-// Returns only complete characters in a Buffer
-StringDecoder.prototype.text = utf8Text;
-
-// Attempts to complete a partial non-UTF-8 character using bytes from a Buffer
-StringDecoder.prototype.fillLast = function (buf) {
-  if (this.lastNeed <= buf.length) {
-    buf.copy(this.lastChar, this.lastTotal - this.lastNeed, 0, this.lastNeed);
-    return this.lastChar.toString(this.encoding, 0, this.lastTotal);
-  }
-  buf.copy(this.lastChar, this.lastTotal - this.lastNeed, 0, buf.length);
-  this.lastNeed -= buf.length;
-};
-
-// Checks the type of a UTF-8 byte, whether it's ASCII, a leading byte, or a
-// continuation byte.
-function utf8CheckByte(byte) {
-  if (byte <= 0x7F) return 0;else if (byte >> 5 === 0x06) return 2;else if (byte >> 4 === 0x0E) return 3;else if (byte >> 3 === 0x1E) return 4;
-  return -1;
-}
-
-// Checks at most 3 bytes at the end of a Buffer in order to detect an
-// incomplete multi-byte UTF-8 character. The total number of bytes (2, 3, or 4)
-// needed to complete the UTF-8 character (if applicable) are returned.
-function utf8CheckIncomplete(self, buf, i) {
-  var j = buf.length - 1;
-  if (j < i) return 0;
-  var nb = utf8CheckByte(buf[j]);
-  if (nb >= 0) {
-    if (nb > 0) self.lastNeed = nb - 1;
-    return nb;
-  }
-  if (--j < i) return 0;
-  nb = utf8CheckByte(buf[j]);
-  if (nb >= 0) {
-    if (nb > 0) self.lastNeed = nb - 2;
-    return nb;
-  }
-  if (--j < i) return 0;
-  nb = utf8CheckByte(buf[j]);
-  if (nb >= 0) {
-    if (nb > 0) {
-      if (nb === 2) nb = 0;else self.lastNeed = nb - 3;
-    }
-    return nb;
-  }
-  return 0;
-}
-
-// Validates as many continuation bytes for a multi-byte UTF-8 character as
-// needed or are available. If we see a non-continuation byte where we expect
-// one, we "replace" the validated continuation bytes we've seen so far with
-// UTF-8 replacement characters ('\ufffd'), to match v8's UTF-8 decoding
-// behavior. The continuation byte check is included three times in the case
-// where all of the continuation bytes for a character exist in the same buffer.
-// It is also done this way as a slight performance increase instead of using a
-// loop.
-function utf8CheckExtraBytes(self, buf, p) {
-  if ((buf[0] & 0xC0) !== 0x80) {
-    self.lastNeed = 0;
-    return '\ufffd'.repeat(p);
-  }
-  if (self.lastNeed > 1 && buf.length > 1) {
-    if ((buf[1] & 0xC0) !== 0x80) {
-      self.lastNeed = 1;
-      return '\ufffd'.repeat(p + 1);
-    }
-    if (self.lastNeed > 2 && buf.length > 2) {
-      if ((buf[2] & 0xC0) !== 0x80) {
-        self.lastNeed = 2;
-        return '\ufffd'.repeat(p + 2);
-      }
-    }
-  }
-}
-
-// Attempts to complete a multi-byte UTF-8 character using bytes from a Buffer.
-function utf8FillLast(buf) {
-  var p = this.lastTotal - this.lastNeed;
-  var r = utf8CheckExtraBytes(this, buf, p);
-  if (r !== undefined) return r;
-  if (this.lastNeed <= buf.length) {
-    buf.copy(this.lastChar, p, 0, this.lastNeed);
-    return this.lastChar.toString(this.encoding, 0, this.lastTotal);
-  }
-  buf.copy(this.lastChar, p, 0, buf.length);
-  this.lastNeed -= buf.length;
-}
-
-// Returns all complete UTF-8 characters in a Buffer. If the Buffer ended on a
-// partial character, the character's bytes are buffered until the required
-// number of bytes are available.
-function utf8Text(buf, i) {
-  var total = utf8CheckIncomplete(this, buf, i);
-  if (!this.lastNeed) return buf.toString('utf8', i);
-  this.lastTotal = total;
-  var end = buf.length - (total - this.lastNeed);
-  buf.copy(this.lastChar, 0, end);
-  return buf.toString('utf8', i, end);
-}
-
-// For UTF-8, a replacement character for each buffered byte of a (partial)
-// character needs to be added to the output.
-function utf8End(buf) {
-  var r = buf && buf.length ? this.write(buf) : '';
-  if (this.lastNeed) return r + '\ufffd'.repeat(this.lastTotal - this.lastNeed);
-  return r;
-}
-
-// UTF-16LE typically needs two bytes per character, but even if we have an even
-// number of bytes available, we need to check if we end on a leading/high
-// surrogate. In that case, we need to wait for the next two bytes in order to
-// decode the last character properly.
-function utf16Text(buf, i) {
-  if ((buf.length - i) % 2 === 0) {
-    var r = buf.toString('utf16le', i);
-    if (r) {
-      var c = r.charCodeAt(r.length - 1);
-      if (c >= 0xD800 && c <= 0xDBFF) {
-        this.lastNeed = 2;
-        this.lastTotal = 4;
-        this.lastChar[0] = buf[buf.length - 2];
-        this.lastChar[1] = buf[buf.length - 1];
-        return r.slice(0, -1);
-      }
-    }
-    return r;
-  }
-  this.lastNeed = 1;
-  this.lastTotal = 2;
-  this.lastChar[0] = buf[buf.length - 1];
-  return buf.toString('utf16le', i, buf.length - 1);
-}
-
-// For UTF-16LE we do not explicitly append special replacement characters if we
-// end on a partial character, we simply let v8 handle that.
-function utf16End(buf) {
-  var r = buf && buf.length ? this.write(buf) : '';
-  if (this.lastNeed) {
-    var end = this.lastTotal - this.lastNeed;
-    return r + this.lastChar.toString('utf16le', 0, end);
-  }
-  return r;
-}
-
-function base64Text(buf, i) {
-  var n = (buf.length - i) % 3;
-  if (n === 0) return buf.toString('base64', i);
-  this.lastNeed = 3 - n;
-  this.lastTotal = 3;
-  if (n === 1) {
-    this.lastChar[0] = buf[buf.length - 1];
-  } else {
-    this.lastChar[0] = buf[buf.length - 2];
-    this.lastChar[1] = buf[buf.length - 1];
-  }
-  return buf.toString('base64', i, buf.length - n);
-}
-
-function base64End(buf) {
-  var r = buf && buf.length ? this.write(buf) : '';
-  if (this.lastNeed) return r + this.lastChar.toString('base64', 0, 3 - this.lastNeed);
-  return r;
-}
-
-// Pass bytes on through for single-byte encodings (e.g. ascii, latin1, hex)
-function simpleWrite(buf) {
-  return buf.toString(this.encoding);
-}
-
-function simpleEnd(buf) {
-  return buf && buf.length ? this.write(buf) : '';
-}
-},{"safe-buffer":54}],57:[function(require,module,exports){
+},{"events":31,"inherits":35,"readable-stream/duplex.js":41,"readable-stream/passthrough.js":51,"readable-stream/readable.js":52,"readable-stream/transform.js":53,"readable-stream/writable.js":54}],58:[function(require,module,exports){
 (function(nacl) {
 'use strict';
 
@@ -17244,7 +17340,7 @@ nacl.setPRNG = function(fn) {
 
 })(typeof module !== 'undefined' && module.exports ? module.exports : (self.nacl = self.nacl || {}));
 
-},{"crypto":25}],58:[function(require,module,exports){
+},{"crypto":26}],59:[function(require,module,exports){
 (function (global){
 
 /**
