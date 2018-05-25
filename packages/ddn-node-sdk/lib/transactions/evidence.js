@@ -33,16 +33,7 @@ function createEvidence(evidence, secret, secondSecret) {
 		senderPublicKey: keys.publicKey,
 		timestamp: slots.getTime() - options.get('clientDriftSeconds'),
 		asset: {
-			evidence: {
-				ipid: evidence.ipid,
-				title: evidence.title,
-				hash: evidence.hash,
-				author: evidence.author,
-				size: evidence.size,
-				type: evidence.type,
-				url: evidence.url,
-				tags: evidence.tags
-			}
+			evidence: evidence
 		}
 	};
 
