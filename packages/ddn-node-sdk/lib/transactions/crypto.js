@@ -110,6 +110,35 @@ function getOutTransferBytes(outTransfer) {
   return buf;
 }
 
+getEvidenceBytes = function(evidence) {
+  let buf;
+
+  try {
+    buf = new Buffer([]);
+
+    const ipidBuf = new Buffer(evidence.ipid, 'utf8');
+    const titleBuf = new Buffer(evidence.title, 'utf8');
+    const tagsBuf = new Buffer(evidence.tags, 'utf8');
+    const urlBuf = new Buffer(evidence.url, 'utf8');
+    const authorBuf = new Buffer(evidence.author, 'utf8');
+
+    buf = Buffer.concat([buf, ipidBuf, titleBuf, tagsBuf, urlBuf, authorBuf]);
+
+    const bb = new ByteBuffer();
+    bb.writeString(evidence.hash);
+    bb.writeString(evidence.size ? evidence.size : '');
+    bb.writeString(evidence.type);
+
+    bb.flip();
+
+    buf = Buffer.concat([buf, bb.toBuffer()]);
+  } catch (e) {
+    throw Error(e.toString());
+  }
+
+  return buf;
+}
+
 function getBytes(transaction, skipSignature, skipSecondSignature) {
   var assetSize = 0,
     assetBytes = null;
@@ -250,32 +279,20 @@ function getBytes(transaction, skipSignature, skipSecondSignature) {
       assetBytes = toLocalBuffer(bb)
       break;
     case 20: // evidence
-      var bb = new ByteBuffer(1, true)
-      var asset = transaction.asset.evidence;
-      bb.writeString(asset.ipid);
-      bb.writeString(asset.title);
-      bb.writeString(asset.hash);
-      bb.writeString(asset.tags);
-      bb.writeString(asset.author);
-      bb.writeString(asset.url);
-      bb.writeString(asset.size ? asset.size : '');
-      bb.writeString(asset.type);
-
-      bb.flip()
-      assetBytes = toLocalBuffer(bb)
+      assetBytes = getEvidenceBytes(transaction.asset.evidence);
       break;
   }
+
   if (transaction.__assetBytes__) {
     assetBytes = transaction.__assetBytes__;
   }
   if (assetBytes) assetSize = assetBytes.length
 
-  // +32
+  // fixme: please delete follower +32
   // if (transaction.requesterPublicKey) {
   // 	assetSize += 32;
   // }
 
-  // 下面与链上的相同
   var bb = new ByteBuffer(1, true);
   bb.writeByte(transaction.type); // +1
   bb.writeInt(transaction.timestamp); // +4
