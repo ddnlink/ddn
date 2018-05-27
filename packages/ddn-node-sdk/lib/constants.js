@@ -2,7 +2,6 @@ module.exports = {
   fees:{
     send: 10000000,
     vote: 10000000,
-    article: 10000000,   
     evidence: 10000000, // fixme 
     username: 10000000,
     multitransfer: 10000000,

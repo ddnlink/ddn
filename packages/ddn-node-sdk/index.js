@@ -8,7 +8,6 @@ module.exports = {
 	vote : require("./lib/transactions/vote.js"),
 	aob: require("./lib/transactions/aob.js"),
 	storage: require("./lib/transactions/storage.js"),
-	article: require("./lib/transactions/article.js"),
 	evidence: require("./lib/transactions/evidence.js"),	
 	username: require("./lib/transactions/username.js"),
 	domain: require("./lib/transactions/domain.js"),			

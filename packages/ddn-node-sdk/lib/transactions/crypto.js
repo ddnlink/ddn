@@ -246,16 +246,6 @@ function getBytes(transaction, skipSignature, skipSecondSignature) {
       bb.flip()
       assetBytes = toLocalBuffer(bb)
       break;
-    case 15:
-      var bb = new ByteBuffer(1, true)
-      var asset = transaction.asset.article
-      bb.writeString(asset.fileHash)
-      bb.writeString(asset.title ? asset.title : "")
-      bb.writeString(asset.description ? asset.description : "")
-      bb.writeString(asset.fileName ? asset.fileName : "")
-      bb.flip()
-      assetBytes = toLocalBuffer(bb)
-      break;
     case 16:
       var bb = new ByteBuffer(1, true);
       var asset = transaction.asset.output
