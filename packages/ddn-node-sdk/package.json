@@ -1,6 +1,6 @@
 {
   "name": "ddn-js",
-  "version": "2.0.3",
+  "version": "2.0.5",
   "description": "DDN javascript library",
   "main": "index.js",
   "directories": {
