@@ -10,7 +10,11 @@ module.exports = {
     delegate: 10000000000,
     secondsignature: 500000000,
     multisignature: 500000000,
-    dapp: 10000000000
+    dapp: 10000000000,
+
+    // dao
+    org: 10000000
   },
   coin: 100000000
+
 }

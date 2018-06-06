@@ -110,12 +110,28 @@ function getOutTransferBytes(outTransfer) {
   return buf;
 }
 
-getEvidenceBytes = function(evidence) {
-  let buf;
+function getOrgBytes(org) {
+  const bb = new ByteBuffer();
+  try {
+    bb.writeString(org.orgId);
+    bb.writeString(org.name ? org.name : '');
+    bb.writeString(org.address ? org.address : '');
+    bb.writeString(org.url ? org.url : '');
+    bb.writeString(org.tags);
+    bb.writeInt8(org.state);
+
+    bb.flip();
+  } catch (e) {
+    throw Error(e.toString());
+  }
+
+  return bb.toBuffer();
+}
+
+function getEvidenceBytes(evidence) {
+  let buf = new Buffer([]);
 
   try {
-    buf = new Buffer([]);
-
     const ipidBuf = new Buffer(evidence.ipid, 'utf8');
     const titleBuf = new Buffer(evidence.title, 'utf8');
     const tagsBuf = new Buffer(evidence.tags, 'utf8');
@@ -270,6 +286,10 @@ function getBytes(transaction, skipSignature, skipSecondSignature) {
       break;
     case 20: // evidence
       assetBytes = getEvidenceBytes(transaction.asset.evidence);
+      break;
+
+    case 21:
+      assetBytes = getOrgBytes(transaction.asset.org);
       break;
   }
 
