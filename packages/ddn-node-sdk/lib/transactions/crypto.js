@@ -128,6 +128,17 @@ function getOrgBytes(org) {
   return bb.toBuffer();
 }
 
+function getContributionBytes(asset) {
+  const bb = new ByteBuffer();
+  bb.writeUTF8String(asset.receivedAddress);
+  bb.writeUTF8String(asset.senderAddress);
+  bb.writeUTF8String(asset.price);
+  bb.writeUTF8String(asset.url);
+  bb.flip();
+
+  return bb.toBuffer();
+}
+
 function getEvidenceBytes(evidence) {
   let buf = new Buffer([]);
 
@@ -290,6 +301,9 @@ function getBytes(transaction, skipSignature, skipSecondSignature) {
 
     case 21:
       assetBytes = getOrgBytes(transaction.asset.org);
+      break;
+    case 23:
+      assetBytes = getContributionBytes(transaction.asset.daoContribution);
       break;
   }
 

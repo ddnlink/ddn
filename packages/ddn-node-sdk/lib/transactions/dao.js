@@ -49,6 +49,59 @@ function createOrg(org, secret, secondSecret) {
 	return transaction;
 }
 
+/**
+ * create contribution transaction
+ * @param {*} contribution 
+ * @param {*} secret 
+ * @param {*} secondSecret 
+ */
+function createContribution(contribution, secret, secondSecret) {
+	var keys = crypto.getKeys(secret);
+	var bytes = null;
+
+	if (typeof(contribution) !== 'object') {
+		throw new Error('The first argument should be a object!');
+	}
+
+	if (!contribution.senderAddress || contribution.senderAddress.length == 0) {
+		throw new Error('Invalid senderAddress format');
+	}
+	
+	if (!contribution.receivedAddress || contribution.receivedAddress.length == 0) {
+		throw new Error('Invalid receivedAddress format');
+	}
+
+	if (!contribution.url || contribution.url.length == 0) {
+		throw new Error('Invalid url format');
+	}
+	
+	var fee = constants.fees.org;
+
+	var transaction = {
+		type: trsTypes.CONTRIBUTION,
+		nethash: options.get('nethash'),
+		amount: 0,
+		fee: fee,
+		recipientId: null,
+		senderPublicKey: keys.publicKey,
+		timestamp: slots.getTime() - options.get('clientDriftSeconds'),
+		asset: {
+			daoContribution: contribution
+		}
+	};
+
+	crypto.sign(transaction, keys);
+	
+	if (secondSecret) {
+		var secondKeys = crypto.getKeys(secondSecret);
+		crypto.secondSign(transaction, secondKeys);
+	}
+
+	// transaction.id = crypto.getId(transaction);
+	return transaction;
+}
+
 module.exports = {
-	createOrg: createOrg
+	createOrg: createOrg,
+	createContribution: createContribution
 };
