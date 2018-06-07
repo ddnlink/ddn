@@ -115,7 +115,7 @@ function getOrgBytes(org) {
   try {
     bb.writeString(org.orgId);
     bb.writeString(org.name ? org.name : '');
-    bb.writeString(org.address ? org.address : '');
+    // bb.writeString(org.address ? org.address : '');
     bb.writeString(org.url ? org.url : '');
     bb.writeString(org.tags);
     bb.writeInt8(org.state);
