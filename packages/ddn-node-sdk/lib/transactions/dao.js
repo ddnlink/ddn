@@ -63,6 +63,10 @@ function createContribution(contribution, secret, secondSecret) {
 		throw new Error('The first argument should be a object!');
 	}
 
+	if (!contribution.title || contribution.title.length == 0) {
+		throw new Error('Invalid title format');
+	}
+
 	if (!contribution.senderAddress || contribution.senderAddress.length == 0) {
 		throw new Error('Invalid senderAddress format');
 	}

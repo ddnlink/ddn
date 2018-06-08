@@ -130,6 +130,7 @@ function getOrgBytes(org) {
 
 function getContributionBytes(asset) {
   const bb = new ByteBuffer();
+  bb.writeUTF8String(asset.title);
   bb.writeUTF8String(asset.receivedAddress);
   bb.writeUTF8String(asset.senderAddress);
   bb.writeUTF8String(asset.price);
