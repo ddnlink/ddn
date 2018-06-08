@@ -20,4 +20,5 @@ module.exports = {
 	// dao
 	evidence: require("./lib/transactions/evidence.js"),
 	dao: require("./lib/transactions/dao.js"),
+	exchange: require("./lib/transactions/exchange.js"),
 }

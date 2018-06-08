@@ -115,7 +115,7 @@ function getOrgBytes(org) {
   try {
     bb.writeString(org.orgId);
     bb.writeString(org.name ? org.name : '');
-    // bb.writeString(org.address ? org.address : '');
+    bb.writeString(org.address ? org.address : '');
     bb.writeString(org.url ? org.url : '');
     bb.writeString(org.tags);
     bb.writeInt8(org.state);
@@ -125,6 +125,23 @@ function getOrgBytes(org) {
     throw Error(e.toString());
   }
 
+  return bb.toBuffer();
+}
+
+function getExchangeBytes(asset) {
+  const bb = new ByteBuffer();
+  try {
+    bb.writeString(asset.orgId)
+    bb.writeString(asset.exchangeTrsId)
+    bb.writeInt64(asset.price);
+    bb.writeInt8(asset.state);
+    bb.writeString(asset.senderAddress)
+    bb.writeString(asset.receivedAddress)
+
+    bb.flip();
+  } catch (e) {
+    throw Error(e.toString());
+  }
   return bb.toBuffer();
 }
 
@@ -299,9 +316,11 @@ function getBytes(transaction, skipSignature, skipSecondSignature) {
     case 20: // evidence
       assetBytes = getEvidenceBytes(transaction.asset.evidence);
       break;
-
     case 21:
       assetBytes = getOrgBytes(transaction.asset.org);
+      break;
+    case 22:
+      assetBytes = getExchangeBytes(transaction.asset.exchange);
       break;
     case 23:
       assetBytes = getContributionBytes(transaction.asset.daoContribution);
@@ -382,15 +401,17 @@ function getBytes(transaction, skipSignature, skipSecondSignature) {
   }
 
   bb.flip();
-  // var arrayBuffer = new Uint8Array(bb.toArrayBuffer());
-  // var buffer = [];
 
-  // for (var i = 0; i < arrayBuffer.length; i++) {
-  // 	buffer[i] = arrayBuffer[i];
-  // }
+  // competifined browser
+  var arrayBuffer = new Uint8Array(bb.toArrayBuffer());
+  var buffer = [];
 
-  // return new Buffer(buffer);
-  return bb.toBuffer();
+  for (var i = 0; i < arrayBuffer.length; i++) {
+  	buffer[i] = arrayBuffer[i];
+  }
+
+  return new Buffer(buffer);
+  // return bb.toBuffer();
 }
 
 function getId(transaction) {

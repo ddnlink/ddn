@@ -4,6 +4,7 @@ var constants = require('../constants.js');
 var trsTypes = require('../transaction-types');
 var slots = require('../time/slots.js');
 var options = require('../options');
+var addressHelper = require('../address.js')
 
 /**
  * Create org transaction
@@ -14,6 +15,12 @@ var options = require('../options');
 function createOrg(org, secret, secondSecret) {
 	var keys = crypto.getKeys(secret);
 	var bytes = null;
+
+	var sender = addressHelper.generateBase58CheckAddress(keys.publicKey)
+
+	if (!org.address) {
+		org.address = sender;
+	}
 
 	if (typeof org !== 'object') {
 		throw new Error('The first argument should be a object!');

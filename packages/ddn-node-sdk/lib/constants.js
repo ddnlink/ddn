@@ -13,7 +13,8 @@ module.exports = {
     dapp: 10000000000,
 
     // dao
-    org: 10000000
+    org: 10000000,
+    exchange: 10000000,
   },
   coin: 100000000
 
