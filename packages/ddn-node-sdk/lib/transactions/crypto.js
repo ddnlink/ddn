@@ -157,6 +157,18 @@ function getContributionBytes(asset) {
   return bb.toBuffer();
 }
 
+function getConfirmationBytes(asset) {
+    const bb = new ByteBuffer();
+    bb.writeUTF8String(asset.receivedAddress);
+    bb.writeUTF8String(asset.senderAddress);
+    bb.writeUTF8String(asset.contributionTrsId);
+    bb.writeUTF8String(asset.url);
+    bb.writeInt32(asset.state);
+    bb.flip();
+
+    return bb.toBuffer();
+}
+
 function getEvidenceBytes(evidence) {
   let buf = new Buffer([]);
 
@@ -324,6 +336,9 @@ function getBytes(transaction, skipSignature, skipSecondSignature) {
       break;
     case 23:
       assetBytes = getContributionBytes(transaction.asset.daoContribution);
+      break;
+    case 24:
+      assetBytes = getConfirmationBytes(transaction.asset.daoConfirmation);
       break;
   }
 
