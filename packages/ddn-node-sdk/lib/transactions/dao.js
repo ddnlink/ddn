@@ -30,13 +30,24 @@ function createOrg(org, secret, secondSecret) {
 		throw new Error('Invalid orgId format');
 	}
 
-	var fee = constants.fees.org;
+    let olen = org.orgId.length
+    , feeBase = 1
+    if ( olen > 10 ) { feeBase = 10
+    }else if ( olen == 10) { feeBase = 50
+    }else if ( olen == 9 ) { feeBase = 100
+    }else if ( olen == 8 ) { feeBase = 200
+    }else if ( olen == 7 ) { feeBase = 400
+    }else if ( olen == 6 ) { feeBase = 800
+    }else if ( olen == 5 ) { feeBase = 1600
+    }else{ // length <= 4
+      feeBase = 999999 // not allow
+    }
 
 	var transaction = {
 		type: trsTypes.ORG,
 		nethash: options.get('nethash'),
 		amount: 0,
-		fee: fee,
+		fee: feeBase * 100000000,
 		recipientId: null,
 		senderPublicKey: keys.publicKey,
 		timestamp: slots.getTime() - options.get('clientDriftSeconds'),
