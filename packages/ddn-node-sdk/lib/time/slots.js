@@ -1,4 +1,5 @@
-var options = require('../options')
+var options = require('../options');
+var constants = require('../constants');
 
 function getEpochTime(time) {
 	if (time === undefined) {
@@ -10,10 +11,8 @@ function getEpochTime(time) {
 }
 
 function beginEpochTime() {
-	// var d = new Date(Date.UTC(2017, 11, 20, 4, 0, 0, 0))
-	// var d = new Date(Date.UTC(2017, 10, 20, 12, 20, 20, 20));
-	
-	return options.get('nethash') == 'b11fa2f2' ? new Date(Date.UTC(2017, 11, 20, 4, 0, 0, 0)) : new Date(Date.UTC(2017, 10, 20, 12, 20, 20, 20));
+	// return options.get('nethash') == 'b11fa2f2' ? new Date(Date.UTC(2017, 11, 20, 4, 0, 0, 0)) : new Date(Date.UTC(2017, 10, 20, 12, 20, 20, 20));
+	return constants.nethash[options.get('nethash')].beginDate;
 }
 
 var interval = 10,

@@ -1,5 +1,7 @@
 var sha256 = require("fast-sha256");
-var addressHelper = require('../address.js')
+var addressHelper = require('../address.js');
+var options = require('../options');
+var constants = require('../constants');
 
 if (typeof Buffer === "undefined") {
   Buffer = require("buffer/").Buffer;
@@ -84,7 +86,7 @@ function getInTransferBytes(inTransfer) {
     var dappId = new Buffer(inTransfer.dappId, "utf8");
     var currency = new Buffer(inTransfer.currency, "utf8")
     buf = Buffer.concat([buf, dappId, currency]);
-    if (inTransfer.currency !== 'DDN') {
+    if (inTransfer.currency !== constants.nethash[options.get('nethash')].tokenName) {
       var amount = new Buffer(inTransfer.amount, "utf8")
       buf = Buffer.concat([buf, amount])
     }
@@ -170,7 +172,7 @@ function getConfirmationBytes(asset) {
 }
 
 function getEvidenceBytes(evidence) {
-  let buf = new Buffer([]);
+  const buf = new Buffer([]);
 
   try {
     const ipidBuf = new Buffer(evidence.ipid, 'utf8');

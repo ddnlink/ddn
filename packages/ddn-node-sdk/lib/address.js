@@ -1,8 +1,10 @@
 var sha256 = require('fast-sha256')
 var RIPEMD160 = require('ripemd160')
 var base58check = require('./base58check')
+var options = require('./options');
+var constants = require('./constants');
 
-const NORMAL_PREFIX = 'D' // D
+const NORMAL_PREFIX = constants.nethash[options.get('nethash')].tokenPrefix // D
 
 module.exports = {
   isAddress: function (address) {
@@ -13,7 +15,7 @@ module.exports = {
       if (!base58check.decodeUnsafe(address.slice(1))) {
         return false
       }
-      if (['D'].indexOf(address[0]) == -1) {
+      if ([NORMAL_PREFIX].indexOf(address[0]) == -1) {
         return false
       }
     }
@@ -27,7 +29,7 @@ module.exports = {
     if (!base58check.decodeUnsafe(address.slice(1))) {
       return false
     }
-    if (['D'].indexOf(address[0]) == -1) {
+    if ([NORMAL_PREFIX].indexOf(address[0]) == -1) {
       return false
     }
     return true

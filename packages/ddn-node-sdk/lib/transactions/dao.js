@@ -30,7 +30,7 @@ function createOrg(org, secret, secondSecret) {
 		throw new Error('Invalid orgId format');
 	}
 
-    let olen = org.orgId.length
+    const olen = org.orgId.length
     , feeBase = 1
     if ( olen > 10 ) { feeBase = 10
     }else if ( olen == 10) { feeBase = 50
@@ -41,7 +41,11 @@ function createOrg(org, secret, secondSecret) {
     }else if ( olen == 5 ) { feeBase = 1600
     }else{ // length <= 4
       feeBase = 999999 // not allow
-    }
+	}
+	
+	if(org.state == 1){
+		feeBase = parseInt(feeBase / 10);
+	}
 
 	var transaction = {
 		type: trsTypes.ORG,

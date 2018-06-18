@@ -29,4 +29,4 @@ console.log(window.DdnJS)
 
 ## Usage
 
-Please reference the [ddn http interface documents](https://github.com/DDNlink/docs/blob/master/ddn_http_interface.md)
+Please reference the [ddn http interface documents](https://github.com/DDNlink/ddn-docs/blob/master/ddn_http_interface.md)

@@ -1,14 +1,16 @@
-var crypto = require("./crypto.js")
-var constants = require("../constants.js")
-var slots = require("../time/slots.js")
-var options = require('../options')
+var crypto = require("./crypto");
+var constants = require("../constants");
+var slots = require("../time/slots");
+var options = require('../options');
+
+var nethash = options.get('nethash');
 
 function createInTransfer(dappId, currency, amount, secret, secondSecret) {
 	var keys = crypto.getKeys(secret);
 
 	var transaction = {
 		type: 6,
-		nethash: options.get('nethash'),
+		nethash: nethash,
 		amount: 0,
 		fee: constants.fees.send,
 		recipientId: null,
@@ -22,7 +24,7 @@ function createInTransfer(dappId, currency, amount, secret, secondSecret) {
 		}
 	};
 
-	if (currency === 'DDN') {
+	if (currency === constants.nethash[nethash].tokenName) {
 		transaction.amount = Number(amount)
 	} else {
 		transaction.asset.inTransfer.amount = String(amount)
