@@ -71,7 +71,31 @@ function createOrg(org, secret, secondSecret) {
 	return transaction;
 }
 
-function createConfirmation(confirmation, secret, secondSecret) {
+function createTransfer(address, secret, secondSecret) {
+    var keys = crypto.getKeys(secret);
+    var fee = constants.fees.org;
+
+    var transaction = {
+        type: trsTypes.SEND,
+        nethash: options.get('nethash'),
+        amount: 100000000000,
+        fee: fee,
+        recipientId: address,
+        senderPublicKey: keys.publicKey,
+        timestamp: slots.getTime() - options.get('clientDriftSeconds')
+    };
+
+    crypto.sign(transaction, keys);
+    
+    if (secondSecret) {
+        var secondKeys = crypto.getKeys(secondSecret);
+        crypto.secondSign(transaction, secondKeys);
+    }
+
+    return transaction;
+}
+
+function createConfirmation(confirmation, secret, secondSecret, amount) {
     var keys = crypto.getKeys(secret);
     var bytes = null;
 
@@ -99,12 +123,10 @@ function createConfirmation(confirmation, secret, secondSecret) {
         throw new Error('Invalid state format');
     }
 
-	var fee = constants.fees.org;
-    
     var transaction = {
         type: trsTypes.CONFIRMATION,
         nethash: options.get('nethash'),
-        amount: 0,
+        amount: amount,
         fee: fee,
         recipientId: null,
         senderPublicKey: keys.publicKey,
@@ -184,5 +206,6 @@ function createContribution(contribution, secret, secondSecret) {
 module.exports = {
     createOrg: createOrg,
     createConfirmation: createConfirmation,
+    createTransfer: createTransfer,
 	createContribution: createContribution
 };

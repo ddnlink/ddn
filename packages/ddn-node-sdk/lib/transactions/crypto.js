@@ -127,7 +127,7 @@ function getOrgBytes(org) {
     throw Error(e.toString());
   }
 
-  return bb.toBuffer();
+  return toLocalBuffer(bb);
 }
 
 function getExchangeBytes(asset) {
@@ -144,7 +144,7 @@ function getExchangeBytes(asset) {
   } catch (e) {
     throw Error(e.toString());
   }
-  return bb.toBuffer();
+  return toLocalBuffer(bb);
 }
 
 function getContributionBytes(asset) {
@@ -156,7 +156,7 @@ function getContributionBytes(asset) {
   bb.writeUTF8String(asset.url);
   bb.flip();
 
-  return bb.toBuffer();
+  return toLocalBuffer(bb);
 }
 
 function getConfirmationBytes(asset) {
@@ -168,34 +168,45 @@ function getConfirmationBytes(asset) {
     bb.writeInt32(asset.state);
     bb.flip();
 
-    return bb.toBuffer();
+    return toLocalBuffer(bb);
 }
 
 function getEvidenceBytes(evidence) {
+<<<<<<< HEAD
   const buf = new Buffer([]);
+=======
+//   let buf = new Buffer([]);
+>>>>>>> fda64e3aeca0a3ece38ba52a138df2c60d469fc0
+
+  const bb = new ByteBuffer();
 
   try {
-    const ipidBuf = new Buffer(evidence.ipid, 'utf8');
-    const titleBuf = new Buffer(evidence.title, 'utf8');
-    const tagsBuf = new Buffer(evidence.tags, 'utf8');
-    const urlBuf = new Buffer(evidence.url, 'utf8');
-    const authorBuf = new Buffer(evidence.author, 'utf8');
+    // const ipidBuf = new Buffer(evidence.ipid, 'utf8');
+    // const titleBuf = new Buffer(evidence.title, 'utf8');
+    // const tagsBuf = new Buffer(evidence.tags, 'utf8');
+    // const urlBuf = new Buffer(evidence.url, 'utf8');
+    // const authorBuf = new Buffer(evidence.author, 'utf8');
 
-    buf = Buffer.concat([buf, ipidBuf, titleBuf, tagsBuf, urlBuf, authorBuf]);
+    // buf = Buffer.concat([buf, ipidBuf, titleBuf, tagsBuf, urlBuf, authorBuf]);
 
-    const bb = new ByteBuffer();
+    bb.writeString(evidence.ipid);
+    bb.writeString(evidence.title);
+    bb.writeString(evidence.tags);
+    bb.writeString(evidence.url);
+    bb.writeString(evidence.author);
+    
     bb.writeString(evidence.hash);
     bb.writeString(evidence.size ? evidence.size : '');
     bb.writeString(evidence.type);
 
     bb.flip();
 
-    buf = Buffer.concat([buf, bb.toBuffer()]);
+    // buf = Buffer.concat([buf, bb.toBuffer()]);
   } catch (e) {
     throw Error(e.toString());
   }
 
-  return buf;
+  return toLocalBuffer(bb);
 }
 
 function getBytes(transaction, skipSignature, skipSecondSignature) {
