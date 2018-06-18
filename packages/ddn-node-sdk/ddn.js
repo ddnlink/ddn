@@ -17,6 +17,7 @@ module.exports = {
 	domain: require("./lib/transactions/domain.js"),			
 	multitransfer: require("./lib/transactions/multitransfer.js"),		
 	options: require("./lib/options.js"),
+	constants: require("./lib/constants.js"),
 	utils: {
 		slots: require("./lib/time/slots.js"),
 		format: require("./lib/time/format.js")
@@ -27,13 +28,15 @@ module.exports = {
 	dao: require("./lib/transactions/dao.js"),
 	exchange: require("./lib/transactions/exchange.js"),
 }
-},{"./lib/options.js":8,"./lib/time/format.js":9,"./lib/time/slots.js":10,"./lib/transactions/aob.js":12,"./lib/transactions/crypto.js":13,"./lib/transactions/dao.js":14,"./lib/transactions/dapp.js":15,"./lib/transactions/delegate.js":16,"./lib/transactions/domain.js":17,"./lib/transactions/evidence.js":18,"./lib/transactions/exchange.js":19,"./lib/transactions/multitransfer.js":20,"./lib/transactions/signature.js":21,"./lib/transactions/storage.js":22,"./lib/transactions/transaction.js":23,"./lib/transactions/transfer.js":24,"./lib/transactions/username.js":25,"./lib/transactions/vote.js":26}],3:[function(require,module,exports){
+},{"./lib/constants.js":7,"./lib/options.js":8,"./lib/time/format.js":9,"./lib/time/slots.js":10,"./lib/transactions/aob.js":12,"./lib/transactions/crypto.js":13,"./lib/transactions/dao.js":14,"./lib/transactions/dapp.js":15,"./lib/transactions/delegate.js":16,"./lib/transactions/domain.js":17,"./lib/transactions/evidence.js":18,"./lib/transactions/exchange.js":19,"./lib/transactions/multitransfer.js":20,"./lib/transactions/signature.js":21,"./lib/transactions/storage.js":22,"./lib/transactions/transaction.js":23,"./lib/transactions/transfer.js":24,"./lib/transactions/username.js":25,"./lib/transactions/vote.js":26}],3:[function(require,module,exports){
 (function (Buffer){
 var sha256 = require('fast-sha256')
 var RIPEMD160 = require('ripemd160')
 var base58check = require('./base58check')
+var options = require('./options');
+var constants = require('./constants');
 
-const NORMAL_PREFIX = 'D' // D
+const NORMAL_PREFIX = constants.nethash[options.get('nethash')].tokenPrefix // D
 
 module.exports = {
   isAddress: function (address) {
@@ -44,7 +47,7 @@ module.exports = {
       if (!base58check.decodeUnsafe(address.slice(1))) {
         return false
       }
-      if (['D'].indexOf(address[0]) == -1) {
+      if ([NORMAL_PREFIX].indexOf(address[0]) == -1) {
         return false
       }
     }
@@ -58,7 +61,7 @@ module.exports = {
     if (!base58check.decodeUnsafe(address.slice(1))) {
       return false
     }
-    if (['D'].indexOf(address[0]) == -1) {
+    if ([NORMAL_PREFIX].indexOf(address[0]) == -1) {
       return false
     }
     return true
@@ -74,7 +77,7 @@ module.exports = {
   },
 }
 }).call(this,require("buffer").Buffer)
-},{"./base58check":6,"buffer":30,"fast-sha256":34,"ripemd160":56}],4:[function(require,module,exports){
+},{"./base58check":6,"./constants":7,"./options":8,"buffer":30,"fast-sha256":34,"ripemd160":56}],4:[function(require,module,exports){
 (function (Buffer){
 // base-x encoding
 // Forked from https://github.com/cryptocoinjs/bs58
@@ -253,9 +256,29 @@ module.exports = {
     '0ab796cd': {
       tokenName: 'DDN',
       tokenPrefix: 'D',
-    }
+      beginDate: new Date(Date.UTC(2017, 10, 20, 12, 20, 20, 20)),
+    },
 
     // ddn mainnet
+    'b11fa2f2': {
+      tokenName: 'DDN',
+      tokenPrefix: 'D',
+      beginDate: new Date(Date.UTC(2017, 11, 20, 4, 0, 0, 0)),  // 主网上线：2017年12月20日中午12点（+8)
+    },
+
+    // EOK testnet
+    'fl6ybowg': {
+      tokenName: 'EOK',
+      tokenPrefix: 'E',
+      beginDate: new Date(Date.UTC(2018, 5, 18, 4, 0, 0, 0)), // 2018-06-18T04:00:00.000Z +8
+    },
+
+    // EOK mainnet
+    '315by9uk': {
+      tokenName: 'EOK',
+      tokenPrefix: 'E',
+      beginDate: new Date(Date.UTC(2018, 5, 18, 4, 0, 0, 0)), // 2018-06-18T04:00:00.000Z +8
+    }
   }
 
 }
@@ -263,7 +286,7 @@ module.exports = {
 },{}],8:[function(require,module,exports){
 var optionMap = {
   clientDriftSeconds: 5,
-  nethash: '0ab796cd',
+  nethash: '0ab796cd', //default ddn testnet. EOK mainnet: 315by9uk, testnet: fl6ybowg   
 }
 
 module.exports = {
@@ -364,7 +387,8 @@ module.exports = {
   fullTimestamp: fullTimestamp
 }
 },{"./slots.js":10}],10:[function(require,module,exports){
-var options = require('../options')
+var options = require('../options');
+var constants = require('../constants');
 
 function getEpochTime(time) {
 	if (time === undefined) {
@@ -376,10 +400,8 @@ function getEpochTime(time) {
 }
 
 function beginEpochTime() {
-	// var d = new Date(Date.UTC(2017, 11, 20, 4, 0, 0, 0))
-	// var d = new Date(Date.UTC(2017, 10, 20, 12, 20, 20, 20));
-	
-	return options.get('nethash') == 'b11fa2f2' ? new Date(Date.UTC(2017, 11, 20, 4, 0, 0, 0)) : new Date(Date.UTC(2017, 10, 20, 12, 20, 20, 20));
+	// return options.get('nethash') == 'b11fa2f2' ? new Date(Date.UTC(2017, 11, 20, 4, 0, 0, 0)) : new Date(Date.UTC(2017, 10, 20, 12, 20, 20, 20));
+	return constants.nethash[options.get('nethash')].beginDate;
 }
 
 var interval = 10,
@@ -432,7 +454,7 @@ module.exports = {
 	beginEpochTime: beginEpochTime
 }
 
-},{"../options":8}],11:[function(require,module,exports){
+},{"../constants":7,"../options":8}],11:[function(require,module,exports){
 /*---------------------------------------------------------------------------------------------
  *  Created by imfly on Wed Mar 14 2017 16:21:58
  *
@@ -441,6 +463,7 @@ module.exports = {
  *--------------------------------------------------------------------------------------------*/
 
 module.exports = {
+  // base 0-19
   SEND: 0, // TRANSFER
   SIGNATURE: 1, // SETUP SECOND_PASSWORD
   DELEGATE: 2, // SECOND_PASSWORD
@@ -450,26 +473,28 @@ module.exports = {
   IN_TRANSFER: 6, // DAPP DEPOSIT
   OUT_TRANSFER: 7, // DAPP WITHDRAW
 
-  // todo: 10-19, Evidence
-  STORAGE: 8, // UPLOAD STORAGE
-  MULTITRANSFER: 16,
+  MULTITRANSFER: 16, // 待修改
   USERINFO: 17,
-  DOMAIN: 18,
+
+  // Evidence: 20-39, 
   EVIDENCE: 20,
-
-  // DAO 21-39
-  ORG: 21,
-  EXCHANGE: 22,
-  CONTRIBUTION: 23,
-  CONFIRMATION: 24,
-
-  // todo: 20-39, AOB-ASSET ON BLOCKCHAIN
+  STORAGE: 8, // 删除该类型，及其相关代码
+  DOMAIN: 18, // 删除该类型，及其相关代码
+  
+  // AOB-ASSET ON BLOCKCHAIN: 40-59
   AOB_ISSUER: 9, // AOB ISSUER REGISTER
   AOB_ASSET: 10, // AOB ASSET REGISTER
   AOB_FLAGS: 11, // AOB FLAGS UPDATE
   AOB_ACL: 12, // AOB ACL UPDATE
   AOB_ISSUE: 13, // AOB ISSUE
   AOB_TRANSFER: 14, // AOB TRANSFER
+
+  // DAO 60-79
+  ORG: 21,
+  EXCHANGE: 22,
+  CONTRIBUTION: 23,
+  CONFIRMATION: 24,
+
 
   LOCK: 100 // ACCOUNT LOCK
 }
