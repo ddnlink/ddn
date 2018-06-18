@@ -3,7 +3,7 @@ var crypto = require('crypto-browserify');
 var bignum = require('browserify-bignum');
 var Mnemonic = require('bitcore-mnemonic');
 var nacl = nacl_factory.instantiate();
-var EbookchainJS = require('ddn-js')
+var ddnJS = require('ddn-js');
 
 var randomString = function (max) {
 	var text = "";
@@ -48,7 +48,7 @@ function isValidSecret(secret) {
 }
 
 function getAddress(publicKey) {
-	return EbookchainJS.crypto.getAddress(publicKey)
+	return ddnJS.crypto.getAddress(publicKey)
 }
 
 module.exports = {

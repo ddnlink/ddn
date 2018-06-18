@@ -1,12 +1,15 @@
 var crypto = require('crypto');
 var fs = require('fs');
+var ddnJS = require('ddn-js');
 var cryptoLib = require('../lib/crypto.js');
 var transactionsLib = require('../lib/transactions.js');
 var accounts = require('./account.js');
 var ByteBuffer = require('bytebuffer');
-var config = require('../options')
+var config = require('../config');
 
 var sender = accounts.account(cryptoLib.generateSecret());
+
+var nethash = config.nethash;
 
 function getBytes(block, skipSignature) {
 	var size = 4 + 4 + 8 + 4 + 8 + 8 + 8 + 4 + 32 + 32 + 64;
@@ -65,13 +68,14 @@ module.exports = {
 			var lines = fs.readFileSync(accountsFile, 'utf8').split('\n');
 			for (var i in lines) {
 				var parts = lines[i].split('  ');
+				
 				if (parts.length != 2) {
 					console.error('Invalid recipient balance format');
-					process.exit(1);
+					break;
 				}
 				var trs = {
 					type: 0,
-					nethash: config.nethash,
+					nethash: nethash,
 					amount: Number(parts[1]) * 100000000,
 					fee: 0,
 					timestamp: 0,
@@ -91,8 +95,8 @@ module.exports = {
 		} else {
 			var balanceTransaction = {
 				type: 0,
-				nethash: config.nethash,
-				amount: 10000000000000000,
+				nethash: nethash,
+				amount: config.totalAmount,
 				fee: 0,
 				timestamp: 0,
 				recipientId: genesisAccount.address,
@@ -110,16 +114,18 @@ module.exports = {
 			transactions.push(balanceTransaction);
 		}
 
+		var token_prefix = ddnJS.constants.nethash[nethash].tokenName;
+
 		// make delegates
 		for (var i = 0; i < 101; i++) {
 			var delegate = accounts.account(cryptoLib.generateSecret());
 			delegates.push(delegate);
 
-			var username = "ebooker_" + (i + 1);
+			var username =  token_prefix + "_" + (i + 1);
 
 			var transaction = {
 				type: 2,
-				nethash: config.nethash,
+				nethash: nethash,
 				amount: 0,
 				fee: 0,
 				timestamp: 0,
@@ -148,7 +154,7 @@ module.exports = {
 
 		var voteTransaction = {
 			type: 3,
-			nethash: config.nethash,
+			nethash: nethash,
 			amount: 0,
 			fee: 0,
 			timestamp: 0,

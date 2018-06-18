@@ -551,7 +551,7 @@ module.exports = function(program) {
   program
     .command("listdiffvotes")
     .description("list the votes each other")
-    .option("-u, --username <username>", "", process.env.EBOOKCHAIN_USER)
+    .option("-u, --username <username>", "", process.env.DDN_USER)
     .action(listdiffvotes);
 
   program

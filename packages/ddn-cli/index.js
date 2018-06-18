@@ -6,8 +6,8 @@ var path = require("path");
 var package = require('./package.json');
 
 function main() {
-    var default_host = process.env.EBOOKCHAIN_HOST || '127.0.0.1';
-    var default_port = process.env.EBOOKCHAIN_PORT || 8001;
+    var default_host = process.env.DDN_HOST || '127.0.0.1';
+    var default_port = process.env.DDN_PORT || 8001;
     program.version(package.version)
         .option('-H, --host <host>', 'Specify the hostname or ip of the node, default: '  + default_host, default_host)
         .option('-P, --port <port>', 'Specify the port of the node, default: ' + default_port, default_port)

@@ -1,5 +1,5 @@
 var request = require('request');
-var config = require('../options')
+var config = require('../config')
 
 function resultHandler(cb) {
   return function (err, resp, body) {

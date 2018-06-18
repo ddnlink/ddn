@@ -6,12 +6,16 @@ var blockHelper = require("../helpers/block.js");
 var cryptoLib = require("../lib/crypto.js");
 var dappHelper = require("../helpers/dapp.js");
 var Api = require('../helpers/api.js');
-var EbookchainUtils = require('ddn-js').utils;
+var DdnUtils = require('ddn-js').utils;
 
 var globalOptions;
 
 function getApi() {
-  return new Api({host: globalOptions.host, port: globalOptions.port, mainnet: !!globalOptions.main});
+	return new Api({
+		host: globalOptions.host,
+		port: globalOptions.port,
+		mainnet: !!globalOptions.main
+	});
 }
 
 function writeFileSync(file, obj) {
@@ -25,22 +29,6 @@ function appendFileSync(file, obj) {
 }
 
 function genGenesisBlock(options) {
-	var genesisAccount = accountHelper.account(cryptoLib.generateSecret());
-	var newBlockInfo = blockHelper.new(genesisAccount, null, options.file);
-	var delegateSecrets = newBlockInfo.delegates.map(function(i) {
-		return i.secret;
-	});
-	writeFileSync("./genesisBlock.json", newBlockInfo.block);
-	
-	var logFile = "./genGenesisBlock.log";
-	writeFileSync(logFile, "genesis account:\n");
-	appendFileSync(logFile, genesisAccount);
-	appendFileSync(logFile, "\ndelegates secrets:\n");
-	appendFileSync(logFile, delegateSecrets);
-	console.log('New genesis block and related account has been created, please see the two file: genesisBlock.json and genGenesisBlock.log');
-}
-
-function genMine(options) {
 	var genesisAccount = accountHelper.account(cryptoLib.generateSecret());
 	var newBlockInfo = blockHelper.new(genesisAccount, null, options.file);
 	var delegateSecrets = newBlockInfo.delegates.map(function (i) {
@@ -59,18 +47,27 @@ function genMine(options) {
 function peerstat() {
 	var api = getApi();
 	api.get('/api/peers/', {}, function (err, result) {
-    if (err) {
+		if (err) {
 			console.log('Failed to get peers', err);
 			return;
 		}
 		async.map(result.peers, function (peer, next) {
-			new Api({host: peer.ip, port: peer.port}).get('/api/blocks/getHeight', function (err, result) {
+			new Api({
+				host: peer.ip,
+				port: peer.port
+			}).get('/api/blocks/getHeight', function (err, result) {
 				if (err) {
 					console.log('%s:%d %s %d', peer.ip, peer.port, peer.version, err);
-					next(null, {peer: peer, error: err});
+					next(null, {
+						peer: peer,
+						error: err
+					});
 				} else {
 					console.log('%s:%d %s %d', peer.ip, peer.port, peer.version, result.height);
-					next(null, {peer: peer, height: result.height});
+					next(null, {
+						peer: peer,
+						height: result.height
+					});
 				}
 			});
 		}, function (err, results) {
@@ -93,15 +90,21 @@ function peerstat() {
 			var normalList = [];
 			var errList = [];
 			for (var k in heightMap) {
-				normalList.push({peers: heightMap[k], height: k});
+				normalList.push({
+					peers: heightMap[k],
+					height: k
+				});
 			}
 			for (var k in errorMap) {
-				errList.push({peers: errorMap[k], error: k});
+				errList.push({
+					peers: errorMap[k],
+					error: k
+				});
 			}
 			normalList.sort(function (l, r) {
 				return r.height - l.height;
 			});
-			
+
 			function joinPeerAddrs(peers) {
 				var peerAddrs = [];
 				peers.forEach(function (p) {
@@ -123,13 +126,13 @@ function peerstat() {
 				console.log(item.peers.length + ' error: ' + item.error, joinPeerAddrs(item.peers));
 			}
 		});
-  });
+	});
 }
 
 function delegatestat() {
 	var api = getApi();
 	api.get('/api/delegates', {}, function (err, result) {
-    if (err) {
+		if (err) {
 			console.log('Failed to get delegates', err);
 			return;
 		}
@@ -144,7 +147,10 @@ function delegatestat() {
 				if (err) {
 					next(err);
 				} else {
-					next(null, {delegate: delegate, block: result.blocks[0]});
+					next(null, {
+						delegate: delegate,
+						block: result.blocks[0]
+					});
 				}
 			});
 		}, function (err, delegates) {
@@ -166,17 +172,17 @@ function delegatestat() {
 				var d = delegates[i].delegate;
 				var b = delegates[i].block;
 				console.log('%s\t%s\t%d\t%s%%\t%s%%\t%d\t%d\t%s\t%s\t%s(%s)',
-						d.username,
-						d.address,
-						d.rate,
-						d.approval,
-						d.productivity,
-						d.producedblocks,
-						d.balance / 100000000,
-						b ? b.height : '',
-						b ? b.id : '',
-						EbookchainUtils.format.fullTimestamp(b ? b.timestamp : ''),
-						EbookchainUtils.format.timeAgo(b ? b.timestamp : ''));
+					d.username,
+					d.address,
+					d.rate,
+					d.approval,
+					d.productivity,
+					d.producedblocks,
+					d.balance / 100000000,
+					b ? b.height : '',
+					b ? b.id : '',
+					DdnUtils.format.fullTimestamp(b ? b.timestamp : ''),
+					DdnUtils.format.timeAgo(b ? b.timestamp : ''));
 			}
 		});
 	});
@@ -185,7 +191,7 @@ function delegatestat() {
 function ipstat() {
 	var api = getApi();
 	api.get('/api/peers/', {}, function (err, result) {
-    if (err) {
+		if (err) {
 			console.log('Failed to get peers', err);
 			return;
 		}
@@ -210,27 +216,27 @@ function ipstat() {
 	});
 }
 
-module.exports = function(program) {
+module.exports = function (program) {
 	globalOptions = program;
 
-  program
-	  .command("creategenesis")
+	program
+		.command("creategenesis")
 		.description("create genesis block")
 		.option("-f, --file <file>", "genesis accounts balance file")
 		.action(genGenesisBlock);
-		
-  program
-	  .command("peerstat")
+
+	program
+		.command("peerstat")
 		.description("analyze block height of all peers")
 		.action(peerstat);
-		
-  program
-	  .command("delegatestat")
+
+	program
+		.command("delegatestat")
 		.description("analyze delegates status")
 		.action(delegatestat);
-	
-  program
-	  .command("ipstat")
+
+	program
+		.command("ipstat")
 		.description("analyze peer ip info")
 		.action(ipstat);
 }
