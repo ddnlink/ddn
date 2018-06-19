@@ -7,10 +7,6 @@ var accounts = require('./account.js');
 var ByteBuffer = require('bytebuffer');
 var config = require('../config');
 
-var sender = accounts.account(cryptoLib.generateSecret());
-
-var nethash = config.nethash;
-
 function getBytes(block, skipSignature) {
 	var size = 4 + 4 + 8 + 4 + 8 + 8 + 8 + 4 + 32 + 32 + 64;
 
@@ -56,19 +52,34 @@ function getBytes(block, skipSignature) {
 
 module.exports = {
 	getBytes: getBytes,
-	new: function (genesisAccount, dapp, accountsFile) {
+	new: function (genesisAccount, nethash, tokenName, tokenPrefix, dapp, accountsFile) {
+
 		var payloadLength = 0,
 			payloadHash = crypto.createHash('sha256'),
 			transactions = [],
 			totalAmount = 0,
 			delegates = [];
 
+		if (!nethash) {
+			nethash = cryptoLib.randomNethash();
+		}
+
+		if (!tokenName) {
+			tokenName = 'DDN';
+		}
+
+		if (!tokenPrefix) {
+			tokenPrefix = 'D';
+		}
+
+		var sender = accounts.account(cryptoLib.generateSecret(), tokenPrefix);
+
 		// fund recipient account
 		if (accountsFile && fs.existsSync(accountsFile)) {
 			var lines = fs.readFileSync(accountsFile, 'utf8').split('\n');
 			for (var i in lines) {
 				var parts = lines[i].split('  ');
-				
+
 				if (parts.length != 2) {
 					console.error('Invalid recipient balance format');
 					break;
@@ -114,14 +125,12 @@ module.exports = {
 			transactions.push(balanceTransaction);
 		}
 
-		var token_prefix = ddnJS.constants.nethash[nethash].tokenName;
-
 		// make delegates
 		for (var i = 0; i < 101; i++) {
-			var delegate = accounts.account(cryptoLib.generateSecret());
+			var delegate = accounts.account(cryptoLib.generateSecret(), tokenPrefix);
 			delegates.push(delegate);
 
-			var username =  token_prefix + "_" + (i + 1);
+			var username = tokenName + "_" + (i + 1);
 
 			var transaction = {
 				type: 2,
@@ -200,18 +209,18 @@ module.exports = {
 
 		transactions = transactions.sort(function compare(a, b) {
 			if (a.type != b.type) {
-        if (a.type == 1) {
-          return 1;
-        }
-        if (b.type == 1) {
-          return -1;
-        }
-        return a.type - b.type;
-      }
-      if (a.amount != b.amount) {
-        return a.amount - b.amount;
-      }
-      return a.id.localeCompare(b.id);
+				if (a.type == 1) {
+					return 1;
+				}
+				if (b.type == 1) {
+					return -1;
+				}
+				return a.type - b.type;
+			}
+			if (a.amount != b.amount) {
+				return a.amount - b.amount;
+			}
+			return a.id.localeCompare(b.id);
 		});
 
 		transactions.forEach(function (tx) {
@@ -245,7 +254,8 @@ module.exports = {
 		return {
 			block: block,
 			dapp: dappTransaction,
-			delegates: delegates
+			delegates: delegates,
+			nethash: nethash
 		};
 	},
 

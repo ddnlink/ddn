@@ -24,7 +24,7 @@ function genUsers(options) {
 	// 5000万的150个，75亿
 	for (var i = 1; i < 151; i++) {
 		var user = accountHelper.account(cryptoLib.generateSecret());
-		user.username = "team_user_" + i;
+		user.username = "user_" + i;
 		user.amount = 5000 * wan;
 		users.push(user);
 	}
@@ -32,7 +32,7 @@ function genUsers(options) {
 	// 2000万的75个, 15亿
 	for (var i = 151; i < 226; i++) {
 		var user = accountHelper.account(cryptoLib.generateSecret());
-		user.username = "team_user_" + i;
+		user.username = "user_" + i;
 		user.amount = 2000 * wan;
 		users.push(user);
 	}
@@ -40,7 +40,7 @@ function genUsers(options) {
 	// 1000万的100个，10亿
 	for (var i = 226; i < 326; i++) {
 		var user = accountHelper.account(cryptoLib.generateSecret());
-		user.username = "team_user_" + i;
+		user.username = "user_" + i;
 		user.amount = 1000 * wan;
 		users.push(user);
 	}
@@ -70,36 +70,6 @@ function genUsers(options) {
 	console.log('New team and related users have been created, please see the two file: ./teams.log and ./teams.txt');
 }
 
-// Used to create random Nethash
-function randomNethash() {
-	var nethash = randomName(8, '', 'abcdefghijklmnopqrstuvwxyz0123456789');
-	console.log(nethash);
-	return;
-}
-
-function randomName() {
-	// Convert arguments to Array
-	var array = Array.prototype.slice.apply(arguments);
-
-	var size = 16;
-	if (array.length > 2) {
-		size = array.shift();
-	}
-
-	var name = array[0];
-	var random = array[1];
-
-	if (name.length > 0) {
-		size = size - 1
-	}
-
-	for (var i = 0; i < size; i++) {
-		name += random.charAt(Math.floor(Math.random() * random.length));
-	}
-
-	return name;
-}
-
 module.exports = function (program) {
 	globalOptions = program;
 
@@ -107,9 +77,4 @@ module.exports = function (program) {
 		.command("createUsers")
 		.description("create some accounts")
 		.action(genUsers);
-
-	program
-		.command("createNethash")
-		.description("create nethash")
-		.action(randomNethash);
 }

@@ -29,11 +29,18 @@ function appendFileSync(file, obj) {
 }
 
 function genGenesisBlock(options) {
-	var genesisAccount = accountHelper.account(cryptoLib.generateSecret());
-	var newBlockInfo = blockHelper.new(genesisAccount, null, options.file);
+	if (options && options.file) options.default = false;
+	var defaultSecret = "horse dinosaur brand october spoon news install tongue token pig napkin leg";
+	var secret = !(options && options.default) ? cryptoLib.generateSecret() : defaultSecret;
+	var genesisAccount = accountHelper.account(secret, options.tokenPrefix);
+
+	var newBlockInfo = blockHelper.new(genesisAccount, options.nethash, options.tokenName, options.tokenPrefix, null, options.file);
 	var delegateSecrets = newBlockInfo.delegates.map(function (i) {
 		return i.secret;
 	});
+
+	genesisAccount.nethash = newBlockInfo.nethash;
+	
 	writeFileSync("./genesisBlock.json", newBlockInfo.block);
 
 	var logFile = "./genGenesisBlock.log";
@@ -41,7 +48,7 @@ function genGenesisBlock(options) {
 	appendFileSync(logFile, genesisAccount);
 	appendFileSync(logFile, "\ndelegates secrets:\n");
 	appendFileSync(logFile, delegateSecrets);
-	console.log('New genesis block and related account has been created, please see the two file: genesisBlock.json and genGenesisBlock.log');
+	console.log('New genesis block and related account has been created, please see the two files: genesisBlock.json and genGenesisBlock.log');
 }
 
 function peerstat() {
@@ -220,23 +227,27 @@ module.exports = function (program) {
 	globalOptions = program;
 
 	program
-		.command("creategenesis")
+		.command("createGenesis")
 		.description("create genesis block")
 		.option("-f, --file <file>", "genesis accounts balance file")
+		.option("-d, --default", "genesisAccount`s secret, default is the testnet secret")
+		.option("-n, --nethash <nethash>", "default to generate a new nethash")
+		.option("-p, --tokenPrefix <prefix>", "default is `D`")
+		.option("-t, --tokenName <name>", "default is `DDN`")
 		.action(genGenesisBlock);
 
 	program
-		.command("peerstat")
+		.command("peerStat")
 		.description("analyze block height of all peers")
 		.action(peerstat);
 
 	program
-		.command("delegatestat")
+		.command("delegateStat")
 		.description("analyze delegates status")
 		.action(delegatestat);
 
 	program
-		.command("ipstat")
+		.command("ipStat")
 		.description("analyze peer ip info")
 		.action(ipstat);
 }

@@ -1,19 +1,42 @@
+var sha256 = require('fast-sha256');
+var RIPEMD160 = require('ripemd160');
 var nacl_factory = require('js-nacl');
 var crypto = require('crypto-browserify');
 var bignum = require('browserify-bignum');
 var Mnemonic = require('bitcore-mnemonic');
 var nacl = nacl_factory.instantiate();
-var ddnJS = require('ddn-js');
+var base58check = require('./base58check')
 
-var randomString = function (max) {
-	var text = "";
-	var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789#$%^&*@";
+function randomName() {
+	// Convert arguments to Array
+	var array = Array.prototype.slice.apply(arguments);
 
-	for (var i = 0; i < max; i++) {
-		text += possible.charAt(Math.floor(Math.random() * possible.length));
+	var size = 16;
+	if (array.length > 2) {
+		size = array.shift();
 	}
 
-	return text;
+	var name = array[0];
+	var random = array[1];
+
+	if (name.length > 0) {
+		size = size - 1
+	}
+
+	for (var i = 0; i < size; i++) {
+		name += random.charAt(Math.floor(Math.random() * random.length));
+	}
+
+	return name;
+}
+
+var randomNethash = function() {
+	return randomName(8, '', 'abcdefghijklmnopqrstuvwxyz0123456789');
+}
+
+var randomString = function (max) {
+	var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789#$%^&*@";
+	return randomName(max, '', possible);
 }
 
 var keypair = function (secret) {
@@ -47,8 +70,13 @@ function isValidSecret(secret) {
 	return Mnemonic.isValid(secret);
 }
 
-function getAddress(publicKey) {
-	return ddnJS.crypto.getAddress(publicKey)
+function getAddress(publicKey, tokenPrefix) {
+    if (typeof publicKey === 'string') {
+      publicKey = Buffer.from(publicKey, 'hex')
+    }
+    var h1 = sha256.hash(publicKey)
+    var h2 = new RIPEMD160().update(Buffer.from(h1)).digest()
+    return tokenPrefix + base58check.encode(h2)
 }
 
 module.exports = {
@@ -56,6 +84,7 @@ module.exports = {
 	sign: sign,
 	getId: getId,
 	randomString: randomString,
+	randomNethash: randomNethash,
 	generateSecret: generateSecret,
 	isValidSecret: isValidSecret,
 	getAddress: getAddress

@@ -6,7 +6,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 module.exports = {
-  nethash: 'fl6ybowg', // mainnet 315by9uk
+  nethash: '2mn7qoar', //fl6ybowg mainnet 315by9uk
   maxAmount: 100000000 * 100, // 100亿
   fixedPoint : Math.pow(10, 8),
   totalAmount: 10000000000000000 * 100, // 100亿
