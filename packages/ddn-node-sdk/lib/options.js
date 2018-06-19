@@ -1,6 +1,6 @@
 var optionMap = {
   clientDriftSeconds: 5,
-  nethash: '0ab796cd', //default ddn testnet. EOK mainnet: 315by9uk, testnet: fl6ybowg   
+  nethash: 'fl6ybowg', //fl6ybowg 0ab796cd default ddn testnet. EOK mainnet: 315by9uk, testnet: fl6ybowg   
 }
 
 module.exports = {

@@ -44,7 +44,16 @@ module.exports = {
       tokenName: 'EOK',
       tokenPrefix: 'E',
       beginDate: new Date(Date.UTC(2018, 5, 18, 4, 0, 0, 0)), // 2018-06-18T04:00:00.000Z +8
-    }
+    },
+
+    // lims testnet
+    '2mn7qoar': {
+      tokenName: 'LIMS',
+      tokenPrefix: 'L',
+      beginDate: new Date(Date.UTC(2018, 5, 18, 4, 0, 0, 0)), // 2018-06-18T04:00:00.000Z +8
+    },
+
+
   }
 
 }

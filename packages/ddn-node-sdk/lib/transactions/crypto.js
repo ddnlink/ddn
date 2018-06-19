@@ -172,11 +172,7 @@ function getConfirmationBytes(asset) {
 }
 
 function getEvidenceBytes(evidence) {
-<<<<<<< HEAD
   const buf = new Buffer([]);
-=======
-//   let buf = new Buffer([]);
->>>>>>> fda64e3aeca0a3ece38ba52a138df2c60d469fc0
 
   const bb = new ByteBuffer();
 
