@@ -1,5 +1,6 @@
 var crypto = require("./crypto.js")
 var constants = require("../constants.js")
+var transactionTypes = require("../transaction-types.js")
 var slots = require("../time/slots.js")
 var options = require('../options')
 
@@ -7,7 +8,7 @@ function createDelegate(username, secret, secondSecret) {
 	var keys = crypto.getKeys(secret);
 
 	var transaction = {
-		type: 2,
+		type: transactionTypes.DELEGATE,
 		nethash: options.get('nethash'),
 		amount: 0,
 		fee: constants.fees.delegate,

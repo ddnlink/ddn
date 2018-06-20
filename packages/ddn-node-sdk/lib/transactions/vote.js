@@ -1,5 +1,6 @@
 var crypto = require("./crypto.js")
 var constants = require("../constants.js")
+var transactionTypes = require("../transaction-types.js")
 var slots = require("../time/slots.js")
 var options = require('../options')
 
@@ -7,7 +8,7 @@ function createVote(keyList, secret, secondSecret) {
 	var keys = crypto.getKeys(secret);
 
 	var transaction = {
-		type: 3,
+		type: transactionTypes.VOTE,
 		nethash: options.get('nethash'),
 		amount: 0,
 		fee: constants.fees.vote,

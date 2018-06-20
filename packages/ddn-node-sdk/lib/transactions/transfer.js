@@ -1,5 +1,6 @@
 var crypto = require("./crypto");
 var constants = require("../constants");
+var transactionTypes = require("../transaction-types.js")
 var slots = require("../time/slots");
 var options = require('../options');
 
@@ -9,7 +10,7 @@ function createInTransfer(dappId, currency, amount, secret, secondSecret) {
 	var keys = crypto.getKeys(secret);
 
 	var transaction = {
-		type: 6,
+		type: transactionTypes.IN_TRANSFER,
 		nethash: nethash,
 		amount: 0,
 		fee: constants.fees.send,
@@ -45,7 +46,7 @@ function createOutTransfer(recipientId, dappId, transactionId, currency, amount,
 	var keys = crypto.getKeys(secret);
 
 	var transaction = {
-		type: 7,
+		type: transactionTypes.OUT_TRANSFER,
 		amount: 0,
 		fee: constants.fees.send,
 		recipientId: recipientId,

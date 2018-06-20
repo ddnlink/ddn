@@ -1,5 +1,6 @@
 var crypto = require("./crypto.js")
 var constants = require("../constants.js")
+var transactionTypes = require("../transaction-types.js")
 var slots = require("../time/slots.js")
 var options = require('../options')
 
@@ -11,7 +12,7 @@ function calculateFee(amount) {
 
 function createTransaction(recipientId, amount, message, secret, secondSecret) {
 	var transaction = {
-		type: 0,
+		type: transactionTypes.SEND,
 		nethash: options.get('nethash'),
 		amount: amount,
 		fee: constants.fees.send,

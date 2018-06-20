@@ -1,5 +1,6 @@
 var crypto = require("./crypto.js")
 var constants = require("../constants.js")
+var transactionTypes = require("../transaction-types.js")
 var slots = require("../time/slots.js")
 var options = require('../options')
 
@@ -14,7 +15,7 @@ function createMultisignature(keysgroup, lifetime, min, secret, secondSecret) {
 	var keys = crypto.getKeys(secret);
 
 	var transaction = {
-		type: 4,
+		type: transactionTypes.MULTITRANSFER,
 		nethash: options.get('nethash'),
 		amount: 0,
 		fee: constants.fees.multisignature,

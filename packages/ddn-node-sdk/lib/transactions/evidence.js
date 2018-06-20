@@ -1,6 +1,7 @@
 var ByteBuffer = require('bytebuffer');
 var crypto = require('./crypto.js');
 var constants = require('../constants.js');
+var transactionTypes = require("../transaction-types.js")
 var slots = require('../time/slots.js');
 var options = require('../options');
 
@@ -25,7 +26,7 @@ function createEvidence(evidence, secret, secondSecret) {
 	var fee = constants.fees.evidence;
 
 	var transaction = {
-		type: 20,
+		type: transactionTypes.EVIDENCE,
 		nethash: options.get('nethash'),
 		amount: 0,
 		fee: fee,

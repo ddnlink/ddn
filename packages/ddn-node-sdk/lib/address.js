@@ -4,10 +4,9 @@ var base58check = require('./base58check')
 var options = require('./options');
 var constants = require('./constants');
 
-const NORMAL_PREFIX = constants.nethash[options.get('nethash')].tokenPrefix // D
-
 module.exports = {
   isAddress: function (address) {
+    const NORMAL_PREFIX = constants.nethash[options.get('nethash')].tokenPrefix // D
     if (typeof address !== 'string') {
       return false
     }
@@ -23,6 +22,7 @@ module.exports = {
   },
 
   isBase58CheckAddress: function (address) {
+    const NORMAL_PREFIX = constants.nethash[options.get('nethash')].tokenPrefix // D
     if (typeof address !== 'string') {
       return false
     }
@@ -36,6 +36,7 @@ module.exports = {
   },
 
   generateBase58CheckAddress: function (publicKey) {
+    const NORMAL_PREFIX = constants.nethash[options.get('nethash')].tokenPrefix // D
     if (typeof publicKey === 'string') {
       publicKey = Buffer.from(publicKey, 'hex')
     }

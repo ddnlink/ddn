@@ -30,7 +30,7 @@ function createOrg(org, secret, secondSecret) {
 		throw new Error('Invalid orgId format');
 	}
 
-    const olen = org.orgId.length
+    var olen = org.orgId.length
     , feeBase = 1
     if ( olen > 10 ) { feeBase = 10
     }else if ( olen == 10) { feeBase = 50
@@ -123,12 +123,14 @@ function createConfirmation(confirmation, secret, secondSecret, amount) {
         throw new Error('Invalid state format');
     }
 
+    var fee = constants.fees.org;
+
     var transaction = {
         type: trsTypes.CONFIRMATION,
         nethash: options.get('nethash'),
         amount: amount,
         fee: fee,
-        recipientId: null,
+        recipientId: confirmation.receivedAddress,
         senderPublicKey: keys.publicKey,
         timestamp: slots.getTime() - options.get('clientDriftSeconds'),
         asset: {

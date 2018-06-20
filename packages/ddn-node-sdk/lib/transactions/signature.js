@@ -1,5 +1,6 @@
 var crypto = require("./crypto.js")
 var constants = require("../constants.js")
+var transactionTypes = require("../transaction-types.js")
 var slots = require("../time/slots.js")
 var options = require('../options')
 
@@ -18,7 +19,7 @@ function createSignature(secret, secondSecret) {
 
 	var signature = newSignature(secondSecret);
 	var transaction = {
-		type: 1,
+		type: transactionTypes.SIGNATURE,
 		nethash: options.get('nethash'),
 		amount: 0,
 		fee: constants.fees.secondsignature,

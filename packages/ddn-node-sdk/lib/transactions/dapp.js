@@ -1,6 +1,7 @@
 var ByteBuffer = require('bytebuffer')
 var crypto = require("./crypto.js")
 var constants = require("../constants.js")
+var transactionTypes = require("../transaction-types.js")
 var slots = require("../time/slots.js")
 var globalOptions = require('../options.js')
 
@@ -8,7 +9,7 @@ function createDApp(options, secret, secondSecret) {
 	var keys = crypto.getKeys(secret);
 
 	var transaction = {
-		type: 5,
+		type: transactionTypes.DAPP,
 		amount: 0,
 		fee: constants.fees.dapp,
 		recipientId: null,
