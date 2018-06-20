@@ -248,9 +248,6 @@ function getBytes(transaction, skipSignature, skipSecondSignature) {
     case 7:
       assetBytes = getOutTransferBytes(transaction.asset.outTransfer)
       break;
-    case 8:
-      assetBytes = toLocalBuffer(ByteBuffer.fromHex(transaction.asset.storage.content))
-      break;
     case 9:
       var bb = new ByteBuffer(1, true)
       var asset = transaction.asset.aobIssuer

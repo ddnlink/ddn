@@ -21,8 +21,6 @@ module.exports = {
 
   // Evidence: 20-39, 
   EVIDENCE: 20,
-  STORAGE: 8, // 删除该类型，及其相关代码
-  DOMAIN: 18, // 删除该类型，及其相关代码
   
   // AOB-ASSET ON BLOCKCHAIN: 40-59
   AOB_ISSUER: 9, // AOB ISSUER REGISTER
@@ -37,7 +35,6 @@ module.exports = {
   EXCHANGE: 22,
   CONTRIBUTION: 23,
   CONFIRMATION: 24,
-
 
   LOCK: 100 // ACCOUNT LOCK
 }

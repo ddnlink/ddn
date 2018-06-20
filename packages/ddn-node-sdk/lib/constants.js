@@ -4,7 +4,6 @@ module.exports = {
     vote: 10000000, 
     username: 10000000,
     multitransfer: 10000000,
-    domain: 10000000,
     
     delegate: 10000000000,
     secondsignature: 500000000,
@@ -52,7 +51,6 @@ module.exports = {
       tokenPrefix: 'L',
       beginDate: new Date(Date.UTC(2018, 5, 18, 4, 0, 0, 0)), // 2018-06-18T04:00:00.000Z +8
     },
-
 
   }
 
