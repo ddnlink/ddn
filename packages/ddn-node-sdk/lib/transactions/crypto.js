@@ -2,6 +2,7 @@ var sha256 = require("fast-sha256");
 var addressHelper = require('../address.js');
 var options = require('../options');
 var constants = require('../constants');
+var trsTypes = require('../transaction-types');
 
 if (typeof Buffer === "undefined") {
   Buffer = require("buffer/").Buffer;
@@ -210,19 +211,19 @@ function getBytes(transaction, skipSignature, skipSecondSignature) {
     assetBytes = null;
 
   switch (transaction.type) {
-    case 1: // Signature
+    case trsTypes.SIGNATURE: // Signature
       assetBytes = getSignatureBytes(transaction.asset.signature);
       break;
 
-    case 2: // Delegate
+    case trsTypes.DELEGATE: // Delegate
       assetBytes = new Buffer(transaction.asset.delegate.username, "utf8");
       break;
 
-    case 3: // Vote
+    case trsTypes.VOTE: // Vote
       assetBytes = new Buffer(transaction.asset.vote.votes.join(""), "utf8");
       break;
 
-    case 4: // Multi-Signature
+    case trsTypes.MULTI: // Multi-Signature
       var keysgroupBuffer = new Buffer(transaction.asset.multisignature.keysgroup.join(""), "utf8");
       var bb = new ByteBuffer(1 + 1 + keysgroupBuffer.length, true);
 
@@ -238,17 +239,37 @@ function getBytes(transaction, skipSignature, skipSecondSignature) {
       assetBytes = bb.toBuffer();
       break;
 
-    case 5: // Dapp
+    case trsTypes.DAPP: // Dapp
       assetBytes = getDAppBytes(transaction.asset.dapp);
       break;
 
-    case 6: // In Transfer (Dapp Deposit)
+    case trsTypes.IN_TRANSFER: // In Transfer (Dapp Deposit)
       assetBytes = getInTransferBytes(transaction.asset.inTransfer);
       break;
-    case 7:
+    case trsTypes.OUT_TRANSFER:
       assetBytes = getOutTransferBytes(transaction.asset.outTransfer)
       break;
-    case 9:
+    // evidence
+    case trsTypes.EVIDENCE: 
+      assetBytes = getEvidenceBytes(transaction.asset.evidence);
+      break;  
+
+    // dao 
+    case trsTypes.ORG:
+      assetBytes = getOrgBytes(transaction.asset.org);
+      break;
+    case trsTypes.EXCHANGE:
+      assetBytes = getExchangeBytes(transaction.asset.exchange);
+      break;
+    case trsTypes.CONTRIBUTION:
+      assetBytes = getContributionBytes(transaction.asset.daoContribution);
+      break;
+    case trsTypes.CONFIRMATION:
+      assetBytes = getConfirmationBytes(transaction.asset.daoConfirmation);
+      break;
+
+    // aob
+    case trsTypes.AOB_ISSUER:
       var bb = new ByteBuffer(1, true)
       var asset = transaction.asset.aobIssuer
       bb.writeString(asset.name)
@@ -256,7 +277,7 @@ function getBytes(transaction, skipSignature, skipSecondSignature) {
       bb.flip()
       assetBytes = toLocalBuffer(bb)
       break;
-    case 10:
+    case trsTypes.AOB_ASSET:
       var bb = new ByteBuffer(1, true)
       var asset = transaction.asset.aobAsset
       bb.writeString(asset.name)
@@ -272,7 +293,7 @@ function getBytes(transaction, skipSignature, skipSecondSignature) {
       bb.flip()
       assetBytes = toLocalBuffer(bb)
       break;
-    case 11:
+    case trsTypes.AOB_FLAGS:
       var bb = new ByteBuffer(1, true)
       var asset = transaction.asset.aobFlags
       bb.writeString(asset.currency)
@@ -281,7 +302,7 @@ function getBytes(transaction, skipSignature, skipSecondSignature) {
       bb.flip()
       assetBytes = toLocalBuffer(bb)
       break;
-    case 12:
+    case trsTypes.AOB_ACL:
       var bb = new ByteBuffer(1, true)
       var asset = transaction.asset.aobAcl
       bb.writeString(asset.currency)
@@ -293,7 +314,7 @@ function getBytes(transaction, skipSignature, skipSecondSignature) {
       bb.flip()
       assetBytes = toLocalBuffer(bb)
       break;
-    case 13:
+    case trsTypes.AOB_ISSUE:
       var bb = new ByteBuffer(1, true)
       var asset = transaction.asset.aobIssue
       bb.writeString(asset.currency)
@@ -301,7 +322,7 @@ function getBytes(transaction, skipSignature, skipSecondSignature) {
       bb.flip()
       assetBytes = toLocalBuffer(bb)
       break;
-    case 14:
+    case trsTypes.AOB_TRANSFER:
       var bb = new ByteBuffer(1, true)
       var asset = transaction.asset.aobTransfer
       bb.writeString(asset.currency)
@@ -309,7 +330,7 @@ function getBytes(transaction, skipSignature, skipSecondSignature) {
       bb.flip()
       assetBytes = toLocalBuffer(bb)
       break;
-    case 16:
+    case trsTypes.MULTITRANSFER:
       var bb = new ByteBuffer(1, true);
       var asset = transaction.asset.output
       for (var i = 0; i < asset.outputs.length; i++) {
@@ -330,21 +351,6 @@ function getBytes(transaction, skipSignature, skipSecondSignature) {
       }
       bb.flip();
       assetBytes = toLocalBuffer(bb)
-      break;
-    case 20: // evidence
-      assetBytes = getEvidenceBytes(transaction.asset.evidence);
-      break;
-    case 21:
-      assetBytes = getOrgBytes(transaction.asset.org);
-      break;
-    case 22:
-      assetBytes = getExchangeBytes(transaction.asset.exchange);
-      break;
-    case 23:
-      assetBytes = getContributionBytes(transaction.asset.daoContribution);
-      break;
-    case 24:
-      assetBytes = getConfirmationBytes(transaction.asset.daoConfirmation);
       break;
   }
 
