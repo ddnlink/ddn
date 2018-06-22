@@ -10,7 +10,7 @@ function createDelegate(username, secret, secondSecret) {
 	var transaction = {
 		type: transactionTypes.DELEGATE,
 		nethash: options.get('nethash'),
-		amount: 0,
+		amount: "0",
 		fee: constants.fees.delegate,
 		recipientId: null,
 		senderPublicKey: keys.publicKey,

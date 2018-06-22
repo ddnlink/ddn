@@ -50,8 +50,8 @@ function createOrg(org, secret, secondSecret) {
 	var transaction = {
 		type: trsTypes.ORG,
 		nethash: options.get('nethash'),
-		amount: 0,
-		fee: feeBase * 100000000,
+		amount: 0 + "",
+		fee: feeBase * 100000000 + "",
 		recipientId: null,
 		senderPublicKey: keys.publicKey,
 		timestamp: slots.getTime() - options.get('clientDriftSeconds'),
@@ -67,7 +67,7 @@ function createOrg(org, secret, secondSecret) {
 		crypto.secondSign(transaction, secondKeys);
 	}
 
-	transaction.id = crypto.getId(transaction);
+	// transaction.id = crypto.getId(transaction);
 	return transaction;
 }
 
@@ -78,8 +78,8 @@ function createTransfer(address, secret, secondSecret) {
     var transaction = {
         type: trsTypes.SEND,
         nethash: options.get('nethash'),
-        amount: 100000000000,
-        fee: fee,
+        amount: 100000000000 + "",
+        fee: fee + "",
         recipientId: address,
         senderPublicKey: keys.publicKey,
         timestamp: slots.getTime() - options.get('clientDriftSeconds')
@@ -128,8 +128,8 @@ function createConfirmation(confirmation, secret, secondSecret, amount) {
     var transaction = {
         type: trsTypes.CONFIRMATION,
         nethash: options.get('nethash'),
-        amount: amount,
-        fee: fee,
+        amount: amount + "",
+        fee: fee + "",
         recipientId: confirmation.receivedAddress,
         senderPublicKey: keys.publicKey,
         timestamp: slots.getTime() - options.get('clientDriftSeconds'),
@@ -145,7 +145,7 @@ function createConfirmation(confirmation, secret, secondSecret, amount) {
         crypto.secondSign(transaction, secondKeys);
     }
 
-    // transaction.id = crypto.getId(transaction);
+    transaction.id = crypto.getId(transaction);
     return transaction;
 }
 
@@ -184,8 +184,8 @@ function createContribution(contribution, secret, secondSecret) {
 	var transaction = {
 		type: trsTypes.CONTRIBUTION,
 		nethash: options.get('nethash'),
-		amount: 0,
-		fee: fee,
+		amount: "0",
+		fee: fee + "",
 		recipientId: null,
 		senderPublicKey: keys.publicKey,
 		timestamp: slots.getTime() - options.get('clientDriftSeconds'),

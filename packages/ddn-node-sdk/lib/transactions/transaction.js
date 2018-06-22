@@ -5,7 +5,8 @@ var slots = require("../time/slots.js")
 var options = require('../options')
 
 function calculateFee(amount) {
-    var min = constants.fees.send;
+	var min = constants.fees.send;
+	// fixme: to use bignumber
     var fee = parseFloat((amount * 0.0001).toFixed(0));
     return fee < min ? min : fee;
 }
@@ -14,7 +15,7 @@ function createTransaction(recipientId, amount, message, secret, secondSecret) {
 	var transaction = {
 		type: transactionTypes.SEND,
 		nethash: options.get('nethash'),
-		amount: amount,
+		amount: amount + "",
 		fee: constants.fees.send,
 		recipientId: recipientId,
 		message: message,
@@ -39,9 +40,9 @@ function createTransaction(recipientId, amount, message, secret, secondSecret) {
 function createLock(height, secret, secondSecret) {
 	var transaction = {
 		type: 100,
-		amount: 0,
+		amount: 0 + "",
 		nethash: options.get('nethash'),
-		fee: 10000000,
+		fee: 10000000 + "",
 		recipientId: null,
 		args: [ String(height) ],
 		timestamp: slots.getTime() - options.get('clientDriftSeconds'),

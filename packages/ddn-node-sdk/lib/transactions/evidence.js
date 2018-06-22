@@ -7,7 +7,7 @@ var options = require('../options');
 
 /**
  * Create evidence transaction
- * @param {Evidence} evidence object {ipid: ipid, title: title, tags: tags, hash: hash, type: type, size: size, url: url}
+ * @param {Evidence} evidence object {ipid: ipid, title: title, description: description, tags: tags, hash: hash, type: type, size: size, url: url}
  * @param {*} secret 
  * @param {*} secondSecret 
  */
@@ -28,7 +28,7 @@ function createEvidence(evidence, secret, secondSecret) {
 	var transaction = {
 		type: transactionTypes.EVIDENCE,
 		nethash: options.get('nethash'),
-		amount: 0,
+		amount: "0",
 		fee: fee,
 		recipientId: null,
 		senderPublicKey: keys.publicKey,

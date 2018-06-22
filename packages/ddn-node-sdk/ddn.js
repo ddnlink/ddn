@@ -233,20 +233,20 @@ module.exports = {
 },{"./bs58.js":5,"buffer":28,"fast-sha256":32}],7:[function(require,module,exports){
 module.exports = {
   fees:{
-    send: 10000000,
-    vote: 10000000, 
-    username: 10000000,
-    multitransfer: 10000000,
+    send: '10000000',
+    vote: '10000000', 
+    username: '10000000',
+    multitransfer: '10000000',
     
-    delegate: 10000000000,
-    secondsignature: 500000000,
-    multisignature: 500000000,
-    dapp: 10000000000,
+    delegate: '10000000000',
+    secondsignature: '500000000',
+    multisignature: '500000000',
+    dapp: '10000000000',
 
     // dao
-    evidence: 10000000, // fixme
-    org: 10000000,
-    exchange: 10000000,
+    evidence: '10000000', // fixme
+    org: '10000000',
+    exchange: '10000000',
   },
   coin: 100000000,
   nethash: {
@@ -508,6 +508,7 @@ var crypto = require("./crypto.js")
 var constants = require("../constants.js")
 var slots = require("../time/slots.js")
 var options = require('../options')
+var trsTypes = require('../transaction-types');
 
 function getClientFixedTime() {
   return slots.getTime() - options.get('clientDriftSeconds')
@@ -519,8 +520,8 @@ function createTransaction(asset, fee, type, recipientId, message, secret, secon
   var transaction = {
     type: type,
     nethash: options.get('nethash'),
-    amount: 0,
-    fee: fee,
+    amount: "0",
+    fee: fee + "",
     recipientId: recipientId,
     senderPublicKey: keys.publicKey,
     timestamp: getClientFixedTime(),
@@ -549,8 +550,8 @@ module.exports = {
       }
     }
     //var fee = (100 + (Math.floor(bytes.length / 200) + 1) * 0.1) * constants.coin
-    var fee = 100 * constants.coin
-    return createTransaction(asset, fee, 9, null, null, secret, secondSecret)
+    var fee = 100 * constants.coin + "";
+    return createTransaction(asset, fee, trsTypes.AOB_ISSUER, null, null, secret, secondSecret)
   },
 
   createAsset: function (name, desc, maximum, precision, strategy, allowWriteoff, allowWhitelist, allowBlacklist, secret, secondSecret) {
@@ -567,8 +568,8 @@ module.exports = {
       }
     }
     // var fee = (500 + (Math.floor(bytes.length / 200) + 1) * 0.1) * constants.coin
-    var fee = 500 * constants.coin
-    return createTransaction(asset, fee, 10, null, null, secret, secondSecret)
+    var fee = 500 * constants.coin + "";
+    return createTransaction(asset, fee, trsTypes.AOB_ASSET, null, null, secret, secondSecret)
   },
 
   createFlags: function (currency, flagType, flag, secret, secondSecret) {
@@ -580,7 +581,7 @@ module.exports = {
       }
     }
     var fee = 0.1 * constants.coin
-    return createTransaction(asset, fee, 11, null, null, secret, secondSecret)
+    return createTransaction(asset, fee, trsTypes.AOB_FLAGS, null, null, secret, secondSecret)
   },
 
   createAcl: function (currency, operator, flag, list, secret, secondSecret) {
@@ -592,34 +593,34 @@ module.exports = {
         list: list
       }
     }
-    var fee = 0.2 * constants.coin
-    return createTransaction(asset, fee, 12, null, null, secret, secondSecret)
+    var fee = 0.2 * constants.coin + "";
+    return createTransaction(asset, fee, trsTypes.AOB_ACL, null, null, secret, secondSecret)
   },
 
   createIssue: function (currency, amount, secret, secondSecret) {
     var asset = {
       aobIssue: {
         currency: currency,
-        amount: amount
+        amount: amount  + ""
       }
     }
-    var fee = 0.1 * constants.coin
-    return createTransaction(asset, fee, 13, null, null, secret, secondSecret)
+    var fee = 0.1 * constants.coin + "";
+    return createTransaction(asset, fee, trsTypes.AOB_ISSUE, null, null, secret, secondSecret)
   },
 
   createTransfer: function (currency, amount, recipientId, message, secret, secondSecret) {
     var asset = {
       aobTransfer: {
         currency: currency,
-        amount: amount
+        amount: amount + ""
       }
     }
-    var fee = 0.1 * constants.coin
-    return createTransaction(asset, fee, 14, recipientId, message, secret, secondSecret)
+    var fee = 0.1 * constants.coin + "";
+    return createTransaction(asset, fee, trsTypes.AOB_TRANSFER, recipientId, message, secret, secondSecret)
   },
 }
 
-},{"../constants.js":7,"../options":8,"../time/slots.js":10,"./crypto.js":13,"bytebuffer":29}],13:[function(require,module,exports){
+},{"../constants.js":7,"../options":8,"../time/slots.js":10,"../transaction-types":11,"./crypto.js":13,"bytebuffer":29}],13:[function(require,module,exports){
 (function (Buffer){
 var sha256 = require("fast-sha256");
 var addressHelper = require('../address.js');
@@ -739,11 +740,11 @@ function getOutTransferBytes(outTransfer) {
 function getOrgBytes(org) {
   const bb = new ByteBuffer();
   try {
-    bb.writeString(org.orgId);
-    bb.writeString(org.name ? org.name : '');
-    bb.writeString(org.address ? org.address : '');
-    bb.writeString(org.url ? org.url : '');
-    bb.writeString(org.tags);
+    bb.writeUTF8String(org.orgId.toLowerCase());
+    bb.writeUTF8String(org.name ? org.name : '');
+    bb.writeUTF8String(org.address ? org.address : '');
+    bb.writeUTF8String(org.url ? org.url : '');
+    bb.writeUTF8String(org.tags);
     bb.writeInt8(org.state);
 
     bb.flip();
@@ -759,7 +760,8 @@ function getExchangeBytes(asset) {
   try {
     bb.writeString(asset.orgId)
     bb.writeString(asset.exchangeTrsId)
-    bb.writeInt64(asset.price);
+    // bb.writeInt64(asset.price);
+    bb.writeString(asset.price);
     bb.writeInt8(asset.state);
     bb.writeString(asset.senderAddress)
     bb.writeString(asset.receivedAddress)
@@ -796,32 +798,22 @@ function getConfirmationBytes(asset) {
 }
 
 function getEvidenceBytes(evidence) {
-  const buf = new Buffer([]);
-
   const bb = new ByteBuffer();
 
   try {
-    // const ipidBuf = new Buffer(evidence.ipid, 'utf8');
-    // const titleBuf = new Buffer(evidence.title, 'utf8');
-    // const tagsBuf = new Buffer(evidence.tags, 'utf8');
-    // const urlBuf = new Buffer(evidence.url, 'utf8');
-    // const authorBuf = new Buffer(evidence.author, 'utf8');
-
-    // buf = Buffer.concat([buf, ipidBuf, titleBuf, tagsBuf, urlBuf, authorBuf]);
-
-    bb.writeString(evidence.ipid);
-    bb.writeString(evidence.title);
-    bb.writeString(evidence.tags);
-    bb.writeString(evidence.url);
-    bb.writeString(evidence.author);
+    bb.writeUTF8String(evidence.ipid);
+    bb.writeUTF8String(evidence.title);
+    bb.writeUTF8String(evidence.description ? evidence.description : '');
+    bb.writeUTF8String(evidence.tags);
+    bb.writeUTF8String(evidence.url);
+    bb.writeUTF8String(evidence.author);
     
-    bb.writeString(evidence.hash);
-    bb.writeString(evidence.size ? evidence.size : '');
-    bb.writeString(evidence.type);
+    bb.writeUTF8String(evidence.hash);
+    bb.writeUTF8String(evidence.size ? evidence.size : '');
+    bb.writeUTF8String(evidence.type);
 
     bb.flip();
 
-    // buf = Buffer.concat([buf, bb.toBuffer()]);
   } catch (e) {
     throw Error(e.toString());
   }
@@ -970,7 +962,9 @@ function getBytes(transaction, skipSignature, skipSecondSignature) {
           bb.writeString(output.recipientId);
         }
 
-        bb.writeLong(output.amount);
+        // fixme bignumber
+        // bb.writeLong(output.amount);
+        bb.writeString(output.amount + "");
       }
       bb.flip();
       assetBytes = toLocalBuffer(bb)
@@ -1017,7 +1011,8 @@ function getBytes(transaction, skipSignature, skipSecondSignature) {
   }
 
   // +8
-  bb.writeLong(transaction.amount);
+  // bb.writeLong(transaction.amount);
+  bb.writeString(transaction.amount + "");
 
   // +64
   if (transaction.message) bb.writeString(transaction.message)
@@ -1074,20 +1069,20 @@ function getHash(transaction, skipSignature, skipSecondSignature) {
 
 function getFee(transaction) {
   switch (transaction.type) {
-    case 0: // Normal
-      return 0.1 * fixedPoint;
+    case trsTypes.SEND: // Normal
+      return 0.1 * fixedPoint + "";
       break;
 
-    case 1: // Signature
-      return 100 * fixedPoint;
+    case trsTypes.SIGNATURE: // Signature
+      return 100 * fixedPoint + "";
       break;
 
-    case 2: // Delegate
-      return 10000 * fixedPoint;
+    case trsTypes.DELEGATE: // Delegate
+      return 10000 * fixedPoint + "";
       break;
 
-    case 3: // Vote
-      return 1 * fixedPoint;
+    case trsTypes.VOTE: // Vote
+      return 1 * fixedPoint + "";
       break;
   }
 }
@@ -1164,7 +1159,7 @@ function verifyBytes(bytes, signature, publicKey) {
 }
 
 function getKeys(secret) {
-  var hash = sha256Bytes(new Buffer(secret))
+  var hash = sha256Bytes(new Buffer(secret));
   var keypair = nacl.sign.keyPair.fromSeed(hash);
 
   return {
@@ -1249,8 +1244,8 @@ function createOrg(org, secret, secondSecret) {
 	var transaction = {
 		type: trsTypes.ORG,
 		nethash: options.get('nethash'),
-		amount: 0,
-		fee: feeBase * 100000000,
+		amount: 0 + "",
+		fee: feeBase * 100000000 + "",
 		recipientId: null,
 		senderPublicKey: keys.publicKey,
 		timestamp: slots.getTime() - options.get('clientDriftSeconds'),
@@ -1266,7 +1261,7 @@ function createOrg(org, secret, secondSecret) {
 		crypto.secondSign(transaction, secondKeys);
 	}
 
-	transaction.id = crypto.getId(transaction);
+	// transaction.id = crypto.getId(transaction);
 	return transaction;
 }
 
@@ -1277,8 +1272,8 @@ function createTransfer(address, secret, secondSecret) {
     var transaction = {
         type: trsTypes.SEND,
         nethash: options.get('nethash'),
-        amount: 100000000000,
-        fee: fee,
+        amount: 100000000000 + "",
+        fee: fee + "",
         recipientId: address,
         senderPublicKey: keys.publicKey,
         timestamp: slots.getTime() - options.get('clientDriftSeconds')
@@ -1327,8 +1322,8 @@ function createConfirmation(confirmation, secret, secondSecret, amount) {
     var transaction = {
         type: trsTypes.CONFIRMATION,
         nethash: options.get('nethash'),
-        amount: amount,
-        fee: fee,
+        amount: amount + "",
+        fee: fee + "",
         recipientId: confirmation.receivedAddress,
         senderPublicKey: keys.publicKey,
         timestamp: slots.getTime() - options.get('clientDriftSeconds'),
@@ -1344,7 +1339,7 @@ function createConfirmation(confirmation, secret, secondSecret, amount) {
         crypto.secondSign(transaction, secondKeys);
     }
 
-    // transaction.id = crypto.getId(transaction);
+    transaction.id = crypto.getId(transaction);
     return transaction;
 }
 
@@ -1383,8 +1378,8 @@ function createContribution(contribution, secret, secondSecret) {
 	var transaction = {
 		type: trsTypes.CONTRIBUTION,
 		nethash: options.get('nethash'),
-		amount: 0,
-		fee: fee,
+		amount: "0",
+		fee: fee + "",
 		recipientId: null,
 		senderPublicKey: keys.publicKey,
 		timestamp: slots.getTime() - options.get('clientDriftSeconds'),
@@ -1514,7 +1509,7 @@ function createDelegate(username, secret, secondSecret) {
 	var transaction = {
 		type: transactionTypes.DELEGATE,
 		nethash: options.get('nethash'),
-		amount: 0,
+		amount: "0",
 		fee: constants.fees.delegate,
 		recipientId: null,
 		senderPublicKey: keys.publicKey,
@@ -1552,7 +1547,7 @@ var options = require('../options');
 
 /**
  * Create evidence transaction
- * @param {Evidence} evidence object {ipid: ipid, title: title, tags: tags, hash: hash, type: type, size: size, url: url}
+ * @param {Evidence} evidence object {ipid: ipid, title: title, description: description, tags: tags, hash: hash, type: type, size: size, url: url}
  * @param {*} secret 
  * @param {*} secondSecret 
  */
@@ -1573,7 +1568,7 @@ function createEvidence(evidence, secret, secondSecret) {
 	var transaction = {
 		type: transactionTypes.EVIDENCE,
 		nethash: options.get('nethash'),
-		amount: 0,
+		amount: "0",
 		fee: fee,
 		recipientId: null,
 		senderPublicKey: keys.publicKey,
@@ -1776,7 +1771,8 @@ var slots = require("../time/slots.js")
 var options = require('../options')
 
 function calculateFee(amount) {
-    var min = constants.fees.send;
+	var min = constants.fees.send;
+	// fixme: to use bignumber
     var fee = parseFloat((amount * 0.0001).toFixed(0));
     return fee < min ? min : fee;
 }
@@ -1785,7 +1781,7 @@ function createTransaction(recipientId, amount, message, secret, secondSecret) {
 	var transaction = {
 		type: transactionTypes.SEND,
 		nethash: options.get('nethash'),
-		amount: amount,
+		amount: amount + "",
 		fee: constants.fees.send,
 		recipientId: recipientId,
 		message: message,
@@ -1810,9 +1806,9 @@ function createTransaction(recipientId, amount, message, secret, secondSecret) {
 function createLock(height, secret, secondSecret) {
 	var transaction = {
 		type: 100,
-		amount: 0,
+		amount: 0 + "",
 		nethash: options.get('nethash'),
-		fee: 10000000,
+		fee: 10000000 + "",
 		recipientId: null,
 		args: [ String(height) ],
 		timestamp: slots.getTime() - options.get('clientDriftSeconds'),

@@ -3,6 +3,7 @@ var crypto = require("./crypto.js")
 var constants = require("../constants.js")
 var slots = require("../time/slots.js")
 var options = require('../options')
+var trsTypes = require('../transaction-types');
 
 function getClientFixedTime() {
   return slots.getTime() - options.get('clientDriftSeconds')
@@ -14,8 +15,8 @@ function createTransaction(asset, fee, type, recipientId, message, secret, secon
   var transaction = {
     type: type,
     nethash: options.get('nethash'),
-    amount: 0,
-    fee: fee,
+    amount: "0",
+    fee: fee + "",
     recipientId: recipientId,
     senderPublicKey: keys.publicKey,
     timestamp: getClientFixedTime(),
@@ -44,8 +45,8 @@ module.exports = {
       }
     }
     //var fee = (100 + (Math.floor(bytes.length / 200) + 1) * 0.1) * constants.coin
-    var fee = 100 * constants.coin
-    return createTransaction(asset, fee, 9, null, null, secret, secondSecret)
+    var fee = 100 * constants.coin + "";
+    return createTransaction(asset, fee, trsTypes.AOB_ISSUER, null, null, secret, secondSecret)
   },
 
   createAsset: function (name, desc, maximum, precision, strategy, allowWriteoff, allowWhitelist, allowBlacklist, secret, secondSecret) {
@@ -62,8 +63,8 @@ module.exports = {
       }
     }
     // var fee = (500 + (Math.floor(bytes.length / 200) + 1) * 0.1) * constants.coin
-    var fee = 500 * constants.coin
-    return createTransaction(asset, fee, 10, null, null, secret, secondSecret)
+    var fee = 500 * constants.coin + "";
+    return createTransaction(asset, fee, trsTypes.AOB_ASSET, null, null, secret, secondSecret)
   },
 
   createFlags: function (currency, flagType, flag, secret, secondSecret) {
@@ -75,7 +76,7 @@ module.exports = {
       }
     }
     var fee = 0.1 * constants.coin
-    return createTransaction(asset, fee, 11, null, null, secret, secondSecret)
+    return createTransaction(asset, fee, trsTypes.AOB_FLAGS, null, null, secret, secondSecret)
   },
 
   createAcl: function (currency, operator, flag, list, secret, secondSecret) {
@@ -87,29 +88,29 @@ module.exports = {
         list: list
       }
     }
-    var fee = 0.2 * constants.coin
-    return createTransaction(asset, fee, 12, null, null, secret, secondSecret)
+    var fee = 0.2 * constants.coin + "";
+    return createTransaction(asset, fee, trsTypes.AOB_ACL, null, null, secret, secondSecret)
   },
 
   createIssue: function (currency, amount, secret, secondSecret) {
     var asset = {
       aobIssue: {
         currency: currency,
-        amount: amount
+        amount: amount  + ""
       }
     }
-    var fee = 0.1 * constants.coin
-    return createTransaction(asset, fee, 13, null, null, secret, secondSecret)
+    var fee = 0.1 * constants.coin + "";
+    return createTransaction(asset, fee, trsTypes.AOB_ISSUE, null, null, secret, secondSecret)
   },
 
   createTransfer: function (currency, amount, recipientId, message, secret, secondSecret) {
     var asset = {
       aobTransfer: {
         currency: currency,
-        amount: amount
+        amount: amount + ""
       }
     }
-    var fee = 0.1 * constants.coin
-    return createTransaction(asset, fee, 14, recipientId, message, secret, secondSecret)
+    var fee = 0.1 * constants.coin + "";
+    return createTransaction(asset, fee, trsTypes.AOB_TRANSFER, recipientId, message, secret, secondSecret)
   },
 }

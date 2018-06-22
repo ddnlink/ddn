@@ -116,11 +116,11 @@ function getOutTransferBytes(outTransfer) {
 function getOrgBytes(org) {
   const bb = new ByteBuffer();
   try {
-    bb.writeString(org.orgId);
-    bb.writeString(org.name ? org.name : '');
-    bb.writeString(org.address ? org.address : '');
-    bb.writeString(org.url ? org.url : '');
-    bb.writeString(org.tags);
+    bb.writeUTF8String(org.orgId.toLowerCase());
+    bb.writeUTF8String(org.name ? org.name : '');
+    bb.writeUTF8String(org.address ? org.address : '');
+    bb.writeUTF8String(org.url ? org.url : '');
+    bb.writeUTF8String(org.tags);
     bb.writeInt8(org.state);
 
     bb.flip();
@@ -136,7 +136,8 @@ function getExchangeBytes(asset) {
   try {
     bb.writeString(asset.orgId)
     bb.writeString(asset.exchangeTrsId)
-    bb.writeInt64(asset.price);
+    // bb.writeInt64(asset.price);
+    bb.writeString(asset.price);
     bb.writeInt8(asset.state);
     bb.writeString(asset.senderAddress)
     bb.writeString(asset.receivedAddress)
@@ -173,32 +174,22 @@ function getConfirmationBytes(asset) {
 }
 
 function getEvidenceBytes(evidence) {
-  const buf = new Buffer([]);
-
   const bb = new ByteBuffer();
 
   try {
-    // const ipidBuf = new Buffer(evidence.ipid, 'utf8');
-    // const titleBuf = new Buffer(evidence.title, 'utf8');
-    // const tagsBuf = new Buffer(evidence.tags, 'utf8');
-    // const urlBuf = new Buffer(evidence.url, 'utf8');
-    // const authorBuf = new Buffer(evidence.author, 'utf8');
-
-    // buf = Buffer.concat([buf, ipidBuf, titleBuf, tagsBuf, urlBuf, authorBuf]);
-
-    bb.writeString(evidence.ipid);
-    bb.writeString(evidence.title);
-    bb.writeString(evidence.tags);
-    bb.writeString(evidence.url);
-    bb.writeString(evidence.author);
+    bb.writeUTF8String(evidence.ipid);
+    bb.writeUTF8String(evidence.title);
+    bb.writeUTF8String(evidence.description ? evidence.description : '');
+    bb.writeUTF8String(evidence.tags);
+    bb.writeUTF8String(evidence.url);
+    bb.writeUTF8String(evidence.author);
     
-    bb.writeString(evidence.hash);
-    bb.writeString(evidence.size ? evidence.size : '');
-    bb.writeString(evidence.type);
+    bb.writeUTF8String(evidence.hash);
+    bb.writeUTF8String(evidence.size ? evidence.size : '');
+    bb.writeUTF8String(evidence.type);
 
     bb.flip();
 
-    // buf = Buffer.concat([buf, bb.toBuffer()]);
   } catch (e) {
     throw Error(e.toString());
   }
@@ -347,7 +338,9 @@ function getBytes(transaction, skipSignature, skipSecondSignature) {
           bb.writeString(output.recipientId);
         }
 
-        bb.writeLong(output.amount);
+        // fixme bignumber
+        // bb.writeLong(output.amount);
+        bb.writeString(output.amount + "");
       }
       bb.flip();
       assetBytes = toLocalBuffer(bb)
@@ -394,7 +387,8 @@ function getBytes(transaction, skipSignature, skipSecondSignature) {
   }
 
   // +8
-  bb.writeLong(transaction.amount);
+  // bb.writeLong(transaction.amount);
+  bb.writeString(transaction.amount + "");
 
   // +64
   if (transaction.message) bb.writeString(transaction.message)
@@ -451,20 +445,20 @@ function getHash(transaction, skipSignature, skipSecondSignature) {
 
 function getFee(transaction) {
   switch (transaction.type) {
-    case 0: // Normal
-      return 0.1 * fixedPoint;
+    case trsTypes.SEND: // Normal
+      return 0.1 * fixedPoint + "";
       break;
 
-    case 1: // Signature
-      return 100 * fixedPoint;
+    case trsTypes.SIGNATURE: // Signature
+      return 100 * fixedPoint + "";
       break;
 
-    case 2: // Delegate
-      return 10000 * fixedPoint;
+    case trsTypes.DELEGATE: // Delegate
+      return 10000 * fixedPoint + "";
       break;
 
-    case 3: // Vote
-      return 1 * fixedPoint;
+    case trsTypes.VOTE: // Vote
+      return 1 * fixedPoint + "";
       break;
   }
 }
@@ -541,7 +535,7 @@ function verifyBytes(bytes, signature, publicKey) {
 }
 
 function getKeys(secret) {
-  var hash = sha256Bytes(new Buffer(secret))
+  var hash = sha256Bytes(new Buffer(secret));
   var keypair = nacl.sign.keyPair.fromSeed(hash);
 
   return {
