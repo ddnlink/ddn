@@ -4,6 +4,7 @@ var constants = require("../constants.js")
 var slots = require("../time/slots.js")
 var options = require('../options')
 var trsTypes = require('../transaction-types');
+var bignum = require('../../lib/bignum_utils');
 
 function getClientFixedTime() {
   return slots.getTime() - options.get('clientDriftSeconds')
@@ -45,7 +46,7 @@ module.exports = {
       }
     }
     //var fee = (100 + (Math.floor(bytes.length / 200) + 1) * 0.1) * constants.coin
-    var fee = 100 * constants.coin + "";
+    var fee = bignum.multiply(100, constants.coin);
     return createTransaction(asset, fee, trsTypes.AOB_ISSUER, null, null, secret, secondSecret)
   },
 
@@ -63,7 +64,7 @@ module.exports = {
       }
     }
     // var fee = (500 + (Math.floor(bytes.length / 200) + 1) * 0.1) * constants.coin
-    var fee = 500 * constants.coin + "";
+    var fee = bignum.multiply(500, constants.coin);
     return createTransaction(asset, fee, trsTypes.AOB_ASSET, null, null, secret, secondSecret)
   },
 
@@ -75,7 +76,7 @@ module.exports = {
         flag: flag
       }
     }
-    var fee = 0.1 * constants.coin
+    var fee = bignum.multiply(0.1, constants.coin);
     return createTransaction(asset, fee, trsTypes.AOB_FLAGS, null, null, secret, secondSecret)
   },
 
@@ -88,7 +89,7 @@ module.exports = {
         list: list
       }
     }
-    var fee = 0.2 * constants.coin + "";
+    var fee = bignum.multiply(0.2, constants.coin);
     return createTransaction(asset, fee, trsTypes.AOB_ACL, null, null, secret, secondSecret)
   },
 
@@ -99,7 +100,7 @@ module.exports = {
         amount: amount  + ""
       }
     }
-    var fee = 0.1 * constants.coin + "";
+    var fee = bignum.multiply(0.1, constants.coin);
     return createTransaction(asset, fee, trsTypes.AOB_ISSUE, null, null, secret, secondSecret)
   },
 
@@ -110,7 +111,7 @@ module.exports = {
         amount: amount + ""
       }
     }
-    var fee = 0.1 * constants.coin + "";
+    var fee = bignum.multiply(0.1, constants.coin);
     return createTransaction(asset, fee, trsTypes.AOB_TRANSFER, recipientId, message, secret, secondSecret)
   },
 }

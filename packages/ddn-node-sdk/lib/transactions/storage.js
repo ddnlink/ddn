@@ -1,21 +1,27 @@
 var ByteBuffer = require('bytebuffer')
 var crypto = require("./crypto.js")
 var constants = require("../constants.js")
-var transactionTypes = require("../transaction-types.js")
 var slots = require("../time/slots.js")
 var options = require('../options')
+var bignum = require('../../lib/bignum_utils');
 
-function createUsername(name, secret, secondSecret) {
+function createStorage(content, secret, secondSecret) {
 	var keys = crypto.getKeys(secret)
   var bytes =  null
-
-  if (!name || name.length == 0) {
-    throw new Error('Invalid name format')
+  try {
+    bytes = crypto.toLocalBuffer(ByteBuffer.fromHex(content))
+  } catch (e) {
+    throw new Error('Content must be hex format')
   }
-  var fee = constants.fees.username
+  if (!bytes || bytes.length == 0) {
+    throw new Error('Invalid content format')
+  }
+
+//bignum update   var fee = (Math.floor(bytes.length / 200) + 1) * 0.1 * constants.coin
+  var fee = bignum.multiply((Math.floor(bytes.length / 200) + 1), 0.1, constants.coin);
   
 	var transaction = {
-		type: transactionTypes.USERINFO,
+		type: 8,
 		nethash: options.get('nethash'),
 		amount: "0",    //bignum update
 		fee: fee + "",
@@ -23,10 +29,11 @@ function createUsername(name, secret, secondSecret) {
 		senderPublicKey: keys.publicKey,
 		timestamp: slots.getTime() - options.get('clientDriftSeconds'),
 		asset: {
-			userinfo: {
-				username: name
+			storage: {
+				content: content
 			}
 		},
+    __assetBytes__: bytes
 	}
 
 	crypto.sign(transaction, keys)
@@ -35,10 +42,11 @@ function createUsername(name, secret, secondSecret) {
 		var secondKeys = crypto.getKeys(secondSecret)
 		crypto.secondSign(transaction, secondKeys)
 	}
+  delete transaction.__assetBytes__
 	transaction.id = crypto.getId(transaction)
 	return transaction
 }
 
 module.exports = {
-	createUsername : createUsername
+	createStorage : createStorage
 }

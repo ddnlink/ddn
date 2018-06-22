@@ -1,21 +1,23 @@
 var ByteBuffer = require('bytebuffer')
 var crypto = require("./crypto.js")
 var constants = require("../constants.js")
-var transactionTypes = require("../transaction-types.js")
 var slots = require("../time/slots.js")
 var options = require('../options')
 
-function createUsername(name, secret, secondSecret) {
+function createDomain(name, address, secret, secondSecret) {
 	var keys = crypto.getKeys(secret)
   var bytes =  null
 
   if (!name || name.length == 0) {
     throw new Error('Invalid name format')
   }
-  var fee = constants.fees.username
+  if (!address || address.length == 0) {
+    throw new Error('Invalid name format')
+  }
+  var fee = constants.fees.domain
   
 	var transaction = {
-		type: transactionTypes.USERINFO,
+		type: 18,
 		nethash: options.get('nethash'),
 		amount: "0",    //bignum update
 		fee: fee + "",
@@ -23,8 +25,9 @@ function createUsername(name, secret, secondSecret) {
 		senderPublicKey: keys.publicKey,
 		timestamp: slots.getTime() - options.get('clientDriftSeconds'),
 		asset: {
-			userinfo: {
-				username: name
+			domain: {
+				name: name,
+				address: address
 			}
 		},
 	}
@@ -40,5 +43,5 @@ function createUsername(name, secret, secondSecret) {
 }
 
 module.exports = {
-	createUsername : createUsername
+	createDomain : createDomain
 }

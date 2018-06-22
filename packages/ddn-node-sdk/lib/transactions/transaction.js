@@ -3,12 +3,18 @@ var constants = require("../constants.js")
 var transactionTypes = require("../transaction-types.js")
 var slots = require("../time/slots.js")
 var options = require('../options')
+var bignum = require('../../lib/bignum_utils');
 
 function calculateFee(amount) {
-	var min = constants.fees.send;
-	// fixme: to use bignumber
-    var fee = parseFloat((amount * 0.0001).toFixed(0));
-    return fee < min ? min : fee;
+    var min = constants.fees.send;
+    
+    var fee = bignum.multiply(amount, 0.0001).toFixed(0);
+
+    if (bignum.isLessThan(fee, min)) {
+        return min;
+    } else {
+        return fee + "";
+    }
 }
 
 function createTransaction(recipientId, amount, message, secret, secondSecret) {
@@ -40,9 +46,9 @@ function createTransaction(recipientId, amount, message, secret, secondSecret) {
 function createLock(height, secret, secondSecret) {
 	var transaction = {
 		type: 100,
-		amount: 0 + "",
+		amount: "0",    
 		nethash: options.get('nethash'),
-		fee: 10000000 + "",
+		fee: "10000000",    
 		recipientId: null,
 		args: [ String(height) ],
 		timestamp: slots.getTime() - options.get('clientDriftSeconds'),

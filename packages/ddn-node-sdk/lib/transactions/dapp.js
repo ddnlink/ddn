@@ -10,7 +10,7 @@ function createDApp(options, secret, secondSecret) {
 
 	var transaction = {
 		type: transactionTypes.DAPP,
-		amount: 0,
+		amount: "0",    //bignum update
 		fee: constants.fees.dapp,
 		recipientId: null,
 		senderPublicKey: keys.publicKey,

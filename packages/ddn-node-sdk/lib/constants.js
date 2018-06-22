@@ -1,19 +1,19 @@
 module.exports = {
   fees:{
-    send: '10000000',
-    vote: '10000000', 
-    username: '10000000',
-    multitransfer: '10000000',
+    send: "10000000",   //bignum update
+    vote: "10000000", 
+    username: "10000000",
+    multitransfer: "10000000",
     
-    delegate: '10000000000',
-    secondsignature: '500000000',
-    multisignature: '500000000',
-    dapp: '10000000000',
+    delegate: "10000000000",
+    secondsignature: "500000000",
+    multisignature: "500000000",
+    dapp: "10000000000",
 
     // dao
-    evidence: '10000000', // fixme
-    org: '10000000',
-    exchange: '10000000',
+    evidence: "10000000", // fixme
+    org: "10000000",
+    exchange: "10000000",
   },
   coin: 100000000,
   nethash: {

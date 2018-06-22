@@ -21,7 +21,7 @@ function createSignature(secret, secondSecret) {
 	var transaction = {
 		type: transactionTypes.SIGNATURE,
 		nethash: options.get('nethash'),
-		amount: 0,
+		amount: "0",    //bignum update
 		fee: constants.fees.secondsignature,
 		recipientId: null,
 		senderPublicKey: keys.publicKey,

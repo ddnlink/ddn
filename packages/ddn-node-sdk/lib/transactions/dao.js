@@ -5,6 +5,7 @@ var trsTypes = require('../transaction-types');
 var slots = require('../time/slots.js');
 var options = require('../options');
 var addressHelper = require('../address.js')
+var bignum = require('../../lib/bignum_utils');
 
 /**
  * Create org transaction
@@ -12,6 +13,25 @@ var addressHelper = require('../address.js')
  * @param {*} secret 
  * @param {*} secondSecret 
  */
+
+
+
+function isOrgId(dao_id) {
+    if (typeof dao_id !== 'string') {
+      return false
+    }
+    if (/^[0-9a-z_]{1,20}$/g.test(dao_id)) {
+      if (dao_id.charAt(0) == '_' || dao_id.charAt(dao_id.length-1) == '_') {
+        return false // not start or end with _
+      }else{
+        return true
+      }
+      
+    } else {
+      return false
+    }
+  }
+
 function createOrg(org, secret, secondSecret) {
 	var keys = crypto.getKeys(secret);
 	var bytes = null;
@@ -26,7 +46,8 @@ function createOrg(org, secret, secondSecret) {
 		throw new Error('The first argument should be a object!');
 	}
 
-	if (!org.orgId || org.orgId.length == 0) {
+	org.orgId = org.orgId.toLowerCase()
+	if ( !isOrgId(org.orgId) || !org.orgId || org.orgId.length == 0) {
 		throw new Error('Invalid orgId format');
 	}
 
@@ -50,8 +71,8 @@ function createOrg(org, secret, secondSecret) {
 	var transaction = {
 		type: trsTypes.ORG,
 		nethash: options.get('nethash'),
-		amount: 0 + "",
-		fee: feeBase * 100000000 + "",
+		amount: "0",
+		fee: bignum.multiply(feeBase, 100000000).toString(),   //bignum update feeBase * 100000000,
 		recipientId: null,
 		senderPublicKey: keys.publicKey,
 		timestamp: slots.getTime() - options.get('clientDriftSeconds'),
@@ -74,11 +95,10 @@ function createOrg(org, secret, secondSecret) {
 function createTransfer(address, secret, secondSecret) {
     var keys = crypto.getKeys(secret);
     var fee = constants.fees.org;
-
     var transaction = {
         type: trsTypes.SEND,
         nethash: options.get('nethash'),
-        amount: 100000000000 + "",
+        amount: 100000000000 + "", // fixme 1000000000?
         fee: fee + "",
         recipientId: address,
         senderPublicKey: keys.publicKey,
@@ -86,7 +106,7 @@ function createTransfer(address, secret, secondSecret) {
     };
 
     crypto.sign(transaction, keys);
-    
+
     if (secondSecret) {
         var secondKeys = crypto.getKeys(secondSecret);
         crypto.secondSign(transaction, secondKeys);
@@ -95,7 +115,7 @@ function createTransfer(address, secret, secondSecret) {
     return transaction;
 }
 
-function createConfirmation(confirmation, secret, secondSecret, amount) {
+function createConfirmation(trsAmount, confirmation, secret, secondSecret) {
     var keys = crypto.getKeys(secret);
     var bytes = null;
 
@@ -124,6 +144,13 @@ function createConfirmation(confirmation, secret, secondSecret, amount) {
     }
 
     var fee = constants.fees.org;
+
+    var amount = "0";
+    var recipientId = "";
+    if (confirmation.state == 1) {
+        amount = trsAmount;
+        recipientId = confirmation.receivedAddress;
+    }
 
     var transaction = {
         type: trsTypes.CONFIRMATION,

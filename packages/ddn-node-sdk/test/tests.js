@@ -54,7 +54,7 @@ describe("DDN JS", function () {
 			it("should return Buffer of simply transaction and buffer most be 117 length", function () {
 				var transaction = {
 					type: 0,
-					amount: 1000,
+					amount: "1000", //bignum update
 					recipientId: "58191285901858109",
 					timestamp: 141738,
 					asset: {},
@@ -72,7 +72,7 @@ describe("DDN JS", function () {
 			it("should return Buffer of transaction with second signature and buffer most be 181 length", function () {
 				var transaction = {
 					type: 0,
-					amount: 1000,
+					amount: "1000", //bignum update
 					recipientId: "58191285901858109",
 					timestamp: 141738,
 					asset: {},
@@ -103,7 +103,7 @@ describe("DDN JS", function () {
 			it("should return Buffer and Buffer most be 32 bytes length", function () {
 				var transaction = {
 					type: 0,
-					amount: 1000,
+					amount: "1000", //bignum update
 					recipientId: "58191285901858109",
 					timestamp: 141738,
 					asset: {},
@@ -133,7 +133,7 @@ describe("DDN JS", function () {
 			it("should return string id and be equal to 13987348420913138422", function () {
 				var transaction = {
 					type: 0,
-					amount: 1000,
+					amount: "1000", //bignum update
 					recipientId: "58191285901858109",
 					timestamp: 141738,
 					asset: {},
@@ -158,29 +158,36 @@ describe("DDN JS", function () {
 			});
 
 			it("should return number", function () {
-				var fee = getFee({ amount: 100000, type: 0 });
-				(fee).should.be.type("number");
+				var fee = getFee({ amount: "100000", type: 0 });    //bignum update
+                
+                //bignum update (fee).should.be.type("number");
+                (fee).should.be.type("string");
+                
 				(fee).should.be.not.NaN;
 			});
 
 			it("should return 10000000", function () {
-				var fee = getFee({ amount: 100000, type: 0 });
-				(fee).should.be.type("number").and.equal(10000000);
+				var fee = getFee({ amount: "100000", type: 0 });    //bignum update
+                //bignum update (fee).should.be.type("number").and.equal(10000000);
+                (fee).should.be.type("string").and.equal("10000000");
 			});
 
 			it("should return 10000000000", function () {
 				var fee = getFee({ type: 1 });
-				(fee).should.be.type("number").and.equal(10000000000);
+                //bignum update (fee).should.be.type("number").and.equal(10000000000);
+                (fee).should.be.type("string").and.equal("10000000000");
 			});
 
 			it("should be equal 1000000000000", function () {
 				var fee = getFee({ type: 2 });
-				(fee).should.be.type("number").and.equal(1000000000000);
+                //bignum update (fee).should.be.type("number").and.equal(1000000000000);
+                (fee).should.be.type("string").and.equal("1000000000000");
 			});
 
 			it("should be equal 100000000", function () {
 				var fee = getFee({ type: 3 });
-				(fee).should.be.type("number").and.equal(100000000);
+                //bignum update (fee).should.be.type("number").and.equal(100000000);
+                (fee).should.be.type("string").and.equal("100000000");
 			});
 		});
 
@@ -377,7 +384,8 @@ describe("DDN JS", function () {
 				});
 
 				it("should have fee as number and equal 10000000000", function () {
-					(trs.fee).should.be.type("number").and.equal(10000000000);
+                    //bignum update (trs.fee).should.be.type("number").and.equal(10000000000);
+                    (trs.fee).should.be.type("string").and.equal("10000000000");
 				});
 
 				it("should have null recipientId", function () {
@@ -468,19 +476,19 @@ describe("DDN JS", function () {
 				});
 
 				it("should not be signed correctly now", function () {
-					trs.amount = 10000;
+					trs.amount = "10000";   //bignum update
 					var result = ddn.crypto.verify(trs);
 					(result).should.be.not.ok;
 				});
 
 				it("should be second signed correctly", function () {
-					trs.amount = 0;
+					trs.amount = "0";   //bignum update
 					var result = ddn.crypto.verifySecondSignature(trs, secondKeys.publicKey);
 					(result).should.be.ok;
 				});
 
 				it("should not be second signed correctly now", function () {
-					trs.amount = 10000;
+					trs.amount = "10000";   //bignum update
 					var result = ddn.crypto.verifySecondSignature(trs, secondKeys.publicKey);
 					(result).should.be.not.ok;
 				});
@@ -613,13 +621,13 @@ describe("DDN JS", function () {
 				});
 
 				it("should not be signed correctly now", function () {
-					trs.amount = 100;
+					trs.amount = "100"; //bignum update
 					var result = ddn.crypto.verify(trs, keys.publicKey);
 					(result).should.be.not.ok;
 				});
 
 				it("should not be second signed correctly now", function () {
-					trs.amount = 100;
+					trs.amount = "100"; //bignum update
 					var result = ddn.crypto.verify(trs, secondKeys.publicKey);
 					(result).should.be.not.ok;
 				});
@@ -966,7 +974,7 @@ describe("DDN JS", function () {
 				});
 
 				it("should not be signed correctly now", function () {
-					trs.amount = 10000;
+					trs.amount = "10000";   //bignum update
 					var result = ddn.crypto.verify(trs);
 					(result).should.be.not.ok;
 				});
@@ -1068,13 +1076,13 @@ describe("DDN JS", function () {
 				});
 
 				it("should not be signed correctly now", function () {
-					trs.amount = 10000;
+					trs.amount = "10000";   //bignum update
 					var result = ddn.crypto.verify(trs);
 					(result).should.be.not.ok;
 				});
 
 				it("should not be second signed correctly now", function () {
-					trs.amount = 10000;
+					trs.amount = "10000";   //bignum update
 					var result = ddn.crypto.verifySecondSignature(trs, keys.publicKey);
 					(result).should.be.not.ok;
 				});
@@ -1190,13 +1198,13 @@ describe("DDN JS", function () {
 				});
 
 				it("should not be signed correctly now", function () {
-					vt.amount = 100;
+					vt.amount = "100";  //bignum update
 					var result = ddn.crypto.verify(vt);
 					(result).should.be.not.ok;
 				});
 
 				it("should not be second signed correctly now", function () {
-					vt.amount = 100;
+					vt.amount = "100";  //bignum update
 					var result = ddn.crypto.verifySecondSignature(vt, ddn.crypto.getKeys("second secret").publicKey);
 					(result).should.be.not.ok;
 				});

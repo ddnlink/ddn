@@ -5,6 +5,7 @@ var trsTypes = require('../transaction-types');
 var slots = require("../time/slots.js")
 var options = require('../options')
 var addressHelper = require('../address.js')
+var bignum = require('../bignum_utils');
 
 function createMultiTransfer(outputs, secret, secondSecret) {
 	var keys = crypto.getKeys(secret)
@@ -15,7 +16,7 @@ function createMultiTransfer(outputs, secret, secondSecret) {
 	}
 	var sender = addressHelper.generateBase58CheckAddress(keys.publicKey)
 	var fee = constants.fees.multitransfer
-	var amount = 0
+	var amount = bignum.new(0);   //bignum update
 	var recipientId = []
 	for (var i = 0; i < outputs.length; i++) {
 		var output = outputs[i]
@@ -27,7 +28,9 @@ function createMultiTransfer(outputs, secret, secondSecret) {
 			return cb("Invalid output recipient");
 		}
 
-		if (output.amount <= 0) {
+        // bignum update
+		// if (output.amount <= 0) {
+        if (bignum.isLessThanOrEqualTo(output.amount, 0)) {
 			return cb("Invalid output amount");
 		}
 
@@ -35,15 +38,18 @@ function createMultiTransfer(outputs, secret, secondSecret) {
 			return cb("Invalid output recipientId, cannot be your self");
 		}
 
-		amount += output.amount
+        // bignum update
+        // amount += output.amount
+        amount = bignum.plus(amount, output.amount);
+        
 		recipientId.push(output.recipientId)
 	}
 
 	var transaction = {
 		type: trsTypes.MULTITRANSFER,
 		nethash: options.get('nethash'),
-		amount: amount,
-		fee: fee,
+		amount: amount.toString(),  //bignum update amount,
+		fee: fee + "",
 		recipientId: recipientId.join('|'),
 		senderPublicKey: keys.publicKey,
 		timestamp: slots.getTime() - options.get('clientDriftSeconds'),

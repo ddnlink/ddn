@@ -17,7 +17,7 @@ function createMultisignature(keysgroup, lifetime, min, secret, secondSecret) {
 	var transaction = {
 		type: transactionTypes.MULTITRANSFER,
 		nethash: options.get('nethash'),
-		amount: 0,
+		amount: "0",    //bignum update
 		fee: constants.fees.multisignature,
 		recipientId: null,
 		senderPublicKey: keys.publicKey,

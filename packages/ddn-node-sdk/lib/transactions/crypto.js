@@ -4,12 +4,13 @@ var options = require('../options');
 var constants = require('../constants');
 var trsTypes = require('../transaction-types');
 
+
 if (typeof Buffer === "undefined") {
   Buffer = require("buffer/").Buffer;
 }
 
 var ByteBuffer = require("bytebuffer");
-var bignum = require("browserify-bignum");
+var bignum = require("../../lib/bignum_utils");
 var nacl = require('tweetnacl')
 
 var fixedPoint = Math.pow(10, 8);
@@ -134,9 +135,8 @@ function getOrgBytes(org) {
 function getExchangeBytes(asset) {
   const bb = new ByteBuffer();
   try {
-    bb.writeString(asset.orgId)
+    bb.writeString(asset.orgId.toLowerCase())
     bb.writeString(asset.exchangeTrsId)
-    // bb.writeInt64(asset.price);
     bb.writeString(asset.price);
     bb.writeInt8(asset.state);
     bb.writeString(asset.senderAddress)
@@ -328,9 +328,11 @@ function getBytes(transaction, skipSignature, skipSecondSignature) {
         var output = asset.outputs[i]
 
         if (/^[0-9]{1,20}$/g.test(output.recipientId)) {
-          var recipient = bignum(output.recipientId).toBuffer({
+          
+          var recipient = bignum.new(output.recipientId).toBuffer({
             size: 8
           });
+
           for (var i = 0; i < 8; i++) {
             bb.writeByte(recipient[i] || 0);
           }
@@ -338,9 +340,7 @@ function getBytes(transaction, skipSignature, skipSecondSignature) {
           bb.writeString(output.recipientId);
         }
 
-        // fixme bignumber
-        // bb.writeLong(output.amount);
-        bb.writeString(output.amount + "");
+        bb.writeString(output.amount);
       }
       bb.flip();
       assetBytes = toLocalBuffer(bb)
@@ -387,8 +387,7 @@ function getBytes(transaction, skipSignature, skipSecondSignature) {
   }
 
   // +8
-  // bb.writeLong(transaction.amount);
-  bb.writeString(transaction.amount + "");
+  bb.writeString(transaction.amount);
 
   // +64
   if (transaction.message) bb.writeString(transaction.message)
@@ -446,19 +445,22 @@ function getHash(transaction, skipSignature, skipSecondSignature) {
 function getFee(transaction) {
   switch (transaction.type) {
     case trsTypes.SEND: // Normal
-      return 0.1 * fixedPoint + "";
+        return bignum.multiply(0.1, fixedPoint);
       break;
 
     case trsTypes.SIGNATURE: // Signature
-      return 100 * fixedPoint + "";
+        return bignum.multiply(100, fixedPoint);
+
       break;
 
     case trsTypes.DELEGATE: // Delegate
-      return 10000 * fixedPoint + "";
+        return bignum.multiply(10000, fixedPoint);
+
       break;
 
     case trsTypes.VOTE: // Vote
-      return 1 * fixedPoint + "";
+        return bignum.new(fixedPoint);
+
       break;
   }
 }

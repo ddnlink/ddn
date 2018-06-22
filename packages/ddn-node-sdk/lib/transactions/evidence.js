@@ -28,7 +28,7 @@ function createEvidence(evidence, secret, secondSecret) {
 	var transaction = {
 		type: transactionTypes.EVIDENCE,
 		nethash: options.get('nethash'),
-		amount: "0",
+		amount: "0",   
 		fee: fee,
 		recipientId: null,
 		senderPublicKey: keys.publicKey,
