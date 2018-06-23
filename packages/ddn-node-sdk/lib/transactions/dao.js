@@ -157,7 +157,7 @@ function createConfirmation(trsAmount, confirmation, secret, secondSecret) {
         nethash: options.get('nethash'),
         amount: amount + "",
         fee: fee + "",
-        recipientId: confirmation.receivedAddress,
+        recipientId: recipientId,
         senderPublicKey: keys.publicKey,
         timestamp: slots.getTime() - options.get('clientDriftSeconds'),
         asset: {
