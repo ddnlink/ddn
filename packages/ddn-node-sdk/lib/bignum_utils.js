@@ -5,18 +5,18 @@ module.exports = {
     /**
      * 实例化一个大数
      */
-    new: function() {
+    new() {
         if (arguments.length != 1) {
             throw new Error("必须是一个参数");
         }
-        
+
         return new BigNumber(arguments[0]);
     },
 
     /**
      * 加法操作
      */
-    plus: function() {
+    plus() {
         if (arguments.length < 2) {
             throw new Error("至少需要两个参数");
         }
@@ -33,11 +33,11 @@ module.exports = {
     /**
      * 减法操作
      */
-    minus: function() {
+    minus() {
         if (arguments.length < 2) {
             throw new Error("至少需要两个参数");
         }
-        
+
         var result = new BigNumber(arguments[0]);
         for (var i = 1; i < arguments.length; i++) {
             result = result.minus(new BigNumber(arguments[i]));
@@ -48,7 +48,7 @@ module.exports = {
     /**
      * 乘法操作
      */
-    multiply: function() {
+    multiply() {
         if (arguments.length < 2) {
             throw new Error("至少需要两个参数");
         }
@@ -63,7 +63,7 @@ module.exports = {
     /**
      * 除法操作
      */
-    divide: function() {
+    divide() {
         if (arguments.length < 2) {
             throw new Error("至少需要两个参数");
         }
@@ -78,7 +78,7 @@ module.exports = {
     /**
      * 非数值判断
      */
-    isNaN: function() {
+    isNaN() {
         if (arguments.length != 1) {
             throw new Error("必须是一个参数");
         }
@@ -89,7 +89,7 @@ module.exports = {
     /**
      * 零判断
      */
-    isZero: function() {
+    isZero() {
         if (arguments.length != 1) {
             throw new Error("必须是一个参数");
         }
@@ -100,7 +100,7 @@ module.exports = {
     /**
      * 相等判断
      */
-    isEqualTo: function() {
+    isEqualTo() {
         if (arguments.length != 2) {
             throw new Error("必须是两个参数");
         }
@@ -111,7 +111,7 @@ module.exports = {
     /**
      * 大于判断
      */
-    isGreaterThan: function() {
+    isGreaterThan() {
         if (arguments.length != 2) {
             throw new Error("必须是两个参数");
         }
@@ -122,7 +122,7 @@ module.exports = {
     /**
      * 大于等于判断
      */
-    isGreaterThanOrEqualTo: function() {
+    isGreaterThanOrEqualTo() {
         if (arguments.length != 2) {
             throw new Error("必须是两个参数");
         }
@@ -133,7 +133,7 @@ module.exports = {
     /**
      * 小于判断
      */
-    isLessThan: function() {
+    isLessThan() {
         if (arguments.length != 2) {
             throw new Error("必须是两个参数");
         }
@@ -144,7 +144,7 @@ module.exports = {
     /**
      * 小于等于判断
      */
-    isLessThanOrEqualTo: function() {
+    isLessThanOrEqualTo() {
         if (arguments.length != 2) {
             throw new Error("必须是两个参数");
         }
@@ -155,7 +155,7 @@ module.exports = {
     /**
      * 绝对值
      */
-    abs: function() {
+    abs() {
         if (arguments.length != 1) {
             throw new Error("必须是一个参数");
         }
@@ -166,12 +166,46 @@ module.exports = {
     /**
      * 取模
      */
-    modulo: function() {
+    modulo() {
         if (arguments.length != 2) {
             throw new Error("必须是两个参数");
         }
-        
+
         return new BigNumber(arguments[0]).modulo(new BigNumber(arguments[1]));
+    },
+
+    /**
+     * 最接近的较小整数
+     */
+    floor() {
+        if (arguments.length != 1) {
+            throw new Error("必须是一个参数");
+        }
+
+        return new BigNumber(arguments[0]).integerValue(BigNumber.ROUND_FLOOR);
+    },
+
+    /**
+     * 最接近的较大整数
+     */
+    ceil() {
+        if (arguments.length != 1) {
+            throw new Error("必须是一个参数");
+        }
+
+        return new BigNumber(arguments[0]).integerValue(BigNumber.ROUND_CEIL);
+    },
+
+    /**
+     * 乘方 POW
+     * 返回bigNumber对象
+     */
+    pow() {
+        if (arguments.length != 2) {
+            throw new Error("必须是一个参数");
+        }
+
+        return new BigNumber(arguments[0]).pow(arguments[1]);
     }
 
 }

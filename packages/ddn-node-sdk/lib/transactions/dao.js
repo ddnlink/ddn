@@ -98,7 +98,7 @@ function createTransfer(address, secret, secondSecret) {
     var transaction = {
         type: trsTypes.SEND,
         nethash: options.get('nethash'),
-        amount: 100000000000 + "", // fixme 1000000000?
+        amount: 100000000000 + "", // fixme 1000000000 ????
         fee: fee + "",
         recipientId: address,
         senderPublicKey: keys.publicKey,
