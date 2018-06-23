@@ -8,13 +8,12 @@ var rmdir = require("rmdir");
 var request = require("request");
 var valid_url = require("valid-url");
 var fsExtra = require('fs-extra');
-// var DDNJS = require('ddn-js');
 var accountHelper = require("../helpers/account.js");
 var blockHelper = require("../helpers/block.js");
 var dappHelper = require("../helpers/dapp.js");
 var Api = require("../helpers/api.js");
 
-var templatePath = path.join(__dirname, "..", "template");
+// var templatePath = path.join(__dirname, "..", "template");
 
 var dappCategories = [
 	"Common",
