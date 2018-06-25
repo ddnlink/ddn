@@ -9,6 +9,7 @@ function createDApp(options, secret, secondSecret) {
 	var keys = crypto.getKeys(secret);
 
 	var transaction = {
+        nethash: globalOptions.get('nethash'),
 		type: transactionTypes.DAPP,
 		amount: "0",    //bignum update
 		fee: constants.fees.dapp,
@@ -70,6 +71,7 @@ function createInnerTransaction(options, secret) {
 	var args = options.args
 	if (args instanceof Array) args = JSON.stringify(args)
 	var trs = {
+        nethash: globalOptions.get('nethash'),
 		fee: options.fee,
 		timestamp: slots.getTime() - globalOptions.get('clientDriftSeconds'),
 		senderPublicKey: keys.publicKey,

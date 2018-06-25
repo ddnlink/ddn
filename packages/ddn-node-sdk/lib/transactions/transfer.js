@@ -46,6 +46,7 @@ function createOutTransfer(recipientId, dappId, transactionId, currency, amount,
 	var keys = crypto.getKeys(secret);
 
 	var transaction = {
+        nethash: nethash,
 		type: transactionTypes.OUT_TRANSFER,
 		amount: "0",    //bignum update
 		fee: constants.fees.send,
