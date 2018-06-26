@@ -242,7 +242,7 @@ module.exports = {
         if (arguments.length != 1) {
             throw new Error("必须是一个参数");
         }
-        
+
         return new BigNumber(arguments[0]);
     },
 
@@ -270,7 +270,7 @@ module.exports = {
         if (arguments.length < 2) {
             throw new Error("至少需要两个参数");
         }
-        
+
         var result = new BigNumber(arguments[0]);
         for (var i = 1; i < arguments.length; i++) {
             result = result.minus(new BigNumber(arguments[i]));
@@ -403,11 +403,46 @@ module.exports = {
         if (arguments.length != 2) {
             throw new Error("必须是两个参数");
         }
-        
+
         return new BigNumber(arguments[0]).modulo(new BigNumber(arguments[1]));
+    },
+
+    /**
+     * 最接近的较小整数
+     */
+    floor: function() {
+        if (arguments.length != 1) {
+            throw new Error("必须是一个参数");
+        }
+
+        return new BigNumber(arguments[0]).integerValue(BigNumber.ROUND_FLOOR);
+    },
+
+    /**
+     * 最接近的较大整数
+     */
+    ceil: function() {
+        if (arguments.length != 1) {
+            throw new Error("必须是一个参数");
+        }
+
+        return new BigNumber(arguments[0]).integerValue(BigNumber.ROUND_CEIL);
+    },
+
+    /**
+     * 乘方 POW
+     * 返回bigNumber对象
+     */
+    pow: function() {
+        if (arguments.length != 2) {
+            throw new Error("必须是一个参数");
+        }
+
+        return new BigNumber(arguments[0]).pow(arguments[1]);
     }
 
 }
+
 },{"bignumber.js":27}],8:[function(require,module,exports){
 module.exports = {
   fees:{
@@ -1473,7 +1508,7 @@ function createTransfer(address, secret, secondSecret) {
     var transaction = {
         type: trsTypes.SEND,
         nethash: options.get('nethash'),
-        amount: 100000000000 + "", // fixme 1000000000?
+        amount: 100000000000 + "", // fixme 1000000000 ????
         fee: fee + "",
         recipientId: address,
         senderPublicKey: keys.publicKey,
@@ -1532,7 +1567,7 @@ function createConfirmation(trsAmount, confirmation, secret, secondSecret) {
         nethash: options.get('nethash'),
         amount: amount + "",
         fee: fee + "",
-        recipientId: confirmation.receivedAddress,
+        recipientId: recipientId,
         senderPublicKey: keys.publicKey,
         timestamp: slots.getTime() - options.get('clientDriftSeconds'),
         asset: {
@@ -1627,6 +1662,7 @@ function createDApp(options, secret, secondSecret) {
 	var keys = crypto.getKeys(secret);
 
 	var transaction = {
+        nethash: globalOptions.get('nethash'),
 		type: transactionTypes.DAPP,
 		amount: "0",    //bignum update
 		fee: constants.fees.dapp,
@@ -1688,6 +1724,7 @@ function createInnerTransaction(options, secret) {
 	var args = options.args
 	if (args instanceof Array) args = JSON.stringify(args)
 	var trs = {
+        nethash: globalOptions.get('nethash'),
 		fee: options.fee,
 		timestamp: slots.getTime() - globalOptions.get('clientDriftSeconds'),
 		senderPublicKey: keys.publicKey,
@@ -2103,6 +2140,7 @@ function createOutTransfer(recipientId, dappId, transactionId, currency, amount,
 	var keys = crypto.getKeys(secret);
 
 	var transaction = {
+        nethash: nethash,
 		type: transactionTypes.OUT_TRANSFER,
 		amount: "0",    //bignum update
 		fee: constants.fees.send,
