@@ -88,7 +88,7 @@ function getTransactionBytes(trs, skipSignature) {
 		}
 	}
 
-	bb.writeLong(trs.amount);
+	bb.writeString(bignum(trs.amount).toString());
 
 	if (assetSize > 0) {
 		for (var i = 0; i < assetSize; i++) {

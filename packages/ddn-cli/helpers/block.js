@@ -9,8 +9,20 @@ const config = require('../config');
 const bignum = require('../lib/bignum_utils');
 
 function getBytes(block, skipSignature) {
-	const size = 4 + 4 + 8 + 4 + 8 + 8 + 8 + 4 + 32 + 32 + 64;
-
+	// const size = 4 + 4 + 8 + 4 + 8 + 8 + 8 + 4 + 32 + 32 + 64;
+	const size =
+	4 + // version (int)
+    4 + // timestamp (int)
+    64 + // previousBlock 64
+    4 + // numberOfTransactions (int)
+    64 + // totalAmount (long)
+    64 + // totalFee (long)
+    64 + // reward (long)
+    4 + // payloadLength (int)
+    32 + // payloadHash
+    32 + // generatorPublicKey
+	64; // blockSignature or unused
+	
 	const bb = new ByteBuffer(size, true);
 	bb.writeInt(block.version);
 	bb.writeInt(block.timestamp);
@@ -23,9 +35,9 @@ function getBytes(block, skipSignature) {
 
 	bb.writeInt(block.numberOfTransactions);
 	
-	bb.writeString(block.totalAmount + '');
-	bb.writeString(block.totalFee + '');
-	bb.writeString(block.reward + '');
+	bb.writeString(bignum.new(block.totalAmount).toString());
+	bb.writeString(bignum.new(block.totalFee).toString());
+	bb.writeString(bignum.new(block.reward).toString());
 
 	bb.writeInt(block.payloadLength);
 

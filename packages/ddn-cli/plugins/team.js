@@ -47,7 +47,9 @@ function genUsers(options) {
 
 	// 基金账号
 	var user = accountHelper.account(cryptoLib.generateSecret());
-	user.username = ddnJS.constants.nethash[config.nethash].tokenName + " Foundation";
+	console.log(ddnJS.constants);
+	
+	user.username = ddnJS.constants.nethash[options.nethash || config.nethash].tokenName + " Foundation";
 	user.amount = 0
 	users.push(user);
 
@@ -73,8 +75,9 @@ function genUsers(options) {
 module.exports = function (program) {
 	globalOptions = program;
 
-	program
-		.command("createUsers")
-		.description("create some accounts")
-		.action(genUsers);
+	// program
+	// 	.command("createUsers")
+	// 	.description("create some accounts")
+	// 	.option("-n, --nethash <nethash>", "default to generate a new nethash")
+	// 	.action(genUsers);
 }
