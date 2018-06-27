@@ -34,18 +34,38 @@ function genGenesisBlock(options) {
 	var secret = !(options && options.default) ? cryptoLib.generateSecret() : defaultSecret;
 	var genesisAccount = accountHelper.account(secret, options.tokenPrefix);
 
-	var newBlockInfo = blockHelper.new(genesisAccount, options.nethash, options.tokenName, options.tokenPrefix, null, options.file);
+    var index = 0;
+    var Daccount = {};
+    var Eaccount = {};
+
+    var newBlockInfo = blockHelper.new(genesisAccount, options.nethash, options.tokenName, options.tokenPrefix, null, options.file);
 	var delegateSecrets = newBlockInfo.delegates.map(function (i) {
+        var rv = (Math.random() * 100 + index).toFixed(0) % 3;
+        if (rv == 0) {
+            Daccount.address = i.address;
+            Daccount.publicKey = i.keypair.publicKey;
+            Daccount.password = i.secret;
+        } else if (rv == 2) {
+            Eaccount.address = i.address;
+            Eaccount.publicKey = i.keypair.publicKey;
+            Eaccount.password = i.secret;
+        }
+        index ++;
+
 		return i.secret;
 	});
 
 	genesisAccount.nethash = newBlockInfo.nethash;
-	
+
 	writeFileSync("./genesisBlock.json", newBlockInfo.block);
 
 	var logFile = "./genGenesisBlock.log";
 	writeFileSync(logFile, "genesis account:\n");
-	appendFileSync(logFile, genesisAccount);
+    appendFileSync(logFile, genesisAccount);
+    appendFileSync(logFile, "\nDaccount:\n");
+    appendFileSync(logFile, Daccount);
+    appendFileSync(logFile, "\nEaccount:\n");
+    appendFileSync(logFile, Eaccount);
 	appendFileSync(logFile, "\ndelegates secrets:\n");
 	appendFileSync(logFile, delegateSecrets);
 	console.log('New genesis block and related account has been created, please see the two files: genesisBlock.json and genGenesisBlock.log');

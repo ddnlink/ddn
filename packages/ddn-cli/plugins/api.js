@@ -107,9 +107,9 @@ function getBlocks(options) {
     limit: options.limit,
     orderBy: options.sort,
     offset: options.offset,
-    totalAmount: options.totalAmount,
-    totalFee: options.totalFee,
-    reward: options.reward,
+    totalAmount: options.totalAmount + "",
+    totalFee: options.totalFee + "",
+    reward: options.reward + "",
     generatorPublicKey: options.generatorPublicKey
   };
   getApi().get('/api/blocks/', params, function (err, result) {
@@ -186,7 +186,8 @@ function getTransaction(id) {
 function sendMoney(options) {
   var trs = ddnJS.transaction.createTransaction(
     options.to,
-    Number(options.amount),
+    //bignum update Number(options.amount),
+    options.amount + "",
     options.message,
     options.secret,
     options.secondSecret
@@ -199,7 +200,7 @@ function sendMoney(options) {
 function sendAsset(options) {
   var trs = ddnJS.uia.createTransfer(
     options.currency,
-    options.amount,
+    options.amount + "",
     options.to,
     options.message,
     options.secret,

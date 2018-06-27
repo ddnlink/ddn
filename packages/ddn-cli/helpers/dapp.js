@@ -12,7 +12,8 @@ function getBytes(block, skipSignature) {
 
 	bb.writeString(block.prevBlockId || '0')
 
-	bb.writeLong(block.height);
+    //bignum update bb.writeLong(block.height);
+    bb.writeString(block.height + "");
 	bb.writeInt(block.timestamp);
 	bb.writeInt(block.payloadLength);
 
@@ -28,7 +29,8 @@ function getBytes(block, skipSignature) {
 
 	bb.writeString(block.pointId || '0')
 
-	bb.writeLong(block.pointHeight || 0);
+    //bignum update bb.writeLong(block.pointHeight || 0);
+    bb.writeString((block.pointHeight + "") || "0");
 
 	bb.writeInt(block.count);
 
@@ -51,7 +53,7 @@ module.exports = {
 
 		var block = {
 			delegate: genesisAccount.keypair.publicKey,
-			height: 1,
+			height: "1",
 			pointId: null,
 			pointHeight: null,
 			transactions: [],
