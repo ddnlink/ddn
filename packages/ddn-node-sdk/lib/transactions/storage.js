@@ -3,7 +3,7 @@ var crypto = require("./crypto.js")
 var constants = require("../constants.js")
 var slots = require("../time/slots.js")
 var options = require('../options')
-var bignum = require('../../lib/bignum_utils');
+var bignum = require('bignum-utils');
 
 function createStorage(content, secret, secondSecret) {
 	var keys = crypto.getKeys(secret)

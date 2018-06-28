@@ -5,7 +5,7 @@ var trsTypes = require('../transaction-types');
 var slots = require('../time/slots.js');
 var options = require('../options');
 var addressHelper = require('../address.js')
-var bignum = require('../../lib/bignum_utils');
+var bignum = require('bignum-utils');
 
 /**
  * Create org transaction

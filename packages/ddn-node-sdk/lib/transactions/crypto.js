@@ -10,7 +10,7 @@ if (typeof Buffer === "undefined") {
 }
 
 var ByteBuffer = require("bytebuffer");
-var bignum = require("../../lib/bignum_utils");
+var bignum = require("bignum-utils");
 var nacl = require('tweetnacl')
 
 var fixedPoint = Math.pow(10, 8);
