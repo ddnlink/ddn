@@ -1,5 +1,5 @@
 {
-  "name": "ddn_bignum_utils",
+  "name": "bignum-utils",
   "version": "1.0.0",
   "description": "bignumber utils",
   "main": "index.js",
