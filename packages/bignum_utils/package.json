@@ -13,7 +13,7 @@
   "keywords": [
     "bignumber"
   ],
-  "author": "wangxm",
+  "author": "wangxm <softwaiter@126.com>",
   "license": "MIT",
   "dependencies": {
     "bignumber.js": "^7.2.1"
