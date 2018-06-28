@@ -1,0 +1,21 @@
+{
+  "name": "ddn_bignum_utils",
+  "version": "1.0.0",
+  "description": "bignumber utils",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+http://git.ebookchain.net/ddn/bignum_utils.git"
+  },
+  "keywords": [
+    "bignumber"
+  ],
+  "author": "wangxm",
+  "license": "MIT",
+  "dependencies": {
+    "bignumber.js": "^7.2.1"
+  }
+}
