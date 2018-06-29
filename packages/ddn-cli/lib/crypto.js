@@ -2,7 +2,6 @@ var sha256 = require('fast-sha256');
 var RIPEMD160 = require('ripemd160');
 var nacl_factory = require('js-nacl');
 var crypto = require('crypto-browserify');
-var bignum = require('browserify-bignum');
 var Mnemonic = require('bitcore-mnemonic');
 var nacl = nacl_factory.instantiate();
 var base58check = require('./base58check')

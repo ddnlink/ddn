@@ -6,7 +6,7 @@ const transactionsLib = require('../lib/transactions.js');
 const accounts = require('./account.js');
 const ByteBuffer = require('bytebuffer');
 const config = require('../config');
-const bignum = require('../lib/bignum_utils');
+const bignum = require('bignum-utils');
 
 function getBytes(block, skipSignature) {
 	// const size = 4 + 4 + 8 + 4 + 8 + 8 + 8 + 4 + 32 + 32 + 64;

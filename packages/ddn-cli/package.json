@@ -18,9 +18,8 @@
   "license": "MIT",
   "dependencies": {
     "async": "1.5.2",
-    "bignumber.js": "^7.2.1",
+    "bignum-utils": "git+http://git.ebookchain.net/ddn/bignum_utils.git",
     "bitcore-mnemonic": "1.0.1",
-    "browserify-bignum": "1.3.0-2",
     "bytebuffer": "^4.0.0",
     "commander": "^2.8.1",
     "crypto-browserify": "^3.9.14",

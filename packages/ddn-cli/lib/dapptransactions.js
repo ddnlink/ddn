@@ -1,7 +1,6 @@
 var util = require('util');
 var ByteBuffer = require('bytebuffer');
 var crypto = require('./crypto.js');
-var bignum = require('browserify-bignum');
 
 var bytesTypes = {
 	2: function (trs) {

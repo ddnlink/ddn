@@ -1,7 +1,7 @@
 var util = require('util');
 var ByteBuffer = require('bytebuffer');
 var crypto = require('./crypto.js');
-var bignum = require('browserify-bignum');
+var bignum = require('bignum-utils');
 
 var bytesTypes = {
 	2: function (trs) {
@@ -75,7 +75,7 @@ function getTransactionBytes(trs, skipSignature) {
 
 	if (trs.recipientId) {
 		if (/^[0-9]{1,20}$/g.test(trs.recipientId)) {
-			var recipient = bignum(trs.recipientId).toBuffer({ size: 8 });
+			var recipient = bignum.toBuffer(trs.recipientId, { size: 8 }).toString();
 			for (var i = 0; i < 8; i++) {
 				bb.writeByte(recipient[i] || 0);
 			}
@@ -88,7 +88,7 @@ function getTransactionBytes(trs, skipSignature) {
 		}
 	}
 
-	bb.writeString(bignum(trs.amount).toString());
+	bb.writeString(bignum.new(trs.amount).toString());
 
 	if (assetSize > 0) {
 		for (var i = 0; i < assetSize; i++) {

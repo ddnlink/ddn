@@ -4,7 +4,7 @@
  *  Copyright (c) 2017 DDN.link. All rights reserved.
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
-const bignum = require('./lib/bignum_utils');
+const bignum = require('bignum-utils');
 
 module.exports = {
   nethash: '2mn7qoar', //fl6ybowg mainnet 315by9uk

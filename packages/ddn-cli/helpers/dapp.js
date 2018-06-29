@@ -1,6 +1,5 @@
 var cryptoLib = require('../lib/crypto.js');
 var ByteBuffer = require('bytebuffer');
-var bignum = require('browserify-bignum');
 var crypto = require('crypto');
 var dappTransactionsLib = require('../lib/dapptransactions.js');
 var accounts = require('./account.js');
