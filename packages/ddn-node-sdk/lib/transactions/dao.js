@@ -144,7 +144,9 @@ function createConfirmation(trsAmount, confirmation, secret, secondSecret) {
     }
 
     var fee = constants.fees.org;
-
+	if (confirmation.state == 0) {
+		fee = "0"
+	}
     var amount = "0";
     var recipientId = "";
     if (confirmation.state == 1) {
