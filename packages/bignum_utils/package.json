@@ -16,6 +16,6 @@
   "author": "wangxm <softwaiter@126.com>",
   "license": "MIT",
   "dependencies": {
-    "bignumber.js": "^4.1.0"
+    "bignumber.js": "^7.2.1"
   }
 }
