@@ -19,7 +19,7 @@
   "license": "MIT",
   "dependencies": {
     "JSONStream": "^1.3.1",
-    "bignum-utils": "git+http://git.ebookchain.net/ddn/bignum_utils.git",
+    "bignum-utils": "git+http://wangxm:20170829@git.ebookchain.net/ddn/bignum_utils.git",
     "buffer": "^4.7.0",
     "bytebuffer": "^5.0.1",
     "fast-sha256": "^1.0.0",
