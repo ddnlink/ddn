@@ -197,6 +197,23 @@ function getEvidenceBytes(evidence) {
   return toLocalBuffer(bb);
 }
 
+function getCouponIssuerApplyBytes(asset) {
+    const bb = new ByteBuffer();
+    
+      try {
+        bb.writeUTF8String(asset.address);
+        bb.writeUTF8String(asset.orgName + "");
+        bb.writeUTF8String(asset.orgId + "");
+        bb.writeUTF8String(asset.orgOwner + "");
+        bb.writeUTF8String(asset.orgOwnerPhone + "");
+        bb.flip();
+      } catch (e) {
+        throw Error(e.toString());
+      }
+    
+      return toLocalBuffer(bb);
+}
+
 function getBytes(transaction, skipSignature, skipSecondSignature) {
   var assetSize = 0,
     assetBytes = null;
@@ -257,6 +274,11 @@ function getBytes(transaction, skipSignature, skipSecondSignature) {
       break;
     case trsTypes.CONFIRMATION:
       assetBytes = getConfirmationBytes(transaction.asset.daoConfirmation);
+      break;
+
+    // coupon
+    case trsTypes.COUPON_ISSUER_APPLY:
+      assetBytes = getCouponIssuerApplyBytes(transaction.asset.couponIssuerApply);
       break;
 
     // aob
