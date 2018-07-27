@@ -35,7 +35,7 @@ module.exports = {
     'fl6ybowg': {
       tokenName: 'EOK',
       tokenPrefix: 'E',
-      beginDate: new Date(Date.UTC(2018, 5, 18, 4, 0, 0, 0)), // 2018-06-18T04:00:00.000Z +8
+      beginDate: new Date(Date.UTC(2018, 5, 6, 12, 20, 20, 20)), // 2018-06-18T04:00:00.000Z +8
     },
 
     // EOK mainnet
