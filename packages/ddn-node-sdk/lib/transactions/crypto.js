@@ -200,18 +200,53 @@ function getEvidenceBytes(evidence) {
 function getCouponIssuerApplyBytes(asset) {
     const bb = new ByteBuffer();
     
-      try {
+    try {
         bb.writeUTF8String(asset.address);
-        bb.writeUTF8String(asset.orgName + "");
-        bb.writeUTF8String(asset.orgId + "");
-        bb.writeUTF8String(asset.orgOwner + "");
-        bb.writeUTF8String(asset.orgOwnerPhone + "");
+        bb.writeUTF8String(asset.orgName || "");
+        bb.writeUTF8String(asset.orgId || "");
+        bb.writeUTF8String(asset.orgOwner || "");
+        bb.writeUTF8String(asset.orgOwnerPhone || "");
         bb.flip();
-      } catch (e) {
+    } catch (e) {
         throw Error(e.toString());
-      }
+    }
+
+    return toLocalBuffer(bb);
+}
+
+function getCouponIssuerCheckBytes(asset) {
+    const bb = new ByteBuffer();
     
-      return toLocalBuffer(bb);
+    try {
+        bb.writeUTF8String(asset.address);
+        bb.writeUTF8String(asset.orgName || "");
+        bb.writeUTF8String(asset.orgId || "");
+        bb.writeUTF8String(asset.orgOwner || "");
+        bb.writeUTF8String(asset.orgOwnerPhone || "");
+        bb.writeInt(asset.state);
+        bb.flip();
+    } catch (e) {
+        throw Error(e.toString());
+    }
+
+    return toLocalBuffer(bb);
+}
+
+function getCouponIssuerUpdateBytes(asset) {
+    const bb = new ByteBuffer();
+    
+    try {
+        bb.writeUTF8String(asset.address);
+        bb.writeUTF8String(asset.orgName || "");
+        bb.writeUTF8String(asset.orgId || "");
+        bb.writeUTF8String(asset.orgOwner || "");
+        bb.writeUTF8String(asset.orgOwnerPhone || "");
+        bb.flip();
+    } catch (e) {
+        throw Error(e.toString());
+    }
+
+    return toLocalBuffer(bb);
 }
 
 function getBytes(transaction, skipSignature, skipSecondSignature) {
@@ -279,6 +314,12 @@ function getBytes(transaction, skipSignature, skipSecondSignature) {
     // coupon
     case trsTypes.COUPON_ISSUER_APPLY:
       assetBytes = getCouponIssuerApplyBytes(transaction.asset.couponIssuerApply);
+      break;
+    case trsTypes.COUPON_ISSUER_CHECK:
+      assetBytes = getCouponIssuerCheckBytes(transaction.asset.couponIssuerCheck);
+      break;
+    case trsTypes.COUPON_ISSUER_UPDATE:
+      assetBytes = getCouponIssuerUpdateBytes(transaction.asset.couponIssuerUpdate);
       break;
 
     // aob
