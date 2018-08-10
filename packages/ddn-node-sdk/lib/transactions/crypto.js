@@ -249,6 +249,183 @@ function getCouponIssuerUpdateBytes(asset) {
     return toLocalBuffer(bb);
 }
 
+function getCouponIssuerFreezeBytes(asset) {
+    const bb = new ByteBuffer();
+    
+    try {
+        bb.writeUTF8String(asset.address);
+        bb.writeUTF8String(asset.orgName || "");
+        bb.writeUTF8String(asset.orgId || "");
+        bb.writeUTF8String(asset.orgOwner || "");
+        bb.writeUTF8String(asset.orgOwnerPhone || "");
+        bb.flip();
+    } catch (e) {
+        throw Error(e.toString());
+    }
+
+    return toLocalBuffer(bb);
+}
+
+function getCouponIssuerUnfreezeBytes(asset) {
+    const bb = new ByteBuffer();
+    
+    try {
+        bb.writeUTF8String(asset.address);
+        bb.writeUTF8String(asset.orgName || "");
+        bb.writeUTF8String(asset.orgId || "");
+        bb.writeUTF8String(asset.orgOwner || "");
+        bb.writeUTF8String(asset.orgOwnerPhone || "");
+        bb.writeInt(asset.state);
+        bb.flip();
+    } catch (e) {
+        throw Error(e.toString());
+    }
+
+    return toLocalBuffer(bb);
+}
+
+function getCouponIssueNewBytes(asset) {
+    const bb = new ByteBuffer();
+    try
+    {
+        bb.writeUTF8String(asset.address);
+        bb.writeUTF8String(asset.goodsName);
+        bb.writeUTF8String(asset.goodsSpecs);
+        bb.writeInt(asset.goodsNum);
+        bb.writeUTF8String(asset.goodsUnit);
+        bb.writeUTF8String(asset.unitPrice + "");
+        bb.writeUTF8String(asset.batchValue);
+        bb.writeInt(asset.issueNum);
+        bb.writeUTF8String(asset.issueTime);
+        bb.writeUTF8String(asset.expireTime);
+        bb.flip();
+    }
+    catch (e) 
+    {
+        throw Error(e.toString());
+    }
+    return toLocalBuffer(bb);
+}
+
+function getCouponIssueCloseBytes(asset) {
+    const bb = new ByteBuffer();
+    try
+    {
+        bb.writeUTF8String(asset.address);
+        bb.writeUTF8String(asset.goodsName);
+        bb.writeUTF8String(asset.goodsSpecs);
+        bb.writeInt(asset.goodsNum);
+        bb.writeUTF8String(asset.goodsUnit);
+        bb.writeUTF8String(asset.unitPrice + "");
+        bb.writeUTF8String(asset.batchValue);
+        bb.writeInt(asset.issueNum);
+        bb.writeUTF8String(asset.issueTime);
+        bb.writeUTF8String(asset.expireTime);
+        bb.flip();
+    }
+    catch (e) 
+    {
+        throw Error(e.toString());
+    }
+    return toLocalBuffer(bb);
+}
+
+function getCouponIssueReopenBytes(asset) {
+    const bb = new ByteBuffer();
+    try
+    {
+        bb.writeUTF8String(asset.address);
+        bb.writeUTF8String(asset.goodsName);
+        bb.writeUTF8String(asset.goodsSpecs);
+        bb.writeInt(asset.goodsNum);
+        bb.writeUTF8String(asset.goodsUnit);
+        bb.writeUTF8String(asset.unitPrice + "");
+        bb.writeUTF8String(asset.batchValue);
+        bb.writeInt(asset.issueNum);
+        bb.writeUTF8String(asset.issueTime);
+        bb.writeUTF8String(asset.expireTime);
+        bb.flip();
+    }
+    catch (e) 
+    {
+        throw Error(e.toString());
+    }
+    return toLocalBuffer(bb);
+}
+
+function getCouponExchangeBuyBytes(asset) {
+    const bb = new ByteBuffer();
+    try
+    {
+        bb.writeUTF8String(asset.batchValue);
+        bb.writeUTF8String(asset.code);
+        bb.writeUTF8String(asset.senderAddress);
+        bb.writeUTF8String(asset.receivedAddress);
+        bb.writeUTF8String(asset.price);
+        bb.flip();
+    }
+    catch (e) 
+    {
+        throw Error(e.toString());
+    }
+    return toLocalBuffer(bb);
+}
+
+function getCouponExchangePayBytes(asset) {
+    const bb = new ByteBuffer();
+    try
+    {
+        bb.writeUTF8String(asset.batchValue);
+        bb.writeUTF8String(asset.code);
+        bb.writeUTF8String(asset.senderAddress);
+        bb.writeUTF8String(asset.receivedAddress);
+        bb.flip();
+    }
+    catch (e) 
+    {
+        throw Error(e.toString());
+    }
+    return toLocalBuffer(bb);
+}
+
+function getCouponExchangeTransferAskBytes(asset) {
+    const bb = new ByteBuffer();
+    try
+    {
+        bb.writeUTF8String(asset.batchValue);
+        bb.writeUTF8String(asset.code);
+        bb.writeUTF8String(asset.senderAddress);
+        bb.writeUTF8String(asset.receivedAddress);
+        bb.writeUTF8String(asset.price);
+        bb.flip();
+    }
+    catch (e) 
+    {
+        throw Error(e.toString());
+    }
+    return toLocalBuffer(bb);
+}
+
+function getCouponExchangeTransferConfirmBytes(asset) {
+    const bb = new ByteBuffer();
+    try
+    {
+        bb.writeUTF8String(asset.batchValue);
+        bb.writeUTF8String(asset.code);
+        bb.writeUTF8String(asset.senderAddress);
+        bb.writeUTF8String(asset.receivedAddress);
+        bb.writeUTF8String(asset.relatedTrsId);
+        bb.writeUTF8String(asset.price);
+        bb.writeInt(asset.transferState);
+        bb.flip();
+    }
+    catch (e) 
+    {
+        throw Error(e.toString());
+    }
+    return toLocalBuffer(bb);
+}
+
 function getBytes(transaction, skipSignature, skipSecondSignature) {
   var assetSize = 0,
     assetBytes = null;
@@ -320,6 +497,33 @@ function getBytes(transaction, skipSignature, skipSecondSignature) {
       break;
     case trsTypes.COUPON_ISSUER_UPDATE:
       assetBytes = getCouponIssuerUpdateBytes(transaction.asset.couponIssuerUpdate);
+      break;
+    case trsTypes.COUPON_ISSUER_FREEZE:
+      assetBytes = getCouponIssuerFreezeBytes(transaction.asset.couponIssuerFreeze);
+      break;
+    case trsTypes.COUPON_ISSUER_UNFREEZE:
+      assetBytes = getCouponIssuerUnfreezeBytes(transaction.asset.couponIssuerUnfreeze);
+      break;
+    case trsTypes.COUPON_ISSUE_NEW:
+      assetBytes = getCouponIssueNewBytes(transaction.asset.couponIssueNew);
+      break;
+    case trsTypes.COUPON_ISSUE_CLOSE:
+      assetBytes = getCouponIssueCloseBytes(transaction.asset.couponIssueClose);
+      break;
+    case trsTypes.COUPON_ISSUE_REOPEN:
+      assetBytes = getCouponIssueReopenBytes(transaction.asset.couponIssueReopen);
+      break;
+    case trsTypes.COUPON_EXCH_BUY:
+      assetBytes = getCouponExchangeBuyBytes(transaction.asset.couponExcBuy);
+      break;
+    case trsTypes.COUPON_EXCH_PAY:
+      assetBytes = getCouponExchangePayBytes(transaction.asset.couponExcPay);
+      break;
+    case trsTypes.COUPON_EXCH_TRANSFER_ASK:
+      assetBytes = getCouponExchangeTransferAskBytes(transaction.asset.couponExcTransferAsk);
+      break;
+    case trsTypes.COUPON_EXCH_TRANSFER_CONFIRM:
+      assetBytes = getCouponExchangeTransferConfirmBytes(transaction.asset.couponExcTransferConfirm);
       break;
 
     // aob
