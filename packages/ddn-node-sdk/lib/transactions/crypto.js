@@ -197,6 +197,20 @@ function getEvidenceBytes(evidence) {
   return toLocalBuffer(bb);
 }
 
+function getCouponIssuerAuditorBuy(trs) {
+    const bb = new ByteBuffer();
+    
+    try {
+        bb.writeUTF8String(trs.asset.couponIssuerAuditorBuy.address);
+        bb.writeUTF8String(trs.amount);
+        bb.flip();
+    } catch (e) {
+        throw Error(e.toString());
+    }
+
+    return toLocalBuffer(bb);
+}
+
 function getCouponIssuerApplyBytes(asset) {
     const bb = new ByteBuffer();
     
@@ -489,6 +503,9 @@ function getBytes(transaction, skipSignature, skipSecondSignature) {
       break;
 
     // coupon
+    case trsTypes.COUPON_ISSUER_AUDITOR_BUY:
+      assetBytes = getCouponIssuerAuditorBuy(transaction);
+      break;
     case trsTypes.COUPON_ISSUER_APPLY:
       assetBytes = getCouponIssuerApplyBytes(transaction.asset.couponIssuerApply);
       break;

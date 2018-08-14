@@ -92,13 +92,13 @@ function createOrg(org, secret, secondSecret) {
 	return transaction;
 }
 
-function createTransfer(address, secret, secondSecret) {
+function createTransfer(address, amount, secret, secondSecret) {
     var keys = crypto.getKeys(secret);
     var fee = constants.fees.org;
     var transaction = {
         type: trsTypes.SEND,
         nethash: options.get('nethash'),
-        amount: 100000000000 + "", // fixme 1000000000 ????
+        amount: amount, // fixme 1000000000 ????
         fee: fee + "",
         recipientId: address,
         senderPublicKey: keys.publicKey,

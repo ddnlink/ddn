@@ -5,6 +5,36 @@ var options = require('../options');
 var slots = require('../time/slots.js');
 var addressHelper = require('../address.js');
 
+function createIssuerAuditorBuy(receivedAddress, amount, secret, secondSecret) {
+    var keys = crypto.getKeys(secret);
+    
+    var fee = constants.fees.send;
+
+    var transaction = {
+        type: trsTypes.COUPON_ISSUER_AUDITOR_BUY,
+        nethash: options.get('nethash'),
+        amount: amount,
+        fee: fee + "",
+        recipientId: receivedAddress,
+        senderPublicKey: keys.publicKey,
+        timestamp: slots.getTime() - options.get('clientDriftSeconds'),
+        asset: {
+            couponIssuerAuditorBuy: {
+                address: addressHelper.generateBase58CheckAddress(keys.publicKey),
+            }
+        }        
+    };
+    
+    crypto.sign(transaction, keys);
+    
+    if (secondSecret) {
+        var secondKeys = crypto.getKeys(secondSecret);
+        crypto.secondSign(transaction, secondKeys);
+    }
+
+    return transaction;
+}
+
 function createIssuerApply(orgName, orgId, orgOwner, orgOwnerPhone, secret, secondSecret) {
     var keys = crypto.getKeys(secret);
 
@@ -444,6 +474,7 @@ function createExchangeTransferAsk(batchValue, code, receivedAddress,
 }
 
 module.exports = {
+    createIssuerAuditorBuy: createIssuerAuditorBuy,
     createIssuerApply: createIssuerApply,
     createIssuerCheck: createIssuerCheck,
     createIssuerUpdate: createIssuerUpdate,
