@@ -52,6 +52,12 @@ module.exports = {
       beginDate: new Date(Date.UTC(2018, 5, 18, 4, 0, 0, 0)), // 2018-06-18T04:00:00.000Z +8
     },
 
+    '1d6f46cj': {
+        tokenName: 'CCS',
+        tokenPrefix: 'C',
+        beginDate: new Date(Date.UTC(2018, 7, 20, 9, 0, 0, 0)), // 2018-06-18T04:00:00.000Z +8
+    }
+
   }
 
 }
