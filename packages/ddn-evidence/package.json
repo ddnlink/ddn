@@ -1,0 +1,18 @@
+{
+  "name": "ddn-evidence",
+  "version": "1.0.0",
+  "description": "DDN数据存证资产包",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git@git.ebookchain.net:ddn/ddn-evidence.git"
+  },
+  "author": "wangxm",
+  "license": "ISC",
+  "dependencies": {
+    "ddn-asset-base": "git+ssh://git@git.ebookchain.net:ddn/ddn-asset-base.git"
+  }
+}
