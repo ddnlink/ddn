@@ -1,0 +1,15 @@
+{
+  "name": "ddn-asset-base",
+  "version": "1.0.0",
+  "description": "DDN资产基类相关信息",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git@git.ebookchain.net:ddn/ddn-asset-base.git"
+  },
+  "author": "wangxm",
+  "license": "ISC"
+}
