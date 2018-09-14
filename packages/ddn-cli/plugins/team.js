@@ -19,11 +19,13 @@ function appendFileSync(file, obj) {
 
 // 用于分割原始100亿
 function genUsers(options) {
+	var tokenPrefix = ddnJS.constants.nethash[options.nethash || config.nethash].tokenPrefix;
+
 	var wan = 10000;
 	var users = []
 	// 5000万的150个，75亿
 	for (var i = 1; i < 151; i++) {
-		var user = accountHelper.account(cryptoLib.generateSecret());
+		var user = accountHelper.account(cryptoLib.generateSecret(), tokenPrefix);
 		user.username = "user_" + i;
 		user.amount = 5000 * wan;
 		users.push(user);
@@ -31,7 +33,7 @@ function genUsers(options) {
 
 	// 2000万的75个, 15亿
 	for (var i = 151; i < 226; i++) {
-		var user = accountHelper.account(cryptoLib.generateSecret());
+		var user = accountHelper.account(cryptoLib.generateSecret(), tokenPrefix);
 		user.username = "user_" + i;
 		user.amount = 2000 * wan;
 		users.push(user);
@@ -39,15 +41,14 @@ function genUsers(options) {
 
 	// 1000万的100个，10亿
 	for (var i = 226; i < 326; i++) {
-		var user = accountHelper.account(cryptoLib.generateSecret());
+		var user = accountHelper.account(cryptoLib.generateSecret(), tokenPrefix);
 		user.username = "user_" + i;
 		user.amount = 1000 * wan;
 		users.push(user);
 	}
 
 	// 基金账号
-	var user = accountHelper.account(cryptoLib.generateSecret());
-	console.log(ddnJS.constants);
+	var user = accountHelper.account(cryptoLib.generateSecret(), tokenPrefix);
 	
 	user.username = ddnJS.constants.nethash[options.nethash || config.nethash].tokenName + " Foundation";
 	user.amount = 0
@@ -75,9 +76,9 @@ function genUsers(options) {
 module.exports = function (program) {
 	globalOptions = program;
 
-	// program
-	// 	.command("createUsers")
-	// 	.description("create some accounts")
-	// 	.option("-n, --nethash <nethash>", "default to generate a new nethash")
-	// 	.action(genUsers);
+	program
+		.command("createUsers")
+		.description("create some accounts")
+		.option("-n, --nethash <nethash>", "default to generate a new nethash")
+		.action(genUsers);
 }

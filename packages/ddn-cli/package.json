@@ -23,7 +23,7 @@
     "bytebuffer": "^4.0.0",
     "commander": "^2.8.1",
     "crypto-browserify": "^3.9.14",
-    "ddn-js": "git+ssh://git@git.ebookchain.net:ddn/ddn-js.git",
+    "ddn-js": "git+ssh://git@git.ebookchain.net:ddn/ddn-js.git#v2.0.11",
     "fs-extra": "0.30.0",
     "gift": "0.6.1",
     "inquirer": "^3.3.0",

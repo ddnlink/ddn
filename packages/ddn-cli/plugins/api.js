@@ -184,6 +184,8 @@ function getTransaction(id) {
 }
 
 function sendMoney(options) {
+  ddnJS.options.set(options.nethash)
+
   var trs = ddnJS.transaction.createTransaction(
     options.to,
     //bignum update Number(options.amount),
@@ -528,6 +530,7 @@ module.exports = function(program) {
     .option("-a, --amount <n>", "")
     .option("-t, --to <address>", "")
     .option("-m, --message <message>", "")
+    .option("-n, --nethash <nethash>", "fl6ybowg")
     .action(sendMoney);
   
   program
