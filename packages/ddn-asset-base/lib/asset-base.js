@@ -108,7 +108,7 @@ class AssetBase {
         // return [
         //     {"field": "str1", "prop": "name", required: true, minLen: 1, maxLen: 10},
         //     {"field": "int1", "prop": "age", required: true, minVaule: 0, maxValue: 40},
-        //     {"field": "str2", "prop": "addr"}
+        //     {"field": "str2", "prop": "addr"},
         //     {"field": "str_ext", "prop": "ext1"}
         // ];
     }
