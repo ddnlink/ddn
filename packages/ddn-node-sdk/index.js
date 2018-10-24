@@ -9,7 +9,8 @@ module.exports = {
 	aob: require("./lib/transactions/aob.js"),
 	username: require("./lib/transactions/username.js"),
 	multitransfer: require("./lib/transactions/multitransfer.js"),		
-	options: require("./lib/options.js"),
+    options: require("./lib/options.js"),
+    init: require("./lib/init.js"),
 	constants: require("./lib/constants.js"),
 	utils: {
 		slots: require("./lib/time/slots.js"),
@@ -23,4 +24,6 @@ module.exports = {
     
     //coupon
     coupon: require("./lib/transactions/coupon.js"),
+
+    assetPlugin: require("./lib/transactions/asset-plugin.js"),
 }

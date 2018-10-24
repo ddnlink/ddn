@@ -3,7 +3,7 @@ var addressHelper = require('../address.js');
 var options = require('../options');
 var constants = require('../constants');
 var trsTypes = require('../transaction-types');
-
+var { AssetUtils } = require('ddn-asset-base');
 
 if (typeof Buffer === "undefined") {
   Buffer = require("buffer/").Buffer;
@@ -440,6 +440,18 @@ function getCouponExchangeTransferConfirmBytes(asset) {
     return toLocalBuffer(bb);
 }
 
+function getAssetBytes(transaction) {
+    if (AssetUtils.isTypeValueExists(transaction.type)) {
+        var trans = AssetUtils.getTransactionByTypeValue(transaction.type);
+        var transCls = require(trans.package)[trans.name];
+        var transInst = new transCls();
+        var buf = transInst.getBytes(transaction);
+        transInst = null;
+        return buf;
+    }
+    return null;
+}
+
 function getBytes(transaction, skipSignature, skipSecondSignature) {
   var assetSize = 0,
     assetBytes = null;
@@ -629,6 +641,8 @@ function getBytes(transaction, skipSignature, skipSecondSignature) {
       bb.flip();
       assetBytes = toLocalBuffer(bb)
       break;
+    default:
+      assetBytes = getAssetBytes(transaction);  
   }
 
   if (transaction.__assetBytes__) {
