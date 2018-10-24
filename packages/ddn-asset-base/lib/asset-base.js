@@ -98,6 +98,8 @@ class AssetBase {
      * 整数类型3个，名称分别是int1,int2,int3，类型为INT，前2个有索引
      * 时间戳类型2个，分别是timestamp1,timestamp2
      * 扩展类无上限，名称使用str_ext, int_ext, timestamp_ext，分别定义不同类型
+     * 
+     * 注：此方法中不能使用self.library、self.modules
      */
     propsMapping() {
         throw new Error("AssetBase子类必须重载propsMapping方法。");
@@ -387,6 +389,8 @@ class AssetBase {
     /**
      * 获取资产的字节格式数据，用于签名计算
      * @param {*} trs 
+     * 
+     * 注：此方法中不能使用self.library、self.modules
      */
     getBytes(trs) {
         var err = this.fieldsIsValid(trs);
