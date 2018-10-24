@@ -11,5 +11,8 @@
     "url": "git@git.ebookchain.net:ddn/ddn-asset-base.git"
   },
   "author": "wangxm",
-  "license": "ISC"
+  "license": "ISC",
+  "dependencies": {
+    "bytebuffer": "^5.0.1"
+  }
 }
