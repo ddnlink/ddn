@@ -14,6 +14,7 @@
 const AssetUtils = require('./asset-utils');
 const ByteBuffer = require('bytebuffer');
 const CommonUtils = require('./common-utils');
+const bignum = require('bignum-utils');
 
 let self;
 
@@ -98,6 +99,10 @@ class AssetBase {
      * 整数类型3个，名称分别是int1,int2,int3，类型为INT，前2个有索引
      * 时间戳类型2个，分别是timestamp1,timestamp2
      * 扩展类无上限，名称使用str_ext, int_ext, timestamp_ext，分别定义不同类型
+     * 
+     * 以下属于系统属性，不可使用
+     * amount：转账金额，默认为0，字符串类型
+     * receiveAddress，收款地址，默认为null
      * 
      * 注：此方法中不能使用self.library、self.modules
      */
@@ -374,6 +379,18 @@ class AssetBase {
      * @param {*} cb 
      */
     verify(trs, sender, cb) {
+        if (bignum.isZero(trs.amount)) { //等于0
+            if (trs.recipientId) {
+                return cb("The recipientId attribute of the transaction must be null.");
+            }
+        } else if (bignum.isLessThan(trs.amount, 0)) {  //小于0
+            return cb("Invalid amount: " + trs.amount);
+        } else {    //大于0
+            if (!trs.recipientId) {
+                return cb("The recipientId attribute of the transaction can not be null.");
+            }
+        }
+
         var err = this.fieldsIsValid(trs);
         if (!err) {
             return cb(err);
@@ -430,18 +447,68 @@ class AssetBase {
     }
 
     apply(trs, block, sender, cb) {
-        setImmediate(cb);
+        if (bignum.isGreaterThan(trs.amount, 0)) {
+            self.modules.accounts.setAccountAndGet({ address: trs.recipientId }, (err, recipient) => {
+                if (err) {
+                    return cb(err);
+                }
+                self.modules.accounts.mergeAccountAndGet(
+                    {
+                        address: trs.recipientId,
+                        balance: trs.amount,
+                        u_balance: trs.amount,
+                        blockId: block.id,
+                        round: self.modules.round.calc(block.height)
+                    },
+                    (err) => {
+                        cb(err);
+                    }
+                );
+            });
+        } else {
+            setImmediate(cb);
+        }
     }
 
     undo(trs, block, sender, cb) {
-        setImmediate(cb);
+        if (bignum.isGreaterThan(trs.amount, 0)) {
+            self.modules.accounts.setAccountAndGet({ address: trs.recipientId }, (err, recipient) => {
+                if (err) {
+                    return cb(err);
+                }
+                var amountStr = bignum.minus(0, trs.amount).toString();
+                self.modules.accounts.mergeAccountAndGet(
+                    {
+                        address: trs.recipientId,
+                        balance: amountStr,
+                        u_balance: amountStr,
+                        blockId: block.id,
+                        round: self.modules.round.calc(block.height)
+                    },
+                    (err) => {
+                        cb(err);
+                    }
+                );
+            });
+        } else {
+            setImmediate(cb);
+        }
     }
 
     applyUnconfirmed(trs, sender, cb) {
+        const key = trs.type + "_" + trs.id;
+        if (self.library.oneoff.has(key)) {
+            return setImmediate(cb, "The transaction has been confirmed: " + trs.id + ".");
+        }
+
         setImmediate(cb);
+        self.library.oneoff.set(key, true);
     }
 
     undoUnconfirmed(trs, sender, cb) {
+        const key = trs.type + "_" + trs.id;
+        self.library.oneoff.delete(key);
+
         setImmediate(cb);
     }
 

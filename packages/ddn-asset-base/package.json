@@ -13,6 +13,7 @@
   "author": "wangxm",
   "license": "ISC",
   "dependencies": {
+    "bignum-utils": "git+ssh://git@git.ebookchain.net:ddn/bignum_utils.git",
     "bytebuffer": "^5.0.1"
   }
 }
