@@ -12,14 +12,17 @@ function createPluginAsset(trsType, assetInfo, secret, secondSecret) {
 	var transaction = {
 		type: trsType,
 		nethash: options.get('nethash'),
-		amount: "0",
+		amount: assetInfo.amount ? assetInfo.amount + "" : "0",
 		fee: fee + "",
-		recipientId: null,
+		recipientId: assetInfo.receiveAddress ? assetInfo.receiveAddress : null,
 		senderPublicKey: keys.publicKey,
 		timestamp: slots.getTime() - options.get('clientDriftSeconds'),
 		asset: {}
     };
     
+    delete assetInfo.amount;
+    delete assetInfo.receiveAddress;
+
     var assetJsonName = AssetUtils.getAssetJsonName(trsType);
     transaction.asset[assetJsonName] = assetInfo;
 
