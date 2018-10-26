@@ -270,7 +270,7 @@ class AssetBase {
         var assetJsonName = AssetUtils.getAssetJsonName(trs.type);
 
         if (!trs.asset || !trs.asset[assetJsonName]) {
-            return cb('Invalid transaction asset');
+            return 'Invalid transaction asset';
         }
       
         const asset = trs.asset[assetJsonName];
@@ -393,9 +393,9 @@ class AssetBase {
 
         var err = this.fieldsIsValid(trs);
         if (!err) {
-            return cb(err);
-        } else {
             return cb(null, trs);
+        } else {
+            return cb(err);
         }
     }
 
