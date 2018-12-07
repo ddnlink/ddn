@@ -26,8 +26,10 @@ class AssetEvidence extends AssetBase
                         ipid: trans.asset.assetEvidence.ipid
                     }
                 }
-                super.queryAsset(condition, (err2, rows) => {
-                    if (err) {
+                super.queryAsset({
+                    ipid: trans.asset.assetEvidence.ipid
+                }, null, false, 1, 1, (err2, rows) => {
+                    if (err2) {
                         return cb(err2);
                     }
 
