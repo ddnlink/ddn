@@ -1,5 +1,16 @@
 class CommonUtils
 {
+    static isString(obj) {
+        return typeof(obj) == "string";
+    }
+
+    static isArray(obj) {
+        if (obj && obj.shift) {
+            return true;
+        }
+        return false;
+    }
+
     static formatDate(fmt, date)
     {
         try

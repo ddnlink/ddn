@@ -193,56 +193,117 @@ class AssetBase {
     }
 
     /**
-     * @param {*} condition 包括filter、pageSize、pageIndex、sort几个属性
-     *                      filter用来定义查询条件，规则遵循jsonSql规则，使用prop的名称来定义
-     *                      pageSize分页的大小，每页的记录条数
-     *                      pageIndex查询的页码，从1开始
-     *                      sort排序方式，遵循jsonSql写法
+     * 查询规定条件的资产数据
+     * @param {*} where 查询条件，遵循sequelize规则，使用prop的名称定义
+     * @param {*} orders 排序条件，遵循sequelize规则，使用prop的名称定义
+     * @param {*} returnTotal 是否返回总条数，true/false
+     * @param {*} pageIndex 查询的页码，从1开始
+     * @param {*} pageSize 分页的大小，每页的返回的最大记录条数
+     * @param {*} cb 回调
      */
-    queryAsset(condition, cb) {
-        condition = condition || {};
-        
+    queryAsset(where, orders, returnTotal, pageIndex, pageSize, cb) {
+        //构建返回字段数组
+        var attributes = [
+            ['transactionId', 'asset_trs_id'],
+            ['transactionType', 'asset_trs_type'],
+            ['timestamp', 'asset_timestamp']
+        ];
+        var propsMapping =  this.propsMapping();
+        for (var i = 0; i < propsMapping.length; i++) {
+            var propMapping = propsMapping[i];
+            var field = propMapping.field;
+            if (field != "str_ext" && 
+                field != "int_ext" && 
+                field != "timestamp_ext") {
+                attributes.push([field, 'asset_' + field]);
+            }
+        }
+
+        //解析查询条件
         var newConds = {};
-        condition.filter = condition.filter || {};
-        for (var p in condition.filter) {
+        where = where || {};
+        for (var p in where) {
             var condProp = this.getPropsMappingItemByProp(p);
             if (condProp) {
-                newConds["trs_asset." + condProp.field] = condition.filter[p];
+                newConds[condProp.field] = where[p];
             } else {
                 var pName = p.toLowerCase();
-                if (pName == "trsid") {
-                    newConds["trs_asset.transactionId"] = condition.filter[p];
-                } else if (pName == "trstype") {
-                    newConds["trs_asset.transactionType"] = condition.filter[p];
+                if (pName == "trs_id") {
+                    newConds["transactionId"] = where[p];
+                } else if (pName == "trs_type") {
+                    newConds["transactionType"] = where[p];
+                } else if (pName == "trs_timestamp") {
+                    newConds["timestamp"] = where[p];
                 }
             }
         }
 
-        var newSorts = {};
-        condition.sort = condition.sort || {};
-        for (var p in condition.sort) {
-            var condProp = this.getPropsMappingItemByProp(p);
-            if (condProp) {
-                newSorts["trs_asset." + condProp.field] = condition.sort[p];
-            } else {
-                var pName = p.toLowerCase();
-                if (pName == "transactionid") {
-                    newSorts["trs_asset.transactionId"] = condition.sort[p];
-                } else if (pName == "transactiontype") {
-                    newSorts["trs_asset.transactionType"] = condition.sort[p];
-                } else if (pName == "timestamp") {
-                    newSorts["trs_asset.timestamp"] = condition.sort[p];
+        //解析排序条件
+        orders = orders || [];
+        var newOrders = [];
+        if (CommonUtils.isArray(orders) && orders.length > 0) {
+            function getFieldName(prop) {
+                var condProp = self.getPropsMappingItemByProp(prop);
+                if (condProp) {
+                    return condProp.field;
+                } else {
+                    var pName = prop.toLowerCase();
+                    if (pName == "trs_id") {
+                        return "transactionId";
+                    } else if (pName == "trs_type") {
+                        return "transactionType";
+                    } else if (pName == "trs_timestamp") {
+                        return "timestamp";
+                    } else {
+                        self.library.logger.warn("Invalid order field: " + prop);
+                        return null;
+                    }
                 }
             }
+
+            for (var i = 0; i < orders.length; i++) {
+                var orderItem = orders[i];
+                if (CommonUtils.isArray(orderItem)) {
+                    if (orderItem.length == 2) {
+                        if (typeof(orderItem[0]) == "string" && typeof(orderItem[1]) == "string") {
+                            var fieldName = getFieldName(orderItem[0]);
+                            if (fieldName) {
+                                newOrders.push([fieldName, orderItem[1]]);
+                            } else {
+                                self.library.logger.warn("Invalid order field: " + JSON.stringify(orderItem));
+                            }
+                        } else {
+                            //如果传入排序参数不是数组，就直接使用，这里其实有隐患，这里使用的字段名只能使用真正的数据库字段名，str1..str9等等，不能用prop名称
+                            newOrders.push(orderItem);
+                        }
+                    } else {
+                        self.library.logger.warn("Invalid order item: " + JSON.stringify(orderItem));
+                    }
+                } else {
+                    if (CommonUtils.isString(orderItem)) {
+                        var fieldName = getFieldName(p);
+                        if (fieldName) {
+                            newOrders.push(fieldName);
+                        }
+                    } else {
+                        //如果传入排序参数不是数组，就直接使用，这里其实有隐患，这里使用的字段名只能使用真正的数据库字段名，str1..str9等等，不能用prop名称
+                        newOrders.push(orderItem);
+                    }
+                }
+            }
+        } else {
+            //如果传入排序参数不是数组，就直接使用，这里其实有隐患，这里使用的字段名只能使用真正的数据库字段名，str1..str9等等，不能用prop名称
+            newOrders = orders;
         }
 
         self.library.model.getAssetBase(newConds, 
-            this.hasExtProps(), condition.pageIndex,
-            condition.pageSize, newSorts, (err, rows) => {
+            this.hasExtProps(), pageIndex, pageSize, 
+            newOrders, returnTotal, attributes, (err, data) => {
                 if (err) {
                     return cb(err);
                 }
 
+                var rows = data && data.rows ? data.rows : data;
                 if (rows && rows.length > 0) {
                     var rowObjs = [];
                     for (var i = 0; i < rows.length; i++) {
@@ -253,11 +314,26 @@ class AssetBase {
                             rowObjs.push(rowObj[assetName]);
                         }
                     }
-                    return cb(null, rowObjs);
+                    if (returnTotal) {
+                        return cb(null, {
+                            rows: rowObjs,
+                            total: data.total
+                        });
+                    } else {
+                        return cb(null, rowObjs);
+                    }
                 } else {
-                    return cb(null, []);
+                    if (returnTotal) {
+                        return cb(null, {
+                            rows: [],
+                            total: 0
+                        });
+                    } else {
+                        return cb(null, []);
+                    }
                 }
-            });
+            }
+        );
     }
 
     /**
@@ -446,9 +522,15 @@ class AssetBase {
         }
     }
 
-    apply(trs, block, sender, cb) {
+    apply(trs, block, sender, dbTrans, cb) {
+        if (typeof(cb) == "undefined" && typeof(dbTrans) == "function") {
+            cb = dbTrans;
+            dbTrans = null;
+        }
+
         if (bignum.isGreaterThan(trs.amount, 0)) {
-            self.modules.accounts.setAccountAndGet({ address: trs.recipientId }, (err, recipient) => {
+            self.modules.accounts.setAccountAndGet({ address: trs.recipientId }, 
+                dbTrans, (err, recipient) => {
                 if (err) {
                     return cb(err);
                 }
@@ -459,7 +541,7 @@ class AssetBase {
                         u_balance: trs.amount,
                         blockId: block.id,
                         round: self.modules.round.calc(block.height)
-                    },
+                    }, dbTrans,
                     (err) => {
                         cb(err);
                     }
@@ -470,9 +552,15 @@ class AssetBase {
         }
     }
 
-    undo(trs, block, sender, cb) {
+    undo(trs, block, sender, dbTrans, cb) {
+        if (typeof(cb) == "undefined" && typeof(dbTrans) == "function") {
+            cb = dbTrans;
+            dbTrans = null;
+        }
+
         if (bignum.isGreaterThan(trs.amount, 0)) {
-            self.modules.accounts.setAccountAndGet({ address: trs.recipientId }, (err, recipient) => {
+            self.modules.accounts.setAccountAndGet({ address: trs.recipientId }, 
+                dbTrans, (err, recipient) => {
                 if (err) {
                     return cb(err);
                 }
@@ -484,7 +572,7 @@ class AssetBase {
                         u_balance: amountStr,
                         blockId: block.id,
                         round: self.modules.round.calc(block.height)
-                    },
+                    }, dbTrans,
                     (err) => {
                         cb(err);
                     }
@@ -495,7 +583,12 @@ class AssetBase {
         }
     }
 
-    applyUnconfirmed(trs, sender, cb) {
+    applyUnconfirmed(trs, sender, dbTrans, cb) {
+        if (typeof(cb) == "undefined" && typeof(dbTrans) == "function") {
+            cb = dbTrans;
+            dbTrans = null;
+        }
+
         const key = trs.type + "_" + trs.id;
         if (self.library.oneoff.has(key)) {
             return setImmediate(cb, "The transaction has been confirmed: " + trs.id + ".");
@@ -505,7 +598,12 @@ class AssetBase {
         self.library.oneoff.set(key, true);
     }
 
-    undoUnconfirmed(trs, sender, cb) {
+    undoUnconfirmed(trs, sender, dbTrans, cb) {
+        if (typeof(cb) == "undefined" && typeof(dbTrans) == "function") {
+            cb = dbTrans;
+            dbTrans = null;
+        }
+
         const key = trs.type + "_" + trs.id;
         self.library.oneoff.delete(key);
 
@@ -594,17 +692,20 @@ class AssetBase {
         }
     }
 
-    dbSave(trs, cb) {
+    dbSave(trs, dbTrans, cb) {
+        if (typeof(cb) == "undefined" && typeof(dbTrans) == "function") {
+            cb = dbTrans;
+            dbTrans = null;
+        }
+
         var assetName = AssetUtils.getAssetJsonName(trs.type);
         var asset = trs.asset[assetName];
 
-        var fields = ['transactionId', 'transactionType', 'timestamp'];
-        var values = ['$trsid', '$trstype', '$timestamp'];
-        var params = {
-            trsid: trs.id,
-            trstype: trs.type,
+        var assetInst = {
+            transactionId: trs.id,
+            transactionType: trs.type,
             timestamp: trs.timestamp
-        };
+        }
 
         var jsonExtObj = {};
         var hasJsonExt = false;
@@ -615,20 +716,10 @@ class AssetBase {
             if (item) {
                 var itemValue = asset[item.prop];
                 if (itemValue) {
+                    assetInst[item.field] = itemValue;
+
                     var fieldType = item.field.replace(/[0-9]/g, "");
-                    if (fieldType == "str") {
-                        fields.push(item.field);
-                        values.push("$" + item.field);
-                        params[item.field] = itemValue + "";
-                    } else if (fieldType == "int") {
-                        fields.push(item.field);
-                        values.push("$" + item.field);
-                        params[item.field] = itemValue;
-                    } else if (fieldType == "timestamp") {
-                        fields.push(item.field);
-                        values.push("$" + item.field);
-                        params[item.field] = itemValue;
-                    } else if (fieldType == "str_ext" || 
+                    if (fieldType == "str_ext" || 
                         fieldType == "int_ext" || 
                         fieldType == "timestamp_ext") {
                         hasJsonExt = true;
@@ -638,38 +729,25 @@ class AssetBase {
             }
         }
 
-        var sql = "INSERT INTO trs_asset (" + fields.join(",") + ") VALUES(" + values.join(",") + ")";
-        self.library.dbLite.query(sql, params,
-            (err, result) => {
-                if (err) {
-                    return cb(err.toString());
-                }
-
-                if (hasJsonExt) {
-                    //保存jsonExt
-                    var sqlExt = "INSERT INTO trs_asset_ext (transactionId, jsonExt) VALUES($trsId, $jsonExt)";
-                    var paramsExt = {
-                        trsId: trs.id,
-                        jsonExt: JSON.stringify(jsonExtObj)
-                    };
-                    self.library.dbLite.query(sqlExt, paramsExt,
-                        (errExt, resultExt) => {
-                            if (errExt) {
-                                return cb(errExt.toString());
-                            }
-
-                            setImmediate(cb);
-                        }
-                    );
-                } else {
-                    setImmediate(cb);
-                }
+        self.library.dao.insert("trs_asset", assetInst, dbTrans, (err, result) => {
+            if (err) {
+                return cb(err);
             }
-        );
+
+            if (hasJsonExt) {
+                var assetExtInst = {
+                    transactionId: trs.id,
+                    jsonExt: JSON.stringify(jsonExtObj)
+                }
+                self.library.dao.insert("trs_asset_ext", assetExtInst, dbTrans, cb);
+            } else {
+                cb();
+            }
+        })
     }
 
     ready(trs, sender) {
-        if (sender.multisignatures.length) {
+        if (sender.multisignatures && sender.multisignatures.length) {
             if (!trs.signatures) {
                 return false;
             }
