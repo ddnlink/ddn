@@ -27,33 +27,33 @@ function getBytes(block, skipSignature) {
 	bb.writeInt(block.version);
 	bb.writeInt(block.timestamp);
 
-	if (block.previousBlock) {
-		bb.writeString(block.previousBlock)
+	if (block.previous_block) {  //wxm block database
+		bb.writeString(block.previous_block)    //wxm block database
 	} else {
 		bb.writeString('0')
 	}
 
-	bb.writeInt(block.numberOfTransactions);
+	bb.writeInt(block.number_of_transactions);    //wxm block database
 	
-	bb.writeString(bignum.new(block.totalAmount).toString());
-	bb.writeString(bignum.new(block.totalFee).toString());
+	bb.writeString(bignum.new(block.total_amount).toString());   //wxm block database
+	bb.writeString(bignum.new(block.total_fee).toString());  //wxm block database
 	bb.writeString(bignum.new(block.reward).toString());
 
-	bb.writeInt(block.payloadLength);
+	bb.writeInt(block.payload_length);   //wxm block database
 
-	const payloadHashBuffer = new Buffer(block.payloadHash, 'hex');
+	const payloadHashBuffer = new Buffer(block.payload_hash, 'hex'); //wxm block database
 
 	for (let i = 0; i < payloadHashBuffer.length; i++) {
 		bb.writeByte(payloadHashBuffer[i]);
 	}
 
-	const generatorPublicKeyBuffer = new Buffer(block.generatorPublicKey, 'hex');
+	const generatorPublicKeyBuffer = new Buffer(block.generator_public_key, 'hex');   //wxm block database
 	for (let i = 0; i < generatorPublicKeyBuffer.length; i++) {
 		bb.writeByte(generatorPublicKeyBuffer[i]);
 	}
 
-	if (!skipSignature && block.blockSignature) {
-		const blockSignatureBuffer = new Buffer(block.blockSignature, 'hex');
+	if (!skipSignature && block.block_signature) {   //wxm block database
+		const blockSignatureBuffer = new Buffer(block.block_signature, 'hex');
 		for (let i = 0; i < blockSignatureBuffer.length; i++) {
 			bb.writeByte(blockSignatureBuffer[i]);
 		}
@@ -104,9 +104,9 @@ module.exports = {
 					amount: bignum.multiply(bignum.new(parts[1]), 100000000),
 					fee: '0',
 					timestamp: 0,
-					recipientId: parts[0],
-					senderId: sender.address,
-					senderPublicKey: sender.keypair.publicKey
+					recipient_id: parts[0],  //wxm block database
+					sender_id: sender.address,   //wxm block database
+					sender_public_key: sender.keypair.publicKey   //wxm block database
 				};
 				totalAmount = bignum.plus(totalAmount, trs.amount);
 
@@ -124,9 +124,9 @@ module.exports = {
 				amount: config.totalAmount,
 				fee: '0',
 				timestamp: 0,
-				recipientId: genesisAccount.address,
-				senderId: sender.address,
-				senderPublicKey: sender.keypair.publicKey
+				recipient_id: genesisAccount.address,    //wxm   block database
+				sender_id: sender.address,   //wxm block database
+				sender_public_key: sender.keypair.publicKey   //wxm block database
 			};
 
 			totalAmount = bignum.plus(totalAmount, balanceTransaction.amount);
@@ -152,9 +152,9 @@ module.exports = {
 				amount: '0',
 				fee: '0',
 				timestamp: 0,
-				recipientId: null,
-				senderId: delegate.address,
-				senderPublicKey: delegate.keypair.publicKey,
+				recipient_id: null,  //wxm block database
+				sender_id: delegate.address, //wxm block database
+				sender_public_key: delegate.keypair.publicKey,    //wxm block database
 				asset: {
 					delegate: {
 						username
@@ -179,9 +179,9 @@ module.exports = {
 			amount: '0',
 			fee: '0',
 			timestamp: 0,
-			recipientId: null,
-			senderId: genesisAccount.address,
-			senderPublicKey: genesisAccount.keypair.publicKey,
+			recipient_id: null,  //wxm block database
+			sender_id: genesisAccount.address,   //wxm block database
+			sender_public_key: genesisAccount.keypair.publicKey,  //wxm block database
 			asset: {
 				vote: {
 					votes
@@ -203,9 +203,9 @@ module.exports = {
 				amount: '0',
 				fee: '0',
 				timestamp: 0,
-				recipientId: null,
-				senderId: genesisAccount.address,
-				senderPublicKey: genesisAccount.keypair.publicKey,
+				recipient_id: null,  //wxm block database
+				sender_id: genesisAccount.address,   //wxm block database
+				sender_public_key: genesisAccount.keypair.publicKey,  //wxm block database
 				asset: {
 					dapp
 				}
@@ -245,21 +245,21 @@ module.exports = {
 
         const block = {
 			version: 0,
-			totalAmount,
-			totalFee: '0',
+			total_amount: totalAmount,  //wxm block database
+			total_fee: '0', //wxm block database
 			reward: '0',
-			payloadHash: payloadHash.toString('hex'),
+			payload_hash: payloadHash.toString('hex'),  //wxm block database
 			timestamp: 0,
-			numberOfTransactions: transactions.length,
-			payloadLength,
-			previousBlock: null,
-			generatorPublicKey: sender.keypair.publicKey,
+			number_of_transactions: transactions.length,    //wxm block database
+			payload_length: payloadLength,    //wxm block database
+			previous_block: null,   //wxm block database
+			generator_public_key: sender.keypair.publicKey, //wxm block database
 			transactions,
 			height: '1'
 		};
 
         bytes = getBytes(block);
-        block.blockSignature = cryptoLib.sign(sender.keypair, bytes);
+        block.block_signature = cryptoLib.sign(sender.keypair, bytes);  //wxm block database
         bytes = getBytes(block);
         block.id = cryptoLib.getId(bytes);
 

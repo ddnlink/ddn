@@ -68,19 +68,19 @@ function getTransactionBytes(trs, skipSignature) {
 	bb.writeInt(trs.timestamp);
     bb.writeString(trs.nethash);
 
-	var senderPublicKeyBuffer = new Buffer(trs.senderPublicKey, 'hex');
+	var senderPublicKeyBuffer = new Buffer(trs.sender_public_key, 'hex'); //wxm block database
 	for (var i = 0; i < senderPublicKeyBuffer.length; i++) {
 		bb.writeByte(senderPublicKeyBuffer[i]);
 	}
 
-	if (trs.recipientId) {
-		if (/^[0-9]{1,20}$/g.test(trs.recipientId)) {
-			var recipient = bignum.toBuffer(trs.recipientId, { size: 8 }).toString();
+	if (trs.recipient_id) {  //wxm block database
+		if (/^[0-9]{1,20}$/g.test(trs.recipient_id)) {   //wxm block database
+			var recipient = bignum.toBuffer(trs.recipient_id, { size: 8 }).toString();   //wxm block database
 			for (var i = 0; i < 8; i++) {
 				bb.writeByte(recipient[i] || 0);
 			}
 		} else {
-			bb.writeString(trs.recipientId);
+			bb.writeString(trs.recipient_id);    //wxm block database
 		}
 	} else {
 		for (var i = 0; i < 8; i++) {
