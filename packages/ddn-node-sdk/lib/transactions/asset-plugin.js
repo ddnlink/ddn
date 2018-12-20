@@ -14,8 +14,8 @@ function createPluginAsset(trsType, assetInfo, secret, secondSecret) {
 		nethash: options.get('nethash'),
 		amount: assetInfo.amount ? assetInfo.amount + "" : "0",
 		fee: fee + "",
-		recipientId: assetInfo.receiveAddress ? assetInfo.receiveAddress : null,
-		senderPublicKey: keys.publicKey,
+		recipient_id: assetInfo.receive_address ? assetInfo.receive_address : null,
+		sender_public_key: keys.publicKey,
 		timestamp: slots.getTime() - options.get('clientDriftSeconds'),
 		asset: {}
     };

@@ -661,14 +661,14 @@ function getBytes(transaction, skipSignature, skipSecondSignature) {
   bb.writeString(transaction.nethash); // +8
 
   // +32
-  var senderPublicKeyBuffer = new Buffer(transaction.senderPublicKey, "hex");
+  var senderPublicKeyBuffer = new Buffer(transaction.sender_public_key, "hex");   //wxm block database
   for (var i = 0; i < senderPublicKeyBuffer.length; i++) {
     bb.writeByte(senderPublicKeyBuffer[i]);
   }
 
   // +32
-  if (transaction.requesterPublicKey) {
-    var requesterPublicKey = new Buffer(transaction.requesterPublicKey, "hex");
+  if (transaction.requester_public_key) { //wxm block database
+    var requesterPublicKey = new Buffer(transaction.requester_public_key, "hex"); //wxm block database
 
     for (var i = 0; i < requesterPublicKey.length; i++) {
       bb.writeByte(requesterPublicKey[i]);
@@ -676,8 +676,8 @@ function getBytes(transaction, skipSignature, skipSecondSignature) {
   }
 
   // +8
-  if (transaction.recipientId) {
-    bb.writeString(transaction.recipientId);
+  if (transaction.recipient_id) {    //wxm block database
+    bb.writeString(transaction.recipient_id);    //wxm block database
   } else {
     for (var i = 0; i < 8; i++) {
       bb.writeByte(0);
@@ -711,8 +711,8 @@ function getBytes(transaction, skipSignature, skipSecondSignature) {
     }
   }
 
-  if (!skipSecondSignature && transaction.signSignature) {
-    var signSignatureBuffer = new Buffer(transaction.signSignature, "hex");
+  if (!skipSecondSignature && transaction.sign_signature) {  //wxm block database
+    var signSignatureBuffer = new Buffer(transaction.sign_signature, "hex"); //wxm block database
     for (var i = 0; i < signSignatureBuffer.length; i++) {
       bb.writeByte(signSignatureBuffer[i]);
     }
@@ -777,7 +777,7 @@ function sign(transaction, keys) {
 function secondSign(transaction, keys) {
   var hash = getHash(transaction);
   var signature = nacl.sign.detached(hash, new Buffer(keys.privateKey, "hex"));
-  transaction.signSignature = new Buffer(signature).toString("hex")
+  transaction.sign_signature = new Buffer(signature).toString("hex")    //wxm block database
 }
 
 function signBytes(bytes, keys) {
