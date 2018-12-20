@@ -23,14 +23,14 @@ function createTransaction(recipientId, amount, message, secret, secondSecret) {
 		nethash: options.get('nethash'),
 		amount: amount + "",
 		fee: constants.fees.send,
-		recipientId: recipientId,
+		recipient_id: recipientId,
 		message: message,
 		timestamp: slots.getTime() - options.get('clientDriftSeconds'),
 		asset: {}
 	};
 
 	var keys = crypto.getKeys(secret);
-	transaction.senderPublicKey = keys.publicKey;
+	transaction.sender_public_key = keys.publicKey;
 
 	crypto.sign(transaction, keys);
 
