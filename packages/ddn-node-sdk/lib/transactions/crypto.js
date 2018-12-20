@@ -17,7 +17,7 @@ var fixedPoint = Math.pow(10, 8);
 
 function getSignatureBytes(signature) {
   var bb = new ByteBuffer(32, true);
-  var publicKeyBuffer = new Buffer(signature.publicKey, "hex");
+  var publicKeyBuffer = new Buffer(signature.public_key, "hex");
 
   for (var i = 0; i < publicKeyBuffer.length; i++) {
     bb.writeByte(publicKeyBuffer[i]);
@@ -574,9 +574,9 @@ function getBytes(transaction, skipSignature, skipSecondSignature) {
       if (typeof asset.strategy === 'string' && asset.strategy.length > 0) {
         bb.writeString(asset.strategy)
       }
-      bb.writeByte(asset.allowWriteoff)
-      bb.writeByte(asset.allowWhitelist)
-      bb.writeByte(asset.allowBlacklist)
+      bb.writeByte(asset.allow_writeoff)
+      bb.writeByte(asset.allow_whitelist)
+      bb.writeByte(asset.allow_blacklist)
       bb.flip()
       assetBytes = toLocalBuffer(bb)
       break;
@@ -661,11 +661,7 @@ function getBytes(transaction, skipSignature, skipSecondSignature) {
   bb.writeString(transaction.nethash); // +8
 
   // +32
-<<<<<<< HEAD
-  var senderPublicKeyBuffer = new Buffer(transaction.sender_public_key, "hex");   //wxm block database
-=======
   var senderPublicKeyBuffer = new Buffer(transaction.sender_public_key, "hex");
->>>>>>> 2d171ae1c238befb805d7fd84e311b58cc75fded
   for (var i = 0; i < senderPublicKeyBuffer.length; i++) {
     bb.writeByte(senderPublicKeyBuffer[i]);
   }
@@ -680,13 +676,8 @@ function getBytes(transaction, skipSignature, skipSecondSignature) {
   }
 
   // +8
-<<<<<<< HEAD
-  if (transaction.recipient_id) {    //wxm block database
-    bb.writeString(transaction.recipient_id);    //wxm block database
-=======
   if (transaction.recipient_id) {
     bb.writeString(transaction.recipient_id);
->>>>>>> 2d171ae1c238befb805d7fd84e311b58cc75fded
   } else {
     for (var i = 0; i < 8; i++) {
       bb.writeByte(0);

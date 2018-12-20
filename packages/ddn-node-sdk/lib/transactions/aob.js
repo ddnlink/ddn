@@ -18,8 +18,8 @@ function createTransaction(asset, fee, type, recipientId, message, secret, secon
     nethash: options.get('nethash'),
     amount: "0",
     fee: fee + "",
-    recipientId: recipientId,
-    senderPublicKey: keys.publicKey,
+    recipient_id: recipientId,
+    sender_public_key: keys.publicKey,
     timestamp: getClientFixedTime(),
     message: message,
     asset: asset
@@ -58,9 +58,9 @@ module.exports = {
         maximum: maximum,
         precision: precision,
         strategy: strategy,
-        allowBlacklist: allowBlacklist,
-        allowWhitelist: allowWhitelist,
-        allowWriteoff: allowWriteoff
+        allow_blacklist: allowBlacklist,
+        allow_whitelist: allowWhitelist,
+        allow_writeoff: allowWriteoff
       }
     }
     // var fee = (500 + (Math.floor(bytes.length / 200) + 1) * 0.1) * constants.coin
