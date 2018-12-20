@@ -21,7 +21,7 @@ function createPluginAsset(trsType, assetInfo, secret, secondSecret) {
     };
     
     delete assetInfo.amount;
-    delete assetInfo.receiveAddress;
+    delete assetInfo.receive_address;
 
     var assetJsonName = AssetUtils.getAssetJsonName(trsType);
     transaction.asset[assetJsonName] = assetInfo;
