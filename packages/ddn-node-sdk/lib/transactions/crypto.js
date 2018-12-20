@@ -676,13 +676,8 @@ function getBytes(transaction, skipSignature, skipSecondSignature) {
   }
 
   // +8
-<<<<<<< HEAD
-  if (transaction.recipient_id) {    //wxm block database
-    bb.writeString(transaction.recipient_id);    //wxm block database
-=======
   if (transaction.recipient_id) {
     bb.writeString(transaction.recipient_id);
->>>>>>> 2d171ae1c238befb805d7fd84e311b58cc75fded
   } else {
     for (var i = 0; i < 8; i++) {
       bb.writeByte(0);
