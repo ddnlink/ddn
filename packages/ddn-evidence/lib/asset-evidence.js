@@ -18,7 +18,7 @@ class AssetEvidence extends AssetBase
 
     verify(trs, sender, cb)
     {
-        super.verify(trs, sender, (err, trans) => {
+        super.verify(trs, sender, async (err, trans) => {
             if (!err)
             {
                 var condition = {
@@ -26,23 +26,27 @@ class AssetEvidence extends AssetBase
                         ipid: trans.asset.assetEvidence.ipid
                     }
                 }
-                super.queryAsset({
-                    ipid: trans.asset.assetEvidence.ipid
-                }, null, false, 1, 1, (err2, rows) => {
-                    if (err2) {
-                        return cb(err2);
-                    }
 
-                    if (rows && rows.length > 0) {
-                        return cb('Evidence IPID already exists');
+                try
+                {
+                    var results = await super.queryAsset({
+                            ipid: trans.asset.assetEvidence.ipid
+                        }, ["ipid"], false, 1, 1);
+
+                    if (results && results.length > 0) {
+                        cb('Evidence IPID already exists');
                     } else {
-                        return cb(null, trans);
+                        cb(null, trans);
                     }
-                })
+                }
+                catch (err2)
+                {
+                    cb(err2);
+                }
             }
             else
             {
-                return cb(err);
+                cb(err);
             }
         })
     }
