@@ -50,41 +50,6 @@ class AssetUtils
 
         var assetPlugins = require(file);
         return this.loadFromObject(assetPlugins);
-        // for (var p in assetPlugins) {
-        //     var currAsset = assetPlugins[p];
-        //     if (currAsset) {
-        //         if (currAsset.package && !/^\s*$/.test(currAsset.package)) {
-        //             var assetTransactions = currAsset.transactions;
-        //             if (assetTransactions && assetTransactions.length > 0) {
-        //                 for (var i = 0; i < assetTransactions.length; i++) {
-        //                     var currTrans = assetTransactions[i];
-        //                     if (!(currTrans.name && !/^\s*$/.test(currTrans.name))) {
-        //                         throw new Error("The asset.plugin.js error: name property required.");
-        //                     }
-        //                     if (!(currTrans.type && /^[1-9][0-9]*$/.test(currTrans.type))) {
-        //                         throw new Error("The asset.plugin.js error: type property required.");
-        //                     }
-
-        //                     if (_transTypeNames[currTrans.type]) {
-        //                         throw new Error("The asset.plugin.js error: type " + currTrans.type + " is duplicated.");
-        //                     }
-
-        //                     currTrans.package = currAsset.package;
-
-        //                     _transConfigs.push(currTrans);
-        //                     _transTypeValues[currTrans.name] = currTrans;
-        //                     _transTypeNames[currTrans.type] = currTrans;
-        //                 }
-        //             }
-        //         }
-        //         else
-        //         {
-        //             throw new Error("The asset.plugin.js error: package property required.");
-        //         }
-        //     }
-        // }
-
-        // return this;
     }
 
     static getTypeValue(typeName) {
