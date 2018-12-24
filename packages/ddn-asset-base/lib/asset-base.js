@@ -610,7 +610,6 @@ class AssetBase {
     }
 
     objectNormalize(trs) {
-        console.log("wxm 1111111111111111111111111111111111111111111111111111: " + JSON.stringify(trs));
         var assetName = AssetUtils.getAssetJsonName(trs.type);
 
         var propsRules = {};
