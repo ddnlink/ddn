@@ -14,12 +14,12 @@ function createInTransfer(dappId, currency, amount, secret, secondSecret) {
 		nethash: nethash,
 		amount: "0",    //bignum update
 		fee: constants.fees.send,
-		recipientId: null,
-		senderPublicKey: keys.publicKey,
+		recipient_id: null,
+		sender_public_key: keys.publicKey,
 		timestamp: slots.getTime() - options.get('clientDriftSeconds'),
 		asset: {
 			inTransfer: {
-				dappId: dappId,
+				dapp_id: dappId,
 				currency: currency
 			}
 		}
@@ -46,17 +46,17 @@ function createOutTransfer(recipientId, dappId, transactionId, currency, amount,
 	var keys = crypto.getKeys(secret);
 
 	var transaction = {
-        nethash: nethash,
+    nethash: nethash,
 		type: transactionTypes.OUT_TRANSFER,
 		amount: "0",    //bignum update
 		fee: constants.fees.send,
-		recipientId: recipientId,
-		senderPublicKey: keys.publicKey,
+		recipient_id: recipientId,
+		sender_public_key: keys.publicKey,
 		timestamp: slots.getTime() - options.get('clientDriftSeconds'),
 		asset: {
 			outTransfer: {
-				dappId: dappId,
-				transactionId: transactionId,
+				dapp_id: dappId,
+				transaction_id: transactionId,
 				currency: currency,
 				amount: amount
 			}

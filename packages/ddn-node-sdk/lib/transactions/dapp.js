@@ -9,12 +9,12 @@ function createDApp(options, secret, secondSecret) {
 	var keys = crypto.getKeys(secret);
 
 	var transaction = {
-        nethash: globalOptions.get('nethash'),
+    nethash: globalOptions.get('nethash'),
 		type: transactionTypes.DAPP,
 		amount: "0",    //bignum update
 		fee: constants.fees.dapp,
-		recipientId: null,
-		senderPublicKey: keys.publicKey,
+		recipient_id: null,
+		sender_public_key: keys.publicKey,
 		timestamp: slots.getTime() - globalOptions.get('clientDriftSeconds'),
 		asset: {
 			dapp: {
@@ -26,7 +26,7 @@ function createDApp(options, secret, secondSecret) {
 				link: options.link,
 				icon: options.icon,
 				delegates: options.delegates,
-				unlockDelegates: options.unlockDelegates
+				unlock_delegates: options.unlock_delegates
 			}
 		}
 	};
@@ -71,7 +71,7 @@ function createInnerTransaction(options, secret) {
 	var args = options.args
 	if (args instanceof Array) args = JSON.stringify(args)
 	var trs = {
-        nethash: globalOptions.get('nethash'),
+    nethash: globalOptions.get('nethash'),
 		fee: options.fee,
 		timestamp: slots.getTime() - globalOptions.get('clientDriftSeconds'),
 		senderPublicKey: keys.publicKey,

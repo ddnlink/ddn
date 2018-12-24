@@ -71,7 +71,7 @@ function getDAppBytes(dapp) {
     bb.writeInt(dapp.type);
     bb.writeInt(dapp.category);
     bb.writeString(dapp.delegates.join(','));
-    bb.writeInt(dapp.unlockDelegates);
+    bb.writeInt(dapp.unlock_delegates);
     bb.flip();
 
     buf = Buffer.concat([buf, bb.toBuffer()]);
@@ -85,9 +85,9 @@ function getDAppBytes(dapp) {
 function getInTransferBytes(inTransfer) {
   try {
     var buf = new Buffer([]);
-    var dappId = new Buffer(inTransfer.dappId, "utf8");
-    var currency = new Buffer(inTransfer.currency, "utf8")
-    buf = Buffer.concat([buf, dappId, currency]);
+    var dapp_id = new Buffer(inTransfer.dapp_id, "utf8");
+    var currency = new Buffer(inTransfer.currency, "utf8");
+    buf = Buffer.concat([buf, dapp_id, currency]);
     if (inTransfer.currency !== constants.nethash[options.get('nethash')].tokenName) {
       var amount = new Buffer(inTransfer.amount, "utf8")
       buf = Buffer.concat([buf, amount])
@@ -102,8 +102,8 @@ function getInTransferBytes(inTransfer) {
 function getOutTransferBytes(outTransfer) {
   try {
     var buf = new Buffer([]);
-    var dappIdBuf = new Buffer(outTransfer.dappId, 'utf8');
-    var transactionIdBuff = new Buffer(outTransfer.transactionId, 'utf8');
+    var dappIdBuf = new Buffer(outTransfer.dapp_id, 'utf8');
+    var transactionIdBuff = new Buffer(outTransfer.transaction_id, 'utf8');
     var currencyBuff = new Buffer(outTransfer.currency, 'utf8')
     var amountBuff = new Buffer(outTransfer.amount, 'utf8')
     buf = Buffer.concat([buf, dappIdBuf, transactionIdBuff, currencyBuff, amountBuff]);
@@ -584,7 +584,7 @@ function getBytes(transaction, skipSignature, skipSecondSignature) {
       var bb = new ByteBuffer(1, true)
       var asset = transaction.asset.aobFlags
       bb.writeString(asset.currency)
-      bb.writeByte(asset.flagType)
+      bb.writeByte(asset.flag_type)
       bb.writeByte(asset.flag)
       bb.flip()
       assetBytes = toLocalBuffer(bb)

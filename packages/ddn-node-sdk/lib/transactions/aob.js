@@ -72,7 +72,7 @@ module.exports = {
     var asset = {
       aobFlags: {
         currency: currency,
-        flagType: flagType,
+        flag_type: flagType,
         flag: flag
       }
     }
