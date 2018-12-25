@@ -13,12 +13,12 @@ function createDelegate(username, secret, secondSecret) {
 		amount: "0",
 		fee: constants.fees.delegate,
 		recipientId: null,
-		senderPublicKey: keys.publicKey,
+		sender_public_key: keys.publicKey,
 		timestamp: slots.getTime() - options.get('clientDriftSeconds'),
 		asset: {
 			delegate: {
 				username: username,
-				publicKey: keys.publicKey
+				public_key: keys.publicKey
 			}
 		}
 	};
