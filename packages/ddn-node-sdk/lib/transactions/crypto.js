@@ -102,11 +102,11 @@ function getInTransferBytes(inTransfer) {
 function getOutTransferBytes(outTransfer) {
   try {
     var buf = new Buffer([]);
-    var dappIdBuf = new Buffer(outTransfer.dapp_id, 'utf8');
-    var transactionIdBuff = new Buffer(outTransfer.transaction_id, 'utf8');
-    var currencyBuff = new Buffer(outTransfer.currency, 'utf8')
+    var dappId_buf = new Buffer(outTransfer.dapp_id, 'utf8');
+    var transactionId_buff = new Buffer(outTransfer.transaction_id, 'utf8');
+    var currency_buff = new Buffer(outTransfer.currency, 'utf8')
     var amountBuff = new Buffer(outTransfer.amount, 'utf8')
-    buf = Buffer.concat([buf, dappIdBuf, transactionIdBuff, currencyBuff, amountBuff]);
+    buf = Buffer.concat([buf, dappId_buf, transactionId_buff, currency_buff, amountBuff]);
   } catch (e) {
     throw Error(e.toString());
   }
@@ -117,7 +117,7 @@ function getOutTransferBytes(outTransfer) {
 function getOrgBytes(org) {
   const bb = new ByteBuffer();
   try {
-    bb.writeUTF8String(org.orgId.toLowerCase());
+    bb.writeUTF8String(org.org_id.toLowerCase());
     bb.writeUTF8String(org.name ? org.name : '');
     bb.writeUTF8String(org.address ? org.address : '');
     bb.writeUTF8String(org.url ? org.url : '');
@@ -135,12 +135,12 @@ function getOrgBytes(org) {
 function getExchangeBytes(asset) {
   const bb = new ByteBuffer();
   try {
-    bb.writeString(asset.orgId.toLowerCase())
-    bb.writeString(asset.exchangeTrsId)
+    bb.writeString(asset.org_id.toLowerCase())
+    bb.writeString(asset.exchange_trs_id)
     bb.writeString(asset.price);
     bb.writeInt8(asset.state);
-    bb.writeString(asset.senderAddress)
-    bb.writeString(asset.receivedAddress)
+    bb.writeString(asset.sender_address)
+    bb.writeString(asset.received_address)
 
     bb.flip();
   } catch (e) {
@@ -152,8 +152,8 @@ function getExchangeBytes(asset) {
 function getContributionBytes(asset) {
   const bb = new ByteBuffer();
   bb.writeUTF8String(asset.title);
-  bb.writeUTF8String(asset.receivedAddress);
-  bb.writeUTF8String(asset.senderAddress);
+  bb.writeUTF8String(asset.received_address);
+  bb.writeUTF8String(asset.sender_address);
   bb.writeUTF8String(asset.price);
   bb.writeUTF8String(asset.url);
   bb.flip();
@@ -163,9 +163,10 @@ function getContributionBytes(asset) {
 
 function getConfirmationBytes(asset) {
     const bb = new ByteBuffer();
-    bb.writeUTF8String(asset.receivedAddress);
-    bb.writeUTF8String(asset.senderAddress);
-    bb.writeUTF8String(asset.contributionTrsId);
+    bb.writeUTF8String(asset.received_address);
+    bb.writeUTF8String(asset.sender_address);
+    // bb.writeUTF8String(asset.contributionTrsId);
+    bb.writeUTF8String(asset.contribution_trs_id);
     bb.writeUTF8String(asset.url);
     bb.writeInt32(asset.state);
     bb.flip();
@@ -217,7 +218,7 @@ function getCouponIssuerApplyBytes(asset) {
     try {
         bb.writeUTF8String(asset.address);
         bb.writeUTF8String(asset.orgName || "");
-        bb.writeUTF8String(asset.orgId || "");
+        bb.writeUTF8String(asset.org_id || "");
         bb.writeUTF8String(asset.orgOwner || "");
         bb.writeUTF8String(asset.orgOwnerPhone || "");
         bb.flip();
@@ -234,7 +235,7 @@ function getCouponIssuerCheckBytes(asset) {
     try {
         bb.writeUTF8String(asset.address);
         bb.writeUTF8String(asset.orgName || "");
-        bb.writeUTF8String(asset.orgId || "");
+        bb.writeUTF8String(asset.org_id || "");
         bb.writeUTF8String(asset.orgOwner || "");
         bb.writeUTF8String(asset.orgOwnerPhone || "");
         bb.writeInt(asset.state);
@@ -252,7 +253,7 @@ function getCouponIssuerUpdateBytes(asset) {
     try {
         bb.writeUTF8String(asset.address);
         bb.writeUTF8String(asset.orgName || "");
-        bb.writeUTF8String(asset.orgId || "");
+        bb.writeUTF8String(asset.org_id || "");
         bb.writeUTF8String(asset.orgOwner || "");
         bb.writeUTF8String(asset.orgOwnerPhone || "");
         bb.flip();
@@ -269,7 +270,7 @@ function getCouponIssuerFreezeBytes(asset) {
     try {
         bb.writeUTF8String(asset.address);
         bb.writeUTF8String(asset.orgName || "");
-        bb.writeUTF8String(asset.orgId || "");
+        bb.writeUTF8String(asset.org_id || "");
         bb.writeUTF8String(asset.orgOwner || "");
         bb.writeUTF8String(asset.orgOwnerPhone || "");
         bb.flip();
@@ -286,7 +287,7 @@ function getCouponIssuerUnfreezeBytes(asset) {
     try {
         bb.writeUTF8String(asset.address);
         bb.writeUTF8String(asset.orgName || "");
-        bb.writeUTF8String(asset.orgId || "");
+        bb.writeUTF8String(asset.org_id || "");
         bb.writeUTF8String(asset.orgOwner || "");
         bb.writeUTF8String(asset.orgOwnerPhone || "");
         bb.writeInt(asset.state);
@@ -373,8 +374,8 @@ function getCouponExchangeBuyBytes(asset) {
     {
         bb.writeUTF8String(asset.batchValue);
         bb.writeUTF8String(asset.code);
-        bb.writeUTF8String(asset.senderAddress);
-        bb.writeUTF8String(asset.receivedAddress);
+        bb.writeUTF8String(asset.sender_address);
+        bb.writeUTF8String(asset.received_address);
         bb.writeUTF8String(asset.price);
         bb.flip();
     }
@@ -391,8 +392,8 @@ function getCouponExchangePayBytes(asset) {
     {
         bb.writeUTF8String(asset.batchValue);
         bb.writeUTF8String(asset.code);
-        bb.writeUTF8String(asset.senderAddress);
-        bb.writeUTF8String(asset.receivedAddress);
+        bb.writeUTF8String(asset.sender_address);
+        bb.writeUTF8String(asset.received_address);
         bb.flip();
     }
     catch (e) 
@@ -408,8 +409,8 @@ function getCouponExchangeTransferAskBytes(asset) {
     {
         bb.writeUTF8String(asset.batchValue);
         bb.writeUTF8String(asset.code);
-        bb.writeUTF8String(asset.senderAddress);
-        bb.writeUTF8String(asset.receivedAddress);
+        bb.writeUTF8String(asset.sender_address);
+        bb.writeUTF8String(asset.received_address);
         bb.writeUTF8String(asset.price);
         bb.flip();
     }
@@ -426,9 +427,9 @@ function getCouponExchangeTransferConfirmBytes(asset) {
     {
         bb.writeUTF8String(asset.batchValue);
         bb.writeUTF8String(asset.code);
-        bb.writeUTF8String(asset.senderAddress);
-        bb.writeUTF8String(asset.receivedAddress);
-        bb.writeUTF8String(asset.relatedTrsId);
+        bb.writeUTF8String(asset.sender_address);
+        bb.writeUTF8String(asset.received_address);
+        bb.writeUTF8String(asset.related_trs_id);
         bb.writeUTF8String(asset.price);
         bb.writeInt(asset.transferState);
         bb.flip();
@@ -509,6 +510,7 @@ function getBytes(transaction, skipSignature, skipSecondSignature) {
       break;
     case trsTypes.CONTRIBUTION:
       assetBytes = getContributionBytes(transaction.asset.daoContribution);
+      // assetBytes = getContributionBytes(transaction.asset.daoContribution);
       break;
     case trsTypes.CONFIRMATION:
       assetBytes = getConfirmationBytes(transaction.asset.daoConfirmation);
@@ -662,6 +664,7 @@ function getBytes(transaction, skipSignature, skipSecondSignature) {
 
   // +32
   var senderPublicKeyBuffer = new Buffer(transaction.sender_public_key, "hex");
+  // var senderPublicKeyBuffer = new Buffer(transaction.senderPublicKey, "hex");
   for (var i = 0; i < senderPublicKeyBuffer.length; i++) {
     bb.writeByte(senderPublicKeyBuffer[i]);
   }
@@ -765,7 +768,7 @@ function getFee(transaction) {
 
 function sign(transaction, keys) {
   var hash = getHash(transaction, true, true);
-  var signature = nacl.sign.detached(hash, new Buffer(keys.privateKey, "hex"));
+  var signature = nacl.sign.detached(hash, new Buffer(keys.private_key, "hex"));
 
   if (!transaction.signature) {
     transaction.signature = new Buffer(signature).toString("hex");
@@ -776,13 +779,13 @@ function sign(transaction, keys) {
 
 function secondSign(transaction, keys) {
   var hash = getHash(transaction);
-  var signature = nacl.sign.detached(hash, new Buffer(keys.privateKey, "hex"));
+  var signature = nacl.sign.detached(hash, new Buffer(keys.private_key, "hex"));
   transaction.sign_signature = new Buffer(signature).toString("hex")    //wxm block database
 }
 
 function signBytes(bytes, keys) {
   var hash = sha256Bytes(new Buffer(bytes, 'hex'))
-  var signature = nacl.sign.detached(hash, new Buffer(keys.privateKey, "hex"));
+  var signature = nacl.sign.detached(hash, new Buffer(keys.private_key, "hex"));
   return new Buffer(signature).toString("hex");
 }
 
@@ -809,7 +812,7 @@ function verify(transaction) {
   return res;
 }
 
-function verifySecondSignature(transaction, publicKey) {
+function verifySecondSignature(transaction, public_key) {
   var bytes = getBytes(transaction);
   var data2 = new Buffer(bytes.length - 64);
 
@@ -820,16 +823,16 @@ function verifySecondSignature(transaction, publicKey) {
   var hash = sha256Bytes(data2)
 
   var signSignatureBuffer = new Buffer(transaction.signSignature, "hex");
-  var publicKeyBuffer = new Buffer(publicKey, "hex");
+  var publicKeyBuffer = new Buffer(public_key, "hex");
   var res = nacl.sign.detached.verify(hash, signSignatureBuffer, publicKeyBuffer);
 
   return res;
 }
 
-function verifyBytes(bytes, signature, publicKey) {
+function verifyBytes(bytes, signature, public_key) {
   var hash = sha256Bytes(new Buffer(bytes, 'hex'))
   var signatureBuffer = new Buffer(signature, "hex");
-  var publicKeyBuffer = new Buffer(publicKey, "hex");
+  var publicKeyBuffer = new Buffer(public_key, "hex");
   var res = nacl.sign.detached.verify(hash, signatureBuffer, publicKeyBuffer);
   return res
 }
@@ -839,13 +842,13 @@ function getKeys(secret) {
   var keypair = nacl.sign.keyPair.fromSeed(hash);
 
   return {
-    publicKey: new Buffer(keypair.publicKey).toString("hex"),
-    privateKey: new Buffer(keypair.secretKey).toString("hex")
+    public_key: new Buffer(keypair.publicKey).toString("hex"),
+    private_key: new Buffer(keypair.secretKey).toString("hex")
   }
 }
 
-function getAddress(publicKey) {
-  return addressHelper.generateBase58CheckAddress(publicKey)
+function getAddress(public_key) {
+  return addressHelper.generateBase58CheckAddress(public_key)
 }
 
 module.exports = {

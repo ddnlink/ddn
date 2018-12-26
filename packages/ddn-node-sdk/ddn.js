@@ -977,8 +977,8 @@ function getExchangeBytes(asset) {
     bb.writeString(asset.exchangeTrsId)
     bb.writeString(asset.price);
     bb.writeInt8(asset.state);
-    bb.writeString(asset.senderAddress)
-    bb.writeString(asset.receivedAddress)
+    bb.writeString(asset.sender_address)
+    bb.writeString(asset.received_address)
 
     bb.flip();
   } catch (e) {
@@ -990,8 +990,8 @@ function getExchangeBytes(asset) {
 function getContributionBytes(asset) {
   const bb = new ByteBuffer();
   bb.writeUTF8String(asset.title);
-  bb.writeUTF8String(asset.receivedAddress);
-  bb.writeUTF8String(asset.senderAddress);
+  bb.writeUTF8String(asset.received_address);
+  bb.writeUTF8String(asset.sender_address);
   bb.writeUTF8String(asset.price);
   bb.writeUTF8String(asset.url);
   bb.flip();
@@ -1001,9 +1001,9 @@ function getContributionBytes(asset) {
 
 function getConfirmationBytes(asset) {
     const bb = new ByteBuffer();
-    bb.writeUTF8String(asset.receivedAddress);
-    bb.writeUTF8String(asset.senderAddress);
-    bb.writeUTF8String(asset.contributionTrsId);
+    bb.writeUTF8String(asset.received_address);
+    bb.writeUTF8String(asset.sender_address);
+    bb.writeUTF8String(asset.contribution_trs_id);
     bb.writeUTF8String(asset.url);
     bb.writeInt32(asset.state);
     bb.flip();
@@ -1092,6 +1092,7 @@ function getBytes(transaction, skipSignature, skipSecondSignature) {
       break;
     case trsTypes.CONTRIBUTION:
       assetBytes = getContributionBytes(transaction.asset.daoContribution);
+      // assetBytes = getContributionBytes(transaction.asset.daoContribution);
       break;
     case trsTypes.CONFIRMATION:
       assetBytes = getConfirmationBytes(transaction.asset.daoConfirmation);
@@ -1533,16 +1534,16 @@ function createConfirmation(trsAmount, confirmation, secret, secondSecret) {
 		throw new Error('The first argument should be a object!');
 	}
 
-	if (!confirmation.senderAddress || confirmation.senderAddress.length == 0) {
-		throw new Error('Invalid senderAddress format');
+	if (!confirmation.sender_address || confirmation.sender_address.length == 0) {
+		throw new Error('Invalid sender_address format');
 	}
 	
-	if (!confirmation.receivedAddress || confirmation.receivedAddress.length == 0) {
-		throw new Error('Invalid receivedAddress format');
+	if (!confirmation.received_address || confirmation.received_address.length == 0) {
+		throw new Error('Invalid received_address format');
 	}
 
-	if (!confirmation.contributionTrsId || confirmation.contributionTrsId.length == 0) {
-		throw new Error('Invalid contributionTrsId format');
+	if (!confirmation.contribution_trs_id || confirmation.contribution_trs_id.length == 0) {
+		throw new Error('Invalid contribution_trs_id format');
 	}
     
 	if (!confirmation.url || confirmation.url.length == 0) {
@@ -1559,7 +1560,7 @@ function createConfirmation(trsAmount, confirmation, secret, secondSecret) {
     var recipientId = "";
     if (confirmation.state == 1) {
         amount = trsAmount;
-        recipientId = confirmation.receivedAddress;
+        recipientId = confirmation.received_address;
     }
 
     var transaction = {
@@ -1604,12 +1605,12 @@ function createContribution(contribution, secret, secondSecret) {
 		throw new Error('Invalid title format');
 	}
 
-	if (!contribution.senderAddress || contribution.senderAddress.length == 0) {
-		throw new Error('Invalid senderAddress format');
+	if (!contribution.sender_address || contribution.sender_address.length == 0) {
+		throw new Error('Invalid sender_address format');
 	}
 	
-	if (!contribution.receivedAddress || contribution.receivedAddress.length == 0) {
-		throw new Error('Invalid receivedAddress format');
+	if (!contribution.received_address || contribution.received_address.length == 0) {
+		throw new Error('Invalid received_address format');
 	}
 
 	if (!contribution.url || contribution.url.length == 0) {

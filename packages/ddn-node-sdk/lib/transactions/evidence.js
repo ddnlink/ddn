@@ -31,7 +31,9 @@ function createEvidence(evidence, secret, secondSecret) {
 		amount: "0",   
 		fee: fee,
 		recipientId: null,
-		senderPublicKey: keys.publicKey,
+		sender_public_key: keys.public_key,
+		// sender_public_key: keys.publicKey,
+		// senderPublicKey: keys.publicKey,
 		timestamp: slots.getTime() - options.get('clientDriftSeconds'),
 		asset: {
 			evidence: evidence

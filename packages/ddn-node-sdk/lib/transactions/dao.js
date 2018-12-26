@@ -11,7 +11,7 @@ var bignum = require('bignum-utils');
  * Create org transaction
  * @param {Org} org object
  * @param {*} secret 
- * @param {*} secondSecret 
+ * @param {*} second_secret 
  */
 
 
@@ -32,11 +32,11 @@ function isOrgId(dao_id) {
     }
   }
 
-function createOrg(org, secret, secondSecret) {
+function createOrg(org, secret, second_secret) {
 	var keys = crypto.getKeys(secret);
 	var bytes = null;
 
-	var sender = addressHelper.generateBase58CheckAddress(keys.publicKey)
+	var sender = addressHelper.generateBase58CheckAddress(keys.public_key)
 
 	if (!org.address) {
 		org.address = sender;
@@ -46,12 +46,12 @@ function createOrg(org, secret, secondSecret) {
 		throw new Error('The first argument should be a object!');
 	}
 
-	org.orgId = org.orgId.toLowerCase()
-	if ( !isOrgId(org.orgId) || !org.orgId || org.orgId.length == 0) {
-		throw new Error('Invalid orgId format');
+	org.org_id = org.org_id.toLowerCase()
+	if ( !isOrgId(org.org_id) || !org.org_id || org.org_id.length == 0) {
+		throw new Error('Invalid org_id format');
 	}
 
-    var olen = org.orgId.length
+    var olen = org.org_id.length
     , feeBase = 1
     if ( olen > 10 ) { feeBase = 10
     }else if ( olen == 10) { feeBase = 50
@@ -67,14 +67,14 @@ function createOrg(org, secret, secondSecret) {
 	if(org.state == 1){
 		feeBase = parseInt(feeBase / 10);
 	}
-
 	var transaction = {
 		type: trsTypes.ORG,
 		nethash: options.get('nethash'),
 		amount: "0",
 		fee: bignum.multiply(feeBase, 100000000).toString(),   //bignum update feeBase * 100000000,
 		recipientId: null,
-		senderPublicKey: keys.publicKey,
+		sender_public_key: keys.public_key,
+		senderPublicKey: keys.public_key,
 		timestamp: slots.getTime() - options.get('clientDriftSeconds'),
 		asset: {
 			org: org
@@ -83,8 +83,8 @@ function createOrg(org, secret, secondSecret) {
 
 	crypto.sign(transaction, keys);
 
-	if (secondSecret) {
-		var secondKeys = crypto.getKeys(secondSecret);
+	if (second_secret) {
+		var secondKeys = crypto.getKeys(second_secret);
 		crypto.secondSign(transaction, secondKeys);
 	}
 
@@ -92,7 +92,7 @@ function createOrg(org, secret, secondSecret) {
 	return transaction;
 }
 
-function createTransfer(address, amount, secret, secondSecret) {
+function createTransfer(address, amount, secret, second_secret) {
     var keys = crypto.getKeys(secret);
     var fee = constants.fees.org;
     var transaction = {
@@ -101,21 +101,22 @@ function createTransfer(address, amount, secret, secondSecret) {
         amount: amount, // fixme 1000000000 ????
         fee: fee + "",
         recipientId: address,
-        senderPublicKey: keys.publicKey,
+        sender_public_key: keys.public_key,
+        senderPublicKey: keys.public_key,
         timestamp: slots.getTime() - options.get('clientDriftSeconds')
     };
 
     crypto.sign(transaction, keys);
 
-    if (secondSecret) {
-        var secondKeys = crypto.getKeys(secondSecret);
+    if (second_secret) {
+        var secondKeys = crypto.getKeys(second_secret);
         crypto.secondSign(transaction, secondKeys);
     }
 
     return transaction;
 }
 
-function createConfirmation(trsAmount, confirmation, secret, secondSecret) {
+function createConfirmation(trsAmount, confirmation, secret, second_secret) {
     var keys = crypto.getKeys(secret);
     var bytes = null;
 
@@ -123,16 +124,16 @@ function createConfirmation(trsAmount, confirmation, secret, secondSecret) {
 		throw new Error('The first argument should be a object!');
 	}
 
-	if (!confirmation.senderAddress || confirmation.senderAddress.length == 0) {
-		throw new Error('Invalid senderAddress format');
+	if (!confirmation.sender_address || confirmation.sender_address.length == 0) {
+		throw new Error('Invalid sender_address format');
 	}
 	
-	if (!confirmation.receivedAddress || confirmation.receivedAddress.length == 0) {
-		throw new Error('Invalid receivedAddress format');
+	if (!confirmation.received_address || confirmation.received_address.length == 0) {
+		throw new Error('Invalid received_address format');
 	}
 
-	if (!confirmation.contributionTrsId || confirmation.contributionTrsId.length == 0) {
-		throw new Error('Invalid contributionTrsId format');
+	if (!confirmation.contribution_trs_id || confirmation.contribution_trs_id.length == 0) {
+		throw new Error('Invalid contribution_trs_id format');
 	}
     
 	if (!confirmation.url || confirmation.url.length == 0) {
@@ -148,10 +149,10 @@ function createConfirmation(trsAmount, confirmation, secret, secondSecret) {
 		fee = "0"
 	}
     var amount = "0";
-    var recipientId = "";
+    var recipient_id = "";
     if (confirmation.state == 1) {
         amount = trsAmount;
-        recipientId = confirmation.receivedAddress;
+        recipient_id = confirmation.received_address;
     }
 
     var transaction = {
@@ -159,8 +160,9 @@ function createConfirmation(trsAmount, confirmation, secret, secondSecret) {
         nethash: options.get('nethash'),
         amount: amount + "",
         fee: fee + "",
-        recipientId: recipientId,
-        senderPublicKey: keys.publicKey,
+        recipient_id: recipient_id,
+        sender_public_key: keys.public_key,
+        senderPublicKey: keys.public_key,
         timestamp: slots.getTime() - options.get('clientDriftSeconds'),
         asset: {
             daoConfirmation: confirmation
@@ -169,8 +171,8 @@ function createConfirmation(trsAmount, confirmation, secret, secondSecret) {
 
     crypto.sign(transaction, keys);
     
-    if (secondSecret) {
-        var secondKeys = crypto.getKeys(secondSecret);
+    if (second_secret) {
+        var secondKeys = crypto.getKeys(second_secret);
         crypto.secondSign(transaction, secondKeys);
     }
 
@@ -182,9 +184,9 @@ function createConfirmation(trsAmount, confirmation, secret, secondSecret) {
  * create contribution transaction
  * @param {*} contribution 
  * @param {*} secret 
- * @param {*} secondSecret 
+ * @param {*} second_secret 
  */
-function createContribution(contribution, secret, secondSecret) {
+function createContribution(contribution, secret, second_secret) {
 	var keys = crypto.getKeys(secret);
 	var bytes = null;
 
@@ -196,12 +198,12 @@ function createContribution(contribution, secret, secondSecret) {
 		throw new Error('Invalid title format');
 	}
 
-	if (!contribution.senderAddress || contribution.senderAddress.length == 0) {
-		throw new Error('Invalid senderAddress format');
+	if (!contribution.sender_address || contribution.sender_address.length == 0) {
+		throw new Error('Invalid sender_address format');
 	}
 	
-	if (!contribution.receivedAddress || contribution.receivedAddress.length == 0) {
-		throw new Error('Invalid receivedAddress format');
+	if (!contribution.received_address || contribution.received_address.length == 0) {
+		throw new Error('Invalid received_address format');
 	}
 
 	if (!contribution.url || contribution.url.length == 0) {
@@ -209,24 +211,27 @@ function createContribution(contribution, secret, secondSecret) {
 	}
 	
 	var fee = constants.fees.org;
-
+	contribution.sender_address = contribution.sender_address
+	contribution.received_address = contribution.received_address
 	var transaction = {
 		type: trsTypes.CONTRIBUTION,
 		nethash: options.get('nethash'),
 		amount: "0",
 		fee: fee + "",
 		recipientId: null,
-		senderPublicKey: keys.publicKey,
+		sender_public_key: keys.public_key,
+		senderPublicKey: keys.public_key,
 		timestamp: slots.getTime() - options.get('clientDriftSeconds'),
 		asset: {
 			daoContribution: contribution
+			// daoContribution: contribution
 		}
 	};
 
 	crypto.sign(transaction, keys);
 	
-	if (secondSecret) {
-		var secondKeys = crypto.getKeys(secondSecret);
+	if (second_secret) {
+		var secondKeys = crypto.getKeys(second_secret);
 		crypto.secondSign(transaction, secondKeys);
 	}
 

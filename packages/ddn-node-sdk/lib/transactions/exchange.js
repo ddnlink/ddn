@@ -19,7 +19,7 @@ function createExchange(trsopt, exchange, secret, secondSecret) {
 		throw new Error('The first argument should be a object!');
 	}
 
-	if (!exchange.orgId || exchange.orgId.length == 0) {
+	if (!exchange.org_id || exchange.org_id.length == 0) {
 		throw new Error('Invalid orgId format');
 	}
 
@@ -31,7 +31,8 @@ function createExchange(trsopt, exchange, secret, secondSecret) {
 		amount: "0",    //bignum update
 		fee: fee + "",
 		recipientId: null,
-		senderPublicKey: keys.publicKey,
+		sender_public_key: keys.public_key,
+		// senderPublicKey: keys.publicKey,
 		timestamp: slots.getTime() - options.get('clientDriftSeconds'),
 		asset: {
 			exchange: exchange

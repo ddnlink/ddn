@@ -5,7 +5,7 @@ var options = require('../options');
 var slots = require('../time/slots.js');
 var addressHelper = require('../address.js');
 
-function createIssuerAuditorBuy(receivedAddress, amount, secret, secondSecret) {
+function createIssuerAuditorBuy(received_address, amount, secret, secondSecret) {
     var keys = crypto.getKeys(secret);
     
     var fee = constants.fees.send;
@@ -15,8 +15,8 @@ function createIssuerAuditorBuy(receivedAddress, amount, secret, secondSecret) {
         nethash: options.get('nethash'),
         amount: amount,
         fee: fee + "",
-        recipientId: receivedAddress,
-        senderPublicKey: keys.publicKey,
+        recipient_id: received_address,
+        sender_public_key: keys.publicKey,
         timestamp: slots.getTime() - options.get('clientDriftSeconds'),
         asset: {
             couponIssuerAuditorBuy: {
@@ -35,7 +35,7 @@ function createIssuerAuditorBuy(receivedAddress, amount, secret, secondSecret) {
     return transaction;
 }
 
-function createIssuerApply(orgName, orgId, orgOwner, orgOwnerPhone, secret, secondSecret) {
+function createIssuerApply(orgName, org_id, orgOwner, orgOwnerPhone, secret, secondSecret) {
     var keys = crypto.getKeys(secret);
 
     var fee = constants.fees.send;
@@ -45,14 +45,14 @@ function createIssuerApply(orgName, orgId, orgOwner, orgOwnerPhone, secret, seco
         nethash: options.get('nethash'),
         amount: "0",
         fee: fee + "",
-		recipientId: null,
-		senderPublicKey: keys.publicKey,
+		recipient_id: null,
+		sender_public_key: keys.publicKey,
         timestamp: slots.getTime() - options.get('clientDriftSeconds'),
         asset: {
             couponIssuerApply: {
                 address: addressHelper.generateBase58CheckAddress(keys.publicKey),
                 orgName: orgName,
-                orgId: orgId,
+                org_id: org_id,
                 orgOwner: orgOwner,
                 orgOwnerPhone: orgOwnerPhone
             }
@@ -69,7 +69,7 @@ function createIssuerApply(orgName, orgId, orgOwner, orgOwnerPhone, secret, seco
     return transaction;
 }
 
-function createIssuerUpdate(orgName, orgId, orgOwner, orgOwnerPhone, secret, secondSecret) {
+function createIssuerUpdate(orgName, org_id, orgOwner, orgOwnerPhone, secret, secondSecret) {
     var keys = crypto.getKeys(secret);
     
     var fee = constants.fees.send;
@@ -79,14 +79,14 @@ function createIssuerUpdate(orgName, orgId, orgOwner, orgOwnerPhone, secret, sec
         nethash: options.get('nethash'),
         amount: "0",
         fee: fee + "",
-        recipientId: null,
-        senderPublicKey: keys.publicKey,
+        recipient_id: null,
+        sender_public_key: keys.publicKey,
         timestamp: slots.getTime() - options.get('clientDriftSeconds'),
         asset: {
             couponIssuerUpdate: {
                 address: addressHelper.generateBase58CheckAddress(keys.publicKey),
                 orgName: orgName,
-                orgId: orgId,
+                org_id: org_id,
                 orgOwner: orgOwner,
                 orgOwnerPhone: orgOwnerPhone
             }
@@ -103,7 +103,7 @@ function createIssuerUpdate(orgName, orgId, orgOwner, orgOwnerPhone, secret, sec
     return transaction;
 }
 
-function createIssuerCheck(address, orgName, orgId, orgOwner, orgOwnerPhone, state, secret, secondSecret) {
+function createIssuerCheck(address, orgName, org_id, orgOwner, orgOwnerPhone, state, secret, secondSecret) {
     var keys = crypto.getKeys(secret);
     
     var fee = constants.fees.send;
@@ -113,14 +113,14 @@ function createIssuerCheck(address, orgName, orgId, orgOwner, orgOwnerPhone, sta
         nethash: options.get('nethash'),
         amount: "0",
         fee: fee + "",
-        recipientId: null,
-        senderPublicKey: keys.publicKey,
+        recipient_id: null,
+        sender_public_key: keys.publicKey,
         timestamp: slots.getTime() - options.get('clientDriftSeconds'),
         asset: {
             couponIssuerCheck: {
                 address: address,
                 orgName: orgName,
-                orgId: orgId,
+                org_id: org_id,
                 orgOwner: orgOwner,
                 orgOwnerPhone: orgOwnerPhone,
                 state: state
@@ -138,7 +138,7 @@ function createIssuerCheck(address, orgName, orgId, orgOwner, orgOwnerPhone, sta
     return transaction;
 }
 
-function createIssuerFreeze(address, orgName, orgId, orgOwner, orgOwnerPhone, secret, secondSecret) {
+function createIssuerFreeze(address, orgName, org_id, orgOwner, orgOwnerPhone, secret, secondSecret) {
     var keys = crypto.getKeys(secret);
     
     var fee = constants.fees.send;
@@ -148,14 +148,14 @@ function createIssuerFreeze(address, orgName, orgId, orgOwner, orgOwnerPhone, se
         nethash: options.get('nethash'),
         amount: "0",
         fee: fee + "",
-        recipientId: null,
-        senderPublicKey: keys.publicKey,
+        recipient_id: null,
+        sender_public_key: keys.publicKey,
         timestamp: slots.getTime() - options.get('clientDriftSeconds'),
         asset: {
             couponIssuerFreeze: {
                 address: address,
                 orgName: orgName,
-                orgId: orgId,
+                org_id: org_id,
                 orgOwner: orgOwner,
                 orgOwnerPhone: orgOwnerPhone
             }
@@ -172,7 +172,7 @@ function createIssuerFreeze(address, orgName, orgId, orgOwner, orgOwnerPhone, se
     return transaction;
 }
 
-function createIssuerUnfreeze(address, orgName, orgId, orgOwner, orgOwnerPhone, state, secret, secondSecret) {
+function createIssuerUnfreeze(address, orgName, org_id, orgOwner, orgOwnerPhone, state, secret, secondSecret) {
     var keys = crypto.getKeys(secret);
     
     var fee = constants.fees.send;
@@ -182,14 +182,14 @@ function createIssuerUnfreeze(address, orgName, orgId, orgOwner, orgOwnerPhone, 
         nethash: options.get('nethash'),
         amount: "0",
         fee: fee + "",
-        recipientId: null,
-        senderPublicKey: keys.publicKey,
+        recipient_id: null,
+        sender_public_key: keys.publicKey,
         timestamp: slots.getTime() - options.get('clientDriftSeconds'),
         asset: {
             couponIssuerUnfreeze: {
                 address: address,
                 orgName: orgName,
-                orgId: orgId,
+                org_id: org_id,
                 orgOwner: orgOwner,
                 orgOwnerPhone: orgOwnerPhone,
                 state: state
@@ -218,8 +218,8 @@ function createIssueNew(goodsName, goodsSpecs, goodsUnit, goodsNum, unitPrice,
         nethash: options.get('nethash'),
         amount: "0",
         fee: fee + "",
-        recipientId: null,
-        senderPublicKey: keys.publicKey,
+        recipient_id: null,
+        sender_public_key: keys.publicKey,
         timestamp: slots.getTime() - options.get('clientDriftSeconds'),
         asset: {
             couponIssueNew: {
@@ -258,8 +258,8 @@ function createIssueClose(goodsName, goodsSpecs, goodsUnit, goodsNum, unitPrice,
         nethash: options.get('nethash'),
         amount: "0",
         fee: fee + "",
-        recipientId: null,
-        senderPublicKey: keys.publicKey,
+        recipient_id: null,
+        sender_public_key: keys.publicKey,
         timestamp: slots.getTime() - options.get('clientDriftSeconds'),
         asset: {
             couponIssueClose: {
@@ -298,8 +298,8 @@ function createIssueReopen(goodsName, goodsSpecs, goodsUnit, goodsNum, unitPrice
         nethash: options.get('nethash'),
         amount: "0",
         fee: fee + "",
-        recipientId: null,
-        senderPublicKey: keys.publicKey,
+        recipient_id: null,
+        sender_public_key: keys.publicKey,
         timestamp: slots.getTime() - options.get('clientDriftSeconds'),
         asset: {
             couponIssueReopen: {
@@ -327,7 +327,7 @@ function createIssueReopen(goodsName, goodsSpecs, goodsUnit, goodsNum, unitPrice
     return transaction;
 }
 
-function createExchangeBuy(batchValue, code, receivedAddress, 
+function createExchangeBuy(batchValue, code, received_address, 
     price, secret, secondSecret) {
 
     var keys = crypto.getKeys(secret);
@@ -339,15 +339,15 @@ function createExchangeBuy(batchValue, code, receivedAddress,
         nethash: options.get('nethash'),
         amount: price,
         fee: fee + "",
-        recipientId: receivedAddress,
-        senderPublicKey: keys.publicKey,
+        recipient_id: received_address,
+        sender_public_key: keys.publicKey,
         timestamp: slots.getTime() - options.get('clientDriftSeconds'),
         asset: {
             couponExcBuy: {
                 batchValue: batchValue,
                 code: code,
-                senderAddress: addressHelper.generateBase58CheckAddress(keys.publicKey),
-                receivedAddress: receivedAddress,
+                sender_address: addressHelper.generateBase58CheckAddress(keys.publicKey),
+                received_address: received_address,
                 price: price
             }
         }
@@ -363,7 +363,7 @@ function createExchangeBuy(batchValue, code, receivedAddress,
     return transaction;
 }
 
-function createExchangePay(batchValue, code, receivedAddress, 
+function createExchangePay(batchValue, code, received_address, 
     secret, secondSecret) {
 
     var keys = crypto.getKeys(secret);
@@ -375,15 +375,15 @@ function createExchangePay(batchValue, code, receivedAddress,
         nethash: options.get('nethash'),
         amount: "0",
         fee: fee + "",
-        recipientId: null,
-        senderPublicKey: keys.publicKey,
+        recipient_id: null,
+        sender_public_key: keys.publicKey,
         timestamp: slots.getTime() - options.get('clientDriftSeconds'),
         asset: {
             couponExcPay: {
                 batchValue: batchValue,
                 code: code,
-                senderAddress: addressHelper.generateBase58CheckAddress(keys.publicKey),
-                receivedAddress: receivedAddress,
+                sender_address: addressHelper.generateBase58CheckAddress(keys.publicKey),
+                received_address: received_address,
                 price: "0"
             }
         }
@@ -399,8 +399,8 @@ function createExchangePay(batchValue, code, receivedAddress,
     return transaction;
 }
 
-function createExchangeTransferConfirm(batchValue, code, receivedAddress, 
-    price, relatedTrsId, state, secret, secondSecret) {
+function createExchangeTransferConfirm(batchValue, code, received_address, 
+    price, related_trs_id, state, secret, secondSecret) {
 
     var keys = crypto.getKeys(secret);
     
@@ -411,17 +411,17 @@ function createExchangeTransferConfirm(batchValue, code, receivedAddress,
         nethash: options.get('nethash'),
         amount: price,
         fee: fee + "",
-        recipientId: null,
-        senderPublicKey: keys.publicKey,
+        recipient_id: null,
+        sender_public_key: keys.publicKey,
         timestamp: slots.getTime() - options.get('clientDriftSeconds'),
         asset: {
             couponExcTransferConfirm: {
                 batchValue: batchValue,
                 code: code,
-                senderAddress: addressHelper.generateBase58CheckAddress(keys.publicKey),
-                receivedAddress: receivedAddress,
+                sender_address: addressHelper.generateBase58CheckAddress(keys.publicKey),
+                received_address: received_address,
                 price: price,
-                relatedTrsId: relatedTrsId,
+                related_trs_id: related_trs_id,
                 transferState: state
             }
         }
@@ -437,7 +437,7 @@ function createExchangeTransferConfirm(batchValue, code, receivedAddress,
     return transaction;
 }
 
-function createExchangeTransferAsk(batchValue, code, receivedAddress, 
+function createExchangeTransferAsk(batchValue, code, received_address, 
     price, secret, secondSecret) {
 
     var keys = crypto.getKeys(secret);
@@ -449,15 +449,15 @@ function createExchangeTransferAsk(batchValue, code, receivedAddress,
         nethash: options.get('nethash'),
         amount: "0",
         fee: fee + "",
-        recipientId: null,
-        senderPublicKey: keys.publicKey,
+        recipient_id: null,
+        sender_public_key: keys.publicKey,
         timestamp: slots.getTime() - options.get('clientDriftSeconds'),
         asset: {
             couponExcTransferAsk: {
                 batchValue: batchValue,
                 code: code,
-                senderAddress: addressHelper.generateBase58CheckAddress(keys.publicKey),
-                receivedAddress: receivedAddress,
+                sender_address: addressHelper.generateBase58CheckAddress(keys.publicKey),
+                received_address: received_address,
                 price: price
             }
         }

@@ -17,7 +17,7 @@ function calculateFee(amount) {
     }
 }
 
-function createTransaction(recipientId, amount, message, secret, secondSecret) {
+function createTransaction(recipientId, amount, message, secret, second_secret) {
 	var transaction = {
 		type: transactionTypes.SEND,
 		nethash: options.get('nethash'),
@@ -30,12 +30,12 @@ function createTransaction(recipientId, amount, message, secret, secondSecret) {
 	};
 
 	var keys = crypto.getKeys(secret);
-	transaction.sender_public_key = keys.publicKey;
+	transaction.sender_public_key = keys.public_key;
 
 	crypto.sign(transaction, keys);
 
-	if (secondSecret) {
-		var secondKeys = crypto.getKeys(secondSecret);
+	if (second_secret) {
+		var secondKeys = crypto.getKeys(second_secret);
 		crypto.secondSign(transaction, secondKeys);
 	}
 
@@ -43,7 +43,7 @@ function createTransaction(recipientId, amount, message, secret, secondSecret) {
 	return transaction;
 }
 
-function createLock(height, secret, secondSecret) {
+function createLock(height, secret, second_secret) {
 	var transaction = {
 		type: 100,
 		amount: "0",    
@@ -60,8 +60,8 @@ function createLock(height, secret, secondSecret) {
 
 	crypto.sign(transaction, keys);
 
-	if (secondSecret) {
-		var secondKeys = crypto.getKeys(secondSecret);
+	if (second_secret) {
+		var secondKeys = crypto.getKeys(second_secret);
 		crypto.secondSign(transaction, secondKeys);
 	}
 
