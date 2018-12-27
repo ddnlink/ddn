@@ -19,7 +19,7 @@ function createTransaction(asset, fee, type, recipientId, message, secret, secon
     amount: "0",
     fee: fee + "",
     recipient_id: recipientId,
-    sender_public_key: keys.publicKey,
+    sender_public_key: keys.public_key,
     timestamp: getClientFixedTime(),
     message: message,
     asset: asset

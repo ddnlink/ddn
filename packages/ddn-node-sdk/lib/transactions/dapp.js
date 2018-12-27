@@ -14,7 +14,7 @@ function createDApp(options, secret, secondSecret) {
 		amount: "0",    //bignum update
 		fee: constants.fees.dapp,
 		recipient_id: null,
-		sender_public_key: keys.publicKey,
+		sender_public_key: keys.public_key,
 		timestamp: slots.getTime() - globalOptions.get('clientDriftSeconds'),
 		asset: {
 			dapp: {
@@ -74,7 +74,7 @@ function createInnerTransaction(options, secret) {
     nethash: globalOptions.get('nethash'),
 		fee: options.fee,
 		timestamp: slots.getTime() - globalOptions.get('clientDriftSeconds'),
-		senderPublicKey: keys.publicKey,
+		senderPublicKey: keys.public_key,
 		type: options.type,
 		args: args
 	}

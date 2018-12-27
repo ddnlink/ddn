@@ -13,7 +13,7 @@ function createVote(keyList, secret, secondSecret) {
 		amount: "0",    //bignum update
 		fee: constants.fees.vote,
 		recipientId: null,
-		sender_public_key: keys.publicKey,
+		sender_public_key: keys.public_key,
 		timestamp: slots.getTime() - options.get('clientDriftSeconds'),
 		asset: {
 			vote: {

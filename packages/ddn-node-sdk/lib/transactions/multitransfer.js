@@ -14,7 +14,7 @@ function createMultiTransfer(outputs, secret, secondSecret) {
 	if (!outputs || outputs.length == 0) {
 		throw new Error('Invalid fileHash format')
 	}
-	var sender = addressHelper.generateBase58CheckAddress(keys.publicKey)
+	var sender = addressHelper.generateBase58CheckAddress(keys.public_key)
 	var fee = constants.fees.multitransfer
 	var amount = bignum.new(0);   //bignum update
 	var recipientId = []
@@ -51,7 +51,7 @@ function createMultiTransfer(outputs, secret, secondSecret) {
 		amount: amount.toString(),  //bignum update amount,
 		fee: fee + "",
 		recipientId: recipientId.join('|'),
-		senderPublicKey: keys.publicKey,
+		senderPublicKey: keys.public_key,
 		timestamp: slots.getTime() - options.get('clientDriftSeconds'),
 		asset: {
 			output: {

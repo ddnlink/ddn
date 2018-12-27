@@ -18,6 +18,8 @@
   "author": "",
   "license": "MIT",
   "dependencies": {
+    "ddn-utils": "git+ssh://git@git.ebookchain.net:ddn/ddn-utils.git",
+    "ddn-aob": "git+ssh://git@git.ebookchain.net:ddn/ddn-aob.git",
     "JSONStream": "^1.3.1",
     "bignum-utils": "git+http://wangxm:20170829@git.ebookchain.net/ddn/bignum_utils.git",
     "buffer": "^4.7.0",

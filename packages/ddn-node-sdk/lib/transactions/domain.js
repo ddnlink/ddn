@@ -22,7 +22,7 @@ function createDomain(name, address, secret, secondSecret) {
 		amount: "0",    //bignum update
 		fee: fee + "",
 		recipientId: null,
-		senderPublicKey: keys.publicKey,
+		senderPublicKey: keys.public_key,
 		timestamp: slots.getTime() - options.get('clientDriftSeconds'),
 		asset: {
 			domain: {

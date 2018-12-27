@@ -16,11 +16,11 @@ function createIssuerAuditorBuy(received_address, amount, secret, secondSecret) 
         amount: amount,
         fee: fee + "",
         recipient_id: received_address,
-        sender_public_key: keys.publicKey,
+        sender_public_key: keys.public_key,
         timestamp: slots.getTime() - options.get('clientDriftSeconds'),
         asset: {
             couponIssuerAuditorBuy: {
-                address: addressHelper.generateBase58CheckAddress(keys.publicKey),
+                address: addressHelper.generateBase58CheckAddress(keys.public_key),
             }
         }        
     };
@@ -46,11 +46,11 @@ function createIssuerApply(orgName, org_id, orgOwner, orgOwnerPhone, secret, sec
         amount: "0",
         fee: fee + "",
 		recipient_id: null,
-		sender_public_key: keys.publicKey,
+		sender_public_key: keys.public_key,
         timestamp: slots.getTime() - options.get('clientDriftSeconds'),
         asset: {
             couponIssuerApply: {
-                address: addressHelper.generateBase58CheckAddress(keys.publicKey),
+                address: addressHelper.generateBase58CheckAddress(keys.public_key),
                 orgName: orgName,
                 org_id: org_id,
                 orgOwner: orgOwner,
@@ -80,11 +80,11 @@ function createIssuerUpdate(orgName, org_id, orgOwner, orgOwnerPhone, secret, se
         amount: "0",
         fee: fee + "",
         recipient_id: null,
-        sender_public_key: keys.publicKey,
+        sender_public_key: keys.public_key,
         timestamp: slots.getTime() - options.get('clientDriftSeconds'),
         asset: {
             couponIssuerUpdate: {
-                address: addressHelper.generateBase58CheckAddress(keys.publicKey),
+                address: addressHelper.generateBase58CheckAddress(keys.public_key),
                 orgName: orgName,
                 org_id: org_id,
                 orgOwner: orgOwner,
@@ -114,7 +114,7 @@ function createIssuerCheck(address, orgName, org_id, orgOwner, orgOwnerPhone, st
         amount: "0",
         fee: fee + "",
         recipient_id: null,
-        sender_public_key: keys.publicKey,
+        sender_public_key: keys.public_key,
         timestamp: slots.getTime() - options.get('clientDriftSeconds'),
         asset: {
             couponIssuerCheck: {
@@ -149,7 +149,7 @@ function createIssuerFreeze(address, orgName, org_id, orgOwner, orgOwnerPhone, s
         amount: "0",
         fee: fee + "",
         recipient_id: null,
-        sender_public_key: keys.publicKey,
+        sender_public_key: keys.public_key,
         timestamp: slots.getTime() - options.get('clientDriftSeconds'),
         asset: {
             couponIssuerFreeze: {
@@ -183,7 +183,7 @@ function createIssuerUnfreeze(address, orgName, org_id, orgOwner, orgOwnerPhone,
         amount: "0",
         fee: fee + "",
         recipient_id: null,
-        sender_public_key: keys.publicKey,
+        sender_public_key: keys.public_key,
         timestamp: slots.getTime() - options.get('clientDriftSeconds'),
         asset: {
             couponIssuerUnfreeze: {
@@ -219,11 +219,11 @@ function createIssueNew(goodsName, goodsSpecs, goodsUnit, goodsNum, unitPrice,
         amount: "0",
         fee: fee + "",
         recipient_id: null,
-        sender_public_key: keys.publicKey,
+        sender_public_key: keys.public_key,
         timestamp: slots.getTime() - options.get('clientDriftSeconds'),
         asset: {
             couponIssueNew: {
-                address: addressHelper.generateBase58CheckAddress(keys.publicKey),
+                address: addressHelper.generateBase58CheckAddress(keys.public_key),
                 goodsName: goodsName,
                 goodsSpecs: goodsSpecs,
                 goodsUnit: goodsUnit,
@@ -259,11 +259,11 @@ function createIssueClose(goodsName, goodsSpecs, goodsUnit, goodsNum, unitPrice,
         amount: "0",
         fee: fee + "",
         recipient_id: null,
-        sender_public_key: keys.publicKey,
+        sender_public_key: keys.public_key,
         timestamp: slots.getTime() - options.get('clientDriftSeconds'),
         asset: {
             couponIssueClose: {
-                address: addressHelper.generateBase58CheckAddress(keys.publicKey),
+                address: addressHelper.generateBase58CheckAddress(keys.public_key),
                 goodsName: goodsName,
                 goodsSpecs: goodsSpecs,
                 goodsUnit: goodsUnit,
@@ -299,11 +299,11 @@ function createIssueReopen(goodsName, goodsSpecs, goodsUnit, goodsNum, unitPrice
         amount: "0",
         fee: fee + "",
         recipient_id: null,
-        sender_public_key: keys.publicKey,
+        sender_public_key: keys.public_key,
         timestamp: slots.getTime() - options.get('clientDriftSeconds'),
         asset: {
             couponIssueReopen: {
-                address: addressHelper.generateBase58CheckAddress(keys.publicKey),
+                address: addressHelper.generateBase58CheckAddress(keys.public_key),
                 goodsName: goodsName,
                 goodsSpecs: goodsSpecs,
                 goodsUnit: goodsUnit,
@@ -340,13 +340,13 @@ function createExchangeBuy(batchValue, code, received_address,
         amount: price,
         fee: fee + "",
         recipient_id: received_address,
-        sender_public_key: keys.publicKey,
+        sender_public_key: keys.public_key,
         timestamp: slots.getTime() - options.get('clientDriftSeconds'),
         asset: {
             couponExcBuy: {
                 batchValue: batchValue,
                 code: code,
-                sender_address: addressHelper.generateBase58CheckAddress(keys.publicKey),
+                sender_address: addressHelper.generateBase58CheckAddress(keys.public_key),
                 received_address: received_address,
                 price: price
             }
@@ -376,13 +376,13 @@ function createExchangePay(batchValue, code, received_address,
         amount: "0",
         fee: fee + "",
         recipient_id: null,
-        sender_public_key: keys.publicKey,
+        sender_public_key: keys.public_key,
         timestamp: slots.getTime() - options.get('clientDriftSeconds'),
         asset: {
             couponExcPay: {
                 batchValue: batchValue,
                 code: code,
-                sender_address: addressHelper.generateBase58CheckAddress(keys.publicKey),
+                sender_address: addressHelper.generateBase58CheckAddress(keys.public_key),
                 received_address: received_address,
                 price: "0"
             }
@@ -412,13 +412,13 @@ function createExchangeTransferConfirm(batchValue, code, received_address,
         amount: price,
         fee: fee + "",
         recipient_id: null,
-        sender_public_key: keys.publicKey,
+        sender_public_key: keys.public_key,
         timestamp: slots.getTime() - options.get('clientDriftSeconds'),
         asset: {
             couponExcTransferConfirm: {
                 batchValue: batchValue,
                 code: code,
-                sender_address: addressHelper.generateBase58CheckAddress(keys.publicKey),
+                sender_address: addressHelper.generateBase58CheckAddress(keys.public_key),
                 received_address: received_address,
                 price: price,
                 related_trs_id: related_trs_id,
@@ -450,13 +450,13 @@ function createExchangeTransferAsk(batchValue, code, received_address,
         amount: "0",
         fee: fee + "",
         recipient_id: null,
-        sender_public_key: keys.publicKey,
+        sender_public_key: keys.public_key,
         timestamp: slots.getTime() - options.get('clientDriftSeconds'),
         asset: {
             couponExcTransferAsk: {
                 batchValue: batchValue,
                 code: code,
-                sender_address: addressHelper.generateBase58CheckAddress(keys.publicKey),
+                sender_address: addressHelper.generateBase58CheckAddress(keys.public_key),
                 received_address: received_address,
                 price: price
             }

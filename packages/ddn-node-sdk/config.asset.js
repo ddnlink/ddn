@@ -7,3 +7,12 @@ exports.evidence = {
     ],
     package: "ddn-evidence"
 }
+exports.aob = {
+    transactions: [
+        {
+            name: "Issuer",
+            type: 75,
+        },
+    ],
+    package: "ddn-aob"
+}

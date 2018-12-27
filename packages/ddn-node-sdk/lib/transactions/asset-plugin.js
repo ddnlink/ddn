@@ -15,16 +15,16 @@ function createPluginAsset(trsType, assetInfo, secret, secondSecret) {
 		amount: assetInfo.amount ? assetInfo.amount + "" : "0",
 		fee: fee + "",
 		recipient_id: assetInfo.receive_address ? assetInfo.receive_address : null,
-		sender_public_key: keys.publicKey,
+		sender_public_key: keys.public_key,
 		timestamp: slots.getTime() - options.get('clientDriftSeconds'),
 		asset: {}
-    };
+  };
     
-    delete assetInfo.amount;
-    delete assetInfo.receive_address;
+  delete assetInfo.amount;
+  delete assetInfo.receive_address;
 
-    var assetJsonName = AssetUtils.getAssetJsonName(trsType);
-    transaction.asset[assetJsonName] = assetInfo;
+  var assetJsonName = AssetUtils.getAssetJsonName(trsType);
+  transaction.asset[assetJsonName] = assetInfo;
 
 	crypto.sign(transaction, keys);
 	

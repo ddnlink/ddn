@@ -20,7 +20,7 @@ function createMultisignature(keysgroup, lifetime, min, secret, secondSecret) {
 		amount: "0",    //bignum update
 		fee: constants.fees.multisignature,
 		recipientId: null,
-		senderPublicKey: keys.publicKey,
+		senderPublicKey: keys.public_key,
 		timestamp: slots.getTime() - options.get('clientDriftSeconds'),
 		asset: {
 			multisignature: {

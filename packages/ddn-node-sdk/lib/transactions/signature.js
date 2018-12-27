@@ -8,7 +8,7 @@ function newSignature(secondSecret) {
 	var keys = crypto.getKeys(secondSecret);
 
 	var signature = {
-		public_key: keys.publicKey
+		public_key: keys.public_key
 	};
 
 	return signature;
@@ -24,7 +24,7 @@ function createSignature(secret, secondSecret) {
 		amount: "0",    //bignum update
 		fee: constants.fees.secondsignature,
 		recipient_id: null,
-		sender_public_key: keys.publicKey,
+		sender_public_key: keys.public_key,
 		timestamp: slots.getTime() - options.get('clientDriftSeconds'),
 		asset: {
 			signature: signature
