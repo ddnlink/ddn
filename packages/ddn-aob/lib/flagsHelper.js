@@ -1,7 +1,5 @@
-const { AssetBase } = require('ddn-asset-base');
-
-class FlagsHelper extends AssetBase {
-  FLAGS_TYPE = {
+const FlagsHelper = {
+  FLAGS_TYPE : {
     1: {
       name: 'acl',
       range: [0, 1]
@@ -10,9 +8,9 @@ class FlagsHelper extends AssetBase {
       name: 'writeoff',
       range: [1, 1]
     }
-  };
+  },
 
-  instance = {
+  instance : {
     isValidFlagType(type) {
       return !!FLAGS_TYPE[type]
     },
@@ -37,6 +35,6 @@ class FlagsHelper extends AssetBase {
     getAclTable(flag) {
       return flag == '0' ? 'acl_black' : 'acl_white'
     }
-  };
+  }
 }
 module.exports = FlagsHelper;
