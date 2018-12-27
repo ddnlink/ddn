@@ -15,7 +15,7 @@ class Flags extends AssetBase {
   }
 
   calculateFee (trs, sender) {
-    library.base.block.calculateFee();
+    super.library.base.block.calculateFee();
   }
 
   verify (trs, sender, cb) {
@@ -28,7 +28,7 @@ class Flags extends AssetBase {
     if (!flagsHelper.isValidFlagType(asset.flag_type)) return setImmediate(cb, 'Invalid asset flag type')
     if (!flagsHelper.isValidFlag(asset.flag_type, asset.flag)) return setImmediate(cb, 'Invalid asset flag')
 
-    library.model.getAssetByName(trs.asset.aobFlags.currency, (err, result) => {
+    super.library.model.getAssetByName(trs.asset.aobFlags.currency, (err, result) => {
       if (err) return cb(`Database error: ${err}`);
       if (!result) return cb('Asset not exists')
 
@@ -66,7 +66,7 @@ class Flags extends AssetBase {
 			dbTrans = null;
     };
     const asset = trs.asset.aobFlags;
-    library.model.updateAssetFlag(asset.currency, asset.flag, flagsHelper.getTypeName(asset.flag_type), dbTrans, cb)
+    super.library.model.updateAssetFlag(asset.currency, asset.flag, flagsHelper.getTypeName(asset.flag_type), dbTrans, cb)
   }
 
   // 新增事务dbTrans ---wly
@@ -76,7 +76,7 @@ class Flags extends AssetBase {
 			dbTrans = null;
     };
     const asset = trs.asset.aobFlags;
-    library.model.updateAssetFlag(asset.currency, asset.flag ^ 1, flagsHelper.getTypeName(asset.flag_type), dbTrans, cb)
+    super.library.model.updateAssetFlag(asset.currency, asset.flag ^ 1, flagsHelper.getTypeName(asset.flag_type), dbTrans, cb)
     setImmediate(cb)
   }
 
@@ -87,10 +87,10 @@ class Flags extends AssetBase {
 			dbTrans = null;
     };
     const key = `${trs.asset.aobFlags.currency}:${trs.type}`;
-    if (library.oneoff.has(key)) {
+    if (super.library.oneoff.has(key)) {
       return setImmediate(cb, 'Double submit')
     }
-    library.oneoff.set(key, true)
+    super.library.oneoff.set(key, true)
     setImmediate(cb)
   }
 
@@ -100,12 +100,12 @@ class Flags extends AssetBase {
 			cb = dbTrans;
 			dbTrans = null;
     };
-    library.oneoff.delete(`${trs.asset.aobFlags.currency}:${trs.type}`)
+    super.library.oneoff.delete(`${trs.asset.aobFlags.currency}:${trs.type}`)
     setImmediate(cb)
   }
 
   objectNormalize (trs) {
-    const report = library.scheme.validate({
+    const report = super.library.scheme.validate({
       type: 'object',
       properties: {
         currency: {
@@ -124,7 +124,7 @@ class Flags extends AssetBase {
     }, trs.asset.aobFlags);
 
     if (!report) {
-      throw Error(`Can't parse flags: ${library.scheme.errors[0]}`)
+      throw Error(`Can't parse flags: ${super.library.scheme.errors[0]}`)
     }
 
     return trs
@@ -160,7 +160,7 @@ class Flags extends AssetBase {
       flag_type: asset.flag_type,
       flag: asset.flag
     };
-    library.dao.insert('flag', values, dbTrans, cb);
+    super.library.dao.insert('flag', values, dbTrans, cb);
   }
 
   ready (trs, sender) {

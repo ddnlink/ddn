@@ -18,7 +18,7 @@ class Acl extends AssetBase {
   }
 
   calculateFee() {
-    return bignum.multiply(2, library.base.block.calculateFee());
+    return bignum.multiply(2, super.library.base.block.calculateFee());
   }
 
   verify(trs, sender, cb) {
@@ -38,7 +38,7 @@ class Acl extends AssetBase {
     }
     if (_.uniq(asset.list).length != asset.list.length) return setImmediate(cb, 'Duplicated acl address')
 
-    library.model.getAssetByName(asset.currency, (err, result) => {
+    super.library.model.getAssetByName(asset.currency, (err, result) => {
       if (err) return cb(err)
       if (!result) return cb('Asset not exists')
 
@@ -61,7 +61,7 @@ class Acl extends AssetBase {
         }
       ];
       if (asset.operator == '+') {
-        library.model.exists(table, condition, (err, exists) => {
+        super.library.model.exists(table, condition, (err, exists) => {
           if (err) return cb(err)
           if (exists) return cb('Double add acl address')
           return cb()
@@ -97,9 +97,9 @@ class Acl extends AssetBase {
     const asset = trs.asset.aobAcl;
     const table = flagsHelper.getAclTable(asset.flag);
     if (asset.operator == '+') {
-      library.model.addAssetAcl(table, asset.currency, asset.list, dbTrans, cb)
+      super.library.model.addAssetAcl(table, asset.currency, asset.list, dbTrans, cb)
     } else {
-      library.model.removeAssetAcl(table, asset.currency, asset.list, dbTrans, cb)
+      super.library.model.removeAssetAcl(table, asset.currency, asset.list, dbTrans, cb)
     }
   }
 
@@ -111,9 +111,9 @@ class Acl extends AssetBase {
     const asset = trs.asset.aobAcl;
     const table = flagsHelper.getAclTable(asset.flag);
     if (asset.operator == '-') {
-      library.model.addAssetAcl(table, asset.currency, asset.list, dbTrans, cb)
+      super.library.model.addAssetAcl(table, asset.currency, asset.list, dbTrans, cb)
     } else {
-      library.model.removeAssetAcl(table, asset.currency, asset.list, dbTrans, cb)
+      super.library.model.removeAssetAcl(table, asset.currency, asset.list, dbTrans, cb)
     }
     setImmediate(cb)
   }
@@ -124,10 +124,10 @@ class Acl extends AssetBase {
       dbTrans = null;
     };
     const key = `${trs.asset.aobAcl.currency}:${trs.type}`;
-    if (library.oneoff.has(key)) {
+    if (super.library.oneoff.has(key)) {
       return setImmediate(cb, 'Double submit')
     }
-    library.oneoff.set(key, true)
+    super.library.oneoff.set(key, true)
     setImmediate(cb)
   }
 
@@ -136,7 +136,7 @@ class Acl extends AssetBase {
       cb = dbTrans;
       dbTrans = null;
     };
-    library.oneoff.delete(`${trs.asset.aobAcl.currency}:${trs.type}`)
+    super.library.oneoff.delete(`${trs.asset.aobAcl.currency}:${trs.type}`)
     setImmediate(cb)
   }
 
@@ -145,7 +145,7 @@ class Acl extends AssetBase {
    * @param {*} trs 
    */
   objectNormalize(trs) {
-    const report = library.scheme.validate({
+    const report = super.library.scheme.validate({
       type: 'object',
       properties: {
         currency: {
@@ -172,7 +172,7 @@ class Acl extends AssetBase {
     }, trs.asset.aobAcl);
 
     if (!report) {
-      throw Error(`Can't parse acl: ${library.scheme.errors[0]}`)
+      throw Error(`Can't parse acl: ${super.library.scheme.errors[0]}`)
     }
 
     return trs
@@ -211,7 +211,7 @@ class Acl extends AssetBase {
       flag: asset.flag,
       list: asset.list.join(',')
     };
-    library.dao.insert('acl', values, dbTrans, cb)
+    super.library.dao.insert('acl', values, dbTrans, cb)
   }
 
   ready(trs, sender) {

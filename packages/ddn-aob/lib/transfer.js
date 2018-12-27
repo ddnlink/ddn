@@ -15,7 +15,7 @@ class Transfer extends AssetBase {
   }
 
   calculateFee(trs, sender) {
-    return library.base.block.calculateFee();
+    return super.library.base.block.calculateFee();
   }
 
   verify(trs, sender, cb) {
@@ -24,13 +24,13 @@ class Transfer extends AssetBase {
     const asset = trs.asset.aobTransfer;
     const error = Amount.validate(asset.amount);
     if (error) return setImmediate(cb, error)
-    library.model.getAssetByName(asset.currency, (err, assetDetail) => {
+    super.library.model.getAssetByName(asset.currency, (err, assetDetail) => {
       if (err) return cb(`Database error: ${err}`);
       if (!assetDetail) return cb('Asset not exists')
       if (assetDetail.writeoff) return cb('Asset already writeoff')
       if (!assetDetail.allow_whitelist && !assetDetail.allow_blacklist) return cb()
       const aclTable = assetDetail.acl == 0 ? 'acl_black' : 'acl_white';
-      library.model.checkAcl(aclTable, asset.currency, sender.address, trs.recipient_id, (err, isInList) => { //wxm block database
+      super.library.model.checkAcl(aclTable, asset.currency, sender.address, trs.recipient_id, (err, isInList) => { //wxm block database
         if (err) return cb(`Database error when query acl: ${err}`);
         if ((assetDetail.acl == 0) == isInList) return cb('Permission not allowed')
         cb()
@@ -56,13 +56,13 @@ class Transfer extends AssetBase {
       dbTrans = null;
     };
     const transfer = trs.asset.aobTransfer;
-    library.balanceCache.addAssetBalance(trs.recipient_id, transfer.currency, transfer.amount) //wxm block database
+    super.library.balanceCache.addAssetBalance(trs.recipient_id, transfer.currency, transfer.amount) //wxm block database
     async.series([
       next => {
-        library.model.updateAssetBalance(transfer.currency, `-${transfer.amount}`, sender.address, dbTrans, next)
+        super.library.model.updateAssetBalance(transfer.currency, `-${transfer.amount}`, sender.address, dbTrans, next)
       },
       next => {
-        library.model.updateAssetBalance(transfer.currency, transfer.amount, trs.recipient_id, dbTrans, next) //wxm block database
+        super.library.model.updateAssetBalance(transfer.currency, transfer.amount, trs.recipient_id, dbTrans, next) //wxm block database
       }
     ], cb)
   }
@@ -73,13 +73,13 @@ class Transfer extends AssetBase {
       dbTrans = null;
     };
     const transfer = trs.asset.aobTransfer;
-    library.balanceCache.addAssetBalance(trs.recipient_id, transfer.currency, `-${transfer.amount}`) //wxm block database
+    super.library.balanceCache.addAssetBalance(trs.recipient_id, transfer.currency, `-${transfer.amount}`) //wxm block database
     async.series([
       next => {
-        library.model.updateAssetBalance(transfer.currency, transfer.amount, sender.address, dbTrans, next)
+        super.library.model.updateAssetBalance(transfer.currency, transfer.amount, sender.address, dbTrans, next)
       },
       next => {
-        library.model.updateAssetBalance(transfer.currency, `-${transfer.amount}`, trs.recipient_id, dbTrans, next) //wxm block database
+        super.library.model.updateAssetBalance(transfer.currency, `-${transfer.amount}`, trs.recipient_id, dbTrans, next) //wxm block database
       }
     ], cb)
   }
@@ -90,12 +90,12 @@ class Transfer extends AssetBase {
       dbTrans = null;
     };
     const transfer = trs.asset.aobTransfer;
-    const balance = library.balanceCache.getAssetBalance(sender.address, transfer.currency) || 0;
+    const balance = super.library.balanceCache.getAssetBalance(sender.address, transfer.currency) || 0;
     const surplus = bignum.minus(balance, transfer.amount);
     if (bignum.isLessThan(surplus, 0))
       return setImmediate(cb, 'Insufficient asset balance')
 
-    library.balanceCache.setAssetBalance(sender.address, transfer.currency, surplus.toString())
+    super.library.balanceCache.setAssetBalance(sender.address, transfer.currency, surplus.toString())
     setImmediate(cb)
   }
   // 新增事务dbTrans ---wly
@@ -105,12 +105,12 @@ class Transfer extends AssetBase {
       dbTrans = null;
     };
     const transfer = trs.asset.aobTransfer;
-    library.balanceCache.addAssetBalance(sender.address, transfer.currency, transfer.amount)
+    super.library.balanceCache.addAssetBalance(sender.address, transfer.currency, transfer.amount)
     setImmediate(cb)
   }
 
   objectNormalize(trs) {
-    const report = library.scheme.validate({
+    const report = super.library.scheme.validate({
       type: 'object',
       properties: {
         currency: {
@@ -128,7 +128,7 @@ class Transfer extends AssetBase {
     }, trs.asset.aobTransfer);
 
     if (!report) {
-      throw Error(`Can't parse transfer: ${library.scheme.errors[0]}`)
+      throw Error(`Can't parse transfer: ${super.library.scheme.errors[0]}`)
     }
 
     return trs
@@ -165,7 +165,7 @@ class Transfer extends AssetBase {
       currency,
       amount
     };
-    library.dao.insert('transfer', values, dbTrans, cb);
+    super.library.dao.insert('transfer', values, dbTrans, cb);
   }
 
   ready(trs, sender) {

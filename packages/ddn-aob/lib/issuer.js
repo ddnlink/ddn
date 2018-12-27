@@ -12,7 +12,7 @@ class Issuer extends AssetBase {
   }
 
   calculateFee (trs, sender) {
-    return bignum.multiply(100, library.tokenSetting.fixedPoint);
+    return bignum.multiply(100, super.library.tokenSetting.fixedPoint);
   }
 
   verify (trs, sender, cb) {
@@ -26,7 +26,7 @@ class Issuer extends AssetBase {
     if (!issuer.desc) return setImmediate(cb, 'Invalid issuer desc')
     if (issuer.desc.length > 4096) return setImmediate(cb, 'Invalid issuer desc size')
 
-    library.model.isIssuerExists(issuer.name, sender.address, (err, exists) => {
+    super.library.model.isIssuerExists(issuer.name, sender.address, (err, exists) => {
       if (err) return cb(err)
       if (exists) return cb('Double register')
       setImmediate(cb, null, trs)
@@ -67,11 +67,11 @@ class Issuer extends AssetBase {
     };
     const nameKey = `${trs.asset.aobIssuer.name}:${trs.type}`;
     const idKey = `${sender.address}:${trs.type}`;
-    if (library.oneoff.has(nameKey) || library.oneoff.has(idKey)) {
+    if (super.library.oneoff.has(nameKey) || super.library.oneoff.has(idKey)) {
       return setImmediate(cb, 'Double submit')
     }
-    library.oneoff.set(nameKey, true)
-    library.oneoff.set(idKey, true)
+    super.library.oneoff.set(nameKey, true)
+    super.library.oneoff.set(idKey, true)
     setImmediate(cb)
   }
   // 新增事务dbTrans ---wly
@@ -82,13 +82,13 @@ class Issuer extends AssetBase {
     };
     const nameKey = `${trs.asset.aobIssuer.name}:${trs.type}`;
     const idKey = `${sender.address}:${trs.type}`;
-    library.oneoff.delete(nameKey)
-    library.oneoff.delete(idKey)
+    super.library.oneoff.delete(nameKey)
+    super.library.oneoff.delete(idKey)
     setImmediate(cb)
   }
 
   objectNormalize (trs) {
-    const report = library.scheme.validate({
+    const report = super.library.scheme.validate({
       type: 'object',
       properties: {
         name: {
@@ -105,7 +105,7 @@ class Issuer extends AssetBase {
       required: ['name', 'desc']
     }, trs.asset.aobIssuer);
     if (!report) {
-      const err = library.scheme.errors[0];
+      const err = super.library.scheme.errors[0];
       const msg = err.dataPath + " " + err.message;
       throw Error(`Can't parse issuer: ${msg}`)
     }
@@ -141,7 +141,7 @@ class Issuer extends AssetBase {
       name: asset.name,
       desc: asset.desc
     };
-    library.dao.insert('issuer', values, dbTrans, cb);
+    super.library.dao.insert('issuer', values, dbTrans, cb);
   }
 
   ready (trs, sender) {
