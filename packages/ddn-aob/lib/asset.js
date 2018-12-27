@@ -21,7 +21,7 @@ class Asset extends AssetBase {
   }
 
   calculateFee(trs, sender) {
-    return bignum.multiply(500, library.tokenSetting.fixedPoint);
+    return bignum.multiply(500, super.library.tokenSetting.fixedPoint);
   }
 
 
@@ -53,13 +53,13 @@ class Asset extends AssetBase {
     if (asset.allow_whitelist !== 0 && asset.allow_whitelist !== 1) return setImmediate(cb, 'Asset allowWhitelist is not valid')
     if (asset.allow_blacklist !== 0 && asset.allow_blacklist !== 1) return setImmediate(cb, 'Asset allowBlacklist is not valid')
 
-    library.model.exists('assets', {
+    super.library.model.exists('assets', {
       name: fullName
     }, (err, exists) => {
 
       if (err) return cb(err)
       if (exists) return cb('Double register')
-      library.model.getIssuerByName(issuerName, ['issuer_id'], (err, issuer) => {
+      super.library.model.getIssuerByName(issuerName, ['issuer_id'], (err, issuer) => {
         if (err) return cb(err)
         if (!issuer) return cb('Issuer not exists')
         if (issuer.issuer_id != sender.address) return cb('Permission not allowed')
@@ -117,10 +117,10 @@ class Asset extends AssetBase {
       dbTrans = null;
     };
     const key = `${trs.asset.aobAsset.name}:${trs.type}`;
-    if (library.oneoff.has(key)) {
+    if (super.library.oneoff.has(key)) {
       return setImmediate(cb, 'Double submit')
     }
-    library.oneoff.set(key, true)
+    super.library.oneoff.set(key, true)
     setImmediate(cb)
   }
 
@@ -130,12 +130,12 @@ class Asset extends AssetBase {
       cb = dbTrans;
       dbTrans = null;
     };
-    library.oneoff.delete(`${trs.asset.aobAsset.name}:${trs.type}`)
+    super.library.oneoff.delete(`${trs.asset.aobAsset.name}:${trs.type}`)
     setImmediate(cb)
   }
 
   objectNormalize(trs) {
-    const report = library.scheme.validate({
+    const report = super.library.scheme.validate({
       type: 'object',
       properties: {
         name: {
@@ -182,7 +182,7 @@ class Asset extends AssetBase {
     }, trs.asset.aobAsset);
 
     if (!report) {
-      throw Error(`Can't parse asset: ${library.scheme.errors[0]}`)
+      throw Error(`Can't parse asset: ${super.library.scheme.errors[0]}`)
     }
 
     return trs
@@ -237,10 +237,10 @@ class Asset extends AssetBase {
       acl: 0,
       writeoff: 0
     };
-    library.dao.insert('asset', values, dbTrans, cb)
+    super.library.dao.insert('asset', values, dbTrans, cb)
   }
 
-  ready = (trs, sender) => {
+  ready (trs, sender) {
     if (sender.multisignatures.length) {
       if (!trs.signatures) {
         return false

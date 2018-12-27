@@ -15,7 +15,7 @@ class Issue extends AssetBase {
     return trs
   }
 
-  calculateFee (trs, sender) {library.base.block.calculateFee()}
+  calculateFee (trs, sender) {super.library.base.block.calculateFee()}
 
   verify (trs, sender, cb) {
     if (trs.recipient_id) return setImmediate(cb, 'Invalid recipient')
@@ -27,7 +27,7 @@ class Issue extends AssetBase {
     const error = Amount.validate(amount);
     if (error) return setImmediate(cb, error)
 
-    library.model.getAssetByName(trs.asset.aobIssue.currency, (err, result) => {
+    super.library.model.getAssetByName(trs.asset.aobIssue.currency, (err, result) => {
       if (err) return cb(`Database error: ${err}`);
       if (!result) return cb('Asset not exists')
       if (result.issuer_id !== sender.address) return cb('Permission not allowed')
@@ -85,13 +85,13 @@ class Issue extends AssetBase {
     };
     const currency = trs.asset.aobIssue.currency;
     const amount = trs.asset.aobIssue.amount;
-    library.balanceCache.addAssetBalance(sender.address, currency, amount)
+    super.library.balanceCache.addAssetBalance(sender.address, currency, amount)
     async.series([
       next => {
-        library.model.addAssetQuantity(currency, amount, dbTrans, next)
+        super.library.model.addAssetQuantity(currency, amount, dbTrans, next)
       },
       next => {
-        library.model.updateAssetBalance(currency, amount, sender.address, dbTrans, next)
+        super.library.model.updateAssetBalance(currency, amount, sender.address, dbTrans, next)
       }
     ], cb)
   }
@@ -104,17 +104,17 @@ class Issue extends AssetBase {
     const currency = trs.asset.aobIssue.currency;
     const amount = trs.asset.aobIssue.amount;
     const senderBalanceKey = `${currency}:${sender.address}`;
-    const balance = library.balanceCache.getAssetBalance(sender.address, currency) || 0;
+    const balance = super.library.balanceCache.getAssetBalance(sender.address, currency) || 0;
     //bignum update if (bignum(balance).lt(amount)) 
     if (bignum.isLessThan(balance, amount))
         return setImmediate(cb, `Invalid asset balance: ${balance}`);
-    library.balanceCache.addAssetBalance(sender.address, currency, `-${amount}`)
+    super.library.balanceCache.addAssetBalance(sender.address, currency, `-${amount}`)
     async.series([
       next => {
-        library.model.addAssetQuantity(currency, `-${amount}`, dbTrans, next)
+        super.library.model.addAssetQuantity(currency, `-${amount}`, dbTrans, next)
       },
       next => {
-        library.model.updateAssetBalance(currency, `-${amount}`, sender.address, dbTrans, next)
+        super.library.model.updateAssetBalance(currency, `-${amount}`, sender.address, dbTrans, next)
       }
     ], cb)
   }
@@ -125,10 +125,10 @@ class Issue extends AssetBase {
 			dbTrans = null;
     };
     const key = `${trs.asset.aobIssue.currency}:${trs.type}`;
-    if (library.oneoff.has(key)) {
+    if (super.library.oneoff.has(key)) {
       return setImmediate(cb, 'Double submit')
     }
-    library.oneoff.set(key, true)
+    super.library.oneoff.set(key, true)
     setImmediate(cb)
   }
   // 新增事务dbTrans ---wly
@@ -137,12 +137,12 @@ class Issue extends AssetBase {
 			cb = dbTrans;
 			dbTrans = null;
     };
-    library.oneoff.delete(`${trs.asset.aobIssue.currency}:${trs.type}`)
+    super.library.oneoff.delete(`${trs.asset.aobIssue.currency}:${trs.type}`)
     setImmediate(cb)
   }
 
   objectNormalize (trs) {
-    const report = library.scheme.validate({
+    const report = super.library.scheme.validate({
       type: 'object',
       properties: {
         currency: {
@@ -160,7 +160,7 @@ class Issue extends AssetBase {
     }, trs.asset.aobIssue);
 
     if (!report) {
-      throw Error(`Can't parse issue: ${library.scheme.errors[0]}`)
+      throw Error(`Can't parse issue: ${super.library.scheme.errors[0]}`)
     }
 
     return trs
@@ -195,7 +195,7 @@ class Issue extends AssetBase {
       currency,
       amount
     };
-    library.dao.insert('issue', values, dbTrans, cb);
+    super.library.dao.insert('issue', values, dbTrans, cb);
   }
 
   ready (trs, sender) {
