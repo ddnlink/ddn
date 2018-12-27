@@ -1,0 +1,14 @@
+{
+  "name": "ddn-aob",
+  "version": "1.0.0",
+  "description": "这个是ddn链上资产包",
+  "main": "index.js",
+  "directories": {
+    "lib": "lib"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "wly",
+  "license": "ISC"
+}
