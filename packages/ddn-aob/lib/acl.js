@@ -2,6 +2,7 @@ const { AssetBase } = require('ddn-asset-base');
 const ByteBuffer = require('bytebuffer');
 const bignum = require('bignum-utils');
 const _ = require('lodash');
+const { Address } = require('ddn-utils');
 
 class Acl extends AssetBase {
   create(data, trs) {
@@ -13,7 +14,7 @@ class Acl extends AssetBase {
       flag: data.flag,
       list: data.list
     }
-    return trs
+    return trs;
   }
 
   calculateFee() {
@@ -32,7 +33,7 @@ class Acl extends AssetBase {
     if (!_.isArray(asset.list) || asset.list.length == 0 || asset.list.length > 10) return setImmediate(cb, 'Invalid acl list')
 
     for (let i = 0; i < asset.list.length; ++i) {
-      if (!addressUtil.isAddress(asset.list[i])) return setImmediate(cb, 'Acl contains invalid address')
+      if (!Address.isAddress(asset.list[i])) return setImmediate(cb, 'Acl contains invalid address')
       if (sender.address === asset.list[i]) return setImmediate(cb, 'Issuer should not be in ACL list')
     }
     if (_.uniq(asset.list).length != asset.list.length) return setImmediate(cb, 'Duplicated acl address')

@@ -2,6 +2,7 @@ const { AssetBase } = require('ddn-asset-base');
 const async = require('async');
 const mathjs = require('mathjs');
 const bignum = require('bignum-utils');
+const { Amount } = require('ddn-utils');
 
 class Issue extends AssetBase {
   create (data, trs) {
@@ -23,7 +24,7 @@ class Issue extends AssetBase {
         return setImmediate(cb, 'Invalid transaction amount')
 
     const amount = trs.asset.aobIssue.amount;
-    const error = amountHelper.validate(amount);
+    const error = Amount.validate(amount);
     if (error) return setImmediate(cb, error)
 
     library.model.getAssetByName(trs.asset.aobIssue.currency, (err, result) => {

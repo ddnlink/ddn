@@ -12,7 +12,7 @@ class Issuer extends AssetBase {
   }
 
   calculateFee (trs, sender) {
-    return bignum.multiply(100, constants.fixedPoint);
+    return bignum.multiply(100, library.tokenSetting.fixedPoint);
   }
 
   verify (trs, sender, cb) {

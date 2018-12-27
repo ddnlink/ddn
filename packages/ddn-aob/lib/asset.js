@@ -1,6 +1,7 @@
 const { AssetBase } = require('ddn-asset-base');
 const assert = require('assert');
 const bignum = require('bignum-utils');
+const { Amount } = require('ddn-utils');
 
 class Asset extends AssetBase {
   create(data, trs) {
@@ -20,7 +21,7 @@ class Asset extends AssetBase {
   }
 
   calculateFee(trs, sender) {
-    return bignum.multiply(500, constants.fixedPoint);
+    return bignum.multiply(500, library.tokenSetting.fixedPoint);
   }
 
 
@@ -43,7 +44,7 @@ class Asset extends AssetBase {
 
     if (asset.precision > 16 || asset.precision < 0) return setImmediate(cb, 'Invalid asset precision')
 
-    const error = amountHelper.validate(asset.maximum);
+    const error = Amount.validate(asset.maximum);
     if (error) return setImmediate(cb, error)
 
     if (asset.strategy && asset.strategy.length > 256) return setImmediate(cb, 'Invalid asset strategy size')

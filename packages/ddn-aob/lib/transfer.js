@@ -1,6 +1,7 @@
 const { AssetBase } = require('ddn-asset-base');
 const async = require('async');
 const bignum = require('bignum-utils');
+const { Address, Amount } = require('ddn-utils');
 
 class Transfer extends AssetBase {
   create(data, trs) {
@@ -18,10 +19,10 @@ class Transfer extends AssetBase {
   }
 
   verify(trs, sender, cb) {
-    if (!addressUtil.isAddress(trs.recipient_id)) return cb("Invalid recipient")
+    if (!Address.isAddress(trs.recipient_id)) return cb("Invalid recipient")
     if (!bignum.isZero(trs.amount)) return setImmediate(cb, 'Invalid transaction amount')
     const asset = trs.asset.aobTransfer;
-    const error = amountHelper.validate(asset.amount);
+    const error = Amount.validate(asset.amount);
     if (error) return setImmediate(cb, error)
     library.model.getAssetByName(asset.currency, (err, assetDetail) => {
       if (err) return cb(`Database error: ${err}`);
