@@ -20,12 +20,16 @@ class Issuer extends AssetBase {
         return cb(err);
       }
       // 验证是否存在重复数据
-      const issuer = trans.asset.aobIssuer;
-      var results = await super.queryAsset({ '$or': [ { name: issuer.name }, { issuer_id: issuer.issuer_id } ] }, ['name', 'issuer_id'], false, 1, 1);
-      if (results && results.length > 0) {
-          cb('issuer name or issuer_id already exists');
-      } else {
-          cb(null, trans);
+      try{
+        const issuer = trans.asset.aobIssuer;
+        var results = await super.queryAsset({ '$or': [ { name: issuer.name }, { issuer_id: issuer.issuer_id } ] }, ['name', 'issuer_id'], false, 1, 1);
+        if (results && results.length > 0) {
+            cb('issuer name or issuer_id already exists');
+        } else {
+            cb(null, trans);
+        }
+      } catch (err2) {
+        cb(err2);
       }
     })
   }
