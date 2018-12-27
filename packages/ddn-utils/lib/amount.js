@@ -1,20 +1,22 @@
-const address = {
-  isAddress: (address) => {
-    if (typeof address !== 'string') {
-      return false
+const amount = {
+  validate(amount) {
+    if (typeof amount != 'string') return 'Invalid amount type'
+    if (!/^[1-9][0-9]*$/.test(amount)) return 'Amount should be integer'
+
+    let bnAmount;
+    try {
+      bnAmount = bignum.new(amount);
+    } catch (e) {
+      return 'Failed to convert'
     }
-    if (/^[0-9]{1,20}$/g.test(address)) {
-      return true
-    }
-    if (!base58check.decodeUnsafe(address.slice(1))) {
-      return false
+    
+    if (bignum.isLessThan(bnAmount, 1) || 
+        bignum.isGreaterThan(bnAmount, '1e48')) {
+        return 'Invalid amount range'
     }
 
-    if ([constants.tokenPrefix].indexOf(address[0]) == -1) {
-      return false
-    }
-    return true;
-  },
+    return null
+  }
 }
 
-module.exports = address;
+module.exports = amount;
