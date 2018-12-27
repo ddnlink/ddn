@@ -22,7 +22,7 @@ class Issuer extends AssetBase {
       // 验证是否存在重复数据
       try{
         const issuer = trans.asset.aobIssuer;
-        var results = await super.queryAsset({ '$or': [ { name: issuer.name }, { issuer_id: issuer.issuer_id } ] }, ['name', 'issuer_id'], false, 1, 1);
+        var results = super.queryAsset({ '$or': [ { name: issuer.name }, { issuer_id: issuer.issuer_id } ] }, null, false, 1, 1);
         if (results && results.length > 0) {
             cb('issuer name or issuer_id already exists');
         } else {
