@@ -4,8 +4,8 @@ class Issuer extends AssetBase {
   propsMapping() {
     return [
         {field: "str1", prop: "name", required: true},
-        {field: "str2", prop: "issuer_id", required: true},
-        {field: "str10", prop: "desc", required: true},
+        {field: "str2", prop: "issuer_id" },
+        {field: "str10", prop: "desc" },
     ];
   }
 
