@@ -1,4 +1,5 @@
 const { AssetBase } = require('ddn-asset-base');
+var bignum = require('bignum-utils');
 
 class Issuer extends AssetBase {
   propsMapping() {
