@@ -10,7 +10,7 @@ exports.evidence = {
 exports.aob = {
     transactions: [
         {
-            name: "Issuer",
+            name: "AobIssuer",
             type: 75,
         },
     ],

@@ -7,8 +7,8 @@ var { AssetUtils } = require('ddn-asset-base');
 function createPluginAsset(trsType, assetInfo, secret, secondSecret) {
 	var keys = crypto.getKeys(secret);
 	
-	var fee = constants.fees.org;
-
+	var fee = assetInfo.fee || constants.fees.org;
+	delete assetInfo.fee;
 	var transaction = {
 		type: trsType,
 		nethash: options.get('nethash'),
