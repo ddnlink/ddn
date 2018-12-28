@@ -49,13 +49,6 @@ class Issuer extends AssetBase {
     })
   }
 
-  getBytes (trs)  {
-    return Buffer.concat([
-      new Buffer(trs.asset.aobIssuer.name, 'utf8'),
-      new Buffer(trs.asset.aobIssuer.desc, 'utf8')
-    ])
-  }
-
   apply (trs, block, sender, dbTrans, cb) {
     if (typeof(cb) == "undefined" && typeof(dbTrans) == "function") {
 			cb = dbTrans;
