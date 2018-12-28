@@ -10,6 +10,16 @@ class Issuer extends AssetBase {
     ];
   }
 
+  create (data, trs) {
+    trs.recipient_id = null;
+    trs.amount = "0";
+    trs.asset.aobIssuer = {
+      name: data.name,
+      desc: data.desc
+    }
+    return trs;
+  }
+
   calculateFee() {
     return bignum.multiply(100, this.library.tokenSetting.fixedPoint);
   }
@@ -23,12 +33,16 @@ class Issuer extends AssetBase {
       // 验证是否存在重复数据
       try{
         const issuer = trans.asset.aobIssuer;
-        var results = super.queryAsset({ '$or': [ { name: issuer.name }, { issuer_id: issuer.issuer_id } ] }, null, false, 1, 1);
-        if (results && results.length > 0) {
-            cb('issuer name or issuer_id already exists');
-        } else {
-            cb(null, trans);
+        const condition = {
+          filter: { '$or': [ { name: issuer.name }, { issuer_id: issuer.issuer_id } ] },
         }
+        super.queryAsset(condition, (err, result) => {
+          if (results && results.length > 0) {
+            cb('issuer name or issuer_id already exists');
+          } else {
+            cb(null, trans);
+          }
+        });
       } catch (err2) {
         cb(err2);
       }
