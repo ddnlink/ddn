@@ -1,3 +1,3 @@
 module.exports = {
-  Issuer: require('./lib/issuer'),
+  AobIssuer: require('./lib/issuer'),
 }
