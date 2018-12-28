@@ -36,7 +36,7 @@ class Issuer extends AssetBase {
         const condition = {
           filter: { '$or': [ { name: issuer.name }, { issuer_id: issuer.issuer_id } ] },
         }
-        super.queryAsset(condition, (err, result) => {
+        super.queryAsset(condition, (err, results) => {
           if (results && results.length > 0) {
             cb('issuer name or issuer_id already exists');
           } else {
