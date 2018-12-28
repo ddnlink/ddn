@@ -49,5 +49,55 @@ class Issuer extends AssetBase {
     })
   }
 
+  getBytes (trs)  {
+    return Buffer.concat([
+      new Buffer(trs.asset.aobIssuer.name, 'utf8'),
+      new Buffer(trs.asset.aobIssuer.desc, 'utf8')
+    ])
+  }
+
+  apply (trs, block, sender, dbTrans, cb) {
+    if (typeof(cb) == "undefined" && typeof(dbTrans) == "function") {
+			cb = dbTrans;
+			dbTrans = null;
+    };
+    setImmediate(cb)
+  }
+
+  undo (trs, block, sender, dbTrans, cb) {
+    if (typeof(cb) == "undefined" && typeof(dbTrans) == "function") {
+			cb = dbTrans;
+			dbTrans = null;
+    };
+    setImmediate(cb)
+  }
+
+  applyUnconfirmed (trs, sender, dbTrans, cb) {
+    if (typeof(cb) == "undefined" && typeof(dbTrans) == "function") {
+			cb = dbTrans;
+			dbTrans = null;
+    };
+    const nameKey = `${trs.asset.aobIssuer.name}:${trs.type}`;
+    const idKey = `${sender.address}:${trs.type}`;
+    if (library.oneoff.has(nameKey) || library.oneoff.has(idKey)) {
+      return setImmediate(cb, 'Double submit')
+    }
+    this.library.oneoff.set(nameKey, true)
+    this.library.oneoff.set(idKey, true)
+    setImmediate(cb)
+  }
+
+  undoUnconfirmed (trs, sender, dbTrans, cb) {
+    if (typeof(cb) == "undefined" && typeof(dbTrans) == "function") {
+			cb = dbTrans;
+			dbTrans = null;
+    };
+    const nameKey = `${trs.asset.aobIssuer.name}:${trs.type}`;
+    const idKey = `${sender.address}:${trs.type}`;
+    this.library.oneoff.delete(nameKey)
+    this.library.oneoff.delete(idKey)
+    setImmediate(cb)
+  }
+
 }
 module.exports = Issuer;
