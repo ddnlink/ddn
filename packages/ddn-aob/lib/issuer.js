@@ -15,7 +15,8 @@ class Issuer extends AssetBase {
     trs.amount = "0";
     trs.asset.aobIssuer = {
       name: data.name,
-      desc: data.desc
+      desc: data.desc,
+      issuer_id: trs.sender_id,
     }
     return trs;
   }
@@ -90,28 +91,6 @@ class Issuer extends AssetBase {
     this.library.oneoff.delete(nameKey)
     this.library.oneoff.delete(idKey)
     setImmediate(cb)
-  }
-
-  dbSave(trs, dbTrans, cb) {
-    if (typeof(cb) == "undefined" && typeof(dbTrans) == "function") {
-			cb = dbTrans;
-			dbTrans = null;
-    };
-    super.dbSave(trs, dbTrans, (err, data) => {
-      const asset = trs.asset.aobIssuer;
-      const values = {
-        transaction_id: trs.id,
-        issuer_id: trs.sender_id,
-        name: asset.name,
-        desc: asset.desc
-      };
-      const where = {
-        transaction_id: trs.id,
-        name: asset.name,
-      }
-      this.library.dao.update('trs_asset', values, where, dbTrans, cb);
-    })
-    
   }
 
 }
