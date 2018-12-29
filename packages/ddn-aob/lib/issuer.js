@@ -92,5 +92,20 @@ class Issuer extends AssetBase {
     setImmediate(cb)
   }
 
+  dbSave(trs, dbTrans, cb) {
+    if (typeof(cb) == "undefined" && typeof(dbTrans) == "function") {
+			cb = dbTrans;
+			dbTrans = null;
+    };
+    const asset = trs.asset.aobIssuer;
+    const values = {
+      transaction_id: trs.id,
+      issuer_id: trs.sender_id,
+      name: asset.name,
+      desc: asset.desc
+    };
+    this.library.dao.insert('trs_asset', values, dbTrans, cb);
+  }
+
 }
 module.exports = Issuer;
