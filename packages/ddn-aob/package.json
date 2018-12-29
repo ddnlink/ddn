@@ -10,5 +10,8 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "wly",
-  "license": "ISC"
+  "license": "ISC",
+  "dependencies": {
+    "ddn-asset-base": "git+ssh://git@git.ebookchain.net:ddn/ddn-asset-base.git"
+  }
 }

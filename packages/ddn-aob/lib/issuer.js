@@ -3,14 +3,24 @@ var bignum = require('bignum-utils');
 
 class Issuer extends AssetBase {
   propsMapping() {
-    return [
-        {field: "str1", prop: "name", required: true},
-        {field: "str2", prop: "issuer_id" },
-        {field: "str10", prop: "desc" },
+    return [{
+      field: "str1",
+      prop: "name",
+      required: true
+    },
+    {
+      field: "str2",
+      prop: "issuer_id"
+    },
+    {
+      field: "str10",
+      prop: "desc"
+    },
     ];
   }
 
-  create (data, trs) {
+  create(data, trs) {
+    console.log('trs', trs)
     trs.recipient_id = null;
     trs.amount = "0";
     trs.asset.aobIssuer = {
@@ -18,6 +28,9 @@ class Issuer extends AssetBase {
       desc: data.desc,
       issuer_id: trs.sender_id,
     }
+    console.log('010101010101010101010101010010001')
+    console.log('data', data)
+    console.log('trs', trs)
     return trs;
   }
 
@@ -27,49 +40,56 @@ class Issuer extends AssetBase {
 
   verify(trs, sender, cb) {
     // 先调用基类的验证
-    super.verify(trs, sender,(err, trans) => {
-      if(err) {
+    super.verify(trs, sender, async (err, trans) => {
+      if (err) {
         return cb(err);
       }
       // 验证是否存在重复数据
-      try{
+      try {
         const issuer = trans.asset.aobIssuer;
-        const condition = {
-          filter: { '$or': [ { name: issuer.name }, { issuer_id: issuer.issuer_id } ] },
+        const where = {
+          '$or': [{
+            name: issuer.name
+          }, {
+            issuer_id: trs.sender_id
+          }]
         }
-        super.queryAsset(condition, (err, results) => {
-          if (results && results.length > 0) {
-            cb('issuer name or issuer_id already exists');
-          } else {
-            cb(null, trans);
-          }
-        });
+        const orders = null;
+        const returnTotal = null;
+        const pageIndex = 1;
+        const pageSize = 1;
+        var results = await super.queryAsset(where, orders, returnTotal, pageIndex, pageSize);
+        if (results && results.length > 0) {
+          cb('Evidence name/issuer_id already exists');
+        } else {
+          cb(null, trans);
+        }
       } catch (err2) {
         cb(err2);
       }
     })
   }
 
-  apply (trs, block, sender, dbTrans, cb) {
-    if (typeof(cb) == "undefined" && typeof(dbTrans) == "function") {
-			cb = dbTrans;
-			dbTrans = null;
+  apply(trs, block, sender, dbTrans, cb) {
+    if (typeof (cb) == "undefined" && typeof (dbTrans) == "function") {
+      cb = dbTrans;
+      dbTrans = null;
     };
     setImmediate(cb)
   }
 
-  undo (trs, block, sender, dbTrans, cb) {
-    if (typeof(cb) == "undefined" && typeof(dbTrans) == "function") {
-			cb = dbTrans;
-			dbTrans = null;
+  undo(trs, block, sender, dbTrans, cb) {
+    if (typeof (cb) == "undefined" && typeof (dbTrans) == "function") {
+      cb = dbTrans;
+      dbTrans = null;
     };
     setImmediate(cb)
   }
 
-  applyUnconfirmed (trs, sender, dbTrans, cb) {
-    if (typeof(cb) == "undefined" && typeof(dbTrans) == "function") {
-			cb = dbTrans;
-			dbTrans = null;
+  applyUnconfirmed(trs, sender, dbTrans, cb) {
+    if (typeof (cb) == "undefined" && typeof (dbTrans) == "function") {
+      cb = dbTrans;
+      dbTrans = null;
     };
     const nameKey = `${trs.asset.aobIssuer.name}:${trs.type}`;
     const idKey = `${sender.address}:${trs.type}`;
@@ -81,10 +101,10 @@ class Issuer extends AssetBase {
     setImmediate(cb)
   }
 
-  undoUnconfirmed (trs, sender, dbTrans, cb) {
-    if (typeof(cb) == "undefined" && typeof(dbTrans) == "function") {
-			cb = dbTrans;
-			dbTrans = null;
+  undoUnconfirmed(trs, sender, dbTrans, cb) {
+    if (typeof (cb) == "undefined" && typeof (dbTrans) == "function") {
+      cb = dbTrans;
+      dbTrans = null;
     };
     const nameKey = `${trs.asset.aobIssuer.name}:${trs.type}`;
     const idKey = `${sender.address}:${trs.type}`;
