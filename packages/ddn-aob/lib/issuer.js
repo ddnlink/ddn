@@ -97,14 +97,21 @@ class Issuer extends AssetBase {
 			cb = dbTrans;
 			dbTrans = null;
     };
-    const asset = trs.asset.aobIssuer;
-    const values = {
-      transaction_id: trs.id,
-      issuer_id: trs.sender_id,
-      name: asset.name,
-      desc: asset.desc
-    };
-    this.library.dao.insert('trs_asset', values, dbTrans, cb);
+    super.dbSave(trs, dbTrans, (err, data) => {
+      const asset = trs.asset.aobIssuer;
+      const values = {
+        transaction_id: trs.id,
+        issuer_id: trs.sender_id,
+        name: asset.name,
+        desc: asset.desc
+      };
+      const where = {
+        transaction_id: trs.id,
+        name: asset.name,
+      }
+      this.library.dao.update('trs_asset', values, where, dbTrans, cb);
+    })
+    
   }
 
 }
