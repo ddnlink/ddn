@@ -20,7 +20,6 @@ class Issuer extends AssetBase {
   }
 
   create(data, trs) {
-    console.log('trs', trs)
     trs.recipient_id = null;
     trs.amount = "0";
     trs.asset.aobIssuer = {
@@ -28,9 +27,6 @@ class Issuer extends AssetBase {
       desc: data.desc,
       issuer_id: trs.sender_id,
     }
-    console.log('010101010101010101010101010010001')
-    console.log('data', data)
-    console.log('trs', trs)
     return trs;
   }
 
