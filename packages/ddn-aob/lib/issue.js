@@ -9,8 +9,7 @@ class Issue extends AssetBase {
     },
     {
       field: "str2",
-      prop: "amount",
-      required: true
+      prop: "amount"
     }
     ];
   }
