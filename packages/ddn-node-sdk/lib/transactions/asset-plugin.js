@@ -17,11 +17,18 @@ function createPluginAsset(trsType, assetInfo, secret, secondSecret) {
 		recipient_id: assetInfo.receive_address ? assetInfo.receive_address : null,
 		sender_public_key: keys.public_key,
 		timestamp: slots.getTime() - options.get('clientDriftSeconds'),
+		message: assetInfo.message ? assetInfo.message + "" : null,
 		asset: {}
   };
     
   delete assetInfo.amount;
-  delete assetInfo.receive_address;
+	delete assetInfo.receive_address;
+	delete assetInfo.message;
+
+	if(assetInfo.aobAmount) {
+		assetInfo.amount = assetInfo.aobAmount;
+		delete assetInfo.aobAmount;
+	}
 
   var assetJsonName = AssetUtils.getAssetJsonName(trsType);
   transaction.asset[assetJsonName] = assetInfo;

@@ -13,6 +13,18 @@ exports.aob = {
             name: "AobIssuer",
             type: 75,
         },
+        {
+            name: "AobAsset",
+            type: 76,
+        },
+        {
+            name: "AobIssue",
+            type: 77,
+        },
+        {
+            name: "AobTransfer",
+            type: 78,
+        },
     ],
     package: "ddn-aob"
 }
