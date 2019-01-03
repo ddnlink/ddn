@@ -1,5 +1,5 @@
 module.exports = {
-  AobIssuer: require('./lib/issuer'),
+  AobIssuer: require('./lib/Issuer'),
   AobAsset: require('./lib/Asset'),
-  AobIssue: require('./lib/issue'),
+  AobIssue: require('./lib/Issue'),
 }
