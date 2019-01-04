@@ -9,6 +9,9 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
+  "dependencies": {
+    "bignum-utils": "git+ssh://git@git.ebookchain.net:ddn/bignum_utils.git"
+  },
   "author": "wly",
   "license": "ISC"
 }
