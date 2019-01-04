@@ -1,6 +1,6 @@
 const { AssetBase } = require('ddn-asset-base');
 const bignum = require('bignum-utils');
-const Helper = require('ddn-utils')
+const ddnUtils = require('ddn-utils')
 
 
 class Asset extends AssetBase {
@@ -95,6 +95,12 @@ class Asset extends AssetBase {
       if (asset.desc.length > 4096) return setImmediate(cb, 'Invalid asset desc size form ddn-aob')
 
       if (asset.precision > 16 || asset.precision < 0) return setImmediate(cb, 'Invalid asset precision form ddn-aob')
+
+
+      console.log('ddnUtils.Amount.validate', ddnUtils.Amount.validate)
+
+      const error = ddnUtils.Amount.validate(asset.maximum);
+      if (error) return setImmediate(cb, error)
 
       if (asset.strategy && asset.strategy.length > 256) return setImmediate(cb, 'Invalid asset strategy size form ddn-aob')
       if (asset.allow_writeoff !== '0' && asset.allow_writeoff !== '1') return setImmediate(cb, 'Asset allowWriteoff is not valid form ddn-aob')
