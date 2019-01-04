@@ -1,5 +1,5 @@
 const { AssetBase } = require('ddn-asset-base');
-const amountHelper = require('ddn-tools')
+const Helper = require('ddn-utils')
 
 class Asset extends AssetBase {
   propsMapping() {
@@ -94,7 +94,7 @@ class Asset extends AssetBase {
 
       if (asset.precision > 16 || asset.precision < 0) return setImmediate(cb, 'Invalid asset precision')
 
-      const error = amountHelper.validate(asset.maximum);
+      const error = Helper.amount.validate(asset.maximum);
       if (error) return setImmediate(cb, error)
       if (asset.strategy && asset.strategy.length > 256) return setImmediate(cb, 'Invalid asset strategy size')
       if (asset.allow_writeoff !== 0 && asset.allow_writeoff !== 1) return setImmediate(cb, 'Asset allowWriteoff is not valid')
