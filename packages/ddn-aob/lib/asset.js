@@ -107,10 +107,15 @@ class Asset extends AssetBase {
         const returnTotal = null;
         const pageIndex = 1;
         const pageSize = 1;
+
+        console.log('第一次去查询')
+
         const assetData = await super.queryAsset(where, orders, returnTotal, pageIndex, pageSize);
         if (assetData && assetData.length > 0) {
           cb('asset->name Double register');
         }
+
+        console.log('第二次去查询')
 
         // 缺少更多判断
         const issuerWhere = { name: issuerName };
@@ -125,6 +130,9 @@ class Asset extends AssetBase {
         return cb(null);
 
       } catch (err2) {
+
+        console.log('err2', err2)
+
         cb(err2);
       }
     })
