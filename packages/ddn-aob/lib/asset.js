@@ -96,10 +96,6 @@ class Asset extends AssetBase {
 
       if (asset.precision > 16 || asset.precision < 0) return setImmediate(cb, 'Invalid asset precision')
 
-      console.log('Helper.amount.validate', Helper.amount.validate)
-
-      const error = Helper.amount.validate(asset.maximum);
-      if (error) return setImmediate(cb, error)
       if (asset.strategy && asset.strategy.length > 256) return setImmediate(cb, 'Invalid asset strategy size')
       if (asset.allow_writeoff !== 0 && asset.allow_writeoff !== 1) return setImmediate(cb, 'Asset allowWriteoff is not valid')
       if (asset.allow_whitelist !== 0 && asset.allow_whitelist !== 1) return setImmediate(cb, 'Asset allowWhitelist is not valid')
