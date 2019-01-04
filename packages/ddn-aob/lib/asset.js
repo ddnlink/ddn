@@ -96,6 +96,8 @@ class Asset extends AssetBase {
 
       if (asset.precision > 16 || asset.precision < 0) return setImmediate(cb, 'Invalid asset precision')
 
+      console.log('Helper.amount.validate', Helper.amount.validate)
+
       const error = Helper.amount.validate(asset.maximum);
       if (error) return setImmediate(cb, error)
       if (asset.strategy && asset.strategy.length > 256) return setImmediate(cb, 'Invalid asset strategy size')
