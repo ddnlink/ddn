@@ -1,5 +1,7 @@
 const { AssetBase } = require('ddn-asset-base');
+const bignum = require('bignum-utils');
 const Helper = require('ddn-utils')
+
 
 class Asset extends AssetBase {
   propsMapping() {
