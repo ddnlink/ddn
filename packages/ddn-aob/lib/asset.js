@@ -97,9 +97,9 @@ class Asset extends AssetBase {
       if (asset.precision > 16 || asset.precision < 0) return setImmediate(cb, 'Invalid asset precision')
 
       if (asset.strategy && asset.strategy.length > 256) return setImmediate(cb, 'Invalid asset strategy size')
-      if (asset.allow_writeoff !== 0 && asset.allow_writeoff !== 1) return setImmediate(cb, 'Asset allowWriteoff is not valid')
-      if (asset.allow_whitelist !== 0 && asset.allow_whitelist !== 1) return setImmediate(cb, 'Asset allowWhitelist is not valid')
-      if (asset.allow_blacklist !== 0 && asset.allow_blacklist !== 1) return setImmediate(cb, 'Asset allowBlacklist is not valid')
+      if (asset.allow_writeoff !== '0' && asset.allow_writeoff !== '1') return setImmediate(cb, 'Asset allowWriteoff is not valid')
+      if (asset.allow_whitelist !== '0' && asset.allow_whitelist !== '1') return setImmediate(cb, 'Asset allowWhitelist is not valid')
+      if (asset.allow_blacklist !== '0' && asset.allow_blacklist !== '1') return setImmediate(cb, 'Asset allowBlacklist is not valid')
 
       try {
         const where = { name: asset.name }
