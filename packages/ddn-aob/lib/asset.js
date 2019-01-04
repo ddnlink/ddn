@@ -113,9 +113,19 @@ class Asset extends AssetBase {
         }
 
         // 缺少更多判断
+        const issuerWhere = { name: issuerName };
+        const issuerData = await super.queryAsset(issuerWhere, orders, returnTotal, pageIndex, pageSize, 75);
+
+        console.log('issuerData:', issuerData)
+        console.log('sender:', sender)
+
+        if (!assetData || assetData.length < 0) return cb('Issuer not exists');
+        if (assetData.issuer_id != sender.address) return cb('Permission not allowed');
+
+        return cb(null);
 
       } catch (err2) {
-        cb(err2)
+        cb(err2);
       }
     })
   }
