@@ -128,7 +128,7 @@ class Asset extends AssetBase {
         }
         console.log('issuerData:', issuerData)
         console.log('sender:', sender)
-        if (assetData.issuer_id != sender.address) return cb('Permission not allowed form ddn-aob');
+        if (issuerData.issuer_id != sender.address) return cb('Permission not allowed form ddn-aob');
 
         return cb(null);
 
