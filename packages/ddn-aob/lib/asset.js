@@ -119,12 +119,15 @@ class Asset extends AssetBase {
 
         // 缺少更多判断
         const issuerWhere = { name: issuerName };
-        const issuerData = await super.queryAsset(issuerWhere, orders, returnTotal, pageIndex, pageSize, 75);
+        let issuerData = await super.queryAsset(issuerWhere, orders, returnTotal, pageIndex, pageSize, 75);
 
+        if (issuerData && issuerData.length > 0) {
+          issuerData = issuerData[0]
+        } else {
+          return cb('Issuer not exists form ddn-aob')
+        }
         console.log('issuerData:', issuerData)
         console.log('sender:', sender)
-
-        if (!assetData || assetData.length < 0) return cb('Issuer not exists form ddn-aob');
         if (assetData.issuer_id != sender.address) return cb('Permission not allowed form ddn-aob');
 
         return cb(null);
