@@ -196,16 +196,31 @@ class AssetBase {
      * @param {*} returnTotal 是否返回总条数，true/false
      * @param {*} pageIndex 查询的页码，从1开始
      * @param {*} pageSize 分页的大小，每页的返回的最大记录条数
-     * @param {*} cb 回调
+     * @param {*} asset 资产交易的配置name或type（config.asset.js文件中定义）
      */
-    async queryAsset(where, orders, returnTotal, pageIndex, pageSize, cb) {
+    async queryAsset(where, orders, returnTotal, pageIndex, pageSize, asset) {
+        var assetInst = this;
+        if (asset) {
+            var assetTrans;
+            if (/^[0-9]*$/.test(asset)) {
+                assetTrans = AssetUtils.getTransactionByTypeValue(asset);
+            } else {
+                var assetValue = AssetUtils.getTypeValue(asset);
+                assetTrans = AssetUtils.getTransactionByTypeValue(assetValue);
+            }
+            if (assetTrans) {
+                var assetCls = require(assetTrans.package)[assetTrans.name];
+                assetInst = new assetCls(this.library, this.modules);
+            }
+        }
+
         //构建返回字段数组
         var attributes = [
             ['transaction_id', 'asset_trs_id'],
             ['transaction_type', 'asset_trs_type'],
             ['timestamp', 'asset_timestamp']
         ];
-        var propsMapping =  this.propsMapping();
+        var propsMapping = assetInst.propsMapping();
         for (var i = 0; i < propsMapping.length; i++) {
             var propMapping = propsMapping[i];
             var field = propMapping.field;
@@ -220,7 +235,7 @@ class AssetBase {
         var newConds = {};
         where = where || {};
         for (var p in where) {
-            var condProp = this.getPropsMappingItemByProp(p);
+            var condProp = assetInst.getPropsMappingItemByProp(p);
             if (condProp) {
                 newConds[condProp.field] = where[p];
             } else {
@@ -240,7 +255,7 @@ class AssetBase {
         var newOrders = [];
         if (CommonUtils.isArray(orders) && orders.length > 0) {
             var getFieldName = (prop) => {
-                var condProp = this.getPropsMappingItemByProp(prop);
+                var condProp = assetInst.getPropsMappingItemByProp(prop);
                 if (condProp) {
                     return condProp.field;
                 } else {
@@ -295,7 +310,7 @@ class AssetBase {
 
         return new Promise((resolve, reject) => {
             this.library.model.getAssetBase(newConds, 
-                this.hasExtProps(), pageIndex, pageSize, 
+                assetInst.hasExtProps(), pageIndex, pageSize, 
                 newOrders, returnTotal, attributes, (err, data) => {
                     if (err) {
                         reject(err);
@@ -306,7 +321,7 @@ class AssetBase {
                         var rowObjs = [];
                         for (var i = 0; i < rows.length; i++) {
                             var rowInfo = rows[i];
-                            var rowObj = this.dbRead(rowInfo);
+                            var rowObj = assetInst.dbRead(rowInfo);
                             if (rowObj) {
                                 var assetName = AssetUtils.getAssetJsonName(rowInfo.asset_trs_type);
                                 rowObjs.push(rowObj[assetName]);
