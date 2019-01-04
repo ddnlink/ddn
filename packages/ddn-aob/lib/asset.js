@@ -78,7 +78,7 @@ class Asset extends AssetBase {
   }
 
   verify(trs, sender, cb) {
-    super.verify(trs, senderm, async(err, trans) => {
+    super.verify(trs, sender, async(err, trans) => {
       if (err) {
         return cb(err);
       }
