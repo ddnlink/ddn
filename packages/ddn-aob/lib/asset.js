@@ -110,11 +110,11 @@ class Asset extends AssetBase {
 
         console.log('第一次去查询')
 
-        const assetData = await super.queryAsset(where, orders, returnTotal, pageIndex, pageSize);
+        let assetData = await super.queryAsset(where, orders, returnTotal, pageIndex, pageSize);
         if (assetData && assetData.length > 0) {
           cb('asset->name Double register form ddn-aob');
         }
-
+        assetData = assetData[0];
         console.log('第二次去查询')
 
         // 缺少更多判断
