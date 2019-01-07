@@ -1,6 +1,6 @@
 const { AssetBase } = require('ddn-asset-base');
 const bignum = require('bignum-utils');
-const ddnUtils = require('ddn-utils')
+const ddnUtils = require('ddn-utils');
 
 
 class Asset extends AssetBase {
@@ -124,5 +124,25 @@ class Asset extends AssetBase {
     })
   }
 
+  getBytes (trs) {
+    const asset = trs.asset.aobAsset;
+    let buffer = Buffer.concat([
+      new Buffer(asset.name, 'utf8'),
+      new Buffer(asset.desc, 'utf8'),
+      new Buffer(asset.maximum, 'utf8'),
+      Buffer.from([asset.precision || 0]),
+      new Buffer(asset.strategy || '', 'utf8'),
+      Buffer.from([asset.allow_writeoff || '0']),
+      Buffer.from([asset.allow_whitelist || '0']),
+      Buffer.from([asset.allow_blacklist || '0'])
+    ]);
+
+    const strategy = trs.asset.aobAsset.strategy;
+    if (strategy) {
+      buffer = Buffer.concat([buffer, ]);
+    }
+    return buffer;
+  }
+  
 }
 module.exports = Asset;
