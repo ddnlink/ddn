@@ -12,8 +12,10 @@
   "author": "wly",
   "license": "ISC",
   "dependencies": {
-    "ddn-asset-base": "git+ssh://git@git.ebookchain.net:ddn/ddn-asset-base.git",
     "bignum-utils": "git+ssh://git@git.ebookchain.net:ddn/bignum_utils.git",
-    "ddn-utils": "git+ssh://git@git.ebookchain.net:ddn/ddn-utils.git"
+    "ddn-asset-base": "git+ssh://git@git.ebookchain.net:ddn/ddn-asset-base.git",
+    "ddn-utils": "git+ssh://git@git.ebookchain.net:ddn/ddn-utils.git",
+    "mathjs": "^5.4.0",
+    "underscore": "^1.9.1"
   }
 }
