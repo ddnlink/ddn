@@ -1,6 +1,6 @@
 module.exports = {
-  AobIssuer: require('./lib/Issuer'),
-  AobAsset: require('./lib/Asset'),
-  AobIssue: require('./lib/Issue'),
-  AobTransfer: require('./lib/Transfer'),
+  AobIssuer: require('./lib/Issuer'),     // type: 75
+  AobAsset: require('./lib/Asset'),       // type: 76
+  AobIssue: require('./lib/Issue'),       // type: 77
+  AobTransfer: require('./lib/Transfer'), // type: 78
 }
