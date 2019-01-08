@@ -83,27 +83,6 @@ class helper extends AssetBase {
     })
   }
 
-  async addAssetQuantity(currency, amount, dbTrans, cb) {
-    if (typeof(cb) == "undefined" && typeof(dbTrans) == "function") {
-			cb = dbTrans;
-			dbTrans = null;
-    };
-    new Promise(async () => {
-      const where = { name: currency }
-      let data = await super.queryAsset(where, null, null, pageIndex, pageSize, 76);
-      data = data[0];
-      const quantity = data.quantity;
-      const obj = { quantity: bignum.plus(quantity, amount).toString() };
-      super.insertOrUpdate(obj, 76, (err) => {
-        if (err) {
-          return reject(err);
-        }
-        cb();
-      });
-    })
-  }
-
-
   updateAssetBalance(currency, amount, address, dbTrans, cb) {
     if (typeof(cb) == "undefined" && typeof(dbTrans) == "function") {
 			cb = dbTrans;
