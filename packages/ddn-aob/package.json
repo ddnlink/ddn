@@ -12,6 +12,7 @@
   "author": "wly",
   "license": "ISC",
   "dependencies": {
+    "async": "^2.6.1",
     "bignum-utils": "git+ssh://git@git.ebookchain.net:ddn/bignum_utils.git",
     "ddn-asset-base": "git+ssh://git@git.ebookchain.net:ddn/ddn-asset-base.git",
     "ddn-utils": "git+ssh://git@git.ebookchain.net:ddn/ddn-utils.git",

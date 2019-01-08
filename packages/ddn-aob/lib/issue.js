@@ -3,6 +3,7 @@ const bignum = require('bignum-utils');
 const ddnUtils = require('ddn-utils');
 const mathjs = require('mathjs');
 const helper = require('./helper');
+const async = require('async');
 
 class Issue extends AssetBase {
   propsMapping() {
@@ -79,6 +80,46 @@ class Issue extends AssetBase {
         cb(err2, ' --- from ddn-aob -> issue.verify');
       }
     })
+  }
+
+  apply(trs, block, sender, dbTrans, cb) {
+    if (typeof(cb) == "undefined" && typeof(dbTrans) == "function") {
+			cb = dbTrans;
+			dbTrans = null;
+    };
+    const currency = trs.asset.aobIssue.currency;
+    const amount = trs.asset.aobIssue.amount;
+    this.library.balanceCache.addAssetBalance(sender.address, currency, amount)
+    async.series([
+      next => {
+        helper.addAssetQuantity(currency, amount, dbTrans, next)
+      },
+      next => {
+        helper.updateAssetBalance(currency, amount, sender.address, dbTrans, next)
+      }
+    ], cb)
+  }
+  
+  undo(trs, block, sender, dbTrans, cb) {
+    if (typeof(cb) == "undefined" && typeof(dbTrans) == "function") {
+			cb = dbTrans;
+			dbTrans = null;
+    };
+    const currency = trs.asset.aobIssue.currency;
+    const amount = trs.asset.aobIssue.amount;
+    const senderBalanceKey = `${currency}:${sender.address}`;
+    const balance = library.balanceCache.getAssetBalance(sender.address, currency) || 0;
+    //bignum update if (bignum(balance).lt(amount)) 
+    if (bignum.isLessThan(balance, amount)) return setImmediate(cb, `Invalid asset balance: ${balance}`);
+    this.library.balanceCache.addAssetBalance(sender.address, currency, `-${amount}`)
+    async.series([
+      next => {
+        helper.addAssetQuantity(currency, `-${amount}`, dbTrans, next)
+      },
+      next => {
+        helper.updateAssetBalance(currency, `-${amount}`, sender.address, dbTrans, next)
+      }
+    ], cb)
   }
   
 }

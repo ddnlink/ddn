@@ -3,6 +3,9 @@ const _ = require('underscore');
 const ddnUtils = require('ddn-utils');
 
 class helper extends AssetBase {
+  propsMapping() {
+    return [];
+  }
   async getAssets(where, pageIndex, pageSize, cb) {
     new Promise(async () => {
       try {
@@ -65,13 +68,67 @@ class helper extends AssetBase {
 			cb = dbTrans;
 			dbTrans = null;
     };
+    new Promise(async () => {
+      const where = { name: currency }
+      const data = await super.queryAsset(where, null, null, pageIndex, pageSize, 76);
+      const quantity = data.quantity;
+      const obj = { quantity: bignum.plus(quantity, amount).toString() };
+      super.update(obj, where, 76, (err) => {
+        if (err) {
+          return reject(err);
+        }
+        cb();
+      });
 
-    const data = await super.queryAsset({ name: currency }, null, null, pageIndex, pageSize, 76);
+    })
+  }
 
-    const quantity = data.quantity;
+  async addAssetQuantity(currency, amount, dbTrans, cb) {
+    if (typeof(cb) == "undefined" && typeof(dbTrans) == "function") {
+			cb = dbTrans;
+			dbTrans = null;
+    };
+    new Promise(async () => {
+      const where = { name: currency }
+      let data = await super.queryAsset(where, null, null, pageIndex, pageSize, 76);
+      data = data[0];
+      const quantity = data.quantity;
+      const obj = { quantity: bignum.plus(quantity, amount).toString() };
+      super.insertOrUpdate(obj, 76, (err) => {
+        if (err) {
+          return reject(err);
+        }
+        cb();
+      });
+    })
+  }
 
+
+  updateAssetBalance(currency, amount, address, dbTrans, cb) {
+    if (typeof(cb) == "undefined" && typeof(dbTrans) == "function") {
+			cb = dbTrans;
+			dbTrans = null;
+    };
+    new Promise(async () => {
+      const where = { address, currency }
+      let data = await super.queryAsset(where, null, null, pageIndex, pageSize, 79);
+      data = data[0];
+      let balance = '0';
+      if (data) {
+        balance = data.balance
+      }
+      const newBalance = bignum.plus(balance, amount);
+      var obj = { address, currency, balance: newBalance.toString() };
+      super.insertOrUpdate(obj, 76, (err) => {
+        if (err) {
+          return reject(err);
+        }
+        cb();
+      });
+    })
 
   }
+
 
 }
 module.exports = helper;
