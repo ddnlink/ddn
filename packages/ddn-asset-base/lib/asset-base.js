@@ -351,6 +351,61 @@ class AssetBase {
     }
 
     /**
+     * 
+     * @param {*} obj 模型数据, 必传
+     * @param {*} asset type
+     * @param {*} dbTrans 
+     * @param {*} cb 
+     */
+    insertOrUpdate(obj, asset, dbTrans, cb) {
+        if (typeof(cb) == "undefined" && typeof(dbTrans) == "function") {
+            cb = dbTrans;
+            dbTrans = null;
+        }
+        console.log('进入insertOrUpdate方法')
+        console.log('obj', obj)
+        console.log('asset', asset)
+        var assetInst = this;
+        if (asset) {
+            var assetTrans;
+            if (/^[0-9]*$/.test(asset)) {
+                assetTrans = AssetUtils.getTransactionByTypeValue(asset);
+            } else {
+                var assetValue = AssetUtils.getTypeValue(asset);
+                assetTrans = AssetUtils.getTransactionByTypeValue(assetValue);
+            }
+            if (assetTrans) {
+                var assetCls = require(assetTrans.package)[assetTrans.name];
+                assetInst = new assetCls(this.library, this.modules);
+            }
+        }
+        // 解析跟新结构
+        var newObj = {};
+        obj = obj || {};
+        for (var p in obj) {
+            var condProp = assetInst.getPropsMappingItemByProp(p);
+            if (condProp) {
+                newObj[condProp.field] = obj[p];
+            } else {
+                var pName = p.toLowerCase();
+                if (pName == "trs_id") {
+                    newObj["transaction_id"] = obj[p];
+                } else if (pName == "trs_type") {
+                    newObj["transaction_type"] = obj[p];
+                } else if (pName == "trs_timestamp") {
+                    newObj["timestamp"] = obj[p];
+                }
+            }
+        }
+        this.library.dao.insertOrUpdate("trs_asset", obj, dbTrans, (err, result) => {
+            if (err) {
+                return cb(err);
+            }
+            cb();
+        })
+    }
+
+    /**
      * 校验输入数据格式是否符合规则（_assetFiledRules负责定义规则）
      * @param {*} trs 
      */
