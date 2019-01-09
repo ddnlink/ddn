@@ -84,6 +84,9 @@ class Issue extends AssetBase {
   }
 
   apply(trs, block, sender, dbTrans, cb) {
+
+    console.log('进入apply方法')
+
     if (typeof(cb) == "undefined" && typeof(dbTrans) == "function") {
 			cb = dbTrans;
 			dbTrans = null;
@@ -102,6 +105,9 @@ class Issue extends AssetBase {
   }
   
   undo(trs, block, sender, dbTrans, cb) {
+
+    console.log('进入undo方法')
+
     if (typeof(cb) == "undefined" && typeof(dbTrans) == "function") {
 			cb = dbTrans;
 			dbTrans = null;

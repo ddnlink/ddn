@@ -9,6 +9,9 @@ class helper extends AssetBase {
     return [];
   }
   async getAssets(where, pageIndex, pageSize, cb) {
+
+    console.log('进入getAssets方法')
+
     new Promise(async () => {
       try {
         let result; // 最后返回的值
@@ -60,6 +63,7 @@ class helper extends AssetBase {
         // 返回最终值
         cb(null, result);
       } catch(e){
+        console.log('-- from ddn-aob.helper.getAssets -> e:',e);
         cb(e)
       }
     });
