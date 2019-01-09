@@ -44,15 +44,15 @@ class Asset extends AssetBase {
         prop: "writeoff"
       },
       {
-        field: "str4",
+        field: "str5",
         prop: "allow_writeoff"
       },
       {
-        field: "str5",
+        field: "str6",
         prop: "allow_whitelist"
       },
       {
-        field: "str6",
+        field: "str7",
         prop: "allow_blacklist"
       },
     ];
