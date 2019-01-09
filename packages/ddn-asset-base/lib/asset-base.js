@@ -357,13 +357,14 @@ class AssetBase {
      * @param {*} dbTrans 
      * @param {*} cb 
      */
-    insertOrUpdate(obj, asset, dbTrans, cb) {
+    update(obj, where, asset, dbTrans, cb) {
         if (typeof(cb) == "undefined" && typeof(dbTrans) == "function") {
             cb = dbTrans;
             dbTrans = null;
         }
         console.log('进入insertOrUpdate方法')
         console.log('obj', obj)
+        console.log('where', where)
         console.log('asset', asset)
         var assetInst = this;
         if (asset) {
@@ -379,7 +380,8 @@ class AssetBase {
                 assetInst = new assetCls(this.library, this.modules);
             }
         }
-        // 解析跟新结构
+        console.log('assetInst', assetInst)
+        // 解析obj
         var newObj = {};
         obj = obj || {};
         for (var p in obj) {
@@ -397,7 +399,27 @@ class AssetBase {
                 }
             }
         }
-        this.library.dao.insertOrUpdate("trs_asset", obj, dbTrans, (err, result) => {
+        // 解析where
+        var newWhere = {};
+        obj = obj || {};
+        for (var p in obj) {
+            var condProp = assetInst.getPropsMappingItemByProp(p);
+            if (condProp) {
+                newWhere[condProp.field] = obj[p];
+            } else {
+                var pName = p.toLowerCase();
+                if (pName == "trs_id") {
+                    newWhere["transaction_id"] = obj[p];
+                } else if (pName == "trs_type") {
+                    newWhere["transaction_type"] = obj[p];
+                } else if (pName == "trs_timestamp") {
+                    newWhere["timestamp"] = obj[p];
+                }
+            }
+        }  
+        console.log('newObj', newObj)
+        console.log('newWhere', newWhere)
+        this.library.dao.update("trs_asset", newObj, newWhere, dbTrans, (err, result) => {
             if (err) {
                 return cb(err);
             }
