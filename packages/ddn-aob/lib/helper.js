@@ -1,5 +1,6 @@
 const { AssetBase } = require('ddn-asset-base');
 const _ = require('underscore');
+const bignum = require('bignum-utils');
 const ddnUtils = require('ddn-utils');
 const mem = require('./memAssetBalance');
 const memAsset = new mem();
