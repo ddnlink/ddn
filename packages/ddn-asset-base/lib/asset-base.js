@@ -402,7 +402,7 @@ class AssetBase {
         // 解析where
         var newWhere = {};
         obj = obj || {};
-        for (var p in obj) {
+        for (var p in where) {
             var condProp = assetInst.getPropsMappingItemByProp(p);
             if (condProp) {
                 newWhere[condProp.field] = obj[p];
