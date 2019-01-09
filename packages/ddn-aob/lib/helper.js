@@ -75,19 +75,19 @@ class helper extends AssetBase {
     new Promise(async () => {
       try{
         const where = { name: currency }
-        const data = await super.queryAsset(where, null, null, 1, 1, 'AobAsset');
+        let data = await super.queryAsset(where, null, null, 1, 1, 'AobAsset');
         data = data[0];
         const quantity = data.quantity;
         const obj = { quantity: bignum.plus(quantity, amount).toString() };
-        // library.dao.update('asset', {quantity: bignum.plus(quantity, amount).toString()}, { name: currency }, dbTrans, cbk);
         super.update(obj, where, 'AobAsset', (err) => {
           if (err) {
-            return reject(err);
+            console.log('-- from ddn-aob.helper.addAssetQuantity -> err:', err)
+            cb(err);
           }
           cb();
         });
       } catch(e){
-        console.log('-- from ddn-aob.helper.addAssetQuantity -> e:',e);
+        console.log('-- from ddn-aob.helper.addAssetQuantity -> e:', e);
         cb(e);
       }
 
@@ -102,21 +102,39 @@ class helper extends AssetBase {
     new Promise(async () => {
       try{
         const where = { address, currency }
-        let data = await super.queryAsset(where, null, null, pageIndex, pageSize, 79);
+        let data = await super.queryAsset(where, null, null, 1, 1, 'MemAssetBalance');
         data = data[0];
         let balance = '0';
         if (data) {
           balance = data.balance
         }
         const newBalance = bignum.plus(balance, amount);
-        var obj = { address, currency, balance: newBalance.toString() };
-        // 先查询是否存在，在确定是更新还是添加
-        super.insertOrUpdate(obj, 76, (err) => {
-          if (err) {
-            return reject(err);
+       
+        // (1)先查询是否存在，在确定是更新还是添加
+        if(data){
+          // 存在data则进行更新
+          const obj = { balance: newBalance.toString() };
+          console.log('222222222', obj, where)
+          super.update(obj, where, 'AobAsset', (err) => {
+            if (err) {
+              console.log('-- from ddn-aob.helper.addAssetQuantity -> err:', err)
+              cb(err);
+            }
+            cb();
+          });
+        } else {
+          // 不存在则创建一个trs,让trs创建对应的数据 fix 将数字使用方法查询到
+          const trs = {
+            type: '79',
+            asset: {
+              memAssetBalance: {
+                address, currency, balance: newBalance.toString()
+              }
+            }
           }
-          cb();
-        });
+          console.log('1111111111111', trs)
+          super.dbSave(trs, dbTrans, cb);
+        }
       } catch(e){
         console.log('-- from ddn-aob.helper.updateAssetBalance -> e:',e);
       }
