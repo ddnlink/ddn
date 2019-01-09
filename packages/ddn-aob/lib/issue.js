@@ -49,6 +49,7 @@ class Issue extends AssetBase {
         const pageIndex = 1;
         const pageSize = 1;
         helper.getAssets(where, pageIndex, pageSize, (err, result) => {
+          result = result[0];
           if (err) return cb(`Database error: ${err} --- from ddn-aob -> issue.verify`);
           if (!result) return cb('Asset not exists --- from ddn-aob -> issue.verify')
           if (result.issuer_id !== sender.address) return cb('Permission not allowed --- from ddn-aob -> issue.verify')
@@ -84,10 +85,11 @@ class Issue extends AssetBase {
   }
 
   apply(trs, block, sender, dbTrans, cb) {
-    // 引入helper
-    const helper = new Helper(this.library, this.modules);
+
     console.log('进入apply方法')
 
+    // 引入helper
+    const helper = new Helper(this.library, this.modules);
     if (typeof(cb) == "undefined" && typeof(dbTrans) == "function") {
 			cb = dbTrans;
 			dbTrans = null;
@@ -106,10 +108,11 @@ class Issue extends AssetBase {
   }
   
   undo(trs, block, sender, dbTrans, cb) {
-    // 引入helper
-    const helper = new Helper(this.library, this.modules);
+
     console.log('进入undo方法')
 
+    // 引入helper
+    const helper = new Helper(this.library, this.modules);
     if (typeof(cb) == "undefined" && typeof(dbTrans) == "function") {
 			cb = dbTrans;
 			dbTrans = null;
