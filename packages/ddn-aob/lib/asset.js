@@ -1,4 +1,5 @@
 const { AssetBase } = require('ddn-asset-base');
+const assert = require('assert');
 const bignum = require('bignum-utils');
 const ddnUtils = require('ddn-utils');
 
@@ -142,6 +143,32 @@ class Asset extends AssetBase {
       buffer = Buffer.concat([buffer, ]);
     }
     return buffer;
+  }
+
+  dbSave (trs, dbTrans, cb) {
+    if (typeof(cb) == "undefined" && typeof(dbTrans) == "function") {
+			cb = dbTrans;
+			dbTrans = null;
+		};
+    const asset = trs.asset.aobAsset;
+    const nameParts = asset.name.split('.');
+    assert(nameParts.length == 2)
+    const values = {
+      issuer_name: nameParts[0],
+      quantity: '0',
+      name: asset.name,
+      desc: asset.desc,
+      maximum: asset.maximum,
+      precision: asset.precision,
+      strategy: asset.strategy,
+      allow_writeoff: asset.allow_writeoff || '0',
+      allow_whitelist: asset.allow_whitelist || '0',
+      allow_blacklist: asset.allow_blacklist || '0',
+      acl: 0,
+      writeoff: 0
+    };
+    trs.asset.aobAsset = values;
+    super.dbSave(trs, dbTrans, cb)
   }
   
 }
