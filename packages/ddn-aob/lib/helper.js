@@ -75,10 +75,12 @@ class helper extends AssetBase {
     new Promise(async () => {
       try{
         const where = { name: currency }
-        const data = await super.queryAsset(where, null, null, pageIndex, pageSize, 76);
+        const data = await super.queryAsset(where, null, null, 1, 1, 'AobAsset');
+        data = data[0];
         const quantity = data.quantity;
         const obj = { quantity: bignum.plus(quantity, amount).toString() };
-        super.update(obj, where, 76, (err) => {
+        // library.dao.update('asset', {quantity: bignum.plus(quantity, amount).toString()}, { name: currency }, dbTrans, cbk);
+        super.update(obj, where, 'AobAsset', (err) => {
           if (err) {
             return reject(err);
           }
