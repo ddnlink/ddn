@@ -1,6 +1,8 @@
 const { AssetBase } = require('ddn-asset-base');
 const _ = require('underscore');
 const ddnUtils = require('ddn-utils');
+const mem = require('./helper');
+const memAsset = new mem();
 
 class helper extends AssetBase {
   propsMapping() {
@@ -56,7 +58,7 @@ class helper extends AssetBase {
           result[i].quantityShow = ddnUtils.Amount.calcRealAmount(result[i].quantity, precision);
         }
         // 返回最终值
-        cb(null, result)
+        cb(null, result);
       } catch(e){
         cb(e)
       }
@@ -98,6 +100,7 @@ class helper extends AssetBase {
       }
       const newBalance = bignum.plus(balance, amount);
       var obj = { address, currency, balance: newBalance.toString() };
+      // 先查询是否存在，在确定是更新还是添加
       super.insertOrUpdate(obj, 76, (err) => {
         if (err) {
           return reject(err);

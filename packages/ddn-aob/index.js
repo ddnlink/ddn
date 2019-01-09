@@ -3,5 +3,5 @@ module.exports = {
   AobAsset: require('./lib/Asset'),       // type: 76
   AobIssue: require('./lib/Issue'),       // type: 77
   AobTransfer: require('./lib/Transfer'), // type: 78
-  memAssetBalance: require('./lib/memAssetBalance'), // type: 79
+  MemAssetBalance: require('./lib/memAssetBalance'), // type: 79
 }

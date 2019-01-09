@@ -2,9 +2,10 @@ const { AssetBase } = require('ddn-asset-base');
 const bignum = require('bignum-utils');
 const ddnUtils = require('ddn-utils');
 const mathjs = require('mathjs');
-const Helper = require('./helper');
 const async = require('async');
-const helper = new Helper()
+const Helper = require('./helper');
+const helper = new Helper();
+
 class Issue extends AssetBase {
   propsMapping() {
     return [{

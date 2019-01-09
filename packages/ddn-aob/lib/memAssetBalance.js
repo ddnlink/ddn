@@ -1,7 +1,4 @@
 const { AssetBase } = require('ddn-asset-base');
-const bignum = require('bignum-utils');
-const ddnUtils = require('ddn-utils');
-
 
 class memAssetBalance extends AssetBase {
   propsMapping() {
