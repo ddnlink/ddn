@@ -74,12 +74,12 @@ class helper extends AssetBase {
     };
     new Promise(async () => {
       try{
-        const where = { name: currency }
+        const where = { name: currency, trs_type: 76 }
         let data = await super.queryAsset(where, null, null, 1, 1, 'AobAsset');
         data = data[0];
         const quantity = data.quantity;
         const obj = { quantity: bignum.plus(quantity, amount).toString() };
-        super.update(obj, where, 'AobAsset', (err) => {
+        super.update(obj, where, 'AobAsset', dbTrans, (err) => {
           if (err) {
             console.log('-- from ddn-aob.helper.addAssetQuantity -> err:', err)
             cb(err);
@@ -94,7 +94,7 @@ class helper extends AssetBase {
     })
   }
 
-  updateAssetBalance(currency, amount, address, dbTrans, cb) {
+  updateAssetBalance(trs, currency, amount, address, dbTrans, cb) {
     if (typeof(cb) == "undefined" && typeof(dbTrans) == "function") {
 			cb = dbTrans;
 			dbTrans = null;
@@ -114,17 +114,20 @@ class helper extends AssetBase {
         if(data){
           // 存在data则进行更新
           const obj = { balance: newBalance.toString() };
-          console.log('222222222', obj, where)
-          super.update(obj, where, 'AobAsset', (err) => {
+          super.update(obj, where, 'AobAsset', dbTrans,(err) => {
             if (err) {
-              console.log('-- from ddn-aob.helper.addAssetQuantity -> err:', err)
+              console.log('-- from ddn-aob.helper.updateAssetBalance -> err:', err)
               cb(err);
             }
             cb();
           });
         } else {
           // 不存在则创建一个trs,让trs创建对应的数据 fix 将数字使用方法查询到
-          const trs = {
+          let id = trs.id.substr(0, basic.length - 3);
+          id = id + 'abc';
+          const newTrs = {
+            id, // 造的假id!
+            timestamp: trs.timestamp,
             type: '79',
             asset: {
               memAssetBalance: {
@@ -132,8 +135,7 @@ class helper extends AssetBase {
               }
             }
           }
-          console.log('1111111111111', trs)
-          super.dbSave(trs, dbTrans, cb);
+          super.dbSave(newTrs, dbTrans, cb);
         }
       } catch(e){
         console.log('-- from ddn-aob.helper.updateAssetBalance -> e:',e);
