@@ -72,16 +72,21 @@ class helper extends AssetBase {
 			dbTrans = null;
     };
     new Promise(async () => {
-      const where = { name: currency }
-      const data = await super.queryAsset(where, null, null, pageIndex, pageSize, 76);
-      const quantity = data.quantity;
-      const obj = { quantity: bignum.plus(quantity, amount).toString() };
-      super.update(obj, where, 76, (err) => {
-        if (err) {
-          return reject(err);
-        }
-        cb();
-      });
+      try{
+        const where = { name: currency }
+        const data = await super.queryAsset(where, null, null, pageIndex, pageSize, 76);
+        const quantity = data.quantity;
+        const obj = { quantity: bignum.plus(quantity, amount).toString() };
+        super.update(obj, where, 76, (err) => {
+          if (err) {
+            return reject(err);
+          }
+          cb();
+        });
+      } catch(e){
+        console.log('-- from ddn-aob.helper.addAssetQuantity -> e:',e);
+        cb(e);
+      }
 
     })
   }
@@ -92,22 +97,26 @@ class helper extends AssetBase {
 			dbTrans = null;
     };
     new Promise(async () => {
-      const where = { address, currency }
-      let data = await super.queryAsset(where, null, null, pageIndex, pageSize, 79);
-      data = data[0];
-      let balance = '0';
-      if (data) {
-        balance = data.balance
-      }
-      const newBalance = bignum.plus(balance, amount);
-      var obj = { address, currency, balance: newBalance.toString() };
-      // 先查询是否存在，在确定是更新还是添加
-      super.insertOrUpdate(obj, 76, (err) => {
-        if (err) {
-          return reject(err);
+      try{
+        const where = { address, currency }
+        let data = await super.queryAsset(where, null, null, pageIndex, pageSize, 79);
+        data = data[0];
+        let balance = '0';
+        if (data) {
+          balance = data.balance
         }
-        cb();
-      });
+        const newBalance = bignum.plus(balance, amount);
+        var obj = { address, currency, balance: newBalance.toString() };
+        // 先查询是否存在，在确定是更新还是添加
+        super.insertOrUpdate(obj, 76, (err) => {
+          if (err) {
+            return reject(err);
+          }
+          cb();
+        });
+      } catch(e){
+        console.log('-- from ddn-aob.helper.updateAssetBalance -> e:',e);
+      }
     })
 
   }
