@@ -2,8 +2,7 @@ const { AssetBase } = require('ddn-asset-base');
 const _ = require('underscore');
 const bignum = require('bignum-utils');
 const ddnUtils = require('ddn-utils');
-const mem = require('./memAssetBalance');
-const memAsset = new mem();
+const MemAssetBalance = require('./memAssetBalance');
 
 class helper extends AssetBase {
   propsMapping() {
@@ -122,6 +121,7 @@ class helper extends AssetBase {
             cb();
           });
         } else {
+          const memAssetBalance = new MemAssetBalance(this.library, this.modules);
           // 不存在则创建一个trs,让trs创建对应的数据 fix 将数字使用方法查询到
           let id = trs.id.substr(0, basic.length - 3);
           id = id + 'abc';
@@ -135,7 +135,7 @@ class helper extends AssetBase {
               }
             }
           }
-          super.dbSave(newTrs, dbTrans, cb);
+          memAssetBalance.dbSave(newTrs, dbTrans, cb);
         }
       } catch(e){
         console.log('-- from ddn-aob.helper.updateAssetBalance -> e:',e);
