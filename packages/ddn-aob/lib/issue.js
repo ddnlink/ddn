@@ -4,8 +4,6 @@ const ddnUtils = require('ddn-utils');
 const mathjs = require('mathjs');
 const async = require('async');
 const Helper = require('./helper');
-const helper = new Helper();
-
 class Issue extends AssetBase {
   propsMapping() {
     return [{
@@ -31,6 +29,8 @@ class Issue extends AssetBase {
   }
 
   verify(trs, sender, cb) {
+    // 引入helper
+    const helper = new Helper(this.library, this.modules);
     super.verify(trs, sender, async (err, trans) => {
       if (err) {
         return cb(err);
@@ -84,7 +84,8 @@ class Issue extends AssetBase {
   }
 
   apply(trs, block, sender, dbTrans, cb) {
-
+    // 引入helper
+    const helper = new Helper(this.library, this.modules);
     console.log('进入apply方法')
 
     if (typeof(cb) == "undefined" && typeof(dbTrans) == "function") {
@@ -105,7 +106,8 @@ class Issue extends AssetBase {
   }
   
   undo(trs, block, sender, dbTrans, cb) {
-
+    // 引入helper
+    const helper = new Helper(this.library, this.modules);
     console.log('进入undo方法')
 
     if (typeof(cb) == "undefined" && typeof(dbTrans) == "function") {

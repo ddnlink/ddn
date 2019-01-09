@@ -8,10 +8,7 @@ class helper extends AssetBase {
   propsMapping() {
     return [];
   }
-  async getAssets(where, pageIndex, pageSize, cb) {
-
-    console.log('进入getAssets方法')
-
+  getAssets(where, pageIndex, pageSize, cb) {
     new Promise(async () => {
       try {
         let result; // 最后返回的值
@@ -47,7 +44,7 @@ class helper extends AssetBase {
             reslove(data)
           });
         })
-        const blockData = _.indexBy(blockData, 'id');
+        blockData = _.indexBy(blockData, 'id');
         result = _.map(result, num => {
           num.height = blockData[num.block_id].height;
           return num;
