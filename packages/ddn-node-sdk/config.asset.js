@@ -25,6 +25,10 @@ exports.aob = {
             name: "AobTransfer",
             type: 78,
         },
+        {
+            name: "MemAssetBalance",
+            type: 79,
+        },
     ],
     package: "ddn-aob"
 }
