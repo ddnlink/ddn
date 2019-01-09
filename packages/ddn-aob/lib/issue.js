@@ -85,9 +85,6 @@ class Issue extends AssetBase {
   }
 
   apply(trs, block, sender, dbTrans, cb) {
-
-    console.log('进入apply方法')
-
     // 引入helper
     const helper = new Helper(this.library, this.modules);
     if (typeof(cb) == "undefined" && typeof(dbTrans) == "function") {
@@ -108,9 +105,6 @@ class Issue extends AssetBase {
   }
   
   undo(trs, block, sender, dbTrans, cb) {
-
-    console.log('进入undo方法')
-
     // 引入helper
     const helper = new Helper(this.library, this.modules);
     if (typeof(cb) == "undefined" && typeof(dbTrans) == "function") {
