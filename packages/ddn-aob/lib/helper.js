@@ -1,7 +1,7 @@
 const { AssetBase } = require('ddn-asset-base');
 const _ = require('underscore');
 const ddnUtils = require('ddn-utils');
-const mem = require('./helper');
+const mem = require('./memAssetBalance');
 const memAsset = new mem();
 
 class helper extends AssetBase {
