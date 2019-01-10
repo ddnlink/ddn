@@ -1,5 +1,5 @@
 const base58check = require('./base58check');
-const constants = require('../constants');
+const constants = require('./constants');
 const crypto = require('crypto');
 
 const address = {
@@ -19,7 +19,7 @@ const address = {
     }
     return true;
   },
-  
+
   generateBase58CheckAddress(publicKey) {
     if (typeof publicKey === 'string') {
       publicKey = Buffer.from(publicKey, 'hex')
