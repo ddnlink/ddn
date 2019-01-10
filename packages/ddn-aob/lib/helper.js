@@ -123,7 +123,7 @@ class helper extends AssetBase {
         } else {
           const memAssetBalance = new MemAssetBalance(this.library, this.modules);
           // 不存在则创建一个trs,让trs创建对应的数据 fix 将数字使用方法查询到
-          let id = trs.id.substr(0, basic.length - 3);
+          let id = trs.id.substr(0, trs.id.length - 3);
           id = id + 'abc';
           const newTrs = {
             id, // 造的假id!
