@@ -35,7 +35,9 @@ class Transfer extends AssetBase {
     if (error) return setImmediate(cb, error)
 
     const helper = new Helper(this.library, this.modules);
-    const where = { name: asset.currency, trs_type: 76 };
+    const where = { name: asset.currency, trs_type: '76' };
+
+    console.log('where', where)
 
     helper.getAssets(where, 1, 1, (err, data) => {
 
