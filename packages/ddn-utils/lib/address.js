@@ -1,3 +1,5 @@
+const base58check = require('./base58check')
+
 const address = {
   isAddress: (address) => {
     if (typeof address !== 'string') {
