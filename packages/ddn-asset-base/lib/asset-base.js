@@ -396,19 +396,19 @@ class AssetBase {
         }
         // 解析where
         var newWhere = {};
-        obj = obj || {};
+        where = where || {};
         for (var p in where) {
             var condProp = assetInst.getPropsMappingItemByProp(p);
             if (condProp) {
-                newWhere[condProp.field] = obj[p];
+                newWhere[condProp.field] = where[p];
             } else {
                 var pName = p.toLowerCase();
                 if (pName == "trs_id") {
-                    newWhere["transaction_id"] = obj[p];
+                    newWhere["transaction_id"] = where[p];
                 } else if (pName == "trs_type") {
-                    newWhere["transaction_type"] = obj[p];
+                    newWhere["transaction_type"] = where[p];
                 } else if (pName == "trs_timestamp") {
-                    newWhere["timestamp"] = obj[p];
+                    newWhere["timestamp"] = where[p];
                 }
             }
         } 
