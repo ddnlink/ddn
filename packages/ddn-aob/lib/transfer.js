@@ -39,6 +39,7 @@ class Transfer extends AssetBase {
 
     helper.getAssets(where, 1, 1, (err, data) => {
       if (err) return cb(`Database error: ${err}`);
+      assetDetail = data[0];
       if (!assetDetail) return cb('Asset not exists')
       if (assetDetail.writeoff) return cb('Asset already writeoff')
       if (!assetDetail.allow_whitelist && !assetDetail.allow_blacklist) return cb();
@@ -46,7 +47,7 @@ class Transfer extends AssetBase {
       this.library.model.checkAcl(aclTable, asset.currency, sender.address, trs.recipient_id, (err, isInList) => {    //wxm block database
         if (err) return cb(`Database error when query acl: ${err}`);
         if ((assetDetail.acl == 0) == isInList) return cb('Permission not allowed')
-        cb()
+        cb();
       })
 
     })
