@@ -35,9 +35,12 @@ class Transfer extends AssetBase {
     if (error) return setImmediate(cb, error)
 
     const helper = new Helper(this.library, this.modules);
-    const where = { name: asset.currency };
+    const where = { name: asset.currency, trs_type: 76 };
 
     helper.getAssets(where, 1, 1, (err, data) => {
+
+      console.log('data', data)
+
       if (err) return cb(`Database error: ${err}`);
       assetDetail = data[0];
       if (!assetDetail) return cb('Asset not exists')
