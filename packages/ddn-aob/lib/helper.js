@@ -100,7 +100,7 @@ class helper extends AssetBase {
     };
     new Promise(async () => {
       try{
-        const where = { address, currency }
+        const where = { address, currency, trs_type: '79' }
         let data = await super.queryAsset(where, null, null, 1, 1, 'MemAssetBalance');
         data = data[0];
         let balance = '0';

@@ -36,11 +36,7 @@ class Transfer extends AssetBase {
 
     const helper = new Helper(this.library, this.modules);
     const where = { name: asset.currency, trs_type: '76' };
-
-    console.log('where111', where)
-
     helper.getAssets(where, 1, 1, (err, data) => {
-      console.log('data111', data)
       if (err) return cb(`Database error: ${err}`);
       if(!data) return cb('Asset not exists')
       const assetDetail = data[0];
@@ -68,10 +64,10 @@ class Transfer extends AssetBase {
     const helper = new Helper(this.library, this.modules);
     async.series([
       next => {
-        helper.updateAssetBalance(transfer.currency, `-${transfer.amount}`, sender.address, dbTrans, next)
+        helper.updateAssetBalance(trs, transfer.currency, `-${transfer.amount}`, sender.address, dbTrans, next)
       },
       next => {
-        helper.updateAssetBalance(transfer.currency, transfer.amount, trs.recipient_id, dbTrans, next)    //wxm block database
+        helper.updateAssetBalance(trs, transfer.currency, transfer.amount, trs.recipient_id, dbTrans, next)    //wxm block database
       }
     ], cb)
   }
@@ -86,10 +82,10 @@ class Transfer extends AssetBase {
     const helper = new Helper(this.library, this.modules);
     async.series([
       next => {
-        helper.updateAssetBalance(transfer.currency, transfer.amount, sender.address, dbTrans, next)
+        helper.updateAssetBalance(trs, transfer.currency, transfer.amount, sender.address, dbTrans, next)
       },
       next => {
-        helper.updateAssetBalance(transfer.currency, `-${transfer.amount}`, trs.recipient_id, dbTrans, next)  //wxm block database
+        helper.updateAssetBalance(trs, transfer.currency, `-${transfer.amount}`, trs.recipient_id, dbTrans, next)  //wxm block database
       }
     ], cb)
   }
