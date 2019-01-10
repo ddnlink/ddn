@@ -362,10 +362,6 @@ class AssetBase {
             cb = dbTrans;
             dbTrans = null;
         }
-        console.log('进入insertOrUpdate方法')
-        console.log('obj', obj)
-        console.log('where', where)
-        console.log('asset', asset)
         var assetInst = this;
         if (asset) {
             var assetTrans;
@@ -380,7 +376,6 @@ class AssetBase {
                 assetInst = new assetCls(this.library, this.modules);
             }
         }
-        console.log('assetInst', assetInst)
         // 解析obj
         var newObj = {};
         obj = obj || {};
@@ -416,9 +411,7 @@ class AssetBase {
                     newWhere["timestamp"] = obj[p];
                 }
             }
-        }  
-        console.log('newObj', newObj)
-        console.log('newWhere', newWhere)
+        } 
         this.library.dao.update("trs_asset", newObj, newWhere, dbTrans, (err, result) => {
             if (err) {
                 return cb(err);
@@ -813,7 +806,7 @@ class AssetBase {
             var item = mapping[i];
             if (item) {
                 var itemValue = asset[item.prop];
-                if (itemValue) {
+                if (itemValue !== null && itemValue !== undefined) {
                     assetInst[item.field] = itemValue;
 
                     var fieldType = item.field.replace(/[0-9]/g, "");
