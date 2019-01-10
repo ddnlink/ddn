@@ -108,12 +108,11 @@ class helper extends AssetBase {
           balance = data.balance
         }
         const newBalance = bignum.plus(balance, amount);
-       
         // (1)先查询是否存在，在确定是更新还是添加
         if(data){
           // 存在data则进行更新
           const obj = { balance: newBalance.toString() };
-          super.update(obj, where, 'AobAsset', dbTrans,(err) => {
+          super.update(obj, where, 'MemAssetBalance', dbTrans,(err) => {
             if (err) {
               console.log('-- from ddn-aob.helper.updateAssetBalance -> err:', err)
               cb(err);

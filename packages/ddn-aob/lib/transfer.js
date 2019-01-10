@@ -64,7 +64,7 @@ class Transfer extends AssetBase {
     const helper = new Helper(this.library, this.modules);
     async.series([
       next => {
-        helper.updateAssetBalance(trs, transfer.currency, `-${transfer.amount}`, sender.address, dbTrans, next)
+        helper.updateAsssetBalance(trs, transfer.currency, `-${transfer.amount}`, sender.address, dbTrans, next)
       },
       next => {
         helper.updateAssetBalance(trs, transfer.currency, transfer.amount, trs.recipient_id, dbTrans, next)    //wxm block database
