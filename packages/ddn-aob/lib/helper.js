@@ -140,7 +140,27 @@ class helper extends AssetBase {
         console.log('-- from ddn-aob.helper.updateAssetBalance -> e:',e);
       }
     })
+  }
 
+  updateAssetFlag(currency, flag, flagName, dbTrans, cb){
+    if (typeof(cb) == "undefined" && typeof(dbTrans) == "function") {
+			cb = dbTrans;
+			dbTrans = null;
+    };
+    try{
+      const where = { name: currency, trs_type: 76 }
+      const obj = { [flagName]: flag };
+      super.update(obj, where, 'AobAsset', dbTrans, (err) => {
+        if (err) {
+          console.log('-- from ddn-aob.helper.updateAssetFlag -> err:', err)
+          cb(err);
+        }
+        cb();
+      });
+    }catch(e){
+      console.log('-- from ddn-aob.helper.updateAssetFlag -> e:', e);
+      cb(e);
+    }
   }
 
 
