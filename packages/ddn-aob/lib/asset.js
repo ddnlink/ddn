@@ -63,7 +63,7 @@ class Asset extends AssetBase {
     trs.amount = "0";
     trs.asset.aobAsset = {
       name: data.name,
-      desc: data.desc, 
+      desc: data.desc,
       maximum: data.maximum,
       precision: data.precision,
       strategy: data.strategy,
@@ -86,21 +86,20 @@ class Asset extends AssetBase {
       const asset = trs.asset.aobAsset;
       const nameParts = (asset.name || '').split('.');
       if (nameParts.length != 2) return setImmediate(cb, 'Invalid asset full name form ddn-aob')
-      const fullName = asset.name;
       const issuerName = nameParts[0];
       const tokenName = nameParts[1];
       if (!tokenName || !/^[A-Z]{3,6}$/.test(tokenName)) return setImmediate(cb, 'Invalid asset currency name form ddn-aob')
-      if (!asset.desc) return setImmediate(cb, 'Invalid asset desc form ddn-aob')
+      if (!asset.desc) return swetImmediate(cb, 'Invalid asset desc form ddn-aob')
       if (asset.desc.length > 4096) return setImmediate(cb, 'Invalid asset desc size form ddn-aob')
       if (asset.precision > 16 || asset.precision < 0) return setImmediate(cb, 'Invalid asset precision form ddn-aob')
       const error = ddnUtils.Amount.validate(asset.maximum);
-      if (error) return setImmediate(cb, error)
+      if (error) return setImmediate(cb, error);
       if (asset.strategy && asset.strategy.length > 256) return setImmediate(cb, 'Invalid asset strategy size form ddn-aob')
       if (asset.allow_writeoff !== '0' && asset.allow_writeoff !== '1') return setImmediate(cb, 'Asset allowWriteoff is not valid form ddn-aob')
       if (asset.allow_whitelist !== '0' && asset.allow_whitelist !== '1') return setImmediate(cb, 'Asset allowWhitelist is not valid form ddn-aob')
       if (asset.allow_blacklist !== '0' && asset.allow_blacklist !== '1') return setImmediate(cb, 'Asset allowBlacklist is not valid form ddn-aob')
       try {
-        const where = { name: asset.name }
+        const where = { name: asset.name };
         const orders = null;
         const returnTotal = null;
         const pageIndex = 1;
@@ -168,7 +167,7 @@ class Asset extends AssetBase {
       writeoff: 0
     };
     trs.asset.aobAsset = values;
-    super.dbSave(trs, dbTrans, cb)
+    super.dbSave(trs, dbTrans, cb);
   }
   
 }
