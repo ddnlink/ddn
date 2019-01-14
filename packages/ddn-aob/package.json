@@ -17,6 +17,7 @@
     "ddn-asset-base": "git+ssh://git@git.ebookchain.net:ddn/ddn-asset-base.git",
     "ddn-utils": "git+ssh://git@git.ebookchain.net:ddn/ddn-utils.git",
     "mathjs": "^5.4.0",
+    "sequelize": "^4.42.0",
     "underscore": "^1.9.1"
   }
 }
