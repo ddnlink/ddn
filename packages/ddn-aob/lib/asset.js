@@ -169,6 +169,6 @@ class Asset extends AssetBase {
     trs.asset.aobAsset = values;
     super.dbSave(trs, dbTrans, cb);
   }
-  
+ 
 }
 module.exports = Asset;

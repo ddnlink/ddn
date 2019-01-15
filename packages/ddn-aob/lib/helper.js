@@ -2,7 +2,7 @@ const { AssetBase } = require('ddn-asset-base');
 const _ = require('underscore');
 const bignum = require('bignum-utils');
 const ddnUtils = require('ddn-utils');
-const MemAssetBalance = require('./memAssetBalance');
+const async = require('async');
 
 class helper extends AssetBase {
   propsMapping() {
@@ -66,7 +66,7 @@ class helper extends AssetBase {
     });
   }
 
-  async addAssetQuantity(currency, amount, dbTrans, cb) {
+  addAssetQuantity(currency, amount, dbTrans, cb) {
     if (typeof(cb) == "undefined" && typeof(dbTrans) == "function") {
 			cb = dbTrans;
 			dbTrans = null;
@@ -93,49 +93,36 @@ class helper extends AssetBase {
     })
   }
 
-  updateAssetBalance(trs, currency, amount, address, dbTrans, cb) {
+  updateAssetBalance(currency, amount, address, dbTrans, cb) {
     if (typeof(cb) == "undefined" && typeof(dbTrans) == "function") {
 			cb = dbTrans;
 			dbTrans = null;
     };
     new Promise(async () => {
       try{
-        const where = { address, currency, trs_type: '79' }
-        let data = await super.queryAsset(where, null, null, 1, 1, 'MemAssetBalance');
-        data = data[0];
-        let balance = '0';
-        if (data) {
-          balance = data.balance
-        }
-        const newBalance = bignum.plus(balance, amount);
-        // (1)先查询是否存在，在确定是更新还是添加
-        if(data){
-          // 存在data则进行更新
-          const obj = { balance: newBalance.toString() };
-          super.update(obj, where, 'MemAssetBalance', dbTrans,(err) => {
-            if (err) {
-              console.log('-- from ddn-aob.helper.updateAssetBalance -> err:', err)
-              cb(err);
+        async.waterfall([
+          cbk => {
+            library.dao.findOne('mem_asset_balance', { address, currency }, ["balance"], cbk);
+          },
+          (data, cbk) => {
+            let balance = '0';
+            if (data) {
+              balance = data.balance
             }
-            cb();
-          });
-        } else {
-          const memAssetBalance = new MemAssetBalance(this.library, this.modules);
-          // 不存在则创建一个trs,让trs创建对应的数据 fix 将数字使用方法查询到
-          let id = trs.id.substr(0, trs.id.length - 3);
-          id = id + 'abc';
-          const newTrs = {
-            id, // 造的假id!
-            timestamp: trs.timestamp,
-            type: '79',
-            asset: {
-              memAssetBalance: {
-                address, currency, balance: newBalance.toString()
-              }
+            const newBalance = bignum.plus(balance, amount);
+            if (bignum.isLessThan(newBalance, 0)) {
+              return cbk('Asset balance not enough')
+            }
+            if(data){
+              library.dao.update('mem_asset_balance', { balance: newBalance.toString() }, { address, currency }, dbTrans, cbk);
+            } else {
+              library.dao.insert('mem_asset_balance', { address, currency, balance: newBalance.toString() }, dbTrans, cbk);
             }
           }
-          memAssetBalance.dbSave(newTrs, dbTrans, cb);
-        }
+        ],err => {
+          if (err) return cb(`Database error when updateBalance: ${err}`);
+          cb() 
+        })
       } catch(e){
         console.log('-- from ddn-aob.helper.updateAssetBalance -> e:',e);
       }

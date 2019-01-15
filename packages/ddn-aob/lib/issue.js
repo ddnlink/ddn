@@ -99,7 +99,7 @@ class Issue extends AssetBase {
         helper.addAssetQuantity(currency, amount, dbTrans, next)
       },
       next => {
-        helper.updateAssetBalance(trs, currency, amount, sender.address, dbTrans, next)
+        helper.updateAssetBalance(currency, amount, sender.address, dbTrans, next)
       }
     ], cb)
   }
@@ -123,7 +123,7 @@ class Issue extends AssetBase {
         helper.addAssetQuantity(currency, `-${amount}`, dbTrans, next)
       },
       next => {
-        helper.updateAssetBalance(trs, currency, `-${amount}`, sender.address, dbTrans, next)
+        helper.updateAssetBalance(currency, `-${amount}`, sender.address, dbTrans, next)
       }
     ], cb)
   }
