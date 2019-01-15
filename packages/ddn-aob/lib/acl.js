@@ -62,7 +62,7 @@ class Acl extends AssetBase {
     })
   }
 
-  getBytes = trs => {
+  getBytes(trs) {
     const bb = new ByteBuffer();
     const asset = trs.asset.aobAcl;
     bb.writeString(asset.currency)
