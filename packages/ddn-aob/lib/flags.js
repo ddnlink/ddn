@@ -50,7 +50,7 @@ class Flags extends AssetBase {
     })
   }
 
-  apply = (trs, block, sender, dbTrans, cb) => {
+  apply(trs, block, sender, dbTrans, cb) {
     if (typeof(cb) == "undefined" && typeof(dbTrans) == "function") {
 			cb = dbTrans;
 			dbTrans = null;
@@ -60,7 +60,7 @@ class Flags extends AssetBase {
     helper.updateAssetFlag(asset.currency, asset.flag, flagsHelper.getTypeName(asset.flag_type), dbTrans, cb)
   }
 
-  undo = (trs, block, sender, dbTrans, cb) => {
+  undo(trs, block, sender, dbTrans, cb) {
     if (typeof(cb) == "undefined" && typeof(dbTrans) == "function") {
 			cb = dbTrans;
 			dbTrans = null;
@@ -71,7 +71,7 @@ class Flags extends AssetBase {
     setImmediate(cb)
   }
 
-  applyUnconfirmed = (trs, sender, dbTrans, cb) => {
+  applyUnconfirmed(trs, sender, dbTrans, cb) {
     if (typeof(cb) == "undefined" && typeof(dbTrans) == "function") {
 			cb = dbTrans;
 			dbTrans = null;
@@ -84,7 +84,7 @@ class Flags extends AssetBase {
     setImmediate(cb)
   }
 
-  undoUnconfirmed = (trs, sender, dbTrans, cb) => {
+  undoUnconfirmed(trs, sender, dbTrans, cb) {
     if (typeof(cb) == "undefined" && typeof(dbTrans) == "function") {
 			cb = dbTrans;
 			dbTrans = null;
