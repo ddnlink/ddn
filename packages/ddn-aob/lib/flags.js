@@ -4,19 +4,7 @@ const flagsHelper = require('./flagsHelper');
 
 class Flags extends AssetBase {
   propsMapping() {
-    return [{
-        field: "str1",
-        prop: "currency"
-      },
-      {
-        field: "int1",
-        prop: "flag"
-      },
-      {
-        field: "int2",
-        prop: "flag_type"
-      },
-    ];
+    return [];
   }
 
   create(data, trs) {
@@ -104,6 +92,73 @@ class Flags extends AssetBase {
     this.library.oneoff.delete(`${trs.asset.aobFlags.currency}:${trs.type}`)
     setImmediate(cb)
   }
+
+
+  objectNormalize(trs) {
+    const report = library.scheme.validate({
+      type: 'object',
+      properties: {
+        currency: {
+          type: 'string',
+          minLength: 1,
+          maxLength: 22
+        },
+        flag_type: {
+          type: 'integer'
+        },
+        flag: {
+          type: 'integer'
+        }
+      },
+      required: ['currency', 'flag_type', 'flag']
+    }, trs.asset.aobFlags);
+    if (!report) {
+      throw Error(`Can't parse flags: ${library.scheme.errors[0]}`);
+    }
+    return trs;
+  }
+
+  dbRead(raw) {
+    if (!raw.flags_currency) {
+      return null
+    } else {
+      const asset = {
+        transaction_id: raw.t_id,
+        currency: raw.flags_currency,
+        flag_type: raw.flags_flagType,
+        flag: raw.flags_flag
+      };
+
+      return { aobFlags: asset }
+    }
+  }
+
+  dbSave(trs, dbTrans, cb) {
+    if (typeof(cb) == "undefined" && typeof(dbTrans) == "function") {
+			cb = dbTrans;
+			dbTrans = null;
+		};
+    const asset = trs.asset.aobFlags;
+    const values = {
+      transaction_id: trs.id,
+      currency: asset.currency,
+      flag_type: asset.flag_type,
+      flag: asset.flag
+    };
+    library.dao.insert('flag', values, dbTrans, cb);
+  }
+
+  ready(trs, sender) {
+    if (sender.multisignatures.length) {
+      if (!trs.signatures) {
+        return false
+      }
+      return trs.signatures.length >= sender.multimin - 1
+    } else {
+      return true
+    }
+  }
+
 
 }
 module.exports = Flags;
