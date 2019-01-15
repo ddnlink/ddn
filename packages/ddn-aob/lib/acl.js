@@ -5,25 +5,8 @@ const flagsHelper = require('./flagsHelper');
 
 class Acl extends AssetBase {
   propsMapping() {
-    return [{
-        field: "str1",
-        prop: "currency"
-      },
-      {
-        field: "int1",
-        prop: "flag"
-      },
-      {
-        field: "str2",
-        prop: "operator"
-      },
-      {
-        field: "str10",
-        prop: "list"
-      },
-    ];
+    return [];
   }
-
 
   calculateFee(trs, sender) {
     return bignum.multiply(2, this.library.tokenSetting.fixedPoint);
@@ -121,6 +104,84 @@ class Acl extends AssetBase {
     }
     setImmediate(cb)
   }
+
+  objectNormalize(trs) {
+    const report = library.scheme.validate({
+      type: 'object',
+      properties: {
+        currency: {
+          type: 'string',
+          minLength: 1,
+          maxLength: 22
+        },
+        operator: {
+          type: 'string',
+          minLength: 1,
+          maxLength: 1
+        },
+        flag: {
+          type: 'integer'
+        },
+        list: {
+          type: 'array',
+          minLength: 1,
+          maxLength: 10,
+          uniqueItems: true
+        }
+      },
+      required: ['currency', 'operator', 'flag', 'list']
+    }, trs.asset.aobAcl);
+
+    if (!report) {
+      throw Error(`Can't parse acl: ${library.scheme.errors[0]}`)
+    }
+
+    return trs;
+  }
+
+  dbRead(raw) {
+    if (!raw.acls_currency) {
+      return null
+    } else {
+      const asset = {
+        transaction_id: raw.t_id,
+        currency: raw.acls_currency,
+        operator: raw.acls_operator,
+        flag: raw.acls_flag,
+        list: raw.acls_list.split(',')
+      };
+      return { aobAcl: asset };
+    }
+  }
+
+  dbSave(trs, dbTrans, cb) {
+    if (typeof(cb) == "undefined" && typeof(dbTrans) == "function") {
+			cb = dbTrans;
+			dbTrans = null;
+    };
+    const asset = trs.asset.aobAcl;
+    const values = {
+      transaction_id: trs.id,
+      currency: asset.currency,
+      operator: asset.operator,
+      flag: asset.flag,
+      list: asset.list.join(',')
+    };
+    library.dao.insert('acl', values, dbTrans, cb)
+  }
+
+  ready(trs, sender) {
+    if (sender.multisignatures.length) {
+      if (!trs.signatures) {
+        return false;
+      }
+      return trs.signatures.length >= sender.multimin - 1
+    } else {
+      return true;
+    }
+  }
+
+
 
 
 }
