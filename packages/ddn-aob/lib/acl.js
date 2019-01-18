@@ -2,10 +2,28 @@ const { AssetBase } = require('ddn-asset-base');
 const bignum = require('bignum-utils');
 const _ = require('lodash');
 const flagsHelper = require('./flagsHelper');
+const Helper = require('./helper');
 
 class Acl extends AssetBase {
   propsMapping() {
-    return [];
+    return [{
+      field: "str1",
+      prop: "currency",
+      required: true
+    },
+    {
+      field: "str2",
+      prop: "operator"
+    },
+    {
+      field: "str10",
+      prop: "list"
+    },
+    {
+      field: "int1",
+      prop: "flag"
+    },
+    ];
   }
 
   calculateFee(trs, sender) {
@@ -30,6 +48,7 @@ class Acl extends AssetBase {
       if (_.uniq(asset.list).length != asset.list.length) return setImmediate(cb, 'Duplicated acl address')
 
       try{
+        const helper = new Helper(this.library, this.modules);
         const where = { name: asset.currency }
         helper.getAssets(where, 1, 1, (err, result) => {
           if(err) return cb(err);
@@ -167,7 +186,8 @@ class Acl extends AssetBase {
       flag: asset.flag,
       list: asset.list.join(',')
     };
-    library.dao.insert('acl', values, dbTrans, cb)
+    trs.asset.aobAcl = values;
+    super.dbSave(trs, dbTrans, cb);
   }
 
   ready(trs, sender) {

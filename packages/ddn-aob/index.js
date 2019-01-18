@@ -6,4 +6,5 @@ module.exports = {
   AobAcl: require('./lib/acl'), // type: 79
   AobFlag: require('./lib/flags'), // type: 80
   AobFlagHelper: require('./lib/flagsHelper'), // type: 81
+  AobHelper: require('./lib/Helper'), // type: 81
 }
