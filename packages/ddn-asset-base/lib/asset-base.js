@@ -421,6 +421,54 @@ class AssetBase {
     }
 
     /**
+     * 查询规定条件的资产数据的个数
+     * @param {*} where 查询条件，遵循sequelize规则，使用prop的名称定义
+     * @param {*} asset 资产交易的配置name或type（config.asset.js文件中定义）
+     */
+    async queryAssetCount(where, asset, cb) {
+        var assetInst = this;
+        if (asset) {
+            var assetTrans;
+            if (/^[0-9]*$/.test(asset)) {
+                assetTrans = AssetUtils.getTransactionByTypeValue(asset);
+            } else {
+                var assetValue = AssetUtils.getTypeValue(asset);
+                assetTrans = AssetUtils.getTransactionByTypeValue(assetValue);
+            }
+            if (assetTrans) {
+                var assetCls = require(assetTrans.package)[assetTrans.name];
+                assetInst = new assetCls(this.library, this.modules);
+            }
+        }
+
+        // 解析where
+        var newWhere = {};
+        where = where || {};
+        for (var p in where) {
+            var condProp = assetInst.getPropsMappingItemByProp(p);
+            if (condProp) {
+                newWhere[condProp.field] = where[p];
+            } else {
+                var pName = p.toLowerCase();
+                if (pName == "trs_id") {
+                    newWhere["transaction_id"] = where[p];
+                } else if (pName == "trs_type") {
+                    newWhere["transaction_type"] = where[p];
+                } else if (pName == "trs_timestamp") {
+                    newWhere["timestamp"] = where[p];
+                }
+            }
+        }
+
+        this.library.dao.count("trs_asset", newWhere, (err, count) => {
+            if (err) {
+                return cb(err);
+            }
+            cb(null, count);
+        })
+    }
+
+    /**
      * 校验输入数据格式是否符合规则（_assetFiledRules负责定义规则）
      * @param {*} trs 
      */
