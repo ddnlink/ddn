@@ -189,20 +189,5 @@ class Acl extends AssetBase {
     trs.asset.aobAcl = values;
     super.dbSave(trs, dbTrans, cb);
   }
-
-  ready(trs, sender) {
-    if (sender.multisignatures.length) {
-      if (!trs.signatures) {
-        return false;
-      }
-      return trs.signatures.length >= sender.multimin - 1
-    } else {
-      return true;
-    }
-  }
-
-
-
-
 }
 module.exports = Acl;

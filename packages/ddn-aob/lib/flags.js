@@ -1,10 +1,24 @@
 const { AssetBase } = require('ddn-asset-base');
 const bignum = require('bignum-utils');
 const flagsHelper = require('./flagsHelper');
+const Helper = require('./helper');
 
 class Flags extends AssetBase {
   propsMapping() {
-    return [];
+    return [{
+      field: "str1",
+      prop: "currency",
+      required: true
+    },
+    {
+      field: "int1",
+      prop: "flag"
+    },
+    {
+      field: "int2",
+      prop: "flag_type"
+    }
+    ];
   }
 
   create(data, trs) {
@@ -145,20 +159,9 @@ class Flags extends AssetBase {
       flag_type: asset.flag_type,
       flag: asset.flag
     };
-    library.dao.insert('flag', values, dbTrans, cb);
+    trs.asset.aobFlags = values;
+    super.dbSave(trs, dbTrans, cb);
   }
-
-  ready(trs, sender) {
-    if (sender.multisignatures.length) {
-      if (!trs.signatures) {
-        return false
-      }
-      return trs.signatures.length >= sender.multimin - 1
-    } else {
-      return true
-    }
-  }
-
 
 }
 module.exports = Flags;
