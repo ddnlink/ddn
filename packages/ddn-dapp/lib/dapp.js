@@ -1,4 +1,5 @@
 const { AssetBase } = require('ddn-asset-base');
+const valid_url = require('valid-url');
 const bignum = require('bignum-utils');
 const ByteBuffer = require('bytebuffer');
 const dappCategory = require('./dapp/dapp-category.js');
