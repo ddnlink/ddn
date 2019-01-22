@@ -1,28 +1,8 @@
 const { AssetBase } = require('ddn-asset-base');
 const bignum = require('bignum-utils');
+const ByteBuffer = require('bytebuffer');
 
 const WITNESS_CLUB_DAPP_NAME = 'DDN-FOUNDATION'
-
-async function checkDuplicate (library, trs, cb) {
-  const where = {
-    '$or': [{ name: trs.asset.dapp.name }, {link: trs.asset.dapp.link || null}],
-    transaction_id: { '$ne': trs.id }
-  }
-
-  result = await super.queryAsset(where, null, null, 1, 1);
-  if (data.length > 0) {
-    const dapp = data[0];
-    if (dapp.name == trs.asset.dapp.name) {
-      return cb(`Dapp name already exists: ${dapp.name}`);
-    } else if (dapp.link == trs.asset.dapp.link) {
-      return cb(`Dapp link already exists: ${dapp.link}`);
-    } else {
-      return cb("Unknown error");
-    }
-  } else {
-    return cb();
-  }
-}
 
 class Dapp extends AssetBase {
   propsMapping() {
@@ -83,7 +63,7 @@ class Dapp extends AssetBase {
     return trs;
   }
 
-  verify(trs, sender, cb) {
+  async verify(trs, sender, cb) {
     const dapp = trs.asset.dapp;
     if (trs.recipient_id) {
       return setImmediate(cb, "Invalid recipient");
@@ -187,7 +167,24 @@ class Dapp extends AssetBase {
       return setImmediate(cb, "Invalid unlock delegates number")
     }
 
-    checkDuplicate(library, trs, cb);
+    const where = {
+      '$or': [{ name: trs.asset.dapp.name }, {link: trs.asset.dapp.link || null}],
+      transaction_id: { '$ne': trs.id }
+    }
+  
+    result = await super.queryAsset(where, null, null, 1, 1);
+    if (data.length > 0) {
+      const dapp = data[0];
+      if (dapp.name == trs.asset.dapp.name) {
+        return cb(`Dapp name already exists: ${dapp.name}`);
+      } else if (dapp.link == trs.asset.dapp.link) {
+        return cb(`Dapp link already exists: ${dapp.link}`);
+      } else {
+        return cb("Unknown error");
+      }
+    } else {
+      return cb();
+    }
   }
 
   getBytes (trs) {

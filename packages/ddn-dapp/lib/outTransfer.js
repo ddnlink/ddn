@@ -88,7 +88,7 @@ class OutTranssfer extends AssetBase {
     })
   }
   
-  process(trs, sender, cb) {
+  async process(trs, sender, cb) {
     try{
       const transfer = trs.asset.outTransfer;
       const where = { id: transfer.dapp_id };
