@@ -24,7 +24,7 @@ class Intransfer extends AssetBase {
   create(data, trs) {
     trs.recipient_id = null;
 
-    if (data.currency === constants.tokenName) {
+    if (data.currency === library.tokenSetting.tokenName) {
       trs.amount = data.amount + "";
       trs.asset.inTransfer = {
         dapp_id: data.dapp_id,
@@ -53,7 +53,7 @@ class Intransfer extends AssetBase {
         return setImmediate(cb, "Invalid address")
       }
       const asset = trs.asset.inTransfer;
-      if (asset.currency !== constants.tokenName) {
+      if (asset.currency !== library.tokenSetting.tokenName) {
         if (!bignum.isZero(trs.amount) || bignum.isZero(asset.amount)) {
           return setImmediate(cb, "Invalid transfer amount")
         }
@@ -75,7 +75,7 @@ class Intransfer extends AssetBase {
             return setImmediate(cb, `Dapp not found: ${trs.asset.inTransfer.dapp_id}`);
           }
           const currency = trs.asset.inTransfer.currency;
-          if (currency === constants.tokenName) return cb()
+          if (currency === library.tokenSetting.tokenName) return cb()
 
           const where = { name: currency, trs_type: 76 };
           const orders = null;
@@ -104,7 +104,7 @@ class Intransfer extends AssetBase {
     try {
       var buf = new Buffer([]);
       const dappId = new Buffer(trs.asset.inTransfer.dapp_id, 'utf8');
-      if (trs.asset.inTransfer.currency !== constants.tokenName) {
+      if (trs.asset.inTransfer.currency !== library.tokenSetting.tokenName) {
         var currency = new Buffer(trs.asset.inTransfer.currency, 'utf8');
         const amount = new Buffer(trs.asset.inTransfer.amount, 'utf8');
         buf = Buffer.concat([buf, dappId, currency, amount]);
@@ -127,7 +127,7 @@ class Intransfer extends AssetBase {
     const asset = trs.asset.inTransfer;
     const dappId = asset.dapp_id;
 
-    if (asset.currency === constants.tokenName) {
+    if (asset.currency === library.tokenSetting.tokenName) {
       library.balanceCache.addAssetBalance(dappId, asset.currency, trs.amount)
       library.model.updateAssetBalance(asset.currency, trs.amount, dappId, dbTrans, cb)
     } else {
@@ -152,7 +152,7 @@ class Intransfer extends AssetBase {
     const transfer = trs.asset.inTransfer;
     const dappId = asset.dapp_id;
 
-    if (transfer.currency === constants.tokenName) {
+    if (transfer.currency === library.tokenSetting.tokenName) {
       library.balanceCache.addAssetBalance(dappId, transfer.currency, `-${trs.amount}`)
       library.model.updateAssetBalance(transfer.currency, `-${trs.amount}`, dappId, dbTrans, cb)
     } else {
@@ -174,7 +174,7 @@ class Intransfer extends AssetBase {
       dbTrans = null;
     };
     const transfer = trs.asset.inTransfer;
-    if (transfer.currency === constants.tokenName) return setImmediate(cb)
+    if (transfer.currency === library.tokenSetting.tokenName) return setImmediate(cb)
     const balance = self.library.balanceCache.getAssetBalance(sender.address, transfer.currency) || 0;
     const surplus = bignum.minus(balance, transfer.amount);
     if (bignum.isLessThan(surplus, 0))return setImmediate(cb, 'Insufficient asset balance')
@@ -188,7 +188,7 @@ class Intransfer extends AssetBase {
       dbTrans = null;
     };
     const transfer = trs.asset.inTransfer;
-    if (transfer.currency === constants.tokenName) return setImmediate(cb)
+    if (transfer.currency === library.tokenSetting.tokenName) return setImmediate(cb)
     library.balanceCache.addAssetBalance(sender.address, transfer.currency, transfer.amount)
     setImmediate(cb);
   }

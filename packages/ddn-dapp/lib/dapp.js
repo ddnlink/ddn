@@ -65,6 +65,10 @@ class Dapp extends AssetBase {
     return trs;
   }
 
+  calculateFee(trs, sender) {
+    return bignum.multiply(100, library.tokenSetting.fixedPoint);
+  }
+
   async verify(trs, sender, cb) {
     const dapp = trs.asset.dapp;
     if (trs.recipient_id) {

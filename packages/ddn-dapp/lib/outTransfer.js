@@ -64,7 +64,7 @@ class OutTranssfer extends AssetBase {
         return setImmediate(cb, 'Invalid signatures');
       }
       const currency = trs.asset.outTransfer.currency;
-      if (currency === constants.tokenName) return cb();
+      if (currency === library.tokenSetting.tokenName) return cb();
       try{
         const where = { name: currency, trs_type: 76 };
         const orders = null;
@@ -158,7 +158,7 @@ class OutTranssfer extends AssetBase {
 		const transfer = trs.asset.outTransfer;
 		privated.unconfirmedOutTansfers[transfer.transactionId] = false;
 
-		if (transfer.currency !== constants.tokenName) {
+		if (transfer.currency !== library.tokenSetting.tokenName) {
 			library.balanceCache.addAssetBalance(trs.recipient_id, transfer.currency, transfer.amount);
 			async.series(
 				[
@@ -173,7 +173,7 @@ class OutTranssfer extends AssetBase {
 					},
 					(next) => {
 						library.model.updateAssetBalance(
-							constants.tokenName,
+							library.tokenSetting.tokenName,
 							`-${trs.fee}`,
 							transfer.dapp_id,
 							dbTrans,
@@ -211,7 +211,7 @@ class OutTranssfer extends AssetBase {
             if (err) return cb(err);          
             var minusSum = bignum.minus(0, amount, trs.fee);
 						library.model.updateAssetBalance(
-							constants.tokenName,
+							library.tokenSetting.tokenName,
 							minusSum.toString(),
 							transfer.dapp_id,
 							dbTrans,
@@ -231,7 +231,7 @@ class OutTranssfer extends AssetBase {
 
 		privated.unconfirmedOutTansfers[transfer.transaction_id] = true;
 
-		if (transfer.currency !== constants.tokenName) {
+		if (transfer.currency !== library.tokenSetting.tokenName) {
 			library.balanceCache.addAssetBalance(trs.recipient_id, transfer.currency, transfer.amount);    //wxm block database
 			async.series(
 				[
@@ -245,7 +245,7 @@ class OutTranssfer extends AssetBase {
 						);
 					},
 					(next) => {
-						library.model.updateAssetBalance(constants.tokenName, trs.fee, transfer.dapp_id, dbTrans, next);
+						library.model.updateAssetBalance(library.tokenSetting.tokenName, trs.fee, transfer.dapp_id, dbTrans, next);
 					},
 					(next) => {
 						library.model.updateAssetBalance(
@@ -281,7 +281,7 @@ class OutTranssfer extends AssetBase {
 					(err) => {
 						if (err) return cb(err);
 						library.model.updateAssetBalance(
-							constants.tokenName,
+							library.tokenSetting.tokenName,
 							sum,
 							transfer.dapp_id,
 							dbTrans,
@@ -302,15 +302,15 @@ class OutTranssfer extends AssetBase {
 		privated.unconfirmedOutTansfers[transfer.transactionId] = true;
 		const balance = library.balanceCache.getAssetBalance(transfer.dapp_id, transfer.currency) || 0;
 		const fee = trs.fee;
-		if (transfer.currency === constants.tokenName) {
+		if (transfer.currency === library.tokenSetting.tokenName) {
       const amount = bignum.plus(transfer.amount, fee);
       if (bignum.isLessThan(balance, amount))return setImmediate(cb, 'Insufficient balance');
 			library.balanceCache.addAssetBalance(transfer.dapp_id, transfer.currency, bignum.minus(0, amount).toString());//bignum update -amount
 		} else {
-			const ddnBalance = library.balanceCache.getAssetBalance(transfer.dapp_id, constants.tokenName) || 0;
+			const ddnBalance = library.balanceCache.getAssetBalance(transfer.dapp_id, library.tokenSetting.tokenName) || 0;
       if (bignum.isLessThan(ddnBalance, fee))return setImmediate(cb, 'Insufficient balance');
       if (bignum.isLessThan(balance, transfer.amount))return setImmediate(cb, 'Insufficient asset balance');
-			library.balanceCache.addAssetBalance(transfer.dapp_id, constants.tokenName, `-${fee}`);
+			library.balanceCache.addAssetBalance(transfer.dapp_id, library.tokenSetting.tokenName, `-${fee}`);
 			library.balanceCache.addAssetBalance(transfer.dapp_id, transfer.currency, `-${transfer.amount}`);
 		}
 		setImmediate(cb);
@@ -324,11 +324,11 @@ class OutTranssfer extends AssetBase {
 		const transfer = trs.asset.outTransfer;
 		privated.unconfirmedOutTansfers[transfer.transaction_id] = false;
 		const fee = trs.fee;
-		if (transfer.currency === constants.tokenName) {
+		if (transfer.currency === library.tokenSetting.tokenName) {
       const amount = bignum.plus(transfer.amount, fee);
 			library.balanceCache.addAssetBalance(transfer.dapp_id, transfer.currency, amount.toString());
 		} else {
-			library.balanceCache.addAssetBalance(transfer.dapp_id, constants.tokenName, fee);
+			library.balanceCache.addAssetBalance(transfer.dapp_id, library.tokenSetting.tokenName, fee);
 		  library.balanceCache.addAssetBalance(transfer.dapp_id, transfer.currency, transfer.amount);
 		}
 		setImmediate(cb);
