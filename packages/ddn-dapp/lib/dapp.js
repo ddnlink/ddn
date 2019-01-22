@@ -1,6 +1,8 @@
 const { AssetBase } = require('ddn-asset-base');
 const bignum = require('bignum-utils');
 const ByteBuffer = require('bytebuffer');
+const dappCategory = require('./dapp/dapp-category.js');
+
 
 const WITNESS_CLUB_DAPP_NAME = 'DDN-FOUNDATION'
 
