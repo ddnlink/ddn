@@ -82,8 +82,8 @@ class Intransfer extends AssetBase {
           const returnTotal = null;
           const pageIndex = 1;
           const pageSize = 1;
-          let assetData = await super.queryAsset(where, orders, returnTotal, pageIndex, pageSize);
-          assetData = assetData[0];
+          let assetData = await super.queryAsset(where, orders, returnTotal, pageIndex, pageSize, 76);
+          const assetDetail = assetData[0];
           if (!assetDetail) return cb('Asset not exists')
           if (assetDetail.writeoff) return cb('Asset already writeoff')
           if (!assetDetail.allow_whitelist && !assetDetail.allow_blacklist) return cb();
@@ -176,7 +176,7 @@ class Intransfer extends AssetBase {
     };
     const transfer = trs.asset.inTransfer;
     if (transfer.currency === library.tokenSetting.tokenName) return setImmediate(cb)
-    const balance = self.library.balanceCache.getAssetBalance(sender.address, transfer.currency) || 0;
+    const balance = library.balanceCache.getAssetBalance(sender.address, transfer.currency) || 0;
     const surplus = bignum.minus(balance, transfer.amount);
     if (bignum.isLessThan(surplus, 0))return setImmediate(cb, 'Insufficient asset balance')
     library.balanceCache.setAssetBalance(sender.address, transfer.currency, surplus.toString())
