@@ -104,7 +104,8 @@ class Intransfer extends AssetBase {
     try {
       var buf = new Buffer([]);
       const dappId = new Buffer(trs.asset.inTransfer.dapp_id, 'utf8');
-      if (trs.asset.inTransfer.currency !== library.tokenSetting.tokenName) {
+      // if (trs.asset.inTransfer.currency !== this.library.tokenSetting.tokenName) {
+      if (trs.asset.inTransfer.currency !== 'EOK') {
         var currency = new Buffer(trs.asset.inTransfer.currency, 'utf8');
         const amount = new Buffer(trs.asset.inTransfer.amount, 'utf8');
         buf = Buffer.concat([buf, dappId, currency, amount]);
