@@ -7,11 +7,11 @@ class Intransfer extends AssetBase {
   propsMapping() {
     return[
       {
-        field: "str1",
+        field: "str2",
         prop: "dapp_id"
       },
       {
-        field: "str2",
+        field: "str1",
         prop: "currency"
       },
       {
