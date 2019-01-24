@@ -161,33 +161,40 @@ class Dapp extends AssetBase {
       }
     }
 
-    if (!dapp.delegates || dapp.delegates.length < 5 || dapp.delegates.length > 101) {
-      return setImmediate(cb, "Invalid dapp delegates");
-    }
-    for (let i in dapp.delegates) {
-      if (dapp.delegates[i].length != 64) {
-        return setImmediate(cb, "Invalid dapp delegates format");
+    if(dapp.delegates){
+      if (!dapp.delegates || dapp.delegates.length < 5 || dapp.delegates.length > 101) {
+        return setImmediate(cb, "Invalid dapp delegates");
+      }
+      for (let i in dapp.delegates) {
+        if (dapp.delegates[i].length != 64) {
+          return setImmediate(cb, "Invalid dapp delegates format");
+        }
       }
     }
 
-    if (!dapp.unlock_delegates || dapp.unlock_delegates < 3 || dapp.unlock_delegates > dapp.delegates.length) {
-      return setImmediate(cb, "Invalid unlock delegates number")
+    if(dapp.unlock_delegates){
+      if (!dapp.unlock_delegates || dapp.unlock_delegates < 3 || dapp.unlock_delegates > dapp.delegates.length) {
+        return setImmediate(cb, "Invalid unlock delegates number")
+      }
     }
-
-    const where = {
-      '$or': [{ name: trs.asset.dapp.name }, {link: trs.asset.dapp.link || null}],
-      transaction_id: { '$ne': trs.id }
+    const data1 = await super.queryAsset({ name: trs.asset.dapp.name }, false, false, 1, 1);
+    const data2 = await super.queryAsset({ link: trs.asset.dapp.link }, false, false, 1, 1);
+    const data = data1.concat(data2);
+    for(let i = 0; i < data.length; i++){
+      if(data[i].transaction_id === trs.id){
+        data.splice(i, 1);
+      }
     }
-  
-    result = await super.queryAsset(where, null, null, 1, 1);
     if (data.length > 0) {
-      const dapp = data[0];
-      if (dapp.name == trs.asset.dapp.name) {
-        return cb(`Dapp name already exists: ${dapp.name}`);
-      } else if (dapp.link == trs.asset.dapp.link) {
-        return cb(`Dapp link already exists: ${dapp.link}`);
-      } else {
-        return cb("Unknown error");
+      for(let i = 0; i < data.length; i++){
+        let dapp = data[i];
+        if (dapp.name == trs.asset.dapp.name) {
+          return cb(`Dapp name already exists: ${dapp.name}`);
+        } else if (dapp.link == trs.asset.dapp.link) {
+          return cb(`Dapp link already exists: ${dapp.link}`);
+        } else {
+          return cb("Unknown error");
+        }
       }
     } else {
       return cb();
@@ -223,8 +230,12 @@ class Dapp extends AssetBase {
       const bb = new ByteBuffer(1, true);
       bb.writeInt(dapp.type);
       bb.writeInt(dapp.category);
-      bb.writeString(dapp.delegates.join(','))
-      bb.writeInt(dapp.unlock_delegates)
+      if(dapp.delegates){
+        bb.writeString(dapp.delegates.join(','))
+      }
+      if(dapp.unlock_delegates || dapp.unlock_delegates === 0){
+        bb.writeInt(dapp.unlock_delegates)
+      }
       bb.flip();
 
       buf = Buffer.concat([buf, bb.toBuffer()]);
@@ -271,7 +282,7 @@ class Dapp extends AssetBase {
     }
 
     //bignum update if (trs.asset.dapp.link && privated.unconfirmedLinks[trs.asset.dapp.link]) {
-    if (trs.asset.dapp.link && self.library.oneoff.has(trs.asset.dapp.link)) {
+    if (trs.asset.dapp.link && library.oneoff.has(trs.asset.dapp.link)) {
       return setImmediate(cb, "Dapp link already exists");
     }
 
@@ -296,26 +307,6 @@ class Dapp extends AssetBase {
     setImmediate(cb);
   }
 
-  dbRead (raw) {
-    if (!raw.dapp_name) {
-      return null;
-    } else {
-      const dapp = {
-        name: raw.dapp_name,
-        description: raw.dapp_description,
-        tags: raw.dapp_tags,
-        type: raw.dapp_type,
-        link: raw.dapp_link,
-        category: raw.dapp_category,
-        icon: raw.dapp_icon,
-        delegates: raw.dapp_delegates.split(','),
-        unlock_delegates: raw.dapp_unlockDelegates
-      };
-
-      return { dapp };
-    }
-  }
-
   dbSave(trs, dbTrans, cb) {
     if (typeof(cb) == "undefined" && typeof(dbTrans) == "function") {
 			cb = dbTrans;
@@ -330,11 +321,10 @@ class Dapp extends AssetBase {
       link: dapp.link || null,
       icon: dapp.icon || null,
       category: dapp.category,
-      delegates: dapp.delegates.join(','),
-      unlock_delegates: dapp.unlock_delegates,
+      delegates: dapp.delegates ?  dapp.delegates.join(',') : null,
+      unlock_delegates: dapp.unlock_delegates || null,
       transaction_id: trs.id
     };
-
     trs.asset.dapp = values;
     super.dbSave(trs, dbTrans, err => {
       if (err) {

@@ -10,7 +10,7 @@ secondSecret: 二级密码；(可不传)
 ```
 trsType: 11;  
 assetInfo: {  
-              secret: Account1.password,  
+              secret: 密码,  
               category: node.randomProperty(node.DappCategory),  
               type: node.DappType.DAPP,  
               name: DappName,  
