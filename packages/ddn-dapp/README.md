@@ -7,7 +7,7 @@ secondSecret: 二级密码；(可不传)
 都是调用ddn-js  assetPlugin.createPluginAsset(trsType, assetInfo, secret, secondSecret) 方法创建交易  
 
 一：Dapp  
-···
+```
 trsType: 11;  
 assetInfo: {  
               secret: Account1.password,  
@@ -19,5 +19,5 @@ assetInfo: {
               link: node.guestbookDapp.link,  
               icon: node.guestbookDapp.icon,  
             }  
-···
+```
 
