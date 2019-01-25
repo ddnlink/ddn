@@ -43,18 +43,13 @@ class Issuer extends AssetBase {
       // 验证是否存在重复数据
       try {
         const issuer = trans.asset.aobIssuer;
-        const where = {
-          '$or': [{
-            name: issuer.name
-          }, {
-            issuer_id: trs.sender_id
-          }]
-        }
         const orders = null;
         const returnTotal = null;
         const pageIndex = 1;
         const pageSize = 1;
-        var results = await super.queryAsset(where, orders, returnTotal, pageIndex, pageSize);
+        const data1 = await super.queryAsset({ name: issuer.name }, orders, returnTotal, pageIndex, pageSize);
+        const data2 = await super.queryAsset({ issuer_id: trs.sender_id }, orders, returnTotal, pageIndex, pageSize);
+        results = data1.concat(data2);
         if (results && results.length > 0) {
           cb('Evidence name/issuer_id already exists');
         } else {
