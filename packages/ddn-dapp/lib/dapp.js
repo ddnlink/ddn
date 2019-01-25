@@ -162,12 +162,12 @@ class Dapp extends AssetBase {
     }
 
     if(dapp.delegates){
-      dapp.delegates = dapp.delegates.split(',');
-      if (!dapp.delegates || dapp.delegates.length < 5 || dapp.delegates.length > 101) {
+      arr = dapp.delegates.split(',');
+      if (!arr || arr.length < 5 || arr.length > 101) {
         return setImmediate(cb, "Invalid dapp delegates");
       }
-      for (let i in dapp.delegates) {
-        if (dapp.delegates[i].length != 64) {
+      for (let i in arr) {
+        if (arr[i].length != 64) {
           return setImmediate(cb, "Invalid dapp delegates format");
         }
       }
@@ -232,7 +232,7 @@ class Dapp extends AssetBase {
       bb.writeInt(dapp.type);
       bb.writeInt(dapp.category);
       if(dapp.delegates){
-        bb.writeString(dapp.delegates.split(','))
+        bb.writeString(dapp.delegates)
       }
       if(dapp.unlock_delegates || dapp.unlock_delegates === 0){
         bb.writeInt(dapp.unlock_delegates)
