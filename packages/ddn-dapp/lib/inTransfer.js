@@ -42,62 +42,57 @@ class Intransfer extends AssetBase {
   }
 
   verify(trs, sender, cb) {
-    super.verify(trs, sender, async(err, trans) => {
-      if(err){
-        cb(err);
+    if (trs.recipient_id) {
+      return setImmediate(cb, "Invalid recipient");
+    }
+    if (!ddnUtils.Address.isAddress(sender.address)) {
+      return setImmediate(cb, "Invalid address")
+    }
+    const asset = trs.asset.inTransfer;
+    if (asset.currency !== library.tokenSetting.tokenName) {
+      if (!bignum.isZero(trs.amount) || bignum.isZero(asset.amount)) {
+        return setImmediate(cb, "Invalid transfer amount")
       }
-      if (trs.recipient_id) {
-        return setImmediate(cb, "Invalid recipient");
+      const error = ddnUtils.Amount.validate(trs.asset.inTransfer.amount);
+      if (error) return setImmediate(cb, error)
+    } else {
+      if ((typeof (trs.amount) == "undefined" || bignum.isZero(trs.amount)) ||
+        (typeof (asset.amount) != "undefined" && !bignum.isZero(asset.amount))) {
+        return setImmediate(cb, "Invalid transfer amount")
       }
-      if (!ddnUtils.Address.isAddress(sender.address)) {
-        return setImmediate(cb, "Invalid address")
-      }
-      const asset = trs.asset.inTransfer;
-      if (asset.currency !== library.tokenSetting.tokenName) {
-        if (!bignum.isZero(trs.amount) || bignum.isZero(asset.amount)) {
-          return setImmediate(cb, "Invalid transfer amount")
+    }
+    try {
+      super.queryAssetCount({ transaction_id: trs.asset.inTransfer.dapp_id }, 'dapp', async(err, count) => {
+        if (err) {
+          library.logger.error(err.toString());
+          return setImmediate(cb, `Dapp not found: ${trs.asset.inTransfer.dapp_id}`);
         }
-        const error = ddnUtils.Amount.validate(trs.asset.inTransfer.amount);
-        if (error) return setImmediate(cb, error)
-      } else {
-        if ((typeof (trs.amount) == "undefined" || bignum.isZero(trs.amount)) ||
-          (typeof (asset.amount) != "undefined" && !bignum.isZero(asset.amount))) {
-          return setImmediate(cb, "Invalid transfer amount")
+        if (count === 0) {
+          return setImmediate(cb, `Dapp not found: ${trs.asset.inTransfer.dapp_id}`);
         }
-      }
-      try {
-        super.queryAssetCount({ transaction_id: trs.asset.inTransfer.dapp_id }, 'dapp', async(err, count) => {
-          if (err) {
-            library.logger.error(err.toString());
-            return setImmediate(cb, `Dapp not found: ${trs.asset.inTransfer.dapp_id}`);
-          }
-          if (count === 0) {
-            return setImmediate(cb, `Dapp not found: ${trs.asset.inTransfer.dapp_id}`);
-          }
-          const currency = trs.asset.inTransfer.currency;
-          if (currency === library.tokenSetting.tokenName) return cb()
+        const currency = trs.asset.inTransfer.currency;
+        if (currency === library.tokenSetting.tokenName) return cb()
 
-          const where = { name: currency, trs_type: 76 };
-          const orders = null;
-          const returnTotal = null;
-          const pageIndex = 1;
-          const pageSize = 1;
-          let assetData = await super.queryAsset(where, orders, returnTotal, pageIndex, pageSize, 76);
-          const assetDetail = assetData[0];
-          if (!assetDetail) return cb('Asset not exists')
-          if (assetDetail.writeoff) return cb('Asset already writeoff')
-          if (!assetDetail.allow_whitelist && !assetDetail.allow_blacklist) return cb();
-          const aclTable = assetDetail.acl == 0 ? 'acl_black' : 'acl_white';
-          library.model.checkAcl(aclTable, currency, sender.address, null, (err, isInList) => {
-            if (err) return cb(`Database error when query acl: ${err}`);
-            if ((assetDetail.acl == 0) == isInList) return cb('Permission not allowed')
-            cb()
-          })
+        const where = { name: currency, trs_type: 76 };
+        const orders = null;
+        const returnTotal = null;
+        const pageIndex = 1;
+        const pageSize = 1;
+        let assetData = await super.queryAsset(where, orders, returnTotal, pageIndex, pageSize, 76);
+        const assetDetail = assetData[0];
+        if (!assetDetail) return cb('Asset not exists')
+        if (assetDetail.writeoff) return cb('Asset already writeoff')
+        if (!assetDetail.allow_whitelist && !assetDetail.allow_blacklist) return cb();
+        const aclTable = assetDetail.acl == 0 ? 'acl_black' : 'acl_white';
+        library.model.checkAcl(aclTable, currency, sender.address, null, (err, isInList) => {
+          if (err) return cb(`Database error when query acl: ${err}`);
+          if ((assetDetail.acl == 0) == isInList) return cb('Permission not allowed')
+          cb()
         })
-      } catch(err2){
-        cb(err2);
-      }
-    })
+      })
+    } catch(err2){
+      cb(err2);
+    }
   }
 
   getBytes(trs) {
