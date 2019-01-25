@@ -232,7 +232,7 @@ class Dapp extends AssetBase {
       bb.writeInt(dapp.type);
       bb.writeInt(dapp.category);
       if(dapp.delegates){
-        bb.writeString(dapp.delegates)
+        bb.writeString(dapp.delegates.split(','))
       }
       if(dapp.unlock_delegates || dapp.unlock_delegates === 0){
         bb.writeInt(dapp.unlock_delegates)
