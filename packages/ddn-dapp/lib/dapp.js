@@ -162,6 +162,7 @@ class Dapp extends AssetBase {
     }
 
     if(dapp.delegates){
+      dapp.delegates = dapp.delegates.split(',');
       if (!dapp.delegates || dapp.delegates.length < 5 || dapp.delegates.length > 101) {
         return setImmediate(cb, "Invalid dapp delegates");
       }
@@ -231,7 +232,7 @@ class Dapp extends AssetBase {
       bb.writeInt(dapp.type);
       bb.writeInt(dapp.category);
       if(dapp.delegates){
-        bb.writeString(dapp.delegates.join(','))
+        bb.writeString(dapp.delegates)
       }
       if(dapp.unlock_delegates || dapp.unlock_delegates === 0){
         bb.writeInt(dapp.unlock_delegates)
@@ -240,7 +241,7 @@ class Dapp extends AssetBase {
 
       buf = Buffer.concat([buf, bb.toBuffer()]);
     } catch (e) {
-      library.logger.error(e);
+      // library.logger.error(e);
       throw Error(e.toString());
     }
 
@@ -321,7 +322,7 @@ class Dapp extends AssetBase {
       link: dapp.link || null,
       icon: dapp.icon || null,
       category: dapp.category,
-      delegates: dapp.delegates ?  dapp.delegates.join(',') : null,
+      delegates: dapp.delegates ?  dapp.delegates : null,
       unlock_delegates: dapp.unlock_delegates || null,
       transaction_id: trs.id
     };
