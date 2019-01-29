@@ -49,7 +49,7 @@ class Issuer extends AssetBase {
         const pageSize = 1;
         const data1 = await super.queryAsset({ name: issuer.name }, orders, returnTotal, pageIndex, pageSize);
         const data2 = await super.queryAsset({ issuer_id: trs.sender_id }, orders, returnTotal, pageIndex, pageSize);
-        results = data1.concat(data2);
+        const results = data1.concat(data2);
         if (results && results.length > 0) {
           cb('Evidence name/issuer_id already exists');
         } else {
