@@ -92,7 +92,7 @@ class OutTranssfer extends AssetBase {
     try{
       const transfer = trs.asset.outTransfer;
       const where = { id: transfer.dapp_id };
-      const dappData = await super.queryAsset(where, null, null, 1, 1);
+      const dappData = await super.queryAsset(where, null, null, 1, 1, 11);
       const dapp = dappData[0];
       dapp.delegates = dapp.delegates.split(',');
       if (!dapp) {
