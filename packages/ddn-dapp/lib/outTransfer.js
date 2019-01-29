@@ -261,21 +261,15 @@ class OutTranssfer extends AssetBase {
 				if (err) {
 					return cb(err);
 				}
-                //bignum update const amount = Number(transfer.amount);
-                
-                const minusAmount = bignum.minus(0, transfer.amount);
-                const sum = bignum.plus(transfer.amount, trs.fee);
-
-				modules.accounts.mergeAccountAndGet(
-					{
+        const minusAmount = bignum.minus(0, transfer.amount);
+        const sum = bignum.plus(transfer.amount, trs.fee);
+				modules.accounts.mergeAccountAndGet({
 						address: trs.recipient_id,   //wxm block database
 						balance: minusAmount.toString(),
 						u_balance: minusAmount.toString(),
 						block_id: block.id,  //wxm block database
 						round: modules.round.calc(block.height).toString()
-					},
-					dbTrans,
-					(err) => {
+					}, dbTrans, (err) => {
 						if (err) return cb(err);
 						library.model.updateAssetBalance(
 							library.tokenSetting.tokenName,
@@ -331,7 +325,11 @@ class OutTranssfer extends AssetBase {
 		setImmediate(cb);
   }
   
-  dbSave(trs, cb) {
+  dbSave(trs, dbTrans, cb) {
+		if (typeof(cb) == "undefined" && typeof(dbTrans) == "function") {
+			cb = dbTrans;
+			dbTrans = null;
+    };
 		const transfer = trs.asset.outTransfer;
 		const dapp_id = transfer.dapp_id;
 		const currency = transfer.currency;
@@ -345,7 +343,7 @@ class OutTranssfer extends AssetBase {
 			outtransaction_id
     };
     trs.asset.outTransfer = values;
-    super.dbSave(trs,(err)=>{
+    super.dbSave(trs, dbTrans, (err)=>{
       if (err) return cb(err);
 			library.bus.message(
 				transfer.dapp_id,

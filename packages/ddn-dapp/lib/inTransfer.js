@@ -115,8 +115,8 @@ class Intransfer extends AssetBase {
     return buf;
   }
 
-   // 新增事务dbTrans ---wly
-   apply(trs, block, sender, dbTrans, cb) {
+  // 新增事务dbTrans ---wly
+  apply(trs, block, sender, dbTrans, cb) {
     if (typeof (cb) == "undefined" && typeof (dbTrans) == "function") {
       cb = dbTrans;
       dbTrans = null;
@@ -189,7 +189,6 @@ class Intransfer extends AssetBase {
     library.balanceCache.addAssetBalance(sender.address, transfer.currency, transfer.amount)
     setImmediate(cb);
   }
-
 
 }
 module.exports = Intransfer;
