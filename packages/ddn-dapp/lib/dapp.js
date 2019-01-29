@@ -160,9 +160,9 @@ class Dapp extends AssetBase {
         }
       }
     }
-
+    
     if(dapp.delegates){
-      arr = dapp.delegates.split(',');
+      const arr = dapp.delegates.split(',');
       if (!arr || arr.length < 5 || arr.length > 101) {
         return setImmediate(cb, "Invalid dapp delegates");
       }

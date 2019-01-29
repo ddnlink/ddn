@@ -103,10 +103,7 @@ class OutTranssfer extends AssetBase {
 			}
 			if (dapp.delegates.indexOf(trs.sender_public_key) === -1) return cb('Sender must be dapp delegate');
 			if (!trs.signatures || trs.signatures.length !== dapp.unlock_delegates) return cb('Invalid signature number');
-      if (dapp.delegates.indexOf(trs.sender_public_key) === -1) return cb('Sender must be dapp delegate');
-
-			if (!trs.signatures || trs.signatures.length !== dapp.unlock_delegates) return cb('Invalid signature number');
-			let validSignatureNumber = 0;
+  		let validSignatureNumber = 0;
       const bytes = library.base.transaction.getBytes(trs, true, true);
       
       try {
