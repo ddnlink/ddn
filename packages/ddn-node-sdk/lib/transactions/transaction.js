@@ -56,7 +56,7 @@ function createLock(height, secret, second_secret) {
 	};
 
 	var keys = crypto.getKeys(secret);
-	transaction.senderPublicKey = keys.public_key;
+	transaction.sender_public_key = keys.public_key;
 
 	crypto.sign(transaction, keys);
 

@@ -806,7 +806,7 @@ function verify(transaction) {
   var hash = sha256Bytes(data2)
 
   var signatureBuffer = new Buffer(transaction.signature, "hex");
-  var senderPublicKeyBuffer = new Buffer(transaction.senderPublicKey, "hex");
+  var senderPublicKeyBuffer = new Buffer(transaction.sender_public_key, "hex");
   var res = nacl.sign.detached.verify(hash, signatureBuffer, senderPublicKeyBuffer);
 
   return res;
