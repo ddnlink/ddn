@@ -12,6 +12,9 @@ class AssetUtils
                 if (currAsset.package && !/^\s*$/.test(currAsset.package)) {
                     var assetTransactions = currAsset.transactions;
                     if (assetTransactions && assetTransactions.length > 0) {
+                        //测试资产插件包配置是否正确
+                        require(currAsset.package);
+
                         for (var i = 0; i < assetTransactions.length; i++) {
                             var currTrans = assetTransactions[i];
                             if (!(currTrans.name && !/^\s*$/.test(currTrans.name))) {
@@ -22,7 +25,7 @@ class AssetUtils
                             }
 
                             if (_transTypeNames[currTrans.type]) {
-                                throw new Error("The asset.plugin.js error: type " + currTrans.type + " is duplicated.");
+                                throw new Error("The asset.plugin.js error: type " + currTrans.type + " is conflicting.");
                             }
 
                             currTrans.package = currAsset.package;

@@ -15,6 +15,7 @@ const AssetUtils = require('./asset-utils');
 const ByteBuffer = require('bytebuffer');
 const CommonUtils = require('./common-utils');
 const bignum = require('bignum-utils');
+const _ = require('underscore');
 
 /**
  * 定义字段相应规则
@@ -66,9 +67,9 @@ const _assetFiledRules = {
 
 class AssetBase {
 
-    constructor(library, modules) {
-        this.library = library;
-        this.modules = modules;
+    constructor(context) {
+        Object.assign(this, context);
+        this._context = context;
     }
 
     /**
@@ -76,7 +77,7 @@ class AssetBase {
      * @param {*} data 
      * @param {*} trs 
      */
-    create(data, trs) {
+    async create(data, trs) {
         return trs;
     }
 
@@ -85,8 +86,8 @@ class AssetBase {
      * @param {*} trs 
      * @param {*} sender 
      */
-    calculateFee(trs, sender) {
-        return this.library.base.block.calculateFee();
+    async calculateFee(trs, sender) {
+        return await this.runtime.block.calculateFee();
     }
 
     /**
@@ -103,7 +104,7 @@ class AssetBase {
      * 
      * 注：此方法中不能使用this.library、this.modules
      */
-    propsMapping() {
+    async propsMapping() {
         throw new Error("AssetBase子类必须重载propsMapping方法。");
 
         //例如：员工资产类型有name、age、address 3个自定义属性，对应预设字段如下：
@@ -118,19 +119,19 @@ class AssetBase {
     /**
      * 自定义资产Api
      */
-    attachApi(config, router) {
+    async attachApi(router) {
     }
 
     /**
      * 判断是否包含Json扩展属性
      */
-    hasExtProps(){
+    async hasExtProps(){
         if (this.isHasExtProps != null && typeof(this.isHasExtProps) != "undefined") {
             return this.isHasExtProps;
         }
 
         this.isHasExtProps = false;
-        var mapping = this.propsMapping();
+        var mapping = await this.propsMapping();
         for (var i = 0; i < mapping.length; i++) {
             var item = mapping[i];
             if (item) {
@@ -143,10 +144,10 @@ class AssetBase {
         return this.isHasExtProps;
     }
 
-    getPropsMappingItemByProp(propName) {
+    async getPropsMappingItemByProp(propName) {
         if (!this.propsMappingItems || 
             !this.propsMappingItems[propName.toLowerCase()]) {
-            var props = this.propsMapping();
+            var props = await this.propsMapping();
             for (var i = 0; i < props.length; i++) {
                 var currProp = props[i];
                 if (currProp.prop.toLowerCase() == propName.toLowerCase()) {
@@ -166,10 +167,10 @@ class AssetBase {
         }
     }
 
-    getPropsMappingItemByField(fieldName) {
+    async getPropsMappingItemByField(fieldName) {
         if (!this.propsMappingItems || 
             !this.propsMappingItems[fieldName.toLowerCase()]) {
-            var props = this.propsMapping();
+            var props = await this.propsMapping();
             for (var i = 0; i < props.length; i++) {
                 var currProp = props[i];
                 if (currProp.field.toLowerCase() == fieldName.toLowerCase()) {
@@ -188,6 +189,97 @@ class AssetBase {
             return null;
         }
     }
+
+    //资产模块相关方法
+    /**
+     * 
+     * @param {*} filter 查询条件，遵循jsonSql规则
+     * @param {*} hasExtProps 是否包含扩展内容，布尔值
+     * @param {*} pageIndex 查询的页码，从1开始
+     * @param {*} pageSize 页码的记录条数，默认50
+     * @param {*} cb 
+     */
+    async getAssetBase(filter, hasExtProps, pageIndex, pageSize, orders, returnTotal, attributes) {
+        if(typeof (orders) != "array"){
+            orders = null;
+        }
+
+        attributes = [
+            ['transaction_id', 'asset_trs_id'],
+            ['transaction_type', 'asset_trs_type'],
+            ['timestamp', 'asset_timestamp'],
+            ['str1', 'asset_str1'],
+            ['str2', 'asset_str2'],
+            ['str3', 'asset_str3'],
+            ['str4', 'asset_str4'],
+            ['str5', 'asset_str5'],
+            ['str6', 'asset_str6'],
+            ['str7', 'asset_str7'],
+            ['str8', 'asset_str8'],
+            ['str9', 'asset_str9'],
+            ['str10', 'asset_str10'],
+            ['int1', 'asset_int1'],
+            ['int2', 'asset_int2'],
+            ['int3', 'asset_int3'],
+            ['timestamp1', 'asset_timestamp1'],
+            ['timestamp2', 'asset_timestamp2']
+        ];
+
+        // ---！wly修改
+        pageIndex = pageIndex || 1;
+        pageSize = pageSize || 50;
+        let limit = pageSize;
+        let offset = (pageIndex - 1) * pageSize;
+
+        let result, total = 0;
+        return new Promise((resolve, reject) => {
+            this.dao.findPage('trs_asset', filter, limit, offset, returnTotal, attributes, 
+                orders, (err, rows) => {
+                if (err) {
+                    reject(err);
+                } else {
+                    result = rows;
+
+                    var trsIds = [];
+                    if (returnTotal) {
+                        trsIds = _.pluck(rows.rows, 'asset_trs_id');
+                    } else {
+                        trsIds = _.pluck(rows, 'asset_trs_id');
+                    }
+
+                    if(hasExtProps) {
+                        this.dao.findPage('trs_asset_ext', {transaction_id: { '$in': trsIds }},
+                            limit, null, null, [['json_ext', 'asset_ext_json'], 'transaction_id'], 
+                            null, (err2, rows2) => {
+                                if (err2) {
+                                    reject(err2);
+                                } else {
+                                    if (rows2 && rows2.length > 0) {
+                                        const obj = _.indexBy(rows2, 'transaction_id');
+                                        if (returnTotal) {
+                                            result.rows = _.map(result.rows, num => {
+                                                num = _.extend(num, obj[num.asset_trs_id]);
+                                                return num;
+                                            });
+                                        } else {
+                                            result = _.map(result, num => {
+                                                num = _.extend(num, obj[num.asset_trs_id]);
+                                                return num;
+                                            });
+                                        }
+                                    }
+
+                                    resolve(result);
+                                }
+                            });
+                    } else {
+                        resolve(result);
+                    }
+                }
+            });
+        });
+    }
+    
 
     /**
      * 查询规定条件的资产数据
@@ -220,7 +312,7 @@ class AssetBase {
             ['transaction_type', 'asset_trs_type'],
             ['timestamp', 'asset_timestamp']
         ];
-        var propsMapping = assetInst.propsMapping();
+        var propsMapping = await assetInst.propsMapping();
         for (var i = 0; i < propsMapping.length; i++) {
             var propMapping = propsMapping[i];
             var field = propMapping.field;
@@ -235,7 +327,7 @@ class AssetBase {
         var newConds = {};
         where = where || {};
         for (var p in where) {
-            var condProp = assetInst.getPropsMappingItemByProp(p);
+            var condProp = await assetInst.getPropsMappingItemByProp(p);
             if (condProp) {
                 newConds[condProp.field] = where[p];
             } else {
@@ -254,8 +346,8 @@ class AssetBase {
         orders = orders || [];
         var newOrders = [];
         if (CommonUtils.isArray(orders) && orders.length > 0) {
-            var getFieldName = (prop) => {
-                var condProp = assetInst.getPropsMappingItemByProp(prop);
+            var getFieldName = async (prop) => {
+                var condProp = await assetInst.getPropsMappingItemByProp(prop);
                 if (condProp) {
                     return condProp.field;
                 } else {
@@ -278,7 +370,7 @@ class AssetBase {
                 if (CommonUtils.isArray(orderItem)) {
                     if (orderItem.length == 2) {
                         if (typeof(orderItem[0]) == "string" && typeof(orderItem[1]) == "string") {
-                            var fieldName = getFieldName(orderItem[0]);
+                            var fieldName = await getFieldName(orderItem[0]);
                             if (fieldName) {
                                 newOrders.push([fieldName, orderItem[1]]);
                             } else {
@@ -293,7 +385,7 @@ class AssetBase {
                     }
                 } else {
                     if (CommonUtils.isString(orderItem)) {
-                        var fieldName = getFieldName(p);
+                        var fieldName = await getFieldName(p);
                         if (fieldName) {
                             newOrders.push(fieldName);
                         }
@@ -308,46 +400,79 @@ class AssetBase {
             newOrders = orders;
         }
 
-        return new Promise((resolve, reject) => {
-            this.library.model.getAssetBase(newConds, 
-                assetInst.hasExtProps(), pageIndex, pageSize, 
-                newOrders, returnTotal, attributes, (err, data) => {
-                    if (err) {
-                        reject(err);
-                    }
-
-                    var rows = data && data.rows ? data.rows : data;
-                    if (rows && rows.length > 0) {
-                        var rowObjs = [];
-                        for (var i = 0; i < rows.length; i++) {
-                            var rowInfo = rows[i];
-                            var rowObj = assetInst.dbRead(rowInfo);
-                            if (rowObj) {
-                                var assetName = AssetUtils.getAssetJsonName(rowInfo.asset_trs_type);
-                                rowObjs.push(rowObj[assetName]);
-                            }
-                        }
-                        if (returnTotal) {
-                            resolve({
-                                rows: rowObjs,
-                                total: data.total
-                            });
-                        } else {
-                            resolve(rowObjs);
-                        }
-                    } else {
-                        if (returnTotal) {
-                            resolve({
-                                rows: [],
-                                total: 0
-                            });
-                        } else {
-                            resolve([]);
-                        }
-                    }
+        var data = await this.getAssetBase(newConds, await assetInst.hasExtProps(), 
+            pageIndex, pageSize, newOrders, returnTotal, attributes);
+        
+        var rows = data && data.rows ? data.rows : data;
+        if (rows && rows.length > 0) {
+            var rowObjs = [];
+            for (var i = 0; i < rows.length; i++) {
+                var rowInfo = rows[i];
+                var rowObj = await assetInst.dbRead(rowInfo);
+                if (rowObj) {
+                    var assetName = AssetUtils.getAssetJsonName(rowInfo.asset_trs_type);
+                    rowObjs.push(rowObj[assetName]);
                 }
-            );
-        });
+            }
+            if (returnTotal) {
+                return {
+                    rows: rowObjs,
+                    total: data.total
+                };
+            } else {
+                return rowObjs;
+            }
+        } else {
+            if (returnTotal) {
+                return {
+                    rows: [],
+                    total: 0
+                };
+            } else {
+                return [];
+            }
+        }
+
+        // return new Promise((resolve, reject) => {
+        //     this.library.model.getAssetBase(newConds, 
+        //         assetInst.hasExtProps(), pageIndex, pageSize, 
+        //         newOrders, returnTotal, attributes, (err, data) => {
+        //             if (err) {
+        //                 reject(err);
+        //             }
+
+        //             var rows = data && data.rows ? data.rows : data;
+        //             if (rows && rows.length > 0) {
+        //                 var rowObjs = [];
+        //                 for (var i = 0; i < rows.length; i++) {
+        //                     var rowInfo = rows[i];
+        //                     var rowObj = assetInst.dbRead(rowInfo);
+        //                     if (rowObj) {
+        //                         var assetName = AssetUtils.getAssetJsonName(rowInfo.asset_trs_type);
+        //                         rowObjs.push(rowObj[assetName]);
+        //                     }
+        //                 }
+        //                 if (returnTotal) {
+        //                     resolve({
+        //                         rows: rowObjs,
+        //                         total: data.total
+        //                     });
+        //                 } else {
+        //                     resolve(rowObjs);
+        //                 }
+        //             } else {
+        //                 if (returnTotal) {
+        //                     resolve({
+        //                         rows: [],
+        //                         total: 0
+        //                     });
+        //                 } else {
+        //                     resolve([]);
+        //                 }
+        //             }
+        //         }
+        //     );
+        // });
     }
 
     /**
@@ -357,11 +482,7 @@ class AssetBase {
      * @param {*} dbTrans 
      * @param {*} cb 
      */
-    update(obj, where, asset, dbTrans, cb) {
-        if (typeof(cb) == "undefined" && typeof(dbTrans) == "function") {
-            cb = dbTrans;
-            dbTrans = null;
-        }
+    async update(obj, where, asset, dbTrans) {
         var assetInst = this;
         if (asset) {
             var assetTrans;
@@ -380,7 +501,7 @@ class AssetBase {
         var newObj = {};
         obj = obj || {};
         for (var p in obj) {
-            var condProp = assetInst.getPropsMappingItemByProp(p);
+            var condProp = await assetInst.getPropsMappingItemByProp(p);
             if (condProp) {
                 newObj[condProp.field] = obj[p];
             } else {
@@ -398,7 +519,7 @@ class AssetBase {
         var newWhere = {};
         where = where || {};
         for (var p in where) {
-            var condProp = assetInst.getPropsMappingItemByProp(p);
+            var condProp = await assetInst.getPropsMappingItemByProp(p);
             if (condProp) {
                 newWhere[condProp.field] = where[p];
             } else {
@@ -412,12 +533,16 @@ class AssetBase {
                 }
             }
         } 
-        this.library.dao.update("trs_asset", newObj, newWhere, dbTrans, (err, result) => {
-            if (err) {
-                return cb(err);
-            }
-            cb();
-        })
+
+        return new Promise((resolve, reject) => {
+            this.dao.update("trs_asset", newObj, newWhere, dbTrans, (err, result) => {
+                if (err) {
+                    reject(err);
+                } else {
+                    resolve(result);
+                }
+            });
+        });
     }
 
     /**
@@ -425,7 +550,7 @@ class AssetBase {
      * @param {*} where 查询条件，遵循sequelize规则，使用prop的名称定义
      * @param {*} asset 资产交易的配置name或type（config.asset.js文件中定义）
      */
-    async queryAssetCount(where, asset, cb) {
+    async queryAssetCount(where, asset) {
         var assetInst = this;
         if (asset) {
             var assetTrans;
@@ -445,7 +570,7 @@ class AssetBase {
         var newWhere = {};
         where = where || {};
         for (var p in where) {
-            var condProp = assetInst.getPropsMappingItemByProp(p);
+            var condProp = await assetInst.getPropsMappingItemByProp(p);
             if (condProp) {
                 newWhere[condProp.field] = where[p];
             } else {
@@ -460,30 +585,31 @@ class AssetBase {
             }
         }
 
-        this.library.dao.count("trs_asset", newWhere, (err, count) => {
-            if (err) {
-                return cb(err);
-            }
-            cb(null, count);
-        })
+        return new Promise((resolve, reject) => {
+            this.dao.count("trs_asset", newWhere, (err, count) => {
+                if (err) {
+                    reject(err);
+                } else {
+                    resolve(count);
+                }
+            });
+        });
     }
 
     /**
      * 校验输入数据格式是否符合规则（_assetFiledRules负责定义规则）
      * @param {*} trs 
      */
-    fieldsIsValid(trs) {
-        var err = null;
-
+    async fieldsIsValid(trs) {
         var assetJsonName = AssetUtils.getAssetJsonName(trs.type);
-
+console.log("wxm 1111111111111111111111111111111111111111111111: " + trs.type + "   ---   " + assetJsonName + "   ---   " + JSON.stringify(trs));
         if (!trs.asset || !trs.asset[assetJsonName]) {
-            return 'Invalid transaction asset';
+            throw new Error('Invalid transaction asset');
         }
       
         const asset = trs.asset[assetJsonName];
 
-        var mapping = this.propsMapping();
+        var mapping = await this.propsMapping();
         for (var i = 0; i < mapping.length; i++) {
             var item = mapping[i];
             if (item) {
@@ -494,8 +620,8 @@ class AssetBase {
                     var strValue = asset[item.prop];
                     if (strValue != null && typeof(strValue) != "undefined") {
                         if (typeof(strValue) != "string") {
-                            err = "The '" + item.prop + "' attribute type of '" + assetJsonName + "' must be a string.";
-                            break;
+                            var err = "The '" + item.prop + "' attribute type of '" + assetJsonName + "' must be a string.";
+                            throw new Error(err);
                         }
 
                         var minLen = item.minLen;
@@ -512,51 +638,51 @@ class AssetBase {
                             }
                             catch(err3) 
                             {
-                                err = "The '" + item.prop + "' attribute min length of '" + assetJsonName + "' must be greater than " + minLen;
-                                break;
+                                var err = "The '" + item.prop + "' attribute min length of '" + assetJsonName + "' must be greater than " + minLen;
+                                throw new Error(err);
                             }
 
                             if (strValue.length < minLen){
-                                err = "The '" + item.prop + "' attribute min length of '" + assetJsonName + "' must be greater than " + minLen;
-                                break;
+                                var err = "The '" + item.prop + "' attribute min length of '" + assetJsonName + "' must be greater than " + minLen;
+                                throw new Error(err);
                             }
                         }
                         if (maxLen != null && typeof(maxLen) != "undefined") {
                             if (strValue.length > maxLen) {
-                                err = "The '" + item.prop + "' attribute max length of '" + assetJsonName + "' must be less than " + maxLen;
-                                break;
+                                var err = "The '" + item.prop + "' attribute max length of '" + assetJsonName + "' must be less than " + maxLen;
+                                throw new Error(err);
                             }
                         }
                     } else if (item.required) {
-                        err = "The '" + item.prop + "' attribute of '" + assetJsonName + "' is required.";
-                        break;
+                        var err = "The '" + item.prop + "' attribute of '" + assetJsonName + "' is required.";
+                        throw new Error(err);
                     }
                 } else if (fieldType == "int") {
                     var intValue = asset[item.prop];
                     if (intValue != null && typeof(intValue) != "undefined") {
                         if (typeof(intValue) != "number") {
-                            err = "The '" + item.prop + "' attribute type of '" + assetJsonName + "' must be a integer.";
-                            break;
+                            var err = "The '" + item.prop + "' attribute type of '" + assetJsonName + "' must be a integer.";
+                            throw new Error(err);
                         }
 
                         if (itemRule) {
                             if (itemRule.maxValue != null && typeof(itemRule.maxValue) != "undefined") {
                                 if (intValue > itemRule.maxValue) {
-                                    err = "The '" + item.prop + "' attribute max value of '" + assetJsonName + "' must be less than " + itemRule.maxValue;
-                                    break;
+                                    var err = "The '" + item.prop + "' attribute max value of '" + assetJsonName + "' must be less than " + itemRule.maxValue;
+                                    throw new Error(err);
                                 }
                             }
 
                             if (itemRule.minValue != null && typeof(itemRule.minValue) != "undefined") {
                                 if (intValue < itemRule.minValue) {
-                                    err = "The '" + item.prop + "' attribute min value of '" + assetJsonName + "' must be greater than " + itemRule.maxValue;
-                                    break;
+                                    var err = "The '" + item.prop + "' attribute min value of '" + assetJsonName + "' must be greater than " + itemRule.maxValue;
+                                    throw new Error(err);
                                 }
                             }
                         }
                     } else if (item.required) {
-                        err = "The '" + item.prop + "' attribute of '" + assetJsonName + "' is required.";
-                        break;
+                        var err = "The '" + item.prop + "' attribute of '" + assetJsonName + "' is required.";
+                        throw new Error(err);
                     }
                 } else if (fieldType == "timestamp") {
                     var timestampValue = asset[item.prop];
@@ -565,19 +691,17 @@ class AssetBase {
                             try {
                                 var dt = new Date(timestampValue);
                             } catch(error) {
-                                err = "The '" + item.prop + "' attribute type of '" + assetJsonName + "' must be a datetime.";
-                                break;
+                                var err = "The '" + item.prop + "' attribute type of '" + assetJsonName + "' must be a datetime.";
+                                throw new Error(err);
                             }
                         }
                     } else if (item.required) {
-                        err = "The '" + item.prop + "' attribute of '" + assetJsonName + "' is required.";
-                        break;
+                        var err = "The '" + item.prop + "' attribute of '" + assetJsonName + "' is required.";
+                        throw new Error(err);
                     }
                 }
             }
         }
-
-        return err;
     }
 
     /**
@@ -586,29 +710,26 @@ class AssetBase {
      * @param {*} sender 
      * @param {*} cb 
      */
-    verify(trs, sender, cb) {
+    async verify(trs, sender) {
         if (bignum.isZero(trs.amount)) { //等于0
             if (trs.recipient_id) { //wxm block database
-                return cb("The recipient_id attribute of the transaction must be null.");
+                throw new Error("The recipient_id attribute of the transaction must be null.");
             }
         } else if (bignum.isLessThan(trs.amount, 0)) {  //小于0
-            return cb("Invalid amount: " + trs.amount);
+            throw new Error("Invalid amount: " + trs.amount);
         } else {    //大于0
             if (!trs.recipient_id) {    //wxm block database
-                return cb("The recipient_id attribute of the transaction can not be null.");
+                throw new Error("The recipient_id attribute of the transaction can not be null.");
             }
         }
 
-        var err = this.fieldsIsValid(trs);
-        if (!err) {
-            return cb(null, trs);
-        } else {
-            return cb(err);
-        }
+        await this.fieldsIsValid(trs);
+
+        return trs;
     }
 
-    process(trs, sender, cb) {
-        setImmediate(cb, null, trs);
+    async process(trs, sender) {
+        return trs;
     }
 
     /**
@@ -617,15 +738,12 @@ class AssetBase {
      * 
      * 注：此方法中不能使用this.library、this.modules
      */
-    getBytes(trs) {
-        var err = this.fieldsIsValid(trs);
-        if (err) {
-            throw new Error(err);
-        }
+    async getBytes(trs) {
+        await this.fieldsIsValid(trs);
 
         var assetName = AssetUtils.getAssetJsonName(trs.type);
         var asset = trs.asset[assetName];
-        var mapping = this.propsMapping();
+        var mapping = await this.propsMapping();
 
         var bb = new ByteBuffer();
         for (var i = 0; i < mapping.length; i++) {
@@ -654,101 +772,64 @@ class AssetBase {
         }
     }
 
-    apply(trs, block, sender, dbTrans, cb) {
-        if (typeof(cb) == "undefined" && typeof(dbTrans) == "function") {
-            cb = dbTrans;
-            dbTrans = null;
-        }
+    async isLockedType() {
+        return true;
+    }
 
+    async apply(trs, block, sender, dbTrans) {
         if (bignum.isGreaterThan(trs.amount, 0)) {
-            this.modules.accounts.setAccountAndGet({ address: trs.recipient_id },    //wxm block database
-                dbTrans, (err, recipient) => {
-                if (err) {
-                    return cb(err);
-                }
-                this.modules.accounts.mergeAccountAndGet(
-                    {
-                        address: trs.recipient_id,   //wxm block database
-                        balance: trs.amount,
-                        u_balance: trs.amount,
-                        block_id: block.id,  //wxm block database
-                        round: this.modules.round.calc(block.height)
-                    }, dbTrans,
-                    (err) => {
-                        cb(err);
-                    }
-                );
-            });
-        } else {
-            setImmediate(cb);
+            await this.runtime.account.setAccount({ address: trs.recipient_id }, dbTrans);
+
+            await this.runtime.account.merge(trs.recipient_id, {
+                address: trs.recipient_id,   //wxm block database
+                balance: trs.amount,
+                u_balance: trs.amount,
+                block_id: block.id,  //wxm block database
+                round: await this.runtime.round.calc(block.height)
+            }, dbTrans);
         }
+        return;
     }
 
-    undo(trs, block, sender, dbTrans, cb) {
-        if (typeof(cb) == "undefined" && typeof(dbTrans) == "function") {
-            cb = dbTrans;
-            dbTrans = null;
-        }
-
+    async undo(trs, block, sender, dbTrans) {
         if (bignum.isGreaterThan(trs.amount, 0)) {
-            this.modules.accounts.setAccountAndGet({ address: trs.recipient_id },    //wxm block database
-                dbTrans, (err, recipient) => {
-                if (err) {
-                    return cb(err);
-                }
-                var amountStr = bignum.minus(0, trs.amount).toString();
-                this.modules.accounts.mergeAccountAndGet(
-                    {
-                        address: trs.recipient_id,   //wxm block database
-                        balance: amountStr,
-                        u_balance: amountStr,
-                        block_id: block.id,  //wxm block database
-                        round: this.modules.round.calc(block.height)
-                    }, dbTrans,
-                    (err) => {
-                        cb(err);
-                    }
-                );
-            });
-        } else {
-            setImmediate(cb);
+            await this.runtime.account.setAccount({address: trs.recipient_id}, dbTrans);
+
+            var amountStr = bignum.minus(0, trs.amount).toString();
+            await this.runtime.account.merge(trs.recipient_id, {
+                address: trs.recipient_id,   //wxm block database
+                balance: amountStr,
+                u_balance: amountStr,
+                block_id: block.id,  //wxm block database
+                round: await this.runtime.round.calc(block.height)
+            }, dbTrans);
         }
+        return;
     }
 
-    applyUnconfirmed(trs, sender, dbTrans, cb) {
-        if (typeof(cb) == "undefined" && typeof(dbTrans) == "function") {
-            cb = dbTrans;
-            dbTrans = null;
-        }
-
+    async applyUnconfirmed(trs, sender, dbTrans) {
         const key = trs.type + "_" + trs.id;
-        if (this.library.oneoff.has(key)) {
-            return setImmediate(cb, "The transaction has been confirmed: " + trs.id + ".");
+        if (this.oneoff.has(key)) {
+            throw new Error("The transaction has been confirmed: " + trs.id + ".");
         }
 
-        setImmediate(cb);
-        this.library.oneoff.set(key, true);
+        this.oneoff.set(key, true);
+        return;
     }
 
-    undoUnconfirmed(trs, sender, dbTrans, cb) {
-        if (typeof(cb) == "undefined" && typeof(dbTrans) == "function") {
-            cb = dbTrans;
-            dbTrans = null;
-        }
-
+    async undoUnconfirmed(trs, sender, dbTrans) {
         const key = trs.type + "_" + trs.id;
-        this.library.oneoff.delete(key);
-
-        setImmediate(cb);
+        this.oneoff.delete(key);
+        return;
     }
 
-    objectNormalize(trs) {
+    async objectNormalize(trs) {
         var assetName = AssetUtils.getAssetJsonName(trs.type);
 
         var propsRules = {};
         var requiredFields = [];
 
-        var props = this.propsMapping();
+        var props = await this.propsMapping();
         for (var i = 0; i < props.length; i++) {
             var currProp = props[i];
             propsRules[currProp.prop] = {};
@@ -769,24 +850,25 @@ class AssetBase {
             }
         }
 
-        const isValid = this.library.scheme.validate({
-            type: 'object',
-            properties: propsRules,
-            required: requiredFields
-        }, trs.asset[assetName]);
+        //wxm TODO
+        // const isValid = this.library.scheme.validate({
+        //     type: 'object',
+        //     properties: propsRules,
+        //     required: requiredFields
+        // }, trs.asset[assetName]);
 
-        if (!isValid) {
-            const err = library.scheme.errors[0];
-            const msg = err.dataPath + " " + err.message;
-            library.logger.error(`can't parse asset ${assetName}: ${msg}`);
+        // if (!isValid) {
+        //     const err = library.scheme.errors[0];
+        //     const msg = err.dataPath + " " + err.message;
+        //     library.logger.error(`can't parse asset ${assetName}: ${msg}`);
 
-            throw Error(`can't parse asset data: ${msg}`);
-        }
+        //     throw Error(`can't parse asset data: ${msg}`);
+        // }
 
         return trs;
     }
 
-    dbRead(raw) {
+    async dbRead(raw) {
         if (raw && raw.asset_trs_id) {
             var result = {
                 transaction_id: raw.asset_trs_id,
@@ -794,7 +876,7 @@ class AssetBase {
                 timestamp: raw.asset_timestamp
             };
 
-            var props = this.propsMapping();
+            var props = await this.propsMapping();
             if (props && props.length > 0) {
                 for (var i = 0; i < props.length; i++) {
                     var mapping = props[i];
@@ -831,12 +913,7 @@ class AssetBase {
         }
     }
 
-    dbSave(trs, dbTrans, cb) {
-        if (typeof(cb) == "undefined" && typeof(dbTrans) == "function") {
-            cb = dbTrans;
-            dbTrans = null;
-        }
-
+    async dbSave(trs, dbTrans, cb) {
         var assetName = AssetUtils.getAssetJsonName(trs.type);
         var asset = trs.asset[assetName];
 
@@ -849,7 +926,7 @@ class AssetBase {
         var jsonExtObj = {};
         var hasJsonExt = false;
 
-        var mapping = this.propsMapping();
+        var mapping = await this.propsMapping();
         for (var i = 0; i < mapping.length; i++) {
             var item = mapping[i];
             if (item) {
@@ -868,24 +945,33 @@ class AssetBase {
             }
         }
 
-        this.library.dao.insert("trs_asset", assetInst, dbTrans, (err, result) => {
-            if (err) {
-                return cb(err);
-            }
+        return new Promise((resolve, reject) => {
+            this.dao.insert("trs_asset", assetInst, dbTrans, (err, result) => {
+                if (err) {
+                    reject(err);
+                } else {
+                    if (hasJsonExt) {
+                        var assetExtInst = {
+                            transaction_id: trs.id,
+                            json_ext: JSON.stringify(jsonExtObj)
+                        }
 
-            if (hasJsonExt) {
-                var assetExtInst = {
-                    transaction_id: trs.id,
-                    json_ext: JSON.stringify(jsonExtObj)
+                        this.dao.insert("trs_asset_ext", assetExtInst, dbTrans, (err2, result2) => {
+                            if (err2) {
+                                reject(err2);
+                            } else {
+                                resolve(result2);
+                            }
+                        })
+                    } else {
+                        resolve(result);
+                    }
                 }
-                this.library.dao.insert("trs_asset_ext", assetExtInst, dbTrans, cb);
-            } else {
-                cb();
-            }
-        })
+            });
+        });
     }
 
-    ready(trs, sender) {
+    async ready(trs, sender) {
         if (sender.multisignatures && sender.multisignatures.length) {
             if (!trs.signatures) {
                 return false;
