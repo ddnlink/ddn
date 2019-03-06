@@ -1,0 +1,16 @@
+{
+  "name": "ddn-dao",
+  "version": "1.0.0",
+  "description": "this is ddn-dao",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "wly",
+  "license": "ISC",
+  "dependencies": {
+    "bignum-utils": "git+ssh://git@git.ebookchain.net:ddn/bignum_utils.git",
+    "ddn-asset-base": "git+ssh://git@git.ebookchain.net:ddn/ddn-asset-base.git",
+    "ddn-utils": "git+ssh://git@git.ebookchain.net:ddn/ddn-utils.git"
+  }
+}
