@@ -2,7 +2,7 @@ var { AssetBase } = require('ddn-asset-base');
 
 class AssetEvidence extends AssetBase
 {
-    propsMapping() {
+    async propsMapping() {
         return [
             {field: "str4", prop: "ipid", required: true},
             {field: "str6", prop: "title", required: true},
@@ -16,39 +16,18 @@ class AssetEvidence extends AssetBase
         ];
     }
 
-    verify(trs, sender, cb)
+    async verify(trs, sender)
     {
-        super.verify(trs, sender, async (err, trans) => {
-            if (!err)
-            {
-                var condition = {
-                    filter: {
-                        ipid: trans.asset.assetEvidence.ipid
-                    }
-                }
+        var trans = await super.verify(trs, sender);
 
-                try
-                {
-                    var results = await super.queryAsset({
-                            ipid: trans.asset.assetEvidence.ipid
-                        }, ["ipid"], false, 1, 1);
-
-                    if (results && results.length > 0) {
-                        cb('Evidence IPID already exists');
-                    } else {
-                        cb(null, trans);
-                    }
-                }
-                catch (err2)
-                {
-                    cb(err2);
-                }
-            }
-            else
-            {
-                cb(err);
-            }
-        })
+        var results = await super.queryAsset({
+            ipid: trans.asset.assetEvidence.ipid
+        }, ["ipid"], false, 1, 1);
+        if (results && results.length > 0) {
+            throw new Error('Evidence IPID already exists');
+        } else {
+            return trans;
+        }
     }
 }
 
