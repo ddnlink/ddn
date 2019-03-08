@@ -602,7 +602,6 @@ class AssetBase {
      */
     async fieldsIsValid(trs) {
         var assetJsonName = AssetUtils.getAssetJsonName(trs.type);
-console.log("wxm 1111111111111111111111111111111111111111111111: " + trs.type + "   ---   " + assetJsonName + "   ---   " + JSON.stringify(trs));
         if (!trs.asset || !trs.asset[assetJsonName]) {
             throw new Error('Invalid transaction asset');
         }
