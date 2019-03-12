@@ -441,19 +441,19 @@ function getCouponExchangeTransferConfirmBytes(asset) {
     return toLocalBuffer(bb);
 }
 
-function getAssetBytes(transaction) {
+async function getAssetBytes (transaction) {
     if (AssetUtils.isTypeValueExists(transaction.type)) {
         var trans = AssetUtils.getTransactionByTypeValue(transaction.type);
         var transCls = require(trans.package)[trans.name];
         var transInst = new transCls();
-        var buf = transInst.getBytes(transaction);
+        var buf = await transInst.getBytes(transaction);
         transInst = null;
         return buf;
     }
     return null;
 }
 
-function getBytes(transaction, skipSignature, skipSecondSignature) {
+async function getBytes(transaction, skipSignature, skipSecondSignature) {
   var assetSize = 0,
     assetBytes = null;
 
@@ -644,7 +644,7 @@ function getBytes(transaction, skipSignature, skipSecondSignature) {
       assetBytes = toLocalBuffer(bb)
       break;
     default:
-      assetBytes = getAssetBytes(transaction);  
+      assetBytes = await getAssetBytes(transaction);  
   }
 
   if (transaction.__assetBytes__) {
@@ -735,12 +735,12 @@ function getBytes(transaction, skipSignature, skipSecondSignature) {
   // return bb.toBuffer();
 }
 
-function getId(transaction) {
-  return sha256Hex(getBytes(transaction))
+async function getId(transaction) {
+  return sha256Hex(await getBytes(transaction))
 }
 
-function getHash(transaction, skipSignature, skipSecondSignature) {
-  return sha256Bytes(getBytes(transaction, skipSignature, skipSecondSignature))
+async function getHash(transaction, skipSignature, skipSecondSignature) {
+  return sha256Bytes(await getBytes(transaction, skipSignature, skipSecondSignature))
 }
 
 function getFee(transaction) {
@@ -766,8 +766,8 @@ function getFee(transaction) {
   }
 }
 
-function sign(transaction, keys) {
-  var hash = getHash(transaction, true, true);
+async function sign(transaction, keys) {
+  var hash = await getHash(transaction, true, true);
   var signature = nacl.sign.detached(hash, new Buffer(keys.private_key, "hex"));
 
   if (!transaction.signature) {
@@ -777,8 +777,8 @@ function sign(transaction, keys) {
   }
 }
 
-function secondSign(transaction, keys) {
-  var hash = getHash(transaction);
+async function secondSign(transaction, keys) {
+  var hash = await getHash(transaction);
   var signature = nacl.sign.detached(hash, new Buffer(keys.private_key, "hex"));
   transaction.sign_signature = new Buffer(signature).toString("hex")    //wxm block database
 }
@@ -789,14 +789,14 @@ function signBytes(bytes, keys) {
   return new Buffer(signature).toString("hex");
 }
 
-function verify(transaction) {
+async function verify(transaction) {
   var remove = 64;
 
   if (transaction.signSignature) {
     remove = 128;
   }
 
-  var bytes = getBytes(transaction);
+  var bytes = await getBytes(transaction);
   var data2 = new Buffer(bytes.length - remove);
 
   for (var i = 0; i < data2.length; i++) {

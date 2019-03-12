@@ -4,7 +4,7 @@ var slots = require('../time/slots.js');
 var options = require('../options');
 var { AssetUtils } = require('ddn-asset-base');
 
-function createPluginAsset(trsType, assetInfo, secret, secondSecret) {
+async function createPluginAsset(trsType, assetInfo, secret, secondSecret) {
 	var keys = crypto.getKeys(secret);
 	
 	var fee = assetInfo.fee || constants.fees.org;
@@ -33,7 +33,7 @@ function createPluginAsset(trsType, assetInfo, secret, secondSecret) {
   var assetJsonName = AssetUtils.getAssetJsonName(trsType);
   transaction.asset[assetJsonName] = assetInfo;
 
-	crypto.sign(transaction, keys);
+	await crypto.sign(transaction, keys);
 	
 	if (secondSecret) {
 		var secondKeys = crypto.getKeys(secondSecret);
