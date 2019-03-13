@@ -17,7 +17,7 @@ function calculateFee(amount) {
     }
 }
 
-function createTransaction(recipientId, amount, message, secret, second_secret) {
+async function createTransaction(recipientId, amount, message, secret, second_secret) {
 	var transaction = {
 		type: transactionTypes.SEND,
 		nethash: options.get('nethash'),
@@ -32,14 +32,14 @@ function createTransaction(recipientId, amount, message, secret, second_secret) 
 	var keys = crypto.getKeys(secret);
 	transaction.sender_public_key = keys.public_key;
 
-	crypto.sign(transaction, keys);
+	await crypto.sign(transaction, keys);
 
 	if (second_secret) {
 		var secondKeys = crypto.getKeys(second_secret);
-		crypto.secondSign(transaction, secondKeys);
+		await crypto.secondSign(transaction, secondKeys);
 	}
 
-	transaction.id = crypto.getId(transaction);
+	transaction.id = await crypto.getId(transaction);
 	return transaction;
 }
 

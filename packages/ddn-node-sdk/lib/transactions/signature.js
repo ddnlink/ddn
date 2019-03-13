@@ -14,7 +14,7 @@ function newSignature(secondSecret) {
 	return signature;
 }
 
-function createSignature(secret, secondSecret) {
+async function createSignature(secret, secondSecret) {
 	var keys = crypto.getKeys(secret);
 
 	var signature = newSignature(secondSecret);
@@ -31,8 +31,8 @@ function createSignature(secret, secondSecret) {
 		}
 	};
 
-	crypto.sign(transaction, keys);
-	transaction.id = crypto.getId(transaction);
+	await crypto.sign(transaction, keys);
+	transaction.id = await crypto.getId(transaction);
 
 	return transaction;
 }
