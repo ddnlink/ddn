@@ -771,7 +771,7 @@ class AssetBase {
         }
     }
 
-    async isLockedType() {
+    async isSupportLock() {
         return true;
     }
 
@@ -849,20 +849,15 @@ class AssetBase {
             }
         }
 
-        //wxm TODO
-        // const isValid = this.library.scheme.validate({
-        //     type: 'object',
-        //     properties: propsRules,
-        //     required: requiredFields
-        // }, trs.asset[assetName]);
-
-        // if (!isValid) {
-        //     const err = library.scheme.errors[0];
-        //     const msg = err.dataPath + " " + err.message;
-        //     library.logger.error(`can't parse asset ${assetName}: ${msg}`);
-
-        //     throw Error(`can't parse asset data: ${msg}`);
-        // }
+        var validateErrors = await this.ddnSchema.validate({
+            type: 'object',
+            properties: propsRules,
+            required: requiredFields
+        }, trs.asset[assetName]);
+        if (validateErrors) {
+            this.logger.error(`Can't parse asset ${assetName}: ${validateErrors[0].message}`);
+            throw new Error(`Can't parse asset data: ${validateErrors[0].message}`);
+        }
 
         return trs;
     }
