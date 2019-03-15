@@ -7,6 +7,15 @@ exports.evidence = {
     ],
     package: "ddn-evidence"
 }
+exports.signature = {
+    transactions: [
+        {
+            name: "Signature",
+            type: 1,
+        }
+    ],
+    package: "ddn-signature"
+}
 exports.aob = {
     transactions: [
         {

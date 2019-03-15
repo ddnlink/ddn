@@ -25,6 +25,7 @@
     "ddn-aob": "git+ssh://git@git.ebookchain.net:ddn/ddn-aob.git",
     "ddn-asset-base": "git+ssh://git@git.ebookchain.net:ddn/ddn-asset-base.git",
     "ddn-evidence": "git+ssh://git@git.ebookchain.net:ddn/ddn-evidence.git",
+    "ddn-signature": "git+ssh://git@git.ebookchain.net:ddn/ddn-signature.git",
     "ddn-utils": "git+ssh://git@git.ebookchain.net:ddn/ddn-utils.git",
     "fast-sha256": "^1.0.0",
     "ripemd160": "^2.0.1",

@@ -30,7 +30,6 @@ async function createSignature(secret, secondSecret) {
 			signature: signature
 		}
 	};
-
 	await crypto.sign(transaction, keys);
 	transaction.id = await crypto.getId(transaction);
 

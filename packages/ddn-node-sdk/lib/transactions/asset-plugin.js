@@ -20,7 +20,7 @@ async function createPluginAsset(trsType, assetInfo, secret, secondSecret) {
 		message: assetInfo.message ? assetInfo.message + "" : null,
 		asset: {}
   };
-    
+  
   delete assetInfo.amount;
 	delete assetInfo.receive_address;
 	delete assetInfo.message;
@@ -32,19 +32,18 @@ async function createPluginAsset(trsType, assetInfo, secret, secondSecret) {
 
 	// fix 这个是创建二级密码使用的 这个条件是否应该再次检查一下或优化一下
 	if(assetInfo.secondSecret && trsType === 1){
-		var keys = await crypto.getKeys(assetInfo.secondSecret);
-		console.log('确定走了创建二级密码这一步')
-		assetInfo = { public_key: keys.public_key }
+		var secondSecretKeys = crypto.getKeys(assetInfo.secondSecret);
+		assetInfo = { public_key: secondSecretKeys.public_key };
+		delete transaction.message;
 	}
 
   var assetJsonName = AssetUtils.getAssetJsonName(trsType);
   transaction.asset[assetJsonName] = assetInfo;
-
 	await crypto.sign(transaction, keys);
 	
 	if (secondSecret) {
 		var secondKeys = crypto.getKeys(secondSecret);
-		crypto.secondSign(transaction, secondKeys);
+		await crypto.secondSign(transaction, secondKeys);
 	}
 
 	// transaction.id = crypto.getId(transaction);
