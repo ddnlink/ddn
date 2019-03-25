@@ -13,6 +13,6 @@
   "author": "wangxm",
   "license": "ISC",
   "dependencies": {
-    "ddn-asset-base": "git+ssh://git@git.ebookchain.net:ddn/ddn-asset-base.git"
+    "ddn-asset-base": "git+ssh://git@git.ebookchain.net:ddn/ddn-asset-base.git#async-await"
   }
 }
