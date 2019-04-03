@@ -22,7 +22,7 @@ class Issuer extends AssetBase {
   }
 
   async calculateFee() {
-    return bignum.multiply(100, this.library.tokenSetting.fixedPoint);
+    return bignum.multiply(100, this.tokenSetting.fixedPoint);
   }
 
   async verify(trs, sender, cb) {
