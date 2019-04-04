@@ -1,7 +1,8 @@
-var _transConfigs = [];
-
-var _transTypeValues = [];
-var _transTypeNames = [];
+global.assets = {
+    transConfigs: [],
+    transTypeValues: [],
+    transTypeNames: []
+};
 
 class AssetUtils
 {
@@ -24,15 +25,15 @@ class AssetUtils
                                 throw new Error("The asset.plugin.js error: type property required.");
                             }
 
-                            if (_transTypeNames[currTrans.type]) {
+                            if (global.assets.transTypeNames[currTrans.type]) {
                                 throw new Error("The asset.plugin.js error: type " + currTrans.type + " is conflicting.");
                             }
 
                             currTrans.package = currAsset.package;
 
-                            _transConfigs.push(currTrans);
-                            _transTypeValues[currTrans.name] = currTrans;
-                            _transTypeNames[currTrans.type] = currTrans;
+                            global.assets.transConfigs.push(currTrans);
+                            global.assets.transTypeValues[currTrans.name] = currTrans;
+                            global.assets.transTypeNames[currTrans.type] = currTrans;
                         }
                     }
                 }
@@ -47,30 +48,30 @@ class AssetUtils
     }
 
     static loadFromFile(file) {
-        _transConfigs.length = 0;
-        _transTypeValues.length = 0;
-        _transTypeNames.length = 0;
+        global.assets.transConfigs.length = 0;
+        global.assets.transTypeValues.length = 0;
+        global.assets.transTypeNames.length = 0;
 
         var assetPlugins = require(file);
         return this.loadFromObject(assetPlugins);
     }
 
     static getTypeValue(typeName) {
-        if (_transTypeValues[typeName]) {
-            return _transTypeValues[typeName].type;
+        if (global.assets.transTypeValues[typeName]) {
+            return global.assets.transTypeValues[typeName].type;
         }
         return -1;
     }
 
     static getTypeName(typeValue) {
-        if (_transTypeNames[typeValue]) {
-            return _transTypeNames[typeValue].name;
+        if (global.assets.transTypeNames[typeValue]) {
+            return global.assets.transTypeNames[typeValue].name;
         }
         return null;
     }
 
     static isTypeValueExists(typeValue) {
-        return !!_transTypeNames[typeValue];
+        return !!global.assets.transTypeNames[typeValue];
     }
 
     static getAssetJsonName(typeValue) {
@@ -93,18 +94,18 @@ class AssetUtils
     }
 
     static getTransactionCount() {
-        return _transConfigs.length;
+        return global.assets.transConfigs.length;
     }
 
     static getTransactionByIndex(index) {
-        if (index >= 0 && index < _transConfigs.length) {
-            return _transConfigs[index];
+        if (index >= 0 && index < global.assets.transConfigs.length) {
+            return global.assets.transConfigs[index];
         }
         return null;
     }
 
     static getTransactionByTypeValue(typeValue) {
-        return _transTypeNames[typeValue];
+        return global.assets.transTypeNames[typeValue];
     }
 }
 
