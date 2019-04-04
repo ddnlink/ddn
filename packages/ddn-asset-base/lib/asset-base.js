@@ -101,8 +101,6 @@ class AssetBase {
      * 以下属于系统属性，不可使用
      * amount：转账金额，默认为0，字符串类型
      * receive_address，收款地址，默认为null
-     * 
-     * 注：此方法中不能使用this.library、this.modules
      */
     async propsMapping() {
         throw new Error("AssetBase子类必须重载propsMapping方法。");
@@ -302,7 +300,7 @@ class AssetBase {
             }
             if (assetTrans) {
                 var assetCls = require(assetTrans.package)[assetTrans.name];
-                assetInst = new assetCls(this.library, this.modules);
+                assetInst = new assetCls(this._context);
             }
         }
 
@@ -359,7 +357,7 @@ class AssetBase {
                     } else if (pName == "trs_timestamp") {
                         return "timestamp";
                     } else {
-                        this.library.logger.warn("Invalid order field: " + prop);
+                        this.logger.warn("Invalid order field: " + prop);
                         return null;
                     }
                 }
@@ -374,14 +372,14 @@ class AssetBase {
                             if (fieldName) {
                                 newOrders.push([fieldName, orderItem[1]]);
                             } else {
-                                this.library.logger.warn("Invalid order field: " + JSON.stringify(orderItem));
+                                this.logger.warn("Invalid order field: " + JSON.stringify(orderItem));
                             }
                         } else {
                             //如果传入排序参数不是数组，就直接使用，这里其实有隐患，这里使用的字段名只能使用真正的数据库字段名，str1..str9等等，不能用prop名称
                             newOrders.push(orderItem);
                         }
                     } else {
-                        this.library.logger.warn("Invalid order item: " + JSON.stringify(orderItem));
+                        this.logger.warn("Invalid order item: " + JSON.stringify(orderItem));
                     }
                 } else {
                     if (CommonUtils.isString(orderItem)) {
@@ -494,7 +492,7 @@ class AssetBase {
             }
             if (assetTrans) {
                 var assetCls = require(assetTrans.package)[assetTrans.name];
-                assetInst = new assetCls(this.library, this.modules);
+                assetInst = new assetCls(this._context);
             }
         }
         // 解析obj
@@ -562,7 +560,7 @@ class AssetBase {
             }
             if (assetTrans) {
                 var assetCls = require(assetTrans.package)[assetTrans.name];
-                assetInst = new assetCls(this.library, this.modules);
+                assetInst = new assetCls(this._context);
             }
         }
 
@@ -734,8 +732,6 @@ class AssetBase {
     /**
      * 获取资产的字节格式数据，用于签名计算
      * @param {*} trs 
-     * 
-     * 注：此方法中不能使用this.library、this.modules
      */
     async getBytes(trs) {
         await this.fieldsIsValid(trs);
