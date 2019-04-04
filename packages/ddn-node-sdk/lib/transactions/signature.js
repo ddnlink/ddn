@@ -14,10 +14,11 @@ function newSignature(secondSecret) {
 	return signature;
 }
 
-async function createSignature(secret, secondSecret) {
+async function createSignature(secret, secondSecret, oldSecondSecret) {
 	var keys = crypto.getKeys(secret);
 
-	var signature = newSignature(secondSecret);
+    var signature = newSignature(secondSecret);
+
 	var transaction = {
 		type: transactionTypes.SIGNATURE,
 		nethash: options.get('nethash'),
@@ -29,9 +30,16 @@ async function createSignature(secret, secondSecret) {
 		asset: {
 			signature: signature
 		}
-	};
-	await crypto.sign(transaction, keys);
-	transaction.id = await crypto.getId(transaction);
+    };
+
+    await crypto.sign(transaction, keys);
+
+	if (oldSecondSecret) {
+        var secondKeys = crypto.getKeys(oldSecondSecret);
+		await crypto.secondSign(transaction, secondKeys);
+    }
+    
+    transaction.id = await crypto.getId(transaction);
 
 	return transaction;
 }
