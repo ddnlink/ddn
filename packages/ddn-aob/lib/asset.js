@@ -5,7 +5,7 @@ const ddnUtils = require('ddn-utils');
 
 
 class Asset extends AssetBase {
-  propsMapping() {
+  async propsMapping() {
     return [{
         field: "str1",
         prop: "name",
@@ -58,27 +58,11 @@ class Asset extends AssetBase {
     ];
   }
 
-  create(data, trs) {
-    trs.recipient_id = null
-    trs.amount = "0";
-    trs.asset.aobAsset = {
-      name: data.name,
-      desc: data.desc,
-      maximum: data.maximum,
-      precision: data.precision,
-      strategy: data.strategy,
-      allow_writeoff: data.allow_writeoff,
-      allow_whitelist: data.allow_whitelist,
-      allow_blacklist: data.allow_blacklist
-    }
-    return trs;
+  async calculateFee(trs, sender) {
+    return bignum.multiply(500, this.tokenSetting.fixedPoint);
   }
 
-  calculateFee(trs, sender) {
-    return bignum.multiply(500, this.library.tokenSetting.fixedPoint);
-  }
-
-  verify(trs, sender, cb) {
+  async verify(trs, sender, cb) {
     super.verify(trs, sender, async(err, trans) => {
       if (err) {
         return cb(err);
@@ -124,7 +108,7 @@ class Asset extends AssetBase {
     })
   }
 
-  getBytes (trs) {
+  async getBytes (trs) {
     const asset = trs.asset.aobAsset;
     let buffer = Buffer.concat([
       new Buffer(asset.name, 'utf8'),
@@ -144,11 +128,7 @@ class Asset extends AssetBase {
     return buffer;
   }
 
-  dbSave (trs, dbTrans, cb) {
-    if (typeof(cb) == "undefined" && typeof(dbTrans) == "function") {
-			cb = dbTrans;
-			dbTrans = null;
-		};
+  async dbSave (trs, dbTrans) {
     const asset = trs.asset.aobAsset;
     const nameParts = asset.name.split('.');
     assert(nameParts.length == 2)
@@ -167,7 +147,7 @@ class Asset extends AssetBase {
       writeoff: 0
     };
     trs.asset.aobAsset = values;
-    super.dbSave(trs, dbTrans, cb);
+    return await super.dbSave(trs, dbTrans);
   }
  
 }
