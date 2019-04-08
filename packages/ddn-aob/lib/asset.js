@@ -1,4 +1,6 @@
-const { AssetBase } = require('ddn-asset-base');
+const {
+  AssetBase
+} = require('ddn-asset-base');
 const assert = require('assert');
 const bignum = require('bignum-utils');
 const ddnUtils = require('ddn-utils');
@@ -62,53 +64,60 @@ class Asset extends AssetBase {
     return bignum.multiply(500, this.tokenSetting.fixedPoint);
   }
 
-  async verify(trs, sender, cb) {
-    super.verify(trs, sender, async(err, trans) => {
-      if (err) {
-        return cb(err);
-      }
-      const asset = trs.asset.aobAsset;
-      const nameParts = (asset.name || '').split('.');
-      if (nameParts.length != 2) return setImmediate(cb, 'Invalid asset full name form ddn-aob')
-      const issuerName = nameParts[0];
-      const tokenName = nameParts[1];
-      if (!tokenName || !/^[A-Z]{3,6}$/.test(tokenName)) return setImmediate(cb, 'Invalid asset currency name form ddn-aob')
-      if (!asset.desc) return swetImmediate(cb, 'Invalid asset desc form ddn-aob')
-      if (asset.desc.length > 4096) return setImmediate(cb, 'Invalid asset desc size form ddn-aob')
-      if (asset.precision > 16 || asset.precision < 0) return setImmediate(cb, 'Invalid asset precision form ddn-aob')
-      const error = ddnUtils.Amount.validate(asset.maximum);
-      if (error) return setImmediate(cb, error);
-      if (asset.strategy && asset.strategy.length > 256) return setImmediate(cb, 'Invalid asset strategy size form ddn-aob')
-      if (asset.allow_writeoff !== '0' && asset.allow_writeoff !== '1') return setImmediate(cb, 'Asset allowWriteoff is not valid form ddn-aob')
-      if (asset.allow_whitelist !== '0' && asset.allow_whitelist !== '1') return setImmediate(cb, 'Asset allowWhitelist is not valid form ddn-aob')
-      if (asset.allow_blacklist !== '0' && asset.allow_blacklist !== '1') return setImmediate(cb, 'Asset allowBlacklist is not valid form ddn-aob')
-      try {
-        const where = { name: asset.name };
-        const orders = null;
-        const returnTotal = null;
-        const pageIndex = 1;
-        const pageSize = 1;
-        let assetData = await super.queryAsset(where, orders, returnTotal, pageIndex, pageSize);
-        if (assetData && assetData.length > 0) {
-          cb('asset->name Double register form ddn-aob');
-        }
-        assetData = assetData[0];
-        const issuerWhere = { name: issuerName };
-        let issuerData = await super.queryAsset(issuerWhere, orders, returnTotal, pageIndex, pageSize, 75);
-        if (issuerData && issuerData.length > 0) {
-          issuerData = issuerData[0]
-        } else {
-          return cb('Issuer not exists form ddn-aob')
-        }
-        if (issuerData.issuer_id != sender.address) return cb('Permission not allowed form ddn-aob');
-        return cb(null);
-      } catch (err2) {
-        cb(err2);
-      }
-    })
+  async verify(trs, sender) {
+    await super.verify(trs, sender);
+    const asset = trs.asset.aobAsset;
+    const nameParts = (asset.name || '').split('.');
+    if (nameParts.length != 2){
+      throw new Error('Invalid asset full name form ddn-aob');
+    }
+    const issuerName = nameParts[0];
+    const tokenName = nameParts[1];
+    if (!tokenName || !/^[A-Z]{3,6}$/.test(tokenName)) {
+      throw new Error('Invalid asset currency name form ddn-aob');
+    }
+    if (!asset.desc){
+      throw new Error('Invalid asset desc form ddn-aob');
+    }
+    if (asset.desc.length > 4096) {
+      throw new Error('Invalid asset desc size form ddn-aob');
+    }
+    if (asset.precision > 16 || asset.precision < 0){
+      throw new Error('Invalid asset precision form ddn-aob');
+    }
+    const error = ddnUtils.Amount.validate(asset.maximum);
+    if (error){
+      throw new Error(error);
+    }
+    if (asset.strategy && asset.strategy.length > 256){
+      throw new Error('Invalid asset strategy size form ddn-aob');
+    } 
+    if (asset.allow_writeoff !== '0' && asset.allow_writeoff !== '1'){
+      throw new Error('Asset allowWriteoff is not valid form ddn-aob');
+    } 
+    if (asset.allow_whitelist !== '0' && asset.allow_whitelist !== '1'){
+      throw new Error('Asset allowWhitelist is not valid form ddn-aob');
+    }
+    if (asset.allow_blacklist !== '0' && asset.allow_blacklist !== '1'){
+      throw new Error('Asset allowBlacklist is not valid form ddn-aob');
+    }
+    let assetData = await super.queryAsset({ name: asset.name }, null, null, 1, 1, 76);
+    if (assetData && assetData.length > 0) {
+      throw new Error('asset->name Double register form ddn-aob');
+    } 
+    let issuerData = await super.queryAsset({ name: issuerName }, null, null, 1, 1, 75);
+    if (issuerData && issuerData.length > 0) {
+      issuerData = issuerData[0]
+    } else {
+      throw new Error('Issuer not exists form ddn-aob');
+    }
+    if (issuerData.issuer_id != sender.address){
+      throw new Error('Permission not allowed form ddn-aob');
+    }
+    return null;
   }
 
-  async getBytes (trs) {
+  async getBytes(trs) {
     const asset = trs.asset.aobAsset;
     let buffer = Buffer.concat([
       new Buffer(asset.name, 'utf8'),
@@ -128,7 +137,7 @@ class Asset extends AssetBase {
     return buffer;
   }
 
-  async dbSave (trs, dbTrans) {
+  async dbSave(trs, dbTrans) {
     const asset = trs.asset.aobAsset;
     const nameParts = asset.name.split('.');
     assert(nameParts.length == 2)
@@ -149,6 +158,6 @@ class Asset extends AssetBase {
     trs.asset.aobAsset = values;
     return await super.dbSave(trs, dbTrans);
   }
- 
+
 }
 module.exports = Asset;
