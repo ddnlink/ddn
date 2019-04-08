@@ -1,22 +1,23 @@
-const {
-  AssetBase
-} = require('ddn-asset-base');
-const bignum = require('bignum-utils');
+import {
+  AssetBase,
+} from 'ddn-asset-base';
+import bignum from 'bignum-utils';
 
 class Issuer extends AssetBase {
-  async propsMapping() {
-    return [{
-        field: "str1",
-        prop: "name",
-        required: true
+  static async propsMapping() {
+    return [
+      {
+        field: 'str1',
+        prop: 'name',
+        required: true,
       },
       {
-        field: "str2",
-        prop: "issuer_id"
+        field: 'str2',
+        prop: 'issuer_id',
       },
       {
-        field: "str10",
-        prop: "desc"
+        field: 'str10',
+        prop: 'desc',
       },
     ];
   }
@@ -25,15 +26,15 @@ class Issuer extends AssetBase {
     return bignum.multiply(100, this.tokenSetting.fixedPoint);
   }
 
-  async verify(trs, sender, cb) {
+  async verify(trs, sender) {
     // 先调用基类的验证
-    var trans = await super.verify(trs, sender);
+    const trans = await super.verify(trs, sender);
     // 验证是否存在重复数据
     const data1 = await super.queryAsset({
-      name: trans.asset.aobIssuer.name
+      name: trans.asset.aobIssuer.name,
     }, null, null, 1, 1);
     const data2 = await super.queryAsset({
-      issuer_id: trs.sender_id
+      issuer_id: trs.sender_id,
     }, null, null, 1, 1);
     const results = data1.concat(data2);
     if (results && results.length > 0) {
@@ -42,6 +43,5 @@ class Issuer extends AssetBase {
       return trans;
     }
   }
-
 }
 module.exports = Issuer;
