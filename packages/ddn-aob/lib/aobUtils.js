@@ -1,6 +1,6 @@
-import _ from 'underscore';
-import bignum from 'bignum-utils';
-import ddnUtils from 'ddn-utils';
+const _ = require('underscore');
+const bignum = require('bignum-utils');
+const ddnUtils = require('ddn-utils');
 
 async function getAssets(thisFun, superFun, where, pageIndex, pageSize) {
   let result; // 最后返回的值
@@ -52,11 +52,6 @@ async function getAssets(thisFun, superFun, where, pageIndex, pageSize) {
   return result;
 }
 
-function foo() {
-  console.log('111');
-}
-
-export {
+module.exports = {
   getAssets,
-  foo,
 };

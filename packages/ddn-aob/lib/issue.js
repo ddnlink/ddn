@@ -1,4 +1,4 @@
-const AssetBase = require('ddn-asset-base');
+const { AssetBase } = require('ddn-asset-base');
 const bignum = require('bignum-utils');
 const ddnUtils = require('ddn-utils');
 const mathjs = require('mathjs');
