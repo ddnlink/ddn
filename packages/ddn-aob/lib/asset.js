@@ -121,10 +121,14 @@ class Asset extends AssetBase {
   async getBytes(trs) {
     const asset = trs.asset.aobAsset;
     let buffer = Buffer.concat([
+      // eslint-disable-next-line
       new Buffer(asset.name, 'utf8'),
+      // eslint-disable-next-line
       new Buffer(asset.desc, 'utf8'),
+      // eslint-disable-next-line
       new Buffer(asset.maximum, 'utf8'),
       Buffer.from([asset.precision || 0]),
+      // eslint-disable-next-line
       new Buffer(asset.strategy || '', 'utf8'),
       Buffer.from([asset.allow_writeoff || '0']),
       Buffer.from([asset.allow_whitelist || '0']),

@@ -34,7 +34,8 @@ class Issue extends AssetBase {
       throw new Error('Invalid transaction amount');
     }
     // (1)得到资产数据
-    const resultArr = await aobUtils.getAssets(this, super.valueOf() instanceof Object, {
+    console.log('super.queryAsset()', super.queryAsset());
+    const resultArr = await aobUtils.getAssets(this, super.queryAsset(), {
       name: trs.asset.aobIssue.currency,
     }, 1, 1);
     console.log('resultArr', resultArr);

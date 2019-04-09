@@ -5,9 +5,9 @@ const ddnUtils = require('ddn-utils');
 async function getAssets(thisFun, superFun, where, pageIndex, pageSize) {
   let result; // 最后返回的值
   // (1)查询到asset的数据列表
-  result = await superFun.queryAsset(where, null, null, pageIndex, pageSize, 76);
+  result = await superFun(where, null, null, pageIndex, pageSize, 76);
   // (2)查询到issuer的数据列表
-  let issuerData = await superFun.queryAsset({
+  let issuerData = await superFun({
     $in: _.pluck(result, 'issuer_name'),
   }, null, null, 1, 1000, 75);
   issuerData = _.indexBy(issuerData, 'name');
