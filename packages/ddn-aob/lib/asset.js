@@ -103,17 +103,15 @@ class Asset extends AssetBase {
     if (asset.allow_blacklist !== '0' && asset.allow_blacklist !== '1') {
       throw new Error('Asset allowBlacklist is not valid form ddn-aob');
     }
-    let assetData = await super.queryAsset({ name: asset.name }, null, null, 1, 1, 76);
+    const assetData = await super.queryAsset({ name: asset.name }, null, null, 1, 1, 76);
     if (assetData && assetData.length > 0) {
       throw new Error('asset->name Double register form ddn-aob');
     }
-    let issuerData = await super.queryAsset({ name: issuerName }, null, null, 1, 1, 75);
-    if (issuerData && issuerData.length > 0) {
-      issuerData = issuerData[0]
-    } else {
+    const issuerData = await super.queryAsset({ name: issuerName }, null, null, 1, 1, 75);
+    if (!issuerData || !issuerData.length > 0) {
       throw new Error('Issuer not exists form ddn-aob');
     }
-    if (issuerData.issuer_id != sender.address) {
+    if (issuerData[0].issuer_id !== sender.address) {
       throw new Error('Permission not allowed form ddn-aob');
     }
     return null;
@@ -133,9 +131,9 @@ class Asset extends AssetBase {
       Buffer.from([asset.allow_blacklist || '0']),
     ]);
 
-    const strategy = trs.asset.aobAsset.strategy;
+    const { strategy } = trs.asset.aobAsset;
     if (strategy) {
-      buffer = Buffer.concat([buffer ]);
+      buffer = Buffer.concat([buffer]);
     }
     return buffer;
   }
@@ -143,7 +141,7 @@ class Asset extends AssetBase {
   async dbSave(trs, dbTrans) {
     const asset = trs.asset.aobAsset;
     const nameParts = asset.name.split('.');
-    assert(nameParts.length == 2)
+    assert(nameParts.length === 2);
     const values = {
       issuer_name: nameParts[0],
       quantity: '0',
@@ -158,8 +156,10 @@ class Asset extends AssetBase {
       acl: 0,
       writeoff: 0,
     };
-    trs.asset.aobAsset = values;
-    return await super.dbSave(trs, dbTrans);
+    const trans = trs;
+    trans.asset.aobAsset = values;
+    const result = await super.dbSave(trans, dbTrans);
+    return result;
   }
 }
 module.exports = Asset;
