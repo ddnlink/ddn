@@ -1,167 +1,109 @@
 const { AssetBase } = require('ddn-asset-base');
 const bignum = require('bignum-utils');
 const flagsHelper = require('./flagsHelper');
-const Helper = require('./helper');
 
 class Flags extends AssetBase {
-  propsMapping() {
+  // eslint-disable-next-line
+  async propsMapping() {
     return [{
-      field: "str1",
-      prop: "currency",
-      required: true
+      field: 'str1',
+      prop: 'currency',
+      required: true,
     },
     {
-      field: "int1",
-      prop: "flag"
+      field: 'int1',
+      prop: 'flag',
     },
     {
-      field: "int2",
-      prop: "flag_type"
-    }
+      field: 'int2',
+      prop: 'flag_type',
+    },
     ];
   }
-
-  create(data, trs) {
-    trs.recipient_id = null;
-    trs.amount = "0";
-    trs.asset.aobFlags = {
-      currency: data.currency,
-      flag_type: data.flag_type,
-      flag: data.flag
+  // eslint-disable-next-line
+  async verify(trs, sender) {
+    if (trs.recipient_id) {
+      throw new Error('Invalid recipient');
     }
-    return trs;
-  }
-
-  verify(trs, sender, cb) {
-    const helper = new Helper(this.library, this.modules);
-    super.verify(trs, sender, (err, trans) => {
-      if (trs.recipient_id) return setImmediate(cb, 'Invalid recipient')
-      if (!bignum.isZero(trs.amount)) return setImmediate(cb, 'Invalid transaction amount')
-  
-      const asset = trs.asset.aobFlags;
-      if (!flagsHelper.isValidFlagType(asset.flag_type)) return setImmediate(cb, 'Invalid asset flag type')
-      if (!flagsHelper.isValidFlag(asset.flag_type, asset.flag)) return setImmediate(cb, 'Invalid asset flag')
-
-      try{
-        const where = { name: trs.asset.aobFlags.currency }
-        const pageIndex = 1;
-        const pageSize = 1;
-        helper.getAssets(where, pageIndex, pageSize, (err, resulr) => {
-          if (err) return cb(`Database error: ${err}`);
-          result = result[0];
-          if (!result) return cb('Asset not exists');
-          if (result.issuer_id !== sender.address) return cb('Permission not allowed');
-          if (result.writeoff) return cb('Asset already writeoff');
-          if (!Number(result.allow_writeoff) && asset.flag_type === 2) return cb('Writeoff not allowed');
-          if (!Number(result.allow_whitelist) && asset.flag_type === 1 && asset.flag === 1) return cb('Whitelist not allowed');
-          if (!Number(result.allow_blacklist) && asset.flag_type === 1 && asset.flag === 0) return cb('Blacklist not allowed');
-          if (flagsHelper.isSameFlag(asset.flag_type, asset.flag, result)) return cb('Flag double set');
-          return cb();
-        })
-      } catch(e){
-        cb('form ddn-aob flag', e);
-      }
-    })
-  }
-
-  apply(trs, block, sender, dbTrans, cb) {
-    if (typeof(cb) == "undefined" && typeof(dbTrans) == "function") {
-			cb = dbTrans;
-			dbTrans = null;
-    };
+    if (!bignum.isZero(trs.amount)) {
+      throw new Error('Invalid transaction amount');
+    }
     const asset = trs.asset.aobFlags;
-    const helper = new Helper(this.library, this.modules);
-    helper.updateAssetFlag(asset.currency, asset.flag, flagsHelper.getTypeName(asset.flag_type), dbTrans, cb)
+    if (!flagsHelper.isValidFlagType(asset.flag_type)) {
+      throw new Error('Invalid asset flag type');
+    }
+    if (!flagsHelper.isValidFlag(asset.flag_type, asset.flag)) {
+      throw new Error('Invalid asset flag');
+    }
+
+    const assetData = await super.queryAsset({
+      name: trs.asset.aobFlags.currency,
+    }, null, null, 1, 1, 76);
+    if (assetData && assetData.length > 0) {
+      throw new Error('asset->name Double register form ddn-aob');
+    }
+    if (assetData[0].writeoff) {
+      throw new Error('Asset already writeoff');
+    }
+    if (!Number(assetData[0].allow_writeoff) && asset.flag_type === 2) {
+      throw new Error('Writeoff not allowed');
+    }
+    if (!Number(assetData[0].allow_whitelist) && asset.flag_type === 1 && asset.flag === 1) {
+      throw new Error('Whitelist not allowed');
+    }
+    if (!Number(assetData[0].allow_blacklist) && asset.flag_type === 1 && asset.flag === 0) {
+      throw new Error('Blacklist not allowed');
+    }
+    const issuerData = await super.queryAsset({
+      name: trs.asset.aobFlags.currency,
+    }, null, null, 1, 1, 75);
+    if (issuerData[0].issuer_id !== sender.address) {
+      throw new Error('Permission not allowed');
+    }
+    if (flagsHelper.isSameFlag(asset.flag_type, asset.flag, assetData)) {
+      throw new Error('Flag double set');
+    }
+    return null;
   }
 
-  undo(trs, block, sender, dbTrans, cb) {
-    if (typeof(cb) == "undefined" && typeof(dbTrans) == "function") {
-			cb = dbTrans;
-			dbTrans = null;
-    };
+  async apply(trs, block, sender, dbTrans) {
     const asset = trs.asset.aobFlags;
-    const helper = new Helper(this.library, this.modules);
-    helper.updateAssetFlag(asset.currency, asset.flag ^ 1, flagsHelper.getTypeName(asset.flag_type), dbTrans, cb)
-    setImmediate(cb)
-  }
-
-  applyUnconfirmed(trs, sender, dbTrans, cb) {
-    if (typeof(cb) == "undefined" && typeof(dbTrans) == "function") {
-			cb = dbTrans;
-			dbTrans = null;
+    const where = {
+      name: asset.currency,
+      trs_type: 76,
     };
-    const key = `${trs.asset.aobFlags.currency}:${trs.type}`;
-    if (library.oneoff.has(key)) {
-      return setImmediate(cb, 'Double submit')
-    }
-    this.library.oneoff.set(key, true)
-    setImmediate(cb)
-  }
-
-  undoUnconfirmed(trs, sender, dbTrans, cb) {
-    if (typeof(cb) == "undefined" && typeof(dbTrans) == "function") {
-			cb = dbTrans;
-			dbTrans = null;
+    const obj = {
+      [flagsHelper.getTypeName(asset.flag_type)]: asset.flag,
     };
-    this.library.oneoff.delete(`${trs.asset.aobFlags.currency}:${trs.type}`)
-    setImmediate(cb)
+    super.update(obj, where, 'AobAsset', dbTrans);
+    return null;
   }
 
-
-  objectNormalize(trs) {
-    const report = library.scheme.validate({
-      type: 'object',
-      properties: {
-        currency: {
-          type: 'string',
-          minLength: 1,
-          maxLength: 22
-        },
-        flag_type: {
-          type: 'integer'
-        },
-        flag: {
-          type: 'integer'
-        }
-      },
-      required: ['currency', 'flag_type', 'flag']
-    }, trs.asset.aobFlags);
-    if (!report) {
-      throw Error(`Can't parse flags: ${library.scheme.errors[0]}`);
-    }
-    return trs;
+  undo(trs, block, sender, dbTrans) {
+    const asset = trs.asset.aobFlags;
+    const where = {
+      name: asset.currency,
+      trs_type: 76,
+    };
+    const obj = {
+      // eslint-disable-next-line no-bitwise
+      [flagsHelper.getTypeName(asset.flag_type)]: asset.flag ^ 1,
+    };
+    super.update(obj, where, 'AobAsset', dbTrans);
+    return null;
   }
 
-  dbRead(raw) {
-    if (!raw.flags_currency) {
-      return null
-    } else {
-      const asset = {
-        transaction_id: raw.t_id,
-        currency: raw.flags_currency,
-        flag_type: raw.flags_flagType,
-        flag: raw.flags_flag
-      };
-
-      return { aobFlags: asset }
-    }
-  }
-
-  dbSave(trs, dbTrans, cb) {
-    if (typeof(cb) == "undefined" && typeof(dbTrans) == "function") {
-			cb = dbTrans;
-			dbTrans = null;
-		};
+  async dbSave(trs, dbTrans) {
     const asset = trs.asset.aobFlags;
     const values = {
       transaction_id: trs.id,
       currency: asset.currency,
       flag_type: asset.flag_type,
-      flag: asset.flag
+      flag: asset.flag,
     };
-    trs.asset.aobFlags = values;
-    super.dbSave(trs, dbTrans, cb);
+    const trans = trs;
+    trans.asset.aobFlags = values;
+    super.dbSave(trans, dbTrans);
   }
-
 }
 module.exports = Flags;
