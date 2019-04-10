@@ -19,7 +19,7 @@ class Transfer extends AssetBase {
     ];
   }
 
-  async verify(trs, sender, cb) {
+  async verify(trs, sender) {
     if (!ddnUtils.Address.isAddress(trs.recipient_id)) {
       throw new Error('Invalid recipient');
     }
@@ -47,13 +47,29 @@ class Transfer extends AssetBase {
     }
     // 检查黑白名单
     const aclTable = assetDetail.acl === 0 ? 'acl_black' : 'acl_white';
-    const count1 = await this.dao.count(aclTable, {
-      address: sender.address,
-      currency: asset.currency,
+    const count1 = await new Promise((resolve) => {
+      this.dao.count(aclTable, {
+        address: sender.address,
+        currency: asset.currency,
+      }, (err, rows) => {
+        if (err) {
+          resolve(err);
+        } else {
+          resolve(rows);
+        }
+      });
     });
-    const count2 = await this.dao.count(aclTable, {
-      address: trs.recipient_id,
-      currency: asset.currency,
+    const count2 = await new Promise((resolve) => {
+      this.dao.count(aclTable, {
+        address: trs.recipient_id,
+        currency: asset.currency,
+      }, (err, rows) => {
+        if (err) {
+          resolve(err);
+        } else {
+          resolve(rows);
+        }
+      });
     });
     const isInList = (count1 + count2) !== 0;
     if ((assetDetail.acl === 0) === isInList) {
@@ -67,10 +83,18 @@ class Transfer extends AssetBase {
     const transfer = trs.asset.aobTransfer;
     this.balanceCache.addAssetBalance(trs.recipient_id, transfer.currency, transfer.amount);
     // (1)
-    const assetBalancedata = this.dao.findOne('mem_asset_balance', {
-      address: sender.address,
-      currency: transfer.currency,
-    }, ['balance']);
+    const assetBalancedata = await new Promise((resolve) => {
+      this.dao.findOne('mem_asset_balance', {
+        address: sender.address,
+        currency: transfer.currency,
+      }, ['balance'], (err, rows) => {
+        if (err) {
+          resolve(err);
+        } else {
+          resolve(rows);
+        }
+      });
+    });
     const balance = (assetBalancedata && assetBalancedata.balance) ? assetBalancedata.balance : '0';
     const newBalance = bignum.plus(balance, `-${transfer.amount}`);
     if (bignum.isLessThan(newBalance, 0)) {
@@ -91,10 +115,18 @@ class Transfer extends AssetBase {
       }, dbTrans);
     }
     // (2)
-    const assetBalancedata2 = this.dao.findOne('mem_asset_balance', {
-      address: trs.recipient_id,
-      currency: transfer.currency,
-    }, ['balance']);
+    const assetBalancedata2 = await new Promise((resolve) => {
+      this.dao.findOne('mem_asset_balance', {
+        address: trs.recipient_id,
+        currency: transfer.currency,
+      }, ['balance'], (err, rows) => {
+        if (err) {
+          resolve(err);
+        } else {
+          resolve(rows);
+        }
+      });
+    });
     const balance2 = (assetBalancedata2 && assetBalancedata2.balance) ? assetBalancedata2.balance : '0';
     const newBalance2 = bignum.plus(balance2, transfer.amount);
     if (bignum.isLessThan(newBalance2, 0)) {
@@ -121,10 +153,18 @@ class Transfer extends AssetBase {
     this.balanceCache.addAssetBalance(trs.recipient_id, transfer.currency, `-${transfer.amount}`);
 
     // (1)
-    const assetBalancedata = this.dao.findOne('mem_asset_balance', {
-      address: sender.address,
-      currency: transfer.currency,
-    }, ['balance']);
+    const assetBalancedata = await new Promise((resolve) => {
+      this.dao.findOne('mem_asset_balance', {
+        address: sender.address,
+        currency: transfer.currency,
+      }, ['balance'], (err, rows) => {
+        if (err) {
+          resolve(err);
+        } else {
+          resolve(rows);
+        }
+      });
+    });
     const balance = (assetBalancedata && assetBalancedata.balance) ? assetBalancedata.balance : '0';
     const newBalance = bignum.plus(balance, transfer.amount);
     if (bignum.isLessThan(newBalance, 0)) {
@@ -145,10 +185,18 @@ class Transfer extends AssetBase {
       }, dbTrans);
     }
     // (2)
-    const assetBalancedata2 = this.dao.findOne('mem_asset_balance', {
-      address: trs.recipient_id,
-      currency: transfer.currency,
-    }, ['balance']);
+    const assetBalancedata2 = await new Promise((resolve) => {
+      this.dao.findOne('mem_asset_balance', {
+        address: trs.recipient_id,
+        currency: transfer.currency,
+      }, ['balance'], (err, rows) => {
+        if (err) {
+          resolve(err);
+        } else {
+          resolve(rows);
+        }
+      });
+    });
     const balance2 = (assetBalancedata2 && assetBalancedata2.balance) ? assetBalancedata2.balance : '0';
     const newBalance2 = bignum.plus(balance2, `-${transfer.amount}`);
     if (bignum.isLessThan(newBalance2, 0)) {
