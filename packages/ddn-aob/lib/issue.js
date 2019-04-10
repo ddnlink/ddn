@@ -2,7 +2,7 @@ const { AssetBase } = require('ddn-asset-base');
 const bignum = require('bignum-utils');
 const ddnUtils = require('ddn-utils');
 const mathjs = require('mathjs');
-const aobUtils = require('./aobUtils');
+const _ = require('underscore');
 
 class Issue extends AssetBase {
   // eslint-disable-next-line class-methods-use-this
@@ -34,12 +34,69 @@ class Issue extends AssetBase {
       throw new Error('Invalid transaction amount');
     }
     // (1)得到资产数据
-    console.log('super.queryAsset()', super.queryAsset());
-    const resultArr = await aobUtils.getAssets(this, super.queryAsset(), {
-      name: trs.asset.aobIssue.currency,
-    }, 1, 1);
-    console.log('resultArr', resultArr);
-    const result = resultArr[0];
+    // (1)查询到asset的数据列表
+    let result;
+    result = await super.queryAsset({ name: trs.asset.aobIssue.currency }, null, null, 1, 1, 76);
+    // (2)查询到issuer的数据列表
+    let issuerData = await super.queryAsset({
+      $in: _.pluck(result, 'issuer_name'),
+    }, null, null, 1, 1000, 75);
+    issuerData = _.indexBy(issuerData, 'name');
+    result = _.map(result, (num) => {
+      const num2 = num;
+      num2.issuer_id = issuerData[num.issuer_name].issuer_id;
+      return num2;
+    });
+    // (3)查询到交易的相关数据
+    let trData = await new Promise((resolve) => {
+      this.dao.findList('tr', {
+        id: {
+          $in: _.pluck(result, 'transaction_id'),
+        },
+      }, null, null, (err, rows) => {
+        if (err) {
+          resolve(err);
+        } else {
+          resolve(rows);
+        }
+      });
+    });
+    trData = _.indexBy(trData, 'id');
+    result = _.map(result, (num) => {
+      const num2 = num;
+      num2.block_id = trData[num.transaction_id].block_id;
+      return num2;
+    });
+    // (4)查询到块的相关数据
+    let blockData = await new Promise((resolve) => {
+      this.dao.findList('block', {
+        id: {
+          $in: _.pluck(result, 'block_id'),
+        },
+      }, null, null, (err, rows) => {
+        if (err) {
+          resolve(err);
+        } else {
+          resolve(rows);
+        }
+      });
+    });
+    blockData = _.indexBy(blockData, 'id');
+    result = _.map(result, (num) => {
+      const num2 = num;
+      num2.height = blockData[num.block_id].height;
+      return num2;
+    });
+    // 循环整合验证数据
+    for (let i = 0; i < result.length; i += 1) {
+      const { precision } = result[i];
+      result[i].maximum = bignum.new(result[i].maximum).toString(10);
+      result[i].maximumShow = ddnUtils.Amount.calcRealAmount(result[i].maximum, precision);
+      result[i].quantity = bignum.new(result[i].quantity).toString(10);
+      result[i].quantityShow = ddnUtils.Amount.calcRealAmount(result[i].quantity, precision);
+    }
+    const count = 0;
+    result = result[count];
     if (!result) {
       throw new Error('Asset not exists --- from ddn-aob -> issue.verify');
     }
@@ -57,7 +114,7 @@ class Issue extends AssetBase {
     }
     const { strategy } = result;
     const genesisHeight = result.height;
-    const height = bignum.plus(this.blocks.getLastBlock().height, 1);
+    const height = bignum.plus(this.runtime.block.getLastBlock().height, 1);
     if (strategy) {
       const context = {
         maximum: mathjs.bignumber(maximum),
@@ -87,7 +144,7 @@ class Issue extends AssetBase {
     if (bignum.isLessThan(newBalance, 0)) {
       throw new Error('Asset balance not enough');
     }
-    if (data) {
+    if (assetBalancedata) {
       await this.dao.update('mem_asset_balance', { balance: newBalance.toString() }, { address: sender.address, currency }, dbTrans);
     } else {
       await this.dao.insert('mem_asset_balance', { address: sender.address, currency, balance: newBalance.toString() }, dbTrans);
@@ -114,7 +171,7 @@ class Issue extends AssetBase {
     if (bignum.isLessThan(newBalance, 0)) {
       throw new Error('Asset balance not enough');
     }
-    if (data) {
+    if (assetBalancedata) {
       await this.dao.update('mem_asset_balance', { balance: newBalance.toString() }, { address: sender.address, currency }, dbTrans);
     } else {
       await this.dao.insert('mem_asset_balance', { address: sender.address, currency, balance: newBalance.toString() }, dbTrans);
