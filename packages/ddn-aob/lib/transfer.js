@@ -3,7 +3,6 @@ const {
 } = require('ddn-asset-base');
 const bignum = require('bignum-utils');
 const ddnUtils = require('ddn-utils');
-const Helper = require('./helper');
 
 class Transfer extends AssetBase {
   // eslint-disable-next-line class-methods-use-this
@@ -21,34 +20,40 @@ class Transfer extends AssetBase {
   }
 
   async verify(trs, sender, cb) {
-    if (!ddnUtils.Address.isAddress(trs.recipient_id)) return cb('Invalid recipient');
-    if (!bignum.isZero(trs.amount)) return setImmediate(cb, 'Invalid transaction amount');
+    if (!ddnUtils.Address.isAddress(trs.recipient_id)) {
+      throw new Error('Invalid recipient');
+    }
+    if (!bignum.isZero(trs.amount)) {
+      throw new Error('Invalid transaction amount');
+    }
     const asset = trs.asset.aobTransfer;
     const error = ddnUtils.Amount.validate(asset.amount);
-    if (error) return setImmediate(cb, error);
-
-    const helper = new Helper(this.library, this.modules);
-    const where = {
+    if (error) {
+      throw new Error(error);
+    }
+    const data = await super.queryAsset({
       name: asset.currency,
       trs_type: '76',
-    };
-    helper.getAssets(where, 1, 1, (err, data) => {
-      if (err) return cb(`Database error: ${err}`);
-      if (!data) return cb('Asset not exists');
-      const assetDetail = data[0];
-      if (!assetDetail) return cb('Asset not exists');
-      if (assetDetail.writeoff) return cb('Asset already writeoff');
-      if (!assetDetail.allow_whitelist && !assetDetail.allow_blacklist) return cb();
-      const aclTable = assetDetail.acl === 0 ? 'acl_black' : 'acl_white';
-      this.model.checkAcl(aclTable, asset.currency, sender.address, trs.recipient_id,
-        (terr, isInList) => {
-          // wxm block database
-          if (terr) return cb(`Database error when query acl: ${terr}`);
-          if ((assetDetail.acl === 0) === isInList) return cb('Permission not allowed');
-          return null;
-        });
+    }, null, null, 1, 1, 76);
+    const assetDetail = data[0];
+    if (!assetDetail) {
+      throw new Error('Asset not exists');
+    }
+    if (assetDetail.writeoff) {
+      throw new Error('Asset already writeoff');
+    }
+    if (!assetDetail.allow_whitelist && !assetDetail.allow_blacklist) {
       return null;
-    });
+    }
+
+    const aclTable = assetDetail.acl === 0 ? 'acl_black' : 'acl_white';
+    this.model.checkAcl(aclTable, asset.currency, sender.address, trs.recipient_id,
+      (terr, isInList) => {
+        // wxm block database
+        if (terr) return cb(`Database error when query acl: ${terr}`);
+        if ((assetDetail.acl === 0) === isInList) return cb('Permission not allowed');
+        return null;
+      });
     return null;
   }
 
