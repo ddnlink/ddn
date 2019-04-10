@@ -45,15 +45,20 @@ class Transfer extends AssetBase {
     if (!assetDetail.allow_whitelist && !assetDetail.allow_blacklist) {
       return null;
     }
-
+    // 检查黑白名单
     const aclTable = assetDetail.acl === 0 ? 'acl_black' : 'acl_white';
-    this.model.checkAcl(aclTable, asset.currency, sender.address, trs.recipient_id,
-      (terr, isInList) => {
-        // wxm block database
-        if (terr) return cb(`Database error when query acl: ${terr}`);
-        if ((assetDetail.acl === 0) === isInList) return cb('Permission not allowed');
-        return null;
-      });
+    const count1 = await this.dao.count(aclTable, {
+      address: sender.address,
+      currency: asset.currency,
+    });
+    const count2 = await this.dao.count(aclTable, {
+      address: trs.recipient_id,
+      currency: asset.currency,
+    });
+    const isInList = (count1 + count2) !== 0;
+    if ((assetDetail.acl === 0) === isInList) {
+      throw new Error('Permission not allowed');
+    }
     return null;
   }
 
