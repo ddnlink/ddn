@@ -1,116 +1,182 @@
-const { AssetBase } = require('ddn-asset-base');
+const {
+  AssetBase,
+} = require('ddn-asset-base');
 const bignum = require('bignum-utils');
 const ddnUtils = require('ddn-utils');
 const Helper = require('./helper');
-const async = require('async');
 
 class Transfer extends AssetBase {
-  propsMapping() {
-    return [{
-      field: "str1",
-      prop: "currency"
-    },
-    {
-      field: "str2",
-      prop: "amount"
-    }
+  // eslint-disable-next-line class-methods-use-this
+  async propsMapping() {
+    return [
+      {
+        field: 'str1',
+        prop: 'currency',
+      },
+      {
+        field: 'str2',
+        prop: 'amount',
+      },
     ];
   }
 
-  create(data, trs) {
-    trs.amount = "0";
-    trs.recipient_id = data.recipient_id;
-    trs.asset.aobTransfer = {
-      currency: data.currency,
-      amount: data.amount,
-    }
-    return trs;
-  }
-
-  verify(trs, sender, cb) {
-    if (!ddnUtils.Address.isAddress(trs.recipient_id)) return cb("Invalid recipient")
-    if (!bignum.isZero(trs.amount)) return setImmediate(cb, 'Invalid transaction amount')
+  async verify(trs, sender, cb) {
+    if (!ddnUtils.Address.isAddress(trs.recipient_id)) return cb('Invalid recipient');
+    if (!bignum.isZero(trs.amount)) return setImmediate(cb, 'Invalid transaction amount');
     const asset = trs.asset.aobTransfer;
     const error = ddnUtils.Amount.validate(asset.amount);
-    if (error) return setImmediate(cb, error)
+    if (error) return setImmediate(cb, error);
 
     const helper = new Helper(this.library, this.modules);
-    const where = { name: asset.currency, trs_type: '76' };
+    const where = {
+      name: asset.currency,
+      trs_type: '76',
+    };
     helper.getAssets(where, 1, 1, (err, data) => {
       if (err) return cb(`Database error: ${err}`);
-      if(!data) return cb('Asset not exists')
+      if (!data) return cb('Asset not exists');
       const assetDetail = data[0];
-      if (!assetDetail) return cb('Asset not exists')
-      if (assetDetail.writeoff) return cb('Asset already writeoff')
+      if (!assetDetail) return cb('Asset not exists');
+      if (assetDetail.writeoff) return cb('Asset already writeoff');
       if (!assetDetail.allow_whitelist && !assetDetail.allow_blacklist) return cb();
-      const aclTable = assetDetail.acl == 0 ? 'acl_black' : 'acl_white';
-      this.library.model.checkAcl(aclTable, asset.currency, sender.address, trs.recipient_id, (err, isInList) => {    //wxm block database
-        if (err) return cb(`Database error when query acl: ${err}`);
-        if ((assetDetail.acl == 0) == isInList) return cb('Permission not allowed')
-        cb();
-      })
-
-    })
+      const aclTable = assetDetail.acl === 0 ? 'acl_black' : 'acl_white';
+      this.model.checkAcl(aclTable, asset.currency, sender.address, trs.recipient_id,
+        (terr, isInList) => {
+          // wxm block database
+          if (terr) return cb(`Database error when query acl: ${terr}`);
+          if ((assetDetail.acl === 0) === isInList) return cb('Permission not allowed');
+          return null;
+        });
+      return null;
+    });
+    return null;
   }
 
-   // 新增事务dbTrans ---wly
-   apply (trs, block, sender, dbTrans, cb) {
-    if (typeof(cb) == "undefined" && typeof(dbTrans) == "function") {
-			cb = dbTrans;
-			dbTrans = null;
-    };
+  // 新增事务dbTrans ---wly
+  async apply(trs, block, sender, dbTrans) {
     const transfer = trs.asset.aobTransfer;
-    this.library.balanceCache.addAssetBalance(trs.recipient_id, transfer.currency, transfer.amount)   //wxm block database
-    const helper = new Helper(this.library, this.modules);
-    async.series([
-      next => {
-        helper.updateAssetBalance(transfer.currency, `-${transfer.amount}`, sender.address, dbTrans, next)
-      },
-      next => {
-        helper.updateAssetBalance(transfer.currency, transfer.amount, trs.recipient_id, dbTrans, next)    //wxm block database
-      }
-    ], cb)
+    this.balanceCache.addAssetBalance(trs.recipient_id, transfer.currency, transfer.amount);
+    // (1)
+    const assetBalancedata = this.dao.findOne('mem_asset_balance', {
+      address: sender.address,
+      currency: transfer.currency,
+    }, ['balance']);
+    const balance = (assetBalancedata && assetBalancedata.balance) ? assetBalancedata.balance : '0';
+    const newBalance = bignum.plus(balance, `-${transfer.amount}`);
+    if (bignum.isLessThan(newBalance, 0)) {
+      throw new Error('Asset balance not enough');
+    }
+    if (assetBalancedata) {
+      this.dao.update('mem_asset_balance', {
+        balance: newBalance.toString(),
+      }, {
+        address: sender.address,
+        currency: transfer.currency,
+      }, dbTrans);
+    } else {
+      this.dao.insert('mem_asset_balance', {
+        address: sender.address,
+        currency: transfer.currency,
+        balance: newBalance.toString(),
+      }, dbTrans);
+    }
+    // (2)
+    const assetBalancedata2 = this.dao.findOne('mem_asset_balance', {
+      address: trs.recipient_id,
+      currency: transfer.currency,
+    }, ['balance']);
+    const balance2 = (assetBalancedata2 && assetBalancedata2.balance) ? assetBalancedata2.balance : '0';
+    const newBalance2 = bignum.plus(balance2, transfer.amount);
+    if (bignum.isLessThan(newBalance2, 0)) {
+      throw new Error('Asset balance not enough');
+    }
+    if (assetBalancedata2) {
+      this.dao.update('mem_asset_balance', {
+        balance: newBalance2.toString(),
+      }, {
+        address: sender.address,
+        currency: transfer.currency,
+      }, dbTrans);
+    } else {
+      this.dao.insert('mem_asset_balance', {
+        address: sender.address,
+        currency: transfer.currency,
+        balance: newBalance.toString(),
+      }, dbTrans);
+    }
   }
 
-  undo (trs, block, sender, dbTrans, cb) {
-    if (typeof(cb) == "undefined" && typeof(dbTrans) == "function") {
-			cb = dbTrans;
-			dbTrans = null;
-    };
+  async undo(trs, block, sender, dbTrans) {
     const transfer = trs.asset.aobTransfer;
-    this.library.balanceCache.addAssetBalance(trs.recipient_id, transfer.currency, `-${transfer.amount}`) //wxm block database
-    const helper = new Helper(this.library, this.modules);
-    async.series([
-      next => {
-        helper.updateAssetBalance(transfer.currency, transfer.amount, sender.address, dbTrans, next)
-      },
-      next => {
-        helper.updateAssetBalance(transfer.currency, `-${transfer.amount}`, trs.recipient_id, dbTrans, next)  //wxm block database
-      }
-    ], cb)
+    this.balanceCache.addAssetBalance(trs.recipient_id, transfer.currency, `-${transfer.amount}`);
+
+    // (1)
+    const assetBalancedata = this.dao.findOne('mem_asset_balance', {
+      address: sender.address,
+      currency: transfer.currency,
+    }, ['balance']);
+    const balance = (assetBalancedata && assetBalancedata.balance) ? assetBalancedata.balance : '0';
+    const newBalance = bignum.plus(balance, transfer.amount);
+    if (bignum.isLessThan(newBalance, 0)) {
+      throw new Error('Asset balance not enough');
+    }
+    if (assetBalancedata) {
+      this.dao.update('mem_asset_balance', {
+        balance: newBalance.toString(),
+      }, {
+        address: sender.address,
+        currency: transfer.currency,
+      }, dbTrans);
+    } else {
+      this.dao.insert('mem_asset_balance', {
+        address: sender.address,
+        currency: transfer.currency,
+        balance: newBalance.toString(),
+      }, dbTrans);
+    }
+    // (2)
+    const assetBalancedata2 = this.dao.findOne('mem_asset_balance', {
+      address: trs.recipient_id,
+      currency: transfer.currency,
+    }, ['balance']);
+    const balance2 = (assetBalancedata2 && assetBalancedata2.balance) ? assetBalancedata2.balance : '0';
+    const newBalance2 = bignum.plus(balance2, `-${transfer.amount}`);
+    if (bignum.isLessThan(newBalance2, 0)) {
+      throw new Error('Asset balance not enough');
+    }
+    if (assetBalancedata2) {
+      this.dao.update('mem_asset_balance', {
+        balance: newBalance2.toString(),
+      }, {
+        address: sender.address,
+        currency: transfer.currency,
+      }, dbTrans);
+    } else {
+      this.dao.insert('mem_asset_balance', {
+        address: sender.address,
+        currency: transfer.currency,
+        balance: newBalance.toString(),
+      }, dbTrans);
+    }
   }
-  applyUnconfirmed(trs, sender, dbTrans, cb) {
-    if (typeof(cb) == "undefined" && typeof(dbTrans) == "function") {
-			cb = dbTrans;
-			dbTrans = null;
-    };
+
+  async applyUnconfirmed(trs, sender) {
     const transfer = trs.asset.aobTransfer;
-    const balance = this.library.balanceCache.getAssetBalance(sender.address, transfer.currency) || 0;
+    const balance = this.balanceCache.getAssetBalance(
+      sender.address, transfer.currency,
+    ) || 0;
     const surplus = bignum.minus(balance, transfer.amount);
-    if (bignum.isLessThan(surplus, 0))return setImmediate(cb, 'Insufficient asset balance')
-    this.library.balanceCache.setAssetBalance(sender.address, transfer.currency, surplus.toString())
-    setImmediate(cb)
+    if (bignum.isLessThan(surplus, 0)) {
+      throw new Error('Insufficient asset balance');
+    }
+    this.balanceCache.setAssetBalance(sender.address, transfer.currency, surplus.toString());
+    return null;
   }
-  
-  undoUnconfirmed (trs, sender, dbTrans, cb) {
-    if (typeof(cb) == "undefined" && typeof(dbTrans) == "function") {
-			cb = dbTrans;
-			dbTrans = null;
-    };
+
+  async undoUnconfirmed(trs, sender) {
     const transfer = trs.asset.aobTransfer;
-    this.library.balanceCache.addAssetBalance(sender.address, transfer.currency, transfer.amount)
-    setImmediate(cb)
+    this.balanceCache.addAssetBalance(sender.address, transfer.currency, transfer.amount);
+    return null;
   }
-  
 }
 module.exports = Transfer;
