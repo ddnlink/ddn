@@ -1,20 +1,21 @@
 const { AssetBase } = require('ddn-asset-base');
 const bignum = require('bignum-utils');
-const daoUtil = require('./daoUtil.js');
 const ddnUtils = require('ddn-utils');
-const valid_url = require('valid-url');
 const ByteBuffer = require('bytebuffer');
+const { isUri } = require('valid-url');
+
+const daoUtil = require('./daoUtil.js');
 
 // 10 秒内不允许重复处理
-let processOrgIdList = {}
+let processOrgIdList = {};
 
-library.bus.on('newBlock', function () {
+this.bus.on('newBlock', () => {
   // console.log("library.bus.on('newBlock'--------------processOrgIdList--------------------")
-  processOrgIdList = {}
+  processOrgIdList = {};
 });
 
 class Org extends AssetBase {
- /**
+/**
   * Org 自治组织中的组织
   * 自治组织可以包含媒体号、企业号等组织形态，为未来更多扩展留有余地。
   *
@@ -23,36 +24,37 @@ class Org extends AssetBase {
   * 2、前期申请 >= 5个字符，5位以下逐年开放；
   * 3、必须英文开头；
   */
- propsMapping() {
-  return [{
-    field: "str1",
-    prop: "org_id",
-    required: true
-  },
-  {
-    field: "str2",
-    prop: "name"
-  },
-  {
-    field: "str4",
-    prop: "address"
-  },
-  {
-    field: "str3",
-    prop: "tags",
-    required: true
-  },
-  {
-    field: "str6",
-    prop: "url"
-  },
-  {
-    field: "int1",
-    prop: "state",
-    required: true
-  },
-  ];
-}
+  // eslint-disable-next-line class-methods-use-this
+  async propsMapping() {
+    return [{
+      field: 'str1',
+      prop: 'org_id',
+      required: true,
+    },
+    {
+      field: 'str2',
+      prop: 'name',
+    },
+    {
+      field: 'str4',
+      prop: 'address',
+    },
+    {
+      field: 'str3',
+      prop: 'tags',
+      required: true,
+    },
+    {
+      field: 'str6',
+      prop: 'url',
+    },
+    {
+      field: 'int1',
+      prop: 'state',
+      required: true,
+    },
+    ];
+  }
 
   /**
    * 创建组织号
@@ -71,174 +73,153 @@ class Org extends AssetBase {
    * @param {object} data 传回来的数据
    * @param {object} trs 交易
    */
-  create(data, trs) {
-    trs.recipient_id = null;
-    trs.amount = "0";
-    trs.asset.org = data.org;
-    return trs;
+  // eslint-disable-next-line class-methods-use-this
+  async create(data, trs) {
+    const trans = trs;
+    trans.recipient_id = null;
+    trans.amount = '0';
+    trans.asset.org = data.org;
+    return trans;
   }
 
-  calculateFee(trs, sender) {
+  // eslint-disable-next-line class-methods-use-this
+  async calculateFee(trs) {
     // register orgId fee x 100000000
     let feeBase = 1;
     const orgId = trs.asset.org.org_id;
     const olen = orgId.length;
     const feeLenMap = {
-      '10': 50,
-      '9': 100,
-      '8': 200,
-      '7': 400,
-      '6': 800,
-      '5': 1600,
+      10: 50,
+      9: 100,
+      8: 200,
+      7: 400,
+      6: 800,
+      5: 1600,
     };
     if (olen > 10) {
-      feeBase = 10
+      feeBase = 10;
     } else if (olen <= 4) {
-      feeBase = 99999999 // not allow
+      feeBase = 99999999; // not allow
     } else {
-      feeBase = feeLenMap[olen + '']
+      feeBase = feeLenMap[`${olen}`];
     }
-    if (trs.asset.org.state == 1) {
-      feeBase = parseInt(feeBase / 10); // change info
+    if (trs.asset.org.state === 1) {
+      feeBase = parseInt(feeBase / 10, 10); // change info
     }
     // bignum update
     // return feeBase * 100000000;
     return bignum.multiply(feeBase, 100000000).toString();
   }
 
-  verify(trs, sender, cb) {
-
-    const org = trs.asset.org;
-
+  async verify(trs, sender) {
+    const { org } = trs.asset;
     if (trs.recipient_id) {
-      return setImmediate(cb, 'Invalid recipient');
+      throw new Error('Invalid recipient');
     }
-
-    if (org.state == 0) {
+    if (org.state === 0) {
       if (!org.name || !org.url) {
-        return setImmediate(cb, 'Invalid asset data');
+        throw new Error('Invalid asset data');
       }
-    } else if (org.state == 1) {
+    } else if (org.state === 1) {
       if (!org.name && !org.url && !org.tags) {
-        return setImmediate(cb, 'Invalid asset update no param' + JSON.stringify(org));
+        throw new Error(`Invalid asset update no param${JSON.stringify(org)}`);
       }
     } else {
-      return setImmediate(cb, 'Invalid asset state type: ' + org.state);
+      throw new Error(`Invalid asset state type: ${org.state}`);
     }
-
-
     if (!ddnUtils.Address.isAddress(sender.address)) {
-      return setImmediate(cb, "Invalid address");
-    } 
-
-    //bignum update if (trs.amount != 0) {
+      throw new Error('Invalid address');
+    }
+    // bignum update if (trs.amount != 0) {
     if (!bignum.isZero(trs.amount)) {
-      return setImmediate(cb, 'Invalid transaction amount');
+      throw new Error('Invalid transaction amount');
     }
-
     if (!trs.asset || !org) {
-      return setImmediate(cb, 'Expect asset org, got invalid transaction asset');
+      throw new Error('Expect asset org, got invalid transaction asset');
     }
-
     // check org id
     org.org_id = org.org_id.toLowerCase();
     if (!daoUtil.isOrgId(org.org_id)) {
-      return setImmediate(cb, 'exchange org id not allow');
+      throw new Error('exchange org id not allow');
     }
-
     if (org.name && org.name.lenght > 64) {
-      return setImmediate(cb, 'Name is too long，don`t more than 64 bit.');
+      throw new Error('Name is too long，don`t more than 64 bit.');
     }
     if (!ddnUtils.Address.isAddress(org.address)) {
-      return setImmediate(cb, 'Invalid org address');
+      throw new Error('Invalid org address');
     }
-    if (org.url && !valid_url.isUri(org.url)) {
-      return setImmediate(cb, "Invalid org url");
+    if (org.url && !isUri(org.url)) {
+      throw new Error('Invalid org url');
     }
-
     if (org.url && org.url.lenght > 256) {
-      return setImmediate(cb, 'Url is undefined or too long，don`t more than 256 bit.');
+      throw new Error('Url is undefined or too long，don`t more than 256 bit.');
     }
     if (org.tags && org.tags.length > 40) {
-      return setImmediate(cb, "Org tags is too long. Maximum is 40 characters");
+      throw new Error('Org tags is too long. Maximum is 40 characters');
     }
-
     if (org.tags) {
       let tags = org.tags.split(',');
-
       tags = tags.map(tag => tag.trim()).sort();
-
-      for (var i = 0; i < tags.length - 1; i++) {
-        if (tags[i + 1] == tags[i]) {
-          return setImmediate(cb, `Encountered duplicate tags: ${tags[i]}`);
+      for (let i = 0; i < tags.length - 1; i += 1) {
+        if (tags[i + 1] === tags[i]) {
+          throw new Error(`Encountered duplicate tags: ${tags[i]}`);
         }
       }
     }
-
     // orgId length open by year
-    let olen = org.org_id.length,
-      yyyyNum = parseInt(new Date().getFullYear())
+    const olen = org.org_id.length;
+    const yyyyNum = parseInt(new Date().getFullYear(), 10);
     if (olen <= 4) {
-      return setImmediate(cb, "Org id with 4 length not open in this year");
-    } else if (olen == 5) {
-      if (yyyyNum < 2019)
-        return setImmediate(cb, "Org id with 5 length will open in year 2019");
+      throw new Error('Org id with 4 length not open in this year');
+    } if (olen === 5) {
+      if (yyyyNum < 2019) {
+        throw new Error('Org id with 5 length will open in year 2019');
+      }
     }
-
-    // fixme
-    // state = 0, !state = true
-    // if (org.state == 0) {
-    //   return setImmediate(cb, 'State is undefined.');
-    // }
-
-    self.modules.dao.__private.getEffectiveOrgByOrgId(org.org_id, (err, orgRow) => {
-      if (err) {
-        return setImmediate(cb, err);
+    const where = { org_id: org.org_id.toLowerCase().trim() };
+    const memOrgList = await super.queryAsset(where, null, null, 1, 1, 'org');
+    const memOrgData = memOrgList[0];
+    if (org.state === 0) {
+      if (memOrgData) {
+        throw new Error(`Org ${org.org_id} already exists`);
       }
-      if (org.state == 0) {
-        if (orgRow) {
-          return setImmediate(cb, `Org ${org.org_id} already exists`);
-        }
-      } else if (org.state == 1) {
-        if (!orgRow) {
-          return setImmediate(cb, `Org ${org.org_id} not exists`);
-        }
-        if (sender.address !== orgRow.address) {
-          return setImmediate(cb, `Org ${org.org_id} not belong to you`);
-        }
+    } else if (org.state === 1) {
+      if (!memOrgData) {
+        throw new Error(`Org ${org.org_id} not exists`);
       }
-      return setImmediate(cb, null, trs);
-    });
+      if (sender.address !== memOrgData.address) {
+        throw new Error(`Org ${org.org_id} not belong to you`);
+      }
+    }
+    return null;
   }
 
-  process(trs, sender, cb) {
-    const org = trs.asset.org
+  // eslint-disable-next-line class-methods-use-this
+  async process(trs, sender) {
+    const { org } = trs.asset;
     if (!org.address) {
       org.address = sender.address;
     }
     if (org.org_id) {
-      org.org_id = org.org_id.toLowerCase()
+      org.org_id = org.org_id.toLowerCase();
     }
-
     // process cache
-    let oldOrg = processOrgIdList[org.org_id]
+    const oldOrg = processOrgIdList[org.org_id];
     if (oldOrg) {
-      let error = `Org ${org.org_id} being process for ` + (oldOrg.state ? 'change' : 'apply')
-      return cb(error);
+      const error = `Org ${org.org_id} being process for ${oldOrg.state ? 'change' : 'apply'}`;
+      throw new Error(error);
     }
-    processOrgIdList[org.org_id] = org
-
-    cb && cb(null, trs);
+    processOrgIdList[org.org_id] = org;
+    return null;
   }
 
-  getBytes(trs) {
-    const org = trs.asset.org;
+  // eslint-disable-next-line class-methods-use-this
+  async getBytes(trs) {
+    const { org } = trs.asset;
     const bb = new ByteBuffer();
-
     if (!org) {
       return null;
     }
-
     try {
       bb.writeUTF8String(org.org_id.toLowerCase());
       bb.writeUTF8String(org.name ? org.name : '');
@@ -246,53 +227,25 @@ class Org extends AssetBase {
       bb.writeUTF8String(org.url ? org.url : '');
       bb.writeUTF8String(org.tags ? org.tags : '');
       bb.writeInt8(org.state);
-
       bb.flip();
     } catch (e) {
       throw Error(e.toString());
     }
-
     return bb.toBuffer();
   }
 
-  dbRead(raw) {
-    if (!raw.org_org_id) {
-      return null;
-    }
-    return {
-      org_id: raw.org_id.toLowerCase(),
-      name: raw.name,
-      tags: raw.tags,
-      address: raw.address,
-      state: raw.state,
-      url: raw.url,
-      timestamp: raw.timestamp,
-    };
-  }
-
-  dbSave(trs, dbTrans, cb) {
-    if (typeof (cb) == "undefined" && typeof (dbTrans) == "function") {
-      cb = dbTrans;
-      dbTrans = null;
-    }
-    const org = trs.asset.org;
+  async dbSave(trs, dbTrans) {
+    const { org } = trs.asset;
     org.transaction_id = trs.id;
     org.timestamp = trs.timestamp;
     if (org.org_id) {
       org.org_id = org.org_id.toLowerCase();
     }
-
     if (org.state === 0) {
-      super.dbSave(trs, dbTrans, (err)=>{
-        if (err) return cb(err);
-        // fix
-        library.model.add('mem_org', org, dbTrans, cb);
-      });
-    } else if (org.state == 1) {
-      modules.dao.__private.updateOrgInfoNotAnyCheck(org.org_id, trs, org, dbTrans, cb)
+      await super.dbSave(trs, dbTrans);
+    } else if (org.state === 1) {
+      await super.update(org.org_id, org);
     }
-
   }
-
 }
 module.exports = Org;

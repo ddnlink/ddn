@@ -10,7 +10,9 @@
   "license": "ISC",
   "dependencies": {
     "bignum-utils": "git+ssh://git@git.ebookchain.net:ddn/bignum_utils.git",
+    "bytebuffer": "^5.0.1",
     "ddn-asset-base": "git+ssh://git@git.ebookchain.net:ddn/ddn-asset-base.git",
-    "ddn-utils": "git+ssh://git@git.ebookchain.net:ddn/ddn-utils.git"
+    "ddn-utils": "git+ssh://git@git.ebookchain.net:ddn/ddn-utils.git",
+    "valid-url": "^1.0.9"
   }
 }

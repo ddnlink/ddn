@@ -1,7 +1,7 @@
 const { AssetBase } = require('ddn-asset-base');
 const bignum = require('bignum-utils');
-const daoUtil = require('./daoUtil.js');
 const ddnUtils = require('ddn-utils');
+const daoUtil = require('./daoUtil.js');
 
 /**
   * 企业号、媒体号等交易
@@ -18,189 +18,153 @@ const ddnUtils = require('ddn-utils');
   * @fee 交易费用
   */
 class Exchange extends AssetBase {
-
-  propsMapping() {
+  // eslint-disable-next-line class-methods-use-this
+  async propsMapping() {
     return [{
-        field: "str1",
-        prop: "org_id",
-        required: true
-      }, {
-        field: "str2",
-        prop: "name"
-      }, {
-        field: "str4",
-        prop: "address"
-      }, {
-        field: "str3",
-        prop: "tags",
-        required: true
-      }, {
-        field: "str6",
-        prop: "url"
-      }, {
-        field: "int1",
-        prop: "state",
-        required: true
-      },
+      field: 'str1',
+      prop: 'org_id',
+      required: true,
+    }, {
+      field: 'str2',
+      prop: 'name',
+    }, {
+      field: 'str4',
+      prop: 'address',
+    }, {
+      field: 'str3',
+      prop: 'tags',
+      required: true,
+    }, {
+      field: 'str6',
+      prop: 'url',
+    }, {
+      field: 'int1',
+      prop: 'state',
+      required: true,
+    },
     ];
   }
 
-  create(data, trs) {
-    trs.amount = "0";
-    trs.asset.exchange = {
+  // eslint-disable-next-line class-methods-use-this
+  async create(data, trs) {
+    const trans = trs;
+    trans.amount = '0';
+    trans.asset.exchange = {
       org_id: data.org_id.toLowerCase(),
-      price: data.price || "0",
+      price: data.price || '0',
       state: data.state,
       exchange_trs_id: data.exchange_trs_id,
       sender_address: data.sender_address,
       received_address: data.received_address,
-    }
-    return trs
+    };
+    return trans;
   }
 
-  calculateFee(trs, sender){
-    library.base.block.calculateFee();
-  }
-
-  verify(trs, sender, cb) {
+  async verify(trs, sender) {
     const asset = trs.asset.exchange;
     // check org id
     if (!daoUtil.isOrgId(asset.org_id.toLowerCase())) {
-      return setImmediate(cb, 'exchange org id not allow')
+      throw new Error('exchange org id not allow');
     }
     if (!ddnUtils.Address.isAddress(sender.address)) {
-      return setImmediate(cb, "Invalid address")
+      throw new Error('Invalid address');
     }
-    if (!ddnUtils.Address.isAddress( asset.sender_address ) ){
-      return setImmediate(cb, 'senderAddress id not allow')
+    if (!ddnUtils.Address.isAddress(asset.sender_address)) {
+      throw new Error('senderAddress id not allow');
     }
-    if (!ddnUtils.Address.isAddress( asset.received_address ) ){
-      return setImmediate(cb, 'receivedAddress id not allow')
+    if (!ddnUtils.Address.isAddress(asset.received_address)) {
+      throw new Error('receivedAddress id not allow');
     }
-    if (asset.sender_address == asset.received_address ){
-      return setImmediate(cb, 'senderAddress receivedAddress cat not equal')
+    if (asset.sender_address === asset.received_address) {
+      throw new Error('senderAddress receivedAddress cat not equal');
     }
-    if (asset.sender_address != sender.address ){
-      return setImmediate(cb, 'senderAddress and sender.address should be equal')
+    if (asset.sender_address !== sender.address) {
+      throw new Error('senderAddress and sender.address should be equal');
     }
     if (bignum.isNaN(asset.price)) {
-      return setImmediate(cb, "Invalid exchange' price.");
+      throw new Error("Invalid exchange' price.");
     }
     // check state right
-    if (asset.state == 0) {
+    if (asset.state === 0) {
       // send exchange
-      //bignum update   if (trs.amount != 0)
-      if (!bignum.isZero(trs.amount))
-        return setImmediate(cb, 'Invalid transaction amount')
+      // bignum update   if (trs.amount != 0)
+      if (!bignum.isZero(trs.amount)) {
+        throw new Error('Invalid transaction amount');
+      }
       if (asset.exchange_trs_id) {
-        return setImmediate(cb, 'not need confirm exchange trs_id')
-      }else{
+        throw new Error('not need confirm exchange trs_id');
+      } else {
         // TODO: 判断媒体号是否由 sender 注册
-        modules.dao.__private.getEffectiveOrgByOrgId(asset.org_id, (err, org) => {
+        this.modules.dao.__private.getEffectiveOrgByOrgId(asset.org_id, (err, org) => {
           // console.log(err, org)
           if (err) {
             return setImmediate(cb, err);
           }
           if (!org) {
-            return setImmediate(cb, 'Org "'+asset.org_id+'" not exists');
+            return setImmediate(cb, `Org "${asset.org_id}" not exists`);
           }
-          if (org.address !== sender.address ) {
-            return setImmediate(cb, 'Org "'+asset.org_id+'" not belong to you');
+          if (org.address !== sender.address) {
+            return setImmediate(cb, `Org "${asset.org_id}" not belong to you`);
           }
-          return setImmediate(cb) // ok
+          return setImmediate(cb); // ok
         });
       }
-    }else if(asset.state === 1) {
+    } else if (asset.state === 1) {
       if (!asset.exchange_trs_id) {
-        return setImmediate(cb, 'must give confirm exchange trs_id')
-      } else {
-        // check exchangeTrsId for confirm
-        library.model.getExchanges({ exchange_trs_id: asset.exchange_trs_id }, { limit: 1 }, (err, result) => {
-          if (err)
-            return setImmediate(cb, err)
-          if (result && result.length)
-            return setImmediate(cb, 'confirm exchange already exists')
-          // confirm
-          library.model.getExchangeByTrsId(asset.exchange_trs_id, (err, result) => {
-            if (err) return setImmediate(cb, err)
-            if (!result) return setImmediate(cb, 'confirm exchange not find')
-            // console.log(trs)
-            // console.log(result)
-            if (result.org_id.toLowerCase() !== asset.org_id.toLowerCase()) return setImmediate(cb, 'confirm exchange orgId atypism')
-            //bignum update if (result.price !== trs.amount)
-            if (!bignum.isEqualTo(result.price, trs.amount)) return setImmediate(cb, 'confirm exchange amount & price atypism')
-            // address is ok
-            if (result.receivedAddress !== asset.sender_address) return setImmediate(cb, 'confirm exchange senderAddress error')
-            if (result.senderAddress !== asset.received_address) return setImmediate(cb, 'confirm exchange receivedAddress error')
-            // orgid is ok
-            if (result.org_id.toLowerCase() != asset.org_id.toLowerCase()) return setImmediate(cb, 'confirm exchange orgId should be equal')
-            // to mark the exchange is confirm ok !!!
-            trs.asset.is_confirm_ok = true // next dbSave to deal
-            return setImmediate(cb) // exchange is ok
-          })
-        })
+        return setImmediate(cb, 'must give confirm exchange trs_id');
       }
-    }else{
-      return setImmediate(cb, 'not support dao exchange state')
+      // check exchangeTrsId for confirm
+      library.model.getExchanges({ exchange_trs_id: asset.exchange_trs_id }, { limit: 1 }, (err, result) => {
+        if (err) { return setImmediate(cb, err); }
+        if (result && result.length) { return setImmediate(cb, 'confirm exchange already exists'); }
+        // confirm
+        library.model.getExchangeByTrsId(asset.exchange_trs_id, (err, result) => {
+          if (err) return setImmediate(cb, err);
+          if (!result) return setImmediate(cb, 'confirm exchange not find');
+          // console.log(trs)
+          // console.log(result)
+          if (result.org_id.toLowerCase() !== asset.org_id.toLowerCase()) return setImmediate(cb, 'confirm exchange orgId atypism');
+          // bignum update if (result.price !== trs.amount)
+          if (!bignum.isEqualTo(result.price, trs.amount)) return setImmediate(cb, 'confirm exchange amount & price atypism');
+          // address is ok
+          if (result.receivedAddress !== asset.sender_address) return setImmediate(cb, 'confirm exchange senderAddress error');
+          if (result.senderAddress !== asset.received_address) return setImmediate(cb, 'confirm exchange receivedAddress error');
+          // orgid is ok
+          if (result.org_id.toLowerCase() != asset.org_id.toLowerCase()) return setImmediate(cb, 'confirm exchange orgId should be equal');
+          // to mark the exchange is confirm ok !!!
+          trs.asset.is_confirm_ok = true; // next dbSave to deal
+          return setImmediate(cb); // exchange is ok
+        });
+      });
+    } else {
+      throw new Error('not support dao exchange state');
     }
-
+    return null;
   }
 
-  process(trs, sender, cb) {
-    trs.asset.exchange.org_id = trs.asset.exchange.org_id.toLowerCase()
-    setImmediate(cb, null, trs);
+  // eslint-disable-next-line class-methods-use-this
+  async process(trs) {
+    const trans = trs;
+    trans.asset.exchange.org_id = trs.asset.exchange.org_id.toLowerCase();
+    return trans;
   }
 
-  getBytes (trs){
+  // eslint-disable-next-line class-methods-use-this
+  async getBytes(trs) {
+    // eslint-disable-next-line no-undef
     const bb = new ByteBuffer();
     const asset = trs.asset.exchange;
-    bb.writeString(asset.org_id.toLowerCase())
-    bb.writeString(asset.exchange_trs_id)
-    bb.writeString(asset.price)
-    bb.writeInt8(asset.state)
-    bb.writeString(asset.sender_address)
-    bb.writeString(asset.received_address)
-    bb.flip()
-    return bb.toBuffer()
+    bb.writeString(asset.org_id.toLowerCase());
+    bb.writeString(asset.exchange_trs_id);
+    bb.writeString(asset.price);
+    bb.writeInt8(asset.state);
+    bb.writeString(asset.sender_address);
+    bb.writeString(asset.received_address);
+    bb.flip();
+    return bb.toBuffer();
   }
 
-  apply(trs, block, sender, dbTrans, cb) {
-    if (typeof(cb) == "undefined" && typeof(dbTrans) == "function") {
-			cb = dbTrans;
-			dbTrans = null;
-    };
-    setImmediate(cb);
-  }
-
-  undo(trs, block, sender, dbTrans, cb) {
-    if (typeof(cb) == "undefined" && typeof(dbTrans) == "function") {
-			cb = dbTrans;
-			dbTrans = null;
-    };
-    setImmediate(cb);
-  }
-
-  applyUnconfirmed(trs, sender, dbTrans, cb) {
-    if (typeof(cb) == "undefined" && typeof(dbTrans) == "function") {
-			cb = dbTrans;
-			dbTrans = null;
-    };
-    setImmediate(cb)
-  }
-
-  undoUnconfirmed(trs, sender, dbTrans, cb) {
-    if (typeof(cb) == "undefined" && typeof(dbTrans) == "function") {
-			cb = dbTrans;
-			dbTrans = null;
-    };
-    setImmediate(cb)
-  }
-
-  dbSave(trs, dbTrans, cb) {
-    if (typeof (cb) == "undefined" && typeof (dbTrans) == "function") {
-      cb = dbTrans;
-      dbTrans = null;
-    }
+  dbSave(trs, dbTrans) {
     const asset = trs.asset.exchange;
     const values = {
       transaction_id: trs.id,
@@ -212,21 +176,19 @@ class Exchange extends AssetBase {
       received_address: asset.received_address,
       timestamp: trs.timestamp,
     };
-    library.model.add('exchange', values, dbTrans, (err, result) => {
+    this.library.model.add('exchange', values, dbTrans, (err, result) => {
       // check is_confirm_ok to add update org belong
-      if (err){
-        return setImmediate(cb, err)
+      if (err) {
+        return setImmediate(cb, err);
       }
       if (!trs.asset.is_confirm_ok) {
-        return setImmediate(cb, null, result)
+        return setImmediate(cb, null, result);
       }
       // update org belong
       modules.dao.__private.updateOrgInfoNotAnyCheck(asset.org_id, trs, {
-        'address': asset.sender_address,
-      }, dbTrans, cb)
-    })
+        address: asset.sender_address,
+      }, dbTrans, cb);
+    });
   }
-
-
 }
 module.exports = Exchange;
