@@ -7,12 +7,12 @@ const { isUri } = require('valid-url');
 const daoUtil = require('./daoUtil.js');
 
 // 10 秒内不允许重复处理
-let processOrgIdList = {};
+// let processOrgIdList = {};
 
-this.bus.on('newBlock', () => {
-  // console.log("library.bus.on('newBlock'--------------processOrgIdList--------------------")
-  processOrgIdList = {};
-});
+// this.bus.on('newBlock', () => {
+//   // console.log("library.bus.on('newBlock'--------------processOrgIdList--------------------")
+//   processOrgIdList = {};
+// });
 
 class Org extends AssetBase {
 /**
@@ -204,12 +204,12 @@ class Org extends AssetBase {
       org.org_id = org.org_id.toLowerCase();
     }
     // process cache
-    const oldOrg = processOrgIdList[org.org_id];
-    if (oldOrg) {
-      const error = `Org ${org.org_id} being process for ${oldOrg.state ? 'change' : 'apply'}`;
-      throw new Error(error);
-    }
-    processOrgIdList[org.org_id] = org;
+    // const oldOrg = processOrgIdList[org.org_id];
+    // if (oldOrg) {
+    //   const error = `Org ${org.org_id} being process for ${oldOrg.state ? 'change' : 'apply'}`;
+    //   throw new Error(error);
+    // }
+    // processOrgIdList[org.org_id] = org;
     return null;
   }
 
