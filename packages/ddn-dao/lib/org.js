@@ -210,7 +210,7 @@ class Org extends AssetBase {
     //   throw new Error(error);
     // }
     // processOrgIdList[org.org_id] = org;
-    return null;
+    return trs;
   }
 
   // eslint-disable-next-line class-methods-use-this
