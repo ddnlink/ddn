@@ -1,3 +1,3 @@
 module.exports = {
-    AssetEvidence: require('./lib/asset-evidence')
+    Evidence: require('./lib/asset-evidence')
 }
