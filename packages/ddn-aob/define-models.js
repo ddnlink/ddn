@@ -9,15 +9,15 @@ function splitFileName(text) {
   }
   return text;
 }
-const arr = [];
+const models = [];
 const files = fs.readdirSync(path.resolve(__dirname, './models/'));
 files.forEach((file) => {
-  // eslint-disable-next-line
-  const item = require(path.resolve(__dirname, './models/', file));
-  arr.push({
-    name: splitFileName(file),
-    data: item,
-  });
+    // eslint-disable-next-line
+    const item = require(path.resolve(__dirname, './models/', file));
+    models.push({
+        name: splitFileName(file),
+        data: item,
+    });
 });
 
-module.exports = arr;
+module.exports = models;
