@@ -65,158 +65,114 @@ class Confirmation extends AssetBase {
     if (trs.asset.daoConfirmation.state === 0) {
       return '0'; // 拒绝稿件时手续费为0
     }
-    return this.library.base.block.calculateFee();
+    return this.tokenSetting.fixedPoint;
   }
 
-  async verify(trs, sender, cb) {
+  async verify(trs) {
     if (trs.asset.daoConfirmation.state === 0) {
       if (trs.recipient_id) {
-        return setImmediate(cb, 'Invalid recipient');
+        throw new Error('Invalid recipient');
       }
     } else if (trs.asset.daoConfirmation.state === 1) {
       if (!trs.recipient_id) {
-        return setImmediate(cb, 'Invalid recipient');
+        throw new Error('Invalid recipient');
       }
     }
-
     if (trs.asset.daoConfirmation.state === 0) {
       if (trs.amount !== 0) {
-        return setImmediate(cb, 'Invalid transaction amount');
+        throw new Error('Invalid transaction amount');
       }
     }
-
     if (!trs.asset || !trs.asset.daoConfirmation) {
-      return cb('Invalid transaction asset "Contribution"');
+      throw new Error('Invalid transaction asset "Contribution"');
     }
-
     if (!trs.asset.daoConfirmation.received_address
       || trs.asset.daoConfirmation.received_address.length > 128) {
-      return cb('received_address is undefined or too long, don`t more than 128 characters.');
+      throw new Error('received_address is undefined or too long, don`t more than 128 characters.');
     }
-
     if (!ddnUtils.Address.isAddress(trs.asset.daoConfirmation.received_address)) {
-      return cb("Invalid confirmation's received_address");
+      throw new Error("Invalid confirmation's received_address");
     }
-
     if (!trs.asset.daoConfirmation.sender_address
       || trs.asset.daoConfirmation.sender_address.length > 128) {
-      return cb('senderAddress is undefined or too long, don`t more than 128 characters.');
+      throw new Error('senderAddress is undefined or too long, don`t more than 128 characters.');
     }
-
     if (!ddnUtils.Address.isAddress(trs.asset.daoConfirmation.sender_address)) {
-      return cb("Invalid confirmation's senderAddress");
+      throw new Error("Invalid confirmation's senderAddress");
     }
-
     if (!trs.asset.daoConfirmation.url
       || trs.asset.daoConfirmation.url.length > 256) {
-      return cb('url is undefined or too long, don`t more than 256 characters.');
+      throw new Error('url is undefined or too long, don`t more than 256 characters.');
     }
-
     if (!trs.asset.daoConfirmation.contribution_trs_id
       || trs.asset.daoConfirmation.contribution_trs_id.length > 64) {
-      return cb('url is undefined or too long, don`t more than 256 characters.');
+      throw new Error('url is undefined or too long, don`t more than 256 characters.');
     }
-
     if (trs.asset.daoConfirmation.state !== 0
       && trs.asset.daoConfirmation.state !== 1) {
-      return cb('The value of state only can be: [0,1]');
+      throw new Error('The value of state only can be: [0,1]');
     }
-
     // (1)查询getConfirmation是否存在
-
-    // 判断是否确认过
-    this.dao.__private.getConfirmationByContributionTrsId(trs.asset.daoConfirmation.contribution_trs_id, (err, confirmation) => {
-      if (err) {
-        return cb(err.toString());
+    const dataArr = await super.queryAsset({
+      contribution_trs_id: trs.asset.daoConfirmation.contribution_trs_id,
+    }, null, null, 1, 1, 43);
+    if (dataArr && dataArr.length >= 1) {
+      throw new Error(`The contribution has been confirmed: ${trs.asset.daoConfirmation.contribution_trs_id}`);
+    }
+    // (2)如果不存在则继续查询
+    const dataArr2 = await super.queryAsset({
+      transaction_id: trs.asset.daoConfirmation.contribution_trs_id,
+    }, null, null, 1, 1, 42);
+    if (dataArr2 && dataArr2.length >= 1) {
+      const contribution = dataArr[0];
+      // 确认的请求地址必须和投稿的接收地址一致
+      if (trs.asset.daoConfirmation.sender_address !== contribution.received_address) {
+        throw new Error("confirmation's sender address must same as contribution's received address");
       }
-
-      if (!confirmation) {
-        getContributions();
-        // 判断要确认的投稿是否存在
-        this.modules.dao.__private.getContribution(trs.asset.daoConfirmation.contribution_trs_id,
-          (err2, contribution) => {
-            if (err) {
-              return cb(err.toString());
-            }
-            if (contribution) {
-            // 确认的请求地址必须和投稿的接收地址一致
-              if (trs.asset.daoConfirmation.sender_address != contribution.received_address) {
-                return cb("confirmation's sender address must same as contribution's received address");
-              }
-
-              // 确认的接收地址必须和投稿的发送地址一致
-              if (trs.asset.daoConfirmation.received_address != contribution.sender_address) {
-                return cb("confirmation's received address must same as contribution's sender address");
-              }
-
-              // 判断交易的价格是否和投稿的价值一致
-              if (trs.asset.daoConfirmation.state == 1) {
-                if (trs.amount != contribution.price) {
-                  return cb(`The transaction's amount must be equal contribution's price: ${contribution.price}`);
-                }
-              }
-            } else {
-              return cb(`The contribution is not find: ${trs.asset.daoConfirmation.contribution_trs_id}`);
-            }
-            return cb(null, trs);
-          });
-      } else {
-        return cb(`The contribution has been confirmed: ${trs.asset.daoConfirmation.contribution_trs_id}`);
+      // 确认的接收地址必须和投稿的发送地址一致
+      if (trs.asset.daoConfirmation.received_address !== contribution.sender_address) {
+        throw new Error("confirmation's received address must same as contribution's sender address");
       }
-    });
+      // 判断交易的价格是否和投稿的价值一致
+      if (trs.asset.daoConfirmation.state === 1) {
+        if (trs.amount !== contribution.price) {
+          throw new Error(`The transaction's amount must be equal contribution's price: ${contribution.price}`);
+        }
+      }
+    } else {
+      throw new Error(`The contribution has been confirmed: ${trs.asset.daoConfirmation.contribution_trs_id}`);
+    }
     return null;
   }
 
   // 新增事务dbTrans ---wly
   async apply(trs, block, sender, dbTrans) {
     if (trs.asset.daoConfirmation.state === 1) {
-      this.accounts.setAccountAndGet({
+      await this.runtime.account.setAccount({ address: trs.recipient_id }, dbTrans);
+      await this.runtime.account.merge(trs.recipient_id, {
         address: trs.recipient_id,
-      }, dbTrans, (err, recipient) => { // wxm block database
-        if (err) {
-          return cb(err);
-        }
-        this.accounts.mergeAccountAndGet({
-          address: trs.recipient_id, // wxm block database
-          balance: trs.amount,
-          u_balance: trs.amount,
-          block_id: block.id, // wxm block database
-          round: this.round.calc(block.height).toString(),
-        },
-        dbTrans,
-        (err) => {
-          cb(err);
-        });
-      });
-    } else {
-      setImmediate(cb);
+        balance: trs.amount,
+        u_balance: trs.amount,
+        block_id: block.id,
+        round: this.round.calc(block.height).toString(),
+      }, dbTrans);
     }
   }
 
   // 新增事务dbTrans ---wly
   async undo(trs, block, sender, dbTrans) {
     if (trs.asset.daoConfirmation.state === 1) {
-      this.modules.accounts.setAccountAndGet({
+      await this.runtime.account.setAccount({
         address: trs.recipient_id,
-      }, dbTrans, (err, recipient) => { // wxm block database
-        if (err) {
-          return cb(err);
-        }
-        const amountStr = bignum.minus(0, trs.amount).toString();
-        this.modules.accounts.mergeAccountAndGet({
-          address: trs.recipient_id, // wxm block database
-          balance: amountStr,
-          u_balance: amountStr,
-          block_id: block.id, // wxm block database
-          round: this.modules.round.calc(block.height).toString(),
-        },
-        dbTrans,
-        (err) => {
-          cb(err);
-        });
-      });
-    } else {
-      return null;
+      }, dbTrans);
+      const amountStr = bignum.minus(0, trs.amount).toString();
+      await this.runtime.account.merge(trs.recipient_id, {
+        address: trs.recipient_id,
+        balance: amountStr,
+        u_balance: amountStr,
+        block_id: block.id,
+        round: this.modules.round.calc(block.height).toString(),
+      }, dbTrans);
     }
   }
 
@@ -230,18 +186,9 @@ class Confirmation extends AssetBase {
       transaction_id: trs.id,
       timestamp: trs.timestamp,
     };
-    this.dao.insert('confirmation', params, dbTrans);
-  }
-
-  // eslint-disable-next-line class-methods-use-this
-  async ready(trs, sender) {
-    if (sender.multisignatures.length) {
-      if (!trs.signatures) {
-        return false;
-      }
-      return trs.signatures.length >= sender.multimin - 1;
-    }
-    return true;
+    const trans = trs;
+    trans.asset.daoConfirmation = params;
+    super.dbSave(trans, dbTrans);
   }
 }
 module.exports = Confirmation;

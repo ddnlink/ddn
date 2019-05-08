@@ -139,7 +139,6 @@ class Confirmation extends AssetBase {
     return null;
   }
 
-  // eslint-disable-next-line class-methods-use-this
   async dbSave(trs, dbTrans) {
     const newData = {
       title: trs.asset.daoContribution.title,
@@ -150,18 +149,9 @@ class Confirmation extends AssetBase {
       transaction_id: trs.id,
       timestamp: trs.timestamp,
     };
-    await super.dbSave(newData, dbTrans);
-  }
-
-  // eslint-disable-next-line class-methods-use-this
-  async ready(trs, sender) {
-    if (sender.multisignatures.length) {
-      if (!trs.signatures) {
-        return false;
-      }
-      return trs.signatures.length >= sender.multimin - 1;
-    }
-    return true;
+    const trans = trs;
+    trans.asset.daoContribution = newData;
+    await super.dbSave(trans, dbTrans);
   }
 }
 module.exports = Confirmation;
