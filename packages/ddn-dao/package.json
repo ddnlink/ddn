@@ -13,6 +13,7 @@
     "bytebuffer": "^5.0.1",
     "ddn-asset-base": "git+ssh://git@git.ebookchain.net:ddn/ddn-asset-base.git",
     "ddn-utils": "git+ssh://git@git.ebookchain.net:ddn/ddn-utils.git",
+    "ed25519": "0.0.4",
     "valid-url": "^1.0.9"
   }
 }
