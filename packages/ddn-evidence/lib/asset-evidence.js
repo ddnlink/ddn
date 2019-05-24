@@ -1,4 +1,4 @@
-var { AssetBase, AssetUtils } = require('ddn-asset-base');
+var { AssetBase } = require('ddn-asset-base');
 
 class AssetEvidence extends AssetBase
 {
@@ -19,13 +19,14 @@ class AssetEvidence extends AssetBase
 
     async verify(trs, sender)
     {
-        var trans = await super.verify(trs, sender);
-
-        var results = await super.queryAsset({
-            ipid: trans.asset.assetEvidence.ipid
+        const trans = await super.verify(trs, sender);
+        const assetObj = await this.getAssetObject(trs);
+        
+        const results = await super.queryAsset({
+            ipid: assetObj.ipid
         }, ["ipid"], false, 1, 1);
         if (results && results.length > 0) {
-            var oldEvidence = results[0];
+            const oldEvidence = results[0];
             return await new Promise((resolve, reject) => {
                 this.dao.findOneByPrimaryKey("tr", oldEvidence.transaction_id, 
                 ["sender_id"], async (err, result) => {
@@ -33,14 +34,14 @@ class AssetEvidence extends AssetBase
                         reject(err);
                     } else {
                         if (result.sender_id != sender.address) {
-                            return reject('The evidence ipid ' + trans.asset.assetEvidence.ipid + ' has been registered by ' + result.sender_id);
+                            return reject('The evidence ipid ' + assetObj.ipid + ' has been registered by ' + result.sender_id);
                         } else {
                             var results2;
                             try
                             {
                                 results2 = await super.queryAsset({
-                                    ipid: trans.asset.assetEvidence.ipid,
-                                    hash: trans.asset.assetEvidence.hash
+                                    ipid: assetObj.ipid,
+                                    hash: assetObj.hash
                                 }, ["ipid", "hash"], false, 1, 1);
                             }
                             catch (err2)
@@ -49,7 +50,7 @@ class AssetEvidence extends AssetBase
                             }
 
                             if (results2 && results2.length > 0) {
-                                return reject('The evidence hash already exists: ' + trans.asset.assetEvidence.hash);
+                                return reject('The evidence hash already exists: ' + assetObj.hash);
                             } else {
                                 resolve(trans);
                             }
@@ -63,9 +64,10 @@ class AssetEvidence extends AssetBase
     }
 
     async applyUnconfirmed(trs, sender, dbTrans) {
-        var key = `${sender.address}:${trs.type}:${trs.asset.assetEvidence.ipid}`;
+        const assetObj = await this.getAssetObject(trs);
+        const key = `${sender.address}:${trs.type}:${assetObj.ipid}`;
         if (this.oneoff.has(key)) {
-            throw new Error(`The evidence ${trs.asset.assetEvidence.ipid} is in process already.`);
+            throw new Error(`The evidence ${assetObj.ipid} is in process already.`);
         }
 
         await super.applyUnconfirmed(trs, sender, dbTrans);
@@ -74,7 +76,8 @@ class AssetEvidence extends AssetBase
     }
 
     async undoUnconfirmed(trs, sender, dbTrans) {
-        const key = `${sender.address}:${trs.type}:${trs.asset.assetEvidence.ipid}`;
+        const assetObj = await this.getAssetObject(trs);
+        const key = `${sender.address}:${trs.type}:${assetObj.ipid}`;
         this.oneoff.delete(key);
 
         var result = await super.undoUnconfirmed(trs, sender, dbTrans);
