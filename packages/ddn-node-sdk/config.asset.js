@@ -1,7 +1,7 @@
 exports.evidence = {
     transactions: [
         {
-            name: "AssetEvidence",
+            name: "Evidence",
             type: 10,
         }
     ],
@@ -35,4 +35,25 @@ exports.aob = {
         }
     ],
     package: "ddn-aob"
+}
+exports.dao = {
+    transactions: [
+        {
+            name: "Org",
+            type: 40,
+        },
+        {
+            name: "Exchange",
+            type: 41,
+        },
+        {
+            name: "Contribution",
+            type: 42,
+        },
+        {
+            name: "Confirmation",
+            type: 43,
+        },
+    ],
+    package: "ddn-dao"
 }

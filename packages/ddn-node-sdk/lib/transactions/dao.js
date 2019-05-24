@@ -30,7 +30,7 @@ function isOrgId(dao_id) {
     } else {
       return false
     }
-  }
+}
 
 function createOrg(org, secret, second_secret) {
 	var keys = crypto.getKeys(secret);
@@ -243,5 +243,5 @@ module.exports = {
     createOrg: createOrg,
     createConfirmation: createConfirmation,
     createTransfer: createTransfer,
-	createContribution: createContribution
+    createContribution: createContribution
 };

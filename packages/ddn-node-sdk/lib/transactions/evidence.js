@@ -26,7 +26,7 @@ function createEvidence(evidence, secret, secondSecret) {
 	var fee = constants.fees.evidence;
 
 	var transaction = {
-		type: transactionTypes.EVIDENCE,
+		type: 10,   //transactionTypes.EVIDENCE,
 		nethash: options.get('nethash'),
 		amount: "0",   
 		fee: fee,

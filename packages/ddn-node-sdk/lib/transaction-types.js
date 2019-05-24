@@ -20,13 +20,13 @@ module.exports = {
   USERINFO: 9,
 
   // Evidence: 20-39, 
-  EVIDENCE: 20,
+//   EVIDENCE: 20,
   
   // DAO 40-59
-  ORG: 40,
-  EXCHANGE: 41,
-  CONTRIBUTION: 42,
-  CONFIRMATION: 43,
+//   ORG: 40,
+//   EXCHANGE: 41,
+//   CONTRIBUTION: 42,
+//   CONFIRMATION: 43,
 
   //Coupon 
   COUPON_ISSUER_AUDITOR_BUY: 49,
