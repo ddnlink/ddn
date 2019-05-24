@@ -67,9 +67,23 @@ const _assetFiledRules = {
 
 class AssetBase {
 
-    constructor(context) {
+    constructor(context, transactionConfig) {
         Object.assign(this, context);
         this._context = context;
+
+        this._transactionConfig = transactionConfig;
+    }
+
+    async getTransactionType() {
+        return this._transactionConfig.type;
+    }
+
+    async getTransactionName() {
+        return this._transactionConfig.name;
+    }
+
+    async getPackageName() {
+        return this._transactionConfig.package;
     }
 
     /**
@@ -82,12 +96,12 @@ class AssetBase {
     }
 
     /**
-     * 计算该类型资产交易的手续费
+     * 计算该类型资产交易的手续费（方法内不允许使用context对象内容）
      * @param {*} trs 
      * @param {*} sender 
      */
     async calculateFee(trs, sender) {
-        return await this.runtime.block.calculateFee();
+        return bignum.multiply(0.1, 100000000);
     }
 
     /**
@@ -188,6 +202,25 @@ class AssetBase {
         }
     }
 
+    async getAssetJsonName(type) {
+        if (!type) {
+            type = await this.getTransactionType();
+        }
+        return AssetUtils.getAssetJsonName(type);
+    }
+
+    /**
+     * 获得交易信息中的当前资产对象
+     * @param {*} trs 
+     */
+    async getAssetObject(trs) {
+        if (!trs || !trs.asset) {
+            return null;
+        }
+        var assetJsonName = AssetUtils.getAssetJsonName(trs.type);
+        return trs.asset[assetJsonName];
+    }
+
     //资产模块相关方法
     /**
      * 
@@ -198,10 +231,6 @@ class AssetBase {
      * @param {*} cb 
      */
     async getAssetBase(filter, hasExtProps, pageIndex, pageSize, orders, returnTotal, attributes) {
-        if(typeof (orders) != "array"){
-            orders = null;
-        }
-
         attributes = [
             ['transaction_id', 'asset_trs_id'],
             ['transaction_type', 'asset_trs_type'],
@@ -492,7 +521,7 @@ class AssetBase {
             }
             if (assetTrans) {
                 var assetCls = require(assetTrans.package)[assetTrans.name];
-                assetInst = new assetCls(this._context);
+                assetInst = new assetCls(this._context, assetTrans);
             }
         }
         // 解析obj
@@ -903,7 +932,7 @@ class AssetBase {
         }
     }
 
-    async dbSave(trs, dbTrans, cb) {
+    async dbSave(trs, dbTrans) {
         var assetName = AssetUtils.getAssetJsonName(trs.type);
         var asset = trs.asset[assetName];
 
