@@ -36,11 +36,11 @@ class Issue extends AssetBase {
     // (1)得到资产数据
     // (1)查询到asset的数据列表
     let result;
-    result = await super.queryAsset({ name: trs.asset.aobIssue.currency }, null, null, 1, 1, 76);
+    result = await super.queryAsset({ name: trs.asset.aobIssue.currency }, null, null, 1, 1, 61);
     // (2)查询到issuer的数据列表
     let issuerData = await super.queryAsset({
       $in: _.pluck(result, 'issuer_name'),
-    }, null, null, 1, 1000, 75);
+    }, null, null, 1, 1000, 60);
     issuerData = _.indexBy(issuerData, 'name');
     result = _.map(result, (num) => {
       const num2 = num;
@@ -135,9 +135,9 @@ class Issue extends AssetBase {
     const { currency } = trs.asset.aobIssue;
     const { amount } = trs.asset.aobIssue;
     this.balanceCache.addAssetBalance(sender.address, currency, amount);
-    const data = await super.queryAsset({ name: currency, trs_type: 76 }, null, null, 1, 1, 'AobAsset');
+    const data = await super.queryAsset({ name: currency, trs_type: 61 }, null, null, 1, 1, 'AobAsset');
     const { quantity } = data[0];
-    await super.update({ quantity: bignum.plus(quantity, amount).toString() }, { name: currency, trs_type: 76 }, 'AobAsset', dbTrans);
+    await super.update({ quantity: bignum.plus(quantity, amount).toString() }, { name: currency, trs_type: 61 }, 'AobAsset', dbTrans);
     const assetBalancedata = await new Promise((resolve) => {
       this.dao.findOne('mem_asset_balance', { address: sender.address, currency }, ['balance'], (err, rows) => {
         if (err) {
@@ -169,9 +169,9 @@ class Issue extends AssetBase {
       throw new Error(`Invalid asset balance: ${balance}`);
     }
     this.balanceCache.addAssetBalance(sender.address, currency, `-${amount}`);
-    const data = await super.queryAsset({ name: currency, trs_type: 76 }, null, null, 1, 1, 'AobAsset');
+    const data = await super.queryAsset({ name: currency, trs_type: 61 }, null, null, 1, 1, 'AobAsset');
     const { quantity } = data[0];
-    await super.update({ quantity: bignum.plus(quantity, amount).toString() }, { name: currency, trs_type: 76 }, 'AobAsset', dbTrans);
+    await super.update({ quantity: bignum.plus(quantity, amount).toString() }, { name: currency, trs_type: 61 }, 'AobAsset', dbTrans);
     // helper.updateAssetBalance(currency, amount, sender.address, dbTrans, next);
     const assetBalancedata = await new Promise((resolve) => {
       this.dao.findOne('mem_asset_balance', { address: sender.address, currency }, ['balance'], (err, rows) => {

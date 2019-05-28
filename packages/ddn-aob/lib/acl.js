@@ -63,7 +63,7 @@ class Acl extends AssetBase {
 
     const assetData = await super.queryAsset({
       name: asset.currency,
-    }, null, null, 1, 1, 76);
+    }, null, null, 1, 1, 61);
     if (assetData && assetData.length > 0) {
       throw new Error('asset->name Double register form ddn-aob');
     }
@@ -81,7 +81,7 @@ class Acl extends AssetBase {
     }
     const issuerData = await super.queryAsset({
       name: asset.currency,
-    }, null, null, 1, 1, 75);
+    }, null, null, 1, 1, 60);
     if (issuerData[0].issuer_id !== sender.address) {
       throw new Error('Permission not allowed');
     }

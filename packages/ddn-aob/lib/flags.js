@@ -38,7 +38,7 @@ class Flags extends AssetBase {
 
     const assetData = await super.queryAsset({
       name: trs.asset.aobFlags.currency,
-    }, null, null, 1, 1, 76);
+    }, null, null, 1, 1, 61);
     if (assetData && assetData.length > 0) {
       throw new Error('asset->name Double register form ddn-aob');
     }
@@ -56,7 +56,7 @@ class Flags extends AssetBase {
     }
     const issuerData = await super.queryAsset({
       name: trs.asset.aobFlags.currency,
-    }, null, null, 1, 1, 75);
+    }, null, null, 1, 1, 60);
     if (issuerData[0].issuer_id !== sender.address) {
       throw new Error('Permission not allowed');
     }
@@ -70,7 +70,7 @@ class Flags extends AssetBase {
     const asset = trs.asset.aobFlags;
     const where = {
       name: asset.currency,
-      trs_type: 76,
+      trs_type: 61,
     };
     const obj = {
       [flagsHelper.getTypeName(asset.flag_type)]: asset.flag,
@@ -83,7 +83,7 @@ class Flags extends AssetBase {
     const asset = trs.asset.aobFlags;
     const where = {
       name: asset.currency,
-      trs_type: 76,
+      trs_type: 61,
     };
     const obj = {
       // eslint-disable-next-line no-bitwise

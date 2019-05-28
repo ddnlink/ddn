@@ -103,11 +103,11 @@ class Asset extends AssetBase {
     if (asset.allow_blacklist !== '0' && asset.allow_blacklist !== '1') {
       throw new Error('Asset allowBlacklist is not valid form ddn-aob');
     }
-    const assetData = await super.queryAsset({ name: asset.name }, null, null, 1, 1, 76);
+    const assetData = await super.queryAsset({ name: asset.name }, null, null, 1, 1, 61);
     if (assetData && assetData.length > 0) {
       throw new Error('asset->name Double register form ddn-aob');
     }
-    const issuerData = await super.queryAsset({ name: issuerName }, null, null, 1, 1, 75);
+    const issuerData = await super.queryAsset({ name: issuerName }, null, null, 1, 1, 60);
     if (!issuerData || !issuerData.length > 0) {
       throw new Error('Issuer not exists form ddn-aob');
     }
