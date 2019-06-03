@@ -10,29 +10,21 @@ exports.evidence = {
 exports.aob = {
     transactions: [
         {
-            name: "AobIssuer",
-            type: 75,
+            name: "Issuer",
+            type: 60,
         },
         {
-            name: "AobAsset",
-            type: 76,
+            name: "Asset",
+            type: 61,
         },
         {
-            name: "AobIssue",
-            type: 77,
+            name: "Issue",
+            type: 64,
         },
         {
-            name: "AobTransfer",
-            type: 78,
+            name: "Transfer",
+            type: 65,
         },
-        {
-            name: "AobAcl",
-            type: 79,
-        },
-        {
-            name: "AobFlag",
-            type: 80,
-        }
     ],
     package: "ddn-aob"
 }
