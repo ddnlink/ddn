@@ -221,6 +221,10 @@ class AssetBase {
         return trs.asset[assetJsonName];
     }
 
+    async getAssetInstanceByClass(cls) {
+        return AssetUtils.getAssetInstanceByClass(this._context, cls);
+    }
+
     //资产模块相关方法
     /**
      * 
@@ -317,6 +321,7 @@ class AssetBase {
      * @param {*} pageSize 分页的大小，每页的返回的最大记录条数
      * @param {*} asset 资产交易的配置name或type（config.asset.js文件中定义）
      */
+    //TODO 此处应该默认加上trs_type的查询条件，只能查询本资产的内容
     async queryAsset(where, orders, returnTotal, pageIndex, pageSize, asset) {
         var assetInst = this;
         if (asset) {
@@ -359,11 +364,11 @@ class AssetBase {
                 newConds[condProp.field] = where[p];
             } else {
                 var pName = p.toLowerCase();
-                if (pName == "trs_id") {
+                if (pName == "trs_id" || pName == "transaction_id") {
                     newConds["transaction_id"] = where[p];
-                } else if (pName == "trs_type") {
+                } else if (pName == "trs_type" || pName == "transaction_type") {
                     newConds["transaction_type"] = where[p];
-                } else if (pName == "trs_timestamp") {
+                } else if (pName == "trs_timestamp" || pName == "timestamp") {
                     newConds["timestamp"] = where[p];
                 }
             }
@@ -429,7 +434,7 @@ class AssetBase {
 
         var data = await this.getAssetBase(newConds, await assetInst.hasExtProps(), 
             pageIndex, pageSize, newOrders, returnTotal, attributes);
-        
+
         var rows = data && data.rows ? data.rows : data;
         if (rows && rows.length > 0) {
             var rowObjs = [];
@@ -894,7 +899,7 @@ class AssetBase {
                 transaction_type: raw.asset_trs_type,
                 timestamp: raw.asset_timestamp
             };
-
+    
             var props = await this.propsMapping();
             if (props && props.length > 0) {
                 for (var i = 0; i < props.length; i++) {
