@@ -1,9 +1,11 @@
+/* eslint-disable class-methods-use-this */
 const {
   AssetBase,
 } = require('ddn-asset-base');
 const assert = require('assert');
 const bignum = require('bignum-utils');
 const ddnUtils = require('ddn-utils');
+const flagsHelper = require('./flagsHelper');
 
 
 class Asset extends AssetBase {
@@ -165,5 +167,61 @@ class Asset extends AssetBase {
     const result = await super.dbSave(trans, dbTrans);
     return result;
   }
+
+  /**
+     * 自定义资产Api
+     */
+  async attachApi(router) {
+    router.get('/assets', async (req, res) => {
+      try {
+        const result = await this.getList(req, res);
+        res.json(result);
+      } catch (err) {
+        res.json({ success: false, error: err.message || err.toString() });
+      }
+    });
+
+    router.get('/assets/:name', async (req, res) => {
+      try {
+        const result = await this.getOneByName(req, res);
+        res.json(result);
+      } catch (err) {
+        res.json({ success: false, error: err.message || err.toString() });
+      }
+    });
+
+    router.get('/assets/:name/acl/:flag', async (req, res) => {
+      try {
+        const result = await this.getAssetAcl(req, res);
+        res.json(result);
+      } catch (err) {
+        res.json({ success: false, error: err.message || err.toString() });
+      }
+    });
+  }
+
+  async getList(req) {
+    // 确定页数相关
+    const pageIndex = req.query.pageindex || 1;
+    const pageSize = req.query.pagesize || 50;
+    const limit = pageSize;
+    const offset = (pageIndex - 1) * pageSize;
+    const data = await super.queryAsset({ trs_type: 61 }, null, true, offset, limit);
+    return data;
+  }
+
+  async getOneByName(req) {
+    const { url } = req;
+    const name = url.split('/')[2];
+    if (!name) {
+      return '无效参数 name';
+    }
+    const data = await super.queryAsset({
+      trs_type: 61,
+      name,
+    }, null, false, 0, 1);
+    return data[0];
+  }
 }
+
 module.exports = Asset;

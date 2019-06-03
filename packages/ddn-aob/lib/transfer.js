@@ -3,6 +3,8 @@ const {
 } = require('ddn-asset-base');
 const bignum = require('bignum-utils');
 const ddnUtils = require('ddn-utils');
+const crypto = require('crypto');
+const ed = require('ed25519');
 
 class Transfer extends AssetBase {
   // eslint-disable-next-line class-methods-use-this
@@ -235,6 +237,179 @@ class Transfer extends AssetBase {
     const transfer = trs.asset.aobTransfer;
     this.balanceCache.addAssetBalance(sender.address, transfer.currency, transfer.amount);
     return null;
+  }
+
+  /**
+   * 自定义资产Api
+   */
+  async attachApi(router) {
+    router.put('/transfers', async (req, res) => {
+      try {
+        const result = await this.getList(req, res);
+        res.json(result);
+      } catch (err) {
+        res.json({ success: false, error: err.message || err.toString() });
+      }
+    });
+  }
+
+  async transferAsset(req) {
+    const { body } = req;
+    const validateErrors = await this.ddnSchema.validate({
+      type: 'object',
+      properties: {
+        secret: {
+          type: 'string',
+          minLength: 1,
+          maxLength: 100,
+        },
+        currency: {
+          type: 'string',
+          maxLength: 22,
+        },
+        amount: {
+          type: 'string',
+          maxLength: 50,
+        },
+        recipientId: {
+          type: 'string',
+          minLength: 1,
+        },
+        publicKey: {
+          type: 'string',
+          format: 'publicKey',
+        },
+        secondSecret: {
+          type: 'string',
+          minLength: 1,
+          maxLength: 100,
+        },
+        multisigAccountPublicKey: {
+          type: 'string',
+          format: 'publicKey',
+        },
+        message: {
+          type: 'string',
+          maxLength: 256,
+        },
+      },
+      required: ['secret', 'amount', 'recipientId', 'currency'],
+    }, body);
+    if (validateErrors) {
+      throw new Error(`Invalid parameters: ${validateErrors[0].message}`);
+    }
+
+    const hash = crypto.createHash('sha256').update(body.secret, 'utf8').digest();
+    const keypair = ed.MakeKeypair(hash);
+    if (body.publicKey) {
+      if (keypair.publicKey.toString('hex') !== body.publicKey) {
+        return 'Invalid passphrase';
+      }
+    }
+    const promise = new Promise((resolve, reject) => {
+      // eslint-disable-next-line consistent-return
+      this.balancesSequence.add(async (cb) => {
+        if (body.multisigAccountPublicKey && body.multisigAccountPublicKey !== keypair.publicKey.toString('hex')) {
+          let account;
+          try {
+            account = await this.runtime.account.getAccountByPublicKey(
+              body.multisigAccountPublicKey,
+            );
+          } catch (e) {
+            return cb(e);
+          }
+          if (!account) {
+            return cb('Multisignature account not found');
+          }
+          if (!account.multisignatures) {
+            return cb('Account does not have multisignatures enabled');
+          }
+          if (account.multisignatures.indexOf(keypair.publicKey.toString('hex')) < 0) {
+            return cb('Account does not belong to multisignature group');
+          }
+          let requester;
+          try {
+            requester = await this.runtime.account.getAccountByPublicKey(keypair.publicKey);
+          } catch (e) {
+            return cb(e);
+          }
+          if (!requester || !requester.public_key) {
+            return cb('Invalid requester');
+          }
+          if (requester.second_signature && !body.secondSecret) {
+            return cb('Invalid second passphrase');
+          }
+
+          if (requester.public_key === account.public_key) {
+            return cb('Invalid requester');
+          }
+
+          let secondKeypair = null;
+
+          if (requester.secondSignature) {
+            const secondHash = crypto.createHash('sha256').update(body.secondSecret, 'utf8').digest();
+            secondKeypair = ed.MakeKeypair(secondHash);
+          }
+          let transaction;
+          try {
+            transaction = await this.runtime.transaction.create({
+              type: 65,
+              amount: body.amount,
+              currency: body.currency,
+              sender: account,
+              recipientId: body.recipientId,
+              keypair,
+              requester: keypair,
+              secondKeypair,
+              message: body.message,
+            });
+          } catch (e) {
+            return cb(e.toString());
+          }
+          await this.runtime.transaction.receiveTransactions([transaction], cb);
+        } else {
+          let account;
+          try {
+            account = await this.runtime.account.getAccountByPublicKey(keypair.publicKey.toString('hex'));
+          } catch (e) {
+            return cb(e);
+          }
+          if (!account) {
+            return cb('Account not found');
+          }
+          if (account.secondSignature && !body.secondSecret) {
+            return cb('Invalid second passphrase');
+          }
+          let secondKeypair = null;
+          if (account.secondSignature) {
+            const secondHash = crypto.createHash('sha256').update(body.secondSecret, 'utf8').digest();
+            secondKeypair = ed.MakeKeypair(secondHash);
+          }
+          let transaction;
+          try {
+            transaction = this.runtime.transaction.create({
+              type: 65,
+              currency: body.currency,
+              amount: body.amount,
+              sender: account,
+              recipientId: body.recipientId,
+              keypair,
+              secondKeypair,
+              message: body.message,
+            });
+          } catch (e) {
+            return cb(e.toString());
+          }
+          this.runtime.transactions.receiveTransactions([transaction], cb);
+        }
+      }, (err, transactions) => {
+        if (err) {
+          return reject(err);
+        }
+        resolve({ success: true, transactionId: transactions[0].id });
+      });
+    });
+    return promise;
   }
 }
 module.exports = Transfer;

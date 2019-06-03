@@ -42,5 +42,75 @@ class Issuer extends AssetBase {
       return trans;
     }
   }
+
+  /**
+     * 自定义资产Api
+     */
+  async attachApi(router) {
+    router.get('/issuers', async (req, res) => {
+      try {
+        const result = await this.getList(req, res);
+        res.json(result);
+      } catch (err) {
+        res.json({ success: false, error: err.message || err.toString() });
+      }
+    });
+    router.get('/issuers/:name', async (req, res) => {
+      try {
+        const result = await this.getOneByName(req, res);
+        res.json(result);
+      } catch (err) {
+        res.json({ success: false, error: err.message || err.toString() });
+      }
+    });
+    router.get('/issuers/:name/assets', async (req, res) => {
+      try {
+        const result = await this.getIssuerAssets(req, res);
+        res.json(result);
+      } catch (err) {
+        res.json({ success: false, error: err.message || err.toString() });
+      }
+    });
+  }
+
+  async getList(req) {
+    // 确定页数相关
+    const pageIndex = req.query.pageindex || 1;
+    const pageSize = req.query.pagesize || 50;
+    const limit = pageSize;
+    const offset = (pageIndex - 1) * pageSize;
+    const data = await super.queryAsset({ trs_type: 60 }, null, true, offset, limit);
+    return data;
+  }
+
+  async getOneByName(req) {
+    const { url } = req;
+    const name = url.split('/')[2];
+    if (!name) {
+      return '无效参数 name';
+    }
+    const data = await super.queryAsset({
+      trs_type: 60,
+      name,
+    }, null, false, 0, 1);
+    return data[0];
+  }
+
+  async getIssuerAssets(req) {
+    const { url } = req;
+    const name = url.split('/')[2];
+    if (!name) {
+      return '无效参数 name';
+    }
+    const pageIndex = req.query.pageindex || 1;
+    const pageSize = req.query.pagesize || 50;
+    const limit = pageSize;
+    const offset = (pageIndex - 1) * pageSize;
+    const data = await super.queryAsset({
+      trs_type: 61,
+      issuerName: name,
+    }, null, true, offset, limit, 61);
+    return data;
+  }
 }
 module.exports = Issuer;
