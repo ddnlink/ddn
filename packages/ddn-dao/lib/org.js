@@ -309,6 +309,15 @@ class Org extends AssetBase {
                 res.json({success: false, error: err.message || err.toString()});
             }
         });
+
+        router.get("/address/:address", async(req, res) => {
+            try {
+                const result = await daoUtil.getEffectiveOrgByAddress(this._context, req.params.address)
+                res.json({success: true, data: {org: result}});
+            } catch (err) {
+                res.json({success: false, error: err.message || err.toString()});
+            }
+        });
     }
 
     /**

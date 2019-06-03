@@ -43,6 +43,10 @@ async function getEffectiveOrg(context, where) {
     });
 }
 
+async function getEffectiveOrgByAddress(context, address) {
+    return await getEffectiveOrg(context, { address: address });
+}
+
 async function getEffectiveOrgByOrgId(context, orgId) {
     return await getEffectiveOrg(context, { org_id: orgId.toLowerCase() });
 }
@@ -70,6 +74,7 @@ module.exports = {
     isOrgId,
     updateOrg,
     getEffectiveOrg,
+    getEffectiveOrgByAddress,
     getEffectiveOrgByOrgId,
     exchangeOrg
 };
