@@ -5,7 +5,6 @@ const {
 const assert = require('assert');
 const bignum = require('bignum-utils');
 const ddnUtils = require('ddn-utils');
-const flagsHelper = require('./flagsHelper');
 
 
 class Asset extends AssetBase {
@@ -105,11 +104,16 @@ class Asset extends AssetBase {
     if (asset.allow_blacklist !== '0' && asset.allow_blacklist !== '1') {
       throw new Error('Asset allowBlacklist is not valid form ddn-aob');
     }
-    const assetData = await super.queryAsset({ name: asset.name }, null, null, 1, 1, 61);
+    const trsType = await super.getTransactionType();
+    const assetData = await super.queryAsset({
+      name: asset.name, trs_type: trsType,
+    }, null, null, 1, 1);
     if (assetData && assetData.length > 0) {
       throw new Error('asset->name Double register form ddn-aob');
     }
-    const issuerData = await super.queryAsset({ name: issuerName }, null, null, 1, 1, 60);
+    const issuerData = await super.queryAsset({
+      name: issuerName, trs_type: trsType - 1,
+    }, null, null, 1, 1);
     if (!issuerData || !issuerData.length > 0) {
       throw new Error('Issuer not exists form ddn-aob');
     }
@@ -172,7 +176,7 @@ class Asset extends AssetBase {
      * 自定义资产Api
      */
   async attachApi(router) {
-    router.get('/assets', async (req, res) => {
+    router.get('/list', async (req, res) => {
       try {
         const result = await this.getList(req, res);
         res.json(result);
@@ -181,7 +185,7 @@ class Asset extends AssetBase {
       }
     });
 
-    router.get('/assets/:name', async (req, res) => {
+    router.get('/:name', async (req, res) => {
       try {
         const result = await this.getOneByName(req, res);
         res.json(result);
@@ -190,9 +194,26 @@ class Asset extends AssetBase {
       }
     });
 
-    router.get('/assets/:name/acl/:flag', async (req, res) => {
+    router.get('/:name/acl/:flag', async (req, res) => {
       try {
         const result = await this.getAssetAcl(req, res);
+        res.json(result);
+      } catch (err) {
+        res.json({ success: false, error: err.message || err.toString() });
+      }
+    });
+
+    router.get('/balances/:address', async (req, res) => { // 127.0.0.1:8001/api/aobasset/balances/:address
+      try {
+        const result = await this.getBalances(req, res);
+        res.json(result);
+      } catch (err) {
+        res.json({ success: false, error: err.message || err.toString() });
+      }
+    });
+    router.get('/balances/:address/:currency', async (req, res) => { // 127.0.0.1:8001/api/aobasset/balances/:address/:currency
+      try {
+        const result = await this.getBalance(req, res);
         res.json(result);
       } catch (err) {
         res.json({ success: false, error: err.message || err.toString() });
@@ -206,21 +227,78 @@ class Asset extends AssetBase {
     const pageSize = req.query.pagesize || 50;
     const limit = pageSize;
     const offset = (pageIndex - 1) * pageSize;
-    const data = await super.queryAsset({ trs_type: 61 }, null, true, offset, limit);
+    const trsType = await super.getTransactionType();
+    const data = await super.queryAsset({ trs_type: trsType }, null, true, offset, limit);
     return data;
   }
 
   async getOneByName(req) {
     const { url } = req;
-    const name = url.split('/')[2];
+    const name = url.split('/')[1];
     if (!name) {
       return '无效参数 name';
     }
+    const trsType = await super.getTransactionType();
     const data = await super.queryAsset({
-      trs_type: 61,
+      trs_type: trsType,
       name,
     }, null, false, 0, 1);
     return data[0];
+  }
+
+  async getAssetAcl(req) {
+    const { url } = req;
+    const name = url.split('/')[1];
+    const flag = url.split('/')[3];
+    if (!name || !flag) {
+      return '无效参数';
+    }
+    const table = (flag === '0') ? 'acl_black' : 'acl_white';
+    const promise = new Promise((resolve, reject) => {
+      this.dao.findList(table, { currency: name }, null, null, null, (err, data) => {
+        if (err) {
+          reject(err);
+        }
+        resolve(data);
+      });
+    });
+    return promise;
+  }
+
+  async getBalances(req) {
+    const { url } = req;
+    const address = url.split('/')[2];
+    if (!address) {
+      return '无效参数';
+    }
+    const { limit, offset } = req.query;
+    const promise = new Promise((resolve, reject) => {
+      this.dao.findPage('mem_asset_balance', { address }, limit, offset, true, null, null, null, (err, data) => {
+        if (err) {
+          reject(err);
+        }
+        resolve(data);
+      });
+    });
+    return promise;
+  }
+
+  async getBalance(req) {
+    const { url } = req;
+    const address = url.split('/')[2];
+    const currency = url.split('/')[3];
+    if (!address || !currency) {
+      return '无效参数';
+    }
+    const promise = new Promise((resolve, reject) => {
+      this.dao.findOne('mem_asset_balance', { address, currency }, null, null, (err, data) => {
+        if (err) {
+          reject(err);
+        }
+        resolve(data);
+      });
+    });
+    return promise;
   }
 }
 

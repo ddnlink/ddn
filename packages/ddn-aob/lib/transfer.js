@@ -1,10 +1,9 @@
-const {
-  AssetBase,
-} = require('ddn-asset-base');
+const { AssetBase } = require('ddn-asset-base');
 const bignum = require('bignum-utils');
 const ddnUtils = require('ddn-utils');
 const crypto = require('crypto');
 const ed = require('ed25519');
+const _ = require('lodash');
 
 class Transfer extends AssetBase {
   // eslint-disable-next-line class-methods-use-this
@@ -251,6 +250,30 @@ class Transfer extends AssetBase {
         res.json({ success: false, error: err.message || err.toString() });
       }
     });
+    router.get('/transactions/my/:address/', async (req, res) => { // 127.0.0.1:8001/api/aobasset/balances/:address/:currency
+      try {
+        const result = await this.getMyTransactions(req, res);
+        res.json(result);
+      } catch (err) {
+        res.json({ success: false, error: err.message || err.toString() });
+      }
+    });
+    router.get('/transactions/my/:address/:currency', async (req, res) => { // 127.0.0.1:8001/api/aobasset/balances/:address/:currency
+      try {
+        const result = await this.getMyTransactions(req, res);
+        res.json(result);
+      } catch (err) {
+        res.json({ success: false, error: err.message || err.toString() });
+      }
+    });
+    router.get('/transactions/:currency', async (req, res) => { // 127.0.0.1:8001/api/aobasset/balances/:address/:currency
+      try {
+        const result = await this.getTransactions(req, res);
+        res.json(result);
+      } catch (err) {
+        res.json({ success: false, error: err.message || err.toString() });
+      }
+    });
   }
 
   async transferAsset(req) {
@@ -411,5 +434,54 @@ class Transfer extends AssetBase {
     });
     return promise;
   }
+
+  async getMyTransactions(req) {
+    const { url } = req;
+    const address = url.split('/')[3];
+    const currency = url.split('/')[4];
+    const { limit, offset } = req.query;
+    if (!address) {
+      return '无效参数';
+    }
+    // (1)先查询到对应的transfer中的相关数据表查询到对应数据
+    const trsType = await super.getTransactionType();
+    const where1 = { trs_type: trsType };
+    if (currency) {
+      where1.currency = currency;
+    }
+    const transfer = await super.queryAsset(where1, null, null, offset, limit);
+    const tids = _.map(transfer, 'transaction_id');
+    const where2 = { id: { $in: tids }, sender_id: address };
+    const result = await this.runtime.dataquery.queryFullTransactionData(
+      where2, null, null, null, null,
+    );
+    return {
+      transactions: result,
+      success: true,
+    };
+  }
+
+  async getTransactions(req) {
+    const { url } = req;
+    const currency = url.split('/')[2];
+    const { limit, offset } = req.query;
+    if (!currency) {
+      return '无效参数';
+    }
+    // (1)先查询到对应的transfer中的相关数据表查询到对应数据
+    const trsType = await super.getTransactionType();
+    const where1 = { trs_type: trsType, currency };
+    const transfer = await super.queryAsset(where1, null, null, offset, limit);
+    const tids = _.map(transfer, 'transaction_id');
+    const where2 = { id: { $in: tids } };
+    const result = await this.runtime.dataquery.queryFullTransactionData(
+      where2, null, null, null, null,
+    );
+    return {
+      transactions: result,
+      success: true,
+    };
+  }
 }
+
 module.exports = Transfer;

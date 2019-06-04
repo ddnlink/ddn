@@ -79,8 +79,9 @@ class Issuer extends AssetBase {
     const pageSize = req.query.pagesize || 50;
     const limit = pageSize;
     const offset = (pageIndex - 1) * pageSize;
-    const data = await super.queryAsset({ trs_type: 60 }, null, true, offset, limit);
-    return data;
+    const trsType = await super.getTransactionType();
+    const data = await super.queryAsset({ trs_type: trsType }, null, true, offset, limit);
+    return Object.assign(data, { success: true });
   }
 
   async getOneByName(req) {
@@ -89,11 +90,12 @@ class Issuer extends AssetBase {
     if (!name) {
       return '无效参数 name';
     }
+    const trsType = await super.getTransactionType();
     const data = await super.queryAsset({
-      trs_type: 60,
+      trs_type: trsType,
       name,
     }, null, false, 0, 1);
-    return data[0];
+    return Object.assign(data[0], { success: true });
   }
 
   async getIssuerAssets(req) {
@@ -109,8 +111,8 @@ class Issuer extends AssetBase {
     const data = await super.queryAsset({
       trs_type: 61,
       issuerName: name,
-    }, null, true, offset, limit, 61);
-    return data;
+    }, null, true, offset, limit);
+    return Object.assign(data, { success: true });
   }
 }
 module.exports = Issuer;
