@@ -10,19 +10,19 @@ exports.evidence = {
 exports.aob = {
     transactions: [
         {
-            name: "Issuer",
+            name: "AobIssuer",
             type: 60,
         },
         {
-            name: "Asset",
+            name: "AobAsset",
             type: 61,
         },
         {
-            name: "Issue",
+            name: "AobIssue",
             type: 64,
         },
         {
-            name: "Transfer",
+            name: "AobTransfer",
             type: 65,
         },
     ],
