@@ -38,7 +38,7 @@ class Transfer extends AssetBase {
     const data = await assetInst.queryAsset({
       name: assetData.currency,
       trs_type: assetType,
-    }, null, null, 1, 1, 61);
+    }, null, null, 1, 1);
     const assetDetail = data[0];
     if (!assetDetail) {
       throw new Error('Asset not exists');
