@@ -42,7 +42,7 @@ class Issue extends AssetBase {
     const assetType = await assetInst.getTransactionType();
     result = await assetInst.queryAsset({
       name: trs.asset.aobIssue.currency, trs_type: assetType,
-    }, null, null, 1, 1, 61);
+    }, null, null, 1, 1);
     // (2)查询到issuer的数据列表
     const issuerInst = await this.getAssetInstanceByClass(issuer);
     const issuerType = await issuerInst.getTransactionType();
