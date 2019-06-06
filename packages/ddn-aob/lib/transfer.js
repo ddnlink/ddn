@@ -29,7 +29,7 @@ class Transfer extends AssetBase {
       throw new Error('Invalid transaction amount');
     }
     const assetData = trs.asset.aobTransfer;
-    const error = ddnUtils.Amount.validate(asset.amount);
+    const error = ddnUtils.Amount.validate(assetData.amount);
     if (error) {
       throw new Error(error);
     }
