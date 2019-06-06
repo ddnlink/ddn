@@ -5,6 +5,7 @@ const {
 const assert = require('assert');
 const bignum = require('bignum-utils');
 const ddnUtils = require('ddn-utils');
+const issuer = require('./issuer');
 
 
 class Asset extends AssetBase {
@@ -111,8 +112,10 @@ class Asset extends AssetBase {
     if (assetData && assetData.length > 0) {
       throw new Error('asset->name Double register form ddn-aob');
     }
-    const issuerData = await super.queryAsset({
-      name: issuerName, trs_type: trsType - 1,
+    const issuerInst = await this.getAssetInstanceByClass(issuer);
+    const issuerType = await issuerInst.getTransactionType();
+    const issuerData = await issuerInst.queryAsset({
+      name: issuerName, trs_type: issuerType,
     }, null, null, 1, 1);
     if (!issuerData || !issuerData.length > 0) {
       throw new Error('Issuer not exists form ddn-aob');

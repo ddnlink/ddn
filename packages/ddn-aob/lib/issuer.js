@@ -1,5 +1,6 @@
 const { AssetBase } = require('ddn-asset-base');
 const bignum = require('bignum-utils');
+const asset = require('./asset');
 
 class Issuer extends AssetBase {
   // eslint-disable-next-line class-methods-use-this
@@ -29,8 +30,10 @@ class Issuer extends AssetBase {
     // 先调用基类的验证
     const trans = await super.verify(trs, sender);
     // 验证是否存在重复数据
+    const trsType = await super.getTransactionType();
     const data1 = await super.queryAsset({
       name: trans.asset.aobIssuer.name,
+      trs_type: trsType,
     }, null, null, 1, 1);
     const data2 = await super.queryAsset({
       issuer_id: trs.sender_id,
@@ -108,8 +111,10 @@ class Issuer extends AssetBase {
     const pageSize = req.query.pagesize || 50;
     const limit = pageSize;
     const offset = (pageIndex - 1) * pageSize;
-    const data = await super.queryAsset({
-      trs_type: 61,
+    const assetInst = await this.getAssetInstanceByClass(asset);
+    const assetType = await assetInst.getTransactionType();
+    const data = await assetInst.queryAsset({
+      trs_type: assetType,
       issuerName: name,
     }, null, true, offset, limit);
     return Object.assign(data, { success: true });

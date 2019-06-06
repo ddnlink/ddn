@@ -4,6 +4,7 @@ const ddnUtils = require('ddn-utils');
 const crypto = require('crypto');
 const ed = require('ed25519');
 const _ = require('lodash');
+const asset = require('./asset');
 
 class Transfer extends AssetBase {
   // eslint-disable-next-line class-methods-use-this
@@ -27,14 +28,16 @@ class Transfer extends AssetBase {
     if (!bignum.isZero(trs.amount)) {
       throw new Error('Invalid transaction amount');
     }
-    const asset = trs.asset.aobTransfer;
+    const assetData = trs.asset.aobTransfer;
     const error = ddnUtils.Amount.validate(asset.amount);
     if (error) {
       throw new Error(error);
     }
-    const data = await super.queryAsset({
-      name: asset.currency,
-      trs_type: '61',
+    const assetInst = await this.getAssetInstanceByClass(asset);
+    const assetType = await assetInst.getTransactionType();
+    const data = await assetInst.queryAsset({
+      name: assetData.currency,
+      trs_type: assetType,
     }, null, null, 1, 1, 61);
     const assetDetail = data[0];
     if (!assetDetail) {
@@ -51,7 +54,7 @@ class Transfer extends AssetBase {
     const count1 = await new Promise((resolve) => {
       this.dao.count(aclTable, {
         address: sender.address,
-        currency: asset.currency,
+        currency: assetData.currency,
       }, (err, rows) => {
         if (err) {
           resolve(err);
@@ -63,7 +66,7 @@ class Transfer extends AssetBase {
     const count2 = await new Promise((resolve) => {
       this.dao.count(aclTable, {
         address: trs.recipient_id,
-        currency: asset.currency,
+        currency: assetData.currency,
       }, (err, rows) => {
         if (err) {
           resolve(err);

@@ -3,6 +3,8 @@ const bignum = require('bignum-utils');
 const ddnUtils = require('ddn-utils');
 const mathjs = require('mathjs');
 const _ = require('underscore');
+const issuer = require('./issuer');
+const asset = require('./asset');
 
 class Issue extends AssetBase {
   // eslint-disable-next-line class-methods-use-this
@@ -36,11 +38,18 @@ class Issue extends AssetBase {
     // (1)得到资产数据
     // (1)查询到asset的数据列表
     let result;
-    result = await super.queryAsset({ name: trs.asset.aobIssue.currency }, null, null, 1, 1, 61);
+    const assetInst = await this.getAssetInstanceByClass(asset);
+    const assetType = await assetInst.getTransactionType();
+    result = await assetInst.queryAsset({
+      name: trs.asset.aobIssue.currency, trs_type: assetType,
+    }, null, null, 1, 1, 61);
     // (2)查询到issuer的数据列表
-    let issuerData = await super.queryAsset({
-      $in: _.pluck(result, 'issuer_name'),
-    }, null, null, 1, 1000, 60);
+    const issuerInst = await this.getAssetInstanceByClass(issuer);
+    const issuerType = await issuerInst.getTransactionType();
+    let issuerData = await issuerInst.queryAsset({
+      name: { $in: _.pluck(result, 'issuer_name') },
+      trs_type: issuerType,
+    }, null, null, 1, 1000);
     issuerData = _.indexBy(issuerData, 'name');
     result = _.map(result, (num) => {
       const num2 = num;
@@ -135,7 +144,11 @@ class Issue extends AssetBase {
     const { currency } = trs.asset.aobIssue;
     const { amount } = trs.asset.aobIssue;
     this.balanceCache.addAssetBalance(sender.address, currency, amount);
-    const data = await super.queryAsset({ name: currency, trs_type: 61 }, null, null, 1, 1, 'AobAsset');
+    const assetInst = await this.getAssetInstanceByClass(asset);
+    const assetType = await assetInst.getTransactionType();
+    const data = await assetInst.queryAsset({
+      name: currency, trs_type: assetType,
+    }, null, null, 1, 1);
     const { quantity } = data[0];
     await super.update({ quantity: bignum.plus(quantity, amount).toString() }, { name: currency, trs_type: 61 }, 'AobAsset', dbTrans);
     const assetBalancedata = await new Promise((resolve) => {
@@ -169,10 +182,13 @@ class Issue extends AssetBase {
       throw new Error(`Invalid asset balance: ${balance}`);
     }
     this.balanceCache.addAssetBalance(sender.address, currency, `-${amount}`);
-    const data = await super.queryAsset({ name: currency, trs_type: 61 }, null, null, 1, 1, 'AobAsset');
+    const assetInst = await this.getAssetInstanceByClass(asset);
+    const assetType = await assetInst.getTransactionType();
+    const data = await assetInst.queryAsset({
+      name: currency, trs_type: assetType,
+    }, null, null, 1, 1);
     const { quantity } = data[0];
     await super.update({ quantity: bignum.plus(quantity, amount).toString() }, { name: currency, trs_type: 61 }, 'AobAsset', dbTrans);
-    // helper.updateAssetBalance(currency, amount, sender.address, dbTrans, next);
     const assetBalancedata = await new Promise((resolve) => {
       this.dao.findOne('mem_asset_balance', { address: sender.address, currency }, ['balance'], (err, rows) => {
         if (err) {
