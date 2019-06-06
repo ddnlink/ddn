@@ -1,12 +1,12 @@
-global.assets = {
-    transConfigs: [],
-    transTypeValues: [],
-    transTypeNames: []
-};
-
 class AssetUtils
 {
     static loadFromObject(assetPlugins) {
+        global.assets = {
+            transConfigs: [],
+            transTypeValues: [],
+            transTypeNames: []
+        };
+        
         for (var p in assetPlugins) {
             var currAsset = assetPlugins[p];
             if (currAsset) {
@@ -48,10 +48,6 @@ class AssetUtils
     }
 
     static loadFromFile(file) {
-        global.assets.transConfigs.length = 0;
-        global.assets.transTypeValues.length = 0;
-        global.assets.transTypeNames.length = 0;
-
         var assetPlugins = require(file);
         return this.loadFromObject(assetPlugins);
     }
