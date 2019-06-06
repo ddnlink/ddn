@@ -1,6 +1,5 @@
 const { AssetBase } = require('ddn-asset-base');
 const bignum = require('bignum-utils');
-const asset = require('./asset');
 
 class Issuer extends AssetBase {
   // eslint-disable-next-line class-methods-use-this
@@ -66,14 +65,6 @@ class Issuer extends AssetBase {
         res.json({ success: false, error: err.message || err.toString() });
       }
     });
-    router.get('/issuers/:name/assets', async (req, res) => {
-      try {
-        const result = await this.getIssuerAssets(req, res);
-        res.json(result);
-      } catch (err) {
-        res.json({ success: false, error: err.message || err.toString() });
-      }
-    });
   }
 
   async getList(req) {
@@ -99,25 +90,6 @@ class Issuer extends AssetBase {
       name,
     }, null, false, 0, 1);
     return Object.assign(data[0], { success: true });
-  }
-
-  async getIssuerAssets(req) {
-    const { url } = req;
-    const name = url.split('/')[2];
-    if (!name) {
-      return '无效参数 name';
-    }
-    const pageIndex = req.query.pageindex || 1;
-    const pageSize = req.query.pagesize || 50;
-    const limit = pageSize;
-    const offset = (pageIndex - 1) * pageSize;
-    const assetInst = await this.getAssetInstanceByClass(asset);
-    const assetType = await assetInst.getTransactionType();
-    const data = await assetInst.queryAsset({
-      trs_type: assetType,
-      issuerName: name,
-    }, null, true, offset, limit);
-    return Object.assign(data, { success: true });
   }
 }
 module.exports = Issuer;

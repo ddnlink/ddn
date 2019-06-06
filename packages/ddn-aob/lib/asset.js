@@ -222,6 +222,14 @@ class Asset extends AssetBase {
         res.json({ success: false, error: err.message || err.toString() });
       }
     });
+    router.get('/issuers/:name/assets', async (req, res) => {
+      try {
+        const result = await this.getIssuerAssets(req, res);
+        res.json(result);
+      } catch (err) {
+        res.json({ success: false, error: err.message || err.toString() });
+      }
+    });
   }
 
   async getList(req) {
@@ -302,6 +310,24 @@ class Asset extends AssetBase {
       });
     });
     return promise;
+  }
+
+  async getIssuerAssets(req) {
+    const { url } = req;
+    const name = url.split('/')[2];
+    if (!name) {
+      return '无效参数 name';
+    }
+    const pageIndex = req.query.pageindex || 1;
+    const pageSize = req.query.pagesize || 50;
+    const limit = pageSize;
+    const offset = (pageIndex - 1) * pageSize;
+    const assetType = await super.getTransactionType();
+    const data = await super.queryAsset({
+      trs_type: assetType,
+      issuerName: name,
+    }, null, true, offset, limit);
+    return Object.assign(data, { success: true });
   }
 }
 
