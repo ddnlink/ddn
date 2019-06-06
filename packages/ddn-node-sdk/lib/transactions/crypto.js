@@ -4,6 +4,8 @@ var options = require('../options');
 var constants = require('../constants');
 var trsTypes = require('../transaction-types');
 var { AssetUtils } = require('ddn-asset-base');
+const Mnemonic = require('bitcore-mnemonic');
+const crypto = require('crypto');
 
 if (typeof Buffer === "undefined") {
     Buffer = require("buffer/").Buffer;
@@ -800,6 +802,7 @@ function verifyBytes(bytes, signature, public_key) {
     return res
 }
 
+// 根据助记词生成密钥对
 function getKeys(secret) {
     var hash = sha256Bytes(new Buffer(secret));
     var keypair = nacl.sign.keyPair.fromSeed(hash);
@@ -810,8 +813,23 @@ function getKeys(secret) {
     }
 }
 
+//根据公钥生成账户地址
 function getAddress(public_key) {
     return addressHelper.generateBase58CheckAddress(public_key)
+}
+
+//生成助记词
+function generatePhasekey()
+{
+    var secret = new Mnemonic(128).toString();
+    return secret;
+}
+
+function generateHash(content)
+{
+    var md5 = crypto.createHash('md5');
+    var result = md5.update(content).digest('hex');
+    return result;
 }
 
 module.exports = {
@@ -830,5 +848,7 @@ module.exports = {
     toLocalBuffer: toLocalBuffer,
     verifyBytes: verifyBytes,
     isAddress: addressHelper.isAddress,
-    isBase58CheckAddress: addressHelper.isBase58CheckAddress
+    isBase58CheckAddress: addressHelper.isBase58CheckAddress,
+    generatePhasekey: generatePhasekey,
+    generateHash: generateHash
 }
