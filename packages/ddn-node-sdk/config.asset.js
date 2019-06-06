@@ -49,3 +49,12 @@ exports.dao = {
     ],
     package: "ddn-dao"
 }
+exports.tmnevidence = {
+    transactions: [
+        {
+            name: "TmnEvidence",
+            type: 71,
+        },
+    ],
+    package: "ddn-tmn-evidence"
+}

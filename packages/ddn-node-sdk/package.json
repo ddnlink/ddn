@@ -26,6 +26,7 @@
     "ddn-asset-base": "git+ssh://git@git.ebookchain.net:ddn/ddn-asset-base.git",
     "ddn-dao": "git+ssh://git@git.ebookchain.net:ddn/ddn-dao.git",
     "ddn-evidence": "git+ssh://git@git.ebookchain.net:ddn/ddn-evidence.git",
+    "ddn-tmn-evidence": "git+ssh://git@git.ebookchain.net:idiapro/ddn-tmn-evidence.git",
     "ddn-signature": "git+ssh://git@git.ebookchain.net:ddn/ddn-signature.git",
     "ddn-utils": "git+ssh://git@git.ebookchain.net:ddn/ddn-utils.git",
     "fast-sha256": "^1.0.0",
