@@ -358,6 +358,8 @@ class AssetBase {
         //解析查询条件
         var newConds = {};
         where = where || {};
+        where.trs_type = await this.getTransactionType();
+
         for (var p in where) {
             var condProp = await assetInst.getPropsMappingItemByProp(p);
             if (condProp) {
