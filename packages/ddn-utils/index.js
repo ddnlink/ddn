@@ -1,4 +1,6 @@
 module.exports = {
-  Address: require('./lib/address'),
-  Amount: require('./lib/amount'),
+    AssetTypes: require('./lib/asset-types'),
+    RuntimeState: require('./lib/runtime-states'),
+    Address: require('./lib/address'),
+    Amount: require('./lib/amount'),
 }
