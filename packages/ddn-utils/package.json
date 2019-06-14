@@ -10,7 +10,8 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "dependencies": {
-    "bignum-utils": "git+ssh://git@git.ebookchain.net:ddn/bignum_utils.git"
+    "bignum-utils": "git+ssh://git@git.ebookchain.net:ddn/bignum_utils.git",
+    "shelljs": "^0.8.3"
   },
   "author": "wly",
   "license": "ISC"
