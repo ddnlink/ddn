@@ -1,7 +1,6 @@
 const { AssetBase } = require('ddn-asset-base');
 const bignum = require('bignum-utils');
 const ddnUtils = require('ddn-utils');
-const Contribution = require('./contribution');
 const daoUtil = require('./daoUtil');
 const crypto = require('crypto');
 const ed = require('ed25519');
@@ -130,7 +129,7 @@ class Confirmation extends AssetBase {
         }
 
         // (2)如果不存在则继续查询
-        const contributionInst = await this.getAssetInstanceByClass(Contribution);
+        const contributionInst = await this.getAssetInstanceByName("Contribution");
 
         const contributionRecords = await contributionInst.queryAsset({
             trs_id: confirmation.contribution_trs_id,
@@ -294,7 +293,7 @@ class Confirmation extends AssetBase {
         const keypair = ed.MakeKeypair(hash);
         var senderPublicKey = keypair.publicKey.toString('hex')
 
-        const contributionInst = await this.getAssetInstanceByClass(Contribution);
+        const contributionInst = await this.getAssetInstanceByName("Contribution");
         const contributionRecords = await contributionInst.queryAsset({
             trs_id: body.contributionTrsId,
         }, null, false, 1, 1);
