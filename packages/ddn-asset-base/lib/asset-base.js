@@ -221,8 +221,8 @@ class AssetBase {
         return trs.asset[assetJsonName];
     }
 
-    async getAssetInstanceByClass(cls) {
-        return AssetUtils.getAssetInstanceByClass(this._context, cls);
+    async getAssetInstanceByName(assetName) {
+        return AssetUtils.getAssetInstanceByName(this._context, assetName);
     }
 
     //资产模块相关方法
@@ -321,7 +321,6 @@ class AssetBase {
      * @param {*} pageSize 分页的大小，每页的返回的最大记录条数
      * @param {*} asset 资产交易的配置name或type（config.asset.js文件中定义）
      */
-    //TODO 此处应该默认加上trs_type的查询条件，只能查询本资产的内容
     async queryAsset(where, orders, returnTotal, pageIndex, pageSize, asset) {
         var assetInst = this;
         if (asset) {
@@ -334,7 +333,7 @@ class AssetBase {
             }
             if (assetTrans) {
                 var assetCls = require(assetTrans.package)[assetTrans.name];
-                assetInst = new assetCls(this._context);
+                assetInst = new assetCls(this._context, assetTrans);
             }
         }
 
@@ -552,17 +551,19 @@ class AssetBase {
         // 解析where
         var newWhere = {};
         where = where || {};
+        where.trs_type = await this.getTransactionType();
+
         for (var p in where) {
             var condProp = await assetInst.getPropsMappingItemByProp(p);
             if (condProp) {
                 newWhere[condProp.field] = where[p];
             } else {
                 var pName = p.toLowerCase();
-                if (pName == "trs_id") {
+                if (pName == "trs_id" || pName == "transaction_id") {
                     newWhere["transaction_id"] = where[p];
-                } else if (pName == "trs_type") {
+                } else if (pName == "trs_type" || pName == "transaction_type") {
                     newWhere["transaction_type"] = where[p];
-                } else if (pName == "trs_timestamp") {
+                } else if (pName == "trs_timestamp" || pName == "timestamp") {
                     newWhere["timestamp"] = where[p];
                 }
             }
@@ -596,24 +597,26 @@ class AssetBase {
             }
             if (assetTrans) {
                 var assetCls = require(assetTrans.package)[assetTrans.name];
-                assetInst = new assetCls(this._context);
+                assetInst = new assetCls(this._context, assetTrans);
             }
         }
 
         // 解析where
         var newWhere = {};
         where = where || {};
+        where.trs_type = await this.getTransactionType();
+
         for (var p in where) {
             var condProp = await assetInst.getPropsMappingItemByProp(p);
             if (condProp) {
                 newWhere[condProp.field] = where[p];
             } else {
                 var pName = p.toLowerCase();
-                if (pName == "trs_id") {
+                if (pName == "trs_id" || pName == "transaction_id") {
                     newWhere["transaction_id"] = where[p];
-                } else if (pName == "trs_type") {
+                } else if (pName == "trs_type" || pName == "transaction_type") {
                     newWhere["transaction_type"] = where[p];
-                } else if (pName == "trs_timestamp") {
+                } else if (pName == "trs_timestamp" || pName == "timestamp") {
                     newWhere["timestamp"] = where[p];
                 }
             }
@@ -1006,6 +1009,12 @@ class AssetBase {
         } else {
             return true;
         }
+    }
+
+    /**
+     * 区块链自动后执行
+     */
+    async onBlockchainReady() {
     }
 }
 

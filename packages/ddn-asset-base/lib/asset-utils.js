@@ -104,14 +104,15 @@ class AssetUtils
         return global.assets.transTypeNames[typeValue];
     }
 
-    static getAssetInstanceByClass(context, cls) {
-        if (context && cls) {
+    static getAssetInstanceByName(context, assetName) {
+        if (context && assetName) {
             if (context.runtime && context.runtime.transaction) {
-                return context.runtime.transaction.getAssetInstanceByClass(cls);
+                return context.runtime.transaction.getAssetInstanceByName(assetName);
             }
         }
         return null;
     }
+
 }
 
 module.exports = AssetUtils;
