@@ -74,9 +74,9 @@ function createOutTransfer(recipientId, dappId, transactionId, currency, amount,
 	return transaction;
 }
 
-function signOutTransfer(transaction, secret) {
+async function signOutTransfer(transaction, secret) {
 	var keys = crypto.getKeys(secret);
-	var signature = crypto.sign(transaction, keys);
+	var signature = await crypto.sign(transaction, keys);
 
 	return signature;
 }

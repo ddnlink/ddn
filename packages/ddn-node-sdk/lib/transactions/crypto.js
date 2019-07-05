@@ -409,7 +409,11 @@ async function getAssetBytes(transaction) {
     if (AssetUtils.isTypeValueExists(transaction.type)) {
         var trans = AssetUtils.getTransactionByTypeValue(transaction.type);
         var transCls = require(trans.package)[trans.name];
-        var transInst = new transCls();
+        var transInst = new transCls({
+            tokenSetting: {
+                tokenName: constants.nethash[options.get('nethash')].tokenName
+            }
+        });
         var buf = await transInst.getBytes(transaction);
         transInst = null;
         return buf;
@@ -722,7 +726,11 @@ async function getFee(transaction) {
             if (AssetUtils.isTypeValueExists(transaction.type)) {
                 var trans = AssetUtils.getTransactionByTypeValue(transaction.type);
                 var transCls = require(trans.package)[trans.name];
-                var transInst = new transCls();
+                var transInst = new transCls({
+                    tokenSetting: {
+                        fixedPoint: 100000000
+                    }
+                });
                 fee = await transInst.calculateFee(transaction);
                 transInst = null;
             }
