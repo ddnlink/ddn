@@ -357,7 +357,7 @@ class AssetBase {
         //解析查询条件
         var newConds = {};
         where = where || {};
-        where.trs_type = await this.getTransactionType();
+        where.trs_type = await assetInst.getTransactionType();
 
         for (var p in where) {
             var condProp = await assetInst.getPropsMappingItemByProp(p);
@@ -515,7 +515,7 @@ class AssetBase {
      * @param {*} dbTrans 
      * @param {*} cb 
      */
-    async update(obj, where, asset, dbTrans) {
+    async update(obj, where, dbTrans, asset) {
         var assetInst = this;
         if (asset) {
             var assetTrans;
@@ -551,7 +551,7 @@ class AssetBase {
         // 解析where
         var newWhere = {};
         where = where || {};
-        where.trs_type = await this.getTransactionType();
+        where.trs_type = await assetInst.getTransactionType();
 
         for (var p in where) {
             var condProp = await assetInst.getPropsMappingItemByProp(p);
@@ -604,7 +604,7 @@ class AssetBase {
         // 解析where
         var newWhere = {};
         where = where || {};
-        where.trs_type = await this.getTransactionType();
+        where.trs_type = await assetInst.getTransactionType();
 
         for (var p in where) {
             var condProp = await assetInst.getPropsMappingItemByProp(p);
