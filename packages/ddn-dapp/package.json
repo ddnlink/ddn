@@ -19,6 +19,11 @@
     "async": "^2.6.1",
     "bignum-utils": "git+ssh://git@git.ebookchain.net:ddn/bignum_utils.git",
     "ddn-asset-base": "git+ssh://git@git.ebookchain.net:ddn/ddn-asset-base.git",
-    "ddn-utils": "git+ssh://git@git.ebookchain.net:ddn/ddn-utils.git"
+    "ddn-sandbox": "git+ssh://git@git.ebookchain.net:ddn/ddn-sandbox.git",
+    "ddn-utils": "git+ssh://git@git.ebookchain.net:ddn/ddn-utils.git",
+    "decompress-zip": "^0.2.2",
+    "ed25519": "0.0.4",
+    "request": "^2.88.0",
+    "valid-url": "^1.0.9"
   }
 }
