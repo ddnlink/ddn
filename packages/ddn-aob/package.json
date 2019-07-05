@@ -16,6 +16,7 @@
     "bignum-utils": "git+ssh://git@git.ebookchain.net:ddn/bignum_utils.git",
     "ddn-asset-base": "git+ssh://git@git.ebookchain.net:ddn/ddn-asset-base.git",
     "ddn-utils": "git+ssh://git@git.ebookchain.net:ddn/ddn-utils.git",
+    "ed25519": "0.0.4",
     "mathjs": "^5.4.0",
     "sequelize": "^4.42.0",
     "underscore": "^1.9.1"
