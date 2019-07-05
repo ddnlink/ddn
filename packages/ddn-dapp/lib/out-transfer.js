@@ -65,12 +65,13 @@ class OutTransfer extends AssetBase {
             }
 
             const aobAssetDetail = aobAssetResult[0];
-            if (aobAssetDetail.writeoff) {
+            if (aobAssetDetail.writeoff == "1") {
                 throw new Error('Asset already writeoff')
             }
 
-            if (aobAssetDetail.allow_whitelist || aobAssetDetail.allow_blacklist) {
-                if (aobAssetInst.isInBlackList(currency, sender.address)) {
+            if (aobAssetDetail.allow_whitelist == "1" || aobAssetDetail.allow_blacklist == "1") {
+                const aobTransferInst = await this.getAssetInstanceByName("AobTransfer");
+                if (await aobTransferInst.isInBlackList(currency, sender.address)) {
                     throw new Error("Permission not allowed");
                 }
 
