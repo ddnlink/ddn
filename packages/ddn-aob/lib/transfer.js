@@ -46,10 +46,10 @@ class Transfer extends AssetBase {
         const data = await assetInst.queryAsset({
             name: assetData.currency
         }, null, null, 1, 1);
-        const assetDetail = data[0];
-        if (!assetDetail) {
+        if (data.length <= 0) {
             throw new Error('Asset not exists');
         }
+        const assetDetail = data[0];
         if (assetDetail.writeoff == "1") {
             throw new Error('Asset already writeoff');
         }
@@ -58,15 +58,43 @@ class Transfer extends AssetBase {
             return trs;
         }
 
-        // 检查黑白名单
-        if (assetDetail.acl == 0) {
+        if (assetDetail.acl == 0) { // 检查黑白名单
             if (await this.isInBlackList(assetData.currency, sender.address) ||
                 await this.isInBlackList(assetData.currency, trs.recipient_id)) {
                 throw new Error('Permission not allowed');
             }
+        } else if (assetDetail.acl == 1) {  //检查白名单
+            const issuerInst = await this.getAssetInstanceByName("AobIssuer");
+            const data2 = await issuerInst.queryAsset({
+                name: assetDetail.issuer_name
+            }, null, null, 1, 1);
+            if (data2.length <= 0) {
+                throw new Error('Issuer not exists');
+            }
+            const issuerInfo = data2[0];
+    
+            if (((sender.address != issuerInfo.issuer_id) && 
+                !(await this.isInWhiteList(assetData.currency, sender.address))) ||
+                ((trs.recipient_id != issuerInfo.issuer_id) &&
+                !(await this.isInWhiteList(assetData.currency, trs.recipient_id)))) {
+                throw new Error('Permission not allowed.');
+            }
         }
 
         return trs;
+    }
+
+    async isInWhiteList(currency, address) {
+        return new Promise((resolve, reject) => {
+            this.dao.findOne('acl_white', { currency, address },
+                null, null, (err, result) => {
+                    if (err) {
+                        return reject(err);
+                    }
+
+                    resolve(result);
+                });
+        });
     }
 
     async isInBlackList(currency, address) {
@@ -110,7 +138,7 @@ class Transfer extends AssetBase {
             }, {
                     address: sender.address,
                     currency: transfer.currency,
-                }, dbTrans);
+            }, dbTrans);
         } else {
             this.dao.insert('mem_asset_balance', {
                 address: sender.address,
@@ -140,14 +168,14 @@ class Transfer extends AssetBase {
             this.dao.update('mem_asset_balance', {
                 balance: newBalance2.toString(),
             }, {
-                    address: sender.address,
+                    address: trs.recipient_id,
                     currency: transfer.currency,
-                }, dbTrans);
+            }, dbTrans);
         } else {
             this.dao.insert('mem_asset_balance', {
-                address: sender.address,
+                address: trs.recipient_id,
                 currency: transfer.currency,
-                balance: newBalance.toString(),
+                balance: newBalance2.toString(),
             }, dbTrans);
         }
     }
@@ -180,7 +208,7 @@ class Transfer extends AssetBase {
             }, {
                     address: sender.address,
                     currency: transfer.currency,
-                }, dbTrans);
+            }, dbTrans);
         } else {
             this.dao.insert('mem_asset_balance', {
                 address: sender.address,
@@ -210,14 +238,14 @@ class Transfer extends AssetBase {
             this.dao.update('mem_asset_balance', {
                 balance: newBalance2.toString(),
             }, {
-                    address: sender.address,
+                    address: trs.recipient_id,
                     currency: transfer.currency,
-                }, dbTrans);
+            }, dbTrans);
         } else {
             this.dao.insert('mem_asset_balance', {
-                address: sender.address,
+                address: trs.recipient_id,
                 currency: transfer.currency,
-                balance: newBalance.toString(),
+                balance: newBalance2.toString(),
             }, dbTrans);
         }
     }

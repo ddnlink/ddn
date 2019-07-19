@@ -17,7 +17,7 @@ class Asset extends AssetBase {
                 field: 'str9',
                 prop: 'desc',
                 minLen: 1,
-                maxLen: 4096,
+                maxLen: 1024,
                 required: true
             },
             {
@@ -105,13 +105,13 @@ class Asset extends AssetBase {
         if (asset.allow_blacklist !== '0' && asset.allow_blacklist !== '1') {
             throw new Error('Asset allowBlacklist is not valid form ddn-aob');
         }
-        const assetData = await this.queryAsset(null, null, null, 1, 1);
+        const assetData = await this.queryAsset({ name: asset.name }, null, null, 1, 1);
         if (assetData && assetData.length > 0) {
             throw new Error('asset->name Double register form ddn-aob');
         }
         const issuerInst = await this.getAssetInstanceByName("AobIssuer");
         const issuerData = await issuerInst.queryAsset({ name: issuerName }, null, null, 1, 1);
-        if (!issuerData || !issuerData.length > 0) {
+        if (!issuerData || !(issuerData && issuerData.length > 0)) {
             throw new Error('Issuer not exists form ddn-aob');
         }
         if (issuerData[0].issuer_id !== sender.address) {

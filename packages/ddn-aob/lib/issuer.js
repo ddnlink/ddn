@@ -18,7 +18,7 @@ class Issuer extends AssetBase {
                 field: 'str10',
                 prop: 'desc',
                 minLen: 1,
-                maxLen: 4096,
+                maxLen: 1024,
                 required: true
             },
         ];
