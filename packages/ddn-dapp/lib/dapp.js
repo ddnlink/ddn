@@ -622,14 +622,7 @@ class Dapp extends AssetBase {
             }
         });
 
-        const cp = sandbox.run(args);
-
-        console.log("wxm ======================================================================  ")
-
-        console.log("wxm       pid: " + cp.pid + "   ppid: " + cp.ppid);
-
-        console.log("wxm **********************************************************************")
-
+        sandbox.run(args);
 
         _dappLaunched[id] = sandbox;
 
