@@ -54,11 +54,13 @@ class Dapp extends AssetBase {
         },
         {
             field: "str_ext",
-            prop: "delegates"
+            prop: "delegates",
+            required: true
         },
         {
             field: "int3",
-            prop: "unlock_delegates"
+            prop: "unlock_delegates",
+            required: true
         },
         ];
     }
@@ -179,22 +181,18 @@ class Dapp extends AssetBase {
             }
         }
 
-        if (dapp.delegates) {
-            const arr = dapp.delegates.split(',');
-            if (!arr || arr.length < 5 || arr.length > 101) {
-                throw new Error("Invalid dapp delegates")
-            }
-            for (let i in arr) {
-                if (arr[i].length != 64) {
-                    throw new Error("Invalid dapp delegates format")
-                }
+        if (!dapp.delegates || dapp.delegates.length < 5 || 
+            dapp.delegates.length > this.config.settings.delegateNumber) {
+            throw new Error("Invalid dapp delegates")
+        }
+        for (let i in dapp.delegates) {
+            if (dapp.delegates[i].length != 64) {
+                throw new Error("Invalid dapp delegates format")
             }
         }
 
-        if (dapp.unlock_delegates) {
-            if (!dapp.unlock_delegates || dapp.unlock_delegates < 3 || dapp.unlock_delegates > dapp.delegates.length) {
-                throw new Error("Invalid unlock delegates number")
-            }
+        if (!dapp.unlock_delegates || dapp.unlock_delegates < 3 || dapp.unlock_delegates > dapp.delegates.length) {
+            throw new Error("Invalid unlock delegates number")
         }
 
         const data1 = await super.queryAsset({ name: dapp.name }, false, false, 1, 1);
@@ -238,10 +236,10 @@ class Dapp extends AssetBase {
         bb.writeInt(dapp.type);
         bb.writeInt(dapp.category);
         if (dapp.delegates) {
-            bb.writeString(dapp.delegates)
+            bb.writeString(dapp.delegates.join(','));
         }
         if (dapp.unlock_delegates || dapp.unlock_delegates === 0) {
-            bb.writeInt(dapp.unlock_delegates)
+            bb.writeInt(dapp.unlock_delegates);
         }
         bb.flip();
 
@@ -292,9 +290,29 @@ class Dapp extends AssetBase {
         this.oneoff.delete(assetObj.link.toLowerCase());
     }
 
+    async dbRead(raw) {
+        const result = await super.dbRead(raw);
+        if (result.delegates) {
+            result.delegates = result.delegates.split(',');
+        }
+        return result;
+    }
+
     async dbSave(trs, dbTrans) {
+        const dappObj = await this.getAssetObject(trs);
+        dappObj.delegates = dappObj.delegates.join(',');
         await super.dbSave(trs, dbTrans);
-        await this.runtime.socketio.emit('dapps/change', {});
+
+        setImmediate(async() => {
+            try
+            {
+                await this.runtime.socketio.emit('dapps/change', {});
+            }
+            catch (err)
+            {
+                this.logger.error("socket emit error: dapps/change");
+            }
+        })
     }
 
     async attachApi(router) {
@@ -873,7 +891,6 @@ class Dapp extends AssetBase {
                 }
             }
         }
-        console.log("wxm SSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSS: " + orders);
 
         const pageindex = query.pageindex || 1;
         const pagesize = query.pagesize || 100;
@@ -1283,7 +1300,7 @@ class Dapp extends AssetBase {
                         link: body.link,
                         icon: body.icon,
                         delegates: body.delegates,
-                        unlockDelegates: body.unlockDelegates
+                        unlock_delegates: body.unlock_delegates
                     };
 
                     var transaction = await this.runtime.transaction.create(data);
@@ -1313,6 +1330,41 @@ class Dapp extends AssetBase {
                 await this.runDapp(dappId); //wxm params
             }
         }
+    }
+
+    async onNewBlock(block, votes) {
+        Object.keys(_dappLaunched).forEach(async(dappId) => {
+            const sandbox = _dappLaunched[dappId];
+            if (sandbox) {
+                try
+                {
+                    await new Promise((resolve, reject) => {
+                        sandbox.request({
+                            method: "post",
+                            path: "/message",
+                            query: null,
+                            body: {
+                                message: "newblock",
+                                data: {
+                                    block_id: block.id,
+                                    block_height: block.height,
+                                    number_of_transactions: block.number_of_transactions
+                                }
+                            }
+                        }, (err, data) => {
+                            if (err) {
+                                return reject(err);
+                            }
+                            resolve(data);
+                        });
+                    });
+                }
+                catch (err2)
+                {
+                    this.logger.error(err2);
+                }
+            }
+        });
     }
 }
 

@@ -115,7 +115,7 @@ class OutTransfer extends AssetBase {
         if (!trs.signatures || trs.signatures.length !== dapp.unlock_delegates) {
             throw new Error('Invalid signature number');
         }
-        console.log("wxm ========================== " + JSON.stringify(trs));
+
         let validSignatureNumber = 0;
         const bytes = await this.runtime.transaction.getBytes(trs, true, true);
         try {
