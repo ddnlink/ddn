@@ -22,47 +22,50 @@ class Acl extends AssetBase
         bb.writeString(aclObj.currency);
         bb.writeString(aclObj.operator);
         bb.writeByte(aclObj.flag);
-        for (let i = 0; i < aclObj.list.length; ++i) {
-            bb.writeString(aclObj.list[i]);
+        // for (let i = 0; i < aclObj.list.length; ++i) {
+        //     bb.writeString(aclObj.list[i]);
+        // }
+        if (aclObj.list)
+        {
+            bb.writeString(aclObj.list);
         }
         bb.flip();
 
         return bb.toBuffer()
     }
 
-    async objectNormalize(trs) {
-        const aclObj = await this.getAssetObject(trs);
-        var validateErrors = await this.ddnSchema.validate({
-            type: 'object',
-            properties: {
-                currency: {
-                    type: 'string',
-                    minLength: 1,
-                    maxLength: 22
-                },
-                operator: {
-                    type: 'string',
-                    minLength: 1,
-                    maxLength: 1
-                },
-                flag: {
-                    type: 'integer'
-                },
-                list: {
-                    type: 'array',
-                    minLength: 1,
-                    maxLength: 10,
-                    uniqueItems: true
-                }
-            },
-            required: ['currency', 'operator', 'flag', 'list']
-        }, aclObj);
-        if (validateErrors) {
-            throw new Error(`Incorrect acl in transactions: ${validateErrors[0].message}`);
-        }
+    // async objectNormalize(trs) {
+    //     const aclObj = await this.getAssetObject(trs);
+    //     var validateErrors = await this.ddnSchema.validate({
+    //         type: 'object',
+    //         properties: {
+    //             currency: {
+    //                 type: 'string',
+    //                 minLength: 1,
+    //                 maxLength: 22
+    //             },
+    //             operator: {
+    //                 type: 'string',
+    //                 minLength: 1,
+    //                 maxLength: 1
+    //             },
+    //             flag: {
+    //                 type: 'integer'
+    //             },
+    //             list: {
+    //                 type: 'string',
+    //                 minLength: 64,
+    //                 maxLength: 10
+    //             }
+    //         },
+    //         required: ['currency', 'operator', 'flag', 'list']
+    //     }, aclObj);
+    //     if (validateErrors) {
+    //         throw new Error(`Incorrect acl in transactions: ${validateErrors[0].message}`);
+    //     }
 
-		return trs;
-    }
+	// 	return trs;
+    // }
 
     async verify(trs, sender) {
         if (trs.recipient_id) {
@@ -83,13 +86,14 @@ class Acl extends AssetBase
             throw new Error("Invalid acl flag");
         }
 
-        if (!(aclObj.list && aclObj.list.length > 0 && aclObj.list.length <= 10)) {
+        const listArr = aclObj.list ? aclObj.list.split(',') : [];
+        if (listArr.length <= 0 || listArr.length > 10) {
             throw new Error("Invalid acl list");
         }
 
         const duplicateCheckObj = {};
-        for (var i = 0; i < aclObj.list.length; i++) {
-            const listItem = aclObj.list[i];
+        for (var i = 0; i < listArr.length; i++) {
+            const listItem = listArr[i];
             if (sender.address == listItem) {
                 throw new Error("Issuer should not be in ACL list");
             }
@@ -200,10 +204,12 @@ class Acl extends AssetBase
     async apply(trs, block, sender, dbTrans) {
         const aclObj = await this.getAssetObject(trs);
         const modelName = aclObj.flag == 0 ? "acl_black" : "acl_white";
+
+        const listArr = aclObj.list ? aclObj.list.split(',') : [];
         if (aclObj.operator == "+") {
-            await this._addList(modelName, aclObj.currency, aclObj.list, dbTrans);
+            await this._addList(modelName, aclObj.currency, listArr, dbTrans);
         } else if (aclObj.operator == "-") {
-            await this._removeList(modelName, aclObj.currency, aclObj.list, dbTrans);
+            await this._removeList(modelName, aclObj.currency, listArr, dbTrans);
         }
         return trs;
     }
@@ -211,25 +217,27 @@ class Acl extends AssetBase
     async undo(trs, block, sender, dbTrans) {
         const aclObj = await this.getAssetObject(trs);
         const modelName = aclObj.flag == 0 ? "acl_black" : "acl_white";
+
+        const listArr = aclObj.list ? aclObj.list.split(',') : [];
         if (aclObj.operator == "+") {
-            await this._removeList(modelName, aclObj.currency, aclObj.list, dbTrans);
+            await this._removeList(modelName, aclObj.currency, listArr, dbTrans);
         } else if (aclObj.operator == "-") {
-            await this._addList(modelName, aclObj.currency, aclObj.list, dbTrans);
+            await this._addList(modelName, aclObj.currency, listArr, dbTrans);
         }
         return trs;
     }
 
-    async dbRead(raw) {
-        const result = await super.dbRead(raw);
-        result.list = result.list.split(',');
-        return result;
-    }
+    // async dbRead(raw) {
+    //     const result = await super.dbRead(raw);
+    //     result.list = result.list.split(',');
+    //     return result;
+    // }
 
-    async dbSave(trs, dbTrans) {
-        const aclObj = await this.getAssetObject(trs);
-        aclObj.list = aclObj.list.join(',');
-        await super.dbSave(trs, dbTrans);
-    }
+    // async dbSave(trs, dbTrans) {
+    //     const aclObj = await this.getAssetObject(trs);
+    //     aclObj.list = aclObj.list.join(',');
+    //     await super.dbSave(trs, dbTrans);
+    // }
 
 }
 
