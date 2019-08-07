@@ -181,17 +181,18 @@ class Dapp extends AssetBase {
             }
         }
 
-        if (!dapp.delegates || dapp.delegates.length < 5 || 
-            dapp.delegates.length > this.config.settings.delegateNumber) {
+        const delegatesArr = dapp.delegates ? dapp.delegates.split(',') : [];
+        if (!dapp.delegates || delegatesArr.length < 5 || 
+            delegatesArr.length > this.config.settings.delegateNumber) {
             throw new Error("Invalid dapp delegates")
         }
-        for (let i in dapp.delegates) {
-            if (dapp.delegates[i].length != 64) {
+        for (let i in delegatesArr) {
+            if (delegatesArr[i].length != 64) {
                 throw new Error("Invalid dapp delegates format")
             }
         }
 
-        if (!dapp.unlock_delegates || dapp.unlock_delegates < 3 || dapp.unlock_delegates > dapp.delegates.length) {
+        if (!dapp.unlock_delegates || dapp.unlock_delegates < 3 || dapp.unlock_delegates > delegatesArr.length) {
             throw new Error("Invalid unlock delegates number")
         }
 
@@ -236,7 +237,8 @@ class Dapp extends AssetBase {
         bb.writeInt(dapp.type);
         bb.writeInt(dapp.category);
         if (dapp.delegates) {
-            bb.writeString(dapp.delegates.join(','));
+            // bb.writeString(dapp.delegates.join(','));
+            bb.writeString(dapp.delegates);
         }
         if (dapp.unlock_delegates || dapp.unlock_delegates === 0) {
             bb.writeInt(dapp.unlock_delegates);
@@ -292,15 +294,15 @@ class Dapp extends AssetBase {
 
     async dbRead(raw) {
         const result = await super.dbRead(raw);
-        if (result.delegates) {
-            result.delegates = result.delegates.split(',');
-        }
+        // if (result.delegates) {
+        //     result.delegates = result.delegates.split(',');
+        // }
         return result;
     }
 
     async dbSave(trs, dbTrans) {
-        const dappObj = await this.getAssetObject(trs);
-        dappObj.delegates = dappObj.delegates.join(',');
+        // const dappObj = await this.getAssetObject(trs);
+        // dappObj.delegates = dappObj.delegates.join(',');
         await super.dbSave(trs, dbTrans);
 
         setImmediate(async() => {
