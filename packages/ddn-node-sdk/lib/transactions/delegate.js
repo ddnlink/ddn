@@ -4,7 +4,7 @@ var transactionTypes = require("../transaction-types.js")
 var slots = require("../time/slots.js")
 var options = require('../options')
 
-function createDelegate(username, secret, secondSecret) {
+async function createDelegate(username, secret, secondSecret) {
 	var keys = crypto.getKeys(secret);
 
 	var transaction = {
@@ -23,14 +23,14 @@ function createDelegate(username, secret, secondSecret) {
 		}
 	};
 
-	crypto.sign(transaction, keys);
+	await crypto.sign(transaction, keys);
 
 	if (secondSecret) {
 		var secondKeys = crypto.getKeys(secondSecret);
-		crypto.secondSign(transaction, secondKeys);
+		await crypto.secondSign(transaction, secondKeys);
 	}
 
-	transaction.id = crypto.getId(transaction);
+	transaction.id = await crypto.getId(transaction);
 	return transaction;
 }
 
