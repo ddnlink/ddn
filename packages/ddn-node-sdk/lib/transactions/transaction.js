@@ -43,7 +43,7 @@ async function createTransaction(recipientId, amount, message, secret, second_se
 	return transaction;
 }
 
-function createLock(height, secret, second_secret) {
+async function createLock(height, secret, second_secret) {
 	var transaction = {
 		type: 100,
 		amount: "0",    
@@ -58,14 +58,14 @@ function createLock(height, secret, second_secret) {
 	var keys = crypto.getKeys(secret);
 	transaction.sender_public_key = keys.public_key;
 
-	crypto.sign(transaction, keys);
+	await crypto.sign(transaction, keys);
 
 	if (second_secret) {
 		var secondKeys = crypto.getKeys(second_secret);
-		crypto.secondSign(transaction, secondKeys);
+		await crypto.secondSign(transaction, secondKeys);
 	}
 
-	transaction.id = crypto.getId(transaction);
+	transaction.id = await crypto.getId(transaction);
 	return transaction;
 }
 
