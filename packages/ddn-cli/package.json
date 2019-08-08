@@ -19,11 +19,11 @@
   "dependencies": {
     "async": "1.5.2",
     "bignum-utils": "git+http://git.ebookchain.net/ddn/bignum_utils.git",
-    "bitcore-mnemonic": "1.0.1",
+    "bitcore-mnemonic": "^8.5.1",
     "bytebuffer": "^4.0.0",
     "commander": "^2.8.1",
     "crypto-browserify": "^3.9.14",
-    "ddn-js": "git+ssh://git@git.ebookchain.net:ddn/ddn-js.git#v2.0.11",
+    "ddn-js": "git+ssh://git@git.ebookchain.net:ddn/ddn-js.git#async-await",
     "fs-extra": "0.30.0",
     "gift": "0.6.1",
     "inquirer": "^3.3.0",

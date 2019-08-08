@@ -1,0 +1,10 @@
+{
+    "type": 0,
+    "secret": "aaaaaaaaaaaaaaaaaaaaaa",
+    "sender_public_key": "bbbbbbbbbbbbbbbbbbbbbbbbb",
+    "amount": "100000000",
+    "fee": "10000000",
+    "recipient_id": "EKq1pu3fuFm7CXrAeYeFP3TtdktQnzx4kh",
+    "timestamp": 36878040,
+    "nethash": "fl6ybowg"
+}

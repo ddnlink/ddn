@@ -7,7 +7,7 @@
 const bignum = require('bignum-utils');
 
 module.exports = {
-  nethash: '2mn7qoar', //fl6ybowg mainnet 315by9uk
+  nethash: 'fl6ybowg', //fl6ybowg mainnet 315by9uk 2mn7qoar
   maxAmount: bignum.multiply('100000000', '100').toString(), // 100亿
   fixedPoint : bignum.pow(10, 8),
   totalAmount: bignum.multiply('10000000000000000', '100').toString(), // 100亿

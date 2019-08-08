@@ -183,10 +183,10 @@ function getTransaction(id) {
   });
 }
 
-function sendMoney(options) {
-  ddnJS.options.set(options.nethash)
+async function sendMoney(options) {
+  ddnJS.init.init(options.nethash);
 
-  var trs = ddnJS.transaction.createTransaction(
+  var trs = await ddnJS.transaction.createTransaction(
     options.to,
     //bignum update Number(options.amount),
     options.amount + "",
@@ -194,27 +194,32 @@ function sendMoney(options) {
     options.secret,
     options.secondSecret
   );
+
   getApi().broadcastTransaction(trs, function (err, result) {
     console.log(err || result.transactionId)
   });
 }
 
-function sendAsset(options) {
-  var trs = ddnJS.uia.createTransfer(
-    options.currency,
-    options.amount + "",
-    options.to,
-    options.message,
-    options.secret,
-    options.secondSecret
-  );
+async function sendAsset(options) {
+  ddnJS.init.init(options.nethash);
+
+  var obj = {
+    recipient_id: options.to,
+    currency: options.currency,
+    aobAmount: options.amount + "",
+    message: options.message
+  };
+  var trs = await ddnJS.assetPlugin.createPluginAsset(65, obj, options.secret, options.secondSecret);
+
   getApi().broadcastTransaction(trs, function (err, result) {
     console.log(err || result.transactionId)
   });
 }
 
-function registerDelegate(options) {
-  var trs = ddnJS.delegate.createDelegate(
+async function registerDelegate(options) {
+  ddnJS.init.init(options.nethash);
+
+  var trs = await ddnJS.delegate.createDelegate(
     options.username,
     options.secret,
     options.secondSecret
@@ -224,11 +229,23 @@ function registerDelegate(options) {
   });
 }
 
-function vote(secret, publicKeys, op, secondSecret) {
+async function vote(secret, publicKeys, op, secondSecret) {
+    if (!secret)
+    {
+        console.log("secret required.");
+        return;
+    }
+
+    if (!publicKeys)
+    {
+        console.log("publicKeys required.");
+        return;
+    }
+
   var votes = publicKeys.split(',').map(function (el) {
     return op + el;
   });
-  var trs = ddnJS.vote.createVote(
+  var trs = await ddnJS.vote.createVote(
     votes,
     secret,
     secondSecret
@@ -241,13 +258,25 @@ function vote(secret, publicKeys, op, secondSecret) {
 function listdiffvotes(options) {
     var params = {username: options.username};
     getApi().get('/api/delegates/get', params, function (err, result) {
-        var publicKey = result.delegate.publicKey;
+        if (err)
+        {
+            console.log(err);
+            return;
+        }
+
+        var publicKey = result.delegate.public_key;
         var params = {
           address: result.delegate.address,
           limit: options.limit || 101,
           offset: options.offset || 0,
         };
         getApi().get('/api/accounts/delegates', params, function (err, result) {
+            if (err)
+            {
+                console.log(err);
+                return;
+            }
+            
             var names_a = [];
             for (var i = 0; i < result.delegates.length; ++i) {
                 names_a[i] = result.delegates[i].username;
@@ -255,13 +284,24 @@ function listdiffvotes(options) {
             var a = new Set(names_a);
             var params = {publicKey: publicKey};
             getApi().get('/api/delegates/voters', params, function (err, result) {
+                if (err)
+                {
+                    console.log(err);
+                    return;
+                }
+
                 var names_b = [];
                 for (var i = 0; i < result.accounts.length; ++i) {
                     names_b[i] = result.accounts[i].username;
                 }
                 var b = new Set(names_b);
-                var diffab = [...a].filter(x => !b.has(x));
-                var diffba = [...b].filter(x => !a.has(x));
+                var diffab = [...a].filter(x => {
+                    return x != null && !b.has(x);
+                });
+                var diffba = [...b].filter(x => {
+                    return x != null && !a.has(x);
+                });
+                
                 console.log('you voted but doesn\'t vote you: \n\t', JSON.stringify(diffab));
                 console.log('\nvoted you but you don\'t voted: \n\t', JSON.stringify(diffba));
             });
@@ -277,27 +317,36 @@ function downvote(options) {
   vote(options.secret, options.publicKeys, '-', options.secondSecret);
 }
 
-function setSecondSecret(options) {
-  var trs = ddnJS.signature.createSignature(options.secret, options.secondSecret);
+async function setSecondSecret(options) {
+  var trs = await ddnJS.signature.createSignature(options.secret, options.newSecondSecret, options.oldSecondSecret);
   getApi().broadcastTransaction(trs, function (err, result) {
     console.log(err || result.transactionId)
   });
 }
 
-function registerDapp(options) {
+async function registerDapp(options) {
   if (!options.metafile || !fs.existsSync(options.metafile)) {
     console.error("Error: invalid params, dapp meta file must exists");
     return;
   }
+  ddnJS.init.init(options.nethash);
   var dapp = JSON.parse(fs.readFileSync(options.metafile, 'utf8'));
-  var trs = ddnJS.dapp.createDApp(dapp, options.secret, options.secondSecret);
+  var trs = await ddnJS.assetPlugin.createPluginAsset(11, dapp, options.secret, options.secondSecret);
+//   var trs = ddnJS.dapp.createDApp(dapp, options.secret, options.secondSecret);
   getApi().broadcastTransaction(trs, function (err, result) {
     console.log(err || result.transactionId)
   });
 }
 
-function deposit(options) {
-  var trs = ddnJS.transfer.createInTransfer(options.dapp, options.currency, options.amount, options.secret, options.secondSecret)
+async function deposit(options) {
+    ddnJS.init.init(options.nethash);
+    const dapp = {
+        dapp_id: options.dapp,
+        currency: options.currency,
+        amount: options.amount
+    };
+    const trs = await ddnJS.assetPlugin.createPluginAsset(12, dapp, options.secret, options.secondSecret);
+//   var trs = ddnJS.transfer.createInTransfer(options.dapp, options.currency, options.amount, options.secret, options.secondSecret)
   getApi().broadcastTransaction(trs, function (err, result) {
     console.log(err || result.transactionId)
   });
@@ -314,8 +363,9 @@ function dappTransaction(options) {
   });
 }
 
-function lock(options) {
-  var trs = ddnJS.transaction.createLock(options.height, options.secret, options.secondSecret)
+async function lock(options) {
+    ddnJS.init.init(options.nethash);
+  var trs = await ddnJS.transaction.createLock(options.height, options.secret, options.secondSecret)
   getApi().broadcastTransaction(trs, function (err, result) {
     console.log(err || result.transactionId)
   });
@@ -333,27 +383,34 @@ function getFullBlockByHeight(height) {
   })
 }
 
-function getTransactionBytes(options) {
+async function getTransactionBytes(options) {
+    ddnJS.init.init(options.nethash);
   try {
     var trs = JSON.parse(fs.readFileSync(options.file))
   } catch (e) {
     console.log('Invalid transaction format')
     return
   }
-  console.log(ddnJS.crypto.getBytes(trs, true, true).toString('hex'))
+
+  const buff = await ddnJS.crypto.getBytes(trs, true, true);
+  const hex = buff.toString('hex');
+  console.log(hex)
 }
 
-function getTransactionId(options) {
+async function getTransactionId(options) {
+    ddnJS.init.init(options.nethash);
   try {
     var trs = JSON.parse(fs.readFileSync(options.file))
   } catch (e) {
     console.log('Invalid transaction format')
     return
   }
-  console.log(ddnJS.crypto.getId(trs))
+  const trsId = await ddnJS.crypto.getId(trs);
+  console.log(trsId);
 }
 
-function getBlockPayloadHash(options) {
+async function getBlockPayloadHash(options) {
+    ddnJS.init.init(options.nethash);
   try {
     var block = JSON.parse(fs.readFileSync(options.file))
   } catch (e) {
@@ -362,7 +419,7 @@ function getBlockPayloadHash(options) {
   }
   var payloadHash = crypto.createHash('sha256');
   for (let i = 0; i < block.transactions.length; ++i) {
-    payloadHash.update(ddnJS.crypto.getBytes(block.transactions[i]))
+    payloadHash.update(await ddnJS.crypto.getBytes(block.transactions[i]))
   }
   console.log(payloadHash.digest().toString('hex'))
 }
@@ -578,7 +635,8 @@ module.exports = function(program) {
     .command("setsecondsecret")
     .description("set second secret")
     .option("-e, --secret <secret>", "")
-    .option("-s, --secondSecret <secret>", "")
+    .option("--newSecondSecret <secret>", "")
+    .option("--oldSecondSecret <secret>", "")
     .action(setSecondSecret);
     
   program
