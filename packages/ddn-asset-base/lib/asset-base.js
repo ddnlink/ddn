@@ -74,14 +74,23 @@ class AssetBase {
         this._transactionConfig = transactionConfig;
     }
 
+    /**
+     * 获取资产配置类型值
+     */
     async getTransactionType() {
         return this._transactionConfig.type;
     }
 
+    /**
+     * 获取资产配置名称
+     */
     async getTransactionName() {
         return this._transactionConfig.name;
     }
 
+    /**
+     * 获取资产所属包名
+     */
     async getPackageName() {
         return this._transactionConfig.package;
     }
@@ -131,6 +140,7 @@ class AssetBase {
 
     /**
      * 自定义资产Api
+     * @param {*} router 
      */
     async attachApi(router) {
     }
@@ -203,6 +213,10 @@ class AssetBase {
         }
     }
 
+    /**
+     * 获取资产在交易对象中的名称
+     * @param {*} type 
+     */
     async getAssetJsonName(type) {
         if (!type) {
             type = await this.getTransactionType();
@@ -222,6 +236,10 @@ class AssetBase {
         return trs.asset[assetJsonName];
     }
 
+    /**
+     * 根据资产配置名称获取资产对应实例
+     * @param {*} assetName 
+     */
     async getAssetInstanceByName(assetName) {
         return AssetUtils.getAssetInstanceByName(this._context, assetName);
     }
@@ -765,6 +783,11 @@ class AssetBase {
         return trs;
     }
 
+    /**
+     * 
+     * @param {*} trs 
+     * @param {*} sender 
+     */
     async process(trs, sender) {
         return trs;
     }
@@ -811,6 +834,13 @@ class AssetBase {
         return true;
     }
 
+    /**
+     * 应用交易业务金额，进行转账操作
+     * @param {*} trs 
+     * @param {*} block 
+     * @param {*} sender 
+     * @param {*} dbTrans 
+     */
     async apply(trs, block, sender, dbTrans) {
         if (bignum.isGreaterThan(trs.amount, 0)) {
             await this.runtime.account.setAccount({ address: trs.recipient_id }, dbTrans);
@@ -826,6 +856,13 @@ class AssetBase {
         return;
     }
 
+    /**
+     * 回滚交易业务金额，进行退回操作
+     * @param {*} trs 
+     * @param {*} block 
+     * @param {*} sender 
+     * @param {*} dbTrans 
+     */
     async undo(trs, block, sender, dbTrans) {
         if (bignum.isGreaterThan(trs.amount, 0)) {
             await this.runtime.account.setAccount({address: trs.recipient_id}, dbTrans);
@@ -842,6 +879,12 @@ class AssetBase {
         return;
     }
 
+    /**
+     * 应用未确认交易，锁定转账金额
+     * @param {*} trs 
+     * @param {*} sender 
+     * @param {*} dbTrans 
+     */
     async applyUnconfirmed(trs, sender, dbTrans) {
         const key = trs.type + "_" + trs.id;
         if (this.oneoff.has(key)) {
@@ -852,12 +895,22 @@ class AssetBase {
         return;
     }
 
+    /**
+     * 回滚未确认交易，解锁转账金额
+     * @param {*} trs 
+     * @param {*} sender 
+     * @param {*} dbTrans 
+     */
     async undoUnconfirmed(trs, sender, dbTrans) {
         const key = trs.type + "_" + trs.id;
         this.oneoff.delete(key);
         return;
     }
 
+    /**
+     * 校验交易传入数据是否符合规范，从数据格式、数据长度、是否必须角度进行
+     * @param {*} trs 
+     */
     async objectNormalize(trs) {
         var assetName = AssetUtils.getAssetJsonName(trs.type);
 
@@ -898,6 +951,10 @@ class AssetBase {
         return trs;
     }
 
+    /**
+     * 读取数据库数据并反序列成交易对象体
+     * @param {*} raw 
+     */
     async dbRead(raw) {
         if (raw && raw.asset_trs_id) {
             var result = {
@@ -943,6 +1000,11 @@ class AssetBase {
         }
     }
 
+    /**
+     * 将交易存储到数据库中
+     * @param {*} trs 
+     * @param {*} dbTrans 
+     */
     async dbSave(trs, dbTrans) {
         var assetName = AssetUtils.getAssetJsonName(trs.type);
         var asset = trs.asset[assetName];
@@ -1001,6 +1063,11 @@ class AssetBase {
         });
     }
 
+    /**
+     * 确认交易当前状态是否可以打包进当前区块
+     * @param {*} trs 
+     * @param {*} sender 
+     */
     async ready(trs, sender) {
         if (sender.multisignatures && sender.multisignatures.length) {
             if (!trs.signatures) {
@@ -1013,7 +1080,7 @@ class AssetBase {
     }
 
     /**
-     * 区块链自动后执行
+     * 区块链启动成功后执行
      */
     async onBlockchainReady() {
     }
