@@ -1,6 +1,6 @@
 {
   "name": "@ddn/ddn-js",
-  "version": "3.0.0",
+  "version": "3.0.1",
   "description": "DDN javascript library",
   "main": "index.js",
   "directories": {
@@ -19,12 +19,12 @@
   "license": "MIT",
   "dependencies": {
     "@ddn/bignum-utils": "^1.0.0",
-    "@ddn/ddn-aob": "^1.0.1",
+    "@ddn/ddn-aob": "^1.0.2",
     "@ddn/ddn-asset-base": "^1.0.1",
-    "@ddn/ddn-dao": "^1.0.1",
-    "@ddn/ddn-dapp": "^1.0.1",
+    "@ddn/ddn-dao": "^1.0.2",
+    "@ddn/ddn-dapp": "^1.0.2",
     "@ddn/ddn-evidence": "^1.0.1",
-    "@ddn/ddn-utils": "^1.0.1",
+    "@ddn/ddn-utils": "^1.0.2",
     "JSONStream": "^1.3.1",
     "bitcore-mnemonic": "^8.5.1",
     "buffer": "^4.7.0",
