@@ -14,7 +14,7 @@
 const AssetUtils = require('./asset-utils');
 const ByteBuffer = require('bytebuffer');
 const CommonUtils = require('./common-utils');
-const bignum = require('bignum-utils');
+const bignum = require('@ddn/bignum-utils');
 const _ = require('underscore');
 
 /**

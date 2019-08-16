@@ -1,6 +1,6 @@
 {
-  "name": "ddn-asset-base",
-  "version": "1.0.0",
+  "name": "@ddn/ddn-asset-base",
+  "version": "1.0.1",
   "description": "DDN资产基类相关信息",
   "main": "index.js",
   "scripts": {
@@ -13,7 +13,7 @@
   "author": "wangxm",
   "license": "ISC",
   "dependencies": {
-    "bignum-utils": "git+ssh://git@git.ebookchain.net:ddn/bignum_utils.git",
+    "@ddn/bignum-utils": "^1.0.0",
     "bytebuffer": "^5.0.1",
     "underscore": "^1.9.1"
   }
