@@ -3,7 +3,7 @@ var addressHelper = require('../address.js');
 var options = require('../options');
 var constants = require('../constants');
 var trsTypes = require('../transaction-types');
-var { AssetUtils } = require('ddn-asset-base');
+var { AssetUtils } = require('@ddn/ddn-asset-base');
 const Mnemonic = require('bitcore-mnemonic');
 const crypto = require('crypto');
 
@@ -12,7 +12,7 @@ if (typeof Buffer === "undefined") {
 }
 
 var ByteBuffer = require("bytebuffer");
-var bignum = require("bignum-utils");
+var bignum = require("@ddn/bignum-utils");
 var nacl = require('tweetnacl')
 
 var fixedPoint = Math.pow(10, 8);

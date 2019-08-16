@@ -3,7 +3,7 @@ var constants = require("../constants.js")
 var transactionTypes = require("../transaction-types.js")
 var slots = require("../time/slots.js")
 var options = require('../options')
-var bignum = require('bignum-utils');
+var bignum = require('@ddn/bignum-utils');
 
 function calculateFee(amount) {
     var min = constants.fees.send;

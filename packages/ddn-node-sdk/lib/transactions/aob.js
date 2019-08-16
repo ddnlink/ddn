@@ -4,7 +4,7 @@ var constants = require("../constants.js")
 var slots = require("../time/slots.js")
 var options = require('../options')
 var trsTypes = require('../transaction-types');
-var bignum = require('bignum-utils');
+var bignum = require('@ddn/bignum-utils');
 
 function getClientFixedTime() {
   return slots.getTime() - options.get('clientDriftSeconds')

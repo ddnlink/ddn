@@ -5,7 +5,7 @@ var trsTypes = require('../transaction-types');
 var slots = require("../time/slots.js")
 var options = require('../options')
 var addressHelper = require('../address.js')
-var bignum = require('bignum-utils');
+var bignum = require('@ddn/bignum-utils');
 
 function createMultiTransfer(outputs, secret, secondSecret) {
 	var keys = crypto.getKeys(secret)

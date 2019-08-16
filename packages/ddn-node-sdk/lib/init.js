@@ -1,5 +1,5 @@
 var options = require('./options');
-var { AssetUtils } = require('ddn-asset-base');
+var { AssetUtils } = require('@ddn/ddn-asset-base');
 
 var assetPlugins = require('../config.asset');
 

@@ -5,7 +5,7 @@ exports.evidence = {
             type: 10,
         }
     ],
-    package: "ddn-evidence"
+    package: "@ddn/ddn-evidence"
 }
 exports.aob = {
     transactions: [
@@ -34,7 +34,7 @@ exports.aob = {
             type: 65,
         },
     ],
-    package: "ddn-aob"
+    package: "@ddn/ddn-aob"
 }
 exports.dao = {
     transactions: [
@@ -55,7 +55,7 @@ exports.dao = {
             type: 43,
         },
     ],
-    package: "ddn-dao"
+    package: "@ddn/ddn-dao"
 }
 exports.dapp = {
     transactions: [
@@ -72,14 +72,5 @@ exports.dapp = {
             type: 13,
         },
     ],
-    package: "ddn-dapp"
+    package: "@ddn/ddn-dapp"
 }
-// exports.tmnevidence = {
-//     transactions: [
-//         {
-//             name: "TmnEvidence",
-//             type: 71,
-//         },
-//     ],
-//     package: "ddn-tmn-evidence"
-// }
