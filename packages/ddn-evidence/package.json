@@ -1,6 +1,6 @@
 {
-  "name": "ddn-evidence",
-  "version": "1.0.0",
+  "name": "@ddn/ddn-evidence",
+  "version": "1.0.1",
   "description": "DDN数据存证资产包",
   "main": "index.js",
   "scripts": {
@@ -13,6 +13,6 @@
   "author": "wangxm",
   "license": "ISC",
   "dependencies": {
-    "ddn-asset-base": "git+ssh://git@git.ebookchain.net:ddn/ddn-asset-base.git#async-await"
+    "@ddn/ddn-asset-base": "^1.0.1"
   }
 }
