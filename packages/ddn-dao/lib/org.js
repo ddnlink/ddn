@@ -1,6 +1,6 @@
-const { AssetBase } = require('ddn-asset-base');
-const bignum = require('bignum-utils');
-const ddnUtils = require('ddn-utils');
+const { AssetBase } = require('@ddn/ddn-asset-base');
+const bignum = require('@ddn/bignum-utils');
+const ddnUtils = require('@ddn/ddn-utils');
 const ByteBuffer = require('bytebuffer');
 const { isUri } = require('valid-url');
 const crypto = require('crypto');

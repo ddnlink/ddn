@@ -1,6 +1,6 @@
 {
-  "name": "ddn-dao",
-  "version": "1.0.0",
+  "name": "@ddn/ddn-dao",
+  "version": "1.0.1",
   "description": "this is ddn-dao",
   "main": "index.js",
   "scripts": {
@@ -9,10 +9,10 @@
   "author": "wly",
   "license": "ISC",
   "dependencies": {
-    "bignum-utils": "git+ssh://git@git.ebookchain.net:ddn/bignum_utils.git",
+    "@ddn/bignum-utils": "^1.0.0",
+    "@ddn/ddn-asset-base": "^1.0.1",
+    "@ddn/ddn-utils": "^1.0.1",
     "bytebuffer": "^5.0.1",
-    "ddn-asset-base": "git+ssh://git@git.ebookchain.net:ddn/ddn-asset-base.git",
-    "ddn-utils": "git+ssh://git@git.ebookchain.net:ddn/ddn-utils.git",
     "ed25519": "0.0.4",
     "sequelize": "^5.8.7",
     "valid-url": "^1.0.9"

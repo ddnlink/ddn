@@ -1,4 +1,4 @@
-const { AssetUtils } = require('ddn-asset-base');
+const { AssetUtils } = require('@ddn/ddn-asset-base');
 
 function isOrgId(daoId) {
     if (typeof daoId !== 'string') {
