@@ -1,5 +1,5 @@
-const { AssetBase } = require('ddn-asset-base');
-const bignum = require('bignum-utils');
+const { AssetBase } = require('@ddn/ddn-asset-base');
+const bignum = require('@ddn/bignum-utils');
 
 class Issuer extends AssetBase {
     // eslint-disable-next-line class-methods-use-this

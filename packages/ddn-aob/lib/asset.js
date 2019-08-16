@@ -1,7 +1,7 @@
 /* eslint-disable class-methods-use-this */
-const { AssetBase } = require('ddn-asset-base');
-const bignum = require('bignum-utils');
-const ddnUtils = require('ddn-utils');
+const { AssetBase } = require('@ddn/ddn-asset-base');
+const bignum = require('@ddn/bignum-utils');
+const ddnUtils = require('@ddn/ddn-utils');
 const assert = require('assert');
 
 class Asset extends AssetBase {

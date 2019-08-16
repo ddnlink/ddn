@@ -1,7 +1,7 @@
-const { AssetBase } = require('ddn-asset-base');
+const { AssetBase } = require('@ddn/ddn-asset-base');
 const ByteBuffer = require('bytebuffer');
-const bignum = require('bignum-utils');
-const ddnUtils = require('ddn-utils');
+const bignum = require('@ddn/bignum-utils');
+const ddnUtils = require('@ddn/ddn-utils');
 
 class Acl extends AssetBase
 {
