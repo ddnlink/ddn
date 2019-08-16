@@ -1,6 +1,6 @@
 {
-  "name": "ddn-utils",
-  "version": "1.0.0",
+  "name": "@ddn/ddn-utils",
+  "version": "1.0.1",
   "description": "ddn 通用工具类",
   "main": "index.js",
   "directories": {
@@ -10,7 +10,7 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "dependencies": {
-    "bignum-utils": "git+ssh://git@git.ebookchain.net:ddn/bignum_utils.git",
+    "@ddn/bignum-utils": "^1.0.0",
     "shelljs": "^0.8.3"
   },
   "author": "wly",

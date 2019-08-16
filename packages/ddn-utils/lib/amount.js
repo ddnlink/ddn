@@ -1,4 +1,4 @@
-const bignum = require('bignum-utils');
+const bignum = require('@ddn/bignum-utils');
 const amount = {
   validate(amount) {
     if (typeof amount != 'string') return 'Invalid amount type'
