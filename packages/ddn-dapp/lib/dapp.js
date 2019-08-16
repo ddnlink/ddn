@@ -1,6 +1,6 @@
-const { AssetBase } = require('ddn-asset-base');
+const { AssetBase } = require('@ddn/ddn-asset-base');
 const valid_url = require('valid-url');
-const bignum = require('bignum-utils');
+const bignum = require('@ddn/bignum-utils');
 const ByteBuffer = require('bytebuffer');
 const dappCategory = require('./dapp/dapp-category.js');
 const crypto = require('crypto');
@@ -9,7 +9,7 @@ const path = require('path');
 const fs = require('fs');
 const request = require('request');
 const DecompressZip = require('decompress-zip');
-const { Sandbox } = require('ddn-sandbox');
+const { Sandbox } = require('@ddn/ddn-sandbox');
 
 const WITNESS_CLUB_DAPP_NAME = 'DDN-FOUNDATION'
 

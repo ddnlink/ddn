@@ -1,6 +1,6 @@
 {
-  "name": "ddn-dapp",
-  "version": "1.0.0",
+  "name": "@ddn/ddn-dapp",
+  "version": "1.0.1",
   "description": "this is ddn-dapp package",
   "main": "index.js",
   "directories": {
@@ -16,11 +16,11 @@
   "author": "wly",
   "license": "ISC",
   "dependencies": {
+    "@ddn/bignum-utils": "^1.0.0",
+    "@ddn/ddn-asset-base": "^1.0.1",
+    "@ddn/ddn-sandbox": "^1.0.0",
+    "@ddn/ddn-utils": "^1.0.1",
     "async": "^2.6.1",
-    "bignum-utils": "git+ssh://git@git.ebookchain.net:ddn/bignum_utils.git",
-    "ddn-asset-base": "git+ssh://git@git.ebookchain.net:ddn/ddn-asset-base.git",
-    "ddn-sandbox": "git+ssh://git@git.ebookchain.net:ddn/ddn-sandbox.git",
-    "ddn-utils": "git+ssh://git@git.ebookchain.net:ddn/ddn-utils.git",
     "decompress-zip": "^0.2.2",
     "ed25519": "0.0.4",
     "request": "^2.88.0",

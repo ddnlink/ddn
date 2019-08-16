@@ -1,6 +1,6 @@
-const { AssetBase } = require('ddn-asset-base');
-const bignum = require('bignum-utils');
-const ddnUtils = require('ddn-utils');
+const { AssetBase } = require('@ddn/ddn-asset-base');
+const bignum = require('@ddn/bignum-utils');
+const ddnUtils = require('@ddn/ddn-utils');
 
 class InTransfer extends AssetBase {
 
