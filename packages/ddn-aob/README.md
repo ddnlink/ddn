@@ -1,15 +1,15 @@
 DDN链上资产包
 ===
 
-交易体创建方法：
-ddnJS.assetPlugin.createPluginAsset(trsType, assetInfo, secret, secondSecret)
-参数：
-    trsType: 创建交易的类型；  
-    assetInfo: 创建交易的具体内容；  
-    secret: 账号的密码；  
-    secondSecret: 二级密码；(可不传)  
-返回：
-    创建成功的交易体对象
+交易体创建方法：<br/>
+ddnJS.assetPlugin.createPluginAsset(trsType, assetInfo, secret, secondSecret)<br/>
+参数：<br/>
+&emsp;&emsp;trsType: 创建交易的类型<br/>
+&emsp;&emsp;assetInfo: 创建交易的具体内容<br/>
+&emsp;&emsp;secret: 账号的密码<br/>
+&emsp;&emsp;secondSecret: 二级密码；(可不传)<br/>
+返回：<br/>
+&emsp;&emsp;创建成功的交易体对象<br/>
 
 一、issuer
 ====  
