@@ -1,6 +1,6 @@
 {
   "name": "@ddn/ddn-aob",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "这个是ddn链上资产包",
   "main": "index.js",
   "directories": {
