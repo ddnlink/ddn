@@ -13,7 +13,7 @@
   "license": "ISC",
   "dependencies": {
     "@ddn/bignum-utils": "^1.0.0",
-    "@ddn/ddn-asset-base": "^1.0.2",
+    "@ddn/ddn-asset-base": "^1.0.3",
     "@ddn/ddn-utils": "^1.0.0",
     "async": "^2.6.1",
     "ed25519": "0.0.4",
