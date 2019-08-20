@@ -3,28 +3,17 @@
 ## Install
 
 ```
-npm install ddn-js --save
+npm install @ddn/ddn-node-sdk --save
 ```
 
 ## Import
 
-CommonJS
+Node.js
 
 ```
-var DdnJS = require('ddn-js');
-DdnJS.options.set('nethash','aaaaaa')
+var ddnsdk = require('@ddn/ddn-node-sdk');
+ddnsdk.init.int('nethash')
 ```
-
-Front end
-
-```
-<script type="text/javascript" src="/ddn.js"></script>
-# or
-<script type="text/javascript" src="/ddn.min.js"></script>
-window.DdnJS.options.set('nethash','aaaaaa')
-console.log(window.DdnJS)
-```
-
 
 
 ## Usage

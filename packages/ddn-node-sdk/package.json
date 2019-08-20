@@ -1,19 +1,18 @@
 {
-  "name": "@ddn/ddn-js",
-  "version": "3.0.1",
-  "description": "DDN javascript library",
+  "name": "@ddn/ddn-node-sdk",
+  "version": "3.0.0",
+  "description": "DDN Node.js SDK",
   "main": "index.js",
   "directories": {
     "test": "test"
   },
   "scripts": {
-    "test": "mocha test",
-    "build": "browserify build.js -o ddn.js && uglifyjs ddn.js > ddn.min.js"
+    "test": "mocha test"
   },
   "keywords": [
     "ddn",
-    "js",
-    "library"
+    "node",
+    "sdk"
   ],
   "author": "",
   "license": "MIT",
