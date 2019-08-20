@@ -340,7 +340,7 @@ class AssetBase {
      * @param {*} pageSize 分页的大小，每页的返回的最大记录条数
      * @param {*} asset 资产交易的配置name或type（config.asset.js文件中定义）
      */
-    async queryAsset(where, orders, returnTotal, pageIndex, pageSize, asset) {
+    async queryAsset(where, orders, returnTotal, pageIndex, pageSize, asset, defaultTrsType) {
         var assetInst = this;
         if (asset) {
             var assetTrans;
@@ -373,10 +373,19 @@ class AssetBase {
             }
         }
 
+        var useDefaultTrsType = true;
+        if (typeof(defaultTrsType) != "undefined" && defaultTrsType != null)
+        {
+            useDefaultTrsType = !!defaultTrsType;
+        }
+
         //解析查询条件
         var newConds = {};
         where = where || {};
-        where.trs_type = await assetInst.getTransactionType();
+        if (useDefaultTrsType)
+        {
+            where.trs_type = await assetInst.getTransactionType();
+        }
 
         for (var p in where) {
             var condProp = await assetInst.getPropsMappingItemByProp(p);
@@ -410,6 +419,9 @@ class AssetBase {
                         return "transaction_type";
                     } else if (pName == "trs_timestamp") {
                         return "timestamp";
+                    } else if (pName == "$or" || pName == "$and" || pName == "$in" || pName == "$like" || 
+                        pName == "$in" || pName == "&lt" || pName == "$lte" || pName == "$gt" || pName == "$gte") {
+                        newConds[pName] = where[p];
                     } else {
                         this.logger.warn("Invalid order field: " + prop);
                         return null;

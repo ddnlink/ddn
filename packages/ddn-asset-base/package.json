@@ -1,6 +1,6 @@
 {
   "name": "@ddn/ddn-asset-base",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "DDN资产基类相关信息",
   "main": "index.js",
   "scripts": {
