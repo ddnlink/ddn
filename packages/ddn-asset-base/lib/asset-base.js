@@ -399,6 +399,8 @@ class AssetBase {
                     newConds["transaction_type"] = where[p];
                 } else if (pName == "trs_timestamp" || pName == "timestamp") {
                     newConds["timestamp"] = where[p];
+                } else {
+                    newConds[pName] = where[p];
                 }
             }
         }
