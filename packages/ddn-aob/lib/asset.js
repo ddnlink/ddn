@@ -230,7 +230,10 @@ class Asset extends AssetBase {
         const flag = req.params.flag;
         const table = (flag === '0') ? 'acl_black' : 'acl_white';
         return new Promise((resolve, reject) => {
-            this.dao.findList(table, { currency: name }, null, null, null, (err, data) => {
+            var where = { currency: name };
+            var limit = req.query.limit || 100;
+            var offset = req.query.offset || "0";
+            this.dao.findPage(table, where, limit, offset, true, null, null, null, (err, data) => {
                 if (err) {
                     reject(err);
                 }

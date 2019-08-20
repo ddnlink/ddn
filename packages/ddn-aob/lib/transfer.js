@@ -362,6 +362,14 @@ class Transfer extends AssetBase {
             }
         }
 
+        var transfer = {
+            recipient_id: body.recipientId,
+            currency: body.currency,
+            amount: body.amount,
+            message: body.message,
+            fee: '0',
+        };
+
         return new Promise((resolve, reject) => {
             // eslint-disable-next-line consistent-return
             this.balancesSequence.add(async (cb) => {
@@ -486,16 +494,38 @@ class Transfer extends AssetBase {
         const where1 = {};
         if (currency) {
             where1.currency = currency;
+        } else {
+            where1["$and"] = [
+                {
+                    "transaction_type": {
+                        "$gte": 60
+                    }
+                },
+                {
+                    "transaction_type": {
+                        "$lte": 65
+                    }
+                }
+            ];
         }
-        const transfer = await this.queryAsset(where1, null, null, pageindex, pagesize);
-        const tids = _.map(transfer, 'transaction_id');
+        const transfer = await this.queryAsset(where1, null, true, pageindex, pagesize, null, false);
+        const tids = _.map(transfer.rows, 'transaction_id');
         const where2 = { id: { $in: tids }, sender_id: address };
         const result = await this.runtime.dataquery.queryFullTransactionData(
             where2, null, null, null, null,
         );
+        const trslist = [];
+        for (var i = 0; i < result.length; i++)
+        {
+            var newTrs = await this.runtime.transaction.serializeDbData2Transaction(result[i]);
+            trslist.push(newTrs);
+        }
         return {
-            transactions: result,
             success: true,
+            result: {
+                rows: trslist,
+                total: transfer.total
+            }
         };
     }
 
@@ -506,15 +536,24 @@ class Transfer extends AssetBase {
 
         // (1)先查询到对应的transfer中的相关数据表查询到对应数据
         const where1 = { currency };
-        const transfer = await this.queryAsset(where1, null, null, pageindex, pagesize);
-        const tids = _.map(transfer, 'transaction_id');
+        const transfer = await this.queryAsset(where1, null, true, pageindex, pagesize);
+        const tids = _.map(transfer.rows, 'transaction_id');
         const where2 = { id: { $in: tids } };
         const result = await this.runtime.dataquery.queryFullTransactionData(
             where2, null, null, null, null,
         );
+        const trslist = [];
+        for (var i = 0; i < result.length; i++)
+        {
+            var newTrs = await this.runtime.transaction.serializeDbData2Transaction(result[i]);
+            trslist.push(newTrs);
+        }
         return {
-            transactions: result,
             success: true,
+            result: {
+                rows: trslist,
+                total: transfer.total
+            }
         };
     }
 }
