@@ -1,6 +1,6 @@
 {
   "name": "@ddn/ddn-dao",
-  "version": "1.0.1",
+  "version": "1.0.3",
   "description": "this is ddn-dao",
   "main": "index.js",
   "scripts": {
@@ -10,8 +10,8 @@
   "license": "ISC",
   "dependencies": {
     "@ddn/bignum-utils": "^1.0.0",
-    "@ddn/ddn-asset-base": "^1.0.1",
-    "@ddn/ddn-utils": "^1.0.1",
+    "@ddn/ddn-asset-base": "^1.0.3",
+    "@ddn/ddn-utils": "^1.0.2",
     "bytebuffer": "^5.0.1",
     "ed25519": "0.0.4",
     "sequelize": "^5.8.7",
