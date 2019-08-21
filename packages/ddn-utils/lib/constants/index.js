@@ -6,7 +6,5 @@
  *--------------------------------------------------------------------------------------------*/
 
 const ddn = require('./constants.ddn');
-const eok = require('./constants.eok');
-const lims = require('./constants.lims');
 
-module.exports = eok;
+module.exports = ddn;

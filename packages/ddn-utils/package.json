@@ -1,6 +1,6 @@
 {
   "name": "@ddn/ddn-utils",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "ddn 通用工具类",
   "main": "index.js",
   "directories": {
