@@ -1,6 +1,6 @@
 {
   "name": "@ddn/ddn-dapp",
-  "version": "1.0.1",
+  "version": "1.0.3",
   "description": "this is ddn-dapp package",
   "main": "index.js",
   "directories": {
@@ -17,9 +17,9 @@
   "license": "ISC",
   "dependencies": {
     "@ddn/bignum-utils": "^1.0.0",
-    "@ddn/ddn-asset-base": "^1.0.1",
+    "@ddn/ddn-asset-base": "^1.0.3",
     "@ddn/ddn-sandbox": "^1.0.0",
-    "@ddn/ddn-utils": "^1.0.1",
+    "@ddn/ddn-utils": "^1.0.2",
     "async": "^2.6.1",
     "decompress-zip": "^0.2.2",
     "ed25519": "0.0.4",
