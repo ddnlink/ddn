@@ -12,7 +12,7 @@ async function createDelegate(username, secret, secondSecret) {
 		nethash: options.get('nethash'),
 		amount: "0",
 		fee: constants.fees.delegate,
-		recipientId: null,
+		recipient_id: null,
 		sender_public_key: keys.public_key,
 		timestamp: slots.getTime() - options.get('clientDriftSeconds'),
 		asset: {

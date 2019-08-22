@@ -49,7 +49,7 @@ async function createLock(height, secret, second_secret) {
 		amount: "0",    
 		nethash: options.get('nethash'),
 		fee: "10000000",    
-		recipientId: null,
+		recipient_id: null,
 		args: [ String(height) ],
 		timestamp: slots.getTime() - options.get('clientDriftSeconds'),
 		asset: {}
