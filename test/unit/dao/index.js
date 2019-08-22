@@ -1,0 +1,5 @@
+require('./evidence.test.js')
+require('./dao.test.js')
+require('./dao1Contribution.test.js')
+require('./dao2Confirmation.test.js')
+require('./exchange.test.js')

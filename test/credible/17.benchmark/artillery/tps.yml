@@ -1,0 +1,52 @@
+# http://47.92.35.19:8001
+config:
+  target: 'http://localhost:8001'
+  http:
+    pool: 10
+  phases:
+    - duration: 1
+      arrivalRate: 5
+  processor: "./tps.js"
+  payload:
+    path: "address.csv"
+    fields:
+      - "recipientId"
+    order: "sequence"
+  environments:
+    1k:
+      target: 'http://localhost:8001'
+      http:
+        pool: 5
+      phases:
+        - duration: 5
+          arrivalRate: 1000
+    5k:
+      target: 'http://localhost:8001'
+      phases:
+        - duration: 5
+          arrivalRate: 5000
+    10k:
+      target: 'http://localhost:8001'
+      phases:
+        - duration: 5
+          arrivalRate: 10000
+    50k:
+      target: 'http://localhost:8001'
+      phases:
+        - duration: 5
+          arrivalRate: 50000
+scenarios:
+  - flow:
+    - log: "Current environment is set to: {{ $environment }}"
+    - post:
+        url: "/peer/transactions"
+        headers:
+          version: "testnet"
+          port: 8001
+          nethash: "fl6ybowg"
+          os: 'mac'
+        beforeRequest: "setJSONBody"
+        afterResponse: "logHeaders"
+        capture:
+          json: "$.id"
+          as: "id"

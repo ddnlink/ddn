@@ -1,0 +1,59 @@
+{
+    "type": "object",
+    "properties": {
+        "id": {
+            "type": "string"
+        },
+        "height": {
+            "type": "string"
+        },
+        "block_id": {
+            "type": "string"
+        },
+        "type": {
+            "type": "integer"
+        },
+        "timestamp": {
+            "type": "integer"
+        },
+        "sender_public_key": {
+            "type": "string",
+            "format": "publicKey"
+        },
+        "requester_public_key": {
+            "type": "string",
+            "format": "publicKey"
+        },
+        "sender_id": {
+            "type": "string"
+        },
+        "recipient_id": {
+            "type": "string"
+        },
+        "amount": {
+            "type": "string" 
+        },
+        "fee": {
+            "type": "string"
+        },
+        "signature": {
+            "type": "string",
+            "format": "signature"
+        },
+        "sign_signature": {
+            "type": "string",
+            "format": "signature"
+        },
+        "asset": {
+            "type": "object"
+        },
+        "args": {
+            "type": "array"
+        },
+        "message": {
+            "type": "string",
+            "maxLength": 256
+        }
+    },
+    "required": ["type", "timestamp", "sender_public_key", "signature"]
+}
