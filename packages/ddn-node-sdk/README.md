@@ -18,4 +18,4 @@ ddnsdk.init.int('nethash')
 
 ## Usage
 
-Please reference the [ddn http interface documents](https://github.com/DDNlink/ddn-docs/blob/master/ddn_http_interface.md)
+Please reference the [ddn http interface documents](https://github.com/ddnlink/ddn-docs/ddn-node-sdk-api.md)
