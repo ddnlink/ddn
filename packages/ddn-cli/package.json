@@ -1,7 +1,7 @@
 {
   "name": "ddn-cli",
   "preferGlobal": true,
-  "version": "2.0.2",
+  "version": "3.0.0",
   "description": "A Command line tool to manage ddn",
   "main": "index.js",
   "scripts": {
@@ -18,12 +18,12 @@
   "license": "MIT",
   "dependencies": {
     "async": "1.5.2",
-    "bignum-utils": "git+http://git.ebookchain.net/ddn/bignum_utils.git",
+    "@ddn/bignum-utils": "^1.0.0",
     "bitcore-mnemonic": "^8.5.1",
     "bytebuffer": "^4.0.0",
     "commander": "^2.8.1",
     "crypto-browserify": "^3.9.14",
-    "ddn-js": "git+ssh://git@git.ebookchain.net:ddn/ddn-js.git#async-await",
+    "@ddn/ddn-node-sdk": "^3.0.1",
     "fs-extra": "0.30.0",
     "gift": "0.6.1",
     "inquirer": "^3.3.0",

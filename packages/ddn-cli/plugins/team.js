@@ -1,5 +1,5 @@
 var fs = require("fs");
-var ddnJS = require('ddn-js');
+var ddnJS = require('@ddn/ddn-node-sdk');
 
 var accountHelper = require("../helpers/account.js");
 var cryptoLib = require("../lib/crypto.js");

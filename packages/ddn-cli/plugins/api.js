@@ -1,6 +1,6 @@
 var fs = require('fs');
 var crypto = require('crypto');
-var ddnJS = require('ddn-js');
+var ddnJS = require('@ddn/ddn-node-sdk');
 var Api = require('../helpers/api.js');
 var blockHelper = require('../helpers/block.js');
 var cryptoLib = require('../lib/crypto.js');

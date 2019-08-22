@@ -6,7 +6,7 @@ var blockHelper = require("../helpers/block.js");
 var cryptoLib = require("../lib/crypto.js");
 var dappHelper = require("../helpers/dapp.js");
 var Api = require('../helpers/api.js');
-var DdnUtils = require('ddn-js').utils;
+var DdnUtils = require('@ddn/ddn-node-sdk').utils;
 
 var globalOptions;
 

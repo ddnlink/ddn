@@ -1,12 +1,12 @@
 const crypto = require('crypto');
 const fs = require('fs');
-const ddnJS = require('ddn-js');
+const ddnJS = require('@ddn/ddn-node-sdk');
 const cryptoLib = require('../lib/crypto.js');
 const transactionsLib = require('../lib/transactions.js');
 const accounts = require('./account.js');
 const ByteBuffer = require('bytebuffer');
 const config = require('../config');
-const bignum = require('bignum-utils');
+const bignum = require('@ddn/bignum-utils');
 
 function getBytes(block, skipSignature) {
 	// const size = 4 + 4 + 8 + 4 + 8 + 8 + 8 + 4 + 32 + 32 + 64;
