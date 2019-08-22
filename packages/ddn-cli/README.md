@@ -65,4 +65,4 @@ npm install -g ddn-cli
 
 ## Documents
 
-[ddn-docs](https://github.com/ddnlink/docs)
+[ddn-docs](https://github.com/ddnlink/ddn-docs)
