@@ -68,7 +68,7 @@ npm install
 ## Run 
 
 ```
-cd DDN && node app.js
+cd DDN && yarn start // or npm start
 or
 cd DDN && ./ddnd start
 ```
@@ -108,6 +108,18 @@ node app.js --help
   "address": "[*]CE3q83WTqk58Y3hU9GDStn7MmqWU9xHbK",
   "secret": "enter boring shaft rent essence foil trick vibrant fabric quote indoor output"
 }
+```
+
+## Test
+
+Start server firstly.
+```
+cd DDN && yarn start
+```
+
+Then, test
+```
+$ yarn test
 ```
 
 ## Releated projects

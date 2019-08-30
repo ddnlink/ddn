@@ -1,4 +1,3 @@
-var crypto = require('crypto')
 var bignum = require('@ddn/bignum-utils');
 var node = require('../variables.js')
 var DEBUG = require('debug')('aob')
@@ -25,12 +24,6 @@ async function issueAssetAsync(currency, amount, account) {
 async function writeoffAssetAsync(currency, account) {
   var res = await node.submitTransactionAsync(node.ddn.aob.createFlags(currency, 2, 1, account.password))
   DEBUG('writeoff asset response', res.body)
-  return res
-}
-
-async function changeFlagsAsync(currency, flagType, flag, account) {
-  var res = await node.submitTransactionAsync(node.ddn.aob.createFlags(currency, flagType, flag, account.password))
-  DEBUG('change flags response', res.body)
   return res
 }
 
@@ -597,7 +590,7 @@ describe('Test AOB', () => {
 
     it('should fail to issue if amount exceed the limit', async function () {
     //bignum update   var res = await issueAssetAsync(ASSET_NAME, bignum(MAX_AMOUNT).plus(1).toString(), ISSUE_ACCOUNT)
-      var res = await issueAssetAsync(ASSET_NAME, 
+      var res = await issueAssetAsync(ASSET_NAME,
         bignum.plus(MAX_AMOUNT, 1).toString(), ISSUE_ACCOUNT);
 
       expect(res.body).to.have.property('error').to.match(/^Exceed issue limit/)
