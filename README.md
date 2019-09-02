@@ -2,7 +2,7 @@
 
 # DDN
 
-DDN, Data Delivery Network, is a blockchain system.
+DDN, Data Delivery Network, is next generation blockchain system.
 
 More infomation please visit our [official website](https://www.ddn.link)
 

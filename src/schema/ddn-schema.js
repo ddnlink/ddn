@@ -1,6 +1,12 @@
+/*---------------------------------------------------------------------------------------------
+ *  Created by wangxm on Mon Mar 13 2019 8:52:48
+ *
+ *  Copyright (c) 2019 DDN.link. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
 /**
  * DDN Schema
- * wangxm   2019-03-13
  */
 var Ajv = require("ajv");
 var path = require("path");
@@ -37,7 +43,7 @@ class DdnSchema {
                     var ext = item.substring(pos);
                     if (ext.toLowerCase() == ".js") {
                         var extFormat = _require_runtime_(itemPath);
-                        if (extFormat != null && 
+                        if (extFormat != null &&
                             typeof(extFormat.name) == "string" &&
                             typeof(extFormat.validate) == "function") {
                             this._ajv.addFormat(extFormat.name, extFormat.validate);
@@ -74,8 +80,8 @@ class DdnSchema {
 
     /**
      * 根据schema格式校验data数据是否合法，合法返回null，否则返回错误对象
-     * @param {*} schema 
-     * @param {*} data 
+     * @param {*} schema
+     * @param {*} data
      */
     async validate(schema, data) {
         var result = this._ajv.validate(schema, data);
