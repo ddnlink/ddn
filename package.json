@@ -83,7 +83,7 @@
     "pg-hstore": "^2.3.2",
     "protobufjs": "^6.8.6",
     "randomstring": "1.1.5",
-    "request": "2.83.0",
+    "request": "^2.88.0",
     "rimraf": "2.5.4",
     "sequelize": "^4.41.0",
     "socket.io": "^2.2.0",
