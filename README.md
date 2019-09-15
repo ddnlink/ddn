@@ -4,7 +4,7 @@
 
 DDN, Data Delivery Network, is next generation blockchain system.
 
-More infomation please visit our [official website](https://www.ddn.link)
+More infomation please visit our [official website](https://www.ddn.link) or [ddn-docs](https://github.com/ddnlink/ddn-docs)
 
 ## System Dependency
 
@@ -68,7 +68,7 @@ npm install
 ## Run 
 
 ```
-cd DDN && node app.js
+cd DDN && yarn start // or npm start
 or
 cd DDN && ./ddnd start
 ```
@@ -108,6 +108,18 @@ node app.js --help
   "address": "[*]CE3q83WTqk58Y3hU9GDStn7MmqWU9xHbK",
   "secret": "enter boring shaft rent essence foil trick vibrant fabric quote indoor output"
 }
+```
+
+## Test
+
+Start server firstly.
+```
+cd DDN && yarn start
+```
+
+Then, test
+```
+$ yarn test
 ```
 
 ## Releated projects
