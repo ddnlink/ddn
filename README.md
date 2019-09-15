@@ -4,7 +4,7 @@
 
 DDN, Data Delivery Network, is next generation blockchain system.
 
-More infomation please visit our [official website](https://www.ddn.link)
+More infomation please visit our [official website](https://www.ddn.link) or [ddn-docs](https://github.com/ddnlink/ddn-docs)
 
 ## System Dependency
 
