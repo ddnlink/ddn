@@ -1,7 +1,7 @@
 /*---------------------------------------------------------------------------------------------
- *  Created by imfly on Tue Apr 10 2017 16:22:31
+ *  Created by DDN Team on Tue Apr 10 2017 16:22:31
  *
- *  Copyright (c) 2018 DDN.link. All rights reserved.
+ *  Copyright (c) 2019 DDN Foundation. All rights reserved.
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
@@ -15,7 +15,7 @@ const changeCase = require('change-case');
  * subscribe(接收者对象)
  *
  * 通过广播方法进行消息广播
- * 
+ *
  * ```
  * library.bus.message('blockchainReady');
  * ```
@@ -30,7 +30,7 @@ class Bus extends EventEmitter {
 
     /**
      * 订阅消息
-     * @param {*} obj 
+     * @param {*} obj
      */
     subscribe(obj) {
         if (this._subscribers.indexOf(obj) < 0) {
@@ -40,7 +40,7 @@ class Bus extends EventEmitter {
 
     /**
      * 取消消息订阅
-     * @param {*} obj 
+     * @param {*} obj
      */
     unsubscribe(obj) {
         for (var i = 0; i < this._subscribers.length; i++) {
@@ -50,7 +50,7 @@ class Bus extends EventEmitter {
             }
         }
     }
-    
+
     /**
      * 发布消息，第一个参数是消息名，依次调用订阅者的同名函数（on开头，消息第一个字母大写），后面参数作为函数参数
      */
