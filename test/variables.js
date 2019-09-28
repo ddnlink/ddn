@@ -15,12 +15,8 @@ var ddn = require('@ddn/ddn-node-sdk');
 var bignum = require('@ddn/bignum-utils');
 var bluebird = require('bluebird');
 
-//wxm TODO 这些都应该使用对应的npm包里的数据
-// var DappType = require('../src/dapp/dapp-types.js');
-//wxm TODO 这些都应该使用对应的npm包里的数据
-var { DappCategory, DappType } = require('@ddn/ddn-dapp'); // require('../src/dapp/dapp-category.js');
-//wxm TODO 这些都应该使用对应的npm包里的数据
-// var TxTypes = require('../src/helpers/transaction-types.js');
+// TODO 包的整理规划需要进一步明确原则，根据通用性确定是否写成npm包
+var { DappCategory, DappType } = require('@ddn/ddn-dapp'); 
 var { AssetTypes } = require('@ddn/ddn-utils');
 
 var addressUtil = require('../src/lib/address.js');
