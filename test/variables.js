@@ -404,6 +404,8 @@ function getRealTime(epochTime) {
   return t + epochTime * 1000;
 }
 
+ddn.init.init();
+
 // Exports variables and functions for access from other files
 module.exports = {
   api: api,

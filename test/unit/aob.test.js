@@ -62,11 +62,12 @@ describe('Test AOB', () => {
     }
 
     it('Get issuers should be ok', async function () {
-      var [err, res] = await node.apiGetAsyncE('/aob/issuers')
-      DEBUG('get /aob/issuers response', err, res.body)
+      var [err, res] = await node.apiGetAsyncE('/aobissuer/issuers')
+      DEBUG('get /aobissuer/issuers response', err, res.body)
       expect(err).to.not.exist
-      expect(res.body.count).to.be.a('number')
-      expect(res.body.issuers).to.be.instanceOf(Array)
+      expect(res.body.success).to.be.true
+      expect(res.body.result.total).to.be.a('number')
+      expect(res.body.result.rows).to.be.instanceOf(Array)
     })
 
     it('Register issuer should be ok', async function () {
@@ -80,11 +81,11 @@ describe('Test AOB', () => {
       await node.onNewBlockAsync()
 
       var [err, res] = await node.apiGetAsyncE('/aob/issuers/' + ISSUER1.name)
-      DEBUG('get /aob/issuers/:name response', err, res.body)
+      DEBUG('get /aobissuer/issuers/:name response', err, res.body)
       expect(err).to.not.exist
-      expect(res.body).to.have.property('issuer')
-      expect(res.body.issuer.name).to.equal(ISSUER1.name)
-      expect(res.body.issuer.issuer_id).to.equal(node.Gaccount.address)
+      expect(res.body).to.have.property('result')
+      expect(res.body.result.name).to.equal(ISSUER1.name)
+      expect(res.body.result.issuer_id).to.equal(node.Gaccount.address)
     })
 
     it('Register asset should be ok', async function () {
@@ -108,45 +109,45 @@ describe('Test AOB', () => {
 
       await node.onNewBlockAsync()
 
-      var [err, res] = await node.apiGetAsyncE('/aob/issuers/' + ISSUER1.name + '/assets')
-      DEBUG('get /aob/issuers/:name/assets response', err, res.body)
+      var [err, res] = await node.apiGetAsyncE('/aobasset/issuers/' + ISSUER1.name + '/assets')
+      DEBUG('get /aobasset/issuers/:name/assets response', err, res.body)
       expect(err).to.not.exist
-      expect(res.body.count).to.be.a('number')
-      expect(res.body.assets).to.be.instanceOf(Array)
+      expect(res.body.result.total).to.be.a('number')
+      expect(res.body.result.rows).to.be.instanceOf(Array)
 
-      var [err, res] = await node.apiGetAsyncE('/aob/assets/' + currency)
-      DEBUG('get /aob/assets/:name response', err, res.body)
+      var [err, res] = await node.apiGetAsyncE('/aobasset/' + currency)
+      DEBUG('get /aobasset/:name response', err, res.body)
       expect(err).to.not.exist
-      expect(res.body.asset.name).to.equal(currency)
-      expect(res.body.asset.desc).to.equal(ASSET1.desc)
-      expect(res.body.asset.maximum).to.equal(ASSET1.maximum)
-      expect(res.body.asset.precision).to.equal(ASSET1.precision)
-      expect(res.body.asset.issuer_id).to.equal(node.Gaccount.address)
-      expect(res.body.asset.quantity).to.equal('0')
-      expect(res.body.asset.acl).to.equal(0)
-      expect(res.body.asset.writeoff).to.equal(0)
+      expect(res.body.result.name).to.equal(currency)
+      expect(res.body.result.desc).to.equal(ASSET1.desc)
+      expect(res.body.result.maximum).to.equal(ASSET1.maximum)
+      expect(res.body.result.precision).to.equal(ASSET1.precision)
+      expect(res.body.result.issuer_id).to.equal(node.Gaccount.address)
+      expect(res.body.result.quantity).to.equal('0')
+      expect(res.body.result.acl).to.equal(0)
+      expect(res.body.result.writeoff).to.equal(0)
     })
 
     it('Issue and transfer asset should be ok', async function () {
       var currency = ISSUER1.name + '.' + ASSET1.name
       var transferAddress = '12345'
 
-      var [err, res] = await node.apiGetAsyncE('/aob/balances/' + node.Gaccount.address)
+      var [err, res] = await node.apiGetAsyncE('/aobasset/balances/' + node.Gaccount.address)
       DEBUG('get issuer balance before issue response', err, res.body)
       expect(err).to.not.exist
 
-      var issuerBalance = (res.body.balances[0] && res.body.balances[0].balance) || 0
+      var issuerBalance = (res.body.result[0] && res.body.result[0].balance) || 0
 
-      var [err, res] = await node.apiGetAsyncE('/aob/balances/' + transferAddress)
+      var [err, res] = await node.apiGetAsyncE('/aobasset/balances/' + transferAddress)
       DEBUG('get recipient balance before issue response', err, res.body)
       expect(err).to.not.exist
 
-      var recipientBalance = (res.body.balances[0] && res.body.balances[0].balance) || 0
+      var recipientBalance = (res.body.result.balances[0] && res.body.result.balances[0].balance) || 0
 
-      var [err, res] = await node.apiGetAsyncE('/aob/assets/' + currency)
+      var [err, res] = await node.apiGetAsyncE('/aobasset/' + currency)
       DEBUG('get asset before issue response', err, res.body)
       expect(err).to.not.exist
-      expect(res.body.asset.name).to.equal(currency)
+      expect(res.body.result.name).to.equal(currency)
 
       var quantity = res.body.asset.quantity
 
@@ -166,20 +167,19 @@ describe('Test AOB', () => {
     //bignum update   quantity = bignum(quantity).plus(amount).toString()
       quantity = bignum.plus(quantity, amount).toString();
 
-      var [err, res] = await node.apiGetAsyncE('/aob/assets/' + currency)
+      var [err, res] = await node.apiGetAsyncE('/aobasset/' + currency)
       DEBUG('get asset after issue response', err, res.body)
       expect(err).to.not.exist
-      expect(res.body.asset.name).to.equal(currency)
-      expect(res.body.asset.quantity).to.equal(quantity)
+      expect(res.body.result.name).to.equal(currency)
+      expect(res.body.result.quantity).to.equal(quantity)
 
-      var [err, res] = await node.apiGetAsyncE('/aob/balances/' + node.Gaccount.address)
+      var [err, res] = await node.apiGetAsyncE('/aobasset/balances/' + node.Gaccount.address)
       DEBUG('get issuer balance after issue response', err, res.body)
       expect(err).to.not.exist
-      expect(res.body.count).to.be.a('number')
-      expect(res.body.balances).to.be.instanceOf(Array)
-      expect(res.body.balances.length).to.equal(1)
-      expect(res.body.balances[0].currency).to.equal(currency)
-      expect(res.body.balances[0].balance).to.equal(issuerBalance)
+      expect(res.body.result).to.be.instanceOf(Array)
+      expect(res.body.result.length).to.equal(1)
+      expect(res.body.result[0].currency).to.equal(currency)
+      expect(res.body.result[0].balance).to.equal(issuerBalance)
 
       var transferAmount = '10'
       trs = node.ddn.aob.createTransfer(currency, transferAmount, transferAddress, '', node.Gaccount.password)
@@ -194,41 +194,39 @@ describe('Test AOB', () => {
     //bignum update   issuerBalance = bignum(issuerBalance).sub(transferAmount).toString()
       issuerBalance = bignum.minus(issuerBalance, transferAmount).toString();
 
-      var [err, res] = await node.apiGetAsyncE('/aob/balances/' + node.Gaccount.address)
+      var [err, res] = await node.apiGetAsyncE('/aobasset/balances/' + node.Gaccount.address)
       DEBUG('get issuer balance response', err, res.body)
       expect(err).to.not.exist
-      expect(res.body.count).to.be.a('number')
-      expect(res.body.balances).to.be.instanceOf(Array)
-      expect(res.body.balances.length).to.equal(1)
-      expect(res.body.balances[0].currency).to.equal(currency)
-      expect(res.body.balances[0].balance).to.equal(issuerBalance)
+      expect(res.body.result).to.be.instanceOf(Array)
+      expect(res.body.result.length).to.equal(1)
+      expect(res.body.result[0].currency).to.equal(currency)
+      expect(res.body.result[0].balance).to.equal(issuerBalance)
 
     //bignum update   recipientBalance = bignum(recipientBalance).plus(transferAmount).toString()
       recipientBalance = bignum.plus(recipientBalance, transferAmount).toString();
 
-      var [err, res] = await node.apiGetAsyncE('/aob/balances/' + transferAddress)
+      var [err, res] = await node.apiGetAsyncE('/aobasset/balances/' + transferAddress)
       DEBUG('get recipient balance response', err, res.body)
       expect(err).to.not.exist
-      expect(res.body.count).to.be.a('number')
-      expect(res.body.balances).to.be.instanceOf(Array)
-      expect(res.body.balances.length).to.equal(1)
-      expect(res.body.balances[0].currency).to.equal(currency)
-      expect(res.body.balances[0].balance).to.equal(recipientBalance)
+      expect(res.body.result).to.be.instanceOf(Array)
+      expect(res.body.result.length).to.equal(1)
+      expect(res.body.result[0].currency).to.equal(currency)
+      expect(res.body.result[0].balance).to.equal(recipientBalance)
 
     })
 
     it('Update flags and acl should be ok', async function () {
       var currency = ISSUER1.name + '.' + ASSET1.name
 
-      var [err, res] = await node.apiGetAsyncE('/aob/assets/' + currency)
+      var [err, res] = await node.apiGetAsyncE('/aobasset/' + currency)
       expect(err).to.not.exist
-      expect(res.body.asset.name).to.equal(currency)
-      expect(res.body.asset.acl).to.equal(0)
+      expect(res.body.result.name).to.equal(currency)
+      expect(res.body.result.acl).to.equal(0)
 
       // get white list before update acl
-      res = await node.apiGetAsync('/aob/assets/' + currency + '/acl/1')
-      expect(res.body.count).to.be.a('number')
-      expect(res.body.list).to.be.instanceOf(Array)
+      res = await node.apiGetAsync('/aobasset/' + currency + '/acl/1')
+      expect(res.body.result.total).to.be.a('number')
+      expect(res.body.result.rows).to.be.instanceOf(Array)
       var origCount = res.body.count
       expect(origCount >= 0).to.be.ok
 
@@ -242,10 +240,10 @@ describe('Test AOB', () => {
 
       await node.onNewBlockAsyncE()
 
-      var [err, res] = await node.apiGetAsyncE('/aob/assets/' + currency)
+      var [err, res] = await node.apiGetAsyncE('/aobasset/' + currency)
       expect(err).to.not.exist
-      expect(res.body.asset.name).to.equal(currency)
-      expect(res.body.asset.acl).to.equal(1)
+      expect(res.body.result.name).to.equal(currency)
+      expect(res.body.result.acl).to.equal(1)
 
       // add address to white list
       var account1 = node.genNormalAccount()
@@ -260,10 +258,10 @@ describe('Test AOB', () => {
       await node.onNewBlockAsync()
 
       // get white list
-      res = await node.apiGetAsync('/aob/assets/' + currency + '/acl/1')
-      expect(res.body.count).to.be.a('number')
-      expect(res.body.list).to.be.instanceOf(Array)
-      expect(res.body.count == origCount + 2).to.be.ok
+      res = await node.apiGetAsync('/aobasset/' + currency + '/acl/1')
+      expect(res.body.total).to.be.a('number')
+      expect(res.body.result.rows).to.be.instanceOf(Array)
+      expect(res.body.result.total == origCount + 2).to.be.ok
 
       trs = node.ddn.aob.createTransfer(currency, '10', account1.address, '', node.Gaccount.password)
       res = await node.submitTransactionAsync(trs)
@@ -302,10 +300,10 @@ describe('Test AOB', () => {
       expect(res.body).to.have.property('error').to.match(/^Invalid transaction body/)
 
       res = await registerIssuerAsync('invalid_name', 'normal desc', account)
-      expect(res.body).to.have.property('error').to.match(/^Invalid issuer name/)
+      expect(res.body).to.have.property('error').to.match(/^Invalid transaction body/)
 
       res = await registerIssuerAsync('invalid.name', 'normal desc', account)
-      expect(res.body).to.have.property('error').to.match(/^Invalid issuer name/)
+      expect(res.body).to.have.property('error').to.match(/^Invalid transaction body/)
     })
 
     it('Insufficient balance', async function () {
@@ -723,15 +721,15 @@ describe('Test AOB', () => {
 
       await node.onNewBlockAsync()
 
-      res = await node.apiGetAsync('/aob/balances/' + account.address)
+      res = await node.apiGetAsync('/aobasset/balances/' + account.address)
       DEBUG('get sender\'s balances first time', res.body)
-      expect(res.body.balances[0].currency).to.equal(assetName)
-      expect(res.body.balances[0].balance).to.equal('0')
+      expect(res.body.result[0].currency).to.equal(assetName)
+      expect(res.body.result[0].balance).to.equal('0')
 
-      res = await node.apiGetAsync('/aob/balances/' + anotherAccount.address)
+      res = await node.apiGetAsync('/aobasset/balances/' + anotherAccount.address)
       DEBUG('get recipient\'s balances first time', res.body)
-      expect(res.body.balances[0].currency).to.equal(assetName)
-      expect(res.body.balances[0].balance).to.equal('3000')
+      expect(res.body.result[0].currency).to.equal(assetName)
+      expect(res.body.result[0].balance).to.equal('3000')
 
       res = await transferAsync(assetName, '1000', account.address, anotherAccount)
       expect(res.body).to.have.property('success').to.be.true
@@ -739,15 +737,15 @@ describe('Test AOB', () => {
       expect(res.body).to.have.property('error').to.match(/^Insufficient asset balance/)
       await node.onNewBlockAsync()
 
-      res = await node.apiGetAsync('/aob/balances/' + account.address)
+      res = await node.apiGetAsync('/aobasset/balances/' + account.address)
       DEBUG('get sender\'s balances second time', res.body)
-      expect(res.body.balances[0].currency).to.equal(assetName)
-      expect(res.body.balances[0].balance).to.equal('1000')
+      expect(res.body.result[0].currency).to.equal(assetName)
+      expect(res.body.result[0].balance).to.equal('1000')
 
-      res = await node.apiGetAsync('/aob/balances/' + anotherAccount.address)
+      res = await node.apiGetAsync('/aobasset/balances/' + anotherAccount.address)
       DEBUG('get recipient\'s balances second time', res.body)
-      expect(res.body.balances[0].currency).to.equal(assetName)
-      expect(res.body.balances[0].balance).to.equal('2000')
+      expect(res.body.result[0].currency).to.equal(assetName)
+      expect(res.body.result[0].balance).to.equal('2000')
     })
   })
 
@@ -784,11 +782,11 @@ describe('Test AOB', () => {
       res = registerAssetWithAllowParameters(0, 0, 0)
       await node.onNewBlockAsync()
 
-      res = await node.apiGetAsync('/aob/assets/' + ASSET_NAME)
+      res = await node.apiGetAsync('/aobasset/' + ASSET_NAME)
       DEBUG('get assets response', res.body)
-      expect(res.body.asset.allow_writeoff).to.equal(0)
-      expect(res.body.asset.allow_whitelist).to.equal(0)
-      expect(res.body.asset.allow_blacklist).to.equal(0)
+      expect(res.body.result.allow_writeoff).to.equal(0)
+      expect(res.body.result.allow_whitelist).to.equal(0)
+      expect(res.body.result.allow_blacklist).to.equal(0)
 
       res = await writeoffAssetAsync(ASSET_NAME, ISSUE_ACCOUNT)
       expect(res.body).to.have.property('error').to.match(/^Writeoff not allowed/)
