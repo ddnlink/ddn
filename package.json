@@ -38,14 +38,19 @@
     "node": ">=8.6.0"
   },
   "scripts": {
-    "start": "node --harmony app.js",
-    "test": "./node_modules/.bin/mocha -r intelli-espower-loader test/**/*.test.js",
-    "build": "cross-env NODE_ENV=production ./node_modules/.bin/gulp linux-build-main",
-    "build-testnet": "./node_modules/.bin/gulp linux-build-test",
-    "build-testnet-mac": "./node_modules/.bin/gulp mac-build-test",
-    "build-localnet": "./node_modules/.bin/gulp linux-build-local"
+    "bootstrap": "lerna bootstrap",
+    "build": "father-build",
+    "changelog": "lerna-changelog",
+    "chore:update-deps": "sh ./scripts/reinstall_deps.sh",
+    "clean": "lerna clean -y",
+    "publish": "./scripts/publish.js",
+    "test": "node scripts/test.js",
+    "ui:build": "node ./scripts/ui.js"
   },
-
+  "private": true,
+  "workspaces": [
+    "packages/*"
+  ],
   "devDependencies": {
     "lerna": "^3.18.1"
   }
