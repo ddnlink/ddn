@@ -1,0 +1,24 @@
+{
+  "name": "@ddn/ddn-aob",
+  "version": "1.0.4",
+  "description": "这个是ddn链上资产包",
+  "main": "index.js",
+  "directories": {
+    "lib": "lib"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "wly",
+  "license": "ISC",
+  "dependencies": {
+    "@ddn/bignum-utils": "^1.0.0",
+    "@ddn/ddn-asset-base": "^1.0.3",
+    "@ddn/ddn-utils": "^1.0.0",
+    "async": "^2.6.1",
+    "ed25519": "0.0.4",
+    "mathjs": "^5.4.0",
+    "sequelize": "^4.42.0",
+    "underscore": "^1.9.1"
+  }
+}

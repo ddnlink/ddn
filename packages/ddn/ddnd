@@ -4,7 +4,7 @@ readonly PROG_DIR=$(pwd)
 readonly PID_FILE=$PROG_DIR/ddn.pid
 
 # 修改主节点
-readonly IPS=("https://ddn.link/static/download-International" "http://ddn.org/static/download-Chinese")
+readonly IPS=("https://ddn.link/static/download-International" "http://ddn.link/static/download-Chinese")
 
 function read_port() {
   echo `cat $PROG_DIR/config.json |grep '"port"'|head -n 1| awk -F "[:,]" '{print$2}'|tr -d ' '`

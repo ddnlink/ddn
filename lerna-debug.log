@@ -1,0 +1,16 @@
+0 silly argv { _: [ 'create' ],
+0 silly argv   lernaVersion: '3.18.1',
+0 silly argv   '$0': '/usr/local/bin/lerna',
+0 silly argv   name: 'ddn' }
+1 notice cli v3.18.1
+2 verbose rootPath /Users/imfly/Documents/projects/DDN/ddn
+3 info versioning independent
+4 error Error: Command failed: git config --get user.name
+4 error
+4 error
+4 error     at makeError (/Users/imfly/.config/yarn/global/node_modules/execa/index.js:174:9)
+4 error     at Function.module.exports.sync (/Users/imfly/.config/yarn/global/node_modules/execa/index.js:338:15)
+4 error     at Object.execSync (/Users/imfly/.config/yarn/global/node_modules/@lerna/child-process/index.js:26:16)
+4 error     at CreateCommand.gitConfig (/Users/imfly/.config/yarn/global/node_modules/@lerna/create/index.js:181:34)
+4 error     at CreateCommand.initialize (/Users/imfly/.config/yarn/global/node_modules/@lerna/create/index.js:103:46)
+4 error     at Promise.resolve.then (/Users/imfly/.config/yarn/global/node_modules/@lerna/command/index.js:271:24)
