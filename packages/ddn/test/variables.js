@@ -1,7 +1,7 @@
 /*---------------------------------------------------------------------------------------------
- *  Created by imfly on Thu Mar 15 2017 9:37:56
+ *  Created by DDN Team on Thu Mar 15 2017 9:37:56
  *
- *  Copyright (c) 2017 DDN.link. All rights reserved.
+ *  Copyright (c) 2019 DDN Foundation. All rights reserved.
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
@@ -15,12 +15,8 @@ var ddn = require('@ddn/ddn-node-sdk');
 var bignum = require('@ddn/bignum-utils');
 var bluebird = require('bluebird');
 
-//wxm TODO 这些都应该使用对应的npm包里的数据
-// var DappType = require('../src/dapp/dapp-types.js');
-//wxm TODO 这些都应该使用对应的npm包里的数据
-var { DappCategory, DappType } = require('@ddn/ddn-dapp'); // require('../src/dapp/dapp-category.js');
-//wxm TODO 这些都应该使用对应的npm包里的数据
-// var TxTypes = require('../src/helpers/transaction-types.js');
+// TODO 包的整理规划需要进一步明确原则，根据通用性确定是否写成npm包
+var { DappCategory, DappType } = require('@ddn/ddn-dapp'); 
 var { AssetTypes } = require('@ddn/ddn-utils');
 
 var addressUtil = require('../src/lib/address.js');
@@ -407,6 +403,8 @@ function getRealTime(epochTime) {
   const t = Math.floor(d.getTime() / 1000) * 1000;
   return t + epochTime * 1000;
 }
+
+ddn.init.init();
 
 // Exports variables and functions for access from other files
 module.exports = {

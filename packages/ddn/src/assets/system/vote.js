@@ -1,14 +1,13 @@
 /*---------------------------------------------------------------------------------------------
- *  Created by imfly on Wed Mar 28 2018 9:28:20
+ *  Created by DDN Team on Wed Mar 28 2018 9:28:20
  *
- *  Copyright (c) 2018 DDN.link. All rights reserved.
+ *  Copyright (c) 2019 DDN Foundation. All rights reserved.
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 const util = require('util');
 const ByteBuffer = require('bytebuffer');
 const Diff = require('../../lib/diff.js');
 const bignum = require('@ddn/bignum-utils');
-
 
 class Vote {
 

@@ -1,7 +1,7 @@
 /*---------------------------------------------------------------------------------------------
- *  Created by imfly on Sat Jun 16 2017 12:14:9
+ *  Created by DDN Team on Sat Jun 16 2017 12:14:9
  *
- *  Copyright (c) 2017 DDN.link. All rights reserved.
+ *  Copyright (c) 2019 DDN Foundation. All rights reserved.
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
@@ -11,9 +11,9 @@ const bignum = require('@ddn/bignum-utils');
 
 describe('Constants params', function () {
   it('test block reward', function (done) {
-    var BlockStatus = require('../../src/helpers/block-status.js');
-    global.Config = {netVersion: 'testnet'};
-    var blockStatus = new BlockStatus();
+    var BlockStatus = require('../../src/kernal/block/block-status.js');
+    global.config = {netVersion: 'testnet', settings: {delegateNumber: 101}};
+    var blockStatus = new BlockStatus(global);
     node.expect(blockStatus.calcMilestone(1)).to.equal("0");
     node.expect(blockStatus.calcMilestone(2999999)).to.equal("0");
     node.expect(blockStatus.calcMilestone(3000000)).to.equal("0");
@@ -38,8 +38,8 @@ describe('Constants params', function () {
     // node.expect(blockStatus.calcSupply(3000000)).to.equal(11499950500000000);
     // node.expect(blockStatus.calcSupply(3000003)).to.equal(11500000700000000);
 
-    global.Config = {netVersion: 'mainnet'};
-    blockStatus = new BlockStatus();
+    global.config = {netVersion: 'mainnet'};
+    blockStatus = new BlockStatus(global);
     node.expect(blockStatus.calcReward(0)).to.equal("0");
     node.expect(blockStatus.calcReward(1)).to.equal("0");
     node.expect(blockStatus.calcReward(2)).to.equal("500000000");

@@ -22,7 +22,7 @@ describe('address', function () {
   })
 
   it('normal address should be ok', function (done) {
-    node.expect(address.isAddress('EDaYcsGrwpPnR5SJK6AFBC6tMavGhBAkFD')).to.be.true
+    node.expect(address.isAddress('DDaYcsGrwpPnR5SJK6AFBC6tMavGhBAkFD')).to.be.true
 
     var addr1 = address.generateBase58CheckAddress(node.genNormalAccount().public_key)
     node.expect(address.isAddress(addr1)).to.be.true

@@ -1,7 +1,7 @@
 /*---------------------------------------------------------------------------------------------
- *  Created by imfly on Wed Mar 14 2017 16:3:33
+ *  Created by DDN Team on Wed Mar 14 2017 16:3:33
  *
- *  Copyright (c) 2017 DDN.link. All rights reserved.
+ *  Copyright (c) 2019 DDN Foundation. All rights reserved.
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 var bignum = require('@ddn/bignum-utils');
@@ -35,12 +35,12 @@ class Lock {
 
 		const lastBlock = this.runtime.block.getLastBlock();
 
-		//bignum update if (isNaN(lockHeight) || lockHeight <= lastBlock.height) 
+		//bignum update if (isNaN(lockHeight) || lockHeight <= lastBlock.height)
 		if (bignum.isNaN(lockHeight) || bignum.isLessThanOrEqualTo(lockHeight, lastBlock.height)) {
             throw new Error('Invalid lock height');
         }
 
-		//bignum update if (sender.lockHeight && lastBlock.height + 1 <= sender.lockHeight) 
+		//bignum update if (sender.lockHeight && lastBlock.height + 1 <= sender.lockHeight)
 		if (sender.lockHeight && bignum.isLessThanOrEqualTo(bignum.plus(lastBlock.height, 1), sender.lockHeight)) {
             throw new Error('Account is locked');
         }
@@ -63,12 +63,12 @@ class Lock {
 	async apply(trs, block, sender, dbTrans) {
         await this.runtime.account.setAccount({
             address: sender.address,
-            lock_height: trs.args[0]     //bignum update Number(trs.args[0]) 
+            lock_height: trs.args[0]     //bignum update Number(trs.args[0])
         }, dbTrans);
 
 		// self.library.base.account.set(sender.address,
 		// 	{
-		// 		lock_height: trs.args[0]     //bignum update Number(trs.args[0]) 
+		// 		lock_height: trs.args[0]     //bignum update Number(trs.args[0])
 		// 	}, dbTrans,
 		// 	cb);
 	}
