@@ -1,79 +1,82 @@
-[中文版](./README-zh-CN.md) | [English](./README.md)
+[中文版](./README-zh-CN.md) | [英文版](./README.md)
 
 # DDN
 
-DDN, Data Delivery Network, is next generation blockchain system.
+DDN, 数据分发网络, 是一个成熟的区块链系统，已经服务于版权存证、检验检测、电子医疗等10多个领域。
 
-More infomation please visit our [official website](https://www.ddn.link) or [ddn-docs](https://github.com/ddnlink/ddn-docs)
+更多信息，请查看 [官网](https://www.ddn.link)
 
-## System Dependency
+## 系统依赖
 
 - nodejs v8+
 - npm 5.3+
 - node-gyp v3.6.2+ 
-- sqlite v3.8.2+，mysql 5.0+
+- sqlite v3.8.2+
+- mysql 5.0+
 - g++
 - libssl
 
-## Installation for ubuntu 16.04.x or higher
+## 操作系统
+
+1. Linux系统：ubuntu 16.04.x or higher
 
 ```
-# Install dependency package
+# 安装依赖
 sudo apt-get install curl sqlite3 ntp wget git libssl-dev openssl make gcc g++ autoconf automake python build-essential libtool libtool-bin -y
 
-# Install nvm
+# 安装nvm
 curl -o- https://raw.githubusercontent.com/creationix/nvm/v0.33.2/install.sh | bash
 # This loads nvm
 export NVM_DIR="$HOME/.nvm"
 [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh" 
 [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
 
-# Install node and npm for current user.
+# 安装 node 和 npm .
 nvm install node 8
 # check node version and it should be v8.x.x
 node --version
 
-# git clone sourece code
+# 克隆代码
 git clone https://github.com/ddnlink/ddn.git && cd ddn && chmod u+x ddnd
 
-# Install node packages
+# 安装 node 包
 npm install
 ```
 
-## Installation for Mac 10.01.x or higher
+2. 苹果系统：Mac 10.01.x or higher
 
 ```
-# Install dependency package
+# 安装依赖包
 brew install curl sqlite3 ntp wget git libssl-dev openssl make gcc g++ autoconf libtool libtool-bin -y
 
-# Install nvm
+# 安装 nvm
 curl -o- https://raw.githubusercontent.com/creationix/nvm/v0.33.2/install.sh | bash
 # This loads nvm
 export NVM_DIR="$HOME/.nvm"
 [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh" 
 [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
 
-# Install node and npm for current user.
+# 安装 node 和 npm .
 nvm install node 8
 # check node version and it should be v8.x.x
 node --version
 
-# git clone sourece code
+# 克隆代码
 git clone https://github.com/ddnlink/ddn.git && cd ddn && chmod u+x ddnd
 
-# Install node packages
+# 安装 node 包
 npm install
 ```
 
-## Run 
+## 启动DDN
 
 ```
-cd DDN && yarn start // or npm start
+cd DDN && node app.js
 or
 cd DDN && ./ddnd start
 ```
 
-## Usage
+## 使用
 
 ```
 node app.js --help
@@ -95,9 +98,10 @@ node app.js --help
     --reindex                  Reindex blockchain
     --base <dir>               Base directory
 ```
-## Default localnet genesis account
 
-**Note**: You can replace the [*] of the address with `D`、`E`...
+## 默认本地创世账户
+
+**注**: 请使用`D`、`E`等代替下面地址里的 [*]  
 
 ```
 {
@@ -110,26 +114,14 @@ node app.js --help
 }
 ```
 
-## Test
-
-Start server firstly.
-```
-cd DDN && yarn start
-```
-
-Then, test
-```
-$ yarn test
-```
-
-## Releated projects
+## 相关工程
 
 - [ddn-docs](https://github.com/ddnlink/ddn-docs)
 - [ddn-cli](https://github.com/ddnlink/ddn-cli)
 - [ddn-node-sdk](https://github.com/ddnlink/ddn-node-sdk)
 - [ddn-explorer] website: [ddn.link](http://mainnet.ddn.link)
 
-## License
+## 协议
 
 The MIT License (MIT)
 
