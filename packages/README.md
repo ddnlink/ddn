@@ -17,6 +17,7 @@ More infomation please visit our [official website](https://www.ddn.link) or [dd
 - [x] **Multi function**, payment, certificate storage, AOB, DAPP, etc;
 - [x] **Multi industry**, currently covering copyright protection, electronic medicine, food safety, anti-counterfeiting traceability and other fields
 - [ ] **Visual deployment**, you can customize your own blockchain by clicking the mouse and publish it to the peer server;
+- [ ] **Docker**, tod support mainstream deployment methods such as docker;
 - [ ] More...
 
 ## Projects
