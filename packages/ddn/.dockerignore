@@ -1,0 +1,5 @@
+node_modules/
+.git/
+build/
+blockchain.db
+package-lock.json

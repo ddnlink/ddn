@@ -1,0 +1,42 @@
+version: '3'
+services: 
+  ddn:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    depends_on:
+      - sqlite
+      # - mysql
+    networks:
+      - docker_ddn
+    ports:
+      - 8001:8001
+
+  sqlite:
+    image: nouchka/sqlite3:latest
+    stdin_open: true
+    tty: true
+    volumes:
+      - ddn-sqlite:/root/db/
+    networks:
+      - docker_ddn
+
+  # mysql:
+  #   image: mysql:5
+  #   restart: always
+  #   environment:      
+  #     - MYSQL_ROOT_PASSWORD=root
+  #   volumes:
+  #     - ddn-mysql:/data
+  #   networks:
+  #     - docker_ddn
+  #   ports:
+  #     - 13306:3306
+
+volumes:
+  ddn-sqlite:
+  # ddn-mysql:
+
+networks:
+  docker_ddn:
+    driver: bridge

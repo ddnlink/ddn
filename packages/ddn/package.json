@@ -39,6 +39,7 @@
   },
   "scripts": {
     "start": "node --harmony app.js",
+    "dev": "node app.js",
     "test": "./node_modules/.bin/mocha -r intelli-espower-loader test/**/*.test.js",
     "build": "cross-env NODE_ENV=production ./node_modules/.bin/gulp linux-build-main",
     "build-testnet": "./node_modules/.bin/gulp linux-build-test",
