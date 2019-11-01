@@ -39,6 +39,7 @@
   },
   "scripts": {
     "start": "node --harmony app.js",
+    "dev": "node app.js",
     "test": "./node_modules/.bin/mocha -r intelli-espower-loader test/**/*.test.js",
     "build": "cross-env NODE_ENV=production ./node_modules/.bin/gulp linux-build-main",
     "build-testnet": "./node_modules/.bin/gulp linux-build-test",
@@ -72,7 +73,7 @@
     "ejs": "2.5.7",
     "express": "^4.16.4",
     "express-domain-middleware": "0.1.0",
-    "extend": "2.0.0",
+    "extend": "3.0.2",
     "ip": "1.1.3",
     "lodash": "^4.17.11",
     "method-override": "^3.0.0",
