@@ -20,6 +20,10 @@ More infomation please visit our [official website](https://www.ddn.link) , [ddn
 - [ ] **Docker**, tod support mainstream deployment methods such as docker;
 - [ ] More...
 
+## Architect
+
+![](./doc/architect.jpg)
+
 ## Projects
 
 - [ddn-docs](https://github.com/ddnlink/ddn-docs)
