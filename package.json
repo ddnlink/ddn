@@ -44,6 +44,7 @@
     "chore:update-deps": "sh ./scripts/reinstall_deps.sh",
     "clean": "lerna clean -y",
     "publish": "./scripts/publish.js",
+    "debug": "./packages/ddn-test/bin/ddn-test.js",
     "test": "node scripts/test.js",
     "ui:build": "node ./scripts/ui.js"
   },
