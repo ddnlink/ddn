@@ -18,7 +18,6 @@
     "lib"
   ],
   "dependencies": {
-    "@ddn/ddn-utils": "^1.0.0",
     "@ddn/ddn-asset-base": "^1.0.3",
     "@ddn/ddn-utils": "^1.0.2",
     "bytebuffer": "^5.0.1",

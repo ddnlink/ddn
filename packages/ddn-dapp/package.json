@@ -18,7 +18,6 @@
   "author": "wly",
   "license": "MIT",
   "dependencies": {
-    "@ddn/ddn-utils": "^1.0.0",
     "@ddn/ddn-asset-base": "^1.0.3",
     "@ddn/ddn-sandbox": "^1.0.0",
     "@ddn/ddn-utils": "^1.0.2",

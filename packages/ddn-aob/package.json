@@ -18,8 +18,7 @@
   "author": "wangxm",
   "license": "MIT",
   "dependencies": {
-    "@ddn/ddn-utils": "^1.0.0",
-    "@ddn/ddn-asset-base": "^1.0.3",
+s    "@ddn/ddn-asset-base": "^1.0.3",
     "@ddn/ddn-utils": "^1.0.0",
     "async": "^2.6.1",
     "ed25519": "0.0.4",
