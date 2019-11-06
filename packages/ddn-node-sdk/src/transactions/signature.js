@@ -22,7 +22,7 @@ async function createSignature(secret, secondSecret, oldSecondSecret) {
 	var transaction = {
 		type: transactionTypes.SIGNATURE,
 		nethash: options.get('nethash'),
-		amount: "0",    //bignum update
+		amount: "0",    //Bignum update
 		fee: constants.fees.secondsignature,
 		recipient_id: null,
 		sender_public_key: keys.public_key,

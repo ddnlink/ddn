@@ -1,5 +1,5 @@
 const { AssetBase } = require('@ddn/ddn-asset-base');
-const bignum = require('@ddn/bignum-utils');
+const { Bignum } = require('@ddn/ddn-utils');
 const ddnUtils = require('@ddn/ddn-utils');
 const daoUtil = require('./daoUtil');
 const crypto = require('crypto');
@@ -55,7 +55,7 @@ class Confirmation extends AssetBase {
         } else if (data[assetJsonName].state === 1) {
             trans.recipient_id = data[assetJsonName].received_address; // wxm block database
             // 此处交易金额=投稿的price
-            trans.amount = bignum.new((data[assetJsonName].price || 0)).toString();
+            trans.amount = Bignum.new((data[assetJsonName].price || 0)).toString();
         }
         trans.asset[assetJsonName] = data[assetJsonName];
 
@@ -89,7 +89,7 @@ class Confirmation extends AssetBase {
         }
 
         if (confirmation.state === 0) {
-            if (!bignum.isZero(trs.amount)) {
+            if (!Bignum.isZero(trs.amount)) {
                 throw new Error('Invalid transaction amount');
             }
         }
@@ -146,7 +146,7 @@ class Confirmation extends AssetBase {
             }
             // 判断交易的价格是否和投稿的价值一致
             if (confirmation.state === 1) {
-                if (!bignum.isEqualTo(trs.amount, contribution.price)) {
+                if (!Bignum.isEqualTo(trs.amount, contribution.price)) {
                     throw new Error(`The transaction's amount must be equal contribution's price: ${contribution.price}`);
                 }
             }

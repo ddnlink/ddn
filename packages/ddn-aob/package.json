@@ -1,18 +1,24 @@
 {
   "name": "@ddn/ddn-aob",
-  "version": "1.0.4",
+  "version": "1.0.6",
   "description": "这个是ddn链上资产包",
   "main": "index.js",
-  "directories": {
-    "lib": "lib"
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ddnlink/ddn.git",
+    "directory": "packages/ddn-aob"
   },
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+  "homepage": "http://github.com/ddnlink/ddn/tree/master/packages/ddn-aob",
+  "bugs": {
+    "url": "http://github.com/ddnlink/ddn/issues"
   },
-  "author": "wly",
-  "license": "ISC",
+  "files": [
+    "lib"
+  ],
+  "author": "wangxm",
+  "license": "MIT",
   "dependencies": {
-    "@ddn/bignum-utils": "^1.0.0",
+    "@ddn/ddn-utils": "^1.0.0",
     "@ddn/ddn-asset-base": "^1.0.3",
     "@ddn/ddn-utils": "^1.0.0",
     "async": "^2.6.1",

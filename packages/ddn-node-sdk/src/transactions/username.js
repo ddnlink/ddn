@@ -17,7 +17,7 @@ function createUsername(name, secret, secondSecret) {
 	var transaction = {
 		type: transactionTypes.USERINFO,
 		nethash: options.get('nethash'),
-		amount: "0",    //bignum update
+		amount: "0",    //Bignum update
 		fee: fee + "",
 		recipientId: null,
 		senderPublicKey: keys.public_key,

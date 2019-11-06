@@ -1,19 +1,24 @@
 {
   "name": "@ddn/ddn-asset-base",
-  "version": "1.0.3",
+  "version": "1.0.8",
   "description": "DDN资产基类相关信息",
   "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
   "repository": {
     "type": "git",
-    "url": "git@git.ebookchain.net:ddn/ddn-asset-base.git"
+    "url": "git+https://github.com/ddnlink/ddn.git",
+    "directory": "packages/ddn-asset-base"
   },
+  "homepage": "http://github.com/ddnlink/ddn/tree/master/packages/ddn-asset-base",
+  "bugs": {
+    "url": "http://github.com/ddnlink/ddn/issues"
+  },
+  "files": [
+    "lib"
+  ],
   "author": "wangxm",
-  "license": "ISC",
+  "license": "MIT",
   "dependencies": {
-    "@ddn/bignum-utils": "^1.0.0",
+    "@ddn/ddn-utils": "^1.0.0",
     "bytebuffer": "^5.0.1",
     "underscore": "^1.9.1"
   }

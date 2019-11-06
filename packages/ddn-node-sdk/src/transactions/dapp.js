@@ -11,7 +11,7 @@ function createDApp(options, secret, secondSecret) {
 	var transaction = {
     nethash: globalOptions.get('nethash'),
 		type: transactionTypes.DAPP,
-		amount: "0",    //bignum update
+		amount: "0",    //Bignum update
 		fee: constants.fees.dapp,
 		recipient_id: null,
 		sender_public_key: keys.public_key,

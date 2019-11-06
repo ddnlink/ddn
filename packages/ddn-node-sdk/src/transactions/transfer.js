@@ -12,7 +12,7 @@ function createInTransfer(dappId, currency, amount, secret, secondSecret) {
 	var transaction = {
 		type: transactionTypes.IN_TRANSFER,
 		nethash: nethash,
-		amount: "0",    //bignum update
+		amount: "0",    //Bignum update
 		fee: constants.fees.send,
 		recipient_id: null,
 		sender_public_key: keys.public_key,
@@ -26,7 +26,7 @@ function createInTransfer(dappId, currency, amount, secret, secondSecret) {
 	};
 
 	if (currency === constants.nethash[nethash].tokenName) {
-		transaction.amount = amount;    //bignum update Number(amount)
+		transaction.amount = amount;    //Bignum update Number(amount)
 	} else {
 		transaction.asset.inTransfer.amount = String(amount)
 	}
@@ -48,7 +48,7 @@ function createOutTransfer(recipientId, dappId, transactionId, currency, amount,
 	var transaction = {
     nethash: nethash,
 		type: transactionTypes.OUT_TRANSFER,
-		amount: "0",    //bignum update
+		amount: "0",    //Bignum update
 		fee: constants.fees.send,
 		recipient_id: recipientId,
 		sender_public_key: keys.public_key,

@@ -1,5 +1,5 @@
 const { AssetBase } = require('@ddn/ddn-asset-base');
-const bignum = require('@ddn/bignum-utils');
+const { Bignum } = require('@ddn/ddn-utils');
 const ddnUtils = require('@ddn/ddn-utils');
 
 class InTransfer extends AssetBase {
@@ -48,8 +48,8 @@ class InTransfer extends AssetBase {
 
         const inTransfer = await this.getAssetObject(trs);
         if (inTransfer.currency !== this.tokenSetting.tokenName) {
-            if ((typeof (trs.amount) != "undefined" && !bignum.isZero(trs.amount)) ||
-                (typeof (inTransfer.amount) == "undefined" || bignum.isZero(inTransfer.amount))) {
+            if ((typeof (trs.amount) != "undefined" && !Bignum.isZero(trs.amount)) ||
+                (typeof (inTransfer.amount) == "undefined" || Bignum.isZero(inTransfer.amount))) {
                 throw new Error("Invalid transfer amount")
             }
 
@@ -58,8 +58,8 @@ class InTransfer extends AssetBase {
                 throw error;
             }
         } else {
-            if ((typeof (trs.amount) == "undefined" || bignum.isZero(trs.amount)) ||
-                (typeof (inTransfer.amount) != "undefined" && !bignum.isZero(inTransfer.amount))) {
+            if ((typeof (trs.amount) == "undefined" || Bignum.isZero(trs.amount)) ||
+                (typeof (inTransfer.amount) != "undefined" && !Bignum.isZero(inTransfer.amount))) {
                 throw new Error("Invalid transfer amount")
             }
         }
@@ -142,8 +142,8 @@ class InTransfer extends AssetBase {
                         balanceExists = true;
                     }
 
-                    const newBalance = bignum.plus(balance, amount);
-                    if (bignum.isLessThan(newBalance, 0)) {
+                    const newBalance = Bignum.plus(balance, amount);
+                    if (Bignum.isLessThan(newBalance, 0)) {
                         return reject('Asset balance not enough');
                     }
 
@@ -193,8 +193,8 @@ class InTransfer extends AssetBase {
         const transfer = await this.getAssetObject(trs);
         if (transfer.currency != this.tokenSetting.tokenName) {
             const balance = this.balanceCache.getAssetBalance(sender.address, transfer.currency) || 0;
-            const surplus = bignum.minus(balance, transfer.amount);
-            if (bignum.isLessThan(surplus, 0)) {
+            const surplus = Bignum.minus(balance, transfer.amount);
+            if (Bignum.isLessThan(surplus, 0)) {
                 throw new Error('Insufficient asset balance');
             }
             this.balanceCache.setAssetBalance(sender.address, transfer.currency, surplus.toString())

@@ -5,7 +5,7 @@ var trsTypes = require('../transaction-types');
 var slots = require('../time/slots.js');
 var options = require('../options');
 var addressHelper = require('../address.js')
-var bignum = require('@ddn/bignum-utils');
+const { Bignum } = require('@ddn/ddn-utils');
 
 /**
  * Create org transaction
@@ -71,7 +71,7 @@ function createOrg(org, secret, second_secret) {
 		type: trsTypes.ORG,
 		nethash: options.get('nethash'),
 		amount: "0",
-		fee: bignum.multiply(feeBase, 100000000).toString(),   //bignum update feeBase * 100000000,
+		fee: Bignum.multiply(feeBase, 100000000).toString(),   //Bignum update feeBase * 100000000,
 		recipientId: null,
 		sender_public_key: keys.public_key,
 		senderPublicKey: keys.public_key,

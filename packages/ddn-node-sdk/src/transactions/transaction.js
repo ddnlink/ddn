@@ -3,14 +3,14 @@ var constants = require("../constants.js")
 var transactionTypes = require("../transaction-types.js")
 var slots = require("../time/slots.js")
 var options = require('../options')
-var bignum = require('@ddn/bignum-utils');
+const { Bignum } = require('@ddn/ddn-utils');
 
 function calculateFee(amount) {
     var min = constants.fees.send;
     
-    var fee = bignum.multiply(amount, 0.0001).toFixed(0);
+    var fee = Bignum.multiply(amount, 0.0001).toFixed(0);
 
-    if (bignum.isLessThan(fee, min)) {
+    if (Bignum.isLessThan(fee, min)) {
         return min;
     } else {
         return fee + "";

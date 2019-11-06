@@ -12,7 +12,7 @@ if (typeof Buffer === "undefined") {
 }
 
 var ByteBuffer = require("bytebuffer");
-var bignum = require("@ddn/bignum-utils");
+var Bignum = require("@ddn/ddn-utils");
 var nacl = require('tweetnacl')
 
 var fixedPoint = Math.pow(10, 8);
@@ -591,7 +591,7 @@ async function getBytes(transaction, skipSignature, skipSecondSignature) {
 
         //     if (/^[0-9]{1,20}$/g.test(output.recipientId)) {
 
-        //       var recipient = bignum.new(output.recipientId).toBuffer({
+        //       var recipient = Bignum.new(output.recipientId).toBuffer({
         //         size: 8
         //       });
 
@@ -710,16 +710,16 @@ async function getHash(transaction, skipSignature, skipSecondSignature) {
 async function getFee(transaction) {
     switch (transaction.type) {
         case trsTypes.SEND: // Normal
-            return bignum.multiply(0.1, fixedPoint);
+            return Bignum.multiply(0.1, fixedPoint);
             break;
         case trsTypes.SIGNATURE: // Signature
-            return bignum.multiply(100, fixedPoint);
+            return Bignum.multiply(100, fixedPoint);
             break;
         case trsTypes.DELEGATE: // Delegate
-            return bignum.multiply(10000, fixedPoint);
+            return Bignum.multiply(10000, fixedPoint);
             break;
         case trsTypes.VOTE: // Vote
-            return bignum.new(fixedPoint);
+            return Bignum.new(fixedPoint);
             break;
         default: {
             var fee = constants.fees.send;

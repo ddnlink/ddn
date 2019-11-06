@@ -1,6 +1,6 @@
 {
   "name": "@ddn/ddn-node-sdk",
-  "version": "3.0.1",
+  "version": "3.0.5",
   "description": "DDN Node.js SDK",
   "main": "index.js",
   "directories": {
@@ -17,7 +17,7 @@
   "author": "",
   "license": "MIT",
   "dependencies": {
-    "@ddn/bignum-utils": "^1.0.0",
+    "@ddn/ddn-utils": "^1.0.0",
     "@ddn/ddn-aob": "^1.0.4",
     "@ddn/ddn-asset-base": "^1.0.3",
     "@ddn/ddn-dao": "^1.0.3",

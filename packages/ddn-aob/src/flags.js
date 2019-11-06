@@ -1,5 +1,5 @@
 const { AssetBase } = require('@ddn/ddn-asset-base');
-const bignum = require('@ddn/bignum-utils');
+const { Bignum } = require('@ddn/ddn-utils');
 
 class Flags extends AssetBase
 {
@@ -19,8 +19,8 @@ class Flags extends AssetBase
         if (trs.recipient_id) {
             throw new Error("Invalid recipient")
         }
-        //bignum update if (trs.amount != 0) 
-        if (!bignum.isZero(trs.amount)) {
+        //Bignum update if (trs.amount != 0) 
+        if (!Bignum.isZero(trs.amount)) {
             throw new Error("Invalid transaction amount")
         }
     
