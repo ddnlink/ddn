@@ -13,7 +13,7 @@ module.exports = {
   maxConfirmations : 77 * 100,
   confirmationLength: 77,
   fixedPoint : Math.pow(10, 8),
-  totalAmount: "10000000000000000", //bignum update
+  totalAmount: "10000000000000000", //Bignum update
   maxTxsPerBlock: 500,
   tokenName: 'DDN',
   tokenPrefix: 'D',
@@ -23,7 +23,7 @@ module.exports = {
   testnet: {
     rewardRatio: 0.2,
     milestones: [
-      "500000000", // Initial Reward    bignum update
+      "500000000", // Initial Reward    Bignum update
       "400000000", // Milestone 1
       "300000000", // Milestone 2
       "200000000", // Milestone 3
@@ -36,7 +36,7 @@ module.exports = {
 
     // Fees for transacton
     fees: {
-      send: "10000000", //bignum update
+      send: "10000000", //Bignum update
       vote: "100000000",
       secondSignature: "500000000",
       delegate: "2500000000",
@@ -51,7 +51,7 @@ module.exports = {
   mainnet: {
     rewardRatio: 0.2,
     milestones: [
-      "500000000", // Initial Reward      bignum update
+      "500000000", // Initial Reward      Bignum update
       "400000000", // Milestone 1
       "300000000", // Milestone 2
       "200000000", // Milestone 3
@@ -65,7 +65,7 @@ module.exports = {
 
     // Fees for transacton
     fees: {
-      send: "10000000", //bignum update
+      send: "10000000", //Bignum update
       vote: "100000000",
       secondSignature: "500000000",
       delegate: "2500000000",

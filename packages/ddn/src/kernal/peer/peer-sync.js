@@ -3,7 +3,7 @@
  * wangxm   2019-01-15
  */
 const ip = require("ip");
-const bignum = require('@ddn/bignum-utils');
+const { Bignum } = require('@ddn/ddn-utils');
 const { Utils } = require('@ddn/ddn-utils');
 
 var _singleton;
@@ -45,7 +45,7 @@ class PeerSync {
                 this.logger.log(`Failed to parse blockchain height: ${peerStr}\n${validateErrors[0].message}`);
             }
 
-            if (bignum.isLessThan(this.runtime.block.getLastBlock().height, remotePeerHeight.body.height)) {
+            if (Bignum.isLessThan(this.runtime.block.getLastBlock().height, remotePeerHeight.body.height)) {
                 var syncLastBlock = null;
                 var lastBlock = this.runtime.block.getLastBlock();
                 if (lastBlock.id != this.genesisblock.id) {
@@ -56,7 +56,7 @@ class PeerSync {
 
                 if (syncLastBlock) {
                     remotePeerHeight = await this.runtime.peer.request({api: "/height"});
-                    if (remotePeerHeight && remotePeerHeight.body && 
+                    if (remotePeerHeight && remotePeerHeight.body &&
                         syncLastBlock.height == remotePeerHeight.body.height) {
                         return true;
                     } else {
@@ -85,7 +85,7 @@ class PeerSync {
                 if (err || !rows || !rows.length) {
                     reject(err ? err.toString() : `Can't get sequence before: ${height}`)
                 }
-            
+
                 var firstHeight = "";
                 var ids = "";
                 for (var i = 0; i < rows.length; i++) {
@@ -95,7 +95,7 @@ class PeerSync {
                     }
                     ids += rows[i].id;
                 }
-            
+
                 resolve({
                     firstHeight: firstHeight,
                     ids: ids
@@ -107,12 +107,12 @@ class PeerSync {
     async _addLackBlocks(peer) {
         var peerStr = peer ? `${ip.fromLong(peer.ip)}:${peer.port}` : 'unknown';
         this.logger.info(`Looking for common block with ${peerStr}`);
-      
+
         var lastBlock = this.runtime.block.getLastBlock();
 
         var lastLackBlock = null;
         var currProcessHeight = lastBlock.height;
-        while (!lastLackBlock && bignum.isGreaterThan(currProcessHeight, 1)) {
+        while (!lastLackBlock && Bignum.isGreaterThan(currProcessHeight, 1)) {
             var data = await this._getIdSequence(currProcessHeight);
 
             var maxHeight = currProcessHeight;
@@ -146,11 +146,11 @@ class PeerSync {
         }
 
         this.logger.info(`Found common block ${lastLackBlock.id} (at ${lastLackBlock.height}) with peer ${peerStr}, last block height is ${lastBlock.height}`);
-        //bignum update const toRemove = lastBlock.height - commonBlock.height;
-        const toRemove = bignum.minus(lastBlock.height, lastLackBlock.height);
+        //Bignum update const toRemove = lastBlock.height - commonBlock.height;
+        const toRemove = Bignum.minus(lastBlock.height, lastLackBlock.height);
 
-        //bignum update if (toRemove >= 5) {
-        if (bignum.isGreaterThanOrEqualTo(toRemove, 5)) {
+        //Bignum update if (toRemove >= 5) {
+        if (Bignum.isGreaterThanOrEqualTo(toRemove, 5)) {
             this.logger.error("long fork, ban 60 min", peerStr);
             this.runtime.peer.changeState(peer.ip, peer.port, 0, 3600);
             return;
@@ -173,12 +173,12 @@ class PeerSync {
                 const backRound = await this.runtime.round.calc(lastLackBlock.height);
                 let backHeight = lastLackBlock.height;
 
-                if (currentRound != backRound || bignum.isEqualTo(bignum.modulo(lastBlock.height, this.config.settings.delegateNumber), 0)) {
+                if (currentRound != backRound || Bignum.isEqualTo(Bignum.modulo(lastBlock.height, this.config.settings.delegateNumber), 0)) {
                     if (backRound == 1) {
                         backHeight = 1;
                     } else {
-                        //bignum update backHeight = backHeight - backHeight % 101;
-                        backHeight = bignum.minus(backHeight, bignum.modulo(backHeight, this.config.settings.delegateNumber));
+                        //Bignum update backHeight = backHeight - backHeight % 101;
+                        backHeight = Bignum.minus(backHeight, Bignum.modulo(backHeight, this.config.settings.delegateNumber));
                     }
 
                     var result = await this.runtime.block.querySimpleBlockData({ height: backHeight.toString() });
@@ -245,7 +245,7 @@ class PeerSync {
             // if (typeof blocks === "string") {
             //     blocks = library.dbLite.parseCSV(blocks);
             // }
-            
+
             var validateErrors = await this.ddnSchema.validate({
                 type: "array"
             }, blocks);
@@ -317,7 +317,7 @@ class PeerSync {
 
     async trySyncSignatures() {
         var data;
-        try 
+        try
         {
             data = await this.runtime.peer.request({api: "/signatures"});
         }
@@ -326,7 +326,7 @@ class PeerSync {
             this.logger.error("Sync Signatures has error: " + err);
             return;
         }
-        
+
         if (data == false) {
             return;
         }
@@ -378,7 +378,7 @@ class PeerSync {
 
     async trySyncUnconfirmedTransactions() {
         var data;
-        try 
+        try
         {
             data = await this.runtime.peer.request({api: "/transactions"});
         }

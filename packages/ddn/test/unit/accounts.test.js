@@ -17,7 +17,7 @@ var AccountTest = {
     "secondPublicKey": "",
     "multisignatures": "",
     "u_multisignatures": "",
-    "lockHeight": "0",  //bignum update
+    "lockHeight": "0",  //Bignum update
     "password": "ddntest"
 };
 

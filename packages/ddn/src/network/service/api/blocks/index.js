@@ -1,4 +1,4 @@
-var bignum = require('@ddn/bignum-utils');
+const { Bignum } = require('@ddn/ddn-utils');
 var { RuntimeState } = require('@ddn/ddn-utils');
 
 /**
@@ -68,16 +68,16 @@ class RootRouter {
         if (query.previousBlock) {
             where.previous_block = query.previousBlock;
         }
-        if (bignum.isGreaterThanOrEqualTo(query.height, 0)) {
+        if (Bignum.isGreaterThanOrEqualTo(query.height, 0)) {
             where.height = query.height;
         }
-        if (bignum.isGreaterThanOrEqualTo(query.totalAmount, 0)) {
+        if (Bignum.isGreaterThanOrEqualTo(query.totalAmount, 0)) {
             where.total_amount = query.totalAmount;
         }
-        if (bignum.isGreaterThanOrEqualTo(query.totalFee, 0)) {
+        if (Bignum.isGreaterThanOrEqualTo(query.totalFee, 0)) {
             where.total_fee = query.totalFee;
         }
-        if (bignum.isGreaterThanOrEqualTo(query.reward, 0)) {
+        if (Bignum.isGreaterThanOrEqualTo(query.reward, 0)) {
             where.reward = query.reward;
         }
 
@@ -241,7 +241,7 @@ class RootRouter {
         }
 
         var lastBlock = this.runtime.block.getLastBlock();
-        return { 
+        return {
             success: true,
             height: lastBlock && lastBlock.height ? lastBlock.height : 0
         };
@@ -257,12 +257,12 @@ class RootRouter {
 
         return {
             success: true,
-            height: height, //bignum update
+            height: height, //Bignum update
             fee: await this.runtime.block.calculateFee(),
             milestone: this.runtime.block.getBlockStatus().calcMilestone(height),
-            reward: this.runtime.block.getBlockStatus().calcReward(height) + "",   //bignum update
+            reward: this.runtime.block.getBlockStatus().calcReward(height) + "",   //Bignum update
             supply: this.runtime.block.getBlockStatus().calcSupply(height)
-        }        
+        }
     }
 
 }

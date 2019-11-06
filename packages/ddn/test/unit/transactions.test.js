@@ -2,7 +2,7 @@
 
 var DEBUG = require('debug')('aob');
 var node = require('./../variables.js');
-var bignum = require('@ddn/bignum-utils');
+const { Bignum } = require('@ddn/ddn-utils');
 
 // Account info for a RANDOM account (which we create later) - 0 DDN amount | Will act as delegate
 var Account1 = node.randomTxAccount();
@@ -14,7 +14,7 @@ var transactionList = [];
 var offsetTimestamp = 0;
 
 // Used for calculating amounts
-var expectedFee = "0";  //bignum update
+var expectedFee = "0";  //Bignum update
 var totalTxFee = "0";
 var randomCoin = "0";
 
@@ -46,9 +46,9 @@ before(async function () {
     Account1.transactions.push(transactionCount);
     transactionCount += 1;
 
-    // bignum update
+    // Bignum update
     // totalTxFee += (expectedFee / node.normalizer);
-    totalTxFee = bignum.plus(totalTxFee, bignum.divide(expectedFee, node.normalizer));
+    totalTxFee = Bignum.plus(totalTxFee, Bignum.divide(expectedFee, node.normalizer));
 
     Account1.balance += randomCoin;
     transactionList[transactionCount - 1] = {
@@ -56,8 +56,8 @@ before(async function () {
         recipient: Account1.address,
         brutoSent: (randomCoin + expectedFee) / node.normalizer,
 
-        //bignum update fee: expectedFee / node.normalizer,
-        fee: bignum.divide(expectedFee, node.normalizer).toString(),
+        //Bignum update fee: expectedFee / node.normalizer,
+        fee: Bignum.divide(expectedFee, node.normalizer).toString(),
 
         nettoSent: randomCoin / node.normalizer,
         txId: res.body.transactionId,
@@ -71,9 +71,9 @@ before(async function () {
     Account2.transactions.push(transactionCount);
     transactionCount += 1;
 
-    // bignum update
+    // Bignum update
     // totalTxFee += (expectedFee / node.normalizer);
-    totalTxFee = bignum.plus(totalTxFee, bignum.divide(expectedFee, node.normalizer));
+    totalTxFee = Bignum.plus(totalTxFee, Bignum.divide(expectedFee, node.normalizer));
 
     Account2.balance += randomCoin;
     transactionList[transactionCount - 1] = {
@@ -81,8 +81,8 @@ before(async function () {
         recipient: Account2.address,
         brutoSent: (randomCoin + expectedFee) / node.normalizer,
 
-        //bignum update fee: expectedFee / node.normalizer,
-        fee: bignum.divide(expectedFee, node.normalizer).toString(),
+        //Bignum update fee: expectedFee / node.normalizer,
+        fee: Bignum.divide(expectedFee, node.normalizer).toString(),
 
         nettoSent: randomCoin / node.normalizer,
         txId: res.body.transactionId,
@@ -111,8 +111,8 @@ describe('GET /api/transactions', function () {
                 if (res.body.transactions.length > 0) {
                     for (var i = 0; i < res.body.transactions.length; i++) {
                         if (res.body.transactions[i + 1] != null) {
-                            //bignum update node.expect(res.body.transactions[i].amount).to.be.at.most(res.body.transactions[i + 1].amount);
-                            var bRet = bignum.isLessThanOrEqualTo(res.body.transactions[i].amount, res.body.transactions[i + 1].amount);
+                            //Bignum update node.expect(res.body.transactions[i].amount).to.be.at.most(res.body.transactions[i + 1].amount);
+                            var bRet = Bignum.isLessThanOrEqualTo(res.body.transactions[i].amount, res.body.transactions[i + 1].amount);
                             node.expect(bRet).to.be.true;
                         }
                     }
@@ -222,7 +222,7 @@ describe('GET /api/transactions', function () {
                 if (res.body.transactions.length > 0) {
                     for (var i = 0; i < res.body.transactions.length; i++) {
                         if (res.body.transactions[i + 1] != null) {
-                            var bRet = bignum.isGreaterThanOrEqualTo(res.body.transactions[i].amount, res.body.transactions[i + 1].amount);
+                            var bRet = Bignum.isGreaterThanOrEqualTo(res.body.transactions[i].amount, res.body.transactions[i + 1].amount);
                             // node.expect(res.body.transactions[i].amount).to.be.at.most(res.body.transactions[i + 1].amount);
                             node.expect(bRet).to.be.true;
                         }
@@ -288,20 +288,20 @@ describe('PUT /api/transactions', function () {
                     if (res.body.success == true && res.body.transactionId != null) {
                         expectedFee = node.expectedFee(amountToSend);
 
-                        //bignum update Account1.balance -= (amountToSend + expectedFee);
-                        Account1.balance = bignum.minus(Account1.balance, amountToSend, expectedFee);
+                        //Bignum update Account1.balance -= (amountToSend + expectedFee);
+                        Account1.balance = Bignum.minus(Account1.balance, amountToSend, expectedFee);
 
                         Account2.balance += amountToSend;
                         Account1.transactions.push(transactionCount);
                         transactionList[transactionCount] = {
                             'sender': Account1.address,
                             'recipient': Account2.address,
-                            'brutoSent': bignum.divide(bignum.plus(amountToSend, expectedFee), node.normalizer),
+                            'brutoSent': Bignum.divide(Bignum.plus(amountToSend, expectedFee), node.normalizer),
 
-                            //bignum update 'fee': expectedFee / node.normalizer,
-                            'fee': bignum.divide(expectedFee, node.normalizer),
+                            //Bignum update 'fee': expectedFee / node.normalizer,
+                            'fee': Bignum.divide(expectedFee, node.normalizer),
 
-                            'nettoSent': bignum.divide(amountToSend, node.normalizer),
+                            'nettoSent': Bignum.divide(amountToSend, node.normalizer),
                             'txId': res.body.transactionId,
                             'type': node.AssetTypes.TRANSFER
                         }
@@ -680,8 +680,8 @@ describe('PUT /signatures', function () {
                         Account1.transactions.push(transactionCount);
                         transactionCount += 1;
 
-                        //bignum update Account1.balance -= node.Fees.secondPasswordFee;
-                        Account1.balance = bignum.minus(Account1.balance, node.Fees.secondPasswordFee);
+                        //Bignum update Account1.balance -= node.Fees.secondPasswordFee;
+                        Account1.balance = Bignum.minus(Account1.balance, node.Fees.secondPasswordFee);
 
                         transactionList[transactionCount - 1] = {
                             'sender': Account1.address,

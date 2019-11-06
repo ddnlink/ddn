@@ -1,6 +1,6 @@
 const crypto = require('crypto');
 const ed = require('ed25519');
-const { AssetTypes } = require('@ddn/ddn-utils');
+const { AssetTypes, Bignum } = require('@ddn/ddn-utils');
 
 /**
  * RootRouter接口
@@ -51,7 +51,7 @@ class RootRouter {
               return sortb - sorta;
             }
         };
-      
+
         function compareString(a, b) {
             const sorta = a[result.orderBy];
             const sortb = b[result.orderBy];
@@ -61,11 +61,11 @@ class RootRouter {
               return sortb.localeCompare(sorta);
             }
         };
-      
+
         if (result.delegates.length > 0 && typeof result.delegates[0][result.orderBy] == 'undefined') {
             result.orderBy = 'rate';
         }
-      
+
         if (["approval", "productivity", "rate", "vote", "missedblocks", "producedblocks", "fees", "rewards", "balance"].indexOf(result.orderBy) > - 1) {
             result.delegates = result.delegates.sort(compareNumber);
         } else {
@@ -84,7 +84,7 @@ class RootRouter {
                 item.voted = (voter.delegates.indexOf(item.public_key) != -1);
             });
         }
-        
+
         return { success: true, delegates, totalCount: result.count };
     }
 
@@ -155,7 +155,7 @@ class RootRouter {
         }
 
         return new Promise((resolve, reject) => {
-            this.dao.findList('mem_accounts2delegate', {dependent_id: query.publicKey}, 
+            this.dao.findList('mem_accounts2delegate', {dependent_id: query.publicKey},
                 [[this.dao.db_fnGroupConcat('account_id'), 'account_id']], null, null,
                 async (err, rows) => {
 
@@ -193,9 +193,9 @@ class RootRouter {
     }
 
     async getFee(req) {
-        //   bignum update
+        //   Bignum update
         //   fee = 100 * constants.fixedPoint;
-        let fee = bignum.multiply(100, this.tokenSetting.fixedPoint);
+        let fee = Bignum.multiply(100, this.tokenSetting.fixedPoint);
         return {fee};
     }
 
@@ -240,9 +240,9 @@ class RootRouter {
 
         return new Promise((resolve, reject) => {
             this.balancesSequence.add(async (cb) => {
-                if (body.multisigAccountPublicKey && 
+                if (body.multisigAccountPublicKey &&
                     body.multisigAccountPublicKey != keypair.publicKey.toString('hex')) {
-                    
+
                     var account;
                     try
                     {
@@ -256,11 +256,11 @@ class RootRouter {
                     if (!account) {
                         return cb("Multisignature account not found");
                     }
-            
+
                     if (!account.multisignatures || !account.multisignatures) {
                         return cb("Account does not have multisignatures enabled");
                     }
-            
+
                     if (account.multisignatures.indexOf(keypair.publicKey.toString('hex')) < 0) {
                         return cb("Account does not belong to multisignature group");
                     }
@@ -278,11 +278,11 @@ class RootRouter {
                     if (!requester || !requester.public_key) {  //wxm block database
                         return cb("Invalid requester");
                     }
-          
+
                     if (requester.second_signature && !body.secondSecret) {
                         return cb("Invalid second passphrase");
                     }
-          
+
                     if (requester.public_key == account.public_key) {   //wxm block database
                         return cb("Incorrect requester");
                     }
@@ -321,17 +321,17 @@ class RootRouter {
                     if (!account) {
                         return cb("Account not found");
                     }
-            
+
                     if (account.second_signature && !body.secondSecret) {
                         return cb("Invalid second passphrase");
                     }
-            
+
                     let second_keypair = null;
                     if (account.second_signature) {
                         const secondHash = crypto.createHash('sha256').update(body.secondSecret, 'utf8').digest();
                         second_keypair = ed.MakeKeypair(secondHash);
                     }
-            
+
                     try {
                         var transaction = await this.runtime.transaction.create({
                             type: AssetTypes.DELEGATE,

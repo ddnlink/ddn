@@ -1,6 +1,6 @@
 {
   "name": "ddn",
-  "version": "3.0.0",
+  "version": "3.0.11",
   "main": "./app.js",
   "repository": {
     "type": "git",
@@ -47,14 +47,13 @@
     "build-localnet": "./node_modules/.bin/gulp linux-build-local"
   },
   "dependencies": {
-    "@ddn/bignum-utils": "^1.0.0",
     "@ddn/ddn-aob": "^1.0.4",
     "@ddn/ddn-asset-base": "^1.0.3",
     "@ddn/ddn-dao": "^1.0.3",
     "@ddn/ddn-dapp": "^1.0.3",
     "@ddn/ddn-evidence": "^1.0.2",
     "@ddn/ddn-node-sdk": "^3.0.1",
-    "@ddn/ddn-utils": "^1.0.2",
+    "@ddn/ddn-utils": "^1.0.0",
     "ajv": "^6.3.0",
     "array.prototype.find": "1.0.0",
     "array.prototype.findindex": "2.0.0",

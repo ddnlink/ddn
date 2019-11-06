@@ -5,7 +5,7 @@
 const util = require('util');
 const ByteBuffer = require('bytebuffer');
 const addressUtil = require('../../lib/address.js');
-const bignum = require('@ddn/bignum-utils');
+const { Bignum } = require('@ddn/ddn-utils');
 
 class Delegate {
 
@@ -16,7 +16,7 @@ class Delegate {
 
 	async create(data, trs) {
 		trs.recipient_id = null;    //wxm block database
-		trs.amount = "0";   //bignum update
+		trs.amount = "0";   //Bignum update
 		trs.asset.delegate = {
 			username: data.username,
 			public_key: data.sender.public_key   //wxm block database
@@ -30,9 +30,9 @@ class Delegate {
 	}
 
 	async calculateFee(trs, sender) {
-		// bignum update
+		// Bignum update
 		// return 100 * constants.fixedPoint;
-		return bignum.multiply(100, this.tokenSetting.fixedPoint);
+		return Bignum.multiply(100, this.tokenSetting.fixedPoint);
 	}
 
 	async verify(trs, sender) {
@@ -40,8 +40,8 @@ class Delegate {
             throw new Error('Invalid recipient');
 		}
 
-		//bignum update if (trs.amount != 0) {
-		if (!bignum.isZero(trs.amount)) {
+		//Bignum update if (trs.amount != 0) {
+		if (!Bignum.isZero(trs.amount)) {
             throw new Error('Invalid transaction amount');
 		}
 
@@ -150,7 +150,7 @@ class Delegate {
 		if (this.oneoff.has(nameKey) || this.oneoff.has(idKey)) {
             throw new Error("Double submit");
         }
-        
+
 		this.oneoff.set(nameKey, true);
         this.oneoff.set(idKey, true);
 	}

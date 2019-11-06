@@ -7,7 +7,7 @@
 
 const node = require("../variables.js");
 const constants = require("../../src/constants");
-const bignum = require('@ddn/bignum-utils');
+const { Bignum } = require('@ddn/ddn-utils');
 
 describe('Constants params', function () {
   it('test block reward', function (done) {
@@ -31,8 +31,8 @@ describe('Constants params', function () {
 
     node.expect(blockStatus.calcSupply(1)).to.equal(constants.totalAmount);
     node.expect(blockStatus.calcSupply(2)).to.equal(constants.totalAmount);
-    node.expect(blockStatus.calcSupply(101)).to.equal(bignum.plus(constants.totalAmount, bignum.multiply(constants.testnet.milestones[0], 100)).toString());
-    node.expect(blockStatus.calcSupply(102)).to.equal(bignum.plus(constants.totalAmount, bignum.multiply(constants.testnet.milestones[0], 100)).toString());
+    node.expect(blockStatus.calcSupply(101)).to.equal(Bignum.plus(constants.totalAmount, Bignum.multiply(constants.testnet.milestones[0], 100)).toString());
+    node.expect(blockStatus.calcSupply(102)).to.equal(Bignum.plus(constants.totalAmount, Bignum.multiply(constants.testnet.milestones[0], 100)).toString());
 
     // todo 下面的还没有修改
     // node.expect(blockStatus.calcSupply(3000000)).to.equal(11499950500000000);

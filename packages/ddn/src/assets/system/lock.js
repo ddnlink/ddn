@@ -4,7 +4,7 @@
  *  Copyright (c) 2019 DDN Foundation. All rights reserved.
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
-var bignum = require('@ddn/bignum-utils');
+const { Bignum } = require('@ddn/ddn-utils');
 
 class Lock {
 
@@ -30,18 +30,18 @@ class Lock {
             throw new Error('Invalid lock height');
         }
 
-		//bignum update const lockHeight = Number(trs.args[0]);
+		//Bignum update const lockHeight = Number(trs.args[0]);
 		const lockHeight = trs.args[0];
 
 		const lastBlock = this.runtime.block.getLastBlock();
 
-		//bignum update if (isNaN(lockHeight) || lockHeight <= lastBlock.height)
-		if (bignum.isNaN(lockHeight) || bignum.isLessThanOrEqualTo(lockHeight, lastBlock.height)) {
+		//Bignum update if (isNaN(lockHeight) || lockHeight <= lastBlock.height)
+		if (Bignum.isNaN(lockHeight) || Bignum.isLessThanOrEqualTo(lockHeight, lastBlock.height)) {
             throw new Error('Invalid lock height');
         }
 
-		//bignum update if (sender.lockHeight && lastBlock.height + 1 <= sender.lockHeight)
-		if (sender.lockHeight && bignum.isLessThanOrEqualTo(bignum.plus(lastBlock.height, 1), sender.lockHeight)) {
+		//Bignum update if (sender.lockHeight && lastBlock.height + 1 <= sender.lockHeight)
+		if (sender.lockHeight && Bignum.isLessThanOrEqualTo(Bignum.plus(lastBlock.height, 1), sender.lockHeight)) {
             throw new Error('Account is locked');
         }
 
@@ -63,12 +63,12 @@ class Lock {
 	async apply(trs, block, sender, dbTrans) {
         await this.runtime.account.setAccount({
             address: sender.address,
-            lock_height: trs.args[0]     //bignum update Number(trs.args[0])
+            lock_height: trs.args[0]     //Bignum update Number(trs.args[0])
         }, dbTrans);
 
 		// self.library.base.account.set(sender.address,
 		// 	{
-		// 		lock_height: trs.args[0]     //bignum update Number(trs.args[0])
+		// 		lock_height: trs.args[0]     //Bignum update Number(trs.args[0])
 		// 	}, dbTrans,
 		// 	cb);
 	}

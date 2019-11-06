@@ -90,7 +90,7 @@ async function sendDDN (account, i) {
                 console.log("Sending " + randomCoin + " DDN to " + account.address);
                 node.expect(res.body).to.have.property("success").to.be.true;
                 if (res.body.success == true && i != null) {
-                // fixme: bignumber
+                // fixme: Bignumber
                     Accounts[i].balance = randomCoin / node.normalizer;
                 }
 

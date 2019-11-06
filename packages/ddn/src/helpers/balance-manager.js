@@ -6,7 +6,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 const Tmdb = require('./tmdb.js');
-const bignum = require('@ddn/bignum-utils');
+const { Bignum } = require('@ddn/ddn-utils');
 
 class BalanceManager {
   constructor() {
@@ -18,23 +18,23 @@ class BalanceManager {
   }
 
   setNativeBalance(address, balance) {
-    // bignum update
+    // Bignum update
     // if (typeof balance === 'number') balance = String(balance)
-    // this.tmdb.set([address, 1], bignum(balance).toString())
+    // this.tmdb.set([address, 1], Bignum(balance).toString())
 
-    this.tmdb.set([address, 1], bignum.new(balance).toString())
+    this.tmdb.set([address, 1], Bignum.new(balance).toString())
   }
 
   addNativeBalance(address, amount) {
-    // bignum update
+    // Bignum update
     // if (typeof amount === 'number') amount = String(amount)
 
     const keys = [address, 1];
     const balance = this.tmdb.get(keys) || '0';
 
-    // bignum update
-    // this.tmdb.set(keys, bignum(balance).plus(amount).toString())
-    this.tmdb.set(keys, bignum.plus(balance, amount).toString());
+    // Bignum update
+    // this.tmdb.set(keys, Bignum(balance).plus(amount).toString())
+    this.tmdb.set(keys, Bignum.plus(balance, amount).toString());
   }
 
   getAssetBalance(address, currency) {
@@ -42,23 +42,23 @@ class BalanceManager {
   }
 
   setAssetBalance(address, currency, balance) {
-    // bignum update
+    // Bignum update
     // if (typeof balance === 'number') amount = String(balance)
-    // this.tmdb.set([address, currency], bignum(balance).toString())
+    // this.tmdb.set([address, currency], Bignum(balance).toString())
 
-    this.tmdb.set([address, currency], bignum.new(balance).toString());
+    this.tmdb.set([address, currency], Bignum.new(balance).toString());
   }
 
   addAssetBalance(address, currency, amount) {
-    // bignum update
+    // Bignum update
     // if (typeof amount === 'number') amount = String(amount)
 
     const keys = [address, currency];
     const balance = this.tmdb.get(keys) || '0';
 
-    // bignum update
-    // this.tmdb.set(keys, bignum(balance).plus(amount).toString())
-    this.tmdb.set(keys, bignum.plus(balance, amount).toString());
+    // Bignum update
+    // this.tmdb.set(keys, Bignum(balance).plus(amount).toString())
+    this.tmdb.set(keys, Bignum.plus(balance, amount).toString());
   }
 
   rollback() {

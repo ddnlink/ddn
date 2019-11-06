@@ -1,5 +1,5 @@
 const crypto = require('crypto');
-const bignum = require('@ddn/bignum-utils');
+const { Bignum } = require('@ddn/ddn-utils');
 const ed = require('ed25519');
 
 /**
@@ -35,9 +35,9 @@ class RootRouter {
         }
 
         return {
-            fees: account.fees + "",    //bignum update
-            rewards: account.rewards + "", 
-            forged: bignum.plus(account.fees, account.rewards).toString()
+            fees: account.fees + "",    //Bignum update
+            rewards: account.rewards + "",
+            forged: Bignum.plus(account.fees, account.rewards).toString()
         };
     }
 
@@ -63,18 +63,18 @@ class RootRouter {
         }
 
         var ip = req.connection.remoteAddress;
-        if (this.config.forging.access.whiteList.length > 0 && 
+        if (this.config.forging.access.whiteList.length > 0 &&
             this.config.forging.access.whiteList.indexOf(ip) < 0) {
             return {success: false, error: "Access denied"};
         }
-    
+
         var keypair = ed.MakeKeypair(crypto.createHash('sha256').update(body.secret, 'utf8').digest());
         if (body.publicKey) {
             if (keypair.publicKey.toString('hex') != body.publicKey) {
                 return {success: false, error: "Invalid passphrase"};
             }
         }
-    
+
         var myDelegate = await this.runtime.delegate.getMyDelegateByPublicKey(keypair.publicKey.toString('hex'));
         if (myDelegate) {
             return {success: false, error: "Forging is already enabled"};
@@ -91,7 +91,7 @@ class RootRouter {
         }
 
         if (account && account.is_delegate) {  //wxm block database
-            
+
             await this.runtime.delegate.enableForged(keypair);
             this.logger.info(`Forging enabled on account: ${account.address}`);
             return {success: true, address: account.address};
@@ -122,7 +122,7 @@ class RootRouter {
         }
 
         var ip = req.connection.remoteAddress;
-        if (this.config.forging.access.whiteList.length > 0 && 
+        if (this.config.forging.access.whiteList.length > 0 &&
             this.config.forging.access.whiteList.indexOf(ip) < 0) {
             return {success: false, error: "Access denied"};
         }
@@ -133,7 +133,7 @@ class RootRouter {
                 return {success: false, error: "Invalid passphrase"};
             }
         }
-      
+
         var myDelegate = await this.runtime.delegate.getMyDelegateByPublicKey(keypair.publicKey.toString('hex'));
         if (!myDelegate) {
             return {success: false, error: "Delegate not found"};

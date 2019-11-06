@@ -4,7 +4,7 @@
  */
 const util = require('util');
 const addressUtil = require('../../lib/address.js');
-const bignum = require('@ddn/bignum-utils');  //bignum update
+const { Bignum } = require('@ddn/ddn-utils');  //Bignum update
 
 class Transfer {
 	constructor(context) {
@@ -14,7 +14,7 @@ class Transfer {
 
 	async create(data, trs) {
         trs.recipient_id = data.recipient_id;   //wxm block database
-        // bignum update
+        // Bignum update
         // trs.amount = data.amount;
         trs.amount = data.amount + "";
 
@@ -30,12 +30,12 @@ class Transfer {
 			throw new Error('Invalid recipient');
 		}
 
-        if (bignum.isNaN(trs.amount)) {
+        if (Bignum.isNaN(trs.amount)) {
             throw new Error('Invalid transaction amount.');
         }
 
-		//bignum update if (trs.amount <= 0) {
-        if (bignum.isLessThanOrEqualTo(trs.amount, 0)) {
+		//Bignum update if (trs.amount <= 0) {
+        if (Bignum.isLessThanOrEqualTo(trs.amount, 0)) {
 			throw new Error('Invalid transaction amount');
 		}
 
@@ -45,9 +45,9 @@ class Transfer {
 
 		if (!this.config.settings.enableMoreLockTypes) {
             const lastBlock = this.runtime.block.getLastBlock();
-            
-			//bignum update if (sender.lockHeight && lastBlock && lastBlock.height + 1 <= sender.lockHeight) {
-            if (sender.lockHeight && lastBlock && bignum.isLessThanOrEqualTo(bignum.plus(lastBlock.height, 1), sender.lockHeight)) {
+
+			//Bignum update if (sender.lockHeight && lastBlock && lastBlock.height + 1 <= sender.lockHeight) {
+            if (sender.lockHeight && lastBlock && Bignum.isLessThanOrEqualTo(Bignum.plus(lastBlock.height, 1), sender.lockHeight)) {
 				throw new Error('Account is locked');
 			}
 		}

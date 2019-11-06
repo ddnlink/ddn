@@ -1,5 +1,5 @@
 const crypto = require('crypto');
-const bignum = require('@ddn/bignum-utils');
+const { Bignum } = require('@ddn/ddn-utils');
 const ed = require('ed25519');
 const { AssetTypes } = require('@ddn/ddn-utils');
 
@@ -44,29 +44,29 @@ class RootRouter {
             var limit = query.limit || this.config.settings.delegateNumber;
             var offset = query.offset || 0;
             var orderField = query.orderBy;
-    
+
             orderField = orderField ? orderField.split(':') : null;
             limit = limit > this.config.settings.delegateNumber ? this.config.settings.delegateNumber : limit;
-    
+
             var orderBy = orderField ? orderField[0] : null;
             var sortMode = orderField && orderField.length == 2 ? orderField[1] : 'asc';
             var count = delegates.length;
             var length = Math.min(limit, count);
             var realLimit = Math.min(offset + limit, count);
-    
+
             var lastBlock = this.runtime.block.getLastBlock();
             var totalSupply = this.runtime.block.getBlockStatus().calcSupply(lastBlock.height);
-    
+
             for (let i = 0; i < delegates.length; i++) {
                 delegates[i].rate = i + 1;
                 delegates[i].approval = ((delegates[i].vote / totalSupply) * 100).toFixed(2);
-    
+
                 let percent = 100 - (delegates[i].missedblocks / ((delegates[i].producedblocks + delegates[i].missedblocks) / 100));
                 percent = percent || 0;
                 var outsider = i + 1 > this.config.settings.delegateNumber; //wxm   slots.delegates;
                 delegates[i].productivity = (!outsider) ? parseFloat(Math.floor(percent * 100) / 100).toFixed(2) : 0;
             }
-    
+
             var result = delegates.filter(delegate => account.delegates.indexOf(delegate.public_key) != -1);
             return { success: true, delegates: result };
         } else {
@@ -76,7 +76,7 @@ class RootRouter {
 
     async getFee(req) {
         return {
-            fee: bignum.multiply(1, this.tokenSetting.fixedPoint)
+            fee: Bignum.multiply(1, this.tokenSetting.fixedPoint)
         };
     }
 
@@ -105,7 +105,7 @@ class RootRouter {
 
         var hash = crypto.createHash('sha256').update(body.secret, 'utf8').digest();
         var keypair = ed.MakeKeypair(hash);
-      
+
         if (body.publicKey) {
             if (keypair.publicKey.toString('hex') != body.publicKey) {
                 throw new Error("Invalid passphrase");
@@ -114,9 +114,9 @@ class RootRouter {
 
         return new Promise((resolve, reject) => {
             this.balancesSequence.add(async(cb) => {
-                if (body.multisigAccountPublicKey && 
+                if (body.multisigAccountPublicKey &&
                     body.multisigAccountPublicKey != keypair.publicKey.toString('hex')) {
-                    
+
                     var account;
                     try
                     {
@@ -130,11 +130,11 @@ class RootRouter {
                     if (!account) {
                         return cb("Multisignature account not found");
                     }
-              
+
                     if (!account.multisignatures || !account.multisignatures) {
                         return cb("Account does not have multisignatures enabled");
                     }
-              
+
                     if (account.multisignatures.indexOf(keypair.publicKey.toString('hex')) < 0) {
                         return cb("Account does not belong to multisignature group");
                     }
@@ -152,11 +152,11 @@ class RootRouter {
                     if (!requester || !requester.public_key) {
                         return cb("Invalid requester");
                     }
-            
+
                     if (requester.second_signature && !body.secondSecret) {
                         return cb("Invalid second passphrase");
                     }
-            
+
                     if (requester.public_key == account.public_key) {
                         return cb("Invalid requester");
                     }
@@ -195,7 +195,7 @@ class RootRouter {
                     if (!account) {
                         return cb("Account not found");
                     }
-              
+
                     if (account.second_signature && !body.secondSecret) {
                         return cb("Invalid second passphrase");
                     }

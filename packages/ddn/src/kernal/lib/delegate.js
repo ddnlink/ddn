@@ -5,7 +5,7 @@
 const crypto = require('crypto');
 const util = require('util');
 const ed = require('ed25519');
-const bignum = require('@ddn/bignum-utils');
+const { Bignum } = require('@ddn/ddn-utils');
 
 var _singleton;
 
@@ -67,7 +67,7 @@ class Delegate {
             delegateKeypairs[keypair.publicKey.toString('hex')] = keypair;
             delegatePublicKeys.push(keypair.publicKey.toString('hex'));
         }
-  
+
         var accounts = await this.runtime.account.getAccountList({
             public_key: { //wxm block database
                 "$in": delegatePublicKeys
@@ -102,7 +102,7 @@ class Delegate {
 
             for (var i = 0; i < votes.length; i++) {
                 var action = votes[i];
-                
+
                 var math = action[0];
                 if (math !== '+' && math !== '-') {
                     throw new Error("Invalid math operator");
@@ -151,7 +151,7 @@ class Delegate {
         if (!query) {
             throw "Missing query argument";
         }
-        
+
         var delegates = await this.runtime.account.getAccountList({
             is_delegate: 1,  //wxm block database
             // sort: {"vote": -1, "publicKey": 1},
@@ -164,31 +164,31 @@ class Delegate {
 
         orderField = orderField ? orderField.split(':') : null;
         limit = limit > this.config.settings.delegateNumber ? this.config.settings.delegateNumber : limit;
-    
+
         var orderBy = orderField ? orderField[0] : null;
         var sortMode = orderField && orderField.length == 2 ? orderField[1] : 'asc';
-    
+
         var count = delegates.length;
         var length = Math.min(limit, count);
         var realLimit = Math.min(offset + limit, count);
-    
+
         var lastBlock = this.runtime.block.getLastBlock();
         var totalSupply = this.runtime.block.getBlockStatus().calcSupply(lastBlock.height);
-    
+
         for (let i = 0; i < delegates.length; i++) {
             delegates[i].rate = i + 1;
             delegates[i].approval = (delegates[i].vote / totalSupply) * 100;
             delegates[i].approval = Math.round(delegates[i].approval * 1e2) / 1e2;
-      
+
             let percent = 100 - (delegates[i].missedblocks / ((delegates[i].producedblocks + delegates[i].missedblocks) / 100));
             percent = Math.abs(percent) || 0;
-      
+
             var outsider = i + 1 > this.config.settings.delegateNumber;
             delegates[i].productivity = (!outsider) ? Math.round(percent * 1e2) / 1e2 : 0;
-      
-          //   bignum update
-          //   delegates[i].forged = bignum(delegates[i].fees).plus(bignum(delegates[i].rewards)).toString();
-            delegates[i].forged = bignum.plus(delegates[i].fees, delegates[i].rewards).toString();
+
+          //   Bignum update
+          //   delegates[i].forged = Bignum(delegates[i].fees).plus(Bignum(delegates[i].rewards)).toString();
+            delegates[i].forged = Bignum.plus(delegates[i].fees, delegates[i].rewards).toString();
         }
 
         return {
@@ -236,17 +236,17 @@ class Delegate {
           }
           currentSeed = crypto.createHash('sha256').update(currentSeed).digest();
         }
-    
+
         return truncDelegateList;
     }
 
     /**
      * 返回当前所有受托人列表中在本地节点配置中存在的私钥信息
-     * @param {*} height 
+     * @param {*} height
      */
     async getActiveDelegateKeypairs(height) {
         var delegates = await this.getDisorderDelegatePublicKeys(height);
-        
+
         const results = [];
         for (const key in this._myDelegateKeypairs) {
             if (delegates.indexOf(key) !== -1) {
@@ -258,8 +258,8 @@ class Delegate {
 
     /**
      * 返回当前时间当前节点接下来可以进行铸造区块的受托人信息和时间戳
-     * @param {*} curSlot 
-     * @param {*} height 
+     * @param {*} curSlot
+     * @param {*} height
      */
     async getForgeDelegateWithCurrentTime(curSlot, height) {
         var activeDelegates = await this.getDisorderDelegatePublicKeys(height);
@@ -271,7 +271,7 @@ class Delegate {
             const delegatePublicKey = activeDelegates[delegatePos];
             if (delegatePublicKey && this._myDelegateKeypairs[delegatePublicKey]) {
                 return {
-                    time: this.runtime.slot.getSlotTime(currentSlot), 
+                    time: this.runtime.slot.getSlotTime(currentSlot),
                     keypair: this._myDelegateKeypairs[delegatePublicKey]
                 };
             }
@@ -301,8 +301,8 @@ class Delegate {
 
     /**
      * 该方法向forks_stats插入数据，但未见到其他地方有用到该表数据，目前还不明白原因
-     * @param {*} block 
-     * @param {*} cause 
+     * @param {*} block
+     * @param {*} cause
      */
     async fork(block, cause) {
         this.logger.info('Fork', {

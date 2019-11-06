@@ -2,7 +2,7 @@
 
 var DEBUG = require('debug')('delegates')
 var node = require("../variables.js");
-var bignum = require('@ddn/bignum-utils');
+const { Bignum } = require('@ddn/ddn-utils');
 
 var Raccount = node.randomAccount();
 while (Raccount.username === Raccount.username.toUpperCase()) {
@@ -62,7 +62,7 @@ describe("PUT /accounts/delegates without funds", function () {
                 Raccount.address = res.body.account.address;
                 Raccount.public_key = res.body.account.public_key;
                 Raccount.balance = res.body.account.balance;
-                
+
                 node.onNewBlock(function (err) {
                     node.expect(err).to.be.not.ok;
                     node.api.put("/accounts/delegates")
@@ -124,9 +124,9 @@ describe("PUT /accounts/delegates with funds", function () {
                 node.expect(res.body).to.have.property("transactionId");
                 if (res.body.success == true && res.body.transactionId != null) {
                     node.expect(res.body.transactionId).to.be.a('string');
-                    // fixme: bignumber
-                    //bignum update Raccount.amount += node.RANDOM_COIN;
-                    Raccount.amount = bignum.plus(Raccount.amount, node.RANDOM_COIN).toString();
+                    // fixme: Bignumber
+                    //Bignum update Raccount.amount += node.RANDOM_COIN;
+                    Raccount.amount = Bignum.plus(Raccount.amount, node.RANDOM_COIN).toString();
                 } else {
                     // console.log("Transaction failed or transactionId is null");
                     // console.log("Sent: secret: " + node.Gaccount.password + ", amount: " + node.RANDOM_COIN + ", recipientId: " + Raccount.address);
@@ -469,8 +469,8 @@ describe("PUT /delegates with funds", function () {
                             node.expect(res.body).to.have.property("transactionId");
                             if (res.body.success == true && res.body.transactionId != null) {
                                 node.expect(res.body.transactionId).to.be.a('string');
-                                //bignum update R2account.amount += node.RANDOM_COIN;
-                                R2account.amount = bignum.plus(R2account.amount, node.RANDOM_COIN).toString();
+                                //Bignum update R2account.amount += node.RANDOM_COIN;
+                                R2account.amount = Bignum.plus(R2account.amount, node.RANDOM_COIN).toString();
                             } else {
                                 // console.log("Transaction failed or transactionId is null");
                                 // console.log("Sent: secret: " + node.Gaccount.password + ", amount: " + node.RANDOM_COIN + ", recipientId: " + R2account.address);

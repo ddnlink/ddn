@@ -32,24 +32,24 @@ class Consensus {
 
     getProposeHash(propose) {
         var bytes = new ByteBuffer();
-  
-        //bignum update   bytes.writeLong(propose.height);
+
+        //Bignum update   bytes.writeLong(propose.height);
         bytes.writeString(propose.height);
-        
+
         bytes.writeString(propose.id);
-        
+
         var generatorPublicKeyBuffer = new Buffer(propose.generator_public_key, "hex"); //wxm block database
         for (var i = 0; i < generatorPublicKeyBuffer.length; i++) {
             bytes.writeByte(generatorPublicKeyBuffer[i]);
         }
-        
+
         bytes.writeInt(propose.timestamp);
-        
+
         var parts = propose.address.split(':');
         assert(parts.length == 2);
         bytes.writeInt(ip.toLong(parts[0]));
         bytes.writeInt(Number(parts[1]));
-        
+
         bytes.flip();
 
         return crypto.createHash('sha256').update(bytes.toBuffer()).digest();
@@ -161,11 +161,11 @@ class Consensus {
 
     getVoteHash(height, id) {
         var bytes = new ByteBuffer();
-  
-        //bignum update   bytes.writeLong(height);
+
+        //Bignum update   bytes.writeLong(height);
         bytes.writeString(height + "");
         bytes.writeString(id)
-        
+
         bytes.flip();
         return crypto.createHash('sha256').update(bytes.toBuffer()).digest();
     }
@@ -199,7 +199,7 @@ class Consensus {
 
     /**
      * 判断投票基于本地是否足够，需要2/3
-     * @param {*} votes 
+     * @param {*} votes
      */
     hasEnoughVotes(votes) {
         return votes && votes.signatures && (votes.signatures.length > (this.config.settings.delegateNumber * 2 / 3));
@@ -207,7 +207,7 @@ class Consensus {
 
     /**
      * 判断投票基于分布节点是否足够，需要至少6个
-     * @param {*} votes 
+     * @param {*} votes
      */
     hasEnoughVotesRemote(votes) {
         return votes && votes.signatures && votes.signatures.length >= 6;

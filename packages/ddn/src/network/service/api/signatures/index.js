@@ -2,7 +2,7 @@
  * RootRouter接口
  * wangxm   2019-03-27
  */
-const bignum = require('@ddn/bignum-utils');
+const { Bignum } = require('@ddn/ddn-utils');
 const crypto = require('crypto');
 const ed = require('ed25519');
 const { AssetTypes } = require('@ddn/ddn-utils');
@@ -53,7 +53,7 @@ class RootRouter {
 
         return new Promise((resolve, reject) => {
             this.balancesSequence.add(async(cb) => {
-                if (body.multisigAccountPublicKey && 
+                if (body.multisigAccountPublicKey &&
                     body.multisigAccountPublicKey != keypair.publicKey.toString('hex')) {
 
                     var account;
@@ -69,15 +69,15 @@ class RootRouter {
                     if (!account) {
                         return cb("Multisignature account not found");
                     }
-              
+
                     if (!account.multisignatures || !account.multisignatures) {
                         return cb("Account does not have multisignatures enabled");
                     }
-              
+
                     if (account.multisignatures.indexOf(keypair.publicKey.toString('hex')) < 0) {
                         return cb("Account does not belong to multisignature group");
                     }
-              
+
                     if (account.second_signature || account.u_second_signature) {
                         return cb("Invalid second passphrase");
                     }
@@ -95,11 +95,11 @@ class RootRouter {
                     if (!requester || !requester.public_key) {
                         return cb("Invalid requester");
                     }
-            
+
                     if (requester.second_signature && !body.secondSecret) {
                         return cb("Invalid second passphrase");
                     }
-            
+
                     if (requester.public_key == account.public_key) {
                         return cb("Invalid requester");
                     }
@@ -167,9 +167,9 @@ class RootRouter {
     }
 
     async getFee(req) {
-        //   bignum update
+        //   Bignum update
         //   fee = 5 * constants.fixedPoint;
-        let fee = bignum.multiply(5, this.tokenSetting.fixedPoint);
+        let fee = Bignum.multiply(5, this.tokenSetting.fixedPoint);
         return {fee};
     }
 
