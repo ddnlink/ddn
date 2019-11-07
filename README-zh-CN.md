@@ -6,6 +6,8 @@ DDN, 数据分发网络, 是一个成熟的企业级区块链系统，已经服�
 
 更多信息，请查看 [官网](https://www.ddn.link) , [ddn-docs](https://github.com/ddnlink/ddn-docs) 或 [《Nodejs区块链开发》](https://github.com/imfly/bitcoin-on-nodejs), 旧版代码在[这里](https://github.com/ebookcoin/ebookcoin)
 
+> 我是 [imfly](https://github.com/imfly)，欢迎 `star` 收藏本项目，支持关心 ❤️ 国产区块链发展！
+
 ## 特点
 
 - [x] **成熟**, 已经服务于多个企业级区块链系统;
