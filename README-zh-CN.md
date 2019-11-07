@@ -1,10 +1,12 @@
-[中文版](./README-zh-CN.md) | [英文版](./README.md)
+[中文版](./README-zh-CN.md) | [English](./README.md)
 
 # DDN简介
 
 DDN, 数据分发网络, 是一个成熟的企业级区块链系统，已经服务于版权存证、检验检测、电子医疗等10多个领域。
 
 更多信息，请查看 [官网](https://www.ddn.link) , [ddn-docs](https://github.com/ddnlink/ddn-docs) 或 [《Nodejs区块链开发》](https://github.com/imfly/bitcoin-on-nodejs), 旧版代码在[这里](https://github.com/ebookcoin/ebookcoin)
+
+> 我是 [imfly](https://github.com/imfly)，欢迎 `star` 收藏本项目，支持关心 ❤️ 国产区块链发展！
 
 ## 特点
 
@@ -22,18 +24,29 @@ DDN, 数据分发网络, 是一个成熟的企业级区块链系统，已经服�
 
 ## 架构
 
-![](./doc/architect.jpg)
+![](./doc/images/architect.jpg)
 
-## 工程
+## 案例
 
-- [ddn-docs](https://github.com/ddnlink/ddn-docs)
-- [ddn-cli](https://github.com/ddnlink/ddn-cli)
-- [ddn-aob](./packages/ddn-aob)
-- [ddn-evidence](./packages/ddn-evidence)
-- [ddn-dapp](./packages/ddn-dapp)
-- [ddn-dao](./packages/ddn-dao)
-- [ddn-node-sdk](./packages/ddn-node-sdk)
-- [ddn-explorer] website: [ddn.link](http://mainnet.ddn.link)
+- [DDN 主网](http://mainnet.ddn.link)
+- [DDN 钱包](http://wallet.ddn.link)
+- [DDN手机钱包](https://www.ddn.link/product/wallet)
+
+## 社区
+
+| Github Issue | 微信(小助手) |
+| ------------------------------------------------------- | ------------------------------------------------------------------------------------------- |
+| [ddnlink/ddn/issues](https://github.com/ddnlink/ddn/issues) | ![](./doc/images/hashbase.jpg) | 
+
+> PS：请备注 `DDN开发`
+
+## 捐赠
+
+你可以通过[DDN钱包](http://wallet.ddn.link)或者[DDN手机钱包](https://www.ddn.link/product/wallet)向下面的地址捐赠`DDN`，这些DDN将被用于奖励本项目的贡献者.
+
+| DDN基金会钱包转账地址 | DDN手机钱包扫码转账 |
+| ------------------------------------------------------- | ------------------------------------------------------------------------------------------- |
+| DLjrrVwnmMXstcAYVjcrpwyYb3kY1ehABU | ![](./doc/images/foundation.png) | 
 
 ## 协议
 
