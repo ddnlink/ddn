@@ -3,7 +3,7 @@ var crypto = require("./crypto.js")
 var constants = require("../constants.js")
 var slots = require("../time/slots.js")
 var options = require('../options')
-var bignum = require('@ddn/bignum-utils');
+const { Bignum } = require('@ddn/ddn-utils');
 
 function createStorage(content, secret, secondSecret) {
 	var keys = crypto.getKeys(secret)
@@ -17,13 +17,13 @@ function createStorage(content, secret, secondSecret) {
     throw new Error('Invalid content format')
   }
 
-//bignum update   var fee = (Math.floor(bytes.length / 200) + 1) * 0.1 * constants.coin
-  var fee = bignum.multiply((Math.floor(bytes.length / 200) + 1), 0.1, constants.coin);
+//Bignum update   var fee = (Math.floor(bytes.length / 200) + 1) * 0.1 * constants.coin
+  var fee = Bignum.multiply((Math.floor(bytes.length / 200) + 1), 0.1, constants.coin);
   
 	var transaction = {
 		type: 8,
 		nethash: options.get('nethash'),
-		amount: "0",    //bignum update
+		amount: "0",    //Bignum update
 		fee: fee + "",
 		recipientId: null,
 		senderPublicKey: keys.public_key,

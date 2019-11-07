@@ -3,14 +3,14 @@
 // Requires and node configuration
 var node = require("./../variables.js");
 var genesisblock = require("../../genesisBlock.json");
-var bignum = require('@ddn/bignum-utils');
+const { Bignum } = require('@ddn/ddn-utils');
 
 var block = {
-    blockHeight : "0",  //bignum update
+    blockHeight : "0",  //Bignum update
     id : 0,
     generatorPublicKey : "",
-    totalAmount : "0",  //bignum update
-    totalFee : "0"  //bignum update
+    totalAmount : "0",  //Bignum update
+    totalFee : "0"  //Bignum update
 };
 
 var testBlocksUnder101 = 0;
@@ -171,8 +171,8 @@ describe("GET /blocks/getHeight", function () {
                     node.expect(res.body).to.have.property("height").to.be.above(0);
                     if (res.body.success == true) {
                         block.blockHeight = res.body.height;
-                        //bignum update if (res.body.height > 100) {
-                        if (bignum.isGreaterThan(res.body.height, 100)) {
+                        //Bignum update if (res.body.height > 100) {
+                        if (Bignum.isGreaterThan(res.body.height, 100)) {
                             testBlocksUnder101 = true;
                         }
                     }
@@ -408,8 +408,8 @@ describe("GET /blocks", function () {
                 node.expect(res.body).to.have.property("blocks").that.is.an("array");
                 for (var i = 0; i < res.body.blocks.length; i++) {
                     if (res.body.blocks[i+1] != null) {
-                        //bignum update node.expect(res.body.blocks[i].height).to.be.above(res.body.blocks[i+1].height);
-                        var bRet = bignum.isGreaterThanOrEqualTo(res.body.blocks[i].height, res.body.blocks[i+1].height);
+                        //Bignum update node.expect(res.body.blocks[i].height).to.be.above(res.body.blocks[i+1].height);
+                        var bRet = Bignum.isGreaterThanOrEqualTo(res.body.blocks[i].height, res.body.blocks[i+1].height);
                         node.expect(bRet).to.be.true;
                     }
                 }

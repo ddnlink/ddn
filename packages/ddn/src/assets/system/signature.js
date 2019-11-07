@@ -3,7 +3,7 @@
  * wangxm   2019-03-25
  */
 const util = require('util');
-const bignum = require('@ddn/bignum-utils');
+const { Bignum } = require('@ddn/ddn-utils');
 const ByteBuffer = require('bytebuffer');
 
 class Signatures {
@@ -15,7 +15,7 @@ class Signatures {
 
     async create(data, trs) {
 		trs.recipient_id = null;
-		trs.amount = "0";   //bignum update
+		trs.amount = "0";   //Bignum update
 		trs.asset.signature = {
 			public_key: data.second_keypair.publicKey.toString('hex')
 		};
@@ -23,7 +23,7 @@ class Signatures {
     }
 
     async calculateFee(trs, sender) {
-        return bignum.multiply(5, this.tokenSetting.fixedPoint);
+        return Bignum.multiply(5, this.tokenSetting.fixedPoint);
     }
 
 	async verify(trs, sender, cb) {
@@ -31,8 +31,8 @@ class Signatures {
             throw new Error('Invalid transaction asset');
 		}
 
-		//bignum update if (trs.amount != 0) {
-        if (!bignum.isZero(trs.amount)) {
+		//Bignum update if (trs.amount != 0) {
+        if (!Bignum.isZero(trs.amount)) {
             throw new Error('Invalid transaction amount')
 		}
 
@@ -70,7 +70,7 @@ class Signatures {
     async isSupportLock() {
         return false;
     }
-    
+
 	async apply(trs, block, sender, dbTrans) {
         var data = {
             address: sender.address,
@@ -99,12 +99,12 @@ class Signatures {
 		// if (sender.second_signature) {
         //     throw new Error('Double set second signature');
         // }
-        
+
 		const key = `${sender.address}:${trs.type}`;
 		if (this.oneoff.has(key)) {
             throw new Error('Double submit second signature');
         }
-        
+
 		this.oneoff.set(key, true);
 	}
 
@@ -155,9 +155,9 @@ class Signatures {
 			transaction_id: trs.id,
 			public_key: trs.asset.signature.public_key
         }
-        
+
         return new Promise((resolve, reject) => {
-            this.dao.insert('signature', obj, dbTrans, 
+            this.dao.insert('signature', obj, dbTrans,
             (err, result) => {
                 if (err) {
                     reject(err);
@@ -178,7 +178,7 @@ class Signatures {
 			return true;
 		}
     }
-    
+
 }
 
 module.exports = Signatures;

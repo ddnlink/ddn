@@ -1,4 +1,4 @@
-var bignum = require('@ddn/bignum-utils');
+const { Bignum } = require('@ddn/ddn-utils');
 var node = require('../variables.js')
 var DEBUG = require('debug')('aob')
 var expect = node.expect
@@ -162,10 +162,10 @@ describe('Test AOB', () => {
 
       await node.onNewBlockAsync()
 
-    //bignum update   issuerBalance = bignum(issuerBalance).plus(amount).toString()
-      issuerBalance = bignum.plus(issuerBalance, amount).toString();
-    //bignum update   quantity = bignum(quantity).plus(amount).toString()
-      quantity = bignum.plus(quantity, amount).toString();
+    //Bignum update   issuerBalance = Bignum(issuerBalance).plus(amount).toString()
+      issuerBalance = Bignum.plus(issuerBalance, amount).toString();
+    //Bignum update   quantity = Bignum(quantity).plus(amount).toString()
+      quantity = Bignum.plus(quantity, amount).toString();
 
       var [err, res] = await node.apiGetAsyncE('/aobasset/' + currency)
       DEBUG('get asset after issue response', err, res.body)
@@ -191,8 +191,8 @@ describe('Test AOB', () => {
 
       await node.onNewBlockAsyncE()
 
-    //bignum update   issuerBalance = bignum(issuerBalance).sub(transferAmount).toString()
-      issuerBalance = bignum.minus(issuerBalance, transferAmount).toString();
+    //Bignum update   issuerBalance = Bignum(issuerBalance).sub(transferAmount).toString()
+      issuerBalance = Bignum.minus(issuerBalance, transferAmount).toString();
 
       var [err, res] = await node.apiGetAsyncE('/aobasset/balances/' + node.Gaccount.address)
       DEBUG('get issuer balance response', err, res.body)
@@ -202,8 +202,8 @@ describe('Test AOB', () => {
       expect(res.body.result[0].currency).to.equal(currency)
       expect(res.body.result[0].balance).to.equal(issuerBalance)
 
-    //bignum update   recipientBalance = bignum(recipientBalance).plus(transferAmount).toString()
-      recipientBalance = bignum.plus(recipientBalance, transferAmount).toString();
+    //Bignum update   recipientBalance = Bignum(recipientBalance).plus(transferAmount).toString()
+      recipientBalance = Bignum.plus(recipientBalance, transferAmount).toString();
 
       var [err, res] = await node.apiGetAsyncE('/aobasset/balances/' + transferAddress)
       DEBUG('get recipient balance response', err, res.body)
@@ -587,9 +587,9 @@ describe('Test AOB', () => {
     })
 
     it('should fail to issue if amount exceed the limit', async function () {
-    //bignum update   var res = await issueAssetAsync(ASSET_NAME, bignum(MAX_AMOUNT).plus(1).toString(), ISSUE_ACCOUNT)
+    //Bignum update   var res = await issueAssetAsync(ASSET_NAME, Bignum(MAX_AMOUNT).plus(1).toString(), ISSUE_ACCOUNT)
       var res = await issueAssetAsync(ASSET_NAME,
-        bignum.plus(MAX_AMOUNT, 1).toString(), ISSUE_ACCOUNT);
+        Bignum.plus(MAX_AMOUNT, 1).toString(), ISSUE_ACCOUNT);
 
       expect(res.body).to.have.property('error').to.match(/^Exceed issue limit/)
     })

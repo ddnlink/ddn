@@ -1,18 +1,25 @@
 {
   "name": "@ddn/ddn-utils",
-  "version": "1.0.2",
+  "version": "1.0.11",
   "description": "ddn 通用工具类",
   "main": "index.js",
-  "directories": {
-    "lib": "lib"
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ddnlink/ddn.git",
+    "directory": "packages/ddn-utils"
   },
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+  "homepage": "http://github.com/ddnlink/ddn/tree/master/packages/ddn-utils",
+  "bugs": {
+    "url": "http://github.com/ddnlink/ddn/issues"
   },
+  "files": [
+    "lib"
+  ],
   "dependencies": {
-    "@ddn/bignum-utils": "^1.0.0",
+    "bignumber.js": "^7.2.1",
     "shelljs": "^0.8.3"
   },
   "author": "wly",
-  "license": "ISC"
+  "license": "MIT"
+
 }

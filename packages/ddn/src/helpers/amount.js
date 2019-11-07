@@ -5,7 +5,7 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-const bignum = require('@ddn/bignum-utils');
+const { Bignum } = require('@ddn/ddn-utils');
 
 module.exports = {
   validate(amount) {
@@ -14,13 +14,13 @@ module.exports = {
 
     let bnAmount;
     try {
-      bnAmount = bignum.new(amount);
+      bnAmount = Bignum.new(amount);
     } catch (e) {
       return 'Failed to convert'
     }
 
-    if (bignum.isLessThan(bnAmount, 1) ||
-        bignum.isGreaterThan(bnAmount, '1e48')) {
+    if (Bignum.isLessThan(bnAmount, 1) ||
+        Bignum.isGreaterThan(bnAmount, '1e48')) {
         return 'Invalid amount range'
     }
 
@@ -28,12 +28,12 @@ module.exports = {
   },
 
   calcRealAmount(amount, precision) {
-    let ba = bignum.new(amount);
+    let ba = Bignum.new(amount);
     while (precision > 0) {
       if (precision > 8) {
-        ba = bignum.divide(ba, 10 ** 8);
+        ba = Bignum.divide(ba, 10 ** 8);
       } else {
-        ba = bignum.divide(ba, 10 ** precision);
+        ba = Bignum.divide(ba, 10 ** precision);
       }
       precision -= 8
     }

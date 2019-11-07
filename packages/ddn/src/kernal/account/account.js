@@ -4,7 +4,7 @@
  */
 const addressUtil = require('../../lib/address');
 const bluebird = require('bluebird')
-const bignum = require('@ddn/bignum-utils'); //bignum update
+const { Bignum } = require('@ddn/ddn-utils'); //Bignum update
 
 var _singleton;
 
@@ -100,7 +100,7 @@ class Account {
 
     /**
      * 根据公钥生成钱包地址
-     * @param {*} publicKey 
+     * @param {*} publicKey
      */
     generateAddressByPublicKey(publicKey) {
         return addressUtil.generateBase58CheckAddress(publicKey);
@@ -109,7 +109,7 @@ class Account {
     /**
      * 设置账户信息（有则修改，没有则新增）
      * @param {*} data 账户信息，address或public_key必有其一
-     * @param {*} dbTrans 
+     * @param {*} dbTrans
      */
     async setAccount(data, dbTrans) {
 		let address = data.address || null;
@@ -165,20 +165,20 @@ class Account {
         //       return field.alias || field.field;
         //     });
         // }
-        
+
         // var realFields = this.fields.filter(function (field) {
         //     return fields.indexOf(field.alias || field.field) != -1;
         // });
-        
+
         // var realConv = {};
         // Object.keys(this.conv).forEach(function (key) {
         //     if (fields.indexOf(key) != -1) {
         //       realConv[key] = this.conv[key];
         //     }
         // }.bind(this));
-        
+
         var limit, offset, sort;
-        
+
         if (filter.limit > 0) {
             limit = filter.limit;
         }
@@ -195,11 +195,11 @@ class Account {
         if (typeof(filter.address) == "string" && !this.isAddress(filter.address)) {
             throw new Error('Invalid address getAccount');
         }
-        
+
         // const newFields = realFields.map(({
         //     field
         // }) => field)
-        
+
         // shuai 2019-11-20
         return new Promise(async (resolve, reject) => {
             try {
@@ -283,7 +283,7 @@ class Account {
                         })
                     })
                 }
-        
+
                 mem_accounts = mem_accounts.map((mem_account) => {
                     const delegates_item = delegates.find(({
                         account_id,    //wxm block database
@@ -341,7 +341,7 @@ class Account {
         {
             var list = await getAccountList(pageSize, pageIndex * pageSize);
 
-            if (list && list.length > 0) 
+            if (list && list.length > 0)
             {
                 for (var i = 0; i < list.length; i++)
                 {
@@ -403,7 +403,7 @@ class Account {
                                                 }
 
                                                 await this.cacheAllAccountBalances();
-        
+
                                                 this.logger.info('Blockchain ready');
 
                                                 resolve();
@@ -427,7 +427,7 @@ class Account {
                                                     }
                                                     catch (err6)
                                                     {
-                                                        reject(err6); 
+                                                        reject(err6);
                                                     }
                                                 }
                                                 else
@@ -508,13 +508,13 @@ class Account {
                                     }
                                 } else {
                                     var errCatched = false;
-                                    
+
                                     try
                                     {
                                         let verify = this.config.loading.verifyOnLoading;
                                         await this.runtime.block.loadBlocksOffset(1, count, verify);
                                     }
-                                    catch (err4) 
+                                    catch (err4)
                                     {
                                         errCatched = true;
 
@@ -586,28 +586,28 @@ class Account {
                             update[value] = trueValue;
                             break;
                         case Number:
-                            //bignum update   if (isNaN(trueValue) || trueValue === Infinity) {
-                            if (bignum.isNaN(trueValue)) {
+                            //Bignum update   if (isNaN(trueValue) || trueValue === Infinity) {
+                            if (Bignum.isNaN(trueValue)) {
                                 return reject("Encountered invalid number while merging account: " + trueValue + ", value: " + value + ", value: " + address);
                             }
 
-                            //bignum update   if (Math.abs(trueValue) === trueValue && trueValue !== 0) {
-                            if (bignum.isEqualTo(bignum.abs(trueValue), trueValue) && !bignum.isZero(trueValue)) {
+                            //Bignum update   if (Math.abs(trueValue) === trueValue && trueValue !== 0) {
+                            if (Bignum.isEqualTo(Bignum.abs(trueValue), trueValue) && !Bignum.isZero(trueValue)) {
                                 // update.$inc = update.$inc || {};
-                                // //bignum update update.$inc[value] = trueValue;
-                                // update.$inc[value] = bignum.new(trueValue).toString();
-                                update[value] = this.dao.db_str(`${value} + ${bignum.new(trueValue)}`)
-                            //bignum update   } else if (trueValue < 0) {
-                            } else if (bignum.isLessThan(trueValue, 0)) {
+                                // //Bignum update update.$inc[value] = trueValue;
+                                // update.$inc[value] = Bignum.new(trueValue).toString();
+                                update[value] = this.dao.db_str(`${value} + ${Bignum.new(trueValue)}`)
+                            //Bignum update   } else if (trueValue < 0) {
+                            } else if (Bignum.isLessThan(trueValue, 0)) {
                                 // update.$dec = update.$dec || {};
-                                // //bignum update update.$dec[value] = Math.abs(trueValue);
-                                // update.$dec[value] = bignum.abs(trueValue).toString();
-                                
-                                update[value] = this.dao.db_str(`${value} ${bignum.new(trueValue)}`)   
+                                // //Bignum update update.$dec[value] = Math.abs(trueValue);
+                                // update.$dec[value] = Bignum.abs(trueValue).toString();
+
+                                update[value] = this.dao.db_str(`${value} ${Bignum.new(trueValue)}`)
                             }
 
-                            //bignum update   if (trueValue !== 0 && value == "balance") {
-                            if (!bignum.isZero(trueValue) && value == "balance") {
+                            //Bignum update   if (trueValue !== 0 && value == "balance") {
+                            if (!Bignum.isZero(trueValue) && value == "balance") {
                                 const mem_accounts2delegate = await new Promise((resolve, reject) => {
                                     this.dao.findOne('mem_accounts2delegate', {
                                         account_id: address    //wxm block database
@@ -636,7 +636,7 @@ class Account {
                                     })
                                 }
                             }
-                            
+
                             break;
                         case Array:
                             if (Object.prototype.toString.call(trueValue[0]) == "[object Object]") {
@@ -697,7 +697,7 @@ class Account {
                                                 block_id: diff.block_id,    //wxm block database
                                                 round: diff.round.toString(),
                                             };
-        
+
                                             await new Promise((resolve, reject) => {
                                                 this.dao.insert('mem_round', {
                                                     address: address,
@@ -716,7 +716,7 @@ class Account {
                                     }
                                 }
                             }
-                            
+
                             break;
                     }
                 })

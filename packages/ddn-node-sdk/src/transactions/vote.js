@@ -10,7 +10,7 @@ async function createVote(keyList, secret, secondSecret) {
 	var transaction = {
 		type: transactionTypes.VOTE,
 		nethash: options.get('nethash'),
-		amount: "0",    //bignum update
+		amount: "0",    //Bignum update
 		fee: constants.fees.vote,
 		recipient_id: null,
 		sender_public_key: keys.public_key,

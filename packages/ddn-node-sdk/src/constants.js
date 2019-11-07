@@ -1,6 +1,6 @@
 module.exports = {
   fees:{
-    send: "10000000",   //bignum update
+    send: "10000000",   //Bignum update
     vote: "10000000", 
     username: "10000000",
     multitransfer: "10000000",

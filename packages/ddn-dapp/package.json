@@ -1,22 +1,23 @@
 {
   "name": "@ddn/ddn-dapp",
-  "version": "1.0.3",
+  "version": "1.0.9",
   "description": "this is ddn-dapp package",
   "main": "index.js",
-  "directories": {
-    "lib": "lib"
-  },
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
   "repository": {
     "type": "git",
-    "url": "git@git.ebookchain.net:ddn/ddn-dapp.git"
+    "url": "git+https://github.com/ddnlink/ddn.git",
+    "directory": "packages/ddn-dapp"
   },
+  "homepage": "http://github.com/ddnlink/ddn/tree/master/packages/ddn-dapp",
+  "bugs": {
+    "url": "http://github.com/ddnlink/ddn/issues"
+  },
+  "files": [
+    "lib"
+  ],
   "author": "wly",
-  "license": "ISC",
+  "license": "MIT",
   "dependencies": {
-    "@ddn/bignum-utils": "^1.0.0",
     "@ddn/ddn-asset-base": "^1.0.3",
     "@ddn/ddn-sandbox": "^1.0.0",
     "@ddn/ddn-utils": "^1.0.2",

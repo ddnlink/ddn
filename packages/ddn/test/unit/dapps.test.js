@@ -1,7 +1,7 @@
 "use strict";
 
 var path = require("path");
-var bignum = require('@ddn/bignum-utils');
+const { Bignum } = require('@ddn/ddn-utils');
 
 // Requires and node configuration
 var node = require("./../variables.js");
@@ -13,8 +13,8 @@ var transactionCount = 0;
 var transactionList = [];
 
 // Used for calculating amounts
-var expectedFee = "0";  //bignum update
-var totalTxFee = "0";   //bignum update
+var expectedFee = "0";  //Bignum update
+var totalTxFee = "0";   //Bignum update
 
 // Create random accounts
 var Account1 = node.randomTxAccount();
@@ -207,9 +207,9 @@ before(function (done) {
                     Account2.transactions.push(transactionCount);
                     transactionCount += 1;
 
-                    // bignum update
+                    // Bignum update
                     // totalTxFee += (expectedFee / node.normalizer);
-                    totalTxFee = bignum.plus(totalTxFee, bignum.divide(expectedFee, node.normalizer));
+                    totalTxFee = Bignum.plus(totalTxFee, Bignum.divide(expectedFee, node.normalizer));
 
                     Account2.balance += randomCoin;
                     transactionList[transactionCount - 1] = {
@@ -217,8 +217,8 @@ before(function (done) {
                         "recipient": Account2.address,
                         "brutoSent": (randomCoin + expectedFee) / node.normalizer,
 
-                        //bignum update "fee": expectedFee / node.normalizer,
-                        "fee": bignum.divide(expectedFee, node.normalizer),
+                        //Bignum update "fee": expectedFee / node.normalizer,
+                        "fee": Bignum.divide(expectedFee, node.normalizer),
 
                         "nettoSent": randomCoin / node.normalizer,
                         "txId": res.body.transactionId,

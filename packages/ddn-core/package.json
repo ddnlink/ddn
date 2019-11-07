@@ -15,11 +15,11 @@
 
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/imfly/ddn.git",
+    "url": "git+https://github.com/ddnlink/ddn.git",
     "directory": "packages/ddn-core"
   },
   "bugs": {
-    "url": "https://github.com/imfly/ddn/issues"
+    "url": "https://github.com/ddnlink/ddn/issues"
   },
   "dependencies": {
     "@babel/preset-typescript": "7.3.3",

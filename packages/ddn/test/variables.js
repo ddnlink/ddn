@@ -12,11 +12,11 @@ var supertest = require('supertest');
 var async = require('async');
 var request = require('request');
 var ddn = require('@ddn/ddn-node-sdk');
-var bignum = require('@ddn/bignum-utils');
+const { Bignum } = require('@ddn/ddn-utils');
 var bluebird = require('bluebird');
 
 // TODO 包的整理规划需要进一步明确原则，根据通用性确定是否写成npm包
-var { DappCategory, DappType } = require('@ddn/ddn-dapp'); 
+var { DappCategory, DappType } = require('@ddn/ddn-dapp');
 var { AssetTypes } = require('@ddn/ddn-utils');
 
 var addressUtil = require('../src/lib/address.js');
@@ -36,7 +36,7 @@ var version = '2.0.0' // Node version
 
 // Holds Fee amounts for different transaction types
 var Fees = {
-  voteFee: "10000000",  //bignum update
+  voteFee: "10000000",  //Bignum update
   transactionFee: "10000000",
   secondPasswordFee: "500000000",
   delegateRegistrationFee: "10000000000",
@@ -73,8 +73,8 @@ var Gaccount = {
 
 
 // Random DDN Amount
-//bignum update var RANDOM_COIN = Math.floor(Math.random() * (100000 * 100000000)) + 1;
-var RANDOM_COIN = bignum.plus(bignum.floor(bignum.multiply(Math.random(), 100000, 100000000)), 1).toString();
+//Bignum update var RANDOM_COIN = Math.floor(Math.random() * (100000 * 100000000)) + 1;
+var RANDOM_COIN = Bignum.plus(Bignum.floor(Bignum.multiply(Math.random(), 100000, 100000000)), 1).toString();
 
 // Used to create random delegates names
 function randomDelegateName() {
@@ -155,8 +155,8 @@ function waitForNewBlock(height, cb) {
           return cb(err || 'Got incorrect status');
         }
 
-        //bignum update if (height + 1 == body.height) {
-        if (bignum.isEqualTo(bignum.plus(height, 1), body.height)) {
+        //Bignum update if (height + 1 == body.height) {
+        if (Bignum.isEqualTo(Bignum.plus(height, 1), body.height)) {
           height = body.height;
         }
 
@@ -228,7 +228,7 @@ function randomNumber(min, max) {
 
 // Calculates the expected fee from a transaction
 function expectedFee(amount) {
-//bignum update   return parseInt(Fees.transactionFee);
+//Bignum update   return parseInt(Fees.transactionFee);
     return Fees.transactionFee;
 }
 

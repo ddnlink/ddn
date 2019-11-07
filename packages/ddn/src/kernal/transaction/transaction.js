@@ -7,7 +7,7 @@ const ByteBuffer = require("bytebuffer");
 const crypto = require('crypto');
 const ed = require('ed25519');
 const extend = require('util-extend');
-const bignum = require('@ddn/bignum-utils');    //bignum update
+const { Bignum } = require('@ddn/ddn-utils');    //Bignum update
 const { Utils } = require('@ddn/ddn-utils');
 
 var _singleton;
@@ -42,7 +42,7 @@ class Transaction
 
     /**
      * 根据资产配置名称获取资产实例
-     * @param {*} assetName 
+     * @param {*} assetName
      */
     getAssetInstanceByName(assetName)
     {
@@ -96,10 +96,10 @@ class Transaction
         const hash = await this.getHash(trs);
         return ed.Sign(hash, keypair).toString('hex');
     }
-      
+
     /**
      * 获取交易序列化之后的字节流内容
-     * @param {*} trs 
+     * @param {*} trs
      */
     async getBytes(trs, skipSignature, skipSecondSignature) {
         if (!this._assets.hasType(trs.type)) {
@@ -118,7 +118,7 @@ class Transaction
             8 + // amount (long)
             64 + // message
             64; // args or unused
-  
+
         var bb = new ByteBuffer(size + assetSize, true);
 
         bb.writeByte(trs.type);
@@ -156,7 +156,7 @@ class Transaction
                 bb.writeString(trs.args[i])
             }
         }
-    
+
         if (assetSize > 0) {
             for (let i = 0; i < assetSize; i++) {
                 bb.writeByte(assetBytes[i]);
@@ -169,7 +169,7 @@ class Transaction
                 bb.writeByte(signatureBuffer[i]);
             }
         }
-      
+
         if (!skipSecondSignature && trs.sign_signature) {    //wxm block database
             const signSignatureBuffer = new Buffer(trs.sign_signature, 'hex');
             for (let i = 0; i < signSignatureBuffer.length; i++) {
@@ -178,7 +178,7 @@ class Transaction
         }
 
         bb.flip();
-      
+
         return bb.toBuffer();
     }
 
@@ -259,8 +259,8 @@ class Transaction
                 requester_public_key: raw.t_requesterPublicKey, //wxm block database
                 sender_id: raw.t_senderId, //wxm block database
                 recipient_id: raw.t_recipientId,   //wxm block database
-                amount: raw.t_amount + "", //bignum update parseInt(raw.t_amount),
-                fee: raw.t_fee + "",  //bignum update parseInt(raw.t_fee),
+                amount: raw.t_amount + "", //Bignum update parseInt(raw.t_amount),
+                fee: raw.t_fee + "",  //Bignum update parseInt(raw.t_fee),
                 signature: raw.t_signature,
                 sign_signature: raw.t_signSignature,   //wxm block database
                 signatures: raw.t_signatures ? raw.t_signatures.split(',') : null,
@@ -278,7 +278,7 @@ class Transaction
             if (asset) {
                 trs.asset = extend(trs.asset, asset);
             }
-        
+
             return trs;
         }
     }
@@ -293,8 +293,8 @@ class Transaction
             return await this._assets.call(trs.type, trs, block, sender);
         }
 
-        //bignum update   const amount = trs.amount + trs.fee;
-        var amount = bignum.plus(trs.amount, trs.fee);
+        //Bignum update   const amount = trs.amount + trs.fee;
+        var amount = Bignum.plus(trs.amount, trs.fee);
 
         var sender = await this.runtime.account.merge(sender.address, {
             balance: amount,
@@ -318,11 +318,11 @@ class Transaction
                 result.push(this._unconfirmedTransactions[i]);
             }
         }
-      
+
         if (result.length > 0) {
             result = reverse ? result.reverse() : result;
         }
-      
+
         if (limit) {
             result.splice(limit);
         }
@@ -340,13 +340,13 @@ class Transaction
 
         //wxm TODO
         //此处应该使用this._assets方法（transaction.type）来做判断
-        // if (transaction.type === TransactionTypes.OUT_TRANSFER) 
+        // if (transaction.type === TransactionTypes.OUT_TRANSFER)
         // {
         //     return await this._assets.call(transaction.type, "undoUnconfirmed", transaction, sender);
         // }
 
-        //bignum update   const amount = transaction.amount + transaction.fee;
-        const amount = bignum.plus(transaction.amount, transaction.fee);
+        //Bignum update   const amount = transaction.amount + transaction.fee;
+        const amount = Bignum.plus(transaction.amount, transaction.fee);
 
         this.balanceCache.addNativeBalance(sender.address, amount);
 
@@ -382,41 +382,41 @@ class Transaction
                 throw new Error(`Unknown transaction type ${trs.type}`);
             }
 
-            if (!trs.requester_public_key && sender.second_signature && !bignum.isEqualTo(sender.second_signature, 0) &&
+            if (!trs.requester_public_key && sender.second_signature && !Bignum.isEqualTo(sender.second_signature, 0) &&
                 !trs.sign_signature && trs.block_id != this.genesisblock.id) {    //wxm block database
                 throw new Error(`Failed second signature: ${trs.id}`);
             }
-    
-            if (!trs.requester_public_key && (!sender.second_signature || bignum.isEqualTo(sender.second_signature, 0)) && 
+
+            if (!trs.requester_public_key && (!sender.second_signature || Bignum.isEqualTo(sender.second_signature, 0)) &&
                 (trs.sign_signature && trs.sign_signature.length > 0)) { //wxm block database
                 throw new Error("Account does not have a second signature");
             }
 
-            if (trs.requester_public_key && requester.second_signature && !bignum.isEqualTo(requester.second_signature, 0) && !trs.sign_signature) {  //wxm block database
+            if (trs.requester_public_key && requester.second_signature && !Bignum.isEqualTo(requester.second_signature, 0) && !trs.sign_signature) {  //wxm block database
                 throw new Error(`Failed second signature: ${trs.id}`);
             }
 
-            if (trs.requester_public_key && (!requester.second_signature || bignum.isEqualTo(requester.second_signature, 0)) && 
+            if (trs.requester_public_key && (!requester.second_signature || Bignum.isEqualTo(requester.second_signature, 0)) &&
                 (trs.sign_signature && trs.sign_signature.length > 0)) {    //wxm block database
                 throw new Error("Account does not have a second signature");
             }
-    
+
             //wxm 这个逻辑应该去掉，不应该这么使用序号特殊处理，如果必须，应该是用assetTypes.type枚举
             if (trs.type === 7) {
                 return await this._assets.call(trs.type, "applyUnconfirmed", trs, sender, dbTrans);
             }
-    
-            //bignum update   const amount = trs.amount + trs.fee;
-            const amount = bignum.plus(trs.amount, trs.fee);
-            //bignum update   if (sender.u_balance < amount && trs.blockId != genesisblock.block.id) {
-            if (bignum.isLessThan(sender.u_balance, amount) && trs.block_id != this.genesisblock.id) {    //wxm block database
+
+            //Bignum update   const amount = trs.amount + trs.fee;
+            const amount = Bignum.plus(trs.amount, trs.fee);
+            //Bignum update   if (sender.u_balance < amount && trs.blockId != genesisblock.block.id) {
+            if (Bignum.isLessThan(sender.u_balance, amount) && trs.block_id != this.genesisblock.id) {    //wxm block database
                 throw new Error(`Insufficient balance: ${sender.address}`);
             }
 
-            //bignum update   library.balanceCache.addNativeBalance(sender.address, -amount)
-            this.balanceCache.addNativeBalance(sender.address, bignum.minus(0, amount));
+            //Bignum update   library.balanceCache.addNativeBalance(sender.address, -amount)
+            this.balanceCache.addNativeBalance(sender.address, Bignum.minus(0, amount));
 
-            var accountInfo = await this.runtime.account.merge(sender.address, { u_balance: bignum.minus(0, amount) }, dbTrans);
+            var accountInfo = await this.runtime.account.merge(sender.address, { u_balance: Bignum.minus(0, amount) }, dbTrans);
             var newAccountInfo = Object.assign({}, sender, accountInfo); //wxm block database
 
             try {
@@ -434,11 +434,11 @@ class Transaction
         if (!this._assets.hasType(trs.type)) {
             throw Error(`Unknown transaction type ${trs.type}`);
         }
-        
+
         if (!sender) {
             return false;
         }
-        
+
         return await this._assets.call(trs.type, "ready", trs, sender);
     }
 
@@ -456,16 +456,16 @@ class Transaction
             return this._assets.call(trs.type, "apply", trs, block, sender);
         }
 
-        //bignum update   const amount = trs.amount + trs.fee;
-        const amount = bignum.plus(trs.amount, trs.fee);
+        //Bignum update   const amount = trs.amount + trs.fee;
+        const amount = Bignum.plus(trs.amount, trs.fee);
 
-        //bignum update   if (trs.blockId != genesisblock.block.id && sender.balance < amount) {
-        if (trs.block_id != this.genesisblock.id && bignum.isLessThan(sender.balance, amount)) { //wxm block database
+        //Bignum update   if (trs.blockId != genesisblock.block.id && sender.balance < amount) {
+        if (trs.block_id != this.genesisblock.id && Bignum.isLessThan(sender.balance, amount)) { //wxm block database
             throw new Error(`Insufficient balance: ${sender.balance}`)
         }
-        
+
         var accountInfo = await this.runtime.account.merge(sender.address, {
-            balance: bignum.minus(0, amount),   //bignum update  -amount
+            balance: Bignum.minus(0, amount),   //Bignum update  -amount
             block_id: block.id,  //wxm block database
             round: await this.runtime.round.calc(block.height)}, dbTrans);
         var newSender = Object.assign({}, sender, accountInfo); //wxm block database
@@ -526,17 +526,17 @@ class Transaction
             this.logger.error('Invalid transaction id, err: ', e)
             throw new Error("Invalid transaction id");
         }
-        
+
         if (trs.id && trs.id != txId) {
             throw new Error("Incorrect transaction id");
         } else {
             trs.id = txId;
         }
-      
+
         if (!sender) {
             throw new Error("Invalid sender");
         }
-      
+
         trs.sender_id = sender.address;    //wxm block database
 
         // Verify that requester in multisignature
@@ -564,11 +564,11 @@ class Transaction
                 if (err) {
                     return reject("Database error");
                 }
-        
+
                 if (count) {
                     return reject("Ignoring already confirmed transaction");
                 }
-        
+
                 resolve(trs);
             })
         });
@@ -624,7 +624,7 @@ class Transaction
         }
         // library.bus.message('unconfirmedTransaction', transaction, broadcast);
     }
-    
+
     async receiveTransactions(transactions) {
         if (this._unconfirmedNumber > this.tokenSetting.maxTxsPerBlock) {
             throw new Error("Too many transactions");
@@ -682,8 +682,8 @@ class Transaction
             const lastBlock = this.runtime.block.getLastBlock();
 
             var isLockedType = await this._assets.isSupportLock(trs.type);
-            //bignum update if (sender.lockHeight && lastBlock && lastBlock.height + 1 <= sender.lockHeight && isLockedType) {
-            if (isLockedType && sender.lock_height && lastBlock && bignum.isLessThanOrEqualTo(bignum.plus(lastBlock.height, 1), sender.lock_height)) {
+            //Bignum update if (sender.lockHeight && lastBlock && lastBlock.height + 1 <= sender.lockHeight && isLockedType) {
+            if (isLockedType && sender.lock_height && lastBlock && Bignum.isLessThanOrEqualTo(Bignum.plus(lastBlock.height, 1), sender.lock_height)) {
                 throw new Error('Account is locked');
                 // return cb('Account is locked')
             }
@@ -693,7 +693,7 @@ class Transaction
             if (sender.multisignatures.indexOf(trs.requester_public_key) < 0) {
                 throw new Error("Failed to verify signature, 4");
             }
-        
+
             if (sender.public_key != trs.sender_public_key) {
                 throw new Error("Invalid public key")
             }
@@ -715,18 +715,18 @@ class Transaction
         if (!valid) {
             throw new Error("Failed to verify signature, 5");
         }
-        
+
         if (trs.nethash && trs.nethash != this.config.nethash) {
             throw new Error("Failed to verify nethash");
         }
 
         // Verify second signature66749
-        if (!trs.requester_public_key && sender.second_signature && !bignum.isEqualTo(sender.second_signature, 0)) {
+        if (!trs.requester_public_key && sender.second_signature && !Bignum.isEqualTo(sender.second_signature, 0)) {
             valid = await this.verifySecondSignature(trs, sender.second_public_key, trs.sign_signature);
             if (!valid) {
                 throw new Error(`Failed to verify second signature: ${trs.id}`);
             }
-        } else if (trs.requester_public_key && requester.second_signature && !bignum.isEqualTo(requester.second_signature, 0)) {   //wxm block database
+        } else if (trs.requester_public_key && requester.second_signature && !Bignum.isEqualTo(requester.second_signature, 0)) {   //wxm block database
             valid = await this.verifySecondSignature(trs, requester.second_public_key, trs.sign_signature);   //wxm block database
             if (!valid) {
                 throw new Error(`Failed to verify second signature: ${trs.id}`);
@@ -739,7 +739,7 @@ class Transaction
                 if (p.indexOf(c) < 0) p.push(c);
                 return p;
             }, []);
-        
+
             if (signatures.length != trs.signatures.length) {
                 throw new Error("Encountered duplicate signatures");
             }
@@ -751,7 +751,7 @@ class Transaction
               multisignatures = trs.asset.multisignature.keysgroup.map(key => key.slice(1));
             }
         }
-        
+
         if (trs.requester_public_key) {
             multisignatures.push(trs.sender_public_key);
         }
@@ -761,17 +761,17 @@ class Transaction
         if (trs.signatures && trs.type !== 13) {    //TransactionTypes.OUT_TRANSFER
             for (let d = 0; d < trs.signatures.length; d++) {
                 var verify = false;
-        
+
                 for (let s = 0; s < multisignatures.length; s++) {
                     if (trs.requester_public_key && multisignatures[s] == trs.requester_public_key) {
                         continue;
                     }
-        
+
                     if (await this.verifySignature(trs, multisignatures[s], trs.signatures[d])) {
                         verify = true;
                     }
                 }
-        
+
                 if (!verify) {
                     throw new Error(`Failed to verify multisignature: ${trs.id}`);
                 }
@@ -786,15 +786,15 @@ class Transaction
         // Calc fee
         const fee = await this._assets.call(trs.type, "calculateFee", trs, sender) + "";
 
-        //bignum update
+        //Bignum update
         //   if (!fee || trs.fee != fee) {
-        if (!bignum.isEqualTo(trs.fee, fee)) {
+        if (!Bignum.isEqualTo(trs.fee, fee)) {
             throw new Error(`Invalid transaction type/fee: ${trs.id}`);
         }
         // Check amount
-        //bignum update   if (trs.amount < 0 || trs.amount > constants.maxAmount * constants.fixedPoint || String(trs.amount).indexOf('.') >= 0 || trs.amount.toString().indexOf('e') >= 0) {
-        if (bignum.isLessThan(trs.amount, 0) ||
-            bignum.isGreaterThan(trs.amount, bignum.multiply(this.tokenSetting.maxAmount, this.tokenSetting.fixedPoint)) ||
+        //Bignum update   if (trs.amount < 0 || trs.amount > constants.maxAmount * constants.fixedPoint || String(trs.amount).indexOf('.') >= 0 || trs.amount.toString().indexOf('e') >= 0) {
+        if (Bignum.isLessThan(trs.amount, 0) ||
+            Bignum.isGreaterThan(trs.amount, Bignum.multiply(this.tokenSetting.maxAmount, this.tokenSetting.fixedPoint)) ||
             (trs.amount + "").indexOf(".") >= 0 || (trs.amount + "").indexOf("e") >= 0) {
             throw new Error(`Invalid transaction amount: ${trs.id}`);
         }
@@ -819,7 +819,7 @@ class Transaction
         let bytes = await this.getBytes(trs, false, true);
         return await this.verifyBytes(bytes, publicKey, signature);
     }
-    
+
 }
 
 module.exports = Transaction;

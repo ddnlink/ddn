@@ -8,14 +8,13 @@ const assert = require('assert');
 const crypto = require('crypto');
 const ed = require('ed25519');
 const ByteBuffer = require("bytebuffer");
-const { AssetTypes, RuntimeState, Utils } = require('@ddn/ddn-utils');
-const bignum = require('@ddn/bignum-utils');
+const { AssetTypes, RuntimeState, Utils, Bignum } = require('@ddn/ddn-utils');
 const addressUtil = require('../../lib/address');
 const BlockStatus = require('./block-status');
 
 var _singleton;
 
-class Block 
+class Block
 {
     static singleton(context) {
         if (!_singleton) {
@@ -86,45 +85,45 @@ class Block
 
         bb.writeInt(block.version);
         bb.writeInt(block.timestamp);
-    
+
         if (block.previous_block) {
             bb.writeString(block.previous_block);
         } else {
             bb.writeString('0');
         }
-    
+
         bb.writeInt(block.number_of_transactions);
-        // bignum update
+        // Bignum update
         // bb.writeLong(block.totalAmount);
         bb.writeString(block.total_amount.toString());
-    
-        // bignum update
+
+        // Bignum update
         // bb.writeLong(block.totalFee);
         bb.writeString(block.total_fee.toString());
-    
-        // bignum update
+
+        // Bignum update
         // bb.writeLong(block.reward);
         bb.writeString(block.reward.toString());
-    
+
         bb.writeInt(block.payload_length);
-        
+
         const payloadHashBuffer = new Buffer(block.payload_hash, 'hex');
         for (let i = 0; i < payloadHashBuffer.length; i++) {
             bb.writeByte(payloadHashBuffer[i]);
         }
-    
+
         const generatorPublicKeyBuffer = new Buffer(block.generator_public_key, 'hex');
         for (let i = 0; i < generatorPublicKeyBuffer.length; i++) {
             bb.writeByte(generatorPublicKeyBuffer[i]);
         }
-    
+
         if (block.block_signature) {
             const blockSignatureBuffer = new Buffer(block.block_signature, 'hex');
             for (let i = 0; i < blockSignatureBuffer.length; i++) {
                 bb.writeByte(blockSignatureBuffer[i]);
             }
         }
-    
+
         bb.flip();
 
         return bb.toBuffer();
@@ -198,7 +197,7 @@ class Block
                         });
                     } else {
                         resolve(true);
-                    }                
+                    }
                 }
             });
         })
@@ -223,7 +222,7 @@ class Block
             version: block.version,
             previous_block: block.previous_block || null
         };
-    
+
         return new Promise((resolve, reject) => {
             this.dao.insert("block", newBlock, dbTrans, (err, result) => {
                 if (err) {
@@ -237,7 +236,7 @@ class Block
 
     /**
      * 将数据对象序列化成区块JSON对象
-     * @param {*} data 
+     * @param {*} data
      */
     serializeDbData2Block(raw) {
         if (!raw.b_id) {
@@ -247,12 +246,12 @@ class Block
               id: raw.b_id,
               version: parseInt(raw.b_version),
               timestamp: parseInt(raw.b_timestamp),
-              height: raw.b_height + "",        //bignum update parseInt(raw.b_height),
+              height: raw.b_height + "",        //Bignum update parseInt(raw.b_height),
               previous_block: raw.b_previousBlock,   //wxm block database
               number_of_transactions: parseInt(raw.b_numberOfTransactions),   //wxm block database
-              total_amount: raw.b_totalAmount + "",  //bignum update parseInt(raw.b_totalAmount),    //wxm block database
-              total_fee: raw.b_totalFee + "",    //bignum update parseInt(raw.b_totalFee),   //wxm block database
-              reward: raw.b_reward + "",        //bignum update parseInt(raw.b_reward),
+              total_amount: raw.b_totalAmount + "",  //Bignum update parseInt(raw.b_totalAmount),    //wxm block database
+              total_fee: raw.b_totalFee + "",    //Bignum update parseInt(raw.b_totalFee),   //wxm block database
+              reward: raw.b_reward + "",        //Bignum update parseInt(raw.b_reward),
               payload_length: parseInt(raw.b_payloadLength), //wxm block database
               payload_hash: raw.b_payloadHash,   //wxm block database
               generator_public_key: raw.b_generatorPublicKey, //wxm block database
@@ -260,22 +259,22 @@ class Block
               block_signature: raw.b_blockSignature,    //wxm block database
               confirmations: raw.b_confirmations
             };
-            // bignum update
+            // Bignum update
             // block.totalForged = (block.totalFee + block.reward);
-            block.totalForged = bignum.plus(block.total_fee, block.reward);
-        
+            block.totalForged = Bignum.plus(block.total_fee, block.reward);
+
             return block;
         }
     }
 
     /**
      * 保存区块数据到数据库（包括区块数据记录和所有包含的交易数据记录）
-     * @param {*} block 
-     * @param {*} dbTrans 
+     * @param {*} block
+     * @param {*} dbTrans
      */
     async saveBlock(block, dbTrans) {
         await this.serializeBlock2Db(block, dbTrans);
-        
+
         if (block.transactions && block.transactions.length > 0) {
             for (var i = 0; i < block.transactions.length; i++) {
                 var transaction = block.transactions[i];
@@ -292,47 +291,47 @@ class Block
     async createBlock(data) {
         const transactions = this._sortTransactions(data.transactions);
 
-        const nextHeight = (data.previous_block) ? bignum.plus(data.previous_block.height, 1).toString() : "1"; //bignum update //wxm block database
+        const nextHeight = (data.previous_block) ? Bignum.plus(data.previous_block.height, 1).toString() : "1"; //Bignum update //wxm block database
         const reward = this._blockStatus.calcReward(nextHeight);
 
-        //   bignum update
+        //   Bignum update
         //   let totalFee = 0;
-        let totalFee = bignum.new(0);
+        let totalFee = Bignum.new(0);
 
-        //   bignum update
+        //   Bignum update
         //   let totalAmount = 0;
-        let totalAmount = bignum.new(0);
+        let totalAmount = Bignum.new(0);
         let size = 0;
 
         const blockTransactions = [];
         const payloadHash = crypto.createHash('sha256');
-      
+
         for (const transaction of transactions) {
             const bytes = await this.runtime.transaction.getBytes(transaction);
-      
+
             if (size + bytes.length > this.tokenSetting.maxPayloadLength) {
                 break;
             }
-      
+
             size += bytes.length;
-      
-            // bignum update
+
+            // Bignum update
             // totalFee += transaction.fee;
-            totalFee = bignum.plus(totalFee, transaction.fee);
-      
-            // bignum update
+            totalFee = Bignum.plus(totalFee, transaction.fee);
+
+            // Bignum update
             // totalAmount += transaction.amount;
-            totalAmount = bignum.plus(totalAmount, transaction.amount);
-      
+            totalAmount = Bignum.plus(totalAmount, transaction.amount);
+
             blockTransactions.push(transaction);
             payloadHash.update(bytes);
         }
-      
+
         let block = {
             version: 0,
-            total_amount: totalAmount.toString(),    //bignum update
-            total_fee: totalFee.toString(),  //bignum update
-            reward: reward.toString(),  //bignum update
+            total_amount: totalAmount.toString(),    //Bignum update
+            total_fee: totalFee.toString(),  //Bignum update
+            reward: reward.toString(),  //Bignum update
             payload_hash: payloadHash.digest().toString('hex'),
             timestamp: data.timestamp,
             number_of_transactions: blockTransactions.length,
@@ -341,7 +340,7 @@ class Block
             generator_public_key: data.keypair.publicKey.toString('hex'),
             transactions: blockTransactions
         };
-      
+
         try {
             block.block_signature = this.sign(block, data.keypair);
             block = await this.objectNormalize(block);
@@ -355,8 +354,8 @@ class Block
 
     /**
      * 接收到其他节点铸造的区块数据，进行确认处理
-     * @param {*} block 
-     * @param {*} votes 
+     * @param {*} block
+     * @param {*} votes
      */
     async receiveNewBlock(block, votes) {
         if (this.runtime.state != RuntimeState.Ready) {
@@ -370,8 +369,8 @@ class Block
 
         await new Promise((resolve, reject) => {
             this.sequence.add(async cb => {
-                //bignum update if (block.previousBlock == privated.lastBlock.id && privated.lastBlock.height + 1 == block.height) {
-                if (block.previous_block == this._lastBlock.id && bignum.isEqualTo(bignum.plus(this._lastBlock.height, 1), block.height)) {   //wxm block database
+                //Bignum update if (block.previousBlock == privated.lastBlock.id && privated.lastBlock.height + 1 == block.height) {
+                if (block.previous_block == this._lastBlock.id && Bignum.isEqualTo(Bignum.plus(this._lastBlock.height, 1), block.height)) {   //wxm block database
                     this.logger.info(`Received new block id: ${block.id} height: ${block.height} round: ${await this.runtime.round.calc(this.getLastBlock().height)} slot: ${this.runtime.slot.getSlotNumber(block.timestamp)} reward: ${this.getLastBlock().reward}`)
                     await this.processBlock(block, votes, true, true, true);
                     cb();
@@ -385,8 +384,8 @@ class Block
                     await this.runtime.delegate.fork(block, 5);
 
                     cb("Fork-2");
-                    //bignum update } else if (block.height > privated.lastBlock.height + 1) {
-                } else if (bignum.isGreaterThan(block.height, bignum.plus(this._lastBlock.height, 1))) {
+                    //Bignum update } else if (block.height > privated.lastBlock.height + 1) {
+                } else if (Bignum.isGreaterThan(block.height, Bignum.plus(this._lastBlock.height, 1))) {
                     this.logger.info(`receive discontinuous block height ${block.height}`);
 
                     // modules.loader.startSyncBlocks();
@@ -427,7 +426,7 @@ class Block
                 } catch (err) {
                     if (err) {
                         this.logger.error(`Failed to process confirmed block height: ${height} id: ${id} error: ${err}`);
-                    }              
+                    }
                 }
 
                 this.logger.log(`Forged new block id: ${id} height: ${height} round: ${await this.runtime.round.calc(height)} slot: ${this.runtime.slot.getSlotNumber(block.timestamp)} reward: ${block.reward}`);
@@ -439,7 +438,7 @@ class Block
 
     /**
      * 接收其他节点铸造区块的授权申请提议，进行授权操作
-     * @param {*} propose 
+     * @param {*} propose
      */
     async receiveNewPropose(propose) {
         if (this.runtime.state != RuntimeState.Ready) {
@@ -460,11 +459,11 @@ class Block
                     return cb();
                 }
 
-                //bignum update if (propose.height != privated.lastBlock.height + 1) {
-                if (!bignum.isEqualTo(propose.height, bignum.plus(this._lastBlock.height, 1))) {
+                //Bignum update if (propose.height != privated.lastBlock.height + 1) {
+                if (!Bignum.isEqualTo(propose.height, Bignum.plus(this._lastBlock.height, 1))) {
                     this.logger.debug("invalid propose height", propose);
-                    //bignum update   if (propose.height > privated.lastBlock.height + 1) {
-                    if (bignum.isGreaterThan(propose.height, bignum.plus(this._lastBlock.height, 1))) {
+                    //Bignum update   if (propose.height > privated.lastBlock.height + 1) {
+                    if (Bignum.isGreaterThan(propose.height, Bignum.plus(this._lastBlock.height, 1))) {
                         this.logger.info(`receive discontinuous propose height ${propose.height}`);
                     }
                     return cb();
@@ -509,7 +508,7 @@ class Block
                                 clock: null
                             }
                         };
-                        
+
                         var from = propose.address;
                         var pos = from.indexOf(":");
                         if (pos >= 0) {
@@ -617,7 +616,7 @@ class Block
                         this._isActive = false;
 
                         this.setLastBlock(block);
-                
+
                         this._blockCache = {};
                         this._proposeCache = {};
                         this._lastVoteTime = null;
@@ -625,7 +624,7 @@ class Block
                         this.oneoff.clear()
                         this.balanceCache.commit()
                         this.runtime.consensus.clearState();
-                
+
                         if (broadcast) {
                             this.logger.info(`Block applied correctly with ${block.transactions.length} transactions`);
                             votes.signatures = votes.signatures.slice(0, 6);
@@ -642,7 +641,7 @@ class Block
                                 }
                             });
                         }
-                
+
                         resolve();
                     }
                 });
@@ -657,7 +656,7 @@ class Block
                 {
                     await this.runtime.transaction.undoUnconfirmedList();
                 }
-                catch (err) 
+                catch (err)
                 {
                     this.logger.error('Failed to undo uncomfirmed transactions', err);
                     return process.exit(0);
@@ -665,7 +664,7 @@ class Block
 
                 this.oneoff.clear();
 
-                try 
+                try
                 {
                     await doApplyBlock();
                 }
@@ -687,7 +686,7 @@ class Block
                             }
                         } else {
                             return true;
-                        } 
+                        }
                     } else {
                         return false;
                     }
@@ -715,11 +714,11 @@ class Block
     verifySignature(block) {
         const remove = 64;
         let res = null;
-      
+
         try {
             const data = this.getBytes(block);
             const data2 = new Buffer(data.length - remove);
-      
+
             for (let i = 0; i < data2.length; i++) {
                 data2[i] = data[i];
             }
@@ -731,7 +730,7 @@ class Block
             this.logger.error(e);
             throw Error(e.toString());
         }
-      
+
         return res;
     }
 
@@ -742,8 +741,8 @@ class Block
             throw new Error(`Failed to get block id: ${e.toString()}`);
         }
 
-        //bignum update   block.height = privated.lastBlock.height + 1;
-        block.height = bignum.plus(this._lastBlock.height, 1).toString();
+        //Bignum update   block.height = privated.lastBlock.height + 1;
+        block.height = Bignum.plus(this._lastBlock.height, 1).toString();
 
         this.logger.debug(`verifyBlock, id: ${block.id}, h: ${block.height}`);
 
@@ -753,8 +752,8 @@ class Block
 
         const expectedReward = this._blockStatus.calcReward(block.height);
 
-        //bignum update   if (block.height != 1 && expectedReward !== block.reward) {
-        if (block.height != 1 && !bignum.isEqualTo(expectedReward, block.reward)) {
+        //Bignum update   if (block.height != 1 && expectedReward !== block.reward) {
+        if (block.height != 1 && !Bignum.isEqualTo(expectedReward, block.reward)) {
             throw new Error("Invalid block reward");
         }
 
@@ -790,11 +789,11 @@ class Block
             throw new Error(`Invalid amount of block assets: ${block.id}`);
         }
 
-        //bignum update   let totalAmount = 0;
-        let totalAmount = bignum.new(0);
+        //Bignum update   let totalAmount = 0;
+        let totalAmount = Bignum.new(0);
 
-        //bignum update   let totalFee = 0;
-        let totalFee = bignum.new(0);
+        //Bignum update   let totalFee = 0;
+        let totalFee = Bignum.new(0);
 
         const payloadHash = crypto.createHash('sha256');
         const appliedTransactions = {};
@@ -814,31 +813,31 @@ class Block
 
             appliedTransactions[transaction.id] = transaction;
             payloadHash.update(bytes);
-            //bignum update totalAmount += transaction.amount;
-            totalAmount = bignum.plus(totalAmount, transaction.amount);
+            //Bignum update totalAmount += transaction.amount;
+            totalAmount = Bignum.plus(totalAmount, transaction.amount);
 
-            //bignum update totalFee += transaction.fee;
-            totalFee = bignum.plus(totalFee, transaction.fee);
+            //Bignum update totalFee += transaction.fee;
+            totalFee = Bignum.plus(totalFee, transaction.fee);
         }
 
         if (payloadHash.digest().toString('hex') !== block.payload_hash) {
             throw new Error(`Invalid payload hash: ${block.id}`)
         }
 
-        //bignum update   if (totalAmount != block.totalAmount) {
-        if (!bignum.isEqualTo(totalAmount, block.total_amount)) {
+        //Bignum update   if (totalAmount != block.totalAmount) {
+        if (!Bignum.isEqualTo(totalAmount, block.total_amount)) {
             throw new Error(`Invalid total amount: ${block.id}`);
         }
 
-        //   bignum update
+        //   Bignum update
         //   if (totalFee != block.totalFee) {
-        if (!bignum.isEqualTo(totalFee, block.total_fee)) {
+        if (!Bignum.isEqualTo(totalFee, block.total_fee)) {
             throw new Error(`Invalid total fee: ${block.id}`);
         }
 
         if (votes) {
-            //bignum update if (block.height != votes.height) {
-            if (!bignum.isEqualTo(block.height, votes.height)) {
+            //Bignum update if (block.height != votes.height) {
+            if (!Bignum.isEqualTo(block.height, votes.height)) {
                 throw new Error("Votes height is not correct");
             }
             if (block.id != votes.id) {
@@ -866,7 +865,7 @@ class Block
         delegatesList.forEach(item => {
             publicKeySet[item] = true;
         });
-    
+
         for (const item of votes.signatures) {
             if (!publicKeySet[item.key]) {
                 throw new Error(`Votes key is not in the top list: ${item.key}`);
@@ -878,12 +877,12 @@ class Block
     }
 
     /**
-     * 
-     * @param {*} block 
-     * @param {*} votes 
-     * @param {*} broadcast 
-     * @param {*} save 
-     * @param {*} verifyTrs 
+     *
+     * @param {*} block
+     * @param {*} votes
+     * @param {*} broadcast
+     * @param {*} save
+     * @param {*} verifyTrs
      */
     async processBlock(block, votes, broadcast, save, verifyTrs) {
         try {
@@ -891,7 +890,7 @@ class Block
         } catch (e) {
             throw new Error(`Failed to normalize block: ${e.toString()}`);
         }
-        
+
         block.transactions = this._sortTransactions(block.transactions);
 
         await this.verifyBlock(block, votes);
@@ -949,7 +948,7 @@ class Block
                             const transaction = block.transactions[i];
 
                             await this.runtime.account.setAccount({ public_key: transaction.sender_public_key });
-                            
+
                             transaction.id = await this.runtime.transaction.getId(transaction);
                             transaction.block_id = block.id;   //wxm block database
 
@@ -981,7 +980,7 @@ class Block
                 {
                     return reject(err);
                 }
-      
+
                 resolve();
             });
         });
@@ -989,8 +988,8 @@ class Block
 
     /**
      * 铸造区块
-     * @param {*} keypair 
-     * @param {*} timestamp 
+     * @param {*} keypair
+     * @param {*} timestamp
      */
     async generateBlock(keypair, timestamp) {
         if (this.runtime.consensus.hasPendingBlock(timestamp)) {
@@ -1071,7 +1070,7 @@ class Block
             this.runtime.consensus.addPendingVotes(localVotes);
 
             this._proposeCache[propose.hash] = true;
-            
+
             setImmediate(async () => {
                 try
                 {
@@ -1096,26 +1095,26 @@ class Block
                 }
                 return a.type - b.type;
             }
-        
-            //   bignum update
+
+            //   Bignum update
             //   if (a.amount != b.amount) {
             //     return a.amount - b.amount;
             //   }
-            if (!bignum.isEqualTo(a.amount, b.amount)) {
-                if (bignum.isGreaterThan(a.amount, b.amount)) {
+            if (!Bignum.isEqualTo(a.amount, b.amount)) {
+                if (Bignum.isGreaterThan(a.amount, b.amount)) {
                     return 1;
                 } else {
                     return -1;
                 }
             }
-        
+
             return a.id.localeCompare(b.id);
         })
     }
-      
+
     /**
      * 解析区块链完整数据（包括区块数据、交易数据和其他扩展交易数据）成JSON对象
-     * @param {*} data 
+     * @param {*} data
      */
     async _parseObjectFromFullBlocksData(data) {
         var blocks = {};
@@ -1127,7 +1126,7 @@ class Block
                     if (_block.id == this.genesisblock.id) {  //wxm async ok      genesisblock.block.id
                         _block.generationSignature = (new Array(65)).join('0');
                     }
-              
+
                     order.push(_block.id);
                     blocks[_block.id] = _block;
                 }
@@ -1159,7 +1158,7 @@ class Block
                 this.logger.info(`begin to pop block ${oldLastBlock.height} ${oldLastBlock.id}`);
 
                 //wxm TODO 这里查询条件用的id = previous_block，但过来的previous_block肯定有问题怎么会查出来呢，所以改成按照height-1来查上一个，但不知道会不会有问题
-                var previousBlock = await this.runtime.dataquery.queryFullBlockData({height: bignum.minus(oldLastBlock.height, 1).toString()}, 1, 0, [['height', 'asc']]);     //{id: oldLastBlock.previous_block}
+                var previousBlock = await this.runtime.dataquery.queryFullBlockData({height: Bignum.minus(oldLastBlock.height, 1).toString()}, 1, 0, [['height', 'asc']]);     //{id: oldLastBlock.previous_block}
                 if (!previousBlock || !previousBlock.length) {
                     return cb('previousBlock is null');
                 }
@@ -1217,7 +1216,7 @@ class Block
     async deleteBlocksBefore(block) {
         var blocks = [];
 
-        while (bignum.isLessThan(block.height, this._lastBlock.height)) {
+        while (Bignum.isLessThan(block.height, this._lastBlock.height)) {
             blocks.unshift(this._lastBlock);
 
             var newLastBlock = await this._popLastBlock(this._lastBlock);
@@ -1240,7 +1239,7 @@ class Block
                     if (result && result.height != null &&
                         typeof(result.height) != "undefined")
                     {
-                        this.dao.remove('block', {height: {'$gte': result.height}}, 
+                        this.dao.remove('block', {height: {'$gte': result.height}},
                             (err2, result2) => {
                                 if (err2)
                                 {
@@ -1265,7 +1264,7 @@ class Block
     async loadBlocksOffset(limit, offset, verify) {
         const newLimit = limit + (offset || 0);
         const params = { limit: newLimit, offset: offset || 0 };
-      
+
         this.logger.debug(`loadBlockOffset limit: ${limit}, offset: ${offset}, verify: ${verify}`);
 
         return new Promise((resolve, reject) => {
@@ -1374,7 +1373,7 @@ class Block
 
     /**
      * 根据id、height、hash任一属性，查询对应的区块数据，不包括包含的交易列表
-     * @param {*} query 
+     * @param {*} query
      */
     async querySimpleBlockData(query) {
         var validateErrors = await this.ddnSchema.validate({
@@ -1403,7 +1402,7 @@ class Block
         for (var i in keys) {
             var key = keys[i];
             if (typeof(query[key]) != 'undefined' && query[key] != null) {
-                where = { 
+                where = {
                     [key]: query[key]
                 };
                 break;

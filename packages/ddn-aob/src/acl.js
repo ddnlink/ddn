@@ -1,6 +1,6 @@
 const { AssetBase } = require('@ddn/ddn-asset-base');
 const ByteBuffer = require('bytebuffer');
-const bignum = require('@ddn/bignum-utils');
+const { Bignum } = require('@ddn/ddn-utils');
 const ddnUtils = require('@ddn/ddn-utils');
 
 class Acl extends AssetBase
@@ -72,7 +72,7 @@ class Acl extends AssetBase
             throw new Error("Invalid recipient")
         }
 
-        if (!bignum.isZero(trs.amount)) {
+        if (!Bignum.isZero(trs.amount)) {
             throw new Error("Invalid transaction amount")
         }
 

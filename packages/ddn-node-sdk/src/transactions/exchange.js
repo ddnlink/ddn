@@ -28,7 +28,7 @@ function createExchange(trsopt, exchange, secret, secondSecret) {
 	var transaction = Object.assign({
 		type: trsTypes.EXCHANGE,
 		nethash: options.get('nethash'),
-		amount: "0",    //bignum update
+		amount: "0",    //Bignum update
 		fee: fee + "",
 		recipientId: null,
 		sender_public_key: keys.public_key,

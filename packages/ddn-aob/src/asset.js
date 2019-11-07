@@ -1,6 +1,6 @@
 /* eslint-disable class-methods-use-this */
 const { AssetBase } = require('@ddn/ddn-asset-base');
-const bignum = require('@ddn/bignum-utils');
+const { Bignum } = require('@ddn/ddn-utils');
 const ddnUtils = require('@ddn/ddn-utils');
 const assert = require('assert');
 
@@ -64,7 +64,7 @@ class Asset extends AssetBase {
     }
 
     async calculateFee() {
-        return bignum.multiply(500, this.tokenSetting.fixedPoint);
+        return Bignum.multiply(500, this.tokenSetting.fixedPoint);
     }
 
     async verify(trs, sender) {

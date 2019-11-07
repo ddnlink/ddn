@@ -7,7 +7,7 @@
 const util = require('util');
 const ByteBuffer = require('bytebuffer');
 const Diff = require('../../lib/diff.js');
-const bignum = require('@ddn/bignum-utils');
+const { Bignum } = require('@ddn/ddn-utils');
 
 class Vote {
 
@@ -26,9 +26,9 @@ class Vote {
 	}
 
 	async calculateFee(trs, sender) {
-        // bignum update
+        // Bignum update
         // return 0.1 * constants.fixedPoint;
-        return bignum.multiply(0.1, this.tokenSetting.fixedPoint);
+        return Bignum.multiply(0.1, this.tokenSetting.fixedPoint);
 	}
 
 	async verify(trs, sender) {

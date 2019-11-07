@@ -1,5 +1,5 @@
 const { AssetBase } = require('@ddn/ddn-asset-base');
-const bignum = require('@ddn/bignum-utils');
+const { Bignum } = require('@ddn/ddn-utils');
 
 class Issuer extends AssetBase {
     // eslint-disable-next-line class-methods-use-this
@@ -25,7 +25,7 @@ class Issuer extends AssetBase {
     }
 
     async calculateFee() {
-        return bignum.multiply(100, this.tokenSetting.fixedPoint);
+        return Bignum.multiply(100, this.tokenSetting.fixedPoint);
     }
 
     async verify(trs, sender) {

@@ -446,7 +446,7 @@ module.exports = {
 },{"bignumber.js":27}],8:[function(require,module,exports){
 module.exports = {
   fees:{
-    send: "10000000",   //bignum update
+    send: "10000000",   //Bignum update
     vote: "10000000", 
     username: "10000000",
     multitransfer: "10000000",
@@ -722,7 +722,7 @@ var constants = require("../constants.js")
 var slots = require("../time/slots.js")
 var options = require('../options')
 var trsTypes = require('../transaction-types');
-var bignum = require('../../lib/bignum_utils');
+var Bignum = require('../../lib/bignum_utils');
 
 function getClientFixedTime() {
   return slots.getTime() - options.get('clientDriftSeconds')
@@ -764,7 +764,7 @@ module.exports = {
       }
     }
     //var fee = (100 + (Math.floor(bytes.length / 200) + 1) * 0.1) * constants.coin
-    var fee = bignum.multiply(100, constants.coin);
+    var fee = Bignum.multiply(100, constants.coin);
     return createTransaction(asset, fee, trsTypes.AOB_ISSUER, null, null, secret, secondSecret)
   },
 
@@ -782,7 +782,7 @@ module.exports = {
       }
     }
     // var fee = (500 + (Math.floor(bytes.length / 200) + 1) * 0.1) * constants.coin
-    var fee = bignum.multiply(500, constants.coin);
+    var fee = Bignum.multiply(500, constants.coin);
     return createTransaction(asset, fee, trsTypes.AOB_ASSET, null, null, secret, secondSecret)
   },
 
@@ -794,7 +794,7 @@ module.exports = {
         flag: flag
       }
     }
-    var fee = bignum.multiply(0.1, constants.coin);
+    var fee = Bignum.multiply(0.1, constants.coin);
     return createTransaction(asset, fee, trsTypes.AOB_FLAGS, null, null, secret, secondSecret)
   },
 
@@ -807,7 +807,7 @@ module.exports = {
         list: list
       }
     }
-    var fee = bignum.multiply(0.2, constants.coin);
+    var fee = Bignum.multiply(0.2, constants.coin);
     return createTransaction(asset, fee, trsTypes.AOB_ACL, null, null, secret, secondSecret)
   },
 
@@ -818,7 +818,7 @@ module.exports = {
         amount: amount  + ""
       }
     }
-    var fee = bignum.multiply(0.1, constants.coin);
+    var fee = Bignum.multiply(0.1, constants.coin);
     return createTransaction(asset, fee, trsTypes.AOB_ISSUE, null, null, secret, secondSecret)
   },
 
@@ -829,7 +829,7 @@ module.exports = {
         amount: amount + ""
       }
     }
-    var fee = bignum.multiply(0.1, constants.coin);
+    var fee = Bignum.multiply(0.1, constants.coin);
     return createTransaction(asset, fee, trsTypes.AOB_TRANSFER, recipientId, message, secret, secondSecret)
   },
 }
@@ -848,7 +848,7 @@ if (typeof Buffer === "undefined") {
 }
 
 var ByteBuffer = require("bytebuffer");
-var bignum = require("../../lib/bignum_utils");
+var Bignum = require("../../lib/bignum_utils");
 var nacl = require('tweetnacl')
 
 var fixedPoint = Math.pow(10, 8);
@@ -1168,7 +1168,7 @@ function getBytes(transaction, skipSignature, skipSecondSignature) {
 
         if (/^[0-9]{1,20}$/g.test(output.recipientId)) {
           
-          var recipient = bignum.new(output.recipientId).toBuffer({
+          var recipient = Bignum.new(output.recipientId).toBuffer({
             size: 8
           });
 
@@ -1284,21 +1284,21 @@ function getHash(transaction, skipSignature, skipSecondSignature) {
 function getFee(transaction) {
   switch (transaction.type) {
     case trsTypes.SEND: // Normal
-        return bignum.multiply(0.1, fixedPoint);
+        return Bignum.multiply(0.1, fixedPoint);
       break;
 
     case trsTypes.SIGNATURE: // Signature
-        return bignum.multiply(100, fixedPoint);
+        return Bignum.multiply(100, fixedPoint);
 
       break;
 
     case trsTypes.DELEGATE: // Delegate
-        return bignum.multiply(10000, fixedPoint);
+        return Bignum.multiply(10000, fixedPoint);
 
       break;
 
     case trsTypes.VOTE: // Vote
-        return bignum.new(fixedPoint);
+        return Bignum.new(fixedPoint);
 
       break;
   }
@@ -1416,7 +1416,7 @@ var trsTypes = require('../transaction-types');
 var slots = require('../time/slots.js');
 var options = require('../options');
 var addressHelper = require('../address.js')
-var bignum = require('../../lib/bignum_utils');
+var Bignum = require('../../lib/bignum_utils');
 
 /**
  * Create org transaction
@@ -1483,7 +1483,7 @@ function createOrg(org, secret, secondSecret) {
 		type: trsTypes.ORG,
 		nethash: options.get('nethash'),
 		amount: "0",
-		fee: bignum.multiply(feeBase, 100000000).toString(),   //bignum update feeBase * 100000000,
+		fee: Bignum.multiply(feeBase, 100000000).toString(),   //Bignum update feeBase * 100000000,
 		recipientId: null,
 		senderPublicKey: keys.publicKey,
 		timestamp: slots.getTime() - options.get('clientDriftSeconds'),
@@ -1665,7 +1665,7 @@ function createDApp(options, secret, secondSecret) {
 	var transaction = {
         nethash: globalOptions.get('nethash'),
 		type: transactionTypes.DAPP,
-		amount: "0",    //bignum update
+		amount: "0",    //Bignum update
 		fee: constants.fees.dapp,
 		recipientId: null,
 		senderPublicKey: keys.publicKey,
@@ -1870,7 +1870,7 @@ function createExchange(trsopt, exchange, secret, secondSecret) {
 	var transaction = Object.assign({
 		type: trsTypes.EXCHANGE,
 		nethash: options.get('nethash'),
-		amount: "0",    //bignum update
+		amount: "0",    //Bignum update
 		fee: fee + "",
 		recipientId: null,
 		senderPublicKey: keys.publicKey,
@@ -1903,7 +1903,7 @@ var trsTypes = require('../transaction-types');
 var slots = require("../time/slots.js")
 var options = require('../options')
 var addressHelper = require('../address.js')
-var bignum = require('../bignum_utils');
+var Bignum = require('../bignum_utils');
 
 function createMultiTransfer(outputs, secret, secondSecret) {
 	var keys = crypto.getKeys(secret)
@@ -1914,7 +1914,7 @@ function createMultiTransfer(outputs, secret, secondSecret) {
 	}
 	var sender = addressHelper.generateBase58CheckAddress(keys.publicKey)
 	var fee = constants.fees.multitransfer
-	var amount = bignum.new(0);   //bignum update
+	var amount = Bignum.new(0);   //Bignum update
 	var recipientId = []
 	for (var i = 0; i < outputs.length; i++) {
 		var output = outputs[i]
@@ -1926,9 +1926,9 @@ function createMultiTransfer(outputs, secret, secondSecret) {
 			return cb("Invalid output recipient");
 		}
 
-        // bignum update
+        // Bignum update
 		// if (output.amount <= 0) {
-        if (bignum.isLessThanOrEqualTo(output.amount, 0)) {
+        if (Bignum.isLessThanOrEqualTo(output.amount, 0)) {
 			return cb("Invalid output amount");
 		}
 
@@ -1936,9 +1936,9 @@ function createMultiTransfer(outputs, secret, secondSecret) {
 			return cb("Invalid output recipientId, cannot be your self");
 		}
 
-        // bignum update
+        // Bignum update
         // amount += output.amount
-        amount = bignum.plus(amount, output.amount);
+        amount = Bignum.plus(amount, output.amount);
         
 		recipientId.push(output.recipientId)
 	}
@@ -1946,7 +1946,7 @@ function createMultiTransfer(outputs, secret, secondSecret) {
 	var transaction = {
 		type: trsTypes.MULTITRANSFER,
 		nethash: options.get('nethash'),
-		amount: amount.toString(),  //bignum update amount,
+		amount: amount.toString(),  //Bignum update amount,
 		fee: fee + "",
 		recipientId: recipientId.join('|'),
 		senderPublicKey: keys.publicKey,
@@ -1995,7 +1995,7 @@ function createSignature(secret, secondSecret) {
 	var transaction = {
 		type: transactionTypes.SIGNATURE,
 		nethash: options.get('nethash'),
-		amount: "0",    //bignum update
+		amount: "0",    //Bignum update
 		fee: constants.fees.secondsignature,
 		recipientId: null,
 		senderPublicKey: keys.publicKey,
@@ -2021,14 +2021,14 @@ var constants = require("../constants.js")
 var transactionTypes = require("../transaction-types.js")
 var slots = require("../time/slots.js")
 var options = require('../options')
-var bignum = require('../../lib/bignum_utils');
+var Bignum = require('../../lib/bignum_utils');
 
 function calculateFee(amount) {
     var min = constants.fees.send;
     
-    var fee = bignum.multiply(amount, 0.0001).toFixed(0);
+    var fee = Bignum.multiply(amount, 0.0001).toFixed(0);
 
-    if (bignum.isLessThan(fee, min)) {
+    if (Bignum.isLessThan(fee, min)) {
         return min;
     } else {
         return fee + "";
@@ -2107,7 +2107,7 @@ function createInTransfer(dappId, currency, amount, secret, secondSecret) {
 	var transaction = {
 		type: transactionTypes.IN_TRANSFER,
 		nethash: nethash,
-		amount: "0",    //bignum update
+		amount: "0",    //Bignum update
 		fee: constants.fees.send,
 		recipientId: null,
 		senderPublicKey: keys.publicKey,
@@ -2121,7 +2121,7 @@ function createInTransfer(dappId, currency, amount, secret, secondSecret) {
 	};
 
 	if (currency === constants.nethash[nethash].tokenName) {
-		transaction.amount = amount;    //bignum update Number(amount)
+		transaction.amount = amount;    //Bignum update Number(amount)
 	} else {
 		transaction.asset.inTransfer.amount = String(amount)
 	}
@@ -2143,7 +2143,7 @@ function createOutTransfer(recipientId, dappId, transactionId, currency, amount,
 	var transaction = {
         nethash: nethash,
 		type: transactionTypes.OUT_TRANSFER,
-		amount: "0",    //bignum update
+		amount: "0",    //Bignum update
 		fee: constants.fees.send,
 		recipientId: recipientId,
 		senderPublicKey: keys.publicKey,
@@ -2201,7 +2201,7 @@ function createUsername(name, secret, secondSecret) {
 	var transaction = {
 		type: transactionTypes.USERINFO,
 		nethash: options.get('nethash'),
-		amount: "0",    //bignum update
+		amount: "0",    //Bignum update
 		fee: fee + "",
 		recipientId: null,
 		senderPublicKey: keys.publicKey,
@@ -2240,7 +2240,7 @@ function createVote(keyList, secret, secondSecret) {
 	var transaction = {
 		type: transactionTypes.VOTE,
 		nethash: options.get('nethash'),
-		amount: "0",    //bignum update
+		amount: "0",    //Bignum update
 		fee: constants.fees.vote,
 		recipientId: null,
 		senderPublicKey: keys.publicKey,

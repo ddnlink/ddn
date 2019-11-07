@@ -1,17 +1,22 @@
 {
   "name": "@ddn/ddn-evidence",
-  "version": "1.0.2",
+  "version": "1.0.9",
   "description": "DDN数据存证资产包",
   "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
   "repository": {
     "type": "git",
-    "url": "git@git.ebookchain.net:ddn/ddn-evidence.git"
+    "url": "git+https://github.com/ddnlink/ddn.git",
+    "directory": "packages/ddn-evidence"
   },
+  "homepage": "http://github.com/ddnlink/ddn/tree/master/packages/ddn-evidence",
+  "bugs": {
+    "url": "http://github.com/ddnlink/ddn/issues"
+  },
+  "files": [
+    "lib"
+  ],
   "author": "wangxm",
-  "license": "ISC",
+  "license": "MIT",
   "dependencies": {
     "@ddn/ddn-asset-base": "^1.0.3"
   }

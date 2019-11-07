@@ -1,6 +1,6 @@
 const crypto = require('crypto');
 const ed = require('ed25519');
-const bignum = require('@ddn/bignum-utils');
+const { Bignum } = require('@ddn/ddn-utils');
 const { AssetTypes } = require('@ddn/ddn-utils');
 
 /**
@@ -104,7 +104,7 @@ class RootRouter {
             andWheres.push({
                 "recipient_id": {
                     "$like": query.recipientId
-                }                
+                }
             });
         }
         if (query.ownerAddress && query.ownerPublicKey) {
@@ -130,13 +130,13 @@ class RootRouter {
                 ]
             });
         }
-        if (query.type >= 0) 
+        if (query.type >= 0)
         {
             andWheres.push({
                 "type": query.type
             });
-        } 
-        else if (query.aob) 
+        }
+        else if (query.aob)
         {
             //wxm TODO 此处不应该有具体类型，资产类型是动态配置的，这种应该在对应的aob包里实现独立的接口
             // fields_or.push('(type >=9 and type <= 14)')
@@ -149,7 +149,7 @@ class RootRouter {
         if (andWheres.length > 0) {
             where["$and"] = andWheres;
         }
-        
+
         var limit = query.limit || 100;
         var offset = query.offset || 0;
 
@@ -195,7 +195,7 @@ class RootRouter {
             }
 
             return {
-                success: true, 
+                success: true,
                 transaction: result[0]
             };
         } else {
@@ -283,15 +283,15 @@ class RootRouter {
                     if (!account) {
                         return cb("Multisignature account not found");
                     }
-            
+
                     if (!account.multisignatures) {
                         return cb("Account does not have multisignatures enabled");
                     }
-            
+
                     if (account.multisignatures.indexOf(keypair.publicKey.toString('hex')) < 0) {
                         return cb("Account does not belong to multisignature group");
                     }
-            
+
                     var requester;
                     try
                     {
@@ -305,17 +305,17 @@ class RootRouter {
                     if (!requester || !requester.public_key) {  //wxm block database
                         return cb("Invalid requester");
                     }
-          
-                    if (requester.second_signature && !bignum.isEqualTo(requester.second_signature, 0) && !body.secondSecret) {  //wxm block database
+
+                    if (requester.second_signature && !Bignum.isEqualTo(requester.second_signature, 0) && !body.secondSecret) {  //wxm block database
                         return cb("Invalid second passphrase");
                     }
-          
+
                     if (requester.public_key == account.public_key) { //wxm block database
                         return cb("Invalid requester");
                     }
 
                     let second_keypair = null;
-                    if (requester.second_signature && !bignum.isEqualTo(requester.second_signature, 0)) {    //wxm block database
+                    if (requester.second_signature && !Bignum.isEqualTo(requester.second_signature, 0)) {    //wxm block database
                         var secondHash = crypto.createHash('sha256').update(body.secondSecret, 'utf8').digest();
                         second_keypair = ed.MakeKeypair(secondHash);
                     }
@@ -354,7 +354,7 @@ class RootRouter {
                     if (!account) {
                         return cb("Account not found");
                     }
-            
+
                     if (account.second_signature && !body.secondSecret) {
                         return cb("Invalid second passphrase");
                     }
@@ -396,7 +396,7 @@ class RootRouter {
 
     /**
      * 功能:得到一定时间段内的每天的交易量
-     * 参数: 
+     * 参数:
      *      startTime:2019-6-4;默认为七天前
      *      endTime:2019-6-4;默认为当前时间
      * 返回值:{ "success": true,"data": [{ "time": "2019-6-4", "count": 0 }]}
@@ -471,12 +471,12 @@ class RootRouter {
         dataArr.push(obj);
       }
       return {
-        success: true, 
+        success: true,
         data: dataArr,
       };
 
     }
-    
+
 }
 
 module.exports = RootRouter;

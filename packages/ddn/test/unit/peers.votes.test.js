@@ -1,6 +1,6 @@
 "use strict";
 
-var bignum = require('@ddn/bignum-utils');
+const { Bignum } = require('@ddn/ddn-utils');
 var node = require("./../variables.js"),
     crypto = require("crypto");
 
@@ -12,7 +12,7 @@ var delegate2;
 node.chai.config.includeStack = true;
 
 describe("POST /peer/transactions", function () {
-    
+
     before(function (done) {
         node.api.post("/accounts/open")
             .set("Accept", "application/json")
@@ -33,7 +33,7 @@ describe("POST /peer/transactions", function () {
                     console.log("Data sent: secret: " + voterAccount.password + " , secondSecret: " + voterAccount.secondPassword);
                     node.expect("TEST").to.equal("FAILED");
                 }
-                
+
                 // Send random DDN amount from genesis account to Random account
                 node.api.put("/transactions")
                     .set("Accept", "application/json")
@@ -51,8 +51,8 @@ describe("POST /peer/transactions", function () {
                         if (res.body.success == true && res.body.transactionId != null) {
                             // node.expect(res.body.transactionId).to.be.above(1);
                             node.expect(res.body.transactionId).to.be.a('string');
-                            //bignum update voterAccount.amount += node.RANDOM_COIN;
-                            voterAccount.amount = bignum.plus(voterAccount.amount, node.RANDOM_COIN).toString();
+                            //Bignum update voterAccount.amount += node.RANDOM_COIN;
+                            voterAccount.amount = Bignum.plus(voterAccount.amount, node.RANDOM_COIN).toString();
                         } else {
                             // console.log("Transaction failed or transactionId is null");
                             // console.log("Sent: secret: " + node.Gaccount.password + ", amount: " + node.RANDOM_COIN + ", recipientId: " + voterAccount.address);
@@ -203,9 +203,9 @@ describe("POST /peer/transactions", function () {
                     .set("port",node.config.port)
                     .send({
                         secret: node.Gaccount.password,
-                        
-                        //bignum update amount: node.Fees.delegateRegistrationFee + node.Fees.voteFee,
-                        amount: bignum.plus(node.Fees.delegateRegistrationFee, node.Fees.voteFee),
+
+                        //Bignum update amount: node.Fees.delegateRegistrationFee + node.Fees.voteFee,
+                        amount: Bignum.plus(node.Fees.delegateRegistrationFee, node.Fees.voteFee),
 
                         recipientId: account.address
                     })

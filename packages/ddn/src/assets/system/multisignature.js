@@ -3,7 +3,7 @@
  * wangxm   2019-03-25
  */
 const util = require('util');
-const bignum = require('@ddn/bignum-utils');
+const { Bignum } = require('@ddn/ddn-utils');
 const ByteBuffer = require('bytebuffer');
 const Diff = require('../../lib/diff');
 
@@ -18,7 +18,7 @@ class Multisignature {
 
     async create(data, trs) {
 		trs.recipient_id = null; //wxm block database
-		trs.amount = "0";   //bignum update
+		trs.amount = "0";   //Bignum update
 		trs.asset.multisignature = {
 			min: data.min,
 			keysgroup: data.keysgroup,
@@ -28,8 +28,8 @@ class Multisignature {
     }
 
     async calculateFee(trs, sender) {
-		return bignum.multiply(
-			bignum.plus(trs.asset.multisignature.keysgroup.length, 1),
+		return Bignum.multiply(
+			Bignum.plus(trs.asset.multisignature.keysgroup.length, 1),
 			5, this.tokenSetting.fixedPoint);
     }
 
@@ -53,7 +53,7 @@ class Multisignature {
 		if (trs.asset.multisignature.min > trs.asset.multisignature.keysgroup.length + 1) {
             throw new Error('Invalid multisignature min');
 		}
-        
+
 		if (trs.asset.multisignature.lifetime < 1 || trs.asset.multisignature.lifetime > 24) {
             throw new Error(`Invalid multisignature lifetime: ${trs.id}`);
 		}
@@ -142,7 +142,7 @@ class Multisignature {
 
     async apply(trs, block, sender, dbTrans) {
         this._unconfirmedSignatures[sender.address] = false;
-        
+
         await this.runtime.account.merge(sender.address, {
             multisignatures: trs.asset.multisignature.keysgroup,
             multimin: trs.asset.multisignature.min,
@@ -170,7 +170,7 @@ class Multisignature {
 		var multiInvert = Diff.reverse(trs.asset.multisignature.keysgroup);
 
         this._unconfirmedSignatures[sender.address] = true;
-        
+
         await this.runtime.account.merge(sender.address, {
             multisignatures: multiInvert,
             multimin: -trs.asset.multisignature.min,
@@ -202,7 +202,7 @@ class Multisignature {
 		var multiInvert = Diff.reverse(trs.asset.multisignature.keysgroup);
 
         this._unconfirmedSignatures[sender.address] = false;
-        
+
         await this.runtime.account.merge(sender.address, {
             u_multisignatures: multiInvert,
             u_multimin: -trs.asset.multisignature.min,

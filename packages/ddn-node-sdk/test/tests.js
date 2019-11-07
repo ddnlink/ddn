@@ -54,7 +54,7 @@ describe("DDN JS", function () {
 			it("should return Buffer of simply transaction and buffer most be 117 length", function () {
 				var transaction = {
 					type: 0,
-					amount: "1000", //bignum update
+					amount: "1000", //Bignum update
 					recipientId: "58191285901858109",
 					timestamp: 141738,
 					asset: {},
@@ -72,7 +72,7 @@ describe("DDN JS", function () {
 			it("should return Buffer of transaction with second signature and buffer most be 181 length", function () {
 				var transaction = {
 					type: 0,
-					amount: "1000", //bignum update
+					amount: "1000", //Bignum update
 					recipientId: "58191285901858109",
 					timestamp: 141738,
 					asset: {},
@@ -103,7 +103,7 @@ describe("DDN JS", function () {
 			it("should return Buffer and Buffer most be 32 bytes length", function () {
 				var transaction = {
 					type: 0,
-					amount: "1000", //bignum update
+					amount: "1000", //Bignum update
 					recipientId: "58191285901858109",
 					timestamp: 141738,
 					asset: {},
@@ -133,7 +133,7 @@ describe("DDN JS", function () {
 			it("should return string id and be equal to 13987348420913138422", function () {
 				var transaction = {
 					type: 0,
-					amount: "1000", //bignum update
+					amount: "1000", //Bignum update
 					recipientId: "58191285901858109",
 					timestamp: 141738,
 					asset: {},
@@ -158,35 +158,35 @@ describe("DDN JS", function () {
 			});
 
 			it("should return number", function () {
-				var fee = getFee({ amount: "100000", type: 0 });    //bignum update
+				var fee = getFee({ amount: "100000", type: 0 });    //Bignum update
                 
-                //bignum update (fee).should.be.type("number");
+                //Bignum update (fee).should.be.type("number");
                 (fee).should.be.type("string");
                 
 				(fee).should.be.not.NaN;
 			});
 
 			it("should return 10000000", function () {
-				var fee = getFee({ amount: "100000", type: 0 });    //bignum update
-                //bignum update (fee).should.be.type("number").and.equal(10000000);
+				var fee = getFee({ amount: "100000", type: 0 });    //Bignum update
+                //Bignum update (fee).should.be.type("number").and.equal(10000000);
                 (fee).should.be.type("string").and.equal("10000000");
 			});
 
 			it("should return 10000000000", function () {
 				var fee = getFee({ type: 1 });
-                //bignum update (fee).should.be.type("number").and.equal(10000000000);
+                //Bignum update (fee).should.be.type("number").and.equal(10000000000);
                 (fee).should.be.type("string").and.equal("10000000000");
 			});
 
 			it("should be equal 1000000000000", function () {
 				var fee = getFee({ type: 2 });
-                //bignum update (fee).should.be.type("number").and.equal(1000000000000);
+                //Bignum update (fee).should.be.type("number").and.equal(1000000000000);
                 (fee).should.be.type("string").and.equal("1000000000000");
 			});
 
 			it("should be equal 100000000", function () {
 				var fee = getFee({ type: 3 });
-                //bignum update (fee).should.be.type("number").and.equal(100000000);
+                //Bignum update (fee).should.be.type("number").and.equal(100000000);
                 (fee).should.be.type("string").and.equal("100000000");
 			});
 		});
@@ -384,7 +384,7 @@ describe("DDN JS", function () {
 				});
 
 				it("should have fee as number and equal 10000000000", function () {
-                    //bignum update (trs.fee).should.be.type("number").and.equal(10000000000);
+                    //Bignum update (trs.fee).should.be.type("number").and.equal(10000000000);
                     (trs.fee).should.be.type("string").and.equal("10000000000");
 				});
 
@@ -476,19 +476,19 @@ describe("DDN JS", function () {
 				});
 
 				it("should not be signed correctly now", function () {
-					trs.amount = "10000";   //bignum update
+					trs.amount = "10000";   //Bignum update
 					var result = ddn.crypto.verify(trs);
 					(result).should.be.not.ok;
 				});
 
 				it("should be second signed correctly", function () {
-					trs.amount = "0";   //bignum update
+					trs.amount = "0";   //Bignum update
 					var result = ddn.crypto.verifySecondSignature(trs, secondKeys.publicKey);
 					(result).should.be.ok;
 				});
 
 				it("should not be second signed correctly now", function () {
-					trs.amount = "10000";   //bignum update
+					trs.amount = "10000";   //Bignum update
 					var result = ddn.crypto.verifySecondSignature(trs, secondKeys.publicKey);
 					(result).should.be.not.ok;
 				});
@@ -621,13 +621,13 @@ describe("DDN JS", function () {
 				});
 
 				it("should not be signed correctly now", function () {
-					trs.amount = "100"; //bignum update
+					trs.amount = "100"; //Bignum update
 					var result = ddn.crypto.verify(trs, keys.publicKey);
 					(result).should.be.not.ok;
 				});
 
 				it("should not be second signed correctly now", function () {
-					trs.amount = "100"; //bignum update
+					trs.amount = "100"; //Bignum update
 					var result = ddn.crypto.verify(trs, secondKeys.publicKey);
 					(result).should.be.not.ok;
 				});
@@ -974,7 +974,7 @@ describe("DDN JS", function () {
 				});
 
 				it("should not be signed correctly now", function () {
-					trs.amount = "10000";   //bignum update
+					trs.amount = "10000";   //Bignum update
 					var result = ddn.crypto.verify(trs);
 					(result).should.be.not.ok;
 				});
@@ -1076,13 +1076,13 @@ describe("DDN JS", function () {
 				});
 
 				it("should not be signed correctly now", function () {
-					trs.amount = "10000";   //bignum update
+					trs.amount = "10000";   //Bignum update
 					var result = ddn.crypto.verify(trs);
 					(result).should.be.not.ok;
 				});
 
 				it("should not be second signed correctly now", function () {
-					trs.amount = "10000";   //bignum update
+					trs.amount = "10000";   //Bignum update
 					var result = ddn.crypto.verifySecondSignature(trs, keys.publicKey);
 					(result).should.be.not.ok;
 				});
@@ -1198,13 +1198,13 @@ describe("DDN JS", function () {
 				});
 
 				it("should not be signed correctly now", function () {
-					vt.amount = "100";  //bignum update
+					vt.amount = "100";  //Bignum update
 					var result = ddn.crypto.verify(vt);
 					(result).should.be.not.ok;
 				});
 
 				it("should not be second signed correctly now", function () {
-					vt.amount = "100";  //bignum update
+					vt.amount = "100";  //Bignum update
 					var result = ddn.crypto.verifySecondSignature(vt, ddn.crypto.getKeys("second secret").publicKey);
 					(result).should.be.not.ok;
 				});

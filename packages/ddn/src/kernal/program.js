@@ -21,7 +21,7 @@ const { RuntimeState, Utils } = require('@ddn/ddn-utils');
 const HttpServer = require('../network/http-server');
 const MultiSignature = require('./lib/multisignature');
 const crypto = require('crypto');
-const bignum = require('@ddn/bignum-utils');
+const { Bignum } = require('@ddn/ddn-utils');
 const DataQuery = require('./lib/data-query');
 
 class Program
@@ -134,7 +134,7 @@ class Program
 
         const payloadHash = crypto.createHash('sha256');
         let payloadLength = 0;
-    
+
         for (const trs of block.transactions) {
             const bytes = await this._context.runtime.transaction.getBytes(trs);
             payloadLength += bytes.length;
@@ -149,7 +149,7 @@ class Program
 
         return true;
     }
-    
+
     async run(options) {
         //如果是后台模式，禁止输出
         if (options.isDaemonMode) {
@@ -158,7 +158,7 @@ class Program
 
         process.once('cleanup', () => {
             this._context.logger.info('Cleaning up...');
-    
+
             this._resetProcessState();
             process.exit(1);
         });
@@ -166,20 +166,20 @@ class Program
         process.once('SIGTERM', () => {
             process.emit('cleanup');
         })
-      
+
         process.once('exit', () => {
             this._context.logger.info('process exited');
         });
-      
+
         process.once('SIGINT', () => {
             process.emit('cleanup');
         });
-      
+
         process.on('uncaughtException', err => {
             this._context.logger.fatal('uncaughtException', { message: err.message, stack: err.stack });
             process.emit('cleanup');
         });
-      
+
         if (typeof(gc) == 'function') {
             setInterval(() => {
                 gc();
@@ -257,7 +257,7 @@ class Program
     }
 
     async _blockchainReady () {
-        if (!this._blockchainReadyFired && 
+        if (!this._blockchainReadyFired &&
             this._context.runtime.state == RuntimeState.Ready) {
 
             //通知资产系统已就绪事件
@@ -308,7 +308,7 @@ class Program
                 this._context.logger.warn("The peer sync task error: " + err);
             }
 
-            setTimeout(() => { 
+            setTimeout(() => {
                 this.startPeerSyncTask();
             }, 1000 * 49);
         }
@@ -414,10 +414,10 @@ class Program
             }
             catch (err)
             {
-                this._context.logger.warn("The block sync task error: " + err);   
+                this._context.logger.warn("The block sync task error: " + err);
             }
-            
-            setTimeout(async () => { 
+
+            setTimeout(async () => {
                 await this.startBlockDataSyncTask();
             }, 1000 * 10);
         } else {
@@ -450,7 +450,7 @@ class Program
             //     library.logger.trace('Loop:', 'node not ready');
             //     return setImmediate(cb);
             // }
-            
+
             const currentSlot = this._context.runtime.slot.getSlotNumber();
 
             const lastBlock = this._context.runtime.block.getLastBlock();
@@ -465,7 +465,7 @@ class Program
                 return;
             }
 
-            var forgeDelegateInfo = await this._context.runtime.delegate.getForgeDelegateWithCurrentTime(currentSlot, bignum.plus(lastBlock.height, 1));
+            var forgeDelegateInfo = await this._context.runtime.delegate.getForgeDelegateWithCurrentTime(currentSlot, Bignum.plus(lastBlock.height, 1));
             if (forgeDelegateInfo === null) {
                 this._context.logger.trace('Loop:', 'skipping slot');
                 return;

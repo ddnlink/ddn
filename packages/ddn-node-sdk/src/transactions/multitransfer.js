@@ -5,7 +5,7 @@ var trsTypes = require('../transaction-types');
 var slots = require("../time/slots.js")
 var options = require('../options')
 var addressHelper = require('../address.js')
-var bignum = require('@ddn/bignum-utils');
+const { Bignum } = require('@ddn/ddn-utils');
 
 function createMultiTransfer(outputs, secret, secondSecret) {
 	var keys = crypto.getKeys(secret)
@@ -16,7 +16,7 @@ function createMultiTransfer(outputs, secret, secondSecret) {
 	}
 	var sender = addressHelper.generateBase58CheckAddress(keys.public_key)
 	var fee = constants.fees.multitransfer
-	var amount = bignum.new(0);   //bignum update
+	var amount = Bignum.new(0);   //Bignum update
 	var recipientId = []
 	for (var i = 0; i < outputs.length; i++) {
 		var output = outputs[i]
@@ -28,9 +28,9 @@ function createMultiTransfer(outputs, secret, secondSecret) {
 			return cb("Invalid output recipient");
 		}
 
-        // bignum update
+        // Bignum update
 		// if (output.amount <= 0) {
-        if (bignum.isLessThanOrEqualTo(output.amount, 0)) {
+        if (Bignum.isLessThanOrEqualTo(output.amount, 0)) {
 			return cb("Invalid output amount");
 		}
 
@@ -38,9 +38,9 @@ function createMultiTransfer(outputs, secret, secondSecret) {
 			return cb("Invalid output recipientId, cannot be your self");
 		}
 
-        // bignum update
+        // Bignum update
         // amount += output.amount
-        amount = bignum.plus(amount, output.amount);
+        amount = Bignum.plus(amount, output.amount);
         
 		recipientId.push(output.recipientId)
 	}
@@ -48,7 +48,7 @@ function createMultiTransfer(outputs, secret, secondSecret) {
 	var transaction = {
 		type: trsTypes.MULTITRANSFER,
 		nethash: options.get('nethash'),
-		amount: amount.toString(),  //bignum update amount,
+		amount: amount.toString(),  //Bignum update amount,
 		fee: fee + "",
 		recipientId: recipientId.join('|'),
 		senderPublicKey: keys.public_key,

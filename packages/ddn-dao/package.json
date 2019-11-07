@@ -1,15 +1,23 @@
 {
   "name": "@ddn/ddn-dao",
-  "version": "1.0.3",
+  "version": "1.0.7",
   "description": "this is ddn-dao",
   "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
   "author": "wly",
-  "license": "ISC",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ddnlink/ddn.git",
+    "directory": "packages/ddn-test"
+  },
+  "homepage": "http://github.com/ddnlink/ddn/tree/master/packages/ddn-test",
+  "bugs": {
+    "url": "http://github.com/ddnlink/ddn/issues"
+  },
+  "license": "MIT",
+  "files": [
+    "lib"
+  ],
   "dependencies": {
-    "@ddn/bignum-utils": "^1.0.0",
     "@ddn/ddn-asset-base": "^1.0.3",
     "@ddn/ddn-utils": "^1.0.2",
     "bytebuffer": "^5.0.1",

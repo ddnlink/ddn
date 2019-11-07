@@ -1,5 +1,5 @@
 const { AssetBase } = require('@ddn/ddn-asset-base');
-const bignum = require('@ddn/bignum-utils');
+const { Bignum } = require('@ddn/ddn-utils');
 const ddnUtils = require('@ddn/ddn-utils');
 const daoUtil = require('./daoUtil.js');
 const ByteBuffer = require('bytebuffer');
@@ -61,7 +61,7 @@ class Contribution extends AssetBase {
         if (trs.recipient_id) {
             throw new Error('Invalid recipient');
         }
-        if (!bignum.isZero(trs.amount)) {
+        if (!Bignum.isZero(trs.amount)) {
             throw new Error('Invalid transaction amount');
         }
         if (!trs.asset || !contribution) {
@@ -89,7 +89,7 @@ class Contribution extends AssetBase {
             throw new Error('url is undefined or too long, don`t more than 256 characters.');
         }
 
-        if (bignum.isNaN(contribution.price)) {
+        if (Bignum.isNaN(contribution.price)) {
             throw new Error("Invalid contribution's price.");
         }
 

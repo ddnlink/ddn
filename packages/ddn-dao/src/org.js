@@ -1,5 +1,5 @@
 const { AssetBase } = require('@ddn/ddn-asset-base');
-const bignum = require('@ddn/bignum-utils');
+const { Bignum } = require('@ddn/ddn-utils');
 const ddnUtils = require('@ddn/ddn-utils');
 const ByteBuffer = require('bytebuffer');
 const { isUri } = require('valid-url');
@@ -111,9 +111,9 @@ class Org extends AssetBase {
         if (assetObj.state === 1) {
             feeBase = parseInt(feeBase / 10, 10); // change info
         }
-        // bignum update
+        // Bignum update
         // return feeBase * 100000000;
-        const result = bignum.multiply(feeBase, 100000000).toString();
+        const result = Bignum.multiply(feeBase, 100000000).toString();
         return result;
     }
 
@@ -136,8 +136,8 @@ class Org extends AssetBase {
         if (!ddnUtils.Address.isAddress(sender.address)) {
             throw new Error('Invalid address');
         }
-        // bignum update if (trs.amount != 0) {
-        if (!bignum.isZero(trs.amount)) {
+        // Bignum update if (trs.amount != 0) {
+        if (!Bignum.isZero(trs.amount)) {
             throw new Error('Invalid transaction amount');
         }
         if (!trs.asset || !org) {

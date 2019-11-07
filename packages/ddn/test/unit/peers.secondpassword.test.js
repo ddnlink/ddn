@@ -1,6 +1,6 @@
 "use strict";
 
-var bignum = require('@ddn/bignum-utils');
+const { Bignum } = require('@ddn/ddn-utils');
 var node = require("./../variables.js"),
     crypto = require("crypto");
 
@@ -51,9 +51,9 @@ describe("POST /peer/transactions", function () {
                         .set("port", node.config.port)
                         .send({
                             secret: node.Gaccount.password,
-                            
-                            //bignum update amount: node.Fees.secondPasswordFee + 100000000, // Testing 1 delegate registration + 1 transaction sending 1DDN
-                            amount: bignum.plus(node.Fees.secondPasswordFee, 100000000).toString(),
+
+                            //Bignum update amount: node.Fees.secondPasswordFee + 100000000, // Testing 1 delegate registration + 1 transaction sending 1DDN
+                            amount: Bignum.plus(node.Fees.secondPasswordFee, 100000000).toString(),
 
                             recipientId: account.address
                         })

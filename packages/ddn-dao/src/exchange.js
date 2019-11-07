@@ -1,5 +1,5 @@
 const { AssetBase } = require('@ddn/ddn-asset-base');
-const bignum = require('@ddn/bignum-utils');
+const { Bignum } = require('@ddn/ddn-utils');
 const ddnUtils = require('@ddn/ddn-utils');
 const daoUtil = require('./daoUtil.js');
 const ByteBuffer = require('bytebuffer');
@@ -95,14 +95,14 @@ class Exchange extends AssetBase {
         if (asset.sender_address !== sender.address) {
             throw new Error('senderAddress and sender.address should be equal');
         }
-        if (bignum.isNaN(asset.price)) {
+        if (Bignum.isNaN(asset.price)) {
             throw new Error("Invalid exchange' price.");
         }
         // check state right
         if (asset.state === 0) {
             // send exchange
-            // bignum update   if (trs.amount != 0)
-            if (!bignum.isZero(trs.amount)) {
+            // Bignum update   if (trs.amount != 0)
+            if (!Bignum.isZero(trs.amount)) {
                 throw new Error('Invalid transaction amount');
             }
             if (asset.exchange_trs_id) {
@@ -162,8 +162,8 @@ class Exchange extends AssetBase {
             if (latestExchangeRequestObj.org_id.toLowerCase() !== asset.org_id.toLowerCase()) {
                 throw new Error('confirm exchange orgId atypism: ' + asset.exchange_trs_id)
             }
-            // bignum update if (result.price !== trs.amount)
-            if (!bignum.isEqualTo(latestExchangeRequestObj.price, trs.amount)) {
+            // Bignum update if (result.price !== trs.amount)
+            if (!Bignum.isEqualTo(latestExchangeRequestObj.price, trs.amount)) {
                 throw new Error('confirm exchange amount & price atypism: ' + asset.exchange_trs_id)
             }
             // address is ok
@@ -201,8 +201,8 @@ class Exchange extends AssetBase {
             //         // console.log(trs)
             //         // console.log(result)
             //         if (result.org_id.toLowerCase() !== asset.org_id.toLowerCase()) return setImmediate(cb, 'confirm exchange orgId atypism');
-            //         // bignum update if (result.price !== trs.amount)
-            //         if (!bignum.isEqualTo(result.price, trs.amount)) return setImmediate(cb, 'confirm exchange amount & price atypism');
+            //         // Bignum update if (result.price !== trs.amount)
+            //         if (!Bignum.isEqualTo(result.price, trs.amount)) return setImmediate(cb, 'confirm exchange amount & price atypism');
             //         // address is ok
             //         if (result.receivedAddress !== asset.sender_address) return setImmediate(cb, 'confirm exchange senderAddress error');
             //         if (result.senderAddress !== asset.received_address) return setImmediate(cb, 'confirm exchange receivedAddress error');

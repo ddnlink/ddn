@@ -1,6 +1,6 @@
 const { AssetBase } = require('@ddn/ddn-asset-base');
 const valid_url = require('valid-url');
-const bignum = require('@ddn/bignum-utils');
+const { Bignum } = require('@ddn/ddn-utils');
 const ByteBuffer = require('bytebuffer');
 const dappCategory = require('./dapp/dapp-category.js');
 const crypto = require('crypto');
@@ -87,7 +87,7 @@ class Dapp extends AssetBase {
     }
 
     async calculateFee(trs, sender) {
-        return bignum.multiply(100, this.tokenSetting.fixedPoint);
+        return Bignum.multiply(100, this.tokenSetting.fixedPoint);
     }
 
     async verify(trs, sender) {
@@ -96,8 +96,8 @@ class Dapp extends AssetBase {
             throw new Error("Invalid recipient");
         }
 
-        //bignum update if (trs.amount != 0) {
-        if (!bignum.isZero(trs.amount)) {
+        //Bignum update if (trs.amount != 0) {
+        if (!Bignum.isZero(trs.amount)) {
             throw new Error("Invalid transaction amount");
         }
 
@@ -268,27 +268,27 @@ class Dapp extends AssetBase {
     async applyUnconfirmed(trs, sender, dbTrans) {
         const assetObj = await this.getAssetObject(trs);
 
-        //bignum update if (privated.unconfirmedNames[trs.asset.dapp.name]) {
+        //Bignum update if (privated.unconfirmedNames[trs.asset.dapp.name]) {
         if (this.oneoff.has(assetObj.name.toLowerCase())) {
             throw new Error("Dapp name already exists")
         }
 
-        //bignum update if (trs.asset.dapp.link && privated.unconfirmedLinks[trs.asset.dapp.link]) {
+        //Bignum update if (trs.asset.dapp.link && privated.unconfirmedLinks[trs.asset.dapp.link]) {
         if (assetObj.link && this.oneoff.has(assetObj.link.toLowerCase())) {
             throw new Error(cb, "Dapp link already exists");
         }
 
-        //bignum update privated.unconfirmedNames[trs.asset.dapp.name] = true;
+        //Bignum update privated.unconfirmedNames[trs.asset.dapp.name] = true;
         this.oneoff.set(assetObj.name.toLowerCase(), true);
-        //bignum update privated.unconfirmedLinks[trs.asset.dapp.link] = true;
+        //Bignum update privated.unconfirmedLinks[trs.asset.dapp.link] = true;
         this.oneoff.set(assetObj.link.toLowerCase(), true);
     }
 
     async undoUnconfirmed(trs, sender, dbTrans) {
         const assetObj = await this.getAssetObject(trs);
-        //bignum update delete privated.unconfirmedNames[trs.asset.dapp.name];
+        //Bignum update delete privated.unconfirmedNames[trs.asset.dapp.name];
         this.oneoff.delete(assetObj.name.toLowerCase());
-        //bignum update delete privated.unconfirmedLinks[trs.asset.dapp.link];
+        //Bignum update delete privated.unconfirmedLinks[trs.asset.dapp.link];
         this.oneoff.delete(assetObj.link.toLowerCase());
     }
 

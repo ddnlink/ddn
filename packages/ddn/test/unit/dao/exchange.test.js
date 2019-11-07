@@ -1,6 +1,6 @@
 var DEBUG = require('debug')('dao')
 var node = require('../../variables.js')
-var bignum = require('@ddn/bignum-utils');
+const { Bignum } = require('@ddn/ddn-utils');
 
 var Account1 = node.randomTxAccount();
 var Account2 = node.randomTxAccount();
@@ -213,7 +213,7 @@ describe('Put /transactions', () => {
         node.expect(Account1).to.have.property("balance");
 
         const fee = "10000000";
-        const nowBalance = bignum.minus(Account1Balance, exchangePrice, fee);
+        const nowBalance = Bignum.minus(Account1Balance, exchangePrice, fee);
         node.expect(Account1.balance.toString()).to.equal(nowBalance.toString());
     })
 

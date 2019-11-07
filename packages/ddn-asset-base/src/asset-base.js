@@ -14,7 +14,7 @@
 const AssetUtils = require('./asset-utils');
 const ByteBuffer = require('bytebuffer');
 const CommonUtils = require('./common-utils');
-const bignum = require('@ddn/bignum-utils');
+const { Bignum } = require('@ddn/ddn-utils');
 const _ = require('underscore');
 
 /**
@@ -110,7 +110,7 @@ class AssetBase {
      * @param {*} sender 
      */
     async calculateFee(trs, sender) {
-        return bignum.multiply(0.1, 100000000);
+        return Bignum.multiply(0.1, 100000000);
     }
 
     /**
@@ -780,11 +780,11 @@ class AssetBase {
      * @param {*} cb 
      */
     async verify(trs, sender) {
-        if (bignum.isZero(trs.amount)) { //等于0
+        if (Bignum.isZero(trs.amount)) { //等于0
             if (trs.recipient_id) { //wxm block database
                 throw new Error("The recipient_id attribute of the transaction must be null.");
             }
-        } else if (bignum.isLessThan(trs.amount, 0)) {  //小于0
+        } else if (Bignum.isLessThan(trs.amount, 0)) {  //小于0
             throw new Error("Invalid amount: " + trs.amount);
         } else {    //大于0
             if (!trs.recipient_id) {    //wxm block database
@@ -856,7 +856,7 @@ class AssetBase {
      * @param {*} dbTrans 
      */
     async apply(trs, block, sender, dbTrans) {
-        if (bignum.isGreaterThan(trs.amount, 0)) {
+        if (Bignum.isGreaterThan(trs.amount, 0)) {
             await this.runtime.account.setAccount({ address: trs.recipient_id }, dbTrans);
 
             await this.runtime.account.merge(trs.recipient_id, {
@@ -878,10 +878,10 @@ class AssetBase {
      * @param {*} dbTrans 
      */
     async undo(trs, block, sender, dbTrans) {
-        if (bignum.isGreaterThan(trs.amount, 0)) {
+        if (Bignum.isGreaterThan(trs.amount, 0)) {
             await this.runtime.account.setAccount({address: trs.recipient_id}, dbTrans);
 
-            var amountStr = bignum.minus(0, trs.amount).toString();
+            var amountStr = Bignum.minus(0, trs.amount).toString();
             await this.runtime.account.merge(trs.recipient_id, {
                 address: trs.recipient_id,   //wxm block database
                 balance: amountStr,

@@ -6,9 +6,9 @@ syntax = "proto3";
 message Block {
   required int32 version = 1;
   required int32 timestamp = 2;
-  required string total_amount = 3; //bignum update      totalAmount
-  required string total_fee = 4; //bignum update int64
-  required string reward = 5;   //bignum update int64
+  required string total_amount = 3; //Bignum update      totalAmount
+  required string total_fee = 4; //Bignum update int64
+  required string reward = 5;   //Bignum update int64
   required int32 number_of_transactions = 6;
   required int32 payload_length = 7;
   required bytes payload_hash = 8;
@@ -16,7 +16,7 @@ message Block {
   optional bytes block_signature = 10;
   optional string previous_block = 11;
   optional string id = 12;
-  optional string height = 13;  //bignum update     int64
+  optional string height = 13;  //Bignum update     int64
   repeated Transaction transactions = 14;
 }
 
@@ -28,13 +28,13 @@ message Transaction {
   required bytes signature = 5;
   optional string recipient_id = 6;
   optional string sender_id = 7;
-  optional string amount = 8;   //bignum update         int64
-  optional string fee = 9;      //bignum update         int64
+  optional string amount = 8;   //Bignum update         int64
+  optional string fee = 9;      //Bignum update         int64
   optional bytes requester_public_key = 10;
   optional bytes sign_signature = 11;
   repeated string signatures = 12;
   optional string id = 13;
-  optional string height = 14;  //bignum update         int64
+  optional string height = 14;  //Bignum update         int64
   optional string block_id = 15;
   required Asset asset = 16;
   repeated string args = 17;
@@ -155,7 +155,7 @@ message AssetAOBTransfer {
 
 message Output {
   required string recipient_id = 1;
-  required string amount = 2;   //bignum update int64
+  required string amount = 2;   //Bignum update int64
 }
 
 message AssetMultitransfer {
@@ -179,7 +179,7 @@ message AssetEvidence {
 }
 
 message BlockPropose {
-  required string height = 1;   //bignum update     int64
+  required string height = 1;   //Bignum update     int64
   required string id = 2;
   required int32 timestamp = 3;
   required bytes generator_public_key = 4;
@@ -189,7 +189,7 @@ message BlockPropose {
 }
 
 message BlockVotes {
-  required string height = 1;   //bignum update     int64
+  required string height = 1;   //Bignum update     int64
   required string id = 2;
   repeated BlockVoteSignature signatures = 3;
 }

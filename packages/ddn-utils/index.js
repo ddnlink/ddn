@@ -4,5 +4,6 @@ module.exports = {
     Address: require('./lib/address'),
     Amount: require('./lib/amount'),
     LimitCache: require('./lib/limit-cache'),
-    Utils: require('./lib/utils')
+    Utils: require('./lib/utils'),
+    Bignum: require('./lib/bignumber'),
 }
