@@ -4,7 +4,9 @@
 
 DDN, Data Delivery Network, is next generation blockchain system.
 
-More infomation please visit our [official website](https://www.ddn.link) , [ddn-docs](https://github.com/ddnlink/ddn-docs) or [“nodejs on blockchain"](https://github.com/imfly/bitcoin-on-nodejs) . The old code is [here](https://github.com/ebookcoin/ebookcoin)
+More infomation please visit our [official website](https://www.ddn.link) , [ddn-docs](https://github.com/ddnlink/ddn-docs) or [nodejs on blockchain](https://github.com/imfly/bitcoin-on-nodejs) . The old code is [here](https://github.com/ebookcoin/ebookcoin)
+
+> Please follow this project's author, [imfly](https://github.com/imfly), and star the project to show your ❤️ and support.
 
 ## Features
 
