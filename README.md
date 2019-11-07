@@ -26,19 +26,30 @@ More infomation please visit our [official website](https://www.ddn.link) , [ddn
 
 ![](./doc/architect.jpg)
 
-## Projects
+## Examples
 
-- [ddn-docs](https://github.com/ddnlink/ddn-docs)
-- [ddn-cli](https://github.com/ddnlink/ddn-cli)
-- [ddn-aob](./packages/ddn-aob)
-- [ddn-evidence](./packages/ddn-evidence)
-- [ddn-dapp](./packages/ddn-dapp)
-- [ddn-dao](./packages/ddn-dao)
-- [ddn-node-sdk](./packages/ddn-node-sdk)
-- [ddn-explorer] website: [ddn.link](http://mainnet.ddn.link)
+- [DDN Mainnet](http://mainnet.ddn.link)
+- [DDN Wallet](http://wallet.ddn.link)
+- [DDN Mobile Wallet](https://www.ddn.link/product/wallet)
+
+## Community
+
+| Github Issue | WeChat(helper) |
+| ------------------------------------------------------- | ------------------------------------------------------------------------------------------- |
+| [ddnlink/ddn/issues](https://github.com/ddnlink/ddn/issues) | ![](./doc/hashbase.jpg) | 
+
+> PS：Please note `DDN Development`
+
+## Donation
+
+You can donate DDN to the follow address with [DDN Wallet](http://wallet.ddn.link), or [DDN Mobile Wallet](https://www.ddn.link/product/wallet), and these DDN will be paid to those who contribute to this project.
+
+| DDN FOUNDATION Wallet Address | DDN Mobile Wallet QRCode |
+| ------------------------------------------------------- | ------------------------------------------------------------------------------------------- |
+| DLjrrVwnmMXstcAYVjcrpwyYb3kY1ehABU | ![](./doc/images/foundation.png) | 
 
 ## License
 
 The MIT License (MIT)
 
-Copyright (c) 2016-2019 DDN.link. All rights reserved. See License.txt in the project root for license information.
+Copyright (c) 2016-2019 DDN FOUNDATION. All rights reserved. See License.txt in the project root for license information.
