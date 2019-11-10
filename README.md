@@ -24,7 +24,7 @@ More infomation please visit our [official website](https://www.ddn.link) , [ddn
 
 ## Architect
 
-![](./doc/architect.jpg)
+![](./doc/images/architect.jpg)
 
 ## Examples
 
@@ -36,7 +36,7 @@ More infomation please visit our [official website](https://www.ddn.link) , [ddn
 
 | Github Issue | WeChat(helper) |
 | ------------------------------------------------------- | ------------------------------------------------------------------------------------------- |
-| [ddnlink/ddn/issues](https://github.com/ddnlink/ddn/issues) | ![](./doc/hashbase.jpg) | 
+| [ddnlink/ddn/issues](https://github.com/ddnlink/ddn/issues) | ![](./doc/images/hashbase.jpg) | 
 
 > PS：Please note `DDN Development`
 
