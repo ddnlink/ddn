@@ -1,12 +1,14 @@
 [中文版](./README-zh-CN.md) | [English](./README.md)
 
+> I`m [imfly](https://github.com/imfly), this project's author, please star the project to show your ❤️ and support.
+
 # DDN
 
 DDN, Data Delivery Network, is next generation blockchain system.
 
-More infomation please visit our [official website](https://www.ddn.link) , [ddn-docs](https://github.com/ddnlink/ddn-docs) or [nodejs on blockchain](https://github.com/imfly/bitcoin-on-nodejs) . The old code is [here](https://github.com/ebookcoin/ebookcoin)
+More infomation please visit our [official website](https://www.ddn.link) , [ddn-docs](https://github.com/ddnlink/ddn-docs).
 
-> I`m [imfly](https://github.com/imfly), this project's author, please star the project to show your ❤️ and support.
+**Professional books and videos**：[nodejs on blockchain 2](https://github.com/imfly/blockchain-on-nodejs), and [The old book](https://github.com/imfly/bitcoin-on-nodejs), the old code is [here](https://github.com/ebookcoin/ebookcoin).
 
 ## Features
 
