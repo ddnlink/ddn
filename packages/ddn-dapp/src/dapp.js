@@ -633,7 +633,7 @@ class Dapp extends AssetBase {
                 try {
                     await this.stopDapp(dapp);
                 } catch (err) {
-                    ;
+                    
                 }
             }
 

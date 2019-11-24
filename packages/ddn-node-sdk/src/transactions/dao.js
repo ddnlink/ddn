@@ -1,4 +1,3 @@
-var ByteBuffer = require('bytebuffer');
 var crypto = require('./crypto.js');
 var constants = require('../constants.js');
 var trsTypes = require('../transaction-types');
@@ -34,7 +33,6 @@ function isOrgId(dao_id) {
 
 function createOrg(org, secret, second_secret) {
 	var keys = crypto.getKeys(secret);
-	var bytes = null;
 
 	var sender = addressHelper.generateBase58CheckAddress(keys.public_key)
 
@@ -118,7 +116,6 @@ function createTransfer(address, amount, secret, second_secret) {
 
 function createConfirmation(trsAmount, confirmation, secret, second_secret) {
     var keys = crypto.getKeys(secret);
-    var bytes = null;
 
 	if (typeof(confirmation) !== 'object') {
 		throw new Error('The first argument should be a object!');
@@ -188,7 +185,6 @@ function createConfirmation(trsAmount, confirmation, secret, second_secret) {
  */
 function createContribution(contribution, secret, second_secret) {
 	var keys = crypto.getKeys(secret);
-	var bytes = null;
 
 	if (typeof(contribution) !== 'object') {
 		throw new Error('The first argument should be a object!');

@@ -1136,7 +1136,7 @@ describe("DDN JS", function () {
 				});
 
 				it("should have recipientId string equal to sender", function () {
-					(vt).should.have.property("recipientId").equal(null);;
+					(vt).should.have.property("recipientId").equal(null);
 				});
 
 				it("should have amount number eaul to 0", function () {
