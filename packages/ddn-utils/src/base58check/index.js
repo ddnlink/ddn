@@ -1,4 +1,3 @@
-const assert = require('assert');
 const crypto = require('crypto');
 const base58 = require('./bs58.js');
 

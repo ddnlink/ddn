@@ -1,5 +1,6 @@
 const os = require('os');
 const shell = require("shelljs")
+const ip = require("ip");
 
 class Utils{
     static getPublicIp() {
@@ -18,6 +19,8 @@ class Utils{
                 });
             });
         } catch (e) {
+            // TODO: update to logger.info(e)
+            console.log(e);
         }
         return publicIp;
     }

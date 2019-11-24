@@ -242,18 +242,19 @@ module.exports = {
         return new BigNumber(hex.join(''), 16);
     },
 
+    // TODO: var -> let 2019.11.24
     toBuffer: function(currBignumber, opts) {
         currBignumber = new BigNumber(currBignumber);
 
         if (typeof opts === 'string') {
             if (opts !== 'mpint') return 'Unsupported Buffer representation';
     
-            var abs = currBignumber.absoluteValue();
-            var buf = abs.toBuffer({ size : 1, endian : 'big' });
-            var len = buf.length === 1 && buf[0] === 0 ? 0 : buf.length;
+            let abs = currBignumber.absoluteValue();
+            let buf = abs.toBuffer({ size : 1, endian : 'big' });
+            let len = buf.length === 1 && buf[0] === 0 ? 0 : buf.length;
             if (buf[0] & 0x80) len ++;
     
-            var ret = new Buffer(4 + len);
+            let ret = new Buffer(4 + len);
             if (len > 0) buf.copy(ret, 4 + (buf[0] & 0x80 ? 1 : 0));
             if (buf[0] & 0x80) ret[4] = 0;
     
@@ -263,9 +264,9 @@ module.exports = {
             ret[3] = len & (0xff << 0);
     
             // two's compliment for negative integers:
-            var isNeg = currBignumber.isLessThan(0);
+            let isNeg = currBignumber.isLessThan(0);
             if (isNeg) {
-                for (var i = 4; i < ret.length; i++) {
+                for (let i = 4; i < ret.length; i++) {
                     ret[i] = 0xff - ret[i];
                 }
             }
@@ -300,8 +301,8 @@ module.exports = {
         ;
     
         hx.forEach(function (chunk, i) {
-            for (var j = 0; j < size; j++) {
-                var ix = i * size + (endian === 'big' ? j : size - j - 1);
+            for (let j = 0; j < size; j++) {
+                let ix = i * size + (endian === 'big' ? j : size - j - 1);
                 buf[ix] = parseInt(chunk.slice(j*2,j*2+2), 16);
             }
         });

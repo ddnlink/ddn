@@ -1,6 +1,6 @@
-import babelJest from 'babel-jest';
-import { dirname } from 'path';
-import { compatDirname } from 'umi-utils';
+const babelJest = require('babel-jest');
+const { dirname } = require('path');
+const { compatDirname } = require('umi-utils');
 
 const cwd = process.cwd();
 

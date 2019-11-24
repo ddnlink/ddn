@@ -1,4 +1,3 @@
-var ByteBuffer = require('bytebuffer')
 var crypto = require("./crypto.js")
 var constants = require("../constants.js")
 var slots = require("../time/slots.js")
@@ -6,7 +5,6 @@ var options = require('../options')
 
 function createDomain(name, address, secret, secondSecret) {
 	var keys = crypto.getKeys(secret)
-  var bytes =  null
 
   if (!name || name.length == 0) {
     throw new Error('Invalid name format')

@@ -50,7 +50,7 @@ class RootRouter {
             } else {
               return sortb - sorta;
             }
-        };
+        }
 
         function compareString(a, b) {
             const sorta = a[result.orderBy];
@@ -60,7 +60,7 @@ class RootRouter {
             } else {
               return sortb.localeCompare(sorta);
             }
-        };
+        }
 
         if (result.delegates.length > 0 && typeof result.delegates[0][result.orderBy] == 'undefined') {
             result.orderBy = 'rate';
