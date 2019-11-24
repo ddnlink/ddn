@@ -90,7 +90,7 @@ function randomProperty(obj, needKey) {
   } else {
     return keys[keys.length * Math.random() << 0];
   }
-};
+}
 
 // Randomizes DDN amount
 function randomCoin() {

@@ -1,5 +1,4 @@
 var crypto = require('./crypto.js');
-var constants = require('../constants.js');
 var slots = require('../time/slots.js');
 var options = require('../options');
 var { AssetUtils } = require('@ddn/ddn-asset-base');

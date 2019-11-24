@@ -157,7 +157,7 @@ class Acl extends AssetBase
             }
             resolve(true);
         });
-    };
+    }
 
     async _addList(modelName, currency, list, dbTrans) {
         if (!dbTrans) {

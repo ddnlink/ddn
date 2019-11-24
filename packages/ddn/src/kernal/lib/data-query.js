@@ -99,7 +99,7 @@ class DataQuery {
         } else {
             throw new Error("Invalid params: transactionIds");
         }
-    };
+    }
     
     async loadVotesWithTransactionIds(transactionIds) {
         if (transactionIds && transactionIds.length > 0) {
@@ -160,7 +160,7 @@ class DataQuery {
         } else {
             throw new Error("Invalid params: transactionIds");
         }
-    };
+    }
     
     async loadAssetExtsWithTransactionIds(transactionIds) {
         if (transactionIds && transactionIds.length > 0) {
@@ -182,7 +182,7 @@ class DataQuery {
         } else {
             throw new Error("Invalid params: transactionIds");
         }
-    };
+    }
     
     async loadSignaturesWithTransactionIds(transactionIds) {
         if (transactionIds && transactionIds.length > 0) {
@@ -204,7 +204,7 @@ class DataQuery {
         } else {
             throw new Error("Invalid params: transactionIds");
         }
-    };
+    }
     
     async loadMultiSignaturesWithTransactionIds(transactionIds) {
         if (transactionIds && transactionIds.length > 0) {

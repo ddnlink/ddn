@@ -1,4 +1,3 @@
-var ByteBuffer = require('bytebuffer')
 var crypto = require("./crypto.js")
 var constants = require("../constants.js")
 var trsTypes = require('../transaction-types');
@@ -7,9 +6,8 @@ var options = require('../options')
 var addressHelper = require('../address.js')
 const { Bignum } = require('@ddn/ddn-utils');
 
-function createMultiTransfer(outputs, secret, secondSecret) {
+function createMultiTransfer(outputs, secret, secondSecret, cb) {
 	var keys = crypto.getKeys(secret)
-	var bytes = null
 
 	if (!outputs || outputs.length == 0) {
 		throw new Error('Invalid fileHash format')

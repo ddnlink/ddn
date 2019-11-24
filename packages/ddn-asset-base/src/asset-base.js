@@ -1001,7 +1001,7 @@ class AssetBase {
                 }
                 catch(err2)
                 {
-                    ;
+                    
                 }
             }
 
