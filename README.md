@@ -1,17 +1,18 @@
 [中文版](./README-zh-CN.md) | [English](./README.md)
 
+> I`m [imfly](https://github.com/imfly), this project's author, please star the project to show your ❤️ and support.
+
 # DDN
 
 DDN, Data Delivery Network, is next generation blockchain system.
 
-More infomation please visit our [official website](https://www.ddn.link) , [ddn-docs](https://github.com/ddnlink/ddn-docs) or [nodejs on blockchain](https://github.com/imfly/bitcoin-on-nodejs) . The old code is [here](https://github.com/ebookcoin/ebookcoin)
+More infomation please visit our [official website](https://www.ddn.link) , [ddn-docs](https://github.com/ddnlink/ddn-docs).
 
-> I`m [imfly](https://github.com/imfly), this project's author, please star the project to show your ❤️ and support.
-
+**Professional books and videos**：[nodejs on blockchain 2](https://github.com/imfly/blockchain-on-nodejs), and [The old book](https://github.com/imfly/bitcoin-on-nodejs), [The old paper book](https://item.jd.com/12206128.html), [The old code](https://github.com/ebookcoin/ebookcoin)
 ## Features
 
 - [x] **Mature**, has successfully served multiple enterprise level products;
-- [x] **Complete tutorials**, Simple, fast and low threshold for development, please refer to learn the book [“nodejs on blockchain"](https://github.com/imfly/bitcoin-on-nodejs) before development;
+- [x] **Complete tutorials**, Simple, fast and low threshold for development, please refer to learn the book [nodejs on blockchain 2](https://github.com/imfly/blockchain-on-nodejs) before development;
 - [x] **Configurable**, you can use your own peer quantity, token name, etc;
 - [x] **Pluggable**, good scalability can help you quickly requirement your requirement;
 - [x] **Multi platforms**, you can use DDN in Linux, Win, and Mac;
@@ -24,7 +25,7 @@ More infomation please visit our [official website](https://www.ddn.link) , [ddn
 
 ## Architect
 
-![](./doc/architect.jpg)
+![](./doc/images/architect.jpeg)
 
 ## Examples
 
@@ -36,7 +37,7 @@ More infomation please visit our [official website](https://www.ddn.link) , [ddn
 
 | Github Issue | WeChat(helper) |
 | ------------------------------------------------------- | ------------------------------------------------------------------------------------------- |
-| [ddnlink/ddn/issues](https://github.com/ddnlink/ddn/issues) | ![](./doc/hashbase.jpg) | 
+| [ddnlink/ddn/issues](https://github.com/ddnlink/ddn/issues) | ![](./doc/images/hashbase.jpg) | 
 
 > PS：Please note `DDN Development`
 
