@@ -52,8 +52,14 @@
     "packages/*"
   ],
   "devDependencies": {
+    "cz-conventional-changelog": "^3.0.2",
     "eslint": "^6.7.0",
     "lerna": "^3.18.1",
     "lerna-changelog": "^0.8.3"
+  },
+  "config": {
+    "commitizen": {
+      "path": "./node_modules/cz-conventional-changelog"
+    }
   }
 }
