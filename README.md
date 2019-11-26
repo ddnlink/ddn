@@ -1,7 +1,5 @@
 [中文版](./README-zh-CN.md) | [English](./README.md)
 
-> I`m [imfly](https://github.com/imfly), this project's author, please star the project to show your ❤️ and support.
-
 # DDN
 
 DDN, Data Delivery Network, is next generation blockchain system.

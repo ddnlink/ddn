@@ -1,7 +1,5 @@
 [中文版](./README-zh-CN.md) | [English](./README.md)
 
-> 我是 [imfly](https://github.com/imfly)，欢迎 `star` 收藏本项目，支持关心 ❤️ 国产区块链发展！
-
 # DDN简介
 
 DDN, 数据分发网络, 是一个成熟的企业级区块链系统，已经服务于版权存证、检验检测、电子医疗等10多个领域。
