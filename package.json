@@ -38,9 +38,10 @@
     "node": ">=8.6.0"
   },
   "scripts": {
+    "init": "sh ./scripts/init.sh",
+    "start": "node ./scripts/startPeer.js",
     "bootstrap": "lerna bootstrap",
     "build": "father-build",
-    "dev": "node ./scripts/dev.js",
     "changelog": "lerna-changelog",
     "chore:update-deps": "sh ./scripts/reinstall_deps.sh",
     "clean": "lerna clean -y",
