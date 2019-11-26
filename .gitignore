@@ -47,3 +47,7 @@ build
 /packages/**/node_modules/.cache
 /packages/**/.docz
 /packages/**/package-lock\.json
+
+blockchain.*
+*.db
+*.db-journal

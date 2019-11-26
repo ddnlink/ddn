@@ -40,6 +40,7 @@
   "scripts": {
     "bootstrap": "lerna bootstrap",
     "build": "father-build",
+    "dev": "node ./scripts/dev.js",
     "changelog": "lerna-changelog",
     "chore:update-deps": "sh ./scripts/reinstall_deps.sh",
     "clean": "lerna clean -y",
