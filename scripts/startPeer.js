@@ -27,17 +27,7 @@ function startDevServer(opts = {}) {
 }
 
 function start() {
-  return startDevServer({ '8001', cwd: join(__dirname, 'node') });
+  return startDevServer({ port: '8001', cwd: join(__dirname, 'node') });
 }
 
-module.exports = start;
-
-if (require.main === module) {
-  start()
-    .then(() => {
-      console.log('All dev servers are started.');
-    })
-    .catch(e => {
-      console.log(e);
-    });
-}
+start();

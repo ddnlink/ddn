@@ -1,0 +1,17 @@
+{
+  "name": "ddn-dapp-helloworld",
+  "link": "git+http://git.ebookchain.net/ebookchain-dapp-helloworld/archive/master.zip",
+  "category": 1,
+  "description": "A hello world demo for ddn dapp",
+  "tags": "ddn,dapp,demo",
+  "icon": "http://asd.bkt.clouddn.com/hello.png",
+  "type": 0,
+  "delegates": [
+    "a518e4390512e43d71503a02c9912413db6a9ffac4cbefdcd25b8fa2a1d5ca27",
+    "c7dee266d5c85bf19da8fab1efc93204fed7b35538a3618d7f6a12d022498cab",
+    "9cac187d70713b33cc4a9bf3ff4c004bfca94802aed4a32e2f23ed662161ea50",
+    "01944ce58570592250f509214d29171a84f0f9c15129dbea070251512a08f5cc",
+    "f31d61066c902bebc80155fed318200ffbcfc97792511ed18d85bd5af666639f"
+  ],
+  "unlockDelegates": 3
+}

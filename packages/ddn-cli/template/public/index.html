@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <script src="http://lib.sinaapp.com/js/jquery/1.9.1/jquery-1.9.1.min.js"></script>
+    <title>DDN DApp Example 1 - hello world</title>
+</head>
+
+<script type="text/javascript">
+    $(document).ready(function() {
+        var DAPP_ID = window.location.pathname.split('/')[2];
+        var BASE_URL = '/api/dapps/' + DAPP_ID;
+        var COUNT_PER_PAGE = 20;
+        var State = {
+            isLogin: false,
+            timer: null
+        };
+        var UserInfo = {
+            secret: '',
+        };
+        function updateBalanceView(balances) {
+            var $table = $('#balanceTable');
+            $table.find('tr:not(:first)').remove();
+            for (var i in balances) {
+                var balanceInfo = balances[i]
+                var balance = Number(balanceInfo.balance) / 100000000
+                var currency = balanceInfo.currency
+                var tr = '<tr><td>' + currency + '</td>' + '<td>' + balance + '</td></tr>';
+                $table.append(tr);
+            }
+        }
+        function loadContracts() {
+            $.ajax({
+                type: 'GET',
+                url: BASE_URL + '/contracts',
+                dataType: 'json',
+                success: function (ret) {
+                    console.log(ret)
+                    var $contractOptions = $('#contractOptions')
+                    $contractOptions.empty()
+                    for (var i in ret.contracts) {
+                        var c = ret.contracts[i]
+                        $contractOptions.append('<option value="' + c.type + '">' + c.type + ': ' + c.name + '</option>')
+                    }
+                }
+            })
+        }
+        function onLogin(account) {
+            State.isLogin = true;
+            $('#loginBtn').val('Logout');
+            $('#secretInput').hide();
+            $('#mainPanel').show();
+            updateBalanceView(account.balances);
+            loadContracts()
+        }
+        function login(secret) {
+            $.ajax({
+                type: 'POST',
+                url: BASE_URL + '/login',
+                data: {
+                    secret: secret
+                },
+                dataType: 'json',
+                success: function(ret) {
+                    console.log(ret);
+                    if (!ret.success) {
+                        alert(ret.error);
+                        return;
+                    }
+                    UserInfo.secret = secret;
+                    UserInfo.publicKey = ret.account.publicKey;
+                    UserInfo.address = ret.account.address
+                    onLogin(ret.account);
+                }
+            });
+        }
+        function getBalances(address) {
+            $.ajax({
+                type: 'GET',
+                url: BASE_URL + '/balances/' + address,
+                dataType: 'json',
+                success: function(ret) {
+                    console.log(ret);
+                    if (!ret.success) {
+                        alert(ret.error);
+                        return;
+                    }
+                    updateBalanceView(ret.balances)
+                }
+            });
+        }
+        function logout() {
+            $('#loginBtn').val('login');
+            $('#secretInput').show();
+            $('#mainPanel').hide();
+            State.isLogin = false;
+            if (State.timer) {
+                clearInterval(State.timer);
+                State.timer = null;
+            }
+        }
+
+        State.timer = setInterval(function () {
+            if (UserInfo.publicKey) {
+                getBalances(UserInfo.address);
+            }
+        }, 10 * 1000);
+        $('#loginBtn').click(function () {
+            if (State.isLogin) {
+                logout();
+            } else {
+                login($('#secretInput').val());
+            }
+        });
+        $('#invokeBtn').click(function () {
+            var args = $('#contractArgs').val().split('\n')
+            var fee = '10000000'
+            var data = {
+                secret: UserInfo.secret,
+                fee: fee,
+                type: Number($('#contractOptions').val()),
+                args: JSON.stringify(args)
+            }
+            console.log('invoke', data)
+            $.ajax({
+                type: 'PUT',
+                url: BASE_URL + '/transactions/unsigned',
+                data: data,
+                dataType: 'json',
+                success: function(ret) {
+                    console.log(ret);
+                    if (!ret.success) {
+                        alert('Error: ' + ret.error);
+                        return;
+                    }
+                    alert("Success! " + ret.transactionId);
+                }
+            });
+        })
+        $('#accessBtn').click(function () {
+            var params = $('#accessParams').val()
+            var jsonParams = null
+            try {
+                if (params) {
+                    var jsonParams = JSON.parse(params)
+                }
+            } catch (e) {
+                alert('Invalid params')
+                return
+            }
+
+            $.ajax({
+                type: 'GET',
+                url: BASE_URL + $('#accessUrl').val(),
+                data: jsonParams,
+                dataType: 'json',
+                success: function (ret) {
+                    console.log(ret)
+                    $('#accessResponse').val(JSON.stringify(ret, null, 4));
+                }
+            })
+        })
+    });
+</script>
+
+<body>
+    <h1>DDN DApp Example 1 - hello world</h1>
+    <div>
+        <input type="password" id="secretInput" placeholder="Please input master secret">
+        <input type="button" value="Login" id="loginBtn">
+    </div>
+    <div id="mainPanel" style="display: none;">
+        <hr/>
+        <h2>Account balances</h2>
+        <div>
+            <table id="balanceTable" width="200px" border="1">
+                <tr>
+                    <th>Currency</th>
+                    <th>Balance</th>
+                </tr>
+            </table>
+        </div>
+
+        <hr/>
+        <h2>Contract invoke</h2>
+        <div>
+            <select id="contractOptions"></select><input type="button" id="invokeBtn" value="Invoke"><br/>
+            <textarea rows="6" cols="60" id="contractArgs" placeholder="Please input the arguments"></textarea><br/>
+        </div>
+
+        <hr/>
+        <h2>Interface access</h2>
+        <div>
+            <input type="text" id="accessUrl" placeholder="Please input url"><input type="button" id="accessBtn" value="Access"><br/>
+            <textarea rows="10" cols="60" id="accessParams" placeholder="Please input params"></textarea><br/>
+            <textarea rows="20" cols="60" id="accessResponse"></textarea><br/>
+        </div>
+    </div>
+</body>
+
+</html>

@@ -38,6 +38,8 @@
     "node": ">=8.6.0"
   },
   "scripts": {
+    "init": "sh ./scripts/init.sh",
+    "start": "node ./scripts/startPeer.js",
     "bootstrap": "lerna bootstrap",
     "build": "father-build",
     "changelog": "lerna-changelog",
