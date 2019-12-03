@@ -15,7 +15,7 @@ const AssetUtils = require('./asset-utils');
 const ByteBuffer = require('bytebuffer');
 const CommonUtils = require('./common-utils');
 const { Bignum } = require('@ddn/ddn-utils');
-const _ = require('underscore');
+const _ = require('lodash');
 
 /**
  * 定义字段相应规则

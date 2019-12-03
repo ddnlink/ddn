@@ -1,11 +1,9 @@
-const { AssetBase } = require('@ddn/ddn-asset-base');
-const ByteBuffer = require('bytebuffer');
-const { Bignum } = require('@ddn/ddn-utils');
-const ddnUtils = require('@ddn/ddn-utils');
+import { AssetBase } from '@ddn/ddn-asset-base';
+import ByteBuffer from 'bytebuffer';
+import { Bignum } from '@ddn/ddn-utils';
+import ddnUtils from '@ddn/ddn-utils';
 
-class Acl extends AssetBase
-{
-
+class Acl extends AssetBase {
     async propsMapping() {
         return [
             {field: 'str1', prop: 'currency', required: true},
@@ -33,39 +31,6 @@ class Acl extends AssetBase
 
         return bb.toBuffer()
     }
-
-    // async objectNormalize(trs) {
-    //     const aclObj = await this.getAssetObject(trs);
-    //     var validateErrors = await this.ddnSchema.validate({
-    //         type: 'object',
-    //         properties: {
-    //             currency: {
-    //                 type: 'string',
-    //                 minLength: 1,
-    //                 maxLength: 22
-    //             },
-    //             operator: {
-    //                 type: 'string',
-    //                 minLength: 1,
-    //                 maxLength: 1
-    //             },
-    //             flag: {
-    //                 type: 'integer'
-    //             },
-    //             list: {
-    //                 type: 'string',
-    //                 minLength: 64,
-    //                 maxLength: 10
-    //             }
-    //         },
-    //         required: ['currency', 'operator', 'flag', 'list']
-    //     }, aclObj);
-    //     if (validateErrors) {
-    //         throw new Error(`Incorrect acl in transactions: ${validateErrors[0].message}`);
-    //     }
-
-	// 	return trs;
-    // }
 
     async verify(trs, sender) {
         if (trs.recipient_id) {
@@ -112,7 +77,8 @@ class Acl extends AssetBase
             throw new Error(`AOB Asset not found: ${aclObj.currency}`);
         }
 
-        const assetInfo = queryResult[0];
+        // FIXME: return queryResult[0];
+        // const assetInfo = queryResult[0];
     }
 
     async applyUnconfirmed(trs, sender, dbTrans) {
@@ -136,17 +102,19 @@ class Acl extends AssetBase
             this.dao.insertOrUpdate(modelName, {
                 currency,
                 address: item
-            }, trans, (err, result) => {
+            }, trans, (err) => {
                 if (err) {
                     return reject(err);
                 }
-                resolve(true);
+                resolve(true); // resolve(result)
             })
         });
     }
 
+    // FIXME: delete async
     async _insertList(modelName, currency, list, trans) {
-        return new Promise(async(resolve, reject) => {
+        return new Promise(
+            async(resolve, reject) => {
             for (var i = 0; i < list.length; i++) {
                 const item = list[i];
                 try {
@@ -192,7 +160,7 @@ class Acl extends AssetBase
                 address: {
                     "$in": list
                 }
-            }, dbTrans, (err, result) => {
+            }, dbTrans, (err) => {
                 if (err) {
                     return reject(err);
                 }
@@ -226,18 +194,6 @@ class Acl extends AssetBase
         }
         return trs;
     }
-
-    // async dbRead(raw) {
-    //     const result = await super.dbRead(raw);
-    //     result.list = result.list.split(',');
-    //     return result;
-    // }
-
-    // async dbSave(trs, dbTrans) {
-    //     const aclObj = await this.getAssetObject(trs);
-    //     aclObj.list = aclObj.list.join(',');
-    //     await super.dbSave(trs, dbTrans);
-    // }
 
 }
 

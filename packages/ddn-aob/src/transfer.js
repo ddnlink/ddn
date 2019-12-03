@@ -1,13 +1,11 @@
-const { AssetBase } = require('@ddn/ddn-asset-base');
-const { Bignum } = require('@ddn/ddn-utils');
-const ddnUtils = require('@ddn/ddn-utils');
-const crypto = require('crypto');
-const ed = require('ed25519');
-const _ = require('lodash');
-const asset = require('./asset');
+import { AssetBase } from '@ddn/ddn-asset-base';
+import { Bignum } from '@ddn/ddn-utils';
+import ddnUtils from '@ddn/ddn-utils';
+import crypto from 'crypto';
+import ed from 'ed25519';
+import _ from 'lodash';
 
 class Transfer extends AssetBase {
-    // eslint-disable-next-line class-methods-use-this
     async propsMapping() {
         return [
             {
@@ -26,6 +24,7 @@ class Transfer extends AssetBase {
         trs.amount = "0";
 
         const assetJsonName = await this.getAssetJsonName(trs.type);
+        // eslint-disable-next-line require-atomic-updates
         trs.asset[assetJsonName] = data[assetJsonName];
         return trs;
     }
@@ -464,12 +463,12 @@ class Transfer extends AssetBase {
                             recipient_id: body.recipientId,
                             message: body.message
                         };
-                        var assetJsonName = await this.getAssetJsonName();
+                        const assetJsonName = await this.getAssetJsonName();
                         data[assetJsonName] = transfer;
 
-                        var transaction = await this.runtime.transaction.create(data);
+                        const transaction = await this.runtime.transaction.create(data);
 
-                        var transactions = await this.runtime.transaction.receiveTransactions([transaction]);
+                        const transactions = await this.runtime.transaction.receiveTransactions([transaction]);
                         cb(null, transactions);
                     } catch (e) {
                         cb(e);

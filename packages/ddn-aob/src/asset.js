@@ -1,11 +1,8 @@
-/* eslint-disable class-methods-use-this */
-const { AssetBase } = require('@ddn/ddn-asset-base');
-const { Bignum } = require('@ddn/ddn-utils');
-const ddnUtils = require('@ddn/ddn-utils');
-const assert = require('assert');
+import { AssetBase } from '@ddn/ddn-asset-base';
+import { Bignum, Amount } from '@ddn/ddn-utils';
+import assert from 'assert';
 
 class Asset extends AssetBase {
-    // eslint-disable-next-line class-methods-use-this
     async propsMapping() {
         return [
             {
@@ -89,7 +86,7 @@ class Asset extends AssetBase {
         if (asset.precision > 16 || asset.precision < 0) {
             throw new Error('Invalid asset precision form ddn-aob');
         }
-        const error = ddnUtils.Amount.validate(asset.maximum);
+        const error = Amount.validate(asset.maximum);
         if (error) {
             throw new Error(error);
         }
@@ -120,18 +117,13 @@ class Asset extends AssetBase {
         return trs;
     }
 
-    // eslint-disable-next-line class-methods-use-this
     async getBytes(trs) {
         const asset = await this.getAssetObject(trs);
         let buffer = Buffer.concat([
-            // eslint-disable-next-line
             new Buffer(asset.name, 'utf8'),
-            // eslint-disable-next-line
             new Buffer(asset.desc, 'utf8'),
-            // eslint-disable-next-line
             new Buffer(asset.maximum, 'utf8'),
             Buffer.from([asset.precision || 0]),
-            // eslint-disable-next-line
             new Buffer(asset.strategy || '', 'utf8'),
             Buffer.from([asset.allow_writeoff || '0']),
             Buffer.from([asset.allow_whitelist || '0']),

@@ -345,7 +345,6 @@ class Transaction
         //     return await this._assets.call(transaction.type, "undoUnconfirmed", transaction, sender);
         // }
 
-        //Bignum update   const amount = transaction.amount + transaction.fee;
         const amount = Bignum.plus(transaction.amount, transaction.fee);
 
         this.balanceCache.addNativeBalance(sender.address, amount);
