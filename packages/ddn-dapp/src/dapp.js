@@ -70,6 +70,7 @@ class Dapp extends AssetBase {
         trs.amount = "0";
 
         const assetJsonName = await this.getAssetJsonName(trs.type);
+        // eslint-disable-next-line require-atomic-updates
         trs.asset[assetJsonName] = data[assetJsonName];
 
         // {
@@ -86,11 +87,11 @@ class Dapp extends AssetBase {
         return trs;
     }
 
-    async calculateFee(trs, sender) {
+    async calculateFee() {
         return Bignum.multiply(100, this.tokenSetting.fixedPoint);
     }
 
-    async verify(trs, sender) {
+    async verify(trs) {
         const dapp = await this.getAssetObject(trs);
         if (trs.recipient_id) {
             throw new Error("Invalid recipient");
@@ -174,7 +175,7 @@ class Dapp extends AssetBase {
 
             tags = tags.map(tag => tag.trim()).sort();
 
-            for (var i = 0; i < tags.length - 1; i++) {
+            for (let i = 0; i < tags.length - 1; i++) {
                 if (tags[i + 1] == tags[i]) {
                     throw new Error(`Encountered duplicate tags: ${tags[i]}`)
                 }
@@ -250,7 +251,7 @@ class Dapp extends AssetBase {
         return buf;
     }
 
-    async apply(trs, block, sender, dbTrans) {
+    async apply(trs) {
         const assetObj = await this.getAssetObject(trs);
         if (assetObj.name === WITNESS_CLUB_DAPP_NAME) {
             global.state.clubInfo = assetObj
@@ -258,14 +259,14 @@ class Dapp extends AssetBase {
         }
     }
 
-    async undo(trs, block, sender, dbTrans) {
+    async undo(trs) {
         const assetObj = await this.getAssetObject(trs);
         if (assetObj.name === WITNESS_CLUB_DAPP_NAME) {
             global.state.clubInfo = null
         }
     }
 
-    async applyUnconfirmed(trs, sender, dbTrans) {
+    async applyUnconfirmed(trs) {
         const assetObj = await this.getAssetObject(trs);
 
         //Bignum update if (privated.unconfirmedNames[trs.asset.dapp.name]) {
@@ -275,7 +276,7 @@ class Dapp extends AssetBase {
 
         //Bignum update if (trs.asset.dapp.link && privated.unconfirmedLinks[trs.asset.dapp.link]) {
         if (assetObj.link && this.oneoff.has(assetObj.link.toLowerCase())) {
-            throw new Error(cb, "Dapp link already exists");
+            throw new Error("Dapp link already exists");
         }
 
         //Bignum update privated.unconfirmedNames[trs.asset.dapp.name] = true;
@@ -284,7 +285,7 @@ class Dapp extends AssetBase {
         this.oneoff.set(assetObj.link.toLowerCase(), true);
     }
 
-    async undoUnconfirmed(trs, sender, dbTrans) {
+    async undoUnconfirmed(trs) {
         const assetObj = await this.getAssetObject(trs);
         //Bignum update delete privated.unconfirmedNames[trs.asset.dapp.name];
         this.oneoff.delete(assetObj.name.toLowerCase());
@@ -320,7 +321,7 @@ class Dapp extends AssetBase {
     async attachApi(router) {
         router.put("/", async (req, res) => {
             try {
-                const result = await this.putDapp(req, res);
+                const result = await this.putDapp(req);
                 res.json(result);
             } catch (err) {
                 res.json({ success: false, error: err.message || err.toString() });
@@ -338,7 +339,7 @@ class Dapp extends AssetBase {
 
         router.get("/get", async (req, res) => {
             try {
-                const result = await this.getDappById(req, res);
+                const result = await this.getDappById(req);
                 res.json(result);
             } catch (err) {
                 res.json({ success: false, error: err.message || err.toString() });
@@ -356,7 +357,7 @@ class Dapp extends AssetBase {
 
         router.get("/installed", async (req, res) => {
             try {
-                const result = await this.getInstalled(req, res);
+                const result = await this.getInstalled();
                 res.json(result);
             } catch (err) {
                 res.json({ success: false, error: err.message || err.toString() });
@@ -457,7 +458,7 @@ class Dapp extends AssetBase {
 
         router.get("/balances/:dappid", async (req, res) => {
             try {
-                const result = await this.getDappBalances(req, res);
+                const result = await this.getDappBalances(req);
                 res.json(result);
             } catch (err) {
                 res.json({ success: false, error: err.message || err.toString() });
@@ -466,7 +467,7 @@ class Dapp extends AssetBase {
 
         router.get("/balances/:dappid/:currency", async (req, res) => {
             try {
-                const result = await this.getDappBalance(req, res);
+                const result = await this.getDappBalance(req);
                 res.json(result);
             } catch (err) {
                 res.json({ success: false, error: err.message || err.toString() });
@@ -474,7 +475,7 @@ class Dapp extends AssetBase {
         });
     }
 
-    async getDappBalances(req, res) {
+    async getDappBalances(req) {
         const dappId = req.params.dappid;
         const limit = req.query.limit || 100;
         const offset = req.query.offset || 0;
@@ -491,7 +492,7 @@ class Dapp extends AssetBase {
         });
     }
 
-    async getDappBalance(req, res) {
+    async getDappBalance(req) {
         const dappId = req.params.dappid;
         const currency = req.params.currency;
 
@@ -507,7 +508,7 @@ class Dapp extends AssetBase {
         });
     }
 
-    async getLaunchDappLastError(req, res) {
+    async getLaunchDappLastError(req) {
         const query = req.query;
 
         const validateErrors = await this.ddnSchema.validate({
@@ -540,7 +541,7 @@ class Dapp extends AssetBase {
         }
     }
 
-    async postLaunchDapp(req, res) {
+    async postLaunchDapp(req) {
         const body = req.body;
 
         const validateErrors = await this.ddnSchema.validate({
@@ -633,7 +634,7 @@ class Dapp extends AssetBase {
                 try {
                     await this.stopDapp(dapp);
                 } catch (err) {
-                    
+                    throw new Error(err);
                 }
             }
 
@@ -644,6 +645,7 @@ class Dapp extends AssetBase {
 
         sandbox.run(args);
 
+        // eslint-disable-next-line require-atomic-updates
         _dappLaunched[id] = sandbox;
 
         await this._attachDappApi(id);
@@ -753,7 +755,7 @@ class Dapp extends AssetBase {
         }
     }
 
-    async postStopDapp(req, res) {
+    async postStopDapp(req) {
         const body = req.body;
 
         const validateErrors = await this.ddnSchema.validate({
@@ -814,7 +816,7 @@ class Dapp extends AssetBase {
         throw new Error("DApp not found: " + trsId);
     }
 
-    async getDappList(req, res) {
+    async getDappList(req) {
         var query = req.query;
 
         const validateErrors = await this.ddnSchema.validate({
@@ -905,7 +907,7 @@ class Dapp extends AssetBase {
         return { success: true, result };
     }
 
-    async getDappById(req, res) {
+    async getDappById(req) {
         const query = req.query;
 
         const validateErrors = await this.ddnSchema.validate({
@@ -934,13 +936,15 @@ class Dapp extends AssetBase {
     }
 
     delDir(path) {
-        var files = [];
+        let files = [];
+        let self = this;
+
         if (fs.existsSync(path)) {
             files = fs.readdirSync(path);
-            files.forEach(function (file, index) {
+            files.forEach(function (file) {
                 var curPath = path + "/" + file;
                 if (fs.statSync(curPath).isDirectory()) { // recurse
-                    delDir(curPath);
+                    self.delDir(curPath);
                 } else { // delete file
                     fs.unlinkSync(curPath);
                 }
@@ -970,7 +974,7 @@ class Dapp extends AssetBase {
         });
     }
 
-    async getInstalled(req, res) {
+    async getInstalled() {
         const ids = await this.getInstalledDappIds();
         if (ids && ids.length) {
             const dapps = await this.queryAsset({ trs_id: { "$in": ids } }, null, false, 1, ids.length);
@@ -981,7 +985,7 @@ class Dapp extends AssetBase {
 
     async downloadDapp(source, target) {
         const downloadErr = await new Promise((resolve, reject) => {
-            request(source, (err, res, body) => {
+            request(source, (err) => {
                 if (err) {
                     return reject(err);
                 }
@@ -1016,7 +1020,7 @@ class Dapp extends AssetBase {
                 if (fs.existsSync(target)) {
                     fs.unlinkSync(target);
                 }
-                return reject(err);
+                return reject(downloadErr);
             }
             resolve();
         });
@@ -1030,7 +1034,7 @@ class Dapp extends AssetBase {
                 return reject(`Failed to decompress zip file: ${err}`);
             });
 
-            unzipper.on("extract", log => {
+            unzipper.on("extract", () => {
                 resolve();
             });
 
@@ -1128,6 +1132,7 @@ class Dapp extends AssetBase {
 
         if (_dappLaunched[body.id]) {
             await this.stopDapp(dapp);
+            // eslint-disable-next-line require-atomic-updates
             _dappLaunched[body.id] = false;
         }
 
@@ -1137,6 +1142,7 @@ class Dapp extends AssetBase {
             await this.runtime.socketio.emit('dapps/change', {});
             return res.json({ success: true });
         } finally {
+            // eslint-disable-next-line require-atomic-updates
             _dappRemoving[body.id] = false;
         }
     }
@@ -1181,21 +1187,22 @@ class Dapp extends AssetBase {
             const dapp = await this.getDappByTransactionId(body.id);
             const dappPath = await this.installDApp(dapp);
 
-            if (dapp.type == 0) {
-                // no need to install node dependencies
-            } else {
-            }
+            // if (dapp.type == 0) {
+            //     // no need to install node dependencies
+            // } else {
+            // }
 
             await this._removeLaunchedMarkFile(dappPath);
 
             await this.runtime.socketio.emit('dapps/change', {});
             return res.json({ success: true, path: dappPath });
         } finally {
+            // eslint-disable-next-line require-atomic-updates
             _dappInstalling[body.id] = false;
         }
     }
 
-    async putDapp(req, res) {
+    async putDapp(req) {
         const body = req.body;
 
         const validateErrors = await this.ddnSchema.validate({
@@ -1334,7 +1341,7 @@ class Dapp extends AssetBase {
         }
     }
 
-    async onNewBlock(block, votes) {
+    async onNewBlock(block) {
         Object.keys(_dappLaunched).forEach(async(dappId) => {
             const sandbox = _dappLaunched[dappId];
             if (sandbox) {

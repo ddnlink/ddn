@@ -1,7 +1,7 @@
 /*---------------------------------------------------------------------------------------------
  *  Created by imfly on Sun May 06 2017 11:39:6
  *
- *  Copyright (c) 2018 DDN.link. All rights reserved.
+ *  Copyright (c) 2018 DDN FOUNDATION. All rights reserved.
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 /**
@@ -11,11 +11,11 @@
  * create，getBytes，calculateFee，verify，objectNormalize，dbRead，apply，undo，applyUnconfirmed，
  * undoUnconfirmed，ready，process
  */
-const AssetUtils = require('./asset-utils');
-const ByteBuffer = require('bytebuffer');
-const CommonUtils = require('./common-utils');
-const { Bignum } = require('@ddn/ddn-utils');
-const _ = require('lodash');
+import AssetUtils from './asset-utils';
+import ByteBuffer from 'bytebuffer';
+import CommonUtils from './common-utils';
+import { Bignum } from '@ddn/ddn-utils';
+import _ from 'lodash';
 
 /**
  * 定义字段相应规则

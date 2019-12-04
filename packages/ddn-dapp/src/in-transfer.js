@@ -1,6 +1,5 @@
-const { AssetBase } = require('@ddn/ddn-asset-base');
-const { Bignum } = require('@ddn/ddn-utils');
-const ddnUtils = require('@ddn/ddn-utils');
+import { AssetBase } from '@ddn/ddn-asset-base';
+import { Bignum, Address, Amount } from '@ddn/ddn-utils';
 
 class InTransfer extends AssetBase {
 
@@ -27,9 +26,11 @@ class InTransfer extends AssetBase {
         trs.recipient_id = null;
 
         const assetJsonName = await this.getAssetJsonName(trs.type);
+        // eslint-disable-next-line require-atomic-updates
         trs.asset[assetJsonName] = data[assetJsonName];
 
         if (data[assetJsonName].currency === this.tokenSetting.tokenName) {
+            // eslint-disable-next-line require-atomic-updates
             trs.amount = data.amount + "";
             delete data[assetJsonName].amount;
         }
@@ -42,7 +43,7 @@ class InTransfer extends AssetBase {
             throw new Error("Invalid recipient")
         }
 
-        if (!ddnUtils.Address.isAddress(sender.address)) {
+        if (!Address.isAddress(sender.address)) {
             throw new Error("Invalid address")
         }
 
@@ -53,7 +54,7 @@ class InTransfer extends AssetBase {
                 throw new Error("Invalid transfer amount")
             }
 
-            const error = ddnUtils.Amount.validate(inTransfer.amount);
+            const error = Amount.validate(inTransfer.amount);
             if (error) {
                 throw error;
             }
@@ -110,11 +111,11 @@ class InTransfer extends AssetBase {
         // again !!!
         // if (trs.asset.inTransfer.currency !== this.library.tokenSetting.tokenName) {
         if (transfer.currency !== this.tokenSetting.tokenName) {
-            var currency = new Buffer(transfer.currency, 'utf8');
+            let currency = new Buffer(transfer.currency, 'utf8');
             const amount = new Buffer(transfer.amount, 'utf8');
             buf = Buffer.concat([buf, dappId, currency, amount]);
         } else {
-            var currency = new Buffer(transfer.currency, 'utf8');
+            let currency = new Buffer(transfer.currency, 'utf8');
             buf = Buffer.concat([buf, dappId, currency]);
         }
 
@@ -136,10 +137,8 @@ class InTransfer extends AssetBase {
                     }
 
                     let balance = '0';
-                    let balanceExists = false;
                     if (row) {
                         balance = row.balance;
-                        balanceExists = true;
                     }
 
                     const newBalance = Bignum.plus(balance, amount);
@@ -161,7 +160,7 @@ class InTransfer extends AssetBase {
     }
 
     // 新增事务dbTrans ---wly
-    async apply(trs, block, sender, dbTrans) {
+    async apply(trs, _block, sender, dbTrans) {
         const asset = await this.getAssetObject(trs);
         const dappId = asset.dapp_id;
 
@@ -175,7 +174,8 @@ class InTransfer extends AssetBase {
         }
     }
 
-    async undo(trs, block, sender, dbTrans) {
+    async undo(trs, _block, sender, dbTrans) {
+        const asset = await this.getAssetObject(trs);
         const transfer = await this.getAssetObject(trs);
         const dappId = asset.dapp_id;
 
@@ -189,7 +189,7 @@ class InTransfer extends AssetBase {
         }
     }
 
-    async applyUnconfirmed(trs, sender, dbTrans) {
+    async applyUnconfirmed(trs, sender) {
         const transfer = await this.getAssetObject(trs);
         if (transfer.currency != this.tokenSetting.tokenName) {
             const balance = this.balanceCache.getAssetBalance(sender.address, transfer.currency) || 0;
@@ -201,7 +201,7 @@ class InTransfer extends AssetBase {
         }
     }
 
-    async undoUnconfirmed(trs, sender, dbTrans) {
+    async undoUnconfirmed(trs, sender) {
         const transfer = await this.getAssetObject(trs);
         if (transfer.currency != this.tokenSetting.tokenName) {
             this.balanceCache.addAssetBalance(sender.address, transfer.currency, transfer.amount);

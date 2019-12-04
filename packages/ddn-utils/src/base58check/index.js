@@ -1,15 +1,16 @@
-const crypto = require('crypto');
-const base58 = require('./bs58.js');
+'use strict'
+
+var sha256 = require('fast-sha256')
+var base58 = require('./bs58.js')
 
 // SHA256(SHA256(buffer))
 function sha256x2(buffer) {
-  const tmp = crypto.createHash('sha256').update(buffer).digest();
-  return crypto.createHash('sha256').update(tmp).digest()
+  return Buffer.from(sha256.hash(sha256.hash(buffer)))
 }
 
 // Encode a buffer as a base58-check encoded string
 function encode(payload) {
-  const checksum = sha256x2(payload);
+  var checksum = sha256x2(payload)
   return base58.encode(Buffer.concat([
       payload,
       checksum
@@ -17,9 +18,9 @@ function encode(payload) {
 }
 
 function decodeRaw(buffer) {
-  const payload = buffer.slice(0, -4);
-  const checksum = buffer.slice(-4);
-  const newChecksum = sha256x2(payload);
+  var payload = buffer.slice(0, -4)
+  var checksum = buffer.slice(-4)
+  var newChecksum = sha256x2(payload)
 
   if (checksum[0] ^ newChecksum[0] |
     checksum[1] ^ newChecksum[1] |
@@ -31,21 +32,21 @@ function decodeRaw(buffer) {
 
 // Decode a base58-check encoded string to a buffer, no result if checksum is wrong
 function decodeUnsafe(string) {
-  const buffer = base58.decodeUnsafe(string);
+  var buffer = base58.decodeUnsafe(string)
   if (!buffer) return
 
   return decodeRaw(buffer)
 }
 
 function decode(string) {
-  const buffer = base58.decode(string);
-  const payload = decodeRaw(buffer);
+  var buffer = base58.decode(string)
+  var payload = decodeRaw(buffer)
   if (!payload) throw new Error('Invalid checksum')
   return payload
 }
 
 module.exports = {
-  encode,
-  decode,
-  decodeUnsafe
+  encode: encode,
+  decode: decode,
+  decodeUnsafe: decodeUnsafe
 }
