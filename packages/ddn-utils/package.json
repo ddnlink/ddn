@@ -17,6 +17,7 @@
   ],
   "dependencies": {
     "bignumber.js": "^7.2.1",
+    "fast-sha256": "^1.1.1",
     "ip": "^1.1.5",
     "shelljs": "^0.8.3"
   },
