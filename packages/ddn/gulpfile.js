@@ -64,6 +64,7 @@ function getCmds(osName, netVersion, projectName) {
       result.push(format('sed -i "s/testnet/%s/g" %s/ddnd', netVersion, fullpath));
     }
 
+    // todo: %s/configs/
     result.push(format('cp configs/%s/%s.json %s/config.json', projectName, netVersion, fullpath));
     result.push(format('cp genesisBlocks/%s/%s.json %s/genesisBlock.json', projectName, netVersion, fullpath));
 

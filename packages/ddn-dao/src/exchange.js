@@ -1,10 +1,16 @@
-const { AssetBase } = require('@ddn/ddn-asset-base');
-const { Bignum } = require('@ddn/ddn-utils');
-const ddnUtils = require('@ddn/ddn-utils');
-const daoUtil = require('./daoUtil.js');
-const ByteBuffer = require('bytebuffer');
-const crypto = require('crypto');
-const ed = require('ed25519');
+/*---------------------------------------------------------------------------------------------
+ *  Updated by Imfly on Sat Dec 07 2019 09:37:37
+ *
+ *  Copyright (c) 2019 DDN FOUNDATION. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
+import { AssetBase } from '@ddn/ddn-asset-base';
+import { Bignum, Address } from '@ddn/ddn-utils';
+import daoUtil from './daoUtil.js';
+import ByteBuffer from 'bytebuffer';
+import crypto from 'crypto';
+import ed from 'ed25519';
 
 /**
   * 企业号、媒体号等交易
@@ -80,13 +86,13 @@ class Exchange extends AssetBase {
         if (!daoUtil.isOrgId(asset.org_id.toLowerCase())) {
             throw new Error('exchange org id not allow: ' + asset.org_id.toLowerCase());
         }
-        if (!ddnUtils.Address.isAddress(sender.address)) {
+        if (!Address.isAddress(sender.address)) {
             throw new Error('Invalid address');
         }
-        if (!ddnUtils.Address.isAddress(asset.sender_address)) {
+        if (!Address.isAddress(asset.sender_address)) {
             throw new Error('senderAddress id not allow');
         }
-        if (!ddnUtils.Address.isAddress(asset.received_address)) {
+        if (!Address.isAddress(asset.received_address)) {
             throw new Error('receivedAddress id not allow');
         }
         if (asset.sender_address === asset.received_address) {
@@ -101,7 +107,6 @@ class Exchange extends AssetBase {
         // check state right
         if (asset.state === 0) {
             // send exchange
-            // Bignum update   if (trs.amount != 0)
             if (!Bignum.isZero(trs.amount)) {
                 throw new Error('Invalid transaction amount');
             }
@@ -181,54 +186,13 @@ class Exchange extends AssetBase {
             if (trs.recipient_id !== asset.received_address) {
                 throw new Error('confirm exchange recipient_id error: ' + asset.exchange_trs_id)
             }
-
-            // orgid is ok
-            // if (result3.org_id.toLowerCase() != asset.org_id.toLowerCase()) return setImmediate(cb, 'confirm exchange orgId should be equal');
-            // to mark the exchange is confirm ok !!!
-            // trs.asset.is_confirm_ok = true; // next dbSave to deal
-
-            // if (!asset.exchange_trs_id) {
-            //     return setImmediate(cb, 'must give confirm exchange trs_id');
-            // }
-            // // check exchangeTrsId for confirm
-            // library.model.getExchanges({ exchange_trs_id: asset.exchange_trs_id }, { limit: 1 }, (err, result) => {
-            //     if (err) { return setImmediate(cb, err); }
-            //     if (result && result.length) { return setImmediate(cb, 'confirm exchange already exists'); }
-            //     // confirm
-            //     library.model.getExchangeByTrsId(asset.exchange_trs_id, (err, result) => {
-            //         if (err) return setImmediate(cb, err);
-            //         if (!result) return setImmediate(cb, 'confirm exchange not find');
-            //         // console.log(trs)
-            //         // console.log(result)
-            //         if (result.org_id.toLowerCase() !== asset.org_id.toLowerCase()) return setImmediate(cb, 'confirm exchange orgId atypism');
-            //         // Bignum update if (result.price !== trs.amount)
-            //         if (!Bignum.isEqualTo(result.price, trs.amount)) return setImmediate(cb, 'confirm exchange amount & price atypism');
-            //         // address is ok
-            //         if (result.receivedAddress !== asset.sender_address) return setImmediate(cb, 'confirm exchange senderAddress error');
-            //         if (result.senderAddress !== asset.received_address) return setImmediate(cb, 'confirm exchange receivedAddress error');
-            //         // orgid is ok
-            //         if (result.org_id.toLowerCase() != asset.org_id.toLowerCase()) return setImmediate(cb, 'confirm exchange orgId should be equal');
-            //         // to mark the exchange is confirm ok !!!
-            //         // trs.asset.is_confirm_ok = true; // next dbSave to deal
-            //         return setImmediate(cb); // exchange is ok
-            //     });
-            // });
         } else {
             throw new Error('not support dao exchange state');
         }
         return trs;
     }
 
-    // eslint-disable-next-line class-methods-use-this
-    // async process(trs) {
-    //     const trans = trs;
-    //     trans.asset.exchange.org_id = trs.asset.exchange.org_id.toLowerCase();
-    //     return trans;
-    // }
-
-    // eslint-disable-next-line class-methods-use-this
     async getBytes(trs) {
-        // eslint-disable-next-line no-undef
         const asset = await this.getAssetObject(trs);   // trs.asset.exchange;
         const bb = new ByteBuffer();
         bb.writeString(asset.org_id.toLowerCase());
@@ -287,7 +251,7 @@ class Exchange extends AssetBase {
         });
     }
 
-    async putExchange(req, res) {
+    async putExchange(req) {
         const body = req.body;
         const validateErrors = await this.ddnSchema.validate({
             type: 'object',
@@ -351,7 +315,7 @@ class Exchange extends AssetBase {
         return new Promise((resolve, reject) => {
             this.balancesSequence.add(async (cb) => {
                 if (body.multisigAccountPublicKey && body.multisigAccountPublicKey != keypair.publicKey.toString('hex')) {
-                    var account;
+                    let account;
                     try {
                         account = await this.runtime.account.getAccountByPublicKey(body.multisigAccountPublicKey);
                     } catch (e) {
@@ -372,7 +336,7 @@ class Exchange extends AssetBase {
 
                     exchange.sender_address = account.address;
 
-                    var requester;
+                    let requester;
                     try {
                         requester = await this.runtime.account.getAccountByPublicKey(keypair.publicKey);
                     } catch (e) {
@@ -398,25 +362,25 @@ class Exchange extends AssetBase {
                     }
 
                     try {
-                        var data = {
+                        let data = {
                             type: await this.getTransactionType(),
                             sender: account,
                             keypair: keypair,
                             requester: keypair,
                             second_keypair
                         };
-                        var assetJsonName = await this.getAssetJsonName();
+                        let assetJsonName = await this.getAssetJsonName();
                         data[assetJsonName] = exchange;
 
-                        var transaction = await this.runtime.transaction.create(data);
+                        let transaction = await this.runtime.transaction.create(data);
                   
-                        var transactions = await this.runtime.transaction.receiveTransactions([transaction]);
+                        let transactions = await this.runtime.transaction.receiveTransactions([transaction]);
                         cb(null, transactions);
                     } catch (e) {
                         cb(e);
                     }
                 } else {
-                    var account;
+                    let account;
                     try {
                         account = await this.runtime.account.getAccountByPublicKey(keypair.publicKey.toString('hex'));
                     } catch (e) {
@@ -440,17 +404,17 @@ class Exchange extends AssetBase {
                     }
 
                     try {
-                        var data = {
+                        let data = {
                             type: await this.getTransactionType(),
                             sender: account,
                             keypair,
                             second_keypair
                         }
-                        var assetJsonName = await this.getAssetJsonName();
+                        let assetJsonName = await this.getAssetJsonName();
                         data[assetJsonName] = exchange;
 
-                        var transaction = await this.runtime.transaction.create(data);
-                        var transactions = await this.runtime.transaction.receiveTransactions([transaction]);
+                        let transaction = await this.runtime.transaction.create(data);
+                        let transactions = await this.runtime.transaction.receiveTransactions([transaction]);
                         cb(null, transactions);
                     } catch (e) {
                         cb(e);
@@ -466,4 +430,5 @@ class Exchange extends AssetBase {
         });
     }
 }
-module.exports = Exchange;
+
+export default Exchange;

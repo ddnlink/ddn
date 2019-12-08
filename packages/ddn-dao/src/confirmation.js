@@ -1,9 +1,8 @@
-const { AssetBase } = require('@ddn/ddn-asset-base');
-const { Bignum } = require('@ddn/ddn-utils');
-const ddnUtils = require('@ddn/ddn-utils');
-const daoUtil = require('./daoUtil');
-const crypto = require('crypto');
-const ed = require('ed25519');
+import { AssetBase } from '@ddn/ddn-asset-base';
+import { Bignum, Address } from '@ddn/ddn-utils';
+import daoUtil from './daoUtil';
+import crypto from 'crypto';
+import ed from 'ed25519';
 
 /**
   * 确认交易
@@ -43,7 +42,6 @@ class Confirmation extends AssetBase {
         ];
     }
 
-    // eslint-disable-next-line class-methods-use-this
     async create(data, trs) {
         const trans = trs;
 
@@ -98,7 +96,7 @@ class Confirmation extends AssetBase {
             || confirmation.received_address.length > 128) {
             throw new Error('received_address is undefined or too long, don`t more than 128 characters.');
         }
-        if (!ddnUtils.Address.isAddress(confirmation.received_address)) {
+        if (!Address.isAddress(confirmation.received_address)) {
             throw new Error("Invalid confirmation's received_address");
         }
 
@@ -106,7 +104,7 @@ class Confirmation extends AssetBase {
             || confirmation.sender_address.length > 128) {
             throw new Error('senderAddress is undefined or too long, don`t more than 128 characters.');
         }
-        if (!ddnUtils.Address.isAddress(confirmation.sender_address)) {
+        if (!Address.isAddress(confirmation.sender_address)) {
             throw new Error("Invalid confirmation's senderAddress");
         }
 
@@ -183,7 +181,7 @@ class Confirmation extends AssetBase {
         });
     }
 
-    async getConfirmationsByOrgId(req, res) {
+    async getConfirmationsByOrgId(req) {
         const orgId = req.params.orgId;
         const org = await daoUtil.getEffectiveOrgByOrgId(this._context, orgId);
         if (!org) {
@@ -249,7 +247,7 @@ class Confirmation extends AssetBase {
         })
     }
 
-    async putConfirmation(req, res) {
+    async putConfirmation(req) {
         const body = req.body;
 
         const validateErrors = await this.ddnSchema.validate({
@@ -291,7 +289,7 @@ class Confirmation extends AssetBase {
 
         const hash = crypto.createHash('sha256').update(body.secret, 'utf8').digest();
         const keypair = ed.MakeKeypair(hash);
-        var senderPublicKey = keypair.publicKey.toString('hex')
+        // var senderPublicKey = keypair.publicKey.toString('hex')
 
         const contributionInst = await this.getAssetInstanceByName("Contribution");
         const contributionRecords = await contributionInst.queryAsset({
@@ -312,7 +310,7 @@ class Confirmation extends AssetBase {
             return new Promise((resolve, reject) => {
                 this.balancesSequence.add(async (cb) => {
                     if (body.multisigAccountPublicKey && body.multisigAccountPublicKey != keypair.publicKey.toString('hex')) {
-                        var account;
+                        let account;
                         try {
                             account = await this.runtime.account.getAccountByPublicKey(body.multisigAccountPublicKey);
                         } catch (e) {
@@ -359,25 +357,25 @@ class Confirmation extends AssetBase {
                         confirmation.sender_address = account.address;
 
                         try {
-                            var data = {
+                            const data = {
                                 type: await this.getTransactionType(),
                                 sender: account,
                                 keypair,
                                 requester: keypair,
                                 second_keypair,
                             };
-                            var assetJsonName = await this.getAssetJsonName();
+                            const assetJsonName = await this.getAssetJsonName();
                             data[assetJsonName] = confirmation;
     
-                            var transaction = await this.runtime.transaction.create(data);
+                            const transaction = await this.runtime.transaction.create(data);
     
-                            var transactions = await this.runtime.transaction.receiveTransactions([transaction]);
+                            const transactions = await this.runtime.transaction.receiveTransactions([transaction]);
                             cb(null, transactions);
                         } catch (e) {
                             cb(e);
                         }
                     } else {
-                        var account;
+                        let account;
                         try {
                             account = await this.runtime.account.getAccountByPublicKey(keypair.publicKey.toString('hex'));
                         } catch (e) {
@@ -401,18 +399,18 @@ class Confirmation extends AssetBase {
                         confirmation.sender_address = account.address;
         
                         try {
-                            var data = {
+                            let data = {
                                 type: await this.getTransactionType(),
                                 sender: account,
                                 keypair,
                                 second_keypair
                             }
-                            var assetJsonName = await this.getAssetJsonName();
+                            const assetJsonName = await this.getAssetJsonName();
                             data[assetJsonName] = confirmation;
     
-                            var transaction = await this.runtime.transaction.create(data);
+                            const transaction = await this.runtime.transaction.create(data);
     
-                            var transactions = await this.runtime.transaction.receiveTransactions([transaction]);
+                            const transactions = await this.runtime.transaction.receiveTransactions([transaction]);
                             cb(null, transactions);
                         } catch (e) {
                             cb(e);
@@ -435,4 +433,4 @@ class Confirmation extends AssetBase {
     }
 }
 
-module.exports = Confirmation;
+export default Confirmation;

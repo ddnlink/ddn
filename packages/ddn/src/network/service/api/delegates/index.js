@@ -192,10 +192,8 @@ class RootRouter {
         })
     }
 
-    async getFee(req) {
-        //   Bignum update
-        //   fee = 100 * constants.fixedPoint;
-        let fee = Bignum.multiply(100, this.tokenSetting.fixedPoint);
+    async getFee() {
+        const fee = Bignum.multiply(100, this.tokenSetting.fixedPoint);
         return {fee};
     }
 

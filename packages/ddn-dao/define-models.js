@@ -1,5 +1,5 @@
-const fs = require('fs');
-const path = require('path');
+import fs from 'fs';
+import path from 'path';
 
 // 如果文件带有后缀名则去掉
 function splitFileName(text) {
@@ -12,7 +12,6 @@ function splitFileName(text) {
 const models = [];
 const files = fs.readdirSync(path.resolve(__dirname, './models/'));
 files.forEach((file) => {
-    // eslint-disable-next-line
     const item = require(path.resolve(__dirname, './models/', file));
     models.push({
         name: splitFileName(file),
@@ -20,4 +19,4 @@ files.forEach((file) => {
     });
 });
 
-module.exports = models;
+export default models;

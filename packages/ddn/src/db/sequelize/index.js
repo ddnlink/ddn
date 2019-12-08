@@ -1,7 +1,7 @@
 const path = require('path');
 const fs = require('fs');
 const Sequelize = require('sequelize');
-const { dbSettings } = require('../../../config.database');
+const { dbSettings } = require('../../../configs/config.database');
 
 const _sysModels = {};
 
@@ -15,7 +15,7 @@ const logOptions = {
     benchmark: true
 };
 
-var sequelizeInst, _logger;
+let sequelizeInst;
 
 class DAO {
 
@@ -49,10 +49,9 @@ class DAO {
     // 增加方法 --> 创建aobAsset相关的数据表
     static buildModel(name, func) {
         this._addModel(name, func(sequelizeInst));
-    }   
+    }
 
     static connect(logger, cb) {
-        _logger = logger;
 
         sequelizeInst = new Sequelize(dbSettings.database,
             dbSettings.username, dbSettings.password, dbSettings.connection);
@@ -183,14 +182,14 @@ class DAO {
     }
 
     /**
-     * 
+     *
      * $and, $or, $ne, $in, $not, $notIn, $gte, $gt, $lte, $lt, $like, $ilike/$iLike, $notLike, $notILike, '..'/$between, '!..'/$notBetween, '&&'/$overlap, '@>'/$contains, '<@'/$contained
-     * 
-     * @param {*} modelName 
-     * @param {*} modelObj 
-     * @param {*} where 
-     * @param {*} transaction 
-     * @param {*} cb 
+     *
+     * @param {*} modelName
+     * @param {*} modelObj
+     * @param {*} where
+     * @param {*} transaction
+     * @param {*} cb
      */
     static update(modelName, modelObj, where, transaction, cb) {
         try {
@@ -409,7 +408,7 @@ class DAO {
                 }
             }
         }
-        catch (err) 
+        catch (err)
         {
             if (typeof (cb) == "function") {
                 var errMsg = err.toString();
@@ -480,7 +479,7 @@ class DAO {
                 }
             }
         }
-        catch (err) 
+        catch (err)
         {
             if (typeof (cb) == "function") {
                 var errMsg = err.toString();
@@ -574,7 +573,7 @@ class DAO {
             attributes: attributes ? attributes : undefined,
             where: where ? where : undefined
         });
-        
+
         if (dbTrans) {
             options.transaction = dbTrans;
         }
@@ -594,7 +593,7 @@ class DAO {
         var options = Object.assign({}, logOptions, {
             where: where ? where : undefined
         });
-        
+
         if (dbTrans) {
             options.transaction = dbTrans;
         }
