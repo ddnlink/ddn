@@ -20,6 +20,6 @@
   "dependencies": {
     "@ddn/ddn-utils": "^1.0.0",
     "bytebuffer": "^5.0.1",
-    "underscore": "^1.9.1"
+    "lodash": "^4.17.15"
   }
 }

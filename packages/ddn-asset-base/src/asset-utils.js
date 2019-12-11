@@ -115,4 +115,4 @@ class AssetUtils
 
 }
 
-module.exports = AssetUtils;
+export default AssetUtils;

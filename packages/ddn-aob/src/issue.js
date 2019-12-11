@@ -1,11 +1,9 @@
-const { AssetBase } = require('@ddn/ddn-asset-base');
-const { Bignum } = require('@ddn/ddn-utils');
-const ddnUtils = require('@ddn/ddn-utils');
-const mathjs = require('mathjs');
-const _ = require('underscore');
+import { AssetBase } from '@ddn/ddn-asset-base';
+import { Bignum, Amount } from '@ddn/ddn-utils';
+import mathjs from 'mathjs';
+import _ from 'lodash';
 
 class Issue extends AssetBase {
-    // eslint-disable-next-line class-methods-use-this
     async propsMapping() {
         return [
             {
@@ -31,7 +29,7 @@ class Issue extends AssetBase {
             throw new Error('Invalid transaction amount');
         }
         const { amount } = assetIssue;
-        const error = ddnUtils.Amount.validate(amount);
+        const error = Amount.validate(amount);
         if (error) {
             throw new Error('Invalid transaction amount');
         }
@@ -42,17 +40,21 @@ class Issue extends AssetBase {
         result = await assetInst.queryAsset({
             name: assetIssue.currency
         }, null, null, 1, 1);
+
         // (2)查询到issuer的数据列表
         const issuerInst = await this.getAssetInstanceByName("AobIssuer");
         let issuerData = await issuerInst.queryAsset({
             name: { $in: _.pluck(result, 'issuer_name') }
         }, null, null, 1, 1000);
         issuerData = _.indexBy(issuerData, 'name');
-        result = _.map(result, (num) => {
+
+        let result2;
+        result2 = _.map(result, (num) => {
             const num2 = num;
             num2.issuer_id = issuerData[num.issuer_name].issuer_id;
             return num2;
         });
+
         // (3)查询到交易的相关数据
         let trData = await new Promise((resolve) => {
             this.dao.findList('tr', {
@@ -68,11 +70,14 @@ class Issue extends AssetBase {
             });
         });
         trData = _.indexBy(trData, 'id');
-        result = _.map(result, (num) => {
+
+        let result3;
+        result3 = _.map(result2, (num) => {
             const num2 = num;
             num2.block_id = trData[num.transaction_id].block_id;
             return num2;
         });
+
         // (4)查询到块的相关数据
         let blockData = await new Promise((resolve) => {
             this.dao.findList('block', {
@@ -88,40 +93,46 @@ class Issue extends AssetBase {
             });
         });
         blockData = _.indexBy(blockData, 'id');
-        result = _.map(result, (num) => {
+
+        let result4;
+        result4 = _.map(result3, (num) => {
             const num2 = num;
             num2.height = blockData[num.block_id].height;
             return num2;
         });
+
         // 循环整合验证数据
-        for (let i = 0; i < result.length; i += 1) {
-            const { precision } = result[i];
-            result[i].maximum = Bignum.new(result[i].maximum).toString(10);
-            result[i].maximumShow = ddnUtils.Amount.calcRealAmount(result[i].maximum, precision);
-            result[i].quantity = Bignum.new(result[i].quantity).toString(10);
-            result[i].quantityShow = ddnUtils.Amount.calcRealAmount(result[i].quantity, precision);
+        for (let i = 0; i < result4.length; i += 1) {
+            const { precision } = result4[i];
+            result4[i].maximum = Bignum.new(result4[i].maximum).toString(10);
+            result4[i].maximumShow = Amount.calcRealAmount(result4[i].maximum, precision);
+            result4[i].quantity = Bignum.new(result4[i].quantity).toString(10);
+            result4[i].quantityShow = Amount.calcRealAmount(result4[i].quantity, precision);
         }
         const count = 0;
-        result = result[count];
-        if (!result) {
+
+        let result5;
+        result5 = result4[count];
+        if (!result5) {
             throw new Error('Asset not exists --- from ddn-aob -> issue.verify');
         }
-        if (result.issuer_id !== sender.address) {
+        if (result5.issuer_id !== sender.address) {
             throw new Error('Permission not allowed --- from ddn-aob -> issue.verify');
         }
-        if (result.writeoff) {
+        if (result5.writeoff) {
             throw new Error('Asset already writeoff --- from ddn-aob -> issue.verify');
         }
-        const { maximum } = result;
-        const { quantity } = result;
-        const { precision } = result;
+        const { maximum } = result5;
+        const { quantity } = result5;
+        const { precision } = result5;
         if (Bignum.isGreaterThan(Bignum.plus(quantity, amount), maximum)) {
             throw new Error('Exceed issue limit --- from ddn-aob -> issue.verify');
         }
-        const { strategy } = result;
-        const genesisHeight = result.height;
+        const { strategy } = result5;
+        const genesisHeight = result5.height;
         const height = Bignum.plus(this.runtime.block.getLastBlock().height, 1);
         if (strategy) {
+            // FIXME: 这里的mathjs.bignumber应该‘安全’地修改为Bignum
             const context = {
                 maximum: mathjs.bignumber(maximum),
                 precision,
@@ -173,7 +184,6 @@ class Issue extends AssetBase {
         const assetIssue = await this.getAssetObject(trs);
         const { currency, amount } = assetIssue;
         const balance = this.balanceCache.getAssetBalance(sender.address, currency) || 0;
-        // Bignum update if (Bignum(balance).lt(amount))
         if (Bignum.isLessThan(balance, amount)) {
             throw new Error(`Invalid asset balance: ${balance}`);
         }

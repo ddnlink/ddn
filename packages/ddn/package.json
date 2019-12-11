@@ -90,7 +90,6 @@
     "sqlite3": "^4.0.2",
     "strftime": "0.9.2",
     "tracer": "^0.8.11",
-    "underscore": "^1.9.1",
     "util-extend": "1.0.3",
     "valid-url": "1.0.9"
   },

@@ -1,8 +1,7 @@
-const { AssetBase } = require('@ddn/ddn-asset-base');
-const { Bignum } = require('@ddn/ddn-utils');
+import { AssetBase } from '@ddn/ddn-asset-base';
+import { Bignum } from '@ddn/ddn-utils';
 
-class Flags extends AssetBase
-{
+class Flags extends AssetBase {
     
     //flag_type: 1: 设置acl对应值，2：设置writeoff对应值
     async propsMapping() {
@@ -19,7 +18,6 @@ class Flags extends AssetBase
         if (trs.recipient_id) {
             throw new Error("Invalid recipient")
         }
-        //Bignum update if (trs.amount != 0) 
         if (!Bignum.isZero(trs.amount)) {
             throw new Error("Invalid transaction amount")
         }

@@ -1,8 +1,7 @@
-const { AssetBase } = require('@ddn/ddn-asset-base');
-const { Bignum } = require('@ddn/ddn-utils');
+import { AssetBase } from '@ddn/ddn-asset-base';
+import { Bignum } from '@ddn/ddn-utils';
 
 class Issuer extends AssetBase {
-    // eslint-disable-next-line class-methods-use-this
     async propsMapping() {
         return [
             {

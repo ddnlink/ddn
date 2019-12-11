@@ -2,19 +2,19 @@
  * 系统启动入口
  * wangxm   2018-12-25
  */
-const package = require('./package.json');
-const command = require('commander');
-const path = require('path');
-const fs = require('fs');
-const { Utils } = require('@ddn/ddn-utils');
-const Program = require('./src/kernal/program');
+const packageFile =require('./package.json');
+const command =require('commander');
+const path =require('path');
+const fs =require('fs');
+const { Utils } =require('@ddn/ddn-utils');
+const Program =require('./src/kernal/program');
 
 /**
  * 整理系统配置文件生成输入参数
  */
 function genOptions() {
     command
-        .version(package.version)
+        .version(packageFile.version)
         .option('-c, --config <path>', 'Config file path')
         .option('-p, --port <port>', 'Listening port number')
         .option('-a, --address <ip>', 'Listening host name or ip')
@@ -40,7 +40,7 @@ function genOptions() {
         return;
     }
 
-    let genesisblockFile = path.join(baseDir, 'genesisBlock.json');
+    let genesisblockFile = path.join(baseDir, 'configs', 'genesisBlock.json');
     if (command.genesisblock) {
         genesisblockFile = path.resolve(process.cwd(), command.genesisblock);
     }
@@ -57,7 +57,7 @@ function genOptions() {
         return;
     }
 
-    const assetConfigFile = path.resolve(path.join(baseDir, 'config.asset.js'));
+    const assetConfigFile = path.resolve(path.join(baseDir, 'configs', 'config.asset.js'));
     if (!fs.existsSync(assetConfigFile)) {
         console.error('Failed: DDN asset config file does not exists.');
         process.exit(1);
@@ -78,7 +78,7 @@ function genOptions() {
         fs.writeFileSync(configFile, JSON.stringify(configObject, null, 2), "utf8");
     }
 
-    configObject.version = package.version;
+    configObject.version = packageFile.version;
     configObject.basedir = baseDir;
     configObject.buildVersion = 'development';
     configObject.netVersion = process.env.NET_VERSION || 'testnet';

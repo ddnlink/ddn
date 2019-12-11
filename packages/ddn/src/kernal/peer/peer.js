@@ -2,7 +2,7 @@
  * Peer
  * wangxm   2019-01-14
  */
-const _ = require('underscore');
+const _ = require('lodash');
 const ip = require('ip');
 const PeerInvoker = require('../../network/peer-invoker');
 const PeerSync = require('./peer-sync');
@@ -36,16 +36,16 @@ class Peer {
             var peer = peers[i];
 
             await new Promise((resolve, reject) => {
-                this.dao.findOne('peer', { 
-                    ip: ip.toLong(peer.ip), 
-                    port: peer.port 
+                this.dao.findOne('peer', {
+                    ip: ip.toLong(peer.ip),
+                    port: peer.port
                 }, null, (err, result) => {
                     if (err) {
                         reject(err);
                     } else if (!result) {
                         this.dao.insertOrUpdate('peer', {
-                            ip: ip.toLong(peer.ip), 
-                            port: peer.port, 
+                            ip: ip.toLong(peer.ip),
+                            port: peer.port,
                             state: 2
                         }, (err2, result2) => {
                             if (err2) {
@@ -91,8 +91,8 @@ class Peer {
     async addDapp(config) {
         return new Promise((resolve, reject) => {
             this.dao.findOne('peer', {
-                ip: config.ip, 
-                port: config.port 
+                ip: config.ip,
+                port: config.port
             }, null, (err, data) => {
                 if (err) {
                     return reject(err);
@@ -100,7 +100,7 @@ class Peer {
 
                 if (data) {
                     this.dao.findOne('peers_dapp', {
-                        peer_id: data.id 
+                        peer_id: data.id
                     }, null, (err2, data2) => {
                         if (err2) {
                             return reject(err2);
@@ -108,8 +108,8 @@ class Peer {
 
                         if (!data2) {
                             this.dao.insert('peers_dapp', {
-                                peer_id: data.id, 
-                                dapp_id: config.dappId 
+                                peer_id: data.id,
+                                dapp_id: config.dappId
                             }, (err3, data3) => {
                                 if (err3) {
                                     reject(err3);
@@ -146,7 +146,7 @@ class Peer {
                 version: peer.version || null,
                 state: peer.state || 1,
             };
-            
+
             var peerKey = peer.ip + "_" + peer.port;
 
             let needUpdateToDB = true;
@@ -161,14 +161,14 @@ class Peer {
             } else {
                 needUpdateToDB = true;
             }
-          
+
             if (needUpdateToDB && !this._peerUpdatings[peerKey]) {
                 this._peerUpdatings[peerKey] = true;
 
                 return new Promise((resolve, reject) => {
-                    this.dao.findOne('peer', { 
-                        ip: peerData.ip, 
-                        port: peerData.port 
+                    this.dao.findOne('peer', {
+                        ip: peerData.ip,
+                        port: peerData.port
                     }, null, (err, data) => {
                         if (!err) {
                             if(data && data.state === 0) {
@@ -199,9 +199,9 @@ class Peer {
 
     /**
      * 请求节点指定接口（默认随机节点，也可指定args.peer来使用指定节点）
-     * @param {*} args 
-     * @param {*} dappId 
-     * @param {*} allowSelf 
+     * @param {*} args
+     * @param {*} dappId
+     * @param {*} allowSelf
      */
     async request(args, dappId, allowSelf) {
         try
@@ -240,9 +240,9 @@ class Peer {
                     this.logger.error(`Invalid peer: ${validateErrors[0].message}`);
                     continue;
                 }
-        
+
                 peer.ip = parseInt(peer.ip);
-        
+
                 if (isNaN(peer.ip)) {
                     continue;
                 }
@@ -283,7 +283,7 @@ class Peer {
         }
 
         const compatibleVersion = this.tokenSetting[this.config.netVersion].compatibleVersion;
-      
+
         const numsCompatible = compatibleVersion.split('.').map(Number);
         for (let i = 0; i < nums.length; ++i) {
           if (nums[i] < numsCompatible[i]) {
@@ -301,9 +301,9 @@ class Peer {
             this.logger.info("Peer in white list, can't remove.");
         } else {
             return new Promise((resolve, reject) => {
-                this.dao.remove('peer', { 
-                    ip: pip, 
-                    port 
+                this.dao.remove('peer', {
+                    ip: pip,
+                    port
                 }, (err, result) => {
                     if (err) {
                         this.logger.error("remove peer: " + err);
@@ -319,7 +319,7 @@ class Peer {
      */
     async restoreBanState() {
         return await new Promise((resolve) => {
-            this.dao.update('peer', { state: 1, clock: null }, 
+            this.dao.update('peer', { state: 1, clock: null },
                 { state: 0, clock: { '$lt': Date.now() } },
                 (err, result) => {
                     if (err) {
@@ -329,7 +329,7 @@ class Peer {
                     }
                 });
         })
-    }    
+    }
 
     /**
      * 修改指定节点服务的状态
@@ -349,8 +349,8 @@ class Peer {
             }
 
             return new Promise((resolve, reject) => {
-                this.dao.update('peer', 
-                    { state, clock }, 
+                this.dao.update('peer',
+                    { state, clock },
                     { ip: pip, port}, err => {
                     err && this.logger.error('Peer#state', err);
                     resolve();
@@ -403,7 +403,7 @@ class Peer {
 
     async queryDappPeers() {
         var data = await new Promise((resolve, reject) => {
-            this.dao.findList('peers_dapp', {}, 
+            this.dao.findList('peers_dapp', {},
                 null, null, (err, result) => {
                     if (err) {
                         reject(err);
@@ -414,13 +414,13 @@ class Peer {
             );
         });
 
-        var where = { 
+        var where = {
             id: {
                 '$in': _.pluck(data, 'peer_id')
             }
         };
         return new Promise((resolve, reject) => {
-            this.dao.findList('peer', where, 
+            this.dao.findList('peer', where,
                 null, null, (err, result) => {
                     if (err) {
                         reject(err);
@@ -437,9 +437,9 @@ class Peer {
 
         if (dappId) {
             data = await new Promise((resolve, reject) => {
-                this.dao.findPage('peers_dapp', { 
-                    dapp_id: dappId 
-                }, limit ? limit : this.config.settings.delegateNumber, 
+                this.dao.findPage('peers_dapp', {
+                    dapp_id: dappId
+                }, limit ? limit : this.config.settings.delegateNumber,
                 null, false, (err, result) => {
                     if (err) {
                         reject(err);
@@ -456,8 +456,8 @@ class Peer {
         }
 
         return new Promise((resolve, reject) => {
-            this.dao.findPage('peer', where, 
-                limit ? limit : this.config.settings.delegateNumber, 
+            this.dao.findPage('peer', where,
+                limit ? limit : this.config.settings.delegateNumber,
                 null, false, null, [[this.dao.db_fnRandom()]], (err, result) => {
                     if (err) {
                         reject(err);

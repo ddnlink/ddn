@@ -1,6 +1,6 @@
 var sha256 = require('fast-sha256')
 var RIPEMD160 = require('ripemd160')
-var base58check = require('./base58check')
+var base58check = require('@ddn/ddn-utils')
 var options = require('./options');
 var constants = require('./constants');
 

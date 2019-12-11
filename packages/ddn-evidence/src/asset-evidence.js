@@ -1,4 +1,4 @@
-var { AssetBase } = require('@ddn/ddn-asset-base');
+import { AssetBase } from '@ddn/ddn-asset-base';
 
 class AssetEvidence extends AssetBase
 {

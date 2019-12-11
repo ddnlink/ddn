@@ -1,5 +1,5 @@
-const { AssetBase } = require('@ddn/ddn-asset-base');
-const { Bignum } = require('@ddn/ddn-utils');
+import { AssetBase } from '@ddn/ddn-asset-base';
+import { Bignum } from '@ddn/ddn-utils';
 
 const _dappOuttransferUnconfirmeds = {};
 
@@ -34,6 +34,7 @@ class OutTransfer extends AssetBase {
         trs.amount = "0";
 
         const assetJsonName = await this.getAssetJsonName(trs.type);
+        // eslint-disable-next-line require-atomic-updates
         trs.asset[assetJsonName] = data[assetJsonName];
 
         return trs;
@@ -88,7 +89,7 @@ class OutTransfer extends AssetBase {
         return trs;
     }
 
-    async process(trs, sender, cb) {
+    async process(trs, _sender, _cb) {
         var dapp = null;
 
         const transfer = await this.getAssetObject(trs);
@@ -159,10 +160,10 @@ class OutTransfer extends AssetBase {
                     }
 
                     let balance = '0';
-                    let balanceExists = false;
+                    // FIXME: let balanceExists = false;
                     if (row) {
                         balance = row.balance;
-                        balanceExists = true;
+                        // balanceExists = true;
                     }
 
                     const newBalance = Bignum.plus(balance, amount);
@@ -183,7 +184,7 @@ class OutTransfer extends AssetBase {
         });
     }
 
-    async apply(trs, block, sender, dbTrans) {
+    async apply(trs, block, _sender, dbTrans) {
         const transfer = await this.getAssetObject(trs);
 
         _dappOuttransferUnconfirmeds[trs.id] = false;
@@ -215,7 +216,7 @@ class OutTransfer extends AssetBase {
         }
     }
 
-    async undo(trs, block, sender, dbTrans) {
+    async undo(trs, block, _sender, dbTrans) {
         const transfer = await this.getAssetObject(trs);
 
         _dappOuttransferUnconfirmeds[trs.id] = true;
@@ -246,7 +247,7 @@ class OutTransfer extends AssetBase {
         }
     }
 
-    async applyUnconfirmed(trs, sender, dbTrans) {
+    async applyUnconfirmed(trs) {
         const transfer = await this.getAssetObject(trs);
 
         _dappOuttransferUnconfirmeds[trs.id] = true;
@@ -274,7 +275,7 @@ class OutTransfer extends AssetBase {
         }
     }
 
-    async undoUnconfirmed(trs, sender, dbTrans) {
+    async undoUnconfirmed(trs) {
         _dappOuttransferUnconfirmeds[trs.id] = false;
 
         const transfer = await this.getAssetObject(trs);
@@ -290,34 +291,6 @@ class OutTransfer extends AssetBase {
 
     async dbSave(trs, dbTrans) {
         await super.dbSave(trs, dbTrans);
-
-        // const transfer = trs.asset.outTransfer;
-        // const dapp_id = transfer.dapp_id;
-        // const currency = transfer.currency;
-        // const amount = transfer.amount;
-        // const outtransaction_id = transfer.outtransaction_id;
-        // const values = {
-        //     transaction_id: trs.id,
-        //     dapp_id,
-        //     currency,
-        //     amount,
-        //     outtransaction_id
-        // };
-        // trs.asset.outTransfer = values;
-        // super.dbSave(trs, dbTrans, (err) => {
-        //     if (err) return cb(err);
-        //     library.bus.message(
-        //         transfer.dapp_id,
-        //         {
-        //             topic: 'withdrawalCompleted',
-        //             message: {
-        //                 transaction_id: trs.id
-        //             }
-        //         },
-        //         () => { }
-        //     );
-        //     return cb();
-        // })
     }
 }
 
