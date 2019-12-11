@@ -13,10 +13,10 @@ function main() {
         .option('-P, --port <port>', 'Specify the port of the node, default: ' + default_port, default_port)
         .option('-M, --main', 'Specify the mainnet, default: false')
     
-    var plugins = fs.readdirSync(path.join(__dirname, 'plugins'));
+    var plugins = fs.readdirSync(path.join(__dirname, 'lib', 'plugins'));
     plugins.forEach(function (el) {
         if (el.endsWith('js')) {
-            require('./plugins/' + el)(program);
+            require('./lib/plugins/' + el)(program);
         }
     });
 

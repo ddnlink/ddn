@@ -3,7 +3,7 @@ var crypto = require('crypto');
 var ddnJS = require('@ddn/ddn-node-sdk');
 var Api = require('../helpers/api.js');
 var blockHelper = require('../helpers/block.js');
-var cryptoLib = require('../lib/crypto.js');
+var cryptoLib = require('../crypto.js');
 
 var globalOptions;
 

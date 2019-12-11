@@ -2,8 +2,8 @@ var fs = require("fs");
 var ddnJS = require('@ddn/ddn-node-sdk');
 
 var accountHelper = require("../helpers/account.js");
-var cryptoLib = require("../lib/crypto.js");
-var config = require("../config");
+var cryptoLib = require("../crypto.js");
+var config = require("../../config");
 
 var globalOptions;
 

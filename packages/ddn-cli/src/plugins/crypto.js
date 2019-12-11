@@ -1,5 +1,5 @@
 var inquirer = require("inquirer");
-var cryptoLib = require("../lib/crypto.js");
+var cryptoLib = require("../crypto.js");
 var accountHelper = require("../helpers/account.js");
 
 async function genPubkey() {

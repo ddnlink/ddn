@@ -1,7 +1,7 @@
-var cryptoLib = require('../lib/crypto.js');
+var cryptoLib = require('../crypto.js');
 var ByteBuffer = require('bytebuffer');
 var crypto = require('crypto');
-var dappTransactionsLib = require('../lib/dapptransactions.js');
+var dappTransactionsLib = require('../dapptransactions.js');
 var accounts = require('./account.js');
 
 function getBytes(block, skipSignature) {

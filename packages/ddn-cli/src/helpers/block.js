@@ -1,12 +1,11 @@
 const crypto = require('crypto');
 const fs = require('fs');
-const ddnJS = require('@ddn/ddn-node-sdk');
-const cryptoLib = require('../lib/crypto.js');
-const transactionsLib = require('../lib/transactions.js');
+const cryptoLib = require('../crypto.js');
+const transactionsLib = require('../transactions.js');
 const accounts = require('./account.js');
 const ByteBuffer = require('bytebuffer');
-const config = require('../config');
-const bignum = require('@ddn/bignum-utils');
+const config = require('../../config');
+const { Bignum } = require('@ddn/ddn-utils');
 
 function getBytes(block, skipSignature) {
 	// const size = 4 + 4 + 8 + 4 + 8 + 8 + 8 + 4 + 32 + 32 + 64;
@@ -35,9 +34,9 @@ function getBytes(block, skipSignature) {
 
 	bb.writeInt(block.number_of_transactions);    //wxm block database
 	
-	bb.writeString(bignum.new(block.total_amount).toString());   //wxm block database
-	bb.writeString(bignum.new(block.total_fee).toString());  //wxm block database
-	bb.writeString(bignum.new(block.reward).toString());
+	bb.writeString(Bignum.new(block.total_amount).toString());   //wxm block database
+	bb.writeString(Bignum.new(block.total_fee).toString());  //wxm block database
+	bb.writeString(Bignum.new(block.reward).toString());
 
 	bb.writeInt(block.payload_length);   //wxm block database
 
@@ -101,14 +100,14 @@ module.exports = {
 				const trs = {
 					type: 0,
 					nethash,
-					amount: bignum.multiply(bignum.new(parts[1]), 100000000),
+					amount: Bignum.multiply(Bignum.new(parts[1]), 100000000),
 					fee: '0',
 					timestamp: 0,
 					recipient_id: parts[0],  //wxm block database
 					sender_id: sender.address,   //wxm block database
 					sender_public_key: sender.keypair.publicKey   //wxm block database
 				};
-				totalAmount = bignum.plus(totalAmount, trs.amount);
+				totalAmount = Bignum.plus(totalAmount, trs.amount);
 
 				var bytes = transactionsLib.getTransactionBytes(trs);
 				trs.signature = cryptoLib.sign(sender.keypair, bytes);
@@ -129,7 +128,7 @@ module.exports = {
 				sender_public_key: sender.keypair.publicKey   //wxm block database
 			};
 
-			totalAmount = bignum.plus(totalAmount, balanceTransaction.amount);
+			totalAmount = Bignum.plus(totalAmount, balanceTransaction.amount);
 
 			var bytes = transactionsLib.getTransactionBytes(balanceTransaction);
 			balanceTransaction.signature = cryptoLib.sign(sender.keypair, bytes);
@@ -229,8 +228,8 @@ module.exports = {
 				}
 				return a.type - b.type;
 			}
-			if (!bignum.isEqualTo(a.amount, b.amount)) {
-				return bignum.minus(a.amount, b.amount);
+			if (!Bignum.isEqualTo(a.amount, b.amount)) {
+				return Bignum.minus(a.amount, b.amount);
 			}
 			return a.id.localeCompare(b.id);
 		});

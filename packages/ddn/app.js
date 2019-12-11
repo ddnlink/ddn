@@ -30,7 +30,7 @@ function genOptions() {
 
     const baseDir = command.base || path.resolve(__dirname, './');
 
-    let configFile = path.join(baseDir, 'config.json');
+    let configFile = path.join(baseDir, 'configs', 'config.json');
     if (command.config) {
         configFile = path.resolve(process.cwd(), command.config);
     }
@@ -87,7 +87,7 @@ function genOptions() {
     if (command.port) {
         configObject.port = command.port;
     }
-    
+
     if (command.address) {
         configObject.address = command.address;
     }
@@ -105,7 +105,7 @@ function genOptions() {
             configObject.peers.list = [];
         }
     }
-    
+
     if (command.log) {
         configObject.logLevel = command.log;
     }
@@ -113,7 +113,7 @@ function genOptions() {
     if (command.reindex) {
         configObject.loading.verifyOnLoading = true;
     }
-    
+
     return {
         baseDir,
         configObject,
@@ -133,18 +133,18 @@ async function main() {
         }
     };
 
-    var program;
+    let program;
 
     try
     {
-        var options = genOptions();
+        let options = genOptions();
         program = new Program();
         await program.run(options);
     }
     catch (err)
     {
         console.error(Utils.getErrorMsg(err));
-        
+
         if (program) {
             program.destory();
         }
