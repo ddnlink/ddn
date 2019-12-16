@@ -11,7 +11,7 @@ var getLoaders = function(env) {
     // {
     //   test: /\.es6\.js$/,
     //   exclude: /node_modules/,
-    //   // include: path.resolve(__dirname, "./src"),
+    //   // include: path.resolve(__dirname, "./lib"),
     //   use: {
     //     loader: 'babel-loader',
     //     query: {

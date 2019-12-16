@@ -28,17 +28,17 @@ class Loader {
     }
 
     _registerAsset(type, inst, assetName) {
-        if (inst && typeof(inst.create) == 'function' && 
+        if (inst && typeof(inst.create) == 'function' &&
             typeof(inst.getBytes) == 'function' &&
-            typeof(inst.calculateFee) == 'function' && 
+            typeof(inst.calculateFee) == 'function' &&
             typeof(inst.verify) == 'function' &&
-            typeof(inst.objectNormalize) == 'function' && 
+            typeof(inst.objectNormalize) == 'function' &&
             typeof(inst.dbRead) == 'function' &&
-            typeof(inst.apply) == 'function' && 
+            typeof(inst.apply) == 'function' &&
             typeof(inst.undo) == 'function' &&
-            typeof(inst.applyUnconfirmed) == 'function' && 
+            typeof(inst.applyUnconfirmed) == 'function' &&
             typeof(inst.undoUnconfirmed) == 'function' &&
-            typeof(inst.ready) == 'function' && 
+            typeof(inst.ready) == 'function' &&
             typeof(inst.process) == 'function') {
 
             this._assets[this._getAssetKey(type)] = inst;
@@ -68,7 +68,7 @@ class Loader {
 
     /**
      * 根据资产配置名称获取资产实例
-     * @param {*} assetName 
+     * @param {*} assetName
      */
     findInstanceByName(assetName)
     {
@@ -89,8 +89,8 @@ class Loader {
 
     /**
      * 为指定的资产插件生成API路由
-     * @param {*} assetConfig 
-     * @param {*} assetInst 
+     * @param {*} assetConfig
+     * @param {*} assetInst
      */
     async _attachAssetPluginApi(assetConfig, assetInst) {
         if (assetConfig && assetInst) {
@@ -136,20 +136,20 @@ class Loader {
                     }
                 }
             }
-    
+
             var where = {
                 trs_type: assetType,
                 [paramName]: req.params[paramName]
             };
-    
+
             var orders = [];
             var sortItems = req.query.sort;
-    
+
             if (sortItems) {
                 if (!sortItems.splice) {
                     sortItems = [sortItems];
                 }
-    
+
                 for (var i = 0; i < sortItems.length; i++) {
                     var sortItem = sortItems[i];
                     if (sortItem.replace(/\s*/, "") != "") {
@@ -170,7 +170,7 @@ class Loader {
                     res.status(200).json({success: false, state: -1, error: err.toString()});
                 });
         };
-    
+
         return func;
     }
 
@@ -184,7 +184,7 @@ class Loader {
                     }
                 }
             }
-    
+
             var where = {
                 trs_type: assetType
             };
@@ -196,18 +196,18 @@ class Loader {
                     where[p] = req.query[p];
                 }
             }
-    
+
             var pageIndex = req.query.pageindex || 1;
             var pageSize = req.query.pagesize || 50;
-    
+
             var orders = [];
             var sortItems = req.query.sort;
-    
+
             if (sortItems) {
                 if (!sortItems.splice) {
                     sortItems = [sortItems];
                 }
-    
+
                 for (var i = 0; i < sortItems.length; i++) {
                     var sortItem = sortItems[i];
                     if (sortItem.replace(/\s*/, "") != "") {
@@ -228,7 +228,7 @@ class Loader {
                     res.status(200).json({success: false, state: -1, error: err.toString()});
                 });
         }
-    
+
         return func;
     }
 
@@ -274,7 +274,7 @@ class Loader {
         assetsPackageList.map((packageName) => {
             var assetModels;
             try {
-                assetModels = _require_runtime_(packageName + '/define-models') || [];
+                assetModels = _require_runtime_(packageName + '/lib/define-models') || [];
             } catch (err){
                 this.logger.info(packageName + ' 资产包不包含自定义数据模型内容。');
                 return;
@@ -293,7 +293,7 @@ class Loader {
                     });
                 })
             }
-        }) 
+        })
     }
 
     async init() {
@@ -334,7 +334,7 @@ class Loader {
 
     /**
      * 在所有加载的扩展资产上执行指定方法
-     * @param {*} funcName 
+     * @param {*} funcName
      */
     async execAssetFunc(funcName) {
         var args = [];
@@ -346,7 +346,7 @@ class Loader {
         for (var p in keys) {
             const key = keys[p];
             const inst = this._assets[key];
-            if (inst != null && 
+            if (inst != null &&
                 typeof(inst[funcName]) == "function") {
                 try {
                     await inst[funcName].apply(inst, args);

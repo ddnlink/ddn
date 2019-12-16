@@ -71,10 +71,10 @@ function getCmds(osName, netVersion, projectName) {
     result.push(format('cp config.database.js %s/config.database.js', fullpath));
     result.push(format('cp config.asset.js %s/config.asset.js', fullpath));
 
-    result.push(format('cp -r ./src/db/sequelize/models/ %s/', fullpath));
-    result.push(format('cp -r ./src/schema/format-ext/ %s/', fullpath));
-    result.push(format('cp -r ./src/schema/ddn-schemas/ %s/', fullpath));
-    result.push(format('cp -r ./src/network/service/ %s/', fullpath));
+    result.push(format('cp -r ./lib/db/sequelize/models/ %s/', fullpath));
+    result.push(format('cp -r ./lib/schema/format-ext/ %s/', fullpath));
+    result.push(format('cp -r ./lib/schema/ddn-schemas/ %s/', fullpath));
+    result.push(format('cp -r ./lib/network/service/ %s/', fullpath));
   } else {
     result.push(format('cp config.json %s/', fullpath));
     result.push(format('cp genesisBlock.json %s/', fullpath));
