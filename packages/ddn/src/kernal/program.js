@@ -180,8 +180,9 @@ class Program
             process.emit('cleanup');
         });
 
-        if (typeof(gc) == 'function') {
+        if (typeof(gc) === 'function') {
             setInterval(() => {
+                // eslint-disable-next-line no-undef
                 gc();
             }, 1000 * 60 * 30);
         }
@@ -282,6 +283,7 @@ class Program
         }
         catch (err)
         {
+          this._context.logger.warn("Error: " + err);
         }
         return null;
     }

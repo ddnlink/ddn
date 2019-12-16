@@ -1,19 +1,19 @@
 
-var program = require("commander");
+const program = require("commander");
 
-var fs = require("fs");
-var path = require("path");
-var package = require('./package.json');
+const fs = require("fs");
+const path = require("path");
+const packageFile = require('./package.json');
 
 function main() {
-    var default_host = process.env.DDN_HOST || '127.0.0.1';
-    var default_port = process.env.DDN_PORT || 8001;
-    program.version(package.version)
+    const default_host = process.env.DDN_HOST || '127.0.0.1';
+    const default_port = process.env.DDN_PORT || 8001;
+    program.version(packageFile.version)
         .option('-H, --host <host>', 'Specify the hostname or ip of the node, default: '  + default_host, default_host)
         .option('-P, --port <port>', 'Specify the port of the node, default: ' + default_port, default_port)
         .option('-M, --main', 'Specify the mainnet, default: false')
     
-    var plugins = fs.readdirSync(path.join(__dirname, 'lib', 'plugins'));
+    const plugins = fs.readdirSync(path.join(__dirname, 'lib', 'plugins'));
     plugins.forEach(function (el) {
         if (el.endsWith('js')) {
             require('./lib/plugins/' + el)(program);

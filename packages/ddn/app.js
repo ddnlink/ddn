@@ -7,7 +7,7 @@ const command =require('commander');
 const path =require('path');
 const fs =require('fs');
 const { Utils } =require('@ddn/ddn-utils');
-const Program =require('./src/kernal/program');
+const Program =require('./lib/kernal/program');
 
 /**
  * 整理系统配置文件生成输入参数

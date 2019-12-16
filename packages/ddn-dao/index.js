@@ -1,9 +1,9 @@
-import Org from './lib/org';
-import Contribution from './lib/contribution';
-import Confirmation from './lib/confirmation';
-import Exchange from './lib/exchange';
+const Org = require('./lib/org');
+const Contribution = require('./lib/contribution');
+const Confirmation = require('./lib/confirmation');
+const Exchange = require('./lib/exchange');
 
-export default {
+module.exports = {
   Org, // 40
   Contribution, // 42
   Confirmation, // 43

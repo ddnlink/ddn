@@ -1,8 +1,8 @@
-var cryptoLib = require('../crypto.js');
-var ByteBuffer = require('bytebuffer');
-var crypto = require('crypto');
-var dappTransactionsLib = require('../dapptransactions.js');
-var accounts = require('./account.js');
+const cryptoLib = require('../crypto.js');
+const ByteBuffer = require('bytebuffer');
+const crypto = require('crypto');
+const dappTransactionsLib = require('../dapptransactions.js');
+const accounts = require('./account.js');
 
 function getBytes(block, skipSignature) {
 	var size = 8 + 4 + 4 + 4 + 32 + 32 + 8 + 4 + 4 + 64;
@@ -22,7 +22,7 @@ function getBytes(block, skipSignature) {
 	}
 
 	var pb = new Buffer(block.delegate, 'hex');
-	for (var i = 0; i < pb.length; i++) {
+	for (let i = 0; i < pb.length; i++) {
 		bb.writeByte(pb[i]);
 	}
 
