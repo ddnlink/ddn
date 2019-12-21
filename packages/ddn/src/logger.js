@@ -36,6 +36,7 @@ Object.defineProperty(global, '__function', {
             return __stack[stack_level].getFunctionName();
         }
 });
+
 Object.defineProperty(global, '__file', {
   get: function(){
       return __stack[stack_level].getFileName().split('/').slice(-1)[0];
@@ -81,7 +82,10 @@ module.exports = function (config) {
       }
       if (config.echo && config.levels[config.echo] <= config.levels[log.level]) {
         try {
-          console.log(log.level.bgYellow.black, log.timestamp.grey, __file + ':' + __line, log.message, log.data ? log.data : '');
+          console.log(log.level.bgYellow.black, log.timestamp.grey, log.message, log.data ? log.data : '');
+
+          // FIXME: The __file + ':' + __line can not be uesed? 2019.12.21
+          // console.log(log.level.bgYellow.black, log.timestamp.grey, __file + ':' + __line, log.message, log.data ? log.data : '');
         }catch (e){
           console.log(e)
         }

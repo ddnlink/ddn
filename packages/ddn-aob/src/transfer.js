@@ -557,4 +557,4 @@ class Transfer extends AssetBase {
     }
 }
 
-module.exports = Transfer;
+export default Transfer;

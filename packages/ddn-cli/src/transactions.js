@@ -1,7 +1,5 @@
-var util = require('util');
-var ByteBuffer = require('bytebuffer');
-var crypto = require('./crypto.js');
-var bignum = require('@ddn/bignum-utils');
+const ByteBuffer = require('bytebuffer');
+const { Bignum } = require('@ddn/ddn-utils');
 
 var bytesTypes = {
 	2: function (trs) {
@@ -75,7 +73,7 @@ function getTransactionBytes(trs, skipSignature) {
 
 	if (trs.recipient_id) {  //wxm block database
 		if (/^[0-9]{1,20}$/g.test(trs.recipient_id)) {   //wxm block database
-			var recipient = bignum.toBuffer(trs.recipient_id, { size: 8 }).toString();   //wxm block database
+			var recipient = Bignum.toBuffer(trs.recipient_id, { size: 8 }).toString();   //wxm block database
 			for (var i = 0; i < 8; i++) {
 				bb.writeByte(recipient[i] || 0);
 			}
@@ -88,7 +86,7 @@ function getTransactionBytes(trs, skipSignature) {
 		}
 	}
 
-	bb.writeString(bignum.new(trs.amount).toString());
+	bb.writeString(Bignum.new(trs.amount).toString());
 
 	if (assetSize > 0) {
 		for (var i = 0; i < assetSize; i++) {

@@ -27,6 +27,7 @@ const DataQuery = require('./lib/data-query');
 class Program
 {
     async _init(options) {
+
         options.logger = new Logger({
             filename: path.join(options.baseDir, 'logs', 'debug.log'),
             echo: options.isDaemonMode ? null : options.configObject.logLevel,
@@ -180,8 +181,9 @@ class Program
             process.emit('cleanup');
         });
 
-        if (typeof(gc) == 'function') {
+        if (typeof(gc) === 'function') {
             setInterval(() => {
+                // eslint-disable-next-line no-undef
                 gc();
             }, 1000 * 60 * 30);
         }
@@ -282,6 +284,7 @@ class Program
         }
         catch (err)
         {
+          this._context.logger.warn("Error: " + err);
         }
         return null;
     }

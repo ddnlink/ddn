@@ -785,13 +785,10 @@ class Transaction
         // Calc fee
         const fee = await this._assets.call(trs.type, "calculateFee", trs, sender) + "";
 
-        //Bignum update
-        //   if (!fee || trs.fee != fee) {
         if (!Bignum.isEqualTo(trs.fee, fee)) {
             throw new Error(`Invalid transaction type/fee: ${trs.id}`);
         }
         // Check amount
-        //Bignum update   if (trs.amount < 0 || trs.amount > constants.maxAmount * constants.fixedPoint || String(trs.amount).indexOf('.') >= 0 || trs.amount.toString().indexOf('e') >= 0) {
         if (Bignum.isLessThan(trs.amount, 0) ||
             Bignum.isGreaterThan(trs.amount, Bignum.multiply(this.tokenSetting.maxAmount, this.tokenSetting.fixedPoint)) ||
             (trs.amount + "").indexOf(".") >= 0 || (trs.amount + "").indexOf("e") >= 0) {

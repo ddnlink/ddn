@@ -48,7 +48,7 @@ class AssetUtils
     }
 
     static loadFromFile(file) {
-        var assetPlugins = require(file);
+        const assetPlugins = require(file);
         return this.loadFromObject(assetPlugins);
     }
 
@@ -115,4 +115,4 @@ class AssetUtils
 
 }
 
-module.exports = AssetUtils;
+export default AssetUtils;

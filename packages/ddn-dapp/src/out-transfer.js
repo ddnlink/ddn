@@ -294,4 +294,4 @@ class OutTransfer extends AssetBase {
     }
 }
 
-module.exports = OutTransfer;
+export default OutTransfer;

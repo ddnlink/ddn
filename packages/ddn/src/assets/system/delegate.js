@@ -31,7 +31,6 @@ class Delegate {
 
 	async calculateFee(trs, sender) {
 		// Bignum update
-		// return 100 * constants.fixedPoint;
 		return Bignum.multiply(100, this.tokenSetting.fixedPoint);
 	}
 

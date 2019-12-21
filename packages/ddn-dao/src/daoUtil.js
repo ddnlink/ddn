@@ -1,4 +1,9 @@
-const { AssetUtils } = require('@ddn/ddn-asset-base');
+/*---------------------------------------------------------------------------------------------
+ *  Updated by Imfly on Sat Dec 07 2019 09:30:48
+ *
+ *  Copyright (c) 2019 DDN FOUNDATION. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
 
 function isOrgId(daoId) {
     if (typeof daoId !== 'string') {
@@ -70,7 +75,7 @@ async function exchangeOrg(context, orgId, address, dbTrans) {
     });
 }
 
-module.exports = {
+export default {
     isOrgId,
     updateOrg,
     getEffectiveOrg,

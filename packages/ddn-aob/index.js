@@ -1,9 +1,9 @@
-const Issuer = require('./lib/issuer');
-const Asset = require('./lib/asset');
-const Flags = require('./lib/flags');
-const Acl = require('./lib/acl');
-const Issue = require('./lib/issue');
-const Transfer = require('./lib/transfer');
+const Issuer = require('./lib/issuer').default;
+const Asset = require('./lib/asset').default;
+const Flags = require('./lib/flags').default;
+const Acl = require('./lib/acl').default;
+const Issue = require('./lib/issue').default;
+const Transfer = require('./lib/transfer').default;
 
 module.exports = {
   AobIssuer: Issuer, // type: 60

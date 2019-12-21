@@ -1,15 +1,15 @@
-const { AssetBase } = require('@ddn/ddn-asset-base');
-const valid_url = require('valid-url');
-const { Bignum } = require('@ddn/ddn-utils');
-const ByteBuffer = require('bytebuffer');
-const dappCategory = require('./dapp/dapp-category.js');
-const crypto = require('crypto');
-const ed = require('ed25519');
-const path = require('path');
-const fs = require('fs');
-const request = require('request');
-const DecompressZip = require('decompress-zip');
-const { Sandbox } = require('@ddn/ddn-sandbox');
+import { AssetBase } from '@ddn/ddn-asset-base';
+import { Sandbox } from '@ddn/ddn-sandbox';
+import { Bignum } from '@ddn/ddn-utils';
+import valid_url from 'valid-url';
+import ByteBuffer from 'bytebuffer';
+import dappCategory from './dapp/dapp-category.js';
+import crypto from 'crypto';
+import ed from 'ed25519';
+import path from 'path';
+import fs from 'fs';
+import request from 'request';
+import DecompressZip from 'decompress-zip';
 
 const WITNESS_CLUB_DAPP_NAME = 'DDN-FOUNDATION'
 
@@ -97,7 +97,6 @@ class Dapp extends AssetBase {
             throw new Error("Invalid recipient");
         }
 
-        //Bignum update if (trs.amount != 0) {
         if (!Bignum.isZero(trs.amount)) {
             throw new Error("Invalid transaction amount");
         }
@@ -287,9 +286,7 @@ class Dapp extends AssetBase {
 
     async undoUnconfirmed(trs) {
         const assetObj = await this.getAssetObject(trs);
-        //Bignum update delete privated.unconfirmedNames[trs.asset.dapp.name];
         this.oneoff.delete(assetObj.name.toLowerCase());
-        //Bignum update delete privated.unconfirmedLinks[trs.asset.dapp.link];
         this.oneoff.delete(assetObj.link.toLowerCase());
     }
 
@@ -1271,7 +1268,7 @@ class Dapp extends AssetBase {
 
         return new Promise((resolve, reject) => {
             this.balancesSequence.add(async (cb) => {
-                var account;
+                let account;
                 try {
                     account = await this.runtime.account.getAccountByPublicKey(keypair.publicKey.toString('hex'));
                 } catch (e) {
@@ -1293,13 +1290,13 @@ class Dapp extends AssetBase {
                 }
 
                 try {
-                    var data = {
+                    const data = {
                         type: await this.getTransactionType(),
                         sender: account,
                         keypair,
                         second_keypair
                     }
-                    var assetJsonName = await this.getAssetJsonName();
+                    const assetJsonName = await this.getAssetJsonName();
                     data[assetJsonName] = {
                         category: body.category,
                         name: body.name,
@@ -1312,8 +1309,8 @@ class Dapp extends AssetBase {
                         unlock_delegates: body.unlock_delegates
                     };
 
-                    var transaction = await this.runtime.transaction.create(data);
-                    var transactions = await this.runtime.transaction.receiveTransactions([transaction]);
+                    const transaction = await this.runtime.transaction.create(data);
+                    const transactions = await this.runtime.transaction.receiveTransactions([transaction]);
 
                     cb(null, transactions);
                 } catch (e) {
@@ -1331,7 +1328,7 @@ class Dapp extends AssetBase {
 
     async onBlockchainReady() {
         const installIds = await this.getInstalledDappIds();
-        for (var i = 0; i < installIds.length; i++) {
+        for (let i = 0; i < installIds.length; i++) {
             const dappId = installIds[i];
             const dappPath = path.join(this.config.dappsDir, dappId);
             const file = await this._getLaunchedMarkFile(dappPath);
@@ -1377,4 +1374,4 @@ class Dapp extends AssetBase {
     }
 }
 
-module.exports = Dapp;
+export default Dapp;

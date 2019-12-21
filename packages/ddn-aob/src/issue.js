@@ -216,4 +216,4 @@ class Issue extends AssetBase {
     }
 }
 
-module.exports = Issue;
+export default Issue;

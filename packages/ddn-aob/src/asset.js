@@ -274,4 +274,4 @@ class Asset extends AssetBase {
     }
 }
 
-module.exports = Asset;
+export default Asset;

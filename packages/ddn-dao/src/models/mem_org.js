@@ -1,6 +1,6 @@
-const Sequelize = require('sequelize');
+import Sequelize from 'sequelize';
 
-module.exports = function(connection) {
+export default function(connection) {
     return connection.define("mem_org", {
         transaction_id: {
             type: Sequelize.STRING(64),

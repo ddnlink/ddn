@@ -2,19 +2,19 @@
  * 系统启动入口
  * wangxm   2018-12-25
  */
-const package = require('./package.json');
-const command = require('commander');
-const path = require('path');
-const fs = require('fs');
-const { Utils } = require('@ddn/ddn-utils');
-const Program = require('./src/kernal/program');
+const packageFile =require('./package.json');
+const command =require('commander');
+const path =require('path');
+const fs =require('fs');
+const { Utils } =require('@ddn/ddn-utils');
+const Program =require('./lib/kernal/program');
 
 /**
  * 整理系统配置文件生成输入参数
  */
 function genOptions() {
     command
-        .version(package.version)
+        .version(packageFile.version)
         .option('-c, --config <path>', 'Config file path')
         .option('-p, --port <port>', 'Listening port number')
         .option('-a, --address <ip>', 'Listening host name or ip')
@@ -30,7 +30,7 @@ function genOptions() {
 
     const baseDir = command.base || path.resolve(__dirname, './');
 
-    let configFile = path.join(baseDir, 'config.json');
+    let configFile = path.join(baseDir, 'configs', 'config.json');
     if (command.config) {
         configFile = path.resolve(process.cwd(), command.config);
     }
@@ -40,7 +40,7 @@ function genOptions() {
         return;
     }
 
-    let genesisblockFile = path.join(baseDir, 'genesisBlock.json');
+    let genesisblockFile = path.join(baseDir, 'configs', 'genesisBlock.json');
     if (command.genesisblock) {
         genesisblockFile = path.resolve(process.cwd(), command.genesisblock);
     }
@@ -57,7 +57,7 @@ function genOptions() {
         return;
     }
 
-    const assetConfigFile = path.resolve(path.join(baseDir, 'config.asset.js'));
+    const assetConfigFile = path.resolve(path.join(baseDir, 'configs', 'config.asset.js'));
     if (!fs.existsSync(assetConfigFile)) {
         console.error('Failed: DDN asset config file does not exists.');
         process.exit(1);
@@ -78,7 +78,7 @@ function genOptions() {
         fs.writeFileSync(configFile, JSON.stringify(configObject, null, 2), "utf8");
     }
 
-    configObject.version = package.version;
+    configObject.version = packageFile.version;
     configObject.basedir = baseDir;
     configObject.buildVersion = 'development';
     configObject.netVersion = process.env.NET_VERSION || 'testnet';
@@ -87,7 +87,7 @@ function genOptions() {
     if (command.port) {
         configObject.port = command.port;
     }
-    
+
     if (command.address) {
         configObject.address = command.address;
     }
@@ -105,7 +105,7 @@ function genOptions() {
             configObject.peers.list = [];
         }
     }
-    
+
     if (command.log) {
         configObject.logLevel = command.log;
     }
@@ -113,7 +113,7 @@ function genOptions() {
     if (command.reindex) {
         configObject.loading.verifyOnLoading = true;
     }
-    
+
     return {
         baseDir,
         configObject,
@@ -129,22 +129,22 @@ async function main() {
         if (typeof(_require_native_) == "function") {
             return _require_native_(m);
         } else {
-            return require(m);
+            return require(m).default || require(m); // 兼容 ESM
         }
     };
 
-    var program;
+    let program;
 
     try
     {
-        var options = genOptions();
+        let options = genOptions();
         program = new Program();
         await program.run(options);
     }
     catch (err)
     {
         console.error(Utils.getErrorMsg(err));
-        
+
         if (program) {
             program.destory();
         }

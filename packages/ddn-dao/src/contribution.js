@@ -1,10 +1,9 @@
-const { AssetBase } = require('@ddn/ddn-asset-base');
-const { Bignum } = require('@ddn/ddn-utils');
-const ddnUtils = require('@ddn/ddn-utils');
-const daoUtil = require('./daoUtil.js');
-const ByteBuffer = require('bytebuffer');
-const crypto = require('crypto');
-const ed = require('ed25519');
+import { AssetBase } from '@ddn/ddn-asset-base';
+import { Bignum, Address } from '@ddn/ddn-utils';
+import daoUtil from './daoUtil.js';
+import ByteBuffer from 'bytebuffer';
+import crypto from 'crypto';
+import ed from 'ed25519';
 
 /**
  * 贡献（投稿）交易
@@ -18,7 +17,6 @@ const ed = require('ed25519');
  * @fee 0.1EBT
  */
 class Contribution extends AssetBase {
-    // eslint-disable-next-line class-methods-use-this
     async propsMapping() {
         return [{
             field: 'str2',
@@ -43,7 +41,6 @@ class Contribution extends AssetBase {
         ];
     }
 
-    // eslint-disable-next-line class-methods-use-this
     async create(data, trs) {
         const trans = trs;
         trans.recipient_id = null; // wxm block database
@@ -74,14 +71,14 @@ class Contribution extends AssetBase {
             || contribution.received_address.length > 128) {
             throw new Error('received_address is undefined or too long, don`t more than 128 characters.');
         }
-        if (!ddnUtils.Address.isAddress(contribution.received_address)) {
+        if (!Address.isAddress(contribution.received_address)) {
             throw new Error("Invalid contribution's received_address");
         }
         if (!contribution.sender_address
             || contribution.sender_address.length > 128) {
             throw new Error('sender_address is undefined or too long, don`t more than 128 characters.');
         }
-        if (!ddnUtils.Address.isAddress(contribution.sender_address)) {
+        if (!Address.isAddress(contribution.sender_address)) {
             throw new Error("Invalid contribution's sender_address");
         }
         if (!contribution.url
@@ -101,10 +98,8 @@ class Contribution extends AssetBase {
         return trs;
     }
 
-    // eslint-disable-next-line class-methods-use-this
     async getBytes(trs) {
         const contribution = await this.getAssetObject(trs);
-        // eslint-disable-next-line no-undef
         const bb = new ByteBuffer();
         bb.writeUTF8String(contribution.title);
         bb.writeUTF8String(contribution.received_address);
@@ -141,7 +136,7 @@ class Contribution extends AssetBase {
         });
     }
 
-    async getContributionsByOrgId(req, res) {
+    async getContributionsByOrgId(req) {
         const orgId = req.params.orgId;
         const org = await daoUtil.getEffectiveOrgByOrgId(this._context, orgId);
         if (!org) {
@@ -206,7 +201,7 @@ class Contribution extends AssetBase {
         })
     }
 
-    async putContribution(req, res) {
+    async putContribution(req) {
         const orgId = req.params.orgId;
         const org = await daoUtil.getEffectiveOrgByOrgId(this._context, orgId);
         if (!org) {
@@ -252,9 +247,9 @@ class Contribution extends AssetBase {
 
         const hash = crypto.createHash('sha256').update(body.secret, 'utf8').digest();
         const keypair = ed.MakeKeypair(hash);
-        const senderPublicKey = keypair.publicKey.toString('hex')
+        // const senderPublicKey = keypair.publicKey.toString('hex')
 
-        var contribution = {
+        const contribution = {
             title: body.title,
             received_address: org.address || "",
             price: body.price || "0",
@@ -264,7 +259,7 @@ class Contribution extends AssetBase {
         return new Promise((resolve, reject) => {
             this.balancesSequence.add(async (cb) => {
                 if (body.multisigAccountPublicKey && body.multisigAccountPublicKey != keypair.publicKey.toString('hex')) {
-                    var account;
+                    let account;
                     try {
                         account = await this.runtime.account.getAccountByPublicKey(body.multisigAccountPublicKey);
                     } catch (e) {
@@ -283,7 +278,7 @@ class Contribution extends AssetBase {
                         return cb("Account does not belong to multisignature group");
                     }
 
-                    var requester;
+                    let requester;
                     try {
                         requester = await this.runtime.account.getAccountByPublicKey(keypair.publicKey);
                     } catch (e) {
@@ -311,25 +306,25 @@ class Contribution extends AssetBase {
                     contribution.sender_address = account.address;
 
                     try {
-                        var data = {
+                        let data = {
                             type: await this.getTransactionType(),
                             sender: account,
                             keypair,
                             requester: keypair,
                             second_keypair,
                         };
-                        var assetJsonName = await this.getAssetJsonName();
+                        let assetJsonName = await this.getAssetJsonName();
                         data[assetJsonName] = contribution;
 
-                        var transaction = await this.runtime.transaction.create(data);
+                        let transaction = await this.runtime.transaction.create(data);
 
-                        var transactions = await this.runtime.transaction.receiveTransactions([transaction]);
+                        let transactions = await this.runtime.transaction.receiveTransactions([transaction]);
                         cb(null, transactions);
                     } catch (e) {
                         cb(e);
                     }
                 } else {
-                    var account;
+                    let account;
                     try {
                         account = await this.runtime.account.getAccountByPublicKey(keypair.publicKey.toString('hex'));
                     } catch (e) {
@@ -353,18 +348,18 @@ class Contribution extends AssetBase {
                     contribution.sender_address = account.address;
 
                     try {
-                        var data = {
+                        let data = {
                             type: await this.getTransactionType(),
                             sender: account,
                             keypair,
                             second_keypair
                         }
-                        var assetJsonName = await this.getAssetJsonName();
+                        let assetJsonName = await this.getAssetJsonName();
                         data[assetJsonName] = contribution;
 
-                        var transaction = await this.runtime.transaction.create(data);
+                        let transaction = await this.runtime.transaction.create(data);
 
-                        var transactions = await this.runtime.transaction.receiveTransactions([transaction]);
+                        let transactions = await this.runtime.transaction.receiveTransactions([transaction]);
                         cb(null, transactions);
                     } catch (e) {
                         cb(e);
@@ -385,4 +380,4 @@ class Contribution extends AssetBase {
 
 }
 
-module.exports = Contribution;
+export default Contribution;

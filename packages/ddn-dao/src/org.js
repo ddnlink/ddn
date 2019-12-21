@@ -1,11 +1,17 @@
-const { AssetBase } = require('@ddn/ddn-asset-base');
-const { Bignum } = require('@ddn/ddn-utils');
-const ddnUtils = require('@ddn/ddn-utils');
-const ByteBuffer = require('bytebuffer');
-const { isUri } = require('valid-url');
-const crypto = require('crypto');
-const ed = require('ed25519');
-const daoUtil = require('./daoUtil.js');
+/*---------------------------------------------------------------------------------------------
+ *  Updated by Imfly on Sat Dec 07 2019 09:42:53
+ *
+ *  Copyright (c) 2019 DDN FOUNDATION. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
+import { AssetBase } from '@ddn/ddn-asset-base';
+import { Bignum, Address } from '@ddn/ddn-utils';
+import ByteBuffer from 'bytebuffer';
+import { isUri } from 'valid-url';
+import crypto from 'crypto';
+import ed from 'ed25519';
+import daoUtil from './daoUtil.js';
 
 // 10 秒内不允许重复处理
 // let processOrgIdList = {};
@@ -112,7 +118,6 @@ class Org extends AssetBase {
             feeBase = parseInt(feeBase / 10, 10); // change info
         }
         // Bignum update
-        // return feeBase * 100000000;
         const result = Bignum.multiply(feeBase, 100000000).toString();
         return result;
     }
@@ -133,10 +138,9 @@ class Org extends AssetBase {
         } else {
             throw new Error(`Invalid asset state type: ${org.state}`);
         }
-        if (!ddnUtils.Address.isAddress(sender.address)) {
+        if (!Address.isAddress(sender.address)) {
             throw new Error('Invalid address');
         }
-        // Bignum update if (trs.amount != 0) {
         if (!Bignum.isZero(trs.amount)) {
             throw new Error('Invalid transaction amount');
         }
@@ -144,14 +148,13 @@ class Org extends AssetBase {
             throw new Error('Expect asset org, got invalid transaction asset');
         }
         // check org id
-        // org.org_id = org.org_id.toLowerCase();
         if (!daoUtil.isOrgId(org.org_id)) {
             throw new Error('exchange org id not allow');
         }
         if (org.name && org.name.lenght > 64) {
             throw new Error('Name is too long，don`t more than 64 bit.');
         }
-        if (!ddnUtils.Address.isAddress(org.address)) {
+        if (!Address.isAddress(org.address)) {
             throw new Error('Invalid org address');
         }
         if (org.address != sender.address) {
@@ -202,25 +205,6 @@ class Org extends AssetBase {
         return trs;
     }
 
-    // eslint-disable-next-line class-methods-use-this
-    // async process(trs, sender) {
-    //     const { org } = trs.asset;
-    //     if (!org.address) {
-    //         org.address = sender.address;
-    //     }
-    //     if (org.org_id) {
-    //         org.org_id = org.org_id.toLowerCase();
-    //     }
-    //     // process cache
-    //     // const oldOrg = processOrgIdList[org.org_id];
-    //     // if (oldOrg) {
-    //     //   const error = `Org ${org.org_id} being process for ${oldOrg.state ? 'change' : 'apply'}`;
-    //     //   throw new Error(error);
-    //     // }
-    //     // processOrgIdList[org.org_id] = org;
-    //     return trs;
-    // }
-
     async applyUnconfirmed(trs, sender, dbTrans) {
         const assetObj = await this.getAssetObject(trs);
         const key = `${sender.address}:${trs.type}:${assetObj.org_id}:${assetObj.state}`;
@@ -246,7 +230,6 @@ class Org extends AssetBase {
         return result;
     }
 
-    // eslint-disable-next-line class-methods-use-this
     async getBytes(trs) {
         const org = await this.getAssetObject(trs);
         const bb = new ByteBuffer();
@@ -325,7 +308,7 @@ class Org extends AssetBase {
      * @param {*} req 
      * @param {*} res 
      */
-    async putOrg(req, res) {
+    async putOrg(req) {
         const body = req.body;
 
         const validateErrors = await this.ddnSchema.validate({
@@ -409,7 +392,7 @@ class Org extends AssetBase {
         return new Promise((resolve, reject) => {
             this.balancesSequence.add(async(cb) => {
                 if (body.multisigAccountPublicKey && body.multisigAccountPublicKey != keypair.publicKey.toString('hex')) {
-                    var account;
+                    let account;
                     try {
                         account = await this.runtime.account.getAccountByPublicKey(body.multisigAccountPublicKey);
                     } catch (e) {
@@ -428,7 +411,7 @@ class Org extends AssetBase {
                         return cb("Account does not belong to multisignature group");
                     }
 
-                    var requester;
+                    let requester;
                     try {
                         requester = await this.runtime.account.getAccountByPublicKey(keypair.publicKey);
                     } catch (e) {
@@ -454,25 +437,25 @@ class Org extends AssetBase {
                     }
 
                     try {
-                        var data = {
+                        const data = {
                             type: await this.getTransactionType(),
                             sender: account,
                             keypair,
                             requester: keypair,
                             second_keypair,
                         };
-                        var assetJsonName = await this.getAssetJsonName();
+                        const assetJsonName = await this.getAssetJsonName();
                         data[assetJsonName] = org;
 
-                        var transaction = await this.runtime.transaction.create(data);
+                        const transaction = await this.runtime.transaction.create(data);
 
-                        var transactions = await this.runtime.transaction.receiveTransactions([transaction]);
+                        const transactions = await this.runtime.transaction.receiveTransactions([transaction]);
                         cb(null, transactions);
                     } catch (e) {
                         cb(e);
                     }
                 } else {
-                    var account;
+                    let account;
                     try {
                         account = await this.runtime.account.getAccountByPublicKey(keypair.publicKey.toString('hex'));
                     } catch (e) {
@@ -494,18 +477,18 @@ class Org extends AssetBase {
                     }
 
                     try {
-                        var data = {
+                        const data = {
                             type: await this.getTransactionType(),
                             sender: account,
                             keypair,
                             second_keypair
                         }
-                        var assetJsonName = await this.getAssetJsonName();
+                        const assetJsonName = await this.getAssetJsonName();
                         data[assetJsonName] = org;
 
-                        var transaction = await this.runtime.transaction.create(data);
+                        const transaction = await this.runtime.transaction.create(data);
                       
-                        var transactions = await this.runtime.transaction.receiveTransactions([transaction]);
+                        const transactions = await this.runtime.transaction.receiveTransactions([transaction]);
                         cb(null, transactions);
                     } catch (e) {
                         cb(e);
@@ -526,9 +509,9 @@ class Org extends AssetBase {
      * @param {*} req 
      * @param {*} res 
      */
-    async getOrgByOrgId(req, res) {
+    async getOrgByOrgId(req) {
         const orgInfo = await daoUtil.getEffectiveOrgByOrgId(this._context, req.params.orgId);
-        return {success: true, data: {org: orgInfo}};
+        return {success: true, data: {org: orgInfo}}; // FIXME: res
     }
 
     /**
@@ -536,7 +519,7 @@ class Org extends AssetBase {
      * @param {*} req 
      * @param {*} res 
      */
-    async getOrgList(req, res) {
+    async getOrgList(req) {
         const query = req.query || req.body;
 
         const validateErrors = await this.ddnSchema.validate({
@@ -596,7 +579,7 @@ class Org extends AssetBase {
             tags: query.tags,
             state: query.state
         };
-        for (var p in where) {
+        for (let p in where) {
             if (!where[p]) {
                 delete where[p];
             }
@@ -624,4 +607,5 @@ class Org extends AssetBase {
     }
 
 }
-module.exports = Org;
+
+export default Org;

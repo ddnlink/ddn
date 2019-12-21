@@ -1,5 +1,5 @@
 var request = require('request');
-var config = require('../config')
+var config = require('../../config')
 
 function resultHandler(cb) {
   return function (err, resp, body) {

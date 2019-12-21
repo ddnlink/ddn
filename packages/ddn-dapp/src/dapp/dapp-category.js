@@ -5,7 +5,7 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-module.exports = {
+export default {
   Common: 1,
   Business: 2,
   Social: 3,
