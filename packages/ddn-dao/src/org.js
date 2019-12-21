@@ -608,4 +608,4 @@ class Org extends AssetBase {
 
 }
 
-module.exports = Org;
+export default Org;

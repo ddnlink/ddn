@@ -1100,4 +1100,4 @@ class AssetBase {
     }
 }
 
-module.exports = AssetBase;
+export default AssetBase;

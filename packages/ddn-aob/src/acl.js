@@ -197,4 +197,4 @@ class Acl extends AssetBase {
 
 }
 
-module.exports = Acl;
+export default Acl;

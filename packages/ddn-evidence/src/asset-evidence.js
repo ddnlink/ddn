@@ -86,4 +86,4 @@ class AssetEvidence extends AssetBase
 
 }
 
-module.exports = AssetEvidence;
+export default AssetEvidence;

@@ -210,4 +210,4 @@ class InTransfer extends AssetBase {
 
 }
 
-module.exports = InTransfer;
+export default InTransfer;

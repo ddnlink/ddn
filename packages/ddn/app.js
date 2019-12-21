@@ -129,7 +129,7 @@ async function main() {
         if (typeof(_require_native_) == "function") {
             return _require_native_(m);
         } else {
-            return require(m);
+            return require(m).default || require(m); // 兼容 ESM
         }
     };
 

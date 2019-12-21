@@ -1,6 +1,7 @@
-const Sequelize = require('sequelize');
+import Sequelize from 'sequelize';
 
-module.exports = connection => connection.define('mem_asset_balance', {
+// FIXME: 
+export default connection => connection.define('mem_asset_balance', {
     address: {
         type: Sequelize.STRING(128),
         allowNull: false,
