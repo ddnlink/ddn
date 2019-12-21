@@ -27,6 +27,7 @@ const DataQuery = require('./lib/data-query');
 class Program
 {
     async _init(options) {
+
         options.logger = new Logger({
             filename: path.join(options.baseDir, 'logs', 'debug.log'),
             echo: options.isDaemonMode ? null : options.configObject.logLevel,

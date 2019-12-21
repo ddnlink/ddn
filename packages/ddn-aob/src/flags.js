@@ -115,4 +115,4 @@ class Flags extends AssetBase {
 
 }
 
-module.exports = Flags;
+export default Flags;

@@ -178,11 +178,6 @@ module.exports = (schemaFile, cb) => {
                 var assetJsonName = AssetUtils.getAssetJsonName(assetTrans.type);
 
                 var transCls = _require_runtime_(assetTrans.package)[assetTrans.name];
-                console.log('====================================');
-                console.log(transCls);
-                console.log(assetTrans);
-
-                console.log('====================================');
                 var transInst = new transCls();   //wxm 此处传的都是null，必须保证propsMapping里不要用到这传入的context参数
                 var props = await transInst.propsMapping();
                 var fields = {};

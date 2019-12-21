@@ -1,6 +1,6 @@
-const Sequelize = require('sequelize');
+import Sequelize from 'sequelize';
 
-module.exports = connection => connection.define('acl_white', {
+export default connection => connection.define('acl_white', {
   currency: {
     type: Sequelize.STRING(22),
     allowNull: false,

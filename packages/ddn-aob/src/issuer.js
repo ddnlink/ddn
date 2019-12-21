@@ -118,4 +118,4 @@ class Issuer extends AssetBase {
 
 }
 
-module.exports = Issuer;
+export default Issuer;

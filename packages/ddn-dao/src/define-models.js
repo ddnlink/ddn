@@ -12,7 +12,7 @@ function splitFileName(text) {
 const models = [];
 const files = fs.readdirSync(path.resolve(__dirname, './models/'));
 files.forEach((file) => {
-    const item = require(path.resolve(__dirname, './models/', file));
+    const item = require(path.resolve(__dirname, './models/', file)).default || require(path.resolve(__dirname, './lib/models/', file));
     models.push({
         name: splitFileName(file),
         data: item,
