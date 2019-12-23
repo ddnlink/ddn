@@ -3,7 +3,6 @@
  * wangxm   2018-01-07
  */
 const { Bignum } = require('@ddn/ddn-utils');
-const slot = require('./slot');
 const constants = require('../../constants');
 const RoundChanges = require('./round-changes');
 

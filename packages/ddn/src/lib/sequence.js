@@ -40,7 +40,6 @@ function Sequence(config) {
 }
 
 Sequence.prototype.__tick = function (cb) {
-  const self = this;
   const task = this.sequence.shift();
   if (!task) {
     return setImmediate(cb);

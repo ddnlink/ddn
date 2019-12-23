@@ -8,9 +8,8 @@ const assert = require('assert');
 const crypto = require('crypto');
 const ed = require('ed25519');
 const ByteBuffer = require("bytebuffer");
-const { AssetTypes, RuntimeState, Utils, Bignum } = require('@ddn/ddn-utils');
-const addressUtil = require('../../lib/address');
-const BlockStatus = require('./block-status');
+const { AssetTypes, RuntimeState, Utils, Bignum, Address } = require('@ddn/ddn-utils');
+import BlockStatus from './block-status';
 
 var _singleton;
 
@@ -255,7 +254,7 @@ class Block
               payload_length: parseInt(raw.b_payloadLength), //wxm block database
               payload_hash: raw.b_payloadHash,   //wxm block database
               generator_public_key: raw.b_generatorPublicKey, //wxm block database
-              generator_id: addressUtil.generateBase58CheckAddress(raw.b_generatorPublicKey),    //wxm block database
+              generator_id: Address.generateBase58CheckAddress(raw.b_generatorPublicKey),    //wxm block database
               block_signature: raw.b_blockSignature,    //wxm block database
               confirmations: raw.b_confirmations
             };
@@ -369,7 +368,6 @@ class Block
 
         await new Promise((resolve, reject) => {
             this.sequence.add(async cb => {
-                //Bignum update if (block.previousBlock == privated.lastBlock.id && privated.lastBlock.height + 1 == block.height) {
                 if (block.previous_block == this._lastBlock.id && Bignum.isEqualTo(Bignum.plus(this._lastBlock.height, 1), block.height)) {   //wxm block database
                     this.logger.info(`Received new block id: ${block.id} height: ${block.height} round: ${await this.runtime.round.calc(this.getLastBlock().height)} slot: ${this.runtime.slot.getSlotNumber(block.timestamp)} reward: ${this.getLastBlock().reward}`)
                     await this.processBlock(block, votes, true, true, true);
@@ -384,7 +382,6 @@ class Block
                     await this.runtime.delegate.fork(block, 5);
 
                     cb("Fork-2");
-                    //Bignum update } else if (block.height > privated.lastBlock.height + 1) {
                 } else if (Bignum.isGreaterThan(block.height, Bignum.plus(this._lastBlock.height, 1))) {
                     this.logger.info(`receive discontinuous block height ${block.height}`);
 
@@ -459,10 +456,8 @@ class Block
                     return cb();
                 }
 
-                //Bignum update if (propose.height != privated.lastBlock.height + 1) {
                 if (!Bignum.isEqualTo(propose.height, Bignum.plus(this._lastBlock.height, 1))) {
                     this.logger.debug("invalid propose height", propose);
-                    //Bignum update   if (propose.height > privated.lastBlock.height + 1) {
                     if (Bignum.isGreaterThan(propose.height, Bignum.plus(this._lastBlock.height, 1))) {
                         this.logger.info(`receive discontinuous propose height ${propose.height}`);
                     }
@@ -752,7 +747,6 @@ class Block
 
         const expectedReward = this._blockStatus.calcReward(block.height);
 
-        //Bignum update   if (block.height != 1 && expectedReward !== block.reward) {
         if (block.height != 1 && !Bignum.isEqualTo(expectedReward, block.reward)) {
             throw new Error("Invalid block reward");
         }
@@ -789,10 +783,8 @@ class Block
             throw new Error(`Invalid amount of block assets: ${block.id}`);
         }
 
-        //Bignum update   let totalAmount = 0;
         let totalAmount = Bignum.new(0);
 
-        //Bignum update   let totalFee = 0;
         let totalFee = Bignum.new(0);
 
         const payloadHash = crypto.createHash('sha256');
@@ -813,10 +805,8 @@ class Block
 
             appliedTransactions[transaction.id] = transaction;
             payloadHash.update(bytes);
-            //Bignum update totalAmount += transaction.amount;
             totalAmount = Bignum.plus(totalAmount, transaction.amount);
 
-            //Bignum update totalFee += transaction.fee;
             totalFee = Bignum.plus(totalFee, transaction.fee);
         }
 
@@ -824,19 +814,15 @@ class Block
             throw new Error(`Invalid payload hash: ${block.id}`)
         }
 
-        //Bignum update   if (totalAmount != block.totalAmount) {
         if (!Bignum.isEqualTo(totalAmount, block.total_amount)) {
             throw new Error(`Invalid total amount: ${block.id}`);
         }
 
-        //   Bignum update
-        //   if (totalFee != block.totalFee) {
         if (!Bignum.isEqualTo(totalFee, block.total_fee)) {
             throw new Error(`Invalid total fee: ${block.id}`);
         }
 
         if (votes) {
-            //Bignum update if (block.height != votes.height) {
             if (!Bignum.isEqualTo(block.height, votes.height)) {
                 throw new Error("Votes height is not correct");
             }

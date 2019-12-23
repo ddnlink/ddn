@@ -2,9 +2,8 @@
  * 区块数据核心处理逻辑和方法
  * wangxm   2018-12-27
  */
-const addressUtil = require('../../lib/address');
 const bluebird = require('bluebird')
-const { Bignum } = require('@ddn/ddn-utils'); //Bignum update
+const { Bignum, Address } = require('@ddn/ddn-utils'); //Bignum update
 
 var _singleton;
 
@@ -95,7 +94,7 @@ class Account {
     }
 
     isAddress(address) {
-        return addressUtil.isAddress(address);
+        return Address.isAddress(address);
     }
 
     /**
@@ -103,7 +102,7 @@ class Account {
      * @param {*} publicKey
      */
     generateAddressByPublicKey(publicKey) {
-        return addressUtil.generateBase58CheckAddress(publicKey);
+        return Address.generateBase58CheckAddress(publicKey);
     }
 
     /**
