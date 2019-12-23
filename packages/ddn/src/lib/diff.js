@@ -25,7 +25,7 @@ module.exports = {
       if (math == "+") {
         res = res || [];
 
-        var index = -1;
+        let index = -1;
         if (res) {
           index = res.indexOf(publicKey);
         }
@@ -35,8 +35,9 @@ module.exports = {
 
         res.push(publicKey);
       }
+
       if (math == "-") {
-        var index = -1;
+        let index = -1;
         if (res) {
           index = res.indexOf(publicKey);
         }

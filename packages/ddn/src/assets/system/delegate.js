@@ -4,8 +4,7 @@
  */
 const util = require('util');
 const ByteBuffer = require('bytebuffer');
-const addressUtil = require('../../lib/address.js');
-const { Bignum } = require('@ddn/ddn-utils');
+const { Bignum, Address } = require('@ddn/ddn-utils');
 
 class Delegate {
 
@@ -68,7 +67,7 @@ class Delegate {
             throw new Error('Username is too long. Maximum is 20 characters');
 		}
 
-		if (addressUtil.isAddress(username)) {
+		if (Address.isAddress(username)) {
             throw new Error('Username can not be a potential address');
 		}
 

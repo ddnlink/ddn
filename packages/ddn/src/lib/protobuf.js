@@ -60,7 +60,6 @@ class Protobuf {
 
   decodeBlockPropose (data) {
     let obj= this.root.BlockPropose.decode(data);
-    // obj = toNumber(obj);
     obj.generator_public_key = obj.generator_public_key.toString('hex');    //wxm block database
     obj.hash = obj.hash.toString('hex');
     obj.signature = obj.signature.toString('hex');
@@ -83,7 +82,6 @@ class Protobuf {
 
   decodeBlockVotes (data) {
     let obj= this.root.BlockVotes.decode(data);
-    // obj = toNumber(obj);
 
     for (let signature of obj.signatures) {
       signature.key = signature.key.toString('hex');
@@ -177,7 +175,7 @@ module.exports = (schemaFile, cb) => {
             if (assetTrans) {
                 var assetJsonName = AssetUtils.getAssetJsonName(assetTrans.type);
 
-                var transCls = _require_runtime_(assetTrans.package)[assetTrans.name];
+                var transCls = global._require_runtime_(assetTrans.package)[assetTrans.name];
                 var transInst = new transCls();   //wxm 此处传的都是null，必须保证propsMapping里不要用到这传入的context参数
                 var props = await transInst.propsMapping();
                 var fields = {};
