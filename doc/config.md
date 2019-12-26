@@ -10,11 +10,10 @@ DDN 允许在 `.ddnrc.js` ，`config/config.json` 或 `config/config.js`（三�
 
 ```js
 export default {
-  base: '/admin/',
-  publicPath: 'http://cdn.com/foo',
-  plugins: [
-    ['umi-plugin-react', {
-      dva: true,
+  publicPath: 'http://bar.com/foo',
+  assets: [
+    ['ddn-aob', {
+      assets: true,
     }],
   ],
 };
