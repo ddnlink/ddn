@@ -10,7 +10,7 @@ import getUserConfig, {
   addAffix,
   getConfigPaths,
   cleanConfigRequireCache,
-} from '../src/getUserConfig';
+} from '../lib/getUserConfig';
 
 const fixtures = winPath(`${__dirname}/fixtures/getUserConfig`);
 
@@ -26,6 +26,12 @@ describe('getUserConfig', () => {
   describe('getConfigFile', () => {
     it('.ddnrc.js', () => {
       expect(stripPrefix(getConfigFile(`${fixtures}/ddnrc`))).toEqual('ddnrc/.ddnrc.js');
+    });
+
+    it('config/config.json', () => {
+      expect(stripPrefix(getConfigFile(`${fixtures}/config-configjson`))).toEqual(
+        'config-configjson/config/config.json',
+      );
     });
 
     it('config/config.js', () => {
@@ -77,6 +83,49 @@ test('config with .ddnrc.js', () => {
   });
 });
 
+test('config with mergeConfigs .ddnrc.local.js', () => {
+  process.env.NODE_ENV = 'development'
+
+  const config = getUserConfig({
+    cwd: join(fixtures, 'config-ddnrc'),
+  });
+
+  expect(config).toEqual({
+    history: 'sorry',
+    story: 'ok',
+  });
+
+  process.env.NODE_ENV = ''
+});
+
+test('config with mergeConfigs .ddnrc.prod.js', () => {
+  process.env.DDN_ENV = 'prod'
+
+  const config = getUserConfig({
+    cwd: join(fixtures, 'config-ddnrc'),
+  });
+  expect(config).toEqual({
+    history: 'prod',
+    story: 'yes'
+  });
+
+  process.env.DDN_ENV = ''
+});
+
+test('config with mergeConfigs config/config.local.js and config.jsons', () => {
+  process.env.NODE_ENV = 'development'
+
+  const config = getUserConfig({
+    cwd: join(fixtures, 'config-configjson'),
+  });
+  expect(config).toEqual({
+    history: 'local',
+    story: 'ok'
+  });
+
+  process.env.NODE_ENV = ''
+});
+
 test('config with DDN_CONFIG_FILE env', () => {
   process.env.DDN_CONFIG_FILE = 'foo.js';
   const config = getUserConfig({
@@ -92,6 +141,7 @@ test('getConfigPaths', () => {
   function winPathFiles(files) {
     return files.map(f => slash2(f));
   }
+  process.env.DDN_ENV = ''
   expect(winPathFiles(getConfigPaths('foo'))).toEqual([
     'foo/config/',
     'foo/.ddnrc.js',
@@ -114,6 +164,13 @@ test('getConfigPaths', () => {
 
 test('requireFile', () => {
   expect(requireFile('/file/not/exists')).toEqual({});
+});
+
+test('requireFile from config.json', () => {
+  expect(requireFile(join(fixtures, 'requireFile', 'config.json'))).toEqual({
+      "a": 1,
+      "b": 2
+  });
 });
 
 test('requireFile with syntax error', () => {

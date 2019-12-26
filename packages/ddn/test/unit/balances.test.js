@@ -1,5 +1,5 @@
 var node = require("./../variables.js")
-var BalanceManager = require('../../src/helpers/balance-manager.js')
+var BalanceManager = require('../../lib/helpers/balance-manager.js')
 
 describe('balance cache manager', function () {
   it('normal test', function (done) {

@@ -1,5 +1,5 @@
 var node = require("./../variables.js")
-var BufferCache = require('../../src/helpers/buffer-cache')
+var BufferCache = require('../../lib/helpers/buffer-cache')
 
 describe('BufferCache', function () {
   it('normal test', async function () {
@@ -21,7 +21,7 @@ describe('BufferCache', function () {
     node.expect(f).to.throw(Error, /Cache limit exceeded/)
     bc.remove('k1')
     node.expect(bc.has('k1')).to.be.false
-    
+
     await node.sleepAsync(1)
     bc.set('k11', 1)
     node.expect(bc.has('k2')).to.be.true

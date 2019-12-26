@@ -6,12 +6,12 @@
  *--------------------------------------------------------------------------------------------*/
 
 const node = require("../variables.js");
-const constants = require("../../src/constants");
+const constants = require("../../lib/constants");
 const { Bignum } = require('@ddn/ddn-utils');
 
 describe('Constants params', function () {
   it('test block reward', function (done) {
-    var BlockStatus = require('../../src/kernal/block/block-status.js');
+    var BlockStatus = require('../../lib/kernal/block/block-status.js');
     global.config = {netVersion: 'testnet', settings: {delegateNumber: 101}};
     var blockStatus = new BlockStatus(global);
     node.expect(blockStatus.calcMilestone(1)).to.equal("0");
