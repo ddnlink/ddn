@@ -7,6 +7,7 @@ const command =require('commander');
 const path =require('path');
 const fs =require('fs');
 const { Utils } =require('@ddn/ddn-utils');
+const { getConfigFile, requireFile } =require('@ddn/ddn-core/lib/getUserConfig');
 const Program =require('./lib/kernal/program');
 
 /**
@@ -30,7 +31,8 @@ function genOptions() {
 
     const baseDir = command.base || path.resolve(__dirname, './');
 
-    let configFile = path.join(baseDir, 'configs', 'config.json');
+    // let configFile = path.join(baseDir, 'config', 'config.json');
+    let configFile = getConfigFile(baseDir);
     if (command.config) {
         configFile = path.resolve(process.cwd(), command.config);
     }
@@ -40,7 +42,7 @@ function genOptions() {
         return;
     }
 
-    let genesisblockFile = path.join(baseDir, 'configs', 'genesisBlock.json');
+    let genesisblockFile = path.join(baseDir, 'config', 'genesisBlock.json');
     if (command.genesisblock) {
         genesisblockFile = path.resolve(process.cwd(), command.genesisblock);
     }
@@ -57,14 +59,14 @@ function genOptions() {
         return;
     }
 
-    const assetConfigFile = path.resolve(path.join(baseDir, 'configs', 'config.asset.js'));
+    const assetConfigFile = path.resolve(path.join(baseDir, 'config', 'config.asset.js'));
     if (!fs.existsSync(assetConfigFile)) {
         console.error('Failed: DDN asset config file does not exists.');
         process.exit(1);
         return;
     }
 
-    const configObject = JSON.parse(fs.readFileSync(configFile, 'utf8'));
+    const configObject = requireFile(configFile);
     const genesisblockObject = JSON.parse(fs.readFileSync(genesisblockFile, 'utf8'));
 
     //wxm 修改config.json文件，自动生成dapp的masterpassword，这个不应该在代码中，应该在外围生成
@@ -126,8 +128,8 @@ function genOptions() {
 
 async function main() {
     global._require_runtime_ = function(m) {
-        if (typeof(_require_native_) == "function") {
-            return _require_native_(m);
+        if (typeof(global._require_native_) == "function") {
+            return global._require_native_(m);
         } else {
             return require(m).default || require(m); // 兼容 ESM
         }

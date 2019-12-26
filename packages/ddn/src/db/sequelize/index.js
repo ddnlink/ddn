@@ -1,7 +1,7 @@
 const path = require('path');
 const fs = require('fs');
 const Sequelize = require('sequelize');
-const { dbSettings } = require('../../../configs/config.database');
+const { dbSettings } = require('../../../config/config.database');
 
 const _sysModels = {};
 
