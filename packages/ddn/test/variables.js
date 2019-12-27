@@ -5,25 +5,27 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-var _ = require('lodash');
-var expect = require('chai').expect;
-var chai = require('chai');
-var supertest = require('supertest');
-var async = require('async');
-var request = require('request');
-var ddn = require('@ddn/ddn-node-sdk');
-const { Bignum } = require('@ddn/ddn-utils');
-var bluebird = require('bluebird');
+const path =require('path');
+const _ = require('lodash');
+const expect = require('chai').expect;
+const chai = require('chai');
+const supertest = require('supertest');
+const async = require('async');
+const request = require('request');
+const ddn = require('@ddn/ddn-node-sdk');
+const { getConfigFile, requireFile } =require('@ddn/ddn-core/lib/getUserConfig');
+const { Bignum, Address, AssetTypes } = require('@ddn/ddn-utils');
+const bluebird = require('bluebird');
 
 // TODO 包的整理规划需要进一步明确原则，根据通用性确定是否写成npm包
-var { DappCategory, DappType } = require('@ddn/ddn-dapp');
-var { AssetTypes } = require('@ddn/ddn-utils');
-
-var addressUtil = require('../src/lib/address.js');
+const { DappCategory, DappType } = require('@ddn/ddn-dapp');
 
 // Node configuration
-var config = require('../config.json');
-var constants = require('../src/constants');
+const baseDir = path.resolve(__dirname, '../');
+const configFile = getConfigFile(baseDir);
+const config = requireFile(configFile);
+
+var constants = require('../lib/constants');
 
 var baseUrl = 'http://' + config.address + ':' + config.port;
 var api = supertest(baseUrl + '/api');
@@ -291,7 +293,7 @@ function genNormalAccount() {
   var password = randomPassword()
   var keys = ddn.crypto.getKeys(password)
   return {
-    address: addressUtil.generateBase58CheckAddress(keys.public_key),
+    address: Address.generateBase58CheckAddress(keys.public_key),
     public_key: keys.public_key,
     password: password
   }

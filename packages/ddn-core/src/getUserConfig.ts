@@ -14,8 +14,10 @@ interface IOpts {
 export function getConfigFile(cwd) {
   const files = process.env.DDN_CONFIG_FILE
     ? process.env.DDN_CONFIG_FILE.split(',').filter(v => v && v.trim())
-    : ['.ddnrc.ts', '.ddnrc.js', 'config/config.ts', 'config/config.js'];
+    : ['.ddnrc.ts', '.ddnrc.js', 'config/config.json', 'config/config.ts', 'config/config.js'];
+  
   const validFiles = files.filter(f => existsSync(join(cwd, f)));
+
   assert(
     validFiles.length <= 1,
     `Multiple config files (${validFiles.join(', ')}) were detected, please keep only one.`,
@@ -94,6 +96,10 @@ export function cleanConfigRequireCache(cwd) {
   });
 }
 
+/**
+ * 配置调用
+ * @param opts {cwd: cwd, defaultConfig: config.default.js }
+ */
 export default function(opts: IOpts = {}): IConfig {
   const { cwd, defaultConfig } = opts;
   const absConfigFile = getConfigFile(cwd);

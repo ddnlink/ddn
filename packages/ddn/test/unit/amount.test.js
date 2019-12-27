@@ -1,5 +1,5 @@
 var node = require("./../variables.js")
-var amount = require('../../src/helpers/amount.js')
+var amount = require('../../lib/helpers/amount.js')
 
 describe('amount', function () {
   it('normal test', function (done) {

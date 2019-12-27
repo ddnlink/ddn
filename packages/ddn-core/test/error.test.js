@@ -1,4 +1,4 @@
-import { DdnError, printDdnError } from '../src/error';
+import { DdnError, printDdnError } from '../lib/error';
 
 test('ERR_CORE_PLUGIN_RESOLVE_FAILED', () => {
   const error = new DdnError({

@@ -108,7 +108,6 @@
     "gulp-shell": "^0.5.2",
     "gulp-uglify": "^3.0.0",
     "intelli-espower-loader": "^1.0.1",
-    "lerna": "^3.18.1",
     "mocha": "^5.2.0",
     "mocha-babel": "^3.0.3",
     "moment": "^2.9.0",

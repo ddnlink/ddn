@@ -1,14 +1,14 @@
 /**
  * Http服务
- * 
+ *
  * 服务采用目录结构形式，如api目录自动路由为 /api，具体路由方法定义在目录下方的 index.js 文件中
- * 
+ *
  * index.js文件需要输出一个类，类方法为路由子路径，根据请求方式分为post、get、delete、put 4种
  * 如请求块高方法，可以定义为 getHeight，然后具体路由会解析为 /height，然后和所在目录路由拼接为完整路由，/api/height
  * 方法输入参数为request对象，输出为json对象
- * 
+ *
  * 如果想定义目录路由的根方法，可以在index.js中直接定义 post方法、get方法等，则完整路由就是 get /api  post /api
- * 
+ *
  * wangxm   2018-12-25
  */
 const express = require('express');
@@ -45,15 +45,15 @@ class HttpServer {
         if (this.config.ssl.enabled) {
             const privateKey = fs.readFileSync(this.config.ssl.options.key);
             const certificate = fs.readFileSync(this.config.ssl.options.cert);
-    
+
             this._https_server = https.createServer({
                 key: privateKey,
                 cert: certificate,
                 ciphers: "ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-AES256-GCM-SHA384:DHE-RSA-AES128-GCM-SHA256:"
                     + "ECDHE-RSA-AES128-SHA256:DHE-RSA-AES128-SHA256:ECDHE-RSA-AES256-SHA384:DHE-RSA-AES256-SHA384:ECDHE-RSA-AES256-SHA256:DHE-RSA-AES256-SHA256:HIGH:"
                     + "!aNULL:!eNULL:!EXPORT:!DES:!RC4:!MD5:!PSK:!SRP:!CAMELLIA"
-            }, app);
-    
+            }, this._app); // FIXME: app -> this._app ?
+
             this._https_io = require('socket.io')(this._https_server);
         }
 
@@ -73,7 +73,7 @@ class HttpServer {
         this._app.use(bodyParser.raw({limit: "8mb"}));
         this._app.use(bodyParser.urlencoded({extended: true, limit: "8mb", parameterLimit: 5000}));
         this._app.use(bodyParser.json({limit: "8mb"}));
-        this._app.use(methodOverride()); 
+        this._app.use(methodOverride());
 
         this._addQueryParamsMiddleware();
         this._addSecurityMiddleware();
@@ -85,7 +85,7 @@ class HttpServer {
      */
     _addQueryParamsMiddleware() {
         const ignore = [
-            'id', 'name', 'lastBlockId', 'blockId', 'transactionId', 
+            'id', 'name', 'lastBlockId', 'blockId', 'transactionId',
             'address', 'recipientId', 'senderId', 'previousBlock', 'ip',
             'fee', 'totalFee', 'amount', 'totalAmount', 'height', 'reward'
         ];
@@ -94,11 +94,11 @@ class HttpServer {
                 if (ignore.indexOf(name) >= 0) {
                     return value;
                 }
-  
+
                 if (isNaN(value) || parseInt(value) != value || isNaN(parseInt(value, radix))) {
                     return value;
                 }
-  
+
                 return parseInt(value);
             }
         }));
@@ -149,13 +149,13 @@ class HttpServer {
             }
 
             this.logger.debug(`${req.method} ${req.url} from ${ip}:${port}`);
-    
+
             /* Instruct browser to deny display of <frame>, <iframe> regardless of origin.
              *
              * RFC -> https://tools.ietf.org/html/rfc7034
              */
             res.setHeader('X-Frame-Options', 'DENY');
-    
+
             /* Set Content-Security-Policy headers.
              *
              * frame-ancestors - Defines valid sources for <frame>, <iframe>, <object>, <embed> or <applet>.
@@ -163,7 +163,7 @@ class HttpServer {
              * W3C Candidate Recommendation -> https://www.w3.org/TR/CSP/
              */
             res.setHeader('Content-Security-Policy', "frame-ancestors 'none'");
-    
+
             if (parts.length > 1) {
                 if (parts[1] == 'api') {
                     if (this.config.api.access.whiteList.length > 0 &&
@@ -190,7 +190,7 @@ class HttpServer {
 
     /**
      * 遍历指定目录的子目录和文件
-     * @param {*} currDir 
+     * @param {*} currDir
      */
     async _enumerateDir(currDir) {
         var items = fs.readdirSync(currDir);
@@ -208,7 +208,7 @@ class HttpServer {
 
     /**
      * 遍历指定目录下的文件
-     * @param {*} currDir 
+     * @param {*} currDir
      */
     async _enumerateFiles(currDir) {
         var items = fs.readdirSync(currDir);
@@ -233,9 +233,9 @@ class HttpServer {
 
     /**
      * 将指定目录下的指定类挂载到指定路由
-     * @param {*} currDir 
-     * @param {*} cls 
-     * @param {*} inst 
+     * @param {*} currDir
+     * @param {*} cls
+     * @param {*} inst
      */
     async _mountRouter(currDir, cls, inst) {
         var rootPath = await this._getBasePath();
@@ -273,9 +273,9 @@ class HttpServer {
 
     /**
      * 将指定类实例中的指定方法挂载到指定路由中
-     * @param {*} router 
-     * @param {*} inst 
-     * @param {*} name 
+     * @param {*} router
+     * @param {*} inst
+     * @param {*} name
      */
     async _tryAddRouter(router, inst, name) {
         if (name) {
@@ -332,10 +332,10 @@ class HttpServer {
         return new Promise((resolve, reject) => {
             this._http_server.listen(this.config.port, this.config.address, err => {
                 this.logger.info(`DDN http server listened on ${this.config.address}:${this.config.port}`);
-        
+
                 if (!err) {
                     if (this.config.ssl.enabled) {
-                        this._https_server.listen(this.config.ssl.options.port, 
+                        this._https_server.listen(this.config.ssl.options.port,
                             this.config.ssl.options.address, err2 => {
                                 if (err2) {
                                     return reject(err2);
@@ -368,7 +368,7 @@ class HttpServer {
     async removeApiRouter(path)
     {
         const key = ("/api" + path).toLowerCase();
-        if (this._apiRouters[key]) 
+        if (this._apiRouters[key])
         {
             const index = this._apiRouters[key];
             if (index >= 0 && index < this._app._router.stack.length)
