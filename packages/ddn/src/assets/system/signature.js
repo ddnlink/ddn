@@ -37,7 +37,7 @@ class Signatures {
 		}
 
 		try {
-			if (!trs.asset.signature.public_key || new Buffer(trs.asset.signature.public_key, 'hex').length != 32) {
+			if (!trs.asset.signature.public_key || Buffer.from(trs.asset.signature.public_key, 'hex').length != 32) {
                 throw new Error('Invalid signature length');
 			}
 		} catch (e) {
@@ -54,7 +54,7 @@ class Signatures {
 	async getBytes(trs) {
 		try {
 			var bb = new ByteBuffer(32, true);
-			const publicKeyBuffer = new Buffer(trs.asset.signature.public_key, 'hex');
+			const publicKeyBuffer = Buffer.from(trs.asset.signature.public_key, 'hex');
 
 			for (let i = 0; i < publicKeyBuffer.length; i++) {
 				bb.writeByte(publicKeyBuffer[i]);
@@ -150,7 +150,7 @@ class Signatures {
 	}
 
 	async dbSave(trs, dbTrans) {
-		// var public_key = new Buffer(trs.asset.signature.public_key, 'hex');
+		// var public_key = Buffer.from(trs.asset.signature.public_key, 'hex');
 		var obj = {
 			transaction_id: trs.id,
 			public_key: trs.asset.signature.public_key

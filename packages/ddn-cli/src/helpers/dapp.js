@@ -16,12 +16,12 @@ function getBytes(block, skipSignature) {
 	bb.writeInt(block.timestamp);
 	bb.writeInt(block.payloadLength);
 
-	var ph = new Buffer(block.payloadHash, 'hex');
+	var ph = Buffer.from(block.payloadHash, 'hex');
 	for (var i = 0; i < ph.length; i++) {
 		bb.writeByte(ph[i]);
 	}
 
-	var pb = new Buffer(block.delegate, 'hex');
+	var pb = Buffer.from(block.delegate, 'hex');
 	for (let i = 0; i < pb.length; i++) {
 		bb.writeByte(pb[i]);
 	}
@@ -34,7 +34,7 @@ function getBytes(block, skipSignature) {
 	bb.writeInt(block.count);
 
 	if (!skipSignature && block.signature) {
-		var pb = new Buffer(block.signature, 'hex');
+		var pb = Buffer.from(block.signature, 'hex');
 		for (var i = 0; i < pb.length; i++) {
 			bb.writeByte(pb[i]);
 		}

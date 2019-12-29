@@ -8,7 +8,7 @@ module.exports = {
         }
 
         try {
-            const publicKey = new Buffer(str, 'hex');
+            const publicKey = Buffer.from(str, 'hex');
             return publicKey.length == 32;
         } catch (e) {
             return false;

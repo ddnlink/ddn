@@ -211,26 +211,26 @@ class Dapp extends AssetBase {
 
     async getBytes(trs) {
         const dapp = trs.asset.dapp;
-        let buf = new Buffer([]);
-        const nameBuf = new Buffer(dapp.name, 'utf8');
+        let buf = Buffer.from([]);
+        const nameBuf = Buffer.from(dapp.name, 'utf8');
         buf = Buffer.concat([buf, nameBuf]);
 
         if (dapp.description) {
-            const descriptionBuf = new Buffer(dapp.description, 'utf8');
+            const descriptionBuf = Buffer.from(dapp.description, 'utf8');
             buf = Buffer.concat([buf, descriptionBuf]);
         }
 
         if (dapp.tags) {
-            const tagsBuf = new Buffer(dapp.tags, 'utf8');
+            const tagsBuf = Buffer.from(dapp.tags, 'utf8');
             buf = Buffer.concat([buf, tagsBuf]);
         }
 
         if (dapp.link) {
-            buf = Buffer.concat([buf, new Buffer(dapp.link, 'utf8')]);
+            buf = Buffer.concat([buf, Buffer.from(dapp.link, 'utf8')]);
         }
 
         if (dapp.icon) {
-            buf = Buffer.concat([buf, new Buffer(dapp.icon, 'utf8')]);
+            buf = Buffer.concat([buf, Buffer.from(dapp.icon, 'utf8')]);
         }
 
         const bb = new ByteBuffer(1, true);

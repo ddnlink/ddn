@@ -38,7 +38,7 @@ class Consensus {
 
         bytes.writeString(propose.id);
 
-        var generatorPublicKeyBuffer = new Buffer(propose.generator_public_key, "hex"); //wxm block database
+        var generatorPublicKeyBuffer = Buffer.from(propose.generator_public_key, "hex"); //wxm block database
         for (var i = 0; i < generatorPublicKeyBuffer.length; i++) {
             bytes.writeByte(generatorPublicKeyBuffer[i]);
         }
@@ -77,8 +77,8 @@ class Consensus {
         }
 
         try {
-            var signature = new Buffer(propose.signature, "hex");
-            var publicKey = new Buffer(propose.generator_public_key, "hex");    //wxm block database
+            var signature = Buffer.from(propose.signature, "hex");
+            var publicKey = Buffer.from(propose.generator_public_key, "hex");    //wxm block database
             if (ed.Verify(hash, signature, publicKey)) {
                 return;
             } else {
@@ -189,8 +189,8 @@ class Consensus {
     verifyVote(height, id, voteItem) {
         try {
             var hash = this.getVoteHash(height, id);
-            var signature = new Buffer(voteItem.sig, "hex");
-            var publicKey = new Buffer(voteItem.key, "hex");
+            var signature = Buffer.from(voteItem.sig, "hex");
+            var publicKey = Buffer.from(voteItem.key, "hex");
             return ed.Verify(hash, signature, publicKey);
         } catch (e) {
             return false;

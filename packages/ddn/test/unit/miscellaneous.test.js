@@ -21,7 +21,7 @@ describe("POST /accounts/open", function () {
         node.api.post("/accounts/open")
             .set("Accept", "application/json")
             .send({
-                payload: new Buffer(8 * 1000 * 1000).toString()
+                payload: Buffer.allocUnsafe(8 * 1000 * 1000).toString()
             })
             .expect("Content-Type", /json/)
             .expect(200)

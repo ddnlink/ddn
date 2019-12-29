@@ -295,7 +295,7 @@ describe('Test AOB', () => {
       res = await registerIssuerAsync('normalname', '', account)
       expect(res.body).to.have.property('error').to.match(/^Invalid transaction body/)
 
-      var largeString = new Buffer(5000).toString()
+      var largeString = Buffer.allocUnsafe(5000).toString()
       res = await registerIssuerAsync('normalname', largeString, account)
       expect(res.body).to.have.property('error').to.match(/^Invalid transaction body/)
 
@@ -405,7 +405,7 @@ describe('Test AOB', () => {
       var res = await registerAssetAsync(VALID_ASSET_NAME, '', VALID_MAXIMUM, VALID_PRECISION, VALID_STRATEGY, ISSUER_ACCOUNT)
       expect(res.body).to.have.property('error').to.match(/^Invalid transaction body/)
 
-      var largeDesc = new Buffer(5000).toString()
+      var largeDesc = Buffer.allocUnsafe(5000).toString()
       res = await registerAssetAsync(VALID_ASSET_NAME, largeDesc, VALID_MAXIMUM, VALID_PRECISION, VALID_STRATEGY, ISSUER_ACCOUNT)
       expect(res.body).to.have.property('error').to.match(/^Invalid transaction body/)
     })
@@ -445,7 +445,7 @@ describe('Test AOB', () => {
     })
 
     it('Invalid asset strategy', async function () {
-      var largeString = new Buffer(300).toString()
+      var largeString = Buffer.allocUnsafe(300).toString()
       var res = await registerAssetAsync(VALID_ASSET_NAME, VALID_DESC, VALID_MAXIMUM, VALID_PRECISION, largeString, ISSUER_ACCOUNT)
       expect(res.body).to.have.property('error').to.match(/^Invalid transaction body/)
     })

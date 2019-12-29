@@ -106,16 +106,16 @@ class InTransfer extends AssetBase {
     async getBytes(trs) {
         const transfer = await this.getAssetObject(trs);
 
-        var buf = new Buffer([]);
-        const dappId = new Buffer(transfer.dapp_id, 'utf8');
+        var buf = Buffer.from([]);
+        const dappId = Buffer.from(transfer.dapp_id, 'utf8');
         // again !!!
         // if (trs.asset.inTransfer.currency !== this.library.tokenSetting.tokenName) {
         if (transfer.currency !== this.tokenSetting.tokenName) {
-            let currency = new Buffer(transfer.currency, 'utf8');
-            const amount = new Buffer(transfer.amount, 'utf8');
+            let currency = Buffer.from(transfer.currency, 'utf8');
+            const amount = Buffer.from(transfer.amount, 'utf8');
             buf = Buffer.concat([buf, dappId, currency, amount]);
         } else {
-            let currency = new Buffer(transfer.currency, 'utf8');
+            let currency = Buffer.from(transfer.currency, 'utf8');
             buf = Buffer.concat([buf, dappId, currency]);
         }
 

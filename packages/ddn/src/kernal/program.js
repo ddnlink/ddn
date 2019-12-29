@@ -277,7 +277,7 @@ class Program
             const publicIp = this._context.config.publicIp || "127.0.0.1";
             const publicIpLongValue = ip.toLong(publicIp);
             const port = this._context.config.port;
-            const result = await this._context.runtime.peer.queryList(null, {state: {'$gt': 0}, "$not": {ip: publicIpLongValue, port: port}}, 1);
+            const result = await this._context.runtime.peer.queryList(null, {state: {$gt: 0}, "$not": {ip: publicIpLongValue, port: port}}, 1);
             if (result && result.length) {
                 return result[0];
             }

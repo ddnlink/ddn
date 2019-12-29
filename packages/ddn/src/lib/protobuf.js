@@ -17,10 +17,10 @@ class Protobuf {
 
   encodeBlock (block) {
     const obj = extend(true, {}, block);
-    obj.payload_hash = new Buffer(obj.payload_hash, 'hex');  //wxm block database
-    obj.generator_public_key = new Buffer(obj.generator_public_key, 'hex'); //wxm block database
+    obj.payload_hash = Buffer.from(obj.payload_hash, 'hex');  //wxm block database
+    obj.generator_public_key = Buffer.from(obj.generator_public_key, 'hex'); //wxm block database
     if (obj.block_signature) {  //wxm block database
-      obj.block_signature = new Buffer(obj.block_signature, 'hex'); //wxm block database
+      obj.block_signature = Buffer.from(obj.block_signature, 'hex'); //wxm block database
     }
     for (let i = 0; i < obj.transactions.length; ++i) {
       this.transactionStringToBytes(obj.transactions[i]);
@@ -48,9 +48,9 @@ class Protobuf {
 
   encodeBlockPropose (propose) {
     const obj = extend(true, {}, propose);
-    obj.generator_public_key = new Buffer(obj.generator_public_key, 'hex');   //wxm block database
-    obj.hash = new Buffer(obj.hash, 'hex');
-    obj.signature = new Buffer(obj.signature, 'hex');
+    obj.generator_public_key = Buffer.from(obj.generator_public_key, 'hex');   //wxm block database
+    obj.hash = Buffer.from(obj.hash, 'hex');
+    obj.signature = Buffer.from(obj.signature, 'hex');
     var err = this.root.BlockPropose.verify(obj);
     if (err){
       throw Error(err);
@@ -68,8 +68,8 @@ class Protobuf {
 
   encodeBlockVotes (obj) {
     for (let signature of obj.signatures) {
-      signature.key = new Buffer(signature.key, 'hex');
-      signature.sig = new Buffer(signature.sig, 'hex');
+      signature.key = Buffer.from(signature.key, 'hex');
+      signature.sig = Buffer.from(signature.sig, 'hex');
     }
 
     var err = this.root.BlockVotes.verify(obj);
@@ -110,48 +110,48 @@ class Protobuf {
   }
 
   transactionStringToBytes (obj) {
-    obj.sender_public_key = new Buffer(obj.sender_public_key, 'hex');   //wxm block database
-    obj.signature = new Buffer(obj.signature, 'hex');
+    obj.sender_public_key = Buffer.from(obj.sender_public_key, 'hex');   //wxm block database
+    obj.signature = Buffer.from(obj.signature, 'hex');
     if (obj.requester_public_key) {   //wxm block database
-      obj.requester_public_key = new Buffer(obj.requester_public_key, 'hex');   //wxm block database
+      obj.requester_public_key = Buffer.from(obj.requester_public_key, 'hex');   //wxm block database
     }
     if (obj.sign_signature) {    //wxm block database
-      obj.sign_signature = new Buffer(obj.sign_signature, 'hex'); //wxm block database
+      obj.sign_signature = Buffer.from(obj.sign_signature, 'hex'); //wxm block database
     }
 
     switch (obj.type) {
         case AssetTypes.DELEGATE:
             if (obj.asset.delegate) {
-                obj.asset.delegate.public_key = new Buffer(obj.asset.delegate.public_key, 'hex');   //wxm block database
+                obj.asset.delegate.public_key = Buffer.from(obj.asset.delegate.public_key, 'hex');   //wxm block database
             }
             break;
         case AssetTypes.SIGNATURE:
             if (obj.asset.signature) {
-                obj.asset.signature.public_key = new Buffer(obj.asset.signature.public_key, 'hex'); //wxm block database
+                obj.asset.signature.public_key = Buffer.from(obj.asset.signature.public_key, 'hex'); //wxm block database
             }
             break;
     }
   }
 
   transactionBytesToString (obj) {
-    obj.sender_public_key = new Buffer(obj.sender_public_key, "base64").toString("hex");    // obj.sender_public_key.toString('hex');  //wxm block database
-    obj.signature = new Buffer(obj.signature, "base64").toString("hex");    // obj.signature.toString('hex');
+    obj.sender_public_key = Buffer.from(obj.sender_public_key, "base64").toString("hex");    // obj.sender_public_key.toString('hex');  //wxm block database
+    obj.signature = Buffer.from(obj.signature, "base64").toString("hex");    // obj.signature.toString('hex');
     if (obj.requester_public_key) {   //wxm block database
-      obj.requester_public_key = new Buffer(obj.requester_public_key, "base64").toString("hex");    // obj.requester_public_key.toString('hex');  //wxm block database
+      obj.requester_public_key = Buffer.from(obj.requester_public_key, "base64").toString("hex");    // obj.requester_public_key.toString('hex');  //wxm block database
     }
     if (obj.sign_signature) {    //wxm block database
-      obj.sign_signature = new Buffer(obj.sign_signature, "base64").toString("hex");    // obj.sign_signature.toString('hex');    //wxm block database
+      obj.sign_signature = Buffer.from(obj.sign_signature, "base64").toString("hex");    // obj.sign_signature.toString('hex');    //wxm block database
     }
 
     switch (obj.type) {
         case AssetTypes.DELEGATE:
             if (obj.asset.delegate) {
-                obj.asset.delegate.public_key = new Buffer(obj.asset.delegate.public_key, "base64").toString("hex");    // obj.asset.delegate.public_key.toString('hex');  //wxm block database
+                obj.asset.delegate.public_key = Buffer.from(obj.asset.delegate.public_key, "base64").toString("hex");    // obj.asset.delegate.public_key.toString('hex');  //wxm block database
             }
             break;
         case AssetTypes.SIGNATURE:
             if (obj.asset.signature) {
-                obj.asset.signature.public_key = new Buffer(obj.asset.signature.public_key, "base64").toString("hex");  // obj.asset.signature.public_key.toString('hex');    //wxm block database
+                obj.asset.signature.public_key = Buffer.from(obj.asset.signature.public_key, "base64").toString("hex");  // obj.asset.signature.public_key.toString('hex');    //wxm block database
             }
             break;
     }

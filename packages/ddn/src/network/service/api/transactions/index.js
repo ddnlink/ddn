@@ -1,7 +1,6 @@
 const crypto = require('crypto');
 const ed = require('ed25519');
-const { Bignum } = require('@ddn/ddn-utils');
-const { AssetTypes } = require('@ddn/ddn-utils');
+const { Bignum, AssetTypes } = require('@ddn/ddn-utils');
 
 /**
  * RootRouter接口
@@ -103,13 +102,13 @@ class RootRouter {
         if (query.recipientId) {
             andWheres.push({
                 "recipient_id": {
-                    "$like": query.recipientId
+                    $like: query.recipientId
                 }
             });
         }
         if (query.ownerAddress && query.ownerPublicKey) {
             andWheres.push({
-                "$or": [
+                $or: [
                     {
                         "sender_public_key": query.ownerPublicKey
                     },
@@ -120,7 +119,7 @@ class RootRouter {
             });
         } else if (query.ownerAddress) {
             andWheres.push({
-                "$or": [
+                $or: [
                     {
                         "sender_id": query.ownerAddress
                     },

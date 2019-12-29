@@ -103,7 +103,7 @@ class Multisignature {
             }
 
             try {
-                var b = new Buffer(publicKey, 'hex');
+                var b = Buffer.from(publicKey, 'hex');
                 if (b.length != 32) {
                     throw new Error('Invalid public key');
                 }
@@ -129,7 +129,7 @@ class Multisignature {
 	}
 
     async getBytes(trs) {
-		var keysgroupBuffer = new Buffer(trs.asset.multisignature.keysgroup.join(''), 'utf8');
+		var keysgroupBuffer = Buffer.from(trs.asset.multisignature.keysgroup.join(''), 'utf8');
 		var bb = new ByteBuffer(1 + 1 + keysgroupBuffer.length, true);
 		bb.writeByte(trs.asset.multisignature.min);
 		bb.writeByte(trs.asset.multisignature.lifetime);

@@ -1,7 +1,14 @@
 {
   "name": "ddn",
-  "version": "3.0.11",
+  "version": "3.0.28",
   "main": "./app.js",
+  "files": [
+    "lib",
+    "protos",
+    "init",
+    "tasks",
+    "test"
+  ],
   "repository": {
     "type": "git",
     "url": "git+https://github.com/ddnlink/ddn.git"
@@ -86,7 +93,7 @@
     "randomstring": "1.1.5",
     "request": "^2.88.0",
     "rimraf": "2.5.4",
-    "sequelize": "^4.41.0",
+    "sequelize": "^5.21.3",
     "socket.io": "^2.2.0",
     "sqlite3": "^4.0.2",
     "strftime": "0.9.2",

@@ -56,7 +56,7 @@ class RootRouter {
         if (!req.headers.version) {
             return next();
         }
-    
+
         var peer = {
             ip: ip.toLong(peerIp),
             port: req.headers.port,
@@ -93,11 +93,11 @@ class RootRouter {
 
     async getHeight(req) {
         var lastBlock = this.runtime.block.getLastBlock();
-        return { 
+        return {
             height: lastBlock && lastBlock.height ? lastBlock.height : 0
         };
     }
-    
+
     async getList(req) {
         var peers;
         try
@@ -113,7 +113,7 @@ class RootRouter {
 
     async postPropose(req) {
         if (typeof req.body.propose == 'string') {
-            req.body.propose = this.protobuf.decodeBlockPropose(new Buffer(req.body.propose, 'base64'));
+            req.body.propose = this.protobuf.decodeBlockPropose(Buffer.from(req.body.propose, 'base64'));
         }
 
         var validateErrors = await this.ddnSchema.validate({
@@ -151,7 +151,7 @@ class RootRouter {
         if (validateErrors) {
             return {success: false, error: "Schema validation error: " + validateErrors[0].message};
         }
-    
+
         setImmediate(async () => {
             await this.runtime.block.receiveNewPropose(req.body.propose);
         });
@@ -181,10 +181,10 @@ class RootRouter {
         if (validateErrors) {
             return {success: false, error: "Schema validation error"};
         }
-    
+
         setImmediate(async () => {
             await this.runtime.block.receiveVotes(req.body);
-        }); 
+        });
 
         return {success: true};
     }
@@ -258,7 +258,7 @@ class RootRouter {
         const peerIp = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
         const peerStr = peerIp ? `${peerIp}:${isNaN(req.headers['port']) ? 'unknown' : req.headers['port']}` : 'unknown';
         if (typeof req.body.transaction == 'string') {
-            req.body.transaction = this.protobuf.decodeTransaction(new Buffer(req.body.transaction, 'base64'));
+            req.body.transaction = this.protobuf.decodeTransaction(Buffer.from(req.body.transaction, 'base64'));
         }
 
         let transaction;
@@ -271,12 +271,12 @@ class RootRouter {
                 trs: transaction,
                 error: Utils.getErrorMsg(e)
             });
-    
+
             if (peerIp && req.headers['port'] > 0 && req.headers['port' < 65536]) {
                 await this.runtime.peer.changeState(ip.toLong(peerIp), req.headers['port'], 0, 3600);
                 this.logger.log(`Received transaction ${transaction ? transaction.id : 'null'} is not valid, ban 60 min`, peerStr);
             }
-    
+
             return {success: false, error: "Invalid transaction body"};
         }
 
@@ -287,13 +287,13 @@ class RootRouter {
         if (this._invalidTrsCache.has(transaction.id)) {
             return {success: false, error: `The transaction ${transaction.id} is in process alreay.`};
         }
-    
+
         return new Promise((resolve, reject) => {
             this.balancesSequence.add(async (cb) => {
                 if (await this.runtime.transaction.hasUnconfirmedTransaction(transaction)) {
                     return cb(`The transaction ${transaction.id} is in process already..`); // Note: please get it.
                 }
-    
+
                 this.logger.log(`Received transaction ${transaction.id} from peer ${peerStr}`);
 
                 try

@@ -183,7 +183,7 @@ async function createDAppMetaFile() {
 
 				for (var i in publicKeys) {
 					try {
-						var b = new Buffer(publicKeys[i], "hex");
+						var b = Buffer.from(publicKeys[i], "hex");
 						if (b.length != 32) {
 							done("Invalid public key: " + publicKeys[i]);
 							return;

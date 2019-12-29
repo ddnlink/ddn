@@ -1,6 +1,6 @@
 {
   "name": "@ddn/ddn-dapp",
-  "version": "1.0.9",
+  "version": "1.0.12",
   "description": "this is ddn-dapp package",
   "main": "index.js",
   "repository": {

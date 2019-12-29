@@ -43,8 +43,8 @@ var keypair = function (secret) {
 	var kp = nacl.crypto_sign_keypair_from_seed(hash);
 
 	var keypair = {
-		publicKey: new Buffer(kp.signPk).toString('hex'),
-		privateKey: new Buffer(kp.signSk).toString('hex')
+		publicKey: Buffer.from(kp.signPk).toString('hex'),
+		privateKey: Buffer.from(kp.signSk).toString('hex')
 	}
 
 	return keypair;
@@ -52,8 +52,8 @@ var keypair = function (secret) {
 
 var sign = function (keypair, data) {
 	var hash = crypto.createHash('sha256').update(data).digest();
-	var signature = nacl.crypto_sign_detached(hash, new Buffer(keypair.privateKey, 'hex'));
-	return new Buffer(signature).toString('hex');
+	var signature = nacl.crypto_sign_detached(hash, Buffer.from(keypair.privateKey, 'hex'));
+	return Buffer.from(signature).toString('hex');
 }
 
 var getId = function (data) {

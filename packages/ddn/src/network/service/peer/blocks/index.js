@@ -2,6 +2,8 @@
  * RootRouter接口
  * wangxm   2019-01-16
  */
+const ip = require("ip");
+
 class RootRouter {
 
     constructor(context) {
@@ -13,10 +15,10 @@ class RootRouter {
         const peerIp = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
         const peerStr = peerIp ? `${peerIp}:${isNaN(parseInt(req.headers['port'])) ? 'unkwnown' : parseInt(req.headers['port'])}` : 'unknown';
         if (typeof req.body.block == 'string') {
-            req.body.block = this.protobuf.decodeBlock(new Buffer(req.body.block, 'base64'));
+            req.body.block = this.protobuf.decodeBlock(Buffer.from(req.body.block, 'base64'));
         }
         if (typeof req.body.votes == 'string') {
-            req.body.votes = this.protobuf.decodeBlockVotes(new Buffer(req.body.votes, 'base64'));
+            req.body.votes = this.protobuf.decodeBlockVotes(Buffer.from(req.body.votes, 'base64'));
         }
         try {
             var block = await this.runtime.block.objectNormalize(req.body.block);
@@ -24,7 +26,7 @@ class RootRouter {
         } catch (e) {
             this.logger.error(`normalize block or votes object error: ${e.toString()}`);
             this.logger.error(`Block ${block ? block.id : 'null'} is not valid, ban 60 min`, peerStr);
-    
+
             if (peerIp && req.headers['port'] > 0 && req.headers['port'] < 65536) {
                 await this.runtime.peer.changeState(ip.toLong(peerIp), parseInt(req.headers['port']), 0, 3600);
             }
@@ -42,17 +44,17 @@ class RootRouter {
                 this.logger.error("Process received new block failed: " + err);
             }
         });
-    
+
         return {succ: true}
     }
 
     async get(req) {
         var validateErrors = await this.ddnSchema.validate({
             type: 'object',
-            properties: { 
-                lastBlockId: { 
-                    type: 'string' 
-                } 
+            properties: {
+                lastBlockId: {
+                    type: 'string'
+                }
             }
         }, req.query);
         if (validateErrors) {
@@ -82,7 +84,7 @@ class RootRouter {
                             "$gt": row ? row.height : 0
                         }
                     }
-            
+
                     var data = await this.runtime.dataquery.queryFullBlockData(where, limit, 0, [['height', 'asc']]);
                     cb(null, {blocks: data});
                 });
@@ -97,7 +99,7 @@ class RootRouter {
     }
 
     async getCommon(req) {
-        var validateErrors = await this.ddnSchema.validate({
+        const validateErrors = await this.ddnSchema.validate({
             type: "object",
             properties: {
                 max: {
@@ -124,7 +126,7 @@ class RootRouter {
         const escapedIds = ids.map(id => `'${id}'`);
 
         if (!escapedIds.length) {
-            var validateErrors = await this.ddnSchema.validate({
+            const validateErrors = await this.ddnSchema.validate({
                 type: "object",
                 properties: {
                     port: {
@@ -144,25 +146,25 @@ class RootRouter {
             const peerPort = parseInt(req.headers['port']);
             const peerStr = peerIp ? `${peerIp}:${isNaN(peerPort) ? 'unkwnown' : peerPort}` : 'unknown';
             this.logger.log('Invalid common block request, ban 60 min', peerStr);
-  
+
             if (!validateErrors && peerIp && !isNaN(peerPort)) {
                 await this.runtime.peer.changeState(ip.toLong(peerIp), peerPort, 0, 3600);
             }
-  
+
             return {success: false, error: "Invalid block id sequence"};
         }
 
         return new Promise((resolve, reject) => {
             // shuai 2018-12-01
             this.dao.findList('block', {
-                id: { '$in': ids },
-                height: { '$gte': min, '$lte': max },
+                id: { $in: ids },
+                height: { $gte: min, $lte: max },
             }, ["id", "timestamp", "previous_block", "height"],
             [['height', 'DESC']], (err, rows) => {
                 if (err) {
                     resolve({success: false, error: "Database error"});
                 }
-    
+
                 const commonBlock = rows.length ? rows[0] : null;
                 resolve({success: true, common: commonBlock});
             })

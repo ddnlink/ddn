@@ -7,7 +7,7 @@ module.exports = {
 		}
 		
 		var kp = crypto.keypair(secret);
-		var address = crypto.getAddress(new Buffer(kp.publicKey, 'hex'), tokenPrefix);
+		var address = crypto.getAddress(Buffer.from(kp.publicKey, 'hex'), tokenPrefix);
 
 		return {
 			keypair: kp,
