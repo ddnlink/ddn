@@ -5,7 +5,7 @@ var crypto = require('./crypto.js');
 var bytesTypes = {
 	2: function (trs) {
 		try {
-			var buf = new Buffer(trs.asset.delegates.list.join(","), 'utf8');
+			var buf = Buffer.from(trs.asset.delegates.list.join(","), 'utf8');
 		} catch (e) {
 			throw Error(e.toString());
 		}
@@ -21,7 +21,7 @@ function getTransactionBytes(trs, skipSignature) {
 		bb.writeInt(trs.timestamp);
 		bb.writeString(trs.fee)
 
-		var senderPublicKeyBuffer = new Buffer(trs.senderPublicKey, 'hex');
+		var senderPublicKeyBuffer = Buffer.from(trs.senderPublicKey, 'hex');
 		for (var i = 0; i < senderPublicKeyBuffer.length; i++) {
 			bb.writeByte(senderPublicKeyBuffer[i]);
 		}
@@ -33,7 +33,7 @@ function getTransactionBytes(trs, skipSignature) {
 		}
 
 		if (!skipSignature && trs.signature) {
-			var signatureBuffer = new Buffer(trs.signature, 'hex');
+			var signatureBuffer = Buffer.from(trs.signature, 'hex');
 			for (var i = 0; i < signatureBuffer.length; i++) {
 				bb.writeByte(signatureBuffer[i]);
 			}

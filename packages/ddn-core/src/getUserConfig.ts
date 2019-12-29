@@ -66,8 +66,11 @@ export function getConfigByConfigFile(configFile, opts: IOpts = {}): IConfig {
     defaultConfig,
     requireFile(configFile, requireOpts),
     ddnEnv && requireFile(addAffix(configFile, ddnEnv), requireOpts),
+    isDev && requireFile(addAffix(configFile, 'testnet'), requireOpts),
     isDev && requireFile(addAffix(configFile, 'local'), requireOpts),
+    !isDev && requireFile(addAffix(configFile, 'mainnet'), requireOpts),
   ];
+
   return mergeConfigs(...configs);
 }
 
@@ -98,13 +101,15 @@ export function cleanConfigRequireCache(cwd) {
 
 /**
  * 配置调用
+ * 默认 .ddnrc.js，config/config.json, config/config.j(t)s是主要配置文件，
+ * 当 DDN_ENV 给定值的时候，主配置文件不变，但是 在 .{DDN_ENV}.js 中的配置覆盖
+ * 主配置文件而生效。
  * @param opts {cwd: cwd, defaultConfig: config.default.js }
  */
 export default function(opts: IOpts = {}): IConfig {
   const { cwd, defaultConfig } = opts;
   const absConfigFile = getConfigFile(cwd);
 
-  // 主 config 文件，DDN_ENV 才生效
   if (absConfigFile) {
     return getConfigByConfigFile(absConfigFile, {
       defaultConfig,

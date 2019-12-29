@@ -215,7 +215,7 @@ class Account {
                 if (mem_account_ids.length > 0) {
                     delegates = await new Promise((reslove, reject) => {
                         this.dao.findListByGroup('mem_accounts2delegate', {
-                        account_id: { '$in': mem_account_ids }   //wxm block database
+                        account_id: { $in: mem_account_ids }   //wxm block database
                         }, {
                             limit: mem_account_ids.length,
                             offset: 0,
@@ -231,7 +231,7 @@ class Account {
                     u_delegates = await new Promise((reslove, reject) => {
                         this.dao.findListByGroup('mem_accounts2u_delegate', {
                             account_id: {    //wxm block database
-                                '$in': mem_account_ids
+                                $in: mem_account_ids
                             }
                         }, {
                             limit: mem_account_ids.length,
@@ -248,7 +248,7 @@ class Account {
                     multisignatures = await new Promise((reslove, reject) => {
                         this.dao.findListByGroup('mem_accounts2multisignature', {
                             account_id: {    //wxm block database
-                                '$in': mem_account_ids
+                                $in: mem_account_ids
                             }
                         }, {
                             limit: mem_account_ids.length,
@@ -266,7 +266,7 @@ class Account {
                     u_multisignatures = await new Promise((reslove, reject) => {
                         this.dao.findListByGroup('mem_accounts2u_multisignature', {
                             account_id: {    //wxm block database
-                                '$in': mem_account_ids
+                                $in: mem_account_ids
                             }
                         }, {
                             limit: mem_account_ids.length,
@@ -585,22 +585,13 @@ class Account {
                             update[value] = trueValue;
                             break;
                         case Number:
-                            //Bignum update   if (isNaN(trueValue) || trueValue === Infinity) {
                             if (Bignum.isNaN(trueValue)) {
                                 return reject("Encountered invalid number while merging account: " + trueValue + ", value: " + value + ", value: " + address);
                             }
 
-                            //Bignum update   if (Math.abs(trueValue) === trueValue && trueValue !== 0) {
                             if (Bignum.isEqualTo(Bignum.abs(trueValue), trueValue) && !Bignum.isZero(trueValue)) {
-                                // update.$inc = update.$inc || {};
-                                // //Bignum update update.$inc[value] = trueValue;
-                                // update.$inc[value] = Bignum.new(trueValue).toString();
                                 update[value] = this.dao.db_str(`${value} + ${Bignum.new(trueValue)}`)
-                            //Bignum update   } else if (trueValue < 0) {
                             } else if (Bignum.isLessThan(trueValue, 0)) {
-                                // update.$dec = update.$dec || {};
-                                // //Bignum update update.$dec[value] = Math.abs(trueValue);
-                                // update.$dec[value] = Bignum.abs(trueValue).toString();
 
                                 update[value] = this.dao.db_str(`${value} ${Bignum.new(trueValue)}`)
                             }

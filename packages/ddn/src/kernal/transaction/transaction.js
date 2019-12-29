@@ -125,13 +125,13 @@ class Transaction
         bb.writeInt(trs.timestamp);
         bb.writeString(trs.nethash);
 
-        const senderPublicKeyBuffer = new Buffer(trs.sender_public_key, 'hex');
+        const senderPublicKeyBuffer = Buffer.from(trs.sender_public_key, 'hex');
         for (let i = 0; i < senderPublicKeyBuffer.length; i++) {
             bb.writeByte(senderPublicKeyBuffer[i]);
         }
 
         if (trs.requester_public_key) {
-            const requesterPublicKey = new Buffer(trs.requester_public_key, 'hex');
+            const requesterPublicKey = Buffer.from(trs.requester_public_key, 'hex');
             for (let i = 0; i < requesterPublicKey.length; i++) {
                 bb.writeByte(requesterPublicKey[i]);
             }
@@ -164,14 +164,14 @@ class Transaction
         }
 
         if (!skipSignature && trs.signature) {
-            const signatureBuffer = new Buffer(trs.signature, 'hex');
+            const signatureBuffer = Buffer.from(trs.signature, 'hex');
             for (let i = 0; i < signatureBuffer.length; i++) {
                 bb.writeByte(signatureBuffer[i]);
             }
         }
 
         if (!skipSecondSignature && trs.sign_signature) {    //wxm block database
-            const signSignatureBuffer = new Buffer(trs.sign_signature, 'hex');
+            const signSignatureBuffer = Buffer.from(trs.sign_signature, 'hex');
             for (let i = 0; i < signSignatureBuffer.length; i++) {
                 bb.writeByte(signSignatureBuffer[i]);
             }
@@ -638,15 +638,15 @@ class Transaction
     }
 
     async verifyBytes(bytes, publicKey, signature) {
-        const data2 = new Buffer(bytes.length);
+        const data2 = Buffer.allocUnsafe(bytes.length);
         for (let i = 0; i < data2.length; i++) {
             data2[i] = bytes[i];
         }
 
         // Note: how to
         const hash = crypto.createHash('sha256').update(data2).digest();
-        const signatureBuffer = new Buffer(signature, 'hex');
-        const publicKeyBuffer = new Buffer(publicKey, 'hex');
+        const signatureBuffer = Buffer.from(signature, 'hex');
+        const publicKeyBuffer = Buffer.from(publicKey, 'hex');
         return ed.Verify(hash, signatureBuffer || ' ', publicKeyBuffer || ' ');
     }
 

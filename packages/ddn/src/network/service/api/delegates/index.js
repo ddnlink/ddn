@@ -170,7 +170,7 @@ class RootRouter {
                     {
                         rows = await this.runtime.account.getAccountList({
                             address: {
-                                "$in": addresses
+                                $in: addresses
                             },
                             sort: [['balance', 'ASC']]
                         }, ['address', 'balance', 'public_key', 'username']);

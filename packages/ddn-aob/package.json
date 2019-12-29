@@ -1,7 +1,7 @@
 {
   "name": "@ddn/ddn-aob",
-  "version": "1.0.6",
-  "description": "这个是ddn链上资产包",
+  "version": "1.0.8",
+  "description": "DDN链上资产包",
   "main": "index.js",
   "repository": {
     "type": "git",

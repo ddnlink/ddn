@@ -3,8 +3,7 @@
  * wangxm   2019-01-15
  */
 const ip = require("ip");
-const { Bignum } = require('@ddn/ddn-utils');
-const { Utils } = require('@ddn/ddn-utils');
+const { Bignum, Utils } = require('@ddn/ddn-utils');
 
 var _singleton;
 
@@ -78,7 +77,7 @@ class PeerSync {
         return new Promise((resolve, reject) => {
             this.dao.findPage("block", {
                 height: {
-                "$lte": height
+                $lte: height
                 }
             }, 5, 0, false, ['id', 'height'],
             [['height', 'DESC']], (err, rows) => {

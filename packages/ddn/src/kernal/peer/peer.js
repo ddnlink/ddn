@@ -320,7 +320,7 @@ class Peer {
     async restoreBanState() {
         return await new Promise((resolve) => {
             this.dao.update('peer', { state: 1, clock: null },
-                { state: 0, clock: { '$lt': Date.now() } },
+                { state: 0, clock: { $lt: Date.now() } },
                 (err, result) => {
                     if (err) {
                         resolve(false);
@@ -376,7 +376,7 @@ class Peer {
     }
 
     async getRandomPeer(dappId, allowSelf) {
-        var peers = await this.queryList(dappId, {state: {'$gt': 0}}, 2);
+        var peers = await this.queryList(dappId, {state: {$gt: 0}}, 2);
         if (peers && peers.length) {
             var peer = peers[0];
             var peerIp = ip.fromLong(peer.ip);
@@ -416,7 +416,7 @@ class Peer {
 
         var where = {
             id: {
-                '$in': _.pluck(data, 'peer_id')
+                $in: _.pluck(data, 'peer_id')
             }
         };
         return new Promise((resolve, reject) => {
@@ -452,7 +452,7 @@ class Peer {
 
         where = where || {};
         if (data) {
-            where.id = {'$in': _.pluck(data, 'peer_id')}
+            where.id = {$in: _.pluck(data, 'peer_id')}
         }
 
         return new Promise((resolve, reject) => {

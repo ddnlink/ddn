@@ -5,7 +5,7 @@ module.exports = {
     validate: function(str) {
         let b = null;
         try {
-            b = new Buffer(str, 'hex');
+            b = Buffer.from(str, 'hex');
         } catch (e) {
             return false;
         }

@@ -16,7 +16,7 @@ function getBytes(trs) {
     bb.writeInt(trs.timestamp)
     bb.writeString(trs.fee)
 
-    var senderPublicKeyBuffer = new Buffer(trs.senderPublicKey, 'hex');
+    var senderPublicKeyBuffer = Buffer.from(trs.senderPublicKey, 'hex');
     for (var i = 0; i < senderPublicKeyBuffer.length; i++) {
       bb.writeByte(senderPublicKeyBuffer[i]);
     }
@@ -59,7 +59,7 @@ describe('benchmarks', function () {
 
   it('sha256', function (done) {
     const COUNT = 10000
-    let bytes = new Buffer(256)
+    let bytes = Buffer.allocUnsafe(256)
     let label = 'time usage for ' + COUNT + ' sha256 hashes'
     console.time(label)
     for (let i = 0; i < COUNT; ++i) {

@@ -4,7 +4,7 @@ const { Bignum } = require('@ddn/ddn-utils');
 var bytesTypes = {
 	2: function (trs) {
 		try {
-			var buf = new Buffer(trs.asset.delegate.username, 'utf8');
+			var buf = Buffer.from(trs.asset.delegate.username, 'utf8');
 		} catch (e) {
 			throw Error(e.toString());
 		}
@@ -14,7 +14,7 @@ var bytesTypes = {
 
 	3: function (trs) {
 		try {
-			var buf = trs.asset.vote.votes ? new Buffer(trs.asset.vote.votes.join(''), 'utf8') : null;
+			var buf = trs.asset.vote.votes ? Buffer.from(trs.asset.vote.votes.join(''), 'utf8') : null;
 		} catch (e) {
 			throw Error(e.toString());
 		}
@@ -24,17 +24,17 @@ var bytesTypes = {
 
 	5: function (trs) {
 		try {
-			var buf = new Buffer([]);
-			var nameBuf = new Buffer(trs.asset.dapp.name, 'utf8');
+			var buf = Buffer.from([]);
+			var nameBuf = Buffer.from(trs.asset.dapp.name, 'utf8');
 			buf = Buffer.concat([buf, nameBuf]);
 
 			if (trs.asset.dapp.description) {
-				var descriptionBuf = new Buffer(trs.asset.dapp.description, 'utf8');
+				var descriptionBuf = Buffer.from(trs.asset.dapp.description, 'utf8');
 				buf = Buffer.concat([buf, descriptionBuf]);
 			}
 
 			if (trs.asset.dapp.git) {
-				buf = Buffer.concat([buf, new Buffer(trs.asset.dapp.git, 'utf8')]);
+				buf = Buffer.concat([buf, Buffer.from(trs.asset.dapp.git, 'utf8')]);
 			}
 
 			var bb = new ByteBuffer(4 + 4, true);
@@ -66,7 +66,7 @@ function getTransactionBytes(trs, skipSignature) {
 	bb.writeInt(trs.timestamp);
     bb.writeString(trs.nethash);
 
-	var senderPublicKeyBuffer = new Buffer(trs.sender_public_key, 'hex'); //wxm block database
+	var senderPublicKeyBuffer = Buffer.from(trs.sender_public_key, 'hex'); //wxm block database
 	for (var i = 0; i < senderPublicKeyBuffer.length; i++) {
 		bb.writeByte(senderPublicKeyBuffer[i]);
 	}
@@ -95,7 +95,7 @@ function getTransactionBytes(trs, skipSignature) {
 	}
 
 	if (!skipSignature && trs.signature) {
-		var signatureBuffer = new Buffer(trs.signature, 'hex');
+		var signatureBuffer = Buffer.from(trs.signature, 'hex');
 		for (var i = 0; i < signatureBuffer.length; i++) {
 			bb.writeByte(signatureBuffer[i]);
 		}

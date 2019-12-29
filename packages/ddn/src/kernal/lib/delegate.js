@@ -116,7 +116,7 @@ class Delegate {
 
                 var publicKey2 = action.slice(1);
                 try {
-                    new Buffer(publicKey2, "hex");
+                    Buffer.from(publicKey2, "hex");
                 } catch (e) {
                     throw new Error("Invalid public key");
                 }

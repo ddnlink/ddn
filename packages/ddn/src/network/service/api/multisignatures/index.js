@@ -84,13 +84,13 @@ class RootRouter {
                 if (account.second_signature && !body.secondSecret) {
                     return cb("Invalid second passphrase");
                 }
-            
+
                 let second_keypair = null;
                 if (account.second_signature) {
                     var secondHash = crypto.createHash('sha256').update(body.secondSecret, 'utf8').digest();
                     second_keypair = ed.MakeKeypair(secondHash);
                 }
-        
+
                 try {
                     let transaction = await this.runtime.transaction.create({
                         type: AssetTypes.MULTISIGNATURE,
@@ -101,7 +101,7 @@ class RootRouter {
                         keysgroup: body.keysgroup,
                         lifetime: body.lifetime
                     });
-    
+
                     var transactions = await this.runtime.transaction.receiveTransactions([transaction]);
                     cb(null, transactions);
                 } catch (e) {
@@ -167,18 +167,18 @@ class RootRouter {
                 throw new Error("Invalid passphrase");
             }
         }
-        
+
         var hash = crypto.createHash('sha256').update(body.secret, 'utf8').digest();
         var keypair = ed.MakeKeypair(hash);
 
         var sign = await this.runtime.transaction.multisign(keypair, transaction);
 
         if (transaction.type == AssetTypes.MULTISIGNATURE) {
-            if ((transaction.asset.multisignature.keysgroup.indexOf(`+${keypair.publicKey.toString('hex')}`) == -1) || 
+            if ((transaction.asset.multisignature.keysgroup.indexOf(`+${keypair.publicKey.toString('hex')}`) == -1) ||
                 (transaction.signatures && transaction.signatures.indexOf(sign.toString('hex')) != -1)) {
                 throw new Error("Permission to sign transaction denied");
             }
-          
+
             setImmediate(async() => {
                 try
                 {
@@ -200,12 +200,12 @@ class RootRouter {
                     throw new Error("Permission to sign transaction denied");
                 }
             } else {
-                if (account.public_key != keypair.publicKey.toString('hex') || 
+                if (account.public_key != keypair.publicKey.toString('hex') ||
                     transaction.sender_public_key != keypair.publicKey.toString('hex')) {   //wxm block database
                     throw new Error("Permission to sign transaction denied");
                 }
             }
-        
+
             if (transaction.signatures && transaction.signatures.indexOf(sign) != -1) {
                 throw new Error("Permission to sign transaction denied");
             }
@@ -278,7 +278,7 @@ class RootRouter {
         if (query.isOutTransfer) {
             transactions = transactions.filter(item => item.type == TransactionTypes.OUT_TRANSFER);
         }
-      
+
         var pendings = [];
         for (var i = 0; i < transactions.length; i++) {
             var item = transactions[i];
@@ -289,19 +289,19 @@ class RootRouter {
             if (!verify && item.signatures && item.signatures.length > 0) {
                 for (const i in item.signatures) {
                     let signature = item.signatures[i];
-            
+
                     try {
                         verify = await this.runtime.transaction.verifySignature(item, query.publicKey, signature);
                     } catch (e) {
                         this.logger.error('/multisignatures/pending verify fail, error is ', e.stack)
                         verify = false;
                     }
-            
+
                     if (verify) {
                         break;
                     }
                 }
-            
+
                 if (verify) {
                     signed = true;
                 }
@@ -318,13 +318,13 @@ class RootRouter {
                     break;
                 }
 
-                if ((sender.public_key == query.publicKey && sender.u_multisignatures.length > 0) || 
-                    sender.u_multisignatures.indexOf(query.publicKey) >= 0 || 
+                if ((sender.public_key == query.publicKey && sender.u_multisignatures.length > 0) ||
+                    sender.u_multisignatures.indexOf(query.publicKey) >= 0 ||
                     sender.multisignatures.indexOf(query.publicKey) >= 0) {
                     var min = sender.u_multimin || sender.multimin;
                     var lifetime = sender.u_multilifetime || sender.multilifetime;
                     var signatures = sender.u_multisignatures.length;
-            
+
                     pendings.push({
                         max: signatures.length,
                         min,
@@ -365,7 +365,7 @@ class RootRouter {
         return new Promise((resolve, reject) => {
             this.dao.findList('mem_accounts2multisignature', {
                 dependent_id: query.publicKey    //wxm block database
-            }, null, null, false, false, 
+            }, null, null, false, false,
             [[this.dao.db_fnGroupConcat('account_id'), 'account_id']], //wxm block database   library.dao.db_fn('group_concat', library.dao.db_col('accountId'))
             null, async (err, rows) => {
                 if (err) {
@@ -379,12 +379,12 @@ class RootRouter {
                 {
                     var rows = await this.runtime.account.getAccountList({
                         address: {
-                            "$in": addresses
+                            $in: addresses
                         },
                         sort: [['balance', 'ASC']]  //wxm block database
                     }, ['address', 'balance', 'multisignatures', 'multilifetime', 'multimin']);
 
-                    for (var i = 0; i < rows.length; i++) {
+                    for (let i = 0; i < rows.length; i++) {
                         var account = rows[i];
 
                         var addresses = [];
@@ -393,8 +393,8 @@ class RootRouter {
                         }
 
                         var multisigaccounts = await this.runtime.account.getAccountList({
-                            address: { 
-                                "$in": addresses 
+                            address: {
+                                $in: addresses
                             }
                         }, ['address', 'publicKey', 'balance']);
                         account.multisigaccounts = multisigaccounts;

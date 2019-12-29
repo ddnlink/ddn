@@ -92,32 +92,24 @@ class Block
         }
 
         bb.writeInt(block.number_of_transactions);
-        // Bignum update
-        // bb.writeLong(block.totalAmount);
         bb.writeString(block.total_amount.toString());
-
-        // Bignum update
-        // bb.writeLong(block.totalFee);
         bb.writeString(block.total_fee.toString());
-
-        // Bignum update
-        // bb.writeLong(block.reward);
         bb.writeString(block.reward.toString());
 
         bb.writeInt(block.payload_length);
 
-        const payloadHashBuffer = new Buffer(block.payload_hash, 'hex');
+        const payloadHashBuffer = Buffer.from(block.payload_hash, 'hex');
         for (let i = 0; i < payloadHashBuffer.length; i++) {
             bb.writeByte(payloadHashBuffer[i]);
         }
 
-        const generatorPublicKeyBuffer = new Buffer(block.generator_public_key, 'hex');
+        const generatorPublicKeyBuffer = Buffer.from(block.generator_public_key, 'hex');
         for (let i = 0; i < generatorPublicKeyBuffer.length; i++) {
             bb.writeByte(generatorPublicKeyBuffer[i]);
         }
 
         if (block.block_signature) {
-            const blockSignatureBuffer = new Buffer(block.block_signature, 'hex');
+            const blockSignatureBuffer = Buffer.from(block.block_signature, 'hex');
             for (let i = 0; i < blockSignatureBuffer.length; i++) {
                 bb.writeByte(blockSignatureBuffer[i]);
             }
@@ -712,14 +704,17 @@ class Block
 
         try {
             const data = this.getBytes(block);
-            const data2 = new Buffer(data.length - remove);
+            // FIXME: Buffer.from 不能使用number作为参数的，但是这里使用数组是不安全的，
+            // 应该使用另外2个，比如：alloc
+            let str = data.length - remove;
+            const data2 = Buffer.allocUnsafe(str);
 
             for (let i = 0; i < data2.length; i++) {
                 data2[i] = data[i];
             }
             const hash = crypto.createHash('sha256').update(data2).digest();
-            const blockSignatureBuffer = new Buffer(block.block_signature, 'hex');
-            const generatorPublicKeyBuffer = new Buffer(block.generator_public_key, 'hex');
+            const blockSignatureBuffer = Buffer.from(block.block_signature, 'hex');
+            const generatorPublicKeyBuffer = Buffer.from(block.generator_public_key, 'hex');
             res = ed.Verify(hash, blockSignatureBuffer || ' ', generatorPublicKeyBuffer || ' ');
         } catch (e) {
             this.logger.error(e);
@@ -918,7 +913,7 @@ class Block
                     var existsTrsIds = [];
                     if (trsIds.length > 0) {
                         existsTrsIds = await new Promise((resolve, reject) => {
-                            this.dao.findList("tr", {id: {"$in": trsIds}}, ["id"], null, null, (err, result) => {
+                            this.dao.findList("tr", {id: {$in: trsIds}}, ["id"], null, null, (err, result) => {
                                 if (err) {
                                     return reject(`Failed to query transaction from db: ${err}`);
                                 } else {
@@ -1082,10 +1077,6 @@ class Block
                 return a.type - b.type;
             }
 
-            //   Bignum update
-            //   if (a.amount != b.amount) {
-            //     return a.amount - b.amount;
-            //   }
             if (!Bignum.isEqualTo(a.amount, b.amount)) {
                 if (Bignum.isGreaterThan(a.amount, b.amount)) {
                     return 1;
@@ -1225,7 +1216,7 @@ class Block
                     if (result && result.height != null &&
                         typeof(result.height) != "undefined")
                     {
-                        this.dao.remove('block', {height: {'$gte': result.height}},
+                        this.dao.remove('block', {height: {$gte: result.height}},
                             (err2, result2) => {
                                 if (err2)
                                 {
@@ -1257,7 +1248,7 @@ class Block
             this.dbSequence.add(async (cb) => {
                 var where = {
                     height: {
-                      "$gte": offset || 0
+                      $gte: offset || 0
                     }
                 }
 

@@ -8,7 +8,7 @@ module.exports = {
         }
 
         try {
-            const signature = new Buffer(str, 'hex');
+            const signature = Buffer.from(str, 'hex');
             return signature.length == 64;
         } catch (e) {
             return false;

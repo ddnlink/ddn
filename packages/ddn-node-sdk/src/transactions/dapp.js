@@ -47,7 +47,7 @@ function getDAppTransactionBytes(trs, skipSignature) {
 	bb.writeInt(trs.timestamp);
 	bb.writeString(trs.fee)
 
-	var senderPublicKeyBuffer = new Buffer(trs.senderPublicKey, 'hex');
+	var senderPublicKeyBuffer = Buffer.from(trs.senderPublicKey, 'hex');
 	for (var i = 0; i < senderPublicKeyBuffer.length; i++) {
 		bb.writeByte(senderPublicKeyBuffer[i]);
 	}
@@ -57,7 +57,7 @@ function getDAppTransactionBytes(trs, skipSignature) {
 	if (trs.args) bb.writeString(trs.args)
 
 	if (!skipSignature && trs.signature) {
-		var signatureBuffer = new Buffer(trs.signature, 'hex');
+		var signatureBuffer = Buffer.from(trs.signature, 'hex');
 		for (var i = 0; i < signatureBuffer.length; i++) {
 			bb.writeByte(signatureBuffer[i]);
 		}

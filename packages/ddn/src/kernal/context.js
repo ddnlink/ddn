@@ -73,12 +73,12 @@ class Context
         });
 
         //数据库操作对象
-        this.dao = await this._buildDataAccessObject(options.logger);
+        this.dao = await this._buildDataAccessObject(this.config.database, options.logger);
 
         //数据库参数对象，Key/Value类型
         this.dbParams = await this._buildDataParams(this.dao);
 
-        //fix 币种基本配置
+        //FIXME: 币种基本配置
         this.tokenSetting = constants;
 
         //运行时核心逻辑处理模块组
@@ -97,9 +97,9 @@ class Context
         })
     }
 
-    async _buildDataAccessObject(logger) {
+    async _buildDataAccessObject(dbSetting, logger) {
         return new Promise((resolve, reject) => {
-            database.init(logger, (err, result) => {
+            database.init(dbSetting, logger, (err, result) => {
                 if (err) {
                     reject(err)
                 } else {

@@ -8,8 +8,8 @@ class DBUtils {
      * @param {*} logger 日志对象
      * @param {*} cb 回调函数
      */
-    static init(logger, cb) {
-        sequelizeDB.connect(logger, (err, sequelize) => {
+    static init(dbSettings, logger, cb) {
+        sequelizeDB.connect(dbSettings, logger, (err, sequelize) => {
             if (err) {
                 cb(err);
             } else {
@@ -57,7 +57,7 @@ class DBUtils {
 
     /**
      * 对指定字段的内容连接成一个字符串，逗号分隔
-     * @param {*} field 
+     * @param {*} field
      */
     static fnGroupConcat(field) {
         if (this.db_TYPE == "postgres") {
@@ -69,7 +69,7 @@ class DBUtils {
 
     /**
      * 对指定字段求取最大值（指定范围内）
-     * @param {*} field 
+     * @param {*} field
      */
     static fnMax(field) {
         return this.db_fn('MAX', this.db_col(field));
@@ -85,12 +85,12 @@ class DBUtils {
 
     /**
      * 增加方法 --> 创建aobAsset相关的数据表
-     * @param {*} name 
-     * @param {*} func 
+     * @param {*} name
+     * @param {*} func
      */
     static buildModel(name, func) {
         sequelizeDB.buildModel(name, func);
-    }    
+    }
 
     /**
      * 插入数据
@@ -128,7 +128,7 @@ class DBUtils {
 
     /**
      * 系统配置表专用，其他数据禁用，区块链数据不允许删除
-     * @param {*} modelName 
+     * @param {*} modelName
      * @param {*} where 查询条件，参考Sequelize的Query查询定义https://sequelize.readthedocs.io/en/latest/docs/querying/?q=Sequelize.fn&check_keywords=yes&area=default#where
      * @param {*} transaction 事务对象
      * @param {*} cb 回调函数
@@ -222,7 +222,7 @@ class DBUtils {
     }
 
     /**
-     * 
+     *
      * @param {*} func 业务函数，由用户编写，系统会自动调用，并传入两个参数 trans-事务对象实例，done-回调方法
      * @param {*} cb 回调函数
      */
@@ -232,9 +232,9 @@ class DBUtils {
 
     /**
      * 创建指定对象的物理表格
-     * @param {*} modelName 
+     * @param {*} modelName
      * @param {*} force true - 如果存在的话，先删除再创建
-     * @param {*} cb 
+     * @param {*} cb
      */
     static createTable(modelName, force, cb) {
         sequelizeDB.createTable(modelName, force, cb);
@@ -242,8 +242,8 @@ class DBUtils {
 
     /**
      * 删除指定对象的物理表格
-     * @param {*} modelName 
-     * @param {*} cb 
+     * @param {*} modelName
+     * @param {*} cb
      */
     static removeTable(modelName, cb) {
         sequelizeDB.removeTable(modelName, cb);
@@ -251,9 +251,9 @@ class DBUtils {
 
     /**
      * 清除指定对象的所有数据
-     * @param {*} modelName 
+     * @param {*} modelName
      * @param {*} truncate 使用数据库TRUNCATE方法，释放空间和索引
-     * @param {*} cb 
+     * @param {*} cb
      */
     static clear(modelName, truncate, cb) {
         sequelizeDB.clear(modelName, truncate, cb);

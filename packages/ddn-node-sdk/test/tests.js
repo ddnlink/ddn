@@ -251,7 +251,7 @@ describe("DDN JS", function () {
 				(keys).should.have.property("privateKey");
 				(keys.publicKey).should.be.type("string").and.match(function () {
 					try {
-						new Buffer(keys.publicKey, "hex");
+						Buffer.from(keys.publicKey, "hex");
 					} catch (e) {
 						return false;
 					}
@@ -260,7 +260,7 @@ describe("DDN JS", function () {
 				});
 				(keys.privateKey).should.be.type("string").and.match(function () {
 					try {
-						new Buffer(keys.privateKey, "hex");
+						Buffer.from(keys.privateKey, "hex");
 					} catch (e) {
 						return false;
 					}
@@ -395,7 +395,7 @@ describe("DDN JS", function () {
 				it("should have senderPublicKey as hex string", function () {
 					(trs.senderPublicKey).should.be.type("string").and.match(function () {
 						try {
-							new Buffer(trs.senderPublicKey, "hex")
+							Buffer.from(trs.senderPublicKey, "hex")
 						} catch (e) {
 							return false;
 						}
@@ -449,7 +449,7 @@ describe("DDN JS", function () {
 				it("should have signature as hex string", function () {
 					(trs.signature).should.be.type("string").and.match(function () {
 						try {
-							new Buffer(trs.signature, "hex")
+							Buffer.from(trs.signature, "hex")
 						} catch (e) {
 							return false;
 						}
@@ -461,7 +461,7 @@ describe("DDN JS", function () {
 				it("should have second signature in hex", function () {
 					(trs).should.have.property("signSignature").and.type("string").and.match(function () {
 						try {
-							new Buffer(trs.signSignature, "hex");
+							Buffer.from(trs.signSignature, "hex");
 						} catch (e) {
 							return false;
 						}
@@ -501,7 +501,7 @@ describe("DDN JS", function () {
 					var result = ddn.crypto.verifyBytes(data1, signature, keys.publicKey)
 					result.should.be.ok
 
-					var data2 = new Buffer('a1b2c3d4', 'hex')
+					var data2 = Buffer.from('a1b2c3d4', 'hex')
 					signature = ddn.crypto.signBytes(data2, keys)
 					result = ddn.crypto.verifyBytes(data2, signature, keys.publicKey)
 					result.should.be.ok
@@ -572,7 +572,7 @@ describe("DDN JS", function () {
 				it("should have senderPublicKey in hex", function () {
 					(trs).should.have.property("senderPublicKey").and.type("string").and.match(function () {
 						try {
-							new Buffer(trs.senderPublicKey, "hex");
+							Buffer.from(trs.senderPublicKey, "hex");
 						} catch (e) {
 							return false;
 						}
@@ -584,7 +584,7 @@ describe("DDN JS", function () {
 				it("should have signature in hex", function () {
 					(trs).should.have.property("signature").and.type("string").and.match(function () {
 						try {
-							new Buffer(trs.signature, "hex");
+							Buffer.from(trs.signature, "hex");
 						} catch (e) {
 							return false;
 						}
@@ -596,7 +596,7 @@ describe("DDN JS", function () {
 				it("should have second signature in hex", function () {
 					(trs).should.have.property("signSignature").and.type("string").and.match(function () {
 						try {
-							new Buffer(trs.signSignature, "hex");
+							Buffer.from(trs.signSignature, "hex");
 						} catch (e) {
 							return false;
 						}
@@ -714,7 +714,7 @@ describe("DDN JS", function () {
 					it("should have publicKey in hex", function () {
 						(sgn.asset.signature.publicKey).should.be.type("string").and.match(function () {
 							try {
-								new Buffer(sgn.asset.signature.publicKey);
+								Buffer.from(sgn.asset.signature.publicKey);
 							} catch (e) {
 								return false;
 							}
@@ -724,7 +724,7 @@ describe("DDN JS", function () {
 					});
 
 					it("should have publicKey in 32 bytes", function () {
-						var publicKey = new Buffer(sgn.asset.signature.publicKey, "hex");
+						var publicKey = Buffer.from(sgn.asset.signature.publicKey, "hex");
 						(publicKey.length).should.be.equal(32);
 					});
 				});
@@ -931,7 +931,7 @@ describe("DDN JS", function () {
 				it("should have senderPublicKey as hex string", function () {
 					(trs.senderPublicKey).should.be.type("string").and.match(function () {
 						try {
-							new Buffer(trs.senderPublicKey, "hex")
+							Buffer.from(trs.senderPublicKey, "hex")
 						} catch (e) {
 							return false;
 						}
@@ -959,7 +959,7 @@ describe("DDN JS", function () {
 				it("should have signature as hex string", function () {
 					(trs.signature).should.be.type("string").and.match(function () {
 						try {
-							new Buffer(trs.signature, "hex")
+							Buffer.from(trs.signature, "hex")
 						} catch (e) {
 							return false;
 						}
@@ -1016,7 +1016,7 @@ describe("DDN JS", function () {
 				it("should have senderPublicKey as hex string", function () {
 					(trs.senderPublicKey).should.be.type("string").and.match(function () {
 						try {
-							new Buffer(trs.senderPublicKey, "hex")
+							Buffer.from(trs.senderPublicKey, "hex")
 						} catch (e) {
 							return false;
 						}
@@ -1044,7 +1044,7 @@ describe("DDN JS", function () {
 				it("should have signature as hex string", function () {
 					(trs.signature).should.be.type("string").and.match(function () {
 						try {
-							new Buffer(trs.signature, "hex")
+							Buffer.from(trs.signature, "hex")
 						} catch (e) {
 							return false;
 						}
@@ -1056,7 +1056,7 @@ describe("DDN JS", function () {
 				it("should have signSignature as hex string", function () {
 					(trs.signSignature).should.be.type("string").and.match(function () {
 						try {
-							new Buffer(trs.signSignature, "hex");
+							Buffer.from(trs.signSignature, "hex");
 						} catch (e) {
 							return false;
 						}
@@ -1154,7 +1154,7 @@ describe("DDN JS", function () {
 				it("should have senderPublicKey hex string equal to sender public key", function () {
 					(vt).should.have.property("senderPublicKey").and.be.type("string").and.match(function () {
 						try {
-							new Buffer(vt.senderPublicKey, "hex");
+							Buffer.from(vt.senderPublicKey, "hex");
 						} catch (e) {
 							return false;
 						}
@@ -1166,7 +1166,7 @@ describe("DDN JS", function () {
 				it("should have signature hex string", function () {
 					(vt).should.have.property("signature").and.be.type("string").and.match(function () {
 						try {
-							new Buffer(vt.signature, "hex");
+							Buffer.from(vt.signature, "hex");
 						} catch (e) {
 							return false;
 						}
@@ -1178,7 +1178,7 @@ describe("DDN JS", function () {
 				it("should have second signature hex string", function () {
 					(vt).should.have.property("signSignature").and.be.type("string").and.match(function () {
 						try {
-							new Buffer(vt.signSignature, "hex");
+							Buffer.from(vt.signSignature, "hex");
 						} catch (e) {
 							return false;
 						}
@@ -1234,7 +1234,7 @@ describe("DDN JS", function () {
 						vt.asset.vote.votes.forEach(function (v) {
 							(v).should.be.type("string").startWith("+").and.match(function () {
 								try {
-									new Buffer(v.substring(1, v.length), "hex");
+									Buffer.from(v.substring(1, v.length), "hex");
 								} catch (e) {
 									return false;
 								}
@@ -1256,7 +1256,7 @@ describe("DDN JS", function () {
 	describe('crypto sha256 and address', function () {
 		it('should be equal to the expected address', function () {
 			ddn.crypto.getAddress('7a91b9bfc0ea185bf3ade9d264da273f7fe19bf71008210b1d7239c82dd3ad20').should.be.equal('AFbYJhiJb3DXzHy5ZP24mKw21M2dCBJCXP')
-			var publicKeyBuffer = new Buffer('7a91b9bfc0ea185bf3ade9d264da273f7fe19bf71008210b1d7239c82dd3ad20', 'hex')
+			var publicKeyBuffer = Buffer.from('7a91b9bfc0ea185bf3ade9d264da273f7fe19bf71008210b1d7239c82dd3ad20', 'hex')
 			ddn.crypto.getAddress(publicKeyBuffer).should.be.equal('AFbYJhiJb3DXzHy5ZP24mKw21M2dCBJCXP')
 		})
 	})

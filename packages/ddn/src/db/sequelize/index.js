@@ -1,7 +1,6 @@
 const path = require('path');
 const fs = require('fs');
 const Sequelize = require('sequelize');
-const { dbSettings } = require('../../../config/config.database');
 
 const _sysModels = {};
 
@@ -51,10 +50,9 @@ class DAO {
         this._addModel(name, func(sequelizeInst));
     }
 
-    static connect(logger, cb) {
-
-        sequelizeInst = new Sequelize(dbSettings.database,
-            dbSettings.username, dbSettings.password, dbSettings.connection);
+    static connect(dbSetting, logger, cb) {
+        sequelizeInst = new Sequelize(dbSetting.database,
+            dbSetting.username, dbSetting.password, dbSetting.options);
 
         sequelizeInst.authenticate()
             .then(err => {
@@ -505,7 +503,7 @@ class DAO {
             if (modelInst) {
                 var invokeMethod = modelInst.findAll;
 
-                var options = Object.assign({}, logOptions, {
+                let opts = Object.assign({}, logOptions, {
                     attributes: attributes ? attributes : undefined,
                     where: where ? where : undefined,
                     order: orders,
@@ -515,7 +513,7 @@ class DAO {
                     transaction: dbTrans ? dbTrans : undefined
                 });
 
-                invokeMethod.call(modelInst, options)
+                invokeMethod.call(modelInst, opts)
                     .then((results) => {
                         if (typeof (cb) == "function") {
                             var jsonResults = [];

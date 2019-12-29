@@ -15,28 +15,25 @@ export default function(opts: IOpts) {
   const { cwd, config } = opts;
   const outputPath = config.outputPath || './dist';
 
-  let pagesPath = 'pages';
-  if (process.env.PAGES_PATH) {
-    pagesPath = process.env.PAGES_PATH;
+  let publicPath = 'public';
+  if (process.env.PUBLIC_PATH) {
+    publicPath = process.env.PUBLIC_PATH;
   } else {
-    if (test(join(cwd, 'src/page'))) {
-      pagesPath = 'src/page';
+    if (test(join(cwd, 'src/public'))) {
+      publicPath = 'src/public';
     }
-    if (test(join(cwd, 'src/pages'))) {
-      pagesPath = 'src/pages';
-    }
-    if (test(join(cwd, 'page'))) {
-      pagesPath = 'page';
+    if (test(join(cwd, 'public'))) {
+      publicPath = 'public';
     }
   }
 
-  const absPagesPath = join(cwd, pagesPath);
+  const absPagesPath = join(cwd, publicPath);
   const absSrcPath = join(absPagesPath, '../');
 
   const envAffix = process.env.NODE_ENV === 'development' ? '' : `-production`;
   const tmpDirPath = process.env.DDN_TEMP_DIR
     ? `${process.env.DDN_TEMP_DIR}${envAffix}`
-    : `${pagesPath}/.ddn${envAffix}`;
+    : `${publicPath}/.ddn${envAffix}`;
 
   const absTmpDirPath = join(cwd, tmpDirPath);
 
@@ -45,7 +42,7 @@ export default function(opts: IOpts) {
     outputPath,
     absOutputPath: join(cwd, outputPath),
     absNodeModulesPath: join(cwd, 'node_modules'),
-    pagesPath,
+    publicPath,
     absPagesPath,
     absSrcPath,
     tmpDirPath,

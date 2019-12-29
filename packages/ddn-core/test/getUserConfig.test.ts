@@ -112,15 +112,24 @@ test('config with mergeConfigs .ddnrc.prod.js', () => {
   process.env.DDN_ENV = ''
 });
 
-test('config with mergeConfigs config/config.local.js and config.jsons', () => {
+test('config with mergeConfigs config/config.local.json and config.jsons', () => {
   process.env.NODE_ENV = 'development'
 
   const config = getUserConfig({
     cwd: join(fixtures, 'config-configjson'),
   });
   expect(config).toEqual({
-    history: 'local',
-    story: 'ok'
+    "port": 7000,
+    "address": "127.0.0.1",
+    "publicIp": "",
+    "logLevel": "info",
+    "netVersion": "testnet",
+    "nethash": "3ab796cd",
+    "api": {
+        "access": {
+        "whiteList": []
+        }
+    }
   });
 
   process.env.NODE_ENV = ''

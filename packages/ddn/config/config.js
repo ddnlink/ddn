@@ -1,24 +1,34 @@
-{
-  "port": 8001,
-  "address": "127.0.0.1",
-  "publicIp": "",
-  "logLevel": "info",
-  "netVersion": "testnet",
-  "nethash": "0ab796cd",
-  "api": {
-    "access": {
-      "whiteList": []
+/*---------------------------------------------------------------------------------------------
+ *  Created by Imfly on Sun Dec 29 2019 15:57:56
+ *
+ *  Copyright (c) 2019 DDN FOUNDATION. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+const Sequelize = require('sequelize');
+const Op = Sequelize.Op;
+
+module.exports = {
+  // About Peer
+  port: 8001,
+  address: "127.0.0.1",
+  publicIp: "",
+  logLevel: "info",
+  netVersion: "testnet",
+  nethash: "0ab796cd",
+  api: {
+    access: {
+      whiteList: []
     }
   },
-  "peers": {
-    "list": [],
-    "blackList": [],
-    "options": {
-      "timeout": 4000
+  peers: {
+    list: [],
+    blackList: [],
+    options: {
+      timeout: 4000
     }
   },
-  "forging": {
-    "secret": [
+  forging: {
+    secret: [
       "lake kitten arrow elephant because entire club rug unique climb club arrive",
       "frog foil road lab skate mother height arrow secret allow shell found",
       "surprise thrive maple salmon absent chest act easy stomach drill permit trophy",
@@ -121,32 +131,96 @@
       "elite sunset cake shaft human cradle remember select flame panther tongue ancient",
       "shrug yard energy zoo test wasp pilot merry shove around pet young"
     ],
-    "access": {
-      "whiteList": [
-        "127.0.0.1"
-      ]
+    access: {
+      whiteList: ["127.0.0.1"]
     }
   },
-  "loading": {
-    "verifyOnLoading": false,
-    "loadPerIteration": 5000
+  loading: {
+    verifyOnLoading: false,
+    loadPerIteration: 5000
   },
-  "ssl": {
-    "enabled": false,
-    "options": {
-      "port": 443,
-      "address": "0.0.0.0",
-      "key": "./ssl/server.key",
-      "cert": "./ssl/server.crt"
+  ssl: {
+    enabled: false,
+    options: {
+      port: 443,
+      address: "0.0.0.0",
+      key: "./ssl/server.key",
+      cert: "./ssl/server.crt"
     }
   },
-  "dapp": {
-    "masterpassword": "xS5XaSoHsTEL",
-    "params": {}
+  dapp: {
+    masterpassword: "xS5XaSoHsTEL",
+    params: {}
   },
-  "settings": {
-    "enableMoreLockTypes": true,
-    "delegateNumber": 101,
-    "blockIntervalTime": 10
+  settings: {
+    enableMoreLockTypes: true,
+    delegateNumber: 101,
+    blockIntervalTime: 10
+  },
+
+  /**
+   * Database options
+   * https://sequelize.org/master/class/lib/sequelize.js~Sequelize.html#instance-constructor-constructor
+   * */
+  database: {
+    database: process.env.DBNAME || "ddn",
+    username: process.env.DBUSERNAME || "root",
+    password: process.env.DBPASSWORD || "root", // Please use process.env.DBPASSWORD
+
+    options: {
+      // the sql dialect of the database
+      // currently supported: 'mysql', 'sqlite', 'postgres', 'mssql'
+      dialect: "sqlite",
+
+      // custom host; default: localhost
+      host: "127.0.0.1",
+
+      // custom port; default: dialect default
+      // port: 12345,
+
+      pool: {
+        max: 10,
+        min: 1,
+        idle: 10000
+      },
+
+      // SQLite only
+      storage: "blockchain.db",
+
+      // Sequelize will warn you if you're using the default aliases and not limiting them
+      // https://sequelize.org/master/manual/querying.html#operators-aliases
+      operatorsAliases: {
+        $and: Op.and,
+        $or: Op.or,
+        $eq: Op.eq,
+        $gt: Op.gt,
+        $lt: Op.lt,
+        $lte: Op.lte,
+        $like: Op.like,
+        $in: Op.in,
+        $is: Op.is,
+
+        // ---
+        $ne: Op.ne,
+        $gte: Op.gte,
+        $not: Op.not,
+        $notIn: Op.notIn,
+        $notLike: Op.notLike,
+        $iLike: Op.iLike,
+        $notILike: Op.notILike,
+        $regexp: Op.regexp,
+        $notRegexp: Op.notRegexp,
+        $iRegexp: Op.iRegexp,
+        $notIRegexp: Op.notIRegexp,
+        $between: Op.between,
+        $notBetween: Op.notBetween,
+        $overlap: Op.overlap,
+        $contains: Op.contains,
+        $contained: Op.contained,
+        $any: Op.any,
+        $all: Op.all,
+        $col: Op.col
+      }
+    }
   }
-}
+};

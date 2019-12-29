@@ -40,19 +40,19 @@ function getBytes(block, skipSignature) {
 
 	bb.writeInt(block.payload_length);   //wxm block database
 
-	const payloadHashBuffer = new Buffer(block.payload_hash, 'hex'); //wxm block database
+	const payloadHashBuffer = Buffer.from(block.payload_hash, 'hex'); //wxm block database
 
 	for (let i = 0; i < payloadHashBuffer.length; i++) {
 		bb.writeByte(payloadHashBuffer[i]);
 	}
 
-	const generatorPublicKeyBuffer = new Buffer(block.generator_public_key, 'hex');   //wxm block database
+	const generatorPublicKeyBuffer = Buffer.from(block.generator_public_key, 'hex');   //wxm block database
 	for (let i = 0; i < generatorPublicKeyBuffer.length; i++) {
 		bb.writeByte(generatorPublicKeyBuffer[i]);
 	}
 
 	if (!skipSignature && block.block_signature) {   //wxm block database
-		const blockSignatureBuffer = new Buffer(block.block_signature, 'hex');
+		const blockSignatureBuffer = Buffer.from(block.block_signature, 'hex');
 		for (let i = 0; i < blockSignatureBuffer.length; i++) {
 			bb.writeByte(blockSignatureBuffer[i]);
 		}
@@ -308,7 +308,7 @@ module.exports = {
 		dappTransaction.id = cryptoLib.getId(bytes);
 
 		genesisBlock.payloadLength += bytes.length;
-		const payloadHash = crypto.createHash('sha256').update(new Buffer(genesisBlock.payloadHash, 'hex'));
+		const payloadHash = crypto.createHash('sha256').update(Buffer.from(genesisBlock.payloadHash, 'hex'));
 		payloadHash.update(bytes);
 		genesisBlock.payloadHash = payloadHash.digest().toString('hex');
 

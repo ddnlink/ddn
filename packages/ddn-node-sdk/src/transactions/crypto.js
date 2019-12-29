@@ -20,7 +20,7 @@ var fixedPoint = Math.pow(10, 8);
 
 function getSignatureBytes(signature) {
     var bb = new ByteBuffer(32, true);
-    var publicKeyBuffer = new Buffer(signature.public_key, "hex");
+    var publicKeyBuffer = Buffer.from(signature.public_key, "hex");
 
     for (var i = 0; i < publicKeyBuffer.length; i++) {
         bb.writeByte(publicKeyBuffer[i]);
@@ -75,19 +75,19 @@ async function getBytes(transaction, skipSignature, skipSecondSignature) {
 
         case trsTypes.DELEGATE: // Delegate
             {
-                assetBytes = new Buffer(transaction.asset.delegate.username, "utf8");
+                assetBytes = Buffer.from(transaction.asset.delegate.username, "utf8");
                 break;
             }
 
         case trsTypes.VOTE: // Vote
             {
-                assetBytes = new Buffer(transaction.asset.vote.votes.join(""), "utf8");
+                assetBytes = Buffer.from(transaction.asset.vote.votes.join(""), "utf8");
                 break;
             }
 
         case trsTypes.MULTI: // Multi-Signature
             {
-                let keysgroupBuffer = new Buffer(transaction.asset.multisignature.keysgroup.join(""), "utf8");
+                let keysgroupBuffer = Buffer.from(transaction.asset.multisignature.keysgroup.join(""), "utf8");
                 let bb = new ByteBuffer(1 + 1 + keysgroupBuffer.length, true);
 
                 bb.writeByte(transaction.asset.multisignature.min);
@@ -125,15 +125,15 @@ async function getBytes(transaction, skipSignature, skipSecondSignature) {
     bb.writeString(transaction.nethash); // +8
 
     // +32
-    const senderPublicKeyBuffer = new Buffer(transaction.sender_public_key, "hex");
-    // var senderPublicKeyBuffer = new Buffer(transaction.senderPublicKey, "hex");
+    const senderPublicKeyBuffer = Buffer.from(transaction.sender_public_key, "hex");
+    // var senderPublicKeyBuffer = Buffer.from(transaction.senderPublicKey, "hex");
     for (let i = 0; i < senderPublicKeyBuffer.length; i++) {
         bb.writeByte(senderPublicKeyBuffer[i]);
     }
 
     // +32
     if (transaction.requester_public_key) { //wxm block database
-        let requesterPublicKey = new Buffer(transaction.requester_public_key, "hex"); //wxm block database
+        let requesterPublicKey = Buffer.from(transaction.requester_public_key, "hex"); //wxm block database
 
         for (let i = 0; i < requesterPublicKey.length; i++) {
             bb.writeByte(requesterPublicKey[i]);
@@ -170,14 +170,14 @@ async function getBytes(transaction, skipSignature, skipSecondSignature) {
     }
 
     if (!skipSignature && transaction.signature) {
-        let signatureBuffer = new Buffer(transaction.signature, "hex");
+        let signatureBuffer = Buffer.from(transaction.signature, "hex");
         for (let i = 0; i < signatureBuffer.length; i++) {
             bb.writeByte(signatureBuffer[i]);
         }
     }
 
     if (!skipSecondSignature && transaction.sign_signature) {  //wxm block database
-        let signSignatureBuffer = new Buffer(transaction.sign_signature, "hex"); //wxm block database
+        let signSignatureBuffer = Buffer.from(transaction.sign_signature, "hex"); //wxm block database
         for (let i = 0; i < signSignatureBuffer.length; i++) {
             bb.writeByte(signSignatureBuffer[i]);
         }
@@ -193,7 +193,7 @@ async function getBytes(transaction, skipSignature, skipSecondSignature) {
         buffer[i] = arrayBuffer[i];
     }
 
-    return new Buffer(buffer);
+    return Buffer.from(buffer);
     // return bb.toBuffer();
 }
 
@@ -235,27 +235,27 @@ async function getFee(transaction) {
 
 async function sign(transaction, keys) {
     var hash = await getHash(transaction, true, true);
-    var signature = nacl.sign.detached(hash, new Buffer(keys.private_key, "hex"));
+    var signature = nacl.sign.detached(hash, Buffer.from(keys.private_key, "hex"));
 
     if (!transaction.signature) {
         // eslint-disable-next-line require-atomic-updates
-        transaction.signature = new Buffer(signature).toString("hex");
+        transaction.signature = Buffer.from(signature).toString("hex");
     } else {
-        return new Buffer(signature).toString("hex");
+        return Buffer.from(signature).toString("hex");
     }
 }
 
 async function secondSign(transaction, keys) {
     var hash = await getHash(transaction);
-    var signature = nacl.sign.detached(hash, new Buffer(keys.private_key, "hex"));
+    var signature = nacl.sign.detached(hash, Buffer.from(keys.private_key, "hex"));
     // eslint-disable-next-line require-atomic-updates
-    transaction.sign_signature = new Buffer(signature).toString("hex")    //wxm block database
+    transaction.sign_signature = Buffer.from(signature).toString("hex")    //wxm block database
 }
 
 function signBytes(bytes, keys) {
-    var hash = sha256Bytes(new Buffer(bytes, 'hex'))
-    var signature = nacl.sign.detached(hash, new Buffer(keys.private_key, "hex"));
-    return new Buffer(signature).toString("hex");
+    var hash = sha256Bytes(Buffer.from(bytes, 'hex'))
+    var signature = nacl.sign.detached(hash, Buffer.from(keys.private_key, "hex"));
+    return Buffer.from(signature).toString("hex");
 }
 
 async function verify(transaction) {
@@ -266,7 +266,7 @@ async function verify(transaction) {
     }
 
     var bytes = await getBytes(transaction);
-    var data2 = new Buffer(bytes.length - remove);
+    var data2 = Buffer.allocUnsafe(bytes.length - remove);
 
     for (var i = 0; i < data2.length; i++) {
         data2[i] = bytes[i];
@@ -274,8 +274,8 @@ async function verify(transaction) {
 
     var hash = sha256Bytes(data2)
 
-    var signatureBuffer = new Buffer(transaction.signature, "hex");
-    var senderPublicKeyBuffer = new Buffer(transaction.sender_public_key, "hex");
+    var signatureBuffer = Buffer.from(transaction.signature, "hex");
+    var senderPublicKeyBuffer = Buffer.from(transaction.sender_public_key, "hex");
     var res = nacl.sign.detached.verify(hash, signatureBuffer, senderPublicKeyBuffer);
 
     return res;
@@ -283,7 +283,7 @@ async function verify(transaction) {
 
 function verifySecondSignature(transaction, public_key) {
     var bytes = getBytes(transaction);
-    var data2 = new Buffer(bytes.length - 64);
+    var data2 = Buffer.allocUnsafe(bytes.length - 64);
 
     for (var i = 0; i < data2.length; i++) {
         data2[i] = bytes[i];
@@ -291,29 +291,29 @@ function verifySecondSignature(transaction, public_key) {
 
     var hash = sha256Bytes(data2)
 
-    var signSignatureBuffer = new Buffer(transaction.signSignature, "hex");
-    var publicKeyBuffer = new Buffer(public_key, "hex");
+    var signSignatureBuffer = Buffer.from(transaction.signSignature, "hex");
+    var publicKeyBuffer = Buffer.from(public_key, "hex");
     var res = nacl.sign.detached.verify(hash, signSignatureBuffer, publicKeyBuffer);
 
     return res;
 }
 
 function verifyBytes(bytes, signature, public_key) {
-    var hash = sha256Bytes(new Buffer(bytes, 'hex'))
-    var signatureBuffer = new Buffer(signature, "hex");
-    var publicKeyBuffer = new Buffer(public_key, "hex");
+    var hash = sha256Bytes(Buffer.from(bytes, 'hex'))
+    var signatureBuffer = Buffer.from(signature, "hex");
+    var publicKeyBuffer = Buffer.from(public_key, "hex");
     var res = nacl.sign.detached.verify(hash, signatureBuffer, publicKeyBuffer);
     return res
 }
 
 // 根据助记词生成密钥对
 function getKeys(secret) {
-    var hash = sha256Bytes(new Buffer(secret));
+    var hash = sha256Bytes(Buffer.from(secret));
     var keypair = nacl.sign.keyPair.fromSeed(hash);
 
     return {
-        public_key: new Buffer(keypair.publicKey).toString("hex"),
-        private_key: new Buffer(keypair.secretKey).toString("hex")
+        public_key: Buffer.from(keypair.publicKey).toString("hex"),
+        private_key: Buffer.from(keypair.secretKey).toString("hex")
     }
 }
 
