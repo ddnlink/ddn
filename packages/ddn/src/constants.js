@@ -1,3 +1,6 @@
+/**
+ * Note: Once the mainnet is online, this file can no longer be changed.
+ */
 module.exports = {
   maxAmount: 100000000,
   maxPayloadLength: 8 * 1024 * 1024,

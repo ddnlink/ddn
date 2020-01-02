@@ -21,6 +21,7 @@ class BlockStatus {
         Object.assign(this, context);
         this._context = context;
 
+        // TODO: constants 使用 global ？
         this._milestones = constants[context.config.netVersion].milestones;
         this._distance = constants[context.config.netVersion].rewardDistance;
         this._rewardOffset = constants[context.config.netVersion].rewardOffset;

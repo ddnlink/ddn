@@ -4,11 +4,13 @@
  *  Copyright (c) 2019 DDN FOUNDATION. All rights reserved.
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
-const Sequelize = require('sequelize');
+const Sequelize = require("sequelize");
 const Op = Sequelize.Op;
 
 module.exports = {
-  // About Peer
+  /**
+   * About Peer
+  */
   port: 8001,
   address: "127.0.0.1",
   publicIp: "",
@@ -221,6 +223,93 @@ module.exports = {
         $all: Op.all,
         $col: Op.col
       }
+    }
+  },
+
+  /**
+   * 扩展插件，对于区块链而言就是资产包，所以使用 assets
+   * TODO: 将交易类型直接扩展在插件内部，简化配置如下：
+   * assets: [
+   *  "@ddn/ddn-evidence",
+   *  "@ddn/ddn-aob"
+   * ]
+   */
+  assets: {
+    evidence: {
+      transactions: [
+        {
+          name: "Evidence",
+          type: 10
+        }
+      ],
+      package: "@ddn/ddn-evidence"
+    },
+    aob: {
+      transactions: [
+        {
+          name: "AobIssuer",
+          type: 60
+        },
+        {
+          name: "AobAsset",
+          type: 61
+        },
+        {
+          name: "AobFlags",
+          type: 62
+        },
+        {
+          name: "AobAcl",
+          type: 63
+        },
+        {
+          name: "AobIssue",
+          type: 64
+        },
+        {
+          name: "AobTransfer",
+          type: 65
+        }
+      ],
+      package: "@ddn/ddn-aob"
+    },
+    dapp: {
+      transactions: [
+        {
+          name: "Dapp",
+          type: 11
+        },
+        {
+          name: "InTransfer",
+          type: 12
+        },
+        {
+          name: "OutTransfer",
+          type: 13
+        }
+      ],
+      package: "@ddn/ddn-dapp"
+    },
+    dao: {
+      transactions: [
+        {
+          name: "Org",
+          type: 40
+        },
+        {
+          name: "Exchange",
+          type: 41
+        },
+        {
+          name: "Contribution",
+          type: 42
+        },
+        {
+          name: "Confirmation",
+          type: 43
+        }
+      ],
+      package: "@ddn/ddn-dao"
     }
   }
 };

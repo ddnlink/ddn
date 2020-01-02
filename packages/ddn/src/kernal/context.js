@@ -46,7 +46,7 @@ class Context
         this.ddnSchema = DdnSchema.singleton();
 
         //资产插件配置对象
-        this.assetPlugins = AssetUtils.loadFromFile(options.assetConfigFile);
+        this.assetPlugins = AssetUtils.loadFromObject(options.configObject.assets);
 
         //二进制序列化对象
         this.protobuf = await this._buildProtobuf(options.protoFile);
