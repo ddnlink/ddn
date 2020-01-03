@@ -60,13 +60,6 @@ function genOptions() {
         return;
     }
 
-    const assetConfigFile = path.resolve(path.join(baseDir, 'config', 'config.asset.js'));
-    if (!fs.existsSync(assetConfigFile)) {
-        console.error('Failed: DDN asset config file does not exists.');
-        process.exit(1);
-        return;
-    }
-
     const configObject = getUserConfig({cwd: baseDir, defaultConfig: defaultConfigFile });
     // const configObject = getUserConfig.default({cwd: baseDir});
     const genesisblockObject = JSON.parse(fs.readFileSync(genesisblockFile, 'utf8'));
@@ -122,7 +115,6 @@ function genOptions() {
         baseDir,
         configObject,
         genesisblockObject,
-        assetConfigFile,
         protoFile,
         isDaemonMode: !!command.daemon
     }
