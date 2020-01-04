@@ -1,6 +1,6 @@
-const path = require('path');
-const fs = require('fs');
-const Sequelize = require('sequelize');
+import path from 'path';
+import fs from 'fs';
+import Sequelize from 'sequelize';
 
 const _sysModels = {};
 
@@ -19,17 +19,17 @@ let sequelizeInst;
 class DAO {
 
     static _registerModel(connection) {
-        var modelDir = path.resolve(__dirname, "models");
-        var files = fs.readdirSync(modelDir);
-        for (var i = 0; i < files.length; i++) {
-            var fullName = files[i];
-            var pos = fullName.lastIndexOf(".");
+        const modelDir = path.resolve(__dirname, "models");
+        const files = fs.readdirSync(modelDir);
+        for (let i = 0; i < files.length; i++) {
+            const fullName = files[i];
+            const pos = fullName.lastIndexOf(".");
             if (pos >= 0) {
-                var name = fullName.substring(0, pos);
-                var ext = fullName.substring(pos);
+                const name = fullName.substring(0, pos);
+                const ext = fullName.substring(pos);
                 if (ext.toLowerCase() == ".js") {
                     if (name.toLowerCase() != "index") {
-                        var defineModel = require('./models/' + name);
+                        const defineModel = require('./models/' + name);
                         this._addModel(name, defineModel(connection));
                     }
                 }
@@ -57,19 +57,19 @@ class DAO {
         sequelizeInst.authenticate()
             .then(err => {
                 if (err) {
-                    cb(err);
+                    return cb(err);
                 } else {
                     this._registerModel(sequelizeInst);
 
-                    sequelizeInst.sync(logOptions)
+                    return sequelizeInst.sync(logOptions)
                         .then(() => {
-                            cb(null, sequelizeInst);
+                            return cb(null, sequelizeInst);
                         }).catch(err3 => {
-                            cb(err3);
+                            return cb(err3);
                         });
                 }
             }).catch(err2 => {
-                cb(err2);
+                return cb(err2);
             });
     }
 
@@ -80,48 +80,48 @@ class DAO {
                 transaction = null;
             }
 
-            var modelInst = this._getModel(modelName);
+            const modelInst = this._getModel(modelName);
             if (modelInst) {
                 if (modelObj) {
-                    var options = Object.assign({}, logOptions, {
+                    const options = Object.assign({}, logOptions, {
                         transaction: transaction ? transaction : null
                     });
                     modelInst.create(modelObj, options)
                         .then((newRecord) => {
                             if (typeof (cb) == "function") {
-                                cb(null, newRecord);
+                                return cb(null, newRecord);
                             }
                         }).catch(err2 => {
                             if (typeof (cb) == "function") {
-                                var errMsg2 = err2.toString();
+                                let errMsg2 = err2.toString();
                                 if (err2.errors && err2.errors.length > 0) {
-                                    for (var i = 0; i < err2.errors.length; i++) {
+                                    for (let i = 0; i < err2.errors.length; i++) {
                                         errMsg2 += ("\r\n" + err2.errors[i].message);
                                     }
                                 }
-                                cb(errMsg2);
+                                return cb(errMsg2);
                             }
                         });
                 } else {
                     if (typeof (cb) == "function") {
-                        cb("无效的数据输入：" + modelObj);
+                        return cb("无效的数据输入：" + modelObj);
                     }
                 }
             } else {
                 if (typeof (cb) == "function") {
-                    cb("数据模型未定义：" + modelName);
+                    return cb("数据模型未定义：" + modelName);
                 }
             }
         }
         catch (err) {
             if (typeof (cb) == "function") {
-                var errMsg = err.toString();
+                let errMsg = err.toString();
                 if (err.errors && err.errors.length > 0) {
-                    for (var i = 0; i < err.errors.length; i++) {
+                    for (let i = 0; i < err.errors.length; i++) {
                         errMsg += ("\r\n" + err.errors[i].message);
                     }
                 }
-                cb(errMsg);
+                return cb(errMsg);
             }
         }
     }
@@ -133,48 +133,48 @@ class DAO {
                 transaction = null;
             }
 
-            var modelInst = this._getModel(modelName);
+            const modelInst = this._getModel(modelName);
             if (modelInst) {
                 if (modelObj) {
-                    var options = Object.assign({}, logOptions, {
+                    const options = Object.assign({}, logOptions, {
                         transaction: transaction ? transaction : null
                     });
                     modelInst.upsert(modelObj, options)
                         .then((newRecord) => {
                             if (typeof (cb) == "function") {
-                                cb(null, modelObj);
+                                return cb(null, newRecord);
                             }
                         }).catch(err2 => {
                             if (typeof (cb) == "function") {
-                                var errMsg2 = err2.toString();
+                                let errMsg2 = err2.toString();
                                 if (err2.errors && err2.errors.length > 0) {
-                                    for (var i = 0; i < err2.errors.length; i++) {
+                                    for (let i = 0; i < err2.errors.length; i++) {
                                         errMsg2 += ("\r\n" + err2.errors[i].message);
                                     }
                                 }
-                                cb(errMsg2);
+                                return cb(errMsg2);
                             }
                         });
                 } else {
                     if (typeof (cb) == "function") {
-                        cb("无效的数据输入：" + modelObj);
+                        return cb("无效的数据输入：" + modelObj);
                     }
                 }
             } else {
                 if (typeof (cb) == "function") {
-                    cb("数据模型未定义：" + modelName);
+                    return cb("数据模型未定义：" + modelName);
                 }
             }
         }
         catch (err) {
             if (typeof (cb) == "function") {
-                var errMsg = err.toString();
+                let errMsg = err.toString();
                 if (err.errors && err.errors.length > 0) {
-                    for (var i = 0; i < err.errors.length; i++) {
+                    for (let i = 0; i < err.errors.length; i++) {
                         errMsg += ("\r\n" + err.errors[i].message);
                     }
                 }
-                cb(errMsg);
+                return cb(errMsg);
             }
         }
     }
@@ -196,49 +196,49 @@ class DAO {
                 transaction = null;
             }
 
-            var modelInst = this._getModel(modelName);
+            const modelInst = this._getModel(modelName);
             if (modelInst) {
                 if (modelObj) {
-                    var options = Object.assign({}, logOptions, {
+                    const options = Object.assign({}, logOptions, {
                         where: where,
                         transaction: transaction ? transaction : null
                     });
                     modelInst.update(modelObj, options)
                         .then((result) => {
                             if (typeof (cb) == "function") {
-                                cb(null, (result && result.length > 0 ? result[0] : 0));
+                                return cb(null, (result && result.length > 0 ? result[0] : 0));
                             }
                         }).catch(err2 => {
                             if (typeof (cb) == "function") {
-                                var errMsg2 = err2.toString();
+                                let errMsg2 = err2.toString();
                                 if (err2.errors && err2.errors.length > 0) {
-                                    for (var i = 0; i < err2.errors.length; i++) {
+                                    for (let i = 0; i < err2.errors.length; i++) {
                                         errMsg2 += ("\r\n" + err2.errors[i].message);
                                     }
                                 }
-                                cb(errMsg2);
+                                return cb(errMsg2);
                             }
                         });
                 } else {
                     if (typeof (cb) == "function") {
-                        cb("无效的数据输入：" + modelObj);
+                        return cb("无效的数据输入：" + modelObj);
                     }
                 }
             } else {
                 if (typeof (cb) == "function") {
-                    cb("数据模型未定义：" + modelName);
+                    return cb("数据模型未定义：" + modelName);
                 }
             }
         }
         catch (err) {
             if (typeof (cb) == "function") {
-                var errMsg = err.toString();
+                let errMsg = err.toString();
                 if (err.errors && err.errors.length > 0) {
-                    for (var i = 0; i < err.errors.length; i++) {
+                    for (let i = 0; i < err.errors.length; i++) {
                         errMsg += ("\r\n" + err.errors[i].message);
                     }
                 }
-                cb(errMsg);
+                return cb(errMsg);
             }
         }
     }
@@ -250,10 +250,10 @@ class DAO {
                 transaction = null;
             }
 
-            var modelInst = this._getModel(modelName);
+            const modelInst = this._getModel(modelName);
             if (modelInst) {
                 if (where) {
-                    var options = Object.assign({}, logOptions, {
+                    const options = Object.assign({}, logOptions, {
                         where: where,
                         transaction: transaction ? transaction : null,
                         cascade: true
@@ -261,39 +261,39 @@ class DAO {
                     modelInst.destroy(options)
                         .then((result) => {
                             if (typeof (cb) == "function") {
-                                cb(null, result);
+                                return cb(null, result);
                             }
                         }).catch(err2 => {
                             if (typeof (cb) == "function") {
-                                var errMsg2 = err2.toString();
+                                let errMsg2 = err2.toString();
                                 if (err2.errors && err2.errors.length > 0) {
-                                    for (var i = 0; i < err2.errors.length; i++) {
+                                    for (let i = 0; i < err2.errors.length; i++) {
                                         errMsg2 += ("\r\n" + err2.errors[i].message);
                                     }
                                 }
-                                cb(errMsg2);
+                                return cb(errMsg2);
                             }
                         });
                 } else {
                     if (typeof (cb) == "function") {
-                        cb("where参数是必须的：" + where);
+                        return cb("where参数是必须的：" + where);
                     }
                 }
             } else {
                 if (typeof (cb) == "function") {
-                    cb("数据模型未定义：" + modelName);
+                    return cb("数据模型未定义：" + modelName);
                 }
             }
         }
         catch (err) {
             if (typeof (cb) == "function") {
-                var errMsg = err.toString();
+                let errMsg = err.toString();
                 if (err.errors && err.errors.length > 0) {
-                    for (var i = 0; i < err.errors.length; i++) {
+                    for (let i = 0; i < err.errors.length; i++) {
                         errMsg += ("\r\n" + err.errors[i].message);
                     }
                 }
-                cb(errMsg);
+                return cb(errMsg);
             }
         }
     }
@@ -305,7 +305,7 @@ class DAO {
                 dbTrans = null;
             }
 
-            var modelInst = this._getModel(modelName);
+            const modelInst = this._getModel(modelName);
             if (modelInst) {
                 if (value) {
                     modelInst.findByPk(value, Object.assign({}, logOptions, {
@@ -314,42 +314,42 @@ class DAO {
                     })).then((result) => {
                         if (typeof (cb) == "function") {
                             if (result && result.toJSON) {
-                                cb(null, result.toJSON());
+                                return cb(null, result.toJSON());
                             } else {
-                                cb(null, result);
+                                return cb(null, result);
                             }
                         }
                     }).catch(err2 => {
                         if (typeof (cb) == "function") {
-                            var errMsg2 = err2.toString();
+                            let errMsg2 = err2.toString();
                             if (err2.errors && err2.errors.length > 0) {
-                                for (var i = 0; i < err2.errors.length; i++) {
+                                for (let i = 0; i < err2.errors.length; i++) {
                                     errMsg2 += ("\r\n" + err2.errors[i].message);
                                 }
                             }
-                            cb(errMsg2);
+                            return cb(errMsg2);
                         }
                     });
                 } else {
                     if (typeof (cb) == "function") {
-                        cb("无效的数据输入：" + value);
+                        return cb("无效的数据输入：" + value);
                     }
                 }
             } else {
                 if (typeof (cb) == "function") {
-                    cb("数据模型未定义：" + modelName);
+                    return cb("数据模型未定义：" + modelName);
                 }
             }
         }
         catch (err) {
             if (typeof (cb) == "function") {
-                var errMsg = err.toString();
+                let errMsg = err.toString();
                 if (err.errors && err.errors.length > 0) {
-                    for (var i = 0; i < err.errors.length; i++) {
+                    for (let i = 0; i < err.errors.length; i++) {
                         errMsg += ("\r\n" + err.errors[i].message);
                     }
                 }
-                cb(errMsg);
+                return cb(errMsg);
             }
         }
     }
@@ -361,11 +361,11 @@ class DAO {
                 dbTrans = null;
             }
 
-            var modelInst = this._getModel(modelName);
+            const modelInst = this._getModel(modelName);
             if (modelInst) {
-                var invokeMethod = modelInst.findAll;
+                const invokeMethod = modelInst.findAll;
 
-                var options = Object.assign({}, logOptions, {
+                const options = Object.assign({}, logOptions, {
                     attributes: attributes ? attributes : undefined,
                     where: where ? where : undefined,
                     order: orders ? orders : undefined
@@ -374,48 +374,48 @@ class DAO {
                 invokeMethod.call(modelInst, options)
                     .then((results) => {
                         if (typeof (cb) == "function") {
-                            var jsonResults = [];
-                            var foundRows = results.rows ? results.rows : results;
-                            for (var i = 0; i < foundRows.length; i++) {
+                            const jsonResults = [];
+                            const foundRows = results.rows ? results.rows : results;
+                            for (let i = 0; i < foundRows.length; i++) {
                                 jsonResults.push(foundRows[i].toJSON());
                             }
 
                             if (results.rows) {
-                                cb(null, {
+                                return cb(null, {
                                     rows: jsonResults,
                                     total: results.count
                                 });
                             } else {
-                                cb(null, jsonResults);
+                                return cb(null, jsonResults);
                             }
                         }
                     }).catch(err2 => {
                         if (typeof (cb) == "function") {
-                            var errMsg2 = err2.toString();
+                            let errMsg2 = err2.toString();
                             if (err2.errors && err2.errors.length > 0) {
-                                for (var i = 0; i < err2.errors.length; i++) {
+                                for (let i = 0; i < err2.errors.length; i++) {
                                     errMsg2 += ("\r\n" + err2.errors[i].message);
                                 }
                             }
-                            cb(errMsg2);
+                            return cb(errMsg2);
                         }
                     });
             } else {
                 if (typeof (cb) == "function") {
-                    cb("数据模型未定义：" + modelName);
+                    return cb("数据模型未定义：" + modelName);
                 }
             }
         }
         catch (err)
         {
             if (typeof (cb) == "function") {
-                var errMsg = err.toString();
+                let errMsg = err.toString();
                 if (err.errors && err.errors.length > 0) {
-                    for (var i = 0; i < err.errors.length; i++) {
+                    for (let i = 0; i < err.errors.length; i++) {
                         errMsg += ("\r\n" + err.errors[i].message);
                     }
                 }
-                cb(errMsg);
+                return cb(errMsg);
             }
         }
     }
@@ -427,14 +427,14 @@ class DAO {
                 dbTrans = null;
             }
 
-            var modelInst = this._getModel(modelName);
+            const modelInst = this._getModel(modelName);
             if (modelInst) {
-                var invokeMethod = modelInst.findAll;
+                let invokeMethod = modelInst.findAll;
                 if (returnTotal) {
                     invokeMethod = modelInst.findAndCountAll;
                 }
 
-                var options = Object.assign({}, logOptions, {
+                const options = Object.assign({}, logOptions, {
                     attributes: attributes ? attributes : undefined,
                     where: where ? where : undefined,
                     order: orders ? orders : undefined,
@@ -445,48 +445,48 @@ class DAO {
                 invokeMethod.call(modelInst, options)
                     .then((results) => {
                         if (typeof (cb) == "function") {
-                            var jsonResults = [];
-                            var foundRows = results.rows ? results.rows : results;
-                            for (var i = 0; i < foundRows.length; i++) {
+                            const jsonResults = [];
+                            const foundRows = results.rows ? results.rows : results;
+                            for (let i = 0; i < foundRows.length; i++) {
                                 jsonResults.push(foundRows[i].toJSON());
                             }
 
                             if (results.rows) {
-                                cb(null, {
+                                return cb(null, {
                                     rows: jsonResults,
                                     total: results.count
                                 });
                             } else {
-                                cb(null, jsonResults);
+                                return cb(null, jsonResults);
                             }
                         }
                     }).catch(err2 => {
                         if (typeof (cb) == "function") {
-                            var errMsg2 = err2.toString();
+                            let errMsg2 = err2.toString();
                             if (err2.errors && err2.errors.length > 0) {
-                                for (var i = 0; i < err2.errors.length; i++) {
+                                for (let i = 0; i < err2.errors.length; i++) {
                                     errMsg2 += ("\r\n" + err2.errors[i].message);
                                 }
                             }
-                            cb(errMsg2);
+                            return cb(errMsg2);
                         }
                     });
             } else {
                 if (typeof (cb) == "function") {
-                    cb("数据模型未定义：" + modelName);
+                    return cb("数据模型未定义：" + modelName);
                 }
             }
         }
         catch (err)
         {
             if (typeof (cb) == "function") {
-                var errMsg = err.toString();
+                let errMsg = err.toString();
                 if (err.errors && err.errors.length > 0) {
-                    for (var i = 0; i < err.errors.length; i++) {
+                    for (let i = 0; i < err.errors.length; i++) {
                         errMsg += ("\r\n" + err.errors[i].message);
                     }
                 }
-                cb(errMsg);
+                return cb(errMsg);
             }
         }
     }
@@ -499,9 +499,9 @@ class DAO {
             }
             let { limit, offset, attributes, orders, group } = options
 
-            var modelInst = this._getModel(modelName);
+            const modelInst = this._getModel(modelName);
             if (modelInst) {
-                var invokeMethod = modelInst.findAll;
+                const invokeMethod = modelInst.findAll;
 
                 let opts = Object.assign({}, logOptions, {
                     attributes: attributes ? attributes : undefined,
@@ -516,47 +516,47 @@ class DAO {
                 invokeMethod.call(modelInst, opts)
                     .then((results) => {
                         if (typeof (cb) == "function") {
-                            var jsonResults = [];
-                            var foundRows = results.rows ? results.rows : results;
-                            for (var i = 0; i < foundRows.length; i++) {
+                            const jsonResults = [];
+                            const foundRows = results.rows ? results.rows : results;
+                            for (let i = 0; i < foundRows.length; i++) {
                                 jsonResults.push(foundRows[i].toJSON());
                             }
 
                             if (results.rows) {
-                                cb(null, {
+                                return cb(null, {
                                     rows: jsonResults,
                                     total: results.count
                                 });
                             } else {
-                                cb(null, jsonResults);
+                                return cb(null, jsonResults);
                             }
                         }
                     }).catch(err2 => {
                         if (typeof (cb) == "function") {
-                            var errMsg2 = err2.toString();
+                            let errMsg2 = err2.toString();
                             if (err2.errors && err2.errors.length > 0) {
-                                for (var i = 0; i < err2.errors.length; i++) {
+                                for (let i = 0; i < err2.errors.length; i++) {
                                     errMsg2 += ("\r\n" + err2.errors[i].message);
                                 }
                             }
-                            cb(errMsg2);
+                            return cb(errMsg2);
                         }
                     });
             } else {
                 if (typeof (cb) == "function") {
-                    cb("数据模型未定义：" + modelName);
+                    return cb("数据模型未定义：" + modelName);
                 }
             }
         }
         catch (err) {
             if (typeof (cb) == "function") {
-                var errMsg = err.toString();
+                let errMsg = err.toString();
                 if (err.errors && err.errors.length > 0) {
-                    for (var i = 0; i < err.errors.length; i++) {
+                    for (let i = 0; i < err.errors.length; i++) {
                         errMsg += ("\r\n" + err.errors[i].message);
                     }
                 }
-                cb(errMsg);
+                return cb(errMsg);
             }
         }
     }
@@ -577,7 +577,7 @@ class DAO {
         }
         this._getModel(modelName).findOne(options).then(
             (data) => {
-                cb(null, data ? data.toJSON() : null);
+                return cb(null, data ? data.toJSON() : null);
             }
         ).catch(cb);
     }
@@ -597,7 +597,7 @@ class DAO {
         }
         this._getModel(modelName).count(options).then(
             (data) => {
-                cb(null, data);
+                return cb(null, data);
             }
         ).catch(cb);
     }
@@ -612,29 +612,29 @@ class DAO {
             sequelizeInst.query(sql, Object.assign({}, logOptions, {
                 transaction: transaction ? transaction : null
             })).spread((results, metadata) => {
-                cb(null, results);
+                return cb(null, results);
                 // cb(null, true);
             }).catch(err => {
                 if (typeof (cb) == "function") {
-                    var errMsg = err.toString();
+                    let errMsg = err.toString();
                     if (err.errors && err.errors.length > 0) {
-                        for (var i = 0; i < err.errors.length; i++) {
+                        for (let i = 0; i < err.errors.length; i++) {
                             errMsg += ("\r\n" + err.errors[i].message);
                         }
                     }
-                    cb(errMsg);
+                    return cb(errMsg);
                 }
             });
         }
         catch (err) {
             if (typeof (cb) == "function") {
-                var errMsg = err.toString();
+                let errMsg = err.toString();
                 if (err.errors && err.errors.length > 0) {
-                    for (var i = 0; i < err.errors.length; i++) {
+                    for (let i = 0; i < err.errors.length; i++) {
                         errMsg += ("\r\n" + err.errors[i].message);
                     }
                 }
-                cb(errMsg);
+                return cb(errMsg);
             }
         }
     }
@@ -648,15 +648,15 @@ class DAO {
                     func(t, err => {
                         if (err) {
                             t.rollback().then(() => {
-                                cb('rollback--' + err, true);
+                                return cb('rollback--' + err, true);
                             }).catch(err2 => {
-                                cb('rollback--' + err2, false);
+                                return cb('rollback--' + err2, false);
                             })
                         } else {
                             t.commit().then(() => {
-                                cb(null, true);
+                                return cb(null, true);
                             }).catch(err2 => {
-                                cb('commit--' + err2, false);
+                                return cb('commit--' + err2, false);
                             })
                         }
                     });
@@ -664,14 +664,14 @@ class DAO {
                 catch(err3)
                 {
                     t.rollback().then(() => {
-                        cb('rollback--' + err3, true);
+                        return cb('rollback--' + err3, true);
                     }).catch(err4 => {
-                        cb('rollback--' + err4, false);
+                        return cb('rollback--' + err4, false);
                     })
                 }
             });
         } else {
-            cb("数据库未连接", false);
+            return cb("数据库未连接", false);
         }
     }
 
@@ -682,66 +682,66 @@ class DAO {
                 force = null;
             }
 
-            var modelInst = this._getModel(modelName);
+            const modelInst = this._getModel(modelName);
             if (modelInst) {
                 modelInst.sync(Object.assign({}, logOptions, {
                     force: force ? force : undefined
                 })).then(() => {
                     if (typeof (cb) == "function") {
-                        cb(null, true);
+                        return cb(null, true);
                     }
                 }).catch(err2 => {
                     if (typeof (cb) == "function") {
-                        cb(err2);
+                        return cb(err2);
                     }
                 });
             } else {
                 if (typeof (cb) == "function") {
-                    cb("数据模型未定义：" + modelName);
+                    return cb("数据模型未定义：" + modelName);
                 }
             }
         }
         catch (err) {
             if (typeof (cb) == "function") {
-                var errMsg = err.toString();
+                let errMsg = err.toString();
                 if (err.errors && err.errors.length > 0) {
-                    for (var i = 0; i < err.errors.length; i++) {
+                    for (let i = 0; i < err.errors.length; i++) {
                         errMsg += ("\r\n" + err.errors[i].message);
                     }
                 }
-                cb(errMsg);
+                return cb(errMsg);
             }
         }
     }
 
     static removeTable(modelName, cb) {
         try {
-            var modelInst = this._getModel(modelName);
+            const modelInst = this._getModel(modelName);
             if (modelInst) {
                 modelInst.drop(logOptions).then(() => {
                     if (typeof (cb) == "function") {
-                        cb(null, true);
+                        return cb(null, true);
                     }
                 }).catch(err2 => {
                     if (typeof (cb) == "function") {
-                        cb(err2);
+                        return cb(err2);
                     }
                 });
             } else {
                 if (typeof (cb) == "function") {
-                    cb("数据模型未定义：" + modelName);
+                    return cb("数据模型未定义：" + modelName);
                 }
             }
         }
         catch (err) {
             if (typeof (cb) == "function") {
-                var errMsg = err.toString();
+                let errMsg = err.toString();
                 if (err.errors && err.errors.length > 0) {
-                    for (var i = 0; i < err.errors.length; i++) {
+                    for (let i = 0; i < err.errors.length; i++) {
                         errMsg += ("\r\n" + err.errors[i].message);
                     }
                 }
-                cb(errMsg);
+                return cb(errMsg);
             }
         }
     }
@@ -753,33 +753,33 @@ class DAO {
                 truncate = null;
             }
 
-            var modelInst = this._getModel(modelName);
+            const modelInst = this._getModel(modelName);
             if (modelInst) {
                 modelInst.destroy(Object.assign({}, logOptions, {
                     truncate: truncate ? truncate : undefined
                 })).then(() => {
                     if (typeof (cb) == "function") {
-                        cb(null, true);
+                        return cb(null, true);
                     }
                 }).catch(err2 => {
                     if (typeof (cb) == "function") {
-                        cb(err2);
+                        return cb(err2);
                     }
                 });
             } else {
                 if (typeof (cb) == "function") {
-                    cb("数据模型未定义：" + modelName);
+                    return cb("数据模型未定义：" + modelName);
                 }
             }
         } catch (err) {
             if (typeof (cb) == "function") {
-                var errMsg = err.toString();
+                let errMsg = err.toString();
                 if (err.errors && err.errors.length > 0) {
-                    for (var i = 0; i < err.errors.length; i++) {
+                    for (let i = 0; i < err.errors.length; i++) {
                         errMsg += ("\r\n" + err.errors[i].message);
                     }
                 }
-                cb(errMsg);
+                return cb(errMsg);
             }
         }
     }
