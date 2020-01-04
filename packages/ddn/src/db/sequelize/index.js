@@ -80,10 +80,10 @@ class DAO {
                 transaction = null;
             }
 
-            var modelInst = this._getModel(modelName);
+            const modelInst = this._getModel(modelName);
             if (modelInst) {
                 if (modelObj) {
-                    var options = Object.assign({}, logOptions, {
+                    const options = Object.assign({}, logOptions, {
                         transaction: transaction ? transaction : null
                     });
                     modelInst.create(modelObj, options)
@@ -93,9 +93,9 @@ class DAO {
                             }
                         }).catch(err2 => {
                             if (typeof (cb) == "function") {
-                                var errMsg2 = err2.toString();
+                                let errMsg2 = err2.toString();
                                 if (err2.errors && err2.errors.length > 0) {
-                                    for (var i = 0; i < err2.errors.length; i++) {
+                                    for (let i = 0; i < err2.errors.length; i++) {
                                         errMsg2 += ("\r\n" + err2.errors[i].message);
                                     }
                                 }
@@ -115,9 +115,9 @@ class DAO {
         }
         catch (err) {
             if (typeof (cb) == "function") {
-                var errMsg = err.toString();
+                let errMsg = err.toString();
                 if (err.errors && err.errors.length > 0) {
-                    for (var i = 0; i < err.errors.length; i++) {
+                    for (let i = 0; i < err.errors.length; i++) {
                         errMsg += ("\r\n" + err.errors[i].message);
                     }
                 }
@@ -133,10 +133,10 @@ class DAO {
                 transaction = null;
             }
 
-            var modelInst = this._getModel(modelName);
+            const modelInst = this._getModel(modelName);
             if (modelInst) {
                 if (modelObj) {
-                    var options = Object.assign({}, logOptions, {
+                    const options = Object.assign({}, logOptions, {
                         transaction: transaction ? transaction : null
                     });
                     modelInst.upsert(modelObj, options)
@@ -146,9 +146,9 @@ class DAO {
                             }
                         }).catch(err2 => {
                             if (typeof (cb) == "function") {
-                                var errMsg2 = err2.toString();
+                                let errMsg2 = err2.toString();
                                 if (err2.errors && err2.errors.length > 0) {
-                                    for (var i = 0; i < err2.errors.length; i++) {
+                                    for (let i = 0; i < err2.errors.length; i++) {
                                         errMsg2 += ("\r\n" + err2.errors[i].message);
                                     }
                                 }
@@ -168,9 +168,9 @@ class DAO {
         }
         catch (err) {
             if (typeof (cb) == "function") {
-                var errMsg = err.toString();
+                let errMsg = err.toString();
                 if (err.errors && err.errors.length > 0) {
-                    for (var i = 0; i < err.errors.length; i++) {
+                    for (let i = 0; i < err.errors.length; i++) {
                         errMsg += ("\r\n" + err.errors[i].message);
                     }
                 }
@@ -196,10 +196,10 @@ class DAO {
                 transaction = null;
             }
 
-            var modelInst = this._getModel(modelName);
+            const modelInst = this._getModel(modelName);
             if (modelInst) {
                 if (modelObj) {
-                    var options = Object.assign({}, logOptions, {
+                    const options = Object.assign({}, logOptions, {
                         where: where,
                         transaction: transaction ? transaction : null
                     });
@@ -210,9 +210,9 @@ class DAO {
                             }
                         }).catch(err2 => {
                             if (typeof (cb) == "function") {
-                                var errMsg2 = err2.toString();
+                                let errMsg2 = err2.toString();
                                 if (err2.errors && err2.errors.length > 0) {
-                                    for (var i = 0; i < err2.errors.length; i++) {
+                                    for (let i = 0; i < err2.errors.length; i++) {
                                         errMsg2 += ("\r\n" + err2.errors[i].message);
                                     }
                                 }
@@ -232,9 +232,9 @@ class DAO {
         }
         catch (err) {
             if (typeof (cb) == "function") {
-                var errMsg = err.toString();
+                let errMsg = err.toString();
                 if (err.errors && err.errors.length > 0) {
-                    for (var i = 0; i < err.errors.length; i++) {
+                    for (let i = 0; i < err.errors.length; i++) {
                         errMsg += ("\r\n" + err.errors[i].message);
                     }
                 }
@@ -250,10 +250,10 @@ class DAO {
                 transaction = null;
             }
 
-            var modelInst = this._getModel(modelName);
+            const modelInst = this._getModel(modelName);
             if (modelInst) {
                 if (where) {
-                    var options = Object.assign({}, logOptions, {
+                    const options = Object.assign({}, logOptions, {
                         where: where,
                         transaction: transaction ? transaction : null,
                         cascade: true
@@ -265,9 +265,9 @@ class DAO {
                             }
                         }).catch(err2 => {
                             if (typeof (cb) == "function") {
-                                var errMsg2 = err2.toString();
+                                let errMsg2 = err2.toString();
                                 if (err2.errors && err2.errors.length > 0) {
-                                    for (var i = 0; i < err2.errors.length; i++) {
+                                    for (let i = 0; i < err2.errors.length; i++) {
                                         errMsg2 += ("\r\n" + err2.errors[i].message);
                                     }
                                 }
@@ -287,9 +287,9 @@ class DAO {
         }
         catch (err) {
             if (typeof (cb) == "function") {
-                var errMsg = err.toString();
+                let errMsg = err.toString();
                 if (err.errors && err.errors.length > 0) {
-                    for (var i = 0; i < err.errors.length; i++) {
+                    for (let i = 0; i < err.errors.length; i++) {
                         errMsg += ("\r\n" + err.errors[i].message);
                     }
                 }
@@ -305,7 +305,7 @@ class DAO {
                 dbTrans = null;
             }
 
-            var modelInst = this._getModel(modelName);
+            const modelInst = this._getModel(modelName);
             if (modelInst) {
                 if (value) {
                     modelInst.findByPk(value, Object.assign({}, logOptions, {
@@ -321,9 +321,9 @@ class DAO {
                         }
                     }).catch(err2 => {
                         if (typeof (cb) == "function") {
-                            var errMsg2 = err2.toString();
+                            let errMsg2 = err2.toString();
                             if (err2.errors && err2.errors.length > 0) {
-                                for (var i = 0; i < err2.errors.length; i++) {
+                                for (let i = 0; i < err2.errors.length; i++) {
                                     errMsg2 += ("\r\n" + err2.errors[i].message);
                                 }
                             }
@@ -343,9 +343,9 @@ class DAO {
         }
         catch (err) {
             if (typeof (cb) == "function") {
-                var errMsg = err.toString();
+                let errMsg = err.toString();
                 if (err.errors && err.errors.length > 0) {
-                    for (var i = 0; i < err.errors.length; i++) {
+                    for (let i = 0; i < err.errors.length; i++) {
                         errMsg += ("\r\n" + err.errors[i].message);
                     }
                 }
@@ -361,11 +361,11 @@ class DAO {
                 dbTrans = null;
             }
 
-            var modelInst = this._getModel(modelName);
+            const modelInst = this._getModel(modelName);
             if (modelInst) {
-                var invokeMethod = modelInst.findAll;
+                const invokeMethod = modelInst.findAll;
 
-                var options = Object.assign({}, logOptions, {
+                const options = Object.assign({}, logOptions, {
                     attributes: attributes ? attributes : undefined,
                     where: where ? where : undefined,
                     order: orders ? orders : undefined
@@ -374,9 +374,9 @@ class DAO {
                 invokeMethod.call(modelInst, options)
                     .then((results) => {
                         if (typeof (cb) == "function") {
-                            var jsonResults = [];
-                            var foundRows = results.rows ? results.rows : results;
-                            for (var i = 0; i < foundRows.length; i++) {
+                            const jsonResults = [];
+                            const foundRows = results.rows ? results.rows : results;
+                            for (let i = 0; i < foundRows.length; i++) {
                                 jsonResults.push(foundRows[i].toJSON());
                             }
 
@@ -391,9 +391,9 @@ class DAO {
                         }
                     }).catch(err2 => {
                         if (typeof (cb) == "function") {
-                            var errMsg2 = err2.toString();
+                            let errMsg2 = err2.toString();
                             if (err2.errors && err2.errors.length > 0) {
-                                for (var i = 0; i < err2.errors.length; i++) {
+                                for (let i = 0; i < err2.errors.length; i++) {
                                     errMsg2 += ("\r\n" + err2.errors[i].message);
                                 }
                             }
@@ -409,9 +409,9 @@ class DAO {
         catch (err)
         {
             if (typeof (cb) == "function") {
-                var errMsg = err.toString();
+                let errMsg = err.toString();
                 if (err.errors && err.errors.length > 0) {
-                    for (var i = 0; i < err.errors.length; i++) {
+                    for (let i = 0; i < err.errors.length; i++) {
                         errMsg += ("\r\n" + err.errors[i].message);
                     }
                 }
@@ -427,14 +427,14 @@ class DAO {
                 dbTrans = null;
             }
 
-            var modelInst = this._getModel(modelName);
+            const modelInst = this._getModel(modelName);
             if (modelInst) {
-                var invokeMethod = modelInst.findAll;
+                let invokeMethod = modelInst.findAll;
                 if (returnTotal) {
                     invokeMethod = modelInst.findAndCountAll;
                 }
 
-                var options = Object.assign({}, logOptions, {
+                const options = Object.assign({}, logOptions, {
                     attributes: attributes ? attributes : undefined,
                     where: where ? where : undefined,
                     order: orders ? orders : undefined,
@@ -445,9 +445,9 @@ class DAO {
                 invokeMethod.call(modelInst, options)
                     .then((results) => {
                         if (typeof (cb) == "function") {
-                            var jsonResults = [];
-                            var foundRows = results.rows ? results.rows : results;
-                            for (var i = 0; i < foundRows.length; i++) {
+                            const jsonResults = [];
+                            const foundRows = results.rows ? results.rows : results;
+                            for (let i = 0; i < foundRows.length; i++) {
                                 jsonResults.push(foundRows[i].toJSON());
                             }
 
@@ -462,9 +462,9 @@ class DAO {
                         }
                     }).catch(err2 => {
                         if (typeof (cb) == "function") {
-                            var errMsg2 = err2.toString();
+                            let errMsg2 = err2.toString();
                             if (err2.errors && err2.errors.length > 0) {
-                                for (var i = 0; i < err2.errors.length; i++) {
+                                for (let i = 0; i < err2.errors.length; i++) {
                                     errMsg2 += ("\r\n" + err2.errors[i].message);
                                 }
                             }
@@ -480,9 +480,9 @@ class DAO {
         catch (err)
         {
             if (typeof (cb) == "function") {
-                var errMsg = err.toString();
+                let errMsg = err.toString();
                 if (err.errors && err.errors.length > 0) {
-                    for (var i = 0; i < err.errors.length; i++) {
+                    for (let i = 0; i < err.errors.length; i++) {
                         errMsg += ("\r\n" + err.errors[i].message);
                     }
                 }
@@ -499,9 +499,9 @@ class DAO {
             }
             let { limit, offset, attributes, orders, group } = options
 
-            var modelInst = this._getModel(modelName);
+            const modelInst = this._getModel(modelName);
             if (modelInst) {
-                var invokeMethod = modelInst.findAll;
+                const invokeMethod = modelInst.findAll;
 
                 let opts = Object.assign({}, logOptions, {
                     attributes: attributes ? attributes : undefined,
@@ -516,9 +516,9 @@ class DAO {
                 invokeMethod.call(modelInst, opts)
                     .then((results) => {
                         if (typeof (cb) == "function") {
-                            var jsonResults = [];
-                            var foundRows = results.rows ? results.rows : results;
-                            for (var i = 0; i < foundRows.length; i++) {
+                            const jsonResults = [];
+                            const foundRows = results.rows ? results.rows : results;
+                            for (let i = 0; i < foundRows.length; i++) {
                                 jsonResults.push(foundRows[i].toJSON());
                             }
 
@@ -533,9 +533,9 @@ class DAO {
                         }
                     }).catch(err2 => {
                         if (typeof (cb) == "function") {
-                            var errMsg2 = err2.toString();
+                            let errMsg2 = err2.toString();
                             if (err2.errors && err2.errors.length > 0) {
-                                for (var i = 0; i < err2.errors.length; i++) {
+                                for (let i = 0; i < err2.errors.length; i++) {
                                     errMsg2 += ("\r\n" + err2.errors[i].message);
                                 }
                             }
@@ -550,9 +550,9 @@ class DAO {
         }
         catch (err) {
             if (typeof (cb) == "function") {
-                var errMsg = err.toString();
+                let errMsg = err.toString();
                 if (err.errors && err.errors.length > 0) {
-                    for (var i = 0; i < err.errors.length; i++) {
+                    for (let i = 0; i < err.errors.length; i++) {
                         errMsg += ("\r\n" + err.errors[i].message);
                     }
                 }
@@ -616,9 +616,9 @@ class DAO {
                 // cb(null, true);
             }).catch(err => {
                 if (typeof (cb) == "function") {
-                    var errMsg = err.toString();
+                    let errMsg = err.toString();
                     if (err.errors && err.errors.length > 0) {
-                        for (var i = 0; i < err.errors.length; i++) {
+                        for (let i = 0; i < err.errors.length; i++) {
                             errMsg += ("\r\n" + err.errors[i].message);
                         }
                     }
@@ -628,9 +628,9 @@ class DAO {
         }
         catch (err) {
             if (typeof (cb) == "function") {
-                var errMsg = err.toString();
+                let errMsg = err.toString();
                 if (err.errors && err.errors.length > 0) {
-                    for (var i = 0; i < err.errors.length; i++) {
+                    for (let i = 0; i < err.errors.length; i++) {
                         errMsg += ("\r\n" + err.errors[i].message);
                     }
                 }
@@ -682,7 +682,7 @@ class DAO {
                 force = null;
             }
 
-            var modelInst = this._getModel(modelName);
+            const modelInst = this._getModel(modelName);
             if (modelInst) {
                 modelInst.sync(Object.assign({}, logOptions, {
                     force: force ? force : undefined
@@ -703,9 +703,9 @@ class DAO {
         }
         catch (err) {
             if (typeof (cb) == "function") {
-                var errMsg = err.toString();
+                let errMsg = err.toString();
                 if (err.errors && err.errors.length > 0) {
-                    for (var i = 0; i < err.errors.length; i++) {
+                    for (let i = 0; i < err.errors.length; i++) {
                         errMsg += ("\r\n" + err.errors[i].message);
                     }
                 }
@@ -716,7 +716,7 @@ class DAO {
 
     static removeTable(modelName, cb) {
         try {
-            var modelInst = this._getModel(modelName);
+            const modelInst = this._getModel(modelName);
             if (modelInst) {
                 modelInst.drop(logOptions).then(() => {
                     if (typeof (cb) == "function") {
@@ -735,9 +735,9 @@ class DAO {
         }
         catch (err) {
             if (typeof (cb) == "function") {
-                var errMsg = err.toString();
+                let errMsg = err.toString();
                 if (err.errors && err.errors.length > 0) {
-                    for (var i = 0; i < err.errors.length; i++) {
+                    for (let i = 0; i < err.errors.length; i++) {
                         errMsg += ("\r\n" + err.errors[i].message);
                     }
                 }
@@ -753,7 +753,7 @@ class DAO {
                 truncate = null;
             }
 
-            var modelInst = this._getModel(modelName);
+            const modelInst = this._getModel(modelName);
             if (modelInst) {
                 modelInst.destroy(Object.assign({}, logOptions, {
                     truncate: truncate ? truncate : undefined
@@ -773,9 +773,9 @@ class DAO {
             }
         } catch (err) {
             if (typeof (cb) == "function") {
-                var errMsg = err.toString();
+                let errMsg = err.toString();
                 if (err.errors && err.errors.length > 0) {
-                    for (var i = 0; i < err.errors.length; i++) {
+                    for (let i = 0; i < err.errors.length; i++) {
                         errMsg += ("\r\n" + err.errors[i].message);
                     }
                 }
