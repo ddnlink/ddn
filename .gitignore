@@ -9,6 +9,8 @@ _roadhog-api-doc
 # production
 /dist
 /.vscode
+.changelog
+build
 
 # misc
 .DS_Store
@@ -29,16 +31,10 @@ package-lock.json
 functions/*
 .temp/**
 
-# umi
-.umi
-.umi-production
-
 # screenshot
 screenshot
 .firebase
 .eslintcache
-
-build
 
 # packages
 /packages/*/node_modules
@@ -48,6 +44,10 @@ build
 /packages/**/.docz
 /packages/**/package-lock\.json
 
+# settings
+**/**/config.mainnet.js
+**/**/config.local.js
+**/**/.ddnrc.local.js
 blockchain.*
 *.db
 *.db-journal

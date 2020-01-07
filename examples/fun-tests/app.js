@@ -9,8 +9,8 @@ const fs =require('fs');
 const { Utils } =require('@ddn/ddn-utils');
 const { getUserConfig } =require('@ddn/ddn-core');
 const { getConfigFile } =require('@ddn/ddn-core/lib/getUserConfig');
-const defaultConfigFile = require('./lib/config.default');
-const Program =require('./lib/kernal/program');
+const defaultConfigFile = require('@ddn/ddn-peer/lib/config.default');
+const Program =require('@ddn/ddn-peer/lib/kernal/program');
 
 /**
  * 整理系统配置文件生成输入参数
@@ -61,7 +61,6 @@ function genOptions() {
     }
 
     const configObject = getUserConfig({cwd: baseDir, defaultConfig: defaultConfigFile });
-    // const configObject = getUserConfig.default({cwd: baseDir});
     const genesisblockObject = JSON.parse(fs.readFileSync(genesisblockFile, 'utf8'));
 
     //wxm 修改config.json文件，自动生成dapp的masterpassword，这个不应该在代码中，应该在外围生成

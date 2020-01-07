@@ -250,8 +250,6 @@ class Block
               block_signature: raw.b_blockSignature,    //wxm block database
               confirmations: raw.b_confirmations
             };
-            // Bignum update
-            // block.totalForged = (block.totalFee + block.reward);
             block.totalForged = Bignum.plus(block.total_fee, block.reward);
 
             return block;
@@ -285,12 +283,7 @@ class Block
         const nextHeight = (data.previous_block) ? Bignum.plus(data.previous_block.height, 1).toString() : "1"; //Bignum update //wxm block database
         const reward = this._blockStatus.calcReward(nextHeight);
 
-        //   Bignum update
-        //   let totalFee = 0;
         let totalFee = Bignum.new(0);
-
-        //   Bignum update
-        //   let totalAmount = 0;
         let totalAmount = Bignum.new(0);
         let size = 0;
 
@@ -306,12 +299,7 @@ class Block
 
             size += bytes.length;
 
-            // Bignum update
-            // totalFee += transaction.fee;
             totalFee = Bignum.plus(totalFee, transaction.fee);
-
-            // Bignum update
-            // totalAmount += transaction.amount;
             totalAmount = Bignum.plus(totalAmount, transaction.amount);
 
             blockTransactions.push(transaction);
@@ -546,7 +534,9 @@ class Block
     async applyBlock(block, votes, broadcast, saveBlock) {
         const applyedTrsIdSet = new Set;
 
-        var doApplyBlock = async () => {
+        const doApplyBlock = async () => {
+          this.logger.debug("doApplyBlock is starting");
+
             const sortedTrs = block.transactions.sort((a, b) => {
                 if (a.type == 1) {
                     return 1;
@@ -557,12 +547,12 @@ class Block
             return new Promise((resolve, reject) => {
                 this.dao.transaction(async (dbTrans, done) => {
                     try {
-                        for (var i = 0; i < sortedTrs.length; i++) {
-                            var transaction = sortedTrs[i];
-                            var updatedAccountInfo = await this.runtime.account.setAccount({ public_key: transaction.sender_public_key, isGenesis: block.height == 1 }, dbTrans);
+                        for (let i = 0; i < sortedTrs.length; i++) {
+                            const transaction = sortedTrs[i];
+                            const updatedAccountInfo = await this.runtime.account.setAccount({ public_key: transaction.sender_public_key, isGenesis: block.height == 1 }, dbTrans);
 
-                            var accountInfo = await this.runtime.account.getAccountByAddress(updatedAccountInfo.address);
-                            var newAccountInfo = Object.assign({}, accountInfo, updatedAccountInfo);
+                            const accountInfo = await this.runtime.account.getAccountByAddress(updatedAccountInfo.address);
+                            const newAccountInfo = Object.assign({}, accountInfo, updatedAccountInfo);
 
                             await this.runtime.transaction.applyUnconfirmed(transaction, newAccountInfo, dbTrans);
                             await this.runtime.transaction.apply(transaction, block, newAccountInfo, dbTrans);
@@ -585,7 +575,7 @@ class Block
 
                         done();
                     } catch (err) {
-                        done(err);
+                      done(err);
                     }
                 }, async (err, result) => {
                     if (err) {

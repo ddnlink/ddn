@@ -1,6 +1,7 @@
 {
   "name": "@ddn/ddn-core",
-  "version": "0.0.12",
+  "version": "0.1.0",
+  "description": "DDN core",
   "keywords": [
     "ddn",
     "core"

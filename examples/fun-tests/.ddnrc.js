@@ -14,7 +14,7 @@ module.exports = {
   port: 8001,
   address: "127.0.0.1",
   publicIp: "",
-  logLevel: "info",
+  logLevel: "error",
   netVersion: "testnet",
   nethash: "0ab796cd",
   api: {
