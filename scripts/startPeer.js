@@ -1,7 +1,7 @@
 const { fork } = require('child_process');
 const { join } = require('path');
 
-const DEV_SCRIPT = join(__dirname, '../packages/ddn/app.js');
+const DEV_SCRIPT = join(__dirname, '../examples/fun-tests/app.js');
 
 function startDevServer(opts = {}) {
   const { port, cwd } = opts;
