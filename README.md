@@ -33,11 +33,11 @@ More infomation please visit our [official website](https://www.ddn.link) , [ddn
 
 ## Community
 
-| Github Issue | WeChat(helper) |
+| Github Issue | DATM |
 | ------------------------------------------------------- | ------------------------------------------------------------------------------------------- |
-| [ddnlink/ddn/issues](https://github.com/ddnlink/ddn/issues) | ![](./doc/images/hashbase.jpg) | 
+| [ddnlink/ddn/issues](https://github.com/ddnlink/ddn/issues) | <img src="./styles//images/datm-ddn.jpeg" alt="..." width="200px">) | 
 
-> PS：Please note `DDN Development`
+> PS：DATM is a distributed task management tool based on DDN blockchain. You can get tasks and discuss problems. When you complete tasks, The system will pay you DDN through the smart contract.
 
 ## Donation
 
