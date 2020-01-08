@@ -47,6 +47,10 @@ You can donate DDN to the follow address with [DDN Wallet](http://wallet.ddn.lin
 | ------------------------------------------------------- | ------------------------------------------------------------------------------------------- |
 | DLjrrVwnmMXstcAYVjcrpwyYb3kY1ehABU | ![](./doc/images/foundation.png) | 
 
+## Contribute
+
+Please visit [CONTRIBUTING](./CONTRIBUTING.md) 
+
 ## License
 
 The MIT License (MIT)
