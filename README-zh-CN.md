@@ -40,6 +40,10 @@ DDN, 数据分发网络, 是一个成熟的企业级区块链系统，已经服�
 
 > PS：请备注 `DDN开发`
 
+## 贡献
+
+请参考 [贡献文档](./CONTRIBUTING.md) 
+
 ## 捐赠
 
 你可以通过[DDN钱包](http://wallet.ddn.link)或者[DDN手机钱包](https://www.ddn.link/product/wallet)向下面的地址捐赠`DDN`，这些DDN将被用于奖励本项目的贡献者.
