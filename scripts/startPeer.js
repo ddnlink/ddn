@@ -4,10 +4,10 @@ const { join } = require('path');
 const DEV_SCRIPT = join(__dirname, '../examples/fun-tests/app.js');
 
 function startDevServer(opts = {}) {
-  const { port, cwd } = opts;
+  const { cwd } = opts;
   return new Promise(resolve => {
     console.log(`Start dev blockchain for ${cwd}`);
-    const child = fork(DEV_SCRIPT, ['dev', '--port', port, '--cwd', cwd], {
+    const child = fork(DEV_SCRIPT, ['dev', '--cwd', cwd], {
       env: {
         ...process.env,
         // https://github.com/webpack/webpack-dev-server/issues/128
@@ -27,7 +27,7 @@ function startDevServer(opts = {}) {
 }
 
 function start() {
-  return startDevServer({ port: '8001', cwd: join(__dirname, 'node') });
+  return startDevServer({ cwd: join(__dirname, 'node') });
 }
 
 start();

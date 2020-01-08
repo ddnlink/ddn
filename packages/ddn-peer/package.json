@@ -55,7 +55,7 @@
   "dependencies": {
     "@ddn/ddn-aob": "^1.0.4",
     "@ddn/ddn-asset-base": "^1.0.3",
-    "@ddn/ddn-core": "^0.0.1",
+    "@ddn/ddn-core": "^0.1.0",
     "@ddn/ddn-dao": "^1.0.3",
     "@ddn/ddn-dapp": "^1.0.3",
     "@ddn/ddn-evidence": "^1.0.2",
