@@ -33,6 +33,13 @@ Run it.
 $ yarn start
 ```
 
+or
+
+```bash
+$ cd examples/fun-tests
+$ yarn start
+```
+
 ## Common Tasks
 
 Monitor file changes and transform with babel.
