@@ -7,6 +7,11 @@ DDN, Data Delivery Network, is next generation blockchain system.
 More infomation please visit our [official website](https://www.ddn.link) , [ddn-docs](https://github.com/ddnlink/ddn-docs).
 
 **Professional books and videos**：[nodejs on blockchain 2](https://github.com/imfly/blockchain-on-nodejs), and [The old book](https://github.com/imfly/bitcoin-on-nodejs), [The old paper book](https://item.jd.com/12206128.html), [The old code](https://github.com/ebookcoin/ebookcoin)
+
+**Testnet**: <http://testnet.ddn.link>
+
+> **Special note**: The 3.* versions are not compatible with the [mainnet](http://mainnet.ddn.link). Do not use the mainnet to test your Dapps.
+
 ## Features
 
 - [x] **Mature**, has successfully served multiple enterprise level products;
