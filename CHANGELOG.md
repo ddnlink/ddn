@@ -1,5 +1,14 @@
-# [3.1.0](https://github.com/ddnlink/ddn/compare/v3.0.0...v3.1.0) (2020-01-07)
+## [3.1.1](https://github.com/ddnlink/ddn/compare/v3.1.0...v3.1.1) (2020-01-16)
 
+### Features
+
+* **ddn-peer:** add a new module ddn-peer and example blockchain ([4f3a5c2](https://github.com/ddnlink/ddn/commit/4f3a5c2))
+
+### BREAKING CHANGES
+
+* **ddn-peer:** The new chain is built on the core peer and its components.
+
+## [3.1.0](https://github.com/ddnlink/ddn/compare/v3.0.0...v3.1.0) (2020-01-07)
 
 ### Bug Fixes
 
@@ -14,17 +23,11 @@
 ### Features
 
 * **component:** add scripts and lerna-changelog to project ([0268614](https://github.com/ddnlink/ddn/commit/0268614))
-* **ddn-peer:** add a new module ddn-peer and example blockchain ([4f3a5c2](https://github.com/ddnlink/ddn/commit/4f3a5c2))
 
-
-### improvement
+### Improvement
 
 * **ddn-core:** configured according to different environments ([6c717a4](https://github.com/ddnlink/ddn/commit/6c717a4))
 
-
 ### BREAKING CHANGES
 
-* **ddn-peer:** The new chain is built on the core peer and its components.
-* **ddn-core:** 可以通过环境变量 `DDN_ENV` 区分不同环境来指定配置
-
-
+* **ddn-core:** The config can be specified by distinguishing different environments through the environment variable 'DDN_ENV'

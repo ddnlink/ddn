@@ -6,14 +6,14 @@ var shell = require('gulp-shell');
 var replace = require('gulp-replace');
 var webpack = require('webpack');
 var nodeExternals = require('webpack-node-externals');
-var package = require('./package');
+var packageFile = require('./package');
 // var UglifyJsPlugin = require('uglifyjs-webpack-plugin')
 
 var format = util.format;
 var buildTime = moment().format('HH:mm:ss DD/MM/YYYY');
 
-function build(osName, netVersion, projectName) {
-  var dir = 'ddn-' + osName + '-' + package.version + '-' + netVersion;
+function build(osName, netVersion) {
+  var dir = packageFile.name + '-' + osName + '-' + packageFile.version + '-' + netVersion;
   var fullpath = path.join(__dirname, 'build', dir);
 
   return webpack(require('./webpack.config.js')(fullpath), function(){
@@ -21,12 +21,12 @@ function build(osName, netVersion, projectName) {
     .pipe(replace('localnet', netVersion))
     .pipe(replace('development', buildTime))
     .pipe(gulp.dest(fullpath))
-    .pipe(shell(getCmds(osName, netVersion, projectName)));
+    .pipe(shell(getCmds(osName, netVersion)));
   })
 }
 
 function buildSource(netVersion) {
-  var dir = 'ddn-' + 'linux' + '-' + package.version + '-' + netVersion;
+  var dir = packageFile.name + '-' + 'linux' + '-' + packageFile.version + '-' + netVersion;
   var fullpath = path.join(__dirname, 'build', dir);
 
   return gulp.src('app.js')
@@ -50,13 +50,13 @@ function buildSource(netVersion) {
     .pipe(gulp.dest(fullpath));
 }
 
-function getCmds(osName, netVersion, projectName) {
-  var dir = 'ddn-' + osName + '-' + package.version + '-' + netVersion;
+function getCmds(osName, netVersion) {
+  var dir = packageFile.name + '-' + osName + '-' + packageFile.version + '-' + netVersion;
   var fullpath = path.join(__dirname, 'build', dir);
 
   var result = [];
-  result.push(format('cd %s && mkdir -p public dapps tmp logs bin', fullpath));
-  result.push(format('cp -r package.json ddnd init protos %s', fullpath));
+  result.push(format('cd %s && mkdir -p public dapps tmp logs bin config', fullpath));
+  result.push(format('cp -r package.json ddnd init .ddnrc.js %s', fullpath));
   if (netVersion != 'localnet') {
     if (osName == 'mac') {
       result.push(format('sed -i "" "s/testnet/%s/g" %s/ddnd', netVersion, fullpath));
@@ -64,20 +64,10 @@ function getCmds(osName, netVersion, projectName) {
       result.push(format('sed -i "s/testnet/%s/g" %s/ddnd', netVersion, fullpath));
     }
 
-    // todo: %s/configs/
-    result.push(format('cp configs/%s/%s.json %s/config.json', projectName, netVersion, fullpath));
-    result.push(format('cp genesisBlocks/%s/%s.json %s/genesisBlock.json', projectName, netVersion, fullpath));
-
-    result.push(format('cp config.database.js %s/config.database.js', fullpath));
-    result.push(format('cp config.asset.js %s/config.asset.js', fullpath));
-
-    result.push(format('cp -r ./lib/db/sequelize/models/ %s/', fullpath));
-    result.push(format('cp -r ./lib/schema/format-ext/ %s/', fullpath));
-    result.push(format('cp -r ./lib/schema/ddn-schemas/ %s/', fullpath));
-    result.push(format('cp -r ./lib/network/service/ %s/', fullpath));
+    result.push(format('cp config/genesisBlock.json %s/config/', fullpath));
   } else {
-    result.push(format('cp config.json %s/', fullpath));
-    result.push(format('cp genesisBlock.json %s/', fullpath));
+    // result.push(format('cp config.json %s/', fullpath));
+    result.push(format('cp config/genesisBlock.json %s/config/', fullpath));
     result.push(format('cp third_party/sqlite3.exe %s/', fullpath));
   }
 
@@ -92,44 +82,42 @@ function getCmds(osName, netVersion, projectName) {
   return result
 }
 
-const projectName = 'DDN';
-
 gulp.task('build-src-main', function (done) {
   buildSource('mainnet');
   done();
 })
 
 gulp.task('win64-build-local', function (done) {
-  build('win64', 'localnet', projectName);
+  build('win64', 'localnet');
   done();
 });
 
 gulp.task('linux-build-local', function (done) {
-  build('linux', 'localnet', projectName);
+  build('linux', 'localnet');
   done();
 });
 
 gulp.task('win64-build-test', function (done) {
-  build('win64', 'testnet', projectName);
+  build('win64', 'testnet');
   done();
 });
 
 gulp.task('linux-build-test', function (done) {
-  build('linux', 'testnet', projectName);
+  build('linux', 'testnet');
   done();
 });
 
 gulp.task('mac-build-test', function (done) {
-  build('mac', 'testnet', projectName);
+  build('mac', 'testnet');
   done();
 });
 
 gulp.task('win64-build-main', function (done) {
-  build('win64', 'mainnet', projectName);
+  build('win64', 'mainnet');
   done();
 });
 
 gulp.task('linux-build-main', function (done) {
-  build('linux', 'mainnet', projectName);
+  build('linux', 'mainnet');
   done();
 });
