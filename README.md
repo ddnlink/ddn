@@ -7,6 +7,11 @@ DDN, Data Delivery Network, is next generation blockchain system.
 More infomation please visit our [official website](https://www.ddn.link) , [ddn-docs](https://github.com/ddnlink/ddn-docs).
 
 **Professional books and videos**：[nodejs on blockchain 2](https://github.com/imfly/blockchain-on-nodejs), and [The old book](https://github.com/imfly/bitcoin-on-nodejs), [The old paper book](https://item.jd.com/12206128.html), [The old code](https://github.com/ebookcoin/ebookcoin)
+
+**Testnet**: <http://testnet.ddn.link>
+
+> **Special note**: The 3.* versions are not compatible with the [mainnet](http://mainnet.ddn.link). Do not use the mainnet to test your Dapps.
+
 ## Features
 
 - [x] **Mature**, has successfully served multiple enterprise level products;
@@ -33,11 +38,11 @@ More infomation please visit our [official website](https://www.ddn.link) , [ddn
 
 ## Community
 
-| Github Issue | WeChat(helper) |
+| Github Issue | DATM |
 | ------------------------------------------------------- | ------------------------------------------------------------------------------------------- |
-| [ddnlink/ddn/issues](https://github.com/ddnlink/ddn/issues) | ![](./doc/images/hashbase.jpg) | 
+| [ddnlink/ddn/issues](https://github.com/ddnlink/ddn/issues) | <img src="./styles//images/datm-ddn.jpeg" alt="..." width="200px">) | 
 
-> PS：Please note `DDN Development`
+> PS：DATM is a distributed task management tool based on DDN blockchain. You can get tasks and discuss problems. When you complete tasks, The system will pay you DDN through the smart contract.
 
 ## Donation
 
@@ -46,6 +51,10 @@ You can donate DDN to the follow address with [DDN Wallet](http://wallet.ddn.lin
 | DDN FOUNDATION Wallet Address | DDN Mobile Wallet QRCode |
 | ------------------------------------------------------- | ------------------------------------------------------------------------------------------- |
 | DLjrrVwnmMXstcAYVjcrpwyYb3kY1ehABU | ![](./doc/images/foundation.png) | 
+
+## Contribute
+
+Please visit [CONTRIBUTING](./CONTRIBUTING.md) 
 
 ## License
 

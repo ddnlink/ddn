@@ -40,6 +40,32 @@ $ cd examples/fun-tests
 $ yarn start
 ```
 
+If you watch nothing，please do that
+
+```bash
+$ cd examples/fun-tests
+$ touch .ddnrc.local.js
+```
+
+and then, copy the follow content to `.ddnrc.local.js`
+
+```js
+/*---------------------------------------------------------------------------------------------
+ *  This is your config local.
+ *--------------------------------------------------------------------------------------------*/
+
+module.exports = {
+  /**
+   * About Peer
+  */
+  // port: 8001,
+  // address: "127.0.0.1",
+  // publicIp: "",
+  logLevel: "info", // This allows the command line to output more info for development testing
+  // netVersion: "testnet"
+}
+```
+
 ## Common Tasks
 
 Monitor file changes and transform with babel.
