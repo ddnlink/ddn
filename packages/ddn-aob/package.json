@@ -1,6 +1,6 @@
 {
   "name": "@ddn/ddn-aob",
-  "version": "1.0.8",
+  "version": "1.0.10",
   "description": "DDN链上资产包",
   "main": "index.js",
   "repository": {
@@ -13,7 +13,9 @@
     "url": "http://github.com/ddnlink/ddn/issues"
   },
   "files": [
-    "lib"
+    "lib",
+    ".ddnrc.js",
+    "index.js"
   ],
   "author": "wangxm",
   "license": "MIT",

@@ -7,39 +7,39 @@ class AssetUtils
             transTypeNames: []
         };
         
-        for (var p in assetPlugins) {
-            var currAsset = assetPlugins[p];
+        for (let p in assetPlugins) {
+            const currAsset = assetPlugins[p];
             if (currAsset) {
-                if (currAsset.package && !/^\s*$/.test(currAsset.package)) {
-                    var assetTransactions = currAsset.transactions;
-                    if (assetTransactions && assetTransactions.length > 0) {
-                        //测试资产插件包配置是否正确
-                        require(currAsset.package);
-
-                        for (var i = 0; i < assetTransactions.length; i++) {
-                            var currTrans = assetTransactions[i];
-                            if (!(currTrans.name && !/^\s*$/.test(currTrans.name))) {
-                                throw new Error("The asset.plugin.js error: name property required.");
-                            }
-                            if (!(currTrans.type && /^[1-9][0-9]*$/.test(currTrans.type))) {
-                                throw new Error("The asset.plugin.js error: type property required.");
-                            }
-
-                            if (global.assets.transTypeNames[currTrans.type]) {
-                                throw new Error("The asset.plugin.js error: type " + currTrans.type + " is conflicting.");
-                            }
-
-                            currTrans.package = currAsset.package;
-
-                            global.assets.transConfigs.push(currTrans);
-                            global.assets.transTypeValues[currTrans.name] = currTrans;
-                            global.assets.transTypeNames[currTrans.type] = currTrans;
-                        }
-                    }
+                let assetConfig;
+                try {
+                    assetConfig = require(currAsset + '/.ddnrc.js');
+                } catch (error) {
+                    throw new Error("The asset extends error: " + currAsset + " has no configure .ddnrc.js.");
                 }
-                else
-                {
-                    throw new Error("The asset.plugin.js error: package property required.");
+          
+                const assetTransactions = assetConfig.transactions;
+    
+                if (assetTransactions && assetTransactions.length > 0) {
+        
+                    for (let i = 0; i < assetTransactions.length; i++) {
+                        const currTrans = assetTransactions[i];
+                        if (!(currTrans.name && !/^\s*$/.test(currTrans.name))) {
+                            throw new Error("The asset extends error: name property required.");
+                        }
+                        if (!(currTrans.type && /^[1-9][0-9]*$/.test(currTrans.type))) {
+                            throw new Error("The asset extends error: type property required.");
+                        }
+
+                        if (global.assets.transTypeNames[currTrans.type]) {
+                            throw new Error("The asset extends error: type " + currTrans.type + " is conflicting.");
+                        }
+
+                        currTrans.package = currAsset;
+           
+                        global.assets.transConfigs.push(currTrans);
+                        global.assets.transTypeValues[currTrans.name] = currTrans;
+                        global.assets.transTypeNames[currTrans.type] = currTrans;
+                    }
                 }
             }
         }

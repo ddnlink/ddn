@@ -23,7 +23,7 @@ class Assets {
         this._loader.init();
     }
 
-    async execAssetFunc(funcName) {
+    async execAssetFunc() {
         var args = [];
         for (var i = 0; i < arguments.length; i++) {
             args.push(arguments[i]);
