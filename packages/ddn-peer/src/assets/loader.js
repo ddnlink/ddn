@@ -56,10 +56,10 @@ class Loader {
      * 加载所有系统配置的资产插件
      */
     async _attachAssetPlugins() {
-        for (var i = 0; i < this.assetPlugins.getTransactionCount(); i++) {
-            var transConfig = this.assetPlugins.getTransactionByIndex(i);
-            var transCls = _require_runtime_(transConfig.package)[transConfig.name];
-            var transInst = new transCls(this._context, transConfig);
+        for (let i = 0; i < this.assetPlugins.getTransactionCount(); i++) {
+            const transConfig = this.assetPlugins.getTransactionByIndex(i);
+            const transCls = _require_runtime_(transConfig.package)[transConfig.name];
+            const transInst = new transCls(this._context, transConfig);
 
             this._registerAsset(transConfig.type, transInst, transConfig.name);
             await this._attachAssetPluginApi(transConfig, transInst);

@@ -170,8 +170,8 @@ module.exports = (schemaFile, cb) => {
         }
 
         var transCount = AssetUtils.getTransactionCount();
-        for (var i = 0; i < transCount; i++) {
-            var assetTrans = AssetUtils.getTransactionByIndex(i);
+        for (let i = 0; i < transCount; i++) {
+            const assetTrans = AssetUtils.getTransactionByIndex(i);
             if (assetTrans) {
                 var assetJsonName = AssetUtils.getAssetJsonName(assetTrans.type);
 
