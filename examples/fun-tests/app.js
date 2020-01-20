@@ -8,9 +8,7 @@ const path =require('path');
 const fs =require('fs');
 const { Utils } =require('@ddn/ddn-utils');
 const { getUserConfig } =require('@ddn/ddn-core');
-const { getConfigFile } =require('@ddn/ddn-core/lib/getUserConfig');
-const defaultConfigFile = require('@ddn/ddn-peer/lib/config.default');
-const Program =require('@ddn/ddn-peer/lib/kernal/program');
+const Peer = require('@ddn/ddn-peer');
 
 /**
  * 整理系统配置文件生成输入参数
@@ -18,7 +16,6 @@ const Program =require('@ddn/ddn-peer/lib/kernal/program');
 function genOptions() {
     command
         .version(packageFile.version)
-        .option('-c, --config <path>', 'Config file path')
         .option('-p, --port <port>', 'Listening port number')
         .option('-a, --address <ip>', 'Listening host name or ip')
         .option('-b, --blockchain <path>', 'Blockchain db path')
@@ -33,16 +30,6 @@ function genOptions() {
 
     const baseDir = command.base || path.resolve(__dirname, './');
 
-    let configFile = getConfigFile(baseDir);
-    if (command.config) {
-        configFile = path.resolve(process.cwd(), command.config);
-    }
-    if (!fs.existsSync(configFile)) {
-        console.error("Failed: DDN config file does not exists.")
-        process.exit(1);
-        return;
-    }
-
     let genesisblockFile = path.join(baseDir, 'config', 'genesisBlock.json');
     if (command.genesisblock) {
         genesisblockFile = path.resolve(process.cwd(), command.genesisblock);
@@ -53,6 +40,8 @@ function genOptions() {
         return;
     }
 
+    const genesisblockObject = JSON.parse(fs.readFileSync(genesisblockFile, 'utf8'));
+
     const protoFile = path.join(baseDir, 'protos', 'ddn.proto');
     if (!fs.existsSync(protoFile)) {
         console.error('Failed: DDN proto file does not exists.');
@@ -60,25 +49,13 @@ function genOptions() {
         return;
     }
 
-    const configObject = getUserConfig({cwd: baseDir, defaultConfig: defaultConfigFile });
-    const genesisblockObject = JSON.parse(fs.readFileSync(genesisblockFile, 'utf8'));
-
-    //wxm 修改config.json文件，自动生成dapp的masterpassword，这个不应该在代码中，应该在外围生成
-    if (!configObject.dapp.masterpassword) {
-        const randomstring = require("randomstring");
-        configObject.dapp.masterpassword = randomstring.generate({
-            length: 12,
-            readable: true,
-            charset: 'alphanumeric'
-        });
-        fs.writeFileSync(configFile, JSON.stringify(configObject, null, 2), "utf8");
-    }
+    const configObject = getUserConfig({ cwd: baseDir });
 
     configObject.version = packageFile.version;
     configObject.basedir = baseDir;
     configObject.buildVersion = 'development';
     configObject.netVersion = process.env.NET_VERSION || 'testnet';
-    configObject.publicDir = path.join(baseDir, 'public', 'dist');
+    configObject.publicDir = path.join(baseDir, 'public');
     configObject.dappsDir = command.dapps || path.join(baseDir, 'dapps')
     if (command.port) {
         configObject.port = command.port;
@@ -128,20 +105,20 @@ async function main() {
         }
     };
 
-    let program;
+    let peer;
 
     try
     {
         let options = genOptions();
-        program = new Program();
-        await program.run(options);
+        peer = new Peer();
+        await peer.run(options);
     }
     catch (err)
     {
         console.error(Utils.getErrorMsg(err));
 
-        if (program) {
-            program.destory();
+        if (peer) {
+            peer.destory();
         }
 
         process.exit(1);

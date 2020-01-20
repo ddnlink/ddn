@@ -2,27 +2,29 @@
  * 主程序
  * wangxm   2018-12-27
  */
-const assert = require('assert');
-const path = require('path');
-const fs = require('fs');
-const ip = require('ip');
-const Logger = require('../logger');
-const Context = require('./context');
-const Block = require('./block/block');
-const Transaction = require('./transaction/transaction');
-const Account = require('./account/account');
-const Slot = require('./lib/slot');
-const Round = require('./lib/round');
-const Delegate = require('./lib/delegate');
-const Consensus = require('./lib/consensus');
-const Peer = require('./peer/peer');
-const dbUpgrade = require('../db/db-upgrade');
-const { RuntimeState, Utils } = require('@ddn/ddn-utils');
-const HttpServer = require('../network/http-server');
-const MultiSignature = require('./lib/multisignature');
-const crypto = require('crypto');
-const { Bignum } = require('@ddn/ddn-utils');
-const DataQuery = require('./lib/data-query');
+import assert from 'assert';
+import path from 'path';
+import fs from 'fs';
+import ip from 'ip';
+import Logger from '../logger';
+import Context from'./context';
+import Block from './block/block';
+import Transaction from'./transaction/transaction';
+import Account from'./account/account';
+import Slot from './lib/slot';
+import Round from './lib/round';
+import Delegate from './lib/delegate';
+import Consensus from './lib/consensus';
+import Peer from './peer/peer';
+import dbUpgrade from '../db/db-upgrade';
+import { RuntimeState, Utils } from'@ddn/ddn-utils';
+import HttpServer from '../network/http-server';
+import MultiSignature from './lib/multisignature';
+import crypto from 'crypto';
+import { Bignum } from '@ddn/ddn-utils';
+import DataQuery from './lib/data-query';
+import defaultConfig from '../config.default.js';
+import extend from 'extend2';
 
 class Program
 {
@@ -156,6 +158,9 @@ class Program
         if (options.isDaemonMode) {
             require('daemon')({cwd: process.cwd()});
         }
+
+        // 提供系统默认配置文件
+        options.configObject = extend(true, defaultConfig.default, options.configObject);
 
         process.once('cleanup', () => {
             this._context.logger.info('Cleaning up...');
@@ -509,4 +514,4 @@ class Program
     }
 }
 
-module.exports = Program;
+export default Program;
