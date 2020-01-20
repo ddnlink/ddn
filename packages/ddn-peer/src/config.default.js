@@ -7,14 +7,14 @@
 const Sequelize = require("sequelize");
 const Op = Sequelize.Op;
 
-module.exports = {
+export default {
   /**
    * About Peer
   */
   port: 8001,
   address: "127.0.0.1",
   publicIp: "",
-  logLevel: "error",
+  logLevel: "info",
   netVersion: "testnet",
   nethash: "0ab796cd",
   api: {
