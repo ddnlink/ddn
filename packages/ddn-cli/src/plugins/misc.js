@@ -1,14 +1,15 @@
-var fs = require("fs");
-var async = require("async");
-var request = require("request");
-var accountHelper = require("../helpers/account.js");
-var blockHelper = require("../helpers/block.js");
-var cryptoLib = require("../crypto.js");
-var dappHelper = require("../helpers/dapp.js");
-var Api = require('../helpers/api.js');
-var DdnUtils = require('@ddn/ddn-node-sdk').utils;
+import fs from "fs";
+import async from "async";
+import request from "request";
+import accountHelper from "../helpers/account.js";
+import blockHelper from "../helpers/block.js";
+import cryptoLib from "../crypto.js";
+import Api from '../helpers/api.js';
+import DdnNodeSdk from '@ddn/ddn-node-sdk';
 
-var globalOptions;
+const DdnUtils = DdnNodeSdk.util;
+
+let globalOptions;
 
 function getApi() {
 	return new Api({

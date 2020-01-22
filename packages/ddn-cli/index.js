@@ -16,7 +16,8 @@ function main() {
     const plugins = fs.readdirSync(path.join(__dirname, 'lib', 'plugins'));
     plugins.forEach(function (el) {
         if (el.endsWith('js')) {
-            require('./lib/plugins/' + el)(program);
+            const plugin = require('./lib/plugins/' + el).default || require('./lib/plugins/' + el); 
+            plugin(program);
         }
     });
 

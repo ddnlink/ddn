@@ -1,15 +1,15 @@
 
-var inquirer = require("inquirer");
-var fs = require("fs");
-var path = require("path");
-var request = require("request");
-var valid_url = require("valid-url");
-var accountHelper = require("../helpers/account.js");
-var dappHelper = require("../helpers/dapp.js");
+import inquirer from "inquirer";
+import fs from "fs";
+import path from "path";
+import request from "request";
+import valid_url from "valid-url";
+import accountHelper from "../helpers/account.js";
+import dappHelper from "../helpers/dapp.js";
 
 // var templatePath = path.join(__dirname, "..", "template");
 
-var dappCategories = [
+const dappCategories = [
 	"Common",
 	"Business",
 	"Social",
@@ -22,7 +22,7 @@ var dappCategories = [
 ];
 
 function bip39Validator(input) {
-	var done = this.async();
+	const done = this.async();
 
 	if (!accountHelper.isValidSecret(input)) {
 		done("Secret is not validated by BIP39");
@@ -536,7 +536,7 @@ module.exports = function (program) {
 					} else if (options.genesis) {
 						createGenesisBlock()
 					} else {
-						console.log("'node dapps -h' to get help");
+						console.log("'ddn dapps -h' to get help");
 					}
 				} catch (e) {
 					console.error(e)

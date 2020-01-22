@@ -1,11 +1,9 @@
-var fs = require("fs");
-var ddnJS = require('@ddn/ddn-node-sdk');
+import fs from "fs";
+import ddnJS from '@ddn/ddn-node-sdk';
 
-var accountHelper = require("../helpers/account.js");
-var cryptoLib = require("../crypto.js");
-var config = require("../../config");
-
-var globalOptions;
+import accountHelper from "../helpers/account.js";
+import cryptoLib from "../crypto.js";
+import config from "../../config";
 
 function writeFileSync(file, obj) {
 	var content = (typeof obj === "string" ? obj : JSON.stringify(obj, null, 2));
@@ -32,7 +30,7 @@ function genUsers(options) {
 	}
 
 	// 2000万的75个, 15亿
-	for (var i = 151; i < 226; i++) {
+	for (let i = 151; i < 226; i++) {
 		var user = accountHelper.account(cryptoLib.generateSecret(), tokenPrefix);
 		user.username = "user_" + i;
 		user.amount = 2000 * wan;
@@ -74,8 +72,6 @@ function genUsers(options) {
 }
 
 module.exports = function (program) {
-	globalOptions = program;
-
 	program
 		.command("createUsers")
 		.description("create some accounts")
