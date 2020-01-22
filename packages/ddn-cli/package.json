@@ -1,7 +1,7 @@
 {
-  "name": "ddn-cli",
+  "name": "@ddn/ddn",
   "preferGlobal": true,
-  "version": "3.0.0",
+  "version": "1.0.0",
   "description": "A Command line tool to manage ddn",
   "main": "index.js",
   "scripts": {
@@ -12,7 +12,7 @@
     "cli"
   ],
   "bin": {
-    "ddn-cli": "./bin/ddn-cli"
+    "ddn": "./bin/ddn"
   },
   "author": "HuoDing <hd@qq.com>",
   "license": "MIT",
@@ -24,12 +24,15 @@
     "bytebuffer": "^4.0.0",
     "commander": "^2.8.1",
     "crypto-browserify": "^3.9.14",
+    "download-git-repo": "^3.0.2",
     "fs-extra": "0.30.0",
     "gift": "0.6.1",
-    "inquirer": "^3.3.0",
+    "inquirer": "^7.0.3",
     "js-nacl": "0.6.0",
+    "ora": "^4.0.3",
     "request": "^2.62.0",
     "rmdir": "^1.1.0",
+    "symbols": "^0.0.6",
     "valid-url": "1.0.9"
   },
   "bugs": {

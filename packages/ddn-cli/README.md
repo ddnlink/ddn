@@ -8,16 +8,15 @@ A command line tool to manage [DDN](https://github.com/ddnlink) blockchain apps.
 最新的dapps系列子命令要求node版本号为v8.4.0以上
 
 ```
-npm install -g ddn-cli
+npm install -g @ddn/ddn
 ```
 
 ## Usage
 
 ```
-./bin/ddn-cli --help
+$ ddn --help
 
-  Usage: ddn-cli [options] [command]
-
+  Usage: ddn [options] [command]
 
   Commands:
 

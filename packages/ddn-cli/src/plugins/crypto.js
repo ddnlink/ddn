@@ -1,6 +1,6 @@
-var inquirer = require("inquirer");
-var cryptoLib = require("../crypto.js");
-var accountHelper = require("../helpers/account.js");
+import inquirer from "inquirer";
+import cryptoLib from "../crypto.js";
+import accountHelper from "../helpers/account.js";
 
 async function genPubkey() {
 	let result = await inquirer.prompt([
@@ -10,7 +10,7 @@ async function genPubkey() {
 			message: "Enter secret of your testnet account"
 		}
 	]);
-	var account = accountHelper.account(result.secret.trim());
+	const account = accountHelper.account(result.secret.trim());
 	console.log("Public key: " + account.keypair.publicKey);
 	console.log("Address: " + account.address);
 }
@@ -23,11 +23,11 @@ async function genAccount() {
 			message: "Enter number of accounts to generate"
 		}
 	]);
-	var n = parseInt(result.amount);
-	var accounts = [];
+	const n = parseInt(result.amount);
+	const accounts = [];
 
-	for (var i = 0; i < n; i++) {
-		var a = accountHelper.account(cryptoLib.generateSecret());
+	for (let i = 0; i < n; i++) {
+		const a = accountHelper.account(cryptoLib.generateSecret());
 		accounts.push({
 			address: a.address,
 			secret: a.secret,
@@ -38,7 +38,7 @@ async function genAccount() {
 	console.log("Done");
 }
 
-module.exports = function (program) {
+export default function (program) {
   program
 		.command("crypto")
 		.description("crypto operations")
@@ -52,7 +52,7 @@ module.exports = function (program) {
 					} else if (options.generate) {
 						genAccount();
 					} else {
-						console.log("'node crypto -h' to get help");
+						console.log("'ddn crypto -h' to get help");
 					}
 				} catch (e) {
 					console.log(e)

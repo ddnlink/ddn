@@ -1,11 +1,11 @@
-var fs = require('fs');
-var crypto = require('crypto');
-var ddnJS = require('@ddn/ddn-node-sdk');
-var Api = require('../helpers/api.js');
-var blockHelper = require('../helpers/block.js');
-var cryptoLib = require('../crypto.js');
+import fs from 'fs';
+import crypto from 'crypto';
+import ddnJS from '@ddn/ddn-node-sdk';
+import Api from '../helpers/api.js';
+import blockHelper from '../helpers/block.js';
+import cryptoLib from '../crypto.js';
 
-var globalOptions;
+const globalOptions;
 
 function getApi() {
   return new Api({host: globalOptions.host, port: globalOptions.port, mainnet: !!globalOptions.main});
@@ -449,53 +449,53 @@ function verifyBytes(options) {
   console.log(ddnJS.crypto.verifyBytes(options.bytes, options.signature, options.publicKey))
 }
 
-module.exports = function(program) {
+export default function(program) {
   globalOptions = program;
   
   program
-    .command("getheight")
+    .command("getHeight")
     .description("get block height")
     .action(getHeight);
     
  program
-    .command("getblockstatus")
+    .command("getBlockstatus")
     .description("get block status")
     .action(getBlockStatus);   
   
  program
-   .command("openaccount [secret]")
+   .command("openAccount [secret]")
    .description("open your account and get the infomation by secret")
    .action(openAccount);
 
   program
-    .command("openaccountbypublickey [publickey]")
+    .command("openAccountByPublickey [publickey]")
     .description("open your account and get the infomation by publickey")
     .action(openAccountByPublicKey);
 
   program
-    .command("getbalance [address]")
+    .command("getBalance [address]")
     .description("get balance by address")
     .action(getBalance);
     
   program
-    .command("getaccount [address]")
+    .command("getAccount [address]")
     .description("get account by address")
     .action(getAccount);
      
   program
-    .command("getvoteddelegates [address]")
+    .command("getVotedDelegates [address]")
     .description("get delegates voted by address")
     .option("-o, --offset <n>", "")
     .option("-l, --limit <n>", "")
     .action(getVotedDelegates);
     
   program
-    .command("getdelegatescount")
+    .command("getDelegatesCount")
     .description("get delegates count")
     .action(getDelegatesCount);
     
   program
-    .command("getdelegates")
+    .command("getDelegates")
     .description("get delegates")
     .option("-o, --offset <n>", "")
     .option("-l, --limit <n>", "")
@@ -503,22 +503,22 @@ module.exports = function(program) {
     .action(getDelegates);
     
   program
-    .command("getvoters [publicKey]")
+    .command("getVoters [publicKey]")
     .description("get voters of a delegate by public key")
     .action(getVoters);
     
   program
-    .command("getdelegatebypublickey [publicKey]")
+    .command("getDelegateByPublickey [publicKey]")
     .description("get delegate by public key")
     .action(getDelegateByPublicKey);
 
   program
-    .command("getdelegatebyusername [username]")
+    .command("getDelegateByUsername [username]")
     .description("get delegate by username")
     .action(getDelegateByUsername);
     
   program
-    .command("getblocks")
+    .command("getBlocks")
     .description("get blocks")
     .option("-o, --offset <n>", "")
     .option("-l, --limit <n>", "")
@@ -530,17 +530,17 @@ module.exports = function(program) {
     .action(getBlocks);
     
   program
-    .command("getblockbyid [id]")
+    .command("getBlockById [id]")
     .description("get block by id")
     .action(getBlockById);
     
   program
-    .command("getblockbyheight [height]")
+    .command("getBlockByHeight [height]")
     .description("get block by height")
     .action(getBlockByHeight);
     
   program
-    .command("getpeers")
+    .command("getPeers")
     .description("get peers")
     .option("-o, --offset <n>", "")
     .option("-l, --limit <n>", "")
@@ -552,14 +552,14 @@ module.exports = function(program) {
     .action(getPeers);
     
   program
-    .command("getunconfirmedtransactions")
+    .command("getUnconfirmedTransactions")
     .description("get unconfirmed transactions")
     .option("-k, --key <sender public key>", "")
     .option("-a, --address <address>", "")
     .action(getUnconfirmedTransactions);
     
   program
-    .command("gettransactions")
+    .command("getTransactions")
     .description("get transactions")
     .option("-b, --blockId <id>", "")
     .option("-o, --offset <n>", "")
@@ -575,13 +575,13 @@ module.exports = function(program) {
     .action(getTransactions);
     
   program
-    .command("gettransaction [id]")
+    .command("getTransaction [id]")
     .description("get transactions")
     .action(getTransaction);
     
   program
-    .command("sendmoney")
-    .description("send money to some address")
+    .command("sendToken")
+    .description("send token to some address")
     .option("-e, --secret <secret>", "")
     .option("-s, --secondSecret <secret>", "")
     .option("-a, --amount <n>", "")
@@ -591,7 +591,7 @@ module.exports = function(program) {
     .action(sendMoney);
   
   program
-    .command("sendasset")
+    .command("sendAsset")
     .description("send asset to some address")
     .option("-e, --secret <secret>", "")
     .option("-s, --secondSecret <secret>", "")
@@ -602,7 +602,7 @@ module.exports = function(program) {
     .action(sendAsset);
   
   program
-    .command("registerdelegate")
+    .command("registerDelegate")
     .description("register delegate")
     .option("-e, --secret <secret>", "")
     .option("-s, --secondSecret <secret>", "")
@@ -610,13 +610,13 @@ module.exports = function(program) {
     .action(registerDelegate);
     
   program
-    .command("listdiffvotes")
+    .command("listDiffVotes")
     .description("list the votes each other")
     .option("-u, --username <username>", "", process.env.DDN_USER)
     .action(listdiffvotes);
 
   program
-    .command("upvote")
+    .command("upVote")
     .description("vote for delegates")
     .option("-e, --secret <secret>", "")
     .option("-s, --secondSecret <secret>", "")
@@ -624,7 +624,7 @@ module.exports = function(program) {
     .action(upvote);
     
   program
-    .command("downvote")
+    .command("downVote")
     .description("cancel vote for delegates")
     .option("-e, --secret <secret>", "")
     .option("-s, --secondSecret <secret>", "")
@@ -632,7 +632,7 @@ module.exports = function(program) {
     .action(downvote);
     
   program
-    .command("setsecondsecret")
+    .command("setSecondsecret")
     .description("set second secret")
     .option("-e, --secret <secret>", "")
     .option("--newSecondSecret <secret>", "")
@@ -640,7 +640,7 @@ module.exports = function(program) {
     .action(setSecondSecret);
     
   program
-    .command("registerdapp")
+    .command("registerDapp")
     .description("register a dapp")
     .option("-e, --secret <secret>", "")
     .option("-s, --secondSecret <secret>", "")
@@ -658,7 +658,7 @@ module.exports = function(program) {
     .action(deposit);
 
   program
-    .command("dapptransaction")
+    .command("dappTransaction")
     .description("create a dapp transaction")
     .option("-e, --secret <secret>", "")
     .option("-d, --dapp <dapp id>", "dapp id")
@@ -676,47 +676,47 @@ module.exports = function(program) {
     .action(lock);
 
   program
-    .command("getfullblockbyid [id]")
+    .command("getFullBlockById [id]")
     .description("get full block by block id")
     .action(getFullBlockById);
   
   program
-    .command("getfullblockbyheight [height]")
+    .command("getFullBlockByHeight [height]")
     .description("get full block by block height")
     .action(getFullBlockByHeight);
 
   program
-    .command("gettransactionbytes")
+    .command("getTransactionBytes")
     .description("get transaction bytes")
     .option("-f, --file <file>", "transaction file")
     .action(getTransactionBytes)
   
   program
-    .command("gettransactionid")
+    .command("getTransactionId")
     .description("get transaction id")
     .option("-f, --file <file>", "transaction file")
     .action(getTransactionId)
   
   program
-    .command("getblockbytes")
+    .command("getBlockBytes")
     .description("get block bytes")
     .option("-f, --file <file>", "block file")
     .action(getBlockBytes)
   
   program
-    .command("getblockpayloadhash")
+    .command("getBlockPayloadHash")
     .description("get block bytes")
     .option("-f, --file <file>", "block file")
     .action(getBlockPayloadHash)
   
   program
-    .command("getblockid")
+    .command("getBlockId")
     .description("get block id")
     .option("-f, --file <file>", "block file")
     .action(getBlockId)
   
   program
-    .command("verifybytes")
+    .command("verifyBytes")
     .description("verify bytes/signature/publickey")
     .option("-b, --bytes <bytes>", "transaction or block bytes")
     .option("-s, --signature <signature>", "transaction or block signature")
