@@ -3,7 +3,7 @@ import async from "async";
 import request from "request";
 import accountHelper from "../helpers/account.js";
 import blockHelper from "../helpers/block.js";
-import cryptoLib from "../crypto.js";
+import cryptoLib from "@ddn/ddn-crypto";
 import Api from '../helpers/api.js';
 import DdnNodeSdk from '@ddn/ddn-node-sdk';
 

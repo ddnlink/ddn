@@ -1,6 +1,6 @@
 const crypto = require('crypto');
 const fs = require('fs');
-const cryptoLib = require('../crypto.js');
+const cryptoLib = require('@ddn/ddn-crypto');
 const transactionsLib = require('../transactions.js');
 const accounts = require('./account.js');
 const ByteBuffer = require('bytebuffer');

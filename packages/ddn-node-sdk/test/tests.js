@@ -1,6 +1,4 @@
 var Buffer = require("buffer/").Buffer;
-var crypto_lib = require("crypto-browserify");
-var should = require("should");
 var ddn = require("../index.js");
 
 describe("DDN JS", function () {

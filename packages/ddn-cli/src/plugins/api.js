@@ -3,9 +3,9 @@ import crypto from 'crypto';
 import ddnJS from '@ddn/ddn-node-sdk';
 import Api from '../helpers/api.js';
 import blockHelper from '../helpers/block.js';
-import cryptoLib from '../crypto.js';
+import cryptoLib from '@ddn/ddn-crypto';
 
-const globalOptions;
+let globalOptions;
 
 function getApi() {
   return new Api({host: globalOptions.host, port: globalOptions.port, mainnet: !!globalOptions.main});

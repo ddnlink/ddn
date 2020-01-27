@@ -5,7 +5,7 @@
 const bluebird = require('bluebird')
 const { Bignum, Address } = require('@ddn/ddn-utils'); //Bignum update
 
-var _singleton;
+let _singleton;
 
 class Account {
     static singleton(context) {
@@ -82,8 +82,8 @@ class Account {
     }
 
     async initAccountsAndBalances() {
-        let verify = this.config.loading.verifyOnLoading;
-        var count = await this.runtime.block.getCount();
+        const verify = this.config.loading.verifyOnLoading;
+        const count = await this.runtime.block.getCount();
         if (verify || count == 1) {
             await this.repairAccounts(count, true);
         } else {
@@ -192,6 +192,9 @@ class Account {
         delete filter.sort;
 
         if (typeof(filter.address) == "string" && !this.isAddress(filter.address)) {
+            console.log('====================================');
+            console.log(filter.address);
+            console.log('====================================');
             throw new Error('Invalid address getAccount');
         }
 

@@ -1,18 +1,4 @@
-var util = require('util');
 var ByteBuffer = require('bytebuffer');
-var crypto = require('./crypto.js');
-
-var bytesTypes = {
-	2: function (trs) {
-		try {
-			var buf = Buffer.from(trs.asset.delegates.list.join(","), 'utf8');
-		} catch (e) {
-			throw Error(e.toString());
-		}
-
-		return buf;
-	}
-}
 
 function getTransactionBytes(trs, skipSignature) {
 

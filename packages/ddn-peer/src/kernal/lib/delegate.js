@@ -7,7 +7,7 @@ const util = require('util');
 const ed = require('ed25519');
 const { Bignum } = require('@ddn/ddn-utils');
 
-var _singleton;
+let _singleton;
 
 class Delegate {
 
@@ -60,23 +60,23 @@ class Delegate {
             secrets = util.isArray(this.config.forging.secret) ? this.config.forging.secret : [this.config.forging.secret];
         }
 
-        var delegateKeypairs = {};
-        var delegatePublicKeys = [];
-        for (var i = 0; i < secrets.length; i++) {
+        const delegateKeypairs = {};
+        const delegatePublicKeys = [];
+        for (let i = 0; i < secrets.length; i++) {
             const keypair = ed.MakeKeypair(crypto.createHash('sha256').update(secrets[i], 'utf8').digest());
             delegateKeypairs[keypair.publicKey.toString('hex')] = keypair;
             delegatePublicKeys.push(keypair.publicKey.toString('hex'));
         }
 
-        var accounts = await this.runtime.account.getAccountList({
+        const accounts = await this.runtime.account.getAccountList({
             public_key: { //wxm block database
-                "$in": delegatePublicKeys
+                $in: delegatePublicKeys
             },
             limit: delegatePublicKeys.length
         });
         if (accounts && accounts.length == delegatePublicKeys.length) {
-            for (var i = 0; i < accounts.length; i++) {
-                var account = accounts[i];
+            for (let i = 0; i < accounts.length; i++) {
+                const account = accounts[i];
                 if (account.is_delegate) {
                     this._myDelegateKeypairs[account.public_key] = delegateKeypairs[account.public_key]; //wxm block database
                     this._myDelegateNum++;
