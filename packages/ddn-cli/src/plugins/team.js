@@ -2,7 +2,7 @@ import fs from "fs";
 import ddnJS from '@ddn/ddn-node-sdk';
 
 import accountHelper from "../helpers/account.js";
-import cryptoLib from "../crypto.js";
+import cryptoLib from "@ddn/ddn-crypto";
 import config from "../../config";
 
 function writeFileSync(file, obj) {

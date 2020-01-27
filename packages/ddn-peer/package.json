@@ -5,9 +5,9 @@
   "files": [
     "lib",
     "protos",
-    "src",
     "test"
   ],
+  "main": "lib/index.js",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/ddnlink/ddn.git"

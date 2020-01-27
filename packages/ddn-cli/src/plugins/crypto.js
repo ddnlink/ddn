@@ -1,5 +1,5 @@
 import inquirer from "inquirer";
-import cryptoLib from "../crypto.js";
+import cryptoLib from "@ddn/ddn-crypto";
 import accountHelper from "../helpers/account.js";
 
 async function genPubkey() {

@@ -8,7 +8,7 @@ const path =require('path');
 const fs =require('fs');
 const { Utils } =require('@ddn/ddn-utils');
 const { getUserConfig } =require('@ddn/ddn-core');
-const Peer = require('@ddn/ddn-peer');
+const Peer = require('@ddn/ddn-peer').default;
 
 /**
  * 整理系统配置文件生成输入参数

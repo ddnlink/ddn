@@ -1,5 +1,5 @@
 {
-  "name": "@ddn/ddn",
+  "name": "@ddn/ddn-cli",
   "preferGlobal": true,
   "version": "1.0.0",
   "description": "A Command line tool to manage ddn",
@@ -17,18 +17,16 @@
   "author": "HuoDing <hd@qq.com>",
   "license": "MIT",
   "dependencies": {
+    "@ddn/ddn-crypto": "^0.0.1",
     "@ddn/ddn-node-sdk": "^3.0.1",
     "@ddn/ddn-utils": "^1.0.11",
     "async": "1.5.2",
-    "bitcore-mnemonic": "^8.5.1",
     "bytebuffer": "^4.0.0",
     "commander": "^2.8.1",
-    "crypto-browserify": "^3.9.14",
     "download-git-repo": "^3.0.2",
     "fs-extra": "0.30.0",
     "gift": "0.6.1",
     "inquirer": "^7.0.3",
-    "js-nacl": "0.6.0",
     "ora": "^4.0.3",
     "request": "^2.62.0",
     "rmdir": "^1.1.0",
@@ -36,11 +34,11 @@
     "valid-url": "1.0.9"
   },
   "bugs": {
-    "url": "http://git.ebookchain.net/ddn/ddn-cli/issues"
+    "url": "https://github.com/ddnlink/ddn/issues"
   },
   "repository": {
     "type": "git",
-    "url": "http://git.ebookchain.net/ddn/ddn-cli.git"
+    "url": "https://github.com/ddnlink/ddn/tree/master/packages/ddn-cli"
   },
-  "homepage": "http://git.ebookchain.net/ddn/ddn-cli"
+  "homepage": "https://github.com/ddnlink/ddn/tree/master/packages/ddn-cli"
 }

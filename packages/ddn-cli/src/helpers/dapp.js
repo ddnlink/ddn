@@ -1,4 +1,4 @@
-const cryptoLib = require('../crypto.js');
+const cryptoLib = require('@ddn/ddn-crypto');
 const ByteBuffer = require('bytebuffer');
 const crypto = require('crypto');
 const dappTransactionsLib = require('../dapptransactions.js');

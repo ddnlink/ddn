@@ -5,6 +5,5 @@ module.exports = {
     Amount: require('./lib/amount'),
     LimitCache: require('./lib/limit-cache'),
     Utils: require('./lib/utils'),
-    Bignum: require('./lib/bignumber'),
-    base58check: require('./lib/base58check'),
+    Bignum: require('./lib/bignumber')
 }

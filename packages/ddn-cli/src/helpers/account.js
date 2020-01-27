@@ -1,4 +1,4 @@
-var crypto = require('../crypto.js');
+var crypto = require('@ddn/ddn-crypto');
 
 module.exports = {
 	account: function (secret, tokenPrefix) {
