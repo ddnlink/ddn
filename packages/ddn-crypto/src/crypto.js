@@ -1,18 +1,16 @@
+/*---------------------------------------------------------------------------------------------
+ *  Created by Imfly on Wed Jan 29 2020 11:48:54
+ *
+ *  Copyright (c) 2019 DDN FOUNDATION. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
 import sha256 from "fast-sha256";
 import RIPEMD160 from "ripemd160";
-import nacl_factory from "js-nacl";
-import crypto from "crypto";
 import Mnemonic from "bitcore-mnemonic";
 import base58check from "./base58check";
+import nacl from 'tweetnacl';
 
-const nacl = nacl_factory.instantiate();
-
-function getHash(data) {
-    return crypto
-    .createHash("sha256")
-    .update(data, "utf8")
-    .digest();
-}
 function randomName() {
     // Convert arguments to Array
     const array = Array.prototype.slice.apply(arguments);
@@ -48,29 +46,29 @@ function randomString(max) {
 
 function keypair(secret) {
     const hash = getHash(secret);
-    const kp = nacl.crypto_sign_keypair_from_seed(hash);
+    const keypair = nacl.sign.keyPair.fromSeed(hash);
 
-    const keypair = {
-        publicKey: Buffer.from(kp.signPk).toString("hex"),
-        privateKey: Buffer.from(kp.signSk).toString("hex")
-    };
-
-    return keypair;
+    return {
+        publicKey: bufToHex(keypair.publicKey),
+        privateKey: bufToHex(keypair.secretKey)
+    }
 }
 
+// TODO: sign(keypair, data) -> sign(data, keypair)
 function sign(keypair, data) {
     const hash = getHash(data);
-    const signature = nacl.crypto_sign_detached(
+    const signature = nacl.sign.detached(
         hash,
         Buffer.from(keypair.privateKey, "hex")
     );
-    return Buffer.from(signature).toString("hex");
+    return bufToHex(signature);
 }
 
 function getId(data) {
     return getHash(data).toString("hex");
 }
 
+// 生成助记词 == ddn-node-sdk.crypto.generatePhasekey()
 function generateSecret() {
     return new Mnemonic(Mnemonic.Words.ENGLISH).toString();
 }
@@ -102,13 +100,21 @@ function isAddress(address, tokenPrefix) {
     return true;
 }
 
-function getAddress(publicKey, tokenPrefix) {
+function generateAddress(publicKey, tokenPrefix) {
     if (typeof publicKey === "string") {
         publicKey = Buffer.from(publicKey, "hex");
     }
     const h1 = sha256.hash(publicKey);
     const h2 = new RIPEMD160().update(Buffer.from(h1)).digest();
     return tokenPrefix + base58check.encode(h2);
+}
+
+function getHash(data) {
+    return Buffer.from(sha256.hash(Buffer.from(data)));
+}
+
+function bufToHex(data) {
+    return Buffer.from(data).toString("hex");
 }
 
 export default {
@@ -119,7 +125,7 @@ export default {
     randomNethash,
     generateSecret,
     isValidSecret,
-    getAddress,
+    generateAddress,
     base58check,
     isAddress
 };

@@ -1,4 +1,4 @@
-var crypto = require('@ddn/ddn-crypto');
+const crypto = require('@ddn/ddn-crypto');
 
 module.exports = {
 	account: function (secret, tokenPrefix) {
@@ -6,8 +6,8 @@ module.exports = {
 			tokenPrefix = 'D';
 		}
 		
-		var kp = crypto.keypair(secret);
-		var address = crypto.getAddress(Buffer.from(kp.publicKey, 'hex'), tokenPrefix);
+		const kp = crypto.keypair(secret);
+		const address = crypto.generateAddress(Buffer.from(kp.publicKey, 'hex'), tokenPrefix);
 
 		return {
 			keypair: kp,

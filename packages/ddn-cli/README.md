@@ -8,58 +8,71 @@ A command line tool to manage [DDN](https://github.com/ddnlink) blockchain apps.
 最新的dapps系列子命令要求node版本号为v8.4.0以上
 
 ```
-npm install -g @ddn/ddn
+npm install -g @ddn/ddn-cli
 ```
 
 ## Usage
 
 ```
-$ ddn --help
+$ ddn
 
-  Usage: ddn [options] [command]
+Usage:  [options] [command]
 
-  Commands:
+Options:
+  -V, --version                          output the version number
+  -H, --host <host>                      Specify the hostname or ip of the node, default: 127.0.0.1 (default: "127.0.0.1")
+  -P, --port <port>                      Specify the port of the node, default: 8001 (default: 8001)
+  -M, --main                             Specify the mainnet, default: false
+  -h, --help                             output usage information
 
-    getheight                              get block height
-    getblockstatus                         get block status
-    openaccount [secret]                   open your account and get the infomation by secret
-    openaccountbypublickey [publickey]     open your account and get the infomation by publickey
-    getbalance [address]                   get balance by address
-    getaccount [address]                   get account by address
-    getvoteddelegates [options] [address]  get delegates voted by address
-    getdelegatescount                      get delegates count
-    getdelegates [options]                 get delegates
-    getvoters [publicKey]                  get voters of a delegate by public key
-    getdelegatebypublickey [publicKey]     get delegate by public key
-    getdelegatebyusername [username]       get delegate by username
-    getblocks [options]                    get blocks
-    getblockbyid [id]                      get block by id
-    getblockbyheight [height]              get block by height
-    getpeers [options]                     get peers
-    getunconfirmedtransactions [options]   get unconfirmed transactions
-    gettransactions [options]              get transactions
-    gettransaction [id]                    get transactions
-    sendmoney [options]                    send money to some address
-    registerdelegate [options]             register delegate
-    upvote [options]                       vote for delegates
-    downvote [options]                     cancel vote for delegates
-    setsecondsecret [options]              set second secret
-    registerdapp [options]                 register a dapp
-    contract [options]                     contract operations
-    crypto [options]                       crypto operations
-    dapps [options]                        manage your dapps
-    creategenesis [options]                create genesis block
-    peerstat                               analyze block height of all peers
-    delegatestat                           analyze delegates status
-    ipstat                                 analyze peer ip info
-
-  Options:
-
-    -h, --help         output usage information
-    -V, --version      output the version number
-    -H, --host <host>  Specify the hostname or ip of the node, default: 127.0.0.1
-    -P, --port <port>  Specify the port of the node, default: 8001
-    -M, --main         Specify the mainnet, default: false
+Commands:
+  getHeight                              get block height
+  getBlockstatus                         get block status
+  openAccount [secret]                   open your account and get the infomation by secret
+  openAccountByPublickey [publickey]     open your account and get the infomation by publickey
+  getBalance [address]                   get balance by address
+  getAccount [address]                   get account by address
+  getVotedDelegates [options] [address]  get delegates voted by address
+  getDelegatesCount                      get delegates count
+  getDelegates [options]                 get delegates
+  getVoters [publicKey]                  get voters of a delegate by public key
+  getDelegateByPublickey [publicKey]     get delegate by public key
+  getDelegateByUsername [username]       get delegate by username
+  getBlocks [options]                    get blocks
+  getBlockById [id]                      get block by id
+  getBlockByHeight [height]              get block by height
+  getPeers [options]                     get peers
+  getUnconfirmedTransactions [options]   get unconfirmed transactions
+  getTransactions [options]              get transactions
+  getTransaction [id]                    get transactions
+  sendToken [options]                    send token to some address
+  sendAsset [options]                    send asset to some address
+  registerDelegate [options]             register delegate
+  listDiffVotes [options]                list the votes each other
+  upVote [options]                       vote for delegates
+  downVote [options]                     cancel vote for delegates
+  setSecondsecret [options]              set second secret
+  registerDapp [options]                 register a dapp
+  deposit [options]                      deposit assets to an app
+  dappTransaction [options]              create a dapp transaction
+  lock [options]                         lock account transfer
+  getFullBlockById [id]                  get full block by block id
+  getFullBlockByHeight [height]          get full block by block height
+  getTransactionBytes [options]          get transaction bytes
+  getTransactionId [options]             get transaction id
+  getBlockBytes [options]                get block bytes
+  getBlockPayloadHash [options]          get block bytes
+  getBlockId [options]                   get block id
+  verifyBytes [options]                  verify bytes/signature/publickey
+  generate|g <asset> <name>              generate new blockchain
+  contract [options]                     contract operations
+  crypto [options]                       crypto operations
+  dapps [options]                        manage your dapps
+  createGenesis [options]                create genesis block
+  peerStat                               analyze block height of all peers
+  delegateStat                           analyze delegates status
+  ipStat                                 analyze peer ip info
+  createUsers [options]                  create some accounts
 ```
 
 ## Documents
