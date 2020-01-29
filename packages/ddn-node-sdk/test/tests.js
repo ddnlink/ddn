@@ -31,7 +31,7 @@ describe("DDN JS", function () {
 		});
 
 		it("should has properties", function () {
-			var properties = ["getBytes", "getHash", "getId", "getFee", "sign", "secondSign", "getKeys", "getAddress", "verify", "verifySecondSignature", "fixedPoint"];
+			var properties = ["getBytes", "getHash", "getId", "getFee", "sign", "secondSign", "getKeys", "generateAddress", "verify", "verifySecondSignature", "fixedPoint"];
 			properties.forEach(function (property) {
 				(crypto).should.have.property(property);
 			});
@@ -268,20 +268,20 @@ describe("DDN JS", function () {
 			});
 		});
 
-		describe("#getAddress", function () {
-			var getAddress = crypto.getAddress;
+		describe("#generateAddress", function () {
+			var generateAddress = crypto.generateAddress;
 
 			it("should be ok", function () {
-				(getAddress).should.be.ok;
+				(generateAddress).should.be.ok;
 			})
 
 			it("should be a function", function () {
-				(getAddress).should.be.type("function");
+				(generateAddress).should.be.type("function");
 			});
 
 			it("should generate address by publicKey", function () {
 				var keys = crypto.getKeys("secret");
-				var address = getAddress(keys.publicKey);
+				var address = generateAddress(keys.publicKey);
 
 				(address).should.be.ok;
 				(address).should.be.type("string");
@@ -1253,9 +1253,9 @@ describe("DDN JS", function () {
 
 	describe('crypto sha256 and address', function () {
 		it('should be equal to the expected address', function () {
-			ddn.crypto.getAddress('7a91b9bfc0ea185bf3ade9d264da273f7fe19bf71008210b1d7239c82dd3ad20').should.be.equal('AFbYJhiJb3DXzHy5ZP24mKw21M2dCBJCXP')
+			ddn.crypto.generateAddress('7a91b9bfc0ea185bf3ade9d264da273f7fe19bf71008210b1d7239c82dd3ad20').should.be.equal('AFbYJhiJb3DXzHy5ZP24mKw21M2dCBJCXP')
 			var publicKeyBuffer = Buffer.from('7a91b9bfc0ea185bf3ade9d264da273f7fe19bf71008210b1d7239c82dd3ad20', 'hex')
-			ddn.crypto.getAddress(publicKeyBuffer).should.be.equal('AFbYJhiJb3DXzHy5ZP24mKw21M2dCBJCXP')
+			ddn.crypto.generateAddress(publicKeyBuffer).should.be.equal('AFbYJhiJb3DXzHy5ZP24mKw21M2dCBJCXP')
 		})
 	})
 

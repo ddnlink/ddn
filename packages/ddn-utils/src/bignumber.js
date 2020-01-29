@@ -1,4 +1,4 @@
-var BigNumber = require('bignumber.js');
+const BigNumber = require('bignumber.js');
 
 module.exports = {
 

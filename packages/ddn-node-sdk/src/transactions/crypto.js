@@ -1,9 +1,9 @@
-var sha256 = require("fast-sha256");
-var addressHelper = require('../address.js');
-var options = require('../options');
-var constants = require('../constants');
-var trsTypes = require('../transaction-types');
-var { AssetUtils } = require('@ddn/ddn-asset-base');
+const sha256 = require("fast-sha256");
+const addressHelper = require('../address.js');
+const options = require('../options');
+const constants = require('../constants');
+const trsTypes = require('../transaction-types');
+const { AssetUtils } = require('@ddn/ddn-asset-base');
 const Mnemonic = require('bitcore-mnemonic');
 const crypto = require('crypto');
 
@@ -12,11 +12,11 @@ if (typeof Buffer === "undefined") {
     Buffer = require("buffer/").Buffer;
 }
 
-var ByteBuffer = require("bytebuffer");
-var Bignum = require("@ddn/ddn-utils");
-var nacl = require('tweetnacl')
+const ByteBuffer = require("bytebuffer");
+const Bignum = require("@ddn/ddn-utils");
+const nacl = require('tweetnacl')
 
-var fixedPoint = Math.pow(10, 8);
+const fixedPoint = Math.pow(10, 8);
 
 function getSignatureBytes(signature) {
     var bb = new ByteBuffer(32, true);
@@ -194,7 +194,6 @@ async function getBytes(transaction, skipSignature, skipSecondSignature) {
     }
 
     return Buffer.from(buffer);
-    // return bb.toBuffer();
 }
 
 async function getId(transaction) {
@@ -240,6 +239,7 @@ async function sign(transaction, keys) {
     if (!transaction.signature) {
         // eslint-disable-next-line require-atomic-updates
         transaction.signature = Buffer.from(signature).toString("hex");
+        // return transaction; // fixme: 确认方法
     } else {
         return Buffer.from(signature).toString("hex");
     }
@@ -318,7 +318,7 @@ function getKeys(secret) {
 }
 
 //根据公钥生成账户地址
-function getAddress(public_key) {
+function generateAddress(public_key) {
     return addressHelper.generateBase58CheckAddress(public_key)
 }
 
@@ -344,7 +344,7 @@ module.exports = {
     sign: sign,
     secondSign: secondSign,
     getKeys: getKeys,
-    getAddress: getAddress,
+    generateAddress: generateAddress,
     verify: verify,
     verifySecondSignature: verifySecondSignature,
     fixedPoint: fixedPoint,

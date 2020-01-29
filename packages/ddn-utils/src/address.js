@@ -1,5 +1,5 @@
-const ddnCrypto = require('@ddn/ddn-crypto');
-const constants = require('./constants');
+import ddnCrypto from '@ddn/ddn-crypto';
+import constants from './constants';
 
 const address = {
   isAddress: (address) => {
@@ -7,8 +7,8 @@ const address = {
   },
 
   generateBase58CheckAddress(publicKey) {
-    return ddnCrypto.getAddress(publicKey, constants.tokenPrefix)
+    return ddnCrypto.generateAddress(publicKey, constants.tokenPrefix)
   },
 }
 
-module.exports = address;
+export default address;

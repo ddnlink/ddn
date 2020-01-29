@@ -1,4 +1,5 @@
 const Bignum = require('bignumber.js');
+
 const amount = {
   validate(amount) {
     if (typeof amount != 'string') return 'Invalid amount type'
