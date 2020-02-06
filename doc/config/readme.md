@@ -19,7 +19,7 @@ sidebarDepth: 2
 export default {
   plugins: [
     // npm 依赖
-    'ddn-aob',
+    'ddn-asset-aob',
     // 相对路径
     './plugin',
     // 绝对路径
@@ -35,7 +35,7 @@ export default {
   plugins: [
     // 有参数
     [
-      'ddn-aob',
+      'ddn-asset-aob',
       {
         a: true,
         b: true,

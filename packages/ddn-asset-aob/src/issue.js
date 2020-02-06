@@ -114,19 +114,19 @@ class Issue extends AssetBase {
         let result5;
         result5 = result4[count];
         if (!result5) {
-            throw new Error('Asset not exists --- from ddn-aob -> issue.verify');
+            throw new Error('Asset not exists --- from ddn-asset-aob -> issue.verify');
         }
         if (result5.issuer_id !== sender.address) {
-            throw new Error('Permission not allowed --- from ddn-aob -> issue.verify');
+            throw new Error('Permission not allowed --- from ddn-asset-aob -> issue.verify');
         }
         if (result5.writeoff) {
-            throw new Error('Asset already writeoff --- from ddn-aob -> issue.verify');
+            throw new Error('Asset already writeoff --- from ddn-asset-aob -> issue.verify');
         }
         const { maximum } = result5;
         const { quantity } = result5;
         const { precision } = result5;
         if (Bignum.isGreaterThan(Bignum.plus(quantity, amount), maximum)) {
-            throw new Error('Exceed issue limit --- from ddn-aob -> issue.verify');
+            throw new Error('Exceed issue limit --- from ddn-asset-aob -> issue.verify');
         }
         const { strategy } = result5;
         const genesisHeight = result5.height;
@@ -142,7 +142,7 @@ class Issue extends AssetBase {
             };
             const evalRet = mathjs.eval(strategy, context);
             if (!evalRet) {
-                throw new Error('Strategy not allowed --- from ddn-aob -> issue.verify');
+                throw new Error('Strategy not allowed --- from ddn-asset-aob -> issue.verify');
             }
         }
         return null;

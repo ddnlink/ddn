@@ -1,14 +1,14 @@
 {
-  "name": "@ddn/ddn-aob",
-  "version": "1.0.10",
+  "name": "@ddn/ddn-asset-aob",
+  "version": "0.0.1",
   "description": "DDN链上资产包",
   "main": "index.js",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/ddnlink/ddn.git",
-    "directory": "packages/ddn-aob"
+    "directory": "packages/ddn-asset-aob"
   },
-  "homepage": "http://github.com/ddnlink/ddn/tree/master/packages/ddn-aob",
+  "homepage": "http://github.com/ddnlink/ddn/tree/master/packages/ddn-asset-aob",
   "bugs": {
     "url": "http://github.com/ddnlink/ddn/issues"
   },
