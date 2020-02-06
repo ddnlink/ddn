@@ -14,7 +14,7 @@ DDN 允许在 `.ddnrc.js` ，`config/config.json` 或 `config/config.js`（三�
 export default {
   publicPath: 'http://bar.com/foo',
   assets: [
-    ['ddn-aob', {
+    ['ddn-asset-aob', {
       assets: true,
     }],
   ],

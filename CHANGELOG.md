@@ -17,7 +17,7 @@
 * **ddn:** modified the addressUtil and configs ([9c2a232](https://github.com/ddnlink/ddn/commit/9c2a232))
 * **ddn-cli:** fix bignum-utils instead of ddn-utils ([6d3d36a](https://github.com/ddnlink/ddn/commit/6d3d36a))
 * **ddn-node-sdk:** fix a few bugs about var not being defined ([d65ad07](https://github.com/ddnlink/ddn/commit/d65ad07))
-* **packages:** fix some bugs in ddn-utils, ddn-test, and ddn-aob ([e01a79e](https://github.com/ddnlink/ddn/commit/e01a79e))
+* **packages:** fix some bugs in ddn-utils, ddn-test, and ddn-asset-aob ([e01a79e](https://github.com/ddnlink/ddn/commit/e01a79e))
 
 
 ### Features

@@ -34,7 +34,7 @@ exports.aob = {
             type: 65,
         },
     ],
-    package: "@ddn/ddn-aob"
+    package: "@ddn/ddn-asset-aob"
 }
 exports.dao = {
     transactions: [

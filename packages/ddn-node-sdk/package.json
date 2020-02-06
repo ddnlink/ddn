@@ -17,7 +17,7 @@
   "author": "",
   "license": "MIT",
   "dependencies": {
-    "@ddn/ddn-aob": "^1.0.4",
+    "@ddn/ddn-asset-aob": "^0.0.1",
     "@ddn/ddn-asset-base": "^1.0.3",
     "@ddn/ddn-crypto": "^0.0.1",
     "@ddn/ddn-dao": "^1.0.3",

@@ -70,49 +70,49 @@ class Asset extends AssetBase {
         const asset = await this.getAssetObject(trs);
         const nameParts = (asset.name || '').split('.');
         if (nameParts.length !== 2) {
-            throw new Error('Invalid asset full name form ddn-aob');
+            throw new Error('Invalid asset full name form ddn-asset-aob');
         }
         const issuerName = nameParts[0];
         const tokenName = nameParts[1];
         if (!tokenName || !/^[A-Z]{3,6}$/.test(tokenName)) {
-            throw new Error('Invalid asset currency name form ddn-aob');
+            throw new Error('Invalid asset currency name form ddn-asset-aob');
         }
         if (!asset.desc) {
-            throw new Error('Invalid asset desc form ddn-aob');
+            throw new Error('Invalid asset desc form ddn-asset-aob');
         }
         if (asset.desc.length > 4096) {
-            throw new Error('Invalid asset desc size form ddn-aob');
+            throw new Error('Invalid asset desc size form ddn-asset-aob');
         }
         if (asset.precision > 16 || asset.precision < 0) {
-            throw new Error('Invalid asset precision form ddn-aob');
+            throw new Error('Invalid asset precision form ddn-asset-aob');
         }
         const error = Amount.validate(asset.maximum);
         if (error) {
             throw new Error(error);
         }
         if (asset.strategy && asset.strategy.length > 256) {
-            throw new Error('Invalid asset strategy size form ddn-aob');
+            throw new Error('Invalid asset strategy size form ddn-asset-aob');
         }
         if (asset.allow_writeoff !== '0' && asset.allow_writeoff !== '1') {
-            throw new Error('Asset allowWriteoff is not valid form ddn-aob');
+            throw new Error('Asset allowWriteoff is not valid form ddn-asset-aob');
         }
         if (asset.allow_whitelist !== '0' && asset.allow_whitelist !== '1') {
-            throw new Error('Asset allowWhitelist is not valid form ddn-aob');
+            throw new Error('Asset allowWhitelist is not valid form ddn-asset-aob');
         }
         if (asset.allow_blacklist !== '0' && asset.allow_blacklist !== '1') {
-            throw new Error('Asset allowBlacklist is not valid form ddn-aob');
+            throw new Error('Asset allowBlacklist is not valid form ddn-asset-aob');
         }
         const assetData = await this.queryAsset({ name: asset.name }, null, null, 1, 1);
         if (assetData && assetData.length > 0) {
-            throw new Error('asset->name Double register form ddn-aob');
+            throw new Error('asset->name Double register form ddn-asset-aob');
         }
         const issuerInst = await this.getAssetInstanceByName("AobIssuer");
         const issuerData = await issuerInst.queryAsset({ name: issuerName }, null, null, 1, 1);
         if (!issuerData || !(issuerData && issuerData.length > 0)) {
-            throw new Error('Issuer not exists form ddn-aob');
+            throw new Error('Issuer not exists form ddn-asset-aob');
         }
         if (issuerData[0].issuer_id !== sender.address) {
-            throw new Error('Permission not allowed form ddn-aob');
+            throw new Error('Permission not allowed form ddn-asset-aob');
         }
         return trs;
     }
