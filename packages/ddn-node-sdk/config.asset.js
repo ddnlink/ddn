@@ -5,7 +5,7 @@ exports.evidence = {
             type: 10,
         }
     ],
-    package: "@ddn/ddn-evidence"
+    package: "@ddn/ddn-asset-evidence"
 }
 exports.aob = {
     transactions: [

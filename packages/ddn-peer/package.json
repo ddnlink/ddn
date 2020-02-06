@@ -58,7 +58,7 @@
     "@ddn/ddn-core": "^0.1.0",
     "@ddn/ddn-dao": "^1.0.3",
     "@ddn/ddn-dapp": "^1.0.3",
-    "@ddn/ddn-evidence": "^1.0.2",
+    "@ddn/ddn-asset-evidence": "^0.0.1",
     "@ddn/ddn-node-sdk": "^3.0.1",
     "@ddn/ddn-utils": "^1.0.0",
     "ajv": "^6.3.0",
