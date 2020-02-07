@@ -5,7 +5,7 @@
 ## Usage
 
 ```
-const ddnCrypto = require('ddn-crypto');
+const ddnCrypto = require('@ddn/ddn-crypto');
 
 // TODO: DEMONSTRATE API
 ```

@@ -58,7 +58,7 @@ class Loader {
     async _attachAssetPlugins() {
         for (let i = 0; i < this.assetPlugins.getTransactionCount(); i++) {
             const transConfig = this.assetPlugins.getTransactionByIndex(i);
-            const transCls = _require_runtime_(transConfig.package)[transConfig.name];
+            const transCls = global._require_runtime_(transConfig.package)[transConfig.name];
             const transInst = new transCls(this._context, transConfig);
 
             this._registerAsset(transConfig.type, transInst, transConfig.name);

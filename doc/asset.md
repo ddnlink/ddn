@@ -26,9 +26,18 @@ DDN资产基类AssetBase定义了一种资产接入区块链需要实现的方�
 
 ### 1. 扩展规范
 
-扩展包名称，必须使用`ddn-asset-`作为前缀开头，比如：`ddn-asset-dapp`.
+扩展包名称，建议使用`ddn-asset-`作为前缀开头，比如：`ddn-asset-dapp`，当然这并非必须的，仅仅是一种编码规范；
 
 扩展包文件，必须包含`.ddnrc.js`配置文件，用于设置该扩展里提供的交易配置；如果有新的数据表，还需要`define-models.js`文件用于定义模型；
+
+入口文件（main字段的值），我们建议统一使用 `lib/index.js` 文件，当然，你也可以定义其他名字的文件，只不过，如果你的入口文件不在`src`（编译后是`lib`)，那么，应该是这样：
+
+```
+// main: 'index.js'
+module.exports = {
+    Evidence: require('./lib/evidence').default // 必须是default
+}
+```
 
 ### 2. 扩展方法
 

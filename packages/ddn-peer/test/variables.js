@@ -18,7 +18,7 @@ const { Bignum, Address, AssetTypes } = require('@ddn/ddn-utils');
 const bluebird = require('bluebird');
 
 // TODO 包的整理规划需要进一步明确原则，根据通用性确定是否写成npm包
-const { DappCategory, DappType } = require('@ddn/ddn-dapp');
+const { DappCategory, DappType } = require('@ddn/ddn-asset-dapp');
 
 // Node configuration
 const baseDir = path.resolve(__dirname, '../');

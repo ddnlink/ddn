@@ -1,6 +1,7 @@
 import { AssetBase } from '@ddn/ddn-asset-base';
+// console.log('============', AssetBase);
 
-class AssetEvidence extends AssetBase
+class Evidence extends AssetBase
 {
 
     async propsMapping() {
@@ -86,4 +87,4 @@ class AssetEvidence extends AssetBase
 
 }
 
-export default AssetEvidence;
+export default Evidence;

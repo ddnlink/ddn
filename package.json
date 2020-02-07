@@ -63,5 +63,8 @@
     "commitizen": {
       "path": "./node_modules/cz-conventional-changelog"
     }
+  },
+  "dependencies": {
+    "jslint": "^0.12.1"
   }
 }

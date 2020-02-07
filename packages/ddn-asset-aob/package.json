@@ -1,8 +1,8 @@
 {
   "name": "@ddn/ddn-asset-aob",
   "version": "0.0.1",
-  "description": "DDN链上资产包",
-  "main": "index.js",
+  "description": "DDN asset on blockchain",
+  "main": "lib/index.js",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/ddnlink/ddn.git",
@@ -14,8 +14,7 @@
   },
   "files": [
     "lib",
-    ".ddnrc.js",
-    "index.js"
+    ".ddnrc.js"
   ],
   "author": "wangxm",
   "license": "MIT",

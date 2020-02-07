@@ -236,7 +236,7 @@ export default {
   assets: [
     "@ddn/ddn-asset-evidence",
     "@ddn/ddn-asset-aob",
-    "@ddn/ddn-dapp",
-    "@ddn/ddn-dao"
+    "@ddn/ddn-asset-dapp",
+    "@ddn/ddn-asset-dao"
   ],
 };

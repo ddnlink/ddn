@@ -173,21 +173,20 @@ module.exports = (schemaFile, cb) => {
         for (let i = 0; i < transCount; i++) {
             const assetTrans = AssetUtils.getTransactionByIndex(i);
             if (assetTrans) {
-                var assetJsonName = AssetUtils.getAssetJsonName(assetTrans.type);
-
-                var transCls = global._require_runtime_(assetTrans.package)[assetTrans.name];
-                var transInst = new transCls();   //wxm 此处传的都是null，必须保证propsMapping里不要用到这传入的context参数
-                var props = await transInst.propsMapping();
-                var fields = {};
-                for (var j = 0; j < props.length; j++) {
-                    var pItem = props[j];
+                const assetJsonName = AssetUtils.getAssetJsonName(assetTrans.type);
+                const transCls = global._require_runtime_(assetTrans.package)[assetTrans.name];
+                const transInst = new transCls();   //wxm 此处传的都是null，必须保证propsMapping里不要用到这传入的context参数
+                const props = await transInst.propsMapping();
+                const fields = {};
+                for (let j = 0; j < props.length; j++) {
+                    const pItem = props[j];
                     fields[pItem.prop] = {};
 
                     if (pItem.required) {
                         fields[pItem.prop].rule = "required";
                     }
 
-                    var fieldType = pItem.field.replace(/[0-9]/g, "");
+                    let fieldType = pItem.field.replace(/[0-9]/g, "");
                     fieldType = fieldType.replace(/_ext$/, "");
                     if (fieldType == "int") {
                         fields[pItem.prop].type = "int32";
