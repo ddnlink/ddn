@@ -2,7 +2,7 @@
   "name": "@ddn/ddn-asset-base",
   "version": "1.0.14",
   "description": "DDN资产基类相关信息",
-  "main": "index.js",
+  "main": "lib/index.js",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/ddnlink/ddn.git",

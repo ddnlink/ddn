@@ -1,8 +1,8 @@
 {
-  "name": "@ddn/ddn-dao",
-  "version": "1.0.7",
-  "description": "this is ddn-dao",
-  "main": "index.js",
+  "name": "@ddn/ddn-asset-dao",
+  "version": "0.0.1",
+  "description": "this is ddn-asset-dao",
+  "main": "lib/index.js",
   "author": "wly",
   "repository": {
     "type": "git",
@@ -15,7 +15,8 @@
   },
   "license": "MIT",
   "files": [
-    "lib"
+    "lib",
+    ".ddnrc.js"
   ],
   "dependencies": {
     "@ddn/ddn-asset-base": "^1.0.3",

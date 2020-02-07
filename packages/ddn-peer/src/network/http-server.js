@@ -222,7 +222,7 @@ class HttpServer {
                 if (pos >= 0) {
                     var ext = item.substring(pos);
                     if (ext.toLowerCase() == ".js") {
-                        var Kls = _require_runtime_(subPath);
+                        var Kls = global._require_runtime_(subPath);
                         var inst = new Kls(this._context);
                         await this._mountRouter(subPath, Kls, inst);
                     }

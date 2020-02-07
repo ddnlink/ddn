@@ -3,7 +3,7 @@ const addressHelper = require('../address.js');
 const options = require('../options');
 const constants = require('../constants');
 const trsTypes = require('../transaction-types');
-const { AssetUtils } = require('@ddn/ddn-asset-base');
+const { AssetUtils } = require('@ddn/ddn-asset-base').default;
 const Mnemonic = require('bitcore-mnemonic');
 const crypto = require('crypto');
 

@@ -1,5 +1,5 @@
 {
-  "name": "ddn-dapp-helloworld",
+  "name": "ddn-asset-dapp-helloworld",
   "link": "git+http://git.ebookchain.net/ebookchain-dapp-helloworld/archive/master.zip",
   "category": 1,
   "description": "A hello world demo for ddn dapp",

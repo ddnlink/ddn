@@ -229,14 +229,14 @@ export default {
   /**
    * 扩展资产插件，对于区块链而言就是资产包，所以使用 assets
    * assets: [
-   *  "@ddn/ddn-evidence",
+   *  "@ddn/ddn-asset-evidence",
    *  "@ddn/ddn-asset-aob"
    * ]
    */
   assets: [
-    "@ddn/ddn-evidence",
+    "@ddn/ddn-asset-evidence",
     "@ddn/ddn-asset-aob",
-    "@ddn/ddn-dapp",
-    "@ddn/ddn-dao"
+    "@ddn/ddn-asset-dapp",
+    "@ddn/ddn-asset-dao"
   ],
 };

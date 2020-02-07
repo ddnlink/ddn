@@ -18,7 +18,7 @@ class AssetUtils
                 }
           
                 const assetTransactions = assetConfig.transactions;
-    
+
                 if (assetTransactions && assetTransactions.length > 0) {
         
                     for (let i = 0; i < assetTransactions.length; i++) {

@@ -42,7 +42,7 @@ class DdnSchema {
                 if (pos >= 0) {
                     var ext = item.substring(pos);
                     if (ext.toLowerCase() == ".js") {
-                        var extFormat = _require_runtime_(itemPath);
+                        var extFormat = global._require_runtime_(itemPath);
                         if (extFormat != null &&
                             typeof(extFormat.name) == "string" &&
                             typeof(extFormat.validate) == "function") {
@@ -56,25 +56,25 @@ class DdnSchema {
 
     async validateBlock(block) {
         var schemaFile = path.resolve(__dirname, './ddn-schemas/block.json');
-        var blockSchema = _require_runtime_(schemaFile);
+        var blockSchema = global._require_runtime_(schemaFile);
         return await this.validate(blockSchema, block);
     }
 
     async validateTransaction(trs) {
         var schemaFile = path.resolve(__dirname, './ddn-schemas/transaction.json');
-        var transactionSchema = _require_runtime_(schemaFile);
+        var transactionSchema = global._require_runtime_(schemaFile);
         return await this.validate(transactionSchema, trs);
     }
 
     async validatePeer(peer) {
         var schemaFile = path.resolve(__dirname, './ddn-schemas/peer.json');
-        var peerSchema = _require_runtime_(schemaFile);
+        var peerSchema = global._require_runtime_(schemaFile);
         return await this.validate(peerSchema, peer);
     }
 
     async validatePeers(peer) {
         var schemaFile = path.resolve(__dirname, './ddn-schemas/peers.json');
-        var peerSchema = _require_runtime_(schemaFile);
+        var peerSchema = global._require_runtime_(schemaFile);
         return await this.validate(peerSchema, peer);
     }
 

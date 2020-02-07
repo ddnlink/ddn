@@ -1,19 +1,20 @@
 {
-  "name": "@ddn/ddn-dapp",
-  "version": "1.0.12",
-  "description": "this is ddn-dapp package",
-  "main": "index.js",
+  "name": "@ddn/ddn-asset-dapp",
+  "version": "0.0.1",
+  "description": "this is ddn-asset-dapp package",
+  "main": "lib/index.js",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/ddnlink/ddn.git",
-    "directory": "packages/ddn-dapp"
+    "directory": "packages/ddn-asset-dapp"
   },
-  "homepage": "http://github.com/ddnlink/ddn/tree/master/packages/ddn-dapp",
+  "homepage": "http://github.com/ddnlink/ddn/tree/master/packages/ddn-asset-dapp",
   "bugs": {
     "url": "http://github.com/ddnlink/ddn/issues"
   },
   "files": [
-    "lib"
+    "lib",
+    ".ddnrc.js"
   ],
   "author": "wly",
   "license": "MIT",

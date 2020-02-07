@@ -1,5 +1,5 @@
 /*---------------------------------------------------------------------------------------------
- *  Created by imfly on Sun May 06 2017 11:39:6
+ *  Created by wxx on Sun May 06 2017 11:39:6
  *
  *  Copyright (c) 2018 DDN FOUNDATION. All rights reserved.
  *  Licensed under the MIT License. See License.txt in the project root for license information.
@@ -11,7 +11,7 @@
  * create，getBytes，calculateFee，verify，objectNormalize，dbRead，apply，undo，applyUnconfirmed，
  * undoUnconfirmed，ready，process
  */
-import AssetUtils from './asset-utils';
+import AssetUtils from './utils';
 import ByteBuffer from 'bytebuffer';
 import CommonUtils from './common-utils';
 import { Bignum } from '@ddn/ddn-utils';
@@ -100,7 +100,7 @@ class AssetBase {
      * @param {*} data 
      * @param {*} trs 
      */
-    async create(data, trs) {
+    async create(trs) {
         return trs;
     }
 
@@ -109,7 +109,7 @@ class AssetBase {
      * @param {*} trs 
      * @param {*} sender 
      */
-    async calculateFee(trs, sender) {
+    async calculateFee() {
         return Bignum.multiply(0.1, 100000000);
     }
 
@@ -142,7 +142,7 @@ class AssetBase {
      * 自定义资产Api
      * @param {*} router 
      */
-    async attachApi(router) {
+    async attachApi() {
     }
 
     /**
@@ -154,9 +154,9 @@ class AssetBase {
         }
 
         this.isHasExtProps = false;
-        var mapping = await this.propsMapping();
-        for (var i = 0; i < mapping.length; i++) {
-            var item = mapping[i];
+        const mapping = await this.propsMapping();
+        for (let i = 0; i < mapping.length; i++) {
+            const item = mapping[i];
             if (item) {
                 if (item.field && item.field.substring(item.field.length - 4, item.field.length) == "_ext") {
                     this.isHasExtProps = true;
@@ -170,9 +170,9 @@ class AssetBase {
     async getPropsMappingItemByProp(propName) {
         if (!this.propsMappingItems || 
             !this.propsMappingItems[propName.toLowerCase()]) {
-            var props = await this.propsMapping();
-            for (var i = 0; i < props.length; i++) {
-                var currProp = props[i];
+            const props = await this.propsMapping();
+            for (let i = 0; i < props.length; i++) {
+                const currProp = props[i];
                 if (currProp.prop.toLowerCase() == propName.toLowerCase()) {
                     if (!this.propsMappingItems) {
                         this.propsMappingItems = {};
@@ -193,9 +193,9 @@ class AssetBase {
     async getPropsMappingItemByField(fieldName) {
         if (!this.propsMappingItems || 
             !this.propsMappingItems[fieldName.toLowerCase()]) {
-            var props = await this.propsMapping();
-            for (var i = 0; i < props.length; i++) {
-                var currProp = props[i];
+            const props = await this.propsMapping();
+            for (let i = 0; i < props.length; i++) {
+                const currProp = props[i];
                 if (currProp.field.toLowerCase() == fieldName.toLowerCase()) {
                     if (!this.propsMappingItems) {
                         this.propsMappingItems = {};
@@ -232,7 +232,7 @@ class AssetBase {
         if (!trs || !trs.asset) {
             return null;
         }
-        var assetJsonName = AssetUtils.getAssetJsonName(trs.type);
+        const assetJsonName = AssetUtils.getAssetJsonName(trs.type);
         return trs.asset[assetJsonName];
     }
 
@@ -281,7 +281,7 @@ class AssetBase {
         let limit = pageSize;
         let offset = (pageIndex - 1) * pageSize;
 
-        let result, total = 0;
+        let result;
         return new Promise((resolve, reject) => {
             this.dao.findPage('trs_asset', filter, limit, offset, returnTotal, attributes, 
                 orders, (err, rows) => {
@@ -290,7 +290,7 @@ class AssetBase {
                 } else {
                     result = rows;
 
-                    var trsIds = [];
+                    let trsIds = [];
                     if (returnTotal) {
                         trsIds = _.pluck(rows.rows, 'asset_trs_id');
                     } else {
@@ -341,31 +341,31 @@ class AssetBase {
      * @param {*} asset 资产交易的配置name或type（config.asset.js文件中定义）
      */
     async queryAsset(where, orders, returnTotal, pageIndex, pageSize, asset, defaultTrsType) {
-        var assetInst = this;
+        let assetInst = this;
         if (asset) {
-            var assetTrans;
+            let assetTrans;
             if (/^[0-9]*$/.test(asset)) {
                 assetTrans = AssetUtils.getTransactionByTypeValue(asset);
             } else {
-                var assetValue = AssetUtils.getTypeValue(asset);
+                let assetValue = AssetUtils.getTypeValue(asset);
                 assetTrans = AssetUtils.getTransactionByTypeValue(assetValue);
             }
             if (assetTrans) {
-                var assetCls = require(assetTrans.package)[assetTrans.name];
+                const assetCls = require(assetTrans.package)[assetTrans.name];
                 assetInst = new assetCls(this._context, assetTrans);
             }
         }
 
         //构建返回字段数组
-        var attributes = [
+        const attributes = [
             ['transaction_id', 'asset_trs_id'],
             ['transaction_type', 'asset_trs_type'],
             ['timestamp', 'asset_timestamp']
         ];
-        var propsMapping = await assetInst.propsMapping();
-        for (var i = 0; i < propsMapping.length; i++) {
-            var propMapping = propsMapping[i];
-            var field = propMapping.field;
+        const propsMapping = await assetInst.propsMapping();
+        for (let i = 0; i < propsMapping.length; i++) {
+            const propMapping = propsMapping[i];
+            const field = propMapping.field;
             if (field != "str_ext" && 
                 field != "int_ext" && 
                 field != "timestamp_ext") {
@@ -373,26 +373,26 @@ class AssetBase {
             }
         }
 
-        var useDefaultTrsType = true;
+        let useDefaultTrsType = true;
         if (typeof(defaultTrsType) != "undefined" && defaultTrsType != null)
         {
             useDefaultTrsType = !!defaultTrsType;
         }
 
         //解析查询条件
-        var newConds = {};
+        let newConds = {};
         where = where || {};
         if (useDefaultTrsType)
         {
             where.trs_type = await assetInst.getTransactionType();
         }
 
-        for (var p in where) {
-            var condProp = await assetInst.getPropsMappingItemByProp(p);
+        for (let p in where) {
+            const condProp = await assetInst.getPropsMappingItemByProp(p);
             if (condProp) {
                 newConds[condProp.field] = where[p];
             } else {
-                var pName = p.toLowerCase();
+                const pName = p.toLowerCase();
                 if (pName == "trs_id" || pName == "transaction_id") {
                     newConds["transaction_id"] = where[p];
                 } else if (pName == "trs_type" || pName == "transaction_type") {
@@ -407,10 +407,10 @@ class AssetBase {
 
         //解析排序条件
         orders = orders || [];
-        var newOrders = [];
+        let newOrders = [];
         if (CommonUtils.isArray(orders) && orders.length > 0) {
-            var getFieldName = async (prop) => {
-                var condProp = await assetInst.getPropsMappingItemByProp(prop);
+            const getFieldName = async (prop) => {
+                const condProp = await assetInst.getPropsMappingItemByProp(prop);
                 if (condProp) {
                     return condProp.field;
                 } else {
@@ -423,7 +423,7 @@ class AssetBase {
                         return "timestamp";
                     } else if (pName == "$or" || pName == "$and" || pName == "$in" || pName == "$like" || 
                         pName == "$in" || pName == "&lt" || pName == "$lte" || pName == "$gt" || pName == "$gte") {
-                        newConds[pName] = where[p];
+                        newConds[pName] = where[pName];
                     } else {
                         this.logger.warn("Invalid order field: " + prop);
                         return null;
@@ -431,12 +431,12 @@ class AssetBase {
                 }
             }
 
-            for (var i = 0; i < orders.length; i++) {
-                var orderItem = orders[i];
+            for (let i = 0; i < orders.length; i++) {
+                const orderItem = orders[i];
                 if (CommonUtils.isArray(orderItem)) {
                     if (orderItem.length == 2) {
                         if (typeof(orderItem[0]) == "string" && typeof(orderItem[1]) == "string") {
-                            var fieldName = await getFieldName(orderItem[0]);
+                            const fieldName = await getFieldName(orderItem[0]);
                             if (fieldName) {
                                 newOrders.push([fieldName, orderItem[1]]);
                             } else {
@@ -451,7 +451,7 @@ class AssetBase {
                     }
                 } else {
                     if (CommonUtils.isString(orderItem)) {
-                        var fieldName = await getFieldName(p);
+                        const fieldName = await getFieldName(orderItem); 
                         if (fieldName) {
                             newOrders.push(fieldName);
                         }
@@ -466,17 +466,17 @@ class AssetBase {
             newOrders = orders;
         }
 
-        var data = await this.getAssetBase(newConds, await assetInst.hasExtProps(), 
+        const data = await this.getAssetBase(newConds, await assetInst.hasExtProps(), 
             pageIndex, pageSize, newOrders, returnTotal, attributes);
 
-        var rows = data && data.rows ? data.rows : data;
+        const rows = data && data.rows ? data.rows : data;
         if (rows && rows.length > 0) {
-            var rowObjs = [];
-            for (var i = 0; i < rows.length; i++) {
-                var rowInfo = rows[i];
-                var rowObj = await assetInst.dbRead(rowInfo);
+            const rowObjs = [];
+            for (let i = 0; i < rows.length; i++) {
+                const rowInfo = rows[i];
+                const rowObj = await assetInst.dbRead(rowInfo);
                 if (rowObj) {
-                    var assetName = AssetUtils.getAssetJsonName(rowInfo.asset_trs_type);
+                    const assetName = AssetUtils.getAssetJsonName(rowInfo.asset_trs_type);
                     rowObjs.push(rowObj[assetName]);
                 }
             }
@@ -549,9 +549,9 @@ class AssetBase {
      * @param {*} cb 
      */
     async update(obj, where, dbTrans, asset) {
-        var assetInst = this;
+        let assetInst = this;
         if (asset) {
-            var assetTrans;
+            let assetTrans;
             if (/^[0-9]*$/.test(asset)) {
                 assetTrans = AssetUtils.getTransactionByTypeValue(asset);
             } else {
@@ -559,19 +559,19 @@ class AssetBase {
                 assetTrans = AssetUtils.getTransactionByTypeValue(assetValue);
             }
             if (assetTrans) {
-                var assetCls = require(assetTrans.package)[assetTrans.name];
+                const assetCls = require(assetTrans.package)[assetTrans.name];
                 assetInst = new assetCls(this._context, assetTrans);
             }
         }
         // 解析obj
-        var newObj = {};
+        const newObj = {};
         obj = obj || {};
-        for (var p in obj) {
-            var condProp = await assetInst.getPropsMappingItemByProp(p);
+        for (let p in obj) {
+            const condProp = await assetInst.getPropsMappingItemByProp(p);
             if (condProp) {
                 newObj[condProp.field] = obj[p];
             } else {
-                var pName = p.toLowerCase();
+                const pName = p.toLowerCase();
                 if (pName == "trs_id") {
                     newObj["transaction_id"] = obj[p];
                 } else if (pName == "trs_type") {
@@ -582,16 +582,16 @@ class AssetBase {
             }
         }
         // 解析where
-        var newWhere = {};
+        const newWhere = {};
         where = where || {};
         where.trs_type = await assetInst.getTransactionType();
 
-        for (var p in where) {
-            var condProp = await assetInst.getPropsMappingItemByProp(p);
+        for (let p in where) {
+            const condProp = await assetInst.getPropsMappingItemByProp(p);
             if (condProp) {
                 newWhere[condProp.field] = where[p];
             } else {
-                var pName = p.toLowerCase();
+                const pName = p.toLowerCase();
                 if (pName == "trs_id" || pName == "transaction_id") {
                     newWhere["transaction_id"] = where[p];
                 } else if (pName == "trs_type" || pName == "transaction_type") {
@@ -614,6 +614,8 @@ class AssetBase {
     }
 
     /**
+     * todo: es5 to es6
+     * s
      * 查询规定条件的资产数据的个数
      * @param {*} where 查询条件，遵循sequelize规则，使用prop的名称定义
      * @param {*} asset 资产交易的配置name或type（config.asset.js文件中定义）
@@ -707,65 +709,66 @@ class AssetBase {
                             }
                             catch(err3) 
                             {
-                                var err = "The '" + item.prop + "' attribute min length of '" + assetJsonName + "' must be greater than " + minLen;
+                                const err = "The '" + item.prop + "' attribute min length of '" + assetJsonName + "' must be greater than " + minLen;
                                 throw new Error(err);
                             }
 
                             if (strValue.length < minLen){
-                                var err = "The '" + item.prop + "' attribute min length of '" + assetJsonName + "' must be greater than " + minLen;
+                                const err = "The '" + item.prop + "' attribute min length of '" + assetJsonName + "' must be greater than " + minLen;
                                 throw new Error(err);
                             }
                         }
                         if (maxLen != null && typeof(maxLen) != "undefined") {
                             if (strValue.length > maxLen) {
-                                var err = "The '" + item.prop + "' attribute max length of '" + assetJsonName + "' must be less than " + maxLen;
+                                const err = "The '" + item.prop + "' attribute max length of '" + assetJsonName + "' must be less than " + maxLen;
                                 throw new Error(err);
                             }
                         }
                     } else if (item.required) {
-                        var err = "The '" + item.prop + "' attribute of '" + assetJsonName + "' is required.";
+                        const err = "The '" + item.prop + "' attribute of '" + assetJsonName + "' is required.";
                         throw new Error(err);
                     }
                 } else if (fieldType == "int") {
-                    var intValue = asset[item.prop];
+                    const intValue = asset[item.prop];
                     if (intValue != null && typeof(intValue) != "undefined") {
                         if (typeof(intValue) != "number") {
-                            var err = "The '" + item.prop + "' attribute type of '" + assetJsonName + "' must be a integer.";
+                            const err = "The '" + item.prop + "' attribute type of '" + assetJsonName + "' must be a integer.";
                             throw new Error(err);
                         }
 
                         if (itemRule) {
                             if (itemRule.maxValue != null && typeof(itemRule.maxValue) != "undefined") {
                                 if (intValue > itemRule.maxValue) {
-                                    var err = "The '" + item.prop + "' attribute max value of '" + assetJsonName + "' must be less than " + itemRule.maxValue;
+                                    const err = "The '" + item.prop + "' attribute max value of '" + assetJsonName + "' must be less than " + itemRule.maxValue;
                                     throw new Error(err);
                                 }
                             }
 
                             if (itemRule.minValue != null && typeof(itemRule.minValue) != "undefined") {
                                 if (intValue < itemRule.minValue) {
-                                    var err = "The '" + item.prop + "' attribute min value of '" + assetJsonName + "' must be greater than " + itemRule.maxValue;
+                                    const err = "The '" + item.prop + "' attribute min value of '" + assetJsonName + "' must be greater than " + itemRule.maxValue;
                                     throw new Error(err);
                                 }
                             }
                         }
                     } else if (item.required) {
-                        var err = "The '" + item.prop + "' attribute of '" + assetJsonName + "' is required.";
+                        const err = "The '" + item.prop + "' attribute of '" + assetJsonName + "' is required.";
                         throw new Error(err);
                     }
                 } else if (fieldType == "timestamp") {
-                    var timestampValue = asset[item.prop];
+                    const timestampValue = asset[item.prop];
                     if (timestampValue != null && typeof(timestampValue) != "undefined") {
                         if (typeof(timestampValue) != "object" && typeof(timestampValue.getDate) != "function") {
                             try {
-                                var dt = new Date(timestampValue);
+                                // FIXME: 你要干嘛？
+                                console.log("Todo: what will you do?");
                             } catch(error) {
-                                var err = "The '" + item.prop + "' attribute type of '" + assetJsonName + "' must be a datetime.";
+                                const err = "The '" + item.prop + "' attribute type of '" + assetJsonName + "' must be a datetime.";
                                 throw new Error(err);
                             }
                         }
                     } else if (item.required) {
-                        var err = "The '" + item.prop + "' attribute of '" + assetJsonName + "' is required.";
+                        const err = "The '" + item.prop + "' attribute of '" + assetJsonName + "' is required.";
                         throw new Error(err);
                     }
                 }
@@ -779,7 +782,7 @@ class AssetBase {
      * @param {*} sender 
      * @param {*} cb 
      */
-    async verify(trs, sender) {
+    async verify(trs) {
         if (Bignum.isZero(trs.amount)) { //等于0
             if (trs.recipient_id) { //wxm block database
                 throw new Error("The recipient_id attribute of the transaction must be null.");
@@ -802,7 +805,7 @@ class AssetBase {
      * @param {*} trs 
      * @param {*} sender 
      */
-    async process(trs, sender) {
+    async process(trs) {
         return trs;
     }
 
@@ -855,7 +858,7 @@ class AssetBase {
      * @param {*} sender 
      * @param {*} dbTrans 
      */
-    async apply(trs, block, sender, dbTrans) {
+    async apply(trs, block, dbTrans) {
         if (Bignum.isGreaterThan(trs.amount, 0)) {
             await this.runtime.account.setAccount({ address: trs.recipient_id }, dbTrans);
 
@@ -877,7 +880,7 @@ class AssetBase {
      * @param {*} sender 
      * @param {*} dbTrans 
      */
-    async undo(trs, block, sender, dbTrans) {
+    async undo(trs, block, dbTrans) {
         if (Bignum.isGreaterThan(trs.amount, 0)) {
             await this.runtime.account.setAccount({address: trs.recipient_id}, dbTrans);
 
@@ -899,7 +902,7 @@ class AssetBase {
      * @param {*} sender 
      * @param {*} dbTrans 
      */
-    async applyUnconfirmed(trs, sender, dbTrans) {
+    async applyUnconfirmed(trs) {
         const key = trs.type + "_" + trs.id;
         if (this.oneoff.has(key)) {
             throw new Error("The transaction has been confirmed: " + trs.id + ".");
@@ -915,7 +918,7 @@ class AssetBase {
      * @param {*} sender 
      * @param {*} dbTrans 
      */
-    async undoUnconfirmed(trs, sender, dbTrans) {
+    async undoUnconfirmed(trs) {
         const key = trs.type + "_" + trs.id;
         this.oneoff.delete(key);
         return;
@@ -1001,7 +1004,8 @@ class AssetBase {
                 }
                 catch(err2)
                 {
-                    
+                    // todo
+                    throw new Error(`Can't parse asset extend data`);
                 }
             }
 

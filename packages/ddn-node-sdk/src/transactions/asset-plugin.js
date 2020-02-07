@@ -1,7 +1,7 @@
 var crypto = require('./crypto.js');
 var slots = require('../time/slots.js');
 var options = require('../options');
-var { AssetUtils } = require('@ddn/ddn-asset-base');
+var { AssetUtils } = require('@ddn/ddn-asset-base').default;
 
 async function createPluginAsset(trsType, assetInfo, secret, secondSecret) {
     var keys = crypto.getKeys(secret);
