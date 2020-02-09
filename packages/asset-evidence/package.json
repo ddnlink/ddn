@@ -1,0 +1,24 @@
+{
+  "name": "@ddn/asset-evidence",
+  "version": "0.0.1",
+  "description": "DDN数据存证资产包",
+  "main": "lib/index.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ddnlink/ddn.git",
+    "directory": "packages/asset-evidence"
+  },
+  "homepage": "http://github.com/ddnlink/ddn/tree/master/packages/asset-evidence",
+  "bugs": {
+    "url": "http://github.com/ddnlink/ddn/issues"
+  },
+  "files": [
+    "lib",
+    ".ddnrc.js"
+  ],
+  "author": "wangxm",
+  "license": "MIT",
+  "dependencies": {
+    "@ddn/asset-base": "^0.0.1"
+  }
+}

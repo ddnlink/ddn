@@ -1,0 +1,26 @@
+{
+  "name": "@ddn/utils",
+  "version": "0.0.1",
+  "description": "DDN 通用工具类",
+  "main": "index.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ddnlink/ddn.git",
+    "directory": "packages/ddn-utils"
+  },
+  "homepage": "http://github.com/ddnlink/ddn/tree/master/packages/ddn-utils",
+  "bugs": {
+    "url": "http://github.com/ddnlink/ddn/issues"
+  },
+  "files": [
+    "lib"
+  ],
+  "dependencies": {
+    "@ddn/crypto": "^0.0.1",
+    "bignumber.js": "^7.2.1",
+    "ip": "^1.1.5",
+    "shelljs": "^0.8.3"
+  },
+  "author": "wly",
+  "license": "MIT"
+}

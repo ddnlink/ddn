@@ -1,6 +1,6 @@
 {
   "name": "ddn",
-  "version": "3.1.1",
+  "version": "3.2.0",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/ddnlink/ddn.git"
@@ -46,7 +46,7 @@
     "chore:update-deps": "sh ./scripts/reinstall_deps.sh",
     "clean": "lerna clean -y",
     "publish": "./scripts/publish.js",
-    "test": "./packages/ddn-test/bin/ddn-test.js",
+    "test": "./packages/test/bin/test.js",
     "lint": "eslint --fix --ext .js packages"
   },
   "private": true,

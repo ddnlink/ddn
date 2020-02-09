@@ -3,6 +3,6 @@
 yarn 
 yarn bootstrap
 yarn build
-cd packages/ddn-cli
+cd packages/ddn
 yarn link
 cd ../..

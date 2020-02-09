@@ -6,9 +6,9 @@ const packageFile =require('./package.json');
 const command =require('commander');
 const path =require('path');
 const fs =require('fs');
-const { Utils } =require('@ddn/ddn-utils');
-const { getUserConfig } =require('@ddn/ddn-core');
-const Peer = require('@ddn/ddn-peer').default;
+const { Utils } =require('@ddn/utils');
+const { getUserConfig } =require('@ddn/core');
+const Peer = require('@ddn/peer').default;
 
 /**
  * 整理系统配置文件生成输入参数

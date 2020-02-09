@@ -126,8 +126,8 @@ $ yarn test
 ## Releated projects
 
 - [ddn-docs](https://github.com/ddnlink/ddn-docs)
-- [ddn-cli](https://github.com/ddnlink/ddn-cli)
-- [ddn-node-sdk](https://github.com/ddnlink/ddn-node-sdk)
+- [ddn](https://github.com/ddnlink/ddn)
+- [node-sdk](https://github.com/ddnlink/node-sdk)
 - [ddn-explorer] website: [ddn.link](http://mainnet.ddn.link)
 
 ## License

@@ -1,0 +1,45 @@
+{
+  "name": "@ddn/test",
+  "version": "0.0.1",
+  "bin": {
+    "test": "./bin/test.js"
+  },
+  "main": "./lib/index.js",
+  "repository": {
+    "type": "git",
+    "url": "http://github.com/ddnlink/ddn/tree/master/packages/test"
+  },
+  "homepage": "http://github.com/ddnlink/ddn/tree/master/packages/test",
+  "bugs": {
+    "url": "http://github.com/ddnlink/ddn/issues"
+  },
+  "license": "MIT",
+  "files": [
+    "bin",
+    "lib",
+    "src"
+  ],
+  "dependencies": {
+    "@babel/core": "7.4.5",
+    "@babel/preset-typescript": "7.3.3",
+    "babel-core": "7.0.0-bridge.0",
+    "babel-jest": "^24.8.0",
+    "babel-plugin-module-resolver": "3.2.0",
+    "babel-preset-umi": "1.8.1",
+    "core-js": "3.1.4",
+    "debug": "4.1.1",
+    "enzyme": "^3.10.0",
+    "enzyme-adapter-react-16": "^1.14.0",
+    "identity-obj-proxy": "3.0.0",
+    "jest": "^24.8.0",
+    "jest-cli": "^24.8.0",
+    "jest-pnp-resolver": "^1.2.0",
+    "jest-resolve": "^24.8.0",
+    "react": "^16.8.6",
+    "react-dom": "^16.8.6",
+    "regenerator-runtime": "0.13.2",
+    "typescript": "^3.5.2",
+    "umi-utils": "1.7.1",
+    "yargs-parser": "13.1.1"
+  }
+}

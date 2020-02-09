@@ -1,0 +1,30 @@
+{
+  "name": "@ddn/asset-aob",
+  "version": "0.0.1",
+  "description": "DDN asset on blockchain",
+  "main": "lib/index.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ddnlink/ddn.git",
+    "directory": "packages/asset-aob"
+  },
+  "homepage": "http://github.com/ddnlink/ddn/tree/master/packages/asset-aob",
+  "bugs": {
+    "url": "http://github.com/ddnlink/ddn/issues"
+  },
+  "files": [
+    "lib",
+    ".ddnrc.js"
+  ],
+  "author": "wangxm",
+  "license": "MIT",
+  "dependencies": {
+    "@ddn/asset-base": "^0.0.1",
+    "@ddn/utils": "^0.0.1",
+    "async": "^2.6.1",
+    "ed25519": "0.0.4",
+    "lodash": "^4.17.15",
+    "mathjs": "^5.4.0",
+    "sequelize": "^4.42.0"
+  }
+}
