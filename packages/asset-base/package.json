@@ -1,0 +1,25 @@
+{
+  "name": "@ddn/asset-base",
+  "version": "0.0.1",
+  "description": "DDN资产基类相关信息",
+  "main": "lib/index.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ddnlink/ddn.git",
+    "directory": "packages/asset-base"
+  },
+  "homepage": "http://github.com/ddnlink/ddn/tree/master/packages/asset-base",
+  "bugs": {
+    "url": "http://github.com/ddnlink/ddn/issues"
+  },
+  "files": [
+    "lib"
+  ],
+  "author": "wangxm",
+  "license": "MIT",
+  "dependencies": {
+    "@ddn/utils": "^0.0.1",
+    "bytebuffer": "^5.0.1",
+    "lodash": "^4.17.15"
+  }
+}

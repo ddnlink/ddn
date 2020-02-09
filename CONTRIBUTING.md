@@ -87,7 +87,7 @@ $ yarn test .test.(t|j)s
 $ yarn test getMockData.test.js -w
 
 # Test specified package
-$ PACKAGE=ddn-core yarn test
+$ PACKAGE=core yarn test
 
 # Don't run e2e test
 $ E2E=none yarn test

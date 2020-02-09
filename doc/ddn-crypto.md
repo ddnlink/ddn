@@ -5,7 +5,7 @@ DDN区块链地址的生产与校验
 
 Base58加密原理：和通常base64编码一样，base58编码的作用也是将非可视字符可视化（ASCII化）。但不同的是base58编码去掉了几个看起来会产生歧义的字符，如 0 (零), O (大写字母O), I (大写的字母i) and l (小写的字母L) ，和几个影响双击选择的字符，如/, +。结果字符集正好58个字符(包括9个数字，24个大写字母，25个小写字母)。
 
-参考：[bs58.js](../packages/ddn-crypto/src/base58check/bs58.js)
+参考：[bs58.js](../packages/crypto/src/base58check/bs58.js)
 
 ## 生成地址(公钥)
 

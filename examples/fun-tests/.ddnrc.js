@@ -229,14 +229,14 @@ module.exports = {
   /**
    * 扩展资产插件，对于区块链而言就是资产包，所以使用 assets
    * assets: [
-   *  "@ddn/ddn-asset-evidence",
-   *  "@ddn/ddn-asset-aob"
+   *  "@ddn/asset-evidence",
+   *  "@ddn/asset-aob"
    * ]
    */
   assets: [
-    "@ddn/ddn-asset-evidence",
-    "@ddn/ddn-asset-aob",
-    "@ddn/ddn-asset-dapp",
-    "@ddn/ddn-asset-dao"
+    "@ddn/asset-evidence",
+    "@ddn/asset-aob",
+    "@ddn/asset-dapp",
+    "@ddn/asset-dao"
   ],
 };
