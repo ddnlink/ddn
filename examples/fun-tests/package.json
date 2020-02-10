@@ -2,10 +2,7 @@
   "name": "example",
   "version": "1.0.0",
   "main": "./app.js",
-  "files": [
-    "lib",
-    "test"
-  ],
+  "private": true,
   "repository": {
     "type": "git",
     "url": "git+https://github.com/ddnlink/ddn.git"
