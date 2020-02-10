@@ -60,4 +60,4 @@ DDN, 数据分发网络, 是一个成熟的企业级区块链系统，已经服�
 
 The MIT License (MIT)
 
-Copyright (c) 2016-2019 DDN.link. All rights reserved. See License.txt in the project root for license information.
+版权 (c) 2016-2020 DDN基金会。权限受保护。请查看授权文件License.txt获取更多授权信息。

@@ -60,4 +60,4 @@ Please visit [CONTRIBUTING](./CONTRIBUTING.md)
 
 The MIT License (MIT)
 
-Copyright (c) 2016-2019 DDN FOUNDATION. All rights reserved. See License.txt in the project root for license information.
+Copyright (c) 2016-2020 DDN FOUNDATION. All rights reserved. See License.txt in the project root for license information.
