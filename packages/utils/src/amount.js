@@ -1,4 +1,4 @@
-const Bignum = require('bignumber.js');
+import Bignum from 'bignumber.js';
 
 const amount = {
   validate(amount) {
@@ -30,4 +30,4 @@ const amount = {
   }
 }
 
-module.exports = amount;
+export default amount;

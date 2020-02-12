@@ -1,7 +1,7 @@
 /*---------------------------------------------------------------------------------------------
  *  Created by imfly on Mon Jun 18 2017 9:3:31
  *
- *  Copyright (c) 2017 DDN.link. All rights reserved.
+ *  Copyright (c) 2017 DDN FOUNDATION. All rights reserved.
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 const { Bignum } = require('@ddn/utils');

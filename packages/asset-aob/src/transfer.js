@@ -1,11 +1,11 @@
-import { AssetBase } from '@ddn/asset-base';
+import Asset from '@ddn/asset-base';
 import { Bignum } from '@ddn/utils';
 import ddnUtils from '@ddn/utils';
 import crypto from 'crypto';
 import ed from 'ed25519';
 import _ from 'lodash';
 
-class Transfer extends AssetBase {
+class Transfer extends Asset.Base {
     async propsMapping() {
         return [
             {

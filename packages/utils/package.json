@@ -1,8 +1,8 @@
 {
   "name": "@ddn/utils",
   "version": "0.0.1",
-  "description": "DDN 通用工具类",
-  "main": "index.js",
+  "description": "DDN utils.",
+  "main": "./lib/index.js",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/ddnlink/ddn.git",

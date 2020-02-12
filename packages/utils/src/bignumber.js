@@ -1,30 +1,30 @@
-const BigNumber = require('bignumber.js');
+import BigNumber from 'bignumber.js';
 
-module.exports = {
+export default {
 
     /**
      * 实例化一个大数
      */
-    new: function() {
-        if (arguments.length != 1) {
+    new(...args) {
+        if (args.length != 1) {
             throw new Error("必须是一个参数");
         }
 
-        return new BigNumber(arguments[0]);
+        return new BigNumber(args[0]);
     },
 
     /**
      * 加法操作
      */
-    plus: function() {
-        if (arguments.length < 2) {
+    plus(...args) {
+        if (args.length < 2) {
             throw new Error("至少需要两个参数");
         }
 
-        var result = new BigNumber(0);
+        let result = new BigNumber(0);
 
-        for (var i = 0; i < arguments.length; i++) {
-            result = result.plus(new BigNumber(arguments[i]));
+        for (let i = 0; i < args.length; i++) {
+            result = result.plus(new BigNumber(args[i]));
         }
 
         return result;
@@ -33,14 +33,14 @@ module.exports = {
     /**
      * 减法操作
      */
-    minus: function() {
-        if (arguments.length < 2) {
+    minus(...args) {
+        if (args.length < 2) {
             throw new Error("至少需要两个参数");
         }
 
-        var result = new BigNumber(arguments[0]);
-        for (var i = 1; i < arguments.length; i++) {
-            result = result.minus(new BigNumber(arguments[i]));
+        let result = new BigNumber(args[0]);
+        for (let i = 1; i < args.length; i++) {
+            result = result.minus(new BigNumber(args[i]));
         }
         return result;
     },
@@ -48,14 +48,14 @@ module.exports = {
     /**
      * 乘法操作
      */
-    multiply: function() {
-        if (arguments.length < 2) {
+    multiply(...args) {
+        if (args.length < 2) {
             throw new Error("至少需要两个参数");
         }
 
-        var result = new BigNumber(arguments[0]);
-        for (var i = 1; i < arguments.length; i++) {
-            result = result.multipliedBy(new BigNumber(arguments[i]));
+        let result = new BigNumber(args[0]);
+        for (let i = 1; i < args.length; i++) {
+            result = result.multipliedBy(new BigNumber(args[i]));
         }
         return result;
     },
@@ -63,14 +63,14 @@ module.exports = {
     /**
      * 除法操作
      */
-    divide: function() {
-        if (arguments.length < 2) {
+    divide(...args) {
+        if (args.length < 2) {
             throw new Error("至少需要两个参数");
         }
 
-        var result = new BigNumber(arguments[0]);
-        for (var i = 1; i < arguments.length; i++) {
-            result = result.dividedBy(new BigNumber(arguments[i]));
+        let result = new BigNumber(args[0]);
+        for (let i = 1; i < args.length; i++) {
+            result = result.dividedBy(new BigNumber(args[i]));
         }
         return result;
     },
@@ -78,161 +78,160 @@ module.exports = {
     /**
      * 非数值判断
      */
-    isNaN: function() {
-        if (arguments.length != 1) {
+    isNaN(...args) {
+        if (args.length != 1) {
             throw new Error("必须是一个参数");
         }
 
-        return new BigNumber(arguments[0]).isNaN();
+        return new BigNumber(args[0]).isNaN();
     },
 
     /**
      * 零判断
      */
-    isZero: function() {
-        if (arguments.length != 1) {
+    isZero(...args) {
+        if (args.length != 1) {
             throw new Error("必须是一个参数");
         }
 
-        return new BigNumber(arguments[0]).isZero();
+        return new BigNumber(args[0]).isZero();
     },
 
     /**
      * 相等判断
      */
-    isEqualTo: function() {
-        if (arguments.length != 2) {
+    isEqualTo(...args) {
+        if (args.length != 2) {
             throw new Error("必须是两个参数");
         }
 
-        return new BigNumber(arguments[0]).isEqualTo(new BigNumber(arguments[1]));
+        return new BigNumber(args[0]).isEqualTo(new BigNumber(args[1]));
     },
 
     /**
      * 大于判断
      */
-    isGreaterThan: function() {
-        if (arguments.length != 2) {
+    isGreaterThan(...args) {
+        if (args.length != 2) {
             throw new Error("必须是两个参数");
         }
 
-        return new BigNumber(arguments[0]).isGreaterThan(new BigNumber(arguments[1]));
+        return new BigNumber(args[0]).isGreaterThan(new BigNumber(args[1]));
     },
 
     /**
      * 大于等于判断
      */
-    isGreaterThanOrEqualTo: function() {
-        if (arguments.length != 2) {
+    isGreaterThanOrEqualTo(...args) {
+        if (args.length != 2) {
             throw new Error("必须是两个参数");
         }
 
-        return new BigNumber(arguments[0]).isGreaterThanOrEqualTo(new BigNumber(arguments[1]));
+        return new BigNumber(args[0]).isGreaterThanOrEqualTo(new BigNumber(args[1]));
     },
 
     /**
      * 小于判断
      */
-    isLessThan: function() {
-        if (arguments.length != 2) {
+    isLessThan(...args) {
+        if (args.length != 2) {
             throw new Error("必须是两个参数");
         }
 
-        return new BigNumber(arguments[0]).isLessThan(new BigNumber(arguments[1]));
+        return new BigNumber(args[0]).isLessThan(new BigNumber(args[1]));
     },
 
     /**
      * 小于等于判断
      */
-    isLessThanOrEqualTo: function() {
-        if (arguments.length != 2) {
+    isLessThanOrEqualTo(...args) {
+        if (args.length != 2) {
             throw new Error("必须是两个参数");
         }
 
-        return new BigNumber(arguments[0]).isLessThanOrEqualTo(new BigNumber(arguments[1]));
+        return new BigNumber(args[0]).isLessThanOrEqualTo(new BigNumber(args[1]));
     },
 
     /**
      * 绝对值
      */
-    abs: function() {
-        if (arguments.length != 1) {
+    abs(...args) {
+        if (args.length != 1) {
             throw new Error("必须是一个参数");
         }
 
-        return new BigNumber(arguments[0]).absoluteValue();
+        return new BigNumber(args[0]).absoluteValue();
     },
 
     /**
      * 取模
      */
-    modulo: function() {
-        if (arguments.length != 2) {
+    modulo(...args) {
+        if (args.length != 2) {
             throw new Error("必须是两个参数");
         }
 
-        return new BigNumber(arguments[0]).modulo(new BigNumber(arguments[1]));
+        return new BigNumber(args[0]).modulo(new BigNumber(args[1]));
     },
 
     /**
      * 最接近的较小整数
      */
-    floor: function() {
-        if (arguments.length != 1) {
+    floor(...args) {
+        if (args.length != 1) {
             throw new Error("必须是一个参数");
         }
 
-        return new BigNumber(arguments[0]).integerValue(BigNumber.ROUND_FLOOR);
+        return new BigNumber(args[0]).integerValue(BigNumber.ROUND_FLOOR);
     },
 
     /**
      * 最接近的较大整数
      */
-    ceil: function() {
-        if (arguments.length != 1) {
+    ceil(...args) {
+        if (args.length != 1) {
             throw new Error("必须是一个参数");
         }
 
-        return new BigNumber(arguments[0]).integerValue(BigNumber.ROUND_CEIL);
+        return new BigNumber(args[0]).integerValue(BigNumber.ROUND_CEIL);
     },
 
     /**
      * 乘方 POW
      * 返回bigNumber对象
      */
-    pow: function() {
-        if (arguments.length != 2) {
+    pow(...args) {
+        if (args.length != 2) {
             throw new Error("必须是两个参数");
         }
 
-        return new BigNumber(arguments[0]).pow(arguments[1]);
+        return new BigNumber(args[0]).pow(args[1]);
     },
 
     /**
      * 将byte数组转成16进制大数值
      */
-    fromBuffer: function(buf, opts) {
+    fromBuffer(buf, opts) {
         if (!opts) opts = {};
 
-        var endian = { 1 : 'big', '-1' : 'little' }[opts.endian] || opts.endian || 'big';
+        const endian = { 1 : 'big', '-1' : 'little' }[opts.endian] || opts.endian || 'big';
 
-        var size = opts.size === 'auto' ? Math.ceil(buf.length) : (opts.size || 1);
+        const size = opts.size === 'auto' ? Math.ceil(buf.length) : (opts.size || 1);
         if (buf.length % size !== 0) {
-            throw new RangeError('Buffer length (' + buf.length + ')'
-                + ' must be a multiple of size (' + size + ')'
+            throw new RangeError(`Buffer length (${buf.length}) must be a multiple of size (${size})`
             );
         }
 
-        var hex = [];
-        for (var i = 0; i < buf.length; i += size) {
-            var chunk = [];
-            for (var j = 0; j < size; j++) {
+        const hex = [];
+        for (let i = 0; i < buf.length; i += size) {
+            const chunk = [];
+            for (let j = 0; j < size; j++) {
                 chunk.push(buf[
                     i + (endian === 'big' ? j : (size - j - 1))
                 ]);
             }
             hex.push(chunk
-                .map(function (c) {
+                .map(c => {
                     return (c < 16 ? '0' : '') + c.toString(16);
                 })
                 .join('')
@@ -243,7 +242,7 @@ module.exports = {
     },
 
     // TODO: var -> let 2019.11.24
-    toBuffer: function(currBignumber, opts) {
+    toBuffer(currBignumber, opts) {
         currBignumber = new BigNumber(currBignumber);
 
         if (typeof opts === 'string') {
@@ -279,29 +278,27 @@ module.exports = {
     
         if (!opts) opts = {};
     
-        var endian = { 1 : 'big', '-1' : 'little' }[opts.endian]
-            || opts.endian || 'big'
-        ;
+        const endian = { 1 : 'big', '-1' : 'little' }[opts.endian]
+            || opts.endian || 'big';
     
-        var hex = currBignumber.toString(16);
+        let hex = currBignumber.toString(16);
         if (hex.charAt(0) === '-') throw new Error(
             'converting negative numbers to Buffers not supported yet'
         );
     
-        var size = opts.size === 'auto' ? Math.ceil(hex.length / 2) : (opts.size || 1);
+        const size = opts.size === 'auto' ? Math.ceil(hex.length / 2) : (opts.size || 1);
     
         var len = Math.ceil(hex.length / (2 * size)) * size;
         var buf = Buffer.allocUnsafe(len); // todo: buffer安全
     
         // zero-pad the hex string so the chunks are all `size` long
-        while (hex.length < 2 * len) hex = '0' + hex;
+        while (hex.length < 2 * len) hex = `0${hex}`;
     
-        var hx = hex
-            .split(new RegExp('(.{' + (2 * size) + '})'))
-            .filter(function (s) { return s.length > 0 })
-        ;
+        const hx = hex
+            .split(new RegExp(`(.{${2 * size}})`))
+            .filter(({length}) => { return length > 0; });
     
-        hx.forEach(function (chunk, i) {
+        hx.forEach((chunk, i) => {
             for (let j = 0; j < size; j++) {
                 let ix = i * size + (endian === 'big' ? j : size - j - 1);
                 buf[ix] = parseInt(chunk.slice(j*2,j*2+2), 16);
@@ -311,4 +308,4 @@ module.exports = {
         return buf;
     }
 
-}
+};

@@ -1,7 +1,7 @@
-import { AssetBase } from '@ddn/asset-base';
+import Asset from '@ddn/asset-base';
 import { Bignum } from '@ddn/utils';
 
-class Flags extends AssetBase {
+class Flags extends Asset.AssetBase {
     
     //flag_type: 1: 设置acl对应值，2：设置writeoff对应值
     async propsMapping() {

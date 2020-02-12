@@ -1,4 +1,4 @@
-import { AssetBase } from '@ddn/asset-base';
+import Asset from '@ddn/asset-base';
 import { Bignum, Address } from '@ddn/utils';
 import daoUtil from './daoUtil';
 import crypto from 'crypto';
@@ -16,7 +16,7 @@ import ed from 'ed25519';
   * @amout 等于投稿时作者设定的 @price 的数量
   * @fee 0EBT
   */
-class Confirmation extends AssetBase {
+class Confirmation extends Asset.Base {
     // eslint-disable-next-line class-methods-use-this
     async propsMapping() {
         return [{

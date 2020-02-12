@@ -155,14 +155,14 @@ class AssetBase {
 
         this.isHasExtProps = false;
         const mapping = await this.propsMapping();
-        for (let i = 0; i < mapping.length; i++) {
-            const item = mapping[i];
+
+        mapping.forEach(item => {
             if (item) {
                 if (item.field && item.field.substring(item.field.length - 4, item.field.length) == "_ext") {
                     this.isHasExtProps = true;
                 }
             }
-        }
+        });
 
         return this.isHasExtProps;
     }
@@ -171,8 +171,8 @@ class AssetBase {
         if (!this.propsMappingItems || 
             !this.propsMappingItems[propName.toLowerCase()]) {
             const props = await this.propsMapping();
-            for (let i = 0; i < props.length; i++) {
-                const currProp = props[i];
+
+            for (const currProp of props) {
                 if (currProp.prop.toLowerCase() == propName.toLowerCase()) {
                     if (!this.propsMappingItems) {
                         this.propsMappingItems = {};
@@ -194,8 +194,8 @@ class AssetBase {
         if (!this.propsMappingItems || 
             !this.propsMappingItems[fieldName.toLowerCase()]) {
             const props = await this.propsMapping();
-            for (let i = 0; i < props.length; i++) {
-                const currProp = props[i];
+
+            for (const currProp of props) {
                 if (currProp.field.toLowerCase() == fieldName.toLowerCase()) {
                     if (!this.propsMappingItems) {
                         this.propsMappingItems = {};
@@ -363,15 +363,15 @@ class AssetBase {
             ['timestamp', 'asset_timestamp']
         ];
         const propsMapping = await assetInst.propsMapping();
-        for (let i = 0; i < propsMapping.length; i++) {
-            const propMapping = propsMapping[i];
+
+        propsMapping.forEach(propMapping => {
             const field = propMapping.field;
             if (field != "str_ext" && 
                 field != "int_ext" && 
                 field != "timestamp_ext") {
-                attributes.push([field, 'asset_' + field]);
+                attributes.push([field, `asset_${field}`]);
             }
-        }
+        });
 
         let useDefaultTrsType = true;
         if (typeof(defaultTrsType) != "undefined" && defaultTrsType != null)
@@ -414,7 +414,7 @@ class AssetBase {
                 if (condProp) {
                     return condProp.field;
                 } else {
-                    var pName = prop.toLowerCase();
+                    const pName = prop.toLowerCase();
                     if (pName == "trs_id") {
                         return "transaction_id";
                     } else if (pName == "trs_type") {
@@ -425,14 +425,13 @@ class AssetBase {
                         pName == "$in" || pName == "&lt" || pName == "$lte" || pName == "$gt" || pName == "$gte") {
                         newConds[pName] = where[pName];
                     } else {
-                        this.logger.warn("Invalid order field: " + prop);
+                        this.logger.warn(`Invalid order field: ${prop}`);
                         return null;
                     }
                 }
             }
 
-            for (let i = 0; i < orders.length; i++) {
-                const orderItem = orders[i];
+            orders.forEach(orderItem => {
                 if (CommonUtils.isArray(orderItem)) {
                     if (orderItem.length == 2) {
                         if (typeof(orderItem[0]) == "string" && typeof(orderItem[1]) == "string") {
@@ -440,14 +439,14 @@ class AssetBase {
                             if (fieldName) {
                                 newOrders.push([fieldName, orderItem[1]]);
                             } else {
-                                this.logger.warn("Invalid order field: " + JSON.stringify(orderItem));
+                                this.logger.warn(`Invalid order field: ${JSON.stringify(orderItem)}`);
                             }
                         } else {
                             //如果传入排序参数不是数组，就直接使用，这里其实有隐患，这里使用的字段名只能使用真正的数据库字段名，str1..str9等等，不能用prop名称
                             newOrders.push(orderItem);
                         }
                     } else {
-                        this.logger.warn("Invalid order item: " + JSON.stringify(orderItem));
+                        this.logger.warn(`Invalid order item: ${JSON.stringify(orderItem)}`);
                     }
                 } else {
                     if (CommonUtils.isString(orderItem)) {
@@ -460,7 +459,7 @@ class AssetBase {
                         newOrders.push(orderItem);
                     }
                 }
-            }
+            });
         } else {
             //如果传入排序参数不是数组，就直接使用，这里其实有隐患，这里使用的字段名只能使用真正的数据库字段名，str1..str9等等，不能用prop名称
             newOrders = orders;
@@ -472,14 +471,15 @@ class AssetBase {
         const rows = data && data.rows ? data.rows : data;
         if (rows && rows.length > 0) {
             const rowObjs = [];
-            for (let i = 0; i < rows.length; i++) {
-                const rowInfo = rows[i];
+
+            rows.forEach(rowInfo => {
                 const rowObj = await assetInst.dbRead(rowInfo);
                 if (rowObj) {
                     const assetName = AssetUtils.getAssetJsonName(rowInfo.asset_trs_type);
                     rowObjs.push(rowObj[assetName]);
                 }
-            }
+            });
+
             if (returnTotal) {
                 return {
                     rows: rowObjs,
@@ -555,7 +555,7 @@ class AssetBase {
             if (/^[0-9]*$/.test(asset)) {
                 assetTrans = AssetUtils.getTransactionByTypeValue(asset);
             } else {
-                var assetValue = AssetUtils.getTypeValue(asset);
+                const assetValue = AssetUtils.getTypeValue(asset);
                 assetTrans = AssetUtils.getTransactionByTypeValue(assetValue);
             }
             if (assetTrans) {
@@ -621,32 +621,32 @@ class AssetBase {
      * @param {*} asset 资产交易的配置name或type（config.asset.js文件中定义）
      */
     async queryAssetCount(where, asset) {
-        var assetInst = this;
+        let assetInst = this;
         if (asset) {
-            var assetTrans;
+            let assetTrans;
             if (/^[0-9]*$/.test(asset)) {
                 assetTrans = AssetUtils.getTransactionByTypeValue(asset);
             } else {
-                var assetValue = AssetUtils.getTypeValue(asset);
+                const assetValue = AssetUtils.getTypeValue(asset);
                 assetTrans = AssetUtils.getTransactionByTypeValue(assetValue);
             }
             if (assetTrans) {
-                var assetCls = require(assetTrans.package)[assetTrans.name];
+                const assetCls = require(assetTrans.package)[assetTrans.name];
                 assetInst = new assetCls(this._context, assetTrans);
             }
         }
 
         // 解析where
-        var newWhere = {};
+        const newWhere = {};
         where = where || {};
         where.trs_type = await assetInst.getTransactionType();
 
-        for (var p in where) {
-            var condProp = await assetInst.getPropsMappingItemByProp(p);
+        for (const p in where) {
+            const condProp = await assetInst.getPropsMappingItemByProp(p);
             if (condProp) {
                 newWhere[condProp.field] = where[p];
             } else {
-                var pName = p.toLowerCase();
+                const pName = p.toLowerCase();
                 if (pName == "trs_id" || pName == "transaction_id") {
                     newWhere["transaction_id"] = where[p];
                 } else if (pName == "trs_type" || pName == "transaction_type") {
@@ -673,30 +673,30 @@ class AssetBase {
      * @param {*} trs 
      */
     async fieldsIsValid(trs) {
-        var assetJsonName = AssetUtils.getAssetJsonName(trs.type);
+        const assetJsonName = AssetUtils.getAssetJsonName(trs.type);
         if (!trs.asset || !trs.asset[assetJsonName]) {
             throw new Error('Invalid transaction asset');
         }
       
         const asset = trs.asset[assetJsonName];
 
-        var mapping = await this.propsMapping();
-        for (var i = 0; i < mapping.length; i++) {
-            var item = mapping[i];
+        const mapping = await this.propsMapping();
+        for (let i = 0; i < mapping.length; i++) {
+            const item = mapping[i];
             if (item) {
-                var itemRule = _assetFiledRules[item.field];
-                var fieldType = item.field.replace(/[0-9]/g, "");
+                const itemRule = _assetFiledRules[item.field];
+                let fieldType = item.field.replace(/[0-9]/g, "");
                 fieldType = fieldType.replace(/_ext$/, "");
                 if (fieldType == "str") {
-                    var strValue = asset[item.prop];
+                    const strValue = asset[item.prop];
                     if (strValue != null && typeof(strValue) != "undefined") {
                         if (typeof(strValue) != "string") {
-                            var err = "The '" + item.prop + "' attribute type of '" + assetJsonName + "' must be a string.";
+                            var err = `The '${item.prop}' attribute type of '${assetJsonName}' must be a string.`;
                             throw new Error(err);
                         }
 
-                        var minLen = item.minLen;
-                        var maxLen = item.maxLen;
+                        let minLen = item.minLen;
+                        let maxLen = item.maxLen;
                         if (itemRule) {
                             minLen = itemRule.minLen;
                             maxLen = itemRule.maxLen;
@@ -709,50 +709,50 @@ class AssetBase {
                             }
                             catch(err3) 
                             {
-                                const err = "The '" + item.prop + "' attribute min length of '" + assetJsonName + "' must be greater than " + minLen;
+                                const err = `The '${item.prop}' attribute min length of '${assetJsonName}' must be greater than ${minLen}`;
                                 throw new Error(err);
                             }
 
                             if (strValue.length < minLen){
-                                const err = "The '" + item.prop + "' attribute min length of '" + assetJsonName + "' must be greater than " + minLen;
+                                const err = `The '${item.prop}' attribute min length of '${assetJsonName}' must be greater than ${minLen}`;
                                 throw new Error(err);
                             }
                         }
                         if (maxLen != null && typeof(maxLen) != "undefined") {
                             if (strValue.length > maxLen) {
-                                const err = "The '" + item.prop + "' attribute max length of '" + assetJsonName + "' must be less than " + maxLen;
+                                const err = `The '${item.prop}' attribute max length of '${assetJsonName}' must be less than ${maxLen}`;
                                 throw new Error(err);
                             }
                         }
                     } else if (item.required) {
-                        const err = "The '" + item.prop + "' attribute of '" + assetJsonName + "' is required.";
+                        const err = `The '${item.prop}' attribute of '${assetJsonName}' is required.`;
                         throw new Error(err);
                     }
                 } else if (fieldType == "int") {
                     const intValue = asset[item.prop];
                     if (intValue != null && typeof(intValue) != "undefined") {
                         if (typeof(intValue) != "number") {
-                            const err = "The '" + item.prop + "' attribute type of '" + assetJsonName + "' must be a integer.";
+                            const err = `The '${item.prop}' attribute type of '${assetJsonName}' must be a integer.`;
                             throw new Error(err);
                         }
 
                         if (itemRule) {
                             if (itemRule.maxValue != null && typeof(itemRule.maxValue) != "undefined") {
                                 if (intValue > itemRule.maxValue) {
-                                    const err = "The '" + item.prop + "' attribute max value of '" + assetJsonName + "' must be less than " + itemRule.maxValue;
+                                    const err = `The '${item.prop}' attribute max value of '${assetJsonName}' must be less than ${itemRule.maxValue}`;
                                     throw new Error(err);
                                 }
                             }
 
                             if (itemRule.minValue != null && typeof(itemRule.minValue) != "undefined") {
                                 if (intValue < itemRule.minValue) {
-                                    const err = "The '" + item.prop + "' attribute min value of '" + assetJsonName + "' must be greater than " + itemRule.maxValue;
+                                    const err = `The '${item.prop}' attribute min value of '${assetJsonName}' must be greater than ${itemRule.maxValue}`;
                                     throw new Error(err);
                                 }
                             }
                         }
                     } else if (item.required) {
-                        const err = "The '" + item.prop + "' attribute of '" + assetJsonName + "' is required.";
+                        const err = `The '${item.prop}' attribute of '${assetJsonName}' is required.`;
                         throw new Error(err);
                     }
                 } else if (fieldType == "timestamp") {
@@ -763,12 +763,12 @@ class AssetBase {
                                 // FIXME: 你要干嘛？
                                 console.log("Todo: what will you do?");
                             } catch(error) {
-                                const err = "The '" + item.prop + "' attribute type of '" + assetJsonName + "' must be a datetime.";
+                                const err = `The '${item.prop}' attribute type of '${assetJsonName}' must be a datetime.`;
                                 throw new Error(err);
                             }
                         }
                     } else if (item.required) {
-                        const err = "The '" + item.prop + "' attribute of '" + assetJsonName + "' is required.";
+                        const err = `The '${item.prop}' attribute of '${assetJsonName}' is required.`;
                         throw new Error(err);
                     }
                 }
@@ -788,7 +788,7 @@ class AssetBase {
                 throw new Error("The recipient_id attribute of the transaction must be null.");
             }
         } else if (Bignum.isLessThan(trs.amount, 0)) {  //小于0
-            throw new Error("Invalid amount: " + trs.amount);
+            throw new Error(`Invalid amount: ${trs.amount}`);
         } else {    //大于0
             if (!trs.recipient_id) {    //wxm block database
                 throw new Error("The recipient_id attribute of the transaction can not be null.");
@@ -816,24 +816,24 @@ class AssetBase {
     async getBytes(trs) {
         await this.fieldsIsValid(trs);
 
-        var assetName = AssetUtils.getAssetJsonName(trs.type);
-        var asset = trs.asset[assetName];
-        var mapping = await this.propsMapping();
+        const assetName = AssetUtils.getAssetJsonName(trs.type);
+        const asset = trs.asset[assetName];
+        const mapping = await this.propsMapping();
 
-        var bb = new ByteBuffer();
-        for (var i = 0; i < mapping.length; i++) {
-            var item = mapping[i];
+        const bb = new ByteBuffer();
+        for (let i = 0; i < mapping.length; i++) {
+            const item = mapping[i];
             if (item && item.required) {
-                var fieldType = item.field.replace(/[0-9]/g, "");
+                let fieldType = item.field.replace(/[0-9]/g, "");
                 fieldType = fieldType.replace(/_ext$/, "");
                 if (fieldType == "str") {
-                    var strValue = asset[item.prop];
+                    const strValue = asset[item.prop];
                     bb.writeUTF8String(strValue);
                 } else if (fieldType == "int") {
-                    var intValue = asset[item.prop];
+                    const intValue = asset[item.prop];
                     bb.writeInt(intValue);
                 } else if (fieldType == "timestamp") {
-                    var timestampValue = asset[item.prop];
+                    const timestampValue = asset[item.prop];
                     bb.writeUTF8String(CommonUtils.formatDate("yyyy-MM-dd hh:mm:ss", timestampValue));
                 }
             }
@@ -858,16 +858,16 @@ class AssetBase {
      * @param {*} sender 
      * @param {*} dbTrans 
      */
-    async apply(trs, block, dbTrans) {
-        if (Bignum.isGreaterThan(trs.amount, 0)) {
-            await this.runtime.account.setAccount({ address: trs.recipient_id }, dbTrans);
+    async apply({amount, recipient_id}, {id, height}, dbTrans) {
+        if (Bignum.isGreaterThan(amount, 0)) {
+            await this.runtime.account.setAccount({ address: recipient_id }, dbTrans);
 
-            await this.runtime.account.merge(trs.recipient_id, {
-                address: trs.recipient_id,   //wxm block database
-                balance: trs.amount,
-                u_balance: trs.amount,
-                block_id: block.id,  //wxm block database
-                round: await this.runtime.round.calc(block.height)
+            await this.runtime.account.merge(recipient_id, {
+                address: recipient_id,   //wxm block database
+                balance: amount,
+                u_balance: amount,
+                block_id: id,  //wxm block database
+                round: await this.runtime.round.calc(height)
             }, dbTrans);
         }
         return;
@@ -880,17 +880,17 @@ class AssetBase {
      * @param {*} sender 
      * @param {*} dbTrans 
      */
-    async undo(trs, block, dbTrans) {
-        if (Bignum.isGreaterThan(trs.amount, 0)) {
-            await this.runtime.account.setAccount({address: trs.recipient_id}, dbTrans);
+    async undo({amount, recipient_id}, {id, height}, dbTrans) {
+        if (Bignum.isGreaterThan(amount, 0)) {
+            await this.runtime.account.setAccount({address: recipient_id}, dbTrans);
 
-            var amountStr = Bignum.minus(0, trs.amount).toString();
-            await this.runtime.account.merge(trs.recipient_id, {
-                address: trs.recipient_id,   //wxm block database
+            const amountStr = Bignum.minus(0, amount).toString();
+            await this.runtime.account.merge(recipient_id, {
+                address: recipient_id,   //wxm block database
                 balance: amountStr,
                 u_balance: amountStr,
-                block_id: block.id,  //wxm block database
-                round: await this.runtime.round.calc(block.height)
+                block_id: id,  //wxm block database
+                round: await this.runtime.round.calc(height)
             }, dbTrans);
         }
         return;
@@ -902,10 +902,10 @@ class AssetBase {
      * @param {*} sender 
      * @param {*} dbTrans 
      */
-    async applyUnconfirmed(trs) {
-        const key = trs.type + "_" + trs.id;
+    async applyUnconfirmed({type, id}) {
+        const key = `${type}_${id}`;
         if (this.oneoff.has(key)) {
-            throw new Error("The transaction has been confirmed: " + trs.id + ".");
+            throw new Error(`The transaction has been confirmed: ${id}.`);
         }
 
         this.oneoff.set(key, true);
@@ -918,8 +918,8 @@ class AssetBase {
      * @param {*} sender 
      * @param {*} dbTrans 
      */
-    async undoUnconfirmed(trs) {
-        const key = trs.type + "_" + trs.id;
+    async undoUnconfirmed({type, id}) {
+        const key = `${type}_${id}`;
         this.oneoff.delete(key);
         return;
     }
@@ -929,17 +929,17 @@ class AssetBase {
      * @param {*} trs 
      */
     async objectNormalize(trs) {
-        var assetName = AssetUtils.getAssetJsonName(trs.type);
+        const assetName = AssetUtils.getAssetJsonName(trs.type);
 
-        var propsRules = {};
-        var requiredFields = [];
+        const propsRules = {};
+        const requiredFields = [];
 
-        var props = await this.propsMapping();
-        for (var i = 0; i < props.length; i++) {
-            var currProp = props[i];
+        const props = await this.propsMapping();
+        for (let i = 0; i < props.length; i++) {
+            const currProp = props[i];
             propsRules[currProp.prop] = {};
 
-            var fieldType = currProp.field.replace(/[0-9]/g, "");
+            let fieldType = currProp.field.replace(/[0-9]/g, "");
             fieldType = fieldType.replace(/_ext$/, "");
             if (fieldType == "str") {
                 propsRules[currProp.prop].type = "string";
@@ -955,7 +955,7 @@ class AssetBase {
             }
         }
 
-        var validateErrors = await this.ddnSchema.validate({
+        const validateErrors = await this.ddnSchema.validate({
             type: 'object',
             properties: propsRules,
             required: requiredFields
@@ -974,32 +974,32 @@ class AssetBase {
      */
     async dbRead(raw) {
         if (raw && raw.asset_trs_id) {
-            var result = {
+            const result = {
                 transaction_id: raw.asset_trs_id,
                 transaction_type: raw.asset_trs_type,
                 timestamp: raw.asset_timestamp
             };
     
-            var props = await this.propsMapping();
+            const props = await this.propsMapping();
             if (props && props.length > 0) {
-                for (var i = 0; i < props.length; i++) {
-                    var mapping = props[i];
+                for (let i = 0; i < props.length; i++) {
+                    const mapping = props[i];
 
-                    var fieldType = mapping.field.replace(/[0-9]/g, "");
+                    let fieldType = mapping.field.replace(/[0-9]/g, "");
                     fieldType = fieldType.replace(/_ext$/, "");
                     if (fieldType == "str") {
-                        result[mapping.prop] = raw["asset_" + mapping.field] || "";
+                        result[mapping.prop] = raw[`asset_${mapping.field}`] || "";
                     } else {
-                        result[mapping.prop] = raw["asset_" + mapping.field];
+                        result[mapping.prop] = raw[`asset_${mapping.field}`];
                     }
                 }
             }
 
-            var json = raw.asset_ext_json;
+            const json = raw.asset_ext_json;
             if (json != null && typeof(json) != "undefined" && json != "") {
                 try
                 {
-                    var jsonObj = JSON.parse(json);
+                    const jsonObj = JSON.parse(json);
                     Object.assign(result, jsonObj);
                 }
                 catch(err2)
@@ -1009,8 +1009,8 @@ class AssetBase {
                 }
             }
 
-            var retObj = {};
-            var assetName = AssetUtils.getAssetJsonName(raw.asset_trs_type);
+            const retObj = {};
+            const assetName = AssetUtils.getAssetJsonName(raw.asset_trs_type);
             retObj[assetName] = result;
             return retObj;
         } else {
@@ -1024,27 +1024,27 @@ class AssetBase {
      * @param {*} dbTrans 
      */
     async dbSave(trs, dbTrans) {
-        var assetName = AssetUtils.getAssetJsonName(trs.type);
-        var asset = trs.asset[assetName];
+        const assetName = AssetUtils.getAssetJsonName(trs.type);
+        const asset = trs.asset[assetName];
 
-        var assetInst = {
+        const assetInst = {
             transaction_id: trs.id,
             transaction_type: trs.type,
             timestamp: trs.timestamp
-        }
+        };
 
-        var jsonExtObj = {};
-        var hasJsonExt = false;
+        const jsonExtObj = {};
+        let hasJsonExt = false;
 
-        var mapping = await this.propsMapping();
-        for (var i = 0; i < mapping.length; i++) {
-            var item = mapping[i];
+        const mapping = await this.propsMapping();
+        for (let i = 0; i < mapping.length; i++) {
+            const item = mapping[i];
             if (item) {
-                var itemValue = asset[item.prop];
+                const itemValue = asset[item.prop];
                 if (itemValue !== null && itemValue !== undefined) {
                     assetInst[item.field] = itemValue;
 
-                    var fieldType = item.field.replace(/[0-9]/g, "");
+                    const fieldType = item.field.replace(/[0-9]/g, "");
                     if (fieldType == "str_ext" || 
                         fieldType == "int_ext" || 
                         fieldType == "timestamp_ext") {
@@ -1061,10 +1061,10 @@ class AssetBase {
                     reject(err);
                 } else {
                     if (hasJsonExt) {
-                        var assetExtInst = {
+                        const assetExtInst = {
                             transaction_id: trs.id,
                             json_ext: JSON.stringify(jsonExtObj)
-                        }
+                        };
 
                         this.dao.insert("trs_asset_ext", assetExtInst, dbTrans, (err2, result2) => {
                             if (err2) {
@@ -1086,12 +1086,12 @@ class AssetBase {
      * @param {*} trs 
      * @param {*} sender 
      */
-    async ready(trs, sender) {
-        if (sender.multisignatures && sender.multisignatures.length) {
-            if (!trs.signatures) {
+    async ready({signatures}, {multisignatures, multimin}) {
+        if (multisignatures && multisignatures.length) {
+            if (!signatures) {
                 return false;
             }
-            return trs.signatures.length >= sender.multimin - 1;
+            return signatures.length >= multimin - 1;
         } else {
             return true;
         }

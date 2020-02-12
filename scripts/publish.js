@@ -51,6 +51,7 @@ cp.on('close', code => {
 function publishToNpm() {
   console.log(`repos to publish: ${updatedRepos.join(', ')}`);
   updatedRepos.forEach(repo => {
+    repo.replace('@ddn', ''); 
     shell.cd(join(cwd, 'packages', repo));
     const { version } = require(join(cwd, 'packages', repo, 'package.json'));
     if (version.includes('-rc.') || version.includes('-beta.') || version.includes('-alpha.')) {
@@ -58,7 +59,7 @@ function publishToNpm() {
       shell.exec(`npm publish --tag next`);
     } else {
       console.log(`[${repo}] npm publish`);
-      shell.exec(`npm publish`);
+      shell.exec(`npm publish --access public`);
     }
   });
 }

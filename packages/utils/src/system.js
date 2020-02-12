@@ -1,20 +1,20 @@
-const os = require('os');
-const shell = require("shelljs")
-const ip = require("ip");
+import os from 'os';
+import shell from "shelljs";
+import ip from "ip";
 
-class Utils{
+class System{
     static getPublicIp() {
         let publicIp = null;
         try {
             const ifaces = os.networkInterfaces();
             Object.keys(ifaces).forEach(ifname => {
-                ifaces[ifname].forEach(iface => {
-                    if ('IPv4' !== iface.family || iface.internal !== false) {
+                ifaces[ifname].forEach(({family, internal, address}) => {
+                    if ('IPv4' !== family || internal !== false) {
                         // skip over internal (i.e. 127.0.0.1) and non-ipv4 addresses
                         return;
                     }
-                    if (!ip.isPrivate(iface.address)) {
-                        publicIp = iface.address;
+                    if (!ip.isPrivate(address)) {
+                        publicIp = address;
                     }
                 });
             });
@@ -55,4 +55,4 @@ class Utils{
       
 }
 
-module.exports = Utils;
+export default System;

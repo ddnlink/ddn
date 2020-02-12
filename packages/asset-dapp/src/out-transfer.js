@@ -1,9 +1,9 @@
-import { AssetBase } from '@ddn/asset-base';
+import Asset from '@ddn/asset-base';
 import { Bignum } from '@ddn/utils';
 
 const _dappOuttransferUnconfirmeds = {};
 
-class OutTransfer extends AssetBase {
+class OutTransfer extends Asset.Base {
 
     async propsMapping() {
         return [

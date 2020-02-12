@@ -5,7 +5,7 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { AssetBase } from '@ddn/asset-base';
+import Asset from '@ddn/asset-base';
 import { Bignum, Address } from '@ddn/utils';
 import daoUtil from './daoUtil.js';
 import ByteBuffer from 'bytebuffer';
@@ -26,7 +26,7 @@ import ed from 'ed25519';
   * @amout 0-发起卖，确认买的数量=@price
   * @fee 交易费用
   */
-class Exchange extends AssetBase {
+class Exchange extends Asset.Base {
     // eslint-disable-next-line class-methods-use-this
     async propsMapping() {
         return [{

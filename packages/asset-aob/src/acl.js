@@ -1,9 +1,9 @@
-import { AssetBase } from '@ddn/asset-base';
+import Asset from '@ddn/asset-base';
 import ByteBuffer from 'bytebuffer';
 import { Bignum } from '@ddn/utils';
 import ddnUtils from '@ddn/utils';
 
-class Acl extends AssetBase {
+class Acl extends Asset.Base {
     async propsMapping() {
         return [
             {field: 'str1', prop: 'currency', required: true},

@@ -1,4 +1,4 @@
-module.exports = {
+export default {
     TRANSFER: 0,        // TRANSFER
     SIGNATURE: 1,       // SIGNATURE
     DELEGATE: 2,        // DELEGATE

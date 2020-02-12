@@ -1,7 +1,7 @@
-import { AssetBase } from '@ddn/asset-base';
+import Asset from '@ddn/asset-base';
 import { Bignum, Address, Amount } from '@ddn/utils';
 
-class InTransfer extends AssetBase {
+class InTransfer extends Asset.Base {
 
     async propsMapping() {
         return [

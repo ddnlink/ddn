@@ -1,9 +1,9 @@
-import { AssetBase } from '@ddn/asset-base';
+import Asset from '@ddn/asset-base';
 import { Bignum, Amount } from '@ddn/utils';
 import mathjs from 'mathjs';
 import _ from 'lodash';
 
-class Issue extends AssetBase {
+class Issue extends Asset.Base {
     async propsMapping() {
         return [
             {

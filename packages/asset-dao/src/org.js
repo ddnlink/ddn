@@ -5,7 +5,7 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { AssetBase } from '@ddn/asset-base';
+import Asset from '@ddn/asset-base';
 import { Bignum, Address } from '@ddn/utils';
 import ByteBuffer from 'bytebuffer';
 import { isUri } from 'valid-url';
@@ -21,7 +21,7 @@ import daoUtil from './daoUtil.js';
 //   processOrgIdList = {};
 // });
 
-class Org extends AssetBase {
+class Org extends Asset.Base {
     /**
       * Org 自治组织中的组织
       * 自治组织可以包含媒体号、企业号等组织形态，为未来更多扩展留有余地。
