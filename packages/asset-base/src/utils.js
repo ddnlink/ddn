@@ -12,17 +12,15 @@ class AssetUtils
             if (currAsset) {
                 let assetConfig;
                 try {
-                    assetConfig = require(currAsset + '/.ddnrc.js');
+                    assetConfig = require(`${currAsset}/.ddnrc.js`);
                 } catch (error) {
-                    throw new Error("The asset extends error: " + currAsset + " has no configure .ddnrc.js.");
+                    throw new Error(`The asset extends error: ${currAsset} has no configure .ddnrc.js.`);
                 }
           
                 const assetTransactions = assetConfig.transactions;
 
                 if (assetTransactions && assetTransactions.length > 0) {
-        
-                    for (let i = 0; i < assetTransactions.length; i++) {
-                        const currTrans = assetTransactions[i];
+                    assetTransactions.forEach(currTrans => {
                         if (!(currTrans.name && !/^\s*$/.test(currTrans.name))) {
                             throw new Error("The asset extends error: name property required.");
                         }
@@ -31,15 +29,15 @@ class AssetUtils
                         }
 
                         if (global.assets.transTypeNames[currTrans.type]) {
-                            throw new Error("The asset extends error: type " + currTrans.type + " is conflicting.");
+                            throw new Error(`The asset extends error: type ${currTrans.type} is conflicting.`);
                         }
 
                         currTrans.package = currAsset;
-           
+
                         global.assets.transConfigs.push(currTrans);
                         global.assets.transTypeValues[currTrans.name] = currTrans;
                         global.assets.transTypeNames[currTrans.type] = currTrans;
-                    }
+                    });
                 }
             }
         }
@@ -71,11 +69,11 @@ class AssetUtils
     }
 
     static getAssetJsonName(typeValue) {
-        var result = "";
-        var typeName = this.getTypeName(typeValue) + "";
-        var subNames = typeName.split(/[-_]/);
-        for (var i = 0; i < subNames.length; i++) {
-            var sn = subNames[i];
+        let result = "";
+        const typeName = `${this.getTypeName(typeValue)}`;
+        const subNames = typeName.split(/[-_]/);
+        for (let i = 0; i < subNames.length; i++) {
+            const sn = subNames[i];
             if (sn && !/^\s*$/.test(sn)) {
                 if (i == 0) {
                     var camelSN = sn.substring(0, 1).toLowerCase() + sn.substring(1);

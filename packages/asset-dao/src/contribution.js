@@ -1,4 +1,4 @@
-import { AssetBase } from '@ddn/asset-base';
+import Asset from '@ddn/asset-base';
 import { Bignum, Address } from '@ddn/utils';
 import daoUtil from './daoUtil.js';
 import ByteBuffer from 'bytebuffer';
@@ -16,7 +16,7 @@ import ed from 'ed25519';
  *
  * @fee 0.1EBT
  */
-class Contribution extends AssetBase {
+class Contribution extends Asset.Base {
     async propsMapping() {
         return [{
             field: 'str2',

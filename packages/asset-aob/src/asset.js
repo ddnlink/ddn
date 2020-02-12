@@ -1,8 +1,8 @@
-import { AssetBase } from '@ddn/asset-base';
+import Asset from '@ddn/asset-base';
 import { Bignum, Amount } from '@ddn/utils';
 import assert from 'assert';
 
-class Asset extends AssetBase {
+class Aob extends Asset.Base {
     async propsMapping() {
         return [
             {
@@ -274,4 +274,4 @@ class Asset extends AssetBase {
     }
 }
 
-export default Asset;
+export default Aob;

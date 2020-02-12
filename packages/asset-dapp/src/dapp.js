@@ -1,4 +1,4 @@
-import { AssetBase } from '@ddn/asset-base';
+import Asset from '@ddn/asset-base';
 import { Sandbox } from '@ddn/ddn-sandbox';
 import { Bignum } from '@ddn/utils';
 import valid_url from 'valid-url';
@@ -18,7 +18,7 @@ const _dappRemoving = {};
 const _dappLaunched = {};
 const _dappLaunchedLastError = {};
 
-class Dapp extends AssetBase {
+class Dapp extends Asset.Base {
     async propsMapping() {
         return [{
             field: "str1",

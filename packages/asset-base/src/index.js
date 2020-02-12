@@ -1,7 +1,7 @@
-import AssetBase from "./base";
-import AssetUtils from "./utils";
+import Base from "./base";
+import Utils from "./utils";
 
-module.exports = {
-    AssetBase,
-    AssetUtils
-}
+export default {
+    Base,
+    Utils
+};

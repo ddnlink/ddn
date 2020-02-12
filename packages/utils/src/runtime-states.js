@@ -1,5 +1,4 @@
-module.exports = {
-
+export default {
     //未决，等待中
     Pending: 0, 
 
@@ -8,5 +7,4 @@ module.exports = {
 
     //正常工作
     Ready: 2
-
 };

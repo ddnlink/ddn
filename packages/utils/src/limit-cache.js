@@ -28,4 +28,4 @@ class LimitCache  {
   }
 }
 
-module.exports = LimitCache
+export default LimitCache;

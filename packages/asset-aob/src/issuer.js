@@ -1,7 +1,7 @@
-import { AssetBase } from '@ddn/asset-base';
+import Asset from '@ddn/asset-base';
 import { Bignum } from '@ddn/utils';
 
-class Issuer extends AssetBase {
+class Issuer extends Asset.Base {
     async propsMapping() {
         return [
             {

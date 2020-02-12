@@ -13,7 +13,7 @@ const supertest = require('supertest');
 const async = require('async');
 const request = require('request');
 const ddn = require('@ddn/node-sdk');
-const { getConfigFile, requireFile } =require('@ddn/core/lib/getUserConfig');
+const { getConfigFile, requireFile } = require('@ddn/core/lib/getUserConfig');
 const { Bignum, Address, AssetTypes } = require('@ddn/utils');
 const bluebird = require('bluebird');
 

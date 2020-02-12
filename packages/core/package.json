@@ -1,7 +1,8 @@
 {
   "name": "@ddn/core",
   "version": "0.0.1",
-  "description": "DDN core",
+  "description": "DDN core.",
+  "main": "./lib/index.js",
   "keywords": [
     "ddn",
     "core"
@@ -11,8 +12,7 @@
   "license": "MIT",
   "files": [
     "lib",
-    "src",
-    "index.js"
+    "src"
   ],
   "repository": {
     "type": "git",
