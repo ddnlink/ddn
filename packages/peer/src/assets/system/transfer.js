@@ -2,8 +2,9 @@
  * 转账资产交易
  * wangxm   2018-12-28
  */
-const util = require("util");
-const { Bignum, Address } = require("@ddn/utils"); //Bignum update
+import util from "util";
+
+import DdnUtil from "@ddn/utils"; //DdnUtil.bignum update
 
 class Transfer {
   constructor(context) {
@@ -11,11 +12,11 @@ class Transfer {
     this._context = context;
   }
 
-  async create(data, trs) {
-    trs.recipient_id = data.recipient_id; //wxm block database
-    // Bignum update
+  async create({recipient_id, amount}, trs) {
+    trs.recipient_id = recipient_id; //wxm block database
+    // DdnUtil.bignum update
     // trs.amount = data.amount;
-    trs.amount = data.amount + "";
+    trs.amount = `${amount}`;
 
     return trs;
   }
@@ -24,20 +25,20 @@ class Transfer {
     return this.tokenSetting[this.config.netVersion].fees.send;
   }
 
-  async verify(trs, sender) {
-    if (!Address.isAddress(trs.recipient_id)) {
+  async verify(trs, {address, lockHeight}) {
+    if (!DdnUtil.address.isAddress(trs.recipient_id)) {
       throw new Error("Invalid recipient");
     }
 
-    if (Bignum.isNaN(trs.amount)) {
+    if (DdnUtil.bignum.isNaN(trs.amount)) {
       throw new Error("Invalid transaction amount.");
     }
 
-    if (Bignum.isLessThanOrEqualTo(trs.amount, 0)) {
+    if (DdnUtil.bignum.isLessThanOrEqualTo(trs.amount, 0)) {
       throw new Error("Invalid transaction amount");
     }
 
-    if (trs.recipient_id == sender.address) {
+    if (trs.recipient_id == address) {
       //wxm block database
       throw new Error("Invalid recipient_id, cannot be your self");
     }
@@ -46,11 +47,11 @@ class Transfer {
       const lastBlock = this.runtime.block.getLastBlock();
 
       if (
-        sender.lockHeight &&
+        lockHeight &&
         lastBlock &&
-        Bignum.isLessThanOrEqualTo(
-          Bignum.plus(lastBlock.height, 1),
-          sender.lockHeight
+        DdnUtil.bignum.isLessThanOrEqualTo(
+          DdnUtil.bignum.plus(lastBlock.height, 1),
+          lockHeight
         )
       ) {
         throw new Error("Account is locked");
@@ -73,20 +74,20 @@ class Transfer {
     return true;
   }
 
-  async apply(trs, block, sender, dbTrans) {
+  async apply({recipient_id, amount}, {id, height}, sender, dbTrans) {
     await this.runtime.account.setAccount(
-      { address: trs.recipient_id },
+      { address: recipient_id },
       dbTrans
     );
 
     await this.runtime.account.merge(
-      trs.recipient_id,
+      recipient_id,
       {
-        address: trs.recipient_id, //wxm block database
-        balance: trs.amount,
-        u_balance: trs.amount,
-        block_id: block.id, //wxm block database
-        round: await this.runtime.round.calc(block.height)
+        address: recipient_id, //wxm block database
+        balance: amount,
+        u_balance: amount,
+        block_id: id, //wxm block database
+        round: await this.runtime.round.calc(height)
       },
       dbTrans
     );
@@ -112,20 +113,20 @@ class Transfer {
     // });
   }
 
-  async undo(trs, block, sender, dbTrans) {
+  async undo({recipient_id, amount}, {id, height}, sender, dbTrans) {
     await this.runtime.account.setAccount(
-      { address: trs.recipient_id },
+      { address: recipient_id },
       dbTrans
     );
 
     await this.runtime.account.merge(
-      trs.recipient_id,
+      recipient_id,
       {
-        address: trs.recipient_id, //wxm block database
-        balance: `-${trs.amount}`,
-        u_balance: `-${trs.amount}`,
-        block_id: block.id, //wxm block database
-        round: await this.runtime.round.calc(block.height)
+        address: recipient_id, //wxm block database
+        balance: `-${amount}`,
+        u_balance: `-${amount}`,
+        block_id: id, //wxm block database
+        round: await this.runtime.round.calc(height)
       },
       dbTrans
     );
@@ -174,16 +175,16 @@ class Transfer {
 
   async dbSave(trs, dbTrans) {}
 
-  async ready(trs, sender) {
-    if (util.isArray(sender.multisignatures) && sender.multisignatures.length) {
-      if (!trs.signatures) {
+  async ready({signatures}, {multisignatures, multimin}) {
+    if (util.isArray(multisignatures) && multisignatures.length) {
+      if (!signatures) {
         return false;
       }
-      return trs.signatures.length >= sender.multimin - 1;
+      return signatures.length >= multimin - 1;
     } else {
       return true;
     }
   }
 }
 
-module.exports = Transfer;
+export default Transfer;

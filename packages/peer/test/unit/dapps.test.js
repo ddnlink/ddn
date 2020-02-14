@@ -1,27 +1,24 @@
-"use strict";
-
-var path = require("path");
-const { Bignum } = require('@ddn/utils');
+import DdnUtils from '@ddn/utils';
 
 // Requires and node configuration
-var node = require("./../variables.js");
-var Dapp = {};
-var DappName = "";
-var DappToInstall = {};
-var randomCoin = 0;
-var transactionCount = 0;
-var transactionList = [];
+import node from "./../variables.js";
+
+let DappName = "";
+const DappToInstall = {};
+let randomCoin = 0;
+let transactionCount = 0;
+const transactionList = [];
 
 // Used for calculating amounts
-var expectedFee = "0";  //Bignum update
-var totalTxFee = "0";   //Bignum update
+let expectedFee = "0";  //DdnUtils.bignum update
+let totalTxFee = "0";   //DdnUtils.bignum update
 
 // Create random accounts
-var Account1 = node.randomTxAccount();
-var Account2 = node.randomTxAccount();
-var Account3 = node.randomTxAccount();
-var Account4 = node.randomTxAccount();
-var Account5 = node.randomTxAccount();
+const Account1 = node.randomTxAccount();
+const Account2 = node.randomTxAccount();
+const Account3 = node.randomTxAccount();
+const Account4 = node.randomTxAccount();
+const Account5 = node.randomTxAccount();
 
 console.log('Account1', Account1)
 console.log('Account2', Account2)
@@ -29,7 +26,7 @@ console.log('Account3', Account3)
 console.log('Account3', Account4)
 console.log('Account3', Account5)
 
-before(function (done) {
+before(done => {
     node.api.post("/accounts/open")
         .set("Accept", "application/json")
         .send({
@@ -38,24 +35,24 @@ before(function (done) {
         })
         .expect("Content-Type", /json/)
         .expect(200)
-        .end(function (err, res) {
+        .end((err, {body}) => {
             // console.log(JSON.stringify(res.body));
-            console.log("Opening Account 1 with password: " + Account1.password);
-            node.expect(res.body).to.have.property("success").to.be.true;
-            if (res.body.success == true && res.body.account != null) {
-                Account1.address = res.body.account.address;
-                Account1.public_key = res.body.account.public_key;
-                Account1.balance = res.body.account.balance;
+            console.log(`Opening Account 1 with password: ${Account1.password}`);
+            node.expect(body).to.have.property("success").to.be.true;
+            if (body.success == true && body.account != null) {
+                Account1.address = body.account.address;
+                Account1.public_key = body.account.public_key;
+                Account1.balance = body.account.balance;
             } else {
                 console.log("Unable to open account1, tests will fail");
-                console.log("Data sent: secret: " + Account1.password + " , secondSecret: " + Account1.secondPassword);
+                console.log(`Data sent: secret: ${Account1.password} , secondSecret: ${Account1.secondPassword}`);
                 node.expect("TEST").to.equal("FAILED");
             }
             done();
         });
 });
 
-before(function (done) {
+before(done => {
     node.api.post("/accounts/open")
         .set("Accept", "application/json")
         .send({
@@ -64,24 +61,24 @@ before(function (done) {
         })
         .expect("Content-Type", /json/)
         .expect(200)
-        .end(function (err, res) {
+        .end((err, {body}) => {
             // console.log("register second password");
-            console.log("Opening Account 2 with password: " + Account2.password);
-            node.expect(res.body).to.have.property("success").to.be.true;
-            if (res.body.success == true && res.body.account != null) {
-                Account2.address = res.body.account.address;
-                Account2.public_key = res.body.account.public_key;
-                Account2.balance = res.body.account.balance;
+            console.log(`Opening Account 2 with password: ${Account2.password}`);
+            node.expect(body).to.have.property("success").to.be.true;
+            if (body.success == true && body.account != null) {
+                Account2.address = body.account.address;
+                Account2.public_key = body.account.public_key;
+                Account2.balance = body.account.balance;
             } else {
                 console.log("Unable to open account2, tests will fail");
-                console.log("Data sent: secret: " + Account2.password + " , secondSecret: " + Account2.secondPassword);
+                console.log(`Data sent: secret: ${Account2.password} , secondSecret: ${Account2.secondPassword}`);
                 node.expect("TEST").to.equal("FAILED");
             }
             done();
         });
 });
 
-before(function (done) {
+before(done => {
     node.api.post("/accounts/open")
         .set("Accept", "application/json")
         .send({
@@ -90,24 +87,24 @@ before(function (done) {
         })
         .expect("Content-Type", /json/)
         .expect(200)
-        .end(function (err, res) {
+        .end((err, {body}) => {
             // console.log(JSON.stringify(res.body));
-            console.log("Opening Account 3 with password: " + Account3.password);
-            node.expect(res.body).to.have.property("success").to.be.true;
-            if (res.body.success == true && res.body.account != null) {
-                Account3.address = res.body.account.address;
-                Account3.public_key = res.body.account.public_key;
-                Account3.balance = res.body.account.balance;
+            console.log(`Opening Account 3 with password: ${Account3.password}`);
+            node.expect(body).to.have.property("success").to.be.true;
+            if (body.success == true && body.account != null) {
+                Account3.address = body.account.address;
+                Account3.public_key = body.account.public_key;
+                Account3.balance = body.account.balance;
             } else {
                 console.log("Unable to open account3, tests will fail");
-                console.log("Data sent: secret: " + Account3.password + " , secondSecret: " + Account3.secondPassword);
+                console.log(`Data sent: secret: ${Account3.password} , secondSecret: ${Account3.secondPassword}`);
                 node.expect("TEST").to.equal("FAILED");
             }
             done();
         });
 });
 
-before(function (done) {
+before(done => {
     node.api.post("/accounts/open")
         .set("Accept", "application/json")
         .send({
@@ -116,24 +113,24 @@ before(function (done) {
         })
         .expect("Content-Type", /json/)
         .expect(200)
-        .end(function (err, res) {
+        .end((err, {body}) => {
             // console.log(JSON.stringify(res.body));
-            console.log("Opening Account 4 with password: " + Account4.password);
-            node.expect(res.body).to.have.property("success").to.be.true;
-            if (res.body.success == true && res.body.account != null) {
-                Account4.address = res.body.account.address;
-                Account4.public_key = res.body.account.public_key;
-                Account4.balance = res.body.account.balance;
+            console.log(`Opening Account 4 with password: ${Account4.password}`);
+            node.expect(body).to.have.property("success").to.be.true;
+            if (body.success == true && body.account != null) {
+                Account4.address = body.account.address;
+                Account4.public_key = body.account.public_key;
+                Account4.balance = body.account.balance;
             } else {
                 console.log("Unable to open account4, tests will fail");
-                console.log("Data sent: secret: " + Account4.password + " , secondSecret: " + Account4.secondPassword);
+                console.log(`Data sent: secret: ${Account4.password} , secondSecret: ${Account4.secondPassword}`);
                 node.expect("TEST").to.equal("FAILED");
             }
             done();
         });
 });
 
-before(function (done) {
+before(done => {
     node.api.post("/accounts/open")
         .set("Accept", "application/json")
         .send({
@@ -142,45 +139,45 @@ before(function (done) {
         })
         .expect("Content-Type", /json/)
         .expect(200)
-        .end(function (err, res) {
+        .end((err, {body}) => {
             // console.log(JSON.stringify(res.body));
-            console.log("Opening Account 5 with password: " + Account5.password);
-            node.expect(res.body).to.have.property("success").to.be.true;
-            if (res.body.success == true && res.body.account != null) {
-                Account5.address = res.body.account.address;
-                Account5.public_key = res.body.account.public_key;
-                Account5.balance = res.body.account.balance;
+            console.log(`Opening Account 5 with password: ${Account5.password}`);
+            node.expect(body).to.have.property("success").to.be.true;
+            if (body.success == true && body.account != null) {
+                Account5.address = body.account.address;
+                Account5.public_key = body.account.public_key;
+                Account5.balance = body.account.balance;
             } else {
                 console.log("Unable to open account5, tests will fail");
-                console.log("Data sent: secret: " + Account5.password + " , secondSecret: " + Account5.secondPassword);
+                console.log(`Data sent: secret: ${Account5.password} , secondSecret: ${Account5.secondPassword}`);
                 node.expect("TEST").to.equal("FAILED");
             }
             done();
         });
 });
 
-before(function (done) {
+before(done => {
     // Send money to account 1 address
-    setTimeout(function () {
+    setTimeout(() => {
         randomCoin = node.randomCoin();
         node.api.put("/transactions")
             .set("Accept", "application/json")
             .send({
                 secret: node.Gaccount.password,
-                amount: randomCoin + '',
+                amount: `${randomCoin}`,
                 recipientId: Account1.address
             })
             .expect("Content-Type", /json/)
             .expect(200)
-            .end(function (err, res) {
+            .end((err, {body}) => {
                 // console.log(JSON.stringify(res.body));
-                node.expect(res.body).to.have.property("success").to.be.true;
-                if (res.body.success == true && res.body.transactionId != null) {
+                node.expect(body).to.have.property("success").to.be.true;
+                if (body.success == true && body.transactionId != null) {
                     transactionCount += 1;
                     Account1.transactions.push(transactionCount);
                     Account1.balance += randomCoin
                 } else {
-                    console.log("Sent: secret: " + node.Gaccount.password + ", amount: " + randomCoin + ", recipientId: " + Account1.address);
+                    console.log(`Sent: secret: ${node.Gaccount.password}, amount: ${randomCoin}, recipientId: ${Account1.address}`);
                     node.expect("TEST").to.equal("FAILED");
                 }
                 done();
@@ -188,28 +185,28 @@ before(function (done) {
     }, 2000);
 });
 
-before(function (done) {
-    setTimeout(function () {
+before(done => {
+    setTimeout(() => {
         randomCoin = node.randomCoin();
         expectedFee = node.expectedFee(randomCoin);
         node.api.put("/transactions")
             .set("Accept", "application/json")
             .send({
                 secret: node.Gaccount.password,
-                amount: randomCoin + '',
+                amount: `${randomCoin}`,
                 recipientId: Account2.address
             })
             .expect("Content-Type", /json/)
             .expect(200)
-            .end(function (err, res) {
-                node.expect(res.body).to.have.property("success").to.be.true;
-                if (res.body.success == true && res.body.transactionId != null) {
+            .end((err, {body}) => {
+                node.expect(body).to.have.property("success").to.be.true;
+                if (body.success == true && body.transactionId != null) {
                     Account2.transactions.push(transactionCount);
                     transactionCount += 1;
 
-                    // Bignum update
+                    // DdnUtils.bignum update
                     // totalTxFee += (expectedFee / node.normalizer);
-                    totalTxFee = Bignum.plus(totalTxFee, Bignum.divide(expectedFee, node.normalizer));
+                    totalTxFee = DdnUtils.bignum.plus(totalTxFee, DdnUtils.bignum.divide(expectedFee, node.normalizer));
 
                     Account2.balance += randomCoin;
                     transactionList[transactionCount - 1] = {
@@ -217,15 +214,15 @@ before(function (done) {
                         "recipient": Account2.address,
                         "brutoSent": (randomCoin + expectedFee) / node.normalizer,
 
-                        //Bignum update "fee": expectedFee / node.normalizer,
-                        "fee": Bignum.divide(expectedFee, node.normalizer),
+                        //DdnUtils.bignum update "fee": expectedFee / node.normalizer,
+                        "fee": DdnUtils.bignum.divide(expectedFee, node.normalizer),
 
                         "nettoSent": randomCoin / node.normalizer,
-                        "txId": res.body.transactionId,
+                        "txId": body.transactionId,
                         "type": node.AssetTypes.TRANSFER
                     }
                 } else {
-                    console.log("Sent: secret: " + node.Gaccount.password + ", amount: " + randomCoin + ", recipientId: " + Account2.address);
+                    console.log(`Sent: secret: ${node.Gaccount.password}, amount: ${randomCoin}, recipientId: ${Account2.address}`);
                     node.expect("TEST").to.equal("FAILED");
                 }
                 done();
@@ -233,9 +230,9 @@ before(function (done) {
     }, 2000);
 });
 
-before(function (done) {
+before(done => {
     // Wait for new block to ensure all data has been received
-    node.onNewBlock(function (err) {
+    node.onNewBlock(err => {
         // Add 2nd password for Account 2
         node.api.put("/signatures")
             .set("Accept", "application/json")
@@ -245,22 +242,22 @@ before(function (done) {
             })
             .expect("Content-Type", /json/)
             .expect(200)
-            .end(function (err, res) {
-                node.expect(res.body).to.have.property("success").to.be.true;
-                node.expect(res.body).to.have.property("transaction").that.is.an("object");
+            .end((err, {body}) => {
+                node.expect(body).to.have.property("success").to.be.true;
+                node.expect(body).to.have.property("transaction").that.is.an("object");
                 done();
             });
     });
-    console.log("ACCOUNT 1: " + Account1.address);
-    console.log("ACCOUNT 2: " + Account2.address);
-    console.log("ACCOUNT 3: " + Account3.address);
-    console.log("ACCOUNT 4: " + Account4.address);
-    console.log("ACCOUNT 5: " + Account5.address);
+    console.log(`ACCOUNT 1: ${Account1.address}`);
+    console.log(`ACCOUNT 2: ${Account2.address}`);
+    console.log(`ACCOUNT 3: ${Account3.address}`);
+    console.log(`ACCOUNT 4: ${Account4.address}`);
+    console.log(`ACCOUNT 5: ${Account5.address}`);
 });
 
-describe("PUT /dapps", function () {
+describe("PUT /dapps", () => {
 
-    it("Using invalid secret. Should fail", function (done) {
+    it("Using invalid secret. Should fail", done => {
         node.api.put("/dapp")
             .set("Accept", "application/json")
             .send({
@@ -275,15 +272,15 @@ describe("PUT /dapps", function () {
             })
             .expect("Content-Type", /json/)
             .expect(200)
-            .end(function (err, res) {
-                console.log(res.body);
-                node.expect(res.body).to.have.property("success").to.be.false;
-                node.expect(res.body).to.have.property("error");
+            .end((err, {body}) => {
+                console.log(body);
+                node.expect(body).to.have.property("success").to.be.false;
+                node.expect(body).to.have.property("error");
                 done();
             });
     });
 
-    it("Using invalid Category. Should fail", function (done) {
+    it("Using invalid Category. Should fail", done => {
         node.api.put("/dapp")
             .set("Accept", "application/json")
             .send({
@@ -298,15 +295,15 @@ describe("PUT /dapps", function () {
             })
             .expect("Content-Type", /json/)
             .expect(200)
-            .end(function (err, res) {
-                console.log(JSON.stringify(res.body));
-                node.expect(res.body).to.have.property("success").to.be.false;
-                node.expect(res.body).to.have.property("error");
+            .end((err, {body}) => {
+                console.log(JSON.stringify(body));
+                node.expect(body).to.have.property("success").to.be.false;
+                node.expect(body).to.have.property("error");
                 done();
             });
     });
 
-    it("Using no dapp name. Should fail", function (done) {
+    it("Using no dapp name. Should fail", done => {
         node.api.put("/dapp")
             .set("Accept", "application/json")
             .send({
@@ -320,15 +317,15 @@ describe("PUT /dapps", function () {
             })
             .expect("Content-Type", /json/)
             .expect(200)
-            .end(function (err, res) {
-                console.log(JSON.stringify(res.body));
-                node.expect(res.body).to.have.property("success").to.be.false;
-                node.expect(res.body).to.have.property("error");
+            .end((err, {body}) => {
+                console.log(JSON.stringify(body));
+                node.expect(body).to.have.property("success").to.be.false;
+                node.expect(body).to.have.property("error");
                 done();
             });
     });
 
-    it("Using very long description. Should fail", function (done) {
+    it("Using very long description. Should fail", done => {
         node.api.put("/dapp")
             .set("Accept", "application/json")
             .send({
@@ -342,15 +339,15 @@ describe("PUT /dapps", function () {
             })
             .expect("Content-Type", /json/)
             .expect(200)
-            .end(function (err, res) {
-                console.log(JSON.stringify(res.body));
-                node.expect(res.body).to.have.property("success").to.be.false;
-                node.expect(res.body).to.have.property("error");
+            .end((err, {body}) => {
+                console.log(JSON.stringify(body));
+                node.expect(body).to.have.property("success").to.be.false;
+                node.expect(body).to.have.property("error");
                 done();
             });
     });
 
-    it("Using very long tag. Should fail", function (done) {
+    it("Using very long tag. Should fail", done => {
         node.api.put("/dapp")
             .set("Accept", "application/json")
             .send({
@@ -365,15 +362,15 @@ describe("PUT /dapps", function () {
             })
             .expect("Content-Type", /json/)
             .expect(200)
-            .end(function (err, res) {
-                console.log(JSON.stringify(res.body));
-                node.expect(res.body).to.have.property("success").to.be.false;
-                node.expect(res.body).to.have.property("error");
+            .end((err, {body}) => {
+                console.log(JSON.stringify(body));
+                node.expect(body).to.have.property("success").to.be.false;
+                node.expect(body).to.have.property("error");
                 done();
             });
     });
 
-    it("Using very long name. Should fail", function (done) {
+    it("Using very long name. Should fail", done => {
         node.api.put("/dapp")
             .set("Accept", "application/json")
             .send({
@@ -388,15 +385,15 @@ describe("PUT /dapps", function () {
             })
             .expect("Content-Type", /json/)
             .expect(200)
-            .end(function (err, res) {
-                console.log(JSON.stringify(res.body));
-                node.expect(res.body).to.have.property("success").to.be.false;
-                node.expect(res.body).to.have.property("error");
+            .end((err, {body}) => {
+                console.log(JSON.stringify(body));
+                node.expect(body).to.have.property("success").to.be.false;
+                node.expect(body).to.have.property("error");
                 done();
             });
     });
 
-    it("Using no link. Should fail", function (done) {
+    it("Using no link. Should fail", done => {
         node.api.put("/dapp")
             .set("Accept", "application/json")
             .send({
@@ -409,15 +406,15 @@ describe("PUT /dapps", function () {
             })
             .expect("Content-Type", /json/)
             .expect(200)
-            .end(function (err, res) {
-                console.log(JSON.stringify(res.body));
-                node.expect(res.body).to.have.property("success").to.be.false;
-                node.expect(res.body).to.have.property("error");
+            .end((err, {body}) => {
+                console.log(JSON.stringify(body));
+                node.expect(body).to.have.property("success").to.be.false;
+                node.expect(body).to.have.property("error");
                 done();
             });
     });
 
-    it("Using invalid parameter types. Should fail", function (done) {
+    it("Using invalid parameter types. Should fail", done => {
         node.api.put("/dapp")
             .set("Accept", "application/json")
             .send({
@@ -432,14 +429,14 @@ describe("PUT /dapps", function () {
             })
             .expect("Content-Type", /json/)
             .expect(200)
-            .end(function (err, res) {
-                console.log(JSON.stringify(res.body));
-                node.expect(res.body).to.have.property("success").to.be.error;
+            .end((err, {body}) => {
+                console.log(JSON.stringify(body));
+                node.expect(body).to.have.property("success").to.be.error;
                 done();
             });
     });
 
-    it("Using account with 0 coin account. Should fail", function (done) {
+    it("Using account with 0 coin account. Should fail", done => {
         node.api.put("/dapp")
             .set("Accept", "application/json")
             .send({
@@ -454,14 +451,14 @@ describe("PUT /dapps", function () {
             })
             .expect("Content-Type", /json/)
             .expect(200)
-            .end(function (err, res) {
-                console.log(JSON.stringify(res.body));
-                node.expect(res.body).to.have.property("success").to.be.false;
+            .end((err, {body}) => {
+                console.log(JSON.stringify(body));
+                node.expect(body).to.have.property("success").to.be.false;
                 done();
             });
     });
 
-    it("Using invalid 2nd passphrase. Should fail", function (done) {
+    it("Using invalid 2nd passphrase. Should fail", done => {
         node.api.put("/dapp")
             .set("Accept", "application/json")
             .send({
@@ -477,14 +474,14 @@ describe("PUT /dapps", function () {
             })
             .expect("Content-Type", /json/)
             .expect(200)
-            .end(function (err, res) {
-                console.log(JSON.stringify(res.body));
-                node.expect(res.body).to.have.property("success").to.be.false;
+            .end((err, {body}) => {
+                console.log(JSON.stringify(body));
+                node.expect(body).to.have.property("success").to.be.false;
                 done();
             });
     });
 
-    it("Using invalid type. Should fail", function (done) {
+    it("Using invalid type. Should fail", done => {
         DappName = node.randomDelegateName();
 
         node.api.put("/dapp")
@@ -502,15 +499,15 @@ describe("PUT /dapps", function () {
             })
             .expect("Content-Type", /json/)
             .expect(200)
-            .end(function (err, res) {
-                console.log(JSON.stringify(res.body));
-                node.expect(res.body).to.have.property("success").to.be.false;
+            .end((err, {body}) => {
+                console.log(JSON.stringify(body));
+                node.expect(body).to.have.property("success").to.be.false;
                 done();
             });
     });
 
-    it("Using valid Link. Should be ok", function (done) {
-        var delegates = [
+    it("Using valid Link. Should be ok", done => {
+        const delegates = [
             Account1.public_key,
             Account2.public_key,
             Account3.public_key,
@@ -518,7 +515,7 @@ describe("PUT /dapps", function () {
             Account5.public_key
         ];
 
-        node.onNewBlock(function () {
+        node.onNewBlock(() => {
             DappName = node.randomDelegateName();
             node.api.put("/dapp")
                 .set("Accept", "application/json")
@@ -536,18 +533,18 @@ describe("PUT /dapps", function () {
                 })
                 .expect("Content-Type", /json/)
                 .expect(200)
-                .end(function (err, res) {
-                    console.log(res.body);
-                    node.expect(res.body).to.have.property("success").to.be.true;
-                    node.expect(res.body).to.have.property("transactionId");
-                    DappToInstall.transactionId = res.body.transactionId;
+                .end((err, {body}) => {
+                    console.log(body);
+                    node.expect(body).to.have.property("success").to.be.true;
+                    node.expect(body).to.have.property("transactionId");
+                    DappToInstall.transactionId = body.transactionId;
                     done();
                 });
         });
     });
 
-    it("Using existing dapp name. Should fail", function (done) {
-        node.onNewBlock(function (err) {
+    it("Using existing dapp name. Should fail", done => {
+        node.onNewBlock(err => {
             node.api.put("/dapp")
                 .set("Accept", "application/json")
                 .send({
@@ -562,16 +559,16 @@ describe("PUT /dapps", function () {
                 })
                 .expect("Content-Type", /json/)
                 .expect(200)
-                .end(function (err, res) {
-                    console.log(res.body);
-                    node.expect(res.body).to.have.property("success").to.be.false;
+                .end((err, {body}) => {
+                    console.log(body);
+                    node.expect(body).to.have.property("success").to.be.false;
                     done();
                 });
         });
     });
 
-    it("Using existing dapp link. Should fail", function (done) {
-        node.onNewBlock(function (err) {
+    it("Using existing dapp link. Should fail", done => {
+        node.onNewBlock(err => {
             node.api.put("/dapp")
                 .set("Accept", "application/json")
                 .send({
@@ -586,10 +583,10 @@ describe("PUT /dapps", function () {
                 })
                 .expect("Content-Type", /json/)
                 .expect(200)
-                .end(function (err, res) {
-                    console.log(JSON.stringify(res.body));
-                    node.expect(res.body).to.have.property("success").to.be.false;
-                    node.expect(res.body).to.have.property("error");
+                .end((err, {body}) => {
+                    console.log(JSON.stringify(body));
+                    node.expect(body).to.have.property("success").to.be.false;
+                    node.expect(body).to.have.property("error");
                     done();
                 });
         });

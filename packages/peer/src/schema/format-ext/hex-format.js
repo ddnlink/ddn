@@ -1,8 +1,8 @@
-module.exports = {
+export default {
 
     name: "hex",
 
-    validate: function(str) {
+    validate(str) {
         let b = null;
         try {
             b = Buffer.from(str, 'hex');

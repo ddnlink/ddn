@@ -6,6 +6,10 @@ import assert from 'assert';
 import path from 'path';
 import fs from 'fs';
 import ip from 'ip';
+import crypto from 'crypto';
+import DdnUtils from '@ddn/utils';
+import extend from 'extend2';
+
 import Logger from '../logger';
 import Context from'./context';
 import Block from './block/block';
@@ -17,14 +21,11 @@ import Delegate from './lib/delegate';
 import Consensus from './lib/consensus';
 import Peer from './peer/peer';
 import dbUpgrade from '../db/db-upgrade';
-import { RuntimeState, Utils } from'@ddn/utils';
 import HttpServer from '../network/http-server';
 import MultiSignature from './lib/multisignature';
-import crypto from 'crypto';
-import { Bignum } from '@ddn/utils';
+
 import DataQuery from './lib/data-query';
 import defaultConfig from '../config.default.js';
-import extend from 'extend2';
 
 class Program
 {
@@ -37,13 +38,13 @@ class Program
         });
 
         if (!options.configObject.publicIp) {
-            options.configObject.publicIp = Utils.getPublicIp();
+            options.configObject.publicIp = DdnUtils.system.getPublicIp();
         }
 
         this._context = new Context();
         await this._context.init(options);
 
-        this._context.runtime.state = RuntimeState.Pending;
+        this._context.runtime.state = DdnUtils.runtimeState.Pending;
         //区块核心处理模块
         this._context.runtime.block = Block.singleton(this._context);
         //交易核心处理模块
@@ -110,7 +111,7 @@ class Program
         }
         catch (err)
         {
-            console.error(Utils.getErrorMsg(err));
+            console.error(DdnUtils.system.getErrorMsg(err));
         }
     }
 
@@ -181,6 +182,13 @@ class Program
             process.emit('cleanup');
         });
 
+        process.on('unhandledRejection', (reason, p) => {
+            // this._context.logger.fetal('*******************************************');
+
+            console.log('Unhandled Rejection at: ', p, 'reason:', reason);
+            // application specific logging, throwing an error, or other logic here
+        });
+
         process.on('uncaughtException', err => {
             this._context.logger.fatal('uncaughtException', { message: err.message, stack: err.stack });
             process.emit('cleanup');
@@ -224,7 +232,7 @@ class Program
         }
         catch (err)
         {
-            this._context.logger.error('Failed to load blockchain', Utils.getErrorMsg(err));
+            this._context.logger.error('Failed to load blockchain', DdnUtils.system.getErrorMsg(err));
             return process.exit(1);
         }
 
@@ -265,7 +273,7 @@ class Program
 
     async _blockchainReady () {
         if (!this._blockchainReadyFired &&
-            this._context.runtime.state == RuntimeState.Ready) {
+            this._context.runtime.state == DdnUtils.runtimeState.Ready) {
 
             //通知资产系统已就绪事件
             await this._context.runtime.transaction.execAssetFunc("onBlockchainReady");
@@ -356,7 +364,7 @@ class Program
             try
             {
                 await (async() => {
-                    if (this._context.runtime.state == RuntimeState.Syncing) {
+                    if (this._context.runtime.state == DdnUtils.runtimeState.Syncing) {
                         return;
                     }
 
@@ -383,14 +391,14 @@ class Program
             try
             {
                 await (async() => {
-                    if (this._context.runtime.state == RuntimeState.Syncing) {
+                    if (this._context.runtime.state == DdnUtils.runtimeState.Syncing) {
                         return;
                     }
 
                     var lastBlock = this._context.runtime.block.getLastBlock();
                     var lastSlot = this._context.runtime.slot.getSlotNumber(lastBlock.timestamp);
                     if (this._context.runtime.slot.getNextSlot() - lastSlot >= 3) {
-                        this._context.runtime.state = RuntimeState.Syncing;
+                        this._context.runtime.state = DdnUtils.runtimeState.Syncing;
 
                         this._context.logger.debug('startSyncBlocks enter');
 
@@ -408,10 +416,10 @@ class Program
                                 this._context.logger.debug('startSyncBlocks end');
 
                                 if (syncCompleted) {
-                                    this._context.runtime.state = RuntimeState.Ready;
+                                    this._context.runtime.state = DdnUtils.runtimeState.Ready;
                                     await this._blockchainReady();
                                 } else {
-                                    this._context.runtime.state = RuntimeState.Pending;
+                                    this._context.runtime.state = DdnUtils.runtimeState.Pending;
                                 }
 
                                 resolve();
@@ -429,7 +437,7 @@ class Program
                 await this.startBlockDataSyncTask();
             }, 1000 * 10);
         } else {
-            this._context.runtime.state = RuntimeState.Ready;
+            this._context.runtime.state = DdnUtils.runtimeState.Ready;
             await this._blockchainReady();
         }
     }
@@ -439,7 +447,7 @@ class Program
      */
     async startForgeBlockTask() {
         await (async () => {
-            if (this._context.runtime.state != RuntimeState.Ready) {
+            if (this._context.runtime.state != DdnUtils.runtimeState.Ready) {
                 return;
             }
 
@@ -473,7 +481,7 @@ class Program
                 return;
             }
 
-            var forgeDelegateInfo = await this._context.runtime.delegate.getForgeDelegateWithCurrentTime(currentSlot, Bignum.plus(lastBlock.height, 1));
+            var forgeDelegateInfo = await this._context.runtime.delegate.getForgeDelegateWithCurrentTime(currentSlot, DdnUtils.bignum.plus(lastBlock.height, 1));
             if (forgeDelegateInfo === null) {
                 this._context.logger.trace('Loop:', 'skipping slot');
                 return;
@@ -489,7 +497,7 @@ class Program
                         }
                         catch (err)
                         {
-                            this._context.logger.error("铸造区块异常: " + Utils.getErrorMsg(err));
+                            this._context.logger.error("铸造区块异常: " + DdnUtils.system.getErrorMsg(err));
                         }
                     }
 

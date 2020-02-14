@@ -1,4 +1,4 @@
-var { RuntimeState } = require('@ddn/utils');
+import DdnUtils from '@ddn/utils';
 
 /**
  * RootRouter接口
@@ -12,19 +12,19 @@ class RootRouter {
     }
 
     async get(req) {
-        var count = await this.runtime.block.getCount();
+        const count = await this.runtime.block.getCount();
 
         return {
-            loaded: this.runtime.state == RuntimeState.Ready,
+            loaded: this.runtime.state == DdnUtils.runtimeState.Ready,
             now: this.runtime.block.getLastBlock().height,
             blocksCount: count
         };
     }
 
     async getSync(req) {
-        var remotePeerHeight = await this.runtime.peer.request({api: "/height"});
+        const remotePeerHeight = await this.runtime.peer.request({api: "/height"});
         return {
-            syncing: this.runtime.state != RuntimeState.Ready,
+            syncing: this.runtime.state != DdnUtils.runtimeState.Ready,
             blocks: remotePeerHeight.body.height,
             height: this.runtime.block.getLastBlock().height
         }
@@ -32,4 +32,4 @@ class RootRouter {
 
 }
 
-module.exports = RootRouter;
+export default RootRouter;

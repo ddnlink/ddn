@@ -1,8 +1,8 @@
-module.exports = {
+export default {
 
     name: "checkInt",
 
-    validate: function(value) {
+    validate(value) {
         if (isNaN(value) || 
             parseInt(value) != value || 
             isNaN(parseInt(value, 10))) {

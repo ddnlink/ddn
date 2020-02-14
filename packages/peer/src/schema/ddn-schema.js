@@ -8,11 +8,12 @@
 /**
  * DDN Schema
  */
-var Ajv = require("ajv");
-var path = require("path");
-var fs = require('fs');
+import Ajv from "ajv";
 
-var _singleton;
+import path from "path";
+import fs from 'fs';
+
+let _singleton;
 
 class DdnSchema {
 
@@ -30,19 +31,19 @@ class DdnSchema {
     }
 
     _attachFormatExt(dir) {
-        var extPath = path.resolve(__dirname, dir);
+        const extPath = path.resolve(__dirname, dir);
 
-        var items = fs.readdirSync(extPath);
-        for (var i = 0; i < items.length; i++) {
-            var item = items[i];
-            var itemPath = path.resolve(extPath, item);
-            var itemInfo = fs.statSync(itemPath);
+        const items = fs.readdirSync(extPath);
+        for (let i = 0; i < items.length; i++) {
+            const item = items[i];
+            const itemPath = path.resolve(extPath, item);
+            const itemInfo = fs.statSync(itemPath);
             if (itemInfo.isFile()) {
-                var pos = item.lastIndexOf(".");
+                const pos = item.lastIndexOf(".");
                 if (pos >= 0) {
-                    var ext = item.substring(pos);
+                    const ext = item.substring(pos);
                     if (ext.toLowerCase() == ".js") {
-                        var extFormat = global._require_runtime_(itemPath);
+                        const extFormat = global._require_runtime_(itemPath);
                         if (extFormat != null &&
                             typeof(extFormat.name) == "string" &&
                             typeof(extFormat.validate) == "function") {
@@ -55,26 +56,26 @@ class DdnSchema {
     }
 
     async validateBlock(block) {
-        var schemaFile = path.resolve(__dirname, './ddn-schemas/block.json');
-        var blockSchema = global._require_runtime_(schemaFile);
+        const schemaFile = path.resolve(__dirname, './ddn-schemas/block.json');
+        const blockSchema = global._require_runtime_(schemaFile);
         return await this.validate(blockSchema, block);
     }
 
     async validateTransaction(trs) {
-        var schemaFile = path.resolve(__dirname, './ddn-schemas/transaction.json');
-        var transactionSchema = global._require_runtime_(schemaFile);
+        const schemaFile = path.resolve(__dirname, './ddn-schemas/transaction.json');
+        const transactionSchema = global._require_runtime_(schemaFile);
         return await this.validate(transactionSchema, trs);
     }
 
     async validatePeer(peer) {
-        var schemaFile = path.resolve(__dirname, './ddn-schemas/peer.json');
-        var peerSchema = global._require_runtime_(schemaFile);
+        const schemaFile = path.resolve(__dirname, './ddn-schemas/peer.json');
+        const peerSchema = global._require_runtime_(schemaFile);
         return await this.validate(peerSchema, peer);
     }
 
     async validatePeers(peer) {
-        var schemaFile = path.resolve(__dirname, './ddn-schemas/peers.json');
-        var peerSchema = global._require_runtime_(schemaFile);
+        const schemaFile = path.resolve(__dirname, './ddn-schemas/peers.json');
+        const peerSchema = global._require_runtime_(schemaFile);
         return await this.validate(peerSchema, peer);
     }
 
@@ -84,7 +85,7 @@ class DdnSchema {
      * @param {*} data
      */
     async validate(schema, data) {
-        var result = this._ajv.validate(schema, data);
+        const result = this._ajv.validate(schema, data);
         if (!result) {
             return this._ajv.errors;
         }
@@ -93,4 +94,4 @@ class DdnSchema {
 
 }
 
-module.exports = DdnSchema;
+export default DdnSchema;

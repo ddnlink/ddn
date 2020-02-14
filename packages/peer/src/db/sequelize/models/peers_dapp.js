@@ -1,6 +1,6 @@
-const Sequelize = require('sequelize');
+import Sequelize from 'sequelize';
 
-module.exports = function(connection) {
+export default connection => {
     return connection.define("peers_dapp", {
         peer_id: {
             type: Sequelize.INTEGER,
@@ -21,4 +21,4 @@ module.exports = function(connection) {
             }
         ]
     });
-}
+};

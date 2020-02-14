@@ -1,12 +1,12 @@
 /*
  * @Author: shuai
  * @Date: 2018-11-13 11:34:49 
- * @Last Modified by: shuai
- * @Last Modified time: 2018-11-14 14:24:01
+ * @Last Modified by: mikey.zhaopeng
+ * @Last Modified time: 2020-02-13 22:48:39
  */
-const Sequelize = require('sequelize');
+import Sequelize from 'sequelize';
 
-module.exports = function (connection) {
+export default connection => {
 	return connection.define("tr", {
 		id: {
 			type: Sequelize.STRING(64),
@@ -90,4 +90,4 @@ module.exports = function (connection) {
 			}
 		]
 	});
-}
+};

@@ -2,16 +2,19 @@
  * 区块数据核心处理逻辑和方法
  * wangxm   2018-12-27
  */
-const os = require("os");
-const ip = require('ip');
-const assert = require('assert');
-const crypto = require('crypto');
-const ed = require('ed25519');
-const ByteBuffer = require("bytebuffer");
-const { AssetTypes, RuntimeState, Utils, Bignum, Address } = require('@ddn/utils');
-import BlockStatus from './block-status';
+import os from "os";
 
-var _singleton;
+import ip from "ip";
+import assert from "assert";
+import crypto from "crypto";
+import ed from "ed25519";
+import ByteBuffer from "bytebuffer";
+import DdnUtils from "@ddn/utils";
+import BlockStatus from "./block-status";
+
+const { assetTypes, runtimeState, system, bignum, address } = DdnUtils;
+
+let _singleton;
 
 class Block
 {
@@ -237,20 +240,20 @@ class Block
               id: raw.b_id,
               version: parseInt(raw.b_version),
               timestamp: parseInt(raw.b_timestamp),
-              height: raw.b_height + "",        //Bignum update parseInt(raw.b_height),
+              height: raw.b_height + "",        //bignum update parseInt(raw.b_height),
               previous_block: raw.b_previousBlock,   //wxm block database
               number_of_transactions: parseInt(raw.b_numberOfTransactions),   //wxm block database
-              total_amount: raw.b_totalAmount + "",  //Bignum update parseInt(raw.b_totalAmount),    //wxm block database
-              total_fee: raw.b_totalFee + "",    //Bignum update parseInt(raw.b_totalFee),   //wxm block database
-              reward: raw.b_reward + "",        //Bignum update parseInt(raw.b_reward),
+              total_amount: raw.b_totalAmount + "",  //bignum update parseInt(raw.b_totalAmount),    //wxm block database
+              total_fee: raw.b_totalFee + "",    //bignum update parseInt(raw.b_totalFee),   //wxm block database
+              reward: raw.b_reward + "",        //bignum update parseInt(raw.b_reward),
               payload_length: parseInt(raw.b_payloadLength), //wxm block database
               payload_hash: raw.b_payloadHash,   //wxm block database
               generator_public_key: raw.b_generatorPublicKey, //wxm block database
-              generator_id: Address.generateBase58CheckAddress(raw.b_generatorPublicKey),    //wxm block database
+              generator_id: address.generateBase58CheckAddress(raw.b_generatorPublicKey),    //wxm block database
               block_signature: raw.b_blockSignature,    //wxm block database
               confirmations: raw.b_confirmations
             };
-            block.totalForged = Bignum.plus(block.total_fee, block.reward);
+            block.totalForged = bignum.plus(block.total_fee, block.reward);
 
             return block;
         }
@@ -280,11 +283,11 @@ class Block
     async createBlock(data) {
         const transactions = this._sortTransactions(data.transactions);
 
-        const nextHeight = (data.previous_block) ? Bignum.plus(data.previous_block.height, 1).toString() : "1"; //Bignum update //wxm block database
+        const nextHeight = (data.previous_block) ? bignum.plus(data.previous_block.height, 1).toString() : "1"; //bignum update //wxm block database
         const reward = this._blockStatus.calcReward(nextHeight);
 
-        let totalFee = Bignum.new(0);
-        let totalAmount = Bignum.new(0);
+        let totalFee = bignum.new(0);
+        let totalAmount = bignum.new(0);
         let size = 0;
 
         const blockTransactions = [];
@@ -299,8 +302,8 @@ class Block
 
             size += bytes.length;
 
-            totalFee = Bignum.plus(totalFee, transaction.fee);
-            totalAmount = Bignum.plus(totalAmount, transaction.amount);
+            totalFee = bignum.plus(totalFee, transaction.fee);
+            totalAmount = bignum.plus(totalAmount, transaction.amount);
 
             blockTransactions.push(transaction);
             payloadHash.update(bytes);
@@ -337,7 +340,7 @@ class Block
      * @param {*} votes
      */
     async receiveNewBlock(block, votes) {
-        if (this.runtime.state != RuntimeState.Ready) {
+        if (this.runtime.state != runtimeState.Ready) {
             return;
         }
 
@@ -348,7 +351,7 @@ class Block
 
         await new Promise((resolve, reject) => {
             this.sequence.add(async cb => {
-                if (block.previous_block == this._lastBlock.id && Bignum.isEqualTo(Bignum.plus(this._lastBlock.height, 1), block.height)) {   //wxm block database
+                if (block.previous_block == this._lastBlock.id && bignum.isEqualTo(bignum.plus(this._lastBlock.height, 1), block.height)) {   //wxm block database
                     this.logger.info(`Received new block id: ${block.id} height: ${block.height} round: ${await this.runtime.round.calc(this.getLastBlock().height)} slot: ${this.runtime.slot.getSlotNumber(block.timestamp)} reward: ${this.getLastBlock().reward}`)
                     await this.processBlock(block, votes, true, true, true);
                     cb();
@@ -362,7 +365,7 @@ class Block
                     await this.runtime.delegate.fork(block, 5);
 
                     cb("Fork-2");
-                } else if (Bignum.isGreaterThan(block.height, Bignum.plus(this._lastBlock.height, 1))) {
+                } else if (bignum.isGreaterThan(block.height, bignum.plus(this._lastBlock.height, 1))) {
                     this.logger.info(`receive discontinuous block height ${block.height}`);
 
                     // modules.loader.startSyncBlocks();
@@ -382,7 +385,7 @@ class Block
     }
 
     async receiveVotes(votes) {
-        if (this.runtime.state != RuntimeState.Ready) {
+        if (this.runtime.state != runtimeState.Ready) {
             return;
         }
 
@@ -418,7 +421,7 @@ class Block
      * @param {*} propose
      */
     async receiveNewPropose(propose) {
-        if (this.runtime.state != RuntimeState.Ready) {
+        if (this.runtime.state != runtimeState.Ready) {
             return;
         }
 
@@ -436,9 +439,9 @@ class Block
                     return cb();
                 }
 
-                if (!Bignum.isEqualTo(propose.height, Bignum.plus(this._lastBlock.height, 1))) {
+                if (!bignum.isEqualTo(propose.height, bignum.plus(this._lastBlock.height, 1))) {
                     this.logger.debug("invalid propose height", propose);
-                    if (Bignum.isGreaterThan(propose.height, Bignum.plus(this._lastBlock.height, 1))) {
+                    if (bignum.isGreaterThan(propose.height, bignum.plus(this._lastBlock.height, 1))) {
                         this.logger.info(`receive discontinuous propose height ${propose.height}`);
                     }
                     return cb();
@@ -458,7 +461,7 @@ class Block
                     }
                     catch (err)
                     {
-                        this.logger.error(`Broadcast new propose failed: ${Utils.getErrorMsg(err)}`);
+                        this.logger.error(`Broadcast new propose failed: ${system.getErrorMsg(err)}`);
                     }
                 });
 
@@ -504,7 +507,7 @@ class Block
                             }
                             catch (err)
                             {
-                                this.logger.error(`Replay propose request failed: ${Utils.getErrorMsg(err)}`);
+                                this.logger.error(`Replay propose request failed: ${system.getErrorMsg(err)}`);
                             }
                         });
 
@@ -614,7 +617,7 @@ class Block
                                 }
                                 catch (err)
                                 {
-                                    this.logger.error(`Broadcast new block failed: ${Utils.getErrorMsg(err)}`);
+                                    this.logger.error(`Broadcast new block failed: ${system.getErrorMsg(err)}`);
                                 }
                             });
                         }
@@ -652,7 +655,7 @@ class Block
 
                 const redoTrs = unconfirmedTrs.filter((item) => {
                     if (!applyedTrsIdSet.has(item.id)) {
-                        if (item.type == AssetTypes.MULTISIGNATURE) {
+                        if (item.type == assetTypes.MULTISIGNATURE) {
                             var curTime = this.runtime.slot.getTime();  // (new Date()).getTime();
                             var pasttime = Math.ceil((curTime - item.timestamp) / this.config.settings.blockIntervalTime);
 
@@ -722,7 +725,7 @@ class Block
         }
 
         //Bignum update   block.height = privated.lastBlock.height + 1;
-        block.height = Bignum.plus(this._lastBlock.height, 1).toString();
+        block.height = bignum.plus(this._lastBlock.height, 1).toString();
 
         this.logger.debug(`verifyBlock, id: ${block.id}, h: ${block.height}`);
 
@@ -732,7 +735,7 @@ class Block
 
         const expectedReward = this._blockStatus.calcReward(block.height);
 
-        if (block.height != 1 && !Bignum.isEqualTo(expectedReward, block.reward)) {
+        if (block.height != 1 && !bignum.isEqualTo(expectedReward, block.reward)) {
             throw new Error("Invalid block reward");
         }
 
@@ -768,9 +771,9 @@ class Block
             throw new Error(`Invalid amount of block assets: ${block.id}`);
         }
 
-        let totalAmount = Bignum.new(0);
+        let totalAmount = bignum.new(0);
 
-        let totalFee = Bignum.new(0);
+        let totalFee = bignum.new(0);
 
         const payloadHash = crypto.createHash('sha256');
         const appliedTransactions = {};
@@ -790,25 +793,25 @@ class Block
 
             appliedTransactions[transaction.id] = transaction;
             payloadHash.update(bytes);
-            totalAmount = Bignum.plus(totalAmount, transaction.amount);
+            totalAmount = bignum.plus(totalAmount, transaction.amount);
 
-            totalFee = Bignum.plus(totalFee, transaction.fee);
+            totalFee = bignum.plus(totalFee, transaction.fee);
         }
 
         if (payloadHash.digest().toString('hex') !== block.payload_hash) {
             throw new Error(`Invalid payload hash: ${block.id}`)
         }
 
-        if (!Bignum.isEqualTo(totalAmount, block.total_amount)) {
+        if (!bignum.isEqualTo(totalAmount, block.total_amount)) {
             throw new Error(`Invalid total amount: ${block.id}`);
         }
 
-        if (!Bignum.isEqualTo(totalFee, block.total_fee)) {
+        if (!bignum.isEqualTo(totalFee, block.total_fee)) {
             throw new Error(`Invalid total fee: ${block.id}`);
         }
 
         if (votes) {
-            if (!Bignum.isEqualTo(block.height, votes.height)) {
+            if (!bignum.isEqualTo(block.height, votes.height)) {
                 throw new Error("Votes height is not correct");
             }
             if (block.id != votes.id) {
@@ -1049,7 +1052,7 @@ class Block
                 }
                 catch (err)
                 {
-                    this.logger.error(`Broadcast new propose failed: ${Utils.getErrorMsg(err)}`);
+                    this.logger.error(`Broadcast new propose failed: ${system.getErrorMsg(err)}`);
                 }
             });
         }
@@ -1067,8 +1070,8 @@ class Block
                 return a.type - b.type;
             }
 
-            if (!Bignum.isEqualTo(a.amount, b.amount)) {
-                if (Bignum.isGreaterThan(a.amount, b.amount)) {
+            if (!bignum.isEqualTo(a.amount, b.amount)) {
+                if (bignum.isGreaterThan(a.amount, b.amount)) {
                     return 1;
                 } else {
                     return -1;
@@ -1125,7 +1128,7 @@ class Block
                 this.logger.info(`begin to pop block ${oldLastBlock.height} ${oldLastBlock.id}`);
 
                 //wxm TODO 这里查询条件用的id = previous_block，但过来的previous_block肯定有问题怎么会查出来呢，所以改成按照height-1来查上一个，但不知道会不会有问题
-                var previousBlock = await this.runtime.dataquery.queryFullBlockData({height: Bignum.minus(oldLastBlock.height, 1).toString()}, 1, 0, [['height', 'asc']]);     //{id: oldLastBlock.previous_block}
+                var previousBlock = await this.runtime.dataquery.queryFullBlockData({height: bignum.minus(oldLastBlock.height, 1).toString()}, 1, 0, [['height', 'asc']]);     //{id: oldLastBlock.previous_block}
                 if (!previousBlock || !previousBlock.length) {
                     return cb('previousBlock is null');
                 }
@@ -1183,7 +1186,7 @@ class Block
     async deleteBlocksBefore(block) {
         var blocks = [];
 
-        while (Bignum.isLessThan(block.height, this._lastBlock.height)) {
+        while (bignum.isLessThan(block.height, this._lastBlock.height)) {
             blocks.unshift(this._lastBlock);
 
             var newLastBlock = await this._popLastBlock(this._lastBlock);
@@ -1430,4 +1433,4 @@ class Block
 
 }
 
-module.exports = Block;
+export default Block;

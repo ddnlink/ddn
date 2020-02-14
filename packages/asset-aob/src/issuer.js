@@ -1,5 +1,5 @@
 import Asset from '@ddn/asset-base';
-import { Bignum } from '@ddn/utils';
+import DdnUtils from '@ddn/utils';
 
 class Issuer extends Asset.Base {
     async propsMapping() {
@@ -24,7 +24,7 @@ class Issuer extends Asset.Base {
     }
 
     async calculateFee() {
-        return Bignum.multiply(100, this.tokenSetting.fixedPoint);
+        return DdnUtils.bignum.multiply(100, this.tokenSetting.fixedPoint);
     }
 
     async verify(trs, sender) {

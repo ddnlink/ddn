@@ -1,5 +1,5 @@
 import Asset from '@ddn/asset-base';
-import { Bignum, Address } from '@ddn/utils';
+import DdnUtils from '@ddn/utils';
 import daoUtil from './daoUtil';
 import crypto from 'crypto';
 import ed from 'ed25519';
@@ -53,7 +53,7 @@ class Confirmation extends Asset.Base {
         } else if (data[assetJsonName].state === 1) {
             trans.recipient_id = data[assetJsonName].received_address; // wxm block database
             // 此处交易金额=投稿的price
-            trans.amount = Bignum.new((data[assetJsonName].price || 0)).toString();
+            trans.amount = DdnUtils.bignum.new((data[assetJsonName].price || 0)).toString();
         }
         trans.asset[assetJsonName] = data[assetJsonName];
 
@@ -87,7 +87,7 @@ class Confirmation extends Asset.Base {
         }
 
         if (confirmation.state === 0) {
-            if (!Bignum.isZero(trs.amount)) {
+            if (!DdnUtils.bignum.isZero(trs.amount)) {
                 throw new Error('Invalid transaction amount');
             }
         }
@@ -96,7 +96,7 @@ class Confirmation extends Asset.Base {
             || confirmation.received_address.length > 128) {
             throw new Error('received_address is undefined or too long, don`t more than 128 characters.');
         }
-        if (!Address.isAddress(confirmation.received_address)) {
+        if (!DdnUtils.address.isAddress(confirmation.received_address)) {
             throw new Error("Invalid confirmation's received_address");
         }
 
@@ -104,7 +104,7 @@ class Confirmation extends Asset.Base {
             || confirmation.sender_address.length > 128) {
             throw new Error('senderAddress is undefined or too long, don`t more than 128 characters.');
         }
-        if (!Address.isAddress(confirmation.sender_address)) {
+        if (!DdnUtils.address.isAddress(confirmation.sender_address)) {
             throw new Error("Invalid confirmation's senderAddress");
         }
 
@@ -144,7 +144,7 @@ class Confirmation extends Asset.Base {
             }
             // 判断交易的价格是否和投稿的价值一致
             if (confirmation.state === 1) {
-                if (!Bignum.isEqualTo(trs.amount, contribution.price)) {
+                if (!DdnUtils.bignum.isEqualTo(trs.amount, contribution.price)) {
                     throw new Error(`The transaction's amount must be equal contribution's price: ${contribution.price}`);
                 }
             }

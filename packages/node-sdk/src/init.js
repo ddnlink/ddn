@@ -1,16 +1,16 @@
-var { AssetUtils } = require('@ddn/asset-base');
-var options = require('./options');
+import Asset from '@ddn/asset-base';
+import options from './options';
 
 // fixme: 已经修改为 config.js
-var assetPlugins = require('../config.asset');
+import assetPlugins from '../config.asset';
 
-module.exports = {
+export default {
 
-    init: function(nethash) {
+    init(nethash) {
         if (nethash) {
             options.set("nethash", nethash);
         }
 
-        AssetUtils.loadFromObject(assetPlugins);
+        Asset.Utils.loadFromObject(assetPlugins);
     }
-}
+};

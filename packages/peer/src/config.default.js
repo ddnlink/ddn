@@ -4,7 +4,8 @@
  *  Copyright (c) 2019 DDN FOUNDATION. All rights reserved.
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
-const Sequelize = require("sequelize");
+import Sequelize from "sequelize";
+
 const Op = Sequelize.Op;
 
 export default {

@@ -1,19 +1,16 @@
-"use strict";
+import DdnUtils from '@ddn/utils';
+import node from "./../variables.js";
 
-const { Bignum } = require('@ddn/utils');
-var node = require("./../variables.js"),
-    crypto = require("crypto");
+const account = node.randomAccount();
+const voterAccount = node.randomAccount();
 
-var account = node.randomAccount();
-var voterAccount = node.randomAccount();
-
-var delegate1;
-var delegate2;
+let delegate1;
+let delegate2;
 node.chai.config.includeStack = true;
 
-describe("POST /peer/transactions", function () {
+describe("POST /peer/transactions", () => {
 
-    before(function (done) {
+    before(done => {
         node.api.post("/accounts/open")
             .set("Accept", "application/json")
             .send({
@@ -21,16 +18,16 @@ describe("POST /peer/transactions", function () {
             })
             .expect("Content-Type", /json/)
             .expect(200)
-            .end(function (err, res) {
+            .end((err, {body}) => {
                 // console.log(JSON.stringify(res.body));
-                node.expect(res.body).to.have.property("success").to.be.true;
-                if (res.body.success == true && res.body.account != null) {
-                    voterAccount.address = res.body.account.address;
-                    voterAccount.publicKey = res.body.account.publicKey;
-                    voterAccount.balance = res.body.account.balance;
+                node.expect(body).to.have.property("success").to.be.true;
+                if (body.success == true && body.account != null) {
+                    voterAccount.address = body.account.address;
+                    voterAccount.publicKey = body.account.publicKey;
+                    voterAccount.balance = body.account.balance;
                 } else {
                     console.log("Unable to open voterAccount, tests will fail");
-                    console.log("Data sent: secret: " + voterAccount.password + " , secondSecret: " + voterAccount.secondPassword);
+                    console.log(`Data sent: secret: ${voterAccount.password} , secondSecret: ${voterAccount.secondPassword}`);
                     node.expect("TEST").to.equal("FAILED");
                 }
 
@@ -44,15 +41,15 @@ describe("POST /peer/transactions", function () {
                     })
                     .expect("Content-Type", /json/)
                     .expect(200)
-                    .end(function (err, res) {
-                        console.log(JSON.stringify(res.body));
-                        node.expect(res.body).to.have.property("success").to.be.true;
-                        node.expect(res.body).to.have.property("transactionId");
-                        if (res.body.success == true && res.body.transactionId != null) {
+                    .end((err, {body}) => {
+                        console.log(JSON.stringify(body));
+                        node.expect(body).to.have.property("success").to.be.true;
+                        node.expect(body).to.have.property("transactionId");
+                        if (body.success == true && body.transactionId != null) {
                             // node.expect(res.body.transactionId).to.be.above(1);
-                            node.expect(res.body.transactionId).to.be.a('string');
-                            //Bignum update voterAccount.amount += node.RANDOM_COIN;
-                            voterAccount.amount = Bignum.plus(voterAccount.amount, node.RANDOM_COIN).toString();
+                            node.expect(body.transactionId).to.be.a('string');
+                            //DdnUtils.bignum update voterAccount.amount += node.RANDOM_COIN;
+                            voterAccount.amount = DdnUtils.bignum.plus(voterAccount.amount, node.RANDOM_COIN).toString();
                         } else {
                             // console.log("Transaction failed or transactionId is null");
                             // console.log("Sent: secret: " + node.Gaccount.password + ", amount: " + node.RANDOM_COIN + ", recipientId: " + voterAccount.address);
@@ -63,18 +60,18 @@ describe("POST /peer/transactions", function () {
             });
     });
 
-    before(function (done) {
+    before(done => {
         node.api.get("/delegates/")
             .expect("Content-Type", /json/)
             .expect(200)
-            .end(function (err, res) {
-                node.expect(res.body).to.have.property("success").to.be.true;
-                delegate1 = res.body.delegates[0].public_key;
-                delegate2 = res.body.delegates[1].public_key;
-                var votes = [];
-                votes.push("+" + delegate1);
-                votes.push("+" + delegate2);
-                var transaction = node.ddn.vote.createVote(votes, voterAccount.password);
+            .end((err, {body}) => {
+                node.expect(body).to.have.property("success").to.be.true;
+                delegate1 = body.delegates[0].public_key;
+                delegate2 = body.delegates[1].public_key;
+                const votes = [];
+                votes.push(`+${delegate1}`);
+                votes.push(`+${delegate2}`);
+                const transaction = node.ddn.vote.createVote(votes, voterAccount.password);
                 // console.log('createVote transaction', transaction);
                 if (transaction !== null) {
                     node.peer.post("/transactions")
@@ -83,14 +80,14 @@ describe("POST /peer/transactions", function () {
                         .set("nethash", node.config.nethash)
                         .set("port", node.config.port)
                         .send({
-                            transaction: transaction
+                            transaction
                         })
                         .expect("Content-Type", /json/)
                         .expect(200)
-                        .end(function (err, res) {
+                        .end((err, {body}) => {
                             console.log("Sent vote fix for delegates");
-                            console.log("Sent: " + JSON.stringify(transaction) + " Got reply: " + JSON.stringify(res.body));
-                            node.expect(res.body).to.have.property("success").to.be.true;
+                            console.log(`Sent: ${JSON.stringify(transaction)} Got reply: ${JSON.stringify(body)}`);
+                            node.expect(body).to.have.property("success").to.be.true;
                             done();
                         });
                 } else {
@@ -99,63 +96,63 @@ describe("POST /peer/transactions", function () {
             });
     });
 
-    it("Voting twice for a delegate. Should fail", function (done) {
-        node.onNewBlock(function (err) {
-            var transaction = node.ddn.vote.createVote(["+"+delegate1], voterAccount.password);
+    it("Voting twice for a delegate. Should fail", done => {
+        node.onNewBlock(err => {
+            const transaction = node.ddn.vote.createVote([`+${delegate1}`], voterAccount.password);
             node.peer.post("/transactions")
                 .set("Accept", "application/json")
                 .set("version", node.version)
                 .set("nethash", node.config.nethash)
                 .set("port", node.config.port)
                 .send({
-                    transaction: transaction
+                    transaction
                 })
                 .expect("Content-Type", /json/)
                 .expect(200)
-                .end(function (err, res) {
+                .end((err, {body}) => {
                     // console.log("Sending POST /transactions with data: " + JSON.stringify(transaction) + " Got reply: " + JSON.stringify(res.body));
-                    node.expect(res.body).to.have.property("success").to.be.false;
+                    node.expect(body).to.have.property("success").to.be.false;
                     done();
                 });
         });
     });
 
-    it("Removing votes from a delegate. Should be ok", function (done) {
-        var transaction = node.ddn.vote.createVote(["-"+delegate1], voterAccount.password);
+    it("Removing votes from a delegate. Should be ok", done => {
+        const transaction = node.ddn.vote.createVote([`-${delegate1}`], voterAccount.password);
         node.peer.post("/transactions")
             .set("Accept", "application/json")
             .set("version",node.version)
             .set("nethash", node.config.nethash)
             .set("port",node.config.port)
             .send({
-                transaction: transaction
+                transaction
             })
             .expect("Content-Type", /json/)
             .expect(200)
-            .end(function (err, res) {
+            .end((err, {body}) => {
                 // console.log(JSON.stringify(res.body));
-                node.expect(res.body).to.have.property("success").to.be.true;
+                node.expect(body).to.have.property("success").to.be.true;
                 done();
             });
     });
 
-    it("Removing votes from a delegate and then voting again. Should fail", function (done) {
-        node.onNewBlock(function (err) {
-            var transaction = node.ddn.vote.createVote(["-"+delegate2], voterAccount.password);
+    it("Removing votes from a delegate and then voting again. Should fail", done => {
+        node.onNewBlock(err => {
+            const transaction = node.ddn.vote.createVote([`-${delegate2}`], voterAccount.password);
             node.peer.post("/transactions")
                 .set("Accept", "application/json")
                 .set("version", node.version)
                 .set("nethash", node.config.nethash)
                 .set("port", node.config.port)
                 .send({
-                    transaction: transaction
+                    transaction
                 })
                 .expect("Content-Type", /json/)
                 .expect(200)
-                .end(function (err, res) {
+                .end((err, {body}) => {
                     // console.log("Sent POST /transactions with data:" + JSON.stringify(transaction) + "! Got reply:" + JSON.stringify(res.body));
-                    node.expect(res.body).to.have.property("success").to.be.true;
-                    var transaction2 = node.ddn.vote.createVote(["+"+delegate2], voterAccount.password);
+                    node.expect(body).to.have.property("success").to.be.true;
+                    const transaction2 = node.ddn.vote.createVote([`+${delegate2}`], voterAccount.password);
                     node.peer.post("/transactions")
                         .set("Accept", "application/json")
                         .set("version", node.version)
@@ -166,9 +163,9 @@ describe("POST /peer/transactions", function () {
                         })
                         .expect("Content-Type", /json/)
                         .expect(200)
-                        .end(function (err, res) {
+                        .end((err, {body}) => {
                             // console.log("Sent POST /transactions with data: " + JSON.stringify(transaction2) + "!. Got reply: " + res.body);
-                            node.expect(res.body).to.have.property("success").to.be.false;
+                            node.expect(body).to.have.property("success").to.be.false;
                             done();
                         });
                 });
@@ -176,7 +173,7 @@ describe("POST /peer/transactions", function () {
     });
 
     // Not right test, because sometimes new block comes and we don't have time to vote
-    it("Registering a new delegate. Should be ok", function (done) {
+    it("Registering a new delegate. Should be ok", done => {
         node.api.post("/accounts/open")
             .set("Accept", "application/json")
             .set("version",node.version)
@@ -187,10 +184,10 @@ describe("POST /peer/transactions", function () {
             })
             .expect("Content-Type", /json/)
             .expect(200)
-            .end(function (err, res) {
-                if (res.body.success == true && res.body.account != null){
-                    account.address = res.body.account.address;
-                    account.publicKey = res.body.account.publicKey;
+            .end((err, {body}) => {
+                if (body.success == true && body.account != null){
+                    account.address = body.account.address;
+                    account.publicKey = body.account.publicKey;
                 } else {
                     // console.log("Open account failed or account object is null");
                     node.expect(true).to.equal(false);
@@ -204,30 +201,30 @@ describe("POST /peer/transactions", function () {
                     .send({
                         secret: node.Gaccount.password,
 
-                        //Bignum update amount: node.Fees.delegateRegistrationFee + node.Fees.voteFee,
-                        amount: Bignum.plus(node.Fees.delegateRegistrationFee, node.Fees.voteFee),
+                        //DdnUtils.bignum update amount: node.Fees.delegateRegistrationFee + node.Fees.voteFee,
+                        amount: DdnUtils.bignum.plus(node.Fees.delegateRegistrationFee, node.Fees.voteFee),
 
                         recipientId: account.address
                     })
                     .expect("Content-Type", /json/)
                     .expect(200)
-                    .end(function (err, res) {
-                        node.onNewBlock(function (err) {
+                    .end((err, res) => {
+                        node.onNewBlock(err => {
                             node.expect(err).to.be.not.ok;
                             account.username = node.randomDelegateName().toLowerCase();
-                            var transaction = node.ddn.delegate.createDelegate(account.username, account.password);
+                            const transaction = node.ddn.delegate.createDelegate(account.username, account.password);
                             node.peer.post("/transactions")
                                 .set("Accept", "application/json")
                                 .set("version",node.version)
                                 .set("nethash", node.config.nethash)
                                 .set("port",node.config.port)
                                 .send({
-                                    transaction: transaction
+                                    transaction
                                 })
                                 .expect("Content-Type", /json/)
                                 .expect(200)
-                                .end(function (err, res) {
-                                    node.expect(res.body).to.have.property("success").to.be.true;
+                                .end((err, {body}) => {
+                                    node.expect(body).to.have.property("success").to.be.true;
                                     done();
                                 });
                         });
@@ -235,9 +232,9 @@ describe("POST /peer/transactions", function () {
             });
     });
 
-    it("Voting for a delegate. Should be ok", function (done) {
-        var transaction = node.ddn.vote.createVote(["+" + account.publicKey], account.password);
-        node.onNewBlock(function (err) {
+    it("Voting for a delegate. Should be ok", done => {
+        const transaction = node.ddn.vote.createVote([`+${account.publicKey}`], account.password);
+        node.onNewBlock(err => {
             node.expect(err).to.be.not.ok;
             node.peer.post("/transactions")
                 .set("Accept", "application/json")
@@ -245,12 +242,12 @@ describe("POST /peer/transactions", function () {
                 .set("nethash", node.config.nethash)
                 .set("port",node.config.port)
                 .send({
-                    transaction: transaction
+                    transaction
                 })
                 .expect("Content-Type", /json/)
                 .expect(200)
-                .end(function (err, res) {
-                    node.expect(res.body).to.have.property("success").to.be.true;
+                .end((err, {body}) => {
+                    node.expect(body).to.have.property("success").to.be.true;
                     done();
                 });
         });

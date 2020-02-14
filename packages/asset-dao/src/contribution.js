@@ -1,9 +1,9 @@
 import Asset from '@ddn/asset-base';
-import { Bignum, Address } from '@ddn/utils';
-import daoUtil from './daoUtil.js';
-import ByteBuffer from 'bytebuffer';
+import DdnUtils from '@ddn/utils';
 import crypto from 'crypto';
 import ed from 'ed25519';
+import daoUtil from './daoUtil.js';
+import ByteBuffer from 'bytebuffer';
 
 /**
  * 贡献（投稿）交易
@@ -58,7 +58,7 @@ class Contribution extends Asset.Base {
         if (trs.recipient_id) {
             throw new Error('Invalid recipient');
         }
-        if (!Bignum.isZero(trs.amount)) {
+        if (!DdnUtils.bignum.isZero(trs.amount)) {
             throw new Error('Invalid transaction amount');
         }
         if (!trs.asset || !contribution) {
@@ -71,14 +71,14 @@ class Contribution extends Asset.Base {
             || contribution.received_address.length > 128) {
             throw new Error('received_address is undefined or too long, don`t more than 128 characters.');
         }
-        if (!Address.isAddress(contribution.received_address)) {
+        if (!DdnUtils.address.isAddress(contribution.received_address)) {
             throw new Error("Invalid contribution's received_address");
         }
         if (!contribution.sender_address
             || contribution.sender_address.length > 128) {
             throw new Error('sender_address is undefined or too long, don`t more than 128 characters.');
         }
-        if (!Address.isAddress(contribution.sender_address)) {
+        if (!DdnUtils.address.isAddress(contribution.sender_address)) {
             throw new Error("Invalid contribution's sender_address");
         }
         if (!contribution.url
@@ -86,7 +86,7 @@ class Contribution extends Asset.Base {
             throw new Error('url is undefined or too long, don`t more than 256 characters.');
         }
 
-        if (Bignum.isNaN(contribution.price)) {
+        if (DdnUtils.bignum.isNaN(contribution.price)) {
             throw new Error("Invalid contribution's price.");
         }
 

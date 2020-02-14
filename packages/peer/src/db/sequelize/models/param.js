@@ -1,6 +1,6 @@
-const Sequelize = require('sequelize');
+import Sequelize from 'sequelize';
 
-module.exports = function(connection) {
+export default connection => {
     return connection.define("param", {
         name: {
             type: Sequelize.STRING(32),
@@ -13,4 +13,4 @@ module.exports = function(connection) {
     }, {
         timestamps: false
     });
-}
+};

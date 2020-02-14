@@ -1,4 +1,4 @@
-var _dao;
+let _dao;
 
 class DBParams {
 
@@ -10,8 +10,8 @@ class DBParams {
     static set(name, value, dbTrans, cb) {
         if (_dao) {
             _dao.insertOrUpdate("param", {
-                name: name,
-                value: value
+                name,
+                value
             }, dbTrans, cb);
         } else {
             if (typeof(cb) == "function") {
@@ -45,7 +45,7 @@ class DBParams {
     static remove(name, cb) {
         if (_dao) {
             _dao.remove("param", {
-                name: name
+                name
             }, (err, result) => {
                 if (err) {
                     cb(err);
@@ -62,4 +62,4 @@ class DBParams {
 
 }
 
-module.exports = DBParams;
+export default DBParams;

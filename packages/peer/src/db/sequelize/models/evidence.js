@@ -1,13 +1,13 @@
 /*
  * @Author: shuai 
  * @Date: 2018-11-14 13:32:47 
- * @Last Modified by: shuai
- * @Last Modified time: 2018-11-14 14:33:35
+ * @Last Modified by: mikey.zhaopeng
+ * @Last Modified time: 2020-02-13 22:46:19
  */
 
-const Sequelize = require('sequelize');
+import Sequelize from 'sequelize';
 
-module.exports = function (connection) {
+export default connection => {
 	return connection.define("evidence", {
 		ipid: {
 			type: Sequelize.STRING(64),
@@ -61,4 +61,4 @@ module.exports = function (connection) {
 			}
 		]
 	});
-}
+};

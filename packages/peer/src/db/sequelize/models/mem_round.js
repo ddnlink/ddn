@@ -1,6 +1,6 @@
-const Sequelize = require('sequelize');
+import Sequelize from 'sequelize';
 
-module.exports = function(connection) {
+export default connection => {
     return connection.define("mem_round", {
         round: {
             type: Sequelize.INTEGER
@@ -22,4 +22,4 @@ module.exports = function(connection) {
         freezeTableName: true,
         tableName: 'mem_round',
     });
-}
+};

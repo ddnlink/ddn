@@ -1,6 +1,6 @@
-const crypto = require('crypto');
-const ed = require('ed25519');
-const { Bignum, AssetTypes } = require('@ddn/utils');
+import crypto from 'crypto';
+import ed from 'ed25519';
+import DdnUtils from '@ddn/utils';
 
 /**
  * RootRouter接口
@@ -14,8 +14,8 @@ class RootRouter {
     }
 
     async get(req) {
-        var query = Object.assign({}, req.body, req.query);
-        var validateErrors = await this.ddnSchema.validate({
+        const query = Object.assign({}, req.body, req.query);
+        const validateErrors = await this.ddnSchema.validate({
             type: "object",
             properties: {
                 blockId: {
@@ -82,8 +82,8 @@ class RootRouter {
             throw new Error(validateErrors[0].message);
         }
 
-        var where = {};
-        var andWheres = [];
+        const where = {};
+        const andWheres = [];
         if (query.blockId) {
             andWheres.push({
                 "block_id": query.blockId
@@ -149,15 +149,15 @@ class RootRouter {
             where["$and"] = andWheres;
         }
 
-        var limit = query.limit || 100;
-        var offset = query.offset || 0;
+        const limit = query.limit || 100;
+        const offset = query.offset || 0;
 
-        var data =  await this.runtime.dataquery.queryFullTransactionData(where, limit, offset, null, true);
+        const data =  await this.runtime.dataquery.queryFullTransactionData(where, limit, offset, null, true);
 
-        var transactions = [];
-        for (var i = 0; i < data.transactions.length; i++) {
-            var row = data.transactions[i];
-            var trs = await this.runtime.transaction.serializeDbData2Transaction(row);
+        const transactions = [];
+        for (let i = 0; i < data.transactions.length; i++) {
+            const row = data.transactions[i];
+            const trs = await this.runtime.transaction.serializeDbData2Transaction(row);
             transactions.push(trs);
         }
 
@@ -169,8 +169,8 @@ class RootRouter {
     }
 
     async getGet(req) {
-        var query = Object.assign({}, req.body, req.query);
-        var validateErrors = await this.ddnSchema.validate({
+        const query = Object.assign({}, req.body, req.query);
+        const validateErrors = await this.ddnSchema.validate({
             type: 'object',
             properties: {
                 id: {
@@ -184,12 +184,12 @@ class RootRouter {
             throw new Error(validateErrors[0].message);
         }
 
-        var rows =  await this.runtime.dataquery.queryFullTransactionData({id: query.id}, 1, 0, null);
+        const rows =  await this.runtime.dataquery.queryFullTransactionData({id: query.id}, 1, 0, null);
         if (rows && rows.length) {
-            var result = [];
-            for (var i = 0; i < rows.length; i++) {
-                var row = rows[i];
-                var trs = await this.runtime.transaction.serializeDbData2Transaction(row);
+            const result = [];
+            for (let i = 0; i < rows.length; i++) {
+                const row = rows[i];
+                const trs = await this.runtime.transaction.serializeDbData2Transaction(row);
                 result.push(trs);
             }
 
@@ -203,8 +203,8 @@ class RootRouter {
     }
 
     async put(req) {
-        var body = req.body;
-        var validateErrors = await this.ddnSchema.validate({
+        const body = req.body;
+        const validateErrors = await this.ddnSchema.validate({
             type: "object",
             properties: {
                 secret: {
@@ -243,8 +243,8 @@ class RootRouter {
             throw new Error(validateErrors[0].message);
         }
 
-        var hash = crypto.createHash('sha256').update(body.secret, 'utf8').digest();
-        var keypair = ed.MakeKeypair(hash);
+        const hash = crypto.createHash('sha256').update(body.secret, 'utf8').digest();
+        const keypair = ed.MakeKeypair(hash);
         if (body.publicKey) {
             if (keypair.publicKey.toString('hex') != body.publicKey) {
                 throw new Error("Invalid passphrase");
@@ -253,7 +253,7 @@ class RootRouter {
 
         return new Promise((resolve, reject) => {
             this.balancesSequence.add(async (cb) => {
-                var recipient;
+                let recipient;
                 try
                 {
                     recipient = await this.runtime.account.getAccountByAddress(body.recipientId);
@@ -263,7 +263,7 @@ class RootRouter {
                     return cb(err);
                 }
 
-                var recipientId = recipient ? recipient.address : body.recipientId;
+                const recipientId = recipient ? recipient.address : body.recipientId;
                 if (!recipientId) {
                     return cb("Recipient not found");
                 }
@@ -287,11 +287,11 @@ class RootRouter {
                         return cb("Account does not have multisignatures enabled");
                     }
 
-                    if (account.multisignatures.indexOf(keypair.publicKey.toString('hex')) < 0) {
+                    if (!account.multisignatures.includes(keypair.publicKey.toString('hex'))) {
                         return cb("Account does not belong to multisignature group");
                     }
 
-                    var requester;
+                    let requester;
                     try
                     {
                         requester = await this.runtime.account.getAccountByPublicKey(keypair.publicKey);
@@ -305,7 +305,7 @@ class RootRouter {
                         return cb("Invalid requester");
                     }
 
-                    if (requester.second_signature && !Bignum.isEqualTo(requester.second_signature, 0) && !body.secondSecret) {  //wxm block database
+                    if (requester.second_signature && !DdnUtils.bignum.isEqualTo(requester.second_signature, 0) && !body.secondSecret) {  //wxm block database
                         return cb("Invalid second passphrase");
                     }
 
@@ -314,7 +314,7 @@ class RootRouter {
                     }
 
                     let second_keypair = null;
-                    if (requester.second_signature && !Bignum.isEqualTo(requester.second_signature, 0)) {    //wxm block database
+                    if (requester.second_signature && !DdnUtils.bignum.isEqualTo(requester.second_signature, 0)) {    //wxm block database
                         var secondHash = crypto.createHash('sha256').update(body.secondSecret, 'utf8').digest();
                         second_keypair = ed.MakeKeypair(secondHash);
                     }
@@ -322,7 +322,7 @@ class RootRouter {
                     try
                     {
                         var transaction = await this.runtime.transaction.create({
-                            type: AssetTypes.TRANSFER,
+                            type: DdnUtils.assetTypes.TRANSFER,
                             amount: body.amount,
                             sender: account,
                             recipient_id: recipientId,
@@ -367,7 +367,7 @@ class RootRouter {
                     try
                     {
                         var transaction = await this.runtime.transaction.create({
-                            type: AssetTypes.TRANSFER,
+                            type: DdnUtils.assetTypes.TRANSFER,
                             amount: body.amount,
                             sender: account,
                             recipient_id: recipientId,
@@ -401,15 +401,15 @@ class RootRouter {
      * 返回值:{ "success": true,"data": [{ "time": "2019-6-4", "count": 0 }]}
      */
     async getSpell(req) {
-      var query = req.query;
+      const query = req.query;
       // 将时间换算成对应格式
       const formatDate = (date) => {
         const y = date.getFullYear();
         let m = date.getMonth() + 1;
-        m = m < 10 ? ('0' + m) : m;
+        m = m < 10 ? (`0${m}`) : m;
         let d = date.getDate();
-        d = d < 10 ? ('0' + d) : d;
-        return y + '-' + m + '-' + d;
+        d = d < 10 ? (`0${d}`) : d;
+        return `${y}-${m}-${d}`;
       }
       if (!query.startTime) {
         query.startTime = formatDate(new Date(new Date().getTime() - (1000 * 60 * 60 * 24 * 7)));
@@ -434,8 +434,8 @@ class RootRouter {
       const d2Ms = d2.getTime();
       // 定义转换格式的方法
       const getYMD = (date) => {
-        let retDate = date.getFullYear() + '-'; // 获取年份。
-        retDate += date.getMonth() + 1 + '-'; // 获取月份。
+        let retDate = `${date.getFullYear()}-`; // 获取年份。
+        retDate += `${date.getMonth() + 1}-`; // 获取月份。
         retDate += date.getDate(); // 获取日。
         return retDate; // 返回日期。
       }
@@ -478,4 +478,4 @@ class RootRouter {
 
 }
 
-module.exports = RootRouter;
+export default RootRouter;

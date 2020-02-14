@@ -5,7 +5,7 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-module.exports = {
+export default {
   reverse(diff) {
     const copyDiff = diff.slice();
     for (let i = 0; i < copyDiff.length; i++) {
@@ -52,4 +52,4 @@ module.exports = {
     }
     return res;
   }
-}
+};

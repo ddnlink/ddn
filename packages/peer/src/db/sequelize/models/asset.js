@@ -1,13 +1,13 @@
 /*
  * @Author: shuai 
  * @Date: 2018-11-14 13:32:47 
- * @Last Modified by: shuai
- * @Last Modified time: 2018-11-14 14:19:42
+ * @Last Modified by: mikey.zhaopeng
+ * @Last Modified time: 2020-02-13 22:44:00
  */
 
-const Sequelize = require('sequelize');
+import Sequelize from 'sequelize';
 
-module.exports = function (connection) {
+export default connection => {
 	return connection.define("asset", {
 		name: {
 			type: Sequelize.STRING(22),
@@ -65,4 +65,4 @@ module.exports = function (connection) {
 			}
 		]
 	});
-}
+};

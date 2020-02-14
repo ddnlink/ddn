@@ -2,10 +2,11 @@
  * Peer Sync
  * wangxm   2019-01-15
  */
-const ip = require("ip");
-const { Bignum, Utils } = require('@ddn/utils');
+import ip from "ip";
 
-var _singleton;
+import DdnUtils from '@ddn/utils';
+
+let _singleton;
 
 class PeerSync {
 
@@ -22,7 +23,7 @@ class PeerSync {
     }
 
     async trySyncBlockData() {
-        var remotePeerHeight = await this.runtime.peer.request({api: "/height"});
+        let remotePeerHeight = await this.runtime.peer.request({api: "/height"});
         if (remotePeerHeight == false) {
             return false;
         }
@@ -32,7 +33,7 @@ class PeerSync {
         if (remotePeerHeight && remotePeerHeight.body) {
             this.logger.info(`Check blockchain on ${peerStr}`);
 
-            var validateErrors = await this.ddnSchema.validate({
+            const validateErrors = await this.ddnSchema.validate({
                 type: "object",
                 properties: {
                     "height": {
@@ -44,9 +45,9 @@ class PeerSync {
                 this.logger.log(`Failed to parse blockchain height: ${peerStr}\n${validateErrors[0].message}`);
             }
 
-            if (Bignum.isLessThan(this.runtime.block.getLastBlock().height, remotePeerHeight.body.height)) {
-                var syncLastBlock = null;
-                var lastBlock = this.runtime.block.getLastBlock();
+            if (DdnUtils.bignum.isLessThan(this.runtime.block.getLastBlock().height, remotePeerHeight.body.height)) {
+                let syncLastBlock = null;
+                const lastBlock = this.runtime.block.getLastBlock();
                 if (lastBlock.id != this.genesisblock.id) {
                     syncLastBlock = await this._addLackBlocks(remotePeerHeight.peer);
                 } else {
@@ -85,9 +86,9 @@ class PeerSync {
                     reject(err ? err.toString() : `Can't get sequence before: ${height}`)
                 }
 
-                var firstHeight = "";
-                var ids = "";
-                for (var i = 0; i < rows.length; i++) {
+                let firstHeight = "";
+                let ids = "";
+                for (let i = 0; i < rows.length; i++) {
                     firstHeight = rows[i].height;
                     if (ids.length > 0) {
                     ids += ",";
@@ -96,25 +97,25 @@ class PeerSync {
                 }
 
                 resolve({
-                    firstHeight: firstHeight,
-                    ids: ids
+                    firstHeight,
+                    ids
                 });
             })
         });
     }
 
     async _addLackBlocks(peer) {
-        var peerStr = peer ? `${ip.fromLong(peer.ip)}:${peer.port}` : 'unknown';
+        const peerStr = peer ? `${ip.fromLong(peer.ip)}:${peer.port}` : 'unknown';
         this.logger.info(`Looking for common block with ${peerStr}`);
 
-        var lastBlock = this.runtime.block.getLastBlock();
+        const lastBlock = this.runtime.block.getLastBlock();
 
-        var lastLackBlock = null;
-        var currProcessHeight = lastBlock.height;
-        while (!lastLackBlock && Bignum.isGreaterThan(currProcessHeight, 1)) {
-            var data = await this._getIdSequence(currProcessHeight);
+        let lastLackBlock = null;
+        let currProcessHeight = lastBlock.height;
+        while (!lastLackBlock && DdnUtils.bignum.isGreaterThan(currProcessHeight, 1)) {
+            const data = await this._getIdSequence(currProcessHeight);
 
-            var maxHeight = currProcessHeight;
+            const maxHeight = currProcessHeight;
             currProcessHeight = data.firstHeight;
 
             var result = await this.runtime.peer.request({peer, api: `/blocks/common?ids=${data.ids}&max=${maxHeight}&min=${currProcessHeight}`});
@@ -145,11 +146,11 @@ class PeerSync {
         }
 
         this.logger.info(`Found common block ${lastLackBlock.id} (at ${lastLackBlock.height}) with peer ${peerStr}, last block height is ${lastBlock.height}`);
-        //Bignum update const toRemove = lastBlock.height - commonBlock.height;
-        const toRemove = Bignum.minus(lastBlock.height, lastLackBlock.height);
+        //DdnUtils.bignum update const toRemove = lastBlock.height - commonBlock.height;
+        const toRemove = DdnUtils.bignum.minus(lastBlock.height, lastLackBlock.height);
 
-        //Bignum update if (toRemove >= 5) {
-        if (Bignum.isGreaterThanOrEqualTo(toRemove, 5)) {
+        //DdnUtils.bignum update if (toRemove >= 5) {
+        if (DdnUtils.bignum.isGreaterThanOrEqualTo(toRemove, 5)) {
             this.logger.error("long fork, ban 60 min", peerStr);
             this.runtime.peer.changeState(peer.ip, peer.port, 0, 3600);
             return;
@@ -172,12 +173,12 @@ class PeerSync {
                 const backRound = await this.runtime.round.calc(lastLackBlock.height);
                 let backHeight = lastLackBlock.height;
 
-                if (currentRound != backRound || Bignum.isEqualTo(Bignum.modulo(lastBlock.height, this.config.settings.delegateNumber), 0)) {
+                if (currentRound != backRound || DdnUtils.bignum.isEqualTo(DdnUtils.bignum.modulo(lastBlock.height, this.config.settings.delegateNumber), 0)) {
                     if (backRound == 1) {
                         backHeight = 1;
                     } else {
-                        //Bignum update backHeight = backHeight - backHeight % 101;
-                        backHeight = Bignum.minus(backHeight, Bignum.modulo(backHeight, this.config.settings.delegateNumber));
+                        //DdnUtils.bignum update backHeight = backHeight - backHeight % 101;
+                        backHeight = DdnUtils.bignum.minus(backHeight, DdnUtils.bignum.modulo(backHeight, this.config.settings.delegateNumber));
                     }
 
                     var result = await this.runtime.block.querySimpleBlockData({ height: backHeight.toString() });
@@ -194,7 +195,7 @@ class PeerSync {
                 await this.runtime.block.deleteBlocksBefore(lastLackBlock);
                 await this.runtime.round.directionSwap('forward', lastBlock);
             } catch (err) {
-                this.logger.error(`Failed to rollback blocks before ${lastLackBlock.height}`, Utils.getErrorMsg(err));
+                this.logger.error(`Failed to rollback blocks before ${lastLackBlock.height}`, DdnUtils.system.getErrorMsg(err));
                 process.exit(1);
                 return;
             }
@@ -226,17 +227,17 @@ class PeerSync {
     }
 
     async _cloneBlocksFromPeer(peer, blockId) {
-        var peerStr = peer ? `${ip.fromLong(peer.ip)}:${peer.port}` : 'unknown';
+        const peerStr = peer ? `${ip.fromLong(peer.ip)}:${peer.port}` : 'unknown';
         if (blockId == this.genesisblock.id) {
             this.logger.debug(`Loading blocks from genesis from ${peerStr}`);
         }
 
-        var lastClonedBlock = null;
-        var queryBlockId = blockId;
+        let lastClonedBlock = null;
+        let queryBlockId = blockId;
 
         // for (var i = 0; i < 1; i++) {
         while (true) {
-            var data = await this.runtime.peer.request({peer, api: `/blocks?lastBlockId=${queryBlockId}&limit=200`});
+            const data = await this.runtime.peer.request({peer, api: `/blocks?lastBlockId=${queryBlockId}&limit=200`});
 
             let blocks = data.body.blocks;
 
@@ -245,7 +246,7 @@ class PeerSync {
             //     blocks = library.dbLite.parseCSV(blocks);
             // }
 
-            var validateErrors = await this.ddnSchema.validate({
+            const validateErrors = await this.ddnSchema.validate({
                 type: "array"
             }, blocks);
             if (validateErrors) {
@@ -282,8 +283,8 @@ class PeerSync {
                 break;
             } else {
                 this.logger.log(`Loading ${blocks.length} blocks from`, peerStr);
-                for (var j = 0; j < blocks.length; j++) {
-                    var block = blocks[j];
+                for (let j = 0; j < blocks.length; j++) {
+                    let block = blocks[j];
 
                     try {
                         block = await this.runtime.block.objectNormalize(block);
@@ -315,14 +316,14 @@ class PeerSync {
     }
 
     async trySyncSignatures() {
-        var data;
+        let data;
         try
         {
             data = await this.runtime.peer.request({api: "/signatures"});
         }
         catch (err)
         {
-            this.logger.error("Sync Signatures has error: " + err);
+            this.logger.error(`Sync Signatures has error: ${err}`);
             return;
         }
 
@@ -330,7 +331,7 @@ class PeerSync {
             return;
         }
 
-        var validateErrors = await this.ddnSchema.validate({
+        const validateErrors = await this.ddnSchema.validate({
             type: "object",
             properties: {
                 signatures: {
@@ -347,10 +348,10 @@ class PeerSync {
 
         return new Promise((resolve, reject) => {
             this.sequence.add(async (cb) => {
-                for (var i = 0; i < data.body.signatures.length; i++) {
-                    var signature = data.body.signatures[i];
-                    for (var j = 0; j < signature.signatures; j++) {
-                        var s = signature.signatures[j];
+                for (let i = 0; i < data.body.signatures.length; i++) {
+                    const signature = data.body.signatures[i];
+                    for (let j = 0; j < signature.signatures; j++) {
+                        const s = signature.signatures[j];
                         try
                         {
                             await this.runtime.multisignature.processSignature({
@@ -372,18 +373,18 @@ class PeerSync {
                     resolve();
                 }
             });
-        })
+        });
     }
 
     async trySyncUnconfirmedTransactions() {
-        var data;
+        let data;
         try
         {
             data = await this.runtime.peer.request({api: "/transactions"});
         }
         catch (err)
         {
-            this.logger.error("Sync UnconfirmedTransactions has error: " + err);
+            this.logger.error(`Sync UnconfirmedTransactions has error: ${err}`);
             return;
         }
 
@@ -391,7 +392,7 @@ class PeerSync {
             return;
         }
 
-        var validateErrors = await this.ddnSchema.validate({
+        const validateErrors = await this.ddnSchema.validate({
             type: "object",
             properties: {
                 transactions: {
@@ -448,4 +449,4 @@ class PeerSync {
 
 }
 
-module.exports = PeerSync;
+export default PeerSync;

@@ -1,17 +1,17 @@
-import AssetTypes from './asset-types';
-import RuntimeState from './runtime-states';
-import Address from './address';
-import Amount from './amount';
-import LimitCache from './limit-cache';
-import Utils from './utils';
-import Bignum from './bignumber';
+import assetTypes from './asset-types';
+import runtimeState from './runtime-states';
+import address from './address';
+import amount from './amount';
+import limitCache from './limit-cache';
+import system from './system';
+import bignum from './bignumber';
 
-export {
-    AssetTypes,
-    RuntimeState,
-    Address,
-    Amount,
-    LimitCache,
-    Utils,
-    Bignum
+export default {
+    assetTypes,
+    runtimeState,
+    address,
+    amount,
+    limitCache,
+    system,
+    bignum
 };

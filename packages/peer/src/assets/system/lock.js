@@ -4,7 +4,9 @@
  *  Copyright (c) 2019 DDN Foundation. All rights reserved.
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
-const { Bignum } = require('@ddn/utils');
+import DdnUtils from '@ddn/utils';
+
+const { bignum } = DdnUtils;
 
 class Lock {
 
@@ -13,8 +15,8 @@ class Lock {
         this._context = context;
 	}
 
-	async create(data, trs) {
-		trs.args = data.args;
+	async create({args}, trs) {
+		trs.args = args;
 		return trs;
 	}
 
@@ -30,18 +32,18 @@ class Lock {
             throw new Error('Invalid lock height');
         }
 
-		//Bignum update const lockHeight = Number(trs.args[0]);
+		//bignum update const lockHeight = Number(trs.args[0]);
 		const lockHeight = trs.args[0];
 
 		const lastBlock = this.runtime.block.getLastBlock();
 
-		//Bignum update if (isNaN(lockHeight) || lockHeight <= lastBlock.height)
-		if (Bignum.isNaN(lockHeight) || Bignum.isLessThanOrEqualTo(lockHeight, lastBlock.height)) {
+		//bignum update if (isNaN(lockHeight) || lockHeight <= lastBlock.height)
+		if (bignum.isNaN(lockHeight) || bignum.isLessThanOrEqualTo(lockHeight, lastBlock.height)) {
             throw new Error('Invalid lock height');
         }
 
-		//Bignum update if (sender.lockHeight && lastBlock.height + 1 <= sender.lockHeight)
-		if (sender.lockHeight && Bignum.isLessThanOrEqualTo(Bignum.plus(lastBlock.height, 1), sender.lockHeight)) {
+		//bignum update if (sender.lockHeight && lastBlock.height + 1 <= sender.lockHeight)
+		if (sender.lockHeight && bignum.isLessThanOrEqualTo(bignum.plus(lastBlock.height, 1), sender.lockHeight)) {
             throw new Error('Account is locked');
         }
 
@@ -60,30 +62,30 @@ class Lock {
         return false;
     }
 
-	async apply(trs, block, sender, dbTrans) {
+	async apply({args}, block, {address}, dbTrans) {
         await this.runtime.account.setAccount({
-            address: sender.address,
-            lock_height: trs.args[0]     //Bignum update Number(trs.args[0])
+            address,
+            lock_height: args[0]     //bignum update Number(trs.args[0])
         }, dbTrans);
 
 		// self.library.base.account.set(sender.address,
 		// 	{
-		// 		lock_height: trs.args[0]     //Bignum update Number(trs.args[0])
+		// 		lock_height: trs.args[0]     //bignum update Number(trs.args[0])
 		// 	}, dbTrans,
 		// 	cb);
 	}
 
-	async undo(trs, block, sender, dbTrans) {
+	async undo(trs, block, {address}, dbTrans) {
         await this.runtime.account.setAccount({
-            address: sender.address,
+            address,
             lock_height: 0
         }, dbTrans);
 
 		// self.library.base.account.set(sender.address, { lock_height: 0 }, dbTrans, cb);
 	}
 
-	async applyUnconfirmed(trs, sender, dbTrans) {
-		const key = `${sender.address}:${trs.type}`;
+	async applyUnconfirmed({type}, {address}, dbTrans) {
+		const key = `${address}:${type}`;
 		if (this.oneoff.has(key)) {
             throw new Error('Double submit');
         }
@@ -94,8 +96,8 @@ class Lock {
 		// setImmediate(cb);
 	}
 
-	async undoUnconfirmed(trs, sender, dbTrans) {
-		const key = `${sender.address}:${trs.type}`;
+	async undoUnconfirmed({type}, {address}, dbTrans) {
+		const key = `${address}:${type}`;
 		this.oneoff.delete(key);
 		return;
 	}
@@ -111,13 +113,13 @@ class Lock {
 	async dbSave(trs, dbTrans) {
 	}
 
-	async ready(trs, sender) {
-		if (sender.multisignatures.length) {
-			if (!trs.signatures) {
+	async ready({signatures}, {multisignatures, multimin}) {
+		if (multisignatures.length) {
+			if (!signatures) {
 				return false;
 			}
 
-			return trs.signatures.length >= sender.multimin - 1;
+			return signatures.length >= multimin - 1;
 		} else {
 			return true;
 		}
@@ -125,4 +127,4 @@ class Lock {
 }
 
 // Export
-module.exports = Lock;
+export default Lock;

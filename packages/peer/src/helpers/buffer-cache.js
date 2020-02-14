@@ -10,10 +10,10 @@ const FOUR_HOURS = 1000 * 60 * 60 * 4
 const DEFAULT_MAX_CACHE_NUMBER = 100000
 
 class BufferCache  {
-  constructor(options) {
-    this.maxCacheNumber = options.maxCacheNumber || DEFAULT_MAX_CACHE_NUMBER
-    this.refreshInterval = options.refreshInterval || TEN_MINUTES
-    this.clearInterval = options.clearInterval || FOUR_HOURS
+  constructor({maxCacheNumber, refreshInterval, clearInterval}) {
+    this.maxCacheNumber = maxCacheNumber || DEFAULT_MAX_CACHE_NUMBER
+    this.refreshInterval = refreshInterval || TEN_MINUTES
+    this.clearInterval = clearInterval || FOUR_HOURS
     this.buffer = new Map
     this.history = new Map
     this.lastRefreshTime = Date.now()
@@ -54,4 +54,4 @@ class BufferCache  {
   }
 }
 
-module.exports = BufferCache
+export default BufferCache;

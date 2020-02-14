@@ -1,7 +1,6 @@
 import Asset from '@ddn/asset-base';
 import ByteBuffer from 'bytebuffer';
-import { Bignum } from '@ddn/utils';
-import ddnUtils from '@ddn/utils';
+import DdnUtils from '@ddn/utils';
 
 class Acl extends Asset.Base {
     async propsMapping() {
@@ -37,7 +36,7 @@ class Acl extends Asset.Base {
             throw new Error("Invalid recipient")
         }
 
-        if (!Bignum.isZero(trs.amount)) {
+        if (!DdnUtils.bignum.isZero(trs.amount)) {
             throw new Error("Invalid transaction amount")
         }
 
@@ -62,7 +61,7 @@ class Acl extends Asset.Base {
             if (sender.address == listItem) {
                 throw new Error("Issuer should not be in ACL list");
             }
-            if (!ddnUtils.Address.isAddress(listItem)) {
+            if (!DdnUtils.address.isAddress(listItem)) {
                 throw new Error("Acl contains invalid address");
             }
             if (duplicateCheckObj[listItem]) {

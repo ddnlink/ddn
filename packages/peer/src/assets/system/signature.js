@@ -2,9 +2,10 @@
  * Signatures
  * wangxm   2019-03-25
  */
-const util = require('util');
-const { Bignum } = require('@ddn/utils');
-const ByteBuffer = require('bytebuffer');
+import util from 'util';
+
+import DdnUtils from '@ddn/utils';
+import ByteBuffer from 'bytebuffer';
 
 class Signatures {
 
@@ -13,17 +14,17 @@ class Signatures {
         this._context = context;
 	}
 
-    async create(data, trs) {
+    async create({second_keypair}, trs) {
 		trs.recipient_id = null;
-		trs.amount = "0";   //Bignum update
+		trs.amount = "0";   //DdnUtils.bignum update
 		trs.asset.signature = {
-			public_key: data.second_keypair.publicKey.toString('hex')
+			public_key: second_keypair.publicKey.toString('hex')
 		};
 		return trs;
     }
 
     async calculateFee(trs, sender) {
-        return Bignum.multiply(5, this.tokenSetting.fixedPoint);
+        return DdnUtils.bignum.multiply(5, this.tokenSetting.fixedPoint);
     }
 
 	async verify(trs, sender, cb) {
@@ -31,8 +32,8 @@ class Signatures {
             throw new Error('Invalid transaction asset');
 		}
 
-		//Bignum update if (trs.amount != 0) {
-        if (!Bignum.isZero(trs.amount)) {
+		//DdnUtils.bignum update if (trs.amount != 0) {
+        if (!DdnUtils.bignum.isZero(trs.amount)) {
             throw new Error('Invalid transaction amount')
 		}
 
@@ -51,10 +52,10 @@ class Signatures {
         return trs;
 	}
 
-	async getBytes(trs) {
+	async getBytes({asset}) {
 		try {
 			var bb = new ByteBuffer(32, true);
-			const publicKeyBuffer = Buffer.from(trs.asset.signature.public_key, 'hex');
+			const publicKeyBuffer = Buffer.from(asset.signature.public_key, 'hex');
 
 			for (let i = 0; i < publicKeyBuffer.length; i++) {
 				bb.writeByte(publicKeyBuffer[i]);
@@ -71,36 +72,36 @@ class Signatures {
         return false;
     }
 
-	async apply(trs, block, sender, dbTrans) {
-        var data = {
-            address: sender.address,
+	async apply({asset}, block, {address}, dbTrans) {
+        const data = {
+            address,
             second_signature: 1,
             u_second_signature: 0,
-            second_public_key: trs.asset.signature.public_key
+            second_public_key: asset.signature.public_key
         };
         await this.runtime.account.setAccount(data, dbTrans);
 
-        return await this.runtime.account.getAccountByAddress(sender.address);
+        return await this.runtime.account.getAccountByAddress(address);
 	}
 
-	async undo(trs, block, sender, dbTrans) {
-        var data = {
-            address: sender.address,
+	async undo(trs, block, {address}, dbTrans) {
+        const data = {
+            address,
             second_signature: 0,
             u_second_signature: 1,
             second_public_key: null
         };
         await this.runtime.account.setAccount(data, dbTrans);
 
-        return await this.runtime.account.getAccountByAddress(sender.address);
+        return await this.runtime.account.getAccountByAddress(address);
 	}
 
-	async applyUnconfirmed(trs, sender, dbTrans) {
+	async applyUnconfirmed({type}, {address}, dbTrans) {
 		// if (sender.second_signature) {
         //     throw new Error('Double set second signature');
         // }
 
-		const key = `${sender.address}:${trs.type}`;
+		const key = `${address}:${type}`;
 		if (this.oneoff.has(key)) {
             throw new Error('Double submit second signature');
         }
@@ -108,18 +109,18 @@ class Signatures {
 		this.oneoff.set(key, true);
 	}
 
-	async undoUnconfirmed(trs, sender, dbTrans) {
-        const key = `${sender.address}:${trs.type}`;
+	async undoUnconfirmed({type}, {address}, dbTrans) {
+        const key = `${address}:${type}`;
         this.oneoff.delete(key);
 
-        var data = { address: sender.address, u_second_signature: 0 };
+        const data = { address, u_second_signature: 0 };
         await this.runtime.account.setAccount(data, dbTrans);
 
-        return await this.runtime.account.getAccountByAddress(sender.address);
+        return await this.runtime.account.getAccountByAddress(address);
 	}
 
 	async objectNormalize(trs) {
-        var validateErros = await this.ddnSchema.validate({
+        const validateErros = await this.ddnSchema.validate({
             type: 'object',
             properties: {
                 public_key: {
@@ -136,25 +137,25 @@ class Signatures {
 		return trs;
 	}
 
-	async dbRead(raw) {
-		if (!raw.s_publicKey) {
+	async dbRead({s_publicKey, t_id}) {
+		if (!s_publicKey) {
 			return null;
 		} else {
 			const signature = {
-				transaction_id: raw.t_id,
-				public_key: raw.s_publicKey
+				transaction_id: t_id,
+				public_key: s_publicKey
 			};
 
 			return { signature };
 		}
 	}
 
-	async dbSave(trs, dbTrans) {
+	async dbSave({id, asset}, dbTrans) {
 		// var public_key = Buffer.from(trs.asset.signature.public_key, 'hex');
-		var obj = {
-			transaction_id: trs.id,
-			public_key: trs.asset.signature.public_key
-        }
+		const obj = {
+			transaction_id: id,
+			public_key: asset.signature.public_key
+        };
 
         return new Promise((resolve, reject) => {
             this.dao.insert('signature', obj, dbTrans,
@@ -168,12 +169,12 @@ class Signatures {
         });
 	}
 
-	ready(trs, sender) {
-		if (util.isArray(sender.multisignatures) && sender.multisignatures.length) {
-			if (!trs.signatures) {
+	ready({signatures}, {multisignatures, multimin}) {
+		if (util.isArray(multisignatures) && multisignatures.length) {
+			if (!signatures) {
 				return false;
 			}
-			return trs.signatures.length >= sender.multimin - 1;
+			return signatures.length >= multimin - 1;
 		} else {
 			return true;
 		}
@@ -181,4 +182,4 @@ class Signatures {
 
 }
 
-module.exports = Signatures;
+export default Signatures;

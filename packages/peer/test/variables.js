@@ -5,40 +5,43 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-const path =require('path');
-const _ = require('lodash');
-const expect = require('chai').expect;
-const chai = require('chai');
-const supertest = require('supertest');
-const async = require('async');
-const request = require('request');
-const ddn = require('@ddn/node-sdk');
-const { getConfigFile, requireFile } = require('@ddn/core/lib/getUserConfig');
-const { Bignum, Address, AssetTypes } = require('@ddn/utils');
-const bluebird = require('bluebird');
+import path from 'path';
+
+import _ from 'lodash';
+import {expect} from 'chai';
+import chai from 'chai';
+import supertest from 'supertest';
+import async from 'async';
+import request from 'request';
+import ddn from '@ddn/node-sdk';
+import {getConfigFile, requireFile} from '@ddn/core/lib/getUserConfig';
+import DdnUtils from '@ddn/utils';
+import bluebird from 'bluebird';
 
 // TODO 包的整理规划需要进一步明确原则，根据通用性确定是否写成npm包
-const { DappCategory, DappType } = require('@ddn/asset-dapp');
+import {DappCategory, DappType} from '@ddn/asset-dapp';
+
+const { bignum, address } = DdnUtils;
 
 // Node configuration
 const baseDir = path.resolve(__dirname, '../');
 const configFile = getConfigFile(baseDir);
 const config = requireFile(configFile);
 
-var constants = require('../lib/constants');
+import constants from '../lib/constants';
 
-var baseUrl = 'http://' + config.address + ':' + config.port;
-var api = supertest(baseUrl + '/api');
-var peer = supertest(baseUrl + '/peer');
+const baseUrl = `http://${config.address}:${config.port}`;
+const api = supertest(`${baseUrl}/api`);
+const peer = supertest(`${baseUrl}/peer`);
 
-var normalizer = 100000000; // Use this to convert DDN amount to normal value
-var blockTime = 10000; // Block time in miliseconds
-var blockTimePlus = 12000; // Block time + 2 seconds in miliseconds
-var version = '2.0.0' // Node version
+const normalizer = 100000000; // Use this to convert DDN amount to normal value
+const blockTime = 10000; // Block time in miliseconds
+const blockTimePlus = 12000; // Block time + 2 seconds in miliseconds
+const version = '2.0.0'; // Node version
 
 // Holds Fee amounts for different transaction types
-var Fees = {
-  voteFee: "10000000",  //Bignum update
+const Fees = {
+  voteFee: "10000000",  //bignum update
   transactionFee: "10000000",
   secondPasswordFee: "500000000",
   delegateRegistrationFee: "10000000000",
@@ -46,12 +49,12 @@ var Fees = {
   dappAddFee: "10000000000"
 };
 
-var guestbookDapp = {
+const guestbookDapp = {
   icon: 'http://ebookchain.org/static/media/logo.5e78d8c2.png',
   link: 'http://www.ebookchain.org/dapp-demo.zip'
 };
 
-var Daccount = { // -wly 修改数据库字段后
+const Daccount = { // -wly 修改数据库字段后
   'address': 'DJS57PDiq2srYdL5eqzUt7oAZ4WvEkVT9q',
   'publicKey': 'ae19cd4f38454a22cb976383f092211b3735dc54d7002c1c084c48a187834e85',
   'password': 'toward weapon judge twice two wine salmon primary attract public stool crawl',
@@ -60,13 +63,13 @@ var Daccount = { // -wly 修改数据库字段后
   'delegateName': 'TestDelegate',
 };
 
-var Eaccount = { // wly 修改数据库名称后重新生成
+const Eaccount = { // wly 修改数据库名称后重新生成
   'address': 'DLbsdFXJNVa68SCAJxtGMaGdfBWkPALZzJ',
   'publicKey': '0b5cfb77f401c818f7ebf02a0e88d52a28d3e4e24643e8a080c0c20ac45d0b9c',
   'password': 'elite sunset cake shaft human cradle remember select flame panther tongue ancient',
 };
 
-var Gaccount = {
+const Gaccount = {
   "address": "DCE3q83WTqk58Y3hU9GDStn7MmqWU9xHbK",
   "password": "enter boring shaft rent essence foil trick vibrant fabric quote indoor output",
   'publicKey': '2e6d978c5e6f1fbfc5a27abd964d9b6adc352daa81e31d9098a4f5ee3d7f885e',
@@ -75,8 +78,8 @@ var Gaccount = {
 
 
 // Random DDN Amount
-//Bignum update var RANDOM_COIN = Math.floor(Math.random() * (100000 * 100000000)) + 1;
-var RANDOM_COIN = Bignum.plus(Bignum.floor(Bignum.multiply(Math.random(), 100000, 100000000)), 1).toString();
+//bignum update var RANDOM_COIN = Math.floor(Math.random() * (100000 * 100000000)) + 1;
+const RANDOM_COIN = bignum.plus(bignum.floor(bignum.multiply(Math.random(), 100000, 100000000)), 1).toString();
 
 // Used to create random delegates names
 function randomDelegateName() {
@@ -85,7 +88,7 @@ function randomDelegateName() {
 
 // Randomize a property from within an object
 function randomProperty(obj, needKey) {
-  var keys = Object.keys(obj)
+  const keys = Object.keys(obj);
 
   if (!needKey) {
     return obj[keys[keys.length * Math.random() << 0]];
@@ -96,29 +99,29 @@ function randomProperty(obj, needKey) {
 
 // Randomizes DDN amount
 function randomCoin() {
-  return Math.floor(Math.random() * (10000 * 100000000)) + (1000 * 100000000) + "";
+  return `${Math.floor(Math.random() * (10000 * 100000000)) + (1000 * 100000000)}`;
 }
 
 // Dao
 function randomOrgId() {
   const name = randomName(15, '', 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789');
-  return "DAO1" + name + "M"; // >= 5 bit
+  return `DAO1${name}M`; // >= 5 bit
 }
 
 function randomIpId() {
   const name = randomName(15, '', 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789');
   const date = new Date;
-  const time = "" + date.getFullYear() + date.getUTCMonth() + date.getUTCDate();
-  return "IPID" + time + name + "A"; // >= 5 bit
+  const time = `${date.getFullYear()}${date.getUTCMonth()}${date.getUTCDate()}`;
+  return `IPID${time}${name}A`; // >= 5 bit
 }
 
 function _getHeight(url, cb) {
   request({
     type: 'GET',
-    url: url + '/api/blocks/getHeight',
+    url: `${url}/api/blocks/getHeight`,
     json: true
-  }, function (err, resp, body) {
-    if (err || resp.statusCode != 200) {
+  }, (err, {statusCode}, body) => {
+    if (err || statusCode != 200) {
       console.log("body===", body);
 
       return cb(err || 'Status code is not 200 (getHeight)');
@@ -134,7 +137,7 @@ function getHeight(cb) {
 }
 
 function onNewBlock(cb) {
-  getHeight(function (err, height) {
+  getHeight((err, height) => {
     if (err) {
       return cb(err);
     } else {
@@ -145,30 +148,30 @@ function onNewBlock(cb) {
 
 // Function used to wait until a new block has been created
 function waitForNewBlock(height, cb) {
-  var actualHeight = height;
+  const actualHeight = height;
   async.doWhilst(
-    function (cb) {
+    cb => {
       request({
         type: 'GET',
-        url: baseUrl + '/api/blocks/getHeight',
+        url: `${baseUrl}/api/blocks/getHeight`,
         json: true
-      }, function (err, resp, body) {
-        if (err || resp.statusCode != 200) {
+      }, (err, {statusCode}, body) => {
+        if (err || statusCode != 200) {
           return cb(err || 'Got incorrect status');
         }
 
-        //Bignum update if (height + 1 == body.height) {
-        if (Bignum.isEqualTo(Bignum.plus(height, 1), body.height)) {
+        //bignum update if (height + 1 == body.height) {
+        if (bignum.isEqualTo(bignum.plus(height, 1), body.height)) {
           height = body.height;
         }
 
         setTimeout(cb, 1000);
       });
     },
-    function () {
+    () => {
       return actualHeight == height;
     },
-    function (err) {
+    err => {
       if (err) {
           cb(err);
         // return setImmediate(cb, err);
@@ -182,22 +185,24 @@ function waitForNewBlock(height, cb) {
 
 // Adds peers to local node
 function addPeers(numOfPeers, cb) {
-  var operatingSystems = ['win32', 'win64', 'ubuntu', 'debian', 'centos'];
-  var ports = [4000, 5000, 7000, 8000];
+  const operatingSystems = ['win32', 'win64', 'ubuntu', 'debian', 'centos'];
+  const ports = [4000, 5000, 7000, 8000];
 
-  var os, version, port;
+  let os;
+  let version;
+  let port;
 
-  var i = 0;
-  async.whilst(function () {
+  let i = 0;
+  async.whilst(() => {
     return i < numOfPeers
-  }, function (next) {
+  }, next => {
     os = operatingSystems[randomizeSelection(operatingSystems.length)];
     version = 'development';
     port = ports[randomizeSelection(ports.length)];
 
     request({
       type: 'GET',
-      url: baseUrl + '/peer/height',
+      url: `${baseUrl}/peer/height`,
       json: true,
       headers: {
         'version': version,
@@ -205,15 +210,15 @@ function addPeers(numOfPeers, cb) {
         'nethash': config.nethash,
         'os': os
       }
-    }, function (err, resp, body) {
-      if (err || resp.statusCode != 200) {
+    }, (err, {statusCode}, body) => {
+      if (err || statusCode != 200) {
         return next(err || 'Status code is not 200 (getHeight)');
       } else {
         i++;
         next();
       }
     })
-  }, function (err) {
+  }, err => {
     return cb(err);
   });
 }
@@ -230,7 +235,7 @@ function randomNumber(min, max) {
 
 // Calculates the expected fee from a transaction
 function expectedFee(amount) {
-//Bignum update   return parseInt(Fees.transactionFee);
+//bignum update   return parseInt(Fees.transactionFee);
     return Fees.transactionFee;
 }
 
@@ -247,24 +252,24 @@ function randomCapitalUsername() {
   return randomName(constants.tokenPrefix, 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@$&_.');
 }
 
-function randomName() {
+function randomName(...args) {
   // Convert arguments to Array
-  var array = Array.prototype.slice.apply(arguments);
+  const array = Array.prototype.slice.apply(args);
 
-  var max = 16;
+  let max = 16;
   if(array.length > 2) {
     max = array.shift();
   }
 
-  var name = array[0];
-  var random = array[1];
+  let name = array[0];
+  const random = array[1];
 
-  var size = randomNumber(1, max);
+  let size = randomNumber(1, max);
   if (name.length > 0) {
     size = size - 1
   }
 
-  for (var i = 0; i < size; i++){
+  for (let i = 0; i < size; i++){
     name += random.charAt(Math.floor(Math.random() * random.length));
   }
 
@@ -273,7 +278,7 @@ function randomName() {
 
 // Used to create random basic accounts
 function randomAccount() {
-  var account = {
+  const account = {
     'address': '',
     'public_key': '',
     'password': '',
@@ -290,13 +295,13 @@ function randomAccount() {
 }
 
 function genNormalAccount() {
-  var password = randomPassword()
-  var keys = ddn.crypto.getKeys(password)
+  const password = randomPassword();
+  const keys = ddn.crypto.getKeys(password);
   return {
-    address: Address.generateBase58CheckAddress(keys.public_key),
+    address: address.generateBase58CheckAddress(keys.public_key),
     public_key: keys.public_key,
-    password: password
-  }
+    password
+  };
 }
 
 function randomTid() {
@@ -344,7 +349,7 @@ function giveMoney(address, amount, cb) {
     .set('Accept', 'application/json')
     .send({
       secret: Gaccount.password,
-      amount: amount,
+      amount,
       recipientId: address
     })
     .expect('Content-Type', /json/)
@@ -374,23 +379,15 @@ function openAccount(params, cb) {
 }
 
 function PIFY(fn, receiver) {
-  return (...args) => {
-    return new Promise((resolve, reject) => {
-      fn.apply(receiver, [...args, (err, result) => {
-        return err ? reject(err) : resolve(result)
-      }])
-    })
-  }
+  return (...args) => new Promise((resolve, reject) => {
+    fn.apply(receiver, [...args, (err, result) => err ? reject(err) : resolve(result)])
+  });
 }
 
 function EIFY(fn, receiver) {
-  return (...args) => {
-    return new Promise((resolve, reject) => {
-      fn.apply(receiver, [...args, (err, result) => {
-        return resolve([err, result])
-      }])
-    })
-  }
+  return (...args) => new Promise((resolve, reject) => {
+    fn.apply(receiver, [...args, (err, result) => resolve([err, result])])
+  });
 }
 
 function beginEpochTime() {
@@ -409,55 +406,55 @@ function getRealTime(epochTime) {
 ddn.init.init();
 
 // Exports variables and functions for access from other files
-module.exports = {
-  api: api,
-  chai: chai,
-  peer: peer,
-  ddn: ddn,
-  supertest: supertest,
-  expect: expect,
-  version: version,
-  RANDOM_COIN: RANDOM_COIN,
-  Gaccount: Gaccount,
-  Daccount: Daccount,
-  Eaccount: Eaccount,
+export default {
+  api,
+  chai,
+  peer,
+  ddn,
+  supertest,
+  expect,
+  version,
+  RANDOM_COIN,
+  Gaccount,
+  Daccount,
+  Eaccount,
 
   //wxm TODO 此处使用新的类型
 //   TxTypes: TxTypes,
-  AssetTypes: AssetTypes,
+  AssetTypes: assetTypes,
 
   //wxm TODO 此处应该使用对应npm包提供的对象
 //   DappType: DappType,
 //   DappCategory: DappCategory,
 
-  guestbookDapp: guestbookDapp,
-  Fees: Fees,
-  normalizer: normalizer,
-  blockTime: blockTime,
-  blockTimePlus: blockTimePlus,
-  randomProperty: randomProperty,
-  randomDelegateName: randomDelegateName,
-  randomCoin: randomCoin,
-  randomPassword: randomPassword,
-  randomAccount: randomAccount,
-  randomTxAccount: randomTxAccount,
-  randomUsername: randomUsername,
-  randomIssuerName: randomIssuerName,
-  randomNumber: randomNumber,
-  randomCapitalUsername: randomCapitalUsername,
-  expectedFee: expectedFee,
-  addPeers: addPeers,
-  config: config,
-  waitForNewBlock: waitForNewBlock,
+  guestbookDapp,
+  Fees,
+  normalizer,
+  blockTime,
+  blockTimePlus,
+  randomProperty,
+  randomDelegateName,
+  randomCoin,
+  randomPassword,
+  randomAccount,
+  randomTxAccount,
+  randomUsername,
+  randomIssuerName,
+  randomNumber,
+  randomCapitalUsername,
+  expectedFee,
+  addPeers,
+  config,
+  waitForNewBlock,
   _getheight: _getHeight,
-  getHeight: getHeight,
-  onNewBlock: onNewBlock,
-  submitTransaction: submitTransaction,
-  apiGet: apiGet,
-  genNormalAccount: genNormalAccount,
-  openAccount: openAccount,
-  PIFY: PIFY,
-  EIFY: EIFY,
+  getHeight,
+  onNewBlock,
+  submitTransaction,
+  apiGet,
+  genNormalAccount,
+  openAccount,
+  PIFY,
+  EIFY,
 
   submitTransactionAsyncE: EIFY(submitTransaction),
   onNewBlockAsyncE: EIFY(onNewBlock),
@@ -468,18 +465,18 @@ module.exports = {
   onNewBlockAsync: PIFY(onNewBlock),
   apiGetAsync: PIFY(apiGet),
   giveMoneyAsync: PIFY(giveMoney),
-  giveMoneyAndWaitAsync: giveMoneyAndWaitAsync,
+  giveMoneyAndWaitAsync,
   sleepAsync: PIFY(sleep),
   openAccountAsync: PIFY(openAccount),
-  randomTid: randomTid,
+  randomTid,
 
   // DAO
-  randomOrgId: randomOrgId,
-  randomIpId: randomIpId,
-  constants: constants,
+  randomOrgId,
+  randomIpId,
+  constants,
 
-  getRealTime: getRealTime,
+  getRealTime,
 
-  DappCategory: DappCategory,
-  DappType: DappType
+  DappCategory,
+  DappType
 };

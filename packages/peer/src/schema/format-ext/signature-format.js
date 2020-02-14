@@ -1,8 +1,8 @@
-module.exports = {
+export default {
 
     name: "signature",
 
-    validate: function(str) {
+    validate(str) {
         if (str.length == 0) {
             return true;
         }

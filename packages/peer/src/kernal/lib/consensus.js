@@ -2,13 +2,14 @@
  * Delegate
  * wangxm   2018-01-08
  */
-const ByteBuffer = require("bytebuffer");
-const crypto = require("crypto");
-const ed = require('ed25519');
-const assert = require('assert');
-const ip = require('ip');
+import ByteBuffer from "bytebuffer";
 
-var _singleton;
+import crypto from "crypto";
+import ed from 'ed25519';
+import assert from 'assert';
+import ip from 'ip';
+
+let _singleton;
 
 class Consensus {
 
@@ -31,21 +32,21 @@ class Consensus {
     }
 
     getProposeHash(propose) {
-        var bytes = new ByteBuffer();
+        const bytes = new ByteBuffer();
 
         //Bignum update   bytes.writeLong(propose.height);
         bytes.writeString(propose.height);
 
         bytes.writeString(propose.id);
 
-        var generatorPublicKeyBuffer = Buffer.from(propose.generator_public_key, "hex"); //wxm block database
-        for (var i = 0; i < generatorPublicKeyBuffer.length; i++) {
+        const generatorPublicKeyBuffer = Buffer.from(propose.generator_public_key, "hex"); //wxm block database
+        for (let i = 0; i < generatorPublicKeyBuffer.length; i++) {
             bytes.writeByte(generatorPublicKeyBuffer[i]);
         }
 
         bytes.writeInt(propose.timestamp);
 
-        var parts = propose.address.split(':');
+        const parts = propose.address.split(':');
         assert(parts.length == 2);
         bytes.writeInt(ip.toLong(parts[0]));
         bytes.writeInt(Number(parts[1]));
@@ -55,37 +56,37 @@ class Consensus {
         return crypto.createHash('sha256').update(bytes.toBuffer()).digest();
     }
 
-    createPropose(keypair, block, address) {
-        assert(keypair.publicKey.toString("hex") == block.generator_public_key);
-        var propose = {
-            height: block.height,
-            id: block.id,
-            timestamp: block.timestamp,
-            generator_public_key: block.generator_public_key,   //wxm block database
-            address: address
+    createPropose(keypair, {generator_public_key, height, id, timestamp}, address) {
+        assert(keypair.publicKey.toString("hex") == generator_public_key);
+        const propose = {
+            height,
+            id,
+            timestamp,
+            generator_public_key,   //wxm block database
+            address
         };
-        var hash = this.getProposeHash(propose);
+        const hash = this.getProposeHash(propose);
         propose.hash = hash.toString("hex");
         propose.signature = ed.Sign(hash, keypair).toString("hex");
         return propose;
     }
 
     acceptPropose(propose) {
-        var hash = this.getProposeHash(propose);
+        const hash = this.getProposeHash(propose);
         if (propose.hash != hash.toString("hex")) {
             throw new Error("Propose hash is not correct");
         }
 
         try {
-            var signature = Buffer.from(propose.signature, "hex");
-            var publicKey = Buffer.from(propose.generator_public_key, "hex");    //wxm block database
+            const signature = Buffer.from(propose.signature, "hex");
+            const publicKey = Buffer.from(propose.generator_public_key, "hex");    //wxm block database
             if (ed.Verify(hash, signature, publicKey)) {
                 return;
             } else {
                 throw new Error("Vefify signature failed");
             }
         } catch (e) {
-            throw new Error("Verify signature exception: " + e.toString());
+            throw new Error(`Verify signature exception: ${e.toString()}`);
         }
     }
 
@@ -99,24 +100,24 @@ class Consensus {
         return this._pendingBlock;
     }
 
-    addPendingVotes(votes) {
-        if (!this._pendingBlock || this._pendingBlock.height != votes.height || this._pendingBlock.id != votes.id) {
+    addPendingVotes({height, id, signatures}) {
+        if (!this._pendingBlock || this._pendingBlock.height != height || this._pendingBlock.id != id) {
             return this._pendingVotes;
         }
 
-        for (var i = 0; i < votes.signatures.length; ++i) {
-            var item = votes.signatures[i];
+        for (let i = 0; i < signatures.length; ++i) {
+            const item = signatures[i];
 
             if (this._votesKeySet[item.key]) {
                 continue;
             }
 
-            if (this.verifyVote(votes.height, votes.id, item)) {
+            if (this.verifyVote(height, id, item)) {
                 this._votesKeySet[item.key] = true;
                 if (!this._pendingVotes) {
                     this._pendingVotes = {
-                        height: votes.height,
-                        id: votes.id,
+                        height,
+                        id,
                         signatures: []
                     };
                 }
@@ -134,7 +135,7 @@ class Consensus {
     }
 
     async normalizeVotes(votes) {
-        var validateErrors = await this.ddnSchema.validate({
+        const validateErrors = await this.ddnSchema.validate({
             type: "object",
             properties: {
                 height: {
@@ -160,24 +161,24 @@ class Consensus {
     }
 
     getVoteHash(height, id) {
-        var bytes = new ByteBuffer();
+        const bytes = new ByteBuffer();
 
         //Bignum update   bytes.writeLong(height);
-        bytes.writeString(height + "");
+        bytes.writeString(`${height}`);
         bytes.writeString(id)
 
         bytes.flip();
         return crypto.createHash('sha256').update(bytes.toBuffer()).digest();
     }
 
-    createVotes(keypairs, block) {
-        var hash = this.getVoteHash(block.height, block.id);
-        var votes = {
-            height: block.height,
-            id: block.id,
+    createVotes(keypairs, {height, id}) {
+        const hash = this.getVoteHash(height, id);
+        const votes = {
+            height,
+            id,
             signatures: []
         };
-        keypairs.forEach(function (el) {
+        keypairs.forEach(el => {
             votes.signatures.push({
                 key: el.publicKey.toString('hex'),
                 sig: ed.Sign(hash, el).toString('hex')
@@ -186,11 +187,11 @@ class Consensus {
         return votes;
     }
 
-    verifyVote(height, id, voteItem) {
+    verifyVote(height, id, {sig, key}) {
         try {
-            var hash = this.getVoteHash(height, id);
-            var signature = Buffer.from(voteItem.sig, "hex");
-            var publicKey = Buffer.from(voteItem.key, "hex");
+            const hash = this.getVoteHash(height, id);
+            const signature = Buffer.from(sig, "hex");
+            const publicKey = Buffer.from(key, "hex");
             return ed.Verify(hash, signature, publicKey);
         } catch (e) {
             return false;
@@ -214,4 +215,4 @@ class Consensus {
     }
 }
 
-module.exports = Consensus;
+export default Consensus;

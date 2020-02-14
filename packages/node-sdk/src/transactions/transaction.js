@@ -1,41 +1,42 @@
-var crypto = require("./crypto.js")
-var constants = require("../constants.js")
-var transactionTypes = require("../transaction-types.js")
-var slots = require("../time/slots.js")
-var options = require('../options')
-const { Bignum } = require('@ddn/utils');
+import DdnUtils from '@ddn/utils';
+
+import crypto from "./crypto.js";
+import constants from "../constants.js";
+import transactionTypes from "../transaction-types.js";
+import slots from "../time/slots.js";
+import options from '../options';
 
 function calculateFee(amount) {
-    var min = constants.fees.send;
+    const min = constants.fees.send;
     
-    var fee = Bignum.multiply(amount, 0.0001).toFixed(0);
+    const fee = DdnUtils.bignum.multiply(amount, 0.0001).toFixed(0);
 
-    if (Bignum.isLessThan(fee, min)) {
+    if (DdnUtils.bignum.isLessThan(fee, min)) {
         return min;
     } else {
-        return fee + "";
+        return `${fee}`;
     }
 }
 
 async function createTransaction(recipientId, amount, message, secret, second_secret) {
-	var transaction = {
+	const transaction = {
 		type: transactionTypes.SEND,
 		nethash: options.get('nethash'),
-		amount: amount + "",
+		amount: `${amount}`,
 		fee: constants.fees.send,
 		recipient_id: recipientId,
-		message: message,
+		message,
 		timestamp: slots.getTime() - options.get('clientDriftSeconds'),
 		asset: {}
 	};
 
-	var keys = crypto.getKeys(secret);
+	const keys = crypto.getKeys(secret);
 	transaction.sender_public_key = keys.public_key;
 
 	await crypto.sign(transaction, keys);
 
 	if (second_secret) {
-		var secondKeys = crypto.getKeys(second_secret);
+		const secondKeys = crypto.getKeys(second_secret);
 		await crypto.secondSign(transaction, secondKeys);
 	}
 
@@ -44,7 +45,7 @@ async function createTransaction(recipientId, amount, message, secret, second_se
 }
 
 async function createLock(height, secret, second_secret) {
-	var transaction = {
+	const transaction = {
 		type: 100,
 		amount: "0",    
 		nethash: options.get('nethash'),
@@ -55,13 +56,13 @@ async function createLock(height, secret, second_secret) {
 		asset: {}
 	};
 
-	var keys = crypto.getKeys(secret);
+	const keys = crypto.getKeys(secret);
 	transaction.sender_public_key = keys.public_key;
 
 	await crypto.sign(transaction, keys);
 
 	if (second_secret) {
-		var secondKeys = crypto.getKeys(second_secret);
+		const secondKeys = crypto.getKeys(second_secret);
 		await crypto.secondSign(transaction, secondKeys);
 	}
 
@@ -69,8 +70,8 @@ async function createLock(height, secret, second_secret) {
 	return transaction;
 }
 
-module.exports = {
-	createTransaction: createTransaction,
-	calculateFee: calculateFee,
-	createLock: createLock
-}
+export default {
+	createTransaction,
+	calculateFee,
+	createLock
+};

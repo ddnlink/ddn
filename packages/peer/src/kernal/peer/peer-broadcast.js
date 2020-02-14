@@ -3,7 +3,7 @@
  * wangxm   2019-01-23
  */
 
-var _singleton;
+let _singleton;
 
 class PeerBroadcast {
 
@@ -25,20 +25,18 @@ class PeerBroadcast {
      * @param {*} dappId 是否只广播某个dappId的节点
      * @param {*} num 广播的节点个数，默认5个
      */
-    async broadcast(options, dappId, num) {
-        num = num || 5;
+    async broadcast(options, dappId, num = 5) {
+        const broadcastPeers = [];
 
-        var broadcastPeers = [];
+        const peers = await this.runtime.peer.queryList(dappId, {}, num * 2);
 
-        var peers = await this.runtime.peer.queryList(dappId, {}, num * 2);
-
-        for (var i = 0; i < peers.length; i++) {
-            var peer = peers[i];
+        for (let i = 0; i < peers.length; i++) {
+            const peer = peers[i];
 
             try 
             {
                 options.peer = peer;
-                var result = await this.runtime.peer.request(options, dappId, false);
+                const result = await this.runtime.peer.request(options, dappId, false);
                 if (result && result.body) {
                     broadcastPeers.push(peer);
                     if (broadcastPeers.length == num) {
@@ -67,7 +65,7 @@ class PeerBroadcast {
             block: this.protobuf.encodeBlock(block).toString('base64'),
             votes: this.protobuf.encodeBlockVotes(votes).toString('base64'),
         };
-        var result = await this.broadcast({ api: '/blocks', data, method: "POST" });
+        const result = await this.broadcast({ api: '/blocks', data, method: "POST" });
 
         setImmediate(async() => {
             try
@@ -91,15 +89,15 @@ class PeerBroadcast {
         const data = {
             propose: this.protobuf.encodeBlockPropose(propose).toString('base64')
         }
-        var result = await this.broadcast({ api: '/propose', data, method: "POST" });
+        const result = await this.broadcast({ api: '/propose', data, method: "POST" });
         return result;
     }
 
     async broadcastUnconfirmedTransaction(transaction) {
-        var data = {
+        const data = {
             transaction: this.protobuf.encodeTransaction(transaction).toString('base64')
         };
-        var result = await this.broadcast({ api: '/transactions', data, method: "POST" });
+        const result = await this.broadcast({ api: '/transactions', data, method: "POST" });
 
         setImmediate(async() => {
             try
@@ -116,7 +114,7 @@ class PeerBroadcast {
     }
 
     async broadcastNewSignature(signature) {
-        var result = await this.broadcast({api: '/signatures', data: { signature }, method: "POST"});
+        const result = await this.broadcast({api: '/signatures', data: { signature }, method: "POST"});
         setImmediate(async() => {
             try
             {
@@ -132,4 +130,4 @@ class PeerBroadcast {
 
 }
 
-module.exports = PeerBroadcast;
+export default PeerBroadcast;

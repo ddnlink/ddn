@@ -1,5 +1,5 @@
 import Asset from '@ddn/asset-base';
-import { Bignum, Amount } from '@ddn/utils';
+import DdnUtils from '@ddn/utils';
 import mathjs from 'mathjs';
 import _ from 'lodash';
 
@@ -25,11 +25,11 @@ class Issue extends Asset.Base {
         if (trs.recipient_id) {
             throw new Error('Invalid recipient');
         }
-        if (!Bignum.isZero(trs.amount)) {
+        if (!DdnUtils.bignum.isZero(trs.amount)) {
             throw new Error('Invalid transaction amount');
         }
         const { amount } = assetIssue;
-        const error = Amount.validate(amount);
+        const error = DdnUtils.amount.validate(amount);
         if (error) {
             throw new Error('Invalid transaction amount');
         }
@@ -104,10 +104,10 @@ class Issue extends Asset.Base {
         // 循环整合验证数据
         for (let i = 0; i < result4.length; i += 1) {
             const { precision } = result4[i];
-            result4[i].maximum = Bignum.new(result4[i].maximum).toString(10);
-            result4[i].maximumShow = Amount.calcRealAmount(result4[i].maximum, precision);
-            result4[i].quantity = Bignum.new(result4[i].quantity).toString(10);
-            result4[i].quantityShow = Amount.calcRealAmount(result4[i].quantity, precision);
+            result4[i].maximum = DdnUtils.bignum.new(result4[i].maximum).toString(10);
+            result4[i].maximumShow = DdnUtils.amount.calcRealAmount(result4[i].maximum, precision);
+            result4[i].quantity = DdnUtils.bignum.new(result4[i].quantity).toString(10);
+            result4[i].quantityShow = DdnUtils.amount.calcRealAmount(result4[i].quantity, precision);
         }
         const count = 0;
 
@@ -125,20 +125,20 @@ class Issue extends Asset.Base {
         const { maximum } = result5;
         const { quantity } = result5;
         const { precision } = result5;
-        if (Bignum.isGreaterThan(Bignum.plus(quantity, amount), maximum)) {
+        if (DdnUtils.bignum.isGreaterThan(DdnUtils.bignum.plus(quantity, amount), maximum)) {
             throw new Error('Exceed issue limit --- from asset-aob -> issue.verify');
         }
         const { strategy } = result5;
         const genesisHeight = result5.height;
-        const height = Bignum.plus(this.runtime.block.getLastBlock().height, 1);
+        const height = DdnUtils.bignum.plus(this.runtime.block.getLastBlock().height, 1);
         if (strategy) {
             // FIXME: 这里的mathjs.bignumber应该‘安全’地修改为Bignum
             const context = {
                 maximum: mathjs.bignumber(maximum),
                 precision,
                 quantity: mathjs.bignumber(quantity).plus(amount),
-                genesisHeight: mathjs.bignumber(genesisHeight), // Bignum update
-                height: mathjs.bignumber(height.toString()), // Bignum update
+                genesisHeight: mathjs.bignumber(genesisHeight), // DdnUtils.bignum update
+                height: mathjs.bignumber(height.toString()), // DdnUtils.bignum update
             };
             const evalRet = mathjs.eval(strategy, context);
             if (!evalRet) {
@@ -157,7 +157,7 @@ class Issue extends Asset.Base {
             name: currency
         }, null, null, 1, 1);
         const { quantity } = data[0];
-        await assetInst.update({ quantity: Bignum.plus(quantity, amount).toString() }, { name: currency }, dbTrans);
+        await assetInst.update({ quantity: DdnUtils.bignum.plus(quantity, amount).toString() }, { name: currency }, dbTrans);
         const assetBalancedata = await new Promise((resolve, reject) => {
             this.dao.findOne('mem_asset_balance', { address: sender.address, currency }, ['balance'], (err, rows) => {
                 if (err) {
@@ -168,8 +168,8 @@ class Issue extends Asset.Base {
             });
         });
         const balance = (assetBalancedata && assetBalancedata.balance) ? assetBalancedata.balance : '0';
-        const newBalance = Bignum.plus(balance, amount);
-        if (Bignum.isLessThan(newBalance, 0)) {
+        const newBalance = DdnUtils.bignum.plus(balance, amount);
+        if (DdnUtils.bignum.isLessThan(newBalance, 0)) {
             throw new Error('Asset balance not enough');
         }
         if (assetBalancedata) {
@@ -184,7 +184,7 @@ class Issue extends Asset.Base {
         const assetIssue = await this.getAssetObject(trs);
         const { currency, amount } = assetIssue;
         const balance = this.balanceCache.getAssetBalance(sender.address, currency) || 0;
-        if (Bignum.isLessThan(balance, amount)) {
+        if (DdnUtils.bignum.isLessThan(balance, amount)) {
             throw new Error(`Invalid asset balance: ${balance}`);
         }
         this.balanceCache.addAssetBalance(sender.address, currency, `-${amount}`);
@@ -193,7 +193,7 @@ class Issue extends Asset.Base {
             name: currency
         }, null, null, 1, 1);
         const { quantity } = data[0];
-        await assetInst.update({ quantity: Bignum.plus(quantity, amount).toString() }, { name: currency }, dbTrans);
+        await assetInst.update({ quantity: DdnUtils.bignum.plus(quantity, amount).toString() }, { name: currency }, dbTrans);
         const assetBalancedata = await new Promise((resolve, reject) => {
             this.dao.findOne('mem_asset_balance', { address: sender.address, currency }, ['balance'], (err, rows) => {
                 if (err) {
@@ -204,8 +204,8 @@ class Issue extends Asset.Base {
             });
         });
         const balance2 = (assetBalancedata && assetBalancedata.balance) ? assetBalancedata.balance : '0';
-        const newBalance = Bignum.plus(balance2, amount);
-        if (Bignum.isLessThan(newBalance, 0)) {
+        const newBalance = DdnUtils.bignum.plus(balance2, amount);
+        if (DdnUtils.bignum.isLessThan(newBalance, 0)) {
             throw new Error('Asset balance not enough');
         }
         if (assetBalancedata) {

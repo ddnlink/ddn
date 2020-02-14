@@ -1,46 +1,46 @@
-const { Bignum } = require('@ddn/utils');
-var node = require('../variables.js')
-var DEBUG = require('debug')('aob')
-var expect = node.expect
+import DdnUtils from '@ddn/utils';
+import node from '../variables.js';
+const DEBUG = require('debug')('aob');
+const expect = node.expect;
 
-async function registerIssuerAsync(name, desc, account) {
-  var res = await node.submitTransactionAsync(node.ddn.aob.createIssuer(name, desc, account.password))
+async function registerIssuerAsync(name, desc, {password}) {
+  const res = await node.submitTransactionAsync(node.ddn.aob.createIssuer(name, desc, password));
   DEBUG('register issuer response', res.body)
   return res
 }
 
-async function registerAssetAsync(name, desc, maximum, precision, strategy, account) {
-  var res = await node.submitTransactionAsync(node.ddn.aob.createAsset(name, desc, maximum, precision, strategy, 1, 1, 1, account.password))
+async function registerAssetAsync(name, desc, maximum, precision, strategy, {password}) {
+  const res = await node.submitTransactionAsync(node.ddn.aob.createAsset(name, desc, maximum, precision, strategy, 1, 1, 1, password));
   DEBUG('register asset response', res.body)
   return res
 }
 
-async function issueAssetAsync(currency, amount, account) {
-  var res = await node.submitTransactionAsync(node.ddn.aob.createIssue(currency, amount, account.password))
+async function issueAssetAsync(currency, amount, {password}) {
+  const res = await node.submitTransactionAsync(node.ddn.aob.createIssue(currency, amount, password));
   DEBUG('issue asset response', res.body)
   return res
 }
 
-async function writeoffAssetAsync(currency, account) {
-  var res = await node.submitTransactionAsync(node.ddn.aob.createFlags(currency, 2, 1, account.password))
+async function writeoffAssetAsync(currency, {password}) {
+  const res = await node.submitTransactionAsync(node.ddn.aob.createFlags(currency, 2, 1, password));
   DEBUG('writeoff asset response', res.body)
   return res
 }
 
-async function changeFlagsAsync(currency, flagType, flag, account) {
-  var res = await node.submitTransactionAsync(node.ddn.aob.createFlags(currency, flagType, flag, account.password))
+async function changeFlagsAsync(currency, flagType, flag, {password}) {
+  const res = await node.submitTransactionAsync(node.ddn.aob.createFlags(currency, flagType, flag, password));
   DEBUG('change flags response', res.body)
   return res
 }
 
-async function updateAclAsync(currency, operator, flag, list, account) {
-  var res = await node.submitTransactionAsync(node.ddn.aob.createAcl(currency, operator, flag, list, account.password))
+async function updateAclAsync(currency, operator, flag, list, {password}) {
+  const res = await node.submitTransactionAsync(node.ddn.aob.createAcl(currency, operator, flag, list, password));
   DEBUG('update acl response', res.body)
   return res
 }
 
-async function transferAsync(currency, amount, recipientId, account) {
-  var res = await node.submitTransactionAsync(node.ddn.aob.createTransfer(currency, amount, recipientId, '', account.password))
+async function transferAsync(currency, amount, recipientId, {password}) {
+  const res = await node.submitTransactionAsync(node.ddn.aob.createTransfer(currency, amount, recipientId, '', password));
   DEBUG('transfer asset response', res.body)
   return res
 }
@@ -48,21 +48,21 @@ async function transferAsync(currency, amount, recipientId, account) {
 describe('Test AOB', () => {
 
   describe('Normal caces', () => {
-    var ISSUER1 = {
+    const ISSUER1 = {
       name: 'issuername',
       desc: 'issuer1_desc'
-    }
+    };
 
-    var ASSET1 = {
+    const ASSET1 = {
       name: 'BTC',
       desc: 'asset1_desc',
       maximum: '10000000000000',
       precision: 6,
       strategy: ''
-    }
+    };
 
-    it('Get issuers should be ok', async function () {
-      var [err, res] = await node.apiGetAsyncE('/aobissuer/issuers')
+    it('Get issuers should be ok', async () => {
+      const [err, res] = await node.apiGetAsyncE('/aobissuer/issuers');
       DEBUG('get /aobissuer/issuers response', err, res.body)
       expect(err).to.not.exist
       expect(res.body.success).to.be.true
@@ -70,8 +70,8 @@ describe('Test AOB', () => {
       expect(res.body.result.rows).to.be.instanceOf(Array)
     })
 
-    it('Register issuer should be ok', async function () {
-      var trs = node.ddn.aob.createIssuer(ISSUER1.name, ISSUER1.desc, node.Gaccount.password)
+    it('Register issuer should be ok', async () => {
+      const trs = node.ddn.aob.createIssuer(ISSUER1.name, ISSUER1.desc, node.Gaccount.password);
       DEBUG('create issuer trs', trs)
       var [err, res] = await node.submitTransactionAsyncE(trs)
       DEBUG('submit issuer response', err, res.body)
@@ -80,7 +80,7 @@ describe('Test AOB', () => {
 
       await node.onNewBlockAsync()
 
-      var [err, res] = await node.apiGetAsyncE('/aob/issuers/' + ISSUER1.name)
+      var [err, res] = await node.apiGetAsyncE(`/aob/issuers/${ISSUER1.name}`)
       DEBUG('get /aobissuer/issuers/:name response', err, res.body)
       expect(err).to.not.exist
       expect(res.body).to.have.property('result')
@@ -88,9 +88,9 @@ describe('Test AOB', () => {
       expect(res.body.result.issuer_id).to.equal(node.Gaccount.address)
     })
 
-    it('Register asset should be ok', async function () {
-      var currency = ISSUER1.name + '.' + ASSET1.name
-      var trs = node.ddn.aob.createAsset(
+    it('Register asset should be ok', async () => {
+      const currency = `${ISSUER1.name}.${ASSET1.name}`;
+      const trs = node.ddn.aob.createAsset(
         currency,
         ASSET1.desc,
         ASSET1.maximum,
@@ -99,7 +99,7 @@ describe('Test AOB', () => {
         1,
         1,
         1,
-        node.Gaccount.password)
+        node.Gaccount.password);
       DEBUG('create asset trs', trs)
 
       var [err, res] = await node.submitTransactionAsyncE(trs)
@@ -109,13 +109,13 @@ describe('Test AOB', () => {
 
       await node.onNewBlockAsync()
 
-      var [err, res] = await node.apiGetAsyncE('/aobasset/issuers/' + ISSUER1.name + '/assets')
+      var [err, res] = await node.apiGetAsyncE(`/aobasset/issuers/${ISSUER1.name}/assets`)
       DEBUG('get /aobasset/issuers/:name/assets response', err, res.body)
       expect(err).to.not.exist
       expect(res.body.result.total).to.be.a('number')
       expect(res.body.result.rows).to.be.instanceOf(Array)
 
-      var [err, res] = await node.apiGetAsyncE('/aobasset/' + currency)
+      var [err, res] = await node.apiGetAsyncE(`/aobasset/${currency}`)
       DEBUG('get /aobasset/:name response', err, res.body)
       expect(err).to.not.exist
       expect(res.body.result.name).to.equal(currency)
@@ -128,31 +128,31 @@ describe('Test AOB', () => {
       expect(res.body.result.writeoff).to.equal(0)
     })
 
-    it('Issue and transfer asset should be ok', async function () {
-      var currency = ISSUER1.name + '.' + ASSET1.name
-      var transferAddress = '12345'
+    it('Issue and transfer asset should be ok', async () => {
+      const currency = `${ISSUER1.name}.${ASSET1.name}`;
+      const transferAddress = '12345';
 
-      var [err, res] = await node.apiGetAsyncE('/aobasset/balances/' + node.Gaccount.address)
+      var [err, res] = await node.apiGetAsyncE(`/aobasset/balances/${node.Gaccount.address}`)
       DEBUG('get issuer balance before issue response', err, res.body)
       expect(err).to.not.exist
 
-      var issuerBalance = (res.body.result[0] && res.body.result[0].balance) || 0
+      let issuerBalance = (res.body.result[0] && res.body.result[0].balance) || 0;
 
-      var [err, res] = await node.apiGetAsyncE('/aobasset/balances/' + transferAddress)
+      var [err, res] = await node.apiGetAsyncE(`/aobasset/balances/${transferAddress}`)
       DEBUG('get recipient balance before issue response', err, res.body)
       expect(err).to.not.exist
 
-      var recipientBalance = (res.body.result.balances[0] && res.body.result.balances[0].balance) || 0
+      let recipientBalance = (res.body.result.balances[0] && res.body.result.balances[0].balance) || 0;
 
-      var [err, res] = await node.apiGetAsyncE('/aobasset/' + currency)
+      var [err, res] = await node.apiGetAsyncE(`/aobasset/${currency}`)
       DEBUG('get asset before issue response', err, res.body)
       expect(err).to.not.exist
       expect(res.body.result.name).to.equal(currency)
 
-      var quantity = res.body.asset.quantity
+      let quantity = res.body.asset.quantity;
 
-      var amount = '10000000000'
-      var trs = node.ddn.aob.createIssue(currency, amount, node.Gaccount.password)
+      const amount = '10000000000';
+      let trs = node.ddn.aob.createIssue(currency, amount, node.Gaccount.password);
       DEBUG('create issue trs', trs)
 
       var [err, res] = await node.submitTransactionAsyncE(trs)
@@ -162,18 +162,18 @@ describe('Test AOB', () => {
 
       await node.onNewBlockAsync()
 
-    //Bignum update   issuerBalance = Bignum(issuerBalance).plus(amount).toString()
-      issuerBalance = Bignum.plus(issuerBalance, amount).toString();
-    //Bignum update   quantity = Bignum(quantity).plus(amount).toString()
-      quantity = Bignum.plus(quantity, amount).toString();
+    //DdnUtils.bignum update   issuerBalance = DdnUtils.bignum(issuerBalance).plus(amount).toString()
+      issuerBalance = DdnUtils.bignum.plus(issuerBalance, amount).toString();
+    //DdnUtils.bignum update   quantity = DdnUtils.bignum(quantity).plus(amount).toString()
+      quantity = DdnUtils.bignum.plus(quantity, amount).toString();
 
-      var [err, res] = await node.apiGetAsyncE('/aobasset/' + currency)
+      var [err, res] = await node.apiGetAsyncE(`/aobasset/${currency}`)
       DEBUG('get asset after issue response', err, res.body)
       expect(err).to.not.exist
       expect(res.body.result.name).to.equal(currency)
       expect(res.body.result.quantity).to.equal(quantity)
 
-      var [err, res] = await node.apiGetAsyncE('/aobasset/balances/' + node.Gaccount.address)
+      var [err, res] = await node.apiGetAsyncE(`/aobasset/balances/${node.Gaccount.address}`)
       DEBUG('get issuer balance after issue response', err, res.body)
       expect(err).to.not.exist
       expect(res.body.result).to.be.instanceOf(Array)
@@ -181,7 +181,7 @@ describe('Test AOB', () => {
       expect(res.body.result[0].currency).to.equal(currency)
       expect(res.body.result[0].balance).to.equal(issuerBalance)
 
-      var transferAmount = '10'
+      const transferAmount = '10';
       trs = node.ddn.aob.createTransfer(currency, transferAmount, transferAddress, '', node.Gaccount.password)
       DEBUG('create transfer trs', trs)
       var [err, res] = await node.submitTransactionAsyncE(trs)
@@ -191,10 +191,10 @@ describe('Test AOB', () => {
 
       await node.onNewBlockAsyncE()
 
-    //Bignum update   issuerBalance = Bignum(issuerBalance).sub(transferAmount).toString()
-      issuerBalance = Bignum.minus(issuerBalance, transferAmount).toString();
+    //DdnUtils.bignum update   issuerBalance = DdnUtils.bignum(issuerBalance).sub(transferAmount).toString()
+      issuerBalance = DdnUtils.bignum.minus(issuerBalance, transferAmount).toString();
 
-      var [err, res] = await node.apiGetAsyncE('/aobasset/balances/' + node.Gaccount.address)
+      var [err, res] = await node.apiGetAsyncE(`/aobasset/balances/${node.Gaccount.address}`)
       DEBUG('get issuer balance response', err, res.body)
       expect(err).to.not.exist
       expect(res.body.result).to.be.instanceOf(Array)
@@ -202,10 +202,10 @@ describe('Test AOB', () => {
       expect(res.body.result[0].currency).to.equal(currency)
       expect(res.body.result[0].balance).to.equal(issuerBalance)
 
-    //Bignum update   recipientBalance = Bignum(recipientBalance).plus(transferAmount).toString()
-      recipientBalance = Bignum.plus(recipientBalance, transferAmount).toString();
+    //DdnUtils.bignum update   recipientBalance = DdnUtils.bignum(recipientBalance).plus(transferAmount).toString()
+      recipientBalance = DdnUtils.bignum.plus(recipientBalance, transferAmount).toString();
 
-      var [err, res] = await node.apiGetAsyncE('/aobasset/balances/' + transferAddress)
+      var [err, res] = await node.apiGetAsyncE(`/aobasset/balances/${transferAddress}`)
       DEBUG('get recipient balance response', err, res.body)
       expect(err).to.not.exist
       expect(res.body.result).to.be.instanceOf(Array)
@@ -215,23 +215,23 @@ describe('Test AOB', () => {
 
     })
 
-    it('Update flags and acl should be ok', async function () {
-      var currency = ISSUER1.name + '.' + ASSET1.name
+    it('Update flags and acl should be ok', async () => {
+      const currency = `${ISSUER1.name}.${ASSET1.name}`;
 
-      var [err, res] = await node.apiGetAsyncE('/aobasset/' + currency)
+      var [err, res] = await node.apiGetAsyncE(`/aobasset/${currency}`)
       expect(err).to.not.exist
       expect(res.body.result.name).to.equal(currency)
       expect(res.body.result.acl).to.equal(0)
 
       // get white list before update acl
-      res = await node.apiGetAsync('/aobasset/' + currency + '/acl/1')
+      res = await node.apiGetAsync(`/aobasset/${currency}/acl/1`)
       expect(res.body.result.total).to.be.a('number')
       expect(res.body.result.rows).to.be.instanceOf(Array)
-      var origCount = res.body.count
+      const origCount = res.body.count;
       expect(origCount >= 0).to.be.ok
 
       // change to white list mode
-      var trs = node.ddn.aob.createFlags(currency, 1, 1, node.Gaccount.password)
+      let trs = node.ddn.aob.createFlags(currency, 1, 1, node.Gaccount.password);
       var [err, res] = await node.submitTransactionAsyncE(trs)
       DEBUG('change flags response', err, res.body)
       expect(err).to.not.exist
@@ -240,15 +240,15 @@ describe('Test AOB', () => {
 
       await node.onNewBlockAsyncE()
 
-      var [err, res] = await node.apiGetAsyncE('/aobasset/' + currency)
+      var [err, res] = await node.apiGetAsyncE(`/aobasset/${currency}`)
       expect(err).to.not.exist
       expect(res.body.result.name).to.equal(currency)
       expect(res.body.result.acl).to.equal(1)
 
       // add address to white list
-      var account1 = node.genNormalAccount()
-      var account2 = node.genNormalAccount()
-      var whiteList = [account1.address, account2.address]
+      const account1 = node.genNormalAccount();
+      const account2 = node.genNormalAccount();
+      const whiteList = [account1.address, account2.address];
       trs = node.ddn.aob.createAcl(currency, '+', 1, whiteList, node.Gaccount.password)
       var [err, res] = await node.submitTransactionAsyncE(trs)
       DEBUG('update acl response', err, res.body)
@@ -258,7 +258,7 @@ describe('Test AOB', () => {
       await node.onNewBlockAsync()
 
       // get white list
-      res = await node.apiGetAsync('/aobasset/' + currency + '/acl/1')
+      res = await node.apiGetAsync(`/aobasset/${currency}/acl/1`)
       expect(res.body.total).to.be.a('number')
       expect(res.body.result.rows).to.be.instanceOf(Array)
       expect(res.body.result.total == origCount + 2).to.be.ok
@@ -284,9 +284,9 @@ describe('Test AOB', () => {
 
   describe('Register issuer fail cases', () => {
 
-    it('Invalid parameters', async function () {
-      var account = node.genNormalAccount()
-      var res = await registerIssuerAsync('', 'normal desc', account)
+    it('Invalid parameters', async () => {
+      const account = node.genNormalAccount();
+      let res = await registerIssuerAsync('', 'normal desc', account);
       expect(res.body).to.have.property('error').to.match(/^Invalid transaction body/)
 
       res = await registerIssuerAsync('long_name-aaaaaaaaaaaaaa', 'normal desc', account)
@@ -295,7 +295,7 @@ describe('Test AOB', () => {
       res = await registerIssuerAsync('normalname', '', account)
       expect(res.body).to.have.property('error').to.match(/^Invalid transaction body/)
 
-      var largeString = Buffer.allocUnsafe(5000).toString()
+      const largeString = Buffer.allocUnsafe(5000).toString();
       res = await registerIssuerAsync('normalname', largeString, account)
       expect(res.body).to.have.property('error').to.match(/^Invalid transaction body/)
 
@@ -306,19 +306,19 @@ describe('Test AOB', () => {
       expect(res.body).to.have.property('error').to.match(/^Invalid transaction body/)
     })
 
-    it('Insufficient balance', async function () {
-      var account = node.genNormalAccount()
-      var res = await registerIssuerAsync(node.randomIssuerName(), 'normal desc', account)
+    it('Insufficient balance', async () => {
+      const account = node.genNormalAccount();
+      const res = await registerIssuerAsync(node.randomIssuerName(), 'normal desc', account);
       expect(res.body).to.have.property('error').to.match(/^Insufficient balance/)
     })
 
-    it('Double submit', async function () {
-      var account = node.genNormalAccount()
-      var anotherAccount = node.genNormalAccount()
+    it('Double submit', async () => {
+      const account = node.genNormalAccount();
+      const anotherAccount = node.genNormalAccount();
       await node.giveMoneyAndWaitAsync([account.address, anotherAccount.address])
 
-      var registeredName = node.randomIssuerName()
-      var res = await registerIssuerAsync(registeredName, 'normal desc', account)
+      const registeredName = node.randomIssuerName();
+      let res = await registerIssuerAsync(registeredName, 'normal desc', account);
       expect(res.body).to.have.property('success').to.be.true
 
       res = await registerIssuerAsync(node.randomIssuerName(), 'normal desc', account)
@@ -328,13 +328,13 @@ describe('Test AOB', () => {
       expect(res.body).to.have.property('error').to.match(/^Double submit/)
     })
 
-    it('Double register', async function () {
-      var account = node.genNormalAccount()
-      var anotherAccount = node.genNormalAccount()
+    it('Double register', async () => {
+      const account = node.genNormalAccount();
+      const anotherAccount = node.genNormalAccount();
       await node.giveMoneyAndWaitAsync([account.address, anotherAccount.address])
 
-      var registeredName = node.randomIssuerName()
-      var res = await registerIssuerAsync(registeredName, 'normal desc', account)
+      const registeredName = node.randomIssuerName();
+      let res = await registerIssuerAsync(registeredName, 'normal desc', account);
       expect(res.body).to.have.property('success').to.be.true
       await node.onNewBlockAsync()
 
@@ -347,20 +347,20 @@ describe('Test AOB', () => {
   })
 
   describe('Register asset fail cases', () => {
-    var ISSUER_ACCOUNT = node.genNormalAccount()
-    var ISSUER_NAME = node.randomIssuerName()
-    var VALID_ASSET_NAME = ISSUER_NAME + '.BTC'
-    var VALID_DESC = 'valid desc'
-    var VALID_MAXIMUM = '10000000'
-    var VALID_PRECISION = 3
-    var VALID_STRATEGY = ''
+    const ISSUER_ACCOUNT = node.genNormalAccount();
+    const ISSUER_NAME = node.randomIssuerName();
+    const VALID_ASSET_NAME = `${ISSUER_NAME}.BTC`;
+    const VALID_DESC = 'valid desc';
+    const VALID_MAXIMUM = '10000000';
+    const VALID_PRECISION = 3;
+    const VALID_STRATEGY = '';
 
-    before(async function () {
+    before(async () => {
       await node.giveMoneyAndWaitAsync([ISSUER_ACCOUNT.address])
     })
 
-    it('Invalid asset name', async function () {
-      var INVALID_NAME_CASES = [
+    it('Invalid asset name', async () => {
+      const INVALID_NAME_CASES = [
         {
           error: /^Invalid transaction body/,
           cases: [
@@ -389,11 +389,11 @@ describe('Test AOB', () => {
             'ddn.LONGNAME',
           ]
         }
-      ]
+      ];
       for (let i = 0; i < INVALID_NAME_CASES.length; ++i) {
         let error = INVALID_NAME_CASES[i].error
-        for (let j = 0; j < INVALID_NAME_CASES[i].cases.length; ++j) {
-          let name = INVALID_NAME_CASES[i].cases[j]
+
+        for (let name of INVALID_NAME_CASES[i].cases) {
           let res = await registerAssetAsync(name, VALID_DESC, VALID_MAXIMUM, VALID_PRECISION, VALID_STRATEGY, ISSUER_ACCOUNT)
           DEBUG('register asset fail case', name, res.body)
           expect(res.body).to.have.property('error').to.match(error)
@@ -401,17 +401,17 @@ describe('Test AOB', () => {
       }
     })
 
-    it('Invalid asset desc', async function () {
-      var res = await registerAssetAsync(VALID_ASSET_NAME, '', VALID_MAXIMUM, VALID_PRECISION, VALID_STRATEGY, ISSUER_ACCOUNT)
+    it('Invalid asset desc', async () => {
+      let res = await registerAssetAsync(VALID_ASSET_NAME, '', VALID_MAXIMUM, VALID_PRECISION, VALID_STRATEGY, ISSUER_ACCOUNT);
       expect(res.body).to.have.property('error').to.match(/^Invalid transaction body/)
 
-      var largeDesc = Buffer.allocUnsafe(5000).toString()
+      const largeDesc = Buffer.allocUnsafe(5000).toString();
       res = await registerAssetAsync(VALID_ASSET_NAME, largeDesc, VALID_MAXIMUM, VALID_PRECISION, VALID_STRATEGY, ISSUER_ACCOUNT)
       expect(res.body).to.have.property('error').to.match(/^Invalid transaction body/)
     })
 
-    it('Invalid asset maximum', async function () {
-      var res = await registerAssetAsync(VALID_ASSET_NAME, VALID_DESC, '', VALID_PRECISION, VALID_STRATEGY, ISSUER_ACCOUNT)
+    it('Invalid asset maximum', async () => {
+      let res = await registerAssetAsync(VALID_ASSET_NAME, VALID_DESC, '', VALID_PRECISION, VALID_STRATEGY, ISSUER_ACCOUNT);
       expect(res.body).to.have.property('error').to.match(/^Invalid transaction body/)
 
       res = await registerAssetAsync(VALID_ASSET_NAME, VALID_DESC, '0', VALID_PRECISION, VALID_STRATEGY, ISSUER_ACCOUNT)
@@ -436,34 +436,34 @@ describe('Test AOB', () => {
       expect(res.body).to.have.property('error').to.match(/^Amount should be integer/)
     })
 
-    it('Invalid asset precision', async function () {
-      var res = await registerAssetAsync(VALID_ASSET_NAME, VALID_DESC, VALID_MAXIMUM, -1, VALID_STRATEGY, ISSUER_ACCOUNT)
+    it('Invalid asset precision', async () => {
+      let res = await registerAssetAsync(VALID_ASSET_NAME, VALID_DESC, VALID_MAXIMUM, -1, VALID_STRATEGY, ISSUER_ACCOUNT);
       expect(res.body).to.have.property('error').to.match(/^Invalid transaction body/)
 
       res = await registerAssetAsync(VALID_ASSET_NAME, VALID_DESC, VALID_MAXIMUM, 17, VALID_STRATEGY, ISSUER_ACCOUNT)
       expect(res.body).to.have.property('error').to.match(/^Invalid transaction body/)
     })
 
-    it('Invalid asset strategy', async function () {
-      var largeString = Buffer.allocUnsafe(300).toString()
-      var res = await registerAssetAsync(VALID_ASSET_NAME, VALID_DESC, VALID_MAXIMUM, VALID_PRECISION, largeString, ISSUER_ACCOUNT)
+    it('Invalid asset strategy', async () => {
+      const largeString = Buffer.allocUnsafe(300).toString();
+      const res = await registerAssetAsync(VALID_ASSET_NAME, VALID_DESC, VALID_MAXIMUM, VALID_PRECISION, largeString, ISSUER_ACCOUNT);
       expect(res.body).to.have.property('error').to.match(/^Invalid transaction body/)
     })
 
-    it('Issuer not exist', async function () {
-      var account = node.genNormalAccount()
-      var name = node.randomIssuerName() + '.BTC'
-      var res = await registerAssetAsync(name, VALID_DESC, VALID_MAXIMUM, VALID_PRECISION, VALID_STRATEGY, ISSUER_ACCOUNT)
+    it('Issuer not exist', async () => {
+      const account = node.genNormalAccount();
+      const name = `${node.randomIssuerName()}.BTC`;
+      const res = await registerAssetAsync(name, VALID_DESC, VALID_MAXIMUM, VALID_PRECISION, VALID_STRATEGY, ISSUER_ACCOUNT);
       expect(res.body).to.have.property('error').to.match(/^Issuer not exists/)
     })
 
-    it('Double submit and double register', async function () {
-      var account = node.genNormalAccount()
+    it('Double submit and double register', async () => {
+      const account = node.genNormalAccount();
       await node.giveMoneyAndWaitAsync([account.address])
 
-      var issuerName = node.randomIssuerName()
-      var assetName = issuerName + '.BTC'
-      var res = await registerIssuerAsync(issuerName, 'normal desc', account)
+      const issuerName = node.randomIssuerName();
+      const assetName = `${issuerName}.BTC`;
+      let res = await registerIssuerAsync(issuerName, 'normal desc', account);
       expect(res.body).to.have.property('success').to.be.true
       await node.onNewBlockAsync()
 
@@ -479,11 +479,11 @@ describe('Test AOB', () => {
   })
 
   describe('Parameter validate fail cases', () => {
-    var ISSUE_ACCOUNT = node.genNormalAccount()
-    var ASSET_NAME = 'NotExistName.BTC'
+    const ISSUE_ACCOUNT = node.genNormalAccount();
+    const ASSET_NAME = 'NotExistName.BTC';
 
-    it('should fail to issue if amount is invalid', async function () {
-      var res = await issueAssetAsync(ASSET_NAME, '', ISSUE_ACCOUNT)
+    it('should fail to issue if amount is invalid', async () => {
+      let res = await issueAssetAsync(ASSET_NAME, '', ISSUE_ACCOUNT);
       expect(res.body).to.have.property('error').to.match(/^Invalid transaction body/)
 
       res = await issueAssetAsync(ASSET_NAME, '0', ISSUE_ACCOUNT)
@@ -496,8 +496,8 @@ describe('Test AOB', () => {
       expect(res.body).to.have.property('error').to.match(/^Amount should be integer/)
     })
 
-    it('should fail to change flags if parameters is invalid', async function () {
-      var res = await changeFlagsAsync(ASSET_NAME, -1, 1, ISSUE_ACCOUNT)
+    it('should fail to change flags if parameters is invalid', async () => {
+      let res = await changeFlagsAsync(ASSET_NAME, -1, 1, ISSUE_ACCOUNT);
       expect(res.body).to.have.property('error').to.match(/^Invalid asset flag type/)
 
       res = await changeFlagsAsync(ASSET_NAME, 1, -1, ISSUE_ACCOUNT)
@@ -507,11 +507,11 @@ describe('Test AOB', () => {
       expect(res.body).to.have.property('error').to.match(/^Invalid asset flag/)
     })
 
-    it('should fail to update acl if parameters is invalid', async function () {
-      var validFlag = 0
-      var validOperator = '+'
-      var validList = [node.genNormalAccount().address]
-      var res = await updateAclAsync(ASSET_NAME, '+-', validFlag, validList, ISSUE_ACCOUNT)
+    it('should fail to update acl if parameters is invalid', async () => {
+      const validFlag = 0;
+      const validOperator = '+';
+      const validList = [node.genNormalAccount().address];
+      let res = await updateAclAsync(ASSET_NAME, '+-', validFlag, validList, ISSUE_ACCOUNT);
       expect(res.body).to.have.property('error').to.match(/^Invalid transaction body/)
 
       res = await updateAclAsync(ASSET_NAME, '|', validFlag, validList, ISSUE_ACCOUNT)
@@ -523,14 +523,14 @@ describe('Test AOB', () => {
       res = await updateAclAsync(ASSET_NAME, validOperator, validFlag, [], ISSUE_ACCOUNT)
       expect(res.body).to.have.property('error').to.match(/^Invalid acl list/)
 
-      var bigList = []
+      const bigList = [];
       for (let i = 0; i < 11; ++i) {
         bigList.push(node.genNormalAccount().address)
       }
       res = await updateAclAsync(ASSET_NAME, validOperator, validFlag, bigList, ISSUE_ACCOUNT)
       expect(res.body).to.have.property('error').to.match(/^Invalid acl list/)
 
-      var unUniqList = ['123', '123']
+      const unUniqList = ['123', '123'];
       res = await updateAclAsync(ASSET_NAME, validOperator, validFlag, unUniqList, ISSUE_ACCOUNT)
       expect(res.body).to.have.property('error').to.match(/^Invalid transaction body/)
 
@@ -541,9 +541,9 @@ describe('Test AOB', () => {
       expect(res.body).to.have.property('error').to.match(/^Acl contains invalid address/)
     })
 
-    it('should fail to do anything if asset not exists', async function () {
-      var notExistAssetName = 'NotExistName.CNY'
-      var res = await issueAssetAsync(notExistAssetName, '1', ISSUE_ACCOUNT)
+    it('should fail to do anything if asset not exists', async () => {
+      const notExistAssetName = 'NotExistName.CNY';
+      let res = await issueAssetAsync(notExistAssetName, '1', ISSUE_ACCOUNT);
       expect(res.body).to.have.property('error').to.match(/^Asset not exists/)
 
       res = await changeFlagsAsync(notExistAssetName, 1, 1, ISSUE_ACCOUNT)
@@ -558,14 +558,14 @@ describe('Test AOB', () => {
   })
 
   describe('Asset operation fail cases', () => {
-    var ISSUE_ACCOUNT = node.genNormalAccount()
-    var ISSUER_NAME = node.randomIssuerName()
-    var ASSET_NAME = ISSUER_NAME + '.GOLD'
-    var MAX_AMOUNT = '100000'
+    const ISSUE_ACCOUNT = node.genNormalAccount();
+    const ISSUER_NAME = node.randomIssuerName();
+    const ASSET_NAME = `${ISSUER_NAME}.GOLD`;
+    const MAX_AMOUNT = '100000';
 
-    before(async function () {
+    before(async () => {
       await node.giveMoneyAndWaitAsync([ISSUE_ACCOUNT.address])
-      var res = await registerIssuerAsync(ISSUER_NAME, 'valid desc', ISSUE_ACCOUNT)
+      let res = await registerIssuerAsync(ISSUER_NAME, 'valid desc', ISSUE_ACCOUNT);
       expect(res.body).to.have.property('success').to.be.true
       await node.onNewBlockAsync()
 
@@ -574,9 +574,9 @@ describe('Test AOB', () => {
       await node.onNewBlockAsync()
     })
 
-    it('should have no permission to operate if asset belongs to other account', async function () {
-      var account = node.genNormalAccount()
-      var res = await issueAssetAsync(ASSET_NAME, '1', account)
+    it('should have no permission to operate if asset belongs to other account', async () => {
+      const account = node.genNormalAccount();
+      let res = await issueAssetAsync(ASSET_NAME, '1', account);
       expect(res.body).to.have.property('error').to.match(/^Permission not allowed/)
 
       res = await changeFlagsAsync(ASSET_NAME, 1, 1, account)
@@ -586,16 +586,16 @@ describe('Test AOB', () => {
       expect(res.body).to.have.property('error').to.match(/^Permission not allowed/)
     })
 
-    it('should fail to issue if amount exceed the limit', async function () {
-    //Bignum update   var res = await issueAssetAsync(ASSET_NAME, Bignum(MAX_AMOUNT).plus(1).toString(), ISSUE_ACCOUNT)
-      var res = await issueAssetAsync(ASSET_NAME,
-        Bignum.plus(MAX_AMOUNT, 1).toString(), ISSUE_ACCOUNT);
+    it('should fail to issue if amount exceed the limit', async () => {
+    //DdnUtils.bignum update   var res = await issueAssetAsync(ASSET_NAME, DdnUtils.bignum(MAX_AMOUNT).plus(1).toString(), ISSUE_ACCOUNT)
+      const res = await issueAssetAsync(ASSET_NAME,
+        DdnUtils.bignum.plus(MAX_AMOUNT, 1).toString(), ISSUE_ACCOUNT);
 
       expect(res.body).to.have.property('error').to.match(/^Exceed issue limit/)
     })
 
-    it('should fail to double submit issuing', async function () {
-      var res = await issueAssetAsync(ASSET_NAME, '1', ISSUE_ACCOUNT)
+    it('should fail to double submit issuing', async () => {
+      let res = await issueAssetAsync(ASSET_NAME, '1', ISSUE_ACCOUNT);
       expect(res.body).to.have.property('success').to.be.true
       res = await issueAssetAsync(ASSET_NAME, '2', ISSUE_ACCOUNT)
       expect(res.body).to.have.property('error').to.match(/^Double submit/)
@@ -603,14 +603,14 @@ describe('Test AOB', () => {
       await node.onNewBlockAsync()
     })
 
-    it('should fail to double set flag', async function () {
+    it('should fail to double set flag', async () => {
       // default acl flag is 0
-      var res = await changeFlagsAsync(ASSET_NAME, 1, 0, ISSUE_ACCOUNT)
+      const res = await changeFlagsAsync(ASSET_NAME, 1, 0, ISSUE_ACCOUNT);
       expect(res.body).to.have.property('error').to.match(/^Flag double set/)
     })
 
-    it('should fail to double submit flags', async function () {
-      var res = await changeFlagsAsync(ASSET_NAME, 1, 1, ISSUE_ACCOUNT)
+    it('should fail to double submit flags', async () => {
+      let res = await changeFlagsAsync(ASSET_NAME, 1, 1, ISSUE_ACCOUNT);
       expect(res.body).to.have.property('success').to.be.true
       res = await changeFlagsAsync(ASSET_NAME, 2, 1, ISSUE_ACCOUNT)
       expect(res.body).to.have.property('error').to.match(/^Double submit/)
@@ -618,8 +618,8 @@ describe('Test AOB', () => {
       await node.onNewBlockAsync()
     })
 
-    it('should fail to doulbe submit acl', async function () {
-      var res = await updateAclAsync(ASSET_NAME, '+', 0, [node.genNormalAccount().address], ISSUE_ACCOUNT)
+    it('should fail to doulbe submit acl', async () => {
+      let res = await updateAclAsync(ASSET_NAME, '+', 0, [node.genNormalAccount().address], ISSUE_ACCOUNT);
       expect(res.body).to.have.property('success').to.be.true
       res = await updateAclAsync(ASSET_NAME, '+', 0, [node.genNormalAccount().address], ISSUE_ACCOUNT)
       expect(res.body).to.have.property('error').to.match(/^Double submit/)
@@ -627,10 +627,10 @@ describe('Test AOB', () => {
       await node.onNewBlockAsync()
     })
 
-    it('should fail to add acl if some address is already in acl', async function () {
-      var address1 = node.genNormalAccount().address
-      var address2 = node.genNormalAccount().address
-      var res = await updateAclAsync(ASSET_NAME, '+', 0, [address1], ISSUE_ACCOUNT)
+    it('should fail to add acl if some address is already in acl', async () => {
+      const address1 = node.genNormalAccount().address;
+      const address2 = node.genNormalAccount().address;
+      let res = await updateAclAsync(ASSET_NAME, '+', 0, [address1], ISSUE_ACCOUNT);
       expect(res.body).to.have.property('success').to.be.true
       await node.onNewBlockAsync()
 
@@ -648,8 +648,8 @@ describe('Test AOB', () => {
       await node.onNewBlockAsync()
     })
 
-    it('should fail to do anything if asset is writeoff', async function () {
-      var res = await writeoffAssetAsync(ASSET_NAME, ISSUE_ACCOUNT)
+    it('should fail to do anything if asset is writeoff', async () => {
+      let res = await writeoffAssetAsync(ASSET_NAME, ISSUE_ACCOUNT);
       expect(res.body).to.have.property('success').to.be.true
       await node.onNewBlockAsync()
 
@@ -670,11 +670,11 @@ describe('Test AOB', () => {
 
   describe('Test issue strategy', () => {
     async function registerAssetWithStrategyAsync(maximum, strategy) {
-      var account = node.genNormalAccount()
-      var issuerName = node.randomIssuerName()
-      var assetName = issuerName + '.NAME'
+      const account = node.genNormalAccount();
+      const issuerName = node.randomIssuerName();
+      const assetName = `${issuerName}.NAME`;
       await node.giveMoneyAndWaitAsync([account.address])
-      var res = await registerIssuerAsync(issuerName, 'valid desc', account)
+      let res = await registerIssuerAsync(issuerName, 'valid desc', account);
       expect(res.body).to.have.property('success').to.be.true
       await node.onNewBlockAsync()
 
@@ -682,18 +682,18 @@ describe('Test AOB', () => {
       expect(res.body).to.have.property('success').to.be.true
       await node.onNewBlockAsync()
       return {
-        account: account,
-        issuerName: issuerName,
-        assetName: assetName
-      }
+        account,
+        issuerName,
+        assetName
+      };
     }
-    it('normal cases should be ok', async function () {
-      var assetInfo = await registerAssetWithStrategyAsync('10000', 'quantity <= maximum / 10 * (height - genesisHeight)')
+    it('normal cases should be ok', async () => {
+      const assetInfo = await registerAssetWithStrategyAsync('10000', 'quantity <= maximum / 10 * (height - genesisHeight)');
       console.log(assetInfo)
-      var account = assetInfo.account
-      var assetName = assetInfo.assetName
+      const account = assetInfo.account;
+      const assetName = assetInfo.assetName;
 
-      var res = await issueAssetAsync(assetName, '1001', account)
+      let res = await issueAssetAsync(assetName, '1001', account);
       expect(res.body).to.have.property('error').to.match(/^Strategy not allowed/)
 
       res = await issueAssetAsync(assetName, '1000', account)
@@ -709,7 +709,7 @@ describe('Test AOB', () => {
 
       await node.onNewBlockAsync()
 
-      var anotherAccount = node.genNormalAccount()
+      const anotherAccount = node.genNormalAccount();
       await node.giveMoneyAndWaitAsync([anotherAccount.address])
       res = await transferAsync(assetName, '3001', anotherAccount.address, account)
       expect(res.body).to.have.property('error').to.match(/^Insufficient asset balance/)
@@ -721,12 +721,12 @@ describe('Test AOB', () => {
 
       await node.onNewBlockAsync()
 
-      res = await node.apiGetAsync('/aobasset/balances/' + account.address)
+      res = await node.apiGetAsync(`/aobasset/balances/${account.address}`)
       DEBUG('get sender\'s balances first time', res.body)
       expect(res.body.result[0].currency).to.equal(assetName)
       expect(res.body.result[0].balance).to.equal('0')
 
-      res = await node.apiGetAsync('/aobasset/balances/' + anotherAccount.address)
+      res = await node.apiGetAsync(`/aobasset/balances/${anotherAccount.address}`)
       DEBUG('get recipient\'s balances first time', res.body)
       expect(res.body.result[0].currency).to.equal(assetName)
       expect(res.body.result[0].balance).to.equal('3000')
@@ -737,12 +737,12 @@ describe('Test AOB', () => {
       expect(res.body).to.have.property('error').to.match(/^Insufficient asset balance/)
       await node.onNewBlockAsync()
 
-      res = await node.apiGetAsync('/aobasset/balances/' + account.address)
+      res = await node.apiGetAsync(`/aobasset/balances/${account.address}`)
       DEBUG('get sender\'s balances second time', res.body)
       expect(res.body.result[0].currency).to.equal(assetName)
       expect(res.body.result[0].balance).to.equal('1000')
 
-      res = await node.apiGetAsync('/aobasset/balances/' + anotherAccount.address)
+      res = await node.apiGetAsync(`/aobasset/balances/${anotherAccount.address}`)
       DEBUG('get recipient\'s balances second time', res.body)
       expect(res.body.result[0].currency).to.equal(assetName)
       expect(res.body.result[0].balance).to.equal('2000')
@@ -750,20 +750,20 @@ describe('Test AOB', () => {
   })
 
   describe('Test modify permission', () => {
-    var ISSUE_ACCOUNT = node.genNormalAccount()
-    var ISSUER_NAME = node.randomIssuerName()
-    var ASSET_NAME = ISSUER_NAME + '.SILVER'
-    var MAX_AMOUNT = '100000'
+    const ISSUE_ACCOUNT = node.genNormalAccount();
+    const ISSUER_NAME = node.randomIssuerName();
+    const ASSET_NAME = `${ISSUER_NAME}.SILVER`;
+    const MAX_AMOUNT = '100000';
 
     async function registerAssetWithAllowParameters(allowWriteoff, allowWhitelist, allowBlacklist) {
-      var trs = node.ddn.aob.createAsset(ASSET_NAME, 'valid desc', MAX_AMOUNT, 1, '', allowWriteoff, allowWhitelist, allowBlacklist, ISSUE_ACCOUNT.password)
-      var res = await node.submitTransactionAsync(trs)
+      const trs = node.ddn.aob.createAsset(ASSET_NAME, 'valid desc', MAX_AMOUNT, 1, '', allowWriteoff, allowWhitelist, allowBlacklist, ISSUE_ACCOUNT.password);
+      const res = await node.submitTransactionAsync(trs);
       DEBUG('registerAssetWithAllowParameters', res.body)
       return res
     }
 
-    it('Invalid allow parameters', async function () {
-      var res = await registerAssetWithAllowParameters(-1, 1, 1)
+    it('Invalid allow parameters', async () => {
+      let res = await registerAssetWithAllowParameters(-1, 1, 1);
       expect(res.body).to.have.property('error').to.match(/^Asset allowWriteoff is not valid/)
 
       res = await registerAssetWithAllowParameters(1, 2, 1)
@@ -773,16 +773,16 @@ describe('Test AOB', () => {
       expect(res.body).to.have.property('error').to.match(/^Invalid transaction body/)
     })
 
-    it('Flags modifing should be denied with special asset parameters', async function () {
+    it('Flags modifing should be denied with special asset parameters', async () => {
       await node.giveMoneyAndWaitAsync([ISSUE_ACCOUNT.address])
-      var res = await registerIssuerAsync(ISSUER_NAME, 'valid desc', ISSUE_ACCOUNT)
+      let res = await registerIssuerAsync(ISSUER_NAME, 'valid desc', ISSUE_ACCOUNT);
       expect(res.body).to.have.property('success').to.be.true
       await node.onNewBlockAsync()
 
       res = registerAssetWithAllowParameters(0, 0, 0)
       await node.onNewBlockAsync()
 
-      res = await node.apiGetAsync('/aobasset/' + ASSET_NAME)
+      res = await node.apiGetAsync(`/aobasset/${ASSET_NAME}`)
       DEBUG('get assets response', res.body)
       expect(res.body.result.allow_writeoff).to.equal(0)
       expect(res.body.result.allow_whitelist).to.equal(0)

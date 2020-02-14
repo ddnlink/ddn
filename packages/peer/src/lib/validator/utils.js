@@ -1,8 +1,7 @@
-const util = require('util');
-
-exports.extend = extend;
-exports.copy = copy;
-exports.inherits = util.inherits;
+import util from 'util';
+export {extend};
+export {copy};
+export const inherits = util.inherits;
 
 function extend(target, source) {
     if (! target || typeof target !== 'object') return target;

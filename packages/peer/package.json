@@ -1,6 +1,6 @@
 {
   "name": "@ddn/peer",
-  "version": "0.0.1",
+  "version": "0.0.27",
   "description": "DDN Peer.",
   "files": [
     "lib",
@@ -54,7 +54,7 @@
     "@ddn/asset-evidence": "^0.0.1",
     "@ddn/core": "^0.0.1",
     "@ddn/node-sdk": "^0.0.1",
-    "@ddn/utils": "^0.0.1",
+    "@ddn/utils": "^0.0.5",
     "ajv": "^6.3.0",
     "array.prototype.find": "1.0.0",
     "array.prototype.findindex": "2.0.0",

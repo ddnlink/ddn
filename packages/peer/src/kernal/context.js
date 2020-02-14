@@ -2,23 +2,22 @@
  * 运行时上下文
  * wangxm   2018-12-25
  */
-const { Utils } = require('@ddn/utils');
-const Bus = require('../lib/bus');
-const protobuf = require('../lib/protobuf.js');
-const Sequence = require('../lib/sequence.js');
-const BalanceManager = require('../helpers/balance-manager');
-const database = require('../db/database');
-const dbParams = require('../db/db-params');
-const DdnSchema = require('../schema/ddn-schema');
-const { AssetUtils } = require('@ddn/asset-base');
-
-const constants = require('../constants');
+import DdnUtils from '@ddn/utils';
+import Asset from '@ddn/asset-base';
+import Bus from '../lib/bus';
+import protobuf from '../lib/protobuf.js';
+import Sequence from '../lib/sequence.js';
+import BalanceManager from '../helpers/balance-manager';
+import database from '../db/database';
+import dbParams from '../db/db-params';
+import DdnSchema from '../schema/ddn-schema';
+import constants from '../constants';
 
 class Context
 {
     async init(options) {
         if (!options.configObject.publicIp) {
-            options.configObject.publicIp = Utils.getPublicIp();
+            options.configObject.publicIp = DdnUtils.system.getPublicIp();
         }
 
         this.isDaemonMode = options.isDaemonMode;
@@ -47,7 +46,7 @@ class Context
         this.ddnSchema = DdnSchema.singleton();
 
         //资产插件配置对象
-        this.assetPlugins = AssetUtils.loadFromObject(options.configObject.assets);
+        this.assetPlugins = Asset.Utils.loadFromObject(options.configObject.assets);
 
         //二进制序列化对象
         this.protobuf = await this._buildProtobuf(options.protoFile);
@@ -124,4 +123,4 @@ class Context
 
 }
 
-module.exports = Context;
+export default Context;

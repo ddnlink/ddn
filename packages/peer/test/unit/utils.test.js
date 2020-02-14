@@ -5,15 +5,16 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-const node = require("../variables.js");
-const constants = require("../../lib/constants");
-const { Bignum } = require('@ddn/utils');
+import DdnUtil from '@ddn/utils';
 
-describe('Constants params', function () {
-  it('test block reward', function (done) {
-    var BlockStatus = require('../../lib/kernal/block/block-status.js');
+import node from "../variables.js";
+import constants from "../../lib/constants";
+
+describe('Constants params', () => {
+  it('test block reward', done => {
+    const BlockStatus = require('../../lib/kernal/block/block-status.js');
     global.config = {netVersion: 'testnet', settings: {delegateNumber: 101}};
-    var blockStatus = new BlockStatus(global);
+    let blockStatus = new BlockStatus(global);
     node.expect(blockStatus.calcMilestone(1)).to.equal("0");
     node.expect(blockStatus.calcMilestone(2999999)).to.equal("0");
     node.expect(blockStatus.calcMilestone(3000000)).to.equal("0");
@@ -31,8 +32,8 @@ describe('Constants params', function () {
 
     node.expect(blockStatus.calcSupply(1)).to.equal(constants.totalAmount);
     node.expect(blockStatus.calcSupply(2)).to.equal(constants.totalAmount);
-    node.expect(blockStatus.calcSupply(101)).to.equal(Bignum.plus(constants.totalAmount, Bignum.multiply(constants.testnet.milestones[0], 100)).toString());
-    node.expect(blockStatus.calcSupply(102)).to.equal(Bignum.plus(constants.totalAmount, Bignum.multiply(constants.testnet.milestones[0], 100)).toString());
+    node.expect(blockStatus.calcSupply(101)).to.equal(DdnUtil.bignum.plus(constants.totalAmount, DdnUtil.bignum.multiply(constants.testnet.milestones[0], 100)).toString());
+    node.expect(blockStatus.calcSupply(102)).to.equal(DdnUtil.bignum.plus(constants.totalAmount, DdnUtil.bignum.multiply(constants.testnet.milestones[0], 100)).toString());
 
     // todo 下面的还没有修改
     // node.expect(blockStatus.calcSupply(3000000)).to.equal(11499950500000000);
@@ -72,28 +73,28 @@ describe('Constants params', function () {
     done();
   });
 
-  it('transaction sort should be stable', function (done) {
-    var sortBy = function (a, b) {
-      if (a.type != b.type) {
-        if (a.type == 1) {
+  it('transaction sort should be stable', done => {
+    const sortBy = ({type, amount, id}, {type, amount, id}) => {
+      if (type != type) {
+        if (type == 1) {
           return 1;
         }
-        if (b.type == 1) {
+        if (type == 1) {
           return -1;
         }
-        return a.type - b.type;
+        return type - type;
       }
-      if (a.amount != b.amount) {
-        return a.amount - b.amount;
+      if (amount != amount) {
+        return amount - amount;
       }
-      return a.id.localeCompare(b.id);
+      return id.localeCompare(id);
     };
     function randNumber (min, max) {
       return Math.floor(Math.random() * (max - min + 1)) + min;
     }
     function randomTrs () {
-      var trs = [];
-      for (var i = 0; i < 100; ++i) {
+      const trs = [];
+      for (let i = 0; i < 100; ++i) {
         trs.push({
           type: randNumber(0, 8),
           amount: randNumber(0, 10000),
@@ -103,36 +104,36 @@ describe('Constants params', function () {
       return trs;
     }
     function clone(a) {
-      var b  = [];
-      for (var i in a) {
+      const b  = [];
+      for (const i in a) {
         b.push(a[i]);
       }
       return b;
     }
-    var trs = randomTrs();
-    var trs1 = clone(trs);
+    const trs = randomTrs();
+    const trs1 = clone(trs);
     trs1.sort(sortBy);
-    var trs2 = clone(trs1);
+    const trs2 = clone(trs1);
     trs2.sort(sortBy);
     node.expect(trs1).to.eql(trs2);
     trs2.sort(sortBy);
     node.expect(trs1).to.eql(trs2);
 
-    var fs = require('fs');
-    var path = require('path');
-    var trs21 = JSON.parse(fs.readFileSync(path.join(__dirname, './data/trs.21'), 'utf8'));
-    var trs21_1 = clone(trs21);
+    const fs = require('fs');
+    const path = require('path');
+    const trs21 = JSON.parse(fs.readFileSync(path.join(__dirname, './data/trs.21'), 'utf8'));
+    const trs21_1 = clone(trs21);
     trs21_1.sort(sortBy);
 
-    var trs21_2 = clone(trs21_1);
+    const trs21_2 = clone(trs21_1);
     trs21_2.sort(sortBy);
     node.expect(trs21_1).eql(trs21_2);
 
-    var trs7694 = JSON.parse(fs.readFileSync(path.join(__dirname, './data/trs.7694'), 'utf8'));
-    var trs7694_1 = clone(trs7694);
+    const trs7694 = JSON.parse(fs.readFileSync(path.join(__dirname, './data/trs.7694'), 'utf8'));
+    const trs7694_1 = clone(trs7694);
     trs7694_1.sort(sortBy);
 
-    var trs7694_2 = clone(trs7694_1);
+    const trs7694_2 = clone(trs7694_1);
     trs7694_2.sort(sortBy);
     node.expect(trs7694_1).eql(trs7694_2);
     done();

@@ -5,9 +5,12 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-const strftime = require('strftime').utc();
+ const stftime = require('strftime');
 const fs = require('fs');
+
 require('colors');
+
+const strftime = stftime.utc();
 
 Object.defineProperty(global, '__stack', {
     get: function() {
@@ -43,7 +46,7 @@ Object.defineProperty(global, '__file', {
     }
 });
 
-module.exports = function (config) {
+const logger = function (config) {
   config = config || {};
   const exports = {};
 
@@ -97,3 +100,5 @@ module.exports = function (config) {
 
   return exports;
 }
+
+module.exports = logger;

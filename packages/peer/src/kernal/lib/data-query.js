@@ -2,12 +2,11 @@
  * Delegate
  * wangxm   2019-03-25
  */
-const { AssetTypes } = require('@ddn/utils');
+import DdnUtils from '@ddn/utils';
 
-var _singleton;
+let _singleton;
 
 class DataQuery {
-
     static singleton(context) {
         if (!_singleton) {
             _singleton = new DataQuery(context);
@@ -90,7 +89,7 @@ class DataQuery {
                     ['transaction_id', 't_id']
                 ], null, (err, rows) => {
                     if (err) {
-                        resolve(err);
+                        reject(err);
                     } else {
                         resolve(rows);
                     }
@@ -248,7 +247,7 @@ class DataQuery {
                     ['unlockDelegates', 'dapp_unlockDelegates'],
                     ['transaction_id', 't_id']
                 ], null, (err, rows) => {
-                    if (dappErr) {
+                    if (err) {
                         reject(err);
                     } else {
                         resolve(rows);
@@ -310,34 +309,34 @@ class DataQuery {
     }
 
     async queryFullBlockData(where, limit, offset, orders) {
-        var blockRows = await this.loadSimpleBlocksData(where, limit, offset, orders);
+        const blockRows = await this.loadSimpleBlocksData(where, limit, offset, orders);
     
-        var blockIds = [];
-        for (var i = 0; i < blockRows.length; i++) {
+        const blockIds = [];
+        for (let i = 0; i < blockRows.length; i++) {
             blockIds.push(blockRows[i].b_id);
         }
     
         if (blockIds.length > 0) {
-            var trsRows = await this.loadTransactionsWithBlockIds(blockIds);
+            let trsRows = await this.loadTransactionsWithBlockIds(blockIds);
             if (trsRows && trsRows.length) {
-                var blocksResult = [];
-                var blocksResultMap = {};
+                const blocksResult = [];
+                const blocksResultMap = {};
     
-                var trsIds = [];
-                var delegateTrsIds = [];
-                var voteTrsIds = [];
-                var signatureTrsIds = [];
-                var multiSignatureTrsIds = [];
-                var dappTrsIds = [];
-                var dappIntransferTrsIds = [];
-                var dappOuttransferTrsIds = [];
+                const trsIds = [];
+                const delegateTrsIds = [];
+                const voteTrsIds = [];
+                const signatureTrsIds = [];
+                const multiSignatureTrsIds = [];
+                const dappTrsIds = [];
+                const dappIntransferTrsIds = [];
+                const dappOuttransferTrsIds = [];
     
-                for (var i = 0; i < blockRows.length; i++) {
+                for (let i = 0; i < blockRows.length; i++) {
                     let blockItem = blockRows[i];
     
                     let hasTransaction = false;
                     let newTrsRows = [];
-                    for (var j = 0; j < trsRows.length; j++) {
+                    for (let j = 0; j < trsRows.length; j++) {
                         let trsItem = trsRows[j];
     
                         if (trsItem.b_id == blockItem.b_id) {
@@ -346,25 +345,25 @@ class DataQuery {
     
                             trsIds.push(trsItem.t_id);
     
-                            if (trsItem.t_type == AssetTypes.DELEGATE) {
+                            if (trsItem.t_type == DdnUtils.assetTypes.DELEGATE) {
                                 delegateTrsIds.push(trsItem.t_id);
                             }
-                            if (trsItem.t_type == AssetTypes.VOTE) {
+                            if (trsItem.t_type == DdnUtils.assetTypes.VOTE) {
                                 voteTrsIds.push(trsItem.t_id);
                             }
-                            if (trsItem.t_type == AssetTypes.SIGNATURE) {
+                            if (trsItem.t_type == DdnUtils.assetTypes.SIGNATURE) {
                                 signatureTrsIds.push(trsItem.t_id);
                             }
-                            if (trsItem.t_type == AssetTypes.MULTI) {
+                            if (trsItem.t_type == DdnUtils.assetTypes.MULTI) {
                                 multiSignatureTrsIds.push(trsItem.t_id);
                             }
-                            if (trsItem.t_type == AssetTypes.DAPP) {
+                            if (trsItem.t_type == DdnUtils.assetTypes.DAPP) {
                                 dappTrsIds.push(trsItem.t_id);
                             }
-                            if (trsItem.t_type == AssetTypes.IN_TRANSFER) {
+                            if (trsItem.t_type == DdnUtils.assetTypes.IN_TRANSFER) {
                                 dappIntransferTrsIds.push(trsItem.t_id);
                             }
-                            if (trsItem.t_type == AssetTypes.OUT_TRANSFER) {
+                            if (trsItem.t_type == DdnUtils.assetTypes.OUT_TRANSFER) {
                                 dappOuttransferTrsIds.push(trsItem.t_id);
                             }
                         } else {
@@ -379,9 +378,9 @@ class DataQuery {
                     }
                 }
     
-                var combineBlockData = function (trsExtRows) {
+                const combineBlockData = trsExtRows => {
                     if (trsExtRows && trsExtRows.length > 0) {
-                        for (var i = 0; i < trsExtRows.length; i++) {
+                        for (let i = 0; i < trsExtRows.length; i++) {
                             let dataObj = trsExtRows[i];
                             let blocksResultObj = blocksResultMap[dataObj.t_id];
                             if (blocksResultObj) {
@@ -389,29 +388,29 @@ class DataQuery {
                             }
                         }
                     }
-                }
+                };
     
                 //受托人数据
                 if (delegateTrsIds.length > 0) {
-                    var delegatesRows = await this.loadDelegatesWithTransactionIds(delegateTrsIds);
+                    const delegatesRows = await this.loadDelegatesWithTransactionIds(delegateTrsIds);
                     combineBlockData(delegatesRows);
                 }
     
                 //投票交易数据
                 if (voteTrsIds.length > 0) {
-                    var votesRows = await this.loadVotesWithTransactionIds(voteTrsIds);
+                    const votesRows = await this.loadVotesWithTransactionIds(voteTrsIds);
                     combineBlockData(votesRows);
                 }
     
                 //签名交易数据
                 if (signatureTrsIds.length > 0) {
-                    var signaturesRows = await this.loadSignaturesWithTransactionIds(signatureTrsIds);
+                    const signaturesRows = await this.loadSignaturesWithTransactionIds(signatureTrsIds);
                     combineBlockData(signaturesRows);
                 }
 
                 //多重签名交易数据
                 if (multiSignatureTrsIds.length > 0) {
-                    var multisignaturesRows = await this.loadMultiSignaturesWithTransactionIds(multiSignatureTrsIds);
+                    const multisignaturesRows = await this.loadMultiSignaturesWithTransactionIds(multiSignatureTrsIds);
                     combineBlockData(multisignaturesRows);
                 }
     
@@ -434,11 +433,11 @@ class DataQuery {
                 // }
     
                 //扩展资产数据
-                var assetsRows = await this.loadAssetsWithTransactionIds(trsIds);
+                const assetsRows = await this.loadAssetsWithTransactionIds(trsIds);
                 combineBlockData(assetsRows);
     
                 //扩展资产的扩展JSON数据
-                var assetExtsRows = await this.loadAssetExtsWithTransactionIds(trsIds);
+                const assetExtsRows = await this.loadAssetExtsWithTransactionIds(trsIds);
                 combineBlockData(assetExtsRows);
     
                 return blocksResult;
@@ -459,7 +458,7 @@ class DataQuery {
                         return reject(err || "Get Block Error.");
                     }
 
-                    var maxHeight = 2;
+                    let maxHeight = 2;
                     if (rows.length > 0) {
                         maxHeight = rows[0].maxHeight + 1;
                     }
@@ -479,7 +478,7 @@ class DataQuery {
                         ['timestamp', 't_timestamp'],
                         ['block_id', 'b_id'],
                         ['block_height', 'b_height'],
-                        [this.dao.db_str(maxHeight + '-block_height'), 'confirmations']
+                        [this.dao.db_str(`${maxHeight}-block_height`), 'confirmations']
                     ], orders, (err, rows) => {
                         if (err) {
                             reject(err);
@@ -492,59 +491,59 @@ class DataQuery {
     }
 
     async queryFullTransactionData(where, limit, offset, orders, returnTotal) {
-        var queryData = await this.loadSimpleTransactionData(where, limit, offset, orders, returnTotal);
+        const queryData = await this.loadSimpleTransactionData(where, limit, offset, orders, returnTotal);
         
-        var transactionRows = queryData;
-        var count = 0;
+        let transactionRows = queryData;
+        let count = 0;
         if (returnTotal) {
             transactionRows = queryData.rows;
             count = queryData.total;
         }
 
         if (transactionRows && transactionRows.length) {
-            var transactionsMap = {};
+            const transactionsMap = {};
 
-            var trsIds = [];
-            var delegateTrsIds = [];
-            var voteTrsIds = [];
-            var signatureTrsIds = [];
-            var multiSignatureTrsIds = [];
-            var dappTrsIds = [];
-            var dappIntransferTrsIds = [];
-            var dappOuttransferTrsIds = [];
+            const trsIds = [];
+            const delegateTrsIds = [];
+            const voteTrsIds = [];
+            const signatureTrsIds = [];
+            const multiSignatureTrsIds = [];
+            const dappTrsIds = [];
+            const dappIntransferTrsIds = [];
+            const dappOuttransferTrsIds = [];
 
-            for (var i = 0; i < transactionRows.length; i++) {
-                var trsItem = transactionRows[i];
+            for (let i = 0; i < transactionRows.length; i++) {
+                const trsItem = transactionRows[i];
 
                 transactionsMap[trsItem.t_id] = trsItem;
                 trsIds.push(trsItem.t_id);
 
-                if (trsItem.t_type == AssetTypes.DELEGATE) {
+                if (trsItem.t_type == DdnUtils.assetTypes.DELEGATE) {
                     delegateTrsIds.push(trsItem.t_id);
                 }
-                if (trsItem.t_type == AssetTypes.VOTE) {
+                if (trsItem.t_type == DdnUtils.assetTypes.VOTE) {
                     voteTrsIds.push(trsItem.t_id);
                 }
-                if (trsItem.t_type == AssetTypes.SIGNATURE) {
+                if (trsItem.t_type == DdnUtils.assetTypes.SIGNATURE) {
                     signatureTrsIds.push(trsItem.t_id);
                 }
-                if (trsItem.t_type == AssetTypes.MULTI) {
+                if (trsItem.t_type == DdnUtils.assetTypes.MULTI) {
                     multiSignatureTrsIds.push(trsItem.t_id);
                 }
-                if (trsItem.t_type == AssetTypes.DAPP) {
+                if (trsItem.t_type == DdnUtils.assetTypes.DAPP) {
                     dappTrsIds.push(trsItem.t_id);
                 }
-                if (trsItem.t_type == AssetTypes.IN_TRANSFER) {
+                if (trsItem.t_type == DdnUtils.assetTypes.IN_TRANSFER) {
                     dappIntransferTrsIds.push(trsItem.t_id);
                 }
-                if (trsItem.t_type == AssetTypes.OUT_TRANSFER) {
+                if (trsItem.t_type == DdnUtils.assetTypes.OUT_TRANSFER) {
                     dappOuttransferTrsIds.push(trsItem.t_id);
                 }
             }
 
-            var combineTransactionData = function (trsExtRows) {
+            const combineTransactionData = trsExtRows => {
                 if (trsExtRows && trsExtRows.length > 0) {
-                    for (var i = 0; i < trsExtRows.length; i++) {
+                    for (let i = 0; i < trsExtRows.length; i++) {
                         let dataObj = trsExtRows[i];
                         let transactionObj = transactionsMap[dataObj.t_id];
                         if (transactionObj) {
@@ -552,29 +551,29 @@ class DataQuery {
                         }
                     }
                 }
-            }
+            };
 
             //受托人数据
             if (delegateTrsIds.length > 0) {
-                var delegatesRows = await this.loadDelegatesWithTransactionIds(delegateTrsIds);
+                const delegatesRows = await this.loadDelegatesWithTransactionIds(delegateTrsIds);
                 combineTransactionData(delegatesRows);
             }
     
             //投票交易数据
             if (voteTrsIds.length > 0) {
-                var votesRows = await this.loadVotesWithTransactionIds(voteTrsIds);
+                const votesRows = await this.loadVotesWithTransactionIds(voteTrsIds);
                 combineTransactionData(votesRows);
             }
 
             //签名交易数据
             if (signatureTrsIds.length > 0) {
-                var signaturesRows = await this.loadSignaturesWithTransactionIds(signatureTrsIds);
+                const signaturesRows = await this.loadSignaturesWithTransactionIds(signatureTrsIds);
                 combineTransactionData(signaturesRows);
             }
 
             //多重签名交易数据
             if (multiSignatureTrsIds.length > 0) {
-                var multisignaturesRows = await this.loadMultiSignaturesWithTransactionIds(multiSignatureTrsIds);
+                const multisignaturesRows = await this.loadMultiSignaturesWithTransactionIds(multiSignatureTrsIds);
                 combineTransactionData(multisignaturesRows);
             }
 
@@ -597,11 +596,11 @@ class DataQuery {
             // }
 
             //扩展资产数据
-            var assetsRows = await this.loadAssetsWithTransactionIds(trsIds);
+            const assetsRows = await this.loadAssetsWithTransactionIds(trsIds);
             combineTransactionData(assetsRows);
 
             //扩展资产的扩展JSON数据
-            var assetExtsRows = await this.loadAssetExtsWithTransactionIds(trsIds);
+            const assetExtsRows = await this.loadAssetExtsWithTransactionIds(trsIds);
             combineTransactionData(assetExtsRows);
 
             if (returnTotal) {
@@ -626,4 +625,4 @@ class DataQuery {
 
 }
 
-module.exports = DataQuery;
+export default DataQuery;

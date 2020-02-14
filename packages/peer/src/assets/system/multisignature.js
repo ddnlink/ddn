@@ -2,10 +2,11 @@
  * Signatures
  * wangxm   2019-03-25
  */
-const util = require('util');
-const { Bignum } = require('@ddn/utils');
-const ByteBuffer = require('bytebuffer');
-const Diff = require('../../lib/diff');
+import util from 'util';
+
+import DdnUtils from '@ddn/utils';
+import ByteBuffer from 'bytebuffer';
+import Diff from '../../lib/diff';
 
 class Multisignature {
 
@@ -16,20 +17,20 @@ class Multisignature {
         this._unconfirmedSignatures = {};
 	}
 
-    async create(data, trs) {
+    async create({min, keysgroup, lifetime}, trs) {
 		trs.recipient_id = null; //wxm block database
-		trs.amount = "0";   //Bignum update
+		trs.amount = "0";   //DdnUtils.bignum update
 		trs.asset.multisignature = {
-			min: data.min,
-			keysgroup: data.keysgroup,
-			lifetime: data.lifetime
+			min,
+			keysgroup,
+			lifetime
 		};
 		return trs;
     }
 
-    async calculateFee(trs, sender) {
-		return Bignum.multiply(
-			Bignum.plus(trs.asset.multisignature.keysgroup.length, 1),
+    async calculateFee({asset}, sender) {
+		return DdnUtils.bignum.multiply(
+			DdnUtils.bignum.plus(asset.multisignature.keysgroup.length, 1),
 			5, this.tokenSetting.fixedPoint);
     }
 
@@ -87,23 +88,23 @@ class Multisignature {
 			}
 		}
 
-        if (trs.asset.multisignature.keysgroup.indexOf(`+${sender.public_key}`) != -1) {    //wxm block database
+        if (trs.asset.multisignature.keysgroup.includes(`+${sender.public_key}`)) {    //wxm block database
             throw new Error('Unable to sign transaction using own public key');
 		}
 
         var keysgroup = trs.asset.multisignature.keysgroup;
-        for (var i = 0; i < keysgroup.length; i++) {
-            var key = keysgroup[i];
+        for (let i = 0; i < keysgroup.length; i++) {
+            const key = keysgroup[i];
 
-            var math = key[0];
-            var publicKey = key.slice(1);
+            const math = key[0];
+            const publicKey = key.slice(1);
 
             if (math != '+') {
                 throw new Error('Invalid math operator');
             }
 
             try {
-                var b = Buffer.from(publicKey, 'hex');
+                const b = Buffer.from(publicKey, 'hex');
                 if (b.length != 32) {
                     throw new Error('Invalid public key');
                 }
@@ -113,7 +114,7 @@ class Multisignature {
         }
 
         var keysgroup = trs.asset.multisignature.keysgroup.reduce((p, c) => {
-            if (p.indexOf(c) < 0) p.push(c);
+            if (!p.includes(c)) p.push(c);
             return p;
         }, []);
 
@@ -128,11 +129,11 @@ class Multisignature {
         return trs;
 	}
 
-    async getBytes(trs) {
-		var keysgroupBuffer = Buffer.from(trs.asset.multisignature.keysgroup.join(''), 'utf8');
-		var bb = new ByteBuffer(1 + 1 + keysgroupBuffer.length, true);
-		bb.writeByte(trs.asset.multisignature.min);
-		bb.writeByte(trs.asset.multisignature.lifetime);
+    async getBytes({asset}) {
+		const keysgroupBuffer = Buffer.from(asset.multisignature.keysgroup.join(''), 'utf8');
+		const bb = new ByteBuffer(1 + 1 + keysgroupBuffer.length, true);
+		bb.writeByte(asset.multisignature.min);
+		bb.writeByte(asset.multisignature.lifetime);
 		for (let i = 0; i < keysgroupBuffer.length; i++) {
 			bb.writeByte(keysgroupBuffer[i]);
 		}
@@ -140,78 +141,78 @@ class Multisignature {
 		return bb.toBuffer();
     }
 
-    async apply(trs, block, sender, dbTrans) {
+    async apply({asset}, {id, height}, sender, dbTrans) {
         this._unconfirmedSignatures[sender.address] = false;
 
         await this.runtime.account.merge(sender.address, {
-            multisignatures: trs.asset.multisignature.keysgroup,
-            multimin: trs.asset.multisignature.min,
-            multilifetime: trs.asset.multisignature.lifetime,
-            block_id: block.id,  //wxm block database
-            round: await this.runtime.round.calc(block.height)
+            multisignatures: asset.multisignature.keysgroup,
+            multimin: asset.multisignature.min,
+            multilifetime: asset.multisignature.lifetime,
+            block_id: id,  //wxm block database
+            round: await this.runtime.round.calc(height)
         }, dbTrans);
 
-        var keysgroup = trs.asset.multisignature.keysgroup;
-        for (var i = 0; i < keysgroup.length; i++) {
-            var item = keysgroup[i];
+        const keysgroup = asset.multisignature.keysgroup;
+        for (let i = 0; i < keysgroup.length; i++) {
+            const item = keysgroup[i];
 
-            var key = item.substring(1);
-            var address = this.runtime.account.generateAddressByPublicKey(key);
+            const key = item.substring(1);
+            const address = this.runtime.account.generateAddressByPublicKey(key);
 
             await this.runtime.account.setAccount({
                 address,
                 public_key: key,  //wxm block database
-                block_id: block.id  //wxm 这里要直接将block_id更新进去，否则的话，如果不进行转账操作，将出现block_id为空，导致重启失败的问题
+                block_id: id  //wxm 这里要直接将block_id更新进去，否则的话，如果不进行转账操作，将出现block_id为空，导致重启失败的问题
             }, dbTrans);
         }
     }
 
-    async undo(trs, block, sender, dbTrans) {
-		var multiInvert = Diff.reverse(trs.asset.multisignature.keysgroup);
+    async undo({asset}, {id, height}, {address}, dbTrans) {
+		const multiInvert = Diff.reverse(asset.multisignature.keysgroup);
 
-        this._unconfirmedSignatures[sender.address] = true;
+        this._unconfirmedSignatures[address] = true;
 
-        await this.runtime.account.merge(sender.address, {
+        await this.runtime.account.merge(address, {
             multisignatures: multiInvert,
-            multimin: -trs.asset.multisignature.min,
-            multilifetime: -trs.asset.multisignature.lifetime,
-            block_id: block.id,  //wxm block database
-            round: await this.runtime.round.calc(block.height)
+            multimin: -asset.multisignature.min,
+            multilifetime: -asset.multisignature.lifetime,
+            block_id: id,  //wxm block database
+            round: await this.runtime.round.calc(height)
         }, dbTrans);
     }
 
-    async applyUnconfirmed(trs, sender, dbTrans) {
-		if (this._unconfirmedSignatures[sender.address]) {
+    async applyUnconfirmed({asset}, {address, multisignatures}, dbTrans) {
+		if (this._unconfirmedSignatures[address]) {
             throw new Error('Signature on this account is pending confirmation');
 		}
 
-		if (sender.multisignatures.length) {
+		if (multisignatures.length) {
             throw new Error('Account already has multisignatures enabled');
 		}
 
-		this._unconfirmedSignatures[sender.address] = true;
+		this._unconfirmedSignatures[address] = true;
 
-        await this.runtime.account.merge(sender.address, {
-            u_multisignatures: trs.asset.multisignature.keysgroup,
-            u_multimin: trs.asset.multisignature.min,
-            u_multilifetime: trs.asset.multisignature.lifetime
+        await this.runtime.account.merge(address, {
+            u_multisignatures: asset.multisignature.keysgroup,
+            u_multimin: asset.multisignature.min,
+            u_multilifetime: asset.multisignature.lifetime
         }, dbTrans);
     }
 
-    async undoUnconfirmed(trs, sender, dbTrans) {
-		var multiInvert = Diff.reverse(trs.asset.multisignature.keysgroup);
+    async undoUnconfirmed({asset}, {address}, dbTrans) {
+		const multiInvert = Diff.reverse(asset.multisignature.keysgroup);
 
-        this._unconfirmedSignatures[sender.address] = false;
+        this._unconfirmedSignatures[address] = false;
 
-        await this.runtime.account.merge(sender.address, {
+        await this.runtime.account.merge(address, {
             u_multisignatures: multiInvert,
-            u_multimin: -trs.asset.multisignature.min,
-            u_multilifetime: -trs.asset.multisignature.lifetime
+            u_multimin: -asset.multisignature.min,
+            u_multilifetime: -asset.multisignature.lifetime
         }, dbTrans);
     }
 
     async objectNormalize(trs) {
-        var validateErros = await this.ddnSchema.validate({
+        const validateErros = await this.ddnSchema.validate({
             type: 'object',
             properties: {
                 min: {
@@ -238,27 +239,27 @@ class Multisignature {
         return trs;
     }
 
-    async dbRead(raw) {
-		if (!raw.m_keysgroup) {
+    async dbRead({m_keysgroup, m_min, m_lifetime}) {
+		if (!m_keysgroup) {
 			return null;
 		} else {
-			var multisignature = {
-				min: raw.m_min,
-				lifetime: raw.m_lifetime,
-				keysgroup: raw.m_keysgroup.split(',')
+			const multisignature = {
+				min: m_min,
+				lifetime: m_lifetime,
+				keysgroup: m_keysgroup.split(',')
 			};
 
 			return { multisignature };
 		}
     }
 
-    async dbSave(trs, dbTrans) {
+    async dbSave({asset, id}, dbTrans) {
         return new Promise((resolve, reject) => {
             this.dao.insert("multisignature", {
-                min: trs.asset.multisignature.min,
-                lifetime: trs.asset.multisignature.lifetime,
-                keysgroup: trs.asset.multisignature.keysgroup.join(','),
-                transaction_id: trs.id
+                min: asset.multisignature.min,
+                lifetime: asset.multisignature.lifetime,
+                keysgroup: asset.multisignature.keysgroup.join(','),
+                transaction_id: id
             }, dbTrans, (err, result) => {
                 if (err) {
                     reject(err);
@@ -277,26 +278,26 @@ class Multisignature {
                     resolve(result);
                 }
             });
-        })
+        });
     }
 
-    async ready(trs, sender) {
-		if (!trs.signatures) {
+    async ready({signatures, asset}, {multisignatures, multimin}) {
+		if (!signatures) {
             this.logger.warn("The multisignature is waiting for other account signatures.");
 			return false;
 		}
 
-		if (util.isArray(sender.multisignatures) && !sender.multisignatures.length) {
-            var ready = trs.signatures.length == trs.asset.multisignature.keysgroup.length;
+		if (util.isArray(multisignatures) && !multisignatures.length) {
+            const ready = signatures.length == asset.multisignature.keysgroup.length;
             if (!ready) {
-                this.logger.warn("The number of multisignature signatures is less than " + trs.asset.multisignature.keysgroup.length);
+                this.logger.warn(`The number of multisignature signatures is less than ${asset.multisignature.keysgroup.length}`);
             }
 			return ready;
 		} else {
-			return trs.signatures.length >= sender.multimin - 1;
+			return signatures.length >= multimin - 1;
 		}
     }
 
 }
 
-module.exports = Multisignature;
+export default Multisignature;

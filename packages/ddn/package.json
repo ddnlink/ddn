@@ -1,7 +1,7 @@
 {
   "name": "@ddn/ddn",
   "preferGlobal": true,
-  "version": "0.0.1",
+  "version": "0.0.17",
   "description": "A Command line tool to manage ddn",
   "main": "index.js",
   "scripts": {
@@ -19,7 +19,7 @@
   "dependencies": {
     "@ddn/crypto": "^0.0.1",
     "@ddn/node-sdk": "^0.0.1",
-    "@ddn/utils": "^0.0.1",
+    "@ddn/utils": "^0.0.5",
     "async": "1.5.2",
     "bytebuffer": "^4.0.0",
     "commander": "^2.8.1",

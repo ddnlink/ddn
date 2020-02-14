@@ -2,11 +2,12 @@
  * Round
  * wangxm   2018-01-07
  */
-const { Bignum } = require('@ddn/utils');
-const constants = require('../../constants');
-const RoundChanges = require('./round-changes');
+import DdnUtils from '@ddn/utils';
 
-var _singleton;
+import constants from '../../constants';
+import RoundChanges from './round-changes';
+
+let _singleton;
 
 class Round {
 
@@ -33,7 +34,7 @@ class Round {
 
         await new Promise((resolve, reject) => {
             this.dao.findOne("block", {
-                [roundStr]: this.dao.db_str('(select (cast(block.height / ' + this.config.settings.delegateNumber + ' as integer) + (case when block.height % ' + this.config.settings.delegateNumber + ' > 0 then 1 else 0 end))) = ' + roundStr)
+                [roundStr]: this.dao.db_str(`(select (cast(block.height / ${this.config.settings.delegateNumber} as integer) + (case when block.height % ${this.config.settings.delegateNumber} > 0 then 1 else 0 end))) = ${roundStr}`)
             }, [
                 [this.dao.db_fnSum(''), 'fees'],   //wxm block database    library.dao.db_fn('sum', library.dao.db_col('totalFee'))
                 [this.dao.db_fnGroupConcat('reward'), 'rewards'], //wxm block database   library.dao.db_fn('group_concat', library.dao.db_col('reward'))
@@ -57,11 +58,11 @@ class Round {
     }
 
     async calc(height) {
-        var value = 0;
-        if (Bignum.isGreaterThan(Bignum.modulo(height, this.config.settings.delegateNumber), 0)) {
+        let value = 0;
+        if (DdnUtils.bignum.isGreaterThan(DdnUtils.bignum.modulo(height, this.config.settings.delegateNumber), 0)) {
           value = 1;
         }
-        return Bignum.plus(Bignum.floor(Bignum.divide(height, this.config.settings.delegateNumber)), value);
+        return DdnUtils.bignum.plus(DdnUtils.bignum.floor(DdnUtils.bignum.divide(height, this.config.settings.delegateNumber)), value);
     }
 
     async getVotes(round, dbTrans) {
@@ -114,9 +115,9 @@ class Round {
 
         this._feesByRound[round] = (this._feesByRound[round] || 0);
 
-        // Bignum update
+        // DdnUtils.bignum update
         // privated.feesByRound[round] += block.totalFee;
-        this._feesByRound[round] = Bignum.plus(this._feesByRound[round], block.total_fee); //wxm block database
+        this._feesByRound[round] = DdnUtils.bignum.plus(this._feesByRound[round], block.total_fee); //wxm block database
 
         this._rewardsByRound[round] = (this._rewardsByRound[round] || []);
         this._rewardsByRound[round].push(block.reward);
@@ -124,19 +125,19 @@ class Round {
         this._delegatesByRound[round] = this._delegatesByRound[round] || [];
         this._delegatesByRound[round].push(block.generator_public_key);
 
-        const nextRound = await this.calc(Bignum.plus(block.height, 1));
+        const nextRound = await this.calc(DdnUtils.bignum.plus(block.height, 1));
 
-        //Bignum update if (round === nextRound && block.height !== 1) {
-        if (Bignum.isEqualTo(round, nextRound) && !Bignum.isEqualTo(block.height, 1)) {
+        //DdnUtils.bignum update if (round === nextRound && block.height !== 1) {
+        if (DdnUtils.bignum.isEqualTo(round, nextRound) && !DdnUtils.bignum.isEqualTo(block.height, 1)) {
             this.logger.debug("Round tick completed", {
                 height: block.height
             });
             return;
         }
 
-        //Bignum update if (privated.delegatesByRound[round].length !== slots.delegates && block.height !== 1 && block.height !== 101) {
+        //DdnUtils.bignum update if (privated.delegatesByRound[round].length !== slots.delegates && block.height !== 1 && block.height !== 101) {
         if (this._delegatesByRound[round].length !== this.config.settings.delegateNumber &&
-            !Bignum.isEqualTo(block.height, 1) && !Bignum.isEqualTo(block.height, this.config.settings.delegateNumber)) {
+            !DdnUtils.bignum.isEqualTo(block.height, 1) && !DdnUtils.bignum.isEqualTo(block.height, this.config.settings.delegateNumber)) {
             this.logger.debug("Round tick completed", {
                 height: block.height
             });
@@ -145,12 +146,12 @@ class Round {
 
         const outsiders = [];
 
-        //Bignum update if (block.height === 1) {
-        if (!Bignum.isEqualTo(block.height, 1)) {
-            var roundDelegates = await this.runtime.delegate.getDisorderDelegatePublicKeys(block.height);
+        //DdnUtils.bignum update if (block.height === 1) {
+        if (!DdnUtils.bignum.isEqualTo(block.height, 1)) {
+            const roundDelegates = await this.runtime.delegate.getDisorderDelegatePublicKeys(block.height);
 
             for (let i = 0; i < roundDelegates.length; i++) {
-                if (this._delegatesByRound[round].indexOf(roundDelegates[i]) == -1) {
+                if (!this._delegatesByRound[round].includes(roundDelegates[i])) {
                     outsiders.push(this.runtime.account.generateAddressByPublicKey(roundDelegates[i]));
                 }
             }
@@ -164,19 +165,19 @@ class Round {
         }
 
         const roundChanges = new RoundChanges(this._context, round);
-        for (var index = 0; index < this._delegatesByRound[round].length; index++) {
-            var delegate = this._delegatesByRound[round][i];
+        for (let index = 0; index < this._delegatesByRound[round].length; index++) {
+            const delegate = this._delegatesByRound[round][i];
 
             const changes = roundChanges.at(index);
             let changeBalance = changes.balance;
             let changeFees = changes.fees;
             const changeRewards = changes.rewards;
             if (index === this._delegatesByRound[round].length - 1) {
-                // Bignum update
+                // DdnUtils.bignum update
                 // changeBalance += changes.feesRemaining;
                 // changeFees += changes.feesRemaining;
-                changeBalance = Bignum.plus(changeBalance, changes.feesRemaining);
-                changeFees = Bignum.plus(changeFees, changes.feesRemaining);
+                changeBalance = DdnUtils.bignum.plus(changeBalance, changes.feesRemaining);
+                changeFees = DdnUtils.bignum.plus(changeFees, changes.feesRemaining);
             }
 
             await this.runtime.account.merge(null, {
@@ -200,20 +201,20 @@ class Round {
 
         await this.runtime.account.merge(constants.foundAddress, {
             address: constants.foundAddress,
-            balance: Bignum.plus(fees, rewards).toString(),     //Bignum update (fees + rewards),
-            u_balance: Bignum.plus(fees, rewards).toString(),      //Bignum update (fees + rewards),
+            balance: DdnUtils.bignum.plus(fees, rewards).toString(),     //DdnUtils.bignum update (fees + rewards),
+            u_balance: DdnUtils.bignum.plus(fees, rewards).toString(),      //DdnUtils.bignum update (fees + rewards),
             fees: fees.toString(),
             rewards: rewards.toString(),
             block_id: block.id,    //wxm block database
             round: await this.calc(block.height),
         }, dbTrans);
 
-        var votes = await this.getVotes(round, dbTrans);
+        const votes = await this.getVotes(round, dbTrans);
         for (var i = 0; i < votes.length; i++) {
-            var vote = votes[i];
+            const vote = votes[i];
             let address = this.runtime.account.generateAddressByPublicKey(vote.delegate);
             await this.runtime.account.updateAccount({
-                vote: this.dao.db_str('vote + ' + vote.amount),
+                vote: this.dao.db_str(`vote + ${vote.amount}`),
             }, { address }, dbTrans);
         }
 
@@ -225,7 +226,7 @@ class Round {
                 }
                 catch (err)
                 {
-                    this.logger.error("The socket emit error: rounds/change. " + err);
+                    this.logger.error(`The socket emit error: rounds/change. ${err}`);
                 }
             });
         }
@@ -242,7 +243,7 @@ class Round {
     }
 
     async backwardTick(block, previousBlock, dbTrans) {
-        var done = (err) => {
+        const done = (err) => {
             if (err) {
                 this.logger.error(`Round backward tick failed: ${err}`);
             } else {
@@ -251,7 +252,7 @@ class Round {
                     previousBlock
                 });
             }
-        }
+        };
 
         await this.runtime.account.merge(null, {
             public_key: block.generator_public_key,    //wxm block database
@@ -260,14 +261,14 @@ class Round {
             round: await this.calc(block.height)
         }, dbTrans);
 
-        var round = await this.calc(block.height);
-        var prevRound = await this.calc(previousBlock.b_height);
+        const round = await this.calc(block.height);
+        const prevRound = await this.calc(previousBlock.b_height);
 
         this._feesByRound[round] = (this._feesByRound[round] || 0);
 
-        // Bignum update
+        // DdnUtils.bignum update
         // privated.feesByRound[round] -= block.totalFee;
-        this._feesByRound[round] = Bignum.minus(this._feesByRound[round], block.totalFee);
+        this._feesByRound[round] = DdnUtils.bignum.minus(this._feesByRound[round], block.totalFee);
 
         this._rewardsByRound[round] = (this._rewardsByRound[round] || []);
         this._rewardsByRound[round].pop();
@@ -275,8 +276,8 @@ class Round {
         this._delegatesByRound[round] = this._delegatesByRound[round] || [];
         this._delegatesByRound[round].pop();
 
-        //Bignum update if (prevRound === round && previousBlock.height !== 1) {
-        if (prevRound === round && !Bignum.isEqualTo(previousBlock.b_height, 1)) {
+        //DdnUtils.bignum update if (prevRound === round && previousBlock.height !== 1) {
+        if (prevRound === round && !DdnUtils.bignum.isEqualTo(previousBlock.b_height, 1)) {
             return done();
         }
 
@@ -284,8 +285,8 @@ class Round {
         this._unDelegatesByRound[round] = this._unDelegatesByRound[round] || [];
         this._unDelegatesByRound[round].pop();
 
-        //Bignum update if (privated.unDelegatesByRound[round].length !== slots.delegates && previousBlock.height !== 1) {
-        if (this._unDelegatesByRound[round].length !== this.config.settings.delegateNumber && !Bignum.isEqualTo(previousBlock.b_height, 1)) {
+        //DdnUtils.bignum update if (privated.unDelegatesByRound[round].length !== slots.delegates && previousBlock.height !== 1) {
+        if (this._unDelegatesByRound[round].length !== this.config.settings.delegateNumber && !DdnUtils.bignum.isEqualTo(previousBlock.b_height, 1)) {
             return done();
         }
 
@@ -302,8 +303,8 @@ class Round {
     // const outsiders = [];
     // async.series([
     //   cb => {
-    //     //Bignum update if (block.height === 1) {
-    //     if (Bignum.isEqualTo(block.height, 1)) {
+    //     //DdnUtils.bignum update if (block.height === 1) {
+    //     if (DdnUtils.bignum.isEqualTo(block.height, 1)) {
     //       return cb();
     //     }
     //     modules.delegates.generateDelegateList(block.height, (err, roundDelegates) => {
@@ -341,21 +342,21 @@ class Round {
     //       const changeRewards = changes.rewards;
 
     //       if (index === 0) {
-    //         // Bignum update
+    //         // DdnUtils.bignum update
     //         // changeBalance += changes.feesRemaining;
     //         // changeFees += changes.feesRemaining;
-    //         changeBalance = Bignum.plus(changeBalance, changes.feesRemaining);
-    //         changeFees = Bignum.plus(changeFees, changes.feesRemaining);
+    //         changeBalance = DdnUtils.bignum.plus(changeBalance, changes.feesRemaining);
+    //         changeFees = DdnUtils.bignum.plus(changeFees, changes.feesRemaining);
     //       }
 
     //       modules.accounts.mergeAccountAndGet({
     //         public_key: delegate,   //wxm block database
-    //         balance: Bignum.minus(0, changeBalance).toString(),    //Bignum update -changeBalance,
-    //         u_balance: Bignum.minus(0, changeBalance).toString(),  //Bignum update -changeBalance,
+    //         balance: DdnUtils.bignum.minus(0, changeBalance).toString(),    //DdnUtils.bignum update -changeBalance,
+    //         u_balance: DdnUtils.bignum.minus(0, changeBalance).toString(),  //DdnUtils.bignum update -changeBalance,
     //         block_id: block.id,  //wxm block database
     //         round: modules.round.calc(block.height).toString(),
-    //         fees: Bignum.minus(0, changeFees).toString(),   //Bignum update -changeFees,
-    //         rewards: Bignum.minus(0, changeRewards).toString()  //Bignum update -changeRewards
+    //         fees: DdnUtils.bignum.minus(0, changeFees).toString(),   //DdnUtils.bignum update -changeFees,
+    //         rewards: DdnUtils.bignum.minus(0, changeRewards).toString()  //DdnUtils.bignum update -changeRewards
     //       }, dbTrans, next);
     //     }, cb);
     //   },
@@ -370,10 +371,10 @@ class Round {
     //     library.logger.info(`DDN witness club get new bonus: ${bonus}`)
     //     modules.accounts.mergeAccountAndGet({
     //       address: constants.foundAddress,
-    //       balance: Bignum.minus(0, fees, rewards).toString(),     //Bignum update -(fees + rewards),
-    //       u_balance: Bignum.minus(0, fees, rewards).toString(),       //Bignum update -(fees + rewards),
-    //       fees: Bignum.minus(0, fees).toString(),     //Bignum update -fees,
-    //       rewards: Bignum.minus(0, rewards).toString(),       //Bignum update -rewards,
+    //       balance: DdnUtils.bignum.minus(0, fees, rewards).toString(),     //DdnUtils.bignum update -(fees + rewards),
+    //       u_balance: DdnUtils.bignum.minus(0, fees, rewards).toString(),       //DdnUtils.bignum update -(fees + rewards),
+    //       fees: DdnUtils.bignum.minus(0, fees).toString(),     //DdnUtils.bignum update -fees,
+    //       rewards: DdnUtils.bignum.minus(0, rewards).toString(),       //DdnUtils.bignum update -rewards,
     //       block_id: block.id,    //wxm block database
     //       round: modules.round.calc(block.height).toString(),
     //     }, dbTrans, err => {
@@ -412,4 +413,4 @@ class Round {
 
 }
 
-module.exports = Round;
+export default Round;

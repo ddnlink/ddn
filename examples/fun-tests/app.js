@@ -2,13 +2,14 @@
  * 系统启动入口
  * wangxm   2018-12-25
  */
-const packageFile =require('./package.json');
-const command =require('commander');
-const path =require('path');
-const fs =require('fs');
-const { Utils } =require('@ddn/utils');
-const { getUserConfig } =require('@ddn/core');
-const Peer = require('@ddn/peer').default;
+const packageFile = require('./package.json');
+
+const command = require('commander');
+const path = require('path');
+const fs = require('fs');
+const DdnCore = require('@ddn/core').default;
+const DdnPeer = require('@ddn/peer').default;
+const DdnUtils = require('@ddn/utils').default;
 
 /**
  * 整理系统配置文件生成输入参数
@@ -49,7 +50,7 @@ function genOptions() {
         return;
     }
 
-    const configObject = getUserConfig({ cwd: baseDir });
+    const configObject = DdnCore.getUserConfig({ cwd: baseDir });
 
     configObject.version = packageFile.version;
     configObject.basedir = baseDir;
@@ -97,7 +98,7 @@ function genOptions() {
 }
 
 async function main() {
-    global._require_runtime_ = function(m) {
+    global._require_runtime_ = m => {
         if (typeof(global._require_native_) == "function") {
             return global._require_native_(m);
         } else {
@@ -110,12 +111,12 @@ async function main() {
     try
     {
         let options = genOptions();
-        peer = new Peer();
+        peer = new DdnPeer();
         await peer.run(options);
     }
     catch (err)
     {
-        console.error(Utils.getErrorMsg(err));
+        console.error(DdnUtils.system.getErrorMsg(err));
 
         if (peer) {
             peer.destory();

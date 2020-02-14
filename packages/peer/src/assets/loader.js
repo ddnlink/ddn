@@ -2,14 +2,17 @@
  * 资产加载注册器
  * wangxm   2018-12-28
  */
-const express = require('express');
-const { AssetTypes } = require('@ddn/utils');
-const Transfer = require('./system/transfer');
-const Signatures = require('./system/signature');
-const Delegate = require('./system/delegate');
-const Vote = require('./system/vote');
-const Multisignatures = require('./system/multisignature');
-const Lock = require('./system/lock');
+import express from 'express';
+
+import DdnUtils from '@ddn/utils';
+import Transfer from './system/transfer';
+import Signatures from './system/signature';
+import Delegate from './system/delegate';
+import Vote from './system/vote';
+import Multisignatures from './system/multisignature';
+import Lock from './system/lock';
+
+const { assetTypes } = DdnUtils;
 
 class Loader {
 
@@ -24,7 +27,7 @@ class Loader {
     }
 
     _getAssetKey(type) {
-        return "asset_" + type;
+        return `asset_${type}`;
     }
 
     _registerAsset(type, inst, assetName) {
@@ -75,7 +78,7 @@ class Loader {
         if (assetName)
         {
             const keys = Object.getOwnPropertyNames(this._assetsNames)
-            for (var p in keys)
+            for (const p in keys)
             {
                 const key = keys[p];
                 if (key.toLowerCase() == assetName.toLowerCase())
@@ -94,66 +97,66 @@ class Loader {
      */
     async _attachAssetPluginApi(assetConfig, assetInst) {
         if (assetConfig && assetInst) {
-            var apiSubPath = assetConfig.name.toLowerCase();
+            const apiSubPath = assetConfig.name.toLowerCase();
             // if (apiSubPath.length > 5) {
             //     if (apiSubPath.substring(0, 5) == "asset") {
             //         apiSubPath = apiSubPath.substring(5);
             //     }
             // }
 
-            var router = express.Router();
-            var apis = await this._attachAssetPluginApiRouter(router, assetConfig, assetInst);
+            const router = express.Router();
+            const apis = await this._attachAssetPluginApiRouter(router, assetConfig, assetInst);
             if (typeof(assetInst.attachApi) == "function") {
                 await assetInst.attachApi(router);
             }
 
             this._assetsApi.push({
-                path: '/api/' + apiSubPath,
-                router: router,
+                path: `/api/${apiSubPath}`,
+                router,
                 apis
             });
         }
     }
 
     mountAssetApis(expressApp) {
-        for (var i = 0; i < this._assetsApi.length; i++) {
-            var apiInfo = this._assetsApi[i];
+        for (let i = 0; i < this._assetsApi.length; i++) {
+            const apiInfo = this._assetsApi[i];
             expressApp.use(apiInfo.path, apiInfo.router);
 
-            for (var j = 0; j < apiInfo.apis.length; j++) {
-                this.logger.info("mounted asset api: " + apiInfo.path + apiInfo.apis[j]);
+            for (let j = 0; j < apiInfo.apis.length; j++) {
+                this.logger.info(`mounted asset api: ${apiInfo.path}${apiInfo.apis[j]}`);
             }
         }
     }
 
     _assetAssetPluginApiDetail(assetType, paramName, assetInst) {
-        var func = function(req, res, next) {
-            var parseSortItem = function(sort, item) {
-                var subItems = item.split("=");
+        const func = ({params, query}, res, next) => {
+            const parseSortItem = (sort, item) => {
+                const subItems = item.split("=");
                 if (subItems.length == 2) {
                     if (subItems[0].replace(/\s*/, "") != "") {
                         sort.push(subItems);
                     }
                 }
-            }
-
-            var where = {
-                trs_type: assetType,
-                [paramName]: req.params[paramName]
             };
 
-            var orders = [];
-            var sortItems = req.query.sort;
+            const where = {
+                trs_type: assetType,
+                [paramName]: params[paramName]
+            };
+
+            const orders = [];
+            let sortItems = query.sort;
 
             if (sortItems) {
                 if (!sortItems.splice) {
                     sortItems = [sortItems];
                 }
 
-                for (var i = 0; i < sortItems.length; i++) {
-                    var sortItem = sortItems[i];
+                for (let i = 0; i < sortItems.length; i++) {
+                    const sortItem = sortItems[i];
                     if (sortItem.replace(/\s*/, "") != "") {
-                        var pos = sortItem.indexOf("=");
+                        const pos = sortItem.indexOf("=");
                         if (pos >= 0) {
                             parseSortItem(orders, sortItem);
                         } else {
@@ -175,43 +178,43 @@ class Loader {
     }
 
     _assetAssetPluginApiList(assetType, paramName, assetInst) {
-        var func = function(req, res, next) {
-            var parseSortItem = function(sort, item) {
-                var subItems = item.split(":");
+        const func = ({params, query}, res, next) => {
+            const parseSortItem = (sort, item) => {
+                const subItems = item.split(":");
                 if (subItems.length == 2) {
                     if (subItems[0].replace(/\s*/, "") != "") {
                         sort.push(subItems);
                     }
                 }
-            }
+            };
 
-            var where = {
+            const where = {
                 trs_type: assetType
             };
             if (paramName) {
-                where[paramName] = req.params[paramName];
+                where[paramName] = params[paramName];
             }
-            if (req.query) {
-                for (var p in req.query) {
-                    where[p] = req.query[p];
+            if (query) {
+                for (const p in query) {
+                    where[p] = query[p];
                 }
             }
 
-            var pageIndex = req.query.pageindex || 1;
-            var pageSize = req.query.pagesize || 50;
+            const pageIndex = query.pageindex || 1;
+            const pageSize = query.pagesize || 50;
 
-            var orders = [];
-            var sortItems = req.query.sort;
+            const orders = [];
+            let sortItems = query.sort;
 
             if (sortItems) {
                 if (!sortItems.splice) {
                     sortItems = [sortItems];
                 }
 
-                for (var i = 0; i < sortItems.length; i++) {
-                    var sortItem = sortItems[i];
+                for (let i = 0; i < sortItems.length; i++) {
+                    const sortItem = sortItems[i];
                     if (sortItem.replace(/\s*/, "") != "") {
-                        var pos = sortItem.indexOf(":");
+                        const pos = sortItem.indexOf(":");
                         if (pos >= 0) {
                             parseSortItem(orders, sortItem);
                         } else {
@@ -227,34 +230,34 @@ class Loader {
                 }).catch(err => {
                     res.status(200).json({success: false, state: -1, error: err.toString()});
                 });
-        }
+        };
 
         return func;
     }
 
-    async _attachAssetPluginApiRouter(router, assetConfig, assetInst) {
-        var allApis = [];
+    async _attachAssetPluginApiRouter(router, {type}, assetInst) {
+        const allApis = [];
 
-        var props = await assetInst.propsMapping();
-        for (var i = 0; i < props.length; i++) {
-            var currProp = props[i];
+        const props = await assetInst.propsMapping();
+        for (let i = 0; i < props.length; i++) {
+            const currProp = props[i];
             if (currProp.required) {
                 if (!/_ext$/.test(currProp.field)) {
-                    var detailPath = "/" + currProp.prop.toLowerCase() + "/:" + currProp.prop.toLowerCase();
-                    router.get(detailPath, this._assetAssetPluginApiDetail(assetConfig.type, currProp.prop.toLowerCase(), assetInst));
+                    const detailPath = `/${currProp.prop.toLowerCase()}/:${currProp.prop.toLowerCase()}`;
+                    router.get(detailPath, this._assetAssetPluginApiDetail(type, currProp.prop.toLowerCase(), assetInst));
                     allApis.push(detailPath);
 
-                    var listPath = "/" + currProp.prop.toLowerCase() + "/:" + currProp.prop.toLowerCase() + "/list";
-                    router.get(listPath, this._assetAssetPluginApiList(assetConfig.type, currProp.prop.toLowerCase(), assetInst));
+                    const listPath = `/${currProp.prop.toLowerCase()}/:${currProp.prop.toLowerCase()}/list`;
+                    router.get(listPath, this._assetAssetPluginApiList(type, currProp.prop.toLowerCase(), assetInst));
                     allApis.push(listPath);
                 }
             }
         }
 
-        router.get("/transaction/:trs_id", this._assetAssetPluginApiDetail(assetConfig.type, "trs_id", assetInst));
+        router.get("/transaction/:trs_id", this._assetAssetPluginApiDetail(type, "trs_id", assetInst));
         allApis.push("/transaction/:trs_id");
 
-        router.get("/list", this._assetAssetPluginApiList(assetConfig.type, null, assetInst));
+        router.get("/list", this._assetAssetPluginApiList(type, null, assetInst));
         allApis.push("/list");
 
         return allApis;
@@ -264,30 +267,30 @@ class Loader {
     async _addAsesstModels () {
         const { dao } = this;
         const assetsPackageList = [];
-        for (var i = 0; i < this.assetPlugins.getTransactionCount(); i++) {
-            var trans = this.assetPlugins.getTransactionByIndex(i);
-            if(assetsPackageList.indexOf(trans.package) === -1){
+        for (let i = 0; i < this.assetPlugins.getTransactionCount(); i++) {
+            const trans = this.assetPlugins.getTransactionByIndex(i);
+            if(!assetsPackageList.includes(trans.package)){
                 assetsPackageList.push(trans.package);
             }
         }
 
         assetsPackageList.map((packageName) => {
-            var assetModels;
+            let assetModels;
             try {
-                assetModels = _require_runtime_(packageName + '/lib/define-models') || [];
+                assetModels = _require_runtime_(`${packageName}/lib/define-models`) || [];
             } catch (err){
-                this.logger.info(packageName + ' 资产包不包含自定义数据模型内容。');
+                this.logger.info(`${packageName} 资产包不包含自定义数据模型内容。`);
                 return;
             }
 
             if (assetModels) {
-                assetModels.map((model) => {
+                assetModels.map(({name, data}) => {
                     // 挂载方法
-                    dao.buildModel(model.name, model.data);
+                    dao.buildModel(name, data);
                     // 创建表
-                    dao.createTable(model.name, false, (err) => {
+                    dao.createTable(name, false, (err) => {
                         if(err){
-                            this.logger.err(packageName + ' 资产包自定义数据模型生成失败。', err);
+                            this.logger.err(`${packageName} 资产包自定义数据模型生成失败。`, err);
                             process.emit('cleanup');
                         }
                     });
@@ -297,36 +300,36 @@ class Loader {
     }
 
     async init() {
-        var transfer = new Transfer(this._context);
-        this._registerAsset(AssetTypes.TRANSFER, transfer);
+        const transfer = new Transfer(this._context);
+        this._registerAsset(assetTypes.TRANSFER, transfer);
 
-        var signature = new Signatures(this._context);
-        this._registerAsset(AssetTypes.SIGNATURE, signature);
+        const signature = new Signatures(this._context);
+        this._registerAsset(assetTypes.SIGNATURE, signature);
 
-        var delegate = new Delegate(this._context);
-        this._registerAsset(AssetTypes.DELEGATE, delegate);
+        const delegate = new Delegate(this._context);
+        this._registerAsset(assetTypes.DELEGATE, delegate);
 
-        var vote = new Vote(this._context);
-        this._registerAsset(AssetTypes.VOTE, vote);
+        const vote = new Vote(this._context);
+        this._registerAsset(assetTypes.VOTE, vote);
 
-        var multisignature = new Multisignatures(this._context);
-        this._registerAsset(AssetTypes.MULTISIGNATURE, multisignature);
+        const multisignature = new Multisignatures(this._context);
+        this._registerAsset(assetTypes.MULTISIGNATURE, multisignature);
 
-        var lock = new Lock(this._context);
-        this._registerAsset(AssetTypes.LOCK, lock);
+        const lock = new Lock(this._context);
+        this._registerAsset(assetTypes.LOCK, lock);
 
         await this._attachAssetPlugins();
         await this._addAsesstModels();
     }
 
     hasType(type) {
-        var key = this._getAssetKey(type);
+        const key = this._getAssetKey(type);
         return !!this._assets[key];
     }
 
     getAsset(type) {
         if (this.hasType(type)) {
-            var key = this._getAssetKey(type);
+            const key = this._getAssetKey(type);
             return this._assets[key];
         }
         return null;
@@ -337,19 +340,19 @@ class Loader {
      * @param {*} funcName
      */
     async execAssetFunc(funcName) {
-        var args = [];
-        for (var i = 1; i < arguments.length; i++) {
+        const args = [];
+        for (let i = 1; i < arguments.length; i++) {
             args.push(arguments[i]);
         }
 
         const keys = Object.getOwnPropertyNames(this._assets)
-        for (var p in keys) {
+        for (const p in keys) {
             const key = keys[p];
             const inst = this._assets[key];
             if (inst != null &&
                 typeof(inst[funcName]) == "function") {
                 try {
-                    await inst[funcName].apply(inst, args);
+                    await inst[funcName](...args);
                 } catch (err) {
                     this.logger.error(err);
                 }
@@ -359,4 +362,4 @@ class Loader {
 
 }
 
-module.exports = Loader;
+export default Loader;
