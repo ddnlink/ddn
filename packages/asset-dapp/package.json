@@ -20,7 +20,7 @@
   "license": "MIT",
   "dependencies": {
     "@ddn/asset-base": "^0.1.0",
-    "@ddn/ddn-sandbox": "^1.0.0",
+    "@ddn/sandbox": "^0.0.1",
     "@ddn/utils": "^0.0.5",
     "async": "^2.6.1",
     "decompress-zip": "^0.2.2",

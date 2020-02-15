@@ -1,0 +1,16 @@
+{
+  "name": "@ddn/sandbox",
+  "version": "0.0.1",
+  "description": "ddn sandbox which is used to run sidechain dapps",
+  "main": "./lib/index.js",
+  "scripts": {
+    "test": "./node_modules/.bin/mocha",
+    "build": "gulp"
+  },
+  "author": "HuoDing <huo.ding@qq.com>",
+  "license": "ISC",
+  "dependencies": {
+    "vm2": "^3.8.2"
+  },
+  "devDependencies": {}
+}

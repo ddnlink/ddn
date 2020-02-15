@@ -6,9 +6,9 @@
   "repository": {
     "type": "git",
     "url": "git+https://github.com/ddnlink/ddn.git",
-    "directory": "packages/ddn-utils"
+    "directory": "packages/utils"
   },
-  "homepage": "http://github.com/ddnlink/ddn/tree/master/packages/ddn-utils",
+  "homepage": "http://github.com/ddnlink/ddn/tree/master/packages/utils",
   "bugs": {
     "url": "http://github.com/ddnlink/ddn/issues"
   },
