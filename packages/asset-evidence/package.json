@@ -1,7 +1,7 @@
 {
   "name": "@ddn/asset-evidence",
   "version": "0.0.1",
-  "description": "DDN数据存证资产包",
+  "description": "DDN evidence",
   "main": "lib/index.js",
   "repository": {
     "type": "git",
@@ -19,6 +19,6 @@
   "author": "wangxm",
   "license": "MIT",
   "dependencies": {
-    "@ddn/asset-base": "^0.0.1"
+    "@ddn/asset-base": "^0.1.0"
   }
 }

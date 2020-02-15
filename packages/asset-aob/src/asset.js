@@ -1,5 +1,5 @@
 import Asset from '@ddn/asset-base';
-import { Bignum, Amount } from '@ddn/utils';
+import DdnUtils from '@ddn/utils';
 import assert from 'assert';
 
 class Aob extends Asset.Base {
@@ -61,7 +61,7 @@ class Aob extends Asset.Base {
     }
 
     async calculateFee() {
-        return Bignum.multiply(500, this.tokenSetting.fixedPoint);
+        return DdnUtils.bignum.multiply(500, this.tokenSetting.fixedPoint);
     }
 
     async verify(trs, sender) {
@@ -86,7 +86,7 @@ class Aob extends Asset.Base {
         if (asset.precision > 16 || asset.precision < 0) {
             throw new Error('Invalid asset precision form asset-aob');
         }
-        const error = Amount.validate(asset.maximum);
+        const error = DdnUtils.amount.validate(asset.maximum);
         if (error) {
             throw new Error(error);
         }

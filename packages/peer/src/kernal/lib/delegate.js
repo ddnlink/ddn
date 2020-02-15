@@ -2,10 +2,11 @@
  * Delegate
  * wangxm   2018-01-08
  */
-const crypto = require('crypto');
-const util = require('util');
-const ed = require('ed25519');
-const { Bignum } = require('@ddn/utils');
+import crypto from 'crypto';
+
+import util from 'util';
+import ed from 'ed25519';
+import DdnUtils from '@ddn/utils';
 
 let _singleton;
 
@@ -75,8 +76,7 @@ class Delegate {
             limit: delegatePublicKeys.length
         });
         if (accounts && accounts.length == delegatePublicKeys.length) {
-            for (let i = 0; i < accounts.length; i++) {
-                const account = accounts[i];
+            accounts.forEach(account => {
                 if (account.is_delegate) {
                     this._myDelegateKeypairs[account.public_key] = delegateKeypairs[account.public_key]; //wxm block database
                     this._myDelegateNum++;
@@ -84,7 +84,7 @@ class Delegate {
                 } else {
                     this.logger.info(`Delegate with this public key not found: ${account.public_key}`);   //wxm block database
                 }
-            }
+            });
         } else {
             throw new Error("Delegates not found.");
         }
@@ -92,18 +92,19 @@ class Delegate {
 
     async checkDelegates(publicKey, votes) {
         if (util.isArray(votes)) {
-            var account = await this.runtime.account.getAccountByPublicKey(publicKey);
+            const account = await this.runtime.account.getAccountByPublicKey(publicKey);
             if (!account) {
                 throw new Error("Account not found");
             }
 
             const existing_votes = account.delegates ? account.delegates.length : 0;
-            let additions = 0, removals = 0;
+            let additions = 0;
+            let removals = 0;
 
-            for (var i = 0; i < votes.length; i++) {
-                var action = votes[i];
+            for (let i = 0; i < votes.length; i++) {
+                const action = votes[i];
 
-                var math = action[0];
+                const math = action[0];
                 if (math !== '+' && math !== '-') {
                     throw new Error("Invalid math operator");
                 }
@@ -114,21 +115,21 @@ class Delegate {
                     removals += 1;
                 }
 
-                var publicKey2 = action.slice(1);
+                const publicKey2 = action.slice(1);
                 try {
                     Buffer.from(publicKey2, "hex");
                 } catch (e) {
                     throw new Error("Invalid public key");
                 }
 
-                if (math == "+" && (account.delegates !== null && account.delegates.indexOf(publicKey2) != -1)) {
+                if (math == "+" && (account.delegates !== null && account.delegates.includes(publicKey2))) {
                     throw new Error("Failed to add vote, account has already voted for this delegate");
                 }
-                if (math == "-" && (account.delegates === null || account.delegates.indexOf(publicKey2) === -1)) {
+                if (math == "-" && (account.delegates === null || !account.delegates.includes(publicKey2))) {
                     throw new Error("Failed to remove vote, account has not voted for this delegate");
                 }
 
-                var account2 = await this.runtime.account.getAccount({
+                const account2 = await this.runtime.account.getAccount({
                     public_key: publicKey2,
                     is_delegate: 1
                 });
@@ -137,9 +138,9 @@ class Delegate {
                 }
             }
 
-            var total_votes = (existing_votes + additions) - removals;
+            const total_votes = (existing_votes + additions) - removals;
             if (total_votes > this.config.settings.delegateNumber) {
-                var exceeded = total_votes - this.config.settings.delegateNumber;
+                const exceeded = total_votes - this.config.settings.delegateNumber;
                 throw new Error(`Maximum number ${this.config.settings.delegateNumber} votes exceeded (${exceeded} too many).`);
             }
         } else {
@@ -152,28 +153,28 @@ class Delegate {
             throw "Missing query argument";
         }
 
-        var delegates = await this.runtime.account.getAccountList({
+        const delegates = await this.runtime.account.getAccountList({
             is_delegate: 1,  //wxm block database
             // sort: {"vote": -1, "publicKey": 1},
             sort: [['vote', 'DESC'], ['public_key', 'ASC']] //wxm block database
         }, ["username", "address", "public_key", "vote", "missedblocks", "producedblocks", "fees", "rewards", "balance"]);
 
-        var limit = query.limit || this.config.settings.delegateNumber;
-		var offset = query.offset || 0;
-		var orderField = query.orderBy || 'rate:asc';
+        let limit = query.limit || this.config.settings.delegateNumber;
+		const offset = query.offset || 0;
+		let orderField = query.orderBy || 'rate:asc';
 
         orderField = orderField ? orderField.split(':') : null;
         limit = limit > this.config.settings.delegateNumber ? this.config.settings.delegateNumber : limit;
 
-        var orderBy = orderField ? orderField[0] : null;
-        var sortMode = orderField && orderField.length == 2 ? orderField[1] : 'asc';
+        const orderBy = orderField ? orderField[0] : null;
+        const sortMode = orderField && orderField.length == 2 ? orderField[1] : 'asc';
 
-        var count = delegates.length;
-        var length = Math.min(limit, count);
-        var realLimit = Math.min(offset + limit, count);
+        const count = delegates.length;
+        // const length = Math.min(limit, count);
+        const realLimit = Math.min(offset + limit, count);
 
-        var lastBlock = this.runtime.block.getLastBlock();
-        var totalSupply = this.runtime.block.getBlockStatus().calcSupply(lastBlock.height);
+        const lastBlock = this.runtime.block.getLastBlock();
+        const totalSupply = this.runtime.block.getBlockStatus().calcSupply(lastBlock.height);
 
         for (let i = 0; i < delegates.length; i++) {
             delegates[i].rate = i + 1;
@@ -183,12 +184,12 @@ class Delegate {
             let percent = 100 - (delegates[i].missedblocks / ((delegates[i].producedblocks + delegates[i].missedblocks) / 100));
             percent = Math.abs(percent) || 0;
 
-            var outsider = i + 1 > this.config.settings.delegateNumber;
+            const outsider = i + 1 > this.config.settings.delegateNumber;
             delegates[i].productivity = (!outsider) ? Math.round(percent * 1e2) / 1e2 : 0;
 
-          //   Bignum update
-          //   delegates[i].forged = Bignum(delegates[i].fees).plus(Bignum(delegates[i].rewards)).toString();
-            delegates[i].forged = Bignum.plus(delegates[i].fees, delegates[i].rewards).toString();
+          //   DdnUtils.bignum update
+          //   delegates[i].forged = DdnUtils.bignum(delegates[i].fees).plus(DdnUtils.bignum(delegates[i].rewards)).toString();
+            delegates[i].forged = DdnUtils.bignum.plus(delegates[i].fees, delegates[i].rewards).toString();
         }
 
         return {
@@ -205,7 +206,7 @@ class Delegate {
      * 返回所有受托人的public_key列表
      */
     async getDelegatePublickKeysSortByVote() {
-        var delegates = await this.runtime.account.getAccountList({
+        const delegates = await this.runtime.account.getAccountList({
             is_delegate: 1,  //wxm block database
             // sort: {"vote": -1, "publicKey": 1},
             sort: [['vote', 'DESC'], ['public_key', 'ASC']], //wxm block database
@@ -216,14 +217,14 @@ class Delegate {
             throw new Error("No active delegates found");
         }
 
-        return delegates.map(item => item.public_key);
+        return delegates.map(({public_key}) => public_key);
     }
 
     /**
      * 返回乱序处理的受托人public_key列表
      */
     async getDisorderDelegatePublicKeys(height) {
-        var truncDelegateList = await this.getDelegatePublickKeysSortByVote();
+        const truncDelegateList = await this.getDelegatePublickKeysSortByVote();
         const seedSource = await this.runtime.round.calc(height).toString();
         //wxm 对查询返回的受托人列表进行乱序处理
         let currentSeed = crypto.createHash('sha256').update(seedSource, 'utf8').digest();
@@ -245,11 +246,11 @@ class Delegate {
      * @param {*} height
      */
     async getActiveDelegateKeypairs(height) {
-        var delegates = await this.getDisorderDelegatePublicKeys(height);
+        const delegates = await this.getDisorderDelegatePublicKeys(height);
 
         const results = [];
         for (const key in this._myDelegateKeypairs) {
-            if (delegates.indexOf(key) !== -1) {
+            if (delegates.includes(key)) {
                 results.push(this._myDelegateKeypairs[key]);
             }
         }
@@ -262,7 +263,7 @@ class Delegate {
      * @param {*} height
      */
     async getForgeDelegateWithCurrentTime(curSlot, height) {
-        var activeDelegates = await this.getDisorderDelegatePublicKeys(height);
+        const activeDelegates = await this.getDisorderDelegatePublicKeys(height);
 
         let currentSlot = curSlot;
         const lastSlot = this.runtime.slot.getLastSlot(currentSlot);
@@ -279,21 +280,21 @@ class Delegate {
         return null;
     }
 
-    async validateBlockSlot(block) {
-        var activeDelegates = await this.getDisorderDelegatePublicKeys(block.height);
-        var currentSlot = this.runtime.slot.getSlotNumber(block.timestamp);
-        var delegateKey = activeDelegates[currentSlot % this.config.settings.delegateNumber];
-        if (delegateKey && block.generator_public_key == delegateKey) {
+    async validateBlockSlot({height, timestamp, generator_public_key}) {
+        const activeDelegates = await this.getDisorderDelegatePublicKeys(height);
+        const currentSlot = this.runtime.slot.getSlotNumber(timestamp);
+        const delegateKey = activeDelegates[currentSlot % this.config.settings.delegateNumber];
+        if (delegateKey && generator_public_key == delegateKey) {
             return;
         }
         throw new Error(`Failed to verify slot, expected delegate: ${delegateKey}`);
     }
 
-    async validateProposeSlot(propose) {
-        var activeDelegates = await this.getDisorderDelegatePublicKeys(propose.height);
-        var currentSlot = this.runtime.slot.getSlotNumber(propose.timestamp);
-        var delegateKey = activeDelegates[currentSlot % this.config.settings.delegateNumber];
-        if (delegateKey && propose.generator_public_key == delegateKey) {
+    async validateProposeSlot({height, timestamp, generator_public_key}) {
+        const activeDelegates = await this.getDisorderDelegatePublicKeys(height);
+        const currentSlot = this.runtime.slot.getSlotNumber(timestamp);
+        const delegateKey = activeDelegates[currentSlot % this.config.settings.delegateNumber];
+        if (delegateKey && generator_public_key == delegateKey) {
             return;
         }
         throw new Error("Failed to validate propose slot");
@@ -335,4 +336,4 @@ class Delegate {
     }
 }
 
-module.exports = Delegate;
+export default Delegate;

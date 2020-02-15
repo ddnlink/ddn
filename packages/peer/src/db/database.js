@@ -1,5 +1,5 @@
-const Sequelize = require('sequelize');
-const sequelizeDB = require('./sequelize');
+import Sequelize from 'sequelize';
+import sequelizeDB from './sequelize';
 
 class DBUtils {
 
@@ -260,4 +260,4 @@ class DBUtils {
     }
 }
 
-module.exports = DBUtils;
+export default DBUtils;

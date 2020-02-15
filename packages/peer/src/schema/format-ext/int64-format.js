@@ -1,8 +1,9 @@
-module.exports = {
+export default {
 
     name: "int64",
 
-    validate: function(value) {
+    // FIXME: value?
+    validate(value) {
         console.log("int64 haha......................");
         return false;
     }

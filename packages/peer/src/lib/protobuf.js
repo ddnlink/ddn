@@ -5,10 +5,11 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-const protobuf = require('protobufjs');
-const extend = require('extend');
-const { AssetTypes } = require('@ddn/utils');
-const { AssetUtils } = require('@ddn/asset-base');
+import protobuf from 'protobufjs';
+
+import extend from 'extend';
+import DdnUtils from '@ddn/utils';
+import Asset from '@ddn/asset-base';
 
 class Protobuf {
   constructor(root){
@@ -51,7 +52,7 @@ class Protobuf {
     obj.generator_public_key = Buffer.from(obj.generator_public_key, 'hex');   //wxm block database
     obj.hash = Buffer.from(obj.hash, 'hex');
     obj.signature = Buffer.from(obj.signature, 'hex');
-    var err = this.root.BlockPropose.verify(obj);
+    const err = this.root.BlockPropose.verify(obj);
     if (err){
       throw Error(err);
     }
@@ -72,7 +73,7 @@ class Protobuf {
       signature.sig = Buffer.from(signature.sig, 'hex');
     }
 
-    var err = this.root.BlockVotes.verify(obj);
+    const err = this.root.BlockVotes.verify(obj);
     if (err){
       throw Error(err);
     }
@@ -95,7 +96,7 @@ class Protobuf {
     const obj = extend(true, {}, trs);
     this.transactionStringToBytes(obj);
 
-    var err = this.root.Transaction.verify(obj);
+    const err = this.root.Transaction.verify(obj);
     if (err){
       throw Error(err);
     }
@@ -120,12 +121,12 @@ class Protobuf {
     }
 
     switch (obj.type) {
-        case AssetTypes.DELEGATE:
+        case DdnUtils.assetTypes.DELEGATE:
             if (obj.asset.delegate) {
                 obj.asset.delegate.public_key = Buffer.from(obj.asset.delegate.public_key, 'hex');   //wxm block database
             }
             break;
-        case AssetTypes.SIGNATURE:
+        case DdnUtils.assetTypes.SIGNATURE:
             if (obj.asset.signature) {
                 obj.asset.signature.public_key = Buffer.from(obj.asset.signature.public_key, 'hex'); //wxm block database
             }
@@ -144,12 +145,12 @@ class Protobuf {
     }
 
     switch (obj.type) {
-        case AssetTypes.DELEGATE:
+        case DdnUtils.assetTypes.DELEGATE:
             if (obj.asset.delegate) {
                 obj.asset.delegate.public_key = Buffer.from(obj.asset.delegate.public_key, "base64").toString("hex");    // obj.asset.delegate.public_key.toString('hex');  //wxm block database
             }
             break;
-        case AssetTypes.SIGNATURE:
+        case DdnUtils.assetTypes.SIGNATURE:
             if (obj.asset.signature) {
                 obj.asset.signature.public_key = Buffer.from(obj.asset.signature.public_key, "base64").toString("hex");  // obj.asset.signature.public_key.toString('hex');    //wxm block database
             }
@@ -158,55 +159,55 @@ class Protobuf {
   }
 }
 
-module.exports = (schemaFile, cb) => {
-    var insertAssetMessage = async function(root) {
-        var rootTemp = JSON.parse(JSON.stringify(root));
+export default (schemaFile, cb) => {
+    const insertAssetMessage = async root => {
+        const rootTemp = JSON.parse(JSON.stringify(root));
 
-        var maxAssetId = 0;
+        let maxAssetId = 0;
         if (rootTemp.nested.Asset && rootTemp.nested.Asset.fields) {
-            for (var p in rootTemp.nested.Asset.fields) {
+            for (const p in rootTemp.nested.Asset.fields) {
                 maxAssetId = Math.max(maxAssetId, rootTemp.nested.Asset.fields[p].id);
             }
         }
 
-        var transCount = AssetUtils.getTransactionCount();
+        const transCount = Asset.Utils.getTransactionCount();
         for (let i = 0; i < transCount; i++) {
-            const assetTrans = AssetUtils.getTransactionByIndex(i);
+            const assetTrans = Asset.Utils.getTransactionByIndex(i);
             if (assetTrans) {
-                const assetJsonName = AssetUtils.getAssetJsonName(assetTrans.type);
-                const transCls = global._require_runtime_(assetTrans.package)[assetTrans.name];
-                const transInst = new transCls();   //wxm 此处传的都是null，必须保证propsMapping里不要用到这传入的context参数
-                const props = await transInst.propsMapping();
-                const fields = {};
-                for (let j = 0; j < props.length; j++) {
-                    const pItem = props[j];
-                    fields[pItem.prop] = {};
+              const assetJsonName = Asset.Utils.getAssetJsonName(assetTrans.type);
+              const transCls = global._require_runtime_(assetTrans.package)[assetTrans.name];
+              const transInst = new transCls();   //wxm 此处传的都是null，必须保证propsMapping里不要用到这传入的context参数
+              const props = await transInst.propsMapping();
+              const fields = {};
 
-                    if (pItem.required) {
-                        fields[pItem.prop].rule = "required";
-                    }
+              props.forEach((pItem, j) => {
+                fields[pItem.prop] = {};
 
-                    let fieldType = pItem.field.replace(/[0-9]/g, "");
-                    fieldType = fieldType.replace(/_ext$/, "");
-                    if (fieldType == "int") {
-                        fields[pItem.prop].type = "int32";
-                    } else {
-                        fields[pItem.prop].type = "string";
-                    }
-
-                    fields[pItem.prop].id = j + 1;
+                if (pItem.required) {
+                    fields[pItem.prop].rule = "required";
                 }
 
-                rootTemp.nested.Asset.oneofs.derivedAsset.oneof.push(assetJsonName);
-                rootTemp.nested.Asset.fields[assetJsonName] ={
-                    type: assetTrans.name,
-                    id: maxAssetId + 1
-                };
-                rootTemp.nested[assetTrans.name] = {
-                    fields: fields
-                };
+                let fieldType = pItem.field.replace(/[0-9]/g, "");
+                fieldType = fieldType.replace(/_ext$/, "");
+                if (fieldType == "int") {
+                    fields[pItem.prop].type = "int32";
+                } else {
+                    fields[pItem.prop].type = "string";
+                }
 
-                maxAssetId++;
+                fields[pItem.prop].id = j + 1;
+              });
+
+              rootTemp.nested.Asset.oneofs.derivedAsset.oneof.push(assetJsonName);
+              rootTemp.nested.Asset.fields[assetJsonName] ={
+                  type: assetTrans.name,
+                  id: maxAssetId + 1
+              };
+              rootTemp.nested[assetTrans.name] = {
+                  fields
+              };
+
+              maxAssetId++;
             }
         }
 
@@ -224,4 +225,4 @@ module.exports = (schemaFile, cb) => {
         root = await insertAssetMessage(root);
         cb(null, new Protobuf(root));
     });
-}
+};

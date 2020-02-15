@@ -1,13 +1,13 @@
 /*
  * @Author: shuai 
  * @Date: 2018-11-14 13:32:47 
- * @Last Modified by: shuai
- * @Last Modified time: 2018-11-14 14:31:57
+ * @Last Modified by: mikey.zhaopeng
+ * @Last Modified time: 2020-02-13 22:43:51
  */
 
-const Sequelize = require('sequelize');
+import Sequelize from 'sequelize';
 
-module.exports = function (connection) {
+export default connection => {
 	return connection.define("addition", {
 		json: {
 			type: Sequelize.TEXT,
@@ -22,4 +22,4 @@ module.exports = function (connection) {
         tableName: 'addition',
 		timestamps: false,
 	});
-}
+};

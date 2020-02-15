@@ -6,7 +6,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import Asset from '@ddn/asset-base';
-import { Bignum, Address } from '@ddn/utils';
+import DdnUtils from '@ddn/utils';
 import ByteBuffer from 'bytebuffer';
 import { isUri } from 'valid-url';
 import crypto from 'crypto';
@@ -117,8 +117,8 @@ class Org extends Asset.Base {
         if (assetObj.state === 1) {
             feeBase = parseInt(feeBase / 10, 10); // change info
         }
-        // Bignum update
-        const result = Bignum.multiply(feeBase, 100000000).toString();
+        // DdnUtils.bignum update
+        const result = DdnUtils.bignum.multiply(feeBase, 100000000).toString();
         return result;
     }
 
@@ -138,10 +138,10 @@ class Org extends Asset.Base {
         } else {
             throw new Error(`Invalid asset state type: ${org.state}`);
         }
-        if (!Address.isAddress(sender.address)) {
+        if (!DdnUtils.address.isAddress(sender.address)) {
             throw new Error('Invalid address');
         }
-        if (!Bignum.isZero(trs.amount)) {
+        if (!DdnUtils.bignum.isZero(trs.amount)) {
             throw new Error('Invalid transaction amount');
         }
         if (!trs.asset || !org) {
@@ -154,7 +154,7 @@ class Org extends Asset.Base {
         if (org.name && org.name.lenght > 64) {
             throw new Error('Name is too long，don`t more than 64 bit.');
         }
-        if (!Address.isAddress(org.address)) {
+        if (!DdnUtils.address.isAddress(org.address)) {
             throw new Error('Invalid org address');
         }
         if (org.address != sender.address) {

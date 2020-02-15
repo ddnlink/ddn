@@ -1,12 +1,13 @@
-var DEBUG = require('debug')('dao')
-var node = require('../../variables.js')
-const { Bignum } = require('@ddn/utils');
+const DEBUG = require('debug')('dao');
+import node from '../../variables.js';
+import DdnUtil from '@ddn/utils';
 
-var Account1 = node.randomTxAccount();
-var Account2 = node.randomTxAccount();
-var transaction, exchange;
-var Account1Balance;
-var exchangePrice = "700000000"
+const Account1 = node.randomTxAccount();
+const Account2 = node.randomTxAccount();
+let transaction;
+let exchange;
+let Account1Balance;
+const exchangePrice = "700000000";
 
 async function openAccount(account) {
     await new Promise((resolve, reject) => {
@@ -18,33 +19,33 @@ async function openAccount(account) {
             })
             .expect("Content-Type", /json/)
             .expect(200)
-            .end((err, res) => {
+            .end((err, {body}) => {
                 // console.log(JSON.stringify(res.body))
 
                 if (err) {
                     return reject(err);
                 }
 
-                node.expect(res.body).to.have.property("success").to.be.true;
+                node.expect(body).to.have.property("success").to.be.true;
 
-                if (res.body.account != null) {
-                    account.address = res.body.account.address;
-                    account.public_key = res.body.account.public_key;
-                    account.balance = res.body.account.balance;
+                if (body.account != null) {
+                    account.address = body.account.address;
+                    account.public_key = body.account.public_key;
+                    account.balance = body.account.balance;
                 }
 
-                console.log("Open Account [" + account.address + "] with password: " + account.password);
+                console.log(`Open Account [${account.address}] with password: ${account.password}`);
 
                 resolve();
             });
     })
 }
 
-async function sendDDN(account, coin) {
+async function sendDDN({address}, coin) {
     await node.onNewBlockAsync();
 
     const result = await new Promise((resolve, reject) => {
-        var randomCoin = node.randomCoin();
+        const randomCoin = node.randomCoin();
         if (!coin) {
             coin = randomCoin;
         }
@@ -53,20 +54,20 @@ async function sendDDN(account, coin) {
             .set("Accept", "application/json")
             .send({
                 secret: node.Gaccount.password,
-                amount: coin + '',
-                recipientId: account.address
+                amount: `${coin}`,
+                recipientId: address
             })
             .expect("Content-Type", /json/)
             .expect(200)
-            .end((err, res) => {
+            .end((err, {body}) => {
                 // console.log(JSON.stringify(res.body));
 
                 if (err) {
                     return reject(err);
                 }
 
-                console.log("Sending " + coin + " DDN to " + account.address);
-                node.expect(res.body).to.have.property("success").to.be.true;
+                console.log(`Sending ${coin} DDN to ${address}`);
+                node.expect(body).to.have.property("success").to.be.true;
 
                 resolve(coin);
             });
@@ -86,7 +87,7 @@ describe('Put /transactions', () => {
     // let trs = node.ddn.transaction.createTransaction(node.Daccount.address, 89909, "thanks", node.Gaccount.password)
     // sendTransactions(trs);
 
-    var orgId = "";
+    let orgId = "";
 
     before(async () => {
         await openAccount(Account1);
@@ -95,24 +96,24 @@ describe('Put /transactions', () => {
         Account1Balance = await sendDDN(Account1);
 
         await new Promise((resolve, reject) => {
-            var getOrgIdUrl = "/org/getlist?pagesize=1&address=" + node.Gaccount.address;
+            const getOrgIdUrl = `/org/getlist?pagesize=1&address=${node.Gaccount.address}`;
             node.api.get(getOrgIdUrl)
                 .set("Accept", "application/json")
                 .set("version", node.version)
                 .set("nethash", node.config.nethash)
                 .set("port", node.config.port)
                 .expect(200)
-                .end((err, res) => {
+                .end((err, {body}) => {
                     // console.log(JSON.stringify(res.body));
 
                     if (err) {
                         return reject(err);
                     }
 
-                    node.expect(res.body).to.have.property("success").to.be.true;
+                    node.expect(body).to.have.property("success").to.be.true;
 
-                    if (res.body.success && res.body.data && res.body.data.rows && res.body.data.rows.length) {
-                        orgId = res.body.data.rows[0].org_id;
+                    if (body.success && body.data && body.data.rows && body.data.rows.length) {
+                        orgId = body.data.rows[0].org_id;
                         // orgId = res.body.orgId;
                     } else {
                         return reject("未查找到符合要求的Org数据。");
@@ -148,21 +149,21 @@ describe('Put /transactions', () => {
                 .set("nethash", node.config.nethash)
                 .set("port", node.config.port)
                 .send({
-                    transaction: transaction
+                    transaction
                 })
                 .expect("Content-Type", /json/)
                 .expect(200)
-                .end((err, res) => {
+                .end((err, {body}) => {
                     // console.log(JSON.stringify(res.body));
 
                     if (err) {
                         return reject(err);
                     }
 
-                    node.expect(res.body).to.have.property("success").to.be.true;
-                    node.expect(res.body).to.have.property("transactionId");
+                    node.expect(body).to.have.property("success").to.be.true;
+                    node.expect(body).to.have.property("transactionId");
 
-                    exchange.exchange_trs_id = res.body.transactionId;
+                    exchange.exchange_trs_id = body.transactionId;
 
                     resolve();
                 });
@@ -187,19 +188,19 @@ describe('Put /transactions', () => {
                 .set("nethash", node.config.nethash)
                 .set("port", node.config.port)
                 .send({
-                    transaction: transaction
+                    transaction
                 })
                 .expect("Content-Type", /json/)
                 .expect(200)
-                .end((err, res) => {
+                .end((err, {body}) => {
                     // console.log(JSON.stringify(res.body));
 
                     if (err) {
                         return reject(err);
                     }
 
-                    node.expect(res.body).to.have.property("success").to.be.true;
-                    node.expect(res.body).to.have.property("transactionId");
+                    node.expect(body).to.have.property("success").to.be.true;
+                    node.expect(body).to.have.property("transactionId");
 
                     resolve();
                 });
@@ -213,7 +214,7 @@ describe('Put /transactions', () => {
         node.expect(Account1).to.have.property("balance");
 
         const fee = "10000000";
-        const nowBalance = Bignum.minus(Account1Balance, exchangePrice, fee);
+        const nowBalance = DdnUtil.bignum.minus(Account1Balance, exchangePrice, fee);
         node.expect(Account1.balance.toString()).to.equal(nowBalance.toString());
     })
 
@@ -232,19 +233,19 @@ describe('Put /transactions', () => {
                 .set("nethash", node.config.nethash)
                 .set("port", node.config.port)
                 .send({
-                    transaction: transaction
+                    transaction
                 })
                 .expect("Content-Type", /json/)
                 .expect(200)
-                .end((err, res) => {
+                .end((err, {body}) => {
                     // console.log(JSON.stringify(res.body));
 
                     if (err) {
                         return reject(err);
                     }
 
-                    node.expect(res.body).to.have.property("success").to.be.false;
-                    node.expect(res.body).to.have.property("error").to.contain("confirm exchange already exists");
+                    node.expect(body).to.have.property("success").to.be.false;
+                    node.expect(body).to.have.property("error").to.contain("confirm exchange already exists");
 
                     resolve();
                 });
@@ -253,28 +254,28 @@ describe('Put /transactions', () => {
 })
 
 describe('PUT /exchange', () => {
-    var orgId = "";
+    let orgId = "";
 
     before(async () => {
         await new Promise((resolve, reject) => {
-            var getOrgIdUrl = "/org/getlist?pagesize=1&address=" + node.Gaccount.address;
+            const getOrgIdUrl = `/org/getlist?pagesize=1&address=${node.Gaccount.address}`;
             node.api.get(getOrgIdUrl)
                 .set("Accept", "application/json")
                 .set("version", node.version)
                 .set("nethash", node.config.nethash)
                 .set("port", node.config.port)
                 .expect(200)
-                .end((err, res) => {
+                .end((err, {body}) => {
                     // console.log(JSON.stringify(res.body));
 
                     if (err) {
                         return reject(err);
                     }
 
-                    node.expect(res.body).to.have.property("success").to.be.true;
+                    node.expect(body).to.have.property("success").to.be.true;
 
-                    if (res.body.success && res.body.data && res.body.data.rows && res.body.data.rows.length) {
-                        orgId = res.body.data.rows[0].org_id;
+                    if (body.success && body.data && body.data.rows && body.data.rows.length) {
+                        orgId = body.data.rows[0].org_id;
                         // orgId = res.body.orgId;
                     } else {
                         return reject("未查找到符合要求的Org数据。");
@@ -293,15 +294,15 @@ describe('PUT /exchange', () => {
             })
             .expect('Content-Type', /json/)
             .expect(200)
-            .end((err, res) => {
+            .end((err, {body}) => {
                 // console.log(JSON.stringify(res.body));
 
                 if (err) {
                     return done(err);
                 }
 
-                node.expect(res.body).to.have.property("success").to.be.false;
-                node.expect(res.body).to.have.property("error").to.contain("Invalid parameters");
+                node.expect(body).to.have.property("success").to.be.false;
+                node.expect(body).to.have.property("error").to.contain("Invalid parameters");
 
                 done();
             });
@@ -318,18 +319,18 @@ describe('PUT /exchange', () => {
             })
             .expect('Content-Type', /json/)
             .expect(200)
-            .end((err, res) => {
+            .end((err, {body}) => {
                 // console.log(JSON.stringify(res.body));
 
                 if (err) {
                     return done(err);
                 }
 
-                node.expect(res.body).to.have.property("success").to.be.true;
-                node.expect(res.body).to.have.property("transactionId");
+                node.expect(body).to.have.property("success").to.be.true;
+                node.expect(body).to.have.property("transactionId");
 
                 exchange = exchange || {};
-                exchange.exchange_trs_id = res.body.transactionId;
+                exchange.exchange_trs_id = body.transactionId;
 
                 done();
             });
@@ -351,15 +352,15 @@ describe('PUT /exchange', () => {
                 })
                 .expect('Content-Type', /json/)
                 .expect(200)
-                .end((err, res) => {
+                .end((err, {body}) => {
                     // console.log(JSON.stringify(res.body));
 
                     if (err) {
                         return reject(err);
                     }
 
-                    node.expect(res.body).to.have.property("success").to.be.false;
-                    node.expect(res.body).to.have.property("error").to.equal("Account not found");
+                    node.expect(body).to.have.property("success").to.be.false;
+                    node.expect(body).to.have.property("error").to.equal("Account not found");
 
                     resolve();
                 });
@@ -386,15 +387,15 @@ describe('PUT /exchange', () => {
                 })
                 .expect('Content-Type', /json/)
                 .expect(200)
-                .end((err, res) => {
+                .end((err, {body}) => {
                     // console.log(JSON.stringify(res.body));
 
                     if (err) {
                         return reject(err);
                     }
 
-                    node.expect(res.body).to.have.property("success").to.be.false;
-                    node.expect(res.body).to.have.property("error").to.contain("Insufficient balance");
+                    node.expect(body).to.have.property("success").to.be.false;
+                    node.expect(body).to.have.property("error").to.contain("Insufficient balance");
 
                     resolve();
                 });
@@ -421,15 +422,15 @@ describe('PUT /exchange', () => {
                 })
                 .expect('Content-Type', /json/)
                 .expect(200)
-                .end((err, res) => {
+                .end((err, {body}) => {
                     // console.log(JSON.stringify(res.body));
 
                     if (err) {
                         return reject(err);
                     }
 
-                    node.expect(res.body).to.have.property("success").to.be.true;
-                    node.expect(res.body).to.have.property("transactionId");
+                    node.expect(body).to.have.property("success").to.be.true;
+                    node.expect(body).to.have.property("transactionId");
 
                     resolve();
                 });

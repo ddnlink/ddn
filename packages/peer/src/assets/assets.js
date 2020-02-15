@@ -2,9 +2,9 @@
  * 资产管理模块和方法
  * wangxm   2018-12-28
  */
-const Loader = require('./loader');
+import Loader from './loader';
 
-var _singleton;
+let _singleton;
 
 class Assets {
 
@@ -24,11 +24,11 @@ class Assets {
     }
 
     async execAssetFunc() {
-        var args = [];
-        for (var i = 0; i < arguments.length; i++) {
+        const args = [];
+        for (let i = 0; i < arguments.length; i++) {
             args.push(arguments[i]);
         }
-        await this._loader.execAssetFunc.apply(this._loader, args);
+        await this._loader.execAssetFunc(...args);
     }
 
     mountAssetApis(expressApp) {
@@ -66,17 +66,17 @@ class Assets {
      * @param {*} method 
      */
     async call(type, method) {
-        var asset = this._loader.getAsset(type);
+        const asset = this._loader.getAsset(type);
         if (asset && typeof(asset[method]) == "function") {
-            var args = [];
-            for (var i = 2; i < arguments.length; i++) {
+            const args = [];
+            for (let i = 2; i < arguments.length; i++) {
                 args.push(arguments[i]);
             }
-            return await asset[method].apply(asset, args);
+            return await asset[method](...args);
         }
         return null;
     }
 
 }
 
-module.exports = Assets;
+export default Assets;

@@ -11,10 +11,11 @@
  * create，getBytes，calculateFee，verify，objectNormalize，dbRead，apply，undo，applyUnconfirmed，
  * undoUnconfirmed，ready，process
  */
+import DdnUtils from '@ddn/utils';
+
 import AssetUtils from './utils';
 import ByteBuffer from 'bytebuffer';
 import CommonUtils from './common-utils';
-import { Bignum } from '@ddn/utils';
 import _ from 'lodash';
 
 /**
@@ -110,7 +111,7 @@ class AssetBase {
      * @param {*} sender 
      */
     async calculateFee() {
-        return Bignum.multiply(0.1, 100000000);
+        return DdnUtils.bignum.multiply(0.1, 100000000);
     }
 
     /**
@@ -431,7 +432,7 @@ class AssetBase {
                 }
             }
 
-            orders.forEach(orderItem => {
+            orders.forEach( async orderItem => {
                 if (CommonUtils.isArray(orderItem)) {
                     if (orderItem.length == 2) {
                         if (typeof(orderItem[0]) == "string" && typeof(orderItem[1]) == "string") {
@@ -472,7 +473,7 @@ class AssetBase {
         if (rows && rows.length > 0) {
             const rowObjs = [];
 
-            rows.forEach(rowInfo => {
+            rows.forEach(async rowInfo => {
                 const rowObj = await assetInst.dbRead(rowInfo);
                 if (rowObj) {
                     const assetName = AssetUtils.getAssetJsonName(rowInfo.asset_trs_type);
@@ -614,8 +615,6 @@ class AssetBase {
     }
 
     /**
-     * todo: es5 to es6
-     * s
      * 查询规定条件的资产数据的个数
      * @param {*} where 查询条件，遵循sequelize规则，使用prop的名称定义
      * @param {*} asset 资产交易的配置name或type（config.asset.js文件中定义）
@@ -783,11 +782,11 @@ class AssetBase {
      * @param {*} cb 
      */
     async verify(trs) {
-        if (Bignum.isZero(trs.amount)) { //等于0
+        if (DdnUtils.bignum.isZero(trs.amount)) { //等于0
             if (trs.recipient_id) { //wxm block database
                 throw new Error("The recipient_id attribute of the transaction must be null.");
             }
-        } else if (Bignum.isLessThan(trs.amount, 0)) {  //小于0
+        } else if (DdnUtils.bignum.isLessThan(trs.amount, 0)) {  //小于0
             throw new Error(`Invalid amount: ${trs.amount}`);
         } else {    //大于0
             if (!trs.recipient_id) {    //wxm block database
@@ -859,7 +858,7 @@ class AssetBase {
      * @param {*} dbTrans 
      */
     async apply({amount, recipient_id}, {id, height}, dbTrans) {
-        if (Bignum.isGreaterThan(amount, 0)) {
+        if (DdnUtils.bignum.isGreaterThan(amount, 0)) {
             await this.runtime.account.setAccount({ address: recipient_id }, dbTrans);
 
             await this.runtime.account.merge(recipient_id, {
@@ -881,10 +880,10 @@ class AssetBase {
      * @param {*} dbTrans 
      */
     async undo({amount, recipient_id}, {id, height}, dbTrans) {
-        if (Bignum.isGreaterThan(amount, 0)) {
+        if (DdnUtils.bignum.isGreaterThan(amount, 0)) {
             await this.runtime.account.setAccount({address: recipient_id}, dbTrans);
 
-            const amountStr = Bignum.minus(0, amount).toString();
+            const amountStr = DdnUtils.bignum.minus(0, amount).toString();
             await this.runtime.account.merge(recipient_id, {
                 address: recipient_id,   //wxm block database
                 balance: amountStr,

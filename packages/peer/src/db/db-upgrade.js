@@ -1,6 +1,6 @@
-const async = require('async');
+import async from 'async';
 
-var _context;
+let _context;
 
 class DBUpgrade
 {
@@ -19,7 +19,7 @@ class DBUpgrade
 
     static upgrade(context, cb)
     {
-        var self = this;
+        const self = this;
 
         _context = context;
 
@@ -30,10 +30,10 @@ class DBUpgrade
          */
         _context.dbParams.get("version", (err, currVersion) => {
 
-            var migrations = self.getVersionChanges();
-            var versionList = Object.keys(migrations).sort().filter(ver => ver > currVersion);
+            const migrations = self.getVersionChanges();
+            const versionList = Object.keys(migrations).sort().filter(ver => ver > currVersion);
             async.eachSeries(versionList, (ver, cb2) => {
-                var changeList = migrations[ver];
+                const changeList = migrations[ver];
                 _context.dao.transaction((dbTrans, done) => {
                     async.eachSeries(changeList, (command, cb3) => {
                         if (!/^\s*$/.test(command)) {
@@ -75,4 +75,4 @@ class DBUpgrade
 
 }
 
-module.exports = DBUpgrade;
+export default DBUpgrade;

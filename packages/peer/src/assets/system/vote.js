@@ -4,10 +4,11 @@
  *  Copyright (c) 2019 DDN Foundation. All rights reserved.
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
-const util = require('util');
-const ByteBuffer = require('bytebuffer');
-const Diff = require('../../lib/diff.js');
-const { Bignum } = require('@ddn/utils');
+import util from 'util';
+
+import ByteBuffer from 'bytebuffer';
+import Diff from '../../lib/diff.js';
+import DdnUtils from '@ddn/utils';
 
 class Vote {
 
@@ -16,19 +17,19 @@ class Vote {
         this._context = context;
 	}
 
-	async create(data, trs) {
+	async create({votes}, trs) {
 		trs.recipient_id = null;    //wxm block database
 		trs.asset.vote = {
-			votes: data.votes
+			votes
 		};
 
 		return trs;
 	}
 
 	async calculateFee(trs, sender) {
-        // Bignum update
+        // DdnUtils.bignum update
         // return 0.1 * constants.fixedPoint;
-        return Bignum.multiply(0.1, this.tokenSetting.fixedPoint);
+        return DdnUtils.bignum.multiply(0.1, this.tokenSetting.fixedPoint);
 	}
 
 	async verify(trs, sender) {
@@ -49,13 +50,13 @@ class Vote {
         return trs;
 	}
 
-	async getBytes(trs) {
-        if (!trs.asset.vote.votes) {
+	async getBytes({asset}) {
+        if (!asset.vote.votes) {
             return null;
         }
 
-        var bb = new ByteBuffer();
-        bb.writeUTF8String(trs.asset.vote.votes.join(''));
+        const bb = new ByteBuffer();
+        bb.writeUTF8String(asset.vote.votes.join(''));
         bb.flip();
 		return bb.toBuffer();
 	}
@@ -64,27 +65,27 @@ class Vote {
         return false;
     }
 
-	async apply(trs, block, sender, dbTrans) {
-		await this.runtime.account.merge(sender.address, {
-            delegates: trs.asset.vote.votes,
-            block_id: block.id,  //wxm block database
-            round: await this.runtime.round.calc(block.height)
+	async apply({asset}, {id, height}, {address}, dbTrans) {
+		await this.runtime.account.merge(address, {
+            delegates: asset.vote.votes,
+            block_id: id,  //wxm block database
+            round: await this.runtime.round.calc(height)
         }, dbTrans);
 	}
 
-	async undo(trs, block, sender, dbTrans) {
-		if (trs.asset.vote.votes === null) return;
+	async undo({asset}, {id, height}, {address}, dbTrans) {
+		if (asset.vote.votes === null) return;
 
-        const votesInvert = Diff.reverse(trs.asset.vote.votes);
-        await this.runtime.account.merge(sender.address, {
+        const votesInvert = Diff.reverse(asset.vote.votes);
+        await this.runtime.account.merge(address, {
             delegates: votesInvert,
-            block_id: block.id,  //wxm block database
-            round: await this.runtime.round.calc(block.height)
+            block_id: id,  //wxm block database
+            round: await this.runtime.round.calc(height)
         }, dbTrans);
 	}
 
-	async applyUnconfirmed(trs, sender, dbTrans) {
-		const key = `${sender.address}:${trs.type}`;
+	async applyUnconfirmed({type}, {address}, dbTrans) {
+		const key = `${address}:${type}`;
 		if (this.oneoff.has(key)) {
             throw new Error('Double submit');
 		}
@@ -92,14 +93,14 @@ class Vote {
         return;
 	}
 
-	async undoUnconfirmed(trs, sender, dbTrans) {
-		const key = `${sender.address}:${trs.type}`;
+	async undoUnconfirmed({type}, {address}, dbTrans) {
+		const key = `${address}:${type}`;
 		this.oneoff.delete(key);
 		return;
 	}
 
 	async objectNormalize(trs) {
-        var validateErrors = await this.ddnSchema.validate({
+        const validateErrors = await this.ddnSchema.validate({
             type: 'object',
             properties: {
                 votes: {
@@ -118,11 +119,11 @@ class Vote {
 		return trs;
 	}
 
-	async dbRead(raw) {
-		if (!raw.v_votes) {
+	async dbRead({v_votes}) {
+		if (!v_votes) {
 			return null;
 		} else {
-			const votes = raw.v_votes.split(',');
+			const votes = v_votes.split(',');
 			const vote = {
 				votes
 			};
@@ -134,11 +135,11 @@ class Vote {
 	/**
 	 * 功能:新增一条vote数据
 	*/
-	async dbSave(trs, dbTrans) {
+	async dbSave({asset, id}, dbTrans) {
         return new Promise((resolve, reject) => {
             this.dao.insert('vote', {
-                votes: util.isArray(trs.asset.vote.votes) ? trs.asset.vote.votes.join(',') : null,
-                transaction_id: trs.id
+                votes: util.isArray(asset.vote.votes) ? asset.vote.votes.join(',') : null,
+                transaction_id: id
             }, dbTrans, (err, result) => {
                 if (err) {
                     reject(err);
@@ -149,16 +150,16 @@ class Vote {
         });
 	}
 
-	async ready(trs, sender) {
-		if (util.isArray(sender.multisignatures) && sender.multisignatures.length) {
-			if (!trs.signatures) {
+	async ready({signatures}, {multisignatures, multimin}) {
+		if (util.isArray(multisignatures) && multisignatures.length) {
+			if (!signatures) {
 				return false;
 			}
-			return trs.signatures.length >= sender.multimin - 1;
+			return signatures.length >= multimin - 1;
 		} else {
 			return true;
 		}
 	}
 }
 
-module.exports = Vote;
+export default Vote;

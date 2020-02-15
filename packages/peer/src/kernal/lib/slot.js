@@ -2,9 +2,9 @@
  * Slot
  * wangxm   2018-01-07
  */
-const constants = require('../../constants');
+import constants from '../../constants';
 
-var _singleton;
+let _singleton;
 
 class Slot {
     static singleton(context) {
@@ -43,8 +43,8 @@ class Slot {
         if (epochTime === undefined) {
             epochTime = this.getTime()
         }
-        var d = this.getStartEpochTime();
-        var t = Math.floor(d.getTime() / 1000) * 1000;
+        const d = this.getStartEpochTime();
+        const t = Math.floor(d.getTime() / 1000) * 1000;
         return t + epochTime * 1000;
     }
     
@@ -78,4 +78,4 @@ class Slot {
 
 }
 
-module.exports = Slot;
+export default Slot;

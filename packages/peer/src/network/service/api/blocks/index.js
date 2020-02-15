@@ -1,5 +1,4 @@
-const { Bignum } = require('@ddn/utils');
-var { RuntimeState } = require('@ddn/utils');
+import DdnUtils from '@ddn/utils';
 
 /**
  * RootRouter接口
@@ -13,12 +12,12 @@ class RootRouter {
     }
 
     async get(req) {
-        if (this.runtime.state != RuntimeState.Ready) {
+        if (this.runtime.state != DdnUtils.runtimeState.Ready) {
             throw new Error("Blockchain is loading");
         }
 
-        var query = Object.assign({}, req.body, req.query);
-        var validateErrors = await this.ddnSchema.validate({
+        const query = Object.assign({}, req.body, req.query);
+        const validateErrors = await this.ddnSchema.validate({
             type: "object",
             properties: {
                 limit: {
@@ -58,7 +57,7 @@ class RootRouter {
             throw new Error(validateErrors[0].message);
         }
 
-        var where = {};
+        const where = {};
         if (query.generatorPublicKey) {
             where.generator_public_key = query.generatorPublicKey;
         }
@@ -68,49 +67,49 @@ class RootRouter {
         if (query.previousBlock) {
             where.previous_block = query.previousBlock;
         }
-        if (Bignum.isGreaterThanOrEqualTo(query.height, 0)) {
+        if (DdnUtils.bignum.isGreaterThanOrEqualTo(query.height, 0)) {
             where.height = query.height;
         }
-        if (Bignum.isGreaterThanOrEqualTo(query.totalAmount, 0)) {
+        if (DdnUtils.bignum.isGreaterThanOrEqualTo(query.totalAmount, 0)) {
             where.total_amount = query.totalAmount;
         }
-        if (Bignum.isGreaterThanOrEqualTo(query.totalFee, 0)) {
+        if (DdnUtils.bignum.isGreaterThanOrEqualTo(query.totalFee, 0)) {
             where.total_fee = query.totalFee;
         }
-        if (Bignum.isGreaterThanOrEqualTo(query.reward, 0)) {
+        if (DdnUtils.bignum.isGreaterThanOrEqualTo(query.reward, 0)) {
             where.reward = query.reward;
         }
 
-        var sorts = null;
+        let sorts = null;
         if (query.orderBy) {
             sorts = [[]];
 
-            var sortItems = query.orderBy.split(':');
+            const sortItems = query.orderBy.split(':');
 
-            var sortField = sortItems[0].replace(/[^\w\s]/gi, '');
+            let sortField = sortItems[0].replace(/[^\w\s]/gi, '');
             sorts[0].push(sortField);
 
-            var sortMethod = "desc";
+            let sortMethod = "desc";
             if (sortItems.length == 2) {
                 sortMethod = sortItems[1] == 'desc' ? 'desc' : 'asc'
             }
             sorts[0].push(sortMethod);
 
             sortField = `b.${sortField}`;
-            var sortFields = ['b.id', 'b.timestamp', 'b.height', 'b.previousBlock', 'b.totalAmount', 'b.totalFee', 'b.reward', 'b.numberOfTransactions', 'b.generatorPublicKey'];
-            if (sortFields.indexOf(sortField) < 0) {
+            const sortFields = ['b.id', 'b.timestamp', 'b.height', 'b.previousBlock', 'b.totalAmount', 'b.totalFee', 'b.reward', 'b.numberOfTransactions', 'b.generatorPublicKey'];
+            if (!sortFields.includes(sortField)) {
                 throw new Error("Invalid sort field");
             }
         }
 
-        var offset = query.offset;
-        var limit = query.limit;
+        const offset = query.offset;
+        const limit = query.limit;
 
         return new Promise((resolve, reject) => {
             this.dbSequence.add(async (cb) => {
                 try
                 {
-                    var result = await this.runtime.block.queryBlockData(where, sorts, offset, limit, true);
+                    const result = await this.runtime.block.queryBlockData(where, sorts, offset, limit, true);
                     cb(null, result);
                 }
                 catch (e)
@@ -128,12 +127,12 @@ class RootRouter {
     }
 
     async getGet(req) {
-        if (this.runtime.state != RuntimeState.Ready) {
+        if (this.runtime.state != DdnUtils.runtimeState.Ready) {
             throw new Error("Blockchain is loading");
         }
 
-        var query = Object.assign({}, req.body, req.query);
-        var validateErrors = await this.ddnSchema.validate({
+        const query = Object.assign({}, req.body, req.query);
+        const validateErrors = await this.ddnSchema.validate({
             type: "object",
             properties: {
                 id: {
@@ -154,7 +153,7 @@ class RootRouter {
             throw new Error(validateErrors[0].message);
         }
 
-        var block = await this.runtime.block.querySimpleBlockData(query);
+        const block = await this.runtime.block.querySimpleBlockData(query);
         return {
             success: true,
             block
@@ -162,12 +161,12 @@ class RootRouter {
     }
 
     async getFull(req) {
-        if (this.runtime.state != RuntimeState.Ready) {
+        if (this.runtime.state != DdnUtils.runtimeState.Ready) {
             throw new Error("Blockchain is loading");
         }
 
-        var query = Object.assign({}, req.body, req.query);
-        var validateErrors = await this.ddnSchema.validate({
+        const query = Object.assign({}, req.body, req.query);
+        const validateErrors = await this.ddnSchema.validate({
             type: "object",
             properties: {
                 id: {
@@ -184,9 +183,9 @@ class RootRouter {
             throw new Error(validateErrors[0].message);
         }
 
-        var blocksData = await this.runtime.dataquery.queryFullBlockData(query, 1, 0, null);
+        const blocksData = await this.runtime.dataquery.queryFullBlockData(query, 1, 0, null);
         if (blocksData && blocksData.length) {
-            var blocks = await this.runtime.block._parseObjectFromFullBlocksData(blocksData);
+            const blocks = await this.runtime.block._parseObjectFromFullBlocksData(blocksData);
             return {
                 success: true,
                 block: blocks[0]
@@ -197,50 +196,50 @@ class RootRouter {
     }
 
     async getGetFee(req) {
-        if (this.runtime.state != RuntimeState.Ready) {
+        if (this.runtime.state != DdnUtils.runtimeState.Ready) {
             throw new Error("Blockchain is loading");
         }
 
-        var fee = await this.runtime.block.calculateFee();
+        const fee = await this.runtime.block.calculateFee();
         return {fee};
     }
 
     async getGetMilestone(req) {
-        if (this.runtime.state != RuntimeState.Ready) {
+        if (this.runtime.state != DdnUtils.runtimeState.Ready) {
             throw new Error("Blockchain is loading");
         }
 
-        var height = this.runtime.block.getLastBlock().height;
-        var milestone = this.runtime.block.getBlockStatus().calcMilestone(height);
+        const height = this.runtime.block.getLastBlock().height;
+        const milestone = this.runtime.block.getBlockStatus().calcMilestone(height);
         return {milestone};
     }
 
     async getGetReward(req) {
-        if (this.runtime.state != RuntimeState.Ready) {
+        if (this.runtime.state != DdnUtils.runtimeState.Ready) {
             throw new Error("Blockchain is loading");
         }
 
-        var height = this.runtime.block.getLastBlock().height;
-        var reward = this.runtime.block.getBlockStatus().calcReward(height);
+        const height = this.runtime.block.getLastBlock().height;
+        const reward = this.runtime.block.getBlockStatus().calcReward(height);
         return {reward};
     }
 
     async getGetSupply(req) {
-        if (this.runtime.state != RuntimeState.Ready) {
+        if (this.runtime.state != DdnUtils.runtimeState.Ready) {
             throw new Error("Blockchain is loading");
         }
 
-        var height = this.runtime.block.getLastBlock().height;
-        var supply = this.runtime.block.getBlockStatus().calcSupply(height);
+        const height = this.runtime.block.getLastBlock().height;
+        const supply = this.runtime.block.getBlockStatus().calcSupply(height);
         return {supply};
     }
 
     async getGetHeight(req) {
-        if (this.runtime.state != RuntimeState.Ready) {
+        if (this.runtime.state != DdnUtils.runtimeState.Ready) {
             throw new Error("Blockchain is loading");
         }
 
-        var lastBlock = this.runtime.block.getLastBlock();
+        const lastBlock = this.runtime.block.getLastBlock();
         return {
             success: true,
             height: lastBlock && lastBlock.height ? lastBlock.height : 0
@@ -248,23 +247,23 @@ class RootRouter {
     }
 
     async getGetStatus(req) {
-        if (this.runtime.state != RuntimeState.Ready) {
+        if (this.runtime.state != DdnUtils.runtimeState.Ready) {
             throw new Error("Blockchain is loading");
         }
 
-        var lastBlock = this.runtime.block.getLastBlock();
-        var height = lastBlock.height;
+        const lastBlock = this.runtime.block.getLastBlock();
+        const height = lastBlock.height;
 
         return {
             success: true,
-            height: height, //Bignum update
+            height, //DdnUtils.bignum update
             fee: await this.runtime.block.calculateFee(),
             milestone: this.runtime.block.getBlockStatus().calcMilestone(height),
-            reward: this.runtime.block.getBlockStatus().calcReward(height) + "",   //Bignum update
+            reward: `${this.runtime.block.getBlockStatus().calcReward(height)}`,   //DdnUtils.bignum update
             supply: this.runtime.block.getBlockStatus().calcSupply(height)
-        }
+        };
     }
 
 }
 
-module.exports = RootRouter;
+export default RootRouter;

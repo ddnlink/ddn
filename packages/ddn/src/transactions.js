@@ -1,10 +1,12 @@
-const ByteBuffer = require('bytebuffer');
-const { Bignum } = require('@ddn/utils');
+import ByteBuffer from 'bytebuffer';
+import DdnUtils from '@ddn/utils';
 
-var bytesTypes = {
-	2: function (trs) {
+const { bignum } = DdnUtils;
+
+const bytesTypes = {
+	2: function({asset}) {
 		try {
-			var buf = Buffer.from(trs.asset.delegate.username, 'utf8');
+			var buf = Buffer.from(asset.delegate.username, 'utf8');
 		} catch (e) {
 			throw Error(e.toString());
 		}
@@ -12,9 +14,9 @@ var bytesTypes = {
 		return buf;
 	},
 
-	3: function (trs) {
+	3: function({asset}) {
 		try {
-			var buf = trs.asset.vote.votes ? Buffer.from(trs.asset.vote.votes.join(''), 'utf8') : null;
+			var buf = asset.vote.votes ? Buffer.from(asset.vote.votes.join(''), 'utf8') : null;
 		} catch (e) {
 			throw Error(e.toString());
 		}
@@ -22,24 +24,24 @@ var bytesTypes = {
 		return buf;
 	},
 
-	5: function (trs) {
+	5: function({asset}) {
 		try {
 			var buf = Buffer.from([]);
-			var nameBuf = Buffer.from(trs.asset.dapp.name, 'utf8');
+			const nameBuf = Buffer.from(asset.dapp.name, 'utf8');
 			buf = Buffer.concat([buf, nameBuf]);
 
-			if (trs.asset.dapp.description) {
-				var descriptionBuf = Buffer.from(trs.asset.dapp.description, 'utf8');
+			if (asset.dapp.description) {
+				const descriptionBuf = Buffer.from(asset.dapp.description, 'utf8');
 				buf = Buffer.concat([buf, descriptionBuf]);
 			}
 
-			if (trs.asset.dapp.git) {
-				buf = Buffer.concat([buf, Buffer.from(trs.asset.dapp.git, 'utf8')]);
+			if (asset.dapp.git) {
+				buf = Buffer.concat([buf, Buffer.from(asset.dapp.git, 'utf8')]);
 			}
 
-			var bb = new ByteBuffer(4 + 4, true);
-			bb.writeInt(trs.asset.dapp.type);
-			bb.writeInt(trs.asset.dapp.category);
+			const bb = new ByteBuffer(4 + 4, true);
+			bb.writeInt(asset.dapp.type);
+			bb.writeInt(asset.dapp.category);
 			bb.flip();
 
 			buf = Buffer.concat([buf, bb.toBuffer()]);
@@ -49,31 +51,32 @@ var bytesTypes = {
 
 		return buf;
 	}
-}
+};
 
 function getTransactionBytes(trs, skipSignature) {
-	var assetBytes, assetSize;
+    let assetBytes;
+    let assetSize;
 
-	if (trs.type > 0) {
+    if (trs.type > 0) {
 		assetBytes = bytesTypes[trs.type](trs);
 		assetSize = assetBytes ? assetBytes.length : 0;
 	} else {
 		assetSize = 0;
 	}
 
-	var bb = new ByteBuffer(1 + 4 + 8 + 32 + 32 + 8 + 8 + 64 + 64 + assetSize, true);
-	bb.writeByte(trs.type);
-	bb.writeInt(trs.timestamp);
+    const bb = new ByteBuffer(1 + 4 + 8 + 32 + 32 + 8 + 8 + 64 + 64 + assetSize, true);
+    bb.writeByte(trs.type);
+    bb.writeInt(trs.timestamp);
     bb.writeString(trs.nethash);
 
-	var senderPublicKeyBuffer = Buffer.from(trs.sender_public_key, 'hex'); //wxm block database
-	for (var i = 0; i < senderPublicKeyBuffer.length; i++) {
+    const senderPublicKeyBuffer = Buffer.from(trs.sender_public_key, 'hex'); //wxm block database
+    for (var i = 0; i < senderPublicKeyBuffer.length; i++) {
 		bb.writeByte(senderPublicKeyBuffer[i]);
 	}
 
-	if (trs.recipient_id) {  //wxm block database
+    if (trs.recipient_id) {  //wxm block database
 		if (/^[0-9]{1,20}$/g.test(trs.recipient_id)) {   //wxm block database
-			var recipient = Bignum.toBuffer(trs.recipient_id, { size: 8 }).toString();   //wxm block database
+			const recipient = bignum.toBuffer(trs.recipient_id, { size: 8 }).toString();   //wxm block database
 			for (var i = 0; i < 8; i++) {
 				bb.writeByte(recipient[i] || 0);
 			}
@@ -86,26 +89,26 @@ function getTransactionBytes(trs, skipSignature) {
 		}
 	}
 
-	bb.writeString(Bignum.new(trs.amount).toString());
+    bb.writeString(bignum.new(trs.amount).toString());
 
-	if (assetSize > 0) {
+    if (assetSize > 0) {
 		for (var i = 0; i < assetSize; i++) {
 			bb.writeByte(assetBytes[i]);
 		}
 	}
 
-	if (!skipSignature && trs.signature) {
-		var signatureBuffer = Buffer.from(trs.signature, 'hex');
+    if (!skipSignature && trs.signature) {
+		const signatureBuffer = Buffer.from(trs.signature, 'hex');
 		for (var i = 0; i < signatureBuffer.length; i++) {
 			bb.writeByte(signatureBuffer[i]);
 		}
 	}
 
-	bb.flip();
+    bb.flip();
 
-	return bb.toBuffer();
+    return bb.toBuffer();
 }
 
-module.exports = {
-	getTransactionBytes: getTransactionBytes
-}
+export default {
+	getTransactionBytes
+};

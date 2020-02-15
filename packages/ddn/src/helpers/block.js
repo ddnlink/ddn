@@ -1,11 +1,13 @@
-const crypto = require('crypto');
-const fs = require('fs');
-const cryptoLib = require('@ddn/crypto');
-const transactionsLib = require('../transactions.js');
-const accounts = require('./account.js');
-const ByteBuffer = require('bytebuffer');
-const config = require('../../config');
-const { Bignum } = require('@ddn/utils');
+import crypto from 'crypto';
+import fs from 'fs';
+import cryptoLib from '@ddn/crypto';
+import transactionsLib from '../transactions.js';
+import accounts from './account.js';
+import ByteBuffer from 'bytebuffer';
+import config from '../../config';
+import DdnUtils from '@ddn/utils';
+
+const { bignum } = DdnUtils;
 
 function getBytes(block, skipSignature) {
 	// const size = 4 + 4 + 8 + 4 + 8 + 8 + 8 + 4 + 32 + 32 + 64;
@@ -34,9 +36,9 @@ function getBytes(block, skipSignature) {
 
 	bb.writeInt(block.number_of_transactions);    //wxm block database
 	
-	bb.writeString(Bignum.new(block.total_amount).toString());   //wxm block database
-	bb.writeString(Bignum.new(block.total_fee).toString());  //wxm block database
-	bb.writeString(Bignum.new(block.reward).toString());
+	bb.writeString(bignum.new(block.total_amount).toString());   //wxm block database
+	bb.writeString(bignum.new(block.total_fee).toString());  //wxm block database
+	bb.writeString(bignum.new(block.reward).toString());
 
 	bb.writeInt(block.payload_length);   //wxm block database
 
@@ -64,9 +66,9 @@ function getBytes(block, skipSignature) {
 	return b;
 }
 
-module.exports = {
+export default {
 	getBytes,
-	new(genesisAccount, nethash, tokenName, tokenPrefix, dapp, accountsFile) {
+	new({address, keypair}, nethash, tokenName, tokenPrefix, dapp, accountsFile) {
         let payloadLength = 0;
         let payloadHash = crypto.createHash('sha256');
         let transactions = [];
@@ -100,14 +102,14 @@ module.exports = {
 				const trs = {
 					type: 0,
 					nethash,
-					amount: Bignum.multiply(Bignum.new(parts[1]), 100000000),
+					amount: bignum.multiply(bignum.new(parts[1]), 100000000),
 					fee: '0',
 					timestamp: 0,
 					recipient_id: parts[0],  //wxm block database
 					sender_id: sender.address,   //wxm block database
 					sender_public_key: sender.keypair.publicKey   //wxm block database
 				};
-				totalAmount = Bignum.plus(totalAmount, trs.amount);
+				totalAmount = bignum.plus(totalAmount, trs.amount);
 
 				var bytes = transactionsLib.getTransactionBytes(trs);
 				trs.signature = cryptoLib.sign(sender.keypair, bytes);
@@ -123,12 +125,12 @@ module.exports = {
 				amount: config.totalAmount,
 				fee: '0',
 				timestamp: 0,
-				recipient_id: genesisAccount.address,    //wxm   block database
+				recipient_id: address,    //wxm   block database
 				sender_id: sender.address,   //wxm block database
 				sender_public_key: sender.keypair.publicKey   //wxm block database
 			};
 
-			totalAmount = Bignum.plus(totalAmount, balanceTransaction.amount);
+			totalAmount = bignum.plus(totalAmount, balanceTransaction.amount);
 
 			var bytes = transactionsLib.getTransactionBytes(balanceTransaction);
 			balanceTransaction.signature = cryptoLib.sign(sender.keypair, bytes);
@@ -170,7 +172,7 @@ module.exports = {
 		}
 
         // make votes
-        const votes = delegates.map(delegate => `+${delegate.keypair.publicKey}`);
+        const votes = delegates.map(({keypair}) => `+${keypair.publicKey}`);
 
         const voteTransaction = {
 			type: 3,
@@ -179,8 +181,8 @@ module.exports = {
 			fee: '0',
 			timestamp: 0,
 			recipient_id: null,  //wxm block database
-			sender_id: genesisAccount.address,   //wxm block database
-			sender_public_key: genesisAccount.keypair.publicKey,  //wxm block database
+			sender_id: address,   //wxm block database
+			sender_public_key: keypair.publicKey,  //wxm block database
 			asset: {
 				vote: {
 					votes
@@ -189,7 +191,7 @@ module.exports = {
 		};
 
         bytes = transactionsLib.getTransactionBytes(voteTransaction);
-        voteTransaction.signature = cryptoLib.sign(genesisAccount.keypair, bytes);
+        voteTransaction.signature = cryptoLib.sign(keypair, bytes);
         bytes = transactionsLib.getTransactionBytes(voteTransaction);
         voteTransaction.id = cryptoLib.getId(bytes);
 
@@ -203,15 +205,15 @@ module.exports = {
 				fee: '0',
 				timestamp: 0,
 				recipient_id: null,  //wxm block database
-				sender_id: genesisAccount.address,   //wxm block database
-				sender_public_key: genesisAccount.keypair.publicKey,  //wxm block database
+				sender_id: address,   //wxm block database
+				sender_public_key: keypair.publicKey,  //wxm block database
 				asset: {
 					dapp
 				}
 			};
 
 			bytes = transactionsLib.getTransactionBytes(dappTransaction);
-			dappTransaction.signature = cryptoLib.sign(genesisAccount.keypair, bytes);
+			dappTransaction.signature = cryptoLib.sign(keypair, bytes);
 			bytes = transactionsLib.getTransactionBytes(dappTransaction);
 			dappTransaction.id = cryptoLib.getId(bytes);
 
@@ -228,8 +230,8 @@ module.exports = {
 				}
 				return a.type - b.type;
 			}
-			if (!Bignum.isEqualTo(a.amount, b.amount)) {
-				return Bignum.minus(a.amount, b.amount);
+			if (!bignum.isEqualTo(a.amount, b.amount)) {
+				return bignum.minus(a.amount, b.amount);
 			}
 			return a.id.localeCompare(b.id);
 		});
@@ -270,7 +272,7 @@ module.exports = {
 		};
     },
 
-	from(genesisBlock, genesisAccount, dapp) {
+	from(genesisBlock, {address, keypair}, dapp) {
 		for (const i in genesisBlock.transactions) {
 			const tx = genesisBlock.transactions[i];
 
@@ -295,15 +297,15 @@ module.exports = {
 			fee: '0',
 			timestamp: 0,
 			recipientId: null,
-			senderId: genesisAccount.address,
-			senderPublicKey: genesisAccount.keypair.publicKey,
+			senderId: address,
+			senderPublicKey: keypair.publicKey,
 			asset: {
 				dapp
 			}
 		};
 
 		let bytes = transactionsLib.getTransactionBytes(dappTransaction);
-		dappTransaction.signature = cryptoLib.sign(genesisAccount.keypair, bytes);
+		dappTransaction.signature = cryptoLib.sign(keypair, bytes);
 		bytes = transactionsLib.getTransactionBytes(dappTransaction);
 		dappTransaction.id = cryptoLib.getId(bytes);
 
@@ -326,4 +328,4 @@ module.exports = {
 			dapp: dappTransaction
 		};
 	}
-}
+};

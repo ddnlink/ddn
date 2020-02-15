@@ -1,6 +1,6 @@
 {
   "name": "@ddn/asset-aob",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "description": "DDN asset on blockchain",
   "main": "lib/index.js",
   "repository": {
@@ -19,8 +19,8 @@
   "author": "wangxm",
   "license": "MIT",
   "dependencies": {
-    "@ddn/asset-base": "^0.0.1",
-    "@ddn/utils": "^0.0.1",
+    "@ddn/asset-base": "^0.1.0",
+    "@ddn/utils": "^0.0.5",
     "async": "^2.6.1",
     "ed25519": "0.0.4",
     "lodash": "^4.17.15",

@@ -1,6 +1,6 @@
-var { AssetTypes, Utils } = require('@ddn/utils');
+import DdnUtils from '@ddn/utils';
 
-var _singleton;
+let _singleton;
 
 class MultiSignature {
 
@@ -17,41 +17,39 @@ class MultiSignature {
     }
 
     async processSignature(tx) {
-        var done = async () => {
-            return new Promise((resolve, reject) => {
-                this.balancesSequence.add(async (cb) => {
-                    var transaction = await this.runtime.transaction.getUnconfirmedTransaction(tx.transaction);
-                    if (!transaction) {
-                        return reject("Transaction not found");
+        const done = async () => new Promise((resolve, reject) => {
+            this.balancesSequence.add(async (cb) => {
+                const transaction = await this.runtime.transaction.getUnconfirmedTransaction(tx.transaction);
+                if (!transaction) {
+                    return reject("Transaction not found");
+                }
+
+                transaction.signatures = transaction.signatures || [];
+                transaction.signatures.push(tx.signature);
+
+                setImmediate(async() => {
+                    try
+                    {
+                        await this.runtime.peer.broadcast.broadcastNewSignature({
+                            signature: tx.signature,
+                            transaction: transaction.id
+                        });
                     }
-
-                    transaction.signatures = transaction.signatures || [];
-                    transaction.signatures.push(tx.signature);
-
-                    setImmediate(async() => {
-                        try
-                        {
-                            await this.runtime.peer.broadcast.broadcastNewSignature({
-                                signature: tx.signature,
-                                transaction: transaction.id
-                            });
-                        }
-                        catch (err)
-                        {
-                            this.logger.error(`Broadcast new signature failed: ${Utils.getErrorMsg(err)}`);
-                        }
-                    });
-              
-                    cb(null, transaction);
-                }, (err, transaction) => {
-                    if (err) {
-                        reject(err);
-                    } else {
-                        resolve(transaction);
+                    catch (err)
+                    {
+                        this.logger.error(`Broadcast new signature failed: ${DdnUtils.system.getErrorMsg(err)}`);
                     }
                 });
+          
+                cb(null, transaction);
+            }, (err, transaction) => {
+                if (err) {
+                    reject(err);
+                } else {
+                    resolve(transaction);
+                }
             });
-        }
+        });
         
         const transaction = await this.runtime.transaction.getUnconfirmedTransaction(tx.transaction);
 
@@ -59,10 +57,10 @@ class MultiSignature {
             throw new Error("Transaction not found");
         }
 
-        if (transaction.type == AssetTypes.MULTISIGNATURE) {
+        if (transaction.type == DdnUtils.assetTypes.MULTISIGNATURE) {
             transaction.signatures = transaction.signatures || [];
 
-            if (transaction.asset.multisignature.signatures || transaction.signatures.indexOf(tx.signature) != -1) {
+            if (transaction.asset.multisignature.signatures || transaction.signatures.includes(tx.signature)) {
                 throw new Error("Permission to sign transaction denied");
             }
 
@@ -71,7 +69,7 @@ class MultiSignature {
             try
             {
                 for (var i = 0; i < transaction.asset.multisignature.keysgroup.length && !verify; i++) {
-                    var key = transaction.asset.multisignature.keysgroup[i].substring(1);
+                    const key = transaction.asset.multisignature.keysgroup[i].substring(1);
                     verify = await this.runtime.transaction.verifySignature(transaction, key, tx.signature);
                 }
             }
@@ -86,18 +84,18 @@ class MultiSignature {
           
             await done();
         } else {
-            var account;
+            let account;
             try
             {
                 account = await this.runtime.account.getAccountByAddress(transaction.senderId);
             }
             catch (err)
             {
-                throw new Error("Multisignature account not found: " + err);
+                throw new Error(`Multisignature account not found: ${err}`);
             }
 
             let verify = false;
-            var multisignatures = account.multisignatures;
+            const multisignatures = account.multisignatures;
 
             if (transaction.requester_public_key) {
                 multisignatures.push(transaction.sender_public_key);
@@ -109,7 +107,7 @@ class MultiSignature {
 
             transaction.signatures = transaction.signatures || [];
 
-            if (transaction.signatures.indexOf(tx.signature) >= 0) {
+            if (transaction.signatures.includes(tx.signature)) {
                 throw new Error("Signature already exists");
             }
 
@@ -118,7 +116,7 @@ class MultiSignature {
                     verify = await this.runtime.transaction.verifySignature(transaction, multisignatures[i], tx.signature);
                 }
             } catch (e) {
-                throw new Error("Failed to verify signature: " + e);
+                throw new Error(`Failed to verify signature: ${e}`);
             }
         
             if (!verify) {
@@ -142,4 +140,4 @@ class MultiSignature {
 
 }
 
-module.exports = MultiSignature;
+export default MultiSignature;

@@ -1,5 +1,5 @@
-const fs = require('fs');
-const path = require('path');
+import fs from 'fs';
+import path from'path';
 
 // 如果文件带有后缀名则去掉
 function splitFileName(text) {

@@ -2,9 +2,10 @@
  * RootRouter接口
  * wangxm   2019-03-27
  */
-const crypto = require('crypto');
-const ed = require('ed25519');
-const { AssetTypes } = require('@ddn/utils');
+import crypto from 'crypto';
+
+import ed from 'ed25519';
+import DdnUtils from '@ddn/utils';
 
 class RootRouter {
 
@@ -14,8 +15,8 @@ class RootRouter {
     }
 
     async put(req) {
-        var body = Object.assign({}, req.body, req.query);
-        var validateErrors = await this.ddnSchema.validate({
+        const body = Object.assign({}, req.body, req.query);
+        const validateErrors = await this.ddnSchema.validate({
             type: "object",
             properties: {
                 secret: {
@@ -54,8 +55,8 @@ class RootRouter {
             throw new Error(validateErrors[0].message);
         }
 
-        var hash = crypto.createHash('sha256').update(body.secret, 'utf8').digest();
-        var keypair = ed.MakeKeypair(hash);
+        const hash = crypto.createHash('sha256').update(body.secret, 'utf8').digest();
+        const keypair = ed.MakeKeypair(hash);
 
         if (body.publicKey) {
             if (keypair.publicKey.toString('hex') != body.publicKey) {
@@ -65,7 +66,7 @@ class RootRouter {
 
         return new Promise((resolve, reject) => {
             this.balancesSequence.add(async(cb) => {
-                var account;
+                let account;
                 try
                 {
                     account = await this.runtime.account.getAccountByPublicKey(keypair.publicKey.toString('hex'));
@@ -87,13 +88,13 @@ class RootRouter {
 
                 let second_keypair = null;
                 if (account.second_signature) {
-                    var secondHash = crypto.createHash('sha256').update(body.secondSecret, 'utf8').digest();
+                    const secondHash = crypto.createHash('sha256').update(body.secondSecret, 'utf8').digest();
                     second_keypair = ed.MakeKeypair(secondHash);
                 }
 
                 try {
                     let transaction = await this.runtime.transaction.create({
-                        type: AssetTypes.MULTISIGNATURE,
+                        type: DdnUtils.assetTypes.MULTISIGNATURE,
                         sender: account,
                         keypair,
                         second_keypair,
@@ -102,7 +103,7 @@ class RootRouter {
                         lifetime: body.lifetime
                     });
 
-                    var transactions = await this.runtime.transaction.receiveTransactions([transaction]);
+                    const transactions = await this.runtime.transaction.receiveTransactions([transaction]);
                     cb(null, transactions);
                 } catch (e) {
                     return cb(e);
@@ -129,8 +130,8 @@ class RootRouter {
     }
 
     async postSign(req) {
-        var body = Object.assign({}, req.body, req.query);
-        var validateErrors = await this.ddnSchema.validate({
+        const body = Object.assign({}, req.body, req.query);
+        const validateErrors = await this.ddnSchema.validate({
             type: "object",
             properties: {
                 secret: {
@@ -157,7 +158,7 @@ class RootRouter {
             throw new Error(validateErrors[0].message);
         }
 
-        var transaction = await this.runtime.transaction.getUnconfirmedTransaction(body.transactionId);
+        const transaction = await this.runtime.transaction.getUnconfirmedTransaction(body.transactionId);
         if (!transaction) {
             throw new Error("Transaction not found");
         }
@@ -168,14 +169,14 @@ class RootRouter {
             }
         }
 
-        var hash = crypto.createHash('sha256').update(body.secret, 'utf8').digest();
+        const hash = crypto.createHash('sha256').update(body.secret, 'utf8').digest();
         var keypair = ed.MakeKeypair(hash);
 
-        var sign = await this.runtime.transaction.multisign(keypair, transaction);
+        const sign = await this.runtime.transaction.multisign(keypair, transaction);
 
-        if (transaction.type == AssetTypes.MULTISIGNATURE) {
-            if ((transaction.asset.multisignature.keysgroup.indexOf(`+${keypair.publicKey.toString('hex')}`) == -1) ||
-                (transaction.signatures && transaction.signatures.indexOf(sign.toString('hex')) != -1)) {
+        if (transaction.type == DdnUtils.assetTypes.MULTISIGNATURE) {
+            if ((!transaction.asset.multisignature.keysgroup.includes(`+${keypair.publicKey.toString('hex')}`)) ||
+                (transaction.signatures && transaction.signatures.includes(sign.toString('hex')))) {
                 throw new Error("Permission to sign transaction denied");
             }
 
@@ -190,13 +191,13 @@ class RootRouter {
                 }
             });
         } else {
-            var account = await this.runtime.account.getAccountByAddress(transaction.sender_id);
+            const account = await this.runtime.account.getAccountByAddress(transaction.sender_id);
             if (!account) {
                 throw new Error("Account not found");
             }
 
             if (!transaction.requester_public_key) {    //wxm block database
-                if (account.multisignatures.indexOf(keypair.publicKey.toString('hex')) < 0) {
+                if (!account.multisignatures.includes(keypair.publicKey.toString('hex'))) {
                     throw new Error("Permission to sign transaction denied");
                 }
             } else {
@@ -206,7 +207,7 @@ class RootRouter {
                 }
             }
 
-            if (transaction.signatures && transaction.signatures.indexOf(sign) != -1) {
+            if (transaction.signatures && transaction.signatures.includes(sign)) {
                 throw new Error("Permission to sign transaction denied");
             }
 
@@ -224,7 +225,7 @@ class RootRouter {
 
         return new Promise((resolve, reject) => {
             this.balancesSequence.add(async(cb) => {
-                var transaction = await this.runtime.transaction.getUnconfirmedTransaction(body.transactionId);
+                const transaction = await this.runtime.transaction.getUnconfirmedTransaction(body.transactionId);
                 if (!transaction) {
                     return cb("Transaction not found");
                 }
@@ -242,7 +243,7 @@ class RootRouter {
                     }
                     catch (err)
                     {
-                        this.logger.error(`Broadcast new signature failed: ${utils.getErrorMsg(err)}`);
+                        this.logger.error(`Broadcast new signature failed: ${DdnUtils.system.getErrorMsg(err)}`);
                     }
                 });
 
@@ -258,8 +259,8 @@ class RootRouter {
     }
 
     async getPending(req) {
-        var query = Object.assign({}, req.body, req.query);
-        var validateErrors = await this.ddnSchema.validate({
+        const query = Object.assign({}, req.body, req.query);
+        const validateErrors = await this.ddnSchema.validate({
             type: "object",
             properties: {
                 publicKey: {
@@ -276,12 +277,12 @@ class RootRouter {
         let transactions = await this.runtime.transaction.getUnconfirmedTransactionList();
         //wxm TODO 此处不应该用TransactionTypes.OUT_TRANSFER，或者单独一个接口道aob包里
         if (query.isOutTransfer) {
-            transactions = transactions.filter(item => item.type == TransactionTypes.OUT_TRANSFER);
+            transactions = transactions.filter(({type}) => type == TransactionTypes.OUT_TRANSFER);
         }
 
-        var pendings = [];
+        const pendings = [];
         for (var i = 0; i < transactions.length; i++) {
-            var item = transactions[i];
+            const item = transactions[i];
 
             let signed = false;
             let verify = false;
@@ -313,17 +314,17 @@ class RootRouter {
 
             try
             {
-                var sender = await this.runtime.account.getAccountByPublicKey(item.sender_public_key);
+                const sender = await this.runtime.account.getAccountByPublicKey(item.sender_public_key);
                 if (!sender) {
                     break;
                 }
 
                 if ((sender.public_key == query.publicKey && sender.u_multisignatures.length > 0) ||
-                    sender.u_multisignatures.indexOf(query.publicKey) >= 0 ||
-                    sender.multisignatures.indexOf(query.publicKey) >= 0) {
-                    var min = sender.u_multimin || sender.multimin;
-                    var lifetime = sender.u_multilifetime || sender.multilifetime;
-                    var signatures = sender.u_multisignatures.length;
+                    sender.u_multisignatures.includes(query.publicKey) ||
+                    sender.multisignatures.includes(query.publicKey)) {
+                    const min = sender.u_multimin || sender.multimin;
+                    const lifetime = sender.u_multilifetime || sender.multilifetime;
+                    const signatures = sender.u_multisignatures.length;
 
                     pendings.push({
                         max: signatures.length,
@@ -347,8 +348,8 @@ class RootRouter {
     }
 
     async getAccounts(req) {
-        var query = Object.assign({}, req.body, req.query);
-        var validateErrors = await this.ddnSchema.validate({
+        const query = Object.assign({}, req.body, req.query);
+        const validateErrors = await this.ddnSchema.validate({
             type: "object",
             properties: {
                 publicKey: {
@@ -385,14 +386,14 @@ class RootRouter {
                     }, ['address', 'balance', 'multisignatures', 'multilifetime', 'multimin']);
 
                     for (let i = 0; i < rows.length; i++) {
-                        var account = rows[i];
+                        const account = rows[i];
 
                         var addresses = [];
                         for (let j = 0; j < account.multisignatures.length; j++) {
                             addresses.push(this.runtime.account.generateAddressByPublicKey(account.multisignatures[j]));
                         }
 
-                        var multisigaccounts = await this.runtime.account.getAccountList({
+                        const multisigaccounts = await this.runtime.account.getAccountList({
                             address: {
                                 $in: addresses
                             }
@@ -415,4 +416,4 @@ class RootRouter {
 
 }
 
-module.exports = RootRouter;
+export default RootRouter;

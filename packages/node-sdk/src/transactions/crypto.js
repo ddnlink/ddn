@@ -1,28 +1,27 @@
-const sha256 = require("fast-sha256");
-const addressHelper = require('../address.js');
-const options = require('../options');
-const constants = require('../constants');
-const trsTypes = require('../transaction-types');
-const { AssetUtils } = require('@ddn/asset-base');
-const Mnemonic = require('bitcore-mnemonic');
-const crypto = require('crypto');
+import sha256 from "fast-sha256";
+import Asset from '@ddn/asset-base';
+import Mnemonic from 'bitcore-mnemonic';
+import crypto from 'crypto';
+import ByteBuffer from "bytebuffer";
+import DdnUtils from "@ddn/utils";
+import nacl from 'tweetnacl';
+
+import addressHelper from '../address.js';
+import options from '../options';
+import constants from '../constants';
+import trsTypes from '../transaction-types';
 
 let Buffer;
 if (typeof Buffer === "undefined") {
     Buffer = require("buffer/").Buffer;
 }
+const fixedPoint = 10 ** 8;
 
-const ByteBuffer = require("bytebuffer");
-const Bignum = require("@ddn/utils");
-const nacl = require('tweetnacl')
+function getSignatureBytes({public_key}) {
+    const bb = new ByteBuffer(32, true);
+    const publicKeyBuffer = Buffer.from(public_key, "hex");
 
-const fixedPoint = Math.pow(10, 8);
-
-function getSignatureBytes(signature) {
-    var bb = new ByteBuffer(32, true);
-    var publicKeyBuffer = Buffer.from(signature.public_key, "hex");
-
-    for (var i = 0; i < publicKeyBuffer.length; i++) {
+    for (let i = 0; i < publicKeyBuffer.length; i++) {
         bb.writeByte(publicKeyBuffer[i]);
     }
 
@@ -47,15 +46,15 @@ function sha256Hex(data) {
 }
 
 async function getAssetBytes(transaction) {
-    if (AssetUtils.isTypeValueExists(transaction.type)) {
-        var trans = AssetUtils.getTransactionByTypeValue(transaction.type);
-        var transCls = require(trans.package)[trans.name];
-        var transInst = new transCls({
+    if (Asset.Utils.isTypeValueExists(transaction.type)) {
+        const trans = Asset.Utils.getTransactionByTypeValue(transaction.type);
+        const transCls = require(trans.package)[trans.name];
+        let transInst = new transCls({
             tokenSetting: {
                 tokenName: constants.nethash[options.get('nethash')].tokenName
             }
         });
-        var buf = await transInst.getBytes(transaction);
+        const buf = await transInst.getBytes(transaction);
         transInst = null;
         return buf;
     }
@@ -63,8 +62,8 @@ async function getAssetBytes(transaction) {
 }
 
 async function getBytes(transaction, skipSignature, skipSecondSignature) {
-    var assetSize = 0,
-        assetBytes = null;
+    let assetSize = 0;
+    let assetBytes = null;
 
     switch (transaction.type) {
         case trsTypes.SIGNATURE: // Signature
@@ -207,19 +206,19 @@ async function getHash(transaction, skipSignature, skipSecondSignature) {
 async function getFee(transaction) {
     switch (transaction.type) {
         case trsTypes.SEND: // Normal
-            return Bignum.multiply(0.1, fixedPoint);
+            return DdnUtils.bignum.multiply(0.1, fixedPoint);
         case trsTypes.SIGNATURE: // Signature
-            return Bignum.multiply(100, fixedPoint);
+            return DdnUtils.bignum.multiply(100, fixedPoint);
         case trsTypes.DELEGATE: // Delegate
-            return Bignum.multiply(10000, fixedPoint);
+            return DdnUtils.bignum.multiply(10000, fixedPoint);
         case trsTypes.VOTE: // Vote
-            return Bignum.new(fixedPoint);
+            return DdnUtils.bignum.new(fixedPoint);
         default: {
-            var fee = constants.fees.send;
-            if (AssetUtils.isTypeValueExists(transaction.type)) {
-                var trans = AssetUtils.getTransactionByTypeValue(transaction.type);
-                var transCls = require(trans.package)[trans.name];
-                var transInst = new transCls({
+            let fee = constants.fees.send;
+            if (Asset.Utils.isTypeValueExists(transaction.type)) {
+                const trans = Asset.Utils.getTransactionByTypeValue(transaction.type);
+                const transCls = require(trans.package)[trans.name];
+                let transInst = new transCls({
                     tokenSetting: {
                         fixedPoint: 100000000
                     }
@@ -232,9 +231,9 @@ async function getFee(transaction) {
     }
 }
 
-async function sign(transaction, keys) {
-    var hash = await getHash(transaction, true, true);
-    var signature = nacl.sign.detached(hash, Buffer.from(keys.private_key, "hex"));
+async function sign(transaction, {private_key}) {
+    const hash = await getHash(transaction, true, true);
+    const signature = nacl.sign.detached(hash, Buffer.from(private_key, "hex"));
 
     if (!transaction.signature) {
         // eslint-disable-next-line require-atomic-updates
@@ -245,71 +244,71 @@ async function sign(transaction, keys) {
     }
 }
 
-async function secondSign(transaction, keys) {
-    var hash = await getHash(transaction);
-    var signature = nacl.sign.detached(hash, Buffer.from(keys.private_key, "hex"));
+async function secondSign(transaction, {private_key}) {
+    const hash = await getHash(transaction);
+    const signature = nacl.sign.detached(hash, Buffer.from(private_key, "hex"));
     // eslint-disable-next-line require-atomic-updates
     transaction.sign_signature = Buffer.from(signature).toString("hex")    //wxm block database
 }
 
-function signBytes(bytes, keys) {
-    var hash = sha256Bytes(Buffer.from(bytes, 'hex'))
-    var signature = nacl.sign.detached(hash, Buffer.from(keys.private_key, "hex"));
+function signBytes(bytes, {private_key}) {
+    const hash = sha256Bytes(Buffer.from(bytes, 'hex'));
+    const signature = nacl.sign.detached(hash, Buffer.from(private_key, "hex"));
     return Buffer.from(signature).toString("hex");
 }
 
 async function verify(transaction) {
-    var remove = 64;
+    let remove = 64;
 
     if (transaction.signSignature) {
         remove = 128;
     }
 
-    var bytes = await getBytes(transaction);
-    var data2 = Buffer.allocUnsafe(bytes.length - remove);
+    const bytes = await getBytes(transaction);
+    const data2 = Buffer.allocUnsafe(bytes.length - remove);
 
-    for (var i = 0; i < data2.length; i++) {
+    for (let i = 0; i < data2.length; i++) {
         data2[i] = bytes[i];
     }
 
-    var hash = sha256Bytes(data2)
+    const hash = sha256Bytes(data2);
 
-    var signatureBuffer = Buffer.from(transaction.signature, "hex");
-    var senderPublicKeyBuffer = Buffer.from(transaction.sender_public_key, "hex");
-    var res = nacl.sign.detached.verify(hash, signatureBuffer, senderPublicKeyBuffer);
+    const signatureBuffer = Buffer.from(transaction.signature, "hex");
+    const senderPublicKeyBuffer = Buffer.from(transaction.sender_public_key, "hex");
+    const res = nacl.sign.detached.verify(hash, signatureBuffer, senderPublicKeyBuffer);
 
     return res;
 }
 
 function verifySecondSignature(transaction, public_key) {
-    var bytes = getBytes(transaction);
-    var data2 = Buffer.allocUnsafe(bytes.length - 64);
+    const bytes = getBytes(transaction);
+    const data2 = Buffer.allocUnsafe(bytes.length - 64);
 
-    for (var i = 0; i < data2.length; i++) {
+    for (let i = 0; i < data2.length; i++) {
         data2[i] = bytes[i];
     }
 
-    var hash = sha256Bytes(data2)
+    const hash = sha256Bytes(data2);
 
-    var signSignatureBuffer = Buffer.from(transaction.signSignature, "hex");
-    var publicKeyBuffer = Buffer.from(public_key, "hex");
-    var res = nacl.sign.detached.verify(hash, signSignatureBuffer, publicKeyBuffer);
+    const signSignatureBuffer = Buffer.from(transaction.signSignature, "hex");
+    const publicKeyBuffer = Buffer.from(public_key, "hex");
+    const res = nacl.sign.detached.verify(hash, signSignatureBuffer, publicKeyBuffer);
 
     return res;
 }
 
 function verifyBytes(bytes, signature, public_key) {
-    var hash = sha256Bytes(Buffer.from(bytes, 'hex'))
-    var signatureBuffer = Buffer.from(signature, "hex");
-    var publicKeyBuffer = Buffer.from(public_key, "hex");
-    var res = nacl.sign.detached.verify(hash, signatureBuffer, publicKeyBuffer);
+    const hash = sha256Bytes(Buffer.from(bytes, 'hex'));
+    const signatureBuffer = Buffer.from(signature, "hex");
+    const publicKeyBuffer = Buffer.from(public_key, "hex");
+    const res = nacl.sign.detached.verify(hash, signatureBuffer, publicKeyBuffer);
     return res
 }
 
 // 根据助记词生成密钥对
 function getKeys(secret) {
-    var hash = sha256Bytes(Buffer.from(secret));
-    var keypair = nacl.sign.keyPair.fromSeed(hash);
+    const hash = sha256Bytes(Buffer.from(secret));
+    const keypair = nacl.sign.keyPair.fromSeed(hash);
 
     return {
         public_key: Buffer.from(keypair.publicKey).toString("hex"),
@@ -325,34 +324,34 @@ function generateAddress(public_key) {
 //生成助记词
 function generatePhasekey()
 {
-    var secret = new Mnemonic(128).toString();
+    const secret = new Mnemonic(128).toString();
     return secret;
 }
 
 function generateHash(content)
 {
-    var md5 = crypto.createHash('md5');
-    var result = md5.update(content).digest('hex');
+    const md5 = crypto.createHash('md5');
+    const result = md5.update(content).digest('hex');
     return result;
 }
 
-module.exports = {
-    getBytes: getBytes,
-    getHash: getHash,
-    getId: getId,
-    getFee: getFee,
-    sign: sign,
-    secondSign: secondSign,
-    getKeys: getKeys,
-    generateAddress: generateAddress,
-    verify: verify,
-    verifySecondSignature: verifySecondSignature,
-    fixedPoint: fixedPoint,
-    signBytes: signBytes,
-    toLocalBuffer: toLocalBuffer,
-    verifyBytes: verifyBytes,
+export default {
+    getBytes,
+    getHash,
+    getId,
+    getFee,
+    sign,
+    secondSign,
+    getKeys,
+    generateAddress,
+    verify,
+    verifySecondSignature,
+    fixedPoint,
+    signBytes,
+    toLocalBuffer,
+    verifyBytes,
     isAddress: addressHelper.isAddress,
     isBase58CheckAddress: addressHelper.isBase58CheckAddress,
-    generatePhasekey: generatePhasekey,
-    generateHash: generateHash
-}
+    generatePhasekey,
+    generateHash
+};

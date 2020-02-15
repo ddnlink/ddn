@@ -1,8 +1,8 @@
-module.exports = {
+export default {
 
     name: "listQuery",
 
-    validate: function(obj) {
+    validate(obj) {
         obj.limit = 100;
         return true;
     }

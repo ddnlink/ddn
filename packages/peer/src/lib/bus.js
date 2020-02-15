@@ -5,8 +5,9 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-const EventEmitter = require("events");
-const changeCase = require("change-case");
+import EventEmitter from "events";
+
+import changeCase from "change-case";
 
 /**
  * 订阅/广播类
@@ -33,7 +34,7 @@ class Bus extends EventEmitter {
    * @param {*} obj
    */
   subscribe(obj) {
-    if (this._subscribers.indexOf(obj) < 0) {
+    if (!this._subscribers.includes(obj)) {
       this._subscribers.push(obj);
     }
   }
@@ -43,7 +44,7 @@ class Bus extends EventEmitter {
    * @param {*} obj
    */
   unsubscribe(obj) {
-    for (var i = 0; i < this._subscribers.length; i++) {
+    for (let i = 0; i < this._subscribers.length; i++) {
       if (obj == this._subscribers[i]) {
         this._subscribers.splice(i, 1);
         break;
@@ -68,4 +69,4 @@ class Bus extends EventEmitter {
   }
 }
 
-module.exports = Bus;
+export default Bus;

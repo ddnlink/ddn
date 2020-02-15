@@ -1,7 +1,7 @@
 /**
  * Note: Once the mainnet is online, this file can no longer be changed.
  */
-module.exports = {
+export default {
   maxAmount: 100000000,
   maxPayloadLength: 8 * 1024 * 1024,
   blockHeaderLength: 248,
@@ -15,7 +15,7 @@ module.exports = {
   maxSignaturesLength: 196 * 256,
   maxConfirmations : 77 * 100,
   confirmationLength: 77,
-  fixedPoint : Math.pow(10, 8),
+  fixedPoint : 10 ** 8,
   totalAmount: "10000000000000000", //Bignum update
   maxTxsPerBlock: 500,
   tokenName: 'DDN',
@@ -79,4 +79,4 @@ module.exports = {
       data: "10000000"
     },
   }
-}
+};

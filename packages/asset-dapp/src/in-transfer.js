@@ -1,5 +1,5 @@
 import Asset from '@ddn/asset-base';
-import { Bignum, Address, Amount } from '@ddn/utils';
+import DdnUtils from '@ddn/utils';
 
 class InTransfer extends Asset.Base {
 
@@ -43,24 +43,24 @@ class InTransfer extends Asset.Base {
             throw new Error("Invalid recipient")
         }
 
-        if (!Address.isAddress(sender.address)) {
+        if (!DdnUtils.address.isAddress(sender.address)) {
             throw new Error("Invalid address")
         }
 
         const inTransfer = await this.getAssetObject(trs);
         if (inTransfer.currency !== this.tokenSetting.tokenName) {
-            if ((typeof (trs.amount) != "undefined" && !Bignum.isZero(trs.amount)) ||
-                (typeof (inTransfer.amount) == "undefined" || Bignum.isZero(inTransfer.amount))) {
+            if ((typeof (trs.amount) != "undefined" && !DdnUtils.bignum.isZero(trs.amount)) ||
+                (typeof (inTransfer.amount) == "undefined" || DdnUtils.bignum.isZero(inTransfer.amount))) {
                 throw new Error("Invalid transfer amount")
             }
 
-            const error = Amount.validate(inTransfer.amount);
+            const error = DdnUtils.amount.validate(inTransfer.amount);
             if (error) {
                 throw error;
             }
         } else {
-            if ((typeof (trs.amount) == "undefined" || Bignum.isZero(trs.amount)) ||
-                (typeof (inTransfer.amount) != "undefined" && !Bignum.isZero(inTransfer.amount))) {
+            if ((typeof (trs.amount) == "undefined" || DdnUtils.bignum.isZero(trs.amount)) ||
+                (typeof (inTransfer.amount) != "undefined" && !DdnUtils.bignum.isZero(inTransfer.amount))) {
                 throw new Error("Invalid transfer amount")
             }
         }
@@ -141,8 +141,8 @@ class InTransfer extends Asset.Base {
                         balance = row.balance;
                     }
 
-                    const newBalance = Bignum.plus(balance, amount);
-                    if (Bignum.isLessThan(newBalance, 0)) {
+                    const newBalance = DdnUtils.bignum.plus(balance, amount);
+                    if (DdnUtils.bignum.isLessThan(newBalance, 0)) {
                         return reject('Asset balance not enough');
                     }
 
@@ -193,8 +193,8 @@ class InTransfer extends Asset.Base {
         const transfer = await this.getAssetObject(trs);
         if (transfer.currency != this.tokenSetting.tokenName) {
             const balance = this.balanceCache.getAssetBalance(sender.address, transfer.currency) || 0;
-            const surplus = Bignum.minus(balance, transfer.amount);
-            if (Bignum.isLessThan(surplus, 0)) {
+            const surplus = DdnUtils.bignum.minus(balance, transfer.amount);
+            if (DdnUtils.bignum.isLessThan(surplus, 0)) {
                 throw new Error('Insufficient asset balance');
             }
             this.balanceCache.setAssetBalance(sender.address, transfer.currency, surplus.toString())

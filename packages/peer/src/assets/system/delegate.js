@@ -2,23 +2,23 @@
  * 受托人资产交易
  * wangxm   2018-12-28
  */
-const util = require('util');
-const ByteBuffer = require('bytebuffer');
-const { Bignum, Address } = require('@ddn/utils');
+import util from 'util';
+
+import ByteBuffer from 'bytebuffer';
+import DdnUtils from '@ddn/utils';
 
 class Delegate {
-
 	constructor(context) {
         Object.assign(this, context);
         this._context = context;
 	}
 
-	async create(data, trs) {
+	async create({username, sender}, trs) {
 		trs.recipient_id = null;    //wxm block database
 		trs.amount = "0";   //Bignum update
 		trs.asset.delegate = {
-			username: data.username,
-			public_key: data.sender.public_key   //wxm block database
+			username,
+			public_key: sender.public_key   //wxm block database
 		};
 
 		if (trs.asset.delegate.username) {
@@ -30,20 +30,20 @@ class Delegate {
 
 	async calculateFee(trs, sender) {
 		// Bignum update
-		return Bignum.multiply(100, this.tokenSetting.fixedPoint);
+		return DdnUtils.bignum.multiply(100, this.tokenSetting.fixedPoint);
 	}
 
-	async verify(trs, sender) {
+	async verify(trs, {is_delegate}) {
 		if (trs.recipient_id) {
             throw new Error('Invalid recipient');
 		}
 
 		//Bignum update if (trs.amount != 0) {
-		if (!Bignum.isZero(trs.amount)) {
+		if (!DdnUtils.bignum.isZero(trs.amount)) {
             throw new Error('Invalid transaction amount');
 		}
 
-        if (sender.is_delegate) {    //wxm block database
+        if (is_delegate) {    //wxm block database
             throw new Error('Account is already a delegate');
 		}
 
@@ -67,7 +67,7 @@ class Delegate {
             throw new Error('Username is too long. Maximum is 20 characters');
 		}
 
-		if (Address.isAddress(username)) {
+		if (DdnUtils.address.isAddress(username)) {
             throw new Error('Username can not be a potential address');
 		}
 
@@ -75,7 +75,7 @@ class Delegate {
             throw new Error('Username can only contain alphanumeric characters with the exception of !@$&_.');
 		}
 
-        var account = await this.runtime.account.getAccount({username});
+        const account = await this.runtime.account.getAccount({username});
         if (account) {
             throw new Error('Username already exists');
         }
@@ -87,13 +87,13 @@ class Delegate {
 		return trs;
 	}
 
-	async getBytes(trs) {
-		if (!trs.asset.delegate.username) {
+	async getBytes({asset}) {
+		if (!asset.delegate.username) {
 			return null;
         }
 
-        var bb = new ByteBuffer();
-        bb.writeUTF8String(trs.asset.delegate.username);
+        const bb = new ByteBuffer();
+        bb.writeUTF8String(asset.delegate.username);
         bb.flip();
 		return bb.toBuffer();
 	}
@@ -102,49 +102,49 @@ class Delegate {
         return false;
     }
 
-	async apply(trs, block, sender, dbTrans) {
+	async apply({asset}, block, {address}, dbTrans) {
 		const data = {
-			address: sender.address,
+			address,
 			u_is_delegate: 0,    //wxm block database
 			is_delegate: 1,  //wxm block database
 			vote: 0
 		};
 
-		if (trs.asset.delegate.username) {
+		if (asset.delegate.username) {
 			data.u_username = null;
-			data.username = trs.asset.delegate.username;
+			data.username = asset.delegate.username;
 		}
 
         await this.runtime.account.setAccount(data, dbTrans);
 
-        return await this.runtime.account.getAccountByAddress(sender.address);
+        return await this.runtime.account.getAccountByAddress(address);
 	}
 
-	async undo(trs, block, sender, dbTrans) {
+	async undo({asset}, block, {address, nameexist}, dbTrans) {
 		const data = {
-			address: sender.address,
+			address,
 			u_is_delegate: 1,    //wxm block database
 			is_delegate: 0,  //wxm block database
 			vote: 0
 		};
 
-		if (!sender.nameexist && trs.asset.delegate.username) {
+		if (!nameexist && asset.delegate.username) {
 			data.username = null;
-			data.u_username = trs.asset.delegate.username;
+			data.u_username = asset.delegate.username;
 		}
 
         await this.runtime.account.setAccount(data, dbTrans);
 
-        return await this.runtime.account.getAccountByAddress(sender.address);
+        return await this.runtime.account.getAccountByAddress(address);
 	}
 
-	async applyUnconfirmed(trs, sender, dbTrans) {
-		if (sender.isDelegate) {
+	async applyUnconfirmed({asset, type}, {isDelegate, address}, dbTrans) {
+		if (isDelegate) {
             throw new Error("Account is already a delegate");
 		}
 
-		const nameKey = `${trs.asset.delegate.username}:${trs.type}`;
-		const idKey = `${sender.address}:${trs.type}`;
+		const nameKey = `${asset.delegate.username}:${type}`;
+		const idKey = `${address}:${type}`;
 		if (this.oneoff.has(nameKey) || this.oneoff.has(idKey)) {
             throw new Error("Double submit");
         }
@@ -153,16 +153,16 @@ class Delegate {
         this.oneoff.set(idKey, true);
 	}
 
-	async undoUnconfirmed(trs, sender, dbTrans) {
-		const nameKey = `${trs.asset.delegate.name}:${trs.type}`;
-		const idKey = `${sender.address}:${trs.type}`;
+	async undoUnconfirmed({asset, type}, {address}, dbTrans) {
+		const nameKey = `${asset.delegate.name}:${type}`;
+		const idKey = `${address}:${type}`;
 		this.oneoff.delete(nameKey);
 		this.oneoff.delete(idKey);
 		return;
 	}
 
 	async objectNormalize(trs) {
-        var validateErrors = await this.ddnSchema.validate({
+        const validateErrors = await this.ddnSchema.validate({
             type: 'object',
             properties: {
                 public_key: {
@@ -179,14 +179,14 @@ class Delegate {
 		return trs;
 	}
 
-	async dbRead(raw) {
-		if (!raw.d_username) {
+	async dbRead({d_username, t_senderPublicKey, t_senderId}) {
+		if (!d_username) {
 			return null;
 		} else {
 			const delegate = {
-				username: raw.d_username,
-				public_key: raw.t_senderPublicKey,   //wxm block database
-				address: raw.t_senderId
+				username: d_username,
+				public_key: t_senderPublicKey,   //wxm block database
+				address: t_senderId
 			};
 
 			return { delegate };
@@ -197,11 +197,11 @@ class Delegate {
 	/**
 	 * 功能:新增一条delegate数据
 	*/
-	async dbSave(trs, dbTrans) {
+	async dbSave({asset, id}, dbTrans) {
         return new Promise((resolve, reject) => {
             this.dao.insert('delegate', {
-                username: trs.asset.delegate.username,
-                transaction_id: trs.id
+                username: asset.delegate.username,
+                transaction_id: id
             }, dbTrans, (err, result) => {
                 if (err) {
                     reject(err);
@@ -209,19 +209,19 @@ class Delegate {
                     resolve(result);
                 }
             })
-        })
+        });
 	}
 
-	async ready(trs, sender) {
-		if (util.isArray(sender.multisignatures) && sender.multisignatures.length) {
-			if (!trs.signatures) {
+	async ready({signatures}, {multisignatures, multimin}) {
+		if (util.isArray(multisignatures) && multisignatures.length) {
+			if (!signatures) {
 				return false;
 			}
-			return trs.signatures.length >= sender.multimin - 1;
+			return signatures.length >= multimin - 1;
 		} else {
 			return true;
 		}
 	}
 }
 
-module.exports = Delegate;
+export default Delegate;

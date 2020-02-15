@@ -1,6 +1,6 @@
-const Sequelize = require('sequelize');
+import Sequelize from 'sequelize';
 
-module.exports = function(connection) {
+export default connection => {
     return connection.define("trs_asset_ext", {
         transaction_id: {
             type: Sequelize.STRING(64),
@@ -15,4 +15,4 @@ module.exports = function(connection) {
         freezeTableName: true,
         tableName: 'trs_asset_ext',
     });
-}
+};

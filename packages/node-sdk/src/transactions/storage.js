@@ -1,13 +1,13 @@
-var ByteBuffer = require('bytebuffer')
-var crypto = require("./crypto.js")
-var constants = require("../constants.js")
-var slots = require("../time/slots.js")
-var options = require('../options')
-const { Bignum } = require('@ddn/utils');
+import DdnUtils from '@ddn/utils';
+import ByteBuffer from 'bytebuffer';
+import crypto from "./crypto.js";
+import constants from "../constants.js";
+import slots from "../time/slots.js";
+import options from '../options';
 
 function createStorage(content, secret, secondSecret) {
-	var keys = crypto.getKeys(secret)
-  var bytes =  null
+	const keys = crypto.getKeys(secret);
+  let bytes =  null;
   try {
     bytes = crypto.toLocalBuffer(ByteBuffer.fromHex(content))
   } catch (e) {
@@ -17,29 +17,29 @@ function createStorage(content, secret, secondSecret) {
     throw new Error('Invalid content format')
   }
 
-//Bignum update   var fee = (Math.floor(bytes.length / 200) + 1) * 0.1 * constants.coin
-  var fee = Bignum.multiply((Math.floor(bytes.length / 200) + 1), 0.1, constants.coin);
+//bignum update   var fee = (Math.floor(bytes.length / 200) + 1) * 0.1 * constants.coin
+  const fee = DdnUtils.bignum.multiply((Math.floor(bytes.length / 200) + 1), 0.1, constants.coin);
   
-	var transaction = {
+	const transaction = {
 		type: 8,
 		nethash: options.get('nethash'),
-		amount: "0",    //Bignum update
-		fee: fee + "",
+		amount: "0",    //bignum update
+		fee: `${fee}`,
 		recipientId: null,
 		senderPublicKey: keys.public_key,
 		timestamp: slots.getTime() - options.get('clientDriftSeconds'),
 		asset: {
 			storage: {
-				content: content
+				content
 			}
 		},
     __assetBytes__: bytes
-	}
+	};
 
 	crypto.sign(transaction, keys)
 
 	if (secondSecret) {
-		var secondKeys = crypto.getKeys(secondSecret)
+		const secondKeys = crypto.getKeys(secondSecret);
 		crypto.secondSign(transaction, secondKeys)
 	}
   delete transaction.__assetBytes__
@@ -47,6 +47,6 @@ function createStorage(content, secret, secondSecret) {
 	return transaction
 }
 
-module.exports = {
-	createStorage : createStorage
-}
+export default {
+	createStorage
+};

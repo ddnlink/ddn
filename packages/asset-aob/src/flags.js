@@ -1,7 +1,7 @@
 import Asset from '@ddn/asset-base';
-import { Bignum } from '@ddn/utils';
+import DdnUtils from '@ddn/utils';
 
-class Flags extends Asset.AssetBase {
+class Flags extends Asset.Base {
     
     //flag_type: 1: 设置acl对应值，2：设置writeoff对应值
     async propsMapping() {
@@ -18,7 +18,7 @@ class Flags extends Asset.AssetBase {
         if (trs.recipient_id) {
             throw new Error("Invalid recipient")
         }
-        if (!Bignum.isZero(trs.amount)) {
+        if (!DdnUtils.bignum.isZero(trs.amount)) {
             throw new Error("Invalid transaction amount")
         }
     

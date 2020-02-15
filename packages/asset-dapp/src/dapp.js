@@ -1,6 +1,6 @@
 import Asset from '@ddn/asset-base';
 import { Sandbox } from '@ddn/ddn-sandbox';
-import { Bignum } from '@ddn/utils';
+import DdnUtils from '@ddn/utils';
 import valid_url from 'valid-url';
 import ByteBuffer from 'bytebuffer';
 import dappCategory from './dapp/dapp-category.js';
@@ -88,7 +88,7 @@ class Dapp extends Asset.Base {
     }
 
     async calculateFee() {
-        return Bignum.multiply(100, this.tokenSetting.fixedPoint);
+        return DdnUtils.bignum.multiply(100, this.tokenSetting.fixedPoint);
     }
 
     async verify(trs) {
@@ -97,7 +97,7 @@ class Dapp extends Asset.Base {
             throw new Error("Invalid recipient");
         }
 
-        if (!Bignum.isZero(trs.amount)) {
+        if (!DdnUtils.bignum.isZero(trs.amount)) {
             throw new Error("Invalid transaction amount");
         }
 
@@ -268,19 +268,19 @@ class Dapp extends Asset.Base {
     async applyUnconfirmed(trs) {
         const assetObj = await this.getAssetObject(trs);
 
-        //Bignum update if (privated.unconfirmedNames[trs.asset.dapp.name]) {
+        //DdnUtils.bignum update if (privated.unconfirmedNames[trs.asset.dapp.name]) {
         if (this.oneoff.has(assetObj.name.toLowerCase())) {
             throw new Error("Dapp name already exists")
         }
 
-        //Bignum update if (trs.asset.dapp.link && privated.unconfirmedLinks[trs.asset.dapp.link]) {
+        //DdnUtils.bignum update if (trs.asset.dapp.link && privated.unconfirmedLinks[trs.asset.dapp.link]) {
         if (assetObj.link && this.oneoff.has(assetObj.link.toLowerCase())) {
             throw new Error("Dapp link already exists");
         }
 
-        //Bignum update privated.unconfirmedNames[trs.asset.dapp.name] = true;
+        //DdnUtils.bignum update privated.unconfirmedNames[trs.asset.dapp.name] = true;
         this.oneoff.set(assetObj.name.toLowerCase(), true);
-        //Bignum update privated.unconfirmedLinks[trs.asset.dapp.link] = true;
+        //DdnUtils.bignum update privated.unconfirmedLinks[trs.asset.dapp.link] = true;
         this.oneoff.set(assetObj.link.toLowerCase(), true);
     }
 

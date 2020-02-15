@@ -2,7 +2,7 @@
  * RootRouter接口
  * wangxm   2019-01-16
  */
-const ip = require("ip");
+import ip from "ip";
 
 class RootRouter {
 
@@ -11,24 +11,24 @@ class RootRouter {
         this._context = context;
     }
 
-    async post(req) {
-        const peerIp = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
-        const peerStr = peerIp ? `${peerIp}:${isNaN(parseInt(req.headers['port'])) ? 'unkwnown' : parseInt(req.headers['port'])}` : 'unknown';
-        if (typeof req.body.block == 'string') {
-            req.body.block = this.protobuf.decodeBlock(Buffer.from(req.body.block, 'base64'));
+    async post({headers, connection, body}) {
+        const peerIp = headers['x-forwarded-for'] || connection.remoteAddress;
+        const peerStr = peerIp ? `${peerIp}:${isNaN(parseInt(headers['port'])) ? 'unkwnown' : parseInt(headers['port'])}` : 'unknown';
+        if (typeof body.block == 'string') {
+            body.block = this.protobuf.decodeBlock(Buffer.from(body.block, 'base64'));
         }
-        if (typeof req.body.votes == 'string') {
-            req.body.votes = this.protobuf.decodeBlockVotes(Buffer.from(req.body.votes, 'base64'));
+        if (typeof body.votes == 'string') {
+            body.votes = this.protobuf.decodeBlockVotes(Buffer.from(body.votes, 'base64'));
         }
         try {
-            var block = await this.runtime.block.objectNormalize(req.body.block);
-            var votes = await this.runtime.consensus.normalizeVotes(req.body.votes);
+            var block = await this.runtime.block.objectNormalize(body.block);
+            var votes = await this.runtime.consensus.normalizeVotes(body.votes);
         } catch (e) {
             this.logger.error(`normalize block or votes object error: ${e.toString()}`);
             this.logger.error(`Block ${block ? block.id : 'null'} is not valid, ban 60 min`, peerStr);
 
-            if (peerIp && req.headers['port'] > 0 && req.headers['port'] < 65536) {
-                await this.runtime.peer.changeState(ip.toLong(peerIp), parseInt(req.headers['port']), 0, 3600);
+            if (peerIp && headers['port'] > 0 && headers['port'] < 65536) {
+                await this.runtime.peer.changeState(ip.toLong(peerIp), parseInt(headers['port']), 0, 3600);
             }
 
             return {succ: false, error: e};
@@ -41,51 +41,51 @@ class RootRouter {
             }
             catch (err)
             {
-                this.logger.error("Process received new block failed: " + err);
+                this.logger.error(`Process received new block failed: ${err}`);
             }
         });
 
         return {succ: true}
     }
 
-    async get(req) {
-        var validateErrors = await this.ddnSchema.validate({
+    async get({query}) {
+        const validateErrors = await this.ddnSchema.validate({
             type: 'object',
             properties: {
                 lastBlockId: {
                     type: 'string'
                 }
             }
-        }, req.query);
+        }, query);
         if (validateErrors) {
             return {success: false, error: validateErrors[0].message};
         }
 
         let limit = 200;
-        if (req.query.limit) {
-            limit = Math.min(limit, Number(req.query.limit));
+        if (query.limit) {
+            limit = Math.min(limit, Number(query.limit));
         }
 
         return new Promise((resolve, reject) => {
             this.sequence.add((cb) => {
                 this.dao.findOne('block', {
-                    id: req.query.lastBlockId || null
+                    id: query.lastBlockId || null
                 }, ['height'], async (err, row) => {
                     if (err) {
                         return reject(err);
                     }
 
-                    var where = {};
-                    if (req.query.id) {
-                        where.id = req.query.id;
+                    const where = {};
+                    if (query.id) {
+                        where.id = query.id;
                     }
-                    if (req.query.lastBlockId) {
+                    if (query.lastBlockId) {
                         where.height = {
                             "$gt": row ? row.height : 0
                         }
                     }
 
-                    var data = await this.runtime.dataquery.queryFullBlockData(where, limit, 0, [['height', 'asc']]);
+                    const data = await this.runtime.dataquery.queryFullBlockData(where, limit, 0, [['height', 'asc']]);
                     cb(null, {blocks: data});
                 });
             }, (err, result) => {
@@ -118,7 +118,7 @@ class RootRouter {
             return {success: false, error: validateErrors[0].message};
         }
 
-        var query = req.query;
+        const query = req.query;
 
         const max = query.max;
         const min = query.min;
@@ -173,4 +173,4 @@ class RootRouter {
 
 }
 
-module.exports = RootRouter;
+export default RootRouter;

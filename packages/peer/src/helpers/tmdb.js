@@ -92,4 +92,4 @@ class Tmdb {
   }
 }
 
-module.exports = Tmdb
+export default Tmdb;

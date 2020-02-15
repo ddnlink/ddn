@@ -5,22 +5,22 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-const { Bignum } = require('@ddn/utils');
+import DdnUtils from '@ddn/utils';
 
-module.exports = {
+export default {
   validate(amount) {
     if (typeof amount != 'string') return 'Invalid amount type'
     if (!/^[1-9][0-9]*$/.test(amount)) return 'Amount should be integer'
 
     let bnAmount;
     try {
-      bnAmount = Bignum.new(amount);
+      bnAmount = DdnUtils.bignum.new(amount);
     } catch (e) {
       return 'Failed to convert'
     }
 
-    if (Bignum.isLessThan(bnAmount, 1) ||
-        Bignum.isGreaterThan(bnAmount, '1e48')) {
+    if (DdnUtils.bignum.isLessThan(bnAmount, 1) ||
+        DdnUtils.bignum.isGreaterThan(bnAmount, '1e48')) {
         return 'Invalid amount range'
     }
 
@@ -28,15 +28,15 @@ module.exports = {
   },
 
   calcRealAmount(amount, precision) {
-    let ba = Bignum.new(amount);
+    let ba = DdnUtils.bignum.new(amount);
     while (precision > 0) {
       if (precision > 8) {
-        ba = Bignum.divide(ba, 10 ** 8);
+        ba = DdnUtils.bignum.divide(ba, 10 ** 8);
       } else {
-        ba = Bignum.divide(ba, 10 ** precision);
+        ba = DdnUtils.bignum.divide(ba, 10 ** precision);
       }
       precision -= 8
     }
     return ba.toString()
   }
-}
+};

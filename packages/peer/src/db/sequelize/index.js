@@ -28,7 +28,7 @@ class DAO {
         const ext = fullName.substring(pos);
         if (ext.toLowerCase() == ".js") {
           if (name.toLowerCase() != "index") {
-            const defineModel = require("./models/" + name);
+            const defineModel = require("./models/" + name).default;
             this._addModel(name, defineModel(connection));
           }
         }
@@ -832,4 +832,4 @@ class DAO {
   }
 }
 
-module.exports = DAO;
+export default DAO;

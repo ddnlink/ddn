@@ -6,11 +6,11 @@
  *--------------------------------------------------------------------------------------------*/
 
 import Asset from '@ddn/asset-base';
-import { Bignum, Address } from '@ddn/utils';
-import daoUtil from './daoUtil.js';
+import DdnUtils from '@ddn/utils';
 import ByteBuffer from 'bytebuffer';
 import crypto from 'crypto';
 import ed from 'ed25519';
+import daoUtil from './daoUtil.js';
 
 /**
   * 企业号、媒体号等交易
@@ -86,13 +86,13 @@ class Exchange extends Asset.Base {
         if (!daoUtil.isOrgId(asset.org_id.toLowerCase())) {
             throw new Error('exchange org id not allow: ' + asset.org_id.toLowerCase());
         }
-        if (!Address.isAddress(sender.address)) {
+        if (!DdnUtils.address.isAddress(sender.address)) {
             throw new Error('Invalid address');
         }
-        if (!Address.isAddress(asset.sender_address)) {
+        if (!DdnUtils.address.isAddress(asset.sender_address)) {
             throw new Error('senderAddress id not allow');
         }
-        if (!Address.isAddress(asset.received_address)) {
+        if (!DdnUtils.address.isAddress(asset.received_address)) {
             throw new Error('receivedAddress id not allow');
         }
         if (asset.sender_address === asset.received_address) {
@@ -101,13 +101,13 @@ class Exchange extends Asset.Base {
         if (asset.sender_address !== sender.address) {
             throw new Error('senderAddress and sender.address should be equal');
         }
-        if (Bignum.isNaN(asset.price)) {
+        if (DdnUtils.bignum.isNaN(asset.price)) {
             throw new Error("Invalid exchange' price.");
         }
         // check state right
         if (asset.state === 0) {
             // send exchange
-            if (!Bignum.isZero(trs.amount)) {
+            if (!DdnUtils.bignum.isZero(trs.amount)) {
                 throw new Error('Invalid transaction amount');
             }
             if (asset.exchange_trs_id) {
@@ -167,8 +167,8 @@ class Exchange extends Asset.Base {
             if (latestExchangeRequestObj.org_id.toLowerCase() !== asset.org_id.toLowerCase()) {
                 throw new Error('confirm exchange orgId atypism: ' + asset.exchange_trs_id)
             }
-            // Bignum update if (result.price !== trs.amount)
-            if (!Bignum.isEqualTo(latestExchangeRequestObj.price, trs.amount)) {
+            // DdnUtils.bignum update if (result.price !== trs.amount)
+            if (!DdnUtils.bignum.isEqualTo(latestExchangeRequestObj.price, trs.amount)) {
                 throw new Error('confirm exchange amount & price atypism: ' + asset.exchange_trs_id)
             }
             // address is ok

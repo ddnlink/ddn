@@ -1,8 +1,8 @@
-module.exports = {
+export default {
 
     name: "splitarray",
 
-    validate: function(str) {
+    validate(str) {
         try {
             const a = str.split(',');
             if (a.length > 0 && a.length <= 1000) {

@@ -2,10 +2,10 @@
  * 区块数据核心处理逻辑和方法
  * wangxm   2018-12-27
  */
-const bluebird = require('bluebird')
-const { Bignum, Address } = require('@ddn/utils'); //Bignum update
+import bluebird from 'bluebird';
+import DdnUtils from '@ddn/utils'; 
 
-let _singleton;
+var _singleton;
 
 class Account {
     static singleton(context) {
@@ -82,8 +82,8 @@ class Account {
     }
 
     async initAccountsAndBalances() {
-        const verify = this.config.loading.verifyOnLoading;
-        const count = await this.runtime.block.getCount();
+        let verify = this.config.loading.verifyOnLoading;
+        var count = await this.runtime.block.getCount();
         if (verify || count == 1) {
             await this.repairAccounts(count, true);
         } else {
@@ -94,7 +94,7 @@ class Account {
     }
 
     isAddress(address) {
-        return Address.isAddress(address);
+        return DdnUtils.address.isAddress(address);
     }
 
     /**
@@ -102,7 +102,7 @@ class Account {
      * @param {*} publicKey
      */
     generateAddressByPublicKey(publicKey) {
-        return Address.generateBase58CheckAddress(publicKey);
+        return DdnUtils.address.generateBase58CheckAddress(publicKey);
     }
 
     /**
@@ -192,9 +192,6 @@ class Account {
         delete filter.sort;
 
         if (typeof(filter.address) == "string" && !this.isAddress(filter.address)) {
-            console.log('====================================');
-            console.log(filter.address);
-            console.log('====================================');
             throw new Error('Invalid address getAccount');
         }
 
@@ -588,19 +585,19 @@ class Account {
                             update[value] = trueValue;
                             break;
                         case Number:
-                            if (Bignum.isNaN(trueValue)) {
+                            if (DdnUtils.bignum.isNaN(trueValue)) {
                                 return reject("Encountered invalid number while merging account: " + trueValue + ", value: " + value + ", value: " + address);
                             }
 
-                            if (Bignum.isEqualTo(Bignum.abs(trueValue), trueValue) && !Bignum.isZero(trueValue)) {
-                                update[value] = this.dao.db_str(`${value} + ${Bignum.new(trueValue)}`)
-                            } else if (Bignum.isLessThan(trueValue, 0)) {
+                            if (DdnUtils.bignum.isEqualTo(DdnUtils.bignum.abs(trueValue), trueValue) && !DdnUtils.bignum.isZero(trueValue)) {
+                                update[value] = this.dao.db_str(`${value} + ${DdnUtils.bignum.new(trueValue)}`)
+                            } else if (DdnUtils.bignum.isLessThan(trueValue, 0)) {
 
-                                update[value] = this.dao.db_str(`${value} ${Bignum.new(trueValue)}`)
+                                update[value] = this.dao.db_str(`${value} ${DdnUtils.bignum.new(trueValue)}`)
                             }
 
-                            //Bignum update   if (trueValue !== 0 && value == "balance") {
-                            if (!Bignum.isZero(trueValue) && value == "balance") {
+                            //DdnUtils.bignum update   if (trueValue !== 0 && value == "balance") {
+                            if (!DdnUtils.bignum.isZero(trueValue) && value == "balance") {
                                 const mem_accounts2delegate = await new Promise((resolve, reject) => {
                                     this.dao.findOne('mem_accounts2delegate', {
                                         account_id: address    //wxm block database
@@ -810,4 +807,4 @@ class Account {
     }
 }
 
-module.exports = Account;
+export default Account;

@@ -14,6 +14,6 @@ function callMethod(shared, call, args, cb) {
   shared[call].apply(null, callArgs);
 }
 
-module.exports = {
+export default {
   callMethod
 };

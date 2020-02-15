@@ -2,10 +2,9 @@
  * RootRouter接口
  * wangxm   2019-03-27
  */
-const { Bignum } = require('@ddn/utils');
-const crypto = require('crypto');
-const ed = require('ed25519');
-const { AssetTypes } = require('@ddn/utils');
+import crypto from 'crypto';
+import ed from 'ed25519';
+import DdnUtils from '@ddn/utils';
 
 class RootRouter {
 
@@ -15,8 +14,8 @@ class RootRouter {
     }
 
     async put(req) {
-        var body = req.body;
-        var validateErrors = await this.ddnSchema.validate({
+        const body = req.body;
+        const validateErrors = await this.ddnSchema.validate({
             type: "object",
             properties: {
                 secret: {
@@ -42,8 +41,8 @@ class RootRouter {
             throw new Error(validateErrors[0].message);
         }
 
-        var hash = crypto.createHash('sha256').update(body.secret, 'utf8').digest();
-        var keypair = ed.MakeKeypair(hash);
+        const hash = crypto.createHash('sha256').update(body.secret, 'utf8').digest();
+        const keypair = ed.MakeKeypair(hash);
 
         if (body.publicKey) {
             if (keypair.publicKey.toString('hex') != body.publicKey) {
@@ -74,7 +73,7 @@ class RootRouter {
                         return cb("Account does not have multisignatures enabled");
                     }
 
-                    if (account.multisignatures.indexOf(keypair.publicKey.toString('hex')) < 0) {
+                    if (!account.multisignatures.includes(keypair.publicKey.toString('hex'))) {
                         return cb("Account does not belong to multisignature group");
                     }
 
@@ -82,7 +81,7 @@ class RootRouter {
                         return cb("Invalid second passphrase");
                     }
 
-                    var requester;
+                    let requester;
                     try
                     {
                         requester = await this.runtime.account.getAccountByPublicKey(keypair.publicKey);
@@ -110,7 +109,7 @@ class RootRouter {
                     var transactions = [];
                     try {
                         var transaction = await this.runtime.transaction.create({
-                            type: AssetTypes.SIGNATURE,
+                            type: DdnUtils.assetTypes.SIGNATURE,
                             sender: account,
                             keypair,
                             requester: keypair,
@@ -145,7 +144,7 @@ class RootRouter {
                     var transactions = [];
                     try {
                         var transaction = await this.runtime.transaction.create({
-                            type: AssetTypes.SIGNATURE,
+                            type: DdnUtils.assetTypes.SIGNATURE,
                             sender: account,
                             keypair,
                             second_keypair
@@ -163,16 +162,16 @@ class RootRouter {
 
                 resolve({success: true, transaction: transactions[0]});
             });
-        })
+        });
     }
 
     async getFee(req) {
-        //   Bignum update
+        //   DdnUtils.bignum update
         //   fee = 5 * constants.fixedPoint;
-        let fee = Bignum.multiply(5, this.tokenSetting.fixedPoint);
+        let fee = DdnUtils.bignum.multiply(5, this.tokenSetting.fixedPoint);
         return {fee};
     }
 
 }
 
-module.exports = RootRouter;
+export default RootRouter;

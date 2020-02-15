@@ -1,8 +1,8 @@
-module.exports = {
+export default {
 
     name: "listDelegates",
 
-    validate: function(obj) {
+    validate(obj) {
         obj.limit = 101;
         return true;
     }

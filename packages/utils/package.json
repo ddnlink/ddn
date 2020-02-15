@@ -1,6 +1,6 @@
 {
   "name": "@ddn/utils",
-  "version": "0.0.1",
+  "version": "0.0.5",
   "description": "DDN utils.",
   "main": "./lib/index.js",
   "repository": {

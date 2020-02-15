@@ -1,6 +1,5 @@
 import Asset from '@ddn/asset-base';
-import { Bignum } from '@ddn/utils';
-import ddnUtils from '@ddn/utils';
+import DdnUtils from '@ddn/utils';
 import crypto from 'crypto';
 import ed from 'ed25519';
 import _ from 'lodash';
@@ -30,14 +29,14 @@ class Transfer extends Asset.Base {
     }
 
     async verify(trs, sender) {
-        if (!ddnUtils.Address.isAddress(trs.recipient_id)) {
+        if (!DdnUtils.Address.isAddress(trs.recipient_id)) {
             throw new Error('Invalid recipient');
         }
-        if (!Bignum.isZero(trs.amount)) {
+        if (!DdnUtils.bignum.isZero(trs.amount)) {
             throw new Error('Invalid transaction amount');
         }
         const assetData = trs.asset.aobTransfer;
-        const error = ddnUtils.Amount.validate(assetData.amount);
+        const error = DdnUtils.Amount.validate(assetData.amount);
         if (error) {
             throw new Error(error);
         }
@@ -127,8 +126,8 @@ class Transfer extends Asset.Base {
             });
         });
         const balance = (assetBalancedata && assetBalancedata.balance) ? assetBalancedata.balance : '0';
-        const newBalance = Bignum.plus(balance, `-${transfer.amount}`);
-        if (Bignum.isLessThan(newBalance, 0)) {
+        const newBalance = DdnUtils.bignum.plus(balance, `-${transfer.amount}`);
+        if (DdnUtils.bignum.isLessThan(newBalance, 0)) {
             throw new Error('Asset balance not enough');
         }
         if (assetBalancedata) {
@@ -159,8 +158,8 @@ class Transfer extends Asset.Base {
             });
         });
         const balance2 = (assetBalancedata2 && assetBalancedata2.balance) ? assetBalancedata2.balance : '0';
-        const newBalance2 = Bignum.plus(balance2, transfer.amount);
-        if (Bignum.isLessThan(newBalance2, 0)) {
+        const newBalance2 = DdnUtils.bignum.plus(balance2, transfer.amount);
+        if (DdnUtils.bignum.isLessThan(newBalance2, 0)) {
             throw new Error('Asset balance not enough');
         }
         if (assetBalancedata2) {
@@ -197,8 +196,8 @@ class Transfer extends Asset.Base {
             });
         });
         const balance = (assetBalancedata && assetBalancedata.balance) ? assetBalancedata.balance : '0';
-        const newBalance = Bignum.plus(balance, transfer.amount);
-        if (Bignum.isLessThan(newBalance, 0)) {
+        const newBalance = DdnUtils.bignum.plus(balance, transfer.amount);
+        if (DdnUtils.bignum.isLessThan(newBalance, 0)) {
             throw new Error('Asset balance not enough');
         }
         if (assetBalancedata) {
@@ -229,8 +228,8 @@ class Transfer extends Asset.Base {
             });
         });
         const balance2 = (assetBalancedata2 && assetBalancedata2.balance) ? assetBalancedata2.balance : '0';
-        const newBalance2 = Bignum.plus(balance2, `-${transfer.amount}`);
-        if (Bignum.isLessThan(newBalance2, 0)) {
+        const newBalance2 = DdnUtils.bignum.plus(balance2, `-${transfer.amount}`);
+        if (DdnUtils.bignum.isLessThan(newBalance2, 0)) {
             throw new Error('Asset balance not enough');
         }
         if (assetBalancedata2) {
@@ -254,8 +253,8 @@ class Transfer extends Asset.Base {
         const balance = this.balanceCache.getAssetBalance(
             sender.address, transfer.currency,
         ) || 0;
-        const surplus = Bignum.minus(balance, transfer.amount);
-        if (Bignum.isLessThan(surplus, 0)) {
+        const surplus = DdnUtils.bignum.minus(balance, transfer.amount);
+        if (DdnUtils.bignum.isLessThan(surplus, 0)) {
             throw new Error('Insufficient asset balance');
         }
         this.balanceCache.setAssetBalance(sender.address, transfer.currency, surplus.toString());

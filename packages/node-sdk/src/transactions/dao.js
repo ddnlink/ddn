@@ -1,10 +1,12 @@
-var crypto = require('./crypto.js');
-var constants = require('../constants.js');
-var trsTypes = require('../transaction-types');
-var slots = require('../time/slots.js');
-var options = require('../options');
-var addressHelper = require('../address.js')
-const { Bignum } = require('@ddn/utils');
+import crypto from './crypto.js';
+import constants from '../constants.js';
+import trsTypes from '../transaction-types';
+import slots from '../time/slots.js';
+import options from '../options';
+import addressHelper from '../address.js';
+import DdnUtils from '@ddn/utils';
+
+const { bignum } = DdnUtils;
 
 /**
  * Create org transaction
@@ -12,9 +14,6 @@ const { Bignum } = require('@ddn/utils');
  * @param {*} secret 
  * @param {*} second_secret 
  */
-
-
-
 function isOrgId(dao_id) {
     if (typeof dao_id !== 'string') {
       return false
@@ -32,25 +31,25 @@ function isOrgId(dao_id) {
 }
 
 function createOrg(org, secret, second_secret) {
-	var keys = crypto.getKeys(secret);
+    const keys = crypto.getKeys(secret);
 
-	var sender = addressHelper.generateBase58CheckAddress(keys.public_key)
+    const sender = addressHelper.generateBase58CheckAddress(keys.public_key);
 
-	if (!org.address) {
+    if (!org.address) {
 		org.address = sender;
 	}
 
-	if (typeof org !== 'object') {
+    if (typeof org !== 'object') {
 		throw new Error('The first argument should be a object!');
 	}
 
-	org.org_id = org.org_id.toLowerCase()
-	if ( !isOrgId(org.org_id) || !org.org_id || org.org_id.length == 0) {
+    org.org_id = org.org_id.toLowerCase()
+    if ( !isOrgId(org.org_id) || !org.org_id || org.org_id.length == 0) {
 		throw new Error('Invalid org_id format');
 	}
 
-    var olen = org.org_id.length
-    , feeBase = 1
+    const olen = org.org_id.length;
+    let feeBase = 1;
     if ( olen > 10 ) { feeBase = 10
     }else if ( olen == 10) { feeBase = 50
     }else if ( olen == 9 ) { feeBase = 100
@@ -61,43 +60,43 @@ function createOrg(org, secret, second_secret) {
     }else{ // length <= 4
       feeBase = 999999 // not allow
 	}
-	
-	if(org.state == 1){
+
+    if(org.state == 1){
 		feeBase = parseInt(feeBase / 10);
 	}
-	var transaction = {
+    const transaction = {
 		type: trsTypes.ORG,
 		nethash: options.get('nethash'),
 		amount: "0",
-		fee: Bignum.multiply(feeBase, 100000000).toString(),   //Bignum update feeBase * 100000000,
+		fee: bignum.multiply(feeBase, 100000000).toString(),   //bignum update feeBase * 100000000,
 		recipientId: null,
 		sender_public_key: keys.public_key,
 		senderPublicKey: keys.public_key,
 		timestamp: slots.getTime() - options.get('clientDriftSeconds'),
 		asset: {
-			org: org
+			org
 		}
 	};
 
-	crypto.sign(transaction, keys);
+    crypto.sign(transaction, keys);
 
-	if (second_secret) {
-		var secondKeys = crypto.getKeys(second_secret);
+    if (second_secret) {
+		const secondKeys = crypto.getKeys(second_secret);
 		crypto.secondSign(transaction, secondKeys);
 	}
 
-	// transaction.id = crypto.getId(transaction);
-	return transaction;
+    // transaction.id = crypto.getId(transaction);
+    return transaction;
 }
 
 function createTransfer(address, amount, secret, second_secret) {
-    var keys = crypto.getKeys(secret);
-    var fee = constants.fees.org;
-    var transaction = {
+    const keys = crypto.getKeys(secret);
+    const fee = constants.fees.org;
+    const transaction = {
         type: trsTypes.SEND,
         nethash: options.get('nethash'),
-        amount: amount, // fixme 1000000000 ????
-        fee: fee + "",
+        amount, // fixme 1000000000 ????
+        fee: `${fee}`,
         recipientId: address,
         sender_public_key: keys.public_key,
         senderPublicKey: keys.public_key,
@@ -107,7 +106,7 @@ function createTransfer(address, amount, secret, second_secret) {
     crypto.sign(transaction, keys);
 
     if (second_secret) {
-        var secondKeys = crypto.getKeys(second_secret);
+        const secondKeys = crypto.getKeys(second_secret);
         crypto.secondSign(transaction, secondKeys);
     }
 
@@ -115,7 +114,7 @@ function createTransfer(address, amount, secret, second_secret) {
 }
 
 function createConfirmation(trsAmount, confirmation, secret, second_secret) {
-    var keys = crypto.getKeys(secret);
+    const keys = crypto.getKeys(secret);
 
 	if (typeof(confirmation) !== 'object') {
 		throw new Error('The first argument should be a object!');
@@ -141,23 +140,23 @@ function createConfirmation(trsAmount, confirmation, secret, second_secret) {
         throw new Error('Invalid state format');
     }
 
-    var fee = constants.fees.org;
+    let fee = constants.fees.org;
 	if (confirmation.state == 0) {
 		fee = "0"
 	}
-    var amount = "0";
-    var recipient_id = "";
+    let amount = "0";
+    let recipient_id = "";
     if (confirmation.state == 1) {
         amount = trsAmount;
         recipient_id = confirmation.received_address;
     }
 
-    var transaction = {
+    const transaction = {
         type: trsTypes.CONFIRMATION,
         nethash: options.get('nethash'),
-        amount: amount + "",
-        fee: fee + "",
-        recipient_id: recipient_id,
+        amount: `${amount}`,
+        fee: `${fee}`,
+        recipient_id,
         sender_public_key: keys.public_key,
         senderPublicKey: keys.public_key,
         timestamp: slots.getTime() - options.get('clientDriftSeconds'),
@@ -169,7 +168,7 @@ function createConfirmation(trsAmount, confirmation, secret, second_secret) {
     crypto.sign(transaction, keys);
     
     if (second_secret) {
-        var secondKeys = crypto.getKeys(second_secret);
+        const secondKeys = crypto.getKeys(second_secret);
         crypto.secondSign(transaction, secondKeys);
     }
 
@@ -184,7 +183,7 @@ function createConfirmation(trsAmount, confirmation, secret, second_secret) {
  * @param {*} second_secret 
  */
 function createContribution(contribution, secret, second_secret) {
-	var keys = crypto.getKeys(secret);
+	const keys = crypto.getKeys(secret);
 
 	if (typeof(contribution) !== 'object') {
 		throw new Error('The first argument should be a object!');
@@ -206,14 +205,14 @@ function createContribution(contribution, secret, second_secret) {
 		throw new Error('Invalid url format');
 	}
 	
-	var fee = constants.fees.org;
+	const fee = constants.fees.org;
 	contribution.sender_address = contribution.sender_address
 	contribution.received_address = contribution.received_address
-	var transaction = {
+	const transaction = {
 		type: trsTypes.CONTRIBUTION,
 		nethash: options.get('nethash'),
 		amount: "0",
-		fee: fee + "",
+		fee: `${fee}`,
 		recipientId: null,
 		sender_public_key: keys.public_key,
 		senderPublicKey: keys.public_key,
@@ -227,7 +226,7 @@ function createContribution(contribution, secret, second_secret) {
 	crypto.sign(transaction, keys);
 	
 	if (second_secret) {
-		var secondKeys = crypto.getKeys(second_secret);
+		const secondKeys = crypto.getKeys(second_secret);
 		crypto.secondSign(transaction, secondKeys);
 	}
 
@@ -235,9 +234,9 @@ function createContribution(contribution, secret, second_secret) {
 	return transaction;
 }
 
-module.exports = {
-    createOrg: createOrg,
-    createConfirmation: createConfirmation,
-    createTransfer: createTransfer,
-    createContribution: createContribution
+export default {
+    createOrg,
+    createConfirmation,
+    createTransfer,
+    createContribution
 };

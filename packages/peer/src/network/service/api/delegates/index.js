@@ -1,6 +1,6 @@
-const crypto = require('crypto');
-const ed = require('ed25519');
-const { AssetTypes, Bignum } = require('@ddn/utils');
+import crypto from 'crypto';
+import ed from 'ed25519';
+import DdnUtils from '@ddn/utils';
 
 /**
  * RootRouter接口
@@ -14,8 +14,8 @@ class RootRouter {
     }
 
     async get(req) {
-        var query = Object.assign({}, req.body, req.query);
-        var validateErrors = await this.ddnSchema.validate({
+        const query = Object.assign({}, req.body, req.query);
+        const validateErrors = await this.ddnSchema.validate({
             type: 'object',
             properties: {
                 address: {
@@ -40,7 +40,7 @@ class RootRouter {
             throw new Error(validateErrors[0].message);
         }
 
-        var result = await this.runtime.delegate.getDelegates(query);
+        const result = await this.runtime.delegate.getDelegates(query);
 
         function compareNumber(a, b) {
             const sorta = parseFloat(a[result.orderBy]);
@@ -66,22 +66,22 @@ class RootRouter {
             result.orderBy = 'rate';
         }
 
-        if (["approval", "productivity", "rate", "vote", "missedblocks", "producedblocks", "fees", "rewards", "balance"].indexOf(result.orderBy) > - 1) {
+        if (["approval", "productivity", "rate", "vote", "missedblocks", "producedblocks", "fees", "rewards", "balance"].includes(result.orderBy)) {
             result.delegates = result.delegates.sort(compareNumber);
         } else {
             result.delegates = result.delegates.sort(compareString);
         }
 
-        var delegates = result.delegates.slice(result.offset, result.limit);
+        const delegates = result.delegates.slice(result.offset, result.limit);
 
         if (!query.address) {
             return { success: true, delegates, totalCount: result.count };
         }
 
-        var voter = await this.runtime.account.getAccountByAddress(query.address);
+        const voter = await this.runtime.account.getAccountByAddress(query.address);
         if (voter && voter.delegates) {
             delegates.map(item => {
-                item.voted = (voter.delegates.indexOf(item.public_key) != -1);
+                item.voted = (voter.delegates.includes(item.public_key));
             });
         }
 
@@ -89,8 +89,8 @@ class RootRouter {
     }
 
     async getGet(req) {
-        var query = Object.assign({}, req.body, req.query);
-        var validateErrors = await this.ddnSchema.validate({
+        const query = Object.assign({}, req.body, req.query);
+        const validateErrors = await this.ddnSchema.validate({
             type: "object",
             properties: {
                 transactionId: {
@@ -108,13 +108,13 @@ class RootRouter {
             throw new Error(validateErrors[0].message);
         }
 
-        var result = await this.runtime.delegate.getDelegates(query);
-        var delegate = result.delegates.find(delegate => {
+        const result = await this.runtime.delegate.getDelegates(query);
+        const delegate = result.delegates.find(({public_key, username}) => {
             if (query.publicKey) {
-                return delegate.public_key == query.publicKey;
+                return public_key == query.publicKey;
             }
             if (query.username) {
-                return delegate.username == query.username;
+                return username == query.username;
             }
             return false;
         });
@@ -139,8 +139,8 @@ class RootRouter {
     }
 
     async getVoters(req) {
-        var query = Object.assign({}, req.body, req.query);
-        var validateErrors = await this.ddnSchema.validate({
+        const query = Object.assign({}, req.body, req.query);
+        const validateErrors = await this.ddnSchema.validate({
             type: 'object',
             properties: {
                 publicKey: {
@@ -162,7 +162,7 @@ class RootRouter {
                 if (err) {
                     reject(err);
                 } else {
-                    var addresses = [];
+                    let addresses = [];
                     if (rows[0] && rows[0].account_id) {
                         addresses = rows[0].account_id.split(','); //wxm block database
                     }
@@ -180,8 +180,8 @@ class RootRouter {
                         return reject(e);
                     }
 
-                    var lastBlock = this.runtime.block.getLastBlock();
-                    var totalSupply = this.runtime.block.getBlockStatus().calcSupply(lastBlock.height);
+                    const lastBlock = this.runtime.block.getLastBlock();
+                    const totalSupply = this.runtime.block.getBlockStatus().calcSupply(lastBlock.height);
                     rows.forEach(row => {
                         row.weight = row.balance / totalSupply * 100;
                     });
@@ -189,18 +189,18 @@ class RootRouter {
                     resolve({success: true, accounts: rows});
                 }
             });
-        })
+        });
     }
 
     async getFee() {
-        const fee = Bignum.multiply(100, this.tokenSetting.fixedPoint);
+        const fee = DdnUtils.bignum.multiply(100, this.tokenSetting.fixedPoint);
         return {fee};
     }
 
     async put(req) {
-        var body = req.body;
+        const body = req.body;
 
-        var validateErrors = await this.ddnSchema.validate({
+        const validateErrors = await this.ddnSchema.validate({
             type: "object",
             properties: {
                 secret: {
@@ -227,8 +227,8 @@ class RootRouter {
             throw new Error(validateErrors[0].message);
         }
 
-        var hash = crypto.createHash('sha256').update(body.secret, 'utf8').digest();
-        var keypair = ed.MakeKeypair(hash);
+        const hash = crypto.createHash('sha256').update(body.secret, 'utf8').digest();
+        const keypair = ed.MakeKeypair(hash);
 
         if (body.publicKey) {
             if (keypair.publicKey.toString('hex') != body.publicKey) {
@@ -259,11 +259,11 @@ class RootRouter {
                         return cb("Account does not have multisignatures enabled");
                     }
 
-                    if (account.multisignatures.indexOf(keypair.publicKey.toString('hex')) < 0) {
+                    if (!account.multisignatures.includes(keypair.publicKey.toString('hex'))) {
                         return cb("Account does not belong to multisignature group");
                     }
 
-                    var requester;
+                    let requester;
                     try
                     {
                         requester = await this.runtime.account.getAccountByPublicKey(keypair.publicKey);
@@ -293,7 +293,7 @@ class RootRouter {
 
                     try {
                         var transaction = await this.runtime.transaction.create({
-                            type: AssetTypes.DELEGATE,
+                            type: DdnUtils.assetTypes.DELEGATE,
                             username: body.username,
                             sender: account,
                             keypair,
@@ -332,7 +332,7 @@ class RootRouter {
 
                     try {
                         var transaction = await this.runtime.transaction.create({
-                            type: AssetTypes.DELEGATE,
+                            type: DdnUtils.assetTypes.DELEGATE,
                             username: body.username,
                             sender: account,
                             keypair,
@@ -356,4 +356,4 @@ class RootRouter {
 
 }
 
-module.exports = RootRouter;
+export default RootRouter;
