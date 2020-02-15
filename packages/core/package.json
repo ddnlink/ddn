@@ -1,6 +1,6 @@
 {
   "name": "@ddn/core",
-  "version": "0.0.1",
+  "version": "0.0.3",
   "description": "DDN core.",
   "main": "./lib/index.js",
   "keywords": [
@@ -11,8 +11,7 @@
   "homepage": "https://github.com/ddnlink/ddn/tree/master/packages/core#readme",
   "license": "MIT",
   "files": [
-    "lib",
-    "src"
+    "lib"
   ],
   "repository": {
     "type": "git",

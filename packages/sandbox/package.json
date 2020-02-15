@@ -3,6 +3,9 @@
   "version": "0.0.1",
   "description": "ddn sandbox which is used to run sidechain dapps",
   "main": "./lib/index.js",
+  "files": [
+      "lib"
+  ],
   "scripts": {
     "test": "./node_modules/.bin/mocha",
     "build": "gulp"
