@@ -3,7 +3,7 @@ import ddnJS from '@ddn/node-sdk';
 
 import accountHelper from "../helpers/account.js";
 import cryptoLib from "@ddn/crypto";
-import config from "../../config";
+import config from "../config";
 
 function writeFileSync(file, obj) {
 	var content = (typeof obj === "string" ? obj : JSON.stringify(obj, null, 2));

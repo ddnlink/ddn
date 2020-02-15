@@ -1,12 +1,11 @@
 import crypto from 'crypto';
 import fs from 'fs';
 import cryptoLib from '@ddn/crypto';
+import DdnUtils from '@ddn/utils';
+import ByteBuffer from 'bytebuffer';
+import config from '../config';
 import transactionsLib from '../transactions.js';
 import accounts from './account.js';
-import ByteBuffer from 'bytebuffer';
-import config from '../../config';
-import DdnUtils from '@ddn/utils';
-
 const { bignum } = DdnUtils;
 
 function getBytes(block, skipSignature) {

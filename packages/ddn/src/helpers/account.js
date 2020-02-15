@@ -1,7 +1,7 @@
-const crypto = require('@ddn/crypto');
+import crypto from '@ddn/crypto';
 
-module.exports = {
-	account: function (secret, tokenPrefix) {
+export default {
+	account(secret, tokenPrefix) {
 		if (!tokenPrefix) {
 			tokenPrefix = 'D';
 		}
@@ -11,10 +11,10 @@ module.exports = {
 
 		return {
 			keypair: kp,
-			address: address,
-			secret : secret
-		}
+			address,
+			secret
+		};
 	},
 	
 	isValidSecret: crypto.isValidSecret
-}
+};

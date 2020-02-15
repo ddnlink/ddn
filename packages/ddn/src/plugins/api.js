@@ -1,9 +1,9 @@
 import fs from 'fs';
 import crypto from 'crypto';
+import cryptoLib from '@ddn/crypto';
 import ddnJS from '@ddn/node-sdk';
 import Api from '../helpers/api.js';
 import blockHelper from '../helpers/block.js';
-import cryptoLib from '@ddn/crypto';
 
 let globalOptions;
 

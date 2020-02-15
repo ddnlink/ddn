@@ -47,9 +47,9 @@
     "build-localnet": "./node_modules/.bin/gulp linux-build-local"
   },
   "dependencies": {
-    "@ddn/core": "^0.0.1",
+    "@ddn/core": "^0.0.5",
     "@ddn/node-sdk": "^0.0.17",
-    "@ddn/peer": "^0.0.1",
+    "@ddn/peer": "^0.0.29",
     "@ddn/utils": "^0.0.7",
     "commander": "2.6.0",
     "lodash": "^4.17.11"

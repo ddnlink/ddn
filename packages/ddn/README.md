@@ -4,9 +4,6 @@ A command line tool to manage [DDN](https://github.com/ddnlink) blockchain apps.
 
 ## Installation
 
-由于依赖的inquirer模块在低版本node下存在bug
-最新的dapps系列子命令要求node版本号为v8.4.0以上
-
 ```
 npm install -g @ddn/ddn
 ```
