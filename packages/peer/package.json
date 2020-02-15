@@ -1,6 +1,6 @@
 {
   "name": "@ddn/peer",
-  "version": "0.0.28",
+  "version": "0.0.29",
   "description": "DDN Peer.",
   "files": [
     "lib",
@@ -47,14 +47,14 @@
     "test": "./node_modules/.bin/mocha -r intelli-espower-loader test/**/*.test.js"
   },
   "dependencies": {
-    "@ddn/asset-aob": "^0.1.1",
-    "@ddn/asset-base": "^0.1.1",
-    "@ddn/asset-dao": "^0.1.1",
-    "@ddn/asset-dapp": "^0.1.1",
-    "@ddn/asset-evidence": "^0.0.2",
-    "@ddn/core": "^0.0.4",
-    "@ddn/node-sdk": "^0.0.16",
-    "@ddn/utils": "^0.0.6",
+    "@ddn/asset-aob": "^0.1.2",
+    "@ddn/asset-base": "^0.1.2",
+    "@ddn/asset-dao": "^0.1.2",
+    "@ddn/asset-dapp": "^0.1.2",
+    "@ddn/asset-evidence": "^0.0.3",
+    "@ddn/core": "^0.0.5",
+    "@ddn/node-sdk": "^0.0.17",
+    "@ddn/utils": "^0.0.7",
     "ajv": "^6.3.0",
     "array.prototype.find": "^2.1.0",
     "array.prototype.findindex": "^2.0.2",
