@@ -56,6 +56,8 @@ function publishToNpm() {
     const { version } = require(join(cwd, 'packages', repo, 'package.json'));
     if (version.includes('-rc.') || version.includes('-beta.') || version.includes('-alpha.')) {
       console.log(`[${repo}] npm publish --tag next`);
+      console.log('version= ', version);
+
       shell.exec(`npm publish --tag next`);
     } else {
       console.log(`[${repo}] npm publish`);
