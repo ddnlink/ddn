@@ -14,7 +14,9 @@
     "packages/*"
   ],
   "version": "independent",
-
+  "publishConfig": {
+    "access": "public"
+  },
   "useWorkspaces": true,
   "npmClient": "yarn"
 }

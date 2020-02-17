@@ -1,14 +1,14 @@
 {
   "name": "@ddn/utils",
-  "version": "0.0.5",
+  "version": "0.0.7",
   "description": "DDN utils.",
   "main": "./lib/index.js",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/ddnlink/ddn.git",
-    "directory": "packages/ddn-utils"
+    "directory": "packages/utils"
   },
-  "homepage": "http://github.com/ddnlink/ddn/tree/master/packages/ddn-utils",
+  "homepage": "http://github.com/ddnlink/ddn/tree/master/packages/utils",
   "bugs": {
     "url": "http://github.com/ddnlink/ddn/issues"
   },
@@ -16,7 +16,7 @@
     "lib"
   ],
   "dependencies": {
-    "@ddn/crypto": "^0.0.1",
+    "@ddn/crypto": "^0.0.3",
     "bignumber.js": "^7.2.1",
     "ip": "^1.1.5",
     "shelljs": "^0.8.3"
