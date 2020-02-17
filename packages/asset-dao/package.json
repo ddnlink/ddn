@@ -1,6 +1,6 @@
 {
   "name": "@ddn/asset-dao",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "description": "this is asset-dao",
   "main": "lib/index.js",
   "author": "wly",
@@ -19,7 +19,7 @@
     ".ddnrc.js"
   ],
   "dependencies": {
-    "@ddn/asset-base": "^0.1.2",
+    "@ddn/asset-base": "^0.1.3",
     "@ddn/utils": "^0.0.7",
     "bytebuffer": "^5.0.1",
     "ed25519": "0.0.4",
