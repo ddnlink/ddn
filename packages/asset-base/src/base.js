@@ -12,11 +12,11 @@
  * undoUnconfirmed，ready，process
  */
 import DdnUtils from '@ddn/utils';
+import ByteBuffer from 'bytebuffer';
+import _ from 'lodash';
 
 import AssetUtils from './utils';
-import ByteBuffer from 'bytebuffer';
 import CommonUtils from './common-utils';
-import _ from 'lodash';
 
 /**
  * 定义字段相应规则
