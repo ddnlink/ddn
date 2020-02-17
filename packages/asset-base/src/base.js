@@ -293,9 +293,9 @@ class AssetBase {
 
                     let trsIds = [];
                     if (returnTotal) {
-                        trsIds = _.pluck(rows.rows, 'asset_trs_id');
+                        trsIds = _.map(rows.rows, 'asset_trs_id');
                     } else {
-                        trsIds = _.pluck(rows, 'asset_trs_id');
+                        trsIds = _.map(rows, 'asset_trs_id');
                     }
 
                     if(hasExtProps) {
