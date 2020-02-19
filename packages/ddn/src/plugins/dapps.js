@@ -7,8 +7,6 @@ import valid_url from "valid-url";
 import accountHelper from "../helpers/account.js";
 import dappHelper from "../helpers/dapp.js";
 
-// var templatePath = path.join(__dirname, "..", "template");
-
 const dappCategories = [
 	"Common",
 	"Business",
@@ -536,7 +534,7 @@ module.exports = function (program) {
 					} else if (options.genesis) {
 						createGenesisBlock()
 					} else {
-						console.log("'ddn dapps -h' to get help");
+						console.log("'DDN dapps -h' to get help");
 					}
 				} catch (e) {
 					console.error(e)

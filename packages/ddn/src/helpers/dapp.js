@@ -1,22 +1,22 @@
-const cryptoLib = require('@ddn/crypto');
-const ByteBuffer = require('bytebuffer');
-const crypto = require('crypto');
-const dappTransactionsLib = require('../dapptransactions.js');
-const accounts = require('./account.js');
+import cryptoLib from '@ddn/crypto';
+import ByteBuffer from 'bytebuffer';
+import crypto from 'crypto';
+import dappTransactionsLib from '../dapptransactions.js';
+import accounts from './account.js';
 
 function getBytes(block, skipSignature) {
-	var size = 8 + 4 + 4 + 4 + 32 + 32 + 8 + 4 + 4 + 64;
+	const size = 8 + 4 + 4 + 4 + 32 + 32 + 8 + 4 + 4 + 64;
 
-	var bb = new ByteBuffer(size, true);
+	const bb = new ByteBuffer(size, true);
 
 	bb.writeString(block.prevBlockId || '0')
 
     //bignum update bb.writeLong(block.height);
-    bb.writeString(block.height + "");
+    bb.writeString(`${block.height}`);
 	bb.writeInt(block.timestamp);
 	bb.writeInt(block.payloadLength);
 
-	var ph = Buffer.from(block.payloadHash, 'hex');
+	const ph = Buffer.from(block.payloadHash, 'hex');
 	for (var i = 0; i < ph.length; i++) {
 		bb.writeByte(ph[i]);
 	}
@@ -29,7 +29,7 @@ function getBytes(block, skipSignature) {
 	bb.writeString(block.pointId || '0')
 
     //bignum update bb.writeLong(block.pointHeight || 0);
-    bb.writeString((block.pointHeight + "") || "0");
+    bb.writeString((`${block.pointHeight}`) || "0");
 
 	bb.writeInt(block.count);
 
@@ -41,17 +41,17 @@ function getBytes(block, skipSignature) {
 	}
 
 	bb.flip();
-	var b = bb.toBuffer();
+	const b = bb.toBuffer();
 
 	return b;
 }
 
-module.exports = {
-	new: function (genesisAccount, publicKeys, assetInfo) {
-		var sender = accounts.account(cryptoLib.generateSecret());
+export default {
+	new({keypair, address}, publicKeys, assetInfo) {
+		const sender = accounts.account(cryptoLib.generateSecret());
 
-		var block = {
-			delegate: genesisAccount.keypair.publicKey,
+		const block = {
+			delegate: keypair.publicKey,
 			height: "1",
 			pointId: null,
 			pointHeight: null,
@@ -59,20 +59,20 @@ module.exports = {
 			timestamp: 0,
 			payloadLength: 0,
 			payloadHash: crypto.createHash('sha256')
-		}
+		};
 
 		if (assetInfo) {
-			var assetTrs = {
+			const assetTrs = {
 				fee: '0',
 				timestamp: 0,
 				senderPublicKey: sender.keypair.publicKey,
 				type: 3,
 				args: JSON.stringify([
 					assetInfo.name,
-					String(Number(assetInfo.amount) * Math.pow(10, assetInfo.precision)),
-					genesisAccount.address
+					String(Number(assetInfo.amount) * (10 ** assetInfo.precision)),
+					address
 				])
-			}
+			};
 			bytes = dappTransactionsLib.getTransactionBytes(assetTrs);
 			assetTrs.signature = cryptoLib.sign(sender.keypair, bytes);
 			block.payloadLength += bytes.length;
@@ -86,10 +86,10 @@ module.exports = {
 
 		block.payloadHash = block.payloadHash.digest().toString('hex');
 		bytes = getBytes(block);
-		block.signature = cryptoLib.sign(genesisAccount.keypair, bytes);
+		block.signature = cryptoLib.sign(keypair, bytes);
 		bytes = getBytes(block);
 		block.id = cryptoLib.getId(bytes);
 
 		return block;
 	}
-}
+};

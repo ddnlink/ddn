@@ -40,7 +40,7 @@ More infomation please visit our [official website](https://www.ddn.link) , [ddn
 
 | Github Issue | DATM |
 | ------------------------------------------------------- | ------------------------------------------------------------------------------------------- |
-| [ddnlink/ddn/issues](https://github.com/ddnlink/ddn/issues) | <img src="./doc/images/datm.jpg" alt="..." width="200px">) | 
+| [ddnlink/ddn/issues](https://github.com/ddnlink/ddn/issues) | <img src="./doc/images/datm.jpg" width="200px">| 
 
 > PS：DATM is a distributed task management tool based on DDN blockchain. You can get tasks and discuss problems. When you complete tasks, The system will pay you DDN through the smart contract.
 

@@ -1,6 +1,6 @@
 {
   "name": "@ddn/asset-evidence",
-  "version": "0.0.3",
+  "version": "0.0.5",
   "description": "DDN evidence",
   "main": "lib/index.js",
   "repository": {
@@ -19,6 +19,6 @@
   "author": "wangxm",
   "license": "MIT",
   "dependencies": {
-    "@ddn/asset-base": "^0.1.2"
+    "@ddn/asset-base": "^0.1.4"
   }
 }

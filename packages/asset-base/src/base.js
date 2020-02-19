@@ -12,11 +12,11 @@
  * undoUnconfirmed，ready，process
  */
 import DdnUtils from '@ddn/utils';
+import ByteBuffer from 'bytebuffer';
+import _ from 'lodash';
 
 import AssetUtils from './utils';
-import ByteBuffer from 'bytebuffer';
 import CommonUtils from './common-utils';
-import _ from 'lodash';
 
 /**
  * 定义字段相应规则
@@ -293,9 +293,9 @@ class AssetBase {
 
                     let trsIds = [];
                     if (returnTotal) {
-                        trsIds = _.pluck(rows.rows, 'asset_trs_id');
+                        trsIds = _.map(rows.rows, 'asset_trs_id');
                     } else {
-                        trsIds = _.pluck(rows, 'asset_trs_id');
+                        trsIds = _.map(rows, 'asset_trs_id');
                     }
 
                     if(hasExtProps) {
