@@ -1,9 +1,9 @@
-var node = require("./../variables.js")
-var BalanceManager = require('../../lib/helpers/balance-manager.js')
+import node from "./../variables.js";
+import BalanceManager from '../../lib/helpers/balance-manager.js';
 
-describe('balance cache manager', function () {
-  it('normal test', function (done) {
-    var balances = new BalanceManager
+describe('balance cache manager', () => {
+  it('normal test', done => {
+    const balances = new BalanceManager;
     balances.setNativeBalance('1', 10)
     balances.setNativeBalance('2', '1000')
     node.expect(balances.getNativeBalance('1')).to.equal('10')

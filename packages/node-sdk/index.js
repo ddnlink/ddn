@@ -1,4 +1,8 @@
-module.exports = {
+import init from './lib/init';
+
+export default {
+    init,
+
 	crypto : require("./lib/transactions/crypto.js"),
 	dapp: require("./lib/transactions/dapp.js"),
 	transfer: require("./lib/transactions/transfer.js"),
@@ -10,7 +14,6 @@ module.exports = {
 	username: require("./lib/transactions/username.js"),
 	multitransfer: require("./lib/transactions/multitransfer.js"),		
     options: require("./lib/options.js"),
-    init: require("./lib/init.js"),
 	constants: require("./lib/constants.js"),
 	utils: {
 		slots: require("./lib/time/slots.js"),
@@ -26,4 +29,4 @@ module.exports = {
     coupon: require("./lib/transactions/coupon.js"),
 
     assetPlugin: require("./lib/transactions/asset-plugin.js"),
-}
+};

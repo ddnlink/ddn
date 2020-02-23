@@ -1,9 +1,9 @@
-var node = require("./../variables.js")
-var { LimitCache } = require('@ddn/utils')
+import DdnUtils from '@ddn/utils';
+import node from "../variables";
 
-describe('LimitCache', function () {
-  it('normal test', function (done) {
-    let lc = new LimitCache({
+describe('LimitCache', () => {
+  it('normal test', done => {
+    let lc = new DdnUtils.limitCache({
       limit: 10
     })
     for (let i = 0; i < 10; ++i) {

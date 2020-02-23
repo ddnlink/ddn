@@ -1,9 +1,8 @@
-var ByteBuffer = require("bytebuffer");
-var DdnJS = require('./index.js');
-var bb = new ByteBuffer()
+import ByteBuffer from "bytebuffer";
+const bb = new ByteBuffer();
 console.log("bb",bb);
 console.log("bb.toArrayBuffer()",bb.toArrayBuffer());
-var arrayBuffer = new Uint8Array(bb.toArrayBuffer());
+const arrayBuffer = new Uint8Array(bb.toArrayBuffer());
 console.log("arrayBuffer",arrayBuffer);
 bb.writeString("Hello world!")
 console.log("bb",bb);

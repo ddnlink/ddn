@@ -1,4 +1,3 @@
-import { shallow } from 'enzyme';
 import { add } from './count';
 
 it('count', () => {

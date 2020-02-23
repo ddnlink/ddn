@@ -1,0 +1,266 @@
+{
+  "config": {
+    "title": "Ddn",
+    "description": "My awesome app using docz",
+    "menu": [],
+    "version": "3.2.15",
+    "repository": false,
+    "native": false,
+    "codeSandbox": true,
+    "themeConfig": {
+      "mode": "light"
+    },
+    "separator": "-",
+    "typescript": true,
+    "theme": "/Users/imfly/.config/yarn/global/node_modules/docz-theme-umi/es/index.js",
+    "base": "/doc",
+    "plugins": [
+      {},
+      {},
+      {},
+      {},
+      {},
+      {},
+      {}
+    ]
+  },
+  "entries": [
+    {
+      "key": "README-zh-CN.md",
+      "value": {
+        "id": "a818e89b2755f3687392cf6163bf60f9",
+        "filepath": "README-zh-CN.md",
+        "link": "https://github.com/ddnlink/ddn/edit/master/README-zh-CN.md",
+        "slug": "readme-zh-cn",
+        "route": "/doc/readme-zh-cn",
+        "name": "Readme zh cn",
+        "menu": "",
+        "headings": [
+          {
+            "slug": "ddn简介",
+            "depth": 1,
+            "value": "DDN简介"
+          },
+          {
+            "slug": "特点",
+            "depth": 2,
+            "value": "特点"
+          },
+          {
+            "slug": "架构",
+            "depth": 2,
+            "value": "架构"
+          },
+          {
+            "slug": "案例",
+            "depth": 2,
+            "value": "案例"
+          },
+          {
+            "slug": "社区",
+            "depth": 2,
+            "value": "社区"
+          },
+          {
+            "slug": "贡献",
+            "depth": 2,
+            "value": "贡献"
+          },
+          {
+            "slug": "捐赠",
+            "depth": 2,
+            "value": "捐赠"
+          },
+          {
+            "slug": "协议",
+            "depth": 2,
+            "value": "协议"
+          }
+        ]
+      }
+    },
+    {
+      "key": "doc/config/config.md",
+      "value": {
+        "id": "09720b394f945fac9dcbd3b9794d5624",
+        "filepath": "doc/config/config.md",
+        "link": "https://github.com/ddnlink/ddn/edit/master/doc/config/config.md",
+        "slug": "doc-config-config",
+        "route": "/doc/doc-config-config",
+        "name": "Config",
+        "menu": "",
+        "headings": [
+          {
+            "slug": "配置",
+            "depth": 1,
+            "value": "配置"
+          },
+          {
+            "slug": "配置文件",
+            "depth": 2,
+            "value": "配置文件"
+          },
+          {
+            "slug": "ddnrclocaljs",
+            "depth": 2,
+            "value": ".ddnrc.local.js"
+          },
+          {
+            "slug": "node_env",
+            "depth": 2,
+            "value": "NODE_ENV"
+          },
+          {
+            "slug": "ddn_env",
+            "depth": 2,
+            "value": "DDN_ENV"
+          }
+        ]
+      }
+    },
+    {
+      "key": "doc/packages/asset.md",
+      "value": {
+        "title": "DDN Blockchain Asset Plugin",
+        "challengeType": 0,
+        "order": 1,
+        "time": "5个小时",
+        "videoUrl": "",
+        "prjectUrl": "https://github.com/",
+        "localeTitle": "DDN资产扩展",
+        "id": "6c691de55f0870c3427afc3d0333d02d",
+        "filepath": "doc/packages/asset.md",
+        "link": "https://github.com/ddnlink/ddn/edit/master/doc/packages/asset.md",
+        "slug": "doc-packages-asset",
+        "route": "/doc/doc-packages-asset",
+        "name": "Asset",
+        "menu": "",
+        "headings": [
+          {
+            "slug": "ddn资产扩展",
+            "depth": 1,
+            "value": "DDN资产扩展"
+          },
+          {
+            "slug": "资产类型",
+            "depth": 2,
+            "value": "资产类型"
+          },
+          {
+            "slug": "扩展方法",
+            "depth": 2,
+            "value": "扩展方法"
+          },
+          {
+            "slug": "1-扩展规范",
+            "depth": 3,
+            "value": "1. 扩展规范"
+          },
+          {
+            "slug": "2-扩展方法",
+            "depth": 3,
+            "value": "2. 扩展方法"
+          },
+          {
+            "slug": "3-数据交互",
+            "depth": 3,
+            "value": "3. 数据交互"
+          }
+        ]
+      }
+    },
+    {
+      "key": "doc/packages/ddn.md",
+      "value": {
+        "id": "26865547fc43a079f7caed78dec7089c",
+        "filepath": "doc/packages/ddn.md",
+        "link": "https://github.com/ddnlink/ddn/edit/master/doc/packages/ddn.md",
+        "slug": "doc-packages-ddn",
+        "route": "/doc/doc-packages-ddn",
+        "name": "Ddn",
+        "menu": "",
+        "headings": [
+          {
+            "slug": "ddn-命令行工具",
+            "depth": 1,
+            "value": "DDN 命令行工具"
+          }
+        ]
+      }
+    },
+    {
+      "key": "doc/packages/crypto.md",
+      "value": {
+        "id": "061af75e857802d0c45b073d63b0b03e",
+        "filepath": "doc/packages/crypto.md",
+        "link": "https://github.com/ddnlink/ddn/edit/master/doc/packages/crypto.md",
+        "slug": "doc-packages-crypto",
+        "route": "/doc/doc-packages-crypto",
+        "name": "Crypto",
+        "menu": "",
+        "headings": [
+          {
+            "slug": "ddn区块链地址的生产与校验",
+            "depth": 2,
+            "value": "DDN区块链地址的生产与校验"
+          },
+          {
+            "slug": "关于-base58-字符编码及加密",
+            "depth": 2,
+            "value": "关于 Base58 字符编码及加密"
+          },
+          {
+            "slug": "生成地址公钥",
+            "depth": 2,
+            "value": "生成地址(公钥)"
+          },
+          {
+            "slug": "验证地址",
+            "depth": 2,
+            "value": "验证地址"
+          }
+        ]
+      }
+    },
+    {
+      "key": "packages/peer/README-zh-CN.md",
+      "value": {
+        "id": "3e24fa63c93dc3ef06f2444dc823ffe0",
+        "filepath": "packages/peer/README-zh-CN.md",
+        "link": "https://github.com/ddnlink/ddn/edit/master/packages/peer/README-zh-CN.md",
+        "slug": "packages-peer-readme-zh-cn",
+        "route": "/doc/packages-peer-readme-zh-cn",
+        "name": "Readme zh cn",
+        "menu": "",
+        "headings": [
+          {
+            "slug": "ddn-节点",
+            "depth": 2,
+            "value": "DDN 节点"
+          },
+          {
+            "slug": "安装",
+            "depth": 2,
+            "value": "安装"
+          },
+          {
+            "slug": "默认本地创世账户",
+            "depth": 2,
+            "value": "默认本地创世账户"
+          },
+          {
+            "slug": "相关工程",
+            "depth": 2,
+            "value": "相关工程"
+          },
+          {
+            "slug": "协议",
+            "depth": 2,
+            "value": "协议"
+          }
+        ]
+      }
+    }
+  ],
+  "props": []
+}
