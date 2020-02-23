@@ -11,6 +11,7 @@ _roadhog-api-doc
 /.vscode
 .changelog
 build
+.docz
 
 # misc
 .DS_Store
