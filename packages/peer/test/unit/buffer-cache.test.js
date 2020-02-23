@@ -1,8 +1,8 @@
-var node = require("./../variables.js")
-var BufferCache = require('../../lib/helpers/buffer-cache')
+import node from "../variables";
+import BufferCache from '../../lib/helpers/buffer-cache';
 
-describe('BufferCache', function () {
-  it('normal test', async function () {
+describe('BufferCache', () => {
+  it('normal test', async () => {
     let bc = new BufferCache({
       maxCacheNumber: 10,
       refreshInterval: 1000,
@@ -11,7 +11,7 @@ describe('BufferCache', function () {
     bc.set('k1', 1)
     node.expect(bc.has('k1')).to.be.true
     for (let i = 0; i < 9; ++i) {
-      let key = 'k' + (i+2)
+      let key = `k${i+2}`
       bc.set(key, 1)
       node.expect(bc.has(key)).to.be.true
     }

@@ -168,9 +168,7 @@ function waitForNewBlock(height, cb) {
         setTimeout(cb, 1000);
       });
     },
-    () => {
-      return actualHeight == height;
-    },
+    () => actualHeight == height,
     err => {
       if (err) {
           cb(err);
@@ -193,9 +191,7 @@ function addPeers(numOfPeers, cb) {
   let port;
 
   let i = 0;
-  async.whilst(() => {
-    return i < numOfPeers
-  }, next => {
+  async.whilst(() => i < numOfPeers, next => {
     os = operatingSystems[randomizeSelection(operatingSystems.length)];
     version = 'development';
     port = ports[randomizeSelection(ports.length)];
@@ -218,9 +214,7 @@ function addPeers(numOfPeers, cb) {
         next();
       }
     })
-  }, err => {
-    return cb(err);
-  });
+  }, err => cb(err));
 }
 
 // Used to randomize selecting from within an array. Requires array length
@@ -421,7 +415,7 @@ export default {
 
   //wxm TODO 此处使用新的类型
 //   TxTypes: TxTypes,
-  AssetTypes: assetTypes,
+//   AssetTypes: assetTypes,
 
   //wxm TODO 此处应该使用对应npm包提供的对象
 //   DappType: DappType,

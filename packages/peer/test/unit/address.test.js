@@ -1,8 +1,8 @@
-var node = require("./../variables.js")
-var { Address } = require('@ddn/utils')
+import node from "./../variables.js";
+import {Address} from '@ddn/utils';
 
-describe('address', function () {
-  it('old 64bit address should be ok', function (done) {
+describe('address', () => {
+  it('old 64bit address should be ok', done => {
     node.expect(Address.isAddress('a')).to.be.false
     node.expect(Address.isAddress('')).to.be.false
     node.expect(Address.isAddress()).to.be.false
@@ -16,15 +16,15 @@ describe('address', function () {
     done()
   })
 
-  it('bitcoin Address should be invalid', function (done) {
+  it('bitcoin Address should be invalid', done => {
     node.expect(Address.isAddress('14VXPK3foDitWdv132rb3dZJkJUMrMSscp')).to.be.false
     done()
   })
 
-  it('normal Address should be ok', function (done) {
+  it('normal Address should be ok', done => {
     node.expect(Address.isAddress('DDaYcsGrwpPnR5SJK6AFBC6tMavGhBAkFD')).to.be.true
 
-    var addr1 = Address.generateBase58CheckAddress(node.genNormalAccount().public_key)
+    const addr1 = Address.generateBase58CheckAddress(node.genNormalAccount().public_key);
     node.expect(Address.isAddress(addr1)).to.be.true
 
     done()
