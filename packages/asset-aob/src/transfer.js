@@ -271,7 +271,8 @@ class Transfer extends Asset.Base {
      * 自定义资产Api
      */
     async attachApi(router) {
-        router.put('/transfers', async (req, res) => {
+        // TODO: imfly, /transfers 
+        router.put('/', async (req, res) => {
             try {
                 const result = await this.putTransferAsset(req, res);
                 res.json(result);
@@ -279,7 +280,7 @@ class Transfer extends Asset.Base {
                 res.json({ success: false, error: err.message || err.toString() });
             }
         });
-        router.get('/transactions/my/:address/', async (req, res) => { // 127.0.0.1:8001/api/aobasset/balances/:address/:currency
+        router.get('/my/:address/', async (req, res) => { // 127.0.0.1:8001/api/aobasset/balances/:address/:currency
             try {
                 const result = await this.getMyTransactions(req, res);
                 res.json(result);
@@ -287,7 +288,7 @@ class Transfer extends Asset.Base {
                 res.json({ success: false, error: err.message || err.toString() });
             }
         });
-        router.get('/transactions/my/:address/:currency', async (req, res) => { // 127.0.0.1:8001/api/aobasset/balances/:address/:currency
+        router.get('/my/:address/:currency', async (req, res) => { // 127.0.0.1:8001/api/aobasset/balances/:address/:currency
             try {
                 const result = await this.getMyTransactions(req, res);
                 res.json(result);
@@ -295,7 +296,7 @@ class Transfer extends Asset.Base {
                 res.json({ success: false, error: err.message || err.toString() });
             }
         });
-        router.get('/transactions/:currency', async (req, res) => { // 127.0.0.1:8001/api/aobasset/balances/:address/:currency
+        router.get('/:currency', async (req, res) => { // 127.0.0.1:8001/api/aobasset/balances/:address/:currency
             try {
                 const result = await this.getTransactions(req, res);
                 res.json(result);
