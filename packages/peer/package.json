@@ -82,6 +82,7 @@
     "node-gyp": "^3.6.2",
     "pg": "^7.7.1",
     "pg-hstore": "^2.3.2",
+    "pluralize": "^8.0.0",
     "protobufjs": "^6.8.6",
     "randomstring": "1.1.5",
     "request": "^2.88.2",
@@ -93,7 +94,5 @@
     "tracer": "^0.8.11",
     "util-extend": "1.0.3",
     "valid-url": "1.0.9"
-  },
-  "devDependencies": {
   }
 }

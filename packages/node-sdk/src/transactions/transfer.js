@@ -18,7 +18,7 @@ function createInTransfer(dappId, currency, amount, secret, secondSecret) {
 		sender_public_key: keys.public_key,
 		timestamp: slots.getTime() - options.get('clientDriftSeconds'),
 		asset: {
-			inTransfer: {
+			in: {
 				dapp_id: dappId,
 				currency: currency
 			}
@@ -28,7 +28,7 @@ function createInTransfer(dappId, currency, amount, secret, secondSecret) {
 	if (currency === constants.nethash[nethash].tokenName) {
 		transaction.amount = amount;    //Bignum update Number(amount)
 	} else {
-		transaction.asset.inTransfer.amount = String(amount)
+		transaction.asset.in.amount = String(amount)
 	}
 
 	crypto.sign(transaction, keys);

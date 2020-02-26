@@ -1,8 +1,8 @@
 import fs from "fs";
 import ddnJS from '@ddn/node-sdk';
+import cryptoLib from "@ddn/crypto";
 
 import accountHelper from "../helpers/account.js";
-import cryptoLib from "@ddn/crypto";
 import config from "../config";
 
 function writeFileSync(file, obj) {

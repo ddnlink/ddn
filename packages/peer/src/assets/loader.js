@@ -3,6 +3,7 @@
  * wangxm   2018-12-28
  */
 import express from 'express';
+import pluralize from 'pluralize';
 
 import DdnUtils from '@ddn/utils';
 import Transfer from './system/transfer';
@@ -98,11 +99,8 @@ class Loader {
     async _attachAssetPluginApi(assetConfig, assetInst) {
         if (assetConfig && assetInst) {
             const apiSubPath = assetConfig.name.toLowerCase();
-            // if (apiSubPath.length > 5) {
-            //     if (apiSubPath.substring(0, 5) == "asset") {
-            //         apiSubPath = apiSubPath.substring(5);
-            //     }
-            // }
+            const apiSubPaths = pluralize.plural(apiSubPath);
+console.log('assetConfig.name= ', assetConfig.name);
 
             const router = express.Router();
             const apis = await this._attachAssetPluginApiRouter(router, assetConfig, assetInst);
@@ -110,6 +108,14 @@ class Loader {
                 await assetInst.attachApi(router);
             }
 
+            // rustful api, for example: new api: /api/aobassets -> old api: /api/aobasset/list
+            this._assetsApi.push({
+                path: `/api/${apiSubPaths}`,
+                router,
+                apis
+            });
+            
+            // TODO: deprecated, delete it for next version.
             this._assetsApi.push({
                 path: `/api/${apiSubPath}`,
                 router,

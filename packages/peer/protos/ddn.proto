@@ -49,7 +49,7 @@ message Asset {
     AssetVote vote = 4;
     AssetMultisignature multisignature = 5;
     AssetDApp dapp = 6;
-    AssetInTransfer inTransfer = 7;
+    AssetInTransfer in = 7;
     AssetOutTransfer outTransfer = 8;
     AssetAOBIssuer aobIssuer = 9;
     AssetAOBAsset aobAsset = 10;
