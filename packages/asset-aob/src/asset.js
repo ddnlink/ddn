@@ -1,6 +1,7 @@
 import Asset from '@ddn/asset-base';
 import DdnUtils from '@ddn/utils';
 import assert from 'assert';
+const { deprecated } = DdnUtils;
 
 class Aob extends Asset.Base {
     async propsMapping() {
@@ -150,6 +151,15 @@ class Aob extends Asset.Base {
        * 自定义资产Api
        */
     async attachApi(router) {
+        router.get('/', async (req, res) => {
+            try {
+                const result = await this.getList(req, res);
+                res.json(result);
+            } catch (err) {
+                res.json({ success: false, error: err.message || err.toString() });
+            }
+        });
+
         router.get('/list', async (req, res) => {
             try {
                 const result = await this.getList(req, res);

@@ -5,7 +5,7 @@ module.exports = {
             type: 11
         },
         {
-            name: "InTransfer",
+            name: "In",
             type: 12
         },
         {
