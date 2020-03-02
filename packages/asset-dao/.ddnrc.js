@@ -1,19 +1,19 @@
 module.exports = {
     transactions: [
         {
-            name: "Org",
+            name: "DaoOrg",
             type: 40
         },
         {
-            name: "Exchange",
+            name: "DaoExchange",
             type: 41
         },
         {
-            name: "Contribution",
+            name: "DaoContribution",
             type: 42
         },
         {
-            name: "Confirmation",
+            name: "DaoConfirmation",
             type: 43
         }
     ]
