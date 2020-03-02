@@ -100,7 +100,6 @@ class Loader {
         if (assetConfig && assetInst) {
             const apiSubPath = assetConfig.name.toLowerCase();
             const apiSubPaths = pluralize.plural(apiSubPath);
-console.log('assetConfig.name= ', assetConfig.name);
 
             const router = express.Router();
             const apis = await this._attachAssetPluginApiRouter(router, assetConfig, assetInst);
