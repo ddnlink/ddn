@@ -60,8 +60,8 @@ message Asset {
     AssetMultitransfer output = 15;
     AssetUserinfo userinfo = 16;
     AssetEvidence evidence = 17;
-    AssetOrg org = 18;
-    AssetExchange exchange = 19;
+    DaoOrg daoOrg = 18;
+    DaoExchange daoExchange = 19;
     DaoContribution daoContribution = 20;
     DaoConfirmation daoConfirmation = 21;
   }
@@ -199,7 +199,7 @@ message BlockVoteSignature {
   required bytes sig = 2;
 }
 
-message AssetOrg {
+message DaoOrg {
   optional string address = 1;
   required string org_id = 2;
   optional string name = 3;
@@ -208,7 +208,7 @@ message AssetOrg {
   required int32 state = 6;
 }
 
-message AssetExchange {
+message DaoExchange {
   required string org_id = 1;
   required string exchange_trs_id = 2;
   required string sender_address = 3;
