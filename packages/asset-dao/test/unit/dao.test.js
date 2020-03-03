@@ -1,5 +1,5 @@
 const DEBUG = require('debug')('dao')
-const node = require('../../variables.js')
+import node from '../variables';
 
 const Gaccount = node.Gaccount;
 // const createOrg = node.ddn.dao.createOrg;
@@ -9,7 +9,7 @@ describe('Test Dao', () => {
     describe('post /peer/transactions', () => {
 
         // 加载插件
-        node.ddn.init.init();
+        node.ddn.init();
 
         // Common api
         it("Using valid parameters to create a orgId is ok.", async () => {
@@ -32,18 +32,18 @@ describe('Test Dao', () => {
                     .set("nethash", node.config.nethash)
                     .set("port", node.config.port)
                     .send({
-                        transaction: transaction
+                        transaction
                     })
                     .expect("Content-Type", /json/)
                     .expect(200)
-                    .end(function (err, res) {
+                    .end((err, {body}) => {
                         // console.log(JSON.stringify(res.body));
 
                         if (err) {
                             return reject(err);
                         }
 
-                        node.expect(res.body).to.have.property("success").to.be.true;
+                        node.expect(body).to.have.property("success").to.be.true;
 
                         resolve();
                     });
@@ -69,18 +69,18 @@ describe('Test Dao', () => {
                     .set("nethash", node.config.nethash)
                     .set("port", node.config.port)
                     .send({
-                        transaction: transaction
+                        transaction
                     })
                     .expect("Content-Type", /json/)
                     .expect(200)
-                    .end(function (err, res) {
+                    .end((err, {body}) => {
                         if (err) {
                             return reject(err);
                         }
 
                         // console.log(JSON.stringify(res.body));
-                        node.expect(res.body).to.have.property("success").to.be.false;
-                        node.expect(res.body.error).to.include("Insufficient balance");
+                        node.expect(body).to.have.property("success").to.be.false;
+                        node.expect(body.error).to.include("Insufficient balance");
 
                         resolve();
                     });
@@ -92,7 +92,7 @@ describe('Test Dao', () => {
     describe('PUT /api/org to create a orgId', () => {
         let org;
 
-        before(function (done) {
+        before(done => {
             org = {
                 "org_id": node.randomOrgId(),
                 // "orgId": node.randomOrgId(),
@@ -105,7 +105,7 @@ describe('Test Dao', () => {
             done();
         })
 
-        it('Using valid parameters, should be ok.', function (done) {
+        it('Using valid parameters, should be ok.', done => {
             node.api.put('/org')
                 .set('Accept', 'application/json')
                 .send({
@@ -119,16 +119,16 @@ describe('Test Dao', () => {
                 })
                 .expect('Content-Type', /json/)
                 .expect(200)
-                .end(function (err, res) {
+                .end((err, {body}) => {
                     // console.log(JSON.stringify(res.body));
-                    node.expect(res.body).to.have.property('success').to.be.true;
-                    node.expect(res.body).to.have.property('transactionId');
+                    node.expect(body).to.have.property('success').to.be.true;
+                    node.expect(body).to.have.property('transactionId');
                     done();
                 });
         });
 
         // Update name
-        it('Update the Org`s name in the save 10s is fails', function (done) {
+        it('Update the Org`s name in the save 10s is fails', done => {
             node.api.put('/org')
                 .set('Accept', 'application/json')
                 .send({
@@ -141,18 +141,18 @@ describe('Test Dao', () => {
                 })
                 .expect('Content-Type', /json/)
                 .expect(200)
-                .end(function (err, res) {
+                .end((err, {body}) => {
                     // console.log(JSON.stringify(res.body));
-                    node.expect(res.body).to.have.property('success').to.be.false;
-                    node.expect(res.body).to.have.property('error');
+                    node.expect(body).to.have.property('success').to.be.false;
+                    node.expect(body).to.have.property('error');
                     done();
                 });
         });
 
-        it('Get /org/orgid/:orgId should be ok if Org`s name is not modified', function (done) {
-            node.onNewBlock(function (err) {
+        it('Get /org/orgid/:orgId should be ok if Org`s name is not modified', done => {
+            node.onNewBlock(err => {
                 node.expect(err).to.be.not.ok;
-                node.api.get("/org/orgid/" + org.org_id.toLowerCase())
+                node.api.get(`/org/orgid/${org.org_id.toLowerCase()}`)
                     // node.api.get("/dao/" + org.orgId)
                     .set("Accept", "application/json")
                     .set("version", node.version)
@@ -160,20 +160,20 @@ describe('Test Dao', () => {
                     .set("port", node.config.port)
                     .expect("Content-Type", /json/)
                     .expect(200)
-                    .end(function (err, res) {
+                    .end((err, {body}) => {
                         // console.log(JSON.stringify(res.body));
 
-                        node.expect(res.body).to.have.property('success').to.be.true;
-                        node.expect(res.body).to.have.property("data").that.is.an("object");
-                        node.expect(res.body.data).to.have.property("org").that.is.an("object");
+                        node.expect(body).to.have.property('success').to.be.true;
+                        node.expect(body).to.have.property("data").that.is.an("object");
+                        node.expect(body.data).to.have.property("org").that.is.an("object");
 
-                        node.expect(res.body.data.org).to.have.property('transaction_id');
-                        node.expect(res.body.data.org).to.have.property('org_id');
+                        node.expect(body.data.org).to.have.property('transaction_id');
+                        node.expect(body.data.org).to.have.property('org_id');
 
-                        node.expect(res.body.data.org.org_id).to.equal(org.org_id.toLowerCase());
+                        node.expect(body.data.org.org_id).to.equal(org.org_id.toLowerCase());
                         // node.expect(res.body.org.org_id).to.equal(org.orgId.toLowerCase());
-                        node.expect(res.body.data.org.name).to.equal(org.name);
-                        node.expect(res.body.data.org.state).to.equal(org.state);
+                        node.expect(body.data.org.name).to.equal(org.name);
+                        node.expect(body.data.org.state).to.equal(org.state);
                         // node.expect(res.body).to.have.property('balance');
                         // node.expect(res.body).to.have.property('unconfirmedBalance');
 
@@ -182,8 +182,8 @@ describe('Test Dao', () => {
             });
         });
 
-        it('Update the Org`s name in a new block is ok', function (done) {
-            node.onNewBlock(function (err) {
+        it('Update the Org`s name in a new block is ok', done => {
+            node.onNewBlock(err => {
                 const name = node.randomUsername();
                 node.api.put('/org')
                     .set('Accept', 'application/json')
@@ -191,25 +191,25 @@ describe('Test Dao', () => {
                         secret: Gaccount.password,
                         orgId: org.org_id,
                         // orgId: org.orgId,
-                        name: name,
+                        name,
                         state: 1,
                         tags: org.tags
                     })
                     .expect('Content-Type', /json/)
                     .expect(200)
-                    .end(function (err, res) {
+                    .end((err, {body}) => {
                         // console.log(JSON.stringify(res.body));
-                        node.expect(res.body).to.have.property('success').to.be.true;
-                        node.expect(res.body).to.have.property('transactionId');
+                        node.expect(body).to.have.property('success').to.be.true;
+                        node.expect(body).to.have.property('transactionId');
                         done();
                     });
             })
         });
 
-        it('Get /org/orgid/:orgId should be ok if Org`s name has been modified', function (done) {
-            node.onNewBlock(function (err) {
+        it('Get /org/orgid/:orgId should be ok if Org`s name has been modified', done => {
+            node.onNewBlock(err => {
                 node.expect(err).to.be.not.ok;
-                node.api.get("/org/orgid/" + org.org_id.toLowerCase())
+                node.api.get(`/org/orgid/${org.org_id.toLowerCase()}`)
                     // node.api.get("/dao/" + org.orgId)
                     .set("Accept", "application/json")
                     .set("version", node.version)
@@ -217,21 +217,21 @@ describe('Test Dao', () => {
                     .set("port", node.config.port)
                     .expect("Content-Type", /json/)
                     .expect(200)
-                    .end(function (err, res) {
+                    .end((err, {body}) => {
                         // console.log(JSON.stringify(res.body));
 
-                        node.expect(res.body).to.have.property('success').to.be.true;
-                        node.expect(res.body).to.have.property("data").that.is.an("object");
-                        node.expect(res.body.data).to.have.property("org").that.is.an("object");
+                        node.expect(body).to.have.property('success').to.be.true;
+                        node.expect(body).to.have.property("data").that.is.an("object");
+                        node.expect(body.data).to.have.property("org").that.is.an("object");
 
-                        node.expect(res.body.data.org).to.have.property('transaction_id');
-                        node.expect(res.body.data.org).to.have.property('org_id');
+                        node.expect(body.data.org).to.have.property('transaction_id');
+                        node.expect(body.data.org).to.have.property('org_id');
 
-                        node.expect(res.body.data.org.org_id).to.equal(org.org_id.toLowerCase());
+                        node.expect(body.data.org.org_id).to.equal(org.org_id.toLowerCase());
                         // node.expect(res.body.org.org_id).to.equal(org.orgId.toLowerCase());
-                        node.expect(res.body.data.org.name).to.not.equal(org.name); // name 已经更改
-                        node.expect(res.body.data.org.state).to.equal(1);
-                        node.expect(res.body.data.org.state).to.not.equal(org.state);
+                        node.expect(body.data.org.name).to.not.equal(org.name); // name 已经更改
+                        node.expect(body.data.org.state).to.equal(1);
+                        node.expect(body.data.org.state).to.not.equal(org.state);
                         // node.expect(res.body).to.have.property('balance');
                         // node.expect(res.body).to.have.property('unconfirmedBalance');
 
@@ -240,8 +240,8 @@ describe('Test Dao', () => {
             });
         })
 
-        it('Update the orgId`s tags in a new block is ok', function (done) {
-            node.onNewBlock(function (err) {
+        it('Update the orgId`s tags in a new block is ok', done => {
+            node.onNewBlock(err => {
                 node.api.put('/org')
                     .set('Accept', 'application/json')
                     .send({
@@ -249,26 +249,26 @@ describe('Test Dao', () => {
                         orgId: org.org_id.toLowerCase(),
                         // orgId: org.orgId,
                         // name: node.randomUsername(),
-                        tags: org.tags + ", add",
+                        tags: `${org.tags}, add`,
                         state: 1,
                     })
                     .expect('Content-Type', /json/)
                     .expect(200)
-                    .end(function (err, res) {
+                    .end((err, {body}) => {
                         // console.log(JSON.stringify(res.body));
-                        node.expect(res.body).to.have.property('success').to.be.true;
-                        node.expect(res.body).to.have.property('transactionId');
+                        node.expect(body).to.have.property('success').to.be.true;
+                        node.expect(body).to.have.property('transactionId');
                         done();
                     });
             })
         });
 
-        it(' "orgId" more than 20, should be fails. ', function (done) {
+        it(' "orgId" more than 20, should be fails. ', done => {
             node.api.put('/org')
                 .set('Accept', 'application/json')
                 .send({
                     secret: Gaccount.password,
-                    orgId: org.org_id + "asdefasdfs123456789M",
+                    orgId: `${org.org_id}asdefasdfs123456789M`,
                     // orgId: org.orgId + "asdefasdfs123456789M",
                     name: org.name,
                     url: org.url,
@@ -277,15 +277,15 @@ describe('Test Dao', () => {
                 })
                 .expect('Content-Type', /json/)
                 .expect(200)
-                .end(function (err, res) {
+                .end((err, {body}) => {
                     // console.log(JSON.stringify(res.body));
-                    node.expect(res.body).to.have.property('success').to.be.false;
-                    node.expect(res.body.error).to.equal("Invalid parameters: should NOT be longer than 20 characters");
+                    node.expect(body).to.have.property('success').to.be.false;
+                    node.expect(body.error).to.equal("Invalid parameters: should NOT be longer than 20 characters");
                     done();
                 });
         })
 
-        it('Fee is less, should be fails. ', function (done) {
+        it('Fee is less, should be fails. ', done => {
             node.api.put('/org')
                 .set('Accept', 'application/json')
                 .send({
@@ -299,10 +299,10 @@ describe('Test Dao', () => {
                 })
                 .expect('Content-Type', /json/)
                 .expect(200)
-                .end(function (err, res) {
+                .end((err, {body}) => {
                     // console.log(JSON.stringify(res.body));
-                    node.expect(res.body).to.have.property('success').to.be.false;
-                    node.expect(res.body.error).to.include("Insufficient balance");
+                    node.expect(body).to.have.property('success').to.be.false;
+                    node.expect(body.error).to.include("Insufficient balance");
                     done();
                 });
         });
@@ -359,15 +359,15 @@ describe('Test Dao', () => {
                 .set("port", node.config.port)
                 .expect("Content-Type", /json/)
                 .expect(200)
-                .end(function (err, res) {
+                .end((err, {body}) => {
                     // console.log(JSON.stringify(res.body));
 
-                    node.expect(res.body).to.have.property('success').to.be.true;
+                    node.expect(body).to.have.property('success').to.be.true;
 
-                    node.expect(res.body).to.have.property("data").that.is.an("object");
+                    node.expect(body).to.have.property("data").that.is.an("object");
 
-                    node.expect(res.body.data).to.have.property('rows').that.is.an("array");
-                    node.expect(res.body.data).to.have.property('total');
+                    node.expect(body.data).to.have.property('rows').that.is.an("array");
+                    node.expect(body.data).to.have.property('total');
 
                     done();
                 });
@@ -381,15 +381,15 @@ describe('Test Dao', () => {
                 .set("port", node.config.port)
                 .expect("Content-Type", /json/)
                 .expect(200)
-                .end(function (err, res) {
+                .end((err, {body}) => {
                     // console.log(JSON.stringify(res.body));
 
-                    node.expect(res.body).to.have.property('success').to.be.true;
+                    node.expect(body).to.have.property('success').to.be.true;
 
-                    node.expect(res.body).to.have.property("data").that.is.an("object");
+                    node.expect(body).to.have.property("data").that.is.an("object");
 
-                    node.expect(res.body.data).to.have.property('rows').that.is.an("array");
-                    node.expect(res.body.data).to.have.property('total');
+                    node.expect(body.data).to.have.property('rows').that.is.an("array");
+                    node.expect(body.data).to.have.property('total');
 
                     done();
                 });

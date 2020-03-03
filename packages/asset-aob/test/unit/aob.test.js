@@ -1,5 +1,5 @@
 import DdnUtils from '@ddn/utils';
-import node from '../variables.js';
+import node from '../variables';
 const DEBUG = require('debug')('aob');
 const expect = node.expect;
 

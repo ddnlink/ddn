@@ -1,6 +1,6 @@
 import DdnUtils from '@ddn/utils';
 import extend from 'extend';
-import node from './../variables.js';
+import node from '../variables.js';
 let DEBUG = require('debug')('dapp-transfer')
 let expect = node.expect
 
@@ -33,7 +33,7 @@ async function createTransfer(address, amount, secret, second_secret) {
 }
 
 async function registerDAppAsync(options, {password}) {
-    // node.ddn.init.init();
+    // node.ddn.init();
     options.fee = '10000000000';
     const dappData = await createPluginAsset(11, options, password)
     let res = await node.submitTransactionAsync(dappData);
@@ -43,7 +43,7 @@ async function registerDAppAsync(options, {password}) {
 }
 
 async function inTransferAsync(options, {password}) {
-    // node.ddn.init.init();
+    // node.ddn.init();
     const inTransferData = await createPluginAsset(12, options, password)
     let res = await node.submitTransactionAsync(inTransferData)
     DEBUG('in transfer response', res.body)
@@ -75,7 +75,7 @@ async function getDAppBalanceAsync(dappId, currency) {
 describe('dapp transfer', () => {
 
     // (1)加载插件
-    node.ddn.init.init();
+    node.ddn.init();
 
     let delegateAccounts = genNormalAccounts(5)
     let public_key = delegateAccounts.map(a => a.public_key)
@@ -174,7 +174,7 @@ describe('dapp transfer', () => {
         let issueAmount = '1000000000'
 
         // (1)加载插件
-        // node.ddn.init.init();
+        // node.ddn.init();
         // (2)注册资产商
         const issuer = {
             name: issuerName,

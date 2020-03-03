@@ -20,6 +20,7 @@
   "license": "MIT",
   "dependencies": {
     "@ddn/asset-base": "^0.1.4",
+    "@ddn/node-sdk": "^0.0.19",
     "@ddn/utils": "^0.0.7",
     "async": "^2.6.1",
     "ed25519": "0.0.4",

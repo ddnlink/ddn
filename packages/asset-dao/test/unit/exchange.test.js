@@ -1,6 +1,7 @@
 const DEBUG = require('debug')('dao');
-import node from '../../variables.js';
 import DdnUtil from '@ddn/utils';
+
+import node from '../variables.js';
 
 const Account1 = node.randomTxAccount();
 const Account2 = node.randomTxAccount();
@@ -81,7 +82,7 @@ async function sendDDN({address}, coin) {
 describe('Put /transactions', () => {
 
     // 加载插件
-    node.ddn.init.init();
+    node.ddn.init();
 
     // 转账
     // let trs = node.ddn.transaction.createTransaction(node.Daccount.address, 89909, "thanks", node.Gaccount.password)
