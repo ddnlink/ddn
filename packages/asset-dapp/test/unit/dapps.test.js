@@ -1,7 +1,7 @@
 import DdnUtils from '@ddn/utils';
 
 // Requires and node configuration
-import node from "./../variables.js";
+import node from "../variables.js";
 
 let DappName = "";
 const DappToInstall = {};
@@ -20,11 +20,11 @@ const Account3 = node.randomTxAccount();
 const Account4 = node.randomTxAccount();
 const Account5 = node.randomTxAccount();
 
-console.log('Account1', Account1)
-console.log('Account2', Account2)
-console.log('Account3', Account3)
-console.log('Account3', Account4)
-console.log('Account3', Account5)
+// console.log('Account1', Account1)
+// console.log('Account2', Account2)
+// console.log('Account3', Account3)
+// console.log('Account3', Account4)
+// console.log('Account3', Account5)
 
 before(done => {
     node.api.post("/accounts/open")
@@ -35,7 +35,7 @@ before(done => {
         })
         .expect("Content-Type", /json/)
         .expect(200)
-        .end((err, {body}) => {
+        .end((err, { body }) => {
             // console.log(JSON.stringify(res.body));
             console.log(`Opening Account 1 with password: ${Account1.password}`);
             node.expect(body).to.have.property("success").to.be.true;
@@ -61,7 +61,7 @@ before(done => {
         })
         .expect("Content-Type", /json/)
         .expect(200)
-        .end((err, {body}) => {
+        .end((err, { body }) => {
             // console.log("register second password");
             console.log(`Opening Account 2 with password: ${Account2.password}`);
             node.expect(body).to.have.property("success").to.be.true;
@@ -87,7 +87,7 @@ before(done => {
         })
         .expect("Content-Type", /json/)
         .expect(200)
-        .end((err, {body}) => {
+        .end((err, { body }) => {
             // console.log(JSON.stringify(res.body));
             console.log(`Opening Account 3 with password: ${Account3.password}`);
             node.expect(body).to.have.property("success").to.be.true;
@@ -113,7 +113,7 @@ before(done => {
         })
         .expect("Content-Type", /json/)
         .expect(200)
-        .end((err, {body}) => {
+        .end((err, { body }) => {
             // console.log(JSON.stringify(res.body));
             console.log(`Opening Account 4 with password: ${Account4.password}`);
             node.expect(body).to.have.property("success").to.be.true;
@@ -139,7 +139,7 @@ before(done => {
         })
         .expect("Content-Type", /json/)
         .expect(200)
-        .end((err, {body}) => {
+        .end((err, { body }) => {
             // console.log(JSON.stringify(res.body));
             console.log(`Opening Account 5 with password: ${Account5.password}`);
             node.expect(body).to.have.property("success").to.be.true;
@@ -169,7 +169,7 @@ before(done => {
             })
             .expect("Content-Type", /json/)
             .expect(200)
-            .end((err, {body}) => {
+            .end((err, { body }) => {
                 // console.log(JSON.stringify(res.body));
                 node.expect(body).to.have.property("success").to.be.true;
                 if (body.success == true && body.transactionId != null) {
@@ -198,7 +198,7 @@ before(done => {
             })
             .expect("Content-Type", /json/)
             .expect(200)
-            .end((err, {body}) => {
+            .end((err, { body }) => {
                 node.expect(body).to.have.property("success").to.be.true;
                 if (body.success == true && body.transactionId != null) {
                     Account2.transactions.push(transactionCount);
@@ -242,7 +242,7 @@ before(done => {
             })
             .expect("Content-Type", /json/)
             .expect(200)
-            .end((err, {body}) => {
+            .end((err, { body }) => {
                 node.expect(body).to.have.property("success").to.be.true;
                 node.expect(body).to.have.property("transaction").that.is.an("object");
                 done();
@@ -272,7 +272,7 @@ describe("PUT /dapps", () => {
             })
             .expect("Content-Type", /json/)
             .expect(200)
-            .end((err, {body}) => {
+            .end((err, { body }) => {
                 console.log(body);
                 node.expect(body).to.have.property("success").to.be.false;
                 node.expect(body).to.have.property("error");
@@ -295,7 +295,7 @@ describe("PUT /dapps", () => {
             })
             .expect("Content-Type", /json/)
             .expect(200)
-            .end((err, {body}) => {
+            .end((err, { body }) => {
                 console.log(JSON.stringify(body));
                 node.expect(body).to.have.property("success").to.be.false;
                 node.expect(body).to.have.property("error");
@@ -317,7 +317,7 @@ describe("PUT /dapps", () => {
             })
             .expect("Content-Type", /json/)
             .expect(200)
-            .end((err, {body}) => {
+            .end((err, { body }) => {
                 console.log(JSON.stringify(body));
                 node.expect(body).to.have.property("success").to.be.false;
                 node.expect(body).to.have.property("error");
@@ -339,7 +339,7 @@ describe("PUT /dapps", () => {
             })
             .expect("Content-Type", /json/)
             .expect(200)
-            .end((err, {body}) => {
+            .end((err, { body }) => {
                 console.log(JSON.stringify(body));
                 node.expect(body).to.have.property("success").to.be.false;
                 node.expect(body).to.have.property("error");
@@ -362,7 +362,7 @@ describe("PUT /dapps", () => {
             })
             .expect("Content-Type", /json/)
             .expect(200)
-            .end((err, {body}) => {
+            .end((err, { body }) => {
                 console.log(JSON.stringify(body));
                 node.expect(body).to.have.property("success").to.be.false;
                 node.expect(body).to.have.property("error");
@@ -385,7 +385,7 @@ describe("PUT /dapps", () => {
             })
             .expect("Content-Type", /json/)
             .expect(200)
-            .end((err, {body}) => {
+            .end((err, { body }) => {
                 console.log(JSON.stringify(body));
                 node.expect(body).to.have.property("success").to.be.false;
                 node.expect(body).to.have.property("error");
@@ -406,7 +406,7 @@ describe("PUT /dapps", () => {
             })
             .expect("Content-Type", /json/)
             .expect(200)
-            .end((err, {body}) => {
+            .end((err, { body }) => {
                 console.log(JSON.stringify(body));
                 node.expect(body).to.have.property("success").to.be.false;
                 node.expect(body).to.have.property("error");
@@ -429,7 +429,7 @@ describe("PUT /dapps", () => {
             })
             .expect("Content-Type", /json/)
             .expect(200)
-            .end((err, {body}) => {
+            .end((err, { body }) => {
                 console.log(JSON.stringify(body));
                 node.expect(body).to.have.property("success").to.be.error;
                 done();
@@ -451,7 +451,7 @@ describe("PUT /dapps", () => {
             })
             .expect("Content-Type", /json/)
             .expect(200)
-            .end((err, {body}) => {
+            .end((err, { body }) => {
                 console.log(JSON.stringify(body));
                 node.expect(body).to.have.property("success").to.be.false;
                 done();
@@ -474,7 +474,7 @@ describe("PUT /dapps", () => {
             })
             .expect("Content-Type", /json/)
             .expect(200)
-            .end((err, {body}) => {
+            .end((err, { body }) => {
                 console.log(JSON.stringify(body));
                 node.expect(body).to.have.property("success").to.be.false;
                 done();
@@ -499,7 +499,7 @@ describe("PUT /dapps", () => {
             })
             .expect("Content-Type", /json/)
             .expect(200)
-            .end((err, {body}) => {
+            .end((err, { body }) => {
                 console.log(JSON.stringify(body));
                 node.expect(body).to.have.property("success").to.be.false;
                 done();
@@ -533,7 +533,7 @@ describe("PUT /dapps", () => {
                 })
                 .expect("Content-Type", /json/)
                 .expect(200)
-                .end((err, {body}) => {
+                .end((err, { body }) => {
                     console.log(body);
                     node.expect(body).to.have.property("success").to.be.true;
                     node.expect(body).to.have.property("transactionId");
@@ -559,7 +559,7 @@ describe("PUT /dapps", () => {
                 })
                 .expect("Content-Type", /json/)
                 .expect(200)
-                .end((err, {body}) => {
+                .end((err, { body }) => {
                     console.log(body);
                     node.expect(body).to.have.property("success").to.be.false;
                     done();
@@ -583,7 +583,7 @@ describe("PUT /dapps", () => {
                 })
                 .expect("Content-Type", /json/)
                 .expect(200)
-                .end((err, {body}) => {
+                .end((err, { body }) => {
                     console.log(JSON.stringify(body));
                     node.expect(body).to.have.property("success").to.be.false;
                     node.expect(body).to.have.property("error");

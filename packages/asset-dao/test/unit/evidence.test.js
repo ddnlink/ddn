@@ -1,20 +1,21 @@
-var DEBUG = require('debug')('dao')
-var node = require('../../variables.js')
+const DEBUG = require('debug')('dao');
+import node from '../variables.js';
 
-var Account1 = node.randomTxAccount();
-var Account2 = node.randomTxAccount();
-var transaction, evidence;
+const Account1 = node.randomTxAccount();
+const Account2 = node.randomTxAccount();
+let transaction;
+let evidence;
 
-var createEvidence = node.ddn.evidence.createEvidence;
+const createEvidence = node.ddn.evidence.createEvidence;
 
 describe('Test evidence', () => {
 
-  before(function (done) {
+  before(done => {
     const ipid = node.randomIpId();
     evidence = {
       "ipid": ipid,
       "title": node.randomUsername(),
-      "description": ipid + " has been evidence.",
+      "description": `${ipid} has been evidence.`,
       "hash": "f082022ee664008a1f15d62514811dfd",
       "author": "Evanlai",
       "size": "2448kb",
@@ -26,7 +27,7 @@ describe('Test evidence', () => {
     done();
   })
 
-  it("CreateEvidence Should be ok", function (done) {
+  it("CreateEvidence Should be ok", done => {
     transaction = createEvidence(evidence, node.Gaccount.password);
 
     node.peer.post("/transactions")
@@ -35,35 +36,35 @@ describe('Test evidence', () => {
       .set("nethash", node.config.nethash)
       .set("port", node.config.port)
       .send({
-        transaction: transaction
+        transaction
       })
       .expect("Content-Type", /json/)
       .expect(200)
-      .end(function (err, res) {
-        console.log(JSON.stringify(res.body));
-        node.expect(res.body).to.have.property("success").to.be.true;
+      .end((err, {body}) => {
+        console.log(JSON.stringify(body));
+        node.expect(body).to.have.property("success").to.be.true;
         done();
       });
   });
 
-  it('Get /evidence/:ipid should be ok', function (done) {
-    node.onNewBlock(function (err) {
-      node.api.get("/evidence/" + evidence.ipid)
+  it('Get /evidence/:ipid should be ok', done => {
+    node.onNewBlock(err => {
+      node.api.get(`/evidence/${evidence.ipid}`)
         .set("Accept", "application/json")
         .set("version", node.version)
         .set("nethash", node.config.nethash)
         .set("port", node.config.port)
         .expect("Content-Type", /json/)
         .expect(200)
-        .end(function (err, res) {
-          console.log(JSON.stringify(res.body.transaction));
-          node.expect(res.body).to.have.property('success').to.be.true;
-          node.expect(res.body).to.have.property('transaction');
+        .end((err, {body}) => {
+          console.log(JSON.stringify(body.transaction));
+          node.expect(body).to.have.property('success').to.be.true;
+          node.expect(body).to.have.property('transaction');
 
-          node.expect(res.body.transaction.fee).to.equal(transaction.fee);
-          node.expect(res.body.transaction.recipient_id).to.equal('');
-          node.expect(res.body.transaction.type).to.equal(transaction.type);
-          node.expect(res.body.transaction.asset.evidence.type).to.equal(transaction.asset.evidence.type);
+          node.expect(body.transaction.fee).to.equal(transaction.fee);
+          node.expect(body.transaction.recipient_id).to.equal('');
+          node.expect(body.transaction.type).to.equal(transaction.type);
+          node.expect(body.transaction.asset.evidence.type).to.equal(transaction.asset.evidence.type);
 
           done();
         });
@@ -72,14 +73,14 @@ describe('Test evidence', () => {
 })
 
 //
-describe('PUT /api/evidence/new', function () {
+describe('PUT /api/evidence/new', () => {
 
-  it('Using valid parameters. Should be ok', function (done) {
+  it('Using valid parameters. Should be ok', done => {
     const ipid = node.randomIpId();
     evidence = {
       "ipid": node.randomIpId(),
       "title": "test",
-      "description": ipid + " has been evidence.",
+      "description": `${ipid} has been evidence.`,
       "hash": "f082022ee664008a1f15d62514811dfd",
       "author": "Evanlai",
       "size": "2008kb",
@@ -104,10 +105,10 @@ describe('PUT /api/evidence/new', function () {
     })
     .expect('Content-Type', /json/)
     .expect(200)
-    .end(function (err, res) {
-        console.log(JSON.stringify(res.body));
-        node.expect(res.body).to.have.property('success').to.be.true;
-        node.expect(res.body).to.have.property('transactionId');
+    .end((err, {body}) => {
+        console.log(JSON.stringify(body));
+        node.expect(body).to.have.property('success').to.be.true;
+        node.expect(body).to.have.property('transactionId');
         done();
       });
   });

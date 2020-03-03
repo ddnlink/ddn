@@ -1,19 +1,19 @@
-var DEBUG = require('debug')('dao')
-var node = require('../../variables.js')
+const DEBUG = require('debug')('dao');
+import node from '../variables.js';
 
 async function createPluginAsset(type, asset, secret) {
     return await node.ddn.assetPlugin.createPluginAsset(type, asset, secret)
 }
-  
+
 describe('asset puglin Test', () => {
 
-    var ipid = "ipid" + new Date().getTime();
+    const ipid = `ipid${new Date().getTime()}`;
 
     it("POST peers/transactions, Should be ok", async () => {
-        node.ddn.init.init();
+        node.ddn.init();
 
-        var assetEvidence = {
-            ipid: ipid,
+        const assetEvidence = {
+            ipid,
             title: "新增资产说明文档",
             hash: "askdfh12483ashkjfdh128347ahsdfjk1",
             author: "wangxm",
@@ -26,9 +26,9 @@ describe('asset puglin Test', () => {
             ext: "china",
             ext1: 12345,
             ext2: new Date()
-        }
+        };
     
-        var transaction = await createPluginAsset(10, assetEvidence, node.Gaccount.password);
+        const transaction = await createPluginAsset(10, assetEvidence, node.Gaccount.password);
 
         await new Promise((resolve, reject) => {
             node.peer.post("/transactions")
@@ -37,14 +37,14 @@ describe('asset puglin Test', () => {
                 .set("nethash", node.config.nethash)
                 .set("port", node.config.port)
                 .send({
-                    transaction: transaction
+                    transaction
                 })
                 .expect("Content-Type", /json/)
                 .expect(200)
-                .end((err, res) => {
+                .end((err, {body}) => {
                     // console.log(JSON.stringify(res.body));
 
-                    node.expect(res.body).to.have.property("success").to.be.true;
+                    node.expect(body).to.have.property("success").to.be.true;
 
                     if (err) {
                         reject(err);
@@ -56,8 +56,8 @@ describe('asset puglin Test', () => {
     });
 
     it("POST peers/transactions agin, Should fail", async () => {
-        var assetEvidence = {
-            ipid: ipid,
+        const assetEvidence = {
+            ipid,
             title: "新增资产说明文档",
             hash: "askdfh12483ashkjfdh128347ahsdfjk1",
             author: "wangxm",
@@ -70,9 +70,9 @@ describe('asset puglin Test', () => {
             ext: "china",
             ext1: 12345,
             ext2: new Date()
-        }
+        };
     
-        var transaction = await createPluginAsset(10, assetEvidence, node.Gaccount.password);
+        const transaction = await createPluginAsset(10, assetEvidence, node.Gaccount.password);
 
         await new Promise((resolve, reject) => {
             node.peer.post("/transactions")
@@ -81,14 +81,14 @@ describe('asset puglin Test', () => {
                 .set("nethash", node.config.nethash)
                 .set("port", node.config.port)
                 .send({
-                    transaction: transaction
+                    transaction
                 })
                 .expect("Content-Type", /json/)
                 .expect(200)
-                .end((err, res) => {
+                .end((err, {body}) => {
                     // console.log(JSON.stringify(res.body));
 
-                    node.expect(res.body).to.have.property("success").to.be.false;
+                    node.expect(body).to.have.property("success").to.be.false;
 
                     if (err) {
                         reject(err);

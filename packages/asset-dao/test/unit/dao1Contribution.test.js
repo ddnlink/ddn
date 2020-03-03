@@ -1,9 +1,10 @@
-var DEBUG = require('debug')('dao')
-var node = require('../../variables.js')
+const DEBUG = require('debug')('dao');
+import node from '../variables.js';
 
-var Account1 = node.randomTxAccount();
-var Account2 = node.randomTxAccount();
-var transaction, contribution;
+const Account1 = node.randomTxAccount();
+const Account2 = node.randomTxAccount();
+let transaction;
+let contribution;
 
 async function createTransfer(address, amount, secret, second_secret) {
     return await node.ddn.transaction.createTransaction(address, amount, null, secret, second_secret)
@@ -11,12 +12,12 @@ async function createTransfer(address, amount, secret, second_secret) {
 
 describe('Contributions Test', () => {
 
-    var orgId = "";
+    let orgId = "";
 
     before(async () => {
-        node.ddn.init.init();
+        node.ddn.init();
 
-        var transaction = await createTransfer(node.Daccount.address, 10000000000, node.Gaccount.password);
+        const transaction = await createTransfer(node.Daccount.address, 10000000000, node.Gaccount.password);
         await new Promise((resolve, reject) => {
             node.peer.post("/transactions")
                 .set("Accept", "application/json")
@@ -24,13 +25,13 @@ describe('Contributions Test', () => {
                 .set("nethash", node.config.nethash)
                 .set("port", node.config.port)
                 .send({
-                    transaction: transaction
+                    transaction
                 })
                 .expect("Content-Type", /json/)
                 .expect(200)
-                .end((err, res) => {
+                .end((err, {body}) => {
                     // console.log(JSON.stringify(res.body))
-                    node.expect(res.body).to.have.property("success").to.be.true;
+                    node.expect(body).to.have.property("success").to.be.true;
 
                     if (err) {
                         reject(err);
@@ -40,7 +41,7 @@ describe('Contributions Test', () => {
                 });
         });
 
-        var getOrgIdUrl = "/org/address/" + node.Gaccount.address;
+        const getOrgIdUrl = `/org/address/${node.Gaccount.address}`;
         await new Promise((resolve, reject) => {
             node.api.get(getOrgIdUrl)
                 .set("Accept", "application/json")
@@ -48,17 +49,17 @@ describe('Contributions Test', () => {
                 .set("nethash", node.config.nethash)
                 .set("port", node.config.port)
                 .expect(200)
-                .end(function (err, res) {
+                .end((err, {body}) => {
                     // console.log(JSON.stringify(res.body));
 
-                    node.expect(res.body).to.have.property("success").to.be.true;
+                    node.expect(body).to.have.property("success").to.be.true;
 
                     if (err) {
                         return reject(err);
                     }
 
-                    if (res.body.success) {
-                        orgId = res.body.data.org.org_id;
+                    if (body.success) {
+                        orgId = body.data.org.org_id;
                     }
 
                     resolve();
@@ -85,14 +86,14 @@ describe('Contributions Test', () => {
                 .set("nethash", node.config.nethash)
                 .set("port", node.config.port)
                 .send({
-                    transaction: transaction
+                    transaction
                 })
                 .expect("Content-Type", /json/)
                 .expect(200)
-                .end(function (err, res) {
+                .end((err, {body}) => {
                     // console.log(JSON.stringify(res.body));
 
-                    node.expect(res.body).to.have.property("success").to.be.true;
+                    node.expect(body).to.have.property("success").to.be.true;
 
                     if (err) {
                         return reject(err);
@@ -104,17 +105,17 @@ describe('Contributions Test', () => {
     });
 
     it("PUT /api/contribution/:orgId", (done) => {
-        node.onNewBlock(function (err) {
+        node.onNewBlock(err => {
             node.expect(err).to.be.not.ok;
 
             contribution = {
                 title: "from /contributions",
                 url: "dat://f76e1e82cf4eab4bf173627ff93662973c6fab110c70fb0f86370873a9619aa6+18/public/test.html",
-                price: ((Math.random() * 100).toFixed(0) * 100000000) + "",
+                price: `${(Math.random() * 100).toFixed(0) * 100000000}`,
                 secret: node.Daccount.password
             }
 
-            node.api.put("/contribution/" + orgId)
+            node.api.put(`/contribution/${orgId}`)
                 .set("Accept", "application/json")
                 .set("version", node.version)
                 .set("nethash", node.config.nethash)
@@ -122,21 +123,21 @@ describe('Contributions Test', () => {
                 .send(contribution)
                 .expect("Content-Type", /json/)
                 .expect(200)
-                .end(function (err, res) {
+                .end((err, {body}) => {
                     // console.log(JSON.stringify(res.body));
 
-                    node.expect(res.body).to.have.property("success").to.be.true;
+                    node.expect(body).to.have.property("success").to.be.true;
                     done();
                 });
         });
     });
 
     it("GET /api/contribution/list", (done) => {
-        node.onNewBlock(function (err) {
+        node.onNewBlock(err => {
             node.expect(err).to.be.not.ok;
 
-            var reqUrl = "/contribution/list";
-            reqUrl += "?sender_address=" + node.Daccount.address;
+            let reqUrl = "/contribution/list";
+            reqUrl += `?sender_address=${node.Daccount.address}`;
 
             node.api.get(reqUrl)
                 .set("Accept", "application/json")
@@ -145,20 +146,20 @@ describe('Contributions Test', () => {
                 .set("port", node.config.port)
                 .expect("Content-Type", /json/)
                 .expect(200)
-                .end(function (err, res) {
+                .end((err, {body}) => {
                     // console.log(JSON.stringify(res.body));
 
-                    node.expect(res.body).to.have.property("success").to.be.true;
+                    node.expect(body).to.have.property("success").to.be.true;
                     done();
                 });
         });
     });
 
     it("GET /api/contribution/:orgId/list", (done) => {
-        node.onNewBlock(function (err) {
+        node.onNewBlock(err => {
             node.expect(err).to.be.not.ok;
 
-            var reqUrl = "/contribution/" + orgId + "/list";
+            const reqUrl = `/contribution/${orgId}/list`;
 
             node.api.get(reqUrl)
                 .set("Accept", "application/json")
@@ -167,24 +168,23 @@ describe('Contributions Test', () => {
                 .set("port", node.config.port)
                 .expect("Content-Type", /json/)
                 .expect(200)
-                .end(function (err, res) {
+                .end((err, {body}) => {
                     // console.log(JSON.stringify(res.body));
 
-                    node.expect(res.body).to.have.property("success").to.be.true;
+                    node.expect(body).to.have.property("success").to.be.true;
                     done();
                 });
         });
     });
 
     it("GET /api/contribution/:orgId/list?url", (done) => {
-        node.onNewBlock(function (err) {
+        node.onNewBlock(err => {
             node.expect(err).to.be.not.ok;
 
-            var keys = node.ddn.crypto.getKeys(node.Gaccount.password);
+            const keys = node.ddn.crypto.getKeys(node.Gaccount.password);
 
-            var reqUrl = "/contribution/" + orgId + "/list";
-            reqUrl += "?senderPublicKey=" + keys.publicKey + "&url=" +
-                encodeURIComponent("dat://f76e1e82cf4eab4bf173627ff93662973c6fab110c70fb0f86370873a9619aa6+18/public/test.html");
+            let reqUrl = `/contribution/${orgId}/list`;
+            reqUrl += `?senderPublicKey=${keys.publicKey}&url=${encodeURIComponent("dat://f76e1e82cf4eab4bf173627ff93662973c6fab110c70fb0f86370873a9619aa6+18/public/test.html")}`;
 
             node.api.get(reqUrl)
                 .set("Accept", "application/json")
@@ -193,21 +193,21 @@ describe('Contributions Test', () => {
                 .set("port", node.config.port)
                 .expect("Content-Type", /json/)
                 .expect(200)
-                .end(function (err, res) {
+                .end((err, {body}) => {
                     // console.log(JSON.stringify(res.body));
 
-                    node.expect(res.body).to.have.property("success").to.be.true;
+                    node.expect(body).to.have.property("success").to.be.true;
                     done();
                 });
         });
     })
 
     it("GET /api/contribution/list", (done) => {
-        node.onNewBlock(function (err) {
+        node.onNewBlock(err => {
             node.expect(err).to.be.not.ok;
 
-            var reqUrl = "/contribution/list";
-            reqUrl += "?received_address=" + node.Gaccount.address;
+            let reqUrl = "/contribution/list";
+            reqUrl += `?received_address=${node.Gaccount.address}`;
 
             node.api.get(reqUrl)
                 .set("Accept", "application/json")
@@ -216,10 +216,10 @@ describe('Contributions Test', () => {
                 .set("port", node.config.port)
                 .expect("Content-Type", /json/)
                 .expect(200)
-                .end(function (err, res) {
+                .end((err, {body}) => {
                     // console.log(JSON.stringify(res.body));
 
-                    node.expect(res.body).to.have.property("success").to.be.true;
+                    node.expect(body).to.have.property("success").to.be.true;
                     done();
                 });
         });

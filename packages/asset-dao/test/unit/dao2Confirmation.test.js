@@ -1,54 +1,54 @@
-var DEBUG = require('debug')('dao')
-var node = require('../../variables.js')
+const DEBUG = require('debug')('dao');
+import node from '../variables.js';
 
-var Account1 = node.randomTxAccount();
-var Account2 = node.randomTxAccount();
-var transaction, confirmation;
+const Account1 = node.randomTxAccount();
+const Account2 = node.randomTxAccount();
+let transaction;
+let confirmation;
 
 describe('Confirmations Test', () => {
 
-    node.ddn.init.init();
+    node.ddn.init();
 
-    var orgId = "";
-    var contributionTrsId = "";
-    var contributionPrice = "0";
+    let orgId = "";
+    let contributionTrsId = "";
+    let contributionPrice = "0";
 
     before((done) => {
-        var getOrgIdUrl = "/org/address/" + node.Gaccount.address;
+        const getOrgIdUrl = `/org/address/${node.Gaccount.address}`;
         node.api.get(getOrgIdUrl)
             .set("Accept", "application/json")
             .set("version", node.version)
             .set("nethash", node.config.nethash)
             .set("port", node.config.port)
             .expect(200)
-            .end(function (err, res) {
+            .end((err, {body}) => {
                 // console.log(JSON.stringify(res.body));
 
-                node.expect(res.body).to.have.property("success").to.be.true;
+                node.expect(body).to.have.property("success").to.be.true;
 
-                if (res.body.success) {
-                    orgId = res.body.data.org.org_id;
+                if (body.success) {
+                    orgId = body.data.org.org_id;
                     // orgId = res.body.orgId;
                 }
             });
 
-        var getContributionTrsIdUrl = "/contribution/list?received_address=" +
-            node.Gaccount.address + "&pagesize=1";
+        const getContributionTrsIdUrl = `/contribution/list?received_address=${node.Gaccount.address}&pagesize=1`;
         node.api.get(getContributionTrsIdUrl)
             .set("Accept", "application/json")
             .set("version", node.version)
             .set("nethash", node.config.nethash)
             .set("port", node.config.port)
             .expect(200)
-            .end(function (err, res) {
+            .end((err, {body}) => {
                 // console.log(JSON.stringify(res.body));
 
-                node.expect(res.body).to.have.property("success").to.be.true;
+                node.expect(body).to.have.property("success").to.be.true;
 
-                if (res.body.success) {
-                    contributionTrsId = res.body.data.rows[0].transaction_id;
+                if (body.success) {
+                    contributionTrsId = body.data.rows[0].transaction_id;
                     // contributionTrsId = res.body.data.rows[0].transactionId;
-                    contributionPrice = res.body.data.rows[0].price;
+                    contributionPrice = body.data.rows[0].price;
                 }
 
                 done();
@@ -59,14 +59,14 @@ describe('Confirmations Test', () => {
         node.onNewBlock(async (err) => {
             node.expect(err).to.be.not.ok;
 
-            var state = (Math.random() * 100).toFixed(0) % 2;
+            const state = (Math.random() * 100).toFixed(0) % 2;
 
             confirmation = {
                 sender_address: node.Gaccount.address,
                 received_address: node.Daccount.address,
                 url: "dat://f76e1e82cf4eab4bf173627ff93662973c6fab110c70fb0f86370873a9619aa6+18/public/test.html",
                 contribution_trs_id: contributionTrsId, //fixme 确保每次运行都是新的投稿id，才能通过测试
-                state: state,
+                state,
                 amount: state == 1 ? contributionPrice : "0",
                 recipient_id: state == 1 ? node.Daccount.address : "",
             };
@@ -80,18 +80,18 @@ describe('Confirmations Test', () => {
                     .set("nethash", node.config.nethash)
                     .set("port", node.config.port)
                     .send({
-                        transaction: transaction
+                        transaction
                     })
                     .expect("Content-Type", /json/)
                     .expect(200)
-                    .end(function (err, res) {
+                    .end((err, {body}) => {
                         if (err) {
                             return reject(err);
                         }
 
                         // console.log(JSON.stringify(res.body));
 
-                        node.expect(res.body).to.have.property("success").to.be.true;
+                        node.expect(body).to.have.property("success").to.be.true;
 
                         resolve();
                     });
@@ -102,15 +102,15 @@ describe('Confirmations Test', () => {
     });
 
     it("PUT /api/confirmation should be already confirmed ok", (done) => {
-        node.onNewBlock(function (err) {
+        node.onNewBlock(err => {
             node.expect(err).to.be.not.ok;
 
-            var state = (Math.random() * 100).toFixed(0) % 2;
+            const state = (Math.random() * 100).toFixed(0) % 2;
 
             confirmation = {
                 url: "dat://f76e1e82cf4eab4bf173627ff93662973c6fab110c70fb0f86370873a9619aa6+18/public/test.html",
-                contributionTrsId: contributionTrsId,
-                state: state,
+                contributionTrsId,
+                state,
                 secret: node.Gaccount.password
             }
 
@@ -122,24 +122,24 @@ describe('Confirmations Test', () => {
                 .send(confirmation)
                 .expect("Content-Type", /json/)
                 .expect(200)
-                .end(function (err, res) {
+                .end((err, {body}) => {
                     // console.log(JSON.stringify(res.body));
 
-                    node.expect(res.body).to.have.property("success").to.be.false;
-                    node.expect(res.body).to.have.property("error").to.contain("The contribution has been confirmed");
+                    node.expect(body).to.have.property("success").to.be.false;
+                    node.expect(body).to.have.property("error").to.contain("The contribution has been confirmed");
                     done();
                 });
         });
     })
 
     it("GET /api/confirmation/:orgId/list", (done) => {
-        node.onNewBlock(function (err) {
+        node.onNewBlock(err => {
             node.expect(err).to.be.not.ok;
 
-            var keys = node.ddn.crypto.getKeys(node.Gaccount.password);
+            const keys = node.ddn.crypto.getKeys(node.Gaccount.password);
 
-            var reqUrl = "/confirmation/" + orgId + "/list";
-            reqUrl += "?senderPublicKey=" + keys.publicKey;
+            let reqUrl = `/confirmation/${orgId}/list`;
+            reqUrl += `?senderPublicKey=${keys.publicKey}`;
 
             node.api.get(reqUrl)
                 .set("Accept", "application/json")
@@ -148,24 +148,23 @@ describe('Confirmations Test', () => {
                 .set("port", node.config.port)
                 .expect("Content-Type", /json/)
                 .expect(200)
-                .end(function (err, res) {
+                .end((err, {body}) => {
                     // console.log(JSON.stringify(res.body));
 
-                    node.expect(res.body).to.have.property("success").to.be.true;
+                    node.expect(body).to.have.property("success").to.be.true;
                     done();
                 });
         });
     })
 
     it("GET /api/confirmation/:orgId/list?url", (done) => {
-        node.onNewBlock(function (err) {
+        node.onNewBlock(err => {
             node.expect(err).to.be.not.ok;
 
-            var keys = node.ddn.crypto.getKeys(node.Daccount.password);
+            const keys = node.ddn.crypto.getKeys(node.Daccount.password);
 
-            var reqUrl = "/confirmation/" + orgId + "/list";
-            reqUrl += "?senderPublicKey=" + keys.publicKey + "&url=" +
-                encodeURIComponent("dat://f76e1e82cf4eab4bf173627ff93662973c6fab110c70fb0f86370873a9619aa6+18/public/test.html");
+            let reqUrl = `/confirmation/${orgId}/list`;
+            reqUrl += `?senderPublicKey=${keys.publicKey}&url=${encodeURIComponent("dat://f76e1e82cf4eab4bf173627ff93662973c6fab110c70fb0f86370873a9619aa6+18/public/test.html")}`;
 
             node.api.get(reqUrl)
                 .set("Accept", "application/json")
@@ -174,10 +173,10 @@ describe('Confirmations Test', () => {
                 .set("port", node.config.port)
                 .expect("Content-Type", /json/)
                 .expect(200)
-                .end(function (err, res) {
-                    console.log(JSON.stringify(res.body));
+                .end((err, {body}) => {
+                    console.log(JSON.stringify(body));
 
-                    node.expect(res.body).to.have.property("success").to.be.true;
+                    node.expect(body).to.have.property("success").to.be.true;
                     done();
                 });
         });
