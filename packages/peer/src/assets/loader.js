@@ -3,7 +3,7 @@
  * @Author: wangxm   
  * @Date: 2018-12-28 11:08:30 
  * @Last Modified by: imfly
- * @Last Modified time: 2020-03-03 14:03:53
+ * @Last Modified time: 2020-03-03 18:59:58
  */
 
 import express from 'express';
@@ -106,8 +106,6 @@ class Loader {
             const apiSubPaths = pluralize.plural(assetConfig.name);
             const apiSubPathed = _.snakeCase(apiSubPaths).replace('_', '/');
 
-            console.log('apiSubPathed= ', apiSubPathed);
-            
             const router = express.Router();
             const apis = await this._attachAssetPluginApiRouter(router, assetConfig, assetInst);
             if (typeof(assetInst.attachApi) == "function") {

@@ -15,7 +15,7 @@ class DBParams {
             }, dbTrans, cb);
         } else {
             if (typeof(cb) == "function") {
-                cb("数据库未初始化");
+                return cb("数据库未初始化");
             }
         }
     }
@@ -25,19 +25,21 @@ class DBParams {
             _dao.findOneByPrimaryKey("param", name, null, 
                 (err, result) => {
                     if (err) {
-                        cb(err);
+                        return cb(err);
                     }
 
                     if (result && result.value) {
-                        cb(null, result.value);
+                        return cb(null, result.value);
                     } else {
-                        cb(null, null);
+                        // console.log('db-params.js cb= ', cb);
+                        
+                        return cb(null, null);
                     }
                 }
             );
         } else {
             if (typeof(cb) == "function") {
-                cb("数据库未初始化");
+                return cb("数据库未初始化");
             }
         }
     }
@@ -48,14 +50,14 @@ class DBParams {
                 name
             }, (err, result) => {
                 if (err) {
-                    cb(err);
+                    return cb(err);
                 }
 
                 cb(null, result);
             });
         } else {
             if (typeof(cb) == "function") {
-                cb("数据库未初始化");
+                return cb("数据库未初始化");
             }
         }
     }
