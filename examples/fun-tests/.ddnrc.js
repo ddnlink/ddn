@@ -201,27 +201,10 @@ module.exports = {
         $like: Op.like,
         $in: Op.in,
         $is: Op.is,
-
-        // ---
-        $ne: Op.ne,
         $gte: Op.gte,
-        $not: Op.not,
-        $notIn: Op.notIn,
-        $notLike: Op.notLike,
-        $iLike: Op.iLike,
-        $notILike: Op.notILike,
-        $regexp: Op.regexp,
-        $notRegexp: Op.notRegexp,
-        $iRegexp: Op.iRegexp,
-        $notIRegexp: Op.notIRegexp,
         $between: Op.between,
-        $notBetween: Op.notBetween,
-        $overlap: Op.overlap,
-        $contains: Op.contains,
-        $contained: Op.contained,
-        $any: Op.any,
-        $all: Op.all,
-        $col: Op.col
+        $not: Op.not,
+        $contains: Op.contains
       }
     }
   },

@@ -149,8 +149,8 @@ class AssetBase {
     /**
      * 判断是否包含Json扩展属性
      */
-    async hasExtProps(){
-        if (this.isHasExtProps != null && typeof(this.isHasExtProps) != "undefined") {
+    async hasExtProps() {
+        if (this.isHasExtProps != null && typeof (this.isHasExtProps) != "undefined") {
             return this.isHasExtProps;
         }
 
@@ -169,7 +169,7 @@ class AssetBase {
     }
 
     async getPropsMappingItemByProp(propName) {
-        if (!this.propsMappingItems || 
+        if (!this.propsMappingItems ||
             !this.propsMappingItems[propName.toLowerCase()]) {
             const props = await this.propsMapping();
 
@@ -192,7 +192,7 @@ class AssetBase {
     }
 
     async getPropsMappingItemByField(fieldName) {
-        if (!this.propsMappingItems || 
+        if (!this.propsMappingItems ||
             !this.propsMappingItems[fieldName.toLowerCase()]) {
             const props = await this.propsMapping();
 
@@ -284,53 +284,53 @@ class AssetBase {
 
         let result;
         return new Promise((resolve, reject) => {
-            this.dao.findPage('trs_asset', filter, limit, offset, returnTotal, attributes, 
+            this.dao.findPage('trs_asset', filter, limit, offset, returnTotal, attributes,
                 orders, (err, rows) => {
-                if (err) {
-                    reject(err);
-                } else {
-                    result = rows;
-
-                    let trsIds = [];
-                    if (returnTotal) {
-                        trsIds = _.map(rows.rows, 'asset_trs_id');
+                    if (err) {
+                        reject(err);
                     } else {
-                        trsIds = _.map(rows, 'asset_trs_id');
-                    }
+                        result = rows;
 
-                    if(hasExtProps) {
-                        this.dao.findPage('trs_asset_ext', {transaction_id: { '$in': trsIds }},
-                            limit, null, null, [['json_ext', 'asset_ext_json'], 'transaction_id'], 
-                            null, (err2, rows2) => {
-                                if (err2) {
-                                    reject(err2);
-                                } else {
-                                    if (rows2 && rows2.length > 0) {
-                                        const obj = _.indexBy(rows2, 'transaction_id');
-                                        if (returnTotal) {
-                                            result.rows = _.map(result.rows, num => {
-                                                num = _.extend(num, obj[num.asset_trs_id]);
-                                                return num;
-                                            });
-                                        } else {
-                                            result = _.map(result, num => {
-                                                num = _.extend(num, obj[num.asset_trs_id]);
-                                                return num;
-                                            });
+                        let trsIds = [];
+                        if (returnTotal) {
+                            trsIds = _.map(rows.rows, 'asset_trs_id');
+                        } else {
+                            trsIds = _.map(rows, 'asset_trs_id');
+                        }
+
+                        if (hasExtProps) {
+                            this.dao.findPage('trs_asset_ext', { transaction_id: { '$in': trsIds } },
+                                limit, null, null, [['json_ext', 'asset_ext_json'], 'transaction_id'],
+                                null, (err2, rows2) => {
+                                    if (err2) {
+                                        reject(err2);
+                                    } else {
+                                        if (rows2 && rows2.length > 0) {
+                                            const obj = _.indexBy(rows2, 'transaction_id');
+                                            if (returnTotal) {
+                                                result.rows = _.map(result.rows, num => {
+                                                    num = _.extend(num, obj[num.asset_trs_id]);
+                                                    return num;
+                                                });
+                                            } else {
+                                                result = _.map(result, num => {
+                                                    num = _.extend(num, obj[num.asset_trs_id]);
+                                                    return num;
+                                                });
+                                            }
                                         }
-                                    }
 
-                                    resolve(result);
-                                }
-                            });
-                    } else {
-                        resolve(result);
+                                        resolve(result);
+                                    }
+                                });
+                        } else {
+                            resolve(result);
+                        }
                     }
-                }
-            });
+                });
         });
     }
-    
+
 
     /**
      * 查询规定条件的资产数据
@@ -367,24 +367,22 @@ class AssetBase {
 
         propsMapping.forEach(propMapping => {
             const field = propMapping.field;
-            if (field != "str_ext" && 
-                field != "int_ext" && 
+            if (field != "str_ext" &&
+                field != "int_ext" &&
                 field != "timestamp_ext") {
                 attributes.push([field, `asset_${field}`]);
             }
         });
 
         let useDefaultTrsType = true;
-        if (typeof(defaultTrsType) != "undefined" && defaultTrsType != null)
-        {
+        if (typeof (defaultTrsType) != "undefined" && defaultTrsType != null) {
             useDefaultTrsType = !!defaultTrsType;
         }
 
         //解析查询条件
         let newConds = {};
         where = where || {};
-        if (useDefaultTrsType)
-        {
+        if (useDefaultTrsType) {
             where.trs_type = await assetInst.getTransactionType();
         }
 
@@ -422,8 +420,8 @@ class AssetBase {
                         return "transaction_type";
                     } else if (pName == "trs_timestamp") {
                         return "timestamp";
-                    } else if (pName == "$or" || pName == "$and" || pName == "$in" || pName == "$like" || 
-                        pName == "$in" || pName == "&lt" || pName == "$lte" || pName == "$gt" || pName == "$gte") {
+                    } else if (pName == "$or" || pName == "$and" || pName == "$in" || pName == "$like" ||
+                        pName == "$in" || pName == "$lt" || pName == "$lte" || pName == "$gt" || pName == "$gte") {
                         newConds[pName] = where[pName];
                     } else {
                         this.logger.warn(`Invalid order field: ${prop}`);
@@ -432,10 +430,10 @@ class AssetBase {
                 }
             }
 
-            orders.forEach( async orderItem => {
+            orders.forEach(async orderItem => {
                 if (CommonUtils.isArray(orderItem)) {
                     if (orderItem.length == 2) {
-                        if (typeof(orderItem[0]) == "string" && typeof(orderItem[1]) == "string") {
+                        if (typeof (orderItem[0]) == "string" && typeof (orderItem[1]) == "string") {
                             const fieldName = await getFieldName(orderItem[0]);
                             if (fieldName) {
                                 newOrders.push([fieldName, orderItem[1]]);
@@ -451,7 +449,7 @@ class AssetBase {
                     }
                 } else {
                     if (CommonUtils.isString(orderItem)) {
-                        const fieldName = await getFieldName(orderItem); 
+                        const fieldName = await getFieldName(orderItem);
                         if (fieldName) {
                             newOrders.push(fieldName);
                         }
@@ -466,7 +464,7 @@ class AssetBase {
             newOrders = orders;
         }
 
-        const data = await this.getAssetBase(newConds, await assetInst.hasExtProps(), 
+        const data = await this.getAssetBase(newConds, await assetInst.hasExtProps(),
             pageIndex, pageSize, newOrders, returnTotal, attributes);
 
         const rows = data && data.rows ? data.rows : data;
@@ -601,7 +599,7 @@ class AssetBase {
                     newWhere["timestamp"] = where[p];
                 }
             }
-        } 
+        }
 
         return new Promise((resolve, reject) => {
             this.dao.update("trs_asset", newObj, newWhere, dbTrans, (err, result) => {
@@ -676,7 +674,7 @@ class AssetBase {
         if (!trs.asset || !trs.asset[assetJsonName]) {
             throw new Error('Invalid transaction asset');
         }
-      
+
         const asset = trs.asset[assetJsonName];
 
         const mapping = await this.propsMapping();
@@ -688,8 +686,8 @@ class AssetBase {
                 fieldType = fieldType.replace(/_ext$/, "");
                 if (fieldType == "str") {
                     const strValue = asset[item.prop];
-                    if (strValue != null && typeof(strValue) != "undefined") {
-                        if (typeof(strValue) != "string") {
+                    if (strValue != null && typeof (strValue) != "undefined") {
+                        if (typeof (strValue) != "string") {
                             var err = `The '${item.prop}' attribute type of '${assetJsonName}' must be a string.`;
                             throw new Error(err);
                         }
@@ -701,23 +699,21 @@ class AssetBase {
                             maxLen = itemRule.maxLen;
                         }
 
-                        if (minLen != null && typeof(minLen) != "undefined") {
-                            try
-                            {
+                        if (minLen != null && typeof (minLen) != "undefined") {
+                            try {
                                 minLen = parseInt(minLen);
                             }
-                            catch(err3) 
-                            {
+                            catch (err3) {
                                 const err = `The '${item.prop}' attribute min length of '${assetJsonName}' must be greater than ${minLen}`;
                                 throw new Error(err);
                             }
 
-                            if (strValue.length < minLen){
+                            if (strValue.length < minLen) {
                                 const err = `The '${item.prop}' attribute min length of '${assetJsonName}' must be greater than ${minLen}`;
                                 throw new Error(err);
                             }
                         }
-                        if (maxLen != null && typeof(maxLen) != "undefined") {
+                        if (maxLen != null && typeof (maxLen) != "undefined") {
                             if (strValue.length > maxLen) {
                                 const err = `The '${item.prop}' attribute max length of '${assetJsonName}' must be less than ${maxLen}`;
                                 throw new Error(err);
@@ -729,21 +725,21 @@ class AssetBase {
                     }
                 } else if (fieldType == "int") {
                     const intValue = asset[item.prop];
-                    if (intValue != null && typeof(intValue) != "undefined") {
-                        if (typeof(intValue) != "number") {
+                    if (intValue != null && typeof (intValue) != "undefined") {
+                        if (typeof (intValue) != "number") {
                             const err = `The '${item.prop}' attribute type of '${assetJsonName}' must be a integer.`;
                             throw new Error(err);
                         }
 
                         if (itemRule) {
-                            if (itemRule.maxValue != null && typeof(itemRule.maxValue) != "undefined") {
+                            if (itemRule.maxValue != null && typeof (itemRule.maxValue) != "undefined") {
                                 if (intValue > itemRule.maxValue) {
                                     const err = `The '${item.prop}' attribute max value of '${assetJsonName}' must be less than ${itemRule.maxValue}`;
                                     throw new Error(err);
                                 }
                             }
 
-                            if (itemRule.minValue != null && typeof(itemRule.minValue) != "undefined") {
+                            if (itemRule.minValue != null && typeof (itemRule.minValue) != "undefined") {
                                 if (intValue < itemRule.minValue) {
                                     const err = `The '${item.prop}' attribute min value of '${assetJsonName}' must be greater than ${itemRule.maxValue}`;
                                     throw new Error(err);
@@ -756,12 +752,12 @@ class AssetBase {
                     }
                 } else if (fieldType == "timestamp") {
                     const timestampValue = asset[item.prop];
-                    if (timestampValue != null && typeof(timestampValue) != "undefined") {
-                        if (typeof(timestampValue) != "object" && typeof(timestampValue.getDate) != "function") {
+                    if (timestampValue != null && typeof (timestampValue) != "undefined") {
+                        if (typeof (timestampValue) != "object" && typeof (timestampValue.getDate) != "function") {
                             try {
                                 // FIXME: 你要干嘛？
                                 console.log("Todo: what will you do?");
-                            } catch(error) {
+                            } catch (error) {
                                 const err = `The '${item.prop}' attribute type of '${assetJsonName}' must be a datetime.`;
                                 throw new Error(err);
                             }
@@ -857,7 +853,7 @@ class AssetBase {
      * @param {*} sender 
      * @param {*} dbTrans 
      */
-    async apply({amount, recipient_id}, {id, height}, dbTrans) {
+    async apply({ amount, recipient_id }, { id, height }, dbTrans) {
         if (DdnUtils.bignum.isGreaterThan(amount, 0)) {
             await this.runtime.account.setAccount({ address: recipient_id }, dbTrans);
 
@@ -879,9 +875,9 @@ class AssetBase {
      * @param {*} sender 
      * @param {*} dbTrans 
      */
-    async undo({amount, recipient_id}, {id, height}, dbTrans) {
+    async undo({ amount, recipient_id }, { id, height }, dbTrans) {
         if (DdnUtils.bignum.isGreaterThan(amount, 0)) {
-            await this.runtime.account.setAccount({address: recipient_id}, dbTrans);
+            await this.runtime.account.setAccount({ address: recipient_id }, dbTrans);
 
             const amountStr = DdnUtils.bignum.minus(0, amount).toString();
             await this.runtime.account.merge(recipient_id, {
@@ -901,7 +897,7 @@ class AssetBase {
      * @param {*} sender 
      * @param {*} dbTrans 
      */
-    async applyUnconfirmed({type, id}) {
+    async applyUnconfirmed({ type, id }) {
         const key = `${type}_${id}`;
         if (this.oneoff.has(key)) {
             throw new Error(`The transaction has been confirmed: ${id}.`);
@@ -917,7 +913,7 @@ class AssetBase {
      * @param {*} sender 
      * @param {*} dbTrans 
      */
-    async undoUnconfirmed({type, id}) {
+    async undoUnconfirmed({ type, id }) {
         const key = `${type}_${id}`;
         this.oneoff.delete(key);
         return;
@@ -978,7 +974,7 @@ class AssetBase {
                 transaction_type: raw.asset_trs_type,
                 timestamp: raw.asset_timestamp
             };
-    
+
             const props = await this.propsMapping();
             if (props && props.length > 0) {
                 for (let i = 0; i < props.length; i++) {
@@ -995,14 +991,12 @@ class AssetBase {
             }
 
             const json = raw.asset_ext_json;
-            if (json != null && typeof(json) != "undefined" && json != "") {
-                try
-                {
+            if (json != null && typeof (json) != "undefined" && json != "") {
+                try {
                     const jsonObj = JSON.parse(json);
                     Object.assign(result, jsonObj);
                 }
-                catch(err2)
-                {
+                catch (err2) {
                     // todo
                     throw new Error(`Can't parse asset extend data`);
                 }
@@ -1044,8 +1038,8 @@ class AssetBase {
                     assetInst[item.field] = itemValue;
 
                     const fieldType = item.field.replace(/[0-9]/g, "");
-                    if (fieldType == "str_ext" || 
-                        fieldType == "int_ext" || 
+                    if (fieldType == "str_ext" ||
+                        fieldType == "int_ext" ||
                         fieldType == "timestamp_ext") {
                         hasJsonExt = true;
                         jsonExtObj[item.prop] = itemValue;
@@ -1085,7 +1079,7 @@ class AssetBase {
      * @param {*} trs 
      * @param {*} sender 
      */
-    async ready({signatures}, {multisignatures, multimin}) {
+    async ready({ signatures }, { multisignatures, multimin }) {
         if (multisignatures && multisignatures.length) {
             if (!signatures) {
                 return false;

@@ -106,7 +106,7 @@ class Dapp extends Asset.Base {
         }
 
         let foundCategory = false;
-        for (var i in dappCategory) {
+        for (const i in dappCategory) {
             if (dappCategory[i] == dapp.category) {
                 foundCategory = true;
                 break;
@@ -182,7 +182,7 @@ class Dapp extends Asset.Base {
         }
 
         const delegatesArr = dapp.delegates ? dapp.delegates.split(',') : [];
-        if (!dapp.delegates || delegatesArr.length < 5 || 
+        if (!dapp.delegates || delegatesArr.length < 5 ||
             delegatesArr.length > this.config.settings.delegateNumber) {
             throw new Error("Invalid dapp delegates")
         }
@@ -268,19 +268,15 @@ class Dapp extends Asset.Base {
     async applyUnconfirmed(trs) {
         const assetObj = await this.getAssetObject(trs);
 
-        //DdnUtils.bignum update if (privated.unconfirmedNames[trs.asset.dapp.name]) {
         if (this.oneoff.has(assetObj.name.toLowerCase())) {
             throw new Error("Dapp name already exists")
         }
 
-        //DdnUtils.bignum update if (trs.asset.dapp.link && privated.unconfirmedLinks[trs.asset.dapp.link]) {
         if (assetObj.link && this.oneoff.has(assetObj.link.toLowerCase())) {
             throw new Error("Dapp link already exists");
         }
 
-        //DdnUtils.bignum update privated.unconfirmedNames[trs.asset.dapp.name] = true;
         this.oneoff.set(assetObj.name.toLowerCase(), true);
-        //DdnUtils.bignum update privated.unconfirmedLinks[trs.asset.dapp.link] = true;
         this.oneoff.set(assetObj.link.toLowerCase(), true);
     }
 
@@ -292,24 +288,17 @@ class Dapp extends Asset.Base {
 
     async dbRead(raw) {
         const result = await super.dbRead(raw);
-        // if (result.delegates) {
-        //     result.delegates = result.delegates.split(',');
-        // }
         return result;
     }
 
     async dbSave(trs, dbTrans) {
-        // const dappObj = await this.getAssetObject(trs);
-        // dappObj.delegates = dappObj.delegates.join(',');
         await super.dbSave(trs, dbTrans);
 
-        setImmediate(async() => {
-            try
-            {
+        setImmediate(async () => {
+            try {
                 await this.runtime.socketio.emit('dapps/change', {});
             }
-            catch (err)
-            {
+            catch (err) {
                 this.logger.error("socket emit error: dapps/change");
             }
         })
@@ -409,7 +398,7 @@ class Dapp extends Asset.Base {
         router.get("/installing", async (req, res) => {
             try {
                 const ids = [];
-                for (var dappId in _dappInstalling) {
+                for (const dappId in _dappInstalling) {
                     ids.push(dappId);
                 }
 
@@ -422,7 +411,7 @@ class Dapp extends Asset.Base {
         router.get("/removing", async (req, res) => {
             try {
                 const ids = [];
-                for (var dappId in _dappRemoving) {
+                for (const dappId in _dappRemoving) {
                     ids.push(dappId);
                 }
 
@@ -435,7 +424,7 @@ class Dapp extends Asset.Base {
         router.get("/launched", async (req, res) => {
             try {
                 const ids = [];
-                for (var dappId in _dappLaunched) {
+                for (const dappId in _dappLaunched) {
                     ids.push(dappId);
                 }
 
@@ -494,7 +483,7 @@ class Dapp extends Asset.Base {
         const currency = req.params.currency;
 
         return new Promise((resolve, reject) => {
-            this.dao.findOne("mem_asset_balance", { address: dappId, currency }, 
+            this.dao.findOne("mem_asset_balance", { address: dappId, currency },
                 ['balance'], (err, row) => {
                     if (err) {
                         return reject(err);
@@ -611,7 +600,7 @@ class Dapp extends Asset.Base {
 
         const dappPath = path.join(this.config.dappsDir, id);
 
-        var dappConfig;
+        let dappConfig;
         try {
             dappConfig = await this._readDappConfig(dappPath);
         }
@@ -620,7 +609,7 @@ class Dapp extends Asset.Base {
         }
 
         if (dappConfig.peers && dappConfig.peers.length) {
-            for (var i = 0; i < dappConfig.peers.length; i++) {
+            for (let i = 0; i < dappConfig.peers.length; i++) {
                 const peerItem = dappConfig.peers[i];
                 await this.runtime.peer.addDapp(peerItem);
             }
@@ -662,7 +651,7 @@ class Dapp extends Asset.Base {
         const file = await this._getLaunchedMarkFile(dappPath);
         if (!fs.existsSync(file)) {
             try {
-                var fd = fs.openSync(file, 'wx');
+                const fd = fs.openSync(file, 'wx');
                 fs.writeSync(fd, process.pid);
                 fs.closeSync(fd);
             }
@@ -713,7 +702,7 @@ class Dapp extends Asset.Base {
             if (routers && routers.length > 0) {
                 const router = await this.runtime.httpserver.addApiRouter("/dapp/" + id);
 
-                for (var i = 0; i < routers.length; i++) {
+                for (let i = 0; i < routers.length; i++) {
                     const subRouter = routers[i];
                     if (subRouter.method && subRouter.path) {
                         router[subRouter.method](subRouter.path, async (req, res) => {
@@ -814,7 +803,7 @@ class Dapp extends Asset.Base {
     }
 
     async getDappList(req) {
-        var query = req.query;
+        const query = req.query;
 
         const validateErrors = await this.ddnSchema.validate({
             type: "object",
@@ -866,7 +855,7 @@ class Dapp extends Asset.Base {
         if (sort) {
             const sortItems = sort.split(",");
             if (sortItems.length > 0) {
-                for (var i = 0; i < sortItems.length; i++) {
+                for (let i = 0; i < sortItems.length; i++) {
                     const sortItem = sortItems[i];
                     const sortItemExprs = sortItem.split(" ");
                     if (sortItemExprs.length == 1) {
@@ -939,7 +928,7 @@ class Dapp extends Asset.Base {
         if (fs.existsSync(path)) {
             files = fs.readdirSync(path);
             files.forEach(function (file) {
-                var curPath = path + "/" + file;
+                const curPath = path + "/" + file;
                 if (fs.statSync(curPath).isDirectory()) { // recurse
                     self.delDir(curPath);
                 } else { // delete file
@@ -1339,11 +1328,10 @@ class Dapp extends Asset.Base {
     }
 
     async onNewBlock(block) {
-        Object.keys(_dappLaunched).forEach(async(dappId) => {
+        Object.keys(_dappLaunched).forEach(async (dappId) => {
             const sandbox = _dappLaunched[dappId];
             if (sandbox) {
-                try
-                {
+                try {
                     await new Promise((resolve, reject) => {
                         sandbox.request({
                             method: "post",
@@ -1365,8 +1353,7 @@ class Dapp extends Asset.Base {
                         });
                     });
                 }
-                catch (err2)
-                {
+                catch (err2) {
                     this.logger.error(err2);
                 }
             }

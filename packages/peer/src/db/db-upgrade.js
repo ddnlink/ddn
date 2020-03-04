@@ -32,42 +32,42 @@ class DBUpgrade
 
             const migrations = self.getVersionChanges();
             const versionList = Object.keys(migrations).sort().filter(ver => ver > currVersion);
-            async.eachSeries(versionList, (ver, cb2) => {
+            return async.eachSeries(versionList, (ver, cb2) => {
                 const changeList = migrations[ver];
                 _context.dao.transaction((dbTrans, done) => {
                     async.eachSeries(changeList, (command, cb3) => {
                         if (!/^\s*$/.test(command)) {
                             _context.dao.execSql(command, dbTrans, (err3, result2) => {
                                 if (err3) {
-                                    cb3(err3);
+                                    return cb3(err3);
                                 } else {
-                                    cb3(null, result2);
+                                    return cb3(null, result2);
                                 }
                             })
                         } else {
-                            cb3(null, true);
+                            return cb3(null, true);
                         }
                     }, (err2) => {
                         if (err2) {
-                            done(err2);
+                            return done(err2);
                         } else {
                             _context.dbParams.set("version", ver, dbTrans, (err5) => {
-                                done(err5);
+                                return done(err5);
                             });
                         }
                     })
                 }, (err4) => {
                     if (err4) {
-                        cb2(err4);
+                        return cb2(err4);
                     } else {
-                        cb2(null, ver);
+                        return cb2(null, ver);
                     }
                 });
             }, (err) => {
                 if (err) {
-                    cb(err);
+                    return cb(err);
                 } else {
-                    cb(null, self);
+                    return cb(null, self);
                 }
             });
         })
