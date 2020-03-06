@@ -1,6 +1,6 @@
 ---
 id: aob-api
-title: Assets on blockchain
+title: 链上资产
 sidebar_label: Assets on blockchain
 ---
 
