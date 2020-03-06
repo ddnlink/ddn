@@ -47,7 +47,8 @@
     "clean": "lerna clean -y",
     "publish": "./scripts/publish.js",
     "test": "./packages/test/bin/test.js",
-    "lint": "eslint --fix --ext .js packages"
+    "lint": "eslint --fix --ext .js packages",
+    "doc": "dumi dev"
   },
   "private": true,
   "workspaces": [
@@ -57,6 +58,7 @@
   "devDependencies": {
     "@types/jest": "^25.1.3",
     "cz-conventional-changelog": "^3.0.2",
+    "dumi": "^1.0.3",
     "eslint": "^6.7.0",
     "lerna": "^3.18.1"
   },
@@ -65,6 +67,5 @@
       "path": "./node_modules/cz-conventional-changelog"
     }
   },
-  "dependencies": {
-  }
+  "dependencies": {}
 }
