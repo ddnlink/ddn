@@ -2,7 +2,7 @@
  * 交易核心方法和处理逻辑
  * wangxm   2018-12-28
  */
-import Assets from '../../assets/assets';
+import Assets from '../../assets';
 
 import ByteBuffer from "bytebuffer";
 import crypto from 'crypto';
@@ -405,14 +405,11 @@ class Transaction
                 return await this._assets.call(trs.type, "applyUnconfirmed", trs, sender, dbTrans);
             }
 
-            //DdnUtils.bignum update   const amount = trs.amount + trs.fee;
             const amount = DdnUtils.bignum.plus(trs.amount, trs.fee);
-            //DdnUtils.bignum update   if (sender.u_balance < amount && trs.blockId != genesisblock.block.id) {
             if (DdnUtils.bignum.isLessThan(sender.u_balance, amount) && trs.block_id != this.genesisblock.id) {    //wxm block database
                 throw new Error(`Insufficient balance: ${sender.address}`);
             }
 
-            //DdnUtils.bignum update   library.balanceCache.addNativeBalance(sender.address, -amount)
             this.balanceCache.addNativeBalance(sender.address, DdnUtils.bignum.minus(0, amount));
 
             const accountInfo = await this.runtime.account.merge(sender.address, { u_balance: DdnUtils.bignum.minus(0, amount) }, dbTrans);

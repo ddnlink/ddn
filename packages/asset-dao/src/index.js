@@ -1,11 +1,11 @@
-import Org from './org';
-import Contribution from './contribution';
-import Confirmation from './confirmation';
-import Exchange from './exchange';
+import DaoOrg from './org';
+import DaoContribution from './contribution';
+import DaoConfirmation from './confirmation';
+import DaoExchange from './exchange';
 
 export default {
-  Org, // 40
-  Contribution, // 42
-  Confirmation, // 43
-  Exchange, // 41
+  DaoOrg, // 40
+  DaoContribution, // 42
+  DaoConfirmation, // 43
+  DaoExchange, // 41
 };

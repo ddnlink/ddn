@@ -12,6 +12,7 @@ _roadhog-api-doc
 .changelog
 build
 .docz
+.umi
 
 # misc
 .DS_Store

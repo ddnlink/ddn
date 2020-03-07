@@ -21,6 +21,22 @@
     "cryptography",
     "encryption"
   ],
+  "scripts": {
+    "init": "sh ./scripts/init.sh",
+    "start": "NODE_ENV=development node ./scripts/startPeer.js",
+    "bootstrap": "lerna bootstrap",
+    "build": "father-build",
+    "changelog": "lerna-changelog",
+    "cm": "npx git-cz",
+    "chore:update-deps": "sh ./scripts/reinstall_deps.sh",
+    "clean": "lerna clean -y",
+    "publish": "./scripts/publish.js",
+    "test": "./packages/test/bin/test.js",
+    "lint": "eslint --fix --ext .js packages",
+    "doc:dev": "dumi dev",
+    "doc:build": "dumi build",
+    "doc:deploy": "bash ./scripts/deploy_doc.sh"
+  },
   "author": "DDN <support@ddn.link>",
   "contributors": [
     {
@@ -36,19 +52,6 @@
   "engines": {
     "node": ">=8.6.0"
   },
-  "scripts": {
-    "init": "sh ./scripts/init.sh",
-    "start": "NODE_ENV=development node ./scripts/startPeer.js",
-    "bootstrap": "lerna bootstrap",
-    "build": "father-build",
-    "changelog": "lerna-changelog",
-    "cm": "npx git-cz",
-    "chore:update-deps": "sh ./scripts/reinstall_deps.sh",
-    "clean": "lerna clean -y",
-    "publish": "./scripts/publish.js",
-    "test": "./packages/test/bin/test.js",
-    "lint": "eslint --fix --ext .js packages"
-  },
   "private": true,
   "workspaces": [
     "packages/*",
@@ -57,6 +60,7 @@
   "devDependencies": {
     "@types/jest": "^25.1.3",
     "cz-conventional-changelog": "^3.0.2",
+    "dumi": "^1.0.3",
     "eslint": "^6.7.0",
     "lerna": "^3.18.1"
   },
@@ -65,6 +69,5 @@
       "path": "./node_modules/cz-conventional-changelog"
     }
   },
-  "dependencies": {
-  }
+  "dependencies": {}
 }

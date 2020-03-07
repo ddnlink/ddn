@@ -5,11 +5,11 @@ module.exports = {
             type: 11
         },
         {
-            name: "In",
+            name: "DappIn",
             type: 12
         },
         {
-            name: "OutTransfer",
+            name: "DappOut",
             type: 13
         }
     ]

@@ -1,7 +1,4 @@
 import util from 'util';
-export {extend};
-export {copy};
-export const inherits = util.inherits;
 
 function extend(target, source) {
     if (! target || typeof target !== 'object') return target;
@@ -30,3 +27,7 @@ function copy(target) {
         return target;
     }
 }
+
+export {extend};
+export {copy};
+export const inherits = util.inherits;

@@ -1,10 +1,14 @@
-/**
+/** 
  * 资产加载注册器
- * wangxm   2018-12-28
+ * @Author: wangxm   
+ * @Date: 2018-12-28 11:08:30 
+ * @Last Modified by: imfly
+ * @Last Modified time: 2020-03-03 18:59:58
  */
+
 import express from 'express';
 import pluralize from 'pluralize';
-
+import _ from 'lodash';
 import DdnUtils from '@ddn/utils';
 import Transfer from './system/transfer';
 import Signatures from './system/signature';
@@ -99,8 +103,8 @@ class Loader {
     async _attachAssetPluginApi(assetConfig, assetInst) {
         if (assetConfig && assetInst) {
             const apiSubPath = assetConfig.name.toLowerCase();
-            const apiSubPaths = pluralize.plural(apiSubPath);
-console.log('assetConfig.name= ', assetConfig.name);
+            const apiSubPaths = pluralize.plural(assetConfig.name);
+            const apiSubPathed = _.snakeCase(apiSubPaths).replace('_', '/');
 
             const router = express.Router();
             const apis = await this._attachAssetPluginApiRouter(router, assetConfig, assetInst);
@@ -110,7 +114,7 @@ console.log('assetConfig.name= ', assetConfig.name);
 
             // rustful api, for example: new api: /api/aobassets -> old api: /api/aobasset/list
             this._assetsApi.push({
-                path: `/api/${apiSubPaths}`,
+                path: `/api/${apiSubPathed}`,
                 router,
                 apis
             });
@@ -241,6 +245,7 @@ console.log('assetConfig.name= ', assetConfig.name);
         return func;
     }
 
+    // 
     async _attachAssetPluginApiRouter(router, {type}, assetInst) {
         const allApis = [];
 

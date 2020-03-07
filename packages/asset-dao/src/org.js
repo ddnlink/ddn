@@ -266,6 +266,16 @@ class Org extends Asset.Base {
      * 自定义资产Api
      */
     async attachApi(router) {
+        // get /api/dao/orgs/
+        router.get("/", async(req, res) => {
+            try {
+                const result = await this.getOrgList(req, res);
+                res.json(result);
+            } catch (err) {
+                res.json({success: false, error: err.message || err.toString()});
+            }
+        });
+
         router.put("/", async(req, res) => {
             try {
                 const result = await this.putOrg(req, res);
@@ -284,6 +294,7 @@ class Org extends Asset.Base {
             }
         });
 
+        // TODO: delete it, == /
         router.get("/getlist", async(req, res) => {
             try {
                 const result = await this.getOrgList(req, res);
