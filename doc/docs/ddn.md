@@ -1,6 +1,16 @@
-# DDN 命令行工具
+---
+title: 命令行
+order: 1                      
+toc: menu
+---
+
+# 命令行工具
+
+## 简介
 
 从 DDN v3.0.0 以后，我们的命令行工具`ddn`名称正式更改为`ddn`，也就是说，通过命令行操作的命令与实际运行的程序将保持一次，都是`ddn`.
+
+## 全部命令
 
 ```
 imflydeMacBook:ddn imfly$ ddn
@@ -62,3 +72,11 @@ Commands:
   ipStat                                 analyze peer ip info
   createUsers [options]                  create some accounts
   ```
+
+  ## 命令解析
+
+  ### 构建新链
+
+  ### 构建 Dapp
+
+  ### 检索节点状态
