@@ -55,7 +55,7 @@ You can donate DDN to the follow address with [DDN Wallet](http://wallet.ddn.lin
 
 ## Contribute
 
-Please visit [CONTRIBUTING](./CONTRIBUTING.md) 
+Please visit [CONTRIBUTING](./doc/guide/contributing.md) 
 
 ## License
 

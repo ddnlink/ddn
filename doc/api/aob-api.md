@@ -2,6 +2,7 @@
 id: aob-api
 title: 链上资产
 sidebar_label: Assets on blockchain
+toc: menu
 ---
 
 ## **1 API使用说明**   

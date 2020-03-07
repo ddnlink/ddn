@@ -46,7 +46,7 @@ DDN, 数据分发网络, 是一个成熟的企业级区块链系统，已经服�
 
 ## 贡献
 
-请参考 [贡献文档](./CONTRIBUTING.md) 
+请参考 [贡献文档](./doc/guide/contributing.md) 
 
 ## 捐赠
 

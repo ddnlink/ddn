@@ -1,11 +1,12 @@
 ---
-title: DDN Blockchain Asset Plugin # 课程标题
+title: 链上资产 # 课程标题
 challengeType: 0               # 课程类型，默认为0：理论， 1： 实验
 order: 1                       # 序号，以此为当前单元的课程排序
 time:  5个小时                  # 学习时长
 videoUrl: ''                   # 视频链接地址
 prjectUrl: 'https://github.com/' # 源码地址
 localeTitle: DDN资产扩展       # 本地化标题
+toc: menu
 ---
 
 # DDN资产扩展
