@@ -1,6 +1,7 @@
 ---
 title: 贡献
 order: 2
+toc: menu
 ---
 
 # Contribute

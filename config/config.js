@@ -8,6 +8,28 @@ export default {
     { title: '白皮书', path: 'https://github.com/ddnlink/whitepaper' },
     { title: 'GitHub', path: 'https://github.com/ddnlink/ddn' },
   ],
+
+  menus: {
+    '/guide': [
+      {
+        title: '版本 3.0',
+        children: []
+      },
+      {
+        title: '介绍',
+        children: ['guide/readme.md']
+      },
+      {
+        title: '配置',
+        children: ['guide/config']
+      },
+      {
+        title: '贡献',
+        children: ['guide/contributing']
+      }
+    ],
+  },
+
   extraBabelPlugins: [
     [
       'import',

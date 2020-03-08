@@ -26,7 +26,6 @@
     "start": "NODE_ENV=development node ./scripts/startPeer.js",
     "bootstrap": "lerna bootstrap",
     "build": "father-build",
-    "changelog": "lerna-changelog",
     "cm": "npx git-cz",
     "chore:update-deps": "sh ./scripts/reinstall_deps.sh",
     "clean": "lerna clean -y",
@@ -59,15 +58,10 @@
   ],
   "devDependencies": {
     "@types/jest": "^25.1.3",
-    "cz-conventional-changelog": "^3.0.2",
     "dumi": "^1.0.3",
     "eslint": "^6.7.0",
+    "father-build": "^1.17.2",
     "lerna": "^3.18.1"
-  },
-  "config": {
-    "commitizen": {
-      "path": "./node_modules/cz-conventional-changelog"
-    }
   },
   "dependencies": {}
 }
