@@ -325,7 +325,7 @@ class HttpServer {
         this.runtime.transaction.mountAssetApis(this._app);
 
         if (process.env.NODE_ENV === 'development') {
-            DdnUtils.routesMap(this._app, 'routes.md', this.logger);
+            DdnUtils.routesMap(this._app, 'routes.log', this.logger);
         }
 
         const self = this;
