@@ -6,6 +6,8 @@ import amount from './amount';
 import limitCache from './limit-cache';
 import system from './system';
 import bignum from './bignumber';
+import routesMap from './routes-map';
+
 const deprecated = depd('@ddn');
 
 export default {
@@ -16,5 +18,6 @@ export default {
     limitCache,
     system,
     bignum,
+    routesMap,
     deprecated
 };

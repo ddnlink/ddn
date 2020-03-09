@@ -9,7 +9,7 @@ class Socketio {
     }
 
     async emit(event, params) {
-        var result = await this.httpsEmit(event, params);
+        let result = await this.httpsEmit(event, params);
         if (!result) {
             result = await this.httpEmit(event, params);
         }
@@ -34,4 +34,4 @@ class Socketio {
     }
 }
 
-module.exports = Socketio;
+export default Socketio;

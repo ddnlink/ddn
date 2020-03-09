@@ -11,19 +11,21 @@
  *
  * wangxm   2018-12-25
  */
-const express = require('express');
-const os = require('os');
-const path = require('path');
-const fs = require('fs');
-const http = require('http');
-const https = require('https');
-const socketio = require('socket.io');
-const compression = require('compression');
-const cors = require('cors');
-const bodyParser = require('body-parser');
-const methodOverride = require('method-override');
-const queryParser = require('./middleware/query-int');
-const SocketioEmiter = require('./socketio/socket-io');
+import express from 'express';
+
+import os from 'os';
+import path from 'path';
+import fs from 'fs';
+import http from 'http';
+import https from 'https';
+import socketio from 'socket.io';
+import compression from 'compression';
+import cors from 'cors';
+import bodyParser from 'body-parser';
+import methodOverride from 'method-override';
+import DdnUtils from '@ddn/utils';
+import queryParser from './middleware/query-int';
+import SocketioEmiter from './socketio/';
 
 class HttpServer {
     static newServer(context) {
@@ -70,9 +72,9 @@ class HttpServer {
         this._app.set('view engine', 'ejs');
         this._app.set('views', this.config.publicDir);
         this._app.use(express.static(this.config.publicDir));
-        this._app.use(bodyParser.raw({limit: "8mb"}));
-        this._app.use(bodyParser.urlencoded({extended: true, limit: "8mb", parameterLimit: 5000}));
-        this._app.use(bodyParser.json({limit: "8mb"}));
+        this._app.use(bodyParser.raw({ limit: "8mb" }));
+        this._app.use(bodyParser.urlencoded({ extended: true, limit: "8mb", parameterLimit: 5000 }));
+        this._app.use(bodyParser.json({ limit: "8mb" }));
         this._app.use(methodOverride());
 
         this._addQueryParamsMiddleware();
@@ -91,7 +93,7 @@ class HttpServer {
         ];
         this._app.use(queryParser({
             parser(value, radix, name) {
-                if (ignore.indexOf(name) >= 0) {
+                if (ignore.includes(name)) {
                     return value;
                 }
 
@@ -108,15 +110,15 @@ class HttpServer {
      * 公共头信息
      */
     _addCommonHeadersMiddleware() {
-        var commonHeaders = {
+        const commonHeaders = {
             os: os.platform() + os.release(),
             version: this.config.version,
             port: this.config.port,
             nethash: this.config.nethash
         };
 
-        this._app.use((req, res, next) => {
-            const parts = req.url.split('/');
+        this._app.use(({ url }, res, next) => {
+            const parts = url.split('/');
             if (parts.length > 1) {
                 if (parts[1] == 'peer') {
                     res.set(commonHeaders);
@@ -131,14 +133,14 @@ class HttpServer {
      * 安全约束中间件（api白名单、peer黑名单）
      */
     _addSecurityMiddleware() {
-        this._app.use((req, res, next) => {
-            const parts = req.url.split('/');
-            const ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
-            var port = req.headers['port'];
+        this._app.use(({ url, headers, connection, method }, res, next) => {
+            const parts = url.split('/');
+            const ip = headers['x-forwarded-for'] || connection.remoteAddress;
+            let port = headers['port'];
             if (!port) {
-                var host = req.headers["host"];
+                const host = headers["host"];
                 if (host) {
-                    var hostItems = host.split(":");
+                    const hostItems = host.split(":");
                     if (hostItems && hostItems.length == 2) {
                         port = hostItems[1];
                     }
@@ -148,7 +150,7 @@ class HttpServer {
                 port = this.config.port;
             }
 
-            this.logger.debug(`${req.method} ${req.url} from ${ip}:${port}`);
+            this.logger.debug(`${method} ${url} from ${ip}:${port}`);
 
             /* Instruct browser to deny display of <frame>, <iframe> regardless of origin.
              *
@@ -167,14 +169,14 @@ class HttpServer {
             if (parts.length > 1) {
                 if (parts[1] == 'api') {
                     if (this.config.api.access.whiteList.length > 0 &&
-                        this.config.api.access.whiteList.indexOf(ip) < 0) {
+                        !this.config.api.access.whiteList.includes(ip)) {
                         res.sendStatus(403);
                     } else {
                         next();
                     }
                 } else if (parts[1] == 'peer') {
                     if (this.config.peers.blackList.length > 0 &&
-                        this.config.peers.blackList.indexOf(ip) >= 0) {
+                        this.config.peers.blackList.includes(ip)) {
                         res.sendStatus(403);
                     } else {
                         next();
@@ -193,12 +195,12 @@ class HttpServer {
      * @param {*} currDir
      */
     async _enumerateDir(currDir) {
-        var items = fs.readdirSync(currDir);
-        for (var i = 0; i < items.length; i++) {
-            var item = items[i];
+        const items = fs.readdirSync(currDir);
+        for (let i = 0; i < items.length; i++) {
+            const item = items[i];
 
-            var subPath = path.resolve(currDir, item);
-            var itemInfo = fs.statSync(subPath);
+            const subPath = path.resolve(currDir, item);
+            const itemInfo = fs.statSync(subPath);
             if (itemInfo.isDirectory()) {
                 await this._enumerateFiles(subPath);
                 await this._enumerateDir(subPath);
@@ -211,19 +213,19 @@ class HttpServer {
      * @param {*} currDir
      */
     async _enumerateFiles(currDir) {
-        var items = fs.readdirSync(currDir);
-        for (var i = 0; i < items.length; i++) {
-            var item = items[i];
+        const items = fs.readdirSync(currDir);
+        for (let i = 0; i < items.length; i++) {
+            const item = items[i];
 
-            var subPath = path.resolve(currDir, item);
-            var itemInfo = fs.statSync(subPath);
+            const subPath = path.resolve(currDir, item);
+            const itemInfo = fs.statSync(subPath);
             if (itemInfo.isFile()) {
-                var pos = item.lastIndexOf(".");
+                const pos = item.lastIndexOf(".");
                 if (pos >= 0) {
-                    var ext = item.substring(pos);
+                    const ext = item.substring(pos);
                     if (ext.toLowerCase() == ".js") {
-                        var Kls = global._require_runtime_(subPath);
-                        var inst = new Kls(this._context);
+                        const Kls = global._require_runtime_(subPath);
+                        const inst = new Kls(this._context);
                         await this._mountRouter(subPath, Kls, inst);
                     }
                 }
@@ -237,33 +239,31 @@ class HttpServer {
      * @param {*} cls
      * @param {*} inst
      */
-    async _mountRouter(currDir, cls, inst) {
-        var rootPath = await this._getBasePath();
-        var basePath = currDir.toLowerCase().replace(rootPath.toLowerCase(), "");
+    async _mountRouter(currDir, { prototype }, inst) {
+        const rootPath = await this._getBasePath();
+        let basePath = currDir.toLowerCase().replace(rootPath.toLowerCase(), "");
         basePath = basePath.replace(".js", "");
         basePath = basePath.replace(/\\/g, "/");
         if (!basePath.startsWith("/")) {
-            basePath = "/" + basePath;
+            basePath = `/${basePath}`;
         }
 
         //一旦注释这里，文件名也将作为路由的一部分
-        var pos = basePath.lastIndexOf("/");
+        const pos = basePath.lastIndexOf("/");
         if (pos >= 0) {
             basePath = basePath.substring(0, pos);
         }
 
-        var newRouter = express.Router();
+        const newRouter = express.Router();
 
-        if (typeof(inst.filter) == "function") {
-            await newRouter.use(async (req, res, next) => {
-                return await inst.filter.call(this, req, res, next);
-            });
+        if (typeof (inst.filter) == "function") {
+            await newRouter.use(async (req, res, next) => await inst.filter.call(this, req, res, next));
         }
 
-        var names = Object.getOwnPropertyNames(cls.prototype);
-        for (var i = 0; i < names.length; i++) {
-            var name = names[i];
-            if (typeof(inst[name]) == "function") {
+        const names = Object.getOwnPropertyNames(prototype);
+        for (let i = 0; i < names.length; i++) {
+            const name = names[i];
+            if (typeof (inst[name]) == "function") {
                 await this._tryAddRouter(newRouter, inst, name);
             }
         }
@@ -279,10 +279,10 @@ class HttpServer {
      */
     async _tryAddRouter(router, inst, name) {
         if (name) {
-            var method = null;
+            let method = null;
 
-            var lowerName = name.toLowerCase();
-            var subPath;
+            const lowerName = name.toLowerCase();
+            let subPath;
             if (lowerName.startsWith("get")) {
                 method = "get";
                 subPath = lowerName.substring(3);
@@ -298,15 +298,13 @@ class HttpServer {
             }
 
             if (method) {
-                router[method].call(router, '/' + subPath, async(req, res) => {
-                    try
-                    {
-                        var result = await inst[name].call(inst, req);
+                router[method].call(router, `/${subPath}`, async (req, res) => {
+                    try {
+                        const result = await inst[name].call(inst, req);
                         res.json(result);
                     }
-                    catch (err)
-                    {
-                        res.json({success: false, error: err.message || err.toString()});
+                    catch (err) {
+                        res.json({ success: false, error: err.message || err.toString() });
                     }
                 });
             }
@@ -321,11 +319,14 @@ class HttpServer {
      * 启动http监听服务
      */
     async start() {
-        var basePath = await this._getBasePath();
+        const basePath = await this._getBasePath();
         await this._enumerateDir(basePath);
 
         this.runtime.transaction.mountAssetApis(this._app);
 
+        if (process.env.NODE_ENV === 'development') {
+            DdnUtils.routesMap(this._app, 'routes.md', this.logger);
+        }
 
         const self = this;
 
@@ -355,29 +356,24 @@ class HttpServer {
         });
     }
 
-    async addApiRouter(path)
-    {
-        const key = ("/api" + path).toLowerCase();
+    async addApiRouter(path) {
+        const key = (`/api${path}`).toLowerCase();
         this._apiRouters[key] = this._app._router.stack.length;
 
         const newRouter = express.Router();
-        await this._app.use("/api" + path, newRouter);
+        await this._app.use(`/api${path}`, newRouter);
         return newRouter;
     }
 
-    async removeApiRouter(path)
-    {
-        const key = ("/api" + path).toLowerCase();
-        if (this._apiRouters[key])
-        {
+    async removeApiRouter(path) {
+        const key = (`/api${path}`).toLowerCase();
+        if (this._apiRouters[key]) {
             const index = this._apiRouters[key];
-            if (index >= 0 && index < this._app._router.stack.length)
-            {
+            if (index >= 0 && index < this._app._router.stack.length) {
                 this._app._router.stack.splice(index, 1);
             }
         }
     }
-
 }
 
-module.exports = HttpServer;
+export default HttpServer;

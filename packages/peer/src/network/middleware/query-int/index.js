@@ -5,13 +5,13 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-const parseNums = require('./parse');
+import parseNums from './parse';
 
-module.exports = options => {
-  options = options || {
+export default (
+  options = {
     parser: parseInt
-  };
-
+  }
+) => {
   return (req, res, next) => {
     req.query = parseNums(req.query, options);
     next();

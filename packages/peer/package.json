@@ -72,6 +72,7 @@
     "ejs": "2.5.7",
     "express": "^4.16.4",
     "express-domain-middleware": "0.1.0",
+    "express-routemap": "^1.6.0",
     "extend": "3.0.2",
     "extend2": "^1.0.0",
     "ip": "^1.1.5",

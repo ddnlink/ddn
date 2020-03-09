@@ -194,15 +194,15 @@ class RootRouter {
         const signatures = [];
 
         const unconfirmedList = await this.runtime.transaction.getUnconfirmedTransactionList();
-        for (let i = 0; i < unconfirmedList.length; i++) {
-            const trs = unconfirmedList[i];
+
+        unconfirmedList.forEach(trs => {
             if (trs.signatures && trs.signatures.length) {
                 signatures.push({
                     transaction: trs.id,
                     signatures: trs.signatures
                 });
             }
-        }
+        });
 
         return {success: true, signatures};
     }

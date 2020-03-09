@@ -36,4 +36,4 @@ function parseNums(obj, options) {
   return result;
 }
 
-module.exports = parseNums;
+export default parseNums;

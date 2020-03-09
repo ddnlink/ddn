@@ -102,7 +102,7 @@ class Loader {
      */
     async _attachAssetPluginApi(assetConfig, assetInst) {
         if (assetConfig && assetInst) {
-            const apiSubPath = assetConfig.name.toLowerCase();
+            // const apiSubPath = assetConfig.name.toLowerCase();
             const apiSubPaths = pluralize.plural(assetConfig.name);
             const apiSubPathed = _.snakeCase(apiSubPaths).replace('_', '/');
 
@@ -120,11 +120,11 @@ class Loader {
             });
             
             // TODO: deprecated, delete it for next version.
-            this._assetsApi.push({
-                path: `/api/${apiSubPath}`,
-                router,
-                apis
-            });
+            // this._assetsApi.push({
+            //     path: `/api/${apiSubPath}`,
+            //     router,
+            //     apis
+            // });
         }
     }
 
@@ -133,9 +133,9 @@ class Loader {
             const apiInfo = this._assetsApi[i];
             expressApp.use(apiInfo.path, apiInfo.router);
 
-            for (let j = 0; j < apiInfo.apis.length; j++) {
-                this.logger.info(`mounted asset api: ${apiInfo.path}${apiInfo.apis[j]}`);
-            }
+            // for (let j = 0; j < apiInfo.apis.length; j++) {
+            //     this.logger.info(`mounted asset api: ${apiInfo.path}${apiInfo.apis[j]}`);
+            // }
         }
     }
 

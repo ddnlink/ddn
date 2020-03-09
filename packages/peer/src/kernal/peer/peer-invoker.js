@@ -2,13 +2,14 @@
  * PeerInvoker
  * wangxm   2019-01-14
  */
-const util = require('util');
-const request = require('request');
-const ip = require('ip');
-const extend = require('extend');
-const os = require("os");
+import util from 'util';
 
-var _singleton;
+import request from 'request';
+import ip from 'ip';
+import extend from 'extend';
+import os from "os";
+
+let _singleton;
 
 class PeerInvoker {
 
@@ -32,7 +33,7 @@ class PeerInvoker {
     }
 
     async invoke(args, dappId, allowSelf) {
-        var peer = args.peer;
+        let peer = args.peer;
         if (!peer) {
             peer = await this.runtime.peer.getRandomPeer(dappId, allowSelf);
         }
@@ -86,11 +87,11 @@ class PeerInvoker {
                         }
                     }
 
-                    reject(err || "Request peer api failed: " + url);
+                    reject(err || `Request peer api failed: ${url}`);
                 } else {
                     res.headers['port'] = parseInt(res.headers['port']);
 
-                    var validateErrors = await this.ddnSchema.validate({
+                    const validateErrors = await this.ddnSchema.validate({
                         type: "object",
                         properties: {
                             os: {
@@ -141,4 +142,4 @@ class PeerInvoker {
 
 }
 
-module.exports = PeerInvoker;
+export default PeerInvoker;

@@ -5,7 +5,7 @@
 import _ from "lodash";
 
 import ip from "ip";
-import PeerInvoker from "../../network/peer-invoker";
+import PeerInvoker from "./peer-invoker";
 import PeerSync from "./peer-sync";
 import PeerBroadcast from "./peer-broadcast";
 
