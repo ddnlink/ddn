@@ -175,7 +175,7 @@ JSON返回示例：
 ```js  
 {"success":true}
 // 查询更新后的列表（acl/1代表白名单）
-curl -X GET -H "Content-Type: application/json" 'http://localhost:8001/api/aobasset/IssuerName.CNY/acl/1?limit=10&offset=0' && echo
+curl -X GET -H "Content-Type: application/json" 'http://localhost:8001/api/aob/assets/IssuerName.CNY/acl/1?limit=10&offset=0' && echo
 {
 	"success": true,
 	"list": [{
@@ -297,7 +297,7 @@ get /peer/blocks/common //查找common block
 ### **2.2 用户自定义资产aob**  
 
 #### **2.2.1 创建资产**   
-接口地址：/api/aobtransfers   
+接口地址：/api/aob/transfers   
 请求方式：PUT   
 支持格式：json   
 接口备注：   
@@ -326,7 +326,7 @@ get /peer/blocks/common //查找common block
 请求示例：   
 ```bash   
 // 转0.01 absorb.YLB给D2zThPTQZDNQqXbe5tikDQ24YyCQTCpbSC
-curl -k -H "Content-Type: application/json" -X PUT -d '{"secret":"found knife gather faith wrestle private various fame cover response security predict","amount":"1000000","recipientId":"D2zThPTQZDNQqXbe5tikDQ24YyCQTCpbSC","currency":"absorb.YLB"}' 'http://localhost:8001/api/aobtransfers' && echo   
+curl -k -H "Content-Type: application/json" -X PUT -d '{"secret":"found knife gather faith wrestle private various fame cover response security predict","amount":"1000000","recipientId":"D2zThPTQZDNQqXbe5tikDQ24YyCQTCpbSC","currency":"absorb.YLB"}' 'http://localhost:8001/api/aob/transfers' && echo   
 ```   
    
 JSON返回示例：   
@@ -338,7 +338,7 @@ JSON返回示例：
 ```  
 
 #### **2.2.2 获取全网所有发行商**  
-接口地址：/api/aobissuers  
+接口地址：/api/aob/issuers  
 请求方式：get   
 支持格式：urlencoded 
 
@@ -359,7 +359,7 @@ JSON返回示例：
 
 请求示例：   
 ```js   
-curl -X GET -H "Content-Type: application/json"  'http://loc:8001/api/aobissuers?offset=0&limit=1' && echo
+curl -X GET -H "Content-Type: application/json"  'http://loc:8001/api/aob/issuers?offset=0&limit=1' && echo
 ```   
    
 JSON返回示例：   
@@ -381,7 +381,7 @@ JSON返回示例：
 ``` 
 
 #### **2.2.3 查询指定发行商的信息** 
-接口地址：/api/aobissuers/:name  
+接口地址：/api/aob/issuers/:name  
 请求方式：get   
 支持格式：urlencoded 
 
@@ -400,7 +400,7 @@ JSON返回示例：
    
 请求示例：   
 ```js   
-curl -X GET -H "Content-Type: application/json"  'http://localhost:8001/api/aobissuers/huoding' && echo
+curl -X GET -H "Content-Type: application/json"  'http://localhost:8001/api/aob/issuers/huoding' && echo
 ```   
    
 JSON返回示例：   
@@ -416,7 +416,7 @@ JSON返回示例：
 ``` 
 
 #### **2.2.4 查看指定发行商的资产** 
-接口地址：/api/aobissuers/:name/assets  
+接口地址：/api/aob/issuers/:name/assets  
 请求方式：get   
 支持格式：urlencoded 
 
@@ -440,7 +440,7 @@ JSON返回示例：
    
 请求示例：   
 ```js   
-curl -X GET -H "Content-Type: application/json"  'http://localhost:8001/api/aobissuers/huoding/assets?offset=0&limit=2' && echo
+curl -X GET -H "Content-Type: application/json"  'http://localhost:8001/api/aob/issuers/huoding/assets?offset=0&limit=2' && echo
 ```   
    
 JSON返回示例：   
@@ -464,7 +464,7 @@ JSON返回示例：
 ``` 
 
 #### **2.2.5 获取全网所有资产信息** 
-接口地址：/api/aobasset/  
+接口地址：/api/aob/assets/  
 请求方式：get   
 支持格式：urlencoded 
 
@@ -487,7 +487,7 @@ JSON返回示例：
    
 请求示例：   
 ```js   
-curl -X GET -H "Content-Type: application/json"  'http://localhost:8001/api/aobasset?offset=0&limit=2' && echo
+curl -X GET -H "Content-Type: application/json"  'http://localhost:8001/api/aob/assets?offset=0&limit=2' && echo
 ```   
    
 JSON返回示例：   
@@ -523,7 +523,7 @@ JSON返回示例：
 ``` 
 
 #### **2.2.6 获取指定资产信息** 
-接口地址：/api/aobasset/:name  
+接口地址：/api/aob/assets/:name  
 请求方式：get   
 支持格式：urlencoded 
 
@@ -542,7 +542,7 @@ JSON返回示例：
    
 请求示例：   
 ```js   
-curl -X GET -H "Content-Type: application/json"  'http://localhost:8001/api/aobasset/huoding.AOB' && echo
+curl -X GET -H "Content-Type: application/json"  'http://localhost:8001/api/aob/assets/huoding.AOB' && echo
 ```   
    
 JSON返回示例：   
@@ -565,7 +565,7 @@ JSON返回示例：
 ``` 
 
 #### **2.2.7 获取指定资产的访问控制列表（acl）** 
-接口地址：/api/aobasset/:name/acl/flag  
+接口地址：/api/aob/assets/:name/acl/flag  
 请求方式：get   
 支持格式：urlencoded 
 
@@ -590,7 +590,7 @@ JSON返回示例：
 请求示例：   
 ```js   
 // 获取资产huoding.AOB白名单中的地址列表
-curl -X GET -H "Content-Type: application/json"  'http://localhost:8001/api/aobasset/huoding.AOB/acl/1' && echo
+curl -X GET -H "Content-Type: application/json"  'http://localhost:8001/api/aob/assets/huoding.AOB/acl/1' && echo
 ```   
    
 JSON返回示例：   
@@ -608,7 +608,7 @@ JSON返回示例：
 ``` 
 
 #### **2.2.8 获取指定账户所有aob的余额** 
-接口地址：/api/aobbalances/:address  
+接口地址：/api/aob/balances/:address  
 请求方式：get   
 支持格式：urlencoded 
 
@@ -630,7 +630,7 @@ JSON返回示例：
    
 请求示例：   
 ```js   
-curl -X GET -H "Content-Type: application/json" 'http://localhost:8001/api/aobbalances/AKKHPvQb2A119LNicCQWLZQDFxhGVEY57a' && echo
+curl -X GET -H "Content-Type: application/json" 'http://localhost:8001/api/aob/balances/AKKHPvQb2A119LNicCQWLZQDFxhGVEY57a' && echo
 ```   
    
 JSON返回示例：   
@@ -658,7 +658,7 @@ JSON返回示例：
 ```
 
 #### **2.2.9 获取指定账户所有资产相关操作记录** 
-接口地址：/api/aobtransfers/my/:address  
+接口地址：/api/aob/transfers/my/:address  
 请求方式：get   
 支持格式：urlencoded  
 备注：包含发行商创建以及资产创建、发行、转账等  
@@ -681,7 +681,7 @@ JSON返回示例：
    
 请求示例：   
 ```js   
-curl -X GET -H "Content-Type: application/json"  'http://localhost:8001/api/aobtransfers/my/transactions/16358246403719868041?offset=0&limit=2' && echo
+curl -X GET -H "Content-Type: application/json"  'http://localhost:8001/api/aob/transfers/my/transactions/16358246403719868041?offset=0&limit=2' && echo
 ```   
    
 JSON返回示例：   
@@ -832,7 +832,7 @@ type=14
 
 
 #### **2.2.10 获取指定账户指定资产的余额** 
-接口地址：/api/aobassets/balances/:address/:currency  
+接口地址：/api/aob/assets/balances/:address/:currency  
 请求方式：get   
 支持格式：urlencoded 
 
@@ -854,7 +854,7 @@ type=14
    
 请求示例：   
 ```js   
-curl -X GET -H "Content-Type: application/json"  'http://localhost:8001/api/aobassets/balances/16358246403719868041/IssuerName.CNY' && echo
+curl -X GET -H "Content-Type: application/json"  'http://localhost:8001/api/aob/assetss/balances/16358246403719868041/IssuerName.CNY' && echo
 ```   
    
 JSON返回示例：   
@@ -873,7 +873,7 @@ JSON返回示例：
 ```
 
 #### **2.2.11 获取指定账户指定资产转账记录** 
-接口地址：/api/aobtransfers/my/:address/:currency  
+接口地址：/api/aob/transfers/my/:address/:currency  
 请求方式：get   
 支持格式：urlencoded  
 备注：只返回资产转账记录  
@@ -897,7 +897,7 @@ JSON返回示例：
    
 请求示例：   
 ```js   
-curl -X GET -H "Content-Type: application/json"  'http://localhost:8001/api/aobtransfers/my/16358246403719868041/IssuerName.CNY' && echo
+curl -X GET -H "Content-Type: application/json"  'http://localhost:8001/api/aob/transfers/my/16358246403719868041/IssuerName.CNY' && echo
 ```   
    
 JSON返回示例：   
@@ -934,7 +934,7 @@ JSON返回示例：
 ```
 
 #### **2.2.12 获取指定资产转账记录** 
-接口地址：/api/aobtransfers/:currency  
+接口地址：/api/aob/transfers/:currency  
 请求方式：get   
 支持格式：urlencoded  
 备注：只返回指定资产转账记录 
@@ -958,7 +958,7 @@ JSON返回示例：
 请求示例：   
 ```js   
 // 查询引力波资产absorb.YLB的所有转账记录 
-curl -X GET -H "Content-Type: application/json" 'http://127.0.0.1:8001/api/aobtransfers/absorb.YLB' && echo
+curl -X GET -H "Content-Type: application/json" 'http://127.0.0.1:8001/api/aob/transfers/absorb.YLB' && echo
 ```   
    
 JSON返回示例：   
