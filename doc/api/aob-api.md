@@ -854,7 +854,7 @@ type=14
    
 请求示例：   
 ```js   
-curl -X GET -H "Content-Type: application/json"  'http://localhost:8001/api/aob/assetss/balances/16358246403719868041/IssuerName.CNY' && echo
+curl -X GET -H "Content-Type: application/json"  'http://localhost:8001/api/aob/assets/balances/16358246403719868041/IssuerName.CNY' && echo
 ```   
    
 JSON返回示例：   

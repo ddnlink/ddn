@@ -2,11 +2,11 @@ import request from 'request';
 import config from '../config';
 
 function resultHandler(cb) {
-  return (err, {statusCode}, body) => {
+  return (err, res, body) => {
     if (err) {
       cb(`Request error: ${err}`);
-    } else if (statusCode != 200) {
-      let msg = `Unexpected status code: ${statusCode}`;
+    } else if (res.statusCode != 200) {
+      let msg = `Unexpected status code: ${res.statusCode}`;
       if (body.error) {
         msg += ", ";
         msg += body.error;

@@ -5,7 +5,7 @@
 import bluebird from 'bluebird';
 import DdnUtils from '@ddn/utils'; 
 
-var _singleton;
+let _singleton;
 
 class Account {
     static singleton(context) {
@@ -83,7 +83,7 @@ class Account {
 
     async initAccountsAndBalances() {
         let verify = this.config.loading.verifyOnLoading;
-        var count = await this.runtime.block.getCount();
+        const count = await this.runtime.block.getCount();
         if (verify || count == 1) {
             await this.repairAccounts(count, true);
         } else {
@@ -142,8 +142,8 @@ class Account {
     }
 
     async getAccountByPublicKey(publicKey) {
-        var address = this.generateAddressByPublicKey(publicKey);
-        var result = await this.getAccount({address});
+        const address = this.generateAddressByPublicKey(publicKey);
+        const result = await this.getAccount({address});
         if (result && !result.public_key) {
             result.public_key = publicKey;
         }
@@ -165,18 +165,18 @@ class Account {
         //     });
         // }
 
-        // var realFields = this.fields.filter(function (field) {
+        // const realFields = this.fields.filter(function (field) {
         //     return fields.indexOf(field.alias || field.field) != -1;
         // });
 
-        // var realConv = {};
+        // const realConv = {};
         // Object.keys(this.conv).forEach(function (key) {
         //     if (fields.indexOf(key) != -1) {
         //       realConv[key] = this.conv[key];
         //     }
         // }.bind(this));
 
-        var limit, offset, sort;
+        let limit, offset, sort;
 
         if (filter.limit > 0) {
             limit = filter.limit;

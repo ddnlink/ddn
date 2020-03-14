@@ -7,7 +7,7 @@
 import DdnUtils from '@ddn/utils';
 
 export default {
-  nethash: 'fl6ybowg', //fl6ybowg mainnet 315by9uk 2mn7qoar
+  nethash: 'fl6ybowg', //亿书 mainnet： fl6ybowg； mainnet 315by9uk 2mn7qoar
   maxAmount: DdnUtils.bignum.multiply('100000000', '100').toString(), // 100亿
   fixedPoint : DdnUtils.bignum.pow(10, 8),
   totalAmount: DdnUtils.bignum.multiply('10000000000000000', '100').toString(), // 100亿

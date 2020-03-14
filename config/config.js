@@ -17,7 +17,7 @@ export default {
       },
       {
         title: '介绍',
-        children: ['guide/readme.md']
+        children: ['guide/readme.md', 'guide/get-started', 'guide/peer-install']
       },
       {
         title: '配置',
