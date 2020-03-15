@@ -31,14 +31,14 @@ toc: menu
 主网mainnet
 
 ```
-$ wget http://www.ddn.link/static/download/ddn-linux-2.0.2-mainnet.tar.gz
+$ wget http://releases.ddn.link/2.0.2/ddn-linux-2.0.2-mainnet.tar.gz
 $ tar zxvf ddn-linux-2.0.2-mainnet.tar.gz
 ```
 
 测试网testnet
 
 ```
-$ wget http://www.ddn.link/static/download/ddn-linux-2.0.2-testnet.tar.gz
+$ wget http://releases.ddn.link/2.0.2/ddn-linux-2.0.2-mainnet.tar.gz
 $ tar zxvf ddn-linux-2.0.2-testnet.tar.gz
 ```
 
