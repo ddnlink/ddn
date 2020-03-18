@@ -21,9 +21,10 @@ export default {
         children: ['guide/readme.md', 'guide/get-started', 'guide/peer-install']
       },
       {
-        title: '配置',
-        children: ['guide/config']
+        title: '框架',
+        children: ['guide/framework', 'guide/config', 'guide/database', 'guide/context']
       },
+      
       {
         title: '贡献',
         children: ['guide/contributing']

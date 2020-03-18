@@ -4,7 +4,7 @@
 
 DDN, 数据分发网络, 是一个成熟的企业级区块链系统，已经服务于版权存证、检验检测、电子医疗等10多个领域。
 
-更多信息，请查看 [官网](https://www.ddn.link) , [ddn-docs](https://github.com/ddnlink/ddn-docs) 
+更多信息，请查看 [官网](https://www.ddn.link) , [docs](http://docs.ddn.link).
 
 **配套书籍和视频**: [《Nodejs区块链开发2》](https://github.com/imfly/blockchain-on-nodejs), [旧版电子书](https://github.com/imfly/bitcoin-on-nodejs), [旧版纸质书籍](https://item.jd.com/12206128.html), [旧版代码](https://github.com/ebookcoin/ebookcoin)
 

@@ -2,7 +2,7 @@
 title: DDN介绍
 order: 1
 nav:
-  title: 入门指南
+  title: 指南
   order: 1
 ---
 
