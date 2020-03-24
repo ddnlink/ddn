@@ -1,5 +1,5 @@
 const DEBUG = require('debug')('dao');
-import node from '../variables.js';
+import node from '../node';
 
 const Account1 = node.randomTxAccount();
 const Account2 = node.randomTxAccount();

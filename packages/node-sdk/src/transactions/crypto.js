@@ -15,7 +15,7 @@ let Buffer;
 if (typeof Buffer === "undefined") {
     Buffer = require("buffer/").Buffer;
 }
-const fixedPoint = 10 ** 8;
+const fixedPoint = constants.fixedPoint;
 
 function getSignatureBytes({public_key}) {
     const bb = new ByteBuffer(32, true);
@@ -48,7 +48,8 @@ function sha256Hex(data) {
 async function getAssetBytes(transaction) {
     if (Asset.Utils.isTypeValueExists(transaction.type)) {
         const trans = Asset.Utils.getTransactionByTypeValue(transaction.type);
-        const transCls = require(trans.package)[trans.name];
+        const transCls = require(trans.package).default[trans.name];
+        
         let transInst = new transCls({
             tokenSetting: {
                 tokenName: constants.nethash[options.get('nethash')].tokenName
@@ -65,52 +66,58 @@ async function getBytes(transaction, skipSignature, skipSecondSignature) {
     let assetSize = 0;
     let assetBytes = null;
 
-    switch (transaction.type) {
-        case trsTypes.SIGNATURE: // Signature
-            {
-                assetBytes = getSignatureBytes(transaction.asset.signature);
-                break;
-            }
+    // assetBytes = await this._assets.call(transaction.type, "getBytes", transaction, skipSignature, skipSecondSignature);
+    // assetSize = assetBytes ? assetBytes.length : 0;
 
-        case trsTypes.DELEGATE: // Delegate
-            {
-                assetBytes = Buffer.from(transaction.asset.delegate.username, "utf8");
-                break;
-            }
+    // switch (transaction.type) {
+    //     case trsTypes.SIGNATURE: // Signature
+    //         {
+    //             assetBytes = getSignatureBytes(transaction.asset.signature);
+    //             break;
+    //         }
 
-        case trsTypes.VOTE: // Vote
-            {
-                assetBytes = Buffer.from(transaction.asset.vote.votes.join(""), "utf8");
-                break;
-            }
+    //     case trsTypes.DELEGATE: // Delegate
+    //         {
+    //             assetBytes = Buffer.from(transaction.asset.delegate.username, "utf8");
+    //             break;
+    //         }
 
-        case trsTypes.MULTI: // Multi-Signature
-            {
-                let keysgroupBuffer = Buffer.from(transaction.asset.multisignature.keysgroup.join(""), "utf8");
-                let bb = new ByteBuffer(1 + 1 + keysgroupBuffer.length, true);
+    //     case trsTypes.VOTE: // Vote
+    //         {
+    //             assetBytes = Buffer.from(transaction.asset.vote.votes.join(""), "utf8");
+    //             break;
+    //         }
 
-                bb.writeByte(transaction.asset.multisignature.min);
-                bb.writeByte(transaction.asset.multisignature.lifetime);
+    //     case trsTypes.MULTI: // Multi-Signature
+    //         {
+    //             let keysgroupBuffer = Buffer.from(transaction.asset.multisignature.keysgroup.join(""), "utf8");
+    //             let bb = new ByteBuffer(1 + 1 + keysgroupBuffer.length, true);
 
-                for (let i = 0; i < keysgroupBuffer.length; i++) {
-                    bb.writeByte(keysgroupBuffer[i]);
-                }
+    //             bb.writeByte(transaction.asset.multisignature.min);
+    //             bb.writeByte(transaction.asset.multisignature.lifetime);
 
-                bb.flip();
+    //             for (let i = 0; i < keysgroupBuffer.length; i++) {
+    //                 bb.writeByte(keysgroupBuffer[i]);
+    //             }
 
-                assetBytes = bb.toBuffer();
-                break;
-            }
+    //             bb.flip();
 
-        default:
-            {
-                assetBytes = await getAssetBytes(transaction);
-            }
-    }
+    //             assetBytes = bb.toBuffer();
+    //             break;
+    //         }
+
+    //     default:
+    //         {
+    //             assetBytes = await getAssetBytes(transaction);
+    //         }
+    // }
+console.log("assetBytes1: ", assetBytes);
 
     if (transaction.__assetBytes__) {
         assetBytes = transaction.__assetBytes__;
     }
+console.log("assetBytes2: ", assetBytes);
+
     if (assetBytes) assetSize = assetBytes.length
 
     // fixme: please delete follower +32
@@ -217,7 +224,7 @@ async function getFee(transaction) {
             let fee = constants.fees.send;
             if (Asset.Utils.isTypeValueExists(transaction.type)) {
                 const trans = Asset.Utils.getTransactionByTypeValue(transaction.type);
-                const transCls = require(trans.package)[trans.name];
+                const transCls = require(trans.package).default[trans.name];
                 let transInst = new transCls({
                     tokenSetting: {
                         fixedPoint: 100000000

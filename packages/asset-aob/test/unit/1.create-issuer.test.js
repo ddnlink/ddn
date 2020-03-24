@@ -1,4 +1,4 @@
-import node from '../variables.js';
+import node from '../node';
 
 async function createTransfer(address, amount, secret) {
     return await node.ddn.transaction.createTransaction(address, amount, null, secret);

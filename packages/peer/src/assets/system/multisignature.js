@@ -140,7 +140,7 @@ class Multisignature {
 		bb.flip();
 		return bb.toBuffer();
     }
-
+   
     async apply({asset}, {id, height}, sender, dbTrans) {
         this._unconfirmedSignatures[sender.address] = false;
 

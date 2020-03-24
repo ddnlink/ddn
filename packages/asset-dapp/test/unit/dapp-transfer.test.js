@@ -1,6 +1,6 @@
 import DdnUtils from '@ddn/utils';
 import extend from 'extend';
-import node from '../variables.js';
+import node from '../node';
 let DEBUG = require('debug')('dapp-transfer')
 let expect = node.expect
 

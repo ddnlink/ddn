@@ -1,5 +1,5 @@
 const DEBUG = require('debug')('dao');
-import node from '../variables.js';
+import node from '../node';
 
 async function createPluginAsset(type, asset, secret) {
     return await node.ddn.assetPlugin.createPluginAsset(type, asset, secret)

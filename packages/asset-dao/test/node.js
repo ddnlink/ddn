@@ -18,9 +18,6 @@ import {getConfigFile, requireFile} from '@ddn/core/lib/getUserConfig';
 import DdnUtils from '@ddn/utils';
 import bluebird from 'bluebird';
 
-// TODO 包的整理规划需要进一步明确原则，根据通用性确定是否写成npm包
-import {DappCategory, DappType} from '@ddn/asset-dapp';
-
 const { bignum, address } = DdnUtils;
 
 // Node configuration
@@ -28,7 +25,7 @@ const baseDir = path.resolve(process.cwd(), './examples/fun-tests');
 const configFile = getConfigFile(baseDir);
 const config = requireFile(configFile);
 
-const baseUrl = `http://${config.address}:${config.port}/`;
+const baseUrl = `http://${config.address}:${config.port}`;
 const api = supertest(`${baseUrl}/api`);
 const peer = supertest(`${baseUrl}/peer`);
 

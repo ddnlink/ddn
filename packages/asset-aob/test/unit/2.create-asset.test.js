@@ -1,7 +1,4 @@
-import node from '../variables';
-
-console.log('node.ddn= ', node.ddn);
-
+import node from '../node';
 
 async function createTransfer(address, amount, secret) {
     return node.ddn.dao.createTransfer(address, amount, secret)

@@ -18,25 +18,20 @@ import {getConfigFile, requireFile} from '@ddn/core/lib/getUserConfig';
 import DdnUtils from '@ddn/utils';
 import bluebird from 'bluebird';
 
-// TODO 包的整理规划需要进一步明确原则，根据通用性确定是否写成npm包
-import {DappCategory, DappType} from '@ddn/asset-dapp';
-
 const { bignum, address } = DdnUtils;
 
 // Node configuration
-const baseDir = path.resolve(__dirname, '../');
+const baseDir = path.resolve(process.cwd(), './examples/fun-tests');
 const configFile = getConfigFile(baseDir);
 const config = requireFile(configFile);
-
-import constants from '../lib/constants';
 
 const baseUrl = `http://${config.address}:${config.port}`;
 const api = supertest(`${baseUrl}/api`);
 const peer = supertest(`${baseUrl}/peer`);
 
-const normalizer = 100000000; // Use this to convert DDN amount to normal value
-const blockTime = 10000; // Block time in miliseconds
-const blockTimePlus = 12000; // Block time + 2 seconds in miliseconds
+// const normalizer = 100000000; // Use this to convert DDN amount to normal value
+// const blockTime = 10000; // Block time in miliseconds
+// const blockTimePlus = 12000; // Block time + 2 seconds in miliseconds
 const version = '2.0.0'; // Node version
 
 // Holds Fee amounts for different transaction types
@@ -242,10 +237,6 @@ function randomIssuerName() {
   return randomName('', 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz');
 }
 
-function randomCapitalUsername() {
-  return randomName(constants.tokenPrefix, 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@$&_.');
-}
-
 function randomName(...args) {
   // Convert arguments to Array
   const array = Array.prototype.slice.apply(args);
@@ -290,7 +281,7 @@ function randomAccount() {
 
 function genNormalAccount() {
   const password = randomPassword();
-  const keys = ddn.crypto.getKeys(password);
+  const keys = nodeSdk.crypto.getKeys(password);
   return {
     address: address.generateBase58CheckAddress(keys.public_key),
     public_key: keys.public_key,
@@ -384,9 +375,9 @@ function EIFY(fn, receiver) {
   });
 }
 
-function beginEpochTime() {
-  return constants[config.netVersion].beginDate;
-}
+// function beginEpochTime() {
+//   return constants[config.netVersion].beginDate;
+// }
 
 function getRealTime(epochTime) {
   if (epochTime === undefined) {
@@ -397,47 +388,20 @@ function getRealTime(epochTime) {
   return t + epochTime * 1000;
 }
 
-ddn.init.init();
+ddn.init();
 
 // Exports variables and functions for access from other files
 export default {
   api,
   chai,
-  peer,
   ddn,
   supertest,
   expect,
-  version,
-  RANDOM_COIN,
   Gaccount,
   Daccount,
   Eaccount,
-
-  //wxm TODO 此处使用新的类型
-//   TxTypes: TxTypes,
-//   AssetTypes: assetTypes,
-
-  //wxm TODO 此处应该使用对应npm包提供的对象
-//   DappType: DappType,
-//   DappCategory: DappCategory,
-
-  guestbookDapp,
-  Fees,
-  normalizer,
-  blockTime,
-  blockTimePlus,
-  randomProperty,
-  randomDelegateName,
-  randomCoin,
-  randomPassword,
-  randomAccount,
-  randomTxAccount,
-  randomUsername,
-  randomIssuerName,
-  randomNumber,
-  randomCapitalUsername,
-  expectedFee,
-  addPeers,
+ 
+  // randomCapitalUsername,
   config,
   waitForNewBlock,
   _getheight: _getHeight,
@@ -446,7 +410,6 @@ export default {
   submitTransaction,
   apiGet,
   genNormalAccount,
-  openAccount,
   PIFY,
   EIFY,
 
@@ -464,13 +427,5 @@ export default {
   openAccountAsync: PIFY(openAccount),
   randomTid,
 
-  // DAO
-  randomOrgId,
-  randomIpId,
-  constants,
-
-  getRealTime,
-
-  DappCategory,
-  DappType
+  getRealTime
 };

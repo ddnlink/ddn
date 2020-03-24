@@ -7038,6 +7038,11 @@ crypto-random-string@^1.0.0:
   resolved "https://registry.yarnpkg.com/crypto-random-string/-/crypto-random-string-1.0.0.tgz#a230f64f568310e1498009940790ec99545bca7e"
   integrity sha1-ojD2T1aDEOFJgAmUB5DsmVRbyn4=
 
+crypto@^1.0.1:
+  version "1.0.1"
+  resolved "https://registry.npmjs.org/crypto/-/crypto-1.0.1.tgz#2af1b7cad8175d24c8a1b0778255794a21803037"
+  integrity sha512-VxBKmeNcqQdiUQUW2Tzq0t377b54N2bMtXO/qiLa+6eRRmmC4qT3D4OnTGoT/U6O9aklQ/jTwbOtRMTTY8G0Ig==
+
 css-blank-pseudo@^0.1.4:
   version "0.1.4"
   resolved "https://registry.yarnpkg.com/css-blank-pseudo/-/css-blank-pseudo-0.1.4.tgz#dfdefd3254bf8a82027993674ccf35483bfcb3c5"
@@ -9883,6 +9888,11 @@ git-clone@^0.1.0:
   version "0.1.0"
   resolved "https://registry.yarnpkg.com/git-clone/-/git-clone-0.1.0.tgz#0d76163778093aef7f1c30238f2a9ef3f07a2eb9"
   integrity sha1-DXYWN3gJOu9/HDAjjyqe8/B6Lrk=
+
+git-cz@^4.3.1:
+  version "4.3.1"
+  resolved "https://registry.npmjs.org/git-cz/-/git-cz-4.3.1.tgz#1a1a462c2730c17c9fcbfa023beee98fd7659934"
+  integrity sha512-z+mbD76lbra8ml2nMoOoFkQPJ2OQvg6vpZa8d9VzNEvygEQNysgMkzGPBxqFKw1VIwZ/PHoQgAf70BPp9uElJw==
 
 git-raw-commits@2.0.0:
   version "2.0.0"
@@ -19027,6 +19037,14 @@ supertest@^3.0.0:
   version "3.4.2"
   resolved "https://registry.yarnpkg.com/supertest/-/supertest-3.4.2.tgz#bad7de2e43d60d27c8caeb8ab34a67c8a5f71aad"
   integrity sha512-WZWbwceHUo2P36RoEIdXvmqfs47idNNZjCuJOqDz6rvtkk8ym56aU5oglORCpPeXGxT7l9rkJ41+O1lffQXYSA==
+  dependencies:
+    methods "^1.1.2"
+    superagent "^3.8.3"
+
+supertest@^4.0.2:
+  version "4.0.2"
+  resolved "https://registry.npmjs.org/supertest/-/supertest-4.0.2.tgz#c2234dbdd6dc79b6f15b99c8d6577b90e4ce3f36"
+  integrity sha512-1BAbvrOZsGA3YTCWqbmh14L0YEq0EGICX/nBnfkfVJn7SrxQV1I3pMYjSzG9y/7ZU2V9dWqyqk2POwxlb09duQ==
   dependencies:
     methods "^1.1.2"
     superagent "^3.8.3"

@@ -54,8 +54,13 @@ function keypair(secret) {
     }
 }
 
+// 根据助记词生成密钥对
+function getKeys(secret) {
+    return keypair(secret);
+}
+
 // TODO: sign(keypair, data) -> sign(data, keypair)
-function sign(keypair, data) {
+function sign(data, keypair) {
     const hash = getHash(data);
     const signature = nacl.sign.detached(
         hash,
@@ -64,6 +69,7 @@ function sign(keypair, data) {
     return bufToHex(signature);
 }
 
+// hex
 function getId(data) {
     return getHash(data).toString("hex");
 }
@@ -109,9 +115,19 @@ function generateAddress(publicKey, tokenPrefix) {
     return tokenPrefix + base58check.encode(h2);
 }
 
-function getHash(data) {
-    return Buffer.from(sha256.hash(Buffer.from(data)));
+// data: string, array buffer
+// function getHash(transaction, skipSignature, skipSecondSignature) {
+//     console.log('getHash transaction=', transaction);
+    
+//     return Buffer.from(sha256.hash(Buffer.from(transaction)));
+// }
+
+async function getHash(transaction, skipSignature, skipSecondSignature) {
+    return sha256Bytes(await getBytes(transaction, skipSignature, skipSecondSignature))
 }
+// function sha256Bytes(data) {
+//     return Buffer.from(sha256.hash(data))
+// }
 
 function bufToHex(data) {
     return Buffer.from(data).toString("hex");
@@ -119,6 +135,7 @@ function bufToHex(data) {
 
 export default {
     keypair,
+    getKeys,
     sign,
     getId,
     randomString,

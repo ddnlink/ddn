@@ -28,7 +28,7 @@ const baseDir = path.resolve(process.cwd(), './examples/fun-tests');
 const configFile = getConfigFile(baseDir);
 const config = requireFile(configFile);
 
-const baseUrl = `http://${config.address}:${config.port}/`;
+const baseUrl = `http://${config.address}:${config.port}`;
 const api = supertest(`${baseUrl}/api`);
 const peer = supertest(`${baseUrl}/peer`);
 

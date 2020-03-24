@@ -1,5 +1,5 @@
 const DEBUG = require('debug')('dao')
-import node from '../variables';
+import node from '../node';
 
 const Gaccount = node.Gaccount;
 // const createOrg = node.ddn.dao.createOrg;

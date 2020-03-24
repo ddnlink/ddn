@@ -47,8 +47,7 @@ class Assets {
      * 根据资产配置名称获取资产实例
      * @param {*} assetName 
      */
-    findInstanceByName(assetName)
-    {
+    findInstanceByName(assetName) {
         return this._loader.findInstanceByName(assetName);
     }
 

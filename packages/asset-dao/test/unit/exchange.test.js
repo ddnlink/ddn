@@ -1,7 +1,7 @@
 const DEBUG = require('debug')('dao');
 import DdnUtil from '@ddn/utils';
 
-import node from '../variables.js';
+import node from '../node';
 
 const Account1 = node.randomTxAccount();
 const Account2 = node.randomTxAccount();

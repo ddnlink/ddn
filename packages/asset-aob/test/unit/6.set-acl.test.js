@@ -1,4 +1,4 @@
-const node = require('../variables')
+const node = require('../node')
 
 async function createPluginAsset(type, asset, secret, secondSecret) {
     return await node.ddn.assetPlugin.createPluginAsset(type, asset, secret, secondSecret)

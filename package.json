@@ -26,7 +26,7 @@
     "start": "NODE_ENV=development node ./scripts/startPeer.js",
     "bootstrap": "lerna bootstrap",
     "build": "father-build",
-    "cm": "npx git-cz",
+    "cm": "git-cz",
     "chore:update-deps": "sh ./scripts/reinstall_deps.sh",
     "clean": "lerna clean -y",
     "publish": "./scripts/publish.js",
@@ -61,7 +61,8 @@
     "dumi": "^1.0.3",
     "eslint": "^6.7.0",
     "father-build": "^1.17.2",
-    "lerna": "^3.18.1"
-  },
-  "dependencies": {}
+    "git-cz": "^4.3.1",
+    "lerna": "^3.18.1",
+    "supertest": "^4.0.2"
+  }
 }

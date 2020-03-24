@@ -1,129 +1,193 @@
+import DdnUtils from "@ddn/utils";
+
 import crypto from "./crypto.js";
+// import crypto from "@ddn/crypto";
 import constants from "../constants.js";
 import slots from "../time/slots.js";
-import options from '../options';
-import trsTypes from '../transaction-types';
-import DdnUtils from '@ddn/utils';
+import options from "../options";
+import trsTypes from "../transaction-types";
 
 const { bignum } = DdnUtils;
 
 function getClientFixedTime() {
-  return slots.getTime() - options.get('clientDriftSeconds')
+    return slots.getTime() - options.get("clientDriftSeconds");
 }
 
-function createTransaction(asset, fee, type, recipientId, message, secret, secondSecret) {
-  const keys = crypto.getKeys(secret);
-
-  const transaction = {
+async function createTransaction(
+    asset,
+    fee,
     type,
-    nethash: options.get('nethash'),
-    amount: "0",
-    fee: `${fee}`,
-    recipient_id: recipientId,
-    sender_public_key: keys.public_key,
-    timestamp: getClientFixedTime(),
+    recipientId,
     message,
-    asset
-  };
+    secret,
+    secondSecret
+) {
+    const keys = crypto.getKeys(secret);
 
-  crypto.sign(transaction, keys)
+    const transaction = {
+        type,
+        nethash: options.get("nethash"),
+        amount: "0",
+        fee: `${fee}`,
+        recipient_id: recipientId,
+        sender_public_key: keys.public_key,
+        timestamp: getClientFixedTime(),
+        message,
+        asset
+    };
 
-  if (secondSecret) {
-    const secondKeys = crypto.getKeys(secondSecret);
-    crypto.secondSign(transaction, secondKeys)
-  }
+    crypto.sign(transaction, keys);
 
-  transaction.id = crypto.getId(transaction)
+    if (secondSecret) {
+        const secondKeys = crypto.getKeys(secondSecret);
+        crypto.secondSign(transaction, secondKeys);
+    }
 
-  return transaction
+    transaction.id = await crypto.getId(transaction);
+
+    return transaction;
 }
 
 export default {
-  createIssuer(name, desc, secret, secondSecret) {
-    const asset = {
-      aobIssuer: {
-        name,
-        desc
-      }
-    };
-    //var fee = (100 + (Math.floor(bytes.length / 200) + 1) * 0.1) * constants.coin
-    const fee = bignum.multiply(100, constants.coin);
-    return createTransaction(asset, fee, trsTypes.AOB_ISSUER, null, null, secret, secondSecret)
-  },
+    createIssuer(name, desc, secret, secondSecret) {
+        const asset = {
+            aobIssuer: {
+                name,
+                desc
+            }
+        };
+        const fee = bignum.multiply(100, constants.coin);
+        return createTransaction(
+            asset,
+            fee,
+            trsTypes.AOB_ISSUER,
+            null,
+            null,
+            secret,
+            secondSecret
+        );
+    },
 
-  createAsset(
-    name,
-    desc,
-    maximum,
-    precision,
-    strategy,
-    allowWriteoff,
-    allowWhitelist,
-    allowBlacklist,
-    secret,
-    secondSecret
-  ) {
-    const asset = {
-      aobAsset: {
+    createAsset(
         name,
         desc,
         maximum,
         precision,
         strategy,
-        allow_blacklist: allowBlacklist,
-        allow_whitelist: allowWhitelist,
-        allow_writeoff: allowWriteoff
-      }
-    };
-    // var fee = (500 + (Math.floor(bytes.length / 200) + 1) * 0.1) * constants.coin
-    const fee = bignum.multiply(500, constants.coin);
-    return createTransaction(asset, fee, trsTypes.AOB_ASSET, null, null, secret, secondSecret)
-  },
+        allowWriteoff,
+        allowWhitelist,
+        allowBlacklist,
+        secret,
+        secondSecret
+    ) {
+        const asset = {
+            aobAsset: {
+                name,
+                desc,
+                maximum,
+                precision,
+                strategy,
+                allow_blacklist: allowBlacklist,
+                allow_whitelist: allowWhitelist,
+                allow_writeoff: allowWriteoff
+            }
+        };
+        // var fee = (500 + (Math.floor(bytes.length / 200) + 1) * 0.1) * constants.coin
+        const fee = bignum.multiply(500, constants.coin);
+        return createTransaction(
+            asset,
+            fee,
+            trsTypes.AOB_ASSET,
+            null,
+            null,
+            secret,
+            secondSecret
+        );
+    },
 
-  createFlags(currency, flagType, flag, secret, secondSecret) {
-    const asset = {
-      aobFlags: {
-        currency,
-        flag_type: flagType,
-        flag
-      }
-    };
-    const fee = bignum.multiply(0.1, constants.coin);
-    return createTransaction(asset, fee, trsTypes.AOB_FLAGS, null, null, secret, secondSecret)
-  },
+    createFlags(currency, flagType, flag, secret, secondSecret) {
+        const asset = {
+            aobFlags: {
+                currency,
+                flag_type: flagType,
+                flag
+            }
+        };
+        const fee = bignum.multiply(0.1, constants.coin);
+        return createTransaction(
+            asset,
+            fee,
+            trsTypes.AOB_FLAGS,
+            null,
+            null,
+            secret,
+            secondSecret
+        );
+    },
 
-  createAcl(currency, operator, flag, list, secret, secondSecret) {
-    const asset = {
-      aobAcl: {
-        currency,
-        operator,
-        flag,
-        list
-      }
-    };
-    const fee = bignum.multiply(0.2, constants.coin);
-    return createTransaction(asset, fee, trsTypes.AOB_ACL, null, null, secret, secondSecret)
-  },
+    createAcl(currency, operator, flag, list, secret, secondSecret) {
+        const asset = {
+            aobAcl: {
+                currency,
+                operator,
+                flag,
+                list
+            }
+        };
+        const fee = bignum.multiply(0.2, constants.coin);
+        return createTransaction(
+            asset,
+            fee,
+            trsTypes.AOB_ACL,
+            null,
+            null,
+            secret,
+            secondSecret
+        );
+    },
 
-  createIssue(currency, amount, secret, secondSecret) {
-    const asset = {
-      aobIssue: {
-        currency,
-        amount: `${amount}`
-      }
-    };
-    const fee = bignum.multiply(0.1, constants.coin);
-    return createTransaction(asset, fee, trsTypes.AOB_ISSUE, null, null, secret, secondSecret)
-  },
+    createIssue(currency, amount, secret, secondSecret) {
+        const asset = {
+            aobIssue: {
+                currency,
+                amount: `${amount}`
+            }
+        };
+        const fee = bignum.multiply(0.1, constants.coin);
+        return createTransaction(
+            asset,
+            fee,
+            trsTypes.AOB_ISSUE,
+            null,
+            null,
+            secret,
+            secondSecret
+        );
+    },
 
-  createTransfer(currency, amount, recipientId, message, secret, secondSecret) {
-    const asset = {
-      aobTransfer: {
+    createTransfer(
         currency,
-        amount: `${amount}`
-      }
-    };
-    const fee = bignum.multiply(0.1, constants.coin);
-    return createTransaction(asset, fee, trsTypes.AOB_TRANSFER, recipientId, message, secret, secondSecret)
-  },
+        amount,
+        recipientId,
+        message,
+        secret,
+        secondSecret
+    ) {
+        const asset = {
+            aobTransfer: {
+                currency,
+                amount: `${amount}`
+            }
+        };
+        const fee = bignum.multiply(0.1, constants.coin);
+        return createTransaction(
+            asset,
+            fee,
+            trsTypes.AOB_TRANSFER,
+            recipientId,
+            message,
+            secret,
+            secondSecret
+        );
+    }
 };

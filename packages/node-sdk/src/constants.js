@@ -1,4 +1,6 @@
 module.exports = {
+  fixedPoint: 10 ** 8, // TODO: imfly
+
   fees:{
     send: "10000000",   //Bignum update
     vote: "10000000", 

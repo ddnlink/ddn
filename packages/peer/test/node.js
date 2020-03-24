@@ -24,11 +24,13 @@ import {DappCategory, DappType} from '@ddn/asset-dapp';
 const { bignum, address } = DdnUtils;
 
 // Node configuration
-const baseDir = path.resolve(process.cwd(), './examples/fun-tests');
+const baseDir = path.resolve(__dirname, '../');
 const configFile = getConfigFile(baseDir);
 const config = requireFile(configFile);
 
-const baseUrl = `http://${config.address}:${config.port}/`;
+import constants from '../lib/constants';
+
+const baseUrl = `http://${config.address}:${config.port}`;
 const api = supertest(`${baseUrl}/api`);
 const peer = supertest(`${baseUrl}/peer`);
 
@@ -240,6 +242,10 @@ function randomIssuerName() {
   return randomName('', 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz');
 }
 
+function randomCapitalUsername() {
+  return randomName(constants.tokenPrefix, 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@$&_.');
+}
+
 function randomName(...args) {
   // Convert arguments to Array
   const array = Array.prototype.slice.apply(args);
@@ -378,9 +384,9 @@ function EIFY(fn, receiver) {
   });
 }
 
-// function beginEpochTime() {
-//   return constants[config.netVersion].beginDate;
-// }
+function beginEpochTime() {
+  return constants[config.netVersion].beginDate;
+}
 
 function getRealTime(epochTime) {
   if (epochTime === undefined) {
@@ -406,6 +412,15 @@ export default {
   Gaccount,
   Daccount,
   Eaccount,
+
+  //wxm TODO 此处使用新的类型
+//   TxTypes: TxTypes,
+//   AssetTypes: assetTypes,
+
+  //wxm TODO 此处应该使用对应npm包提供的对象
+//   DappType: DappType,
+//   DappCategory: DappCategory,
+
   guestbookDapp,
   Fees,
   normalizer,
@@ -420,7 +435,7 @@ export default {
   randomUsername,
   randomIssuerName,
   randomNumber,
-  // randomCapitalUsername,
+  randomCapitalUsername,
   expectedFee,
   addPeers,
   config,
@@ -452,7 +467,10 @@ export default {
   // DAO
   randomOrgId,
   randomIpId,
-  // constants,
+  constants,
 
-  getRealTime
+  getRealTime,
+
+  DappCategory,
+  DappType
 };

@@ -1,5 +1,5 @@
 import fs from "fs";
-import ddnJS from '@ddn/node-sdk';
+import nodeSdk from '@ddn/node-sdk';
 import cryptoLib from "@ddn/crypto";
 
 import accountHelper from "../helpers/account.js";
@@ -17,7 +17,7 @@ function appendFileSync(file, obj) {
 
 // 用于分割原始100亿
 function genUsers(options) {
-	var tokenPrefix = ddnJS.constants.nethash[options.nethash || config.nethash].tokenPrefix;
+	var tokenPrefix = nodeSdk.constants.nethash[options.nethash || config.nethash].tokenPrefix;
 
 	var wan = 10000;
 	var users = []
@@ -48,7 +48,7 @@ function genUsers(options) {
 	// 基金账号
 	var user = accountHelper.account(cryptoLib.generateSecret(), tokenPrefix);
 	
-	user.username = ddnJS.constants.nethash[options.nethash || config.nethash].tokenName + " Foundation";
+	user.username = nodeSdk.constants.nethash[options.nethash || config.nethash].tokenName + " Foundation";
 	user.amount = 0
 	users.push(user);
 

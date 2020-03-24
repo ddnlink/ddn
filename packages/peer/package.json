@@ -53,7 +53,6 @@
     "@ddn/asset-dapp": "^0.1.4",
     "@ddn/asset-evidence": "^0.0.5",
     "@ddn/core": "^0.0.5",
-    "@ddn/node-sdk": "^0.0.19",
     "@ddn/utils": "^0.0.7",
     "ajv": "^6.3.0",
     "array.prototype.find": "^2.1.0",
@@ -95,5 +94,8 @@
     "tracer": "^0.8.11",
     "util-extend": "1.0.3",
     "valid-url": "1.0.9"
+  },
+  "devDependencies": {
+    "@ddn/node-sdk": "^0.0.19"
   }
 }
