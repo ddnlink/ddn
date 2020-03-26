@@ -1,13 +1,15 @@
 import DdnUtils from "@ddn/utils";
 
-import crypto from "./crypto.js";
+import crypto from "./crypto";
 // import crypto from "@ddn/crypto";
-import constants from "../constants.js";
-import slots from "../time/slots.js";
+import constants from "../constants";
+import slots from "../time/slots";
 import options from "../options";
 import trsTypes from "../transaction-types";
 
-const { bignum } = DdnUtils;
+const {
+    bignum
+} = DdnUtils;
 
 function getClientFixedTime() {
     return slots.getTime() - options.get("clientDriftSeconds");

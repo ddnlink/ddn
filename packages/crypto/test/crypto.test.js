@@ -22,7 +22,23 @@ describe("crypto", () => {
             const buf2 = Buffer.from('publicKey').toString("hex");
 
             expect(buf1).not.toBe(buf2);
-        })
+        });
+
+        it('should Buffer.from(sha256.hash(bytes)) is ok', () => {
+            const bytes = Buffer.from('test');
+
+            const result1 = Buffer.from(sha256.hash(bytes));
+            const result2 = Buffer.from(sha256.hash(bytes));
+
+            console.log('result1= ', result1);
+            console.log('result2= ', result2);
+            
+            expect(result1).toEqual(result2);
+        });
+
+        // test('should ', () => {
+        //     // const keypair = nacl.sign.keyPair.fromSeed(hash);
+        // });
     });
 
     describe("#generateAddress", function() {
@@ -44,7 +60,8 @@ describe("crypto", () => {
             // const secret = ddnCrypto.generateSecret();
             const secret = "you cousin patch lemon luxury picture impact lens slogan exotic purse hole";
             // 2. 产生公私钥对
-            const kp = ddnCrypto.keypair(secret);
+            const kp = ddnCrypto.keypair(secret); 
+            // const kp = ddnCrypto.getKeys(secret);
 
             // 3. 对公钥进行sha256 hash 计算
             const hashPubKey = Buffer.from(sha256.hash(kp.publicKey));

@@ -23,7 +23,8 @@ module.exports = {
     '0ab796cd': {
       tokenName: 'DDN',
       tokenPrefix: 'D',
-      beginDate: new Date(Date.UTC(2017, 10, 20, 12, 20, 20, 20)),
+      beginDate: new Date(Date.UTC(2020, 0, 12, 14, 28, 0, 0)),
+    //   beginDate: new Date(Date.UTC(2017, 10, 20, 12, 20, 20, 20)),
     },
 
     // ddn mainnet

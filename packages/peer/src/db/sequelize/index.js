@@ -61,22 +61,26 @@ class DAO {
       .authenticate()
       .then(err => {
         if (err) {
-          return cb(err);
+          cb(err);
+          return null;
         } else {
           this._registerModel(sequelizeInst);
 
           return sequelizeInst
             .sync(logOptions)
             .then(() => {
-              return cb(null, sequelizeInst);
+              cb(null, sequelizeInst);
+              return null;
             })
             .catch(err3 => {
-              return cb(err3);
+              cb(err3);
+              return null;
             });
         }
       })
       .catch(err2 => {
-        return cb(err2);
+        cb(err2);
+        return null;
       });
   }
 
@@ -97,7 +101,8 @@ class DAO {
             .create(modelObj, options)
             .then(newRecord => {
               if (typeof cb == "function") {
-                return cb(null, newRecord);
+                cb(null, newRecord);
+                return null;
               }
             })
             .catch(err2 => {
@@ -108,17 +113,20 @@ class DAO {
                     errMsg2 += "\r\n" + err2.errors[i].message;
                   }
                 }
-                return cb(errMsg2);
+                cb(errMsg2);
+                return null;
               }
             });
         } else {
           if (typeof cb == "function") {
-            return cb("无效的数据输入：" + modelObj);
+            cb("无效的数据输入：" + modelObj);
+            return null;
           }
         }
       } else {
         if (typeof cb == "function") {
-          return cb("数据模型未定义：" + modelName);
+          cb("数据模型未定义：" + modelName);
+          return null;
         }
       }
     } catch (err) {
@@ -129,7 +137,8 @@ class DAO {
             errMsg += "\r\n" + err.errors[i].message;
           }
         }
-        return cb(errMsg);
+        cb(errMsg);
+        return null;
       }
     }
   }
@@ -149,9 +158,10 @@ class DAO {
           });
           modelInst
             .upsert(modelObj, options)
-            .then(newRecord => {
+            .then(() => {
               if (typeof cb == "function") {
-                return cb(null, modelObj);
+                cb(null, modelObj); 
+                return null;
               }
             })
             .catch(err2 => {
@@ -162,17 +172,20 @@ class DAO {
                     errMsg2 += "\r\n" + err2.errors[i].message;
                   }
                 }
-                return cb(errMsg2);
+                cb(errMsg2);
+                return null;
               }
             });
         } else {
           if (typeof cb == "function") {
-            return cb("无效的数据输入：" + modelObj);
+            cb("无效的数据输入：" + modelObj);
+            return null;
           }
         }
       } else {
         if (typeof cb == "function") {
-          return cb("数据模型未定义：" + modelName);
+          cb("数据模型未定义：" + modelName);
+          return null;
         }
       }
     } catch (err) {
@@ -183,7 +196,8 @@ class DAO {
             errMsg += "\r\n" + err.errors[i].message;
           }
         }
-        return cb(errMsg);
+        cb(errMsg);
+        return null;
       }
     }
   }
@@ -216,7 +230,8 @@ class DAO {
             .update(modelObj, options)
             .then(result => {
               if (typeof cb == "function") {
-                return cb(null, result && result.length > 0 ? result[0] : 0);
+                cb(null, result && result.length > 0 ? result[0] : 0);
+                return null;
               }
             })
             .catch(err2 => {
@@ -227,17 +242,20 @@ class DAO {
                     errMsg2 += "\r\n" + err2.errors[i].message;
                   }
                 }
-                return cb(errMsg2);
+                cb(errMsg2);
+                return null;
               }
             });
         } else {
           if (typeof cb == "function") {
-            return cb("无效的数据输入：" + modelObj);
+            cb("无效的数据输入：" + modelObj);
+            return null;
           }
         }
       } else {
         if (typeof cb == "function") {
-          return cb("数据模型未定义：" + modelName);
+          cb("数据模型未定义：" + modelName);
+          return null;
         }
       }
     } catch (err) {
@@ -248,7 +266,8 @@ class DAO {
             errMsg += "\r\n" + err.errors[i].message;
           }
         }
-        return cb(errMsg);
+        cb(errMsg);
+        return null;
       }
     }
   }
@@ -272,7 +291,8 @@ class DAO {
             .destroy(options)
             .then(result => {
               if (typeof cb == "function") {
-                return cb(null, result);
+                cb(null, result);
+                return null;
               }
             })
             .catch(err2 => {
@@ -283,17 +303,20 @@ class DAO {
                     errMsg2 += "\r\n" + err2.errors[i].message;
                   }
                 }
-                return cb(errMsg2);
+                cb(errMsg2);
+                return null;
               }
             });
         } else {
           if (typeof cb == "function") {
-            return cb("where参数是必须的：" + where);
+            cb("where参数是必须的：" + where);
+            return null;
           }
         }
       } else {
         if (typeof cb == "function") {
-          return cb("数据模型未定义：" + modelName);
+          cb("数据模型未定义：" + modelName);
+          return null;
         }
       }
     } catch (err) {
@@ -304,7 +327,8 @@ class DAO {
             errMsg += "\r\n" + err.errors[i].message;
           }
         }
-        return cb(errMsg);
+        cb(errMsg);
+        return null;
       }
     }
   }
@@ -330,9 +354,11 @@ class DAO {
             .then(result => {
               if (typeof cb == "function") {
                 if (result && result.toJSON) {
-                  return cb(null, result.toJSON());
+                  cb(null, result.toJSON());
+                  return null;
                 } else {
-                  return cb(null, result);
+                  cb(null, result);
+                  return null;
                 }
               }
             })
@@ -344,17 +370,20 @@ class DAO {
                     errMsg2 += "\r\n" + err2.errors[i].message;
                   }
                 }
-                return cb(errMsg2);
+                cb(errMsg2);
+                return null;
               }
             });
         } else {
           if (typeof cb == "function") {
-            return cb("无效的数据输入：" + value);
+            cb("无效的数据输入：" + value);
+            return null;
           }
         }
       } else {
         if (typeof cb == "function") {
-          return cb("数据模型未定义：" + modelName);
+          cb("数据模型未定义：" + modelName);
+          return null;
         }
       }
     } catch (err) {
@@ -365,7 +394,8 @@ class DAO {
             errMsg += "\r\n" + err.errors[i].message;
           }
         }
-        return cb(errMsg);
+        cb(errMsg);
+        return null;
       }
     }
   }
@@ -398,12 +428,14 @@ class DAO {
               }
 
               if (results.rows) {
-                return cb(null, {
+                cb(null, {
                   rows: jsonResults,
                   total: results.count
                 });
+                return null;
               } else {
-                return cb(null, jsonResults);
+                cb(null, jsonResults);
+                return null;
               }
             }
           })
@@ -415,12 +447,14 @@ class DAO {
                   errMsg2 += "\r\n" + err2.errors[i].message;
                 }
               }
-              return cb(errMsg2);
+              cb(errMsg2);
+              return null;
             }
           });
       } else {
         if (typeof cb == "function") {
-          return cb("数据模型未定义：" + modelName);
+          cb("数据模型未定义：" + modelName);
+          return null;
         }
       }
     } catch (err) {
@@ -431,7 +465,8 @@ class DAO {
             errMsg += "\r\n" + err.errors[i].message;
           }
         }
-        return cb(errMsg);
+        cb(errMsg);
+        return null;
       }
     }
   }
@@ -479,12 +514,14 @@ class DAO {
               }
 
               if (results.rows) {
-                return cb(null, {
+                cb(null, {
                   rows: jsonResults,
                   total: results.count
                 });
+                return null;
               } else {
-                return cb(null, jsonResults);
+                cb(null, jsonResults);
+                return null;
               }
             }
           })
@@ -496,12 +533,14 @@ class DAO {
                   errMsg2 += "\r\n" + err2.errors[i].message;
                 }
               }
-              return cb(errMsg2);
+              cb(errMsg2);
+              return null;
             }
           });
       } else {
         if (typeof cb == "function") {
-          return cb("数据模型未定义：" + modelName);
+          cb("数据模型未定义：" + modelName);
+          return null;
         }
       }
     } catch (err) {
@@ -512,7 +551,8 @@ class DAO {
             errMsg += "\r\n" + err.errors[i].message;
           }
         }
-        return cb(errMsg);
+        cb(errMsg);
+        return null;
       }
     }
   }
@@ -550,12 +590,14 @@ class DAO {
               }
 
               if (results.rows) {
-                return cb(null, {
+                cb(null, {
                   rows: jsonResults,
                   total: results.count
                 });
+                return null;
               } else {
-                return cb(null, jsonResults);
+                cb(null, jsonResults);
+                return null;
               }
             }
           })
@@ -567,12 +609,14 @@ class DAO {
                   errMsg2 += "\r\n" + err2.errors[i].message;
                 }
               }
-              return cb(errMsg2);
+              cb(errMsg2);
+              return null;
             }
           });
       } else {
         if (typeof cb == "function") {
-          return cb("数据模型未定义：" + modelName);
+          cb("数据模型未定义：" + modelName);
+          return null;
         }
       }
     } catch (err) {
@@ -583,7 +627,8 @@ class DAO {
             errMsg += "\r\n" + err.errors[i].message;
           }
         }
-        return cb(errMsg);
+        cb(errMsg);
+        return null;
       }
     }
   }
@@ -605,9 +650,11 @@ class DAO {
     this._getModel(modelName)
       .findOne(options)
       .then(data => {
-        return cb(null, data ? data.toJSON() : null);
+        cb(null, data ? data.toJSON() : null);
+        return null;
       })
       .catch(cb);
+      return null;
   }
 
   static count(modelName, where, dbTrans, cb) {
@@ -626,7 +673,8 @@ class DAO {
     this._getModel(modelName)
       .count(options)
       .then(data => {
-        return cb(null, data);
+        cb(null, data);
+        return null;
       })
       .catch(cb);
   }
@@ -646,7 +694,8 @@ class DAO {
           })
         )
         .spread((results, metadata) => {
-          return cb(null, results);
+          cb(null, results);
+          return null;
           // cb(null, true);
         })
         .catch(err => {
@@ -657,7 +706,8 @@ class DAO {
                 errMsg += "\r\n" + err.errors[i].message;
               }
             }
-            return cb(errMsg);
+            cb(errMsg);
+            return null;
           }
         });
     } catch (err) {
@@ -668,7 +718,8 @@ class DAO {
             errMsg += "\r\n" + err.errors[i].message;
           }
         }
-        return cb(errMsg);
+        cb(errMsg);
+        return null;
       }
     }
   }
@@ -681,33 +732,40 @@ class DAO {
             if (err) {
               t.rollback()
                 .then(() => {
-                  return cb("rollback--" + err, true);
+                  cb("rollback--" + err, true);
+                  return null;
                 })
                 .catch(err2 => {
-                  return cb("rollback--" + err2, false);
+                  cb("rollback--" + err2, false);
+                  return null;
                 });
             } else {
               t.commit()
                 .then(() => {
-                  return cb(null, true);
+                  cb(null, true);
+                  return null;
                 })
                 .catch(err2 => {
-                  return cb("commit--" + err2, false);
+                  cb("commit--" + err2, false);
+                  return null;
                 });
             }
           });
         } catch (err3) {
           t.rollback()
             .then(() => {
-              return cb("rollback--" + err3, true);
+              cb("rollback--" + err3, true);
+              return null;
             })
             .catch(err4 => {
-              return cb("rollback--" + err4, false);
+              cb("rollback--" + err4, false);
+              return null;
             });
         }
       });
     } else {
-      return cb("数据库未连接", false);
+      cb("数据库未连接", false);
+      return null;
     }
   }
 
@@ -728,17 +786,20 @@ class DAO {
           )
           .then(() => {
             if (typeof cb == "function") {
-              return cb(null, true);
+              cb(null, true);
+              return null;
             }
           })
           .catch(err2 => {
             if (typeof cb == "function") {
-              return cb(err2);
+              cb(err2);
+              return null;
             }
           });
       } else {
         if (typeof cb == "function") {
-          return cb("数据模型未定义：" + modelName);
+          cb("数据模型未定义：" + modelName);
+          return null;
         }
       }
     } catch (err) {
@@ -749,7 +810,8 @@ class DAO {
             errMsg += "\r\n" + err.errors[i].message;
           }
         }
-        return cb(errMsg);
+        cb(errMsg);
+        return null;
       }
     }
   }
@@ -762,17 +824,20 @@ class DAO {
           .drop(logOptions)
           .then(() => {
             if (typeof cb == "function") {
-              return cb(null, true);
+              cb(null, true);
+              return null;
             }
           })
           .catch(err2 => {
             if (typeof cb == "function") {
-              return cb(err2);
+              cb(err2);
+              return null;
             }
           });
       } else {
         if (typeof cb == "function") {
-          return cb("数据模型未定义：" + modelName);
+          cb("数据模型未定义：" + modelName);
+          return null;
         }
       }
     } catch (err) {
@@ -783,7 +848,8 @@ class DAO {
             errMsg += "\r\n" + err.errors[i].message;
           }
         }
-        return cb(errMsg);
+        cb(errMsg);
+        return null;
       }
     }
   }
@@ -805,17 +871,20 @@ class DAO {
           )
           .then(() => {
             if (typeof cb == "function") {
-              return cb(null, true);
+              cb(null, true);
+              return null;
             }
           })
           .catch(err2 => {
             if (typeof cb == "function") {
-              return cb(err2);
+              cb(err2);
+              return null;
             }
           });
       } else {
         if (typeof cb == "function") {
-          return cb("数据模型未定义：" + modelName);
+          cb("数据模型未定义：" + modelName);
+          return null;
         }
       }
     } catch (err) {
@@ -826,7 +895,8 @@ class DAO {
             errMsg += "\r\n" + err.errors[i].message;
           }
         }
-        return cb(errMsg);
+        cb(errMsg);
+        return null;
       }
     }
   }

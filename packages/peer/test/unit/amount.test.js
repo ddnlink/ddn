@@ -1,4 +1,4 @@
-var node = require("./../variables.js")
+var node = require("../node")
 var amount = require('../../lib/helpers/amount.js')
 
 describe('amount', function () {

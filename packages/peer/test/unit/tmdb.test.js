@@ -1,4 +1,4 @@
-var node = require("./../variables.js")
+var node = require("../node")
 var Tmdb = require('../../lib/helpers/tmdb.js')
 
 describe('tmdb', function () {

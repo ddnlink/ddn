@@ -5,11 +5,12 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
+import nacl from 'tweetnacl';
 import sha256 from "fast-sha256";
 import RIPEMD160 from "ripemd160";
 import Mnemonic from "bitcore-mnemonic";
 import base58check from "./base58check";
-import nacl from 'tweetnacl';
+import { getBytes } from './bytes';
 
 function randomName() {
     // Convert arguments to Array
@@ -44,8 +45,9 @@ function randomString(max) {
     return randomName(max, "", possible);
 }
 
+// 根据助记词生成密钥对
 function keypair(secret) {
-    const hash = getHash(secret);
+    const hash = Buffer.from(sha256.hash(Buffer.from(secret)))
     const keypair = nacl.sign.keyPair.fromSeed(hash);
 
     return {
@@ -54,19 +56,31 @@ function keypair(secret) {
     }
 }
 
-// 根据助记词生成密钥对
+// 兼容处理
 function getKeys(secret) {
     return keypair(secret);
 }
 
 // TODO: sign(keypair, data) -> sign(data, keypair)
-function sign(data, keypair) {
-    const hash = getHash(data);
+function sign(transaction, {private_key}) {
+    const hash = getHash(transaction);
     const signature = nacl.sign.detached(
         hash,
-        Buffer.from(keypair.privateKey, "hex")
+        Buffer.from(private_key, "hex")
     );
-    return bufToHex(signature);
+    // if (!transaction.signature) {
+    //     // eslint-disable-next-line require-atomic-updates
+    //     transaction.signature = bufToHex(signature);
+    // } else {
+        return bufToHex(signature);
+    // }
+}
+
+function secondSign(transaction, {private_key}) {
+    const hash = getHash(transaction);
+    const signature = nacl.sign.detached(hash, Buffer.from(private_key, "hex"));
+    // eslint-disable-next-line require-atomic-updates
+    transaction.sign_signature = Buffer.from(signature).toString("hex")    //wxm block database
 }
 
 // hex
@@ -115,19 +129,10 @@ function generateAddress(publicKey, tokenPrefix) {
     return tokenPrefix + base58check.encode(h2);
 }
 
-// data: string, array buffer
-// function getHash(transaction, skipSignature, skipSecondSignature) {
-//     console.log('getHash transaction=', transaction);
-    
-//     return Buffer.from(sha256.hash(Buffer.from(transaction)));
-// }
-
-async function getHash(transaction, skipSignature, skipSecondSignature) {
-    return sha256Bytes(await getBytes(transaction, skipSignature, skipSecondSignature))
+function getHash(trs, skipSignature, skipSecondSignature) {
+    const bytes = getBytes(trs, skipSignature, skipSecondSignature);
+    return Buffer.from(sha256.hash(bytes));
 }
-// function sha256Bytes(data) {
-//     return Buffer.from(sha256.hash(data))
-// }
 
 function bufToHex(data) {
     return Buffer.from(data).toString("hex");
@@ -136,7 +141,6 @@ function bufToHex(data) {
 export default {
     keypair,
     getKeys,
-    sign,
     getId,
     randomString,
     randomNethash,
@@ -144,5 +148,10 @@ export default {
     isValidSecret,
     generateAddress,
     base58check,
-    isAddress
+    isAddress,
+
+    // packages
+    sha256,
+    sign,
+    secondSign
 };

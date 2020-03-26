@@ -1,7 +1,7 @@
 'use strict';
 
 var DEBUG = require('debug')('multinodes');
-var node = require("./../variables.js");
+var node = require("../node");
 var async = require('async');
 
 var urls = [

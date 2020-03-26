@@ -1,7 +1,8 @@
-import node from './../variables.js';
 import DdnUtils from '@ddn/utils';
 
-const DEBUG = require('debug')('aob');
+import node from '../node';
+
+const DEBUG = require('debug')('peer');
 
 // Account info for a RANDOM account (which we create later) - 0 DDN amount | Will act as delegate
 const Account1 = node.randomTxAccount();
@@ -15,9 +16,9 @@ let offsetTimestamp = 0;
 // Used for calculating amounts
 let expectedFee = "0";  //DdnUtils.bignum update
 let totalTxFee = "0";
-const randomCoin = "0";
+// const randomCoin = "0";
 
-before(async () => {
+beforeAll(async () => {
     let res = await node.openAccountAsync({ secret: Account1.password, secondSecret: Account1.second_password });
     node.expect(res.body).to.have.property('success').to.be.true
     Account1.address = res.body.account.address
@@ -187,7 +188,7 @@ describe('GET /api/transactions', () => {
     });
 
     it('Using offset. Should be ok', done => {
-        const senderId = '';
+        // const senderId = '';
         const blockId = '';
         const recipientId = '';
         const limit = 100;

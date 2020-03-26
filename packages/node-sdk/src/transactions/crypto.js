@@ -38,12 +38,12 @@ function toLocalBuffer(buf) {
 }
 
 function sha256Bytes(data) {
-    return Buffer.from(sha256.hash(data))
+    return Buffer.from(sha256.hash(data));
 }
 
-function sha256Hex(data) {
-    return Buffer.from(sha256.hash(data)).toString('hex')
-}
+// function sha256Hex(data) {
+//     return sha256Bytes(data).toString('hex');
+// }
 
 async function getAssetBytes(transaction) {
     if (Asset.Utils.isTypeValueExists(transaction.type)) {
@@ -66,7 +66,9 @@ async function getBytes(transaction, skipSignature, skipSecondSignature) {
     let assetSize = 0;
     let assetBytes = null;
 
-    // assetBytes = await this._assets.call(transaction.type, "getBytes", transaction, skipSignature, skipSecondSignature);
+    // TODO: 修改吧
+    // console.log('global= ', global);
+    // assetBytes = await global.assets.call(transaction.type, "getBytes", transaction, skipSignature, skipSecondSignature);
     // assetSize = assetBytes ? assetBytes.length : 0;
 
     // switch (transaction.type) {
@@ -111,12 +113,14 @@ async function getBytes(transaction, skipSignature, skipSecondSignature) {
     //             assetBytes = await getAssetBytes(transaction);
     //         }
     // }
-console.log("assetBytes1: ", assetBytes);
+
+    assetBytes = await getAssetBytes(transaction);
+
+    console.log('assetBytes= ', assetBytes);
 
     if (transaction.__assetBytes__) {
         assetBytes = transaction.__assetBytes__;
     }
-console.log("assetBytes2: ", assetBytes);
 
     if (assetBytes) assetSize = assetBytes.length
 
@@ -124,15 +128,25 @@ console.log("assetBytes2: ", assetBytes);
     // if (transaction.requesterPublicKey) {
     // 	assetSize += 32;
     // }
+    const size = 1 + // type (int)
+        4 + // timestamp (int)
+        8 + // nethash 8
+        32 + // senderPublicKey (int)
+        32 + // requesterPublicKey (long)
+        8 + // recipientId (long)
+        8 + // amount (long)
+        64 + // message
+        64; // args or unused
+    
+    const bb = new ByteBuffer(size + assetSize, true);
 
-    const bb = new ByteBuffer(1, true);
+    // const bb = new ByteBuffer(1, true);
     bb.writeByte(transaction.type); // +1
     bb.writeInt(transaction.timestamp); // +4
     bb.writeString(transaction.nethash); // +8
 
     // +32
     const senderPublicKeyBuffer = Buffer.from(transaction.sender_public_key, "hex");
-    // var senderPublicKeyBuffer = Buffer.from(transaction.senderPublicKey, "hex");
     for (let i = 0; i < senderPublicKeyBuffer.length; i++) {
         bb.writeByte(senderPublicKeyBuffer[i]);
     }
@@ -202,12 +216,21 @@ console.log("assetBytes2: ", assetBytes);
     return Buffer.from(buffer);
 }
 
-async function getId(transaction) {
-    return sha256Hex(await getBytes(transaction))
+async function getHash(transaction, skipSignature, skipSecondSignature) {
+    const bytes = await getBytes(transaction, skipSignature, skipSecondSignature);
+    const result = Buffer.from(sha256.hash(bytes));
+
+    console.log("bytes2: ", bytes);
+    console.log("getHash2: ", result);
+    console.log("id2: ", result.toString('hex'));
+    
+    return result;
 }
 
-async function getHash(transaction, skipSignature, skipSecondSignature) {
-    return sha256Bytes(await getBytes(transaction, skipSignature, skipSecondSignature))
+// id: 不含签名的hash值
+async function getId(transaction) {
+    const result = await this.getHash(transaction);
+    return result.toString('hex');
 }
 
 async function getFee(transaction) {
@@ -245,7 +268,6 @@ async function sign(transaction, {private_key}) {
     if (!transaction.signature) {
         // eslint-disable-next-line require-atomic-updates
         transaction.signature = Buffer.from(signature).toString("hex");
-        // return transaction; // fixme: 确认方法
     } else {
         return Buffer.from(signature).toString("hex");
     }

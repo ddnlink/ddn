@@ -1,6 +1,4 @@
-"use strict";
-
-var node = require("./../variables.js");
+import node from "../node";
 
 async function createTransfer(address, amount, secret, second_secret) {
     return await node.ddn.transaction.createTransaction(address, amount, null, secret, second_secret)
@@ -12,56 +10,56 @@ async function newAccount() {
         .set("Accept", "application/json")
         .expect("Content-Type", /json/)
         .expect(200)
-        .end((err, res) => {
-            node.expect(res.body).to.have.property("secret");
+        .end((err, {body}) => {
+            node.expect(body).to.have.property("secret");
 
             if (err)
             {
                 return reject(err);
             }
             
-            resolve(res.body);
+            resolve(body);
         });
     });
 }
 
-async function multiSign(account, trsId) {
+async function multiSign({secret, address}, trsId) {
     return new Promise((resolve, reject) => {
         node.api.post("/multisignatures/sign")
         .set("Accept", "application/json")
         .send({
-            secret: account.secret,
+            secret,
             transactionId: trsId
         })
         .expect("Content-Type", /json/)
         .expect(200)
-        .end(function (err, res) {
+        .end((err, {body}) => {
             if (err) {
                 return reject(err);
             }
 
-            console.log(account.address + " sign:" + JSON.stringify(res.body));
+            console.log(`${address} sign:${JSON.stringify(body)}`);
 
-            node.expect(res.body).to.have.property("success").to.be.true;
+            node.expect(body).to.have.property("success").to.be.true;
 
             resolve();
         });
     });
 }
 
-var multiAccount;
-var accounts = [];
+let multiAccount;
+const accounts = [];
 
-var multiTrsId;
+let multiTrsId;
 
 describe("PUT /multisignatures", () => {
 
     before(async () => {
         multiAccount = await newAccount();
-        console.log("Multi Account: " + JSON.stringify(multiAccount));
+        console.log(`Multi Account: ${JSON.stringify(multiAccount)}`);
         console.log("\r\n");
 
-        var transaction = await createTransfer(multiAccount.address, 100000000000, node.Gaccount.password);
+        const transaction = await createTransfer(multiAccount.address, 100000000000, node.Gaccount.password);
         await new Promise((resolve, reject) => {
             node.peer.post("/transactions")
                 .set("Accept", "application/json")
@@ -69,13 +67,13 @@ describe("PUT /multisignatures", () => {
                 .set("nethash", node.config.nethash)
                 .set("port", node.config.port)
                 .send({
-                    transaction: transaction
+                    transaction
                 })
                 .expect("Content-Type", /json/)
                 .expect(200)
-                .end((err, res) => {
-                    console.log(JSON.stringify(res.body))
-                    node.expect(res.body).to.have.property("success").to.be.true;
+                .end((err, {body}) => {
+                    console.log(JSON.stringify(body))
+                    node.expect(body).to.have.property("success").to.be.true;
                     
                     if (err) {
                         reject(err);
@@ -85,18 +83,18 @@ describe("PUT /multisignatures", () => {
                 });
         });
 
-        var account =  await newAccount();
-        console.log("account: " + JSON.stringify(account));
+        const account =  await newAccount();
+        console.log(`account: ${JSON.stringify(account)}`);
         console.log("\r\n");
         accounts.push(account);
 
-        var account2 =  await newAccount();
-        console.log("account2: " + JSON.stringify(account2));
+        const account2 =  await newAccount();
+        console.log(`account2: ${JSON.stringify(account2)}`);
         console.log("\r\n");
         accounts.push(account2);
 
-        var account3 =  await newAccount();
-        console.log("account3: " + JSON.stringify(account3));
+        const account3 =  await newAccount();
+        console.log(`account3: ${JSON.stringify(account3)}`);
         console.log("\r\n");
         accounts.push(account3);
 
@@ -105,12 +103,12 @@ describe("PUT /multisignatures", () => {
     it("PUT /multisignatures. Should be ok", (done) => {
         node.onNewBlock(() => {
 
-            var kg = [];
-            for (var i = 0; i < accounts.length; i++) {
-                var acc = accounts[i];
-                kg.push("+" + acc.publicKey);
+            const kg = [];
+            for (let i = 0; i < accounts.length; i++) {
+                const acc = accounts[i];
+                kg.push(`+${acc.publicKey}`);
             }
-            console.log("keysgroup: " + JSON.stringify(kg));
+            console.log(`keysgroup: ${JSON.stringify(kg)}`);
             console.log("\r\n");
 
             node.api.put("/multisignatures")
@@ -123,11 +121,11 @@ describe("PUT /multisignatures", () => {
             })
             .expect("Content-Type", /json/)
             .expect(200)
-            .end(function (err, res) {
-                console.log(JSON.stringify(res.body));
-                node.expect(res.body).to.have.property("success").to.be.true;
+            .end((err, {body}) => {
+                console.log(JSON.stringify(body));
+                node.expect(body).to.have.property("success").to.be.true;
 
-                multiTrsId = res.body.transactionId;
+                multiTrsId = body.transactionId;
 
                 done();
             });
@@ -137,12 +135,12 @@ describe("PUT /multisignatures", () => {
     });
 
     it("POST /multisignatures/sign. Should be ok", async() => {
-        var result = false;
+        let result = false;
 
-        for (var i = 0; i < accounts.length; i++) {
+        for (let i = 0; i < accounts.length; i++) {
             try
             {
-                var account = accounts[i];
+                const account = accounts[i];
                 await multiSign(account, multiTrsId);
                 result = true;
             }

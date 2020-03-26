@@ -2,12 +2,11 @@
  * RootRouter接口
  * wangxm   2019-01-11
  */
-import ip from 'ip';
+import ip from "ip";
 
-import DdnUtils from '@ddn/utils';
+import DdnUtils from "@ddn/utils";
 
 class RootRouter {
-
     constructor(context) {
         Object.assign(this, context);
         this._context = context;
@@ -15,42 +14,58 @@ class RootRouter {
         this._invalidTrsCache = new DdnUtils.limitCache();
     }
 
-    async filter({headers, connection, body}, res, next) {
-        const peerIp = headers['x-forwarded-for'] || connection.remoteAddress;
+    async filter({
+        headers,
+        connection,
+        body
+    }, res, next) {
+        const peerIp = headers["x-forwarded-for"] || connection.remoteAddress;
         if (!peerIp) {
-            return res.status(500).send({ success: false, error: "Wrong header data" });
+            return res
+                .status(500)
+                .send({
+                    success: false,
+                    error: "Wrong header data"
+                });
         }
 
-        headers['port'] = parseInt(headers['port']);
+        headers["port"] = parseInt(headers["port"]);
 
         const validateErrors = await this.ddnSchema.validate({
-            type: "object",
-            properties: {
-                os: {
-                    type: "string",
-                    maxLength: 64
+                type: "object",
+                properties: {
+                    os: {
+                        type: "string",
+                        maxLength: 64
+                    },
+                    nethash: {
+                        type: "string",
+                        maxLength: 8
+                    },
+                    version: {
+                        type: "string",
+                        maxLength: 11
+                    }
                 },
-                'nethash': {
-                    type: 'string',
-                    maxLength: 8
-                },
-                'version': {
-                    type: 'string',
-                    maxLength: 11
-                }
+                required: ["nethash", "version"]
             },
-            required: ['nethash', 'version']
-        }, headers);
+            headers
+        );
         if (validateErrors) {
-            return res.status(500).send({success: false, error: validateErrors[0].message});
+            return res
+                .status(500)
+                .send({
+                    success: false,
+                    error: validateErrors[0].message
+                });
         }
 
-        if (headers['nethash'] !== this.config.nethash) {
+        if (headers["nethash"] !== this.config.nethash) {
             return res.status(500).send({
                 success: false,
                 error: "Request is made on the wrong network",
                 expected: this.config.nethash,
-                received: headers['nethash']
+                received: headers["nethash"]
             });
         }
 
@@ -101,93 +116,120 @@ class RootRouter {
 
     async getList(req) {
         let peers;
-        try
-        {
+        try {
             peers = await this.runtime.peer.queryDappPeers();
-        }
-        catch (err)
-        {
+        } catch (err) {
             this.logger.error(`${err}`);
         }
-        return {peers: peers ? peers : []};
+        return {
+            peers: peers ? peers : []
+        };
     }
 
-    async postPropose({body}) {
-        if (typeof body.propose == 'string') {
-            body.propose = this.protobuf.decodeBlockPropose(Buffer.from(body.propose, 'base64'));
+    async postPropose({
+        body
+    }) {
+        if (typeof body.propose == "string") {
+            body.propose = this.protobuf.decodeBlockPropose(
+                Buffer.from(body.propose, "base64")
+            );
         }
 
         const validateErrors = await this.ddnSchema.validate({
-            type: "object",
-            properties: {
-                height: {
-                    type: "string"
+                type: "object",
+                properties: {
+                    height: {
+                        type: "string"
+                    },
+                    id: {
+                        type: "string",
+                        maxLength: 64
+                    },
+                    timestamp: {
+                        type: "integer"
+                    },
+                    generator_public_key: {
+                        type: "string",
+                        format: "publicKey"
+                    },
+                    address: {
+                        type: "string"
+                    },
+                    hash: {
+                        type: "string",
+                        format: "hex"
+                    },
+                    signature: {
+                        type: "string",
+                        format: "signature"
+                    }
                 },
-                id: {
-                    type: "string",
-                    maxLength: 64,
-                },
-                timestamp: {
-                    type: "integer"
-                },
-                generator_public_key: {
-                    type: "string",
-                    format: "publicKey"
-                },
-                address: {
-                    type: "string"
-                },
-                hash: {
-                    type: "string",
-                    format: "hex"
-                },
-                signature: {
-                    type: "string",
-                    format: "signature"
-                }
+                required: [
+                    "height",
+                    "id",
+                    "timestamp",
+                    "generator_public_key",
+                    "address",
+                    "hash",
+                    "signature"
+                ]
             },
-            required: ["height", "id", "timestamp", "generator_public_key", "address", "hash", "signature"]
-        }, body.propose);
+            body.propose
+        );
 
         if (validateErrors) {
-            return {success: false, error: `Schema validation error: ${validateErrors[0].message}`};
+            return {
+                success: false,
+                error: `Schema validation error: ${validateErrors[0].message}`
+            };
         }
 
         setImmediate(async () => {
             await this.runtime.block.receiveNewPropose(body.propose);
         });
 
-        return {succ: true};
+        return {
+            succ: true
+        };
     }
 
-    async postVotes({body}) {
+    async postVotes({
+        body
+    }) {
         const validateErrors = await this.ddnSchema.validate({
-            type: "object",
-            properties: {
-                height: {
-                    type: "string"
+                type: "object",
+                properties: {
+                    height: {
+                        type: "string"
+                    },
+                    id: {
+                        type: "string",
+                        maxLength: 64
+                    },
+                    signatures: {
+                        type: "array",
+                        minLength: 1,
+                        maxLength: 101
+                    }
                 },
-                id: {
-                    type: "string",
-                    maxLength: 64,
-                },
-                signatures: {
-                    type: "array",
-                    minLength: 1,
-                    maxLength: 101,
-                }
+                required: ["height", "id", "signatures"]
             },
-            required: ["height", "id", "signatures"]
-        }, body);
+            body
+        );
         if (validateErrors) {
-            return {success: false, error: "Schema validation error"};
+            return {
+                success: false,
+                error: "Schema validation error"
+            };
         }
 
         setImmediate(async () => {
             await this.runtime.block.receiveVotes(body);
         });
 
-        return {success: true};
+        return {
+            success: true
+        };
     }
 
     async getSignatures(req) {
@@ -204,81 +246,127 @@ class RootRouter {
             }
         });
 
-        return {success: true, signatures};
+        return {
+            success: true,
+            signatures
+        };
     }
 
-    async postSignatures({body}) {
+    async postSignatures({
+        body
+    }) {
         const validateErrors = await this.ddnSchema.validate({
-            type: "object",
-            properties: {
-                signature: {
-                    type: "object",
-                    properties: {
-                        transaction: {
-                            type: "string"
+                type: "object",
+                properties: {
+                    signature: {
+                        type: "object",
+                        properties: {
+                            transaction: {
+                                type: "string"
+                            },
+                            signature: {
+                                type: "string",
+                                format: "signature"
+                            }
                         },
-                        signature: {
-                            type: "string",
-                            format: "signature"
-                        }
-                    },
-                    required: ['transaction', 'signature']
-                }
+                        required: ["transaction", "signature"]
+                    }
+                },
+                required: ["signature"]
             },
-            required: ['signature']
-        }, body);
+            body
+        );
         if (validateErrors) {
-            return {success: false, error: `Validation error: ${validateErrors[0].message}`};
+            return {
+                success: false,
+                error: `Validation error: ${validateErrors[0].message}`
+            };
         }
 
-        try
-        {
+        try {
             await this.runtime.multisignature.processSignature(body.signature);
-            return {success: true};
-        }
-        catch (err)
-        {
-            return {success: false, error: "Process signature error" };
+            return {
+                success: true
+            };
+        } catch (err) {
+            return {
+                success: false,
+                error: "Process signature error"
+            };
         }
     }
 
     async getTransactions(req) {
         const unconfirmedTransactions = await this.runtime.transaction.getUnconfirmedTransactionList();
-        return {transactions: unconfirmedTransactions};
+        return {
+            transactions: unconfirmedTransactions
+        };
     }
 
-    async postTransactions({headers, connection, body}) {
+    async postTransactions({
+        headers,
+        connection,
+        body
+    }) {
         const lastBlock = await this.runtime.block.getLastBlock();
         const lastSlot = this.runtime.slot.getSlotNumber(lastBlock.timestamp);
 
         if (this.runtime.slot.getNextSlot() - lastSlot >= 12) {
-            this.logger.error("Blockchain is not ready", { getNextSlot: this.runtime.slot.getNextSlot(), lastSlot, lastBlockHeight: lastBlock.height });
-            return {success: false, error: "Blockchain is not ready"};
+            this.logger.error("Blockchain is not ready", {
+                getNextSlot: this.runtime.slot.getNextSlot(),
+                lastSlot,
+                lastBlockHeight: lastBlock.height
+            });
+            return {
+                success: false,
+                error: "Blockchain is not ready"
+            };
         }
 
-        const peerIp = headers['x-forwarded-for'] || connection.remoteAddress;
-        const peerStr = peerIp ? `${peerIp}:${isNaN(headers['port']) ? 'unknown' : headers['port']}` : 'unknown';
-        if (typeof body.transaction == 'string') {
-            body.transaction = this.protobuf.decodeTransaction(Buffer.from(body.transaction, 'base64'));
+        const peerIp = headers["x-forwarded-for"] || connection.remoteAddress;
+        const peerStr = peerIp ?
+            `${peerIp}:${
+                  isNaN(headers["port"]) ? "unknown" : headers["port"]
+              }` :
+            "unknown";
+        if (typeof body.transaction == "string") {
+            body.transaction = this.protobuf.decodeTransaction(
+                Buffer.from(body.transaction, "base64")
+            );
         }
 
         let transaction;
         try {
-            transaction = await this.runtime.transaction.objectNormalize(body.transaction);
-            transaction.asset = transaction.asset || {}
+            transaction = await this.runtime.transaction.objectNormalize(
+                body.transaction
+            );
+            transaction.asset = transaction.asset || {};
         } catch (e) {
             this.logger.error("transaction parse error", {
                 raw: body,
                 trs: transaction,
-                error: DdnUtils.system.getErrorMsg(e)
+                error: e // DdnUtils.system.getErrorMsg(e)
             });
 
-            if (peerIp && headers['port'] > 0 && headers['port' < 65536]) {
-                await this.runtime.peer.changeState(ip.toLong(peerIp), headers['port'], 0, 3600);
-                this.logger.log(`Received transaction ${transaction ? transaction.id : 'null'} is not valid, ban 60 min`, peerStr);
+            if (peerIp && headers["port"] > 0 && headers["port" < 65536]) {
+                await this.runtime.peer.changeState(
+                    ip.toLong(peerIp),
+                    headers["port"],
+                    0,
+                    3600
+                );
+                this.logger.log(
+                    `Received transaction ${
+                        transaction ? transaction.id : "null"
+                    } is not valid, ban 60 min`,
+                    peerStr
+                );
             }
 
-            return {success: false, error: "Invalid transaction body"};
+            return {
+                success: false,
+                error: "Invalid transaction body"
+            };
         }
 
         if (!transaction.id) {
@@ -286,43 +374,63 @@ class RootRouter {
         }
 
         if (this._invalidTrsCache.has(transaction.id)) {
-            return {success: false, error: `The transaction ${transaction.id} is in process alreay.`};
+            return {
+                success: false,
+                error: `The transaction ${transaction.id} is in process alreay.`
+            };
         }
 
         return new Promise((resolve, reject) => {
-            this.balancesSequence.add(async (cb) => {
-                if (await this.runtime.transaction.hasUnconfirmedTransaction(transaction)) {
-                    return cb(`The transaction ${transaction.id} is in process already..`); // Note: please get it.
-                }
+            this.balancesSequence.add(
+                async cb => {
+                        if (
+                            await this.runtime.transaction.hasUnconfirmedTransaction(
+                                transaction
+                            )
+                        ) {
+                            return cb(
+                                `The transaction ${transaction.id} is in process already..`
+                            ); // Note: please get it.
+                        }
 
-                this.logger.log(`Received transaction ${transaction.id} from peer ${peerStr}`);
+                        this.logger.log(
+                            `Received transaction ${transaction.id} from peer ${peerStr}`
+                        );
 
-                try
-                {
-                    const transactions = await this.runtime.transaction.receiveTransactions([transaction]);
-                    cb(null, transactions);
-                }
-                catch(exp)
-                {
-                    cb(exp);
-                }
-            }, (err, transactions) => {
-                let result = {success: true};
+                        try {
+                            const transactions = await this.runtime.transaction.receiveTransactions(
+                                [transaction]
+                            );
+                            cb(null, transactions);
+                        } catch (exp) {
+                            cb(exp);
+                        }
+                    },
+                    (err, transactions) => {
+                        let result = {
+                            success: true
+                        };
 
-                if (err) {
-                    this.logger.warn(`Receive invalid transaction, id is ${transaction.id}, ${DdnUtils.system.getErrorMsg(err)}`);
-                    this._invalidTrsCache.set(transaction.id, true);
+                        if (err) {
+                            this.logger.warn(
+                                `Receive invalid transaction, id is ${
+                                transaction.id
+                            }, ${DdnUtils.system.getErrorMsg(err)}`
+                            );
+                            this._invalidTrsCache.set(transaction.id, true);
+                            result = {
+                                success: false,
+                                error: err.message ? err.message : err
+                            };
+                        } else if (transactions && transactions.length > 0) {
+                            result.transactionId = transactions[0].id;
+                        }
 
-                    result = {success: false, error: (err.message ? err.message : err)};
-                } else if (transactions && transactions.length > 0) {
-                    result.transactionId = transactions[0].id;
-                }
-
-                resolve(result);
-            });
+                        resolve(result);
+                    }
+            );
         });
     }
-
 }
 
 export default RootRouter;

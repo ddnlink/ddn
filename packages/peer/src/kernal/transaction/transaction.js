@@ -2,18 +2,20 @@
  * 交易核心方法和处理逻辑
  * wangxm   2018-12-28
  */
-import Assets from '../../assets';
 
 import ByteBuffer from "bytebuffer";
 import crypto from 'crypto';
+import sha256 from "fast-sha256";
 import ed from 'ed25519';
 import extend from 'util-extend';
-import DdnUtils from '@ddn/utils';    //DdnUtils.bignum update
+import cryptoLib from "@ddn/crypto";
+import DdnUtils from '@ddn/utils';
+
+import Assets from '../../assets';
 
 let _singleton;
 
-class Transaction
-{
+class Transaction {
     static singleton(context) {
         if (!_singleton) {
             _singleton = new Transaction(context);
@@ -44,8 +46,7 @@ class Transaction
      * 根据资产配置名称获取资产实例
      * @param {*} assetName
      */
-    getAssetInstanceByName(assetName)
-    {
+    getAssetInstanceByName(assetName) {
         return this._assets.findInstanceByName(assetName);
     }
 
@@ -80,9 +81,10 @@ class Transaction
 
         trs = await this._assets.call(trs.type, "create", data, trs);
 
-        trs.signature = await this.sign(data.keypair, trs);
+        trs.signature = await cryptoLib.sign(trs, data.keypair);
+        // trs.signature = await this.sign(data.keypair, trs);
         if (data.sender.second_signature && data.second_keypair) {
-            trs.sign_signature = await this.sign(data.second_keypair, trs);
+            trs.sign_signature = await cryptoLib.sign(trs, data.second_keypair);
         }
 
         trs.id = await this.getId(trs);
@@ -92,6 +94,7 @@ class Transaction
         return trs;
     }
 
+    // TODO: delete it
     async sign(keypair, trs) {
         const hash = await this.getHash(trs);
         return ed.Sign(hash, keypair).toString('hex');
@@ -170,7 +173,7 @@ class Transaction
             }
         }
 
-        if (!skipSecondSignature && trs.sign_signature) {    //wxm block database
+        if (!skipSecondSignature && trs.sign_signature) { //wxm block database
             const signSignatureBuffer = Buffer.from(trs.sign_signature, 'hex');
             for (let i = 0; i < signSignatureBuffer.length; i++) {
                 bb.writeByte(signSignatureBuffer[i]);
@@ -189,7 +192,7 @@ class Transaction
 
         for (const p in trs) {
             if (trs[p] === null || typeof trs[p] === 'undefined') {
-              delete trs[p];
+                delete trs[p];
             }
         }
 
@@ -252,17 +255,17 @@ class Transaction
             const trs = {
                 id: raw.t_id,
                 height: `${raw.b_height}`,
-                block_id: raw.b_id || raw.t_blockId,   //wxm block database
+                block_id: raw.b_id || raw.t_blockId, //wxm block database
                 type: parseInt(raw.t_type),
                 timestamp: parseInt(raw.t_timestamp),
-                sender_public_key: raw.t_senderPublicKey,   //wxm block database
+                sender_public_key: raw.t_senderPublicKey, //wxm block database
                 requester_public_key: raw.t_requesterPublicKey, //wxm block database
                 sender_id: raw.t_senderId, //wxm block database
-                recipient_id: raw.t_recipientId,   //wxm block database
+                recipient_id: raw.t_recipientId, //wxm block database
                 amount: `${raw.t_amount}`, //DdnUtils.bignum update parseInt(raw.t_amount),
-                fee: `${raw.t_fee}`,  //DdnUtils.bignum update parseInt(raw.t_fee),
+                fee: `${raw.t_fee}`, //DdnUtils.bignum update parseInt(raw.t_fee),
                 signature: raw.t_signature,
-                sign_signature: raw.t_signSignature,   //wxm block database
+                sign_signature: raw.t_signSignature, //wxm block database
                 signatures: raw.t_signatures ? raw.t_signatures.split(',') : null,
                 confirmations: raw.confirmations,
                 args: raw.t_args ? JSON.parse(raw.t_args) : null,
@@ -271,7 +274,7 @@ class Transaction
             };
 
             if (!this._assets.hasType(trs.type)) {
-              throw Error(`Unknown transaction type ${trs.type}`);
+                throw Error(`Unknown transaction type ${trs.type}`);
             }
 
             const asset = await this._assets.call(trs.type, "dbRead", raw);
@@ -289,7 +292,7 @@ class Transaction
         }
 
         //wxm TODO 这里不应该使用特定的类型，应该有通用的方式
-        if (trs.type === 13) {  //TransactionTypes.OUT_TRANSFER
+        if (trs.type === 13) { //TransactionTypes.OUT_TRANSFER
             return await this._assets.call(trs.type, trs, block, sender);
         }
 
@@ -298,7 +301,7 @@ class Transaction
 
         var sender = await this.runtime.account.merge(sender.address, {
             balance: amount,
-            block_id: block.id,  //wxm block database
+            block_id: block.id, //wxm block database
             round: await this.runtime.round.calc(block.height)
         }, dbTrans);
 
@@ -349,7 +352,9 @@ class Transaction
 
         this.balanceCache.addNativeBalance(sender.address, amount);
 
-        await this.runtime.account.merge(sender.address, { u_balance: amount }, dbTrans);
+        await this.runtime.account.merge(sender.address, {
+            u_balance: amount
+        }, dbTrans);
         await this._assets.call(transaction.type, "undoUnconfirmed", transaction, sender, dbTrans);
     }
 
@@ -366,12 +371,12 @@ class Transaction
     }
 
     async applyUnconfirmed(trs, sender, dbTrans) {
-        if (!sender && trs.block_id != this.genesisblock.id) {    //wxm block database
+        if (!sender && trs.block_id != this.genesisblock.id) { //wxm block database
             throw new Error("Invalid block id");
         } else {
-            let requester =  null;
-            if (trs.requester_public_key) {   //wxm block database
-                requester =  await this.runtime.account.getAccountByPublicKey(trs.requester_public_key);
+            let requester = null;
+            if (trs.requester_public_key) { //wxm block database
+                requester = await this.runtime.account.getAccountByPublicKey(trs.requester_public_key);
                 if (!requester) {
                     throw new Error("Invalid requester");
                 }
@@ -382,22 +387,22 @@ class Transaction
             }
 
             if (!trs.requester_public_key && sender.second_signature && !DdnUtils.bignum.isEqualTo(sender.second_signature, 0) &&
-                !trs.sign_signature && trs.block_id != this.genesisblock.id) {    //wxm block database
+                !trs.sign_signature && trs.block_id != this.genesisblock.id) { //wxm block database
                 throw new Error(`Failed second signature: ${trs.id}`);
             }
 
             if (!trs.requester_public_key && (!sender.second_signature || DdnUtils.bignum.isEqualTo(sender.second_signature, 0)) &&
                 (trs.sign_signature && trs.sign_signature.length > 0)) { //wxm block database
-                throw new Error("Account does not have a second signature");
+                throw new Error("Sender account does not have a second signature");
             }
 
-            if (trs.requester_public_key && requester.second_signature && !DdnUtils.bignum.isEqualTo(requester.second_signature, 0) && !trs.sign_signature) {  //wxm block database
+            if (trs.requester_public_key && requester.second_signature && !DdnUtils.bignum.isEqualTo(requester.second_signature, 0) && !trs.sign_signature) { //wxm block database
                 throw new Error(`Failed second signature: ${trs.id}`);
             }
 
             if (trs.requester_public_key && (!requester.second_signature || DdnUtils.bignum.isEqualTo(requester.second_signature, 0)) &&
-                (trs.sign_signature && trs.sign_signature.length > 0)) {    //wxm block database
-                throw new Error("Account does not have a second signature");
+                (trs.sign_signature && trs.sign_signature.length > 0)) { //wxm block database
+                throw new Error("Requester account does not have a second signature");
             }
 
             //wxm 这个逻辑应该去掉，不应该这么使用序号特殊处理，如果必须，应该是用assetTypes.type枚举
@@ -406,20 +411,24 @@ class Transaction
             }
 
             const amount = DdnUtils.bignum.plus(trs.amount, trs.fee);
-            if (DdnUtils.bignum.isLessThan(sender.u_balance, amount) && trs.block_id != this.genesisblock.id) {    //wxm block database
+            if (DdnUtils.bignum.isLessThan(sender.u_balance, amount) && trs.block_id != this.genesisblock.id) { //wxm block database
                 throw new Error(`Insufficient balance: ${sender.address}`);
             }
 
             this.balanceCache.addNativeBalance(sender.address, DdnUtils.bignum.minus(0, amount));
 
-            const accountInfo = await this.runtime.account.merge(sender.address, { u_balance: DdnUtils.bignum.minus(0, amount) }, dbTrans);
+            const accountInfo = await this.runtime.account.merge(sender.address, {
+                u_balance: DdnUtils.bignum.minus(0, amount)
+            }, dbTrans);
             const newAccountInfo = Object.assign({}, sender, accountInfo); //wxm block database
 
             try {
                 await this._assets.call(trs.type, "applyUnconfirmed", trs, newAccountInfo, dbTrans);
             } catch (err) {
                 this.balanceCache.addNativeBalance(newAccountInfo.address, amount)
-                await this.runtime.account.merge(newAccountInfo.address, { u_balance: amount }, dbTrans);
+                await this.runtime.account.merge(newAccountInfo.address, {
+                    u_balance: amount
+                }, dbTrans);
                 throw err;
             }
 
@@ -461,9 +470,10 @@ class Transaction
         }
 
         const accountInfo = await this.runtime.account.merge(sender.address, {
-            balance: DdnUtils.bignum.minus(0, amount),   //DdnUtils.bignum update  -amount
-            block_id: block.id,  //wxm block database
-            round: await this.runtime.round.calc(block.height)}, dbTrans);
+            balance: DdnUtils.bignum.minus(0, amount), //DdnUtils.bignum update  -amount
+            block_id: block.id, //wxm block database
+            round: await this.runtime.round.calc(block.height)
+        }, dbTrans);
         const newSender = Object.assign({}, sender, accountInfo); //wxm block database
         await this._assets.call(trs.type, "apply", trs, block, newSender, dbTrans);
     }
@@ -479,22 +489,21 @@ class Transaction
     }
 
     async addUnconfirmedTransaction(transaction, sender) {
-        try
-        {
+        try {
             await this.applyUnconfirmed(transaction, sender);
             this._unconfirmedTransactions.push(transaction);
             let index = this._unconfirmedTransactions.length - 1;
             this._unconfirmedTransactionsIdIndex[transaction.id] = index;
             this._unconfirmedNumber++;
-        }
-        catch(err)
-        {
+        } catch (err) {
             await this.removeUnconfirmedTransaction(transaction.id);
             throw err;
         }
     }
 
-    async hasUnconfirmedTransaction({id}) {
+    async hasUnconfirmedTransaction({
+        id
+    }) {
         const index = this._unconfirmedTransactionsIdIndex[id];
         const result = index !== undefined && this._unconfirmedTransactions[index] !== false;
         return result;
@@ -502,7 +511,15 @@ class Transaction
 
     async getHash(trs) {
         const bytes = await this.getBytes(trs);
-        return crypto.createHash('sha256').update(bytes).digest();
+        const result = crypto.createHash('sha256').update(bytes).digest();
+        const result12 = Buffer.from(sha256.hash(bytes));
+
+        this.logger.info('bytes1: ', bytes);
+        this.logger.info('getHash1: ', result);
+        this.logger.info('getHash12: ', result12);
+        this.logger.info('Id1: ', result.toString('hex'));
+
+        return result;
     }
 
     async getId(trs) {
@@ -524,6 +541,8 @@ class Transaction
         }
 
         if (trs.id && trs.id != txId) {
+            this.logger.error('Incorrect transaction id, txId: ', txId);
+            this.logger.error('Incorrect transaction id, trs.id: ', trs.id);
             throw new Error("Incorrect transaction id");
         } else {
             trs.id = txId;
@@ -533,7 +552,7 @@ class Transaction
             throw new Error("Invalid sender");
         }
 
-        trs.sender_id = sender.address;    //wxm block database
+        trs.sender_id = sender.address; //wxm block database
 
         // Verify that requester in multisignature
         if (trs.requester_public_key) { //wxm block database
@@ -543,11 +562,11 @@ class Transaction
         }
 
         if (trs.requester_public_key) { //wxm block database
-            if (!await this.verifySignature(trs, trs.requester_public_key, trs.signature)) {  //wxm block database
+            if (!await this.verifySignature(trs, trs.requester_public_key, trs.signature)) { //wxm block database
                 throw new Error("Failed to verify signature, 2");
             }
         } else {
-            if (!await this.verifySignature(trs, trs.sender_public_key, trs.signature)) {   //wxm block database
+            if (!await this.verifySignature(trs, trs.sender_public_key, trs.signature)) { //wxm block database
                 throw new Error("Failed to verify signature, 3");
             }
         }
@@ -556,7 +575,9 @@ class Transaction
 
         return new Promise((resolve, reject) => {
             // shuai 2018-11-13
-            this.dao.count("tr", { id: trs.id }, (err, count) => {
+            this.dao.count("tr", {
+                id: trs.id
+            }, (err, count) => {
                 if (err) {
                     return reject("Database error");
                 }
@@ -584,36 +605,29 @@ class Transaction
             throw new Error(`Transaction ${transaction.id} already exists, ignoring...`);
         }
 
-        await this.runtime.account.setAccount({ public_key: transaction.sender_public_key });
+        await this.runtime.account.setAccount({
+            public_key: transaction.sender_public_key
+        });
         const sender = await this.runtime.account.getAccountByPublicKey(transaction.sender_public_key);
 
         let requester;
-        if (transaction.requester_public_key && sender && sender.multisignatures && sender.multisignatures.length) {  //wxm block database
+        if (transaction.requester_public_key && sender && sender.multisignatures && sender.multisignatures.length) { //wxm block database
             requester = await this.runtime.account.getAccountByPublicKey(transaction.requester_public_key);
             if (!requester) {
                 throw new Error("Invalid requester");
             }
         }
 
-        try
-        {
-            transaction = await this.process(transaction, sender, requester);
-        }
-        catch(err)
-        {
-            throw err;
-        }
+        transaction = await this.process(transaction, sender, requester);
 
         await this.verify(transaction, sender, requester);
         await this.addUnconfirmedTransaction(transaction, sender);
 
         if (broadcast) {
             setImmediate(async () => {
-                try
-                {
+                try {
                     await this.runtime.peer.broadcast.broadcastUnconfirmedTransaction(transaction);
-                }
-                catch (err) {
+                } catch (err) {
                     this.logger.error(`Broadcast unconfirmed transaction failed: ${DdnUtils.system.getErrorMsg(err)}`);
                 }
             });
@@ -664,7 +678,7 @@ class Transaction
         return ed.Sign(hash, keypair).toString('hex');
     }
 
-    async verify(trs, sender, {second_signature, second_public_key}) {
+    async verify(trs, sender, requester) {
         if (!this._assets.hasType(trs.type)) {
             throw new Error(`Unknown transaction type ${trs.type}`)
         }
@@ -702,8 +716,8 @@ class Transaction
 
         // Verify signature
         let valid = false;
-        if (trs.requester_public_key) {   //wxm block database
-            valid = await this.verifySignature(trs, trs.requester_public_key, trs.signature);   //wxm block database
+        if (trs.requester_public_key) { //wxm block database
+            valid = await this.verifySignature(trs, trs.requester_public_key, trs.signature); //wxm block database
         } else {
             valid = await this.verifySignature(trs, trs.sender_public_key, trs.signature);
         }
@@ -716,14 +730,14 @@ class Transaction
             throw new Error("Failed to verify nethash");
         }
 
-        // Verify second signature66749
+        // Verify second signature
         if (!trs.requester_public_key && sender.second_signature && !DdnUtils.bignum.isEqualTo(sender.second_signature, 0)) {
             valid = await this.verifySecondSignature(trs, sender.second_public_key, trs.sign_signature);
             if (!valid) {
                 throw new Error(`Failed to verify second signature: ${trs.id}`);
             }
-        } else if (trs.requester_public_key && second_signature && !DdnUtils.bignum.isEqualTo(second_signature, 0)) {   //wxm block database
-            valid = await this.verifySecondSignature(trs, second_public_key, trs.sign_signature);   //wxm block database
+        } else if (trs.requester_public_key && requester.second_signature && !DdnUtils.bignum.isEqualTo(requester.second_signature, 0)) { //wxm block database
+            valid = await this.verifySecondSignature(trs, requester.second_public_key, trs.sign_signature); //wxm block database
             if (!valid) {
                 throw new Error(`Failed to verify second signature: ${trs.id}`);
             }
@@ -744,7 +758,7 @@ class Transaction
         let multisignatures = sender.multisignatures || sender.u_multisignatures;
         if (multisignatures.length == 0) {
             if (trs.asset && trs.asset.multisignature && trs.asset.multisignature.keysgroup) {
-              multisignatures = trs.asset.multisignature.keysgroup.map(key => key.slice(1));
+                multisignatures = trs.asset.multisignature.keysgroup.map(key => key.slice(1));
             }
         }
 
@@ -754,7 +768,7 @@ class Transaction
 
         //wxm TODO
         // 此处应该用this._assets.方法（trs.type） 来判断是否能够进入下面处理
-        if (trs.signatures && trs.type !== 13) {    //TransactionTypes.OUT_TRANSFER
+        if (trs.signatures && trs.type !== 13) { //TransactionTypes.OUT_TRANSFER
             for (let d = 0; d < trs.signatures.length; d++) {
                 let verify = false;
 
@@ -793,6 +807,10 @@ class Transaction
         }
         // Check timestamp
         if (this.runtime.slot.getSlotNumber(trs.timestamp) > this.runtime.slot.getSlotNumber()) {
+            this.logger.info('this.runtime.slot.getSlotNumber(trs.timestamp)=', {
+                a: this.runtime.slot.getSlotNumber(trs.timestamp),
+                b: this.runtime.slot.getSlotNumber()
+            })
             throw new Error("Invalid transaction timestamp");
         }
 
@@ -804,8 +822,7 @@ class Transaction
             throw Error(`Unknown transaction type ${trs.type}`);
         }
 
-        if (!signature)
-        {
+        if (!signature) {
             return false;
         }
 

@@ -2,7 +2,7 @@
   "name": "@ddn/node-sdk",
   "version": "0.0.19",
   "description": "DDN Node.js SDK",
-  "main": "index.js",
+  "main": "lib/index.js",
   "directories": {
     "test": "test"
   },
@@ -14,7 +14,7 @@
     "node",
     "sdk"
   ],
-  "author": "",
+  "author": "wxx",
   "license": "MIT",
   "dependencies": {
     "@ddn/asset-aob": "^0.1.4",

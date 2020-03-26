@@ -1,6 +1,6 @@
 "use strict";
 
-var node = require("./../variables.js");
+var node = require("../node");
 
 async function createTransfer(address, amount, secret, second_secret) {
     return await node.ddn.transaction.createTransaction(address, amount, null, secret, second_secret)

@@ -1,6 +1,6 @@
 "use strict";
 
-var node = require("./../variables.js"),
+var node = require("../node"),
     crypto = require("crypto");
 
 describe("POST /peer/blocks", function () {
