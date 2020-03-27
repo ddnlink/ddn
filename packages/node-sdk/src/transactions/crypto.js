@@ -66,57 +66,53 @@ async function getBytes(transaction, skipSignature, skipSecondSignature) {
     let assetSize = 0;
     let assetBytes = null;
 
-    // TODO: 修改吧
+    // TODO: 修改，将getBytes统一到 bytes 文件
     // console.log('global= ', global);
     // assetBytes = await global.assets.call(transaction.type, "getBytes", transaction, skipSignature, skipSecondSignature);
     // assetSize = assetBytes ? assetBytes.length : 0;
 
-    // switch (transaction.type) {
-    //     case trsTypes.SIGNATURE: // Signature
-    //         {
-    //             assetBytes = getSignatureBytes(transaction.asset.signature);
-    //             break;
-    //         }
+    switch (transaction.type) {
+        case trsTypes.SIGNATURE: // Signature
+            {
+                assetBytes = getSignatureBytes(transaction.asset.signature);
+                break;
+            }
 
-    //     case trsTypes.DELEGATE: // Delegate
-    //         {
-    //             assetBytes = Buffer.from(transaction.asset.delegate.username, "utf8");
-    //             break;
-    //         }
+        case trsTypes.DELEGATE: // Delegate
+            {
+                assetBytes = Buffer.from(transaction.asset.delegate.username, "utf8");
+                break;
+            }
 
-    //     case trsTypes.VOTE: // Vote
-    //         {
-    //             assetBytes = Buffer.from(transaction.asset.vote.votes.join(""), "utf8");
-    //             break;
-    //         }
+        case trsTypes.VOTE: // Vote
+            {
+                assetBytes = Buffer.from(transaction.asset.vote.votes.join(""), "utf8");
+                break;
+            }
 
-    //     case trsTypes.MULTI: // Multi-Signature
-    //         {
-    //             let keysgroupBuffer = Buffer.from(transaction.asset.multisignature.keysgroup.join(""), "utf8");
-    //             let bb = new ByteBuffer(1 + 1 + keysgroupBuffer.length, true);
+        case trsTypes.MULTI: // Multi-Signature
+            {
+                let keysgroupBuffer = Buffer.from(transaction.asset.multisignature.keysgroup.join(""), "utf8");
+                let bb = new ByteBuffer(1 + 1 + keysgroupBuffer.length, true);
 
-    //             bb.writeByte(transaction.asset.multisignature.min);
-    //             bb.writeByte(transaction.asset.multisignature.lifetime);
+                bb.writeByte(transaction.asset.multisignature.min);
+                bb.writeByte(transaction.asset.multisignature.lifetime);
 
-    //             for (let i = 0; i < keysgroupBuffer.length; i++) {
-    //                 bb.writeByte(keysgroupBuffer[i]);
-    //             }
+                for (let i = 0; i < keysgroupBuffer.length; i++) {
+                    bb.writeByte(keysgroupBuffer[i]);
+                }
 
-    //             bb.flip();
+                bb.flip();
 
-    //             assetBytes = bb.toBuffer();
-    //             break;
-    //         }
+                assetBytes = bb.toBuffer();
+                break;
+            }
 
-    //     default:
-    //         {
-    //             assetBytes = await getAssetBytes(transaction);
-    //         }
-    // }
-
-    assetBytes = await getAssetBytes(transaction);
-
-    console.log('assetBytes= ', assetBytes);
+        default:
+            {
+                assetBytes = await getAssetBytes(transaction);
+            }
+    }
 
     if (transaction.__assetBytes__) {
         assetBytes = transaction.__assetBytes__;
@@ -220,9 +216,9 @@ async function getHash(transaction, skipSignature, skipSecondSignature) {
     const bytes = await getBytes(transaction, skipSignature, skipSecondSignature);
     const result = Buffer.from(sha256.hash(bytes));
 
-    console.log("bytes2: ", bytes);
-    console.log("getHash2: ", result);
-    console.log("id2: ", result.toString('hex'));
+    // console.log("bytes2: ", bytes);
+    // console.log("getHash2: ", result);
+    // console.log("id2: ", result.toString('hex'));
     
     return result;
 }

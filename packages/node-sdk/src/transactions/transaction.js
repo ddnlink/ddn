@@ -1,9 +1,9 @@
 import DdnUtils from '@ddn/utils';
 
-import crypto from "./crypto.js";
-import constants from "../constants.js";
-import transactionTypes from "../transaction-types.js";
-import slots from "../time/slots.js";
+import crypto from "./crypto"; // TODO: @ddn/crypto
+import constants from "../constants";
+import transactionTypes from "../transaction-types";
+import slots from "../time/slots";
 import options from '../options';
 
 function calculateFee(amount) {
@@ -46,7 +46,7 @@ async function createTransaction(recipientId, amount, message, secret, second_se
 
 async function createLock(height, secret, second_secret) {
 	const transaction = {
-		type: 100,
+		type: 100, // TODO: update to string lock
 		amount: "0",    
 		nethash: options.get('nethash'),
 		fee: "10000000",    

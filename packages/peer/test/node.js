@@ -76,7 +76,6 @@ const Gaccount = {
   'balance': 10000000000000000
 };
 
-
 // Random DDN Amount
 //bignum update var RANDOM_COIN = Math.floor(Math.random() * (100000 * 100000000)) + 1;
 const RANDOM_COIN = bignum.plus(bignum.floor(bignum.multiply(Math.random(), 100000, 100000000)), 1).toString();
@@ -415,7 +414,7 @@ export default {
 
   //wxm TODO 此处使用新的类型
 //   TxTypes: TxTypes,
-//   AssetTypes: assetTypes,
+  AssetTypes: DdnUtils.assetTypes,
 
   //wxm TODO 此处应该使用对应npm包提供的对象
 //   DappType: DappType,

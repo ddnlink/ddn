@@ -102,8 +102,6 @@ describe('GET /api/transactions', () => {
         const offset = 0;
         const orderBy = 't_amount:asc';
 
-        // console.log(Account1);
-        // console.log('/transactions?blockId=' + blockId + '&senderId=' + senderId + '&recipientId=' + recipientId + '&limit=' + limit + '&offset=' + offset + '&orderBy=' + orderBy);
         node.api.get(`/transactions?blockId=${blockId}&senderId=${senderId}&recipientId=${recipientId}&limit=${limit}&offset=${offset}&orderBy=${orderBy}`)
             .set('Accept', 'application/json')
             .expect('Content-Type', /json/)
@@ -395,7 +393,7 @@ describe('PUT /api/transactions', () => {
     });
 
     it('Using entire balance. Should fail', function (done) {
-        this.timeout(5000);
+        
         setTimeout(() => {
             node.api.put('/transactions')
                 .set('Accept', 'application/json')
@@ -416,7 +414,7 @@ describe('PUT /api/transactions', () => {
     });
 
     it('Using zero amount. Should fail', function (done) {
-        this.timeout(5000);
+        
         setTimeout(() => {
             node.api.put('/transactions')
                 .set('Accept', 'application/json')
@@ -437,7 +435,7 @@ describe('PUT /api/transactions', () => {
     });
 
     it('Using positive overflown amount. Should fail', function (done) {
-        this.timeout(5000);
+        
         setTimeout(() => {
             node.api.put('/transactions')
                 .set('Accept', 'application/json')
@@ -458,7 +456,7 @@ describe('PUT /api/transactions', () => {
     });
 
     it('Using negative overflown amount. Should fail', function (done) {
-        this.timeout(5000);
+        
         setTimeout(() => {
             node.api.put('/transactions')
                 .set('Accept', 'application/json')
@@ -479,7 +477,7 @@ describe('PUT /api/transactions', () => {
     });
 
     it('Using small fractional amount. Should be ok', function (done) {
-        this.timeout(5000);
+        
         setTimeout(() => {
             node.api.put('/transactions')
                 .set('Accept', 'application/json')
@@ -640,7 +638,7 @@ describe('GET /transactions/unconfirmed', () => {
 
 describe('PUT /signatures', () => {
     it('When account has no funds. Should fail', function (done) {
-        this.timeout(5000);
+        
         setTimeout(() => {
             node.api.put('/signatures')
                 .set('Accept', 'application/json')
@@ -678,7 +676,7 @@ describe('PUT /signatures', () => {
     });
 
     it('Using no second passphrase. Should fail', function (done) {
-        this.timeout(5000);
+        
         setTimeout(() => {
             node.api.put('/signatures')
                 .set('Accept', 'application/json')
@@ -766,7 +764,7 @@ describe('PUT /transactions (with second passphase now enabled)', () => {
 
     it('Using second passphase but without primary passphase. Should fail', function (done) {
         const amountToSend = 100000000;
-        this.timeout(5000);
+        
         setTimeout(() => {
             node.api.put('/transactions')
                 .set('Accept', 'application/json')
@@ -789,7 +787,7 @@ describe('PUT /transactions (with second passphase now enabled)', () => {
 describe('PUT /delegates (with second passphase now enabled)', () => {
 
     it('Without specifying second passphase on account. Should fail', function (done) {
-        this.timeout(5000);
+        
         setTimeout(() => {
             node.api.put('/delegates')
                 .set('Accept', 'application/json')

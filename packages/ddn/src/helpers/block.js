@@ -4,7 +4,7 @@ import cryptoLib from '@ddn/crypto';
 import DdnUtils from '@ddn/utils';
 import ByteBuffer from 'bytebuffer';
 import config from '../config';
-import transactionsLib from '../transactions.js';
+import transactionsLib from '../transactions';
 import accounts from './account.js';
 const { bignum } = DdnUtils;
 

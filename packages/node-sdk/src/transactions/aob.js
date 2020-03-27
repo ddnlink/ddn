@@ -45,8 +45,8 @@ async function createTransaction(
         crypto.secondSign(transaction, secondKeys);
     }
 
-    transaction.id = await crypto.getId(transaction);
-
+    // FIXME: 这里提供的id与写入时的id不一致，记得修改
+    // transaction.id = await crypto.getId(transaction);
     return transaction;
 }
 

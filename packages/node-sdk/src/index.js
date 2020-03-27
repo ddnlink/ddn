@@ -28,5 +28,5 @@ export default {
     //coupon
     coupon: require("./transactions/coupon.js").default,
 
-    assetPlugin: require("./transactions/asset-plugin.js").default,
+    assetPlugin: require("./transactions/asset-plugin").default,
 };

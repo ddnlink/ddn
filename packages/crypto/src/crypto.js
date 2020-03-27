@@ -129,8 +129,8 @@ function generateAddress(publicKey, tokenPrefix) {
     return tokenPrefix + base58check.encode(h2);
 }
 
-function getHash(trs, skipSignature, skipSecondSignature) {
-    const bytes = getBytes(trs, skipSignature, skipSecondSignature);
+async function getHash(trs, skipSignature, skipSecondSignature) {
+    const bytes = await getBytes(trs, skipSignature, skipSecondSignature);
     return Buffer.from(sha256.hash(bytes));
 }
 

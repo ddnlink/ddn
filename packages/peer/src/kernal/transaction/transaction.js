@@ -81,8 +81,8 @@ class Transaction {
 
         trs = await this._assets.call(trs.type, "create", data, trs);
 
-        trs.signature = await cryptoLib.sign(trs, data.keypair);
-        // trs.signature = await this.sign(data.keypair, trs);
+        // trs.signature = await cryptoLib.sign(trs, data.keypair);
+        trs.signature = await this.sign(data.keypair, trs);
         if (data.sender.second_signature && data.second_keypair) {
             trs.sign_signature = await cryptoLib.sign(trs, data.second_keypair);
         }
@@ -511,15 +511,7 @@ class Transaction {
 
     async getHash(trs) {
         const bytes = await this.getBytes(trs);
-        const result = crypto.createHash('sha256').update(bytes).digest();
-        const result12 = Buffer.from(sha256.hash(bytes));
-
-        this.logger.info('bytes1: ', bytes);
-        this.logger.info('getHash1: ', result);
-        this.logger.info('getHash12: ', result12);
-        this.logger.info('Id1: ', result.toString('hex'));
-
-        return result;
+        return Buffer.from(sha256.hash(bytes));
     }
 
     async getId(trs) {
@@ -541,8 +533,9 @@ class Transaction {
         }
 
         if (trs.id && trs.id != txId) {
-            this.logger.error('Incorrect transaction id, txId: ', txId);
-            this.logger.error('Incorrect transaction id, trs.id: ', trs.id);
+            // FIXME: 这里没有要求从Asset插件端传ID，不然会出错，请确认
+            // this.logger.error('Incorrect transaction id, txId: ', txId);
+            // this.logger.error('Incorrect transaction id, trs.id: ', trs.id);
             throw new Error("Incorrect transaction id");
         } else {
             trs.id = txId;
