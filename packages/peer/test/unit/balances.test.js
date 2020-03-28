@@ -1,4 +1,4 @@
-import node from "./../variables.js";
+import node from "../node";
 import BalanceManager from '../../lib/helpers/balance-manager.js';
 
 describe('balance cache manager', () => {

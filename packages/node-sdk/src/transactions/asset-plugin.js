@@ -1,7 +1,8 @@
-import crypto from './crypto.js';
-import slots from '../time/slots.js';
-import options from '../options';
 import Asset from '@ddn/asset-base';
+
+import crypto from './crypto';
+import slots from '../time/slots';
+import options from '../options';
 
 async function createPluginAsset(trsType, assetInfo, secret, secondSecret) {
     const keys = crypto.getKeys(secret);

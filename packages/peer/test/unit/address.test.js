@@ -1,4 +1,4 @@
-import node from "./../variables.js";
+import node from "../node";
 import {Address} from '@ddn/utils';
 
 describe('address', () => {

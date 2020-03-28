@@ -1,16 +1,16 @@
-var crypto = require("./crypto.js")
-var constants = require("../constants.js")
-var transactionTypes = require("../transaction-types.js")
-var slots = require("../time/slots.js")
-var options = require('../options')
+import crypto from "./crypto";
+import constants from "../constants";
+import transactionTypes from "../transaction-types";
+import slots from "../time/slots";
+import options from '../options';
 
 async function createVote(keyList, secret, secondSecret) {
-	var keys = crypto.getKeys(secret);
+	const keys = crypto.getKeys(secret);
 
-	var transaction = {
+	const transaction = {
 		type: transactionTypes.VOTE,
 		nethash: options.get('nethash'),
-		amount: "0",    //Bignum update
+		amount: "0", 
 		fee: constants.fees.vote,
 		recipient_id: null,
 		sender_public_key: keys.public_key,
@@ -25,7 +25,7 @@ async function createVote(keyList, secret, secondSecret) {
 	await crypto.sign(transaction, keys);
 
 	if (secondSecret) {
-		var secondKeys = crypto.getKeys(secondSecret);
+		const secondKeys = crypto.getKeys(secondSecret);
 		await crypto.secondSign(transaction, secondKeys);
 	}
 
@@ -34,6 +34,6 @@ async function createVote(keyList, secret, secondSecret) {
 	return transaction;
 }
 
-module.exports = {
-	createVote: createVote
-}
+export default {
+	createVote
+};

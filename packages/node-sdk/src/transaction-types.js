@@ -5,7 +5,7 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-module.exports = {
+export default {
   // base 0-19
   SEND: 0, // TRANSFER
   SIGNATURE: 1, // SETUP SECOND_PASSWORD
@@ -52,4 +52,4 @@ module.exports = {
   AOB_TRANSFER: 65, // AOB TRANSFER
 
   LOCK: 100 // ACCOUNT LOCK
-}
+};

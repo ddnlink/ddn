@@ -1,44 +1,43 @@
-var ByteBuffer = require('bytebuffer')
-var crypto = require("./crypto.js")
-var constants = require("../constants.js")
-var transactionTypes = require("../transaction-types.js")
-var slots = require("../time/slots.js")
-var options = require('../options')
+import crypto from "./crypto";
+import constants from "../constants";
+import transactionTypes from "../transaction-types";
+import slots from "../time/slots";
+import options from '../options';
 
 function createUsername(name, secret, secondSecret) {
-	var keys = crypto.getKeys(secret)
-  var bytes =  null
+    const keys = crypto.getKeys(secret);
+    //   const bytes =  null;
 
-  if (!name || name.length == 0) {
-    throw new Error('Invalid name format')
-  }
-  var fee = constants.fees.username
-  
-	var transaction = {
-		type: transactionTypes.USERINFO,
-		nethash: options.get('nethash'),
-		amount: "0",    //Bignum update
-		fee: fee + "",
-		recipientId: null,
-		senderPublicKey: keys.public_key,
-		timestamp: slots.getTime() - options.get('clientDriftSeconds'),
-		asset: {
-			userinfo: {
-				username: name
-			}
-		},
-	}
+    if (!name || name.length == 0) {
+        throw new Error('Invalid name format')
+    }
+    const fee = constants.fees.username;
 
-	crypto.sign(transaction, keys)
+    const transaction = {
+        type: transactionTypes.USERINFO,
+        nethash: options.get('nethash'),
+        amount: "0", //Bignum update
+        fee: `${fee}`,
+        recipientId: null,
+        senderPublicKey: keys.public_key,
+        timestamp: slots.getTime() - options.get('clientDriftSeconds'),
+        asset: {
+            userinfo: {
+                username: name
+            }
+        },
+    };
 
-	if (secondSecret) {
-		var secondKeys = crypto.getKeys(secondSecret)
-		crypto.secondSign(transaction, secondKeys)
-	}
-	transaction.id = crypto.getId(transaction)
-	return transaction
+    crypto.sign(transaction, keys)
+
+    if (secondSecret) {
+        const secondKeys = crypto.getKeys(secondSecret);
+        crypto.secondSign(transaction, secondKeys)
+    }
+    transaction.id = crypto.getId(transaction)
+    return transaction
 }
 
-module.exports = {
-	createUsername : createUsername
-}
+export default {
+    createUsername
+};

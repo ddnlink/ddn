@@ -84,7 +84,7 @@ class Transaction {
         // trs.signature = await cryptoLib.sign(trs, data.keypair);
         trs.signature = await this.sign(data.keypair, trs);
         if (data.sender.second_signature && data.second_keypair) {
-            trs.sign_signature = await cryptoLib.sign(trs, data.second_keypair);
+            trs.sign_signature = await this.sign(trs, data.second_keypair);
         }
 
         trs.id = await this.getId(trs);

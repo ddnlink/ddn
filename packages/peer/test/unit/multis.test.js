@@ -54,7 +54,7 @@ let multiTrsId;
 
 describe("PUT /multisignatures", () => {
 
-    before(async () => {
+    beforeAll(async () => {
         multiAccount = await newAccount();
         console.log(`Multi Account: ${JSON.stringify(multiAccount)}`);
         console.log("\r\n");

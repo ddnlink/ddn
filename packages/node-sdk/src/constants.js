@@ -1,4 +1,4 @@
-module.exports = {
+export default {
   fixedPoint: 10 ** 8, // TODO: imfly
 
   fees:{
@@ -63,4 +63,4 @@ module.exports = {
 
   }
 
-}
+};

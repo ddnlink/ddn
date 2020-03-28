@@ -90,7 +90,7 @@ describe('Put /transactions', () => {
 
     let orgId = "";
 
-    before(async () => {
+    beforeAll(async () => {
         await openAccount(Account1);
         await openAccount(Account2);
 
@@ -257,7 +257,7 @@ describe('Put /transactions', () => {
 describe('PUT /exchange', () => {
     let orgId = "";
 
-    before(async () => {
+    beforeAll(async () => {
         await new Promise((resolve, reject) => {
             const getOrgIdUrl = `/org/getlist?pagesize=1&address=${node.Gaccount.address}`;
             node.api.get(getOrgIdUrl)

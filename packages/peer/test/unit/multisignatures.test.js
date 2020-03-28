@@ -162,7 +162,7 @@ async function makeKeysGroup () {
     return keysgroup;
 }
 
-before(async () => {
+beforeAll(async () => {
     for (var i = 0; i < Accounts.length; i++) {
         if (Accounts[i] != null) {
             await openAccount(Accounts[i], i);
@@ -177,7 +177,7 @@ before(async () => {
     await openAccount(MultisigAccount, null);
 });
 
-before(async () => {
+beforeAll(async () => {
    for (var i = 0; i < (Accounts.length); i++) {
        if(Accounts[i] != null) {
            await sendDDN(Accounts[i], i);
@@ -186,14 +186,14 @@ before(async () => {
    await sendDDN(MultisigAccount, null);
 });
 
-before(async () => {
+beforeAll(async () => {
     await node.onNewBlockAsync();
     // Wait for two new blocks to ensure all data has been recieved
     await node.onNewBlockAsync();
 });
 
 describe("PUT /multisignatures", function () {
-    before(async () => {
+    beforeAll(async () => {
         Keys = await makeKeysGroup();
     });
 

@@ -1,10 +1,10 @@
-var crypto = require("./crypto.js")
-var constants = require("../constants.js")
-var slots = require("../time/slots.js")
-var options = require('../options')
+import crypto from "./crypto";
+import constants from "../constants";
+import slots from "../time/slots";
+import options from '../options';
 
 function createDomain(name, address, secret, secondSecret) {
-	var keys = crypto.getKeys(secret)
+	const keys = crypto.getKeys(secret);
 
   if (!name || name.length == 0) {
     throw new Error('Invalid name format')
@@ -12,34 +12,34 @@ function createDomain(name, address, secret, secondSecret) {
   if (!address || address.length == 0) {
     throw new Error('Invalid name format')
   }
-  var fee = constants.fees.domain
+  const fee = constants.fees.domain;
   
-	var transaction = {
+	const transaction = {
 		type: 18,
 		nethash: options.get('nethash'),
 		amount: "0",    //Bignum update
-		fee: fee + "",
+		fee: `${fee}`,
 		recipientId: null,
 		senderPublicKey: keys.public_key,
 		timestamp: slots.getTime() - options.get('clientDriftSeconds'),
 		asset: {
 			domain: {
-				name: name,
-				address: address
+				name,
+				address
 			}
 		},
-	}
+	};
 
 	crypto.sign(transaction, keys)
 
 	if (secondSecret) {
-		var secondKeys = crypto.getKeys(secondSecret)
+		const secondKeys = crypto.getKeys(secondSecret);
 		crypto.secondSign(transaction, secondKeys)
 	}
 	transaction.id = crypto.getId(transaction)
 	return transaction
 }
 
-module.exports = {
-	createDomain : createDomain
-}
+export default {
+	createDomain
+};

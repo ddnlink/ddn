@@ -3,30 +3,30 @@ import init from './init';
 export default {
     init,
 
-	crypto : require("./transactions/crypto.js").default,
-	dapp: require("./transactions/dapp.js").default,
-	transfer: require("./transactions/transfer.js").default,
-	delegate : require("./transactions/delegate.js").default,
-	signature : require("./transactions/signature.js").default,
-	transaction : require("./transactions/transaction.js").default,
-	vote : require("./transactions/vote.js").default,
-	aob: require("./transactions/aob.js").default,
-	username: require("./transactions/username.js").default,
-	multitransfer: require("./transactions/multitransfer.js").default,		
-    options: require("./options.js").default,
-	constants: require("./constants.js").default,
+	crypto : require("./transactions/crypto").default,
+	dapp: require("./transactions/dapp").default,
+	transfer: require("./transactions/transfer").default,
+	delegate : require("./transactions/delegate").default,
+	signature : require("./transactions/signature").default,
+	transaction : require("./transactions/transaction").default,
+	vote : require("./transactions/vote").default,
+	aob: require("./transactions/aob").default,
+	username: require("./transactions/username").default,
+	multitransfer: require("./transactions/multitransfer").default,		
+    options: require("./options").default,
+	constants: require("./constants").default,
 	utils: {
-		slots: require("./time/slots.js").default,
-		format: require("./time/format.js").default
+		slots: require("./time/slots").default,
+		format: require("./time/format").default
 	},
 	
 	// dao
-	evidence: require("./transactions/evidence.js").default,
-	dao: require("./transactions/dao.js").default,
-    exchange: require("./transactions/exchange.js").default,
+	evidence: require("./transactions/evidence").default,
+	dao: require("./transactions/dao").default,
+    exchange: require("./transactions/exchange").default,
     
     //coupon
-    coupon: require("./transactions/coupon.js").default,
+    coupon: require("./transactions/coupon").default,
 
     assetPlugin: require("./transactions/asset-plugin").default,
 };

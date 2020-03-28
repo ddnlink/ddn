@@ -92,7 +92,7 @@ describe('Test Dao', () => {
     describe('PUT /api/org to create a orgId', () => {
         let org;
 
-        before(done => {
+        beforeAll(done => {
             org = {
                 "org_id": node.randomOrgId(),
                 // "orgId": node.randomOrgId(),

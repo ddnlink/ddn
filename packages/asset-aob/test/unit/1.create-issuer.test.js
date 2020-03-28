@@ -132,7 +132,7 @@ describe("AOB Test", () => {
 
 //     var account;
 
-//     before((done) => {
+//     beforeAll((done) => {
 
 //         console.log("开始创建测试账户Test");
 //         node.api.get("/accounts/new")

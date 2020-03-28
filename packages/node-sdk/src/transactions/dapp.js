@@ -1,14 +1,14 @@
-var ByteBuffer = require('bytebuffer')
-var crypto = require("./crypto.js")
-var constants = require("../constants.js")
-var transactionTypes = require("../transaction-types.js")
-var slots = require("../time/slots.js")
-var globalOptions = require('../options.js')
+import ByteBuffer from 'bytebuffer';
+import crypto from "./crypto";
+import constants from "../constants";
+import transactionTypes from "../transaction-types";
+import slots from "../time/slots";
+import globalOptions from '../options';
 
 function createDApp(options, secret, secondSecret) {
-	var keys = crypto.getKeys(secret);
+	const keys = crypto.getKeys(secret);
 
-	var transaction = {
+	const transaction = {
     nethash: globalOptions.get('nethash'),
 		type: transactionTypes.DAPP,
 		amount: "0",    //Bignum update
@@ -34,7 +34,7 @@ function createDApp(options, secret, secondSecret) {
 	crypto.sign(transaction, keys);
 
 	if (secondSecret) {
-		var secondKeys = crypto.getKeys(secondSecret);
+		const secondKeys = crypto.getKeys(secondSecret);
 		crypto.secondSign(transaction, secondKeys);
 	}
 
@@ -43,11 +43,11 @@ function createDApp(options, secret, secondSecret) {
 }
 
 function getDAppTransactionBytes(trs, skipSignature) {
-	var bb = new ByteBuffer(1, true);
+	const bb = new ByteBuffer(1, true);
 	bb.writeInt(trs.timestamp);
 	bb.writeString(trs.fee)
 
-	var senderPublicKeyBuffer = Buffer.from(trs.senderPublicKey, 'hex');
+	const senderPublicKeyBuffer = Buffer.from(trs.senderPublicKey, 'hex');
 	for (var i = 0; i < senderPublicKeyBuffer.length; i++) {
 		bb.writeByte(senderPublicKeyBuffer[i]);
 	}
@@ -57,7 +57,7 @@ function getDAppTransactionBytes(trs, skipSignature) {
 	if (trs.args) bb.writeString(trs.args)
 
 	if (!skipSignature && trs.signature) {
-		var signatureBuffer = Buffer.from(trs.signature, 'hex');
+		const signatureBuffer = Buffer.from(trs.signature, 'hex');
 		for (var i = 0; i < signatureBuffer.length; i++) {
 			bb.writeByte(signatureBuffer[i]);
 		}
@@ -67,22 +67,22 @@ function getDAppTransactionBytes(trs, skipSignature) {
 }
 
 function createInnerTransaction(options, secret) {
-	var keys = crypto.getKeys(secret)
-	var args = options.args
+	const keys = crypto.getKeys(secret);
+	let args = options.args;
 	if (args instanceof Array) args = JSON.stringify(args)
-	var trs = {
+	const trs = {
     nethash: globalOptions.get('nethash'),
 		fee: options.fee,
 		timestamp: slots.getTime() - globalOptions.get('clientDriftSeconds'),
 		senderPublicKey: keys.public_key,
 		type: options.type,
-		args: args
-	}
+		args
+	};
 	trs.signature = crypto.signBytes(getDAppTransactionBytes(trs), keys)
 	return trs
 }
 
-module.exports = {
-	createDApp: createDApp,
-	createInnerTransaction: createInnerTransaction
-}
+export default {
+	createDApp,
+	createInnerTransaction
+};

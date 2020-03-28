@@ -14,7 +14,7 @@ describe('Confirmations Test', () => {
     let contributionTrsId = "";
     let contributionPrice = "0";
 
-    before((done) => {
+    beforeAll((done) => {
         const getOrgIdUrl = `/org/address/${node.Gaccount.address}`;
         node.api.get(getOrgIdUrl)
             .set("Accept", "application/json")

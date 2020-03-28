@@ -1,4 +1,4 @@
-const node = require('../node')
+import node from '../node';
 
 async function createPluginAsset(type, asset, secret, secondSecret) {
     return await node.ddn.assetPlugin.createPluginAsset(type, asset, secret, secondSecret)
@@ -9,12 +9,12 @@ describe("AOB Test", () => {
     node.ddn.init();
 
     it ("开启白名单 Should be ok", async() => {
-        var obj = {
+        const obj = {
             currency: "DDD.NCR",
             flag: 1,
             flag_type: 1
-        }
-        var transaction = await createPluginAsset(62, obj, node.Eaccount.password, "DDD12345");
+        };
+        const transaction = await createPluginAsset(62, obj, node.Eaccount.password, "DDD12345");
         await new Promise((resolve, reject) => {
             node.peer.post("/transactions")
                 .set("Accept", "application/json")
@@ -24,14 +24,14 @@ describe("AOB Test", () => {
                 .send({ transaction })
                 .expect("Content-Type", /json/)
                 .expect(200)
-                .end(function (err, res) {
+                .end((err, {body}) => {
                     // console.log('res.body', res.body);
 
                     if (err) {
                         return reject(err);
                     }
 
-                    node.expect(res.body).to.have.property("success").to.be.true;
+                    node.expect(body).to.have.property("success").to.be.true;
 
                     resolve();
                 });
@@ -41,15 +41,15 @@ describe("AOB Test", () => {
     it("资产转账 Should be fail", async () => {
         await node.onNewBlockAsync();
 
-        var obj = {
+        const obj = {
             recipient_id: node.Daccount.address,
             currency: "DDD.NCR",
             aobAmount: "10",
             message: '测试转账',
             fee: '0',
-        }
+        };
 
-        var transaction = await createPluginAsset(65, obj, node.Eaccount.password, "DDD12345");
+        const transaction = await createPluginAsset(65, obj, node.Eaccount.password, "DDD12345");
         await new Promise((resolve, reject) => {
             node.peer.post("/transactions")
                 .set("Accept", "application/json")
@@ -59,15 +59,15 @@ describe("AOB Test", () => {
                 .send({ transaction })
                 .expect("Content-Type", /json/)
                 .expect(200)
-                .end(function (err, res) {
+                .end((err, {body}) => {
                     // console.log(res.body);
 
                     if (err) {
                         return reject(err);
                     }
 
-                    node.expect(res.body).to.have.property("success").to.be.false;
-                    node.expect(res.body).to.have.property("error").equal("Permission not allowed.");
+                    node.expect(body).to.have.property("success").to.be.false;
+                    node.expect(body).to.have.property("error").equal("Permission not allowed.");
 
                     resolve();
                 });
@@ -75,15 +75,15 @@ describe("AOB Test", () => {
     })
 
     it ("增加Daccount到白名单 Should be ok", async() => {
-        var obj = {
+        const obj = {
             currency: "DDD.NCR",
             flag: 1,
             operator: "+",
             list: [
                 node.Daccount.address
             ].join(",")
-        }
-        var transaction = await createPluginAsset(63, obj, node.Eaccount.password, "DDD12345");
+        };
+        const transaction = await createPluginAsset(63, obj, node.Eaccount.password, "DDD12345");
         await new Promise((resolve, reject) => {
             node.peer.post("/transactions")
                 .set("Accept", "application/json")
@@ -93,14 +93,14 @@ describe("AOB Test", () => {
                 .send({ transaction })
                 .expect("Content-Type", /json/)
                 .expect(200)
-                .end(function (err, res) {
+                .end((err, {body}) => {
                     // console.log('res.body', res.body);
 
                     if (err) {
                         return reject(err);
                     }
 
-                    node.expect(res.body).to.have.property("success").to.be.true;
+                    node.expect(body).to.have.property("success").to.be.true;
 
                     resolve();
                 });
@@ -110,15 +110,15 @@ describe("AOB Test", () => {
     it("资产转账 Should be ok", async () => {
         await node.onNewBlockAsync();
 
-        var obj = {
+        const obj = {
             recipient_id: node.Daccount.address,
             currency: "DDD.NCR",
             aobAmount: "10",
             message: '测试转账',
             fee: '0',
-        }
+        };
 
-        var transaction = await createPluginAsset(65, obj, node.Eaccount.password, "DDD12345");
+        const transaction = await createPluginAsset(65, obj, node.Eaccount.password, "DDD12345");
         await new Promise((resolve, reject) => {
             node.peer.post("/transactions")
                 .set("Accept", "application/json")
@@ -128,14 +128,14 @@ describe("AOB Test", () => {
                 .send({ transaction })
                 .expect("Content-Type", /json/)
                 .expect(200)
-                .end(function (err, res) {
+                .end((err, {body}) => {
                     // console.log(res.body);
 
                     if (err) {
                         return reject(err);
                     }
 
-                    node.expect(res.body).to.have.property("success").to.be.true;
+                    node.expect(body).to.have.property("success").to.be.true;
 
                     resolve();
                 });
@@ -143,15 +143,15 @@ describe("AOB Test", () => {
     })
 
     it ("在白名单删除Daccount Should be ok", async() => {
-        var obj = {
+        const obj = {
             currency: "DDD.NCR",
             flag: 1,
             operator: "-",
             list: [
                 node.Daccount.address
             ].join(",")
-        }
-        var transaction = await createPluginAsset(63, obj, node.Eaccount.password, "DDD12345");
+        };
+        const transaction = await createPluginAsset(63, obj, node.Eaccount.password, "DDD12345");
         await new Promise((resolve, reject) => {
             node.peer.post("/transactions")
                 .set("Accept", "application/json")
@@ -161,14 +161,14 @@ describe("AOB Test", () => {
                 .send({ transaction })
                 .expect("Content-Type", /json/)
                 .expect(200)
-                .end(function (err, res) {
+                .end((err, {body}) => {
                     // console.log('res.body', res.body);
 
                     if (err) {
                         return reject(err);
                     }
 
-                    node.expect(res.body).to.have.property("success").to.be.true;
+                    node.expect(body).to.have.property("success").to.be.true;
 
                     resolve();
                 });
@@ -178,15 +178,15 @@ describe("AOB Test", () => {
     it("资产转账 Should be fail", async () => {
         await node.onNewBlockAsync();
 
-        var obj = {
+        const obj = {
             recipient_id: node.Daccount.address,
             currency: "DDD.NCR",
             aobAmount: "10",
             message: '测试转账',
             fee: '0',
-        }
+        };
 
-        var transaction = await createPluginAsset(65, obj, node.Eaccount.password, "DDD12345");
+        const transaction = await createPluginAsset(65, obj, node.Eaccount.password, "DDD12345");
         await new Promise((resolve, reject) => {
             node.peer.post("/transactions")
                 .set("Accept", "application/json")
@@ -196,15 +196,15 @@ describe("AOB Test", () => {
                 .send({ transaction })
                 .expect("Content-Type", /json/)
                 .expect(200)
-                .end(function (err, res) {
+                .end((err, {body}) => {
                     // console.log(res.body);
 
                     if (err) {
                         return reject(err);
                     }
 
-                    node.expect(res.body).to.have.property("success").to.be.false;
-                    node.expect(res.body).to.have.property("error").equal("Permission not allowed.");
+                    node.expect(body).to.have.property("success").to.be.false;
+                    node.expect(body).to.have.property("error").equal("Permission not allowed.");
 
                     resolve();
                 });
@@ -212,12 +212,12 @@ describe("AOB Test", () => {
     })
 
     it ("关闭白名单 Should be ok", async() => {
-        var obj = {
+        const obj = {
             currency: "DDD.NCR",
             flag: 2,
             flag_type: 1
-        }
-        var transaction = await createPluginAsset(62, obj, node.Eaccount.password, "DDD12345");
+        };
+        const transaction = await createPluginAsset(62, obj, node.Eaccount.password, "DDD12345");
         await new Promise((resolve, reject) => {
             node.peer.post("/transactions")
                 .set("Accept", "application/json")
@@ -227,14 +227,14 @@ describe("AOB Test", () => {
                 .send({ transaction })
                 .expect("Content-Type", /json/)
                 .expect(200)
-                .end(function (err, res) {
+                .end((err, {body}) => {
                     // console.log('res.body', res.body);
 
                     if (err) {
                         return reject(err);
                     }
 
-                    node.expect(res.body).to.have.property("success").to.be.true;
+                    node.expect(body).to.have.property("success").to.be.true;
 
                     resolve();
                 });
@@ -244,15 +244,15 @@ describe("AOB Test", () => {
     it("资产转账 Should be ok", async () => {
         await node.onNewBlockAsync();
 
-        var obj = {
+        const obj = {
             recipient_id: node.Daccount.address,
             currency: "DDD.NCR",
             aobAmount: "10",
             message: '测试转账',
             fee: '0',
-        }
+        };
 
-        var transaction = await createPluginAsset(65, obj, node.Eaccount.password, "DDD12345");
+        const transaction = await createPluginAsset(65, obj, node.Eaccount.password, "DDD12345");
         await new Promise((resolve, reject) => {
             node.peer.post("/transactions")
                 .set("Accept", "application/json")
@@ -262,14 +262,14 @@ describe("AOB Test", () => {
                 .send({ transaction })
                 .expect("Content-Type", /json/)
                 .expect(200)
-                .end(function (err, res) {
+                .end((err, {body}) => {
                     // console.log(res.body);
 
                     if (err) {
                         return reject(err);
                     }
 
-                    node.expect(res.body).to.have.property("success").to.be.true;
+                    node.expect(body).to.have.property("success").to.be.true;
 
                     resolve();
                 });

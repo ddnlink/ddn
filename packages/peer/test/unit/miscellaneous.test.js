@@ -1,6 +1,11 @@
 import DdnUtils from '@ddn/utils';
-import node from "./../variables.js";
-import genesisblock from "../../genesisBlock.json";
+import node from "../node";
+import {
+    requireFile
+} from '@ddn/core/lib/getUserConfig';
+
+const genesisblockFile = path.resolve(process.cwd(), './examples/fun-tests/config/genesisBlock.json');
+const genesisblock = requireFile(genesisblockFile);
 
 const block = {
     blockHeight : "0",  

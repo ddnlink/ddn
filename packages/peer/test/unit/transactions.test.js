@@ -19,19 +19,19 @@ let totalTxFee = "0";
 // const randomCoin = "0";
 
 beforeAll(async () => {
-    let res = await node.openAccountAsync({ secret: Account1.password, secondSecret: Account1.second_password });
+    let res = await node.openAccountAsync({ secret: Account1.password, secondSecret: Account1.secondPassword });
     node.expect(res.body).to.have.property('success').to.be.true
     Account1.address = res.body.account.address
     Account1.publicKey = res.body.account.public_key
     Account1.balance = res.body.account.balance
 
-    res = await node.openAccountAsync({ secret: Account2.password, secondSecret: Account2.second_password })
+    res = await node.openAccountAsync({ secret: Account2.password, secondSecret: Account2.secondPassword })
     node.expect(res.body).to.have.property('success').to.be.true
     Account2.address = res.body.account.address
     Account2.publicKey = res.body.account.public_key
     Account2.balance = res.body.account.balance
 
-    res = await node.openAccountAsync({ secret: Account3.password, secondSecret: Account3.second_password })
+    res = await node.openAccountAsync({ secret: Account3.password, secondSecret: Account3.secondPassword })
     node.expect(res.body).to.have.property('success').to.be.true
     Account3.address = res.body.account.address
     Account3.publicKey = res.body.account.public_key
@@ -700,7 +700,7 @@ describe('PUT /signatures', () => {
                 .set('Accept', 'application/json')
                 .send({
                     secret: Account1.password,
-                    secondSecret: Account1.second_password
+                    secondSecret: Account1.secondPassword
                 })
                 .expect('Content-Type', /json/)
                 .expect(200)
@@ -769,7 +769,7 @@ describe('PUT /transactions (with second passphase now enabled)', () => {
             node.api.put('/transactions')
                 .set('Accept', 'application/json')
                 .send({
-                    secondSecret: Account1.second_password,
+                    secondSecret: Account1.secondPassword,
                     recipientId: Account2.address,
                     amount: amountToSend
                 })

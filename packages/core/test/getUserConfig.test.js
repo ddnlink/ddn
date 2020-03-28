@@ -19,28 +19,28 @@ function stripPrefix(file) {
 }
 
 describe('getUserConfig', () => {
-  it('addAffix', () => {
+  test('addAffix', () => {
     expect(addAffix('/a/b.js', 'foo')).toEqual('/a/b.foo.js');
   });
 
   describe('getConfigFile', () => {
-    it('.ddnrc.js', () => {
+    test('.ddnrc.js', () => {
       expect(stripPrefix(getConfigFile(`${fixtures}/ddnrc`))).toEqual('ddnrc/.ddnrc.js');
     });
 
-    it('config/config.json', () => {
+    test('config/config.json', () => {
       expect(stripPrefix(getConfigFile(`${fixtures}/config-configjson`))).toEqual(
         'config-configjson/config/config.json',
       );
     });
 
-    it('config/config.js', () => {
+    test('config/config.js', () => {
       expect(stripPrefix(getConfigFile(`${fixtures}/config-directory`))).toEqual(
         'config-directory/config/config.js',
       );
     });
 
-    it('conflicts', () => {
+    test('conflicts', () => {
       expect(() => {
         getConfigFile(`${fixtures}/conflicts`);
       }).toThrow(/Multiple config files/);
@@ -48,14 +48,14 @@ describe('getUserConfig', () => {
   });
 
   describe('mergeConfigs', () => {
-    it('shallow', () => {
+    test('shallow', () => {
       expect(mergeConfigs({ foo: 1 }, { bar: 1 }, undefined, { bar: 2 })).toEqual({
         foo: 1,
         bar: 2,
       });
     });
 
-    it('deep', () => {
+    test('deep', () => {
       expect(mergeConfigs({ foo: { bar: 1, haa: 1 } }, { foo: { bar: 2, yaa: 1 } })).toEqual({
         foo: {
           bar: 2,

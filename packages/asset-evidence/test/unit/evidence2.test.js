@@ -10,7 +10,7 @@ const createEvidence = node.ddn.evidence.createEvidence;
 
 describe('Test evidence', () => {
 
-  before(done => {
+  beforeAll(done => {
     const ipid = node.randomIpId();
     evidence = {
       "ipid": ipid,

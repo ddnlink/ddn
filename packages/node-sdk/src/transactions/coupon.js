@@ -1,20 +1,20 @@
-var crypto = require('./crypto.js');
-var constants = require('../constants.js');
-var trsTypes = require('../transaction-types');
-var options = require('../options');
-var slots = require('../time/slots.js');
-var addressHelper = require('../address.js');
+import crypto from './crypto';
+import constants from '../constants';
+import trsTypes from '../transaction-types';
+import options from '../options';
+import slots from '../time/slots';
+import addressHelper from '../address';
 
 function createIssuerAuditorBuy(received_address, amount, secret, secondSecret) {
-    var keys = crypto.getKeys(secret);
+    const keys = crypto.getKeys(secret);
     
-    var fee = constants.fees.send;
+    const fee = constants.fees.send;
 
-    var transaction = {
+    const transaction = {
         type: trsTypes.COUPON_ISSUER_AUDITOR_BUY,
         nethash: options.get('nethash'),
-        amount: amount,
-        fee: fee + "",
+        amount,
+        fee: `${fee}`,
         recipient_id: received_address,
         sender_public_key: keys.public_key,
         timestamp: slots.getTime() - options.get('clientDriftSeconds'),
@@ -28,7 +28,7 @@ function createIssuerAuditorBuy(received_address, amount, secret, secondSecret) 
     crypto.sign(transaction, keys);
     
     if (secondSecret) {
-        var secondKeys = crypto.getKeys(secondSecret);
+        const secondKeys = crypto.getKeys(secondSecret);
         crypto.secondSign(transaction, secondKeys);
     }
 
@@ -36,25 +36,25 @@ function createIssuerAuditorBuy(received_address, amount, secret, secondSecret) 
 }
 
 function createIssuerApply(orgName, org_id, orgOwner, orgOwnerPhone, secret, secondSecret) {
-    var keys = crypto.getKeys(secret);
+    const keys = crypto.getKeys(secret);
 
-    var fee = constants.fees.send;
+    const fee = constants.fees.send;
 
-    var transaction = {
+    const transaction = {
         type: trsTypes.COUPON_ISSUER_APPLY,
         nethash: options.get('nethash'),
         amount: "0",
-        fee: fee + "",
+        fee: `${fee}`,
 		recipient_id: null,
 		sender_public_key: keys.public_key,
         timestamp: slots.getTime() - options.get('clientDriftSeconds'),
         asset: {
             couponIssuerApply: {
                 address: addressHelper.generateBase58CheckAddress(keys.public_key),
-                orgName: orgName,
-                org_id: org_id,
-                orgOwner: orgOwner,
-                orgOwnerPhone: orgOwnerPhone
+                orgName,
+                org_id,
+                orgOwner,
+                orgOwnerPhone
             }
         }
     };
@@ -62,7 +62,7 @@ function createIssuerApply(orgName, org_id, orgOwner, orgOwnerPhone, secret, sec
 	crypto.sign(transaction, keys);
 	
 	if (secondSecret) {
-		var secondKeys = crypto.getKeys(secondSecret);
+		const secondKeys = crypto.getKeys(secondSecret);
 		crypto.secondSign(transaction, secondKeys);
 	}
 
@@ -70,25 +70,25 @@ function createIssuerApply(orgName, org_id, orgOwner, orgOwnerPhone, secret, sec
 }
 
 function createIssuerUpdate(orgName, org_id, orgOwner, orgOwnerPhone, secret, secondSecret) {
-    var keys = crypto.getKeys(secret);
+    const keys = crypto.getKeys(secret);
     
-    var fee = constants.fees.send;
+    const fee = constants.fees.send;
 
-    var transaction = {
+    const transaction = {
         type: trsTypes.COUPON_ISSUER_UPDATE,
         nethash: options.get('nethash'),
         amount: "0",
-        fee: fee + "",
+        fee: `${fee}`,
         recipient_id: null,
         sender_public_key: keys.public_key,
         timestamp: slots.getTime() - options.get('clientDriftSeconds'),
         asset: {
             couponIssuerUpdate: {
                 address: addressHelper.generateBase58CheckAddress(keys.public_key),
-                orgName: orgName,
-                org_id: org_id,
-                orgOwner: orgOwner,
-                orgOwnerPhone: orgOwnerPhone
+                orgName,
+                org_id,
+                orgOwner,
+                orgOwnerPhone
             }
         }
     };
@@ -96,7 +96,7 @@ function createIssuerUpdate(orgName, org_id, orgOwner, orgOwnerPhone, secret, se
     crypto.sign(transaction, keys);
     
     if (secondSecret) {
-        var secondKeys = crypto.getKeys(secondSecret);
+        const secondKeys = crypto.getKeys(secondSecret);
         crypto.secondSign(transaction, secondKeys);
     }
 
@@ -104,26 +104,26 @@ function createIssuerUpdate(orgName, org_id, orgOwner, orgOwnerPhone, secret, se
 }
 
 function createIssuerCheck(address, orgName, org_id, orgOwner, orgOwnerPhone, state, secret, secondSecret) {
-    var keys = crypto.getKeys(secret);
+    const keys = crypto.getKeys(secret);
     
-    var fee = constants.fees.send;
+    const fee = constants.fees.send;
 
-    var transaction = {
+    const transaction = {
         type: trsTypes.COUPON_ISSUER_CHECK,
         nethash: options.get('nethash'),
         amount: "0",
-        fee: fee + "",
+        fee: `${fee}`,
         recipient_id: null,
         sender_public_key: keys.public_key,
         timestamp: slots.getTime() - options.get('clientDriftSeconds'),
         asset: {
             couponIssuerCheck: {
-                address: address,
-                orgName: orgName,
-                org_id: org_id,
-                orgOwner: orgOwner,
-                orgOwnerPhone: orgOwnerPhone,
-                state: state
+                address,
+                orgName,
+                org_id,
+                orgOwner,
+                orgOwnerPhone,
+                state
             }
         }
     };
@@ -131,7 +131,7 @@ function createIssuerCheck(address, orgName, org_id, orgOwner, orgOwnerPhone, st
     crypto.sign(transaction, keys);
     
     if (secondSecret) {
-        var secondKeys = crypto.getKeys(secondSecret);
+        const secondKeys = crypto.getKeys(secondSecret);
         crypto.secondSign(transaction, secondKeys);
     }
 
@@ -139,25 +139,25 @@ function createIssuerCheck(address, orgName, org_id, orgOwner, orgOwnerPhone, st
 }
 
 function createIssuerFreeze(address, orgName, org_id, orgOwner, orgOwnerPhone, secret, secondSecret) {
-    var keys = crypto.getKeys(secret);
+    const keys = crypto.getKeys(secret);
     
-    var fee = constants.fees.send;
+    const fee = constants.fees.send;
 
-    var transaction = {
+    const transaction = {
         type: trsTypes.COUPON_ISSUER_FREEZE,
         nethash: options.get('nethash'),
         amount: "0",
-        fee: fee + "",
+        fee: `${fee}`,
         recipient_id: null,
         sender_public_key: keys.public_key,
         timestamp: slots.getTime() - options.get('clientDriftSeconds'),
         asset: {
             couponIssuerFreeze: {
-                address: address,
-                orgName: orgName,
-                org_id: org_id,
-                orgOwner: orgOwner,
-                orgOwnerPhone: orgOwnerPhone
+                address,
+                orgName,
+                org_id,
+                orgOwner,
+                orgOwnerPhone
             }
         }
     };
@@ -165,7 +165,7 @@ function createIssuerFreeze(address, orgName, org_id, orgOwner, orgOwnerPhone, s
     crypto.sign(transaction, keys);
     
     if (secondSecret) {
-        var secondKeys = crypto.getKeys(secondSecret);
+        const secondKeys = crypto.getKeys(secondSecret);
         crypto.secondSign(transaction, secondKeys);
     }
 
@@ -173,26 +173,26 @@ function createIssuerFreeze(address, orgName, org_id, orgOwner, orgOwnerPhone, s
 }
 
 function createIssuerUnfreeze(address, orgName, org_id, orgOwner, orgOwnerPhone, state, secret, secondSecret) {
-    var keys = crypto.getKeys(secret);
+    const keys = crypto.getKeys(secret);
     
-    var fee = constants.fees.send;
+    const fee = constants.fees.send;
 
-    var transaction = {
+    const transaction = {
         type: trsTypes.COUPON_ISSUER_UNFREEZE,
         nethash: options.get('nethash'),
         amount: "0",
-        fee: fee + "",
+        fee: `${fee}`,
         recipient_id: null,
         sender_public_key: keys.public_key,
         timestamp: slots.getTime() - options.get('clientDriftSeconds'),
         asset: {
             couponIssuerUnfreeze: {
-                address: address,
-                orgName: orgName,
-                org_id: org_id,
-                orgOwner: orgOwner,
-                orgOwnerPhone: orgOwnerPhone,
-                state: state
+                address,
+                orgName,
+                org_id,
+                orgOwner,
+                orgOwnerPhone,
+                state
             }
         }
     };
@@ -200,7 +200,7 @@ function createIssuerUnfreeze(address, orgName, org_id, orgOwner, orgOwnerPhone,
     crypto.sign(transaction, keys);
     
     if (secondSecret) {
-        var secondKeys = crypto.getKeys(secondSecret);
+        const secondKeys = crypto.getKeys(secondSecret);
         crypto.secondSign(transaction, secondKeys);
     }
 
@@ -209,30 +209,30 @@ function createIssuerUnfreeze(address, orgName, org_id, orgOwner, orgOwnerPhone,
 
 function createIssueNew(goodsName, goodsSpecs, goodsUnit, goodsNum, unitPrice, 
     batchValue, issueNum, issueTime, expireTime, secret, secondSecret) {
-    var keys = crypto.getKeys(secret);
+    const keys = crypto.getKeys(secret);
     
-    var fee = constants.fees.send;
+    const fee = constants.fees.send;
 
-    var transaction = {
+    const transaction = {
         type: trsTypes.COUPON_ISSUE_NEW,
         nethash: options.get('nethash'),
         amount: "0",
-        fee: fee + "",
+        fee: `${fee}`,
         recipient_id: null,
         sender_public_key: keys.public_key,
         timestamp: slots.getTime() - options.get('clientDriftSeconds'),
         asset: {
             couponIssueNew: {
                 address: addressHelper.generateBase58CheckAddress(keys.public_key),
-                goodsName: goodsName,
-                goodsSpecs: goodsSpecs,
-                goodsUnit: goodsUnit,
-                goodsNum: goodsNum,
-                unitPrice: unitPrice,
-                batchValue: batchValue,
-                issueNum: issueNum,
-                issueTime: issueTime,
-                expireTime: expireTime
+                goodsName,
+                goodsSpecs,
+                goodsUnit,
+                goodsNum,
+                unitPrice,
+                batchValue,
+                issueNum,
+                issueTime,
+                expireTime
             }
         }
     };
@@ -240,7 +240,7 @@ function createIssueNew(goodsName, goodsSpecs, goodsUnit, goodsNum, unitPrice,
     crypto.sign(transaction, keys);
     
     if (secondSecret) {
-        var secondKeys = crypto.getKeys(secondSecret);
+        const secondKeys = crypto.getKeys(secondSecret);
         crypto.secondSign(transaction, secondKeys);
     }
 
@@ -249,30 +249,30 @@ function createIssueNew(goodsName, goodsSpecs, goodsUnit, goodsNum, unitPrice,
 
 function createIssueClose(goodsName, goodsSpecs, goodsUnit, goodsNum, unitPrice, 
     batchValue, issueNum, issueTime, expireTime, secret, secondSecret) {
-    var keys = crypto.getKeys(secret);
+    const keys = crypto.getKeys(secret);
     
-    var fee = constants.fees.send;
+    const fee = constants.fees.send;
 
-    var transaction = {
+    const transaction = {
         type: trsTypes.COUPON_ISSUE_CLOSE,
         nethash: options.get('nethash'),
         amount: "0",
-        fee: fee + "",
+        fee: `${fee}`,
         recipient_id: null,
         sender_public_key: keys.public_key,
         timestamp: slots.getTime() - options.get('clientDriftSeconds'),
         asset: {
             couponIssueClose: {
                 address: addressHelper.generateBase58CheckAddress(keys.public_key),
-                goodsName: goodsName,
-                goodsSpecs: goodsSpecs,
-                goodsUnit: goodsUnit,
-                goodsNum: goodsNum,
-                unitPrice: unitPrice,
-                batchValue: batchValue,
-                issueNum: issueNum,
-                issueTime: issueTime,
-                expireTime: expireTime
+                goodsName,
+                goodsSpecs,
+                goodsUnit,
+                goodsNum,
+                unitPrice,
+                batchValue,
+                issueNum,
+                issueTime,
+                expireTime
             }
         }
     };
@@ -280,7 +280,7 @@ function createIssueClose(goodsName, goodsSpecs, goodsUnit, goodsNum, unitPrice,
     crypto.sign(transaction, keys);
     
     if (secondSecret) {
-        var secondKeys = crypto.getKeys(secondSecret);
+        const secondKeys = crypto.getKeys(secondSecret);
         crypto.secondSign(transaction, secondKeys);
     }
 
@@ -289,30 +289,30 @@ function createIssueClose(goodsName, goodsSpecs, goodsUnit, goodsNum, unitPrice,
 
 function createIssueReopen(goodsName, goodsSpecs, goodsUnit, goodsNum, unitPrice, 
     batchValue, issueNum, issueTime, expireTime, secret, secondSecret) {
-    var keys = crypto.getKeys(secret);
+    const keys = crypto.getKeys(secret);
     
-    var fee = constants.fees.send;
+    const fee = constants.fees.send;
 
-    var transaction = {
+    const transaction = {
         type: trsTypes.COUPON_ISSUE_REOPEN,
         nethash: options.get('nethash'),
         amount: "0",
-        fee: fee + "",
+        fee: `${fee}`,
         recipient_id: null,
         sender_public_key: keys.public_key,
         timestamp: slots.getTime() - options.get('clientDriftSeconds'),
         asset: {
             couponIssueReopen: {
                 address: addressHelper.generateBase58CheckAddress(keys.public_key),
-                goodsName: goodsName,
-                goodsSpecs: goodsSpecs,
-                goodsUnit: goodsUnit,
-                goodsNum: goodsNum,
-                unitPrice: unitPrice,
-                batchValue: batchValue,
-                issueNum: issueNum,
-                issueTime: issueTime,
-                expireTime: expireTime
+                goodsName,
+                goodsSpecs,
+                goodsUnit,
+                goodsNum,
+                unitPrice,
+                batchValue,
+                issueNum,
+                issueTime,
+                expireTime
             }
         }
     };
@@ -320,7 +320,7 @@ function createIssueReopen(goodsName, goodsSpecs, goodsUnit, goodsNum, unitPrice
     crypto.sign(transaction, keys);
     
     if (secondSecret) {
-        var secondKeys = crypto.getKeys(secondSecret);
+        const secondKeys = crypto.getKeys(secondSecret);
         crypto.secondSign(transaction, secondKeys);
     }
 
@@ -330,25 +330,25 @@ function createIssueReopen(goodsName, goodsSpecs, goodsUnit, goodsNum, unitPrice
 function createExchangeBuy(batchValue, code, received_address, 
     price, secret, secondSecret) {
 
-    var keys = crypto.getKeys(secret);
+    const keys = crypto.getKeys(secret);
     
-    var fee = constants.fees.send;
+    const fee = constants.fees.send;
 
-    var transaction = {
+    const transaction = {
         type: trsTypes.COUPON_EXCH_BUY,
         nethash: options.get('nethash'),
         amount: price,
-        fee: fee + "",
+        fee: `${fee}`,
         recipient_id: received_address,
         sender_public_key: keys.public_key,
         timestamp: slots.getTime() - options.get('clientDriftSeconds'),
         asset: {
             couponExcBuy: {
-                batchValue: batchValue,
-                code: code,
+                batchValue,
+                code,
                 sender_address: addressHelper.generateBase58CheckAddress(keys.public_key),
-                received_address: received_address,
-                price: price
+                received_address,
+                price
             }
         }
     };
@@ -356,7 +356,7 @@ function createExchangeBuy(batchValue, code, received_address,
     crypto.sign(transaction, keys);
     
     if (secondSecret) {
-        var secondKeys = crypto.getKeys(secondSecret);
+        const secondKeys = crypto.getKeys(secondSecret);
         crypto.secondSign(transaction, secondKeys);
     }
 
@@ -366,24 +366,24 @@ function createExchangeBuy(batchValue, code, received_address,
 function createExchangePay(batchValue, code, received_address, 
     secret, secondSecret) {
 
-    var keys = crypto.getKeys(secret);
+    const keys = crypto.getKeys(secret);
     
-    var fee = constants.fees.send;
+    const fee = constants.fees.send;
 
-    var transaction = {
+    const transaction = {
         type: trsTypes.COUPON_EXCH_PAY,
         nethash: options.get('nethash'),
         amount: "0",
-        fee: fee + "",
+        fee: `${fee}`,
         recipient_id: null,
         sender_public_key: keys.public_key,
         timestamp: slots.getTime() - options.get('clientDriftSeconds'),
         asset: {
             couponExcPay: {
-                batchValue: batchValue,
-                code: code,
+                batchValue,
+                code,
                 sender_address: addressHelper.generateBase58CheckAddress(keys.public_key),
-                received_address: received_address,
+                received_address,
                 price: "0"
             }
         }
@@ -392,7 +392,7 @@ function createExchangePay(batchValue, code, received_address,
     crypto.sign(transaction, keys);
     
     if (secondSecret) {
-        var secondKeys = crypto.getKeys(secondSecret);
+        const secondKeys = crypto.getKeys(secondSecret);
         crypto.secondSign(transaction, secondKeys);
     }
 
@@ -402,26 +402,26 @@ function createExchangePay(batchValue, code, received_address,
 function createExchangeTransferConfirm(batchValue, code, received_address, 
     price, related_trs_id, state, secret, secondSecret) {
 
-    var keys = crypto.getKeys(secret);
+    const keys = crypto.getKeys(secret);
     
-    var fee = constants.fees.send;
+    const fee = constants.fees.send;
 
-    var transaction = {
+    const transaction = {
         type: trsTypes.COUPON_EXCH_TRANSFER_CONFIRM,
         nethash: options.get('nethash'),
         amount: price,
-        fee: fee + "",
+        fee: `${fee}`,
         recipient_id: null,
         sender_public_key: keys.public_key,
         timestamp: slots.getTime() - options.get('clientDriftSeconds'),
         asset: {
             couponExcTransferConfirm: {
-                batchValue: batchValue,
-                code: code,
+                batchValue,
+                code,
                 sender_address: addressHelper.generateBase58CheckAddress(keys.public_key),
-                received_address: received_address,
-                price: price,
-                related_trs_id: related_trs_id,
+                received_address,
+                price,
+                related_trs_id,
                 transferState: state
             }
         }
@@ -430,7 +430,7 @@ function createExchangeTransferConfirm(batchValue, code, received_address,
     crypto.sign(transaction, keys);
     
     if (secondSecret) {
-        var secondKeys = crypto.getKeys(secondSecret);
+        const secondKeys = crypto.getKeys(secondSecret);
         crypto.secondSign(transaction, secondKeys);
     }
 
@@ -440,25 +440,25 @@ function createExchangeTransferConfirm(batchValue, code, received_address,
 function createExchangeTransferAsk(batchValue, code, received_address, 
     price, secret, secondSecret) {
 
-    var keys = crypto.getKeys(secret);
+    const keys = crypto.getKeys(secret);
     
-    var fee = constants.fees.send;
+    const fee = constants.fees.send;
 
-    var transaction = {
+    const transaction = {
         type: trsTypes.COUPON_EXCH_TRANSFER_ASK,
         nethash: options.get('nethash'),
         amount: "0",
-        fee: fee + "",
+        fee: `${fee}`,
         recipient_id: null,
         sender_public_key: keys.public_key,
         timestamp: slots.getTime() - options.get('clientDriftSeconds'),
         asset: {
             couponExcTransferAsk: {
-                batchValue: batchValue,
-                code: code,
+                batchValue,
+                code,
                 sender_address: addressHelper.generateBase58CheckAddress(keys.public_key),
-                received_address: received_address,
-                price: price
+                received_address,
+                price
             }
         }
     };
@@ -466,25 +466,25 @@ function createExchangeTransferAsk(batchValue, code, received_address,
     crypto.sign(transaction, keys);
     
     if (secondSecret) {
-        var secondKeys = crypto.getKeys(secondSecret);
+        const secondKeys = crypto.getKeys(secondSecret);
         crypto.secondSign(transaction, secondKeys);
     }
 
     return transaction;
 }
 
-module.exports = {
-    createIssuerAuditorBuy: createIssuerAuditorBuy,
-    createIssuerApply: createIssuerApply,
-    createIssuerCheck: createIssuerCheck,
-    createIssuerUpdate: createIssuerUpdate,
-    createIssuerFreeze: createIssuerFreeze,
-    createIssuerUnfreeze: createIssuerUnfreeze,
-    createIssueNew: createIssueNew,
-    createIssueClose: createIssueClose,
-    createIssueReopen: createIssueReopen,
-    createExchangeBuy: createExchangeBuy,
-    createExchangePay: createExchangePay,
-    createExchangeTransferAsk: createExchangeTransferAsk,
-    createExchangeTransferConfirm: createExchangeTransferConfirm
+export default {
+    createIssuerAuditorBuy,
+    createIssuerApply,
+    createIssuerCheck,
+    createIssuerUpdate,
+    createIssuerFreeze,
+    createIssuerUnfreeze,
+    createIssueNew,
+    createIssueClose,
+    createIssueReopen,
+    createExchangeBuy,
+    createExchangePay,
+    createExchangeTransferAsk,
+    createExchangeTransferConfirm
 };

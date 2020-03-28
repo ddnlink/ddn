@@ -1,5 +1,5 @@
 import DdnUtils from '@ddn/utils';
-import node from "../variables";
+import node from "../node";
 
 describe('LimitCache', () => {
   it('normal test', done => {

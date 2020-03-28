@@ -1,12 +1,12 @@
-var options = require('../options');
-var constants = require('../constants');
+import options from '../options';
+import constants from '../constants';
 
 function getEpochTime(time) {
 	if (time === undefined) {
 		time = (new Date()).getTime();
 	}
-	var d = beginEpochTime();
-	var t = d.getTime();
+	const d = beginEpochTime();
+	const t = d.getTime();
 	return Math.floor((time - t) / 1000);
 }
 
@@ -15,8 +15,8 @@ function beginEpochTime() {
 	return constants.nethash[options.get('nethash')].beginDate;
 }
 
-var interval = 10,
-    delegates = 101;
+const interval = 10;
+const delegates = 101;
 
 function getTime(time) {
 	return getEpochTime(time);
@@ -26,8 +26,8 @@ function getRealTime(epochTime) {
 	if (epochTime === undefined) {
 		epochTime = getTime()
 	}
-	var d = beginEpochTime();
-	var t = Math.floor(d.getTime() / 1000) * 1000;
+	const d = beginEpochTime();
+	const t = Math.floor(d.getTime() / 1000) * 1000;
 	return t + epochTime * 1000;
 }
 
@@ -44,7 +44,7 @@ function getSlotTime(slot) {
 }
 
 function getNextSlot() {
-	var slot = getSlotNumber();
+	const slot = getSlotNumber();
 
 	return slot + 1;
 }
@@ -53,14 +53,14 @@ function getLastSlot(nextSlot) {
 	return nextSlot + delegates;
 }
 
-module.exports = {
-	interval: interval,
-	delegates: delegates,
-	getTime: getTime,
-	getRealTime: getRealTime,
-	getSlotNumber: getSlotNumber,
-	getSlotTime: getSlotTime,
-	getNextSlot: getNextSlot,
-	getLastSlot: getLastSlot,
-	beginEpochTime: beginEpochTime
-}
+export default {
+	interval,
+	delegates,
+	getTime,
+	getRealTime,
+	getSlotNumber,
+	getSlotTime,
+	getNextSlot,
+	getLastSlot,
+	beginEpochTime
+};

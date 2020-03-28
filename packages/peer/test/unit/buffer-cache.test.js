@@ -1,4 +1,4 @@
-import node from "../variables";
+import node from "../node";
 import BufferCache from '../../lib/helpers/buffer-cache';
 
 describe('BufferCache', () => {

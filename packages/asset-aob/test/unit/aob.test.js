@@ -1,50 +1,49 @@
-import DdnUtils from '@ddn/utils';
 import node from '../node';
 
 const DEBUG = require('debug')('aob');
 const expect = node.expect;
 
-// async function registerIssuerAsync(name, desc, {password}) {
-//   const res = await node.submitTransactionAsync(node.ddn.aob.createIssuer(name, desc, password));
-//   DEBUG('register issuer response', res.body)
-//   return res
-// }
+async function registerIssuerAsync(name, desc, {password}) {
+  const res = await node.submitTransactionAsync(node.ddn.aob.createIssuer(name, desc, password));
+  DEBUG('register issuer response', res.body)
+  return res
+}
 
-// async function registerAssetAsync(name, desc, maximum, precision, strategy, {password}) {
-//   const res = await node.submitTransactionAsync(node.ddn.aob.createAsset(name, desc, maximum, precision, strategy, 1, 1, 1, password));
-//   DEBUG('register asset response', res.body)
-//   return res
-// }
+async function registerAssetAsync(name, desc, maximum, precision, strategy, {password}) {
+  const res = await node.submitTransactionAsync(node.ddn.aob.createAsset(name, desc, maximum, precision, strategy, 1, 1, 1, password));
+  DEBUG('register asset response', res.body)
+  return res
+}
 
-// async function issueAssetAsync(currency, amount, {password}) {
-//   const res = await node.submitTransactionAsync(node.ddn.aob.createIssue(currency, amount, password));
-//   DEBUG('issue asset response', res.body)
-//   return res
-// }
+async function issueAssetAsync(currency, amount, {password}) {
+  const res = await node.submitTransactionAsync(node.ddn.aob.createIssue(currency, amount, password));
+  DEBUG('issue asset response', res.body)
+  return res
+}
 
-// async function writeoffAssetAsync(currency, {password}) {
-//   const res = await node.submitTransactionAsync(node.ddn.aob.createFlags(currency, 2, 1, password));
-//   DEBUG('writeoff asset response', res.body)
-//   return res
-// }
+async function writeoffAssetAsync(currency, {password}) {
+  const res = await node.submitTransactionAsync(node.ddn.aob.createFlags(currency, 2, 1, password));
+  DEBUG('writeoff asset response', res.body)
+  return res
+}
 
-// async function changeFlagsAsync(currency, flagType, flag, {password}) {
-//   const res = await node.submitTransactionAsync(node.ddn.aob.createFlags(currency, flagType, flag, password));
-//   DEBUG('change flags response', res.body)
-//   return res
-// }
+async function changeFlagsAsync(currency, flagType, flag, {password}) {
+  const res = await node.submitTransactionAsync(node.ddn.aob.createFlags(currency, flagType, flag, password));
+  DEBUG('change flags response', res.body)
+  return res
+}
 
-// async function updateAclAsync(currency, operator, flag, list, {password}) {
-//   const res = await node.submitTransactionAsync(node.ddn.aob.createAcl(currency, operator, flag, list, password));
-//   DEBUG('update acl response', res.body)
-//   return res
-// }
+async function updateAclAsync(currency, operator, flag, list, {password}) {
+  const res = await node.submitTransactionAsync(node.ddn.aob.createAcl(currency, operator, flag, list, password));
+  DEBUG('update acl response', res.body)
+  return res
+}
 
-// async function transferAsync(currency, amount, recipientId, {password}) {
-//   const res = await node.submitTransactionAsync(node.ddn.aob.createTransfer(currency, amount, recipientId, '', password));
-//   DEBUG('transfer asset response', res.body)
-//   return res
-// }
+async function transferAsync(currency, amount, recipientId, {password}) {
+  const res = await node.submitTransactionAsync(node.ddn.aob.createTransfer(currency, amount, recipientId, '', password));
+  DEBUG('transfer asset response', res.body)
+  return res
+}
 
 describe('Test AOB', () => {
 
@@ -363,7 +362,7 @@ describe('Test AOB', () => {
 //     const VALID_PRECISION = 3;
 //     const VALID_STRATEGY = '';
 
-//     before(async () => {
+//     beforeAll(async () => {
 //       await node.giveMoneyAndWaitAsync([ISSUER_ACCOUNT.address])
 //     })
 
@@ -571,7 +570,7 @@ describe('Test AOB', () => {
 //     const ASSET_NAME = `${ISSUER_NAME}.GOLD`;
 //     const MAX_AMOUNT = '100000';
 
-//     before(async () => {
+//     beforeAll(async () => {
 //       await node.giveMoneyAndWaitAsync([ISSUE_ACCOUNT.address])
 //       let res = await registerIssuerAsync(ISSUER_NAME, 'valid desc', ISSUE_ACCOUNT);
 //       expect(res.body).to.have.property('success').to.be.true

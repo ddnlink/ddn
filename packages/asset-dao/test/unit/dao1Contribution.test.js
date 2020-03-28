@@ -14,7 +14,7 @@ describe('Contributions Test', () => {
 
     let orgId = "";
 
-    before(async () => {
+    beforeAll(async () => {
         node.ddn.init();
 
         const transaction = await createTransfer(node.Daccount.address, 10000000000, node.Gaccount.password);

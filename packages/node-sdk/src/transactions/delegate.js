@@ -1,13 +1,13 @@
-var crypto = require("./crypto.js")
-var constants = require("../constants.js")
-var transactionTypes = require("../transaction-types.js")
-var slots = require("../time/slots.js")
-var options = require('../options')
+import crypto from "./crypto.js";
+import constants from "../constants.js";
+import transactionTypes from "../transaction-types.js";
+import slots from "../time/slots.js";
+import options from '../options';
 
 async function createDelegate(username, secret, secondSecret) {
-	var keys = crypto.getKeys(secret);
+	const keys = crypto.getKeys(secret);
 
-	var transaction = {
+	const transaction = {
 		type: transactionTypes.DELEGATE,
 		nethash: options.get('nethash'),
 		amount: "0",
@@ -17,7 +17,7 @@ async function createDelegate(username, secret, secondSecret) {
 		timestamp: slots.getTime() - options.get('clientDriftSeconds'),
 		asset: {
 			delegate: {
-				username: username,
+				username,
 				public_key: keys.public_key
 			}
 		}
@@ -26,7 +26,7 @@ async function createDelegate(username, secret, secondSecret) {
 	await crypto.sign(transaction, keys);
 
 	if (secondSecret) {
-		var secondKeys = crypto.getKeys(secondSecret);
+		const secondKeys = crypto.getKeys(secondSecret);
 		await crypto.secondSign(transaction, secondKeys);
 	}
 
@@ -34,6 +34,6 @@ async function createDelegate(username, secret, secondSecret) {
 	return transaction;
 }
 
-module.exports = {
-	createDelegate : createDelegate
-}
+export default {
+	createDelegate
+};

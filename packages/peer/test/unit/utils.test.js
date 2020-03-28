@@ -7,7 +7,7 @@
 
 import DdnUtil from '@ddn/utils';
 
-import node from "../variables.js";
+import node from "../node";
 import constants from "../../lib/constants";
 
 describe('Constants params', () => {

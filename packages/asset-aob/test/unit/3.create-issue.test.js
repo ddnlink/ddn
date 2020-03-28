@@ -1,4 +1,4 @@
-const node = require('../node')
+import node from '../node';
 
 async function createPluginAsset(type, asset, secret, secondSecret) {
     return await node.ddn.assetPlugin.createPluginAsset(type, asset, secret, secondSecret)
@@ -30,14 +30,14 @@ describe("AOB Test", () => {
                 .send({ transaction })
                 .expect("Content-Type", /json/)
                 .expect(200)
-                .end(function (err, res) {
-                    console.log(res.body);
+                .end((err, {body}) => {
+                    console.log(body);
 
                     if (err) {
                         return reject(err);
                     }
 
-                    node.expect(res.body).to.have.property("success").to.be.true;
+                    node.expect(body).to.have.property("success").to.be.true;
 
                     resolve();
                 });

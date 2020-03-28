@@ -1,7 +1,7 @@
 import DdnUtils from '@ddn/utils';
 
 // Requires and node configuration
-import node from "../variables.js";
+import node from "../node";
 
 let DappName = "";
 const DappToInstall = {};
@@ -26,12 +26,12 @@ const Account5 = node.randomTxAccount();
 // console.log('Account3', Account4)
 // console.log('Account3', Account5)
 
-before(done => {
+beforeAll(done => {
     node.api.post("/accounts/open")
         .set("Accept", "application/json")
         .send({
             secret: Account1.password,
-            secondSecret: Account1.second_password
+            secondSecret: Account1.secondPassword
         })
         .expect("Content-Type", /json/)
         .expect(200)
@@ -52,12 +52,12 @@ before(done => {
         });
 });
 
-before(done => {
+beforeAll(done => {
     node.api.post("/accounts/open")
         .set("Accept", "application/json")
         .send({
             secret: Account2.password,
-            secondSecret: Account2.second_password
+            secondSecret: Account2.secondPassword
         })
         .expect("Content-Type", /json/)
         .expect(200)
@@ -78,12 +78,12 @@ before(done => {
         });
 });
 
-before(done => {
+beforeAll(done => {
     node.api.post("/accounts/open")
         .set("Accept", "application/json")
         .send({
             secret: Account3.password,
-            secondSecret: Account3.second_password
+            secondSecret: Account3.secondPassword
         })
         .expect("Content-Type", /json/)
         .expect(200)
@@ -104,12 +104,12 @@ before(done => {
         });
 });
 
-before(done => {
+beforeAll(done => {
     node.api.post("/accounts/open")
         .set("Accept", "application/json")
         .send({
             secret: Account4.password,
-            secondSecret: Account4.second_password
+            secondSecret: Account4.secondPassword
         })
         .expect("Content-Type", /json/)
         .expect(200)
@@ -130,12 +130,12 @@ before(done => {
         });
 });
 
-before(done => {
+beforeAll(done => {
     node.api.post("/accounts/open")
         .set("Accept", "application/json")
         .send({
             secret: Account5.password,
-            secondSecret: Account5.second_password
+            secondSecret: Account5.secondPassword
         })
         .expect("Content-Type", /json/)
         .expect(200)
@@ -156,7 +156,7 @@ before(done => {
         });
 });
 
-before(done => {
+beforeAll(done => {
     // Send money to account 1 address
     setTimeout(() => {
         randomCoin = node.randomCoin();
@@ -185,7 +185,7 @@ before(done => {
     }, 2000);
 });
 
-before(done => {
+beforeAll(done => {
     setTimeout(() => {
         randomCoin = node.randomCoin();
         expectedFee = node.expectedFee(randomCoin);
@@ -230,7 +230,7 @@ before(done => {
     }, 2000);
 });
 
-before(done => {
+beforeAll(done => {
     // Wait for new block to ensure all data has been received
     node.onNewBlock(err => {
         // Add 2nd password for Account 2
@@ -238,7 +238,7 @@ before(done => {
             .set("Accept", "application/json")
             .send({
                 secret: Account2.password,
-                secondSecret: Account2.second_password
+                secondSecret: Account2.secondPassword
             })
             .expect("Content-Type", /json/)
             .expect(200)
@@ -589,6 +589,7 @@ describe("PUT /dapps", () => {
                     node.expect(body).to.have.property("error");
                     done();
                 });
+                done();
         });
     });
 });

@@ -1,9 +1,8 @@
-var ByteBuffer = require('bytebuffer');
-var crypto = require('./crypto.js');
-var constants = require('../constants.js');
-var transactionTypes = require("../transaction-types.js")
-var slots = require('../time/slots.js');
-var options = require('../options');
+import crypto from './crypto';
+import constants from '../constants';
+// import transactionTypes from "../transaction-types";
+import slots from '../time/slots';
+import options from '../options';
 
 /**
  * Create evidence transaction
@@ -12,8 +11,8 @@ var options = require('../options');
  * @param {*} secondSecret 
  */
 function createEvidence(evidence, secret, secondSecret) {
-	var keys = crypto.getKeys(secret);
-	var bytes = null;
+	const keys = crypto.getKeys(secret);
+	const bytes = null;
 
 	if (typeof evidence !== 'object') {
 		throw new Error('The first argument should be a object!');
@@ -23,27 +22,27 @@ function createEvidence(evidence, secret, secondSecret) {
 		throw new Error('Invalid ipid format');
 	}
 
-	var fee = constants.fees.evidence;
+	const fee = constants.fees.evidence;
 
-	var transaction = {
+	const transaction = {
 		type: 10,   //transactionTypes.EVIDENCE,
 		nethash: options.get('nethash'),
 		amount: "0",   
-		fee: fee,
+		fee,
 		recipientId: null,
 		sender_public_key: keys.public_key,
 		// sender_public_key: keys.publicKey,
 		// senderPublicKey: keys.publicKey,
 		timestamp: slots.getTime() - options.get('clientDriftSeconds'),
 		asset: {
-			evidence: evidence
+			evidence
 		}
 	};
 
 	crypto.sign(transaction, keys);
 
 	if (secondSecret) {
-		var secondKeys = crypto.getKeys(secondSecret);
+		const secondKeys = crypto.getKeys(secondSecret);
 		crypto.secondSign(transaction, secondKeys);
 	}
 
@@ -51,6 +50,6 @@ function createEvidence(evidence, secret, secondSecret) {
 	return transaction;
 }
 
-module.exports = {
-	createEvidence: createEvidence
+export default {
+	createEvidence
 };

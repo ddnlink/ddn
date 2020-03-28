@@ -1,20 +1,20 @@
-var ddnCrypto = require("@ddn/crypto");
-var options = require("./options");
-var constants = require("./constants");
+import ddnCrypto from "@ddn/crypto";
+import options from "./options";
+import constants from "./constants";
 
-module.exports = {
-    isAddress: function(address) {
+export default {
+    isAddress(address) {
         const NORMAL_PREFIX =
             constants.nethash[options.get("nethash")].tokenPrefix; // D
         return ddnCrypto.isAddress(address, NORMAL_PREFIX);
     },
 
     // TODO: delete it
-    isBase58CheckAddress: function(address) {
+    isBase58CheckAddress(address) {
         return this.isAddress(address);
     },
 
-    generateBase58CheckAddress: function(publicKey) {
+    generateBase58CheckAddress(publicKey) {
         const NORMAL_PREFIX =
             constants.nethash[options.get("nethash")].tokenPrefix; // D
 

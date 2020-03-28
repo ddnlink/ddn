@@ -1,6 +1,6 @@
 const DEBUG = require('debug')('delegates');
 import DdnUtils from '@ddn/utils';
-import node from "../variables.js";
+import node from "../node";
 
 let Raccount = node.randomAccount();
 while (Raccount.username === Raccount.username.toUpperCase()) {
@@ -11,7 +11,7 @@ while (Raccount.username === Raccount.username.toUpperCase()) {
 const R2account = node.randomAccount();
 R2account.username = Raccount.username.toUpperCase();
 
-before(async () => {
+beforeAll(async () => {
     const res = await node.openAccountAsync({ secret: Raccount.password });
     DEBUG('open account response', res.body)
     node.expect(res.body).to.have.property("success").to.be.true;
@@ -106,7 +106,7 @@ describe("PUT /accounts/delegates without funds", () => {
 
 describe("PUT /accounts/delegates with funds", () => {
 
-    before(done => {
+    beforeAll(done => {
         node.api.put("/transactions")
             .set("Accept", "application/json")
             .send({
@@ -134,7 +134,7 @@ describe("PUT /accounts/delegates with funds", () => {
             });
     });
 
-    before(done => {
+    beforeAll(done => {
         node.onNewBlock(err => {
             node.expect(err).to.be.not.ok;
 
@@ -434,7 +434,7 @@ describe("PUT /accounts/delegates with funds", () => {
 
 describe("PUT /delegates with funds", () => {
 
-    before(done => {
+    beforeAll(done => {
         node.api.post("/accounts/open")
             .set("Accept", "application/json")
             .send({
@@ -479,7 +479,7 @@ describe("PUT /delegates with funds", () => {
                 });
             });
 
-        before(done => {
+        beforeAll(done => {
             node.onNewBlock(err => {
                 node.expect(err).to.be.not.ok;
                 node.api.post('/accounts/open')
@@ -820,7 +820,7 @@ describe("GET /delegates/count", () => {
 
 describe("GET /delegates/voters", () => {
 
-    before(done => {
+    beforeAll(done => {
         // console.log(JSON.stringify({
         //    secret: Raccount.password,
         //    delegates: ["+" + node.Eaccount.publicKey]

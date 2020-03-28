@@ -1,20 +1,18 @@
-'use strict';
+const DEBUG = require('debug')('multinodes');
+import node from "../node";
+import async from 'async';
 
-var DEBUG = require('debug')('multinodes');
-var node = require("../node");
-var async = require('async');
-
-var urls = [
+const urls = [
     "http://127.0.0.1:8001",
     "http://127.0.0.1:8002",
     "http://127.0.0.1:8003",
     "http://127.0.0.1:8004"
-]
+];
 
-describe("GET /blocks/getHeight in multi nodes", function () {
+describe("GET /blocks/getHeight in multi nodes", () => {
 
-    it("Should be same height", function (done) {
-        async.mapSeries(urls, node._getheight, function (err, results) {
+    it("Should be same height", done => {
+        async.mapSeries(urls, node._getheight, (err, results) => {
             DEBUG('heights', results);
             if (!err) {
                 let items = new Set(results);

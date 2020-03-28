@@ -1,9 +1,8 @@
-var ByteBuffer = require('bytebuffer');
-var crypto = require('./crypto.js');
-var constants = require('../constants.js');
-var trsTypes = require('../transaction-types');
-var slots = require('../time/slots.js');
-var options = require('../options');
+import crypto from './crypto';
+import constants from '../constants';
+import trsTypes from '../transaction-types';
+import slots from '../time/slots';
+import options from '../options';
 
 /**
  * Create exchange transaction
@@ -12,8 +11,8 @@ var options = require('../options');
  * @param {*} secondSecret 
  */
 function createExchange(trsopt, exchange, secret, secondSecret) {
-	var keys = crypto.getKeys(secret);
-	var bytes = null;
+	const keys = crypto.getKeys(secret);
+	const bytes = null;
 
 	if (typeof exchange !== 'object') {
 		throw new Error('The first argument should be a object!');
@@ -23,26 +22,26 @@ function createExchange(trsopt, exchange, secret, secondSecret) {
 		throw new Error('Invalid orgId format');
 	}
 
-	var fee = constants.fees.exchange;
+	const fee = constants.fees.exchange;
 
-	var transaction = Object.assign({
+	const transaction = Object.assign({
 		type: trsTypes.EXCHANGE,
 		nethash: options.get('nethash'),
 		amount: "0",    //Bignum update
-		fee: fee + "",
+		fee: `${fee}`,
 		recipientId: null,
 		sender_public_key: keys.public_key,
 		// senderPublicKey: keys.publicKey,
 		timestamp: slots.getTime() - options.get('clientDriftSeconds'),
 		asset: {
-			exchange: exchange
+			exchange
 		}
 	}, trsopt||{});
 
 	crypto.sign(transaction, keys);
 
 	if (secondSecret) {
-		var secondKeys = crypto.getKeys(secondSecret);
+		const secondKeys = crypto.getKeys(secondSecret);
 		crypto.secondSign(transaction, secondKeys);
 	}
 
@@ -50,6 +49,6 @@ function createExchange(trsopt, exchange, secret, secondSecret) {
 	return transaction;
 }
 
-module.exports = {
-	createExchange: createExchange
+export default {
+	createExchange
 };

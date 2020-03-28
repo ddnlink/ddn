@@ -275,13 +275,13 @@ function randomAccount() {
     'address': '',
     'public_key': '',
     'password': '',
-    'second_password': '',
+    'secondPassword': '',
     'username': '',
     'balance': 0
   };
 
   account.password = randomPassword();
-  account.second_password = randomPassword();
+  account.secondPassword = randomPassword();
   account.username = randomDelegateName();
 
   return account;

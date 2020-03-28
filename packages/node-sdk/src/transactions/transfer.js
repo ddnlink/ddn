@@ -1,17 +1,17 @@
-var crypto = require("./crypto");
-var constants = require("../constants");
-var transactionTypes = require("../transaction-types.js")
-var slots = require("../time/slots");
-var options = require('../options');
+import crypto from "./crypto";
+import constants from "../constants";
+import transactionTypes from "../transaction-types.js";
+import slots from "../time/slots";
+import options from '../options';
 
-var nethash = options.get('nethash');
+const nethash = options.get('nethash');
 
 function createInTransfer(dappId, currency, amount, secret, secondSecret) {
-	var keys = crypto.getKeys(secret);
+	const keys = crypto.getKeys(secret);
 
-	var transaction = {
+	const transaction = {
 		type: transactionTypes.IN_TRANSFER,
-		nethash: nethash,
+		nethash,
 		amount: "0",    //Bignum update
 		fee: constants.fees.send,
 		recipient_id: null,
@@ -20,7 +20,7 @@ function createInTransfer(dappId, currency, amount, secret, secondSecret) {
 		asset: {
 			in: {
 				dapp_id: dappId,
-				currency: currency
+				currency
 			}
 		}
 	};
@@ -34,7 +34,7 @@ function createInTransfer(dappId, currency, amount, secret, secondSecret) {
 	crypto.sign(transaction, keys);
 
 	if (secondSecret) {
-		var secondKeys = crypto.getKeys(secondSecret);
+		const secondKeys = crypto.getKeys(secondSecret);
 		crypto.secondSign(transaction, secondKeys);
 	}
 
@@ -43,10 +43,10 @@ function createInTransfer(dappId, currency, amount, secret, secondSecret) {
 }
 
 function createOutTransfer(recipientId, dappId, transactionId, currency, amount, secret, secondSecret) {
-	var keys = crypto.getKeys(secret);
+	const keys = crypto.getKeys(secret);
 
-	var transaction = {
-    nethash: nethash,
+	const transaction = {
+    nethash,
 		type: transactionTypes.OUT_TRANSFER,
 		amount: "0",    //Bignum update
 		fee: constants.fees.send,
@@ -57,8 +57,8 @@ function createOutTransfer(recipientId, dappId, transactionId, currency, amount,
 			outTransfer: {
 				dapp_id: dappId,
 				transaction_id: transactionId,
-				currency: currency,
-				amount: amount
+				currency,
+				amount
 			}
 		}
 	};
@@ -66,7 +66,7 @@ function createOutTransfer(recipientId, dappId, transactionId, currency, amount,
 	crypto.sign(transaction, keys);
 
 	if (secondSecret) {
-		var secondKeys = crypto.getKeys(secondSecret);
+		const secondKeys = crypto.getKeys(secondSecret);
 		crypto.secondSign(transaction, secondKeys);
 	}
 
@@ -75,14 +75,14 @@ function createOutTransfer(recipientId, dappId, transactionId, currency, amount,
 }
 
 async function signOutTransfer(transaction, secret) {
-	var keys = crypto.getKeys(secret);
-	var signature = await crypto.sign(transaction, keys);
+	const keys = crypto.getKeys(secret);
+	const signature = await crypto.sign(transaction, keys);
 
 	return signature;
 }
 
-module.exports = {
-	createInTransfer: createInTransfer,
-	createOutTransfer: createOutTransfer,
-	signOutTransfer: signOutTransfer
-}
+export default {
+	createInTransfer,
+	createOutTransfer,
+	signOutTransfer
+};

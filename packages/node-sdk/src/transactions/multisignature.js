@@ -1,20 +1,20 @@
-var crypto = require("./crypto.js")
-var constants = require("../constants.js")
-var transactionTypes = require("../transaction-types.js")
-var slots = require("../time/slots.js")
-var options = require('../options')
+import crypto from "./crypto";
+import constants from "../constants";
+import transactionTypes from "../transaction-types";
+import slots from "../time/slots";
+import options from '../options';
 
 function signTransaction(trs, secret) {
-	var keys = crypto.getKeys(secret);
-	var signature = crypto.sign(trs, keys);
+	const keys = crypto.getKeys(secret);
+	const signature = crypto.sign(trs, keys);
 
 	return signature;
 }
 
 function createMultisignature(keysgroup, lifetime, min, secret, secondSecret) {
-	var keys = crypto.getKeys(secret);
+	const keys = crypto.getKeys(secret);
 
-	var transaction = {
+	const transaction = {
 		type: transactionTypes.MULTITRANSFER,
 		nethash: options.get('nethash'),
 		amount: "0",    //Bignum update
@@ -24,9 +24,9 @@ function createMultisignature(keysgroup, lifetime, min, secret, secondSecret) {
 		timestamp: slots.getTime() - options.get('clientDriftSeconds'),
 		asset: {
 			multisignature: {
-				min: min,
-				lifetime: lifetime,
-				keysgroup: keysgroup
+				min,
+				lifetime,
+				keysgroup
 			}
 		}
 	};
@@ -34,7 +34,7 @@ function createMultisignature(keysgroup, lifetime, min, secret, secondSecret) {
 	crypto.sign(transaction, keys);
 
 	if (secondSecret) {
-		var secondKeys = crypto.getKeys(secondSecret);
+		const secondKeys = crypto.getKeys(secondSecret);
 		crypto.secondSign(transaction, secondKeys);
 	}
 
@@ -42,7 +42,7 @@ function createMultisignature(keysgroup, lifetime, min, secret, secondSecret) {
 	return transaction;
 }
 
-module.exports = {
-	createMultisignature : createMultisignature,
-	signTransaction: signTransaction
-}
+export default {
+	createMultisignature,
+	signTransaction
+};

@@ -1,5 +1,5 @@
 import Debug from 'debug';
-import node from "./../variables.js";
+import node from "../node";
 
 const DEBUG = Debug('accounts');
 // Account info for password "ddntest"

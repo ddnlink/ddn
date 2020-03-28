@@ -8,13 +8,14 @@ import node from "../node";
 
 const message = "test";
 
-// Node configuration examples/fun-tests/config/genesisBlock.json
+// Node configuration
 const genesisblockFile = path.resolve(process.cwd(), './examples/fun-tests/config/genesisBlock.json');
 const genesisblock = requireFile(genesisblockFile);
 
 describe("POST /peer/transactions", () => {
-    beforeAll(() => {
+    beforeAll((done) => {
         node.ddn.init();
+        done();
     });
 
     it("Using valid transaction with wrong nethash in headers. Should fail", async done => {

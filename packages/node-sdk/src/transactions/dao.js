@@ -1,10 +1,11 @@
-import crypto from './crypto.js';
-import constants from '../constants.js';
-import trsTypes from '../transaction-types';
-import slots from '../time/slots.js';
-import options from '../options';
-import addressHelper from '../address.js';
 import DdnUtils from '@ddn/utils';
+
+import crypto from './crypto';
+import constants from '../constants';
+import trsTypes from '../transaction-types';
+import slots from '../time/slots';
+import options from '../options';
+import addressHelper from '../address';
 
 const { bignum } = DdnUtils;
 
