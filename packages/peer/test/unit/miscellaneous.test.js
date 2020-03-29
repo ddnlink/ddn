@@ -1,18 +1,23 @@
+import path from 'path';
+import Debug from 'debug';
 import DdnUtils from '@ddn/utils';
+
 import node from "../node";
 import {
     requireFile
 } from '@ddn/core/lib/getUserConfig';
 
+const debug = Debug('peer');
+
 const genesisblockFile = path.resolve(process.cwd(), './examples/fun-tests/config/genesisBlock.json');
 const genesisblock = requireFile(genesisblockFile);
 
 const block = {
-    blockHeight : "0",  
-    id : 0,
-    generatorPublicKey : "",
-    totalAmount : "0",  
-    totalFee : "0"  
+    blockHeight: "0",
+    id: 0,
+    generatorPublicKey: "",
+    totalAmount: "0",
+    totalFee: "0"
 };
 
 let testBlocksUnder101 = 0;
@@ -27,11 +32,10 @@ describe("POST /accounts/open", () => {
             })
             .expect("Content-Type", /json/)
             .expect(200)
-            .end((err, {body}) => {
-                console.log(JSON.stringify(body));
+            .end((err, { body }) => {
+                debug(body);
                 node.expect(body).to.have.property("success").to.be.false;
                 node.expect(body).to.have.property("error").to.equal("PayloadTooLargeError: request entity too large");
-                // node.expect(res.body.error).to.have.property("limit").to.equal(2097152);
                 done();
             });
     });
@@ -44,8 +48,10 @@ describe("GET /peers/version", () => {
             .set("Accept", "application/json")
             .expect("Content-Type", /json/)
             .expect(200)
-            .end((err, {body}) => {
-                // console.log(JSON.stringify(res.body));
+            .end((err, {
+                body
+            }) => {
+                debug(JSON.stringify(body));
                 node.expect(body).to.have.property("success").to.be.true;
                 node.expect(body).to.have.property("build").to.be.a("string");
                 node.expect(body).to.have.property("version").to.be.a("string");
@@ -68,8 +74,10 @@ describe("GET /peers", () => {
             .set("Accept", "application/json")
             .expect("Content-Type", /json/)
             .expect(200)
-            .end((err, {body}) => {
-                // console.log(JSON.stringify(res.body));
+            .end((err, {
+                body
+            }) => {
+                // debug(JSON.stringify(body));
                 node.expect(body).to.have.property("success").to.be.false;
                 node.expect(body).to.have.property("error");
                 done();
@@ -82,13 +90,15 @@ describe("GET /peers", () => {
             .set("Accept", "application/json")
             .expect("Content-Type", /json/)
             .expect(200)
-            .end((err, {body}) => {
-                // console.log(JSON.stringify(res.body));
+            .end((err, {
+                body
+            }) => {
+                // debug(JSON.stringify(body));
                 node.expect(body).to.have.property("success").to.be.true;
                 node.expect(body).to.have.property("peers").that.is.an("array");
                 if (body.peers.length > 0) {
                     for (let i = 0; i < body.peers.length; i++) {
-                       node.expect(body.peers[i].state).to.equal(parseInt(state));
+                        node.expect(body.peers[i].state).to.equal(parseInt(state));
                     }
                 }
                 done();
@@ -102,8 +112,10 @@ describe("GET /peers", () => {
             .set("Accept", "application/json")
             .expect("Content-Type", /json/)
             .expect(200)
-            .end((err, {body}) => {
-                // console.log(JSON.stringify(res.body));
+            .end((err, {
+                body
+            }) => {
+                // debug(JSON.stringify(body));
                 node.expect(body).to.have.property("success").to.be.true;
                 node.expect(body).to.have.property("peers").that.is.an("array");
 
@@ -119,15 +131,17 @@ describe("GET /peers", () => {
             .set("Accept", "application/json")
             .expect("Content-Type", /json/)
             .expect(200)
-            .end((err, {body}) => {
-                // console.log(JSON.stringify(res.body));
+            .end((err, {
+                body
+            }) => {
+                // debug(JSON.stringify(body));
                 node.expect(body).to.have.property("success").to.be.true;
                 node.expect(body).to.have.property("peers").that.is.an("array");
 
                 if (body.peers.length > 0) {
                     for (let i = 0; i < body.peers.length; i++) {
-                        if (body.peers[i+1] != null) {
-                            node.expect(body.peers[i+1].state).to.at.most(body.peers[i].state);
+                        if (body.peers[i + 1] != null) {
+                            node.expect(body.peers[i + 1].state).to.at.most(body.peers[i].state);
                         }
                     }
                 }
@@ -143,8 +157,10 @@ describe("GET /peers", () => {
             .set("Accept", "application/json")
             .expect("Content-Type", /json/)
             .expect(200)
-            .end((err, {body}) => {
-                // console.log(JSON.stringify(res.body));
+            .end((err, {
+                body
+            }) => {
+                // debug(JSON.stringify(body));
                 node.expect(body).to.have.property("success").to.be.false;
                 node.expect(body).to.have.property("error");
                 done();
@@ -163,8 +179,10 @@ describe("GET /peers", () => {
             .set("Accept", "application/json")
             .expect("Content-Type", /json/)
             .expect(200)
-            .end((err, {body}) => {
-                // console.log(JSON.stringify(res.body));
+            .end((err, {
+                body
+            }) => {
+                // debug(JSON.stringify(body));
                 node.expect(body).to.have.property("success").to.be.false;
                 node.expect(body).to.have.property("error");
                 done();
@@ -179,22 +197,26 @@ describe("GET /blocks/getHeight", () => {
             .set("Accept", "application/json")
             .expect("Content-Type", /json/)
             .expect(200)
-            .end((err, {body}) => {
-                // console.log(JSON.stringify(res.body));
+            .end((err, {
+                body
+            }) => {
+                // debug(JSON.stringify(body));
                 node.expect(body).to.have.property("success").to.be.true;
                 if (body.success == true && body.height != null) {
                     node.expect(body).to.have.property("height").to.be.above(0);
                     if (body.success == true) {
                         block.blockHeight = body.height;
-                         if (res.body.height > 100) {
-                        if (DdnUtils.bignum.isGreaterThan(body.height, 100)) {
-                            testBlocksUnder101 = true;
+                        if (body.height > 100) {
+                            if (DdnUtils.bignum.isGreaterThan(body.height, 100)) {
+                                testBlocksUnder101 = true;
+                                done();
+                            }
                         }
+                    } else {
+                        debug("Request failed or height is null");
+                        done();
                     }
-                } else {
-                    console.log("Request failed or height is null");
                 }
-                done();
             });
     });
 });
@@ -206,14 +228,16 @@ describe("GET /blocks/getFee", () => {
             .set("Accept", "application/json")
             .expect("Content-Type", /json/)
             .expect(200)
-            .end((err, {body}) => {
-                // console.log(JSON.stringify(res.body));
+            .end((err, {
+                body
+            }) => {
+                // debug(JSON.stringify(body));
                 node.expect(body).to.have.property("success").to.be.true;
                 if (body.success == true && body.fee != null) {
                     node.expect(body).to.have.property("fee");
                     node.expect(body.fee).to.equal(node.Fees.transactionFee);
                 } else {
-                    console.log("Request failed or fee is null");
+                    debug("Request failed or fee is null");
                 }
                 done();
             });
@@ -228,17 +252,17 @@ describe("GET /blocks/getFee", () => {
 //             .set("Accept", "application/json")
 //             .expect("Content-Type", /json/)
 //             .expect(200)
-//             .end(function (err, res) {
-//             // console.log(JSON.stringify(res.body));
-//             node.expect(res.body).to.have.property("success").to.be.true;
-//             if (res.body.success == true && res.body.fees != null) {
-//                 node.expect(res.body).to.have.property("fees");
-//                 node.expect(res.body.fees.send).to.equal(node.Fees.transactionFee);
-//                 node.expect(res.body.fees.vote).to.equal(node.Fees.voteFee);
-//                 node.expect(res.body.fees.dapp).to.equal(node.Fees.dappAddFee);
-//                 node.expect(res.body.fees.secondsignature).to.equal(node.Fees.secondPasswordFee);
-//                 node.expect(res.body.fees.delegate).to.equal(node.Fees.delegateRegistrationFee);
-//                 node.expect(res.body.fees.multisignature).to.equal(node.Fees.multisignatureRegistrationFee);
+//             .end(function (err, {body}) {
+//             // debug(JSON.stringify(body));
+//             node.expect(body).to.have.property("success").to.be.true;
+//             if (body.success == true && body.fees != null) {
+//                 node.expect(body).to.have.property("fees");
+//                 node.expect(body.fees.send).to.equal(node.Fees.transactionFee);
+//                 node.expect(body.fees.vote).to.equal(node.Fees.voteFee);
+//                 node.expect(body.fees.dapp).to.equal(node.Fees.dappAddFee);
+//                 node.expect(body.fees.secondsignature).to.equal(node.Fees.secondPasswordFee);
+//                 node.expect(body.fees.delegate).to.equal(node.Fees.delegateRegistrationFee);
+//                 node.expect(body.fees.multisignature).to.equal(node.Fees.multisignatureRegistrationFee);
 //             } else {
 //               console.log("Request failed or fees is null");
 //             }
@@ -255,12 +279,12 @@ describe("GET /blocks/getFee", () => {
 //             .set("Accept", "application/json")
 //             .expect("Content-Type", /json/)
 //             .expect(200)
-//             .end(function (err, res) {
-//                 // console.log(JSON.stringify(res.body));
-//                 node.expect(res.body).to.have.property("success").to.be.true;
-//                 if (res.body.success == true && res.body.nethash != null) {
-//                     node.expect(res.body).to.have.property("nethash");
-//                     node.expect(res.body.nethash).to.equal(node.config.nethash);
+//             .end(function (err, {body}) {
+//                 // debug(JSON.stringify(body));
+//                 node.expect(body).to.have.property("success").to.be.true;
+//                 if (body.success == true && body.nethash != null) {
+//                     node.expect(body).to.have.property("nethash");
+//                     node.expect(body.nethash).to.equal(node.config.nethash);
 //                 } else {
 //                     console.log("Request failed or nethash is null");
 //                 }
@@ -279,8 +303,10 @@ describe("GET /blocks", () => {
             .set("Accept", "application/json")
             .expect("Content-Type", /json/)
             .expect(200)
-            .end((err, {body}) => {
-                // console.log(JSON.stringify(res.body));
+            .end((err, {
+                body
+            }) => {
+                // debug(JSON.stringify(body));
                 node.expect(body).to.have.property("success").to.be.true;
                 if (body.success == true && body.blocks != null) {
                     node.expect(body).to.have.property("blocks").that.is.an("array");
@@ -312,8 +338,10 @@ describe("GET /blocks", () => {
                 .set("Accept", "application/json")
                 .expect("Content-Type", /json/)
                 .expect(200)
-                .end((err, {body}) => {
-                    // console.log(JSON.stringify(res.body));
+                .end((err, {
+                    body
+                }) => {
+                    // debug(JSON.stringify(body));
                     node.expect(body).to.have.property("success").to.be.true;
                     if (body.success == true && body.blocks != null) {
                         node.expect(body).to.have.property("count");
@@ -350,8 +378,10 @@ describe("GET /blocks", () => {
             .set("Accept", "application/json")
             .expect("Content-Type", /json/)
             .expect(200)
-            .end((err, {body}) => {
-                // console.log(JSON.stringify(res.body));
+            .end((err, {
+                body
+            }) => {
+                // debug(JSON.stringify(body));
                 node.expect(body).to.have.property("success").to.be.true;
                 node.expect(body).to.have.property("blocks").that.is.an("array");
                 for (let i = 0; i < body.blocks.length; i++) {
@@ -369,8 +399,10 @@ describe("GET /blocks", () => {
             .set("Accept", "application/json")
             .expect("Content-Type", /json/)
             .expect(200)
-            .end((err, {body}) => {
-                // console.log(JSON.stringify(res.body));
+            .end((err, {
+                body
+            }) => {
+                // debug(JSON.stringify(body));
                 node.expect(body).to.have.property("success").to.be.true;
                 node.expect(body).to.have.property("blocks").that.is.an("array");
                 for (let i = 0; i < body.blocks.length; i++) {
@@ -388,8 +420,10 @@ describe("GET /blocks", () => {
             .set("Accept", "application/json")
             .expect("Content-Type", /json/)
             .expect(200)
-            .end((err, {body}) => {
-                // console.log(JSON.stringify(res.body));
+            .end((err, {
+                body
+            }) => {
+                // debug(JSON.stringify(body));
                 node.expect(body).to.have.property("success").to.be.true;
                 node.expect(body).to.have.property("blocks").that.is.an("array");
                 for (let i = 0; i < body.blocks.length; i++) {
@@ -408,8 +442,10 @@ describe("GET /blocks", () => {
                     .set("Accept", "application/json")
                     .expect("Content-Type", /json/)
                     .expect(200)
-                    .end((err, {body}) => {
-                        // console.log(JSON.stringify(res.body));
+                    .end((err, {
+                        body
+                    }) => {
+                        // debug(JSON.stringify(body));
                         node.expect(body).to.have.property("success").to.be.true;
                         node.expect(body).to.have.property("blocks").that.is.an("array");
                         node.expect(body.blocks).to.have.length(1);
@@ -426,14 +462,16 @@ describe("GET /blocks", () => {
             .set("Accept", "application/json")
             .expect("Content-Type", /json/)
             .expect(200)
-            .end((err, {body}) => {
-                // console.log(JSON.stringify(res.body));
+            .end((err, {
+                body
+            }) => {
+                debug(JSON.stringify(body));
                 node.expect(body).to.have.property("success").to.be.true;
                 node.expect(body).to.have.property("blocks").that.is.an("array");
                 for (let i = 0; i < body.blocks.length; i++) {
-                    if (body.blocks[i+1] != null) {
-                         node.expect(res.body.blocks[i].height).to.be.above(res.body.blocks[i+1].height);
-                        const bRet = DdnUtils.bignum.isGreaterThanOrEqualTo(body.blocks[i].height, body.blocks[i+1].height);
+                    if (body.blocks[i + 1] != null) {
+                        node.expect(body.blocks[i].height).to.be.above(body.blocks[i + 1].height);
+                        const bRet = DdnUtils.bignum.isGreaterThanOrEqualTo(body.blocks[i].height, body.blocks[i + 1].height);
                         node.expect(bRet).to.be.true;
                     }
                 }
@@ -446,13 +484,17 @@ describe("GET /blocks/get?id=", () => {
 
     it("Using genesisblock id. Should be ok", done => {
         const genesisblockId = genesisblock.id;
+        debug('genesisblockId= ', genesisblockId);
 
         node.api.get(`/blocks/get?id=${genesisblockId}`)
             .set("Accept", "application/json")
             .expect("Content-Type", /json/)
             .expect(200)
-            .end((err, {body}) => {
-                // console.log(JSON.stringify(res.body));
+            .end((err, {
+                body
+            }) => {
+                debug(JSON.stringify(body));
+                debug(body.block);
                 node.expect(body).to.have.property("success").to.be.true;
                 node.expect(body).to.have.property("block").to.be.a("object");
                 node.expect(body.block).to.have.property("id").to.be.a("string");
@@ -467,8 +509,10 @@ describe("GET /blocks/get?id=", () => {
             .set("Accept", "application/json")
             .expect("Content-Type", /json/)
             .expect(200)
-            .end((err, {body}) => {
-                // console.log(JSON.stringify(res.body));
+            .end((err, {
+                body
+            }) => {
+                // debug(JSON.stringify(body));
                 node.expect(body).to.have.property("success").to.be.false;
                 node.expect(body).to.have.property("error").to.be.a("string");
                 done();
@@ -480,8 +524,10 @@ describe("GET /blocks/get?id=", () => {
             .set("Accept", "application/json")
             .expect("Content-Type", /json/)
             .expect(200)
-            .end((err, {body}) => {
-                // console.log(JSON.stringify(res.body));
+            .end((err, {
+                body
+            }) => {
+                // debug(JSON.stringify(body));
                 node.expect(body).to.have.property("success").to.be.false;
                 node.expect(body).to.have.property("error").to.be.a("string");
                 done();

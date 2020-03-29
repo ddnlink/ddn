@@ -72,14 +72,23 @@ class HttpServer {
         this._app.set('view engine', 'ejs');
         this._app.set('views', this.config.publicDir);
         this._app.use(express.static(this.config.publicDir));
-        this._app.use(bodyParser.raw({ limit: "8mb" }));
-        this._app.use(bodyParser.urlencoded({ extended: true, limit: "8mb", parameterLimit: 5000 }));
-        this._app.use(bodyParser.json({ limit: "8mb" }));
+        this._app.use(bodyParser.raw({ limit: this.config.payloadLimitSize }));
+        this._app.use(bodyParser.urlencoded({ extended: true, limit: this.config.payloadLimitSize, parameterLimit: 5000 }));
+        this._app.use(bodyParser.json({ limit: this.config.payloadLimitSize }));
         this._app.use(methodOverride());
 
         this._addQueryParamsMiddleware();
         this._addSecurityMiddleware();
         this._addCommonHeadersMiddleware();
+    }
+
+        /**
+     * 转换输入参数类型（字符串 -> 整型）
+     */
+    _addErrorHandleMiddleware() {
+        this._app.use((err, req, res, next) => {
+            next(err);
+        });
     }
 
     /**

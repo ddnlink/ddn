@@ -18,6 +18,8 @@ export default {
   logLevel: "info",
   netVersion: "testnet",
   nethash: "0ab796cd",
+  payloadLimitSize: "8m",
+
   api: {
     access: {
       whiteList: []
