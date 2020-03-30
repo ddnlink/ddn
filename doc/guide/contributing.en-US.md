@@ -68,7 +68,7 @@ module.exports = {
   // address: "127.0.0.1",
   // publicIp: "",
   logLevel: "info", // This allows the command line to output more info for development testing
-  // netVersion: "testnet"
+  // net: "testnet"
 }
 ```
 

@@ -16,7 +16,7 @@ export default {
   address: "127.0.0.1",
   publicIp: "",
   logLevel: "info",
-  netVersion: "testnet",
+  net: "testnet",
   nethash: "0ab796cd",
   payloadLimitSize: "8m",
 

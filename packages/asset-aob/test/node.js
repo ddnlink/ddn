@@ -376,7 +376,7 @@ function EIFY(fn, receiver) {
 }
 
 // function beginEpochTime() {
-//   return constants[config.netVersion].beginDate;
+//   return constants[config.net].beginDate;
 // }
 
 function getRealTime(epochTime) {

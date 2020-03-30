@@ -19,6 +19,26 @@ const AccountTest = {
 const Gaccount = node.Gaccount;
 Gaccount.balance=9990881532094328
 
+
+describe("POST /accounts/open", () => {
+
+    it("When payload is over 2Mb. Should fail", done => {
+        node.api.post("/accounts/open")
+            .set("Accept", "application/json")
+            .send({
+                payload: Buffer.allocUnsafe(8 * 1000 * 1000).toString()
+            })
+            .expect("Content-Type", /json/)
+            .expect(200)
+            .end((err, { body }) => {
+                debug('payload', body);
+                node.expect(body).to.have.property("success").to.be.false;
+                node.expect(body).to.have.property("error").to.equal("request entity too large");
+                done();
+            });
+    });
+});
+
 describe("POST /accounts/open", () => {
     it(`Using valid passphrase: ${AccountTest.password}. Should be ok`, async () => {
         const res = await node.openAccountAsync({ secret: AccountTest.password });

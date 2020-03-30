@@ -14,181 +14,13 @@ const genesisblock = requireFile(genesisblockFile);
 
 const block = {
     blockHeight: "0",
-    id: 0,
+    id: "0",
     generatorPublicKey: "",
     totalAmount: "0",
     totalFee: "0"
 };
 
 let testBlocksUnder101 = 0;
-
-describe("POST /accounts/open", () => {
-
-    it("When payload is over 2Mb. Should fail", done => {
-        node.api.post("/accounts/open")
-            .set("Accept", "application/json")
-            .send({
-                payload: Buffer.allocUnsafe(8 * 1000 * 1000).toString()
-            })
-            .expect("Content-Type", /json/)
-            .expect(200)
-            .end((err, { body }) => {
-                debug(body);
-                node.expect(body).to.have.property("success").to.be.false;
-                node.expect(body).to.have.property("error").to.equal("PayloadTooLargeError: request entity too large");
-                done();
-            });
-    });
-});
-
-describe("GET /peers/version", () => {
-
-    it("Should be ok", done => {
-        node.api.get("/peers/version")
-            .set("Accept", "application/json")
-            .expect("Content-Type", /json/)
-            .expect(200)
-            .end((err, {
-                body
-            }) => {
-                debug(JSON.stringify(body));
-                node.expect(body).to.have.property("success").to.be.true;
-                node.expect(body).to.have.property("build").to.be.a("string");
-                node.expect(body).to.have.property("version").to.be.a("string");
-                done();
-            });
-    });
-});
-
-describe("GET /peers", () => {
-
-    it("Using empty parameters. Should fail", done => {
-        const state = "";
-        const os = "";
-        const shared = "";
-        const version = "";
-        const limit = "";
-        const offset = 0;
-        const orderBy = "";
-        node.api.get(`/peers?state=${state}&os=${os}&shared=${true}&version=${version}&limit=${limit}&offset=${offset}orderBy=${orderBy}`)
-            .set("Accept", "application/json")
-            .expect("Content-Type", /json/)
-            .expect(200)
-            .end((err, {
-                body
-            }) => {
-                // debug(JSON.stringify(body));
-                node.expect(body).to.have.property("success").to.be.false;
-                node.expect(body).to.have.property("error");
-                done();
-            });
-    });
-
-    it("Using state. Should be ok", done => {
-        const state = 1;
-        node.api.get(`/peers?state=${state}`)
-            .set("Accept", "application/json")
-            .expect("Content-Type", /json/)
-            .expect(200)
-            .end((err, {
-                body
-            }) => {
-                // debug(JSON.stringify(body));
-                node.expect(body).to.have.property("success").to.be.true;
-                node.expect(body).to.have.property("peers").that.is.an("array");
-                if (body.peers.length > 0) {
-                    for (let i = 0; i < body.peers.length; i++) {
-                        node.expect(body.peers[i].state).to.equal(parseInt(state));
-                    }
-                }
-                done();
-            });
-    });
-
-    it("Using limit. Should be ok", done => {
-        const limit = 3;
-        const offset = 0;
-        node.api.get(`/peers?&limit=${limit}&offset=${offset}`)
-            .set("Accept", "application/json")
-            .expect("Content-Type", /json/)
-            .expect(200)
-            .end((err, {
-                body
-            }) => {
-                // debug(JSON.stringify(body));
-                node.expect(body).to.have.property("success").to.be.true;
-                node.expect(body).to.have.property("peers").that.is.an("array");
-
-                // To check it need to have peers
-                node.expect(body.peers.length).to.be.at.most(limit);
-                done();
-            });
-    });
-
-    it("Using orderBy. Should be ok", done => {
-        const orderBy = "state:desc";
-        node.api.get(`/peers?orderBy=${orderBy}`)
-            .set("Accept", "application/json")
-            .expect("Content-Type", /json/)
-            .expect(200)
-            .end((err, {
-                body
-            }) => {
-                // debug(JSON.stringify(body));
-                node.expect(body).to.have.property("success").to.be.true;
-                node.expect(body).to.have.property("peers").that.is.an("array");
-
-                if (body.peers.length > 0) {
-                    for (let i = 0; i < body.peers.length; i++) {
-                        if (body.peers[i + 1] != null) {
-                            node.expect(body.peers[i + 1].state).to.at.most(body.peers[i].state);
-                        }
-                    }
-                }
-
-                done();
-            });
-
-    });
-
-    it("Using limit > 100. Should fail", done => {
-        const limit = 101;
-        node.api.get(`/peers?&limit=${limit}`)
-            .set("Accept", "application/json")
-            .expect("Content-Type", /json/)
-            .expect(200)
-            .end((err, {
-                body
-            }) => {
-                // debug(JSON.stringify(body));
-                node.expect(body).to.have.property("success").to.be.false;
-                node.expect(body).to.have.property("error");
-                done();
-            });
-    });
-
-    it("Using invalid parameters. Should fail", done => {
-        const state = "invalid";
-        const os = "invalid";
-        const shared = "invalid";
-        const version = "invalid";
-        const limit = "invalid";
-        const offset = "invalid";
-        const orderBy = "invalid";
-        node.api.get(`/peers?state=${state}&os=${os}&shared=${shared}&version=${version}&limit=${limit}&offset=${offset}orderBy=${orderBy}`)
-            .set("Accept", "application/json")
-            .expect("Content-Type", /json/)
-            .expect(200)
-            .end((err, {
-                body
-            }) => {
-                // debug(JSON.stringify(body));
-                node.expect(body).to.have.property("success").to.be.false;
-                node.expect(body).to.have.property("error");
-                done();
-            });
-    });
-});
 
 describe("GET /blocks/getHeight", () => {
 
@@ -235,7 +67,10 @@ describe("GET /blocks/getFee", () => {
                 node.expect(body).to.have.property("success").to.be.true;
                 if (body.success == true && body.fee != null) {
                     node.expect(body).to.have.property("fee");
-                    node.expect(body.fee).to.equal(node.Fees.transactionFee);
+                    // node.expect(body.fee).to.equal(node.Fees.transactionFee);
+                    const result = DdnUtils.bignum.isEqualTo(body.fee, node.Fees.transactionFee);
+                    node.expect(result).to.be.true;
+                    
                 } else {
                     debug("Request failed or fee is null");
                 }
@@ -406,12 +241,15 @@ describe("GET /blocks", () => {
                 node.expect(body).to.have.property("success").to.be.true;
                 node.expect(body).to.have.property("blocks").that.is.an("array");
                 for (let i = 0; i < body.blocks.length; i++) {
-                    node.expect(body.blocks[i].total_fee).to.equal(block.totalFee);
+                    // node.expect(body.blocks[i].total_fee).to.equal(block.totalFee);
+                    const result = DdnUtils.bignum.isEqualTo(body.blocks[i].total_fee, block.totalFee);
+                    node.expect(result).to.be.true;
                 }
                 done();
             });
     });
 
+    // /blocks?totalAmount=0&limit=100&offset=0
     it("Using totalAmount. Should be ok", done => {
         const totalAmount = block.totalAmount;
         const limit = 100;
@@ -427,7 +265,10 @@ describe("GET /blocks", () => {
                 node.expect(body).to.have.property("success").to.be.true;
                 node.expect(body).to.have.property("blocks").that.is.an("array");
                 for (let i = 0; i < body.blocks.length; i++) {
-                    node.expect(body.blocks[i].total_amount).to.equal(block.totalAmount);
+                    // node.expect(body.blocks[i].total_amount).to.equal(block.totalAmount);
+                    const result = DdnUtils.bignum.isEqualTo(body.blocks[i].total_amount, block.totalAmount);
+                    debug(result, body.blocks[i].total_amount, block.totalAmount);
+                    node.expect(result).to.be.true;
                 }
                 done();
             });
@@ -465,12 +306,11 @@ describe("GET /blocks", () => {
             .end((err, {
                 body
             }) => {
-                debug(JSON.stringify(body));
+                // debug('orderBy', JSON.stringify(body));
                 node.expect(body).to.have.property("success").to.be.true;
                 node.expect(body).to.have.property("blocks").that.is.an("array");
                 for (let i = 0; i < body.blocks.length; i++) {
                     if (body.blocks[i + 1] != null) {
-                        node.expect(body.blocks[i].height).to.be.above(body.blocks[i + 1].height);
                         const bRet = DdnUtils.bignum.isGreaterThanOrEqualTo(body.blocks[i].height, body.blocks[i + 1].height);
                         node.expect(bRet).to.be.true;
                     }
@@ -493,17 +333,17 @@ describe("GET /blocks/get?id=", () => {
             .end((err, {
                 body
             }) => {
-                debug(JSON.stringify(body));
-                debug(body.block);
+                debug('GET /blocks/id', JSON.stringify(body));
+                // debug('body.block', JSON.stringify(body.block));
                 node.expect(body).to.have.property("success").to.be.true;
                 node.expect(body).to.have.property("block").to.be.a("object");
-                node.expect(body.block).to.have.property("id").to.be.a("string");
+                node.expect(body.block).to.have.property("height").to.be.a("string");
                 done();
             });
     });
 
     it("Using unknown id. Should be fail", done => {
-        const unknownId = "9928719876370886655";
+        const unknownId = "323463429834230556352244";
 
         node.api.get(`/blocks/get?id=${unknownId}`)
             .set("Accept", "application/json")

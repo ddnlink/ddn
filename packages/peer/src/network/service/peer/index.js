@@ -1,12 +1,12 @@
 /**
- * RootRouter接口
+ * PeerService 接口
  * wangxm   2019-01-11
  */
 import ip from "ip";
 
 import DdnUtils from "@ddn/utils";
 
-class RootRouter {
+class PeerService {
     constructor(context) {
         Object.assign(this, context);
         this._context = context;
@@ -189,7 +189,7 @@ class RootRouter {
         });
 
         return {
-            succ: true
+            success: true
         };
     }
 
@@ -433,4 +433,4 @@ class RootRouter {
     }
 }
 
-export default RootRouter;
+export default PeerService;

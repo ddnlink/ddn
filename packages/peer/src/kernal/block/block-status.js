@@ -22,9 +22,9 @@ class BlockStatus {
         this._context = context;
 
         // TODO: constants 使用 global ？
-        this._milestones = constants[context.config.netVersion].milestones;
-        this._distance = constants[context.config.netVersion].rewardDistance;
-        this._rewardOffset = constants[context.config.netVersion].rewardOffset;
+        this._milestones = constants[context.config.net].milestones;
+        this._distance = constants[context.config.net].rewardDistance;
+        this._rewardOffset = constants[context.config.net].rewardOffset;
     }
 
     parseHeight(height) {

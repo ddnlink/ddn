@@ -89,12 +89,18 @@ class Peer {
         });
     }
 
+    // FIXME: delete this function, use the follow version() 
     async getVersion() {
         return {
             version: this.config.version,
             build: this.config.buildVersion,
-            net: this.config.netVersion
+            net: this.config.net
         };
+    }
+
+    // TODO: this.running.peer.getVersion() -> this.running.peer.version()
+    async version() {
+        return this.config.version;
     }
 
     async addDapp(config) {
@@ -327,7 +333,7 @@ class Peer {
             return true;
         }
 
-        const compatibleVersion = this.tokenSetting[this.config.netVersion]
+        const compatibleVersion = this.tokenSetting[this.config.net]
             .compatibleVersion;
 
         const numsCompatible = compatibleVersion.split(".").map(Number);

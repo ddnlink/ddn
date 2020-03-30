@@ -12,12 +12,17 @@ import ByteBuffer from "bytebuffer";
 import DdnUtils from "@ddn/utils";
 import BlockStatus from "./block-status";
 
-const { assetTypes, runtimeState, system, bignum, address } = DdnUtils;
+const {
+    assetTypes,
+    runtimeState,
+    system,
+    bignum,
+    address
+} = DdnUtils;
 
 let _singleton;
 
-class Block
-{
+class Block {
     static singleton(context) {
         if (!_singleton) {
             _singleton = new Block(context);
@@ -55,7 +60,7 @@ class Block
     }
 
     async calculateFee() {
-        return this.tokenSetting[this.config.netVersion].fees.send;
+        return this.tokenSetting[this.config.net].fees.send;
     }
 
     getBlockStatus() {
@@ -139,8 +144,8 @@ class Block
 
     async objectNormalize(block) {
         for (let i in block) {
-            if (block[i] == null || typeof(block[i]) === 'undefined') {
-              delete block[i];
+            if (block[i] == null || typeof (block[i]) === 'undefined') {
+                delete block[i];
             }
         }
 
@@ -237,21 +242,21 @@ class Block
             return null;
         } else {
             const block = {
-              id: raw.b_id,
-              version: parseInt(raw.b_version),
-              timestamp: parseInt(raw.b_timestamp),
-              height: raw.b_height + "",        //bignum update parseInt(raw.b_height),
-              previous_block: raw.b_previousBlock,   //wxm block database
-              number_of_transactions: parseInt(raw.b_numberOfTransactions),   //wxm block database
-              total_amount: raw.b_totalAmount + "",  //bignum update parseInt(raw.b_totalAmount),    //wxm block database
-              total_fee: raw.b_totalFee + "",    //bignum update parseInt(raw.b_totalFee),   //wxm block database
-              reward: raw.b_reward + "",        //bignum update parseInt(raw.b_reward),
-              payload_length: parseInt(raw.b_payloadLength), //wxm block database
-              payload_hash: raw.b_payloadHash,   //wxm block database
-              generator_public_key: raw.b_generatorPublicKey, //wxm block database
-              generator_id: address.generateBase58CheckAddress(raw.b_generatorPublicKey),    //wxm block database
-              block_signature: raw.b_blockSignature,    //wxm block database
-              confirmations: raw.b_confirmations
+                id: raw.b_id,
+                version: parseInt(raw.b_version),
+                timestamp: parseInt(raw.b_timestamp),
+                height: raw.b_height + "", //bignum update parseInt(raw.b_height),
+                previous_block: raw.b_previousBlock, //wxm block database
+                number_of_transactions: parseInt(raw.b_numberOfTransactions), //wxm block database
+                total_amount: raw.b_totalAmount + "", //bignum update parseInt(raw.b_totalAmount),    //wxm block database
+                total_fee: raw.b_totalFee + "", //bignum update parseInt(raw.b_totalFee),   //wxm block database
+                reward: raw.b_reward + "", //bignum update parseInt(raw.b_reward),
+                payload_length: parseInt(raw.b_payloadLength), //wxm block database
+                payload_hash: raw.b_payloadHash, //wxm block database
+                generator_public_key: raw.b_generatorPublicKey, //wxm block database
+                generator_id: address.generateBase58CheckAddress(raw.b_generatorPublicKey), //wxm block database
+                block_signature: raw.b_blockSignature, //wxm block database
+                confirmations: raw.b_confirmations
             };
             block.totalForged = bignum.plus(block.total_fee, block.reward);
 
@@ -311,14 +316,14 @@ class Block
 
         let block = {
             version: 0,
-            total_amount: totalAmount.toString(),    //Bignum update
-            total_fee: totalFee.toString(),  //Bignum update
-            reward: reward.toString(),  //Bignum update
+            total_amount: totalAmount.toString(), //Bignum update
+            total_fee: totalFee.toString(), //Bignum update
+            reward: reward.toString(), //Bignum update
             payload_hash: payloadHash.digest().toString('hex'),
             timestamp: data.timestamp,
             number_of_transactions: blockTransactions.length,
             payload_length: size,
-            previous_block: data.previous_block.id,  //wxm block database
+            previous_block: data.previous_block.id, //wxm block database
             generator_public_key: data.keypair.publicKey.toString('hex'),
             transactions: blockTransactions
         };
@@ -351,16 +356,16 @@ class Block
 
         await new Promise((resolve, reject) => {
             this.sequence.add(async cb => {
-                if (block.previous_block == this._lastBlock.id && bignum.isEqualTo(bignum.plus(this._lastBlock.height, 1), block.height)) {   //wxm block database
+                if (block.previous_block == this._lastBlock.id && bignum.isEqualTo(bignum.plus(this._lastBlock.height, 1), block.height)) { //wxm block database
                     this.logger.info(`Received new block id: ${block.id} height: ${block.height} round: ${await this.runtime.round.calc(this.getLastBlock().height)} slot: ${this.runtime.slot.getSlotNumber(block.timestamp)} reward: ${this.getLastBlock().reward}`)
                     await this.processBlock(block, votes, true, true, true);
                     cb();
-                } else if (block.previous_block != this._lastBlock.id && this._lastBlock.height + 1 == block.height) {    //wxm block database
+                } else if (block.previous_block != this._lastBlock.id && this._lastBlock.height + 1 == block.height) { //wxm block database
                     // Fork: Same height but different previous block id
                     await this.runtime.delegate.fork(block, 1);
 
                     cb("Fork-1");
-                } else if (block.previous_block == this._lastBlock.previous_block && block.height == this._lastBlock.height && block.id != this._lastBlock.id) {   //wxm block database
+                } else if (block.previous_block == this._lastBlock.previous_block && block.height == this._lastBlock.height && block.id != this._lastBlock.id) { //wxm block database
                     // Fork: Same height and previous block id, but different block id
                     await this.runtime.delegate.fork(block, 5);
 
@@ -454,13 +459,10 @@ class Block
 
                 this.logger.info(`receive propose height ${propose.height} bid ${propose.id}`);
 
-                setImmediate(async() => {
-                    try
-                    {
+                setImmediate(async () => {
+                    try {
                         await this.runtime.peer.broadcast.broadcastNewPropose(propose);
-                    }
-                    catch (err)
-                    {
+                    } catch (err) {
                         this.logger.error(`Broadcast new propose failed: ${system.getErrorMsg(err)}`);
                     }
                 });
@@ -500,13 +502,10 @@ class Block
                         }
 
                         //向提议请求节点回复本机授权
-                        setImmediate(async() => {
-                            try
-                            {
+                        setImmediate(async () => {
+                            try {
                                 await this.runtime.peer.request(replyData);
-                            }
-                            catch (err)
-                            {
+                            } catch (err) {
                                 this.logger.error(`Replay propose request failed: ${system.getErrorMsg(err)}`);
                             }
                         });
@@ -538,7 +537,7 @@ class Block
         const applyedTrsIdSet = new Set;
 
         const doApplyBlock = async () => {
-          this.logger.debug("doApplyBlock is starting");
+            this.logger.debug("doApplyBlock is starting");
 
             const sortedTrs = block.transactions.sort((a, b) => {
                 if (a.type == 1) {
@@ -552,7 +551,10 @@ class Block
                     try {
                         for (let i = 0; i < sortedTrs.length; i++) {
                             const transaction = sortedTrs[i];
-                            const updatedAccountInfo = await this.runtime.account.setAccount({ public_key: transaction.sender_public_key, isGenesis: block.height == 1 }, dbTrans);
+                            const updatedAccountInfo = await this.runtime.account.setAccount({
+                                public_key: transaction.sender_public_key,
+                                isGenesis: block.height == 1
+                            }, dbTrans);
 
                             const accountInfo = await this.runtime.account.getAccountByAddress(updatedAccountInfo.address);
                             const newAccountInfo = Object.assign({}, accountInfo, updatedAccountInfo);
@@ -578,17 +580,17 @@ class Block
 
                         done();
                     } catch (err) {
-                      done(err);
+                        done(err);
                     }
                 }, async (err, result) => {
                     if (err) {
-                        applyedTrsIdSet.clear();    //wxm TODO 清除上面未处理的交易记录
+                        applyedTrsIdSet.clear(); //wxm TODO 清除上面未处理的交易记录
                         this.balanceCache.rollback();
                         if (!result) {
                             this.logger.error(`回滚失败或者提交异常，出块失败: ${err}`)
                             process.exit(1)
                             return
-                        } else {    //回滚成功
+                        } else { //回滚成功
                             this._isActive = false;
                             reject(err);
                         }
@@ -610,13 +612,10 @@ class Block
                             votes.signatures = votes.signatures.slice(0, 6);
 
                             setImmediate(async () => {
-                                try
-                                {
+                                try {
                                     await this.runtime.peer.broadcast.broadcastNewBlock(block, votes);
                                     await this.runtime.transaction.execAssetFunc("onNewBlock", block, votes);
-                                }
-                                catch (err)
-                                {
+                                } catch (err) {
                                     this.logger.error(`Broadcast new block failed: ${system.getErrorMsg(err)}`);
                                 }
                             });
@@ -632,31 +631,25 @@ class Block
             this.balancesSequence.add(async (cb) => {
                 var unconfirmedTrs = await this.runtime.transaction.getUnconfirmedTransactionList(true);
 
-                try
-                {
+                try {
                     await this.runtime.transaction.undoUnconfirmedList();
-                }
-                catch (err)
-                {
+                } catch (err) {
                     this.logger.error('Failed to undo uncomfirmed transactions', err);
                     return process.exit(0);
                 }
 
                 this.oneoff.clear();
 
-                try
-                {
+                try {
                     await doApplyBlock();
-                }
-                catch (err)
-                {
+                } catch (err) {
                     this.logger.error(`Failed to apply block: ${err}`);
                 }
 
                 const redoTrs = unconfirmedTrs.filter((item) => {
                     if (!applyedTrsIdSet.has(item.id)) {
                         if (item.type == assetTypes.MULTISIGNATURE) {
-                            var curTime = this.runtime.slot.getTime();  // (new Date()).getTime();
+                            var curTime = this.runtime.slot.getTime(); // (new Date()).getTime();
                             var pasttime = Math.ceil((curTime - item.timestamp) / this.config.settings.blockIntervalTime);
 
                             if (pasttime >= item.asset.multisignature.lifetime) {
@@ -671,12 +664,9 @@ class Block
                         return false;
                     }
                 });
-                try
-                {
+                try {
                     await this.runtime.transaction.receiveTransactions(redoTrs);
-                }
-                catch (err)
-                {
+                } catch (err) {
                     this.logger.error('Failed to redo unconfirmed transactions', err);
                 }
 
@@ -724,12 +714,11 @@ class Block
             throw new Error(`Failed to get block id: ${e.toString()}`);
         }
 
-        //Bignum update   block.height = privated.lastBlock.height + 1;
         block.height = bignum.plus(this._lastBlock.height, 1).toString();
 
         this.logger.debug(`verifyBlock, id: ${block.id}, h: ${block.height}`);
 
-        if (!block.previous_block && block.height != 1) {  //wxm block database
+        if (!block.previous_block && block.height != 1) { //wxm block database
             throw new Error("Previous block should not be null");
         }
 
@@ -825,11 +814,9 @@ class Block
     }
 
     async verifyBlockVotes(block, votes) {
-        try
-        {
+        try {
             var delegatesList = await this.runtime.delegate.getDisorderDelegatePublicKeys(block.height);
-        }
-        catch (err) {
+        } catch (err) {
             this.logger.error("Failed to get delegate list while verifying block votes");
             process.exit(-1);
             return;
@@ -884,12 +871,9 @@ class Block
                     return reject(`Block already exists: ${block.id}`);
                 }
 
-                try
-                {
+                try {
                     await this.runtime.delegate.validateBlockSlot(block);
-                }
-                catch(err)
-                {
+                } catch (err) {
                     await this.runtime.delegate.fork(block, 3);
                     return reject(`Can't verify slot: ${err}`);
                 }
@@ -906,7 +890,11 @@ class Block
                     var existsTrsIds = [];
                     if (trsIds.length > 0) {
                         existsTrsIds = await new Promise((resolve, reject) => {
-                            this.dao.findList("tr", {id: {$in: trsIds}}, ["id"], null, null, (err, result) => {
+                            this.dao.findList("tr", {
+                                id: {
+                                    $in: trsIds
+                                }
+                            }, ["id"], null, null, (err, result) => {
                                 if (err) {
                                     return reject(`Failed to query transaction from db: ${err}`);
                                 } else {
@@ -917,16 +905,19 @@ class Block
                     }
 
                     for (var i = 0; i < block.transactions.length; i++) {
-                        try
-                        {
+                        try {
                             const transaction = block.transactions[i];
 
-                            await this.runtime.account.setAccount({ public_key: transaction.sender_public_key });
+                            await this.runtime.account.setAccount({
+                                public_key: transaction.sender_public_key
+                            });
 
                             transaction.id = await this.runtime.transaction.getId(transaction);
-                            transaction.block_id = block.id;   //wxm block database
+                            transaction.block_id = block.id; //wxm block database
 
-                            const existsTrs = existsTrsIds.find((item) => {item.id == transaction.id});
+                            const existsTrs = existsTrsIds.find((item) => {
+                                item.id == transaction.id
+                            });
                             if (existsTrs) {
                                 await this.runtime.transaction.removeUnconfirmedTransaction(transaction.id);
                                 return reject(`Transaction already exists: ${transaction.id}`);
@@ -936,9 +927,7 @@ class Block
                                 var sender = await this.runtime.account.getAccountByPublicKey(transaction.sender_public_key);
                                 await this.runtime.transaction.verify(transaction, sender);
                             }
-                        }
-                        catch (err)
-                        {
+                        } catch (err) {
                             return reject(err);
                         }
                     }
@@ -946,12 +935,9 @@ class Block
 
                 this.logger.debug("verify block transactions ok");
 
-                try
-                {
+                try {
                     await this.applyBlock(block, votes, broadcast, save);
-                }
-                catch (err)
-                {
+                } catch (err) {
                     return reject(err);
                 }
 
@@ -984,13 +970,10 @@ class Block
             }
 
             if (await this.runtime.transaction.ready(transaction, sender)) {
-                try
-                {
+                try {
                     await this.runtime.transaction.verify(transaction, sender);
                     ready.push(transaction);
-                }
-                catch(err)
-                {
+                } catch (err) {
                     this.logger.error(`Failed to verify transaction ${transaction.id}`, err);
                     await this.runtime.transaction.removeUnconfirmedTransaction(transaction.id);
                 }
@@ -1004,7 +987,7 @@ class Block
             block = await this.createBlock({
                 keypair,
                 timestamp,
-                previous_block: this._lastBlock,  //wxm block database
+                previous_block: this._lastBlock, //wxm block database
                 transactions: ready
             });
         } catch (e) {
@@ -1016,7 +999,7 @@ class Block
 
         await this.verifyBlock(block, null);
 
-        var activeKeypairs = await this.runtime.delegate.getActiveDelegateKeypairs(block. height);
+        var activeKeypairs = await this.runtime.delegate.getActiveDelegateKeypairs(block.height);
         assert(activeKeypairs && activeKeypairs.length > 0, "Active keypairs should not be empty");
 
         this.logger.info(`get active delegate keypairs len: ${activeKeypairs.length}`);
@@ -1046,12 +1029,9 @@ class Block
             this._proposeCache[propose.hash] = true;
 
             setImmediate(async () => {
-                try
-                {
+                try {
                     await this.runtime.peer.broadcast.broadcastNewPropose(propose);
-                }
-                catch (err)
-                {
+                } catch (err) {
                     this.logger.error(`Broadcast new propose failed: ${system.getErrorMsg(err)}`);
                 }
             });
@@ -1093,7 +1073,7 @@ class Block
             var _block = this.serializeDbData2Block(data[i]);
             if (_block) {
                 if (!blocks[_block.id]) {
-                    if (_block.id == this.genesisblock.id) {  //wxm async ok      genesisblock.block.id
+                    if (_block.id == this.genesisblock.id) { //wxm async ok      genesisblock.block.id
                         _block.generationSignature = (new Array(65)).join('0');
                     }
 
@@ -1128,7 +1108,11 @@ class Block
                 this.logger.info(`begin to pop block ${oldLastBlock.height} ${oldLastBlock.id}`);
 
                 //wxm TODO 这里查询条件用的id = previous_block，但过来的previous_block肯定有问题怎么会查出来呢，所以改成按照height-1来查上一个，但不知道会不会有问题
-                var previousBlock = await this.runtime.dataquery.queryFullBlockData({height: bignum.minus(oldLastBlock.height, 1).toString()}, 1, 0, [['height', 'asc']]);     //{id: oldLastBlock.previous_block}
+                var previousBlock = await this.runtime.dataquery.queryFullBlockData({
+                    height: bignum.minus(oldLastBlock.height, 1).toString()
+                }, 1, 0, [
+                    ['height', 'asc']
+                ]); //{id: oldLastBlock.previous_block}
                 if (!previousBlock || !previousBlock.length) {
                     return cb('previousBlock is null');
                 }
@@ -1139,8 +1123,7 @@ class Block
                 transactions = transactions.reverse();
 
                 this.dao.transaction(async (dbTrans, done) => {
-                    try
-                    {
+                    try {
                         for (var i = 0; i < transactions.length; i++) {
                             var transaction = transactions[i];
 
@@ -1155,9 +1138,7 @@ class Block
                         await this.deleteBlock(oldLastBlock.id, dbTrans);
 
                         done(null, previousBlock);
-                    }
-                    catch (err)
-                    {
+                    } catch (err) {
                         done(err);
                     }
                 }, cb);
@@ -1173,7 +1154,9 @@ class Block
 
     async deleteBlock(blockId, dbTrans) {
         return new Promise((resolve, reject) => {
-            this.dao.remove("block", { id: blockId }, dbTrans, (err, result) => {
+            this.dao.remove("block", {
+                id: blockId
+            }, dbTrans, (err, result) => {
                 if (err) {
                     reject(err);
                 } else {
@@ -1196,34 +1179,30 @@ class Block
         return blocks;
     }
 
-    async simpleDeleteAfterBlock(blockId)
-    {
+    async simpleDeleteAfterBlock(blockId) {
         return new Promise((resolve, reject) => {
-            this.dao.findOne('block', {id: blockId}, ['height'], (err, result) => {
-                if (err)
-                {
+            this.dao.findOne('block', {
+                id: blockId
+            }, ['height'], (err, result) => {
+                if (err) {
                     return reject(err);
-                }
-                else
-                {
+                } else {
                     if (result && result.height != null &&
-                        typeof(result.height) != "undefined")
-                    {
-                        this.dao.remove('block', {height: {$gte: result.height}},
-                            (err2, result2) => {
-                                if (err2)
-                                {
-                                    return reject(err2);
+                        typeof (result.height) != "undefined") {
+                        this.dao.remove('block', {
+                                height: {
+                                    $gte: result.height
                                 }
-                                else
-                                {
+                            },
+                            (err2, result2) => {
+                                if (err2) {
+                                    return reject(err2);
+                                } else {
                                     resolve(result2);
                                 }
                             }
                         );
-                    }
-                    else
-                    {
+                    } else {
                         resolve();
                     }
                 }
@@ -1233,7 +1212,10 @@ class Block
 
     async loadBlocksOffset(limit, offset, verify) {
         const newLimit = limit + (offset || 0);
-        const params = { limit: newLimit, offset: offset || 0 };
+        const params = {
+            limit: newLimit,
+            offset: offset || 0
+        };
 
         this.logger.debug(`loadBlockOffset limit: ${limit}, offset: ${offset}, verify: ${verify}`);
 
@@ -1241,13 +1223,14 @@ class Block
             this.dbSequence.add(async (cb) => {
                 var where = {
                     height: {
-                      $gte: offset || 0
+                        $gte: offset || 0
                     }
                 }
 
-                try
-                {
-                    var blocksData = await this.runtime.dataquery.queryFullBlockData(where, limit || 1, 0, [['height', 'asc']]);
+                try {
+                    var blocksData = await this.runtime.dataquery.queryFullBlockData(where, limit || 1, 0, [
+                        ['height', 'asc']
+                    ]);
                     var blocks = await this._parseObjectFromFullBlocksData(blocksData);
                     for (var i = 0; i < blocks.length; i++) {
                         var block = blocks[i];
@@ -1269,9 +1252,7 @@ class Block
                     }
 
                     cb();
-                }
-                catch (e)
-                {
+                } catch (e) {
                     cb(e);
                 }
             }, err => {
@@ -1295,7 +1276,9 @@ class Block
 
         return new Promise((resolve, reject) => {
             this.dao.findPage("block", null, 1, 0, false,
-                [[this.dao.db_fnMax('height'), 'maxHeight']],    //wxm block database  library.dao.db_fn('MAX', library.dao.db_col('height'))
+                [
+                    [this.dao.db_fnMax('height'), 'maxHeight']
+                ], //wxm block database  library.dao.db_fn('MAX', library.dao.db_col('height'))
                 null, (err, rows) => {
                     if (err || !rows) {
                         return reject(err || "Get Block Error.");
@@ -1319,23 +1302,22 @@ class Block
                         ['version', 'b_version'],
                         ['timestamp', 'b_timestamp'],
                         ['previous_block', 'b_previousBlock'],
-                        [this.dao.db_str(maxHeight + '-height'), 'b_confirmations']]
-                        , s, (err2, rows2) => {
-                            if (err2) {
-                                return reject(err2);
-                            }
-
-                            var blocks = [];
-                            for (let i = 0; i < rows2.rows.length; i++) {
-                                blocks.push(this.serializeDbData2Block(rows2.rows[i]));
-                            }
-
-                            resolve({
-                                blocks,
-                                count: rows2.total
-                            });
+                        [this.dao.db_str(maxHeight + '-height'), 'b_confirmations']
+                    ], s, (err2, rows2) => {
+                        if (err2) {
+                            return reject(err2);
                         }
-                    );
+
+                        var blocks = [];
+                        for (let i = 0; i < rows2.rows.length; i++) {
+                            blocks.push(this.serializeDbData2Block(rows2.rows[i]));
+                        }
+
+                        resolve({
+                            blocks,
+                            count: rows2.total
+                        });
+                    });
                 }
             );
         });
@@ -1371,7 +1353,7 @@ class Block
         var keys = ['id', 'height', 'hash'];
         for (var i in keys) {
             var key = keys[i];
-            if (typeof(query[key]) != 'undefined' && query[key] != null) {
+            if (typeof (query[key]) != 'undefined' && query[key] != null) {
                 where = {
                     [key]: query[key]
                 };
@@ -1385,7 +1367,9 @@ class Block
         return new Promise((resolve, reject) => {
             this.dbSequence.add(cb => {
                 this.dao.findPage("block", null, 1, 0, false,
-                    [[this.dao.db_fnMax('height'), 'maxHeight']],    //wxm block database  library.dao.db_fn('MAX', library.dao.db_col('height'))
+                    [
+                        [this.dao.db_fnMax('height'), 'maxHeight']
+                    ], //wxm block database  library.dao.db_fn('MAX', library.dao.db_col('height'))
                     null, (err, rows) => {
                         if (err || !rows) {
                             return cb(err || "Get Block Error.");
@@ -1409,16 +1393,15 @@ class Block
                             ['version', 'b_version'],
                             ['timestamp', 'b_timestamp'],
                             ['previous_block', 'b_previousBlock'],
-                            [this.dao.db_str(maxHeight + '-height'), 'b_confirmations']]
-                            , null, (err2, rows2) => {
-                                if (err2 || !rows2 || !rows2.length) {
-                                    return cb(err2 || "Block not found");
-                                }
-
-                                var block = this.serializeDbData2Block(rows2[0]);
-                                cb(null, { block });
+                            [this.dao.db_str(maxHeight + '-height'), 'b_confirmations']
+                        ], null, (err2, rows2) => {
+                            if (err2 || !rows2 || !rows2.length) {
+                                return cb(err2 || "Block not found");
                             }
-                        );
+
+                            var block = this.serializeDbData2Block(rows2[0]);
+                            cb(null, block);
+                        });
                     }
                 );
             }, (err, result) => {

@@ -7,43 +7,49 @@ async function createTransfer(address, amount, secret, second_secret) {
 async function newAccount() {
     return new Promise((resolve, reject) => {
         node.api.get("/accounts/new")
-        .set("Accept", "application/json")
-        .expect("Content-Type", /json/)
-        .expect(200)
-        .end((err, {body}) => {
-            node.expect(body).to.have.property("secret");
+            .set("Accept", "application/json")
+            .expect("Content-Type", /json/)
+            .expect(200)
+            .end((err, {
+                body
+            }) => {
+                node.expect(body).to.have.property("secret");
 
-            if (err)
-            {
-                return reject(err);
-            }
-            
-            resolve(body);
-        });
+                if (err) {
+                    return reject(err);
+                }
+
+                resolve(body);
+            });
     });
 }
 
-async function multiSign({secret, address}, trsId) {
+async function multiSign({
+    secret,
+    address
+}, trsId) {
     return new Promise((resolve, reject) => {
         node.api.post("/multisignatures/sign")
-        .set("Accept", "application/json")
-        .send({
-            secret,
-            transactionId: trsId
-        })
-        .expect("Content-Type", /json/)
-        .expect(200)
-        .end((err, {body}) => {
-            if (err) {
-                return reject(err);
-            }
+            .set("Accept", "application/json")
+            .send({
+                secret,
+                transactionId: trsId
+            })
+            .expect("Content-Type", /json/)
+            .expect(200)
+            .end((err, {
+                body
+            }) => {
+                if (err) {
+                    return reject(err);
+                }
 
-            console.log(`${address} sign:${JSON.stringify(body)}`);
+                console.log(`${address} sign:${JSON.stringify(body)}`);
 
-            node.expect(body).to.have.property("success").to.be.true;
+                node.expect(body).to.have.property("success").to.be.true;
 
-            resolve();
-        });
+                resolve();
+            });
     });
 }
 
@@ -71,10 +77,12 @@ describe("PUT /multisignatures", () => {
                 })
                 .expect("Content-Type", /json/)
                 .expect(200)
-                .end((err, {body}) => {
+                .end((err, {
+                    body
+                }) => {
                     console.log(JSON.stringify(body))
                     node.expect(body).to.have.property("success").to.be.true;
-                    
+
                     if (err) {
                         reject(err);
                     } else {
@@ -83,17 +91,17 @@ describe("PUT /multisignatures", () => {
                 });
         });
 
-        const account =  await newAccount();
+        const account = await newAccount();
         console.log(`account: ${JSON.stringify(account)}`);
         console.log("\r\n");
         accounts.push(account);
 
-        const account2 =  await newAccount();
+        const account2 = await newAccount();
         console.log(`account2: ${JSON.stringify(account2)}`);
         console.log("\r\n");
         accounts.push(account2);
 
-        const account3 =  await newAccount();
+        const account3 = await newAccount();
         console.log(`account3: ${JSON.stringify(account3)}`);
         console.log("\r\n");
         accounts.push(account3);
@@ -112,43 +120,43 @@ describe("PUT /multisignatures", () => {
             console.log("\r\n");
 
             node.api.put("/multisignatures")
-            .set("Accept", "application/json")
-            .send({
-                secret: multiAccount.secret,
-                min: 3,
-                lifetime: 24,
-                keysgroup: kg
-            })
-            .expect("Content-Type", /json/)
-            .expect(200)
-            .end((err, {body}) => {
-                console.log(JSON.stringify(body));
-                node.expect(body).to.have.property("success").to.be.true;
+                .set("Accept", "application/json")
+                .send({
+                    secret: multiAccount.secret,
+                    min: 3,
+                    lifetime: 24,
+                    keysgroup: kg
+                })
+                .expect("Content-Type", /json/)
+                .expect(200)
+                .end((err, {
+                    body
+                }) => {
+                    console.log(JSON.stringify(body));
+                    node.expect(body).to.have.property("success").to.be.true;
 
-                multiTrsId = body.transactionId;
+                    multiTrsId = body.transactionId;
 
-                done();
-            });
-            
+                    done();
+                });
+
         });
 
     });
 
-    it("POST /multisignatures/sign. Should be ok", async() => {
+    it("POST /multisignatures/sign. Should be ok", async (done) => {
         let result = false;
 
         for (let i = 0; i < accounts.length; i++) {
-            try
-            {
+            try {
                 const account = accounts[i];
                 await multiSign(account, multiTrsId);
                 result = true;
-            }
-            catch (err)
-            {
+            } catch (err) {
                 result = false;
             }
         }
+        done();
     });
 
 })

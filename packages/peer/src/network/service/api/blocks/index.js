@@ -1,10 +1,10 @@
 import DdnUtils from '@ddn/utils';
 
 /**
- * RootRouter接口
+ * BlockService 接口
  * wangxm   2019-03-15
  */
-class RootRouter {
+class BlockService {
 
     constructor(context) {
         Object.assign(this, context);
@@ -154,6 +154,7 @@ class RootRouter {
         }
 
         const block = await this.runtime.block.querySimpleBlockData(query);
+        
         return {
             success: true,
             block
@@ -266,4 +267,4 @@ class RootRouter {
 
 }
 
-export default RootRouter;
+export default BlockService;

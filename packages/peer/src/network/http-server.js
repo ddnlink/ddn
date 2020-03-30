@@ -26,9 +26,11 @@ import methodOverride from 'method-override';
 import DdnUtils from '@ddn/utils';
 import queryParser from './middleware/query-int';
 import SocketioEmiter from './socketio/';
+import errorHandler from './middleware/errorHandler';
 
 class HttpServer {
     static newServer(context) {
+        errorHandler();
         return new HttpServer(context);
     }
 
@@ -37,7 +39,9 @@ class HttpServer {
         this._context = context;
 
         this._app = express();
-        this._app.use(compression({ level: 6 }));
+        this._app.use(compression({
+            level: 6
+        }));
         this._app.use(cors());
         this._app.options("*", cors());
 
@@ -51,9 +55,9 @@ class HttpServer {
             this._https_server = https.createServer({
                 key: privateKey,
                 cert: certificate,
-                ciphers: "ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-AES256-GCM-SHA384:DHE-RSA-AES128-GCM-SHA256:"
-                    + "ECDHE-RSA-AES128-SHA256:DHE-RSA-AES128-SHA256:ECDHE-RSA-AES256-SHA384:DHE-RSA-AES256-SHA384:ECDHE-RSA-AES256-SHA256:DHE-RSA-AES256-SHA256:HIGH:"
-                    + "!aNULL:!eNULL:!EXPORT:!DES:!RC4:!MD5:!PSK:!SRP:!CAMELLIA"
+                ciphers: "ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-AES256-GCM-SHA384:DHE-RSA-AES128-GCM-SHA256:" +
+                    "ECDHE-RSA-AES128-SHA256:DHE-RSA-AES128-SHA256:ECDHE-RSA-AES256-SHA384:DHE-RSA-AES256-SHA384:ECDHE-RSA-AES256-SHA256:DHE-RSA-AES256-SHA256:HIGH:" +
+                    "!aNULL:!eNULL:!EXPORT:!DES:!RC4:!MD5:!PSK:!SRP:!CAMELLIA"
             }, this._app); // FIXME: app -> this._app ?
 
             this._https_io = require('socket.io')(this._https_server);
@@ -72,22 +76,41 @@ class HttpServer {
         this._app.set('view engine', 'ejs');
         this._app.set('views', this.config.publicDir);
         this._app.use(express.static(this.config.publicDir));
-        this._app.use(bodyParser.raw({ limit: this.config.payloadLimitSize }));
-        this._app.use(bodyParser.urlencoded({ extended: true, limit: this.config.payloadLimitSize, parameterLimit: 5000 }));
-        this._app.use(bodyParser.json({ limit: this.config.payloadLimitSize }));
+        this._app.use(bodyParser.raw({
+            limit: this.config.payloadLimitSize
+        }));
+        this._app.use(bodyParser.urlencoded({
+            extended: true,
+            limit: this.config.payloadLimitSize,
+            parameterLimit: 5000
+        }));
+        this._app.use(bodyParser.json({
+            limit: this.config.payloadLimitSize
+        }));
         this._app.use(methodOverride());
 
         this._addQueryParamsMiddleware();
         this._addSecurityMiddleware();
+        this._addErrorHandleMiddleware();
+
         this._addCommonHeadersMiddleware();
     }
 
-        /**
-     * 转换输入参数类型（字符串 -> 整型）
+    /**
+     * 配合 errorHandler 拦截错误
      */
     _addErrorHandleMiddleware() {
         this._app.use((err, req, res, next) => {
-            next(err);
+
+            // if (err) {
+                res.status(200);
+                res.json({
+                    success: false,
+                    error: err.message
+                });
+                res.end()
+            // }
+            // next(err);
         });
     }
 
@@ -126,7 +149,9 @@ class HttpServer {
             nethash: this.config.nethash
         };
 
-        this._app.use(({ url }, res, next) => {
+        this._app.use(({
+            url
+        }, res, next) => {
             const parts = url.split('/');
             if (parts.length > 1) {
                 if (parts[1] == 'peer') {
@@ -142,7 +167,12 @@ class HttpServer {
      * 安全约束中间件（api白名单、peer黑名单）
      */
     _addSecurityMiddleware() {
-        this._app.use(({ url, headers, connection, method }, res, next) => {
+        this._app.use(({
+            url,
+            headers,
+            connection,
+            method
+        }, res, next) => {
             const parts = url.split('/');
             const ip = headers['x-forwarded-for'] || connection.remoteAddress;
             let port = headers['port'];
@@ -248,7 +278,9 @@ class HttpServer {
      * @param {*} cls
      * @param {*} inst
      */
-    async _mountRouter(currDir, { prototype }, inst) {
+    async _mountRouter(currDir, {
+        prototype
+    }, inst) {
         const rootPath = await this._getBasePath();
         let basePath = currDir.toLowerCase().replace(rootPath.toLowerCase(), "");
         basePath = basePath.replace(".js", "");
@@ -291,6 +323,8 @@ class HttpServer {
             let method = null;
 
             const lowerName = name.toLowerCase();
+
+            // TODO: 修改这里的方法，让其符合 rustful api 逻辑
             let subPath;
             if (lowerName.startsWith("get")) {
                 method = "get";
@@ -311,9 +345,11 @@ class HttpServer {
                     try {
                         const result = await inst[name].call(inst, req);
                         res.json(result);
-                    }
-                    catch (err) {
-                        res.json({ success: false, error: err.message || err.toString() });
+                    } catch (err) {
+                        res.json({
+                            success: false,
+                            error: err.message || err.toString()
+                        });
                     }
                 });
             }
@@ -332,6 +368,7 @@ class HttpServer {
         await this._enumerateDir(basePath);
 
         this.runtime.transaction.mountAssetApis(this._app);
+        // this._addErrorHandleMiddleware();
 
         if (process.env.NODE_ENV === 'development') {
             DdnUtils.routesMap(this._app, 'routes.log', this.logger);

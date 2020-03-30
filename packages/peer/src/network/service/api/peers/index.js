@@ -13,7 +13,8 @@ class RootRouter {
 
     async queryPeers(filter) {
         var sortFields = ["ip", "port", "state", "os", "version"];
-        var sortMethod = '', sortBy = '';
+        var sortMethod = '',
+            sortBy = '';
         var limit = filter.limit || null;
         var offset = filter.offset || null;
 
@@ -42,13 +43,13 @@ class RootRouter {
                 sortMethod = 'desc';
             }
         }
-        
+
         if (sortBy) {
             if (sortFields.indexOf(sortBy) < 0) {
                 throw new Error("Invalid sort field");
             }
         }
-        
+
         if (limit !== null) {
             if (limit > 100) {
                 throw new Error("Invalid limit. Maximum is 100");
@@ -56,8 +57,10 @@ class RootRouter {
         }
 
         return new Promise((resolve, reject) => {
-            this.dao.findPage('peer', where, limit, offset, true, 
-                ['ip', 'port', 'state', 'os', 'version'], sortBy ? [[sortBy, sortMethod]]: null, 
+            this.dao.findPage('peer', where, limit, offset, true,
+                ['ip', 'port', 'state', 'os', 'version'], sortBy ? [
+                    [sortBy, sortMethod]
+                ] : null,
                 (err, rows) => {
                     if (err) {
                         reject(err);
@@ -75,8 +78,7 @@ class RootRouter {
             throw new Error(validateErrors[0].message);
         }
 
-        try
-        {
+        try {
             var peers = await this.queryPeers(query);
             for (let i = 0; i < peers.rows.length; i++) {
                 peers.rows[i].ip = ip.fromLong(peers.rows[i].ip);
@@ -87,10 +89,11 @@ class RootRouter {
                 peers: peers.rows,
                 totalCount: peers.total
             }
-        }
-        catch (err)
-        {
-            return {success: false, error: err};
+        } catch (err) {
+            return {
+                success: false,
+                error: err
+            };
         }
     }
 
@@ -99,15 +102,15 @@ class RootRouter {
         var validateErrors = await this.ddnSchema.validate({
             type: "object",
             properties: {
-              ip: {
-                type: "string",
-                minLength: 1
-              },
-              port: {
-                type: "integer",
-                minimum: 0,
-                maximum: 65535
-              }
+                ip: {
+                    type: "string",
+                    minLength: 1
+                },
+                port: {
+                    type: "integer",
+                    minimum: 0,
+                    maximum: 65535
+                }
             },
             required: ['ip', 'port']
         }, query);
@@ -115,8 +118,7 @@ class RootRouter {
             throw new Error(validateErrors[0].message);
         }
 
-        try
-        {
+        try {
             var peers = await this.queryPeers({
                 ip: query.ip,
                 port: query.port
@@ -126,19 +128,37 @@ class RootRouter {
             if (peer) {
                 peer.ip = ip.fromLong(peer.ip);
             }
-            return {success: true, peer: peer || {}};
-        }
-        catch (err) 
-        {
-            return {success: false, error: err};
+            return {
+                success: true,
+                peer: peer || {}
+            };
+        } catch (err) {
+            return {
+                success: false,
+                error: err
+            };
         }
     }
 
+    /**
+     * GET /peers/version 
+     * 
+     * 该接口已经修改，原来返回值： 
+     * {
+     *     version: this.config.version,
+     *     build: this.config.buildVersion,
+     *     net: this.config.net
+     * }
+     * @param {*} req 需要提供 nethash 参数
+     */
     async getVersion(req) {
         return {
-            version: this.config.version,
-            build: this.config.buildVersion,
-            net: this.config.netVersion
+            success: true,
+            version: {
+                version: this.config.version,
+                build: this.config.buildVersion,
+                net: this.config.net
+            }
         };
     }
 }

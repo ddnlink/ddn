@@ -123,7 +123,7 @@ test('config with mergeConfigs config/config.local.json and config.jsons', () =>
     "address": "127.0.0.1",
     "publicIp": "",
     "logLevel": "info",
-    "netVersion": "testnet",
+    "net": "testnet",
     "nethash": "3ab796cd",
     "api": {
         "access": {

@@ -1,10 +1,10 @@
 /**
- * RootRouter接口
+ * PeerBlockService 接口
  * wangxm   2019-01-16
  */
 import ip from "ip";
 
-class RootRouter {
+class PeerBlockService {
 
     constructor(context) {
         Object.assign(this, context);
@@ -31,7 +31,7 @@ class RootRouter {
                 await this.runtime.peer.changeState(ip.toLong(peerIp), parseInt(headers['port']), 0, 3600);
             }
 
-            return {succ: false, error: e};
+            return {success: false, error: e};
         }
 
         setImmediate(async () => {
@@ -45,7 +45,7 @@ class RootRouter {
             }
         });
 
-        return {succ: true}
+        return {success: true}
     }
 
     async get({query}) {
@@ -173,4 +173,4 @@ class RootRouter {
 
 }
 
-export default RootRouter;
+export default PeerBlockService;

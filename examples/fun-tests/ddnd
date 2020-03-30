@@ -62,7 +62,7 @@ function restart() {
 }
 
 function ismainnet(){
-  net=$(cat $PROG_DIR/config.json | grep netVersion | awk -F: '{print $2}' | cut -d \" -f2)
+  net=$(cat $PROG_DIR/config.json | grep net | awk -F: '{print $2}' | cut -d \" -f2)
   if [ i$net != i"mainnet" ] && [ i$net != i"testnet" ];then
     echo "Wrong net!"
     exit 2

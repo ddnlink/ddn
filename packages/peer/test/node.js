@@ -37,7 +37,7 @@ const peer = supertest(`${baseUrl}/peer`);
 const normalizer = 100000000; // Use this to convert DDN amount to normal value
 const blockTime = 10000; // Block time in miliseconds
 const blockTimePlus = 12000; // Block time + 2 seconds in miliseconds
-const version = '2.0.0'; // Node version
+const version = '2.0.0'; // peer version
 
 // Holds Fee amounts for different transaction types
 const Fees = {
@@ -192,7 +192,7 @@ function addPeers(numOfPeers, cb) {
   let i = 0;
   async.whilst(() => i < numOfPeers, next => {
     os = operatingSystems[randomizeSelection(operatingSystems.length)];
-    version = 'development';
+    version = '1.0.4'; // development ?
     port = ports[randomizeSelection(ports.length)];
 
     request({
@@ -384,7 +384,7 @@ function EIFY(fn, receiver) {
 }
 
 function beginEpochTime() {
-  return constants[config.netVersion].beginDate;
+  return constants[config.net].beginDate;
 }
 
 function getRealTime(epochTime) {

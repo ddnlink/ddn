@@ -3,10 +3,10 @@ const ed = require('ed25519');
 const Mnemonic = require('bitcore-mnemonic');
 
 /**
- * RootRouter接口
+ * AccountService 接口
  * wangxm   2019-03-22
  */
-class RootRouter {
+class AccountService {
 
     constructor(context) {
         Object.assign(this, context);
@@ -66,7 +66,7 @@ class RootRouter {
                 height: lastBlock.height + "",
                 timestamp: lastBlock.timestamp
             },
-            version: await this.runtime.peer.getVersion()
+            version: await this.runtime.peer.version()
         };
     }
 
@@ -338,10 +338,9 @@ class RootRouter {
               height: lastBlock.height + "",
               timestamp: lastBlock.timestamp
             },
-            version: await this.runtime.peer.getVersion()
+            version: await this.runtime.peer.version()
         };
     }
-
 }
 
-module.exports = RootRouter;
+module.exports = AccountService;

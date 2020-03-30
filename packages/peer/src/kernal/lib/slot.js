@@ -23,7 +23,7 @@ class Slot {
      * 返回区块链启动时间戳
      */
     getStartEpochTime() {
-        return constants[this.config.netVersion].beginDate;
+        return constants[this.config.net].beginDate;
     }
 
     /**

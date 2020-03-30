@@ -14,7 +14,7 @@ class RootRouter {
             nethash: this.config.nethash,
             tokenName: this.tokenSetting.tokenName,
             tokenPrefix: this.tokenSetting.tokenPrefix,
-            beginDate: this.tokenSetting[this.config.netVersion].beginDate
+            beginDate: this.tokenSetting[this.config.net].beginDate
         };
     }
 }

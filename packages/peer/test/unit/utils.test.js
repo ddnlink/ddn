@@ -13,7 +13,7 @@ import constants from "../../lib/constants";
 describe('Constants params', () => {
   it('test block reward', done => {
     const BlockStatus = require('../../lib/kernal/block/block-status.js');
-    global.config = {netVersion: 'testnet', settings: {delegateNumber: 101}};
+    global.config = {net: 'testnet', settings: {delegateNumber: 101}};
     let blockStatus = new BlockStatus(global);
     node.expect(blockStatus.calcMilestone(1)).to.equal("0");
     node.expect(blockStatus.calcMilestone(2999999)).to.equal("0");
@@ -39,7 +39,7 @@ describe('Constants params', () => {
     // node.expect(blockStatus.calcSupply(3000000)).to.equal(11499950500000000);
     // node.expect(blockStatus.calcSupply(3000003)).to.equal(11500000700000000);
 
-    global.config = {netVersion: 'mainnet'};
+    global.config = {net: 'mainnet'};
     blockStatus = new BlockStatus(global);
     node.expect(blockStatus.calcReward(0)).to.equal("0");
     node.expect(blockStatus.calcReward(1)).to.equal("0");

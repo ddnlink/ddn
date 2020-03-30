@@ -12,21 +12,21 @@ var packageFile = require('./package');
 var format = util.format;
 var buildTime = moment().format('HH:mm:ss DD/MM/YYYY');
 
-function build(osName, netVersion) {
-  var dir = packageFile.name + '-' + osName + '-' + packageFile.version + '-' + netVersion;
+function build(osName, net) {
+  var dir = packageFile.name + '-' + osName + '-' + packageFile.version + '-' + net;
   var fullpath = path.join(__dirname, 'build', dir);
 
   return webpack(require('./webpack.config.js')(fullpath), function(){
     gulp.src(path.join(fullpath, 'app.js'))
-    .pipe(replace('localnet', netVersion))
+    .pipe(replace('localnet', net))
     .pipe(replace('development', buildTime))
     .pipe(gulp.dest(fullpath))
-    .pipe(shell(getCmds(osName, netVersion)));
+    .pipe(shell(getCmds(osName, net)));
   })
 }
 
-function buildSource(netVersion) {
-  var dir = packageFile.name + '-' + 'linux' + '-' + packageFile.version + '-' + netVersion;
+function buildSource(net) {
+  var dir = packageFile.name + '-' + 'linux' + '-' + packageFile.version + '-' + net;
   var fullpath = path.join(__dirname, 'build', dir);
 
   return gulp.src('app.js')
@@ -45,23 +45,23 @@ function buildSource(netVersion) {
         // new UglifyJsPlugin()
       ]
     }))
-    .pipe(replace('localnet', netVersion))
+    .pipe(replace('localnet', net))
     .pipe(replace('development', buildTime))
     .pipe(gulp.dest(fullpath));
 }
 
-function getCmds(osName, netVersion) {
-  var dir = packageFile.name + '-' + osName + '-' + packageFile.version + '-' + netVersion;
+function getCmds(osName, net) {
+  var dir = packageFile.name + '-' + osName + '-' + packageFile.version + '-' + net;
   var fullpath = path.join(__dirname, 'build', dir);
 
   var result = [];
   result.push(format('cd %s && mkdir -p public dapps tmp logs bin config', fullpath));
   result.push(format('cp -r package.json ddnd init .ddnrc.js %s', fullpath));
-  if (netVersion != 'localnet') {
+  if (net != 'localnet') {
     if (osName == 'mac') {
-      result.push(format('sed -i "" "s/testnet/%s/g" %s/ddnd', netVersion, fullpath));
+      result.push(format('sed -i "" "s/testnet/%s/g" %s/ddnd', net, fullpath));
     } else {
-      result.push(format('sed -i "s/testnet/%s/g" %s/ddnd', netVersion, fullpath));
+      result.push(format('sed -i "s/testnet/%s/g" %s/ddnd', net, fullpath));
     }
 
     result.push(format('cp config/genesisBlock.json %s/config/', fullpath));

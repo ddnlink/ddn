@@ -22,7 +22,7 @@ class RoundChanges {
             this._roundRewards = (this.runtime.round._unRewardsByRound[round] || []);
         }
 
-        this._CLUB_BONUS_RATIO = constants[this.config.netVersion].rewardRatio;
+        this._CLUB_BONUS_RATIO = constants[this.config.net].rewardRatio;
     }
 
     at(index) {

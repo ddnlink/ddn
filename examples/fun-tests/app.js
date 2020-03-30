@@ -55,7 +55,7 @@ function genOptions() {
     configObject.version = packageFile.version;
     configObject.basedir = baseDir;
     configObject.buildVersion = 'development';
-    configObject.netVersion = process.env.NET_VERSION || 'testnet';
+    configObject.net = process.env.NET_VERSION || 'testnet';
     configObject.publicDir = path.join(baseDir, 'public');
     configObject.dappsDir = command.dapps || path.join(baseDir, 'dapps')
     if (command.port) {
