@@ -2,8 +2,9 @@
  * BlockStatus
  * wangxm   2018-01-09
  */
-import constants from '../../constants'
 import DdnUtils from '@ddn/utils'
+
+import constants from '../../constants'
 import Delegate from '../lib/delegate'
 
 var _singleton;

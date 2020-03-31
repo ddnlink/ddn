@@ -1,5 +1,5 @@
 var node = require("../node")
-var Tmdb = require('../../lib/helpers/tmdb.js')
+var Tmdb = require('../lib/helpers/tmdb.js')
 
 describe('tmdb', function () {
   it('normal test', function (done) {

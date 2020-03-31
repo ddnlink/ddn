@@ -9,10 +9,10 @@ import DdnUtil from '@ddn/utils';
 
 import node from "../node";
 import constants from "../../lib/constants";
+import BlockStatus from '../../lib/kernal/block/block-status';
 
 describe('Constants params', () => {
   it('test block reward', done => {
-    const BlockStatus = require('../../lib/kernal/block/block-status.js');
     global.config = {net: 'testnet', settings: {delegateNumber: 101}};
     let blockStatus = new BlockStatus(global);
     node.expect(blockStatus.calcMilestone(1)).to.equal("0");
@@ -73,25 +73,27 @@ describe('Constants params', () => {
     done();
   });
 
-  it('transaction sort should be stable', done => {
-    const sortBy = ({type, amount, id}, {type, amount, id}) => {
-      if (type != type) {
-        if (type == 1) {
+  it('transaction sort should be stable', function (done) {
+    const sortBy = function (a, b) {
+      if (a.type != b.type) {
+        if (a.type == 1) {
           return 1;
         }
-        if (type == 1) {
+        if (b.type == 1) {
           return -1;
         }
-        return type - type;
+        return a.type - b.type;
       }
-      if (amount != amount) {
-        return amount - amount;
+      if (a.amount != b.amount) {
+        return a.amount - b.amount;
       }
-      return id.localeCompare(id);
+      return a.id.localeCompare(b.id);
     };
+
     function randNumber (min, max) {
       return Math.floor(Math.random() * (max - min + 1)) + min;
     }
+
     function randomTrs () {
       const trs = [];
       for (let i = 0; i < 100; ++i) {
@@ -103,39 +105,43 @@ describe('Constants params', () => {
       }
       return trs;
     }
+
     function clone(a) {
       const b  = [];
-      for (const i in a) {
+      for (let i in a) {
         b.push(a[i]);
       }
       return b;
     }
+
     const trs = randomTrs();
     const trs1 = clone(trs);
     trs1.sort(sortBy);
+
     const trs2 = clone(trs1);
     trs2.sort(sortBy);
     node.expect(trs1).to.eql(trs2);
+
     trs2.sort(sortBy);
     node.expect(trs1).to.eql(trs2);
 
     const fs = require('fs');
     const path = require('path');
-    const trs21 = JSON.parse(fs.readFileSync(path.join(__dirname, './data/trs.21'), 'utf8'));
-    const trs21_1 = clone(trs21);
-    trs21_1.sort(sortBy);
+    const trs11 = JSON.parse(fs.readFileSync(path.join(__dirname, './data/trs.11'), 'utf8'));
+    const trs11_1 = clone(trs11);
+    trs11_1.sort(sortBy);
 
-    const trs21_2 = clone(trs21_1);
-    trs21_2.sort(sortBy);
-    node.expect(trs21_1).eql(trs21_2);
+    const trs11_2 = clone(trs11_1);
+    trs11_2.sort(sortBy);
+    node.expect(trs11_1).eql(trs11_2);
 
-    const trs7694 = JSON.parse(fs.readFileSync(path.join(__dirname, './data/trs.7694'), 'utf8'));
-    const trs7694_1 = clone(trs7694);
-    trs7694_1.sort(sortBy);
+    const trs10 = JSON.parse(fs.readFileSync(path.join(__dirname, './data/trs.10'), 'utf8'));
+    const trs10_1 = clone(trs10);
+    trs10_1.sort(sortBy);
 
-    const trs7694_2 = clone(trs7694_1);
-    trs7694_2.sort(sortBy);
-    node.expect(trs7694_1).eql(trs7694_2);
+    const trs10_2 = clone(trs10_1);
+    trs10_2.sort(sortBy);
+    node.expect(trs10_1).eql(trs10_2);
     done();
   });
 });

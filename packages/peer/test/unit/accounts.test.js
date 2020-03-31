@@ -1,7 +1,7 @@
 import Debug from 'debug';
 import node from "../node";
 
-const DEBUG = Debug('accounts');
+const debug = Debug('accounts');
 // Account info for password "ddntest"
 // New account does not have publickey in db
 const AccountTest = {
@@ -42,7 +42,7 @@ describe("POST /accounts/open", () => {
 describe("POST /accounts/open", () => {
     it(`Using valid passphrase: ${AccountTest.password}. Should be ok`, async () => {
         const res = await node.openAccountAsync({ secret: AccountTest.password });
-        // console.log(JSON.stringify(res.body));
+        debug("POST /accounts/open", JSON.stringify(res.body));
         node.expect(res.body).to.have.property("success").to.be.true;
         node.expect(res.body).to.have.property("account").that.is.an("object");
         node.expect(res.body.account.address).to.equal(AccountTest.address);

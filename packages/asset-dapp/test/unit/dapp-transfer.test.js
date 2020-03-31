@@ -133,7 +133,7 @@ describe('dapp transfer', () => {
         await node.onNewBlockAsync()
     })
 
-    it(`should be ok to transfer ${DAPP_CURRENCY} to an app`, async () => {
+    it(`should be ok to transfer ${DAPP_CURRENCY} to an app`, async (done) => {
         let account = node.genNormalAccount()
         await node.giveMoneyAndWaitAsync([account.address])
 
@@ -163,9 +163,10 @@ describe('dapp transfer', () => {
 
         let dappBalance = res.body.result.balance
         expect(dappBalance).to.equal(String(inTransferAmount))
+        done();
     })
 
-    it('should be ok to transfer assets to an app', async () => {
+    it('should be ok to transfer assets to an app', async (done) => {
         let account = node.genNormalAccount()
         await node.giveMoneyAndWaitAsync([account.address])
 
@@ -248,7 +249,8 @@ describe('dapp transfer', () => {
         DEBUG('get dapp balance response', res.body)
         expect(res.body).to.have.property('success').to.be.true
         let dappBalance = res.body.result.balance
-        expect(dappBalance).to.equal(String(transferOptions.amount))
+        expect(dappBalance).to.equal(String(transferOptions.amount));
+        done();
     })
 
     // it('should be failed to transfer from app to account with invalid params', async () => {
@@ -286,7 +288,7 @@ describe('dapp transfer', () => {
     //   expect(res.body).to.have.property('error').to.match(/^Valid signatures not enough/)
     // })
 
-    it(`should be ok to transfer ${DAPP_CURRENCY} from app to account`, async () => {
+    it(`should be ok to transfer ${DAPP_CURRENCY} from app to account`, async (done) => {
         const transaction = await createTransfer(delegateAccounts[0].address, "50000000", node.Gaccount.password);
 
         node.peer.post("/transactions")
@@ -342,6 +344,7 @@ describe('dapp transfer', () => {
         expect(res.body).to.have.property('success').to.be.true
         let recipientBalance = res.body.balance
         expect(String(recipientBalance)).to.equal(amount)
+        done();
     })
 
     // it('should be ok to transfer assets from app to account', async () => {

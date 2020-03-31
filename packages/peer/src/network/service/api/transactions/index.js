@@ -3,10 +3,10 @@ import ed from 'ed25519';
 import DdnUtils from '@ddn/utils';
 
 /**
- * RootRouter接口
+ * TransactionService 接口
  * wangxm   2019-03-21
  */
-class RootRouter {
+class TransactionService {
 
     constructor(context) {
         Object.assign(this, context);
@@ -71,8 +71,8 @@ class RootRouter {
                     minimum: 1,
                     maximum: 22
                 },
-                and:{
-                    type:"integer",
+                and: {
+                    type: "integer",
                     minimum: 0,
                     maximum: 1
                 }
@@ -108,8 +108,7 @@ class RootRouter {
         }
         if (query.ownerAddress && query.ownerPublicKey) {
             andWheres.push({
-                $or: [
-                    {
+                "$or": [{
                         "sender_public_key": query.ownerPublicKey
                     },
                     {
@@ -119,8 +118,7 @@ class RootRouter {
             });
         } else if (query.ownerAddress) {
             andWheres.push({
-                $or: [
-                    {
+                "$or": [{
                         "sender_id": query.ownerAddress
                     },
                     {
@@ -129,17 +127,15 @@ class RootRouter {
                 ]
             });
         }
-        if (query.type >= 0)
-        {
+        if (query.type >= 0) {
             andWheres.push({
                 "type": query.type
             });
-        }
-        else if (query.aob)
-        {
-            //wxm TODO 此处不应该有具体类型，资产类型是动态配置的，这种应该在对应的aob包里实现独立的接口
-            // fields_or.push('(type >=9 and type <= 14)')
-        }
+        } 
+        // else if (query.aob) {
+        //     //wxm TODO 此处不应该有具体类型，资产类型是动态配置的，这种应该在对应的aob包里实现独立的接口
+        //     // fields_or.push('(type >=9 and type <= 14)')
+        // }
         if (query.message) {
             andWheres.push({
                 "message": query.message
@@ -152,7 +148,7 @@ class RootRouter {
         const limit = query.limit || 100;
         const offset = query.offset || 0;
 
-        const data =  await this.runtime.dataquery.queryFullTransactionData(where, limit, offset, null, true);
+        const data = await this.runtime.dataquery.queryFullTransactionData(where, limit, offset, null, true);
 
         const transactions = [];
         for (let i = 0; i < data.transactions.length; i++) {
@@ -184,7 +180,9 @@ class RootRouter {
             throw new Error(validateErrors[0].message);
         }
 
-        const rows =  await this.runtime.dataquery.queryFullTransactionData({id: query.id}, 1, 0, null);
+        const rows = await this.runtime.dataquery.queryFullTransactionData({
+            id: query.id
+        }, 1, 0, null);
         if (rows && rows.length) {
             const result = [];
             for (let i = 0; i < rows.length; i++) {
@@ -254,12 +252,9 @@ class RootRouter {
         return new Promise((resolve, reject) => {
             this.balancesSequence.add(async (cb) => {
                 let recipient;
-                try
-                {
+                try {
                     recipient = await this.runtime.account.getAccountByAddress(body.recipientId);
-                }
-                catch (err)
-                {
+                } catch (err) {
                     return cb(err);
                 }
 
@@ -269,13 +264,10 @@ class RootRouter {
                 }
 
                 if (body.multisigAccountPublicKey && body.multisigAccountPublicKey != keypair.publicKey.toString('hex')) {
-                    var account;
-                    try
-                    {
+                    let account;
+                    try {
                         account = await this.runtime.account.getAccountByPublicKey(body.multisigAccountPublicKey);
-                    }
-                    catch (err)
-                    {
+                    } catch (err) {
                         return cb(err);
                     }
 
@@ -292,20 +284,17 @@ class RootRouter {
                     }
 
                     let requester;
-                    try
-                    {
+                    try {
                         requester = await this.runtime.account.getAccountByPublicKey(keypair.publicKey);
-                    }
-                    catch (err)
-                    {
+                    } catch (err) {
                         return cb(err);
                     }
 
-                    if (!requester || !requester.public_key) {  //wxm block database
+                    if (!requester || !requester.public_key) { //wxm block database
                         return cb("Invalid requester");
                     }
 
-                    if (requester.second_signature && !DdnUtils.bignum.isEqualTo(requester.second_signature, 0) && !body.secondSecret) {  //wxm block database
+                    if (requester.second_signature && !DdnUtils.bignum.isEqualTo(requester.second_signature, 0) && !body.secondSecret) { //wxm block database
                         return cb("Invalid second passphrase");
                     }
 
@@ -314,14 +303,13 @@ class RootRouter {
                     }
 
                     let second_keypair = null;
-                    if (requester.second_signature && !DdnUtils.bignum.isEqualTo(requester.second_signature, 0)) {    //wxm block database
-                        var secondHash = crypto.createHash('sha256').update(body.secondSecret, 'utf8').digest();
+                    if (requester.second_signature && !DdnUtils.bignum.isEqualTo(requester.second_signature, 0)) { //wxm block database
+                        const secondHash = crypto.createHash('sha256').update(body.secondSecret, 'utf8').digest();
                         second_keypair = ed.MakeKeypair(secondHash);
                     }
 
-                    try
-                    {
-                        var transaction = await this.runtime.transaction.create({
+                    try {
+                        const transaction = await this.runtime.transaction.create({
                             type: DdnUtils.assetTypes.TRANSFER,
                             amount: body.amount,
                             sender: account,
@@ -331,23 +319,18 @@ class RootRouter {
                             second_keypair,
                             message: body.message
                         });
-                        var transactions = await this.runtime.transaction.receiveTransactions([transaction]);
+                        const transactions = await this.runtime.transaction.receiveTransactions([transaction]);
                         cb(null, transactions);
-                    }
-                    catch (err)
-                    {
+                    } catch (err) {
                         cb(err);
                     }
                 } else {
                     this.logger.debug('publicKey is: ', keypair.publicKey.toString('hex'));
 
-                    var account;
-                    try
-                    {
+                    let account;
+                    try {
                         account = await this.runtime.account.getAccountByPublicKey(keypair.publicKey.toString('hex'));
-                    }
-                    catch (err)
-                    {
+                    } catch (err) {
                         return cb(err);
                     }
                     if (!account) {
@@ -364,9 +347,8 @@ class RootRouter {
                         second_keypair = ed.MakeKeypair(secondHash);
                     }
 
-                    try
-                    {
-                        var transaction = await this.runtime.transaction.create({
+                    try {
+                        const transaction = await this.runtime.transaction.create({
                             type: DdnUtils.assetTypes.TRANSFER,
                             amount: body.amount,
                             sender: account,
@@ -375,11 +357,9 @@ class RootRouter {
                             second_keypair,
                             message: body.message
                         });
-                        var transactions = await this.runtime.transaction.receiveTransactions([transaction]);
+                        const transactions = await this.runtime.transaction.receiveTransactions([transaction]);
                         cb(null, transactions);
-                    }
-                    catch (err)
-                    {
+                    } catch (err) {
                         cb(err);
                     }
                 }
@@ -387,7 +367,10 @@ class RootRouter {
                 if (err) {
                     reject(err);
                 } else {
-                    resolve({success: true, transactionId: transaction[0].id});
+                    resolve({
+                        success: true,
+                        transactionId: transaction[0].id
+                    });
                 }
             });
         });
@@ -401,81 +384,81 @@ class RootRouter {
      * 返回值:{ "success": true,"data": [{ "time": "2019-6-4", "count": 0 }]}
      */
     async getSpell(req) {
-      const query = req.query;
-      // 将时间换算成对应格式
-      const formatDate = (date) => {
-        const y = date.getFullYear();
-        let m = date.getMonth() + 1;
-        m = m < 10 ? (`0${m}`) : m;
-        let d = date.getDate();
-        d = d < 10 ? (`0${d}`) : d;
-        return `${y}-${m}-${d}`;
-      }
-      if (!query.startTime) {
-        query.startTime = formatDate(new Date(new Date().getTime() - (1000 * 60 * 60 * 24 * 7)));
-      }
-      if (!query.endTime) {
-        query.endTime = formatDate(new Date());
-      }
-      // 根据日期字符串得到对应日期的0点的毫秒数
-      const getDate = (str) => {
-        str = str.toString();
-        const strArr = str.split('-');
-        const date = new Date(strArr[0], strArr[1] - 1, strArr[2]);
-        return date;
-      }
-      // 获取入参字符串形式日期的Date型日期
-      const d1 = getDate(query.startTime);
-      const d2 = getDate(query.endTime);
-      // 定义一天的毫秒数
-      const dayMilliSeconds = 1000 * 60 * 60 * 24;
-      // 获取输入日期的毫秒数
-      let d1Ms = d1.getTime();
-      const d2Ms = d2.getTime();
-      // 定义转换格式的方法
-      const getYMD = (date) => {
-        let retDate = `${date.getFullYear()}-`; // 获取年份。
-        retDate += `${date.getMonth() + 1}-`; // 获取月份。
-        retDate += date.getDate(); // 获取日。
-        return retDate; // 返回日期。
-      }
-      // 定义返回值
-      let time;
-      const dataArr = [];
-      // 对日期毫秒数进行循环比较，直到d1Ms 大于等于 d2Ms 时退出循环
-      // 每次循环结束，给d1Ms 增加一天
-      for (d1Ms; d1Ms <= d2Ms; d1Ms += dayMilliSeconds) {
-        // 将给的毫秒数转换为Date日期
-        const day = new Date(d1Ms);
-        // 获取其年月日形式的字符串
-        time = getYMD(day);
-        // 查询当日交易量
-        const count = await new Promise((resolve, reject)=>{
-            this.dao.count('tr', {
-                timestamp: {
-                    $gte: Number(this.runtime.slot.getTime(d1Ms)),
-                    $lt: Number(this.runtime.slot.getTime(d1Ms + dayMilliSeconds - 1))
-                }
-            }, null, (err, data) => {
-                if(err){
-                    reject(err);
-                }
-                resolve(data);
+        const query = req.query;
+        // 将时间换算成对应格式
+        const formatDate = (date) => {
+            const y = date.getFullYear();
+            let m = date.getMonth() + 1;
+            m = m < 10 ? (`0${m}`) : m;
+            let d = date.getDate();
+            d = d < 10 ? (`0${d}`) : d;
+            return `${y}-${m}-${d}`;
+        }
+        if (!query.startTime) {
+            query.startTime = formatDate(new Date(new Date().getTime() - (1000 * 60 * 60 * 24 * 7)));
+        }
+        if (!query.endTime) {
+            query.endTime = formatDate(new Date());
+        }
+        // 根据日期字符串得到对应日期的0点的毫秒数
+        const getDate = (str) => {
+            str = str.toString();
+            const strArr = str.split('-');
+            const date = new Date(strArr[0], strArr[1] - 1, strArr[2]);
+            return date;
+        }
+        // 获取入参字符串形式日期的Date型日期
+        const d1 = getDate(query.startTime);
+        const d2 = getDate(query.endTime);
+        // 定义一天的毫秒数
+        const dayMilliSeconds = 1000 * 60 * 60 * 24;
+        // 获取输入日期的毫秒数
+        let d1Ms = d1.getTime();
+        const d2Ms = d2.getTime();
+        // 定义转换格式的方法
+        const getYMD = (date) => {
+            let retDate = `${date.getFullYear()}-`; // 获取年份。
+            retDate += `${date.getMonth() + 1}-`; // 获取月份。
+            retDate += date.getDate(); // 获取日。
+            return retDate; // 返回日期。
+        }
+        // 定义返回值
+        let time;
+        const dataArr = [];
+        // 对日期毫秒数进行循环比较，直到d1Ms 大于等于 d2Ms 时退出循环
+        // 每次循环结束，给d1Ms 增加一天
+        for (d1Ms; d1Ms <= d2Ms; d1Ms += dayMilliSeconds) {
+            // 将给的毫秒数转换为Date日期
+            const day = new Date(d1Ms);
+            // 获取其年月日形式的字符串
+            time = getYMD(day);
+            // 查询当日交易量
+            const count = await new Promise((resolve, reject) => {
+                this.dao.count('tr', {
+                    timestamp: {
+                        $gte: Number(this.runtime.slot.getTime(d1Ms)),
+                        $lt: Number(this.runtime.slot.getTime(d1Ms + dayMilliSeconds - 1))
+                    }
+                }, null, (err, data) => {
+                    if (err) {
+                        reject(err);
+                    }
+                    resolve(data);
+                })
             })
-        })
-        const obj = {
-          time,
-          count,
+            const obj = {
+                time,
+                count,
+            };
+            dataArr.push(obj);
+        }
+        return {
+            success: true,
+            data: dataArr,
         };
-        dataArr.push(obj);
-      }
-      return {
-        success: true,
-        data: dataArr,
-      };
 
     }
 
 }
 
-export default RootRouter;
+export default TransactionService;

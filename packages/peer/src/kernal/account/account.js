@@ -3,7 +3,7 @@
  * wangxm   2018-12-27
  */
 import bluebird from 'bluebird';
-import DdnUtils from '@ddn/utils'; 
+import DdnUtils from '@ddn/utils';
 
 let _singleton;
 
@@ -55,9 +55,9 @@ class Account {
 
         this._editable = [
             "is_delegate", //wxm block database
-            "u_is_delegate",   //wxm block database
-            "second_signature",    //wxm block database
-            "u_second_signature",  //wxm block database
+            "u_is_delegate", //wxm block database
+            "second_signature", //wxm block database
+            "u_second_signature", //wxm block database
             "balance",
             "u_balance",
             "vote",
@@ -70,7 +70,7 @@ class Account {
             "u_multimin",
             "multilifetime",
             "u_multilifetime",
-            "block_id",    //wxm block database
+            "block_id", //wxm block database
             "nameexist",
             "u_nameexist",
             "producedblocks",
@@ -111,17 +111,17 @@ class Account {
      * @param {*} dbTrans
      */
     async setAccount(data, dbTrans) {
-		let address = data.address || null;
-		if (address === null) {
-			if (data.public_key) {  //wxm block database
-				address = this.generateAddressByPublicKey(data.public_key);  //wxm block database
-				delete data.isGenesis;
-			} else {
+        let address = data.address || null;
+        if (address === null) {
+            if (data.public_key) { //wxm block database
+                address = this.generateAddressByPublicKey(data.public_key); //wxm block database
+                delete data.isGenesis;
+            } else {
                 this.logger.debug('setAccount error and data is:', data);
                 throw new Error("Missing address or public key in setAccount");
-			}
-		}
-		if (!address) {
+            }
+        }
+        if (!address) {
             throw new Error("Invalid public key");
         }
         data.address = address;
@@ -138,12 +138,16 @@ class Account {
     }
 
     async getAccountByAddress(address) {
-        return await this.getAccount({address});
+        return await this.getAccount({
+            address
+        });
     }
 
     async getAccountByPublicKey(publicKey) {
         const address = this.generateAddressByPublicKey(publicKey);
-        const result = await this.getAccount({address});
+        const result = await this.getAccount({
+            address
+        });
         if (result && !result.public_key) {
             result.public_key = publicKey;
         }
@@ -191,7 +195,7 @@ class Account {
         }
         delete filter.sort;
 
-        if (typeof(filter.address) == "string" && !this.isAddress(filter.address)) {
+        if (typeof (filter.address) == "string" && !this.isAddress(filter.address)) {
             throw new Error('Invalid address getAccount');
         }
 
@@ -210,18 +214,27 @@ class Account {
                         reslove(data)
                     })
                 })
-                const mem_account_ids = mem_accounts.map(({ address }) => address)
-                let delegates = [], u_delegates = [], multisignatures = [], u_multisignatures = []
+                const mem_account_ids = mem_accounts.map(({
+                    address
+                }) => address)
+                let delegates = [],
+                    u_delegates = [],
+                    multisignatures = [],
+                    u_multisignatures = []
                 if (mem_account_ids.length > 0) {
                     delegates = await new Promise((reslove, reject) => {
                         this.dao.findListByGroup('mem_accounts2delegate', {
-                        account_id: { $in: mem_account_ids }   //wxm block database
+                            account_id: {
+                                $in: mem_account_ids
+                            } //wxm block database
                         }, {
                             limit: mem_account_ids.length,
                             offset: 0,
                             group: ['account_id'],
-                            attributes: [[this.dao.db_fnGroupConcat('dependent_id') , 'delegates'], 'account_id']
-                        }, (err, data) => {//wxm block database library.dao.db_fn('group_concat', library.dao.db_col('dependentId'))
+                            attributes: [
+                                [this.dao.db_fnGroupConcat('dependent_id'), 'delegates'], 'account_id'
+                            ]
+                        }, (err, data) => { //wxm block database library.dao.db_fn('group_concat', library.dao.db_col('dependentId'))
                             if (err) {
                                 return reject(err);
                             }
@@ -230,14 +243,16 @@ class Account {
                     })
                     u_delegates = await new Promise((reslove, reject) => {
                         this.dao.findListByGroup('mem_accounts2u_delegate', {
-                            account_id: {    //wxm block database
+                            account_id: { //wxm block database
                                 $in: mem_account_ids
                             }
                         }, {
                             limit: mem_account_ids.length,
                             offset: 0,
                             group: ['account_id'],
-                            attributes: [[this.dao.db_fnGroupConcat('dependent_id'), 'u_delegates'], 'account_id']    //wxm block database library.dao.db_fn('group_concat', library.dao.db_col('dependentId'))
+                            attributes: [
+                                [this.dao.db_fnGroupConcat('dependent_id'), 'u_delegates'], 'account_id'
+                            ] //wxm block database library.dao.db_fn('group_concat', library.dao.db_col('dependentId'))
                         }, (err, data) => {
                             if (err) {
                                 return reject(err);
@@ -247,7 +262,7 @@ class Account {
                     })
                     multisignatures = await new Promise((reslove, reject) => {
                         this.dao.findListByGroup('mem_accounts2multisignature', {
-                            account_id: {    //wxm block database
+                            account_id: { //wxm block database
                                 $in: mem_account_ids
                             }
                         }, {
@@ -255,8 +270,9 @@ class Account {
                             offset: 0,
                             group: ['account_id'],
                             attributes: [
-                                [this.dao.db_fnGroupConcat('dependent_id'), 'multisignatures'], 'account_id'    //wxm block database library.dao.db_fn('group_concat', library.dao.db_col('dependentId'))
-                        ]}, (err, data) => {
+                                [this.dao.db_fnGroupConcat('dependent_id'), 'multisignatures'], 'account_id' //wxm block database library.dao.db_fn('group_concat', library.dao.db_col('dependentId'))
+                            ]
+                        }, (err, data) => {
                             if (err) {
                                 return reject(err);
                             }
@@ -265,7 +281,7 @@ class Account {
                     })
                     u_multisignatures = await new Promise((reslove, reject) => {
                         this.dao.findListByGroup('mem_accounts2u_multisignature', {
-                            account_id: {    //wxm block database
+                            account_id: { //wxm block database
                                 $in: mem_account_ids
                             }
                         }, {
@@ -273,8 +289,9 @@ class Account {
                             offset: 0,
                             group: ['account_id'],
                             attributes: [
-                                [this.dao.db_fnGroupConcat('dependent_id'), 'u_multisignatures'], 'account_id'   //wxm block database library.dao.db_fn('group_concat', library.dao.db_col('dependentId'))
-                        ]}, (err, data) => {
+                                [this.dao.db_fnGroupConcat('dependent_id'), 'u_multisignatures'], 'account_id' //wxm block database library.dao.db_fn('group_concat', library.dao.db_col('dependentId'))
+                            ]
+                        }, (err, data) => {
                             if (err) {
                                 return reject(err);
                             }
@@ -285,21 +302,21 @@ class Account {
 
                 mem_accounts = mem_accounts.map((mem_account) => {
                     const delegates_item = delegates.find(({
-                        account_id,    //wxm block database
+                        account_id, //wxm block database
                         delegates
-                    }) => account_id === mem_account.address && delegates)  //wxm block database
+                    }) => account_id === mem_account.address && delegates) //wxm block database
                     const u_delegates_item = u_delegates.find(({
-                        account_id,    //wxm block database
+                        account_id, //wxm block database
                         u_delegates
-                    }) => account_id === mem_account.address && u_delegates)    //wxm block database
+                    }) => account_id === mem_account.address && u_delegates) //wxm block database
                     const multisignatures_item = multisignatures.find(({
-                        account_id,    //wxm block database
+                        account_id, //wxm block database
                         multisignatures
-                    }) => account_id === mem_account.address && multisignatures)    //wxm block database
+                    }) => account_id === mem_account.address && multisignatures) //wxm block database
                     const u_multisignatures_item = u_multisignatures.find(({
-                        account_id,    //wxm block database
+                        account_id, //wxm block database
                         u_multisignatures
-                    }) => account_id === mem_account.address && u_multisignatures)  //wxm block database
+                    }) => account_id === mem_account.address && u_multisignatures) //wxm block database
 
                     const result2 = Object.assign({}, mem_account, {
                         delegates: delegates_item ? delegates_item.delegates.split(',') : [],
@@ -318,15 +335,12 @@ class Account {
     }
 
     async cacheAllAccountBalances() {
-        var getAccountList = async (limit, offset) => {
+        const getAccountList = async (limit, offset) => {
             return new Promise((resolve, reject) => {
                 this.dao.findPage('mem_account', null, limit, offset, false, ['address', 'balance'], null, (err, result) => {
-                    if (err)
-                    {
+                    if (err) {
                         reject(`Failed to load native balances: ${err}`);
-                    }
-                    else
-                    {
+                    } else {
                         resolve(result);
                     }
                 });
@@ -336,26 +350,23 @@ class Account {
         var pageSize = 5000;
         var pageIndex = 0;
 
-        while (true)
-        {
-            var list = await getAccountList(pageSize, pageIndex * pageSize);
+        while (true) {
+            const list = await getAccountList(pageSize, pageIndex * pageSize);
 
-            if (list && list.length > 0)
-            {
-                for (var i = 0; i < list.length; i++)
-                {
-                    let { address, balance } = list[i];
+            if (list && list.length > 0) {
+                for (let i = 0; i < list.length; i++) {
+                    let {
+                        address,
+                        balance
+                    } = list[i];
                     this.balanceCache.setNativeBalance(address, balance);
                 }
                 this.balanceCache.commit();
 
-                if (list.length < pageSize)
-                {
+                if (list.length < pageSize) {
                     break;
                 }
-            }
-            else
-            {
+            } else {
                 break;
             }
         }
@@ -363,7 +374,7 @@ class Account {
 
     //重建账户和余额信息（根据已有区块信息）
     async repairAccounts(count, verify) {
-        if (typeof(count) == "undefined") {
+        if (typeof (count) == "undefined") {
             count = await this.runtime.block.getCount();
         }
 
@@ -410,10 +421,8 @@ class Account {
                                                 this.logger.error('loadBlocksOffset', err5);
 
                                                 //wxm TODO 此处的block属性不知道哪里赋值的，待确认
-                                                if (err5 && err5.block)
-                                                {
-                                                    try
-                                                    {
+                                                if (err5 && err5.block) {
+                                                    try {
                                                         this.logger.error('Blockchain failed at ', err5.block.height);
 
                                                         await this.runtime.block.simpleDeleteAfterBlock(err5.block.height);
@@ -423,14 +432,10 @@ class Account {
                                                         await this.cacheAllAccountBalances();
 
                                                         resolve();
-                                                    }
-                                                    catch (err6)
-                                                    {
+                                                    } catch (err6) {
                                                         reject(err6);
                                                     }
-                                                }
-                                                else
-                                                {
+                                                } else {
                                                     reject(err5);
                                                 }
                                             }
@@ -449,8 +454,8 @@ class Account {
     async checkAccounts(count) {
         return new Promise((resolve, reject) => {
             this.dao.update('mem_account', {
-                u_is_delegate: this.dao.db_str("is_delegate"),//wxm block database
-                u_second_signature: this.dao.db_str("second_signature"),//wxm block database
+                u_is_delegate: this.dao.db_str("is_delegate"), //wxm block database
+                u_second_signature: this.dao.db_str("second_signature"), //wxm block database
                 u_username: this.dao.db_str("username"),
                 u_balance: this.dao.db_str("balance"),
                 u_delegates: this.dao.db_str("delegates"),
@@ -460,18 +465,15 @@ class Account {
                     this.logger.error(err);
                     this.logger.info("Failed to verify db integrity 1");
 
-                    try
-                    {
+                    try {
                         await this.repairAccounts(count, true);
                         resolve();
-                    }
-                    catch (e)
-                    {
+                    } catch (e) {
                         return reject(e);
                     }
                 } else {
                     this.dao.count('mem_account', {
-                        block_id: {  //wxm block database
+                        block_id: { //wxm block database
                             "$eq": null
                         }
                     }, async (err2, count2) => {
@@ -479,66 +481,51 @@ class Account {
                             this.logger.error(err || "Encountered missing block, looks like node went down during block processing");
                             this.logger.info("Failed to verify db integrity 2");
 
-                            try
-                            {
+                            try {
                                 await this.repairAccounts(count, true);
                                 resolve();
-                            }
-                            catch (e)
-                            {
+                            } catch (e) {
                                 return reject(e);
                             }
                         } else {
                             this.dao.count('mem_account', {
-                                is_delegate: 1   //wxm block database
+                                is_delegate: 1 //wxm block database
                             }, async (err3, count3) => {
                                 if (err3 || count3 == 0) {
                                     this.logger.error(err || "No delegates, reload database");
                                     this.logger.info("Failed to verify db integrity 3");
 
-                                    try
-                                    {
+                                    try {
                                         await this.repairAccounts(count, true);
                                         resolve();
-                                    }
-                                    catch(e)
-                                    {
+                                    } catch (e) {
                                         return reject(e);
                                     }
                                 } else {
-                                    var errCatched = false;
+                                    let errCatched = false;
 
-                                    try
-                                    {
+                                    try {
                                         let verify = this.config.loading.verifyOnLoading;
                                         await this.runtime.block.loadBlocksOffset(1, count, verify);
-                                    }
-                                    catch (err4)
-                                    {
+                                    } catch (err4) {
                                         errCatched = true;
 
                                         this.logger.error(err || "Unable to load last block");
                                         this.logger.info("Failed to verify db integrity 4");
 
-                                        try
-                                        {
+                                        try {
                                             await this.repairAccounts(count, true);
-                                        }
-                                        catch(e)
-                                        {
+                                        } catch (e) {
                                             return reject(e);
                                         }
                                     }
 
                                     if (!errCatched) {
-                                        try
-                                        {
+                                        try {
                                             //wxm TODO  此处旧代码是直接cacheAllAccountBalances，但是如果block区块内容改动过，是不会发现的，感觉还是应该repaireAccounts，但是repaireAccounts每次重启会重新遍历区块数据，数据太大会导致启动消耗很多时间
                                             // await this.repairAccounts(count, true);
                                             await this.cacheAllAccountBalances();
-                                        }
-                                        catch(e)
-                                        {
+                                        } catch (e) {
                                             return reject(e);
                                         }
 
@@ -556,15 +543,14 @@ class Account {
     }
 
     async merge(address, diff, dbTrans) {
-        var update = {};
-        var remove = {};
-        var insert = {};
-        var insert_object = {};
-        var remove_object = {};
-        var round = [];
+        const update = {};
+        const remove = {};
+        const insert = {};
+        const insert_object = {};
+        const remove_object = {};
 
         if (!address && diff.public_key) {
-            address = this.generateAddressByPublicKey(diff.public_key);   //wxm block database
+            address = this.generateAddressByPublicKey(diff.public_key); //wxm block database
         }
 
         if (diff['balance']) {
@@ -600,7 +586,7 @@ class Account {
                             if (!DdnUtils.bignum.isZero(trueValue) && value == "balance") {
                                 const mem_accounts2delegate = await new Promise((resolve, reject) => {
                                     this.dao.findOne('mem_accounts2delegate', {
-                                        account_id: address    //wxm block database
+                                        account_id: address //wxm block database
                                     }, null, dbTrans, (err, data) => {
                                         if (err) {
                                             return reject(err)
@@ -614,8 +600,8 @@ class Account {
                                         this.dao.insert('mem_round', {
                                             address: address,
                                             amount: trueValue.toString(),
-                                            delegate: mem_accounts2delegate.dependent_id,    //wxm block database
-                                            block_id: diff.block_id,  //wxm block database
+                                            delegate: mem_accounts2delegate.dependent_id, //wxm block database
+                                            block_id: diff.block_id, //wxm block database
                                             round: diff.round.toString(),
                                         }, dbTrans, (err) => {
                                             if (err) {
@@ -630,8 +616,8 @@ class Account {
                             break;
                         case Array:
                             if (Object.prototype.toString.call(trueValue[0]) == "[object Object]") {
-                                for (var i = 0; i < trueValue.length; i++) {
-                                    var val = trueValue[i];
+                                for (let i = 0; i < trueValue.length; i++) {
+                                    const val = trueValue[i];
                                     if (val.action == "-") {
                                         delete val.action;
                                         remove_object[value] = remove_object[value] || [];
@@ -647,9 +633,9 @@ class Account {
                                     }
                                 }
                             } else {
-                                for (var i = 0; i < trueValue.length; i++) {
-                                    var math = trueValue[i][0];
-                                    var val = null;
+                                for (let i = 0; i < trueValue.length; i++) {
+                                    const math = trueValue[i][0];
+                                    let val = null;
                                     if (math == "-") {
                                         val = trueValue[i].slice(1);
                                         remove[value] = remove[value] || [];
@@ -664,7 +650,7 @@ class Account {
                                         insert[value].push(val)
                                     }
                                     if (value == "delegates") {
-                                        var balanceField = 'balance';
+                                        const balanceField = 'balance';
                                         // if (math == '-') {
                                         //   balanceField = '-balance';
                                         // }
@@ -680,20 +666,12 @@ class Account {
                                         })
 
                                         if (mem_account) {
-                                            var a = {
-                                                address: address,
-                                                amount: math + mem_account[balanceField].toString(),
-                                                delegate: val,
-                                                block_id: diff.block_id,    //wxm block database
-                                                round: diff.round.toString(),
-                                            };
-
                                             await new Promise((resolve, reject) => {
                                                 this.dao.insert('mem_round', {
                                                     address: address,
                                                     amount: math + mem_account[balanceField].toString(),
                                                     delegate: val,
-                                                    block_id: diff.block_id,    //wxm block database
+                                                    block_id: diff.block_id, //wxm block database
                                                     round: diff.round.toString(),
                                                 }, dbTrans, (err) => {
                                                     if (err) {
@@ -706,7 +684,6 @@ class Account {
                                     }
                                 }
                             }
-
                             break;
                     }
                 })
@@ -715,10 +692,10 @@ class Account {
                 await bluebird.each(removeKeys, async (el) => {
                     await new Promise((resolve, reject) => {
                         this.dao.remove("mem_accounts2" + el.substring(0, el.length - 1), {
-                            dependent_id: {  //wxm block database
-                                $in: remove[el]
+                            dependent_id: { //wxm block database
+                                "$in": remove[el]
                             },
-                            account_id: address  //wxm block database
+                            account_id: address //wxm block database
                         }, dbTrans, (err) => {
                             if (err) {
                                 return reject(err)
@@ -733,8 +710,8 @@ class Account {
                     await bluebird.each(insert[el], async (_, i) => {
                         await new Promise((resolve, reject) => {
                             this.dao.insert("mem_accounts2" + el.substring(0, el.length - 1), {
-                                account_id: address,   //wxm block database
-                                dependent_id: insert[el][i]    //wxm block database
+                                account_id: address, //wxm block database
+                                dependent_id: insert[el][i] //wxm block database
                             }, dbTrans, (err) => {
                                 if (err) {
                                     return reject(err)

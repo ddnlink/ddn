@@ -17,7 +17,11 @@ module.exports = {
   logLevel: "error",
   net: "testnet",
   nethash: "0ab796cd",
-  payloadLimitSize: "8m",
+  payloadLimitSize: "8mb",
+
+  /**
+   * About Api
+   */
   api: {
     access: {
       whiteList: []

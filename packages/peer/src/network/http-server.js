@@ -97,20 +97,17 @@ class HttpServer {
     }
 
     /**
-     * 配合 errorHandler 拦截错误
+     * 错误处理
+     * 拦截全部使用 next(err) 的错误信息。
      */
     _addErrorHandleMiddleware() {
         this._app.use((err, req, res, next) => {
-
-            // if (err) {
-                res.status(200);
-                res.json({
-                    success: false,
-                    error: err.message
-                });
-                res.end()
-            // }
-            // next(err);
+            res.status(200);
+            res.json({
+                success: false,
+                error: err.message,
+                raw: err,
+            });
         });
     }
 

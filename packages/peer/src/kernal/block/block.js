@@ -149,7 +149,7 @@ class Block {
             }
         }
 
-        var validateErrors = await this.ddnSchema.validateBlock(block);
+        const validateErrors = await this.ddnSchema.validateBlock(block);
         if (validateErrors) {
             this.logger.error(validateErrors[0].message);
             throw new Error(validateErrors[0].message);
@@ -171,7 +171,7 @@ class Block {
      * 处理创世区块
      */
     async handleGenesisBlock() {
-        var genesisblock = this.genesisblock;
+        const genesisblock = this.genesisblock;
         return new Promise((resolve, reject) => {
             this.dao.findOneByPrimaryKey("block", genesisblock.id, null, (err, row) => {
                 if (err) {
@@ -206,7 +206,7 @@ class Block {
      * 序列化区块数据到数据库（仅仅是区块数据本身一条数据记录，不处理其中的交易数据）
      */
     async serializeBlock2Db(block, dbTrans) {
-        var newBlock = {
+        const newBlock = {
             id: block.id,
             height: block.height,
             timestamp: block.timestamp,
@@ -273,8 +273,8 @@ class Block {
         await this.serializeBlock2Db(block, dbTrans);
 
         if (block.transactions && block.transactions.length > 0) {
-            for (var i = 0; i < block.transactions.length; i++) {
-                var transaction = block.transactions[i];
+            for (let i = 0; i < block.transactions.length; i++) {
+                const transaction = block.transactions[i];
                 transaction.block_id = block.id;
                 transaction.block_height = block.height;
 
@@ -395,16 +395,16 @@ class Block {
         }
 
         this.sequence.add(async (cb) => {
-            var totalVotes = this.runtime.consensus.addPendingVotes(votes);
+            const totalVotes = this.runtime.consensus.addPendingVotes(votes);
             if (totalVotes && totalVotes.signatures) {
                 this.logger.debug(`receive new votes, total votes number ${totalVotes.signatures.length}`);
             }
 
             if (this.runtime.consensus.hasEnoughVotes(totalVotes)) {
-                var block = this.runtime.consensus.getPendingBlock();
+                const block = this.runtime.consensus.getPendingBlock();
 
-                var height = block.height;
-                var id = block.id;
+                const height = block.height;
+                const id = block.id;
 
                 try {
                     await this.processBlock(block, totalVotes, true, true, false);
@@ -471,13 +471,13 @@ class Block {
                     await this.runtime.delegate.validateProposeSlot(propose);
                     this.runtime.consensus.acceptPropose(propose);
 
-                    var activeKeypairs = await this.runtime.delegate.getActiveDelegateKeypairs(propose.height);
+                    const activeKeypairs = await this.runtime.delegate.getActiveDelegateKeypairs(propose.height);
                     if (activeKeypairs && activeKeypairs.length > 0) {
-                        var votes = this.runtime.consensus.createVotes(activeKeypairs, propose);
+                        const votes = this.runtime.consensus.createVotes(activeKeypairs, propose);
 
                         this.logger.debug(`send votes height ${votes.height} id ${votes.id} sigatures ${votes.signatures.length}`);
 
-                        var replyData = {
+                        const replyData = {
                             api: "/votes",
                             method: "POST",
                             data: votes,
@@ -489,11 +489,11 @@ class Block {
                             }
                         };
 
-                        var from = propose.address;
-                        var pos = from.indexOf(":");
+                        const from = propose.address;
+                        const pos = from.indexOf(":");
                         if (pos >= 0) {
-                            var fromIp = from.substring(0, pos);
-                            var fromPort = from.substring(pos + 1);
+                            const fromIp = from.substring(0, pos);
+                            const fromPort = from.substring(pos + 1);
                             replyData.peer.ip = ip.toLong(fromIp);
                             replyData.peer.port = parseInt(fromPort);
                         } else {
@@ -629,7 +629,7 @@ class Block {
 
         return new Promise((resolve, reject) => {
             this.balancesSequence.add(async (cb) => {
-                var unconfirmedTrs = await this.runtime.transaction.getUnconfirmedTransactionList(true);
+                const unconfirmedTrs = await this.runtime.transaction.getUnconfirmedTransactionList(true);
 
                 try {
                     await this.runtime.transaction.undoUnconfirmedList();
@@ -649,8 +649,8 @@ class Block {
                 const redoTrs = unconfirmedTrs.filter((item) => {
                     if (!applyedTrsIdSet.has(item.id)) {
                         if (item.type == assetTypes.MULTISIGNATURE) {
-                            var curTime = this.runtime.slot.getTime(); // (new Date()).getTime();
-                            var pasttime = Math.ceil((curTime - item.timestamp) / this.config.settings.blockIntervalTime);
+                            const curTime = this.runtime.slot.getTime(); // (new Date()).getTime();
+                            const pasttime = Math.ceil((curTime - item.timestamp) / this.config.settings.blockIntervalTime);
 
                             if (pasttime >= item.asset.multisignature.lifetime) {
                                 return false;
@@ -769,9 +769,9 @@ class Block {
 
         for (const i in block.transactions) {
             const transaction = block.transactions[i];
-
+            let bytes;
             try {
-                var bytes = await this.runtime.transaction.getBytes(transaction);
+                bytes = await this.runtime.transaction.getBytes(transaction);
             } catch (e) {
                 throw new Error(`Failed to get transaction bytes: ${e.toString()}`);
             }
@@ -814,8 +814,9 @@ class Block {
     }
 
     async verifyBlockVotes(block, votes) {
+        let delegatesList;
         try {
-            var delegatesList = await this.runtime.delegate.getDisorderDelegatePublicKeys(block.height);
+            delegatesList = await this.runtime.delegate.getDisorderDelegatePublicKeys(block.height);
         } catch (err) {
             this.logger.error("Failed to get delegate list while verifying block votes");
             process.exit(-1);
@@ -882,12 +883,12 @@ class Block {
 
                 if (block.transactions && block.transactions.length) {
                     const trsIds = [];
-                    for (var i = 0; i < block.transactions.length; i++) {
-                        var transaction = block.transactions[i];
+                    for (let i = 0; i < block.transactions.length; i++) {
+                        const transaction = block.transactions[i];
                         trsIds.push(transaction.id);
                     }
 
-                    var existsTrsIds = [];
+                    let existsTrsIds = [];
                     if (trsIds.length > 0) {
                         existsTrsIds = await new Promise((resolve, reject) => {
                             this.dao.findList("tr", {
@@ -904,7 +905,7 @@ class Block {
                         });
                     }
 
-                    for (var i = 0; i < block.transactions.length; i++) {
+                    for (let i = 0; i < block.transactions.length; i++) {
                         try {
                             const transaction = block.transactions[i];
 
@@ -924,7 +925,7 @@ class Block {
                             }
 
                             if (verifyTrs) {
-                                var sender = await this.runtime.account.getAccountByPublicKey(transaction.sender_public_key);
+                                const sender = await this.runtime.account.getAccountByPublicKey(transaction.sender_public_key);
                                 await this.runtime.transaction.verify(transaction, sender);
                             }
                         } catch (err) {
@@ -961,9 +962,9 @@ class Block {
         const ready = [];
 
         const transactions = await this.runtime.transaction.getUnconfirmedTransactionList(false, this.tokenSetting.maxTxsPerBlock);
-        for (var i = 0; i < transactions.length; i++) {
-            var transaction = transactions[i];
-            var sender = await this.runtime.account.getAccountByPublicKey(transaction.sender_public_key);
+        for (let i = 0; i < transactions.length; i++) {
+            const transaction = transactions[i];
+            const sender = await this.runtime.account.getAccountByPublicKey(transaction.sender_public_key);
             if (!sender) {
                 this.logger.error("Invalid sender: " + JSON.stringify(transaction));
                 break;
@@ -999,7 +1000,7 @@ class Block {
 
         await this.verifyBlock(block, null);
 
-        var activeKeypairs = await this.runtime.delegate.getActiveDelegateKeypairs(block.height);
+        const activeKeypairs = await this.runtime.delegate.getActiveDelegateKeypairs(block.height);
         assert(activeKeypairs && activeKeypairs.length > 0, "Active keypairs should not be empty");
 
         this.logger.info(`get active delegate keypairs len: ${activeKeypairs.length}`);
@@ -1067,10 +1068,10 @@ class Block {
      * @param {*} data
      */
     async _parseObjectFromFullBlocksData(data) {
-        var blocks = {};
-        var order = [];
-        for (var i = 0; i < data.length; i++) {
-            var _block = this.serializeDbData2Block(data[i]);
+        let blocks = {};
+        const order = [];
+        for (let i = 0; i < data.length; i++) {
+            const _block = this.serializeDbData2Block(data[i]);
             if (_block) {
                 if (!blocks[_block.id]) {
                     if (_block.id == this.genesisblock.id) { //wxm async ok      genesisblock.block.id
@@ -1108,7 +1109,7 @@ class Block {
                 this.logger.info(`begin to pop block ${oldLastBlock.height} ${oldLastBlock.id}`);
 
                 //wxm TODO 这里查询条件用的id = previous_block，但过来的previous_block肯定有问题怎么会查出来呢，所以改成按照height-1来查上一个，但不知道会不会有问题
-                var previousBlock = await this.runtime.dataquery.queryFullBlockData({
+                let previousBlock = await this.runtime.dataquery.queryFullBlockData({
                     height: bignum.minus(oldLastBlock.height, 1).toString()
                 }, 1, 0, [
                     ['height', 'asc']
@@ -1119,15 +1120,15 @@ class Block {
 
                 previousBlock = previousBlock[0];
 
-                var transactions = this._sortTransactions(oldLastBlock.transactions);
+                let transactions = this._sortTransactions(oldLastBlock.transactions);
                 transactions = transactions.reverse();
 
                 this.dao.transaction(async (dbTrans, done) => {
                     try {
-                        for (var i = 0; i < transactions.length; i++) {
-                            var transaction = transactions[i];
+                        for (let i = 0; i < transactions.length; i++) {
+                            const transaction = transactions[i];
 
-                            var sender = await this.runtime.account.getAccountByPublicKey(transaction.sender_public_key, dbTrans);
+                            const sender = await this.runtime.account.getAccountByPublicKey(transaction.sender_public_key, dbTrans);
 
                             this.logger.info('undo transacton: ', transaction.id);
                             await this.runtime.transaction.undo(transaction, oldLastBlock, sender, dbTrans);
@@ -1167,12 +1168,12 @@ class Block {
     }
 
     async deleteBlocksBefore(block) {
-        var blocks = [];
+        const blocks = [];
 
         while (bignum.isLessThan(block.height, this._lastBlock.height)) {
             blocks.unshift(this._lastBlock);
 
-            var newLastBlock = await this._popLastBlock(this._lastBlock);
+            const newLastBlock = await this._popLastBlock(this._lastBlock);
             this.setLastBlock(newLastBlock);
         }
 
@@ -1221,24 +1222,24 @@ class Block {
 
         return new Promise((resolve, reject) => {
             this.dbSequence.add(async (cb) => {
-                var where = {
+                const where = {
                     height: {
                         $gte: offset || 0
                     }
                 }
 
                 try {
-                    var blocksData = await this.runtime.dataquery.queryFullBlockData(where, limit || 1, 0, [
+                    const blocksData = await this.runtime.dataquery.queryFullBlockData(where, limit || 1, 0, [
                         ['height', 'asc']
                     ]);
-                    var blocks = await this._parseObjectFromFullBlocksData(blocksData);
-                    for (var i = 0; i < blocks.length; i++) {
-                        var block = blocks[i];
+                    const blocks = await this._parseObjectFromFullBlocksData(blocksData);
+                    for (let i = 0; i < blocks.length; i++) {
+                        const block = blocks[i];
                         this.logger.debug("loadBlocksOffset processing:", block.id);
 
                         block.transactions = this._sortTransactions(block.transactions);
                         if (verify) {
-                            var lastBlock = this.getLastBlock();
+                            const lastBlock = this.getLastBlock();
                             if (!lastBlock || !lastBlock.id) {
                                 // apply genesis block
                                 await this.applyBlock(block, null, false, false);
@@ -1266,10 +1267,10 @@ class Block {
     }
 
     async queryBlockData(where, sorts, offset, limit, returnTotal) {
-        var w = where || {};
-        var s = sorts || null;
-        var o = offset || 0;
-        var l = limit || 100;
+        const w = where || {};
+        const s = sorts || null;
+        const o = offset || 0;
+        const l = limit || 100;
         if (l > 100) {
             throw new Error("Invalid limit. Maximum is 100");
         }
@@ -1284,7 +1285,7 @@ class Block {
                         return reject(err || "Get Block Error.");
                     }
 
-                    var maxHeight = 2;
+                    let maxHeight = 2;
                     if (rows.length > 0) {
                         maxHeight = rows[0].maxHeight + 1;
                     }
@@ -1308,7 +1309,7 @@ class Block {
                             return reject(err2);
                         }
 
-                        var blocks = [];
+                        let blocks = [];
                         for (let i = 0; i < rows2.rows.length; i++) {
                             blocks.push(this.serializeDbData2Block(rows2.rows[i]));
                         }
@@ -1328,7 +1329,7 @@ class Block {
      * @param {*} query
      */
     async querySimpleBlockData(query) {
-        var validateErrors = await this.ddnSchema.validate({
+        const validateErrors = await this.ddnSchema.validate({
             type: "object",
             properties: {
                 id: {
@@ -1350,9 +1351,9 @@ class Block {
         }
 
         let where = null;
-        var keys = ['id', 'height', 'hash'];
-        for (var i in keys) {
-            var key = keys[i];
+        const keys = ['id', 'height', 'hash'];
+        for (let i in keys) {
+            let key = keys[i];
             if (typeof (query[key]) != 'undefined' && query[key] != null) {
                 where = {
                     [key]: query[key]
@@ -1375,7 +1376,7 @@ class Block {
                             return cb(err || "Get Block Error.");
                         }
 
-                        var maxHeight = 2;
+                        let maxHeight = 2;
                         if (rows.length > 0) {
                             maxHeight = rows[0].maxHeight + 1;
                         }
@@ -1399,7 +1400,7 @@ class Block {
                                 return cb(err2 || "Block not found");
                             }
 
-                            var block = this.serializeDbData2Block(rows2[0]);
+                            const block = this.serializeDbData2Block(rows2[0]);
                             cb(null, block);
                         });
                     }

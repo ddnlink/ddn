@@ -18,7 +18,7 @@ export default {
   logLevel: "info",
   net: "testnet",
   nethash: "0ab796cd",
-  payloadLimitSize: "8m",
+  payloadLimitSize: "8mb",
 
   api: {
     access: {

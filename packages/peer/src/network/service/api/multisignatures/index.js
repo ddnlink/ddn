@@ -65,14 +65,11 @@ class RootRouter {
         }
 
         return new Promise((resolve, reject) => {
-            this.balancesSequence.add(async(cb) => {
+            this.balancesSequence.add(async (cb) => {
                 let account;
-                try
-                {
-                    account = await this.runtime.account.getAccountByPublicKey(keypair.publicKey.toString('hex'));
-                }
-                catch (err)
-                {
+                try {
+                    account = await this.runtime.account.getAccountByPublicKey(keypair.publicKey); // .toString('hex')
+                } catch (err) {
                     return cb(err);
                 }
 
@@ -112,18 +109,18 @@ class RootRouter {
                 if (err) {
                     return reject(err);
                 } else {
-                    setImmediate(async()=> {
-                        try
-                        {
+                    setImmediate(async () => {
+                        try {
                             await this.runtime.socketio.emit('multisignatures/change', {});
-                        }
-                        catch (err2)
-                        {
+                        } catch (err2) {
                             this.logger.error("socket emit error: multisignatures/change");
                         }
                     });
 
-                    resolve({ success: true, transactionId: transactions[0].id });
+                    resolve({
+                        success: true,
+                        transactionId: transactions[0].id
+                    });
                 }
             })
         });
@@ -180,13 +177,10 @@ class RootRouter {
                 throw new Error("Permission to sign transaction denied");
             }
 
-            setImmediate(async() => {
-                try
-                {
+            setImmediate(async () => {
+                try {
                     await this.runtime.socketio.emit('multisignatures/singature/change', {});
-                }
-                catch (err)
-                {
+                } catch (err) {
                     this.logger.error("socket emit error: multisignatures/singature/change");
                 }
             });
@@ -196,13 +190,13 @@ class RootRouter {
                 throw new Error("Account not found");
             }
 
-            if (!transaction.requester_public_key) {    //wxm block database
+            if (!transaction.requester_public_key) { //wxm block database
                 if (!account.multisignatures.includes(keypair.publicKey.toString('hex'))) {
                     throw new Error("Permission to sign transaction denied");
                 }
             } else {
                 if (account.public_key != keypair.publicKey.toString('hex') ||
-                    transaction.sender_public_key != keypair.publicKey.toString('hex')) {   //wxm block database
+                    transaction.sender_public_key != keypair.publicKey.toString('hex')) { //wxm block database
                     throw new Error("Permission to sign transaction denied");
                 }
             }
@@ -211,20 +205,17 @@ class RootRouter {
                 throw new Error("Permission to sign transaction denied");
             }
 
-            setImmediate(async() => {
-                try
-                {
+            setImmediate(async () => {
+                try {
                     await this.runtime.socketio.emit('multisignatures/singature/change', {});
-                }
-                catch (err)
-                {
+                } catch (err) {
                     this.logger.error("socket emit error: multisignatures/singature/change");
                 }
             })
         }
 
         return new Promise((resolve, reject) => {
-            this.balancesSequence.add(async(cb) => {
+            this.balancesSequence.add(async (cb) => {
                 const transaction = await this.runtime.transaction.getUnconfirmedTransaction(body.transactionId);
                 if (!transaction) {
                     return cb("Transaction not found");
@@ -233,16 +224,13 @@ class RootRouter {
                 transaction.signatures = transaction.signatures || [];
                 transaction.signatures.push(sign);
 
-                setImmediate(async() => {
-                    try
-                    {
-                        await this.runtime.peer.broadcast.broadcastNewSignature( {
+                setImmediate(async () => {
+                    try {
+                        await this.runtime.peer.broadcast.broadcastNewSignature({
                             signature: sign,
                             transaction: transaction.id
                         });
-                    }
-                    catch (err)
-                    {
+                    } catch (err) {
                         this.logger.error(`Broadcast new signature failed: ${DdnUtils.system.getErrorMsg(err)}`);
                     }
                 });
@@ -252,7 +240,10 @@ class RootRouter {
                 if (err) {
                     reject(err);
                 } else {
-                    resolve({ success: true, transactionId: transaction.id });
+                    resolve({
+                        success: true,
+                        transactionId: transaction.id
+                    });
                 }
             })
         });
@@ -277,7 +268,9 @@ class RootRouter {
         let transactions = await this.runtime.transaction.getUnconfirmedTransactionList();
         //wxm TODO 此处不应该用TransactionTypes.OUT_TRANSFER，或者单独一个接口道aob包里
         if (query.isOutTransfer) {
-            transactions = transactions.filter(({type}) => type == TransactionTypes.OUT_TRANSFER);
+            transactions = transactions.filter(({
+                type
+            }) => type == TransactionTypes.OUT_TRANSFER);
         }
 
         const pendings = [];
@@ -312,8 +305,7 @@ class RootRouter {
                 signed = true;
             }
 
-            try
-            {
+            try {
                 const sender = await this.runtime.account.getAccountByPublicKey(item.sender_public_key);
                 if (!sender) {
                     break;
@@ -334,9 +326,7 @@ class RootRouter {
                         transaction: item
                     });
                 }
-            }
-            catch (err)
-            {
+            } catch (err) {
                 break;
             }
         }
@@ -365,52 +355,53 @@ class RootRouter {
 
         return new Promise((resolve, reject) => {
             this.dao.findList('mem_accounts2multisignature', {
-                dependent_id: query.publicKey    //wxm block database
-            }, null, null, false, false,
-            [[this.dao.db_fnGroupConcat('account_id'), 'account_id']], //wxm block database   library.dao.db_fn('group_concat', library.dao.db_col('accountId'))
-            null, async (err, rows) => {
-                if (err) {
-                    this.logger.error(err.toString());
-                    return reject("Database error");
-                }
-
-                var addresses = rows[0].account_id.split(','); //wxm block database
-
-                try
-                {
-                    var rows = await this.runtime.account.getAccountList({
-                        address: {
-                            $in: addresses
-                        },
-                        sort: [['balance', 'ASC']]  //wxm block database
-                    }, ['address', 'balance', 'multisignatures', 'multilifetime', 'multimin']);
-
-                    for (let i = 0; i < rows.length; i++) {
-                        const account = rows[i];
-
-                        var addresses = [];
-                        for (let j = 0; j < account.multisignatures.length; j++) {
-                            addresses.push(this.runtime.account.generateAddressByPublicKey(account.multisignatures[j]));
-                        }
-
-                        const multisigaccounts = await this.runtime.account.getAccountList({
-                            address: {
-                                $in: addresses
-                            }
-                        }, ['address', 'publicKey', 'balance']);
-                        account.multisigaccounts = multisigaccounts;
+                    dependent_id: query.publicKey //wxm block database
+                }, null, null, false, false,
+                [
+                    [this.dao.db_fnGroupConcat('account_id'), 'account_id']
+                ], //wxm block database   library.dao.db_fn('group_concat', library.dao.db_col('accountId'))
+                null, async (err, rows) => {
+                    if (err) {
+                        this.logger.error(err.toString());
+                        return reject("Database error");
                     }
 
-                    resolve({
-                        accounts: rows
-                    });
-                }
-                catch (e)
-                {
-                    this.logger.error(e);
-                    return reject(e);
-                }
-            });
+                    var addresses = rows[0].account_id.split(','); //wxm block database
+
+                    try {
+                        var rows = await this.runtime.account.getAccountList({
+                            address: {
+                                $in: addresses
+                            },
+                            sort: [
+                                ['balance', 'ASC']
+                            ] //wxm block database
+                        }, ['address', 'balance', 'multisignatures', 'multilifetime', 'multimin']);
+
+                        for (let i = 0; i < rows.length; i++) {
+                            const account = rows[i];
+
+                            var addresses = [];
+                            for (let j = 0; j < account.multisignatures.length; j++) {
+                                addresses.push(this.runtime.account.generateAddressByPublicKey(account.multisignatures[j]));
+                            }
+
+                            const multisigaccounts = await this.runtime.account.getAccountList({
+                                address: {
+                                    $in: addresses
+                                }
+                            }, ['address', 'publicKey', 'balance']);
+                            account.multisigaccounts = multisigaccounts;
+                        }
+
+                        resolve({
+                            accounts: rows
+                        });
+                    } catch (e) {
+                        this.logger.error(e);
+                        return reject(e);
+                    }
+                });
         });
     }
 
