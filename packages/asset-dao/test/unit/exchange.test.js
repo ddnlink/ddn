@@ -20,7 +20,9 @@ async function openAccount(account) {
             })
             .expect("Content-Type", /json/)
             .expect(200)
-            .end((err, {body}) => {
+            .end((err, {
+                body
+            }) => {
                 // console.log(JSON.stringify(res.body))
 
                 if (err) {
@@ -42,7 +44,9 @@ async function openAccount(account) {
     })
 }
 
-async function sendDDN({address}, coin) {
+async function sendDDN({
+    address
+}, coin) {
     await node.onNewBlockAsync();
 
     const result = await new Promise((resolve, reject) => {
@@ -60,7 +64,9 @@ async function sendDDN({address}, coin) {
             })
             .expect("Content-Type", /json/)
             .expect(200)
-            .end((err, {body}) => {
+            .end((err, {
+                body
+            }) => {
                 // console.log(JSON.stringify(res.body));
 
                 if (err) {
@@ -81,9 +87,6 @@ async function sendDDN({address}, coin) {
 
 describe('Put /transactions', () => {
 
-    // 加载插件
-    node.ddn.init();
-
     // 转账
     // let trs = node.ddn.transaction.createTransaction(node.Daccount.address, 89909, "thanks", node.Gaccount.password)
     // sendTransactions(trs);
@@ -91,6 +94,10 @@ describe('Put /transactions', () => {
     let orgId = "";
 
     beforeAll(async () => {
+
+        // 加载插件
+        node.ddn.init();
+
         await openAccount(Account1);
         await openAccount(Account2);
 
@@ -104,7 +111,9 @@ describe('Put /transactions', () => {
                 .set("nethash", node.config.nethash)
                 .set("port", node.config.port)
                 .expect(200)
-                .end((err, {body}) => {
+                .end((err, {
+                    body
+                }) => {
                     // console.log(JSON.stringify(res.body));
 
                     if (err) {
@@ -154,7 +163,9 @@ describe('Put /transactions', () => {
                 })
                 .expect("Content-Type", /json/)
                 .expect(200)
-                .end((err, {body}) => {
+                .end((err, {
+                    body
+                }) => {
                     // console.log(JSON.stringify(res.body));
 
                     if (err) {
@@ -193,7 +204,9 @@ describe('Put /transactions', () => {
                 })
                 .expect("Content-Type", /json/)
                 .expect(200)
-                .end((err, {body}) => {
+                .end((err, {
+                    body
+                }) => {
                     // console.log(JSON.stringify(res.body));
 
                     if (err) {
@@ -238,7 +251,9 @@ describe('Put /transactions', () => {
                 })
                 .expect("Content-Type", /json/)
                 .expect(200)
-                .end((err, {body}) => {
+                .end((err, {
+                    body
+                }) => {
                     // console.log(JSON.stringify(res.body));
 
                     if (err) {
@@ -266,7 +281,9 @@ describe('PUT /exchange', () => {
                 .set("nethash", node.config.nethash)
                 .set("port", node.config.port)
                 .expect(200)
-                .end((err, {body}) => {
+                .end((err, {
+                    body
+                }) => {
                     // console.log(JSON.stringify(res.body));
 
                     if (err) {
@@ -295,7 +312,9 @@ describe('PUT /exchange', () => {
             })
             .expect('Content-Type', /json/)
             .expect(200)
-            .end((err, {body}) => {
+            .end((err, {
+                body
+            }) => {
                 // console.log(JSON.stringify(res.body));
 
                 if (err) {
@@ -320,7 +339,9 @@ describe('PUT /exchange', () => {
             })
             .expect('Content-Type', /json/)
             .expect(200)
-            .end((err, {body}) => {
+            .end((err, {
+                body
+            }) => {
                 // console.log(JSON.stringify(res.body));
 
                 if (err) {
@@ -353,7 +374,9 @@ describe('PUT /exchange', () => {
                 })
                 .expect('Content-Type', /json/)
                 .expect(200)
-                .end((err, {body}) => {
+                .end((err, {
+                    body
+                }) => {
                     // console.log(JSON.stringify(res.body));
 
                     if (err) {
@@ -368,7 +391,7 @@ describe('PUT /exchange', () => {
         });
     })
 
-    it("Send 1 DDN to Account2, should be ok.", async() => {
+    it("Send 1 DDN to Account2, should be ok.", async () => {
         await sendDDN(Account2, "100000000");
     });
 
@@ -388,7 +411,9 @@ describe('PUT /exchange', () => {
                 })
                 .expect('Content-Type', /json/)
                 .expect(200)
-                .end((err, {body}) => {
+                .end((err, {
+                    body
+                }) => {
                     // console.log(JSON.stringify(res.body));
 
                     if (err) {
@@ -403,7 +428,7 @@ describe('PUT /exchange', () => {
         });
     })
 
-    it("Send random DDN to Account2, should be ok.", async() => {
+    it("Send random DDN to Account2, should be ok.", async () => {
         await sendDDN(Account2);
     });
 
@@ -423,7 +448,9 @@ describe('PUT /exchange', () => {
                 })
                 .expect('Content-Type', /json/)
                 .expect(200)
-                .end((err, {body}) => {
+                .end((err, {
+                    body
+                }) => {
                     // console.log(JSON.stringify(res.body));
 
                     if (err) {

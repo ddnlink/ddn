@@ -1,8 +1,11 @@
 import DdnUtils from '@ddn/utils';
 import extend from 'extend';
+import Debug from 'debug';
+
 import node from '../node';
-let DEBUG = require('debug')('dapp-transfer')
-let expect = node.expect
+
+const expect = node.expect
+const debug = Debug('dapp-transfer')
 
 let DAPP_CURRENCY = "DDN";
 
@@ -38,7 +41,7 @@ async function registerDAppAsync(options, {password}) {
     const dappData = await createPluginAsset(11, options, password)
     let res = await node.submitTransactionAsync(dappData);
     // let res = await node.submitTransactionAsync(node.ddn.dapp.createDApp(options, account.password))
-    DEBUG('register dapp response', res.body)
+    debug('register dapp response', res.body)
     return res
 }
 
@@ -46,7 +49,7 @@ async function inTransferAsync(options, {password}) {
     // node.ddn.init();
     const inTransferData = await createPluginAsset(12, options, password)
     let res = await node.submitTransactionAsync(inTransferData)
-    DEBUG('in transfer response', res.body)
+    debug('in transfer response', res.body)
     return res
 }
 
@@ -54,20 +57,20 @@ async function outTransferAsync(options, {password}) {
     let outTransferData = await createPluginAsset(13, options, password);
     // let trs = node.ddn.transfer.createOutTransfer(options.recipientId, options.dappId, options.transactionId, options.currency, options.amount, account.password)
     let res = await node.submitTransactionAsync(outTransferData)
-    DEBUG('out transfer response', res.body)
+    debug('out transfer response', res.body)
     return res
 }
 
 async function getAssetBalanceAsync(address, currency) {
-    let res = await node.apiGetAsync(`/aobasset/balances/${address}/${currency}`)
-    DEBUG('get asset balance response', res.body)
+    let res = await node.apiGetAsync(`/aob/assets/balances/${address}/${currency}`)
+    debug('get asset balance response', res.body)
     expect(res.body.result.currency).to.equal(currency)
     return res.body.result.balance
 }
 
 async function getDAppBalanceAsync(dappId, currency) {
-    let res = await node.apiGetAsync(`/dapp/balances/${dappId}/${currency}`)
-    DEBUG('get dapp balance response', res.body)
+    let res = await node.apiGetAsync(`/dapps/balances/${dappId}/${currency}`)
+    debug('get dapp balance response', res.body)
     expect(res.body).to.have.property('success').to.be.true
     return res.body.result.balance
 }
@@ -75,17 +78,17 @@ async function getDAppBalanceAsync(dappId, currency) {
 describe('dapp transfer', () => {
 
     // (1)加载插件
-    node.ddn.init();
+    // node.ddn.init();
 
-    let delegateAccounts = genNormalAccounts(5)
-    let public_key = delegateAccounts.map(a => a.public_key)
-    let dapp = extend(true, { delegates: public_key, unlock_delegates: 3 }, DAPP_TEMPLATE)
+    const delegateAccounts = genNormalAccounts(5)
+    const public_key = delegateAccounts.map(a => a.public_key)
+    const dapp = extend(true, { delegates: public_key, unlock_delegates: 3 }, DAPP_TEMPLATE)
     dapp.name = node.randomUsername()
     dapp.link = dapp.link.replace('ddn', node.randomUsername())
     let dappId = ''
 
-    let issuerName = node.randomIssuerName()
-    let assetName = 'CNY'
+    const issuerName = node.randomIssuerName()
+    const assetName = 'CNY'
 
     // it('should fail to register dapp with invalid params', async () => {
     //   let dapp1 = extend(true, {}, dapp)
@@ -126,7 +129,7 @@ describe('dapp transfer', () => {
 
     it('should be ok to register dapp with valid params', async () => {
         dapp.delegates = dapp.delegates.join(',');
-        let res = await registerDAppAsync(dapp, node.Gaccount)
+        const res = await registerDAppAsync(dapp, node.Gaccount)
         // console.log(JSON.stringify(res));
         expect(res.body).to.have.property('success').to.be.true
         dappId = res.body.transactionId
@@ -134,13 +137,13 @@ describe('dapp transfer', () => {
     })
 
     it(`should be ok to transfer ${DAPP_CURRENCY} to an app`, async (done) => {
-        let account = node.genNormalAccount()
+        const account = node.genNormalAccount()
         await node.giveMoneyAndWaitAsync([account.address])
 
         let res = await node.apiGetAsync(`/accounts/getBalance?address=${account.address}`)
         expect(res.body).to.have.property('success').to.be.true
 
-        let balance1 = res.body.balance
+        const balance1 = res.body.balance
         const inTransferAmount = '100000000';
         const options = {
             dapp_id: dappId,
@@ -157,8 +160,8 @@ describe('dapp transfer', () => {
         let balance2 = res.body.balance
         expect(balance1 - parseInt(inTransferAmount) - node.Fees.transactionFee).to.equal(balance2)
 
-        res = await node.apiGetAsync(`/dapp/balances/${dappId}/${DAPP_CURRENCY}`)
-        DEBUG('get dapp balance response', res.body)
+        res = await node.apiGetAsync(`/dapps/balances/${dappId}/${DAPP_CURRENCY}`)
+        debug('get dapp balance response', res.body)
         expect(res.body).to.have.property('success').to.be.true
 
         let dappBalance = res.body.result.balance
@@ -190,7 +193,7 @@ describe('dapp transfer', () => {
         await node.onNewBlockAsync()
 
         //（3）注册资产
-        var obj = {
+        const obj = {
             name: currency,
             desc: 'asset desc',
             maximum,
@@ -215,11 +218,11 @@ describe('dapp transfer', () => {
         await node.onNewBlockAsync()
 
         // （3）注册资产
-        var obj = {
+        const obj2 = {
             currency,
             aobAmount: issueAmount
         }
-        const transaction_aob_issue = await createPluginAsset(64, obj, account.password);
+        const transaction_aob_issue = await createPluginAsset(64, obj2, account.password);
         res = await node.submitTransactionAsync(transaction_aob_issue)
         // res = await node.submitTransactionAsync(node.ddn.aob.createIssue(currency, issueAmount, account.password))
         expect(res.body).to.have.property('success').to.be.true
@@ -245,8 +248,8 @@ describe('dapp transfer', () => {
         //DdnUtils.bignum update expect(DdnUtils.bignum(balance1).sub(transferOptions.amount).toString()).to.equal(balance2)
         expect(DdnUtils.bignum.minus(balance1, transferOptions.amount).toString()).to.equal(balance2)
 
-        res = await node.apiGetAsync(`/dapp/balances/${dappId}/${currency}`)
-        DEBUG('get dapp balance response', res.body)
+        res = await node.apiGetAsync(`/dapps/balances/${dappId}/${currency}`)
+        debug('get dapp balance response', res.body)
         expect(res.body).to.have.property('success').to.be.true
         let dappBalance = res.body.result.balance
         expect(dappBalance).to.equal(String(transferOptions.amount));
@@ -268,7 +271,7 @@ describe('dapp transfer', () => {
 
     //   let trs = node.ddn.transfer.createOutTransfer(recipientAccount.address, dappId, node.randomTid(), DAPP_CURRENCY, '1', delegateAccounts[0].password)
     //   res = await node.submitTransactionAsync(trs)
-    //   DEBUG('submit out transfer response', res.body)
+    //   debug('submit out transfer response', res.body)
     //   expect(res.body).to.have.property('error').to.match(/^Invalid signature number/)
 
     //   trs.signatures = []
@@ -277,14 +280,14 @@ describe('dapp transfer', () => {
     //   }
     //   trs.signatures.push(node.ddn.transfer.signOutTransfer(trs, recipientAccount.password))
     //   res = await node.submitTransactionAsync(trs)
-    //   DEBUG('submito out transfer response', res.body)
+    //   debug('submito out transfer response', res.body)
     //   expect(res.body).to.have.property('error').to.match(/^Invalid signature number/)
     //   trs.signatures = []
     //   for (let i = 0; i < dapp.unlockDelegates; ++i) {
     //     trs.signatures.push(node.ddn.transfer.signOutTransfer(trs, node.genNormalAccount().password))
     //   }
     //   res =await node.submitTransactionAsync(trs)
-    //   DEBUG('submit out transfer response', res.body)
+    //   debug('submit out transfer response', res.body)
     //   expect(res.body).to.have.property('error').to.match(/^Valid signatures not enough/)
     // })
 
@@ -331,7 +334,7 @@ describe('dapp transfer', () => {
         }
 
         let res = await node.submitTransactionAsync(trs)
-        DEBUG('submit out transfer response', res.body)
+        debug('submit out transfer response', res.body)
         expect(res.body).to.have.property('success').to.be.true
 
         await node.onNewBlockAsync()
@@ -359,7 +362,7 @@ describe('dapp transfer', () => {
     //     trs.signatures.push(node.ddn.transfer.signOutTransfer(trs, delegateAccounts[i].password))
     //   }
     //   let res = await node.submitTransactionAsync(trs)
-    //   DEBUG('submit out transfer response', res.body)
+    //   debug('submit out transfer response', res.body)
     //   expect(res.body).to.have.property('success').to.be.true
 
     //   await node.onNewBlockAsync()

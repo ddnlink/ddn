@@ -1,3 +1,5 @@
+import Debug from 'debug';
+
 import crypto from "crypto";
 import path from 'path';
 import {
@@ -5,6 +7,8 @@ import {
 } from '@ddn/core/lib/getUserConfig';
 
 import node from "../node";
+
+const debug = Debug('peer');
 
 const message = "test";
 
@@ -34,7 +38,7 @@ describe("POST /peer/transactions", () => {
             .end((err, {
                 body
             }) => {
-                // console.log(JSON.stringify(res.body));
+                debug(JSON.stringify(res.body));
                 node.expect(body).to.have.property("success").to.be.false;
                 node.expect(body.expected).to.equal(node.config.nethash);
                 done();
@@ -44,7 +48,7 @@ describe("POST /peer/transactions", () => {
     it("Using same valid transaction with correct nethash in headers. Should be ok", async done => {
         const transaction = await node.ddn.transaction.createTransaction(node.Daccount.address, 1, message, node.Gaccount.password);
 
-        console.log('transaction= ', transaction);
+        debug('transaction= ', transaction);
 
         node.peer.post("/transactions")
             .set("Accept", "application/json")

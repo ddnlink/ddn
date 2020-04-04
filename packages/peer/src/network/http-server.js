@@ -97,6 +97,21 @@ class HttpServer {
     }
 
     /**
+     * 404 错误处理
+     * 拦截全部使用 next(err) 的错误信息。
+     */
+    _add404ErrorHandleMiddleware() {
+        this._app.get('*', (req, res) => {
+            res.status(404);
+            res.json({
+                success: false,
+                error: '404 error',
+                message: 'Can`t get ' + req.params[0]
+            });
+        });
+    }
+
+    /**
      * 错误处理
      * 拦截全部使用 next(err) 的错误信息。
      */
@@ -365,7 +380,7 @@ class HttpServer {
         await this._enumerateDir(basePath);
 
         this.runtime.transaction.mountAssetApis(this._app);
-        // this._addErrorHandleMiddleware();
+        this._add404ErrorHandleMiddleware();
 
         if (process.env.NODE_ENV === 'development') {
             DdnUtils.routesMap(this._app, 'routes.log', this.logger);

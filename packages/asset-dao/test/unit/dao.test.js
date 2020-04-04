@@ -1,5 +1,7 @@
-const DEBUG = require('debug')('dao')
+import Debug from 'debug';
 import node from '../node';
+
+const debug = Debug('dao');
 
 const Gaccount = node.Gaccount;
 // const createOrg = node.ddn.dao.createOrg;
@@ -37,7 +39,7 @@ describe('Test Dao', () => {
                     .expect("Content-Type", /json/)
                     .expect(200)
                     .end((err, {body}) => {
-                        // console.log(JSON.stringify(res.body));
+                        debug(JSON.stringify(body));
 
                         if (err) {
                             return reject(err);
@@ -89,7 +91,7 @@ describe('Test Dao', () => {
 
     })
     // special api
-    describe('PUT /api/org to create a orgId', () => {
+    describe('PUT /api/dao/orgs to create a orgId', () => {
         let org;
 
         beforeAll(done => {
@@ -106,7 +108,7 @@ describe('Test Dao', () => {
         })
 
         it('Using valid parameters, should be ok.', done => {
-            node.api.put('/org')
+            node.api.put('/dao/orgs')
                 .set('Accept', 'application/json')
                 .send({
                     secret: Gaccount.password,
@@ -120,7 +122,7 @@ describe('Test Dao', () => {
                 .expect('Content-Type', /json/)
                 .expect(200)
                 .end((err, {body}) => {
-                    // console.log(JSON.stringify(res.body));
+                    debug("put /api/dao/orgs", JSON.stringify(body));
                     node.expect(body).to.have.property('success').to.be.true;
                     node.expect(body).to.have.property('transactionId');
                     done();
@@ -129,7 +131,7 @@ describe('Test Dao', () => {
 
         // Update name
         it('Update the Org`s name in the save 10s is fails', done => {
-            node.api.put('/org')
+            node.api.put('/dao/orgs')
                 .set('Accept', 'application/json')
                 .send({
                     secret: Gaccount.password,
@@ -149,10 +151,10 @@ describe('Test Dao', () => {
                 });
         });
 
-        it('Get /org/orgid/:orgId should be ok if Org`s name is not modified', done => {
+        it('Get /dao/orgs/orgid/:orgId should be ok if Org`s name is not modified', done => {
             node.onNewBlock(err => {
                 node.expect(err).to.be.not.ok;
-                node.api.get(`/org/orgid/${org.org_id.toLowerCase()}`)
+                node.api.get(`/dao/orgs/orgid/${org.org_id.toLowerCase()}`)
                     // node.api.get("/dao/" + org.orgId)
                     .set("Accept", "application/json")
                     .set("version", node.version)
@@ -185,7 +187,7 @@ describe('Test Dao', () => {
         it('Update the Org`s name in a new block is ok', done => {
             node.onNewBlock(err => {
                 const name = node.randomUsername();
-                node.api.put('/org')
+                node.api.put('/dao/orgs')
                     .set('Accept', 'application/json')
                     .send({
                         secret: Gaccount.password,
@@ -206,10 +208,10 @@ describe('Test Dao', () => {
             })
         });
 
-        it('Get /org/orgid/:orgId should be ok if Org`s name has been modified', done => {
+        it('Get /dao/orgs/orgid/:orgId should be ok if Org`s name has been modified', done => {
             node.onNewBlock(err => {
                 node.expect(err).to.be.not.ok;
-                node.api.get(`/org/orgid/${org.org_id.toLowerCase()}`)
+                node.api.get(`/dao/orgs/orgid/${org.org_id.toLowerCase()}`)
                     // node.api.get("/dao/" + org.orgId)
                     .set("Accept", "application/json")
                     .set("version", node.version)
@@ -242,7 +244,7 @@ describe('Test Dao', () => {
 
         it('Update the orgId`s tags in a new block is ok', done => {
             node.onNewBlock(err => {
-                node.api.put('/org')
+                node.api.put('/dao/orgs')
                     .set('Accept', 'application/json')
                     .send({
                         secret: Gaccount.password,
@@ -264,7 +266,7 @@ describe('Test Dao', () => {
         });
 
         it(' "orgId" more than 20, should be fails. ', done => {
-            node.api.put('/org')
+            node.api.put('/dao/orgs')
                 .set('Accept', 'application/json')
                 .send({
                     secret: Gaccount.password,
@@ -286,7 +288,7 @@ describe('Test Dao', () => {
         })
 
         it('Fee is less, should be fails. ', done => {
-            node.api.put('/org')
+            node.api.put('/dao/orgs')
                 .set('Accept', 'application/json')
                 .send({
                     secret: node.Eaccount.password,
@@ -352,7 +354,7 @@ describe('Test Dao', () => {
 
     describe('GET api/dao', () => {
         it('No params should be ok', done => {
-            node.api.get("/org/list")
+            node.api.get("/dao/orgs/list")
                 .set("Accept", "application/json")
                 .set("version", node.version)
                 .set("nethash", node.config.nethash)
@@ -374,7 +376,7 @@ describe('Test Dao', () => {
         });
 
         it('Given filter should be ok', done => {
-            node.api.get("/org/list?pagesize=10&pageindex=1")
+            node.api.get("/dao/orgs/list?pagesize=10&pageindex=1")
                 .set("Accept", "application/json")
                 .set("version", node.version)
                 .set("nethash", node.config.nethash)
@@ -382,7 +384,7 @@ describe('Test Dao', () => {
                 .expect("Content-Type", /json/)
                 .expect(200)
                 .end((err, {body}) => {
-                    // console.log(JSON.stringify(res.body));
+                    debug(JSON.stringify(body));
 
                     node.expect(body).to.have.property('success').to.be.true;
 
