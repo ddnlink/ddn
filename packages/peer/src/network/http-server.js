@@ -101,8 +101,7 @@ class HttpServer {
      * 拦截全部使用 next(err) 的错误信息。
      */
     _add404ErrorHandleMiddleware() {
-        this._app.get('*', (req, res) => {
-            res.status(404);
+        this._app.all('*', (req, res) => {
             res.json({
                 success: false,
                 error: '404 error',
@@ -380,6 +379,8 @@ class HttpServer {
         await this._enumerateDir(basePath);
 
         this.runtime.transaction.mountAssetApis(this._app);
+
+        // The last
         this._add404ErrorHandleMiddleware();
 
         if (process.env.NODE_ENV === 'development') {

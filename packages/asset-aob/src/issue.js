@@ -1,8 +1,8 @@
+import _ from 'lodash';
+import mathjs from 'mathjs';
 
 import Asset from '@ddn/asset-base';
 import DdnUtils from '@ddn/utils';
-import mathjs from 'mathjs';
-import _ from 'lodash';
 
 class Issue extends Asset.Base {
     async propsMapping() {
@@ -45,7 +45,7 @@ class Issue extends Asset.Base {
         // (2)查询到issuer的数据列表
         const issuerInst = await this.getAssetInstanceByName("AobIssuer");
         let issuerData = await issuerInst.queryAsset({
-            name: { $in: _.map(result, 'issuer_name') }
+            name: { "$in": _.map(result, 'issuer_name') }
         }, null, null, 1, 1000);
         issuerData = _.indexBy(issuerData, 'name');
 
@@ -60,7 +60,7 @@ class Issue extends Asset.Base {
         let trData = await new Promise((resolve) => {
             this.dao.findList('tr', {
                 id: {
-                    $in: _.map(result, 'transaction_id'),
+                    "$in": _.map(result, 'transaction_id'),
                 },
             }, null, null, (err, rows) => {
                 if (err) {
@@ -83,7 +83,7 @@ class Issue extends Asset.Base {
         let blockData = await new Promise((resolve) => {
             this.dao.findList('block', {
                 id: {
-                    $in: _.map(result, 'block_id'),
+                    "$in": _.map(result, 'block_id'),
                 },
             }, null, null, (err, rows) => {
                 if (err) {

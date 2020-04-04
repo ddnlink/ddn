@@ -1,12 +1,14 @@
-import node from '../node';
+import node from '@ddn/node-sdk/lib/test';
 
 async function createPluginAsset(type, asset, secret, secondSecret) {
     return await node.ddn.assetPlugin.createPluginAsset(type, asset, secret, secondSecret)
 }
 
 describe("AOB Test", () => {
-    // 加载插件
-    node.ddn.init();
+    beforeAll(() => {
+        // 加载插件
+        node.ddn.init();
+    })
 
     it("发行资产 Should be ok", async () => {
         const obj = {
@@ -16,7 +18,7 @@ describe("AOB Test", () => {
         }
 
         const transaction = await createPluginAsset(64, obj, node.Eaccount.password, "DDD12345");
-        
+
         // var transaction = node.ddn.aob.createIssue("DDD.NCR", "100000", node.Eaccount.password, "DDD12345");
 
         // console.log('transaction:', transaction)
@@ -27,10 +29,14 @@ describe("AOB Test", () => {
                 .set("version", node.version)
                 .set("nethash", node.config.nethash)
                 .set("port", node.config.port)
-                .send({ transaction })
+                .send({
+                    transaction
+                })
                 .expect("Content-Type", /json/)
                 .expect(200)
-                .end((err, {body}) => {
+                .end((err, {
+                    body
+                }) => {
                     console.log(body);
 
                     if (err) {
