@@ -108,14 +108,15 @@ class Confirmation extends Asset.Base {
             throw new Error("Invalid confirmation's senderAddress");
         }
 
+        // TODO: 2020.4.8 如果使用dat协议，地址长度自然大于256，确认数据库字段从256 -> 512
         if (!confirmation.url
-            || confirmation.url.length > 256) {
-            throw new Error('url is undefined or too long, don`t more than 256 characters.');
+            || confirmation.url.length > 512) {
+            throw new Error('url is undefined or too long, don`t more than 512 characters.');
         }
 
         if (!confirmation.contribution_trs_id
             || confirmation.contribution_trs_id.length > 64) {
-            throw new Error('url is undefined or too long, don`t more than 256 characters.');
+            throw new Error('contribution_trs_id is undefined or too long, don`t more than 256 characters.');
         }
 
         // (1)查询getConfirmation是否存在
@@ -208,6 +209,7 @@ class Confirmation extends Asset.Base {
                     type: 'integer',
                     minimum: 1
                 },
+                // FIXME: 2020.4.8 这里出现错误 SQLITE_ERROR: no such column: trs_asset.pagesize"
                 pageSize: {
                     type: 'integer',
                     minimum: 1,

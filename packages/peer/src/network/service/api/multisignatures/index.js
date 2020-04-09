@@ -66,18 +66,20 @@ class RootRouter {
 
         return new Promise((resolve, reject) => {
             this.balancesSequence.add(async (cb) => {
+                const publicKey = keypair.publicKey;
                 let account;
+
                 try {
-                    account = await this.runtime.account.getAccountByPublicKey(keypair.publicKey); // .toString('hex')
+                    account = await this.runtime.account.getAccountByPublicKey(publicKey); // .toString('hex')
                 } catch (err) {
                     return cb(err);
                 }
 
                 if (!account) {
-                    return cb("Account not found");
+                    return cb("Account " + publicKey + " not found");
                 }
 
-                account.public_key = keypair.publicKey.toString('hex');
+                // account.public_key = publicKey;
 
                 if (account.second_signature && !body.secondSecret) {
                     return cb("Invalid second passphrase");
@@ -187,7 +189,7 @@ class RootRouter {
         } else {
             const account = await this.runtime.account.getAccountByAddress(transaction.sender_id);
             if (!account) {
-                throw new Error("Account not found");
+                throw new Error("Account " + transaction.sender_id + " not found");
             }
 
             if (!transaction.requester_public_key) { //wxm block database

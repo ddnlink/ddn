@@ -47,9 +47,9 @@ describe('Test evidence', () => {
       });
   });
 
-  it('Get /evidence/:ipid should be ok', done => {
+  it('Get /evidences/:ipid should be ok', done => {
     node.onNewBlock(err => {
-      node.api.get(`/evidence/${evidence.ipid}`)
+      node.api.get(`/evidences/${evidence.ipid}`)
         .set("Accept", "application/json")
         .set("version", node.version)
         .set("nethash", node.config.nethash)
@@ -73,7 +73,7 @@ describe('Test evidence', () => {
 })
 
 //
-describe('PUT /api/evidence/new', () => {
+describe('PUT /api/evidences/new', () => {
 
   it('Using valid parameters. Should be ok', done => {
     const ipid = node.randomIpId();
@@ -89,7 +89,7 @@ describe('PUT /api/evidence/new', () => {
       "tags": "world,cup,test"
     }
 
-    node.api.put('/evidence/new')
+    node.api.put('/evidences/new')
       .set('Accept', 'application/json')
       .send({
         secret: node.Gaccount.password,

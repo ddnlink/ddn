@@ -1,8 +1,8 @@
-const DEBUG = require('debug')('dao');
-import node from '../node';
+import Debug from 'debug';
+import node from '@ddn/node-sdk/lib/test';
 
-const Account1 = node.randomTxAccount();
-const Account2 = node.randomTxAccount();
+const debug = Debug('dao');
+
 let transaction;
 let confirmation;
 
@@ -15,7 +15,7 @@ describe('Confirmations Test', () => {
     let contributionPrice = "0";
 
     beforeAll((done) => {
-        const getOrgIdUrl = `/org/address/${node.Gaccount.address}`;
+        const getOrgIdUrl = `/dao/orgs/address/${node.Gaccount.address}`;
         node.api.get(getOrgIdUrl)
             .set("Accept", "application/json")
             .set("version", node.version)
@@ -23,17 +23,17 @@ describe('Confirmations Test', () => {
             .set("port", node.config.port)
             .expect(200)
             .end((err, {body}) => {
-                // console.log(JSON.stringify(res.body));
-
+                debug("getOrgIdUrl: ", JSON.stringify(body));
+                
+                node.expect(err).to.be.not.ok;
                 node.expect(body).to.have.property("success").to.be.true;
 
                 if (body.success) {
                     orgId = body.data.org.org_id;
-                    // orgId = res.body.orgId;
                 }
             });
 
-        const getContributionTrsIdUrl = `/contribution/list?received_address=${node.Gaccount.address}&pagesize=1`;
+        const getContributionTrsIdUrl = `/dao/contributions/list?received_address=${node.Gaccount.address}&pagesize=1`;
         node.api.get(getContributionTrsIdUrl)
             .set("Accept", "application/json")
             .set("version", node.version)
@@ -41,13 +41,13 @@ describe('Confirmations Test', () => {
             .set("port", node.config.port)
             .expect(200)
             .end((err, {body}) => {
-                // console.log(JSON.stringify(res.body));
+                debug(JSON.stringify(body));
 
+                node.expect(err).to.be.not.ok;
                 node.expect(body).to.have.property("success").to.be.true;
 
                 if (body.success) {
                     contributionTrsId = body.data.rows[0].transaction_id;
-                    // contributionTrsId = res.body.data.rows[0].transactionId;
                     contributionPrice = body.data.rows[0].price;
                 }
 
@@ -89,7 +89,7 @@ describe('Confirmations Test', () => {
                             return reject(err);
                         }
 
-                        // console.log(JSON.stringify(res.body));
+                        debug(JSON.stringify(body));
 
                         node.expect(body).to.have.property("success").to.be.true;
 
@@ -101,20 +101,21 @@ describe('Confirmations Test', () => {
         });
     });
 
-    it("PUT /api/confirmation should be already confirmed ok", (done) => {
+    it("PUT /api/dao/contributions/${orgId} should be already confirmed ok", (done) => {
         node.onNewBlock(err => {
             node.expect(err).to.be.not.ok;
 
             const state = (Math.random() * 100).toFixed(0) % 2;
 
             confirmation = {
+                title: 'test title',
                 url: "dat://f76e1e82cf4eab4bf173627ff93662973c6fab110c70fb0f86370873a9619aa6+18/public/test.html",
                 contributionTrsId,
                 state,
                 secret: node.Gaccount.password
             }
 
-            node.api.put("/confirmation")
+            node.api.put(`/dao/contributions/${orgId}`)
                 .set("Accept", "application/json")
                 .set("version", node.version)
                 .set("nethash", node.config.nethash)
@@ -123,7 +124,7 @@ describe('Confirmations Test', () => {
                 .expect("Content-Type", /json/)
                 .expect(200)
                 .end((err, {body}) => {
-                    // console.log(JSON.stringify(res.body));
+                    debug(JSON.stringify(body));
 
                     node.expect(body).to.have.property("success").to.be.false;
                     node.expect(body).to.have.property("error").to.contain("The contribution has been confirmed");
@@ -132,13 +133,13 @@ describe('Confirmations Test', () => {
         });
     })
 
-    it("GET /api/confirmation/:orgId/list", (done) => {
+    it("GET /api/dao/contributions/:orgId/list", (done) => {
         node.onNewBlock(err => {
             node.expect(err).to.be.not.ok;
 
             const keys = node.ddn.crypto.getKeys(node.Gaccount.password);
 
-            let reqUrl = `/confirmation/${orgId}/list`;
+            let reqUrl = `/dao/contributions/${orgId}/list`;
             reqUrl += `?senderPublicKey=${keys.publicKey}`;
 
             node.api.get(reqUrl)
@@ -149,7 +150,7 @@ describe('Confirmations Test', () => {
                 .expect("Content-Type", /json/)
                 .expect(200)
                 .end((err, {body}) => {
-                    // console.log(JSON.stringify(res.body));
+                    debug(JSON.stringify(body));
 
                     node.expect(body).to.have.property("success").to.be.true;
                     done();
@@ -157,13 +158,13 @@ describe('Confirmations Test', () => {
         });
     })
 
-    it("GET /api/confirmation/:orgId/list?url", (done) => {
+    it("GET /api/dao/contributions/:orgId/list?url", (done) => {
         node.onNewBlock(err => {
             node.expect(err).to.be.not.ok;
 
             const keys = node.ddn.crypto.getKeys(node.Daccount.password);
 
-            let reqUrl = `/confirmation/${orgId}/list`;
+            let reqUrl = `/dao/contributions/${orgId}/list`;
             reqUrl += `?senderPublicKey=${keys.publicKey}&url=${encodeURIComponent("dat://f76e1e82cf4eab4bf173627ff93662973c6fab110c70fb0f86370873a9619aa6+18/public/test.html")}`;
 
             node.api.get(reqUrl)
@@ -174,7 +175,7 @@ describe('Confirmations Test', () => {
                 .expect("Content-Type", /json/)
                 .expect(200)
                 .end((err, {body}) => {
-                    console.log(JSON.stringify(body));
+                    debug(JSON.stringify(body));
 
                     node.expect(body).to.have.property("success").to.be.true;
                     done();

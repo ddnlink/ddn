@@ -1,7 +1,10 @@
 import DdnUtils from '@ddn/utils';
+import Debug from 'debug';
 
 // Requires and node configuration
 import node from "../node";
+
+const debug = Debug('dapp');
 
 let DappName = "";
 const DappToInstall = {};
@@ -20,12 +23,6 @@ const Account3 = node.randomTxAccount();
 const Account4 = node.randomTxAccount();
 const Account5 = node.randomTxAccount();
 
-// console.log('Account1', Account1)
-// console.log('Account2', Account2)
-// console.log('Account3', Account3)
-// console.log('Account3', Account4)
-// console.log('Account3', Account5)
-
 beforeAll(done => {
     node.api.post("/accounts/open")
         .set("Accept", "application/json")
@@ -36,16 +33,16 @@ beforeAll(done => {
         .expect("Content-Type", /json/)
         .expect(200)
         .end((err, { body }) => {
-            // console.log(JSON.stringify(res.body));
-            console.log(`Opening Account 1 with password: ${Account1.password}`);
+            // debug(JSON.stringify(res.body));
+            debug(`Opening Account 1 with password: ${Account1.password}`);
             node.expect(body).to.have.property("success").to.be.true;
             if (body.success == true && body.account != null) {
                 Account1.address = body.account.address;
                 Account1.public_key = body.account.public_key;
                 Account1.balance = body.account.balance;
             } else {
-                console.log("Unable to open account1, tests will fail");
-                console.log(`Data sent: secret: ${Account1.password} , secondSecret: ${Account1.secondPassword}`);
+                debug("Unable to open account1, tests will fail");
+                debug(`Data sent: secret: ${Account1.password} , secondSecret: ${Account1.secondPassword}`);
                 node.expect("TEST").to.equal("FAILED");
             }
             done();
@@ -62,16 +59,16 @@ beforeAll(done => {
         .expect("Content-Type", /json/)
         .expect(200)
         .end((err, { body }) => {
-            // console.log("register second password");
-            console.log(`Opening Account 2 with password: ${Account2.password}`);
+            // debug("register second password");
+            debug(`Opening Account 2 with password: ${Account2.password}`);
             node.expect(body).to.have.property("success").to.be.true;
             if (body.success == true && body.account != null) {
                 Account2.address = body.account.address;
                 Account2.public_key = body.account.public_key;
                 Account2.balance = body.account.balance;
             } else {
-                console.log("Unable to open account2, tests will fail");
-                console.log(`Data sent: secret: ${Account2.password} , secondSecret: ${Account2.secondPassword}`);
+                debug("Unable to open account2, tests will fail");
+                debug(`Data sent: secret: ${Account2.password} , secondSecret: ${Account2.secondPassword}`);
                 node.expect("TEST").to.equal("FAILED");
             }
             done();
@@ -88,16 +85,16 @@ beforeAll(done => {
         .expect("Content-Type", /json/)
         .expect(200)
         .end((err, { body }) => {
-            // console.log(JSON.stringify(res.body));
-            console.log(`Opening Account 3 with password: ${Account3.password}`);
+            // debug(JSON.stringify(res.body));
+            debug(`Opening Account 3 with password: ${Account3.password}`);
             node.expect(body).to.have.property("success").to.be.true;
             if (body.success == true && body.account != null) {
                 Account3.address = body.account.address;
                 Account3.public_key = body.account.public_key;
                 Account3.balance = body.account.balance;
             } else {
-                console.log("Unable to open account3, tests will fail");
-                console.log(`Data sent: secret: ${Account3.password} , secondSecret: ${Account3.secondPassword}`);
+                debug("Unable to open account3, tests will fail");
+                debug(`Data sent: secret: ${Account3.password} , secondSecret: ${Account3.secondPassword}`);
                 node.expect("TEST").to.equal("FAILED");
             }
             done();
@@ -114,16 +111,16 @@ beforeAll(done => {
         .expect("Content-Type", /json/)
         .expect(200)
         .end((err, { body }) => {
-            // console.log(JSON.stringify(res.body));
-            console.log(`Opening Account 4 with password: ${Account4.password}`);
+            // debug(JSON.stringify(res.body));
+            debug(`Opening Account 4 with password: ${Account4.password}`);
             node.expect(body).to.have.property("success").to.be.true;
             if (body.success == true && body.account != null) {
                 Account4.address = body.account.address;
                 Account4.public_key = body.account.public_key;
                 Account4.balance = body.account.balance;
             } else {
-                console.log("Unable to open account4, tests will fail");
-                console.log(`Data sent: secret: ${Account4.password} , secondSecret: ${Account4.secondPassword}`);
+                debug("Unable to open account4, tests will fail");
+                debug(`Data sent: secret: ${Account4.password} , secondSecret: ${Account4.secondPassword}`);
                 node.expect("TEST").to.equal("FAILED");
             }
             done();
@@ -140,16 +137,16 @@ beforeAll(done => {
         .expect("Content-Type", /json/)
         .expect(200)
         .end((err, { body }) => {
-            // console.log(JSON.stringify(res.body));
-            console.log(`Opening Account 5 with password: ${Account5.password}`);
+            // debug(JSON.stringify(res.body));
+            debug(`Opening Account 5 with password: ${Account5.password}`);
             node.expect(body).to.have.property("success").to.be.true;
             if (body.success == true && body.account != null) {
                 Account5.address = body.account.address;
                 Account5.public_key = body.account.public_key;
                 Account5.balance = body.account.balance;
             } else {
-                console.log("Unable to open account5, tests will fail");
-                console.log(`Data sent: secret: ${Account5.password} , secondSecret: ${Account5.secondPassword}`);
+                debug("Unable to open account5, tests will fail");
+                debug(`Data sent: secret: ${Account5.password} , secondSecret: ${Account5.secondPassword}`);
                 node.expect("TEST").to.equal("FAILED");
             }
             done();
@@ -170,14 +167,14 @@ beforeAll(done => {
             .expect("Content-Type", /json/)
             .expect(200)
             .end((err, { body }) => {
-                // console.log(JSON.stringify(res.body));
+                // debug(JSON.stringify(res.body));
                 node.expect(body).to.have.property("success").to.be.true;
                 if (body.success == true && body.transactionId != null) {
                     transactionCount += 1;
                     Account1.transactions.push(transactionCount);
                     Account1.balance += randomCoin
                 } else {
-                    console.log(`Sent: secret: ${node.Gaccount.password}, amount: ${randomCoin}, recipientId: ${Account1.address}`);
+                    debug(`Sent: secret: ${node.Gaccount.password}, amount: ${randomCoin}, recipientId: ${Account1.address}`);
                     node.expect("TEST").to.equal("FAILED");
                 }
                 done();
@@ -222,7 +219,7 @@ beforeAll(done => {
                         "type": node.AssetTypes.TRANSFER
                     }
                 } else {
-                    console.log(`Sent: secret: ${node.Gaccount.password}, amount: ${randomCoin}, recipientId: ${Account2.address}`);
+                    debug(`Sent: secret: ${node.Gaccount.password}, amount: ${randomCoin}, recipientId: ${Account2.address}`);
                     node.expect("TEST").to.equal("FAILED");
                 }
                 done();
@@ -248,17 +245,17 @@ beforeAll(done => {
                 done();
             });
     });
-    console.log(`ACCOUNT 1: ${Account1.address}`);
-    console.log(`ACCOUNT 2: ${Account2.address}`);
-    console.log(`ACCOUNT 3: ${Account3.address}`);
-    console.log(`ACCOUNT 4: ${Account4.address}`);
-    console.log(`ACCOUNT 5: ${Account5.address}`);
+    debug(`ACCOUNT 1: ${Account1.address}`);
+    debug(`ACCOUNT 2: ${Account2.address}`);
+    debug(`ACCOUNT 3: ${Account3.address}`);
+    debug(`ACCOUNT 4: ${Account4.address}`);
+    debug(`ACCOUNT 5: ${Account5.address}`);
 });
 
 describe("PUT /dapps", () => {
 
     it("Using invalid secret. Should fail", done => {
-        node.api.put("/dapp")
+        node.api.put("/dapps")
             .set("Accept", "application/json")
             .send({
                 secret: "justAR4nd0m Passw0rd",
@@ -273,7 +270,7 @@ describe("PUT /dapps", () => {
             .expect("Content-Type", /json/)
             .expect(200)
             .end((err, { body }) => {
-                console.log(body);
+                debug(body);
                 node.expect(body).to.have.property("success").to.be.false;
                 node.expect(body).to.have.property("error");
                 done();
@@ -281,7 +278,7 @@ describe("PUT /dapps", () => {
     });
 
     it("Using invalid Category. Should fail", done => {
-        node.api.put("/dapp")
+        node.api.put("/dapps")
             .set("Accept", "application/json")
             .send({
                 secret: Account1.password,
@@ -296,7 +293,7 @@ describe("PUT /dapps", () => {
             .expect("Content-Type", /json/)
             .expect(200)
             .end((err, { body }) => {
-                console.log(JSON.stringify(body));
+                debug(JSON.stringify(body));
                 node.expect(body).to.have.property("success").to.be.false;
                 node.expect(body).to.have.property("error");
                 done();
@@ -304,7 +301,7 @@ describe("PUT /dapps", () => {
     });
 
     it("Using no dapp name. Should fail", done => {
-        node.api.put("/dapp")
+        node.api.put("/dapps")
             .set("Accept", "application/json")
             .send({
                 secret: Account1.password,
@@ -318,7 +315,7 @@ describe("PUT /dapps", () => {
             .expect("Content-Type", /json/)
             .expect(200)
             .end((err, { body }) => {
-                console.log(JSON.stringify(body));
+                debug(JSON.stringify(body));
                 node.expect(body).to.have.property("success").to.be.false;
                 node.expect(body).to.have.property("error");
                 done();
@@ -326,7 +323,7 @@ describe("PUT /dapps", () => {
     });
 
     it("Using very long description. Should fail", done => {
-        node.api.put("/dapp")
+        node.api.put("/dapps")
             .set("Accept", "application/json")
             .send({
                 secret: Account1.password,
@@ -340,7 +337,7 @@ describe("PUT /dapps", () => {
             .expect("Content-Type", /json/)
             .expect(200)
             .end((err, { body }) => {
-                console.log(JSON.stringify(body));
+                debug(JSON.stringify(body));
                 node.expect(body).to.have.property("success").to.be.false;
                 node.expect(body).to.have.property("error");
                 done();
@@ -348,7 +345,7 @@ describe("PUT /dapps", () => {
     });
 
     it("Using very long tag. Should fail", done => {
-        node.api.put("/dapp")
+        node.api.put("/dapps")
             .set("Accept", "application/json")
             .send({
                 secret: Account1.password,
@@ -363,7 +360,7 @@ describe("PUT /dapps", () => {
             .expect("Content-Type", /json/)
             .expect(200)
             .end((err, { body }) => {
-                console.log(JSON.stringify(body));
+                debug(JSON.stringify(body));
                 node.expect(body).to.have.property("success").to.be.false;
                 node.expect(body).to.have.property("error");
                 done();
@@ -371,7 +368,7 @@ describe("PUT /dapps", () => {
     });
 
     it("Using very long name. Should fail", done => {
-        node.api.put("/dapp")
+        node.api.put("/dapps")
             .set("Accept", "application/json")
             .send({
                 secret: Account1.password,
@@ -386,7 +383,7 @@ describe("PUT /dapps", () => {
             .expect("Content-Type", /json/)
             .expect(200)
             .end((err, { body }) => {
-                console.log(JSON.stringify(body));
+                debug(JSON.stringify(body));
                 node.expect(body).to.have.property("success").to.be.false;
                 node.expect(body).to.have.property("error");
                 done();
@@ -394,7 +391,7 @@ describe("PUT /dapps", () => {
     });
 
     it("Using no link. Should fail", done => {
-        node.api.put("/dapp")
+        node.api.put("/dapps")
             .set("Accept", "application/json")
             .send({
                 secret: Account1.password,
@@ -407,7 +404,7 @@ describe("PUT /dapps", () => {
             .expect("Content-Type", /json/)
             .expect(200)
             .end((err, { body }) => {
-                console.log(JSON.stringify(body));
+                debug(JSON.stringify(body));
                 node.expect(body).to.have.property("success").to.be.false;
                 node.expect(body).to.have.property("error");
                 done();
@@ -415,7 +412,7 @@ describe("PUT /dapps", () => {
     });
 
     it("Using invalid parameter types. Should fail", done => {
-        node.api.put("/dapp")
+        node.api.put("/dapps")
             .set("Accept", "application/json")
             .send({
                 secret: Account1.password,
@@ -430,14 +427,14 @@ describe("PUT /dapps", () => {
             .expect("Content-Type", /json/)
             .expect(200)
             .end((err, { body }) => {
-                console.log(JSON.stringify(body));
+                debug(JSON.stringify(body));
                 node.expect(body).to.have.property("success").to.be.error;
                 done();
             });
     });
 
     it("Using account with 0 coin account. Should fail", done => {
-        node.api.put("/dapp")
+        node.api.put("/dapps")
             .set("Accept", "application/json")
             .send({
                 secret: Account3.password,
@@ -452,14 +449,14 @@ describe("PUT /dapps", () => {
             .expect("Content-Type", /json/)
             .expect(200)
             .end((err, { body }) => {
-                console.log(JSON.stringify(body));
+                debug(JSON.stringify(body));
                 node.expect(body).to.have.property("success").to.be.false;
                 done();
             });
     });
 
     it("Using invalid 2nd passphrase. Should fail", done => {
-        node.api.put("/dapp")
+        node.api.put("/dapps")
             .set("Accept", "application/json")
             .send({
                 secret: Account2.password,
@@ -475,7 +472,7 @@ describe("PUT /dapps", () => {
             .expect("Content-Type", /json/)
             .expect(200)
             .end((err, { body }) => {
-                console.log(JSON.stringify(body));
+                debug(JSON.stringify(body));
                 node.expect(body).to.have.property("success").to.be.false;
                 done();
             });
@@ -484,7 +481,7 @@ describe("PUT /dapps", () => {
     it("Using invalid type. Should fail", done => {
         DappName = node.randomDelegateName();
 
-        node.api.put("/dapp")
+        node.api.put("/dapps")
             .set("Accept", "application/json")
             .send({
                 secret: Account1.password,
@@ -500,7 +497,7 @@ describe("PUT /dapps", () => {
             .expect("Content-Type", /json/)
             .expect(200)
             .end((err, { body }) => {
-                console.log(JSON.stringify(body));
+                debug(JSON.stringify(body));
                 node.expect(body).to.have.property("success").to.be.false;
                 done();
             });
@@ -517,7 +514,7 @@ describe("PUT /dapps", () => {
 
         node.onNewBlock(() => {
             DappName = node.randomDelegateName();
-            node.api.put("/dapp")
+            node.api.put("/dapps")
                 .set("Accept", "application/json")
                 .send({
                     secret: Account1.password,
@@ -534,7 +531,7 @@ describe("PUT /dapps", () => {
                 .expect("Content-Type", /json/)
                 .expect(200)
                 .end((err, { body }) => {
-                    console.log(body);
+                    debug(body);
                     node.expect(body).to.have.property("success").to.be.true;
                     node.expect(body).to.have.property("transactionId");
                     DappToInstall.transactionId = body.transactionId;
@@ -545,7 +542,7 @@ describe("PUT /dapps", () => {
 
     it("Using existing dapp name. Should fail", done => {
         node.onNewBlock(err => {
-            node.api.put("/dapp")
+            node.api.put("/dapps")
                 .set("Accept", "application/json")
                 .send({
                     secret: Account1.password,
@@ -560,7 +557,7 @@ describe("PUT /dapps", () => {
                 .expect("Content-Type", /json/)
                 .expect(200)
                 .end((err, { body }) => {
-                    console.log(body);
+                    debug(body);
                     node.expect(body).to.have.property("success").to.be.false;
                     done();
                 });
@@ -569,7 +566,7 @@ describe("PUT /dapps", () => {
 
     it("Using existing dapp link. Should fail", done => {
         node.onNewBlock(err => {
-            node.api.put("/dapp")
+            node.api.put("/dapps")
                 .set("Accept", "application/json")
                 .send({
                     secret: Account1.password,
@@ -584,7 +581,7 @@ describe("PUT /dapps", () => {
                 .expect("Content-Type", /json/)
                 .expect(200)
                 .end((err, { body }) => {
-                    console.log(JSON.stringify(body));
+                    debug(JSON.stringify(body));
                     node.expect(body).to.have.property("success").to.be.false;
                     node.expect(body).to.have.property("error");
                     done();
@@ -605,7 +602,7 @@ describe("PUT /dapps", () => {
 //                 .expect("Content-Type", /json/)
 //                 .expect(200)
 //                 .end(function (err, res) {
-//                     // console.log(JSON.stringify(res.body));
+//                     // debug(JSON.stringify(res.body));
 //                     node.expect(res.body).to.have.property("success").to.be.true;
 //                     node.expect(res.body).to.have.property("dapps").that.is.an("array");
 //                     if (res.body.success == true && res.body.dapps != null) {
@@ -614,8 +611,8 @@ describe("PUT /dapps", () => {
 //                             DappToInstall = Dapp;
 //                         }
 //                     } else {
-//                         // console.log(JSON.stringify(res.body));
-//                         console.log("Request failed or dapps array is null");
+//                         // debug(JSON.stringify(res.body));
+//                         debug("Request failed or dapps array is null");
 //                     }
 //                     done();
 //                 });
@@ -629,7 +626,7 @@ describe("PUT /dapps", () => {
 //             .expect("Content-Type", /json/)
 //             .expect(200)
 //             .end(function (err, res) {
-//                 // console.log(JSON.stringify(res.body));
+//                 // debug(JSON.stringify(res.body));
 //                 node.expect(res.body).to.have.property("success").to.be.false;
 //                 node.expect(res.body).to.have.property("error");
 //                 done();
@@ -643,7 +640,7 @@ describe("PUT /dapps", () => {
 //             .expect("Content-Type", /json/)
 //             .expect(200)
 //             .end(function (err, res) {
-//                 // console.log(JSON.stringify(res.body));
+//                 // debug(JSON.stringify(res.body));
 //                 node.expect(res.body).to.have.property("success").to.be.true;
 //                 node.expect(res.body).to.have.property("dapps").that.is.an("array");
 //                 if (res.body.success == true && res.body.dapps != null) {
@@ -655,8 +652,8 @@ describe("PUT /dapps", () => {
 //                         }
 //                     }
 //                 } else {
-//                     // console.log(JSON.stringify(res.body));
-//                     console.log("Request failed or dapps array is null");
+//                     // debug(JSON.stringify(res.body));
+//                     debug("Request failed or dapps array is null");
 //                 }
 //                 done();
 //             });
@@ -669,7 +666,7 @@ describe("PUT /dapps", () => {
 //             .expect("Content-Type", /json/)
 //             .expect(200)
 //             .end(function (err, res) {
-//                 // console.log(JSON.stringify(res.body));
+//                 // debug(JSON.stringify(res.body));
 //                 node.expect(res.body).to.have.property("success").to.be.true;
 //                 node.expect(res.body).to.have.property("dapps").that.is.an("array");
 //                 if (res.body.success == true && res.body.dapps != null) {
@@ -681,8 +678,8 @@ describe("PUT /dapps", () => {
 //                         }
 //                     }
 //                 } else {
-//                     // console.log(JSON.stringify(res.body));
-//                     console.log("Request failed or dapps array is null");
+//                     // debug(JSON.stringify(res.body));
+//                     debug("Request failed or dapps array is null");
 //                 }
 //                 done();
 //             });
@@ -695,14 +692,14 @@ describe("PUT /dapps", () => {
 //             .expect("Content-Type", /json/)
 //             .expect(200)
 //             .end(function (err, res) {
-//                 // console.log(JSON.stringify(res.body));
+//                 // debug(JSON.stringify(res.body));
 //                 node.expect(res.body).to.have.property("success").to.be.true;
 //                 node.expect(res.body).to.have.property("dapps").that.is.an("array");
 //                 if (res.body.success == true && res.body.dapps != null) {
 //                     node.expect((res.body.dapps).length).to.be.at.most(limit);
 //                 } else {
-//                     // console.log(JSON.stringify(res.body));
-//                     console.log("Request failed or dapps array is null");
+//                     // debug(JSON.stringify(res.body));
+//                     debug("Request failed or dapps array is null");
 //                 }
 //                 done();
 //             });
@@ -715,7 +712,7 @@ describe("PUT /dapps", () => {
 //             .expect("Content-Type", /json/)
 //             .expect(200)
 //             .end(function (err, res) {
-//                 // console.log(JSON.stringify(res.body));
+//                 // debug(JSON.stringify(res.body));
 //                 node.expect(res.body).to.have.property("success").to.be.true;
 //                 node.expect(res.body).to.have.property("dapps").that.is.an("array");
 //                 if (res.body.success == true && res.body.dapps != null) {
@@ -723,8 +720,8 @@ describe("PUT /dapps", () => {
 //                         node.expect(res.body.dapps[0].category).to.equal(node.DappCategory[randomCategory]);
 //                     }
 //                 } else {
-//                     // console.log(JSON.stringify(res.body));
-//                     console.log("Request failed or dapps array is null");
+//                     // debug(JSON.stringify(res.body));
+//                     debug("Request failed or dapps array is null");
 //                 }
 //                 done();
 //             });
@@ -743,7 +740,7 @@ describe("PUT /dapps", () => {
 //             .expect("Content-Type", /json/)
 //             .expect(200)
 //             .end(function (err, res) {
-//                 // console.log(JSON.stringify(res.body));
+//                 // debug(JSON.stringify(res.body));
 //                 if (name == "test") {
 //                     node.expect(res.body).to.have.property("success");
 //                 } else {
@@ -753,8 +750,8 @@ describe("PUT /dapps", () => {
 //                     if (res.body.success == true && res.body.dapps != null) {
 //                         node.expect(res.body.dapps[0].name).to.equal(name);
 //                     } else {
-//                         // console.log(JSON.stringify(res.body));
-//                         console.log("Request failed or dapps array is null");
+//                         // debug(JSON.stringify(res.body));
+//                         debug("Request failed or dapps array is null");
 //                     }
 //                 }
 //                 done()
@@ -768,7 +765,7 @@ describe("PUT /dapps", () => {
 //             .expect("Content-Type", /json/)
 //             .expect(200)
 //             .end(function (err, res) {
-//                 // console.log(JSON.stringify(res.body));
+//                 // debug(JSON.stringify(res.body));
 //                 node.expect(res.body).to.have.property("success").to.be.true;
 //                 node.expect(res.body).to.have.property("dapps").that.is.an("array");
 //                 if (res.body.success == true && res.body.dapps != null) {
@@ -778,8 +775,8 @@ describe("PUT /dapps", () => {
 //                         }
 //                     }
 //                 } else {
-//                     // console.log(JSON.stringify(res.body));
-//                     console.log("Request failed or dapps array is null");
+//                     // debug(JSON.stringify(res.body));
+//                     debug("Request failed or dapps array is null");
 //                 }
 //                 done();
 //             });
@@ -792,7 +789,7 @@ describe("PUT /dapps", () => {
 //             .expect("Content-Type", /json/)
 //             .expect(200)
 //             .end(function (err, res) {
-//                 // console.log(JSON.stringify(res.body));
+//                 // debug(JSON.stringify(res.body));
 //                 node.expect(res.body).to.have.property("success").to.be.true;
 //                 node.expect(res.body).to.have.property("dapps").that.is.an("array");
 //                 if (res.body.success == true && res.body.dapps != null) {
@@ -802,8 +799,8 @@ describe("PUT /dapps", () => {
 //                         }
 //                     }
 //                 } else {
-//                     // console.log(JSON.stringify(res.body));
-//                     console.log("Request failed or dapps array is null");
+//                     // debug(JSON.stringify(res.body));
+//                     debug("Request failed or dapps array is null");
 //                 }
 //                 done();
 //             });
@@ -817,30 +814,30 @@ describe("PUT /dapps", () => {
 //             .expect("Content-Type", /json/)
 //             .expect(200)
 //             .end(function (err, res) {
-//                 // console.log(JSON.stringify(res.body));
+//                 // debug(JSON.stringify(res.body));
 //                 node.expect(res.body).to.have.property("success").to.be.true;
 //                 node.expect(res.body).to.have.property("dapps").that.is.an("array");
 //                 if (res.body.success == true && res.body.dapps != null) {
 //                     if (res.body.dapps[1] != null) {
 //                         secondDapp = res.body.dapps[1];
-//                         console.log(offset);
+//                         debug(offset);
 //                         node.api.get("/dapps?offset=" + offset )
 //                             .expect("Content-Type", /json/)
 //                             .expect(200)
 //                             .end(function (err, res) {
-//                                 // console.log(JSON.stringify(res.body));
+//                                 // debug(JSON.stringify(res.body));
 //                                 node.expect(res.body).to.have.property("success").to.be.true;
 //                                 if (res.body.success == true && res.body.dapps != null) {
 //                                     node.expect(res.body.dapps[0]).to.deep.equal(secondDapp);
 //                                 }
 //                             });
 //                     } else {
-//                         // console.log(JSON.stringify(res.body));
-//                         console.log("Only 1 dapp or something went wrong. Cannot check offset");
+//                         // debug(JSON.stringify(res.body));
+//                         debug("Only 1 dapp or something went wrong. Cannot check offset");
 //                     }
 //                 } else {
-//                     // console.log(JSON.stringify(res.body));
-//                     console.log("Request failed or dapps array is null");
+//                     // debug(JSON.stringify(res.body));
+//                     debug("Request failed or dapps array is null");
 //                 }
 //                 done();
 //             });
@@ -856,7 +853,7 @@ describe("PUT /dapps", () => {
 //             .expect("Content-Type", /json/)
 //             .expect(200)
 //             .end(function (err, res) {
-//                 // console.log(JSON.stringify(res.body));
+//                 // debug(JSON.stringify(res.body));
 //                 node.expect(res.body).to.have.property("success").to.be.false;
 //                 node.expect(res.body).to.have.property("error");
 //                 done();
@@ -868,7 +865,7 @@ describe("PUT /dapps", () => {
 //             .expect("Content-Type", /json/)
 //             .expect(200)
 //             .end(function (err, res) {
-//                 // console.log(JSON.stringify(res.body));
+//                 // debug(JSON.stringify(res.body));
 //                 node.expect(res.body).to.have.property("success").to.be.false;
 //                 node.expect(res.body).to.have.property("error");
 //                 done();
@@ -882,14 +879,14 @@ describe("PUT /dapps", () => {
 //             .expect("Content-Type", /json/)
 //             .expect(200)
 //             .end(function (err, res) {
-//                 // console.log(JSON.stringify(res.body));
+//                 // debug(JSON.stringify(res.body));
 //                 node.expect(res.body).to.have.property("success").to.be.true;
 //                 node.expect(res.body).to.have.property("dapp");
 //                 if (res.body.success == true && res.body.dapp != null) {
 //                     node.expect(res.body.dapp.transactionId).to.equal(dappId);
 //                 } else {
-//                     // console.log(JSON.stringify(res.body));
-//                     console.log("Request failed or dapps array is null");
+//                     // debug(JSON.stringify(res.body));
+//                     debug("Request failed or dapps array is null");
 //                 }
 //                 done();
 //             });
@@ -906,7 +903,7 @@ describe("PUT /dapps", () => {
 //             .expect("Content-Type", /json/)
 //             .expect(200)
 //             .end(function (err, res) {
-//                 // console.log(JSON.stringify(res.body));
+//                 // debug(JSON.stringify(res.body));
 //                 node.expect(res.body).to.have.property("success").to.be.false;
 //                 node.expect(res.body).to.have.property("error");
 //                 done();
@@ -923,7 +920,7 @@ describe("PUT /dapps", () => {
 //             .expect("Content-Type", /json/)
 //             .expect(200)
 //             .end(function (err, res) {
-//                 // console.log(JSON.stringify(res.body));
+//                 // debug(JSON.stringify(res.body));
 //                 node.expect(res.body).to.have.property("success").to.be.false;
 //                 node.expect(res.body).to.have.property("error");
 //                 done();
@@ -942,7 +939,7 @@ describe("PUT /dapps", () => {
 //             .expect("Content-Type", /json/)
 //             .expect(200)
 //             .end(function (err, res) {
-//                 console.log(JSON.stringify(res.body));
+//                 debug(JSON.stringify(res.body));
 //                 node.expect(res.body).to.have.property("success").to.be.true;
 //                 node.expect(res.body).to.have.property("path");
 //                 done();
@@ -959,7 +956,7 @@ describe("PUT /dapps", () => {
 //             .expect("Content-Type", /json/)
 //             .expect(200)
 //             .end(function (err, res) {
-//                 console.log(JSON.stringify(res.body));
+//                 debug(JSON.stringify(res.body));
 //                 node.expect(res.body).to.have.property("success").to.be.true;
 //                 node.expect(res.body).to.have.property("dapps").that.is.an("array");
 //                 if (res.body.success == true && res.body.dapps != null) {
@@ -972,8 +969,8 @@ describe("PUT /dapps", () => {
 //                     }
 //                     node.expect(flag).to.equal(1);
 //                 } else {
-//                     // console.log(JSON.stringify(res.body));
-//                     console.log("Request failed or dapps array is null");
+//                     // debug(JSON.stringify(res.body));
+//                     debug("Request failed or dapps array is null");
 //                 }
 //                 done();
 //             });
@@ -989,7 +986,7 @@ describe("PUT /dapps", () => {
 //             .expect("Content-Type", /json/)
 //             .expect(200)
 //             .end(function (err, res) {
-//                 // console.log(JSON.stringify(res.body));
+//                 // debug(JSON.stringify(res.body));
 //                 node.expect(res.body).to.have.property("success").to.be.true;
 //                 node.expect(res.body).to.have.property("ids").that.is.an("array");
 //                 if (res.body.success == true && res.body.ids != null) {
@@ -1002,8 +999,8 @@ describe("PUT /dapps", () => {
 //                     }
 //                     node.expect(flag).to.equal(1);
 //                 } else {
-//                     // console.log(JSON.stringify(res.body));
-//                     console.log("Request failed or dapps array is null");
+//                     // debug(JSON.stringify(res.body));
+//                     debug("Request failed or dapps array is null");
 //                 }
 //                 done();
 //             });
@@ -1019,7 +1016,7 @@ describe("PUT /dapps", () => {
 //             .expect("Content-Type", /json/)
 //             .expect(200)
 //             .end(function (err, res) {
-//                 // console.log(JSON.stringify(res.body));
+//                 // debug(JSON.stringify(res.body));
 //                 node.expect(res.body).to.have.property("success").to.be.false;
 //                 node.expect(res.body).to.have.property("error");
 //                 done();
@@ -1035,7 +1032,7 @@ describe("PUT /dapps", () => {
 //             .expect("Content-Type", /json/)
 //             .expect(200)
 //             .end(function (err, res) {
-//                 // console.log(JSON.stringify(res.body));
+//                 // debug(JSON.stringify(res.body));
 //                 node.expect(res.body).to.have.property("success").to.be.true;
 //                 node.expect(res.body).to.have.property("dapps").that.is.an("array");
 //                 done();
@@ -1051,7 +1048,7 @@ describe("PUT /dapps", () => {
 //             .expect("Content-Type", /json/)
 //             .expect(200)
 //             .end(function (err, res) {
-//                 // console.log(JSON.stringify(res.body));
+//                 // debug(JSON.stringify(res.body));
 //                 node.expect(res.body).to.have.property("success").to.be.true;
 //                 node.expect(res.body).to.have.property("dapps").that.is.an("array");
 //                 done();
@@ -1072,7 +1069,7 @@ describe("PUT /dapps", () => {
 //             .expect("Content-Type", /json/)
 //             .expect(200)
 //             .end(function (err, res) {
-//                 // console.log(JSON.stringify(res.body));
+//                 // debug(JSON.stringify(res.body));
 //                 node.expect(res.body).to.have.property("success").to.be.false;
 //                 node.expect(res.body).to.have.property("error");
 //                 done();
@@ -1091,7 +1088,7 @@ describe("PUT /dapps", () => {
 //             .expect("Content-Type", /json/)
 //             .expect(200)
 //             .end(function (err, res) {
-//                 // console.log(JSON.stringify(res.body));
+//                 // debug(JSON.stringify(res.body));
 //                 node.expect(res.body).to.have.property("success").to.be.false;
 //                 node.expect(res.body).to.have.property("error");
 //                 done();
@@ -1110,13 +1107,13 @@ describe("PUT /dapps", () => {
 //             .expect("Content-Type", /json/)
 //             .expect(200)
 //             .end(function (err, res) {
-//                 // console.log(JSON.stringify(res.body));
+//                 // debug(JSON.stringify(res.body));
 //                 node.expect(res.body).to.have.property("success").to.be.true;
 //                 node.api.get("/dapps/launched")
 //                     .expect("Content-Type", /json/)
 //                     .expect(200)
 //                     .end(function (err, res) {
-//                         // console.log(JSON.stringify(res.body));
+//                         // debug(JSON.stringify(res.body));
 //                         node.expect(res.body).to.have.property("success").to.be.true;
 //                         node.expect(res.body).to.have.property("launched").that.is.an("array");
 //                         if(res.body.success == true && res.body.launched != null) {
@@ -1130,8 +1127,8 @@ describe("PUT /dapps", () => {
 //                             }
 //                             node.expect(flag).to.equal(1);
 //                         } else {
-//                             // console.log(JSON.stringify(res.body));
-//                             console.log("Request failed or launched array is null");
+//                             // debug(JSON.stringify(res.body));
+//                             debug("Request failed or launched array is null");
 //                         }
 //                     });
 //                 done();
@@ -1148,7 +1145,7 @@ describe("PUT /dapps", () => {
 //             .expect("Content-Type", /json/)
 //             .expect(200)
 //             .end(function (err, res) {
-//                 // console.log(JSON.stringify(res.body));
+//                 // debug(JSON.stringify(res.body));
 //                 node.expect(res.body).to.have.property("success").to.be.false;
 //                 node.expect(res.body).to.have.property("error");
 //                 done();
@@ -1167,7 +1164,7 @@ describe("PUT /dapps", () => {
 //             .expect("Content-Type", /json/)
 //             .expect(200)
 //             .end(function (err, res) {
-//                 // console.log(JSON.stringify(res.body));
+//                 // debug(JSON.stringify(res.body));
 //                 node.expect(res.body).to.have.property("success").to.be.false;
 //                 node.expect(res.body).to.have.property("error");
 //                 done();
@@ -1186,7 +1183,7 @@ describe("PUT /dapps", () => {
 //             .expect("Content-Type", /json/)
 //             .expect(200)
 //             .end(function (err, res) {
-//                 // console.log(JSON.stringify(res.body));
+//                 // debug(JSON.stringify(res.body));
 //                 node.expect(res.body).to.have.property("success").to.be.true;
 //                 done();
 //             });
@@ -1200,7 +1197,7 @@ describe("PUT /dapps", () => {
 //             .expect("Content-Type", /json/)
 //             .expect(200)
 //             .end(function (err, res) {
-//                 // console.log(JSON.stringify(res.body));
+//                 // debug(JSON.stringify(res.body));
 //                 node.expect(res.body).to.have.property("success").to.be.true;
 //                 node.expect(res.body).to.have.property("categories").that.is.an("object");
 //                 for (var i in node.DappCategory) {
@@ -1223,7 +1220,7 @@ describe("PUT /dapps", () => {
 //             .expect("Content-Type", /json/)
 //             .expect(200)
 //             .end(function (err, res) {
-//                 // console.log(JSON.stringify(res.body));
+//                 // debug(JSON.stringify(res.body));
 //                 node.expect(res.body).to.have.property("success").to.be.false;
 //                 node.expect(res.body).to.have.property("error");
 //                 done();
@@ -1242,7 +1239,7 @@ describe("PUT /dapps", () => {
 //             .expect("Content-Type", /json/)
 //             .expect(200)
 //             .end(function (err, res) {
-//                 // console.log(JSON.stringify(res.body));
+//                 // debug(JSON.stringify(res.body));
 //                 node.expect(res.body).to.have.property("success").to.be.false;
 //                 node.expect(res.body).to.have.property("error");
 //                 done();
@@ -1261,7 +1258,7 @@ describe("PUT /dapps", () => {
 //             .expect("Content-Type", /json/)
 //             .expect(200)
 //             .end(function (err, res) {
-//                 // console.log(JSON.stringify(res.body));
+//                 // debug(JSON.stringify(res.body));
 //                 node.expect(res.body).to.have.property("success").to.be.true;
 //                 done();
 //             });

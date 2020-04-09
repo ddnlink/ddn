@@ -145,13 +145,14 @@ class Account {
 
     async getAccountByPublicKey(publicKey) {
         const address = this.generateAddressByPublicKey(publicKey);
-        const result = await this.getAccount({
+        this.logger.info('getAccountByPublicKey, publicKey -> address; ' + publicKey + " -> " + address);
+        const account = await this.getAccount({
             address
         });
-        if (result && !result.public_key) {
-            result.public_key = publicKey;
+        if (account && !account.public_key) {
+            account.public_key = publicKey;
         }
-        return result;
+        return account;
     }
 
     async getAccount(filter, fields) {
@@ -350,6 +351,7 @@ class Account {
         var pageSize = 5000;
         var pageIndex = 0;
 
+        // fixme
         while (true) {
             const list = await getAccountList(pageSize, pageIndex * pageSize);
 

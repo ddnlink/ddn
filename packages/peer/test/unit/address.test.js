@@ -1,5 +1,5 @@
-import node from "../node";
 import {Address} from '@ddn/utils';
+import node from "../node";
 
 describe('address', () => {
   it('old 64bit address should be ok', done => {

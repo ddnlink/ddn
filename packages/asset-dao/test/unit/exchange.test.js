@@ -1,7 +1,9 @@
-const DEBUG = require('debug')('dao');
+import Debug from 'debug';
 import DdnUtil from '@ddn/utils';
 
-import node from '../node';
+import node from '@ddn/node-sdk/lib/test';
+
+const debug = Debug('dao');
 
 const Account1 = node.randomTxAccount();
 const Account2 = node.randomTxAccount();
@@ -23,7 +25,7 @@ async function openAccount(account) {
             .end((err, {
                 body
             }) => {
-                // console.log(JSON.stringify(res.body))
+                debug(JSON.stringify(body))
 
                 if (err) {
                     return reject(err);
@@ -67,7 +69,7 @@ async function sendDDN({
             .end((err, {
                 body
             }) => {
-                // console.log(JSON.stringify(res.body));
+                debug(JSON.stringify(body));
 
                 if (err) {
                     return reject(err);
@@ -104,7 +106,7 @@ describe('Put /transactions', () => {
         Account1Balance = await sendDDN(Account1);
 
         await new Promise((resolve, reject) => {
-            const getOrgIdUrl = `/org/getlist?pagesize=1&address=${node.Gaccount.address}`;
+            const getOrgIdUrl = `/orgs/getlist?pagesize=1&address=${node.Gaccount.address}`;
             node.api.get(getOrgIdUrl)
                 .set("Accept", "application/json")
                 .set("version", node.version)
@@ -114,7 +116,7 @@ describe('Put /transactions', () => {
                 .end((err, {
                     body
                 }) => {
-                    // console.log(JSON.stringify(res.body));
+                    debug(JSON.stringify(body));
 
                     if (err) {
                         return reject(err);
@@ -124,7 +126,7 @@ describe('Put /transactions', () => {
 
                     if (body.success && body.data && body.data.rows && body.data.rows.length) {
                         orgId = body.data.rows[0].org_id;
-                        // orgId = res.body.orgId;
+                        // orgId = body.orgId;
                     } else {
                         return reject("未查找到符合要求的Org数据。");
                     }
@@ -166,7 +168,7 @@ describe('Put /transactions', () => {
                 .end((err, {
                     body
                 }) => {
-                    // console.log(JSON.stringify(res.body));
+                    debug(JSON.stringify(body));
 
                     if (err) {
                         return reject(err);
@@ -207,7 +209,7 @@ describe('Put /transactions', () => {
                 .end((err, {
                     body
                 }) => {
-                    // console.log(JSON.stringify(res.body));
+                    debug(JSON.stringify(body));
 
                     if (err) {
                         return reject(err);
@@ -254,7 +256,7 @@ describe('Put /transactions', () => {
                 .end((err, {
                     body
                 }) => {
-                    // console.log(JSON.stringify(res.body));
+                    debug(JSON.stringify(body));
 
                     if (err) {
                         return reject(err);
@@ -269,12 +271,12 @@ describe('Put /transactions', () => {
     });
 })
 
-describe('PUT /exchange', () => {
+describe('PUT /dao/exchanges', () => {
     let orgId = "";
 
     beforeAll(async () => {
         await new Promise((resolve, reject) => {
-            const getOrgIdUrl = `/org/getlist?pagesize=1&address=${node.Gaccount.address}`;
+            const getOrgIdUrl = `/orgs/getlist?pagesize=1&address=${node.Gaccount.address}`;
             node.api.get(getOrgIdUrl)
                 .set("Accept", "application/json")
                 .set("version", node.version)
@@ -284,7 +286,7 @@ describe('PUT /exchange', () => {
                 .end((err, {
                     body
                 }) => {
-                    // console.log(JSON.stringify(res.body));
+                    debug(JSON.stringify(body));
 
                     if (err) {
                         return reject(err);
@@ -294,7 +296,7 @@ describe('PUT /exchange', () => {
 
                     if (body.success && body.data && body.data.rows && body.data.rows.length) {
                         orgId = body.data.rows[0].org_id;
-                        // orgId = res.body.orgId;
+                        // orgId = body.orgId;
                     } else {
                         return reject("未查找到符合要求的Org数据。");
                     }
@@ -305,7 +307,7 @@ describe('PUT /exchange', () => {
     });
 
     it("Using invalid parameters, no parameters, should be fail.", (done) => {
-        node.api.put("/exchange")
+        node.api.put("/dao/exchanges")
             .set('Accept', 'application/json')
             .send({
                 secret: node.Gaccount.password
@@ -315,7 +317,7 @@ describe('PUT /exchange', () => {
             .end((err, {
                 body
             }) => {
-                // console.log(JSON.stringify(res.body));
+                debug(JSON.stringify(body));
 
                 if (err) {
                     return done(err);
@@ -329,7 +331,7 @@ describe('PUT /exchange', () => {
     });
 
     it("State=0, Using valid parameters, should be ok.", (done) => {
-        node.api.put("/exchange")
+        node.api.put("/dao/exchanges")
             .set('Accept', 'application/json')
             .send({
                 secret: node.Gaccount.password,
@@ -342,7 +344,7 @@ describe('PUT /exchange', () => {
             .end((err, {
                 body
             }) => {
-                // console.log(JSON.stringify(res.body));
+                debug(JSON.stringify(body));
 
                 if (err) {
                     return done(err);
@@ -362,7 +364,7 @@ describe('PUT /exchange', () => {
         await node.onNewBlockAsync();
 
         await new Promise((resolve, reject) => {
-            node.api.put("/exchange")
+            node.api.put("/dao/exchanges")
                 .set('Accept', 'application/json')
                 .send({
                     secret: Account2.password,
@@ -377,7 +379,7 @@ describe('PUT /exchange', () => {
                 .end((err, {
                     body
                 }) => {
-                    // console.log(JSON.stringify(res.body));
+                    debug(JSON.stringify(body));
 
                     if (err) {
                         return reject(err);
@@ -399,7 +401,7 @@ describe('PUT /exchange', () => {
         await node.onNewBlockAsync();
 
         await new Promise((resolve, reject) => {
-            node.api.put("/exchange")
+            node.api.put("/dao/exchanges")
                 .set('Accept', 'application/json')
                 .send({
                     secret: Account2.password,
@@ -414,7 +416,7 @@ describe('PUT /exchange', () => {
                 .end((err, {
                     body
                 }) => {
-                    // console.log(JSON.stringify(res.body));
+                    debug(JSON.stringify(body));
 
                     if (err) {
                         return reject(err);
@@ -436,7 +438,7 @@ describe('PUT /exchange', () => {
         await node.onNewBlockAsync();
 
         await new Promise((resolve, reject) => {
-            node.api.put("/exchange")
+            node.api.put("/dao/exchanges")
                 .set('Accept', 'application/json')
                 .send({
                     secret: Account2.password,
@@ -451,7 +453,7 @@ describe('PUT /exchange', () => {
                 .end((err, {
                     body
                 }) => {
-                    // console.log(JSON.stringify(res.body));
+                    debug(JSON.stringify(body));
 
                     if (err) {
                         return reject(err);

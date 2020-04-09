@@ -1,5 +1,5 @@
 import Debug from 'debug';
-import node from '../node';
+import node from '@ddn/node-sdk/lib/test';
 
 const debug = Debug('dao');
 

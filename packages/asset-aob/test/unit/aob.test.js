@@ -74,7 +74,6 @@ describe('Test AOB', () => {
     it('Register issuer should be ok', async () => {
       const trs = await node.ddn.aob.createIssuer(ISSUER1.name, ISSUER1.desc, node.Gaccount.password);
       DEBUG('create issuer trs', trs)
-      console.log('trs= ', trs);
       
     //   var [err, res] = await node.submitTransactionAsyncE(trs)
     //   DEBUG('submit issuer response', err, res.body)
