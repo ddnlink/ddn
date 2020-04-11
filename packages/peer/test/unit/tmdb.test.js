@@ -1,5 +1,5 @@
 import node from "../node";
-import Tmdb from '../lib/helpers/tmdb';
+import Tmdb from '../../lib/helpers/tmdb';
 
 describe('tmdb', () => {
   it('normal test', done => {

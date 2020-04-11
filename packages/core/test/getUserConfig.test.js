@@ -91,8 +91,8 @@ test('config with mergeConfigs .ddnrc.local.js', () => {
   });
 
   expect(config).toEqual({
-    history: 'sorry',
-    story: 'ok',
+    history: 'testnet',
+    story: 'yes',
   });
 
   process.env.NODE_ENV = ''
@@ -106,7 +106,7 @@ test('config with mergeConfigs .ddnrc.prod.js', () => {
   });
   expect(config).toEqual({
     history: 'prod',
-    story: 'yes'
+    story: 'ok',
   });
 
   process.env.DDN_ENV = ''

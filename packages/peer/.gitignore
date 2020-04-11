@@ -21,6 +21,6 @@ public/dist
 package-lock.json
 .vs/
 .vscode
-deploy/
+lib
 height.json
 
