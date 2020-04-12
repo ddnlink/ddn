@@ -1,4 +1,4 @@
-import node from '../node';
+import node from '@ddn/node-sdk/lib/test';
 
 async function createPluginAsset(type, asset, secret, secondSecret) {
     return await node.ddn.assetPlugin.createPluginAsset(type, asset, secret, secondSecret)
@@ -6,9 +6,12 @@ async function createPluginAsset(type, asset, secret, secondSecret) {
 
 describe("AOB Test", () => {
     // 加载插件
-    node.ddn.init();
+    beforeAll((done) => {
+        node.ddn.init();
+        done();
+    })
 
-    it ("开启白名单 Should be ok", async() => {
+    it("开启白名单 Should be ok", async () => {
         const obj = {
             currency: "DDD.NCR",
             flag: 1,
@@ -21,10 +24,14 @@ describe("AOB Test", () => {
                 .set("version", node.version)
                 .set("nethash", node.config.nethash)
                 .set("port", node.config.port)
-                .send({ transaction })
+                .send({
+                    transaction
+                })
                 .expect("Content-Type", /json/)
                 .expect(200)
-                .end((err, {body}) => {
+                .end((err, {
+                    body
+                }) => {
                     // console.log('res.body', res.body);
 
                     if (err) {
@@ -60,10 +67,14 @@ describe("AOB Test", () => {
                 .set("version", node.version)
                 .set("nethash", node.config.nethash)
                 .set("port", node.config.port)
-                .send({ transaction })
+                .send({
+                    transaction
+                })
                 .expect("Content-Type", /json/)
                 .expect(200)
-                .end((err, {body}) => {
+                .end((err, {
+                    body
+                }) => {
                     // console.log(res.body);
 
                     if (err) {
@@ -78,7 +89,7 @@ describe("AOB Test", () => {
         });
     })
 
-    it ("关闭白名单 Should be ok", async() => {
+    it("关闭白名单 Should be ok", async () => {
         const obj = {
             currency: "DDD.NCR",
             flag: 2,
@@ -91,10 +102,14 @@ describe("AOB Test", () => {
                 .set("version", node.version)
                 .set("nethash", node.config.nethash)
                 .set("port", node.config.port)
-                .send({ transaction })
+                .send({
+                    transaction
+                })
                 .expect("Content-Type", /json/)
                 .expect(200)
-                .end((err, {body}) => {
+                .end((err, {
+                    body
+                }) => {
                     // console.log('res.body', res.body);
 
                     if (err) {
@@ -130,10 +145,14 @@ describe("AOB Test", () => {
                 .set("version", node.version)
                 .set("nethash", node.config.nethash)
                 .set("port", node.config.port)
-                .send({ transaction })
+                .send({
+                    transaction
+                })
                 .expect("Content-Type", /json/)
                 .expect(200)
-                .end((err, {body}) => {
+                .end((err, {
+                    body
+                }) => {
                     // console.log(res.body);
 
                     if (err) {
@@ -165,7 +184,7 @@ describe("AOB Test", () => {
     //             .expect("Content-Type", /json/)
     //             .expect(200)
     //             .end(function (err, res) {
-                //     // console.log('res.body', res.body);
+    //     // console.log('res.body', res.body);
 
     //                 if (err) {
     //                     return reject(err);

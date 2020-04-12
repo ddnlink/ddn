@@ -1,4 +1,4 @@
-import node from '../node';
+import node from '@ddn/node-sdk/lib/test';
 
 const DEBUG = require('debug')('aob');
 const expect = node.expect;
@@ -61,15 +61,15 @@ describe('Test AOB', () => {
       strategy: ''
     };
 
-    // it('Get issuers should be ok', async () => {
-    //   const [err, res] = await node.apiGetAsyncE('/aob/issuers/issuers');
+    it('Get issuers should be ok', async () => {
+      const [err, res] = await node.apiGetAsyncE('/aob/issuers/issuers');
       
-    //   DEBUG('get /aob/issuers/issuers response', err, res.body)
-    //   expect(err).to.not.exist
-    //   expect(res.body.success).to.be.true
-    //   expect(res.body.result.total).to.be.a('number')
-    //   expect(res.body.result.rows).to.be.instanceOf(Array)
-    // })
+      DEBUG('get /aob/issuers/issuers response', err, res.body)
+      expect(err).to.not.exist
+      expect(res.body.success).to.be.true
+      expect(res.body.result.total).to.be.a('number')
+      expect(res.body.result.rows).to.be.instanceOf(Array)
+    })
 
     it('Register issuer should be ok', async () => {
       const trs = await node.ddn.aob.createIssuer(ISSUER1.name, ISSUER1.desc, node.Gaccount.password);

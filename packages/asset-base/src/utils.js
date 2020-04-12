@@ -1,12 +1,11 @@
-class AssetUtils
-{
+class AssetUtils {
     static loadFromObject(assetPlugins) {
         global.assets = {
             transConfigs: [],
             transTypeValues: [],
             transTypeNames: []
         };
-        
+
         for (let p in assetPlugins) {
             const currAsset = assetPlugins[p];
             if (currAsset) {
@@ -16,7 +15,7 @@ class AssetUtils
                 } catch (error) {
                     throw new Error(`The asset extends error: ${currAsset} has no configure .ddnrc.js.`);
                 }
-          
+
                 const assetTransactions = assetConfig.transactions;
 
                 if (assetTransactions && assetTransactions.length > 0) {
@@ -76,10 +75,10 @@ class AssetUtils
             const sn = subNames[i];
             if (sn && !/^\s*$/.test(sn)) {
                 if (i == 0) {
-                    var camelSN = sn.substring(0, 1).toLowerCase() + sn.substring(1);
+                    const camelSN = sn.substring(0, 1).toLowerCase() + sn.substring(1);
                     result += camelSN;
                 } else {
-                    var camelSN = sn.substring(0, 1).toUpperCase()  + sn.substring(1);
+                    const camelSN = sn.substring(0, 1).toUpperCase() + sn.substring(1);
                     result += camelSN;
                 }
             }

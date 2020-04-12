@@ -354,7 +354,7 @@ describe('Test Dao', () => {
 
     describe('GET api/dao', () => {
         it('No params should be ok', done => {
-            node.api.get("/dao/orgs/list")
+            node.api.get("/dao/orgs")
                 .set("Accept", "application/json")
                 .set("version", node.version)
                 .set("nethash", node.config.nethash)
@@ -362,7 +362,7 @@ describe('Test Dao', () => {
                 .expect("Content-Type", /json/)
                 .expect(200)
                 .end((err, {body}) => {
-                    // console.log(JSON.stringify(res.body));
+                    debug(JSON.stringify(body));
 
                     node.expect(body).to.have.property('success').to.be.true;
 
@@ -376,7 +376,7 @@ describe('Test Dao', () => {
         });
 
         it('Given filter should be ok', done => {
-            node.api.get("/dao/orgs/list?pagesize=10&pageindex=1")
+            node.api.get("/dao/orgs?pagesize=10&pageindex=1")
                 .set("Accept", "application/json")
                 .set("version", node.version)
                 .set("nethash", node.config.nethash)

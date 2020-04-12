@@ -33,7 +33,7 @@ describe('Confirmations Test', () => {
                 }
             });
 
-        const getContributionTrsIdUrl = `/dao/contributions/list?received_address=${node.Gaccount.address}&pagesize=1`;
+        const getContributionTrsIdUrl = `/dao/contributions?received_address=${node.Gaccount.address}&pagesize=1`;
         node.api.get(getContributionTrsIdUrl)
             .set("Accept", "application/json")
             .set("version", node.version)

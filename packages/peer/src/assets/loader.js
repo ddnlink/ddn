@@ -2,8 +2,8 @@
  * 资产加载注册器
  * @Author: wangxm   
  * @Date: 2018-12-28 11:08:30 
- * @Last Modified by: imfly
- * @Last Modified time: 2020-03-03 18:59:58
+ * @Last Modified by: mikey.zhaopeng
+ * @Last Modified time: 2020-04-12 20:34:41
  */
 
 import express from 'express';
@@ -245,7 +245,7 @@ class Loader {
         return func;
     }
 
-    // 
+    // TODO: 优化路由，使其更符合 rustful api
     async _attachAssetPluginApiRouter(router, {type}, assetInst) {
         const allApis = [];
 
@@ -255,6 +255,7 @@ class Loader {
             if (currProp.required) {
                 if (!/_ext$/.test(currProp.field)) {
                     const detailPath = `/${currProp.prop.toLowerCase()}/:${currProp.prop.toLowerCase()}`;
+
                     router.get(detailPath, this._assetAssetPluginApiDetail(type, currProp.prop.toLowerCase(), assetInst));
                     allApis.push(detailPath);
 
@@ -265,15 +266,16 @@ class Loader {
             }
         }
 
+        // 资产的某个交易
         router.get("/transaction/:trs_id", this._assetAssetPluginApiDetail(type, "trs_id", assetInst));
         allApis.push("/transaction/:trs_id");
 
-        router.get("/list", this._assetAssetPluginApiList(type, null, assetInst));
-        allApis.push("/list");
+        // note: GET  /api/aob/assets/list -> GET  /api/aob/assets 是否有冲突，需要测试确认
+        router.get("/", this._assetAssetPluginApiList(type, null, assetInst));
+        allApis.push("/");
 
         return allApis;
     }
-
 
     async _addAsesstModels () {
         const { dao } = this;
@@ -288,7 +290,7 @@ class Loader {
         assetsPackageList.map((packageName) => {
             let assetModels;
             try {
-                assetModels = _require_runtime_(`${packageName}/lib/define-models`) || [];
+                assetModels = global._require_runtime_(`${packageName}/lib/define-models`) || [];
             } catch (err){
                 this.logger.info(`${packageName} 资产包不包含自定义数据模型内容。`);
                 return;

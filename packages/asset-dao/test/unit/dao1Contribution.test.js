@@ -132,11 +132,11 @@ describe('Contributions Test', () => {
         });
     });
 
-    it("GET /api/dao/contributions/list", (done) => {
+    it("GET /api/dao/contributions", (done) => {
         node.onNewBlock(err => {
             node.expect(err).to.be.not.ok;
 
-            let reqUrl = "/dao/contributions/list";
+            let reqUrl = "/dao/contributions";
             reqUrl += `?sender_address=${node.Daccount.address}`;
 
             node.api.get(reqUrl)
@@ -202,11 +202,11 @@ describe('Contributions Test', () => {
         });
     })
 
-    it("GET /api/dao/contributions/list", (done) => {
+    it("GET /api/dao/contributions", (done) => {
         node.onNewBlock(err => {
             node.expect(err).to.be.not.ok;
 
-            let reqUrl = "/dao/contributions/list";
+            let reqUrl = "/dao/contributions";
             reqUrl += `?received_address=${node.Gaccount.address}`;
 
             node.api.get(reqUrl)

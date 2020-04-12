@@ -56,14 +56,14 @@ describe("GET /blocks/getHeight", () => {
 describe("GET /blocks/getFee", () => {
 
     it("Should be ok", done => {
-        node.api.get("/blocks/getFee")
+        node.api.get("/blocks/getfee")
             .set("Accept", "application/json")
             .expect("Content-Type", /json/)
             .expect(200)
             .end((err, {
                 body
             }) => {
-                // debug(JSON.stringify(body));
+                debug('GET /blocks/getFee ', JSON.stringify(body));
                 node.expect(body).to.have.property("success").to.be.true;
                 if (body.success == true && body.fee != null) {
                     node.expect(body).to.have.property("fee");

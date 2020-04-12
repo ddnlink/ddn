@@ -1,8 +1,8 @@
-import node from '../node';
+import node from '@ddn/node-sdk/lib/test';
 
-async function createTransfer(address, amount, secret) {
-    return node.ddn.dao.createTransfer(address, amount, secret)
-}
+// async function createTransfer(address, amount, secret) {
+//     return node.ddn.dao.createTransfer(address, amount, secret)
+// }
 
 async function createPluginAsset(type, asset, secret, secondSecret) {
     return await node.ddn.assetPlugin.createPluginAsset(type, asset, secret, secondSecret)

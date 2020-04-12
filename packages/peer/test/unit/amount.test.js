@@ -1,8 +1,8 @@
-var node = require("../node")
-var amount = require('../../lib/helpers/amount.js')
+import node from "@ddn/node-sdk/lib/test";
+import amount from '../../lib/helpers/amount';
 
-describe('amount', function () {
-  it('normal test', function (done) {
+describe('amount', () => {
+  it('normal test', done => {
     node.expect(amount.validate(2)).to.equal('Invalid amount type')
     node.expect(amount.validate('abc')).to.equal('Amount should be integer')
     node.expect(amount.validate('NaN')).to.equal('Amount should be integer')

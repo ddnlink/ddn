@@ -1,19 +1,21 @@
-const DEBUG = require('debug')('delegates');
+import Debug from 'debug';
 import DdnUtils from '@ddn/utils';
-import node from "../node";
+import node from "@ddn/node-sdk/lib/test";
+
+const debug = Debug('delegates');
 
 let Raccount = node.randomAccount();
 while (Raccount.username === Raccount.username.toUpperCase()) {
     Raccount = node.randomAccount();
 }
-// DEBUG('Raccount info:',Raccount)
+// debug('Raccount info:', Raccount)
 
 const R2account = node.randomAccount();
 R2account.username = Raccount.username.toUpperCase();
 
 beforeAll(async () => {
     const res = await node.openAccountAsync({ secret: Raccount.password });
-    DEBUG('open account response', res.body)
+    debug('open account response', res.body)
     node.expect(res.body).to.have.property("success").to.be.true;
     node.expect(res.body).to.have.property("account").that.is.an("object");
     node.expect(res.body.account.balance).to.be.equal(0);
@@ -31,7 +33,7 @@ describe("PUT /delegates without funds", () => {
             .expect("Content-Type", /json/)
             .expect(200)
             .end((err, {body}) => {
-                DEBUG('register delegates response', body)
+                debug('register delegates response', body)
                 node.expect(body).to.have.property("success").to.be.false;
                 node.expect(body).to.have.property("error");
                 // node.expect(res.body.error).to.match(/Insufficient balance:/);
@@ -117,7 +119,7 @@ describe("PUT /accounts/delegates with funds", () => {
             .expect("Content-Type", /json/)
             .expect(200)
             .end((err, {body}) => {
-                // DEBUG('give money response', JSON.stringify(res.body));
+                // debug('give money response', JSON.stringify(res.body));
                 node.expect(body).to.have.property("success").to.be.true;
                 node.expect(body).to.have.property("transactionId");
                 if (body.success == true && body.transactionId != null) {
@@ -774,7 +776,7 @@ describe("GET /accounts/delegates?address=", () => {
             .expect("Content-Type", /json/)
             .expect(200)
             .end((err, {body}) => {
-                DEBUG('get delegates using invalid address response', body)
+                debug('get delegates using invalid address response', body)
                 node.expect(body).to.have.property("success").to.be.true;
                 node.expect(body).to.have.property("delegates").that.is.an("array");
                 node.expect(body.delegates).to.have.length.of.at.least(1);

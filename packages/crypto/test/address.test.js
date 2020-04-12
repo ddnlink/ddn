@@ -24,7 +24,7 @@ describe('address', () => {
   it('normal Address should be ok', done => {
     // node.expect(ddnCrypto.isAddress('DDaYcsGrwpPnR5SJK6AFBC6tMavGhBAkFD')).to.be.true
 
-    const addr = ddnCrypto.generateBase58CheckAddress(node.genNormalAccount().public_key);
+    const addr = ddnCrypto.generateAddress(node.genNormalAccount().public_key);
     node.expect(ddnCrypto.isAddress(addr)).to.be.true
 
     done()

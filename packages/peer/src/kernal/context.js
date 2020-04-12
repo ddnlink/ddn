@@ -5,8 +5,8 @@
 import DdnUtils from '@ddn/utils';
 import Asset from '@ddn/asset-base';
 import Bus from '../lib/bus';
-import protobuf from '../lib/protobuf.js';
-import Sequence from '../lib/sequence.js';
+import protobuf from '../lib/protobuf';
+import Sequence from '../lib/sequence';
 import BalanceManager from '../helpers/balance-manager';
 import database from '../db/database';
 import dbParams from '../db/db-params';
@@ -47,6 +47,8 @@ class Context
 
         //资产插件配置对象
         this.assetPlugins = Asset.Utils.loadFromObject(options.configObject.assets);
+
+        // console.log('this.assetPlugins= ', this.assetPlugins.isTypeValueExists(40));
 
         //二进制序列化对象
         this.protobuf = await this._buildProtobuf(options.protoFile);
