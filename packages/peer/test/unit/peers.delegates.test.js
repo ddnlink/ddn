@@ -1,5 +1,9 @@
+/**
+ * passed
+ */
+import node from "@ddn/node-sdk/lib/test";
+
 import crypto from "crypto";
-import node from "../node";
 
 const account = node.randomAccount();
 const account2 = node.randomAccount();

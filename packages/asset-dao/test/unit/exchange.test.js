@@ -136,7 +136,7 @@ describe('Put /transactions', () => {
         });
     });
 
-    it("Create exchange with state = 0, Should be ok", async () => {
+    it("Create exchange with state = 0, Should be ok", async (done) => {
         exchange = {
             "org_id": orgId,
             "price": exchangePrice,
@@ -154,7 +154,7 @@ describe('Put /transactions', () => {
         }, exchange)
 
         transaction = await node.ddn.assetPlugin.createPluginAsset(41, exchange, node.Gaccount.password)
-        await new Promise((resolve, reject) => {
+        // await new Promise((resolve, reject) => {
             node.peer.post("/transactions")
                 .set("Accept", "application/json")
                 .set("version", node.version)
@@ -170,21 +170,22 @@ describe('Put /transactions', () => {
                 }) => {
                     debug(JSON.stringify(body));
 
-                    if (err) {
-                        return reject(err);
-                    }
+                    // if (err) {
+                    //     return reject(err);
+                    // }
+                    node.expect(err).to.be.not.ok;
 
                     node.expect(body).to.have.property("success").to.be.true;
                     node.expect(body).to.have.property("transactionId");
 
                     exchange.exchange_trs_id = body.transactionId;
 
-                    resolve();
+                    done();
                 });
-        });
+        // });
     });
 
-    it("Create exchange with state = 1, Should be ok", async () => {
+    it("Create exchange with state = 1, Should be ok", async (done) => {
         await node.onNewBlockAsync();
 
         const temp = exchange.received_address;
@@ -195,7 +196,7 @@ describe('Put /transactions', () => {
         exchange.state = 1;
 
         transaction = await node.ddn.assetPlugin.createPluginAsset(41, exchange, Account1.password);
-        await new Promise((resolve, reject) => {
+        // await new Promise((resolve, reject) => {
             node.peer.post("/transactions")
                 .set("Accept", "application/json")
                 .set("version", node.version)
@@ -211,16 +212,14 @@ describe('Put /transactions', () => {
                 }) => {
                     debug(JSON.stringify(body));
 
-                    if (err) {
-                        return reject(err);
-                    }
+                    node.expect(err).to.be.not.ok;
 
                     node.expect(body).to.have.property("success").to.be.true;
                     node.expect(body).to.have.property("transactionId");
 
-                    resolve();
+                    done();
                 });
-        });
+        // });
     });
 
     it("Account1 balance calculate, Should be ok.", async () => {
@@ -234,7 +233,7 @@ describe('Put /transactions', () => {
         node.expect(Account1.balance.toString()).to.equal(nowBalance.toString());
     })
 
-    it("Create exchange with state = 1 again, Should be fail", async () => {
+    it("Create exchange with state = 1 again, Should be fail", async (done) => {
         await node.onNewBlockAsync();
 
         exchange.amount = exchange.price;
@@ -242,7 +241,7 @@ describe('Put /transactions', () => {
 
         transaction = await node.ddn.assetPlugin.createPluginAsset(41, exchange, Account1.password);
 
-        await new Promise((resolve, reject) => {
+        // await new Promise((resolve, reject) => {
             node.peer.post("/transactions")
                 .set("Accept", "application/json")
                 .set("version", node.version)
@@ -258,24 +257,22 @@ describe('Put /transactions', () => {
                 }) => {
                     debug(JSON.stringify(body));
 
-                    if (err) {
-                        return reject(err);
-                    }
+                    node.expect(err).to.be.not.ok;
 
                     node.expect(body).to.have.property("success").to.be.false;
                     node.expect(body).to.have.property("error").to.contain("confirm exchange already exists");
 
-                    resolve();
+                    done();
                 });
-        });
+        // });
     });
 })
 
 describe('PUT /dao/exchanges', () => {
     let orgId = "";
 
-    beforeAll(async () => {
-        await new Promise((resolve, reject) => {
+    beforeAll(async (done) => {
+        // await new Promise((resolve, reject) => {
             const getOrgIdUrl = `/orgs/getlist?pagesize=1&address=${node.Gaccount.address}`;
             node.api.get(getOrgIdUrl)
                 .set("Accept", "application/json")
@@ -288,9 +285,7 @@ describe('PUT /dao/exchanges', () => {
                 }) => {
                     debug(JSON.stringify(body));
 
-                    if (err) {
-                        return reject(err);
-                    }
+                    node.expect(err).to.be.not.ok;
 
                     node.expect(body).to.have.property("success").to.be.true;
 
@@ -298,10 +293,11 @@ describe('PUT /dao/exchanges', () => {
                         orgId = body.data.rows[0].org_id;
                         // orgId = body.orgId;
                     } else {
-                        return reject("未查找到符合要求的Org数据。");
+                        debug("未查找到符合要求的Org数据。");
+                        done();
                     }
 
-                    resolve();
+                    done();
                 });
         });
     });
@@ -319,9 +315,7 @@ describe('PUT /dao/exchanges', () => {
             }) => {
                 debug(JSON.stringify(body));
 
-                if (err) {
-                    return done(err);
-                }
+                node.expect(err).to.be.not.ok;
 
                 node.expect(body).to.have.property("success").to.be.false;
                 node.expect(body).to.have.property("error").to.contain("Invalid parameters");
@@ -346,9 +340,7 @@ describe('PUT /dao/exchanges', () => {
             }) => {
                 debug(JSON.stringify(body));
 
-                if (err) {
-                    return done(err);
-                }
+                node.expect(err).to.be.not.ok;
 
                 node.expect(body).to.have.property("success").to.be.true;
                 node.expect(body).to.have.property("transactionId");
@@ -360,7 +352,7 @@ describe('PUT /dao/exchanges', () => {
             });
     });
 
-    it("State=1, Account2 no exists, should be fail.", async () => {
+    it("State=1, Account2 no exists, should be fail.", async (done) => {
         await node.onNewBlockAsync();
 
         await new Promise((resolve, reject) => {
@@ -381,14 +373,12 @@ describe('PUT /dao/exchanges', () => {
                 }) => {
                     debug(JSON.stringify(body));
 
-                    if (err) {
-                        return reject(err);
-                    }
+                    node.expect(err).to.be.not.ok;
 
                     node.expect(body).to.have.property("success").to.be.false;
                     node.expect(body).to.have.property("error").to.equal("Account not found");
 
-                    resolve();
+                    done();
                 });
         });
     })
@@ -397,10 +387,10 @@ describe('PUT /dao/exchanges', () => {
         await sendDDN(Account2, "100000000");
     });
 
-    it("State=1, Account2 balance < 700000000, should be fail.", async () => {
+    it("State=1, Account2 balance < 700000000, should be fail.", async (done) => {
         await node.onNewBlockAsync();
 
-        await new Promise((resolve, reject) => {
+        // await new Promise((resolve, reject) => {
             node.api.put("/dao/exchanges")
                 .set('Accept', 'application/json')
                 .send({
@@ -418,16 +408,14 @@ describe('PUT /dao/exchanges', () => {
                 }) => {
                     debug(JSON.stringify(body));
 
-                    if (err) {
-                        return reject(err);
-                    }
+                    node.expect(err).to.be.not.ok;
 
                     node.expect(body).to.have.property("success").to.be.false;
                     node.expect(body).to.have.property("error").to.contain("Insufficient balance");
 
-                    resolve();
+                    done();
                 });
-        });
+        // });
     })
 
     it("Send random DDN to Account2, should be ok.", async () => {

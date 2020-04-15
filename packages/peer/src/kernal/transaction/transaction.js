@@ -198,7 +198,8 @@ class Transaction {
 
         const validateErrors = await this.ddnSchema.validateTransaction(trs);
         if (validateErrors) {
-            this.logger.error(`Failed to normalize transaction: ${validateErrors}`);
+            this.logger.error(`Failed to normalize transaction: ${JSON.stringify(trs)}`);
+            this.logger.error(`Failed to normalize transaction: ${JSON.stringify(validateErrors)}`);
             this.logger.error(`Failed to normalize transaction: ${validateErrors[0].message}`);
             throw new Error(validateErrors[0].message);
         }

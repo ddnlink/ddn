@@ -1,4 +1,8 @@
+/**
+ * passed
+ */
 import node from "@ddn/node-sdk/lib/test";
+
 import amount from '../../lib/helpers/amount';
 
 describe('amount', () => {

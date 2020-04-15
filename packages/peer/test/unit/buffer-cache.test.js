@@ -1,4 +1,8 @@
-import node from "../node";
+/**
+ * passed
+ */
+import node from "@ddn/node-sdk/lib/test";
+
 import BufferCache from '../../lib/helpers/buffer-cache';
 
 describe('BufferCache', () => {

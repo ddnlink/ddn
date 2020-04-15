@@ -1,4 +1,8 @@
-import node from "../node";
+/**
+ * passed
+ */
+import node from "@ddn/node-sdk/lib/test";
+
 import Tmdb from '../../lib/helpers/tmdb';
 
 describe('tmdb', () => {

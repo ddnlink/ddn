@@ -1,7 +1,10 @@
+/**
+ * note passed
+ */
+import node from "@ddn/node-sdk/lib/test";
+
 import Debug from 'debug';
 import async from 'async';
-
-import node from "../node";
 
 const debug = Debug('multinodes');
 

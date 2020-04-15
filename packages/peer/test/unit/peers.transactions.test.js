@@ -1,3 +1,8 @@
+/**
+ * passed
+ */
+import node from "@ddn/node-sdk/lib/test";
+
 import Debug from 'debug';
 
 import crypto from "crypto";
@@ -5,8 +10,6 @@ import path from 'path';
 import {
     requireFile
 } from '@ddn/core/lib/getUserConfig';
-
-import node from "../node";
 
 const debug = Debug('peer');
 
@@ -38,7 +41,7 @@ describe("POST /peer/transactions", () => {
             .end((err, {
                 body
             }) => {
-                debug(JSON.stringify(res.body));
+                debug(JSON.stringify(body));
                 node.expect(body).to.have.property("success").to.be.false;
                 node.expect(body.expected).to.equal(node.config.nethash);
                 done();

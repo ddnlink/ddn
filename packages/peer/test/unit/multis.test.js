@@ -1,4 +1,7 @@
-import node from "../node";
+/**
+ * not passed
+ */
+import node from "@ddn/node-sdk/lib/test";
 
 async function createTransfer(address, amount, secret, second_secret) {
     return await node.ddn.transaction.createTransaction(address, amount, null, secret, second_secret)

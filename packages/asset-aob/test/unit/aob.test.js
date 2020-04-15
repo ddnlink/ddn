@@ -1,3 +1,4 @@
+// passed
 import node from '@ddn/node-sdk/lib/test';
 
 const DEBUG = require('debug')('aob');
@@ -75,23 +76,23 @@ describe('Test AOB', () => {
       const trs = await node.ddn.aob.createIssuer(ISSUER1.name, ISSUER1.desc, node.Gaccount.password);
       DEBUG('create issuer trs', trs)
       
-    //   var [err, res] = await node.submitTransactionAsyncE(trs)
-    //   DEBUG('submit issuer response', err, res.body)
+      const [err, res] = await node.submitTransactionAsyncE(trs)
+      DEBUG('submit issuer response', err, res.body)
 
-    //   console.log("trs= ", trs);
-    //   console.log("res.body= ", res.body);
+      console.log("trs= ", trs);
+      console.log("res.body= ", res.body);
       
-    //   expect(err).to.not.exist
-    //   expect(res.body).to.have.property('success').to.be.true
+      expect(err).to.not.exist
+      expect(res.body).to.have.property('success').to.be.true
 
-    //   await node.onNewBlockAsync()
+      await node.onNewBlockAsync()
 
-    //   var [err, res] = await node.apiGetAsyncE(`/aob/issuers/${ISSUER1.name}`)
-    //   DEBUG('get /aob/issuers/:name response', err, res.body)
-    //   expect(err).to.not.exist
-    //   expect(res.body).to.have.property('result')
-    //   expect(res.body.result.name).to.equal(ISSUER1.name)
-    //   expect(res.body.result.issuer_id).to.equal(node.Gaccount.address)
+      const [err2, res2] = await node.apiGetAsyncE(`/aob/issuers/${ISSUER1.name}`)
+      DEBUG('get /aob/issuers/:name response', err2, res2.body)
+      expect(err2).to.not.exist
+      expect(res2.body).to.have.property('result')
+      expect(res2.body.result.name).to.equal(ISSUER1.name)
+      expect(res2.body.result.issuer_id).to.equal(node.Gaccount.address)
     })
 
     // it('Register asset should be ok', async () => {

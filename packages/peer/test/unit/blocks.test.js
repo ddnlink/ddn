@@ -1,8 +1,11 @@
+/**
+ * passed
+ */
 import path from 'path';
 import Debug from 'debug';
 import DdnUtils from '@ddn/utils';
+import node from "@ddn/node-sdk/lib/test";
 
-import node from "../node";
 import {
     requireFile
 } from '@ddn/core/lib/getUserConfig';
@@ -20,7 +23,7 @@ const block = {
     totalFee: "0"
 };
 
-let testBlocksUnder101 = 0;
+let testBlocksUnder100 = false;
 
 describe("GET /blocks/getHeight", () => {
 
@@ -38,11 +41,9 @@ describe("GET /blocks/getHeight", () => {
                     node.expect(body).to.have.property("height").to.be.above(0);
                     if (body.success == true) {
                         block.blockHeight = body.height;
-                        if (body.height > 100) {
-                            if (DdnUtils.bignum.isGreaterThan(body.height, 100)) {
-                                testBlocksUnder101 = true;
-                                done();
-                            }
+                        if (DdnUtils.bignum.isGreaterThan(body.height, 100)) {
+                            testBlocksUnder100 = true;
+                            done();
                         }
                     } else {
                         debug("Request failed or height is null");
@@ -70,7 +71,6 @@ describe("GET /blocks/getFee", () => {
                     // node.expect(body.fee).to.equal(node.Fees.transactionFee);
                     const result = DdnUtils.bignum.isEqualTo(body.fee, node.Fees.transactionFee);
                     node.expect(result).to.be.true;
-                    
                 } else {
                     debug("Request failed or fee is null");
                 }
@@ -78,33 +78,6 @@ describe("GET /blocks/getFee", () => {
             });
     });
 });
-
-//该接口不存在
-// describe("GET /blocks/getFees", function () {
-
-//     it.skip("Should be ok", function (done) {
-//         node.api.get("/blocks/getFees")
-//             .set("Accept", "application/json")
-//             .expect("Content-Type", /json/)
-//             .expect(200)
-//             .end(function (err, {body}) {
-//             // debug(JSON.stringify(body));
-//             node.expect(body).to.have.property("success").to.be.true;
-//             if (body.success == true && body.fees != null) {
-//                 node.expect(body).to.have.property("fees");
-//                 node.expect(body.fees.send).to.equal(node.Fees.transactionFee);
-//                 node.expect(body.fees.vote).to.equal(node.Fees.voteFee);
-//                 node.expect(body.fees.dapp).to.equal(node.Fees.dappAddFee);
-//                 node.expect(body.fees.secondsignature).to.equal(node.Fees.secondPasswordFee);
-//                 node.expect(body.fees.delegate).to.equal(node.Fees.delegateRegistrationFee);
-//                 node.expect(body.fees.multisignature).to.equal(node.Fees.multisignatureRegistrationFee);
-//             } else {
-//               console.log("Request failed or fees is null");
-//             }
-//             done();
-//           });
-//     });
-// });
 
 //该接口不存在
 // describe("GET /blocks/getNethash", function () {
@@ -155,19 +128,22 @@ describe("GET /blocks", () => {
                     node.expect(body.blocks[0]).to.have.property("block_signature");
                     node.expect(body.blocks[0]).to.have.property("number_of_transactions");
                     node.expect(body.blocks[0].height).to.equal(block.blockHeight);
+                    
                     block.id = body.blocks[0].id;
                     block.generatorPublicKey = body.blocks[0].generator_public_key;
                     block.totalAmount = body.blocks[0].total_amount;
                     block.totalFee = body.blocks[0].total_fee;
+
+                    done();
                 } else {
                     console.log("Request failed or blocks array is null");
+                    done();
                 }
-                done();
             });
     });
 
     it("Using height < 100. Should be ok", done => {
-        if (testBlocksUnder101) {
+        if (testBlocksUnder100) {
             const height = 10;
             node.api.get(`/blocks?height=${height}`)
                 .set("Accept", "application/json")
@@ -190,10 +166,12 @@ describe("GET /blocks", () => {
                         node.expect(body.blocks[0]).to.have.property("block_signature");
                         node.expect(body.blocks[0]).to.have.property("number_of_transactions");
                         node.expect(body.blocks[0].height).to.equal("10");
+
                         block.id = body.blocks[0].id;
                         block.generatorPublicKey = body.blocks[0].generator_public_key;
-                        block.totalAmount = body.blocks[0].totalAmount;
-                        block.totalFee = body.blocks[0].totalFee;
+                        block.totalAmount = body.blocks[0].total_amount;
+                        block.totalFee = body.blocks[0].total_fee;
+                        block.blockHeight = body.blocks[0].height;
                     } else {
                         console.log("Request failed or blocks array is null");
                     }
@@ -208,7 +186,7 @@ describe("GET /blocks", () => {
         const generatorPublicKey = block.generatorPublicKey;
         const limit = 100;
         const offset = 0;
-        const orderBy = "";
+        // const orderBy = "";
         node.api.get(`/blocks?generatorPublicKey=${generatorPublicKey}&limit=${limit}&offset=${offset}`)
             .set("Accept", "application/json")
             .expect("Content-Type", /json/)
@@ -222,6 +200,7 @@ describe("GET /blocks", () => {
                 for (let i = 0; i < body.blocks.length; i++) {
                     node.expect(body.blocks[i].generator_public_key).to.equal(block.generatorPublicKey);
                 }
+
                 done();
             });
     });
@@ -237,11 +216,10 @@ describe("GET /blocks", () => {
             .end((err, {
                 body
             }) => {
-                // debug(JSON.stringify(body));
+                debug('/blocks?totalFee ', JSON.stringify(body.blocks[0]));
                 node.expect(body).to.have.property("success").to.be.true;
                 node.expect(body).to.have.property("blocks").that.is.an("array");
                 for (let i = 0; i < body.blocks.length; i++) {
-                    // node.expect(body.blocks[i].total_fee).to.equal(block.totalFee);
                     const result = DdnUtils.bignum.isEqualTo(body.blocks[i].total_fee, block.totalFee);
                     node.expect(result).to.be.true;
                 }
@@ -261,15 +239,15 @@ describe("GET /blocks", () => {
             .end((err, {
                 body
             }) => {
-                // debug(JSON.stringify(body));
+                // debug('/blocks?totalAmount ', JSON.stringify(body));
                 node.expect(body).to.have.property("success").to.be.true;
                 node.expect(body).to.have.property("blocks").that.is.an("array");
                 for (let i = 0; i < body.blocks.length; i++) {
-                    // node.expect(body.blocks[i].total_amount).to.equal(block.totalAmount);
                     const result = DdnUtils.bignum.isEqualTo(body.blocks[i].total_amount, block.totalAmount);
-                    debug(result, body.blocks[i].total_amount, block.totalAmount);
+                    debug(result, body.blocks[i].total_amount, totalAmount);
                     node.expect(result).to.be.true;
                 }
+
                 done();
             });
     });
@@ -291,6 +269,7 @@ describe("GET /blocks", () => {
                         node.expect(body).to.have.property("blocks").that.is.an("array");
                         node.expect(body.blocks).to.have.length(1);
                         node.expect(body.blocks[0].previous_block).to.equal(previousBlock);
+                        
                         done();
                     });
             });
@@ -324,7 +303,7 @@ describe("GET /blocks/get?id=", () => {
 
     it("Using genesisblock id. Should be ok", done => {
         const genesisblockId = genesisblock.id;
-        debug('genesisblockId= ', genesisblockId);
+        debug('genesisblockId', genesisblockId);
 
         node.api.get(`/blocks/get?id=${genesisblockId}`)
             .set("Accept", "application/json")

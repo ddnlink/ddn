@@ -1,8 +1,8 @@
+// not passed
 import Debug from 'debug';
 import node from '@ddn/node-sdk/lib/test';
 
 const debug = Debug('aob');
-// debug("node= ", node);
 
 async function createTransfer(address, amount, secret) {
     return await node.ddn.transaction.createTransaction(address, amount, null, secret);

@@ -202,7 +202,7 @@ class BlockService {
         }
 
         const fee = await this.runtime.block.calculateFee();
-        return {fee};
+        return {success: true, fee};
     }
 
     async getGetMilestone(req) {
@@ -212,7 +212,7 @@ class BlockService {
 
         const height = this.runtime.block.getLastBlock().height;
         const milestone = this.runtime.block.getBlockStatus().calcMilestone(height);
-        return {milestone};
+        return {success: true, milestone};
     }
 
     async getGetReward(req) {
@@ -222,7 +222,7 @@ class BlockService {
 
         const height = this.runtime.block.getLastBlock().height;
         const reward = this.runtime.block.getBlockStatus().calcReward(height);
-        return {reward};
+        return {success: true, reward};
     }
 
     async getGetSupply(req) {
@@ -232,7 +232,7 @@ class BlockService {
 
         const height = this.runtime.block.getLastBlock().height;
         const supply = this.runtime.block.getBlockStatus().calcSupply(height);
-        return {supply};
+        return {success: true, supply};
     }
 
     async getGetHeight(req) {

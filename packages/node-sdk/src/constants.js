@@ -1,3 +1,6 @@
+/**
+ * fixme: 2020.4.15 保持与产品 constants 一致，所以最好删除，并使用核心程序的文件
+ */
 export default {
   fixedPoint: 10 ** 8, // TODO: imfly
 

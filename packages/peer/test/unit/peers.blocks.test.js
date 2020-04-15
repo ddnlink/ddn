@@ -1,4 +1,7 @@
-import node from "../node";
+/**
+ * passed
+ */
+import node from "@ddn/node-sdk/lib/test";
 
 describe("test blocks", () => {
 

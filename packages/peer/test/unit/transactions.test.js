@@ -1,6 +1,9 @@
-import DdnUtils from '@ddn/utils';
+/**
+ * passed
+ */
+import node from "@ddn/node-sdk/lib/test";
 
-import node from '../node';
+import DdnUtils from '@ddn/utils';
 
 const DEBUG = require('debug')('peer');
 

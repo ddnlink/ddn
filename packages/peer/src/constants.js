@@ -1,4 +1,5 @@
 /**
+ * Please use yourself constants file
  * Note: Once the mainnet is online, this file can no longer be changed.
  */
 export default {

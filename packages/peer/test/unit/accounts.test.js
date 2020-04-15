@@ -1,11 +1,15 @@
+/**
+ * passed
+ */
 import Debug from 'debug';
-import node from "../node";
+import node from "@ddn/node-sdk/lib/test";
+import constants from '../../lib/constants';
 
 const debug = Debug('accounts');
 // Account info for password "ddntest"
 // New account does not have publickey in db
 const AccountTest = {
-    "address": `${node.constants.tokenPrefix}4tEjMLbAMcwgLpcsmTW4rLyz3maZdBRtZ`,
+    "address": `${constants.tokenPrefix}4tEjMLbAMcwgLpcsmTW4rLyz3maZdBRtZ`,
     "balance": 0,
     "publicKey": "4ebfcc2c652fbc27cfbedb8c985566cd673a5e0e32e266434a0030d28e332984",
     "secondSignature": "",
@@ -17,8 +21,7 @@ const AccountTest = {
 };
 
 const Gaccount = node.Gaccount;
-Gaccount.balance=9990881532094328
-
+Gaccount.balance = '9990881532094328';
 
 describe("POST /accounts/open", () => {
 

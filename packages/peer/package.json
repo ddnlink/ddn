@@ -43,9 +43,7 @@
   "engines": {
     "node": ">=8.6.0"
   },
-  "scripts": {
-    "test": "./node_modules/.bin/mocha -r intelli-espower-loader test/**/*.test.js"
-  },
+
   "dependencies": {
     "@ddn/asset-aob": "^0.1.4",
     "@ddn/asset-base": "^0.1.4",

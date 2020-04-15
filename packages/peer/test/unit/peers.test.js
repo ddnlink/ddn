@@ -1,5 +1,9 @@
+/**
+ * passed
+ */
+import node from "@ddn/node-sdk/lib/test";
+
 import Debug from 'debug';
-import node from "../node";
 
 const debug = Debug('peer');
 

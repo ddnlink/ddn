@@ -1,3 +1,6 @@
+/**
+ * passed
+ */
 import Debug from 'debug';
 import DdnUtils from '@ddn/utils';
 import node from "@ddn/node-sdk/lib/test";
@@ -8,7 +11,6 @@ let Raccount = node.randomAccount();
 while (Raccount.username === Raccount.username.toUpperCase()) {
     Raccount = node.randomAccount();
 }
-// debug('Raccount info:', Raccount)
 
 const R2account = node.randomAccount();
 R2account.username = Raccount.username.toUpperCase();

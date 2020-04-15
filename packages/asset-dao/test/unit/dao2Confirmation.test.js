@@ -1,3 +1,4 @@
+// not passed
 import Debug from 'debug';
 import node from '@ddn/node-sdk/lib/test';
 
@@ -6,13 +7,13 @@ const debug = Debug('dao');
 let transaction;
 let confirmation;
 
+let orgId = "";
+let contributionTrsId = "";
+let contributionPrice = "0";
+
 describe('Confirmations Test', () => {
 
-    node.ddn.init();
-
-    let orgId = "";
-    let contributionTrsId = "";
-    let contributionPrice = "0";
+    // node.ddn.init();
 
     beforeAll((done) => {
         const getOrgIdUrl = `/dao/orgs/address/${node.Gaccount.address}`;

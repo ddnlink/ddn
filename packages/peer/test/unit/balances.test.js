@@ -1,4 +1,8 @@
-import node from "../node";
+/**
+ * passed
+ */
+import node from "@ddn/node-sdk/lib/test";
+
 import BalanceManager from '../../lib/helpers/balance-manager.js';
 
 describe('balance cache manager', () => {

@@ -5,9 +5,13 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
+ /**
+ * passed
+ */
+import node from "@ddn/node-sdk/lib/test";
+
 import DdnUtil from '@ddn/utils';
 
-import node from "../node";
 import constants from "../../lib/constants";
 import BlockStatus from '../../lib/kernal/block/block-status';
 
