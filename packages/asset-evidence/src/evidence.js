@@ -15,6 +15,35 @@ class Evidence extends Asset.Base {
         ];
     }
 
+    /**
+   * All Fields：
+   * ipid - Article`s or file`s identity
+   * title - Article`s title or file`s name.
+   * hash - Article`s or file`s content Hash.
+   * tags - Key words for description of article or file.
+   * author - author`s name.
+   * url - URI in the DDN P2P network
+   * size - Article`s content length or file size
+   * `timestamp` - timestamp from transaction.
+   * type - Extension，e.g: dat://Daesgeadfedfa/first.html , extension is .html
+   * @param {object} data Evidence data
+   * @param {object} trs translation
+   */
+    async create(data, trs) {
+        trs.recipientId = null;
+        trs.amount = "0";   //bignum update
+
+        // trs.asset.evidence = data.evidence;
+        const assetJsonName = await this.getAssetJsonName(trs.type);
+        trs.asset[assetJsonName] = data[assetJsonName];
+
+        if (!trs.asset.evidence.description) {
+            trs.asset.evidence.description = ""
+        }
+
+        return trs;
+    }
+
     async verify(trs, sender) {
         const trans = await super.verify(trs, sender);
         const assetObj = await this.getAssetObject(trs);
@@ -35,7 +64,7 @@ class Evidence extends Asset.Base {
                     "tr",
                     oldEvidence.transaction_id,
                     ["sender_id"],
-                    async (err, {sender_id}) => {
+                    async (err, { sender_id }) => {
                         if (err) {
                             reject(err);
                         } else {

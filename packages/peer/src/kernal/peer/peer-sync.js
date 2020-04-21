@@ -42,7 +42,7 @@ class PeerSync {
                 }, required: ['height']
             }, remotePeerHeight.body);
             if (validateErrors) {
-                this.logger.log(`Failed to parse blockchain height: ${peerStr}\n${validateErrors[0].message}`);
+                this.logger.log(`Failed to parse blockchain height: ${peerStr}\n${validateErrors[0].schemaPath} ${validateErrors[0].message}`);
             }
 
             if (DdnUtils.bignum.isLessThan(this.runtime.block.getLastBlock().height, remotePeerHeight.body.height)) {
@@ -250,7 +250,7 @@ class PeerSync {
                 type: "array"
             }, blocks);
             if (validateErrors) {
-                throw new Error(`Can't parse blocks: ${validateErrors[0].message}`);
+                throw new Error(`Can't parse blocks: ${validateErrors[0].schemaPath} ${validateErrors[0].message}`);
             }
 
             // add two new field: trs.args and trs.message
@@ -342,7 +342,7 @@ class PeerSync {
             required: ['signatures']
         }, data.body);
         if (validateErrors) {
-            this.logger.error(`${validateErrors[0].message}`);
+            this.logger.error(`${validateErrors[0].schemaPath} ${validateErrors[0].message}`);
             return;
         }
 

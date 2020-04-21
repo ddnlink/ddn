@@ -173,7 +173,7 @@ class Delegate {
             required: ['public_key']
         }, trs.asset.delegate);
         if (validateErrors) {
-            throw new Error(`Can't verify delegate transaction, incorrect parameters: ${validateErrors[0].message}`);
+            throw new Error(`Can't verify delegate transaction, incorrect parameters: ${validateErrors[0].schemaPath} ${validateErrors[0].message}`);
         }
 
 		return trs;

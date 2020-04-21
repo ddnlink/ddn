@@ -1,5 +1,7 @@
-const DEBUG = require('debug')('dao');
-import node from '../node';
+const Debug = require('debug');
+import node from '@ddn/node-sdk/lib/test';
+
+const debug = Debug('evidence');
 
 const Account1 = node.randomTxAccount();
 const Account2 = node.randomTxAccount();
@@ -41,7 +43,7 @@ describe('Test evidence', () => {
       .expect("Content-Type", /json/)
       .expect(200)
       .end((err, {body}) => {
-        console.log(JSON.stringify(body));
+        debug(JSON.stringify(body));
         node.expect(body).to.have.property("success").to.be.true;
         done();
       });
@@ -57,7 +59,7 @@ describe('Test evidence', () => {
         .expect("Content-Type", /json/)
         .expect(200)
         .end((err, {body}) => {
-          console.log(JSON.stringify(body.transaction));
+          debug(JSON.stringify(body.transaction));
           node.expect(body).to.have.property('success').to.be.true;
           node.expect(body).to.have.property('transaction');
 
@@ -106,7 +108,7 @@ describe('PUT /api/evidences/new', () => {
     .expect('Content-Type', /json/)
     .expect(200)
     .end((err, {body}) => {
-        console.log(JSON.stringify(body));
+        debug(JSON.stringify(body));
         node.expect(body).to.have.property('success').to.be.true;
         node.expect(body).to.have.property('transactionId');
         done();

@@ -956,8 +956,8 @@ class AssetBase {
             required: requiredFields
         }, trs.asset[assetName]);
         if (validateErrors) {
-            this.logger.error(`Can't parse asset ${assetName}: ${validateErrors[0].message}`);
-            throw new Error(`Can't parse asset data: ${validateErrors[0].message}`);
+            this.logger.error(`Can't parse asset ${assetName}: ${validateErrors[0].schemaPath} ${validateErrors[0].message}`);
+            throw new Error(`Can't parse asset data: ${validateErrors[0].schemaPath} ${validateErrors[0].message}`);
         }
 
         return trs;

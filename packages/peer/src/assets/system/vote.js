@@ -113,7 +113,7 @@ class Vote {
             required: ['votes']
         }, trs.asset.vote);
         if (validateErrors) {
-            throw new Error(`Incorrect votes in transactions: ${validateErrors[0].message}`);
+            throw new Error(`Incorrect votes in transactions: ${validateErrors[0].schemaPath} ${validateErrors[0].message}`);
         }
 
 		return trs;

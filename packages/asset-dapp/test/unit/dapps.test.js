@@ -2,7 +2,7 @@ import DdnUtils from '@ddn/utils';
 import Debug from 'debug';
 
 // Requires and node configuration
-import node from "../node";
+import node from '@ddn/node-sdk/lib/test';
 
 const debug = Debug('dapp');
 
@@ -844,7 +844,7 @@ describe("PUT /dapps", () => {
 //     });
 // });
 
-// describe("GET /dapps?id=", function () {
+describe("GET /dapps?id=", function () {
 
 //     it("Using unknown id. Should fail", function (done) {
 //         var dappId = "UNKNOWN_ID";
@@ -872,26 +872,50 @@ describe("PUT /dapps", () => {
 //             });
 //     });
 
-//     it("Using valid id. Should be ok", function (done) {
-//         var dappId = DappToInstall.transactionId;
+    it("Using valid id. Should be ok", function (done) {
+        var dappId = DappToInstall.transactionId;
 
-//         node.api.get("/dapps/get?id=" + dappId)
-//             .expect("Content-Type", /json/)
-//             .expect(200)
-//             .end(function (err, res) {
-//                 // debug(JSON.stringify(res.body));
-//                 node.expect(res.body).to.have.property("success").to.be.true;
-//                 node.expect(res.body).to.have.property("dapp");
-//                 if (res.body.success == true && res.body.dapp != null) {
-//                     node.expect(res.body.dapp.transactionId).to.equal(dappId);
-//                 } else {
-//                     // debug(JSON.stringify(res.body));
-//                     debug("Request failed or dapps array is null");
-//                 }
-//                 done();
-//             });
-//     });
-// });
+        node.api.get("/dapps?id=" + dappId)
+            .expect("Content-Type", /json/)
+            .expect(200)
+            .end(function (err, res) {
+                // debug(JSON.stringify(res.body));
+                node.expect(res.body).to.have.property("success").to.be.true;
+                node.expect(res.body).to.have.property("dapp");
+                if (res.body.success == true && res.body.dapp != null) {
+                    node.expect(res.body.dapp.transactionId).to.equal(dappId);
+                } else {
+                    // debug(JSON.stringify(res.body));
+                    debug("Request failed or dapps array is null");
+                }
+                done();
+            });
+    });
+
+});
+
+describe("GET /dapps/:id", function () {
+
+    it("Using valid id. Should be ok", function (done) {
+        var dappId = DappToInstall.transactionId;
+
+        node.api.get("/dapps/" + dappId)
+            .expect("Content-Type", /json/)
+            .expect(200)
+            .end(function (err, res) {
+                debug(JSON.stringify(res.body));
+                node.expect(res.body).to.have.property("success").to.be.true;
+                node.expect(res.body).to.have.property("dapp");
+                if (res.body.success == true && res.body.dapp != null) {
+                    node.expect(res.body.dapp.transactionId).to.equal(dappId);
+                } else {
+                    // debug(JSON.stringify(res.body));
+                    debug("Request failed or dapps array is null");
+                }
+                done();
+            });
+    });
+});
 
 // describe("POST /dapps/install", function () {
 

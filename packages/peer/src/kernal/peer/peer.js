@@ -281,7 +281,7 @@ class Peer {
                 const validateErrors = await this.ddnSchema.validatePeer(peer);
                 if (validateErrors) {
                     this.logger.error(
-                        `Invalid peer: ${validateErrors[0].message}`
+                        `Invalid peer: ${validateErrors[0].schemaPath} ${validateErrors[0].message}`
                     );
                     continue;
                 }

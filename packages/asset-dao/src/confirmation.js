@@ -219,7 +219,7 @@ class Confirmation extends Asset.Base {
             required: []
         }, req.query);
         if (validateErrors) {
-            throw new Error(`Invalid parameters: ${validateErrors[0].message}`);
+            throw new Error(`Invalid parameters: ${validateErrors[0].schemaPath} ${validateErrors[0].message}`);
         }
 
         const where = {
@@ -286,7 +286,7 @@ class Confirmation extends Asset.Base {
             required: ['secret', 'contributionTrsId', 'state']
         }, body);
         if (validateErrors) {
-            throw new Error(`Invalid parameters: ${validateErrors[0].message}`);
+            throw new Error(`Invalid parameters: ${validateErrors[0].schemaPath} ${validateErrors[0].message}`);
         }
 
         const hash = crypto.createHash('sha256').update(body.secret, 'utf8').digest();

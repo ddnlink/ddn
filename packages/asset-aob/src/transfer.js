@@ -349,7 +349,7 @@ class Transfer extends Asset.Base {
             required: ['secret', 'amount', 'recipientId', 'currency'],
         }, body);
         if (validateErrors) {
-            throw new Error(`Invalid parameters: ${validateErrors[0].message}`);
+            throw new Error(`Invalid parameters: ${validateErrors[0].schemaPath} ${validateErrors[0].message}`);
         }
 
         const hash = crypto.createHash('sha256').update(body.secret, 'utf8').digest();

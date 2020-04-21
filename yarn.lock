@@ -9891,8 +9891,8 @@ git-clone@^0.1.0:
 
 git-cz@^4.3.1:
   version "4.3.1"
-  resolved "https://registry.npmjs.org/git-cz/-/git-cz-4.3.1.tgz#1a1a462c2730c17c9fcbfa023beee98fd7659934"
-  integrity sha512-z+mbD76lbra8ml2nMoOoFkQPJ2OQvg6vpZa8d9VzNEvygEQNysgMkzGPBxqFKw1VIwZ/PHoQgAf70BPp9uElJw==
+  resolved "https://registry.npm.taobao.org/git-cz/download/git-cz-4.3.1.tgz#1a1a462c2730c17c9fcbfa023beee98fd7659934"
+  integrity sha1-GhpGLCcwwXyfy/oCO+7pj9dlmTQ=
 
 git-raw-commits@2.0.0:
   version "2.0.0"

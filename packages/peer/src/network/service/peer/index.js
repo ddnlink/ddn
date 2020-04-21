@@ -180,7 +180,7 @@ class PeerService {
         if (validateErrors) {
             return {
                 success: false,
-                error: `Schema validation error: ${validateErrors[0].message}`
+                error: `Schema validation error: ${validateErrors[0].schemaPath} ${validateErrors[0].message}`
             };
         }
 
@@ -279,7 +279,7 @@ class PeerService {
         if (validateErrors) {
             return {
                 success: false,
-                error: `Validation error: ${validateErrors[0].message}`
+                error: `Validation error: ${validateErrors[0].schemaPath} ${validateErrors[0].message}`
             };
         }
 

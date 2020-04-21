@@ -323,7 +323,8 @@ class Dapp extends Asset.Base {
             }
         });
 
-        router.get("/get", async (req, res) => {
+        // 2020.4.21 验证: 使用 get api/dapps/get -> get api/dapps/:id ?
+        router.get("/:id", async (req, res) => {
             try {
                 const result = await this.getDappById(req);
                 res.json(result);
@@ -512,7 +513,7 @@ class Dapp extends Asset.Base {
             required: ["id"]
         }, query);
         if (validateErrors) {
-            throw new Error(`Invalid parameters: ${validateErrors[0].message}`);
+            throw new Error(`Invalid parameters: ${validateErrors[0].schemaPath} ${validateErrors[0].message}`);
         }
 
         if (this.config.dapp.masterpassword &&
@@ -549,7 +550,7 @@ class Dapp extends Asset.Base {
             required: ["id"]
         }, body);
         if (validateErrors) {
-            throw new Error(`Invalid parameters: ${validateErrors[0].message}`);
+            throw new Error(`Invalid parameters: ${validateErrors[0].schemaPath} ${validateErrors[0].message}`);
         }
 
         if (this.config.dapp.masterpassword &&
@@ -759,7 +760,7 @@ class Dapp extends Asset.Base {
             required: ["id"]
         }, body);
         if (validateErrors) {
-            throw new Error(`Invalid parameters: ${validateErrors[0].message}`);
+            throw new Error(`Invalid parameters: ${validateErrors[0].schemaPath} ${validateErrors[0].message}`);
         }
 
         if (this.config.dapp.masterpassword &&
@@ -846,7 +847,7 @@ class Dapp extends Asset.Base {
             }
         }, query);
         if (validateErrors) {
-            throw new Error(`Invalid parameters: ${validateErrors[0].message}`);
+            throw new Error(`Invalid parameters: ${validateErrors[0].schemaPath} ${validateErrors[0].message}`);
         }
 
         const orders = [];
@@ -893,8 +894,9 @@ class Dapp extends Asset.Base {
         return { success: true, result };
     }
 
+    // 支持 ?id=abc 和 /abc 两种格式
     async getDappById(req) {
-        const query = req.query;
+        const query = req.query | req.params; 
 
         const validateErrors = await this.ddnSchema.validate({
             type: "object",
@@ -907,7 +909,7 @@ class Dapp extends Asset.Base {
             required: ["id"]
         }, query);
         if (validateErrors) {
-            throw new Error(`Invalid parameters: ${validateErrors[0].message}`);
+            throw new Error(`Invalid parameters: ${validateErrors[0].schemaPath} ${validateErrors[0].message}`);
         }
 
         const dapp = await this.getDappByTransactionId(query.id);
@@ -1101,7 +1103,7 @@ class Dapp extends Asset.Base {
             required: ["id"]
         }, body);
         if (validateErrors) {
-            throw new Error(`Invalid parameters: ${validateErrors[0].message}`);
+            throw new Error(`Invalid parameters: ${validateErrors[0].schemaPath} ${validateErrors[0].message}`);
         }
 
         if (this.config.dapp.masterpassword && body.master !== this.config.dapp.masterpassword) {
@@ -1151,7 +1153,7 @@ class Dapp extends Asset.Base {
             required: ["id"]
         }, body);
         if (validateErrors) {
-            throw new Error(`Invalid parameters: ${validateErrors[0].message}`);
+            throw new Error(`Invalid parameters: ${validateErrors[0].schemaPath} ${validateErrors[0].message}`);
         }
 
         if (this.config.dapp.masterpassword && body.master !== this.config.dapp.masterpassword) {
@@ -1243,7 +1245,7 @@ class Dapp extends Asset.Base {
             required: ["secret", "type", "name", "category"]
         }, body);
         if (validateErrors) {
-            throw new Error(`Invalid parameters: ${validateErrors[0].message}`);
+            throw new Error(`Invalid parameters: ${validateErrors[0].schemaPath} ${validateErrors[0].message}`);
         }
 
         const hash = crypto.createHash('sha256').update(body.secret, 'utf8').digest();
