@@ -13,7 +13,7 @@ ddnJS.assetPlugin.createPluginAsset(trsType, assetInfo, secret, secondSecret)<br
 
 ## 提交存证数据
 ```
-trsType: 10
+trsType: 20
 assetInfo: {  
                 ipid: "ipid12345",  //存证ipid，唯一
                 title: "测试",      //存证内容标题

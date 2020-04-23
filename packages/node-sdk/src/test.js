@@ -414,8 +414,8 @@ export default {
   AssetTypes: DdnUtils.assetTypes,
 
   //wxm TODO 此处应该使用对应npm包提供的对象
-//   DappType: DappType,
-//   DappCategory: DappCategory,
+  DappType,
+  DappCategory,
 
   guestbookDapp,
   Fees,
@@ -465,8 +465,5 @@ export default {
   randomIpId,
   constants,
 
-  getRealTime,
-
-  DappCategory,
-  DappType
+  getRealTime
 };

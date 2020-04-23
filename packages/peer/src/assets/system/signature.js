@@ -15,7 +15,7 @@ class Signatures {
 	}
 
     async create({second_keypair}, trs) {
-		trs.recipient_id = null;
+		trs.recipientId = null;
 		trs.amount = "0";   //DdnUtils.bignum update
 		trs.asset.signature = {
 			public_key: second_keypair.publicKey.toString('hex')

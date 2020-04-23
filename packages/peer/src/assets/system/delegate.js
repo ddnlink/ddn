@@ -14,7 +14,7 @@ class Delegate {
 	}
 
 	async create({username, sender}, trs) {
-		trs.recipient_id = null;    //wxm block database
+		trs.recipientId = null;    //wxm block database
 		trs.amount = "0";   //Bignum update
 		trs.asset.delegate = {
 			username,
@@ -34,7 +34,7 @@ class Delegate {
 	}
 
 	async verify(trs, {is_delegate}) {
-		if (trs.recipient_id) {
+		if (trs.recipientId) {
             throw new Error('Invalid recipient');
 		}
 

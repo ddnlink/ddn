@@ -680,7 +680,7 @@ describe("PUT /multisignatures", () => {
 //                 for (let i = 0; i < body.transactions.length; i++) {
 //                     // debug(MultisigAccount.publicKey);
 //                     if (
-//                         body.transactions[i].transaction.sender_public_key ==
+//                         body.transactions[i].transaction.senderPublicKey ==
 //                         MultisigAccount.public_key
 //                     ) {
 //                         flag += 1;
@@ -705,7 +705,7 @@ describe("PUT /multisignatures", () => {
 //                             .to.have.property("id")
 //                             .to.equal(MultiSigTX.txId);
 //                         node.expect(body.transactions[i].transaction)
-//                             .to.have.property("sender_public_key")
+//                             .to.have.property("senderPublicKey")
 //                             .to.equal(MultisigAccount.public_key);
 //                         node.expect(body.transactions[i])
 //                             .to.have.property("lifetime")

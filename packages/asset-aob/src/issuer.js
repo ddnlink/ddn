@@ -37,7 +37,7 @@ class Issuer extends Asset.Base {
             name: issuerObj.name
         }, null, null, 1, 1);
         const data2 = await this.queryAsset({
-            issuer_id: trs.sender_id,
+            issuer_id: trs.senderId,
         }, null, null, 1, 1);
         const results = data1.concat(data2);
         if (results && results.length > 0) {
@@ -49,7 +49,7 @@ class Issuer extends Asset.Base {
 
     async dbSave(trs, dbTrans) {
         const issuerObj = await this.getAssetObject(trs);
-        issuerObj.issuer_id = trs.sender_id;
+        issuerObj.issuer_id = trs.senderId;
         await super.dbSave(trs, dbTrans);
     }
 

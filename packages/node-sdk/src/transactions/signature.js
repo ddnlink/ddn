@@ -1,6 +1,6 @@
 import crypto from "./crypto";
 import constants from "../constants";
-import transactionTypes from "../transaction-types";
+import DdnUtils from '@ddn/utils';
 import slots from "../time/slots";
 import options from '../options';
 
@@ -20,12 +20,12 @@ async function createSignature(secret, secondSecret, oldSecondSecret) {
     const signature = newSignature(secondSecret);
 
 	const transaction = {
-		type: transactionTypes.SIGNATURE,
+		type: DdnUtils.assetTypes.SIGNATURE,
 		nethash: options.get('nethash'),
 		amount: "0",    //Bignum update
 		fee: constants.fees.secondsignature,
-		recipient_id: null,
-		sender_public_key: keys.public_key,
+		recipientId: null,
+		senderPublicKey: keys.public_key,
 		timestamp: slots.getTime() - options.get('clientDriftSeconds'),
 		asset: {
 			signature
@@ -42,7 +42,7 @@ async function createSignature(secret, secondSecret, oldSecondSecret) {
 		await crypto.secondSign(transaction, secondKeys); 
     }
     
-    transaction.id = await crypto.getId(transaction);
+    // transaction.id = await crypto.getId(transaction);
 
 	return transaction;
 }

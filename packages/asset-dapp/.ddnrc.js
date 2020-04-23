@@ -2,15 +2,15 @@ module.exports = {
     transactions: [
         {
             name: "Dapp",
-            type: 11
+            type:  5 // 11
         },
         {
             name: "DappIn",
-            type: 12
+            type: 6 // 12
         },
         {
             name: "DappOut",
-            type: 13
+            type: 7 //  13
         }
     ]
 };

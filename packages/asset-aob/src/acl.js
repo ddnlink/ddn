@@ -32,7 +32,7 @@ class Acl extends Asset.Base {
     }
 
     async verify(trs, sender) {
-        if (trs.recipient_id) {
+        if (trs.recipientId) {
             throw new Error("Invalid recipient")
         }
 

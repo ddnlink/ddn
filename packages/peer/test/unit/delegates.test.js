@@ -250,7 +250,7 @@ describe("PUT /accounts/delegates with funds", () => {
                 if (body.success == true && body.transaction != null) {
                     node.expect(body.transaction.type).to.equal(node.AssetTypes.VOTE);
                     node.expect(body.transaction.amount).to.equal("0");
-                    node.expect(body.transaction.sender_public_key).to.equal(Raccount.public_key);
+                    node.expect(body.transaction.senderPublicKey).to.equal(Raccount.public_key);
                     node.expect(body.transaction.fee).to.equal(node.Fees.voteFee);
                 } else {
                     // console.log("Transaction failed or transaction object is null");
@@ -305,7 +305,7 @@ describe("PUT /accounts/delegates with funds", () => {
                     if (body.success == true && body.transaction != null) {
                         node.expect(body.transaction.type).to.equal(node.AssetTypes.VOTE);
                         node.expect(body.transaction.amount).to.equal("0");
-                        node.expect(body.transaction.sender_public_key).to.equal(Raccount.public_key);
+                        node.expect(body.transaction.senderPublicKey).to.equal(Raccount.public_key);
                         node.expect(body.transaction.fee).to.equal(node.Fees.voteFee);
                     } else {
                         // console.log("Expected success but got error");

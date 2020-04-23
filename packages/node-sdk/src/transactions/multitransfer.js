@@ -1,6 +1,6 @@
 import crypto from "./crypto.js";
 import constants from "../constants.js";
-import trsTypes from '../transaction-types';
+
 import slots from "../time/slots.js";
 import options from '../options';
 import addressHelper from '../address.js';
@@ -46,7 +46,7 @@ function createMultiTransfer(outputs, secret, secondSecret, cb) {
 	}
 
 	const transaction = {
-		type: trsTypes.MULTITRANSFER,
+		type: DdnUtils.assetTypes.MULTITRANSFER,
 		nethash: options.get('nethash'),
 		amount: amount.toString(),  //bignum update amount,
 		fee: `${fee}`,
@@ -66,7 +66,7 @@ function createMultiTransfer(outputs, secret, secondSecret, cb) {
 		const secondKeys = crypto.getKeys(secondSecret);
 		crypto.secondSign(transaction, secondKeys)
 	}
-	transaction.id = crypto.getId(transaction)
+	// transaction.id = crypto.getId(transaction)
 	return transaction
 }
 

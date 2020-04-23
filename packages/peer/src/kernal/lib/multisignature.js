@@ -98,7 +98,7 @@ class MultiSignature {
             const multisignatures = account.multisignatures;
 
             if (transaction.requester_public_key) {
-                multisignatures.push(transaction.sender_public_key);
+                multisignatures.push(transaction.senderPublicKey);
             }
 
             if (!account) {

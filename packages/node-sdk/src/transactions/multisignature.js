@@ -1,6 +1,7 @@
+import DdnUtils from '@ddn/utils';
+
 import crypto from "./crypto";
 import constants from "../constants";
-import transactionTypes from "../transaction-types";
 import slots from "../time/slots";
 import options from '../options';
 
@@ -15,7 +16,7 @@ function createMultisignature(keysgroup, lifetime, min, secret, secondSecret) {
 	const keys = crypto.getKeys(secret);
 
 	const transaction = {
-		type: transactionTypes.MULTITRANSFER,
+		type: DdnUtils.assetTypes.MULTISIGNATURE, // MULTISIGNATURE
 		nethash: options.get('nethash'),
 		amount: "0",    //Bignum update
 		fee: constants.fees.multisignature,
@@ -38,7 +39,7 @@ function createMultisignature(keysgroup, lifetime, min, secret, secondSecret) {
 		crypto.secondSign(transaction, secondKeys);
 	}
 
-	transaction.id = crypto.getId(transaction);
+	// transaction.id = crypto.getId(transaction);
 	return transaction;
 }
 

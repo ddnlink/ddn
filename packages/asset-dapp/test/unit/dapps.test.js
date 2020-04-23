@@ -1,7 +1,6 @@
 import DdnUtils from '@ddn/utils';
 import Debug from 'debug';
 
-// Requires and node configuration
 import node from '@ddn/node-sdk/lib/test';
 
 const debug = Debug('dapp');
@@ -270,7 +269,7 @@ describe("PUT /dapps", () => {
             .expect("Content-Type", /json/)
             .expect(200)
             .end((err, { body }) => {
-                debug(body);
+                debug('PUT /dapps 01', body);
                 node.expect(body).to.have.property("success").to.be.false;
                 node.expect(body).to.have.property("error");
                 done();
@@ -293,7 +292,7 @@ describe("PUT /dapps", () => {
             .expect("Content-Type", /json/)
             .expect(200)
             .end((err, { body }) => {
-                debug(JSON.stringify(body));
+                debug('PUT /dapps 02', JSON.stringify(body));
                 node.expect(body).to.have.property("success").to.be.false;
                 node.expect(body).to.have.property("error");
                 done();
@@ -315,7 +314,7 @@ describe("PUT /dapps", () => {
             .expect("Content-Type", /json/)
             .expect(200)
             .end((err, { body }) => {
-                debug(JSON.stringify(body));
+                debug('PUT /dapps 03', JSON.stringify(body));
                 node.expect(body).to.have.property("success").to.be.false;
                 node.expect(body).to.have.property("error");
                 done();
@@ -337,7 +336,7 @@ describe("PUT /dapps", () => {
             .expect("Content-Type", /json/)
             .expect(200)
             .end((err, { body }) => {
-                debug(JSON.stringify(body));
+                debug('PUT /dapps 04', JSON.stringify(body));
                 node.expect(body).to.have.property("success").to.be.false;
                 node.expect(body).to.have.property("error");
                 done();
@@ -360,7 +359,7 @@ describe("PUT /dapps", () => {
             .expect("Content-Type", /json/)
             .expect(200)
             .end((err, { body }) => {
-                debug(JSON.stringify(body));
+                debug('PUT /dapps 05', JSON.stringify(body));
                 node.expect(body).to.have.property("success").to.be.false;
                 node.expect(body).to.have.property("error");
                 done();
@@ -383,7 +382,7 @@ describe("PUT /dapps", () => {
             .expect("Content-Type", /json/)
             .expect(200)
             .end((err, { body }) => {
-                debug(JSON.stringify(body));
+                debug('PUT /dapps 06', JSON.stringify(body));
                 node.expect(body).to.have.property("success").to.be.false;
                 node.expect(body).to.have.property("error");
                 done();
@@ -404,7 +403,7 @@ describe("PUT /dapps", () => {
             .expect("Content-Type", /json/)
             .expect(200)
             .end((err, { body }) => {
-                debug(JSON.stringify(body));
+                debug('PUT /dapps 07', JSON.stringify(body));
                 node.expect(body).to.have.property("success").to.be.false;
                 node.expect(body).to.have.property("error");
                 done();
@@ -427,8 +426,9 @@ describe("PUT /dapps", () => {
             .expect("Content-Type", /json/)
             .expect(200)
             .end((err, { body }) => {
-                debug(JSON.stringify(body));
-                node.expect(body).to.have.property("success").to.be.error;
+                debug('PUT /dapps 08', JSON.stringify(body));
+                node.expect(body).to.have.property("success").to.be.false;
+                node.expect(body).to.have.property("error");
                 done();
             });
     });
@@ -449,7 +449,7 @@ describe("PUT /dapps", () => {
             .expect("Content-Type", /json/)
             .expect(200)
             .end((err, { body }) => {
-                debug(JSON.stringify(body));
+                debug('PUT /dapps 09', JSON.stringify(body));
                 node.expect(body).to.have.property("success").to.be.false;
                 done();
             });
@@ -472,7 +472,7 @@ describe("PUT /dapps", () => {
             .expect("Content-Type", /json/)
             .expect(200)
             .end((err, { body }) => {
-                debug(JSON.stringify(body));
+                debug('PUT /dapps 10', JSON.stringify(body));
                 node.expect(body).to.have.property("success").to.be.false;
                 done();
             });
@@ -497,7 +497,7 @@ describe("PUT /dapps", () => {
             .expect("Content-Type", /json/)
             .expect(200)
             .end((err, { body }) => {
-                debug(JSON.stringify(body));
+                debug('PUT /dapps 11', JSON.stringify(body));
                 node.expect(body).to.have.property("success").to.be.false;
                 done();
             });
@@ -531,7 +531,7 @@ describe("PUT /dapps", () => {
                 .expect("Content-Type", /json/)
                 .expect(200)
                 .end((err, { body }) => {
-                    debug(body);
+                    debug('PUT /dapps 12', body);
                     node.expect(body).to.have.property("success").to.be.true;
                     node.expect(body).to.have.property("transactionId");
                     DappToInstall.transactionId = body.transactionId;
@@ -557,7 +557,7 @@ describe("PUT /dapps", () => {
                 .expect("Content-Type", /json/)
                 .expect(200)
                 .end((err, { body }) => {
-                    debug(body);
+                    debug('PUT /dapps 13', body);
                     node.expect(body).to.have.property("success").to.be.false;
                     done();
                 });
@@ -581,7 +581,7 @@ describe("PUT /dapps", () => {
                 .expect("Content-Type", /json/)
                 .expect(200)
                 .end((err, { body }) => {
-                    debug(JSON.stringify(body));
+                    debug('PUT /dapps 14', JSON.stringify(body));
                     node.expect(body).to.have.property("success").to.be.false;
                     node.expect(body).to.have.property("error");
                     done();
@@ -844,7 +844,8 @@ describe("PUT /dapps", () => {
 //     });
 // });
 
-describe("GET /dapps?id=", function () {
+// to delete start
+// describe("GET /dapps?id=", function () {
 
 //     it("Using unknown id. Should fail", function (done) {
 //         var dappId = "UNKNOWN_ID";
@@ -872,38 +873,40 @@ describe("GET /dapps?id=", function () {
 //             });
 //     });
 
-    it("Using valid id. Should be ok", function (done) {
-        var dappId = DappToInstall.transactionId;
+//     it("Using valid id. Should be ok", function (done) {
+//         var dappId = DappToInstall.transactionId;
 
-        node.api.get("/dapps?id=" + dappId)
-            .expect("Content-Type", /json/)
-            .expect(200)
-            .end(function (err, res) {
-                // debug(JSON.stringify(res.body));
-                node.expect(res.body).to.have.property("success").to.be.true;
-                node.expect(res.body).to.have.property("dapp");
-                if (res.body.success == true && res.body.dapp != null) {
-                    node.expect(res.body.dapp.transactionId).to.equal(dappId);
-                } else {
-                    // debug(JSON.stringify(res.body));
-                    debug("Request failed or dapps array is null");
-                }
-                done();
-            });
-    });
+//         node.api.get("/dapps?id=" + dappId)
+//             .expect("Content-Type", /json/)
+//             .expect(200)
+//             .end(function (err, res) {
+//                 debug('GET /dapps?id= 01', JSON.stringify(res.body));
+//                 node.expect(res.body).to.have.property("success").to.be.true;
+//                 node.expect(res.body).to.have.property("dapp");
+//                 if (res.body.success == true && res.body.dapp != null) {
+//                     node.expect(res.body.dapp.transactionId).to.equal(dappId);
+//                 } else {
+//                     // debug(JSON.stringify(res.body));
+//                     debug("Request failed or dapps array is null");
+//                 }
+//                 done();
+//             });
+//     });
 
-});
+// });
+// to delete end
 
 describe("GET /dapps/:id", function () {
 
     it("Using valid id. Should be ok", function (done) {
-        var dappId = DappToInstall.transactionId;
+        const dappId = DappToInstall.transactionId;
 
         node.api.get("/dapps/" + dappId)
             .expect("Content-Type", /json/)
             .expect(200)
             .end(function (err, res) {
-                debug(JSON.stringify(res.body));
+                debug('GET /dapps/:id 01', JSON.stringify(dappId));
+                debug('GET /dapps/:id 01', JSON.stringify(res.body));
                 node.expect(res.body).to.have.property("success").to.be.true;
                 node.expect(res.body).to.have.property("dapp");
                 if (res.body.success == true && res.body.dapp != null) {

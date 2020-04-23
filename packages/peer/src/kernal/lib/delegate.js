@@ -71,7 +71,7 @@ class Delegate {
 
         const accounts = await this.runtime.account.getAccountList({
             public_key: { //wxm block database
-                $in: delegatePublicKeys
+                '$in': delegatePublicKeys
             },
             limit: delegatePublicKeys.length
         });
@@ -187,8 +187,6 @@ class Delegate {
             const outsider = i + 1 > this.config.settings.delegateNumber;
             delegates[i].productivity = (!outsider) ? Math.round(percent * 1e2) / 1e2 : 0;
 
-          //   DdnUtils.bignum update
-          //   delegates[i].forged = DdnUtils.bignum(delegates[i].fees).plus(DdnUtils.bignum(delegates[i].rewards)).toString();
             delegates[i].forged = DdnUtils.bignum.plus(delegates[i].fees, delegates[i].rewards).toString();
         }
 
@@ -301,7 +299,7 @@ class Delegate {
     }
 
     /**
-     * 该方法向forks_stats插入数据，但未见到其他地方有用到该表数据，目前还不明白原因
+     * 该方法向forks_stats插入数据，但未见到其他地方有用到该表数据
      * @param {*} block
      * @param {*} cause
      */

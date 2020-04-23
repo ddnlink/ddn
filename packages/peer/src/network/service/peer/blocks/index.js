@@ -157,7 +157,7 @@ class PeerBlockService {
         return new Promise((resolve, reject) => {
             // shuai 2018-12-01
             this.dao.findList('block', {
-                id: { $in: ids },
+                id: { '$in': ids },
                 height: { $gte: min, $lte: max },
             }, ["id", "timestamp", "previous_block", "height"],
             [['height', 'DESC']], (err, rows) => {

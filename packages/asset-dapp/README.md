@@ -44,7 +44,7 @@ assetInfo: {
 ```
 trsType: 13
 assetInfo: {
-                recipient_id: ,  //转账接收账户地址
+                recipientId: ,  //转账接收账户地址
                 dapp_id: "f90e1f741168106f3bbd76e5eea6aa47d725d1e9b78e2ad6f043d0719881ba22",    //Dapp Id
                 currency: "DDN",    //要转出的币种
                 aobAmount: "10000000"   //要转出的金额,

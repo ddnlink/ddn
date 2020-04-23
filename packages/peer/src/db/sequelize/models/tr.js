@@ -29,15 +29,15 @@ export default connection => {
 			type: Sequelize.INTEGER,  // 原来是 INT
 			allowNull: false
 		},
-		sender_public_key: {
+		senderPublicKey: {
 			type: Sequelize.STRING(64),  // 原来是 BINARY(32)
 			allowNull: false
 		},
-		sender_id: {
+		senderId: {
 			type: Sequelize.STRING(50),   // 类型上不存在 VARCHAR
 			allowNull: false
 		},
-		recipient_id: {
+		recipientId: {
 			type: Sequelize.STRING(1024),   // 类型上不存在 VARCHAR
 		},
 		amount: {
@@ -74,13 +74,13 @@ export default connection => {
 				fields: ['block_id']
 			},
 			{
-				fields: ['sender_id']
+				fields: ['senderId']
 			},
 			{
-				fields: ['recipient_id']
+				fields: ['recipientId']
 			},
 			{
-				fields: ['sender_public_key']
+				fields: ['senderPublicKey']
 			},
 			{
 				fields: ['type']

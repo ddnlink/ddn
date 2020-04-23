@@ -1,5 +1,5 @@
 import Asset from '@ddn/asset-base';
-
+import DdnUtils from '@ddn/utils';
 import crypto from './crypto';
 import slots from '../time/slots';
 import options from '../options';
@@ -14,15 +14,15 @@ async function createPluginAsset(trsType, assetInfo, secret, secondSecret) {
         nethash: options.get('nethash'),
         amount: assetInfo.amount ? `${assetInfo.amount}` : "0",
         // fee: fee + "",
-        recipient_id: assetInfo.recipient_id ? assetInfo.recipient_id : null,
-        sender_public_key: keys.public_key,
+        recipientId: assetInfo.recipientId ? assetInfo.recipientId : null,
+        senderPublicKey: keys.public_key,
         timestamp: slots.getTime() - options.get('clientDriftSeconds'),
         message: assetInfo.message ? `${assetInfo.message}` : null,
         asset: {}
     };
 
     delete assetInfo.amount;
-    delete assetInfo.recipient_id;
+    delete assetInfo.recipientId;
     delete assetInfo.message;
 
     if (assetInfo.aobAmount) {
@@ -31,7 +31,7 @@ async function createPluginAsset(trsType, assetInfo, secret, secondSecret) {
     }
 
     // fix 这个是创建二级密码使用的 这个条件是否应该再次检查一下或优化一下
-    if (assetInfo.secondSecret && trsType === 1) {
+    if (assetInfo.secondSecret && trsType === DdnUtils.assetTypes.SIGNATURE) { // == 1
         const secondSecretKeys = crypto.getKeys(assetInfo.secondSecret);
         assetInfo = { public_key: secondSecretKeys.public_key };
         delete transaction.message;

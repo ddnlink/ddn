@@ -1,6 +1,8 @@
+import DdnUtils from '@ddn/utils';
+
 import crypto from './crypto';
 import constants from '../constants';
-import trsTypes from '../transaction-types';
+
 import options from '../options';
 import slots from '../time/slots';
 import addressHelper from '../address';
@@ -11,12 +13,12 @@ function createIssuerAuditorBuy(received_address, amount, secret, secondSecret) 
     const fee = constants.fees.send;
 
     const transaction = {
-        type: trsTypes.COUPON_ISSUER_AUDITOR_BUY,
+        type: DdnUtils.assetTypes.COUPON_ISSUER_AUDITOR_BUY,
         nethash: options.get('nethash'),
         amount,
         fee: `${fee}`,
-        recipient_id: received_address,
-        sender_public_key: keys.public_key,
+        recipientId: received_address,
+        senderPublicKey: keys.public_key,
         timestamp: slots.getTime() - options.get('clientDriftSeconds'),
         asset: {
             couponIssuerAuditorBuy: {
@@ -41,12 +43,12 @@ function createIssuerApply(orgName, org_id, orgOwner, orgOwnerPhone, secret, sec
     const fee = constants.fees.send;
 
     const transaction = {
-        type: trsTypes.COUPON_ISSUER_APPLY,
+        type: DdnUtils.assetTypes.COUPON_ISSUER_APPLY,
         nethash: options.get('nethash'),
         amount: "0",
         fee: `${fee}`,
-		recipient_id: null,
-		sender_public_key: keys.public_key,
+		recipientId: null,
+		senderPublicKey: keys.public_key,
         timestamp: slots.getTime() - options.get('clientDriftSeconds'),
         asset: {
             couponIssuerApply: {
@@ -75,12 +77,12 @@ function createIssuerUpdate(orgName, org_id, orgOwner, orgOwnerPhone, secret, se
     const fee = constants.fees.send;
 
     const transaction = {
-        type: trsTypes.COUPON_ISSUER_UPDATE,
+        type: DdnUtils.assetTypes.COUPON_ISSUER_UPDATE,
         nethash: options.get('nethash'),
         amount: "0",
         fee: `${fee}`,
-        recipient_id: null,
-        sender_public_key: keys.public_key,
+        recipientId: null,
+        senderPublicKey: keys.public_key,
         timestamp: slots.getTime() - options.get('clientDriftSeconds'),
         asset: {
             couponIssuerUpdate: {
@@ -109,12 +111,12 @@ function createIssuerCheck(address, orgName, org_id, orgOwner, orgOwnerPhone, st
     const fee = constants.fees.send;
 
     const transaction = {
-        type: trsTypes.COUPON_ISSUER_CHECK,
+        type: DdnUtils.assetTypes.COUPON_ISSUER_CHECK,
         nethash: options.get('nethash'),
         amount: "0",
         fee: `${fee}`,
-        recipient_id: null,
-        sender_public_key: keys.public_key,
+        recipientId: null,
+        senderPublicKey: keys.public_key,
         timestamp: slots.getTime() - options.get('clientDriftSeconds'),
         asset: {
             couponIssuerCheck: {
@@ -144,12 +146,12 @@ function createIssuerFreeze(address, orgName, org_id, orgOwner, orgOwnerPhone, s
     const fee = constants.fees.send;
 
     const transaction = {
-        type: trsTypes.COUPON_ISSUER_FREEZE,
+        type: DdnUtils.assetTypes.COUPON_ISSUER_FREEZE,
         nethash: options.get('nethash'),
         amount: "0",
         fee: `${fee}`,
-        recipient_id: null,
-        sender_public_key: keys.public_key,
+        recipientId: null,
+        senderPublicKey: keys.public_key,
         timestamp: slots.getTime() - options.get('clientDriftSeconds'),
         asset: {
             couponIssuerFreeze: {
@@ -178,12 +180,12 @@ function createIssuerUnfreeze(address, orgName, org_id, orgOwner, orgOwnerPhone,
     const fee = constants.fees.send;
 
     const transaction = {
-        type: trsTypes.COUPON_ISSUER_UNFREEZE,
+        type: DdnUtils.assetTypes.COUPON_ISSUER_UNFREEZE,
         nethash: options.get('nethash'),
         amount: "0",
         fee: `${fee}`,
-        recipient_id: null,
-        sender_public_key: keys.public_key,
+        recipientId: null,
+        senderPublicKey: keys.public_key,
         timestamp: slots.getTime() - options.get('clientDriftSeconds'),
         asset: {
             couponIssuerUnfreeze: {
@@ -214,12 +216,12 @@ function createIssueNew(goodsName, goodsSpecs, goodsUnit, goodsNum, unitPrice,
     const fee = constants.fees.send;
 
     const transaction = {
-        type: trsTypes.COUPON_ISSUE_NEW,
+        type: DdnUtils.assetTypes.COUPON_ISSUE_NEW,
         nethash: options.get('nethash'),
         amount: "0",
         fee: `${fee}`,
-        recipient_id: null,
-        sender_public_key: keys.public_key,
+        recipientId: null,
+        senderPublicKey: keys.public_key,
         timestamp: slots.getTime() - options.get('clientDriftSeconds'),
         asset: {
             couponIssueNew: {
@@ -254,12 +256,12 @@ function createIssueClose(goodsName, goodsSpecs, goodsUnit, goodsNum, unitPrice,
     const fee = constants.fees.send;
 
     const transaction = {
-        type: trsTypes.COUPON_ISSUE_CLOSE,
+        type: DdnUtils.assetTypes.COUPON_ISSUE_CLOSE,
         nethash: options.get('nethash'),
         amount: "0",
         fee: `${fee}`,
-        recipient_id: null,
-        sender_public_key: keys.public_key,
+        recipientId: null,
+        senderPublicKey: keys.public_key,
         timestamp: slots.getTime() - options.get('clientDriftSeconds'),
         asset: {
             couponIssueClose: {
@@ -294,12 +296,12 @@ function createIssueReopen(goodsName, goodsSpecs, goodsUnit, goodsNum, unitPrice
     const fee = constants.fees.send;
 
     const transaction = {
-        type: trsTypes.COUPON_ISSUE_REOPEN,
+        type: DdnUtils.assetTypes.COUPON_ISSUE_REOPEN,
         nethash: options.get('nethash'),
         amount: "0",
         fee: `${fee}`,
-        recipient_id: null,
-        sender_public_key: keys.public_key,
+        recipientId: null,
+        senderPublicKey: keys.public_key,
         timestamp: slots.getTime() - options.get('clientDriftSeconds'),
         asset: {
             couponIssueReopen: {
@@ -335,12 +337,12 @@ function createExchangeBuy(batchValue, code, received_address,
     const fee = constants.fees.send;
 
     const transaction = {
-        type: trsTypes.COUPON_EXCH_BUY,
+        type: DdnUtils.assetTypes.COUPON_EXCH_BUY,
         nethash: options.get('nethash'),
         amount: price,
         fee: `${fee}`,
-        recipient_id: received_address,
-        sender_public_key: keys.public_key,
+        recipientId: received_address,
+        senderPublicKey: keys.public_key,
         timestamp: slots.getTime() - options.get('clientDriftSeconds'),
         asset: {
             couponExcBuy: {
@@ -371,12 +373,12 @@ function createExchangePay(batchValue, code, received_address,
     const fee = constants.fees.send;
 
     const transaction = {
-        type: trsTypes.COUPON_EXCH_PAY,
+        type: DdnUtils.assetTypes.COUPON_EXCH_PAY,
         nethash: options.get('nethash'),
         amount: "0",
         fee: `${fee}`,
-        recipient_id: null,
-        sender_public_key: keys.public_key,
+        recipientId: null,
+        senderPublicKey: keys.public_key,
         timestamp: slots.getTime() - options.get('clientDriftSeconds'),
         asset: {
             couponExcPay: {
@@ -407,12 +409,12 @@ function createExchangeTransferConfirm(batchValue, code, received_address,
     const fee = constants.fees.send;
 
     const transaction = {
-        type: trsTypes.COUPON_EXCH_TRANSFER_CONFIRM,
+        type: DdnUtils.assetTypes.COUPON_EXCH_TRANSFER_CONFIRM,
         nethash: options.get('nethash'),
         amount: price,
         fee: `${fee}`,
-        recipient_id: null,
-        sender_public_key: keys.public_key,
+        recipientId: null,
+        senderPublicKey: keys.public_key,
         timestamp: slots.getTime() - options.get('clientDriftSeconds'),
         asset: {
             couponExcTransferConfirm: {
@@ -445,12 +447,12 @@ function createExchangeTransferAsk(batchValue, code, received_address,
     const fee = constants.fees.send;
 
     const transaction = {
-        type: trsTypes.COUPON_EXCH_TRANSFER_ASK,
+        type: DdnUtils.assetTypes.COUPON_EXCH_TRANSFER_ASK,
         nethash: options.get('nethash'),
         amount: "0",
         fee: `${fee}`,
-        recipient_id: null,
-        sender_public_key: keys.public_key,
+        recipientId: null,
+        senderPublicKey: keys.public_key,
         timestamp: slots.getTime() - options.get('clientDriftSeconds'),
         asset: {
             couponExcTransferAsk: {

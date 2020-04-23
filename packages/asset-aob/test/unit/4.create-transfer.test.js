@@ -10,7 +10,7 @@ describe("AOB Test", () => {
 
     it("资产转账 Should be ok", async () => {
         const obj = {
-            recipient_id: node.Daccount.address,
+            recipientId: node.Daccount.address,
             currency: "DDD.NCR",
             aobAmount: "10",
             message: '测试转账',

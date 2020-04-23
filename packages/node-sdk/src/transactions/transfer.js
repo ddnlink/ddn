@@ -1,6 +1,6 @@
 import crypto from "./crypto";
 import constants from "../constants";
-import transactionTypes from "../transaction-types.js";
+import DdnUtils from '@ddn/utils';
 import slots from "../time/slots";
 import options from '../options';
 
@@ -10,12 +10,12 @@ function createInTransfer(dappId, currency, amount, secret, secondSecret) {
 	const keys = crypto.getKeys(secret);
 
 	const transaction = {
-		type: transactionTypes.IN_TRANSFER,
+		type: DdnUtils.assetTypes.DAPP_IN,
 		nethash,
 		amount: "0",    //Bignum update
 		fee: constants.fees.send,
-		recipient_id: null,
-		sender_public_key: keys.public_key,
+		recipientId: null,
+		senderPublicKey: keys.public_key,
 		timestamp: slots.getTime() - options.get('clientDriftSeconds'),
 		asset: {
 			in: {
@@ -38,7 +38,7 @@ function createInTransfer(dappId, currency, amount, secret, secondSecret) {
 		crypto.secondSign(transaction, secondKeys);
 	}
 
-	transaction.id = crypto.getId(transaction);
+	// transaction.id = crypto.getId(transaction);
 	return transaction;
 }
 
@@ -47,11 +47,11 @@ function createOutTransfer(recipientId, dappId, transactionId, currency, amount,
 
 	const transaction = {
     nethash,
-		type: transactionTypes.OUT_TRANSFER,
+		type: DdnUtils.assetTypes.DAPP_OUT,
 		amount: "0",    //Bignum update
 		fee: constants.fees.send,
-		recipient_id: recipientId,
-		sender_public_key: keys.public_key,
+		recipientId: recipientId,
+		senderPublicKey: keys.public_key,
 		timestamp: slots.getTime() - options.get('clientDriftSeconds'),
 		asset: {
 			outTransfer: {
@@ -70,7 +70,7 @@ function createOutTransfer(recipientId, dappId, transactionId, currency, amount,
 		crypto.secondSign(transaction, secondKeys);
 	}
 
-	transaction.id = crypto.getId(transaction);
+	// transaction.id = crypto.getId(transaction);
 	return transaction;
 }
 

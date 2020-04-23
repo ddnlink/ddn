@@ -83,7 +83,7 @@ class Org extends Asset.Base {
     // eslint-disable-next-line class-methods-use-this
     async create(data, trs) {
         const trans = trs;
-        trans.recipient_id = null;
+        trans.recipientId = null;
         trans.amount = '0';
 
         const assetJsonName = await this.getAssetJsonName(trs.type);
@@ -124,7 +124,7 @@ class Org extends Asset.Base {
 
     async verify(trs, sender) {
         const org = await this.getAssetObject(trs);
-        if (trs.recipient_id) {
+        if (trs.recipientId) {
             throw new Error('Invalid recipient');
         }
         if (org.state === 0) {

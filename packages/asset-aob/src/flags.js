@@ -15,7 +15,7 @@ class Flags extends Asset.Base {
     async verify(trs, sender) {
         await super.verify(trs, sender);
 
-        if (trs.recipient_id) {
+        if (trs.recipientId) {
             throw new Error("Invalid recipient")
         }
         if (!DdnUtils.bignum.isZero(trs.amount)) {

@@ -490,7 +490,7 @@ class Peer {
 
         const where = {
             id: {
-                $in: _.map(data, "peer_id")
+                '$in': _.map(data, "peer_id")
             }
         };
         return new Promise((resolve, reject) => {
@@ -530,7 +530,7 @@ class Peer {
 
         where = where || {};
         if (data) {
-            where.id = { $in: _.map(data, "peer_id") };
+            where.id = { '$in': _.map(data, "peer_id") };
         }
 
         return new Promise((resolve, reject) => {

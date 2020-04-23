@@ -1,6 +1,7 @@
+import DdnUtils from '@ddn/utils';
+
 import crypto from './crypto';
 import constants from '../constants';
-// import transactionTypes from "../transaction-types";
 import slots from '../time/slots';
 import options from '../options';
 
@@ -12,7 +13,6 @@ import options from '../options';
  */
 function createEvidence(evidence, secret, secondSecret) {
 	const keys = crypto.getKeys(secret);
-	const bytes = null;
 
 	if (typeof evidence !== 'object') {
 		throw new Error('The first argument should be a object!');
@@ -25,13 +25,13 @@ function createEvidence(evidence, secret, secondSecret) {
 	const fee = constants.fees.evidence;
 
 	const transaction = {
-		type: 10,   //transactionTypes.EVIDENCE,
+		type: DdnUtils.assetTypes.EVIDENCE, // 10 -> 20
 		nethash: options.get('nethash'),
 		amount: "0",   
 		fee,
 		recipientId: null,
-		sender_public_key: keys.public_key,
-		// sender_public_key: keys.publicKey,
+		senderPublicKey: keys.public_key,
+		// senderPublicKey: keys.publicKey,
 		// senderPublicKey: keys.publicKey,
 		timestamp: slots.getTime() - options.get('clientDriftSeconds'),
 		asset: {
@@ -46,7 +46,7 @@ function createEvidence(evidence, secret, secondSecret) {
 		crypto.secondSign(transaction, secondKeys);
 	}
 
-	transaction.id = crypto.getId(transaction);
+	// transaction.id = crypto.getId(transaction);
 	return transaction;
 }
 

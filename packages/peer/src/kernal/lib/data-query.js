@@ -54,9 +54,9 @@ class DataQuery {
                     }
                 }, [['id', 't_id'],
                     ['type', 't_type'],
-                    ['sender_public_key', 't_senderPublicKey'],
-                    ['sender_id', 't_senderId'],
-                    ['recipient_id', 't_recipientId'],
+                    ['senderPublicKey', 't_senderPublicKey'],
+                    ['senderId', 't_senderId'],
+                    ['recipientId', 't_recipientId'],
                     ['amount', 't_amount'],
                     ['fee', 't_fee'],
                     ['signature', 't_signature'],
@@ -354,16 +354,16 @@ class DataQuery {
                             if (trsItem.t_type == DdnUtils.assetTypes.SIGNATURE) {
                                 signatureTrsIds.push(trsItem.t_id);
                             }
-                            if (trsItem.t_type == DdnUtils.assetTypes.MULTI) {
+                            if (trsItem.t_type == DdnUtils.assetTypes.MULTISIGNATURE) {
                                 multiSignatureTrsIds.push(trsItem.t_id);
                             }
                             if (trsItem.t_type == DdnUtils.assetTypes.DAPP) {
                                 dappTrsIds.push(trsItem.t_id);
                             }
-                            if (trsItem.t_type == DdnUtils.assetTypes.IN_TRANSFER) {
+                            if (trsItem.t_type == DdnUtils.assetTypes.DAPP_IN) {
                                 dappIntransferTrsIds.push(trsItem.t_id);
                             }
-                            if (trsItem.t_type == DdnUtils.assetTypes.OUT_TRANSFER) {
+                            if (trsItem.t_type == DdnUtils.assetTypes.DAPP_OUT) {
                                 dappOuttransferTrsIds.push(trsItem.t_id);
                             }
                         } else {
@@ -466,9 +466,9 @@ class DataQuery {
                     this.dao.findPage("tr", where, limit, offset, returnTotal || false, [
                         ['id', 't_id'],
                         ['type', 't_type'],
-                        ['sender_public_key', 't_senderPublicKey'],
-                        ['sender_id', 't_senderId'],
-                        ['recipient_id', 't_recipientId'],
+                        ['senderPublicKey', 't_senderPublicKey'],
+                        ['senderId', 't_senderId'],
+                        ['recipientId', 't_recipientId'],
                         ['amount', 't_amount'],
                         ['fee', 't_fee'],
                         ['signature', 't_signature'],
@@ -527,16 +527,16 @@ class DataQuery {
                 if (trsItem.t_type == DdnUtils.assetTypes.SIGNATURE) {
                     signatureTrsIds.push(trsItem.t_id);
                 }
-                if (trsItem.t_type == DdnUtils.assetTypes.MULTI) {
+                if (trsItem.t_type == DdnUtils.assetTypes.MULTISIGNATURE) {
                     multiSignatureTrsIds.push(trsItem.t_id);
                 }
                 if (trsItem.t_type == DdnUtils.assetTypes.DAPP) {
                     dappTrsIds.push(trsItem.t_id);
                 }
-                if (trsItem.t_type == DdnUtils.assetTypes.IN_TRANSFER) {
+                if (trsItem.t_type == DdnUtils.assetTypes.DAPP_IN) {
                     dappIntransferTrsIds.push(trsItem.t_id);
                 }
-                if (trsItem.t_type == DdnUtils.assetTypes.OUT_TRANSFER) {
+                if (trsItem.t_type == DdnUtils.assetTypes.DAPP_OUT) {
                     dappOuttransferTrsIds.push(trsItem.t_id);
                 }
             }

@@ -2,7 +2,6 @@ import DdnUtils from '@ddn/utils';
 
 import crypto from "./crypto"; // TODO: @ddn/crypto
 import constants from "../constants";
-import transactionTypes from "../transaction-types";
 import slots from "../time/slots";
 import options from '../options';
 
@@ -20,18 +19,18 @@ function calculateFee(amount) {
 
 async function createTransaction(recipientId, amount, message, secret, second_secret) {
 	const transaction = {
-		type: transactionTypes.SEND,
+		type: DdnUtils.assetTypes.TRANSFER,
 		nethash: options.get('nethash'),
 		amount: `${amount}`,
 		fee: constants.fees.send,
-		recipient_id: recipientId,
+		recipientId: recipientId,
 		message,
 		timestamp: slots.getTime() - options.get('clientDriftSeconds'),
 		asset: {}
 	};
 
 	const keys = crypto.getKeys(secret);
-	transaction.sender_public_key = keys.public_key;
+	transaction.senderPublicKey = keys.public_key;
 
 	await crypto.sign(transaction, keys);
 
@@ -40,7 +39,7 @@ async function createTransaction(recipientId, amount, message, secret, second_se
 		await crypto.secondSign(transaction, secondKeys);
 	}
 
-	transaction.id = await crypto.getId(transaction);
+	// transaction.id = await crypto.getId(transaction);
 	return transaction;
 }
 
@@ -50,14 +49,14 @@ async function createLock(height, secret, second_secret) {
 		amount: "0",    
 		nethash: options.get('nethash'),
 		fee: "10000000",    
-		recipient_id: null,
+		recipientId: null,
 		args: [ String(height) ],
 		timestamp: slots.getTime() - options.get('clientDriftSeconds'),
 		asset: {}
 	};
 
 	const keys = crypto.getKeys(secret);
-	transaction.sender_public_key = keys.public_key;
+	transaction.senderPublicKey = keys.public_key;
 
 	await crypto.sign(transaction, keys);
 
@@ -66,7 +65,7 @@ async function createLock(height, secret, second_secret) {
 		await crypto.secondSign(transaction, secondKeys);
 	}
 
-	transaction.id = await crypto.getId(transaction);
+	// transaction.id = await crypto.getId(transaction);
 	return transaction;
 }
 

@@ -204,7 +204,7 @@ async function sendAsset(options) {
   ddnJS.init.init(options.nethash);
 
   var obj = {
-    recipient_id: options.to,
+    recipientId: options.to,
     currency: options.currency,
     aobAmount: options.amount + "",
     message: options.message

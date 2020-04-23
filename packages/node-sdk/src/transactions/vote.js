@@ -1,6 +1,7 @@
+import DdnUtils from '@ddn/utils';
+
 import crypto from "./crypto";
 import constants from "../constants";
-import transactionTypes from "../transaction-types";
 import slots from "../time/slots";
 import options from '../options';
 
@@ -8,12 +9,12 @@ async function createVote(keyList, secret, secondSecret) {
 	const keys = crypto.getKeys(secret);
 
 	const transaction = {
-		type: transactionTypes.VOTE,
+		type: DdnUtils.assetTypes.VOTE,
 		nethash: options.get('nethash'),
 		amount: "0", 
 		fee: constants.fees.vote,
-		recipient_id: null,
-		sender_public_key: keys.public_key,
+		recipientId: null,
+		senderPublicKey: keys.public_key,
 		timestamp: slots.getTime() - options.get('clientDriftSeconds'),
 		asset: {
 			vote: {
@@ -29,7 +30,7 @@ async function createVote(keyList, secret, secondSecret) {
 		await crypto.secondSign(transaction, secondKeys);
 	}
 
-	transaction.id = await crypto.getId(transaction);
+	// transaction.id = await crypto.getId(transaction);
 
 	return transaction;
 }

@@ -226,7 +226,7 @@ class Account {
                     delegates = await new Promise((reslove, reject) => {
                         this.dao.findListByGroup('mem_accounts2delegate', {
                             account_id: {
-                                $in: mem_account_ids
+                                '$in': mem_account_ids
                             } //wxm block database
                         }, {
                             limit: mem_account_ids.length,
@@ -245,7 +245,7 @@ class Account {
                     u_delegates = await new Promise((reslove, reject) => {
                         this.dao.findListByGroup('mem_accounts2u_delegate', {
                             account_id: { //wxm block database
-                                $in: mem_account_ids
+                                '$in': mem_account_ids
                             }
                         }, {
                             limit: mem_account_ids.length,
@@ -264,7 +264,7 @@ class Account {
                     multisignatures = await new Promise((reslove, reject) => {
                         this.dao.findListByGroup('mem_accounts2multisignature', {
                             account_id: { //wxm block database
-                                $in: mem_account_ids
+                                '$in': mem_account_ids
                             }
                         }, {
                             limit: mem_account_ids.length,
@@ -283,7 +283,7 @@ class Account {
                     u_multisignatures = await new Promise((reslove, reject) => {
                         this.dao.findListByGroup('mem_accounts2u_multisignature', {
                             account_id: { //wxm block database
-                                $in: mem_account_ids
+                                '$in': mem_account_ids
                             }
                         }, {
                             limit: mem_account_ids.length,

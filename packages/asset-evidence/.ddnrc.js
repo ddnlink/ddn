@@ -2,7 +2,7 @@ module.exports = {
     transactions: [
         {
             name: "Evidence",
-            type: 10
+            type: 20
         }
     ]
 };

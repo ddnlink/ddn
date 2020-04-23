@@ -550,8 +550,8 @@ describe('GET /transactions/get?id=', () => {
                     node.expect(body.transaction.id).to.equal(transactionInCheck.txId);
                     node.expect(body.transaction.amount / node.normalizer).to.equal(transactionInCheck.nettoSent);
                     node.expect(`${body.transaction.fee / node.normalizer}`).to.equal(transactionInCheck.fee);
-                    node.expect(body.transaction.recipient_id).to.equal(transactionInCheck.recipient);
-                    node.expect(body.transaction.sender_id).to.equal(transactionInCheck.sender);
+                    node.expect(body.transaction.recipientId).to.equal(transactionInCheck.recipient);
+                    node.expect(body.transaction.senderId).to.equal(transactionInCheck.sender);
                     node.expect(body.transaction.type).to.equal(transactionInCheck.type);
                 } else {
                     // console.log('Transaction failed or transaction list is null');
@@ -714,13 +714,12 @@ describe('PUT /signatures', () => {
                     if (body.success == true && body.transaction != null) {
 			// console.log(Account1)
                         node.expect(body.transaction).to.have.property('type').to.equal(node.AssetTypes.SIGNATURE);
-                        node.expect(body.transaction).to.have.property('sender_public_key').to.equal(Account1.publicKey);
-                        node.expect(body.transaction).to.have.property('sender_id').to.equal(Account1.address);
+                        node.expect(body.transaction).to.have.property('senderPublicKey').to.equal(Account1.publicKey);
+                        node.expect(body.transaction).to.have.property('senderId').to.equal(Account1.address);
                         node.expect(body.transaction).to.have.property('fee').to.equal(node.Fees.secondPasswordFee);
                         Account1.transactions.push(transactionCount);
                         transactionCount += 1;
 
-                        //DdnUtils.bignum update Account1.balance -= node.Fees.secondPasswordFee;
                         Account1.balance = DdnUtils.bignum.minus(Account1.balance, node.Fees.secondPasswordFee);
 
                         transactionList[transactionCount - 1] = {

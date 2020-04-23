@@ -552,7 +552,7 @@ class Block {
                         for (let i = 0; i < sortedTrs.length; i++) {
                             const transaction = sortedTrs[i];
                             const updatedAccountInfo = await this.runtime.account.setAccount({
-                                public_key: transaction.sender_public_key,
+                                public_key: transaction.senderPublicKey,
                                 isGenesis: block.height == 1
                             }, dbTrans);
 
@@ -910,7 +910,7 @@ class Block {
                             const transaction = block.transactions[i];
 
                             await this.runtime.account.setAccount({
-                                public_key: transaction.sender_public_key
+                                public_key: transaction.senderPublicKey
                             });
 
                             transaction.id = await this.runtime.transaction.getId(transaction);
@@ -925,7 +925,7 @@ class Block {
                             }
 
                             if (verifyTrs) {
-                                const sender = await this.runtime.account.getAccountByPublicKey(transaction.sender_public_key);
+                                const sender = await this.runtime.account.getAccountByPublicKey(transaction.senderPublicKey);
                                 await this.runtime.transaction.verify(transaction, sender);
                             }
                         } catch (err) {
@@ -964,7 +964,7 @@ class Block {
         const transactions = await this.runtime.transaction.getUnconfirmedTransactionList(false, this.tokenSetting.maxTxsPerBlock);
         for (let i = 0; i < transactions.length; i++) {
             const transaction = transactions[i];
-            const sender = await this.runtime.account.getAccountByPublicKey(transaction.sender_public_key);
+            const sender = await this.runtime.account.getAccountByPublicKey(transaction.senderPublicKey);
             if (!sender) {
                 this.logger.error("Invalid sender: " + JSON.stringify(transaction));
                 break;
@@ -1128,7 +1128,7 @@ class Block {
                         for (let i = 0; i < transactions.length; i++) {
                             const transaction = transactions[i];
 
-                            const sender = await this.runtime.account.getAccountByPublicKey(transaction.sender_public_key, dbTrans);
+                            const sender = await this.runtime.account.getAccountByPublicKey(transaction.senderPublicKey, dbTrans);
 
                             this.logger.info('undo transacton: ', transaction.id);
                             await this.runtime.transaction.undo(transaction, oldLastBlock, sender, dbTrans);

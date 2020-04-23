@@ -16,7 +16,7 @@
         "timestamp": {
             "type": "integer"
         },
-        "sender_public_key": {
+        "senderPublicKey": {
             "type": "string",
             "format": "publicKey"
         },
@@ -24,10 +24,10 @@
             "type": "string",
             "format": "publicKey"
         },
-        "sender_id": {
+        "senderId": {
             "type": "string"
         },
-        "recipient_id": {
+        "recipientId": {
             "type": "string"
         },
         "amount": {
@@ -55,5 +55,5 @@
             "maxLength": 256
         }
     },
-    "required": ["type", "timestamp", "sender_public_key", "signature"]
+    "required": ["type", "timestamp", "senderPublicKey", "signature"]
 }

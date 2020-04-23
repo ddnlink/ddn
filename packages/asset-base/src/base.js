@@ -124,7 +124,7 @@ class AssetBase {
      * 
      * 以下属于系统属性，不可使用
      * amount：转账金额，默认为0，字符串类型
-     * recipient_id：收款地址，默认为null
+     * recipientId：收款地址，默认为null
      * message：备注信息
      */
     async propsMapping() {
@@ -779,14 +779,14 @@ class AssetBase {
      */
     async verify(trs) {
         if (DdnUtils.bignum.isZero(trs.amount)) { //等于0
-            if (trs.recipient_id) { //wxm block database
-                throw new Error("The recipient_id attribute of the transaction must be null.");
+            if (trs.recipientId) { //wxm block database
+                throw new Error("The recipientId attribute of the transaction must be null.");
             }
         } else if (DdnUtils.bignum.isLessThan(trs.amount, 0)) {  //小于0
             throw new Error(`Invalid amount: ${trs.amount}`);
         } else {    //大于0
-            if (!trs.recipient_id) {    //wxm block database
-                throw new Error("The recipient_id attribute of the transaction can not be null.");
+            if (!trs.recipientId) {    //wxm block database
+                throw new Error("The recipientId attribute of the transaction can not be null.");
             }
         }
 
@@ -853,12 +853,12 @@ class AssetBase {
      * @param {*} sender 
      * @param {*} dbTrans 
      */
-    async apply({ amount, recipient_id }, { id, height }, dbTrans) {
+    async apply({ amount, recipientId }, { id, height }, dbTrans) {
         if (DdnUtils.bignum.isGreaterThan(amount, 0)) {
-            await this.runtime.account.setAccount({ address: recipient_id }, dbTrans);
+            await this.runtime.account.setAccount({ address: recipientId }, dbTrans);
 
-            await this.runtime.account.merge(recipient_id, {
-                address: recipient_id,   //wxm block database
+            await this.runtime.account.merge(recipientId, {
+                address: recipientId,   //wxm block database
                 balance: amount,
                 u_balance: amount,
                 block_id: id,  //wxm block database
@@ -875,13 +875,13 @@ class AssetBase {
      * @param {*} sender 
      * @param {*} dbTrans 
      */
-    async undo({ amount, recipient_id }, { id, height }, dbTrans) {
+    async undo({ amount, recipientId }, { id, height }, dbTrans) {
         if (DdnUtils.bignum.isGreaterThan(amount, 0)) {
-            await this.runtime.account.setAccount({ address: recipient_id }, dbTrans);
+            await this.runtime.account.setAccount({ address: recipientId }, dbTrans);
 
             const amountStr = DdnUtils.bignum.minus(0, amount).toString();
-            await this.runtime.account.merge(recipient_id, {
-                address: recipient_id,   //wxm block database
+            await this.runtime.account.merge(recipientId, {
+                address: recipientId,   //wxm block database
                 balance: amountStr,
                 u_balance: amountStr,
                 block_id: id,  //wxm block database

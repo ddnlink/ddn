@@ -49,7 +49,7 @@ describe("AOB Test", () => {
         await node.onNewBlockAsync();
 
         const obj = {
-            recipient_id: node.Daccount.address,
+            recipientId: node.Daccount.address,
             currency: "DDD.NCR",
             aobAmount: "10",
             message: '测试转账',
@@ -127,7 +127,7 @@ describe("AOB Test", () => {
         await node.onNewBlockAsync();
 
         const obj = {
-            recipient_id: node.Daccount.address,
+            recipientId: node.Daccount.address,
             currency: "DDD.NCR",
             aobAmount: "10",
             message: '测试转账',

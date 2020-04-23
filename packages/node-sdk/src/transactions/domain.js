@@ -36,7 +36,7 @@ function createDomain(name, address, secret, secondSecret) {
 		const secondKeys = crypto.getKeys(secondSecret);
 		crypto.secondSign(transaction, secondKeys)
 	}
-	transaction.id = crypto.getId(transaction)
+	// transaction.id = crypto.getId(transaction)
 	return transaction
 }
 

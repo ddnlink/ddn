@@ -18,7 +18,7 @@ class Vote {
 	}
 
 	async create({votes}, trs) {
-		trs.recipient_id = null;    //wxm block database
+		trs.recipientId = null;    //wxm block database
 		trs.asset.vote = {
 			votes
 		};
@@ -41,7 +41,7 @@ class Vote {
             throw new Error('Voting limit exceeded. Maximum is 33 votes per transaction');
 		}
 
-        await this.runtime.delegate.checkDelegates(trs.sender_public_key, trs.asset.vote.votes);
+        await this.runtime.delegate.checkDelegates(trs.senderPublicKey, trs.asset.vote.votes);
 
         return trs;
 	}

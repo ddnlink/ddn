@@ -43,7 +43,7 @@ class Contribution extends Asset.Base {
 
     async create(data, trs) {
         const trans = trs;
-        trans.recipient_id = null; // wxm block database
+        trans.recipientId = null; // wxm block database
         trans.amount = '0';
 
         const assetJsonName = await this.getAssetJsonName(trs.type);
@@ -55,7 +55,7 @@ class Contribution extends Asset.Base {
     async verify(trs) {
         const contribution = await this.getAssetObject(trs);
 
-        if (trs.recipient_id) {
+        if (trs.recipientId) {
             throw new Error('Invalid recipient');
         }
         if (!DdnUtils.bignum.isZero(trs.amount)) {

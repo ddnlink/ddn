@@ -1,6 +1,6 @@
+import DdnUtils from '@ddn/utils';
 import crypto from './crypto';
 import constants from '../constants';
-import trsTypes from '../transaction-types';
 import slots from '../time/slots';
 import options from '../options';
 
@@ -12,7 +12,6 @@ import options from '../options';
  */
 function createExchange(trsopt, exchange, secret, secondSecret) {
 	const keys = crypto.getKeys(secret);
-	const bytes = null;
 
 	if (typeof exchange !== 'object') {
 		throw new Error('The first argument should be a object!');
@@ -25,12 +24,12 @@ function createExchange(trsopt, exchange, secret, secondSecret) {
 	const fee = constants.fees.exchange;
 
 	const transaction = Object.assign({
-		type: trsTypes.EXCHANGE,
+		type: DdnUtils.assetTypes.DAO_EXCHANGE,
 		nethash: options.get('nethash'),
 		amount: "0",    //Bignum update
 		fee: `${fee}`,
 		recipientId: null,
-		sender_public_key: keys.public_key,
+		senderPublicKey: keys.public_key,
 		// senderPublicKey: keys.publicKey,
 		timestamp: slots.getTime() - options.get('clientDriftSeconds'),
 		asset: {
@@ -45,7 +44,7 @@ function createExchange(trsopt, exchange, secret, secondSecret) {
 		crypto.secondSign(transaction, secondKeys);
 	}
 
-	transaction.id = crypto.getId(transaction);
+	// transaction.id = crypto.getId(transaction);
 	return transaction;
 }
 

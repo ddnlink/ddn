@@ -19,7 +19,7 @@ class Transfer extends Asset.Base {
     }
 
     async create(data, trs) {
-        trs.recipient_id = data.recipient_id;
+        trs.recipientId = data.recipientId;
         trs.amount = "0";
 
         const assetJsonName = await this.getAssetJsonName(trs.type);
@@ -29,7 +29,7 @@ class Transfer extends Asset.Base {
     }
 
     async verify(trs, sender) {
-        if (!DdnUtils.Address.isAddress(trs.recipient_id)) {
+        if (!DdnUtils.Address.isAddress(trs.recipientId)) {
             throw new Error('Invalid recipient');
         }
         if (!DdnUtils.bignum.isZero(trs.amount)) {
@@ -58,7 +58,7 @@ class Transfer extends Asset.Base {
 
         if (assetDetail.acl == 0) { // 检查黑白名单
             if (await this.isInBlackList(assetData.currency, sender.address) ||
-                await this.isInBlackList(assetData.currency, trs.recipient_id)) {
+                await this.isInBlackList(assetData.currency, trs.recipientId)) {
                 throw new Error('Permission not allowed');
             }
         } else if (assetDetail.acl == 1) {  //检查白名单
@@ -70,11 +70,11 @@ class Transfer extends Asset.Base {
                 throw new Error('Issuer not exists');
             }
             const issuerInfo = data2[0];
-    
-            if (((sender.address != issuerInfo.issuer_id) && 
+
+            if (((sender.address != issuerInfo.issuer_id) &&
                 !(await this.isInWhiteList(assetData.currency, sender.address))) ||
-                ((trs.recipient_id != issuerInfo.issuer_id) &&
-                !(await this.isInWhiteList(assetData.currency, trs.recipient_id)))) {
+                ((trs.recipientId != issuerInfo.issuer_id) &&
+                    !(await this.isInWhiteList(assetData.currency, trs.recipientId)))) {
                 throw new Error('Permission not allowed.');
             }
         }
@@ -111,7 +111,7 @@ class Transfer extends Asset.Base {
     // 新增事务dbTrans ---wly
     async apply(trs, block, sender, dbTrans) {
         const transfer = await this.getAssetObject(trs);
-        this.balanceCache.addAssetBalance(trs.recipient_id, transfer.currency, transfer.amount);
+        this.balanceCache.addAssetBalance(trs.recipientId, transfer.currency, transfer.amount);
         // (1)
         const assetBalancedata = await new Promise((resolve) => {
             this.dao.findOne('mem_asset_balance', {
@@ -134,8 +134,8 @@ class Transfer extends Asset.Base {
             this.dao.update('mem_asset_balance', {
                 balance: newBalance.toString(),
             }, {
-                    address: sender.address,
-                    currency: transfer.currency,
+                address: sender.address,
+                currency: transfer.currency,
             }, dbTrans);
         } else {
             this.dao.insert('mem_asset_balance', {
@@ -147,7 +147,7 @@ class Transfer extends Asset.Base {
         // (2)
         const assetBalancedata2 = await new Promise((resolve) => {
             this.dao.findOne('mem_asset_balance', {
-                address: trs.recipient_id,
+                address: trs.recipientId,
                 currency: transfer.currency,
             }, ['balance'], (err, rows) => {
                 if (err) {
@@ -166,12 +166,12 @@ class Transfer extends Asset.Base {
             this.dao.update('mem_asset_balance', {
                 balance: newBalance2.toString(),
             }, {
-                    address: trs.recipient_id,
-                    currency: transfer.currency,
+                address: trs.recipientId,
+                currency: transfer.currency,
             }, dbTrans);
         } else {
             this.dao.insert('mem_asset_balance', {
-                address: trs.recipient_id,
+                address: trs.recipientId,
                 currency: transfer.currency,
                 balance: newBalance2.toString(),
             }, dbTrans);
@@ -180,7 +180,7 @@ class Transfer extends Asset.Base {
 
     async undo(trs, block, sender, dbTrans) {
         const transfer = await this.getAssetObject(trs);
-        this.balanceCache.addAssetBalance(trs.recipient_id, transfer.currency, `-${transfer.amount}`);
+        this.balanceCache.addAssetBalance(trs.recipientId, transfer.currency, `-${transfer.amount}`);
 
         // (1)
         const assetBalancedata = await new Promise((resolve) => {
@@ -204,8 +204,8 @@ class Transfer extends Asset.Base {
             this.dao.update('mem_asset_balance', {
                 balance: newBalance.toString(),
             }, {
-                    address: sender.address,
-                    currency: transfer.currency,
+                address: sender.address,
+                currency: transfer.currency,
             }, dbTrans);
         } else {
             this.dao.insert('mem_asset_balance', {
@@ -217,7 +217,7 @@ class Transfer extends Asset.Base {
         // (2)
         const assetBalancedata2 = await new Promise((resolve) => {
             this.dao.findOne('mem_asset_balance', {
-                address: trs.recipient_id,
+                address: trs.recipientId,
                 currency: transfer.currency,
             }, ['balance'], (err, rows) => {
                 if (err) {
@@ -236,12 +236,12 @@ class Transfer extends Asset.Base {
             this.dao.update('mem_asset_balance', {
                 balance: newBalance2.toString(),
             }, {
-                    address: trs.recipient_id,
-                    currency: transfer.currency,
+                address: trs.recipientId,
+                currency: transfer.currency,
             }, dbTrans);
         } else {
             this.dao.insert('mem_asset_balance', {
-                address: trs.recipient_id,
+                address: trs.recipientId,
                 currency: transfer.currency,
                 balance: newBalance2.toString(),
             }, dbTrans);
@@ -361,10 +361,10 @@ class Transfer extends Asset.Base {
             }
         }
 
-        var transfer = {
-            recipient_id: body.recipientId,
+        const transfer = {
+            recipientId: body.recipientId,
             currency: body.currency,
-            amount: body.amount,
+            amount: body.amount + '',
             message: body.message,
             fee: '0',
         };
@@ -381,6 +381,7 @@ class Transfer extends Asset.Base {
                     } catch (e) {
                         return cb(e);
                     }
+
                     if (!account) {
                         return cb('Multisignature account not found');
                     }
@@ -420,20 +421,20 @@ class Transfer extends Asset.Base {
                             keypair,
                             requester: keypair,
                             second_keypair,
-                            recipient_id: body.recipientId,
+                            recipientId: body.recipientId,
                             message: body.message
                         };
-                        var assetJsonName = await this.getAssetJsonName();
+                        const assetJsonName = await this.getAssetJsonName();
                         data[assetJsonName] = transfer;
 
-                        var transaction = await this.runtime.transaction.create(data);
+                        const transaction = await this.runtime.transaction.create(data);
 
-                        var transactions = await this.runtime.transaction.receiveTransactions([transaction]);
+                        const transactions = await this.runtime.transaction.receiveTransactions([transaction]);
                         cb(null, transactions);
                     } catch (e) {
                         cb(e);
                     }
-                    await this.runtime.transaction.receiveTransactions([transaction], cb);
+                    // 2020.4.22 await this.runtime.transaction.receiveTransactions([transaction], cb);
                 } else {
                     let account;
                     try {
@@ -460,7 +461,7 @@ class Transfer extends Asset.Base {
                             sender: account,
                             keypair,
                             second_keypair,
-                            recipient_id: body.recipientId,
+                            recipientId: body.recipientId,
                             message: body.message
                         };
                         const assetJsonName = await this.getAssetJsonName();
@@ -486,7 +487,7 @@ class Transfer extends Asset.Base {
     async getMyTransactions(req) {
         const address = req.params.address;
         const currency = req.params.currency;
-        const pageindex = req.query.pageindex || 1; 
+        const pageindex = req.query.pageindex || 1;
         const pagesize = req.query.pagesize || 50;
 
         // (1)先查询到对应的transfer中的相关数据表查询到对应数据
@@ -509,14 +510,13 @@ class Transfer extends Asset.Base {
         }
         const transfer = await this.queryAsset(where1, null, true, pageindex, pagesize, null, false);
         const tids = _.map(transfer.rows, 'transaction_id');
-        const where2 = { id: { $in: tids }, sender_id: address };
+        const where2 = { id: { '$in': tids }, senderId: address };
         const result = await this.runtime.dataquery.queryFullTransactionData(
             where2, null, null, null, null,
         );
         const trslist = [];
-        for (var i = 0; i < result.length; i++)
-        {
-            var newTrs = await this.runtime.transaction.serializeDbData2Transaction(result[i]);
+        for (let i = 0; i < result.length; i++) {
+            const newTrs = await this.runtime.transaction.serializeDbData2Transaction(result[i]);
             trslist.push(newTrs);
         }
         return {
@@ -537,14 +537,13 @@ class Transfer extends Asset.Base {
         const where1 = { currency };
         const transfer = await this.queryAsset(where1, null, true, pageindex, pagesize);
         const tids = _.map(transfer.rows, 'transaction_id');
-        const where2 = { id: { $in: tids } };
+        const where2 = { id: { '$in': tids } };
         const result = await this.runtime.dataquery.queryFullTransactionData(
             where2, null, null, null, null,
         );
         const trslist = [];
-        for (var i = 0; i < result.length; i++)
-        {
-            var newTrs = await this.runtime.transaction.serializeDbData2Transaction(result[i]);
+        for (let i = 0; i < result.length; i++) {
+            const newTrs = await this.runtime.transaction.serializeDbData2Transaction(result[i]);
             trslist.push(newTrs);
         }
         return {

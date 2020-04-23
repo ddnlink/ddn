@@ -63,14 +63,14 @@ class Evidence extends Asset.Base {
                 this.dao.findOneByPrimaryKey(
                     "tr",
                     oldEvidence.transaction_id,
-                    ["sender_id"],
-                    async (err, { sender_id }) => {
+                    ["senderId"],
+                    async (err, { senderId }) => {
                         if (err) {
                             reject(err);
                         } else {
-                            if (sender_id != sender.address) {
+                            if (senderId != sender.address) {
                                 return reject(
-                                    `The evidence ipid ${assetObj.ipid} has been registered by ${sender_id}`
+                                    `The evidence ipid ${assetObj.ipid} has been registered by ${senderId}`
                                 );
                             } else {
                                 let results2;

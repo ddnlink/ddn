@@ -91,17 +91,17 @@ class TransactionService {
         }
         if (query.senderPublicKey) {
             andWheres.push({
-                "sender_public_key": query.senderPublicKey
+                "senderPublicKey": query.senderPublicKey
             });
         }
         if (query.senderId) {
             andWheres.push({
-                "sender_id": query.senderId
+                "senderId": query.senderId
             });
         }
         if (query.recipientId) {
             andWheres.push({
-                "recipient_id": {
+                "recipientId": {
                     $like: query.recipientId
                 }
             });
@@ -109,20 +109,20 @@ class TransactionService {
         if (query.ownerAddress && query.ownerPublicKey) {
             andWheres.push({
                 "$or": [{
-                        "sender_public_key": query.ownerPublicKey
+                        "senderPublicKey": query.ownerPublicKey
                     },
                     {
-                        "recipient_id": query.ownerAddress
+                        "recipientId": query.ownerAddress
                     }
                 ]
             });
         } else if (query.ownerAddress) {
             andWheres.push({
                 "$or": [{
-                        "sender_id": query.ownerAddress
+                        "senderId": query.ownerAddress
                     },
                     {
-                        "recipient_id": query.ownerAddress
+                        "recipientId": query.ownerAddress
                     }
                 ]
             });
@@ -313,7 +313,7 @@ class TransactionService {
                             type: DdnUtils.assetTypes.TRANSFER,
                             amount: body.amount,
                             sender: account,
-                            recipient_id: recipientId,
+                            recipientId: recipientId,
                             keypair,
                             requester: keypair,
                             second_keypair,
@@ -352,7 +352,7 @@ class TransactionService {
                             type: DdnUtils.assetTypes.TRANSFER,
                             amount: body.amount,
                             sender: account,
-                            recipient_id: recipientId,
+                            recipientId: recipientId,
                             keypair,
                             second_keypair,
                             message: body.message

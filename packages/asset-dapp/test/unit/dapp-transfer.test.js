@@ -2,7 +2,7 @@ import DdnUtils from '@ddn/utils';
 import extend from 'extend';
 import Debug from 'debug';
 
-import node from '../node';
+import node from '@ddn/node-sdk/lib/test';
 
 const expect = node.expect
 const debug = Debug('dapp-transfer')
@@ -38,7 +38,7 @@ async function createTransfer(address, amount, secret, second_secret) {
 async function registerDAppAsync(options, {password}) {
     // node.ddn.init();
     options.fee = '10000000000';
-    const dappData = await createPluginAsset(11, options, password)
+    const dappData = await createPluginAsset(DdnUtils.assetTypes.DAPP, options, password)
     let res = await node.submitTransactionAsync(dappData);
     // let res = await node.submitTransactionAsync(node.ddn.dapp.createDApp(options, account.password))
     debug('register dapp response', res.body)
@@ -47,14 +47,14 @@ async function registerDAppAsync(options, {password}) {
 
 async function inTransferAsync(options, {password}) {
     // node.ddn.init();
-    const inTransferData = await createPluginAsset(12, options, password)
+    const inTransferData = await createPluginAsset(DdnUtils.assetTypes.DAPP_IN_TRANSFER, options, password)
     let res = await node.submitTransactionAsync(inTransferData)
     debug('in transfer response', res.body)
     return res
 }
 
 async function outTransferAsync(options, {password}) {
-    let outTransferData = await createPluginAsset(13, options, password);
+    let outTransferData = await createPluginAsset(DdnUtils.assetTypes.DAPP_OUT, options, password);
     // let trs = node.ddn.transfer.createOutTransfer(options.recipientId, options.dappId, options.transactionId, options.currency, options.amount, account.password)
     let res = await node.submitTransactionAsync(outTransferData)
     debug('out transfer response', res.body)
@@ -260,7 +260,7 @@ describe('dapp transfer', () => {
     //   let recipientAccount = node.genNormalAccount()
     //   let dappBalance = await getDAppBalanceAsync(dappId, DAPP_CURRENCY)
     //   let transferOptions = {
-    //     recipient_id: recipientAccount.address,
+    //     recipientId: recipientAccount.address,
     //     dapp_id: dappId,
     //     transaction_id: node.randomTid(),
     //     currency: DAPP_CURRENCY,
@@ -317,7 +317,7 @@ describe('dapp transfer', () => {
         // let trs = node.ddn.transfer.createOutTransfer(recipientAccount.address, dappId, node.randomTid(), DAPP_CURRENCY, amount, delegateAccounts[0].password)
         let outTransferData = {
             // receive_address: recipientAccount.address,
-            recipient_id: recipientAccount.address,
+            recipientId: recipientAccount.address,
             dapp_id: dappId,
             transaction_id: node.randomTid(),
             currency: DAPP_CURRENCY,

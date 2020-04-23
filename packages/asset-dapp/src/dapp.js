@@ -66,7 +66,7 @@ class Dapp extends Asset.Base {
     }
 
     async create(data, trs) {
-        trs.recipient_id = null;
+        trs.recipientId = null;
         trs.amount = "0";
 
         const assetJsonName = await this.getAssetJsonName(trs.type);
@@ -93,7 +93,7 @@ class Dapp extends Asset.Base {
 
     async verify(trs) {
         const dapp = await this.getAssetObject(trs);
-        if (trs.recipient_id) {
+        if (trs.recipientId) {
             throw new Error("Invalid recipient");
         }
 
@@ -896,7 +896,7 @@ class Dapp extends Asset.Base {
 
     // 支持 ?id=abc 和 /abc 两种格式
     async getDappById(req) {
-        const query = req.query | req.params; 
+        const query = req.params; 
 
         const validateErrors = await this.ddnSchema.validate({
             type: "object",

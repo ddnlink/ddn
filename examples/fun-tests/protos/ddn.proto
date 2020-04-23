@@ -24,10 +24,10 @@ message Transaction {
   required int32 type = 1;
   required int32 timestamp = 2;
   optional string nethash = 3;
-  required bytes sender_public_key = 4;
+  required bytes senderPublicKey = 4;
   required bytes signature = 5;
-  optional string recipient_id = 6;
-  optional string sender_id = 7;
+  optional string recipientId = 6;
+  optional string senderId = 7;
   optional string amount = 8;   //Bignum update         int64
   optional string fee = 9;      //Bignum update         int64
   optional bytes requester_public_key = 10;
@@ -154,7 +154,7 @@ message AssetAOBTransfer {
 }
 
 message Output {
-  required string recipient_id = 1;
+  required string recipientId = 1;
   required string amount = 2;   //Bignum update int64
 }
 

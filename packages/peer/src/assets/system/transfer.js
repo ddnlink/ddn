@@ -12,8 +12,8 @@ class Transfer {
     this._context = context;
   }
 
-  async create({recipient_id, amount}, trs) {
-    trs.recipient_id = recipient_id; //wxm block database
+  async create({recipientId, amount}, trs) {
+    trs.recipientId = recipientId; //wxm block database
     // DdnUtil.bignum update
     // trs.amount = data.amount;
     trs.amount = `${amount}`;
@@ -26,7 +26,7 @@ class Transfer {
   }
 
   async verify(trs, {address, lockHeight}) {
-    if (!DdnUtil.address.isAddress(trs.recipient_id)) {
+    if (!DdnUtil.address.isAddress(trs.recipientId)) {
       throw new Error("Invalid recipient");
     }
 
@@ -38,9 +38,9 @@ class Transfer {
       throw new Error("Invalid transaction amount");
     }
 
-    if (trs.recipient_id == address) {
+    if (trs.recipientId == address) {
       //wxm block database
-      throw new Error("Invalid recipient_id, cannot be your self");
+      throw new Error("Invalid recipientId, cannot be your self");
     }
 
     if (!this.config.settings.enableMoreLockTypes) {
@@ -74,16 +74,16 @@ class Transfer {
     return true;
   }
 
-  async apply({recipient_id, amount}, {id, height}, sender, dbTrans) {
+  async apply({recipientId, amount}, {id, height}, sender, dbTrans) {
     await this.runtime.account.setAccount(
-      { address: recipient_id },
+      { address: recipientId },
       dbTrans
     );
 
     await this.runtime.account.merge(
-      recipient_id,
+      recipientId,
       {
-        address: recipient_id, //wxm block database
+        address: recipientId, //wxm block database
         balance: amount,
         u_balance: amount,
         block_id: id, //wxm block database
@@ -92,14 +92,14 @@ class Transfer {
       dbTrans
     );
 
-    // self.modules.accounts.setAccountAndGet({ address: trs.recipient_id }, dbTrans, (err, recipient) => { //wxm block database
+    // self.modules.accounts.setAccountAndGet({ address: trs.recipientId }, dbTrans, (err, recipient) => { //wxm block database
     // 	if (err) {
     // 		return cb(err);
     // 	}
 
     // 	self.modules.accounts.mergeAccountAndGet(
     // 		{
-    // 			address: trs.recipient_id,   //wxm block database
+    // 			address: trs.recipientId,   //wxm block database
     // 			balance: trs.amount,
     // 			u_balance: trs.amount,
     // 			block_id: block.id,  //wxm block database
@@ -113,16 +113,16 @@ class Transfer {
     // });
   }
 
-  async undo({recipient_id, amount}, {id, height}, sender, dbTrans) {
+  async undo({recipientId, amount}, {id, height}, sender, dbTrans) {
     await this.runtime.account.setAccount(
-      { address: recipient_id },
+      { address: recipientId },
       dbTrans
     );
 
     await this.runtime.account.merge(
-      recipient_id,
+      recipientId,
       {
-        address: recipient_id, //wxm block database
+        address: recipientId, //wxm block database
         balance: `-${amount}`,
         u_balance: `-${amount}`,
         block_id: id, //wxm block database
@@ -135,14 +135,14 @@ class Transfer {
     // 	cb = dbTrans;
     // 	dbTrans = null
     // }
-    // self.modules.accounts.setAccountAndGet({ address: trs.recipient_id }, dbTrans, (err, recipient) => { //wxm block database
+    // self.modules.accounts.setAccountAndGet({ address: trs.recipientId }, dbTrans, (err, recipient) => { //wxm block database
     // 	if (err) {
     // 		return cb(err);
     // 	}
 
     // 	self.modules.accounts.mergeAccountAndGet(
     // 		{
-    // 			address: trs.recipient_id,   //wxm block database
+    // 			address: trs.recipientId,   //wxm block database
     // 			balance: `-${trs.amount}`,
     // 			u_balance: `-${trs.amount}`,
     // 			block_id: block.id,  //wxm block database

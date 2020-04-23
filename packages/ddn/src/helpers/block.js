@@ -104,9 +104,9 @@ export default {
 					amount: bignum.multiply(bignum.new(parts[1]), 100000000),
 					fee: '0',
 					timestamp: 0,
-					recipient_id: parts[0],  //wxm block database
-					sender_id: sender.address,   //wxm block database
-					sender_public_key: sender.keypair.publicKey   //wxm block database
+					recipientId: parts[0],  //wxm block database
+					senderId: sender.address,   //wxm block database
+					senderPublicKey: sender.keypair.publicKey   //wxm block database
 				};
 				totalAmount = bignum.plus(totalAmount, trs.amount);
 
@@ -124,9 +124,9 @@ export default {
 				amount: config.totalAmount,
 				fee: '0',
 				timestamp: 0,
-				recipient_id: address,    //wxm   block database
-				sender_id: sender.address,   //wxm block database
-				sender_public_key: sender.keypair.publicKey   //wxm block database
+				recipientId: address,    //wxm   block database
+				senderId: sender.address,   //wxm block database
+				senderPublicKey: sender.keypair.publicKey   //wxm block database
 			};
 
 			totalAmount = bignum.plus(totalAmount, balanceTransaction.amount);
@@ -152,9 +152,9 @@ export default {
 				amount: '0',
 				fee: '0',
 				timestamp: 0,
-				recipient_id: null,  //wxm block database
-				sender_id: delegate.address, //wxm block database
-				sender_public_key: delegate.keypair.publicKey,    //wxm block database
+				recipientId: null,  //wxm block database
+				senderId: delegate.address, //wxm block database
+				senderPublicKey: delegate.keypair.publicKey,    //wxm block database
 				asset: {
 					delegate: {
 						username
@@ -179,9 +179,9 @@ export default {
 			amount: '0',
 			fee: '0',
 			timestamp: 0,
-			recipient_id: null,  //wxm block database
-			sender_id: address,   //wxm block database
-			sender_public_key: keypair.publicKey,  //wxm block database
+			recipientId: null,  //wxm block database
+			senderId: address,   //wxm block database
+			senderPublicKey: keypair.publicKey,  //wxm block database
 			asset: {
 				vote: {
 					votes
@@ -203,9 +203,9 @@ export default {
 				amount: '0',
 				fee: '0',
 				timestamp: 0,
-				recipient_id: null,  //wxm block database
-				sender_id: address,   //wxm block database
-				sender_public_key: keypair.publicKey,  //wxm block database
+				recipientId: null,  //wxm block database
+				senderId: address,   //wxm block database
+				senderPublicKey: keypair.publicKey,  //wxm block database
 				asset: {
 					dapp
 				}

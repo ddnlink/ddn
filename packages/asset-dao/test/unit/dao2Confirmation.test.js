@@ -69,7 +69,7 @@ describe('Confirmations Test', () => {
                 contribution_trs_id: contributionTrsId, //fixme 确保每次运行都是新的投稿id，才能通过测试
                 state,
                 amount: state == 1 ? contributionPrice : "0",
-                recipient_id: state == 1 ? node.Daccount.address : "",
+                recipientId: state == 1 ? node.Daccount.address : "",
             };
 
             // transaction = createConfirmation(confirmation, node.Gaccount.password, null, contributionPrice);

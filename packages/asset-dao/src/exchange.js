@@ -60,7 +60,7 @@ class Exchange extends Asset.Base {
         const trans = trs;
 
         trans.amount = '0';
-        trans.recipient_id = "";
+        trans.recipientId = "";
 
         const assetJsonName = await this.getAssetJsonName(trs.type);
         trans.asset[assetJsonName] = {
@@ -74,7 +74,7 @@ class Exchange extends Asset.Base {
 
         if (data[assetJsonName].state == 1) {
             trans.amount = trans.asset[assetJsonName].price;
-            trans.recipient_id = trans.asset[assetJsonName].received_address;
+            trans.recipientId = trans.asset[assetJsonName].received_address;
         }
 
         return trans;
@@ -179,12 +179,12 @@ class Exchange extends Asset.Base {
                 throw new Error('confirm exchange receivedAddress error: ' + asset.exchange_trs_id)
             }
 
-            if (!trs.recipient_id) {
-                throw new Error("Invalid params: recipient_id");
+            if (!trs.recipientId) {
+                throw new Error("Invalid params: recipientId");
             }
 
-            if (trs.recipient_id !== asset.received_address) {
-                throw new Error('confirm exchange recipient_id error: ' + asset.exchange_trs_id)
+            if (trs.recipientId !== asset.received_address) {
+                throw new Error('confirm exchange recipientId error: ' + asset.exchange_trs_id)
             }
         } else {
             throw new Error('not support dao exchange state');

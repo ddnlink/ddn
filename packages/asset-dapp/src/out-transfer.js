@@ -30,7 +30,7 @@ class OutTransfer extends Asset.Base {
     }
 
     async create(data, trs) {
-        trs.recipient_id = data.recipient_id;
+        trs.recipientId = data.recipientId;
         trs.amount = "0";
 
         const assetJsonName = await this.getAssetJsonName(trs.type);
@@ -43,7 +43,7 @@ class OutTransfer extends Asset.Base {
     async verify(trs, sender) {
         // await super.verify(trs, sender);
 
-        if (!trs.recipient_id) {
+        if (!trs.recipientId) {
             throw new Error('Invalid recipient')
         }
 
@@ -109,7 +109,7 @@ class OutTransfer extends Asset.Base {
         }
 
         dapp.delegates = dapp.delegates.split(',');
-        if (dapp.delegates.indexOf(trs.sender_public_key) === -1) {
+        if (dapp.delegates.indexOf(trs.senderPublicKey) === -1) {
             throw new Error('Sender must be dapp delegate');
         }
 
@@ -190,20 +190,20 @@ class OutTransfer extends Asset.Base {
         _dappOuttransferUnconfirmeds[trs.id] = false;
 
         if (transfer.currency !== this.tokenSetting.tokenName) {
-            this.balanceCache.addAssetBalance(trs.recipient_id, transfer.currency, transfer.amount);
+            this.balanceCache.addAssetBalance(trs.recipientId, transfer.currency, transfer.amount);
 
             await this._updateAssetBalance(transfer.currency, 
                 `-${transfer.amount}`, transfer.dapp_id, dbTrans);
             await this._updateAssetBalance(this.tokenSetting.tokenName,
                 `-${trs.fee}`, transfer.dapp_id, dbTrans);
             await this._updateAssetBalance(transfer.currency,
-                transfer.amount, trs.recipient_id, dbTrans);   //wxm block database
+                transfer.amount, trs.recipientId, dbTrans);   //wxm block database
         } else {
-            await this.runtime.account.setAccount({ address: trs.recipient_id }, dbTrans);
+            await this.runtime.account.setAccount({ address: trs.recipientId }, dbTrans);
 
             const amount = DdnUtils.bignum.new(transfer.amount);    //DdnUtils.bignum update Number(transfer.amount);
-            await this.runtime.account.merge(trs.recipient_id, {
-                address: trs.recipient_id,   //wxm block database
+            await this.runtime.account.merge(trs.recipientId, {
+                address: trs.recipientId,   //wxm block database
                 balance: amount.toString(),     //DdnUtils.bignum update
                 u_balance: amount.toString(),   //DdnUtils.bignum update
                 block_id: block.id,  //wxm block database
@@ -222,21 +222,21 @@ class OutTransfer extends Asset.Base {
         _dappOuttransferUnconfirmeds[trs.id] = true;
 
         if (transfer.currency !== this.tokenSetting.tokenName) {
-            this.balanceCache.addAssetBalance(trs.recipient_id, transfer.currency, transfer.amount);    //wxm block database
+            this.balanceCache.addAssetBalance(trs.recipientId, transfer.currency, transfer.amount);    //wxm block database
 
             await this._updateAssetBalance(transfer.currency, 
                 transfer.amount, transfer.dapp_id, dbTrans);
             await this._updateAssetBalance(this.tokenSetting.tokenName,
                 trs.fee, transfer.dapp_id, dbTrans);
             await this._updateAssetBalance(transfer.currency,
-                `-${transfer.amount}`, trs.recipient_id, dbTrans);   //wxm block database
+                `-${transfer.amount}`, trs.recipientId, dbTrans);   //wxm block database
         } else {
-            await this.runtime.account.setAccount({ address: trs.recipient_id }, dbTrans);
+            await this.runtime.account.setAccount({ address: trs.recipientId }, dbTrans);
 
             const minusAmount = DdnUtils.bignum.minus(0, transfer.amount);
             const sum = DdnUtils.bignum.plus(transfer.amount, trs.fee);
-            await this.runtime.account.merge(trs.recipient_id, {
-                address: trs.recipient_id,   //wxm block database
+            await this.runtime.account.merge(trs.recipientId, {
+                address: trs.recipientId,   //wxm block database
                 balance: minusAmount.toString(),
                 u_balance: minusAmount.toString(),
                 block_id: block.id,  //wxm block database

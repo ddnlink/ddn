@@ -46,9 +46,9 @@ class RootRouter {
             const sorta = parseFloat(a[result.orderBy]);
             const sortb = parseFloat(b[result.orderBy]);
             if (result.sortMode == 'asc') {
-              return sorta - sortb;
+                return sorta - sortb;
             } else {
-              return sortb - sorta;
+                return sortb - sorta;
             }
         }
 
@@ -56,9 +56,9 @@ class RootRouter {
             const sorta = a[result.orderBy];
             const sortb = b[result.orderBy];
             if (result.sortMode == 'asc') {
-              return sorta.localeCompare(sortb);
+                return sorta.localeCompare(sortb);
             } else {
-              return sortb.localeCompare(sorta);
+                return sortb.localeCompare(sorta);
             }
         }
 
@@ -109,7 +109,7 @@ class RootRouter {
         }
 
         const result = await this.runtime.delegate.getDelegates(query);
-        const delegate = result.delegates.find(({public_key, username}) => {
+        const delegate = result.delegates.find(({ public_key, username }) => {
             if (query.publicKey) {
                 return public_key == query.publicKey;
             }
@@ -132,7 +132,7 @@ class RootRouter {
                 if (err) {
                     reject(err);
                 } else {
-                    resolve({success: true, count});
+                    resolve({ success: true, count });
                 }
             });
         });
@@ -155,46 +155,46 @@ class RootRouter {
         }
 
         return new Promise((resolve, reject) => {
-            this.dao.findList('mem_accounts2delegate', {dependent_id: query.publicKey},
+            this.dao.findList('mem_accounts2delegate', { dependent_id: query.publicKey },
                 [[this.dao.db_fnGroupConcat('account_id'), 'account_id']], null, null,
                 async (err, rows) => {
 
-                if (err) {
-                    reject(err);
-                } else {
-                    let addresses = [];
-                    if (rows[0] && rows[0].account_id) {
-                        addresses = rows[0].account_id.split(','); //wxm block database
-                    }
-                    try
-                    {
-                        rows = await this.runtime.account.getAccountList({
-                            address: {
-                                $in: addresses
-                            },
-                            sort: [['balance', 'ASC']]
-                        }, ['address', 'balance', 'public_key', 'username']);
-                    }
-                    catch (e)
-                    {
-                        return reject(e);
-                    }
+                    if (err) {
+                        reject(err);
+                    } else {
+                        let addresses = [];
+                        if (rows[0] && rows[0].account_id) {
+                            addresses = rows[0].account_id.split(','); //wxm block database
+                        }
+                        try {
+                            rows = await this.runtime.account.getAccountList({
+                                address: {
+                                    '$in': addresses
+                                },
+                                sort: [['balance', 'ASC']]
+                            }, ['address', 'balance', 'public_key', 'username']);
+                        }
+                        catch (e) {
+                            return reject(e);
+                        }
 
-                    const lastBlock = this.runtime.block.getLastBlock();
-                    const totalSupply = this.runtime.block.getBlockStatus().calcSupply(lastBlock.height);
-                    rows.forEach(row => {
-                        row.weight = row.balance / totalSupply * 100;
-                    });
+                        const lastBlock = this.runtime.block.getLastBlock();
+                        const totalSupply = this.runtime.block.getBlockStatus().calcSupply(lastBlock.height);
+                        rows.forEach(row => {
+                            // FIXME: 2020.4.22 这里显然应该是 bignum
+                            // row.weight = row.balance / totalSupply * 100;
+                            row.weight = DdnUtils.bignum.divide(row.balance, DdnUtils.bignum.multiply(totalSupply, 100))
+                        });
 
-                    resolve({success: true, accounts: rows});
-                }
-            });
+                        resolve({ success: true, accounts: rows });
+                    }
+                });
         });
     }
 
     async getFee() {
         const fee = DdnUtils.bignum.multiply(100, this.tokenSetting.fixedPoint);
-        return {fee};
+        return { fee };
     }
 
     async put(req) {
@@ -242,12 +242,10 @@ class RootRouter {
                     body.multisigAccountPublicKey != keypair.publicKey.toString('hex')) {
 
                     var account;
-                    try
-                    {
+                    try {
                         account = await this.runtime.account.getAccountByPublicKey(body.multisigAccountPublicKey);
                     }
-                    catch (err)
-                    {
+                    catch (err) {
                         return cb(err);
                     }
 
@@ -264,12 +262,10 @@ class RootRouter {
                     }
 
                     let requester;
-                    try
-                    {
+                    try {
                         requester = await this.runtime.account.getAccountByPublicKey(keypair.publicKey);
                     }
-                    catch (err)
-                    {
+                    catch (err) {
                         return cb(err);
                     }
 
@@ -292,7 +288,7 @@ class RootRouter {
                     }
 
                     try {
-                        var transaction = await this.runtime.transaction.create({
+                        const transaction = await this.runtime.transaction.create({
                             type: DdnUtils.assetTypes.DELEGATE,
                             username: body.username,
                             sender: account,
@@ -300,19 +296,17 @@ class RootRouter {
                             second_keypair,
                             requester: keypair
                         });
-                        var transactions = await this.runtime.transaction.receiveTransactions([transaction]);
+                        const transactions = await this.runtime.transaction.receiveTransactions([transaction]);
                         cb(null, transactions);
                     } catch (e) {
                         cb(e);
                     }
                 } else {
-                    var account;
-                    try
-                    {
+                    let account;
+                    try {
                         account = await this.runtime.account.getAccountByPublicKey(keypair.publicKey.toString('hex'));
                     }
-                    catch (err)
-                    {
+                    catch (err) {
                         return cb(err);
                     }
 
@@ -331,14 +325,14 @@ class RootRouter {
                     }
 
                     try {
-                        var transaction = await this.runtime.transaction.create({
+                        const transaction = await this.runtime.transaction.create({
                             type: DdnUtils.assetTypes.DELEGATE,
                             username: body.username,
                             sender: account,
                             keypair,
                             second_keypair
                         });
-                        var transactions = await this.runtime.transaction.receiveTransactions([transaction]);
+                        const transactions = await this.runtime.transaction.receiveTransactions([transaction]);
                         cb(null, transactions);
                     } catch (e) {
                         cb(e);
@@ -348,7 +342,7 @@ class RootRouter {
                 if (err) {
                     reject(err);
                 } else {
-                    resolve({success: true, transaction: transactions[0]})
+                    resolve({ success: true, transaction: transactions[0] })
                 }
             })
         });

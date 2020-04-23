@@ -9,7 +9,7 @@ import nacl from 'tweetnacl';
 import addressHelper from '../address.js';
 import options from '../options';
 import constants from '../constants';
-import trsTypes from '../transaction-types';
+
 
 let Buffer;
 if (typeof Buffer === "undefined") {
@@ -72,25 +72,25 @@ async function getBytes(transaction, skipSignature, skipSecondSignature) {
     // assetSize = assetBytes ? assetBytes.length : 0;
 
     switch (transaction.type) {
-        case trsTypes.SIGNATURE: // Signature
+        case DdnUtils.assetTypes.SIGNATURE: // Signature
             {
                 assetBytes = getSignatureBytes(transaction.asset.signature);
                 break;
             }
 
-        case trsTypes.DELEGATE: // Delegate
+        case DdnUtils.assetTypes.DELEGATE: // Delegate
             {
                 assetBytes = Buffer.from(transaction.asset.delegate.username, "utf8");
                 break;
             }
 
-        case trsTypes.VOTE: // Vote
+        case DdnUtils.assetTypes.VOTE: // Vote
             {
                 assetBytes = Buffer.from(transaction.asset.vote.votes.join(""), "utf8");
                 break;
             }
 
-        case trsTypes.MULTI: // Multi-Signature
+        case DdnUtils.assetTypes.MULTISIGNATURE: // Multi-Signature
             {
                 let keysgroupBuffer = Buffer.from(transaction.asset.multisignature.keysgroup.join(""), "utf8");
                 let bb = new ByteBuffer(1 + 1 + keysgroupBuffer.length, true);
@@ -142,7 +142,7 @@ async function getBytes(transaction, skipSignature, skipSecondSignature) {
     bb.writeString(transaction.nethash); // +8
 
     // +32
-    const senderPublicKeyBuffer = Buffer.from(transaction.sender_public_key, "hex");
+    const senderPublicKeyBuffer = Buffer.from(transaction.senderPublicKey, "hex");
     for (let i = 0; i < senderPublicKeyBuffer.length; i++) {
         bb.writeByte(senderPublicKeyBuffer[i]);
     }
@@ -157,8 +157,8 @@ async function getBytes(transaction, skipSignature, skipSecondSignature) {
     }
 
     // +8
-    if (transaction.recipient_id) {
-        bb.writeString(transaction.recipient_id);
+    if (transaction.recipientId) {
+        bb.writeString(transaction.recipientId);
     } else {
         for (let i = 0; i < 8; i++) {
             bb.writeByte(0);
@@ -231,13 +231,13 @@ async function getId(transaction) {
 
 async function getFee(transaction) {
     switch (transaction.type) {
-        case trsTypes.SEND: // Normal
+        case DdnUtils.assetTypes.TRANSFER: // Normal
             return DdnUtils.bignum.multiply(0.1, fixedPoint);
-        case trsTypes.SIGNATURE: // Signature
+        case DdnUtils.assetTypes.SIGNATURE: // Signature
             return DdnUtils.bignum.multiply(100, fixedPoint);
-        case trsTypes.DELEGATE: // Delegate
+        case DdnUtils.assetTypes.DELEGATE: // Delegate
             return DdnUtils.bignum.multiply(10000, fixedPoint);
-        case trsTypes.VOTE: // Vote
+        case DdnUtils.assetTypes.VOTE: // Vote
             return DdnUtils.bignum.new(fixedPoint);
         default: {
             let fee = constants.fees.send;
@@ -299,7 +299,7 @@ async function verify(transaction) {
     const hash = sha256Bytes(data2);
 
     const signatureBuffer = Buffer.from(transaction.signature, "hex");
-    const senderPublicKeyBuffer = Buffer.from(transaction.sender_public_key, "hex");
+    const senderPublicKeyBuffer = Buffer.from(transaction.senderPublicKey, "hex");
     const res = nacl.sign.detached.verify(hash, signatureBuffer, senderPublicKeyBuffer);
 
     return res;

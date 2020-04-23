@@ -62,9 +62,7 @@
     "eslint": "^6.7.0",
     "father-build": "^1.17.2",
     "lerna": "^3.18.1",
-    "supertest": "^4.0.2"
-  },
-  "dependencies": {
+    "supertest": "^4.0.2",
     "git-cz": "^4.3.1"
   }
 }

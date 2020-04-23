@@ -29,7 +29,7 @@ async calculateFee(trs, sender)
  * 
  * 以下属于系统属性，不可使用
  * amount：转账金额，默认为0，字符串类型
- * recipient_id：收款地址，默认为null
+ * recipientId：收款地址，默认为null
  * message：备注信息
  */
 async propsMapping()

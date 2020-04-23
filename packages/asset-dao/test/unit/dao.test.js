@@ -338,7 +338,7 @@ describe('Test Dao', () => {
         //                         'fee': expectedFee / node.normalizer,
         //                         'nettoSent': amountToSend / node.normalizer,
         //                         'txId': res.body.transactionId,
-        //                         'type': node.TxTypes.SEND
+        //                         'type': node.TxTypes.TRANSFER
         //                     }
         //                     transactionCount += 1;
         //                 } else {

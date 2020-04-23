@@ -5,7 +5,6 @@ import crypto from "./crypto";
 import constants from "../constants";
 import slots from "../time/slots";
 import options from "../options";
-import trsTypes from "../transaction-types";
 
 const {
     bignum
@@ -31,8 +30,8 @@ async function createTransaction(
         nethash: options.get("nethash"),
         amount: "0",
         fee: `${fee}`,
-        recipient_id: recipientId,
-        sender_public_key: keys.public_key,
+        recipientId: recipientId,
+        senderPublicKey: keys.public_key,
         timestamp: getClientFixedTime(),
         message,
         asset
@@ -62,7 +61,7 @@ export default {
         return createTransaction(
             asset,
             fee,
-            trsTypes.AOB_ISSUER,
+            DdnUtils.assetTypes.AOB_ISSUER,
             null,
             null,
             secret,
@@ -99,7 +98,7 @@ export default {
         return createTransaction(
             asset,
             fee,
-            trsTypes.AOB_ASSET,
+            DdnUtils.assetTypes.AOB_ASSET,
             null,
             null,
             secret,
@@ -119,7 +118,7 @@ export default {
         return createTransaction(
             asset,
             fee,
-            trsTypes.AOB_FLAGS,
+            DdnUtils.assetTypes.AOB_FLAGS,
             null,
             null,
             secret,
@@ -140,7 +139,7 @@ export default {
         return createTransaction(
             asset,
             fee,
-            trsTypes.AOB_ACL,
+            DdnUtils.assetTypes.AOB_ACL,
             null,
             null,
             secret,
@@ -159,7 +158,7 @@ export default {
         return createTransaction(
             asset,
             fee,
-            trsTypes.AOB_ISSUE,
+            DdnUtils.assetTypes.AOB_ISSUE,
             null,
             null,
             secret,
@@ -185,7 +184,7 @@ export default {
         return createTransaction(
             asset,
             fee,
-            trsTypes.AOB_TRANSFER,
+            DdnUtils.assetTypes.AOB_TRANSFER,
             recipientId,
             message,
             secret,

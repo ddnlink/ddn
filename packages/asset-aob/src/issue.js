@@ -23,7 +23,7 @@ class Issue extends Asset.Base {
         const assetIssue = await this.getAssetObject(trs);
 
         // 检查参数
-        if (trs.recipient_id) {
+        if (trs.recipientId) {
             throw new Error('Invalid recipient');
         }
         if (!DdnUtils.bignum.isZero(trs.amount)) {

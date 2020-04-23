@@ -23,7 +23,7 @@ class InTransfer extends Asset.Base {
     }
 
     async create(data, trs) {
-        trs.recipient_id = null;
+        trs.recipientId = null;
 
         const assetJsonName = await this.getAssetJsonName(trs.type);
         // eslint-disable-next-line require-atomic-updates
@@ -39,7 +39,7 @@ class InTransfer extends Asset.Base {
     }
 
     async verify(trs, sender) {
-        if (trs.recipient_id) {
+        if (trs.recipientId) {
             throw new Error("Invalid recipient")
         }
 

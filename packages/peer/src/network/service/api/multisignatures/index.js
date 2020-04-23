@@ -1,5 +1,5 @@
 /**
- * RootRouter接口
+ * MultisignaturesRouter接口
  * wangxm   2019-03-27
  */
 import crypto from 'crypto';
@@ -7,7 +7,7 @@ import crypto from 'crypto';
 import ed from 'ed25519';
 import DdnUtils from '@ddn/utils';
 
-class RootRouter {
+class MultisignaturesRouter {
 
     constructor(context) {
         Object.assign(this, context);
@@ -187,9 +187,9 @@ class RootRouter {
                 }
             });
         } else {
-            const account = await this.runtime.account.getAccountByAddress(transaction.sender_id);
+            const account = await this.runtime.account.getAccountByAddress(transaction.senderId);
             if (!account) {
-                throw new Error("Account " + transaction.sender_id + " not found");
+                throw new Error("Account " + transaction.senderId + " not found");
             }
 
             if (!transaction.requester_public_key) { //wxm block database
@@ -198,7 +198,7 @@ class RootRouter {
                 }
             } else {
                 if (account.public_key != keypair.publicKey.toString('hex') ||
-                    transaction.sender_public_key != keypair.publicKey.toString('hex')) { //wxm block database
+                    transaction.senderPublicKey != keypair.publicKey.toString('hex')) { //wxm block database
                     throw new Error("Permission to sign transaction denied");
                 }
             }
@@ -268,22 +268,22 @@ class RootRouter {
         }
 
         let transactions = await this.runtime.transaction.getUnconfirmedTransactionList();
-        //wxm TODO 此处不应该用TransactionTypes.OUT_TRANSFER，或者单独一个接口道aob包里
+        //wxm TODO 此处不应该用DdnUtils.assetTypes.DAPP_OUT，或者单独一个接口道aob包里
         if (query.isOutTransfer) {
             transactions = transactions.filter(({
                 type
-            }) => type == TransactionTypes.OUT_TRANSFER);
+            }) => type == DdnUtils.assetTypes.DAPP_OUT);
         }
 
         const pendings = [];
-        for (var i = 0; i < transactions.length; i++) {
+        for (let i = 0; i < transactions.length; i++) {
             const item = transactions[i];
 
             let signed = false;
             let verify = false;
 
             if (!verify && item.signatures && item.signatures.length > 0) {
-                for (const i in item.signatures) {
+                for (let i in item.signatures) {
                     let signature = item.signatures[i];
 
                     try {
@@ -303,12 +303,12 @@ class RootRouter {
                 }
             }
 
-            if (!signed && item.sender_public_key == query.publicKey) { //wxm block database
+            if (!signed && item.senderPublicKey == query.publicKey) { //wxm block database
                 signed = true;
             }
 
             try {
-                const sender = await this.runtime.account.getAccountByPublicKey(item.sender_public_key);
+                const sender = await this.runtime.account.getAccountByPublicKey(item.senderPublicKey);
                 if (!sender) {
                     break;
                 }
@@ -368,12 +368,12 @@ class RootRouter {
                         return reject("Database error");
                     }
 
-                    var addresses = rows[0].account_id.split(','); //wxm block database
+                    const addresses = rows[0].account_id.split(','); //wxm block database
 
                     try {
-                        var rows = await this.runtime.account.getAccountList({
+                        const rows = await this.runtime.account.getAccountList({
                             address: {
-                                $in: addresses
+                                '$in': addresses
                             },
                             sort: [
                                 ['balance', 'ASC']
@@ -383,14 +383,14 @@ class RootRouter {
                         for (let i = 0; i < rows.length; i++) {
                             const account = rows[i];
 
-                            var addresses = [];
+                            const addresses = [];
                             for (let j = 0; j < account.multisignatures.length; j++) {
                                 addresses.push(this.runtime.account.generateAddressByPublicKey(account.multisignatures[j]));
                             }
 
                             const multisigaccounts = await this.runtime.account.getAccountList({
                                 address: {
-                                    $in: addresses
+                                    '$in': addresses
                                 }
                             }, ['address', 'publicKey', 'balance']);
                             account.multisigaccounts = multisigaccounts;
@@ -409,4 +409,4 @@ class RootRouter {
 
 }
 
-export default RootRouter;
+export default MultisignaturesRouter;

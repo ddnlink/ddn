@@ -1,7 +1,8 @@
 import ByteBuffer from 'bytebuffer';
+import DdnUtils from '@ddn/utils';
+
 import crypto from "./crypto";
 import constants from "../constants";
-import transactionTypes from "../transaction-types";
 import slots from "../time/slots";
 import globalOptions from '../options';
 
@@ -10,11 +11,11 @@ function createDApp(options, secret, secondSecret) {
 
 	const transaction = {
     nethash: globalOptions.get('nethash'),
-		type: transactionTypes.DAPP,
+		type: DdnUtils.assetTypes.DAPP,
 		amount: "0",    //Bignum update
 		fee: constants.fees.dapp,
-		recipient_id: null,
-		sender_public_key: keys.public_key,
+		recipientId: null,
+		senderPublicKey: keys.public_key,
 		timestamp: slots.getTime() - globalOptions.get('clientDriftSeconds'),
 		asset: {
 			dapp: {
@@ -38,7 +39,7 @@ function createDApp(options, secret, secondSecret) {
 		crypto.secondSign(transaction, secondKeys);
 	}
 
-	transaction.id = crypto.getId(transaction);
+	// transaction.id = crypto.getId(transaction);
 	return transaction;
 }
 

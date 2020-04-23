@@ -48,10 +48,10 @@ class Confirmation extends Asset.Base {
         const assetJsonName = await this.getAssetJsonName(trs.type);
         if (data[assetJsonName].state === 0) {
             // 拒绝时没有转账交易
-            trans.recipient_id = null; // wxm block database
+            trans.recipientId = null; // wxm block database
             trans.amount = '0';
         } else if (data[assetJsonName].state === 1) {
-            trans.recipient_id = data[assetJsonName].received_address; // wxm block database
+            trans.recipientId = data[assetJsonName].received_address; // wxm block database
             // 此处交易金额=投稿的price
             trans.amount = DdnUtils.bignum.new((data[assetJsonName].price || 0)).toString();
         }
@@ -75,11 +75,11 @@ class Confirmation extends Asset.Base {
         }
 
         if (confirmation.state === 0) {
-            if (trs.recipient_id) {
+            if (trs.recipientId) {
                 throw new Error('Invalid recipient');
             }
         } else if (confirmation.state === 1) {
-            if (!trs.recipient_id) {
+            if (!trs.recipientId) {
                 throw new Error('Invalid recipient');
             }
         } else {

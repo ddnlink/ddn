@@ -8,9 +8,7 @@ import crypto from 'crypto';
 import sha256 from "fast-sha256";
 import ed from 'ed25519';
 import extend from 'util-extend';
-import cryptoLib from "@ddn/crypto";
 import DdnUtils from '@ddn/utils';
-
 import Assets from '../../assets';
 
 let _singleton;
@@ -71,7 +69,7 @@ class Transaction {
             type: data.type,
             amount: "0",
             nethash: this.config.nethash,
-            sender_public_key: data.sender.public_key,
+            senderPublicKey: data.sender.public_key,
             requester_public_key: data.requester ? data.requester.public_key.toString('hex') : null,
             timestamp: this.runtime.slot.getTime(),
             asset: {},
@@ -128,7 +126,8 @@ class Transaction {
         bb.writeInt(trs.timestamp);
         bb.writeString(trs.nethash);
 
-        const senderPublicKeyBuffer = Buffer.from(trs.sender_public_key, 'hex');
+        this.logger.debug('peer/src/kernal/transaciton trs: ', trs)
+        const senderPublicKeyBuffer = Buffer.from(trs.senderPublicKey, 'hex');
         for (let i = 0; i < senderPublicKeyBuffer.length; i++) {
             bb.writeByte(senderPublicKeyBuffer[i]);
         }
@@ -140,8 +139,8 @@ class Transaction {
             }
         }
 
-        if (trs.recipient_id) {
-            bb.writeString(trs.recipient_id);
+        if (trs.recipientId) {
+            bb.writeString(trs.recipientId);
         } else {
             for (let i = 0; i < 8; i++) {
                 bb.writeByte(0);
@@ -221,10 +220,10 @@ class Transaction {
             block_height: trs.block_height,
             type: trs.type,
             timestamp: trs.timestamp,
-            sender_public_key: trs.sender_public_key,
+            senderPublicKey: trs.senderPublicKey,
             requester_public_key: trs.requester_public_key,
-            sender_id: trs.sender_id,
-            recipient_id: trs.recipient_id || null,
+            senderId: trs.senderId,
+            recipientId: trs.recipientId || null,
             amount: `${trs.amount}`,
             fee: `${trs.fee}`,
             signature: trs.signature,
@@ -260,10 +259,10 @@ class Transaction {
                 block_id: raw.b_id || raw.t_blockId, //wxm block database
                 type: parseInt(raw.t_type),
                 timestamp: parseInt(raw.t_timestamp),
-                sender_public_key: raw.t_senderPublicKey, //wxm block database
+                senderPublicKey: raw.t_senderPublicKey, //wxm block database
                 requester_public_key: raw.t_requesterPublicKey, //wxm block database
-                sender_id: raw.t_senderId, //wxm block database
-                recipient_id: raw.t_recipientId, //wxm block database
+                senderId: raw.t_senderId, //wxm block database
+                recipientId: raw.t_recipientId, //wxm block database
                 amount: `${raw.t_amount}`, //DdnUtils.bignum update parseInt(raw.t_amount),
                 fee: `${raw.t_fee}`, //DdnUtils.bignum update parseInt(raw.t_fee),
                 signature: raw.t_signature,
@@ -294,20 +293,20 @@ class Transaction {
         }
 
         //wxm TODO 这里不应该使用特定的类型，应该有通用的方式
-        if (trs.type === 13) { //TransactionTypes.OUT_TRANSFER
+        if (trs.type === DdnUtils.assetTypes.DAPP_OUT) { //
             return await this._assets.call(trs.type, trs, block, sender);
         }
 
         //DdnUtils.bignum update   const amount = trs.amount + trs.fee;
         const amount = DdnUtils.bignum.plus(trs.amount, trs.fee);
 
-        var sender = await this.runtime.account.merge(sender.address, {
+        const sender1 = await this.runtime.account.merge(sender.address, {
             balance: amount,
             block_id: block.id, //wxm block database
             round: await this.runtime.round.calc(block.height)
         }, dbTrans);
 
-        await this._assets.call(trs.type, trs, block, sender, dbTrans);
+        await this._assets.call(trs.type, trs, block, sender1, dbTrans);
     }
 
     async getUnconfirmedTransaction(trsId) {
@@ -336,19 +335,19 @@ class Transaction {
     }
 
     async undoUnconfirmed(transaction, dbTrans) {
-        const sender = await this.runtime.account.getAccountByPublicKey(transaction.sender_public_key);
+        const sender = await this.runtime.account.getAccountByPublicKey(transaction.senderPublicKey);
         await this.removeUnconfirmedTransaction(transaction.id);
 
         if (!this._assets.hasType(transaction.type)) {
-            throw new Error(`Unknown transaction type ${trs.type}`);
+            throw new Error(`Unknown transaction type ${transaction.type}`);
         }
 
         //wxm TODO
         //此处应该使用this._assets方法（transaction.type）来做判断
-        // if (transaction.type === TransactionTypes.OUT_TRANSFER)
-        // {
-        //     return await this._assets.call(transaction.type, "undoUnconfirmed", transaction, sender);
-        // }
+        // fixme: 2020.4.22 这里是 dapp 的交易，转移到别处？
+        if (transaction.type === DdnUtils.assetTypes.DAPP_OUT) {
+            return await this._assets.call(transaction.type, "undoUnconfirmed", transaction, sender);
+        }
 
         const amount = DdnUtils.bignum.plus(transaction.amount, transaction.fee);
 
@@ -408,7 +407,7 @@ class Transaction {
             }
 
             //wxm 这个逻辑应该去掉，不应该这么使用序号特殊处理，如果必须，应该是用assetTypes.type枚举
-            if (trs.type === 7) {
+            if (trs.type === DdnUtils.assetTypes.DAPP_OUT) {
                 return await this._assets.call(trs.type, "applyUnconfirmed", trs, sender, dbTrans);
             }
 
@@ -547,7 +546,7 @@ class Transaction {
             throw new Error("Invalid sender");
         }
 
-        trs.sender_id = sender.address; //wxm block database
+        trs.senderId = sender.address; //wxm block database
 
         // Verify that requester in multisignature
         if (trs.requester_public_key) { //wxm block database
@@ -561,7 +560,7 @@ class Transaction {
                 throw new Error("Failed to verify signature, 2");
             }
         } else {
-            if (!await this.verifySignature(trs, trs.sender_public_key, trs.signature)) { //wxm block database
+            if (!await this.verifySignature(trs, trs.senderPublicKey, trs.signature)) { //wxm block database
                 throw new Error("Failed to verify signature, 3");
             }
         }
@@ -601,9 +600,9 @@ class Transaction {
         }
 
         await this.runtime.account.setAccount({
-            public_key: transaction.sender_public_key
+            public_key: transaction.senderPublicKey
         });
-        const sender = await this.runtime.account.getAccountByPublicKey(transaction.sender_public_key);
+        const sender = await this.runtime.account.getAccountByPublicKey(transaction.senderPublicKey);
 
         let requester;
         if (transaction.requester_public_key && sender && sender.multisignatures && sender.multisignatures.length) { //wxm block database
@@ -699,7 +698,7 @@ class Transaction {
                 throw new Error("Failed to verify signature, 4");
             }
 
-            if (sender.public_key != trs.sender_public_key) {
+            if (sender.public_key != trs.senderPublicKey) {
                 throw new Error("Invalid public key")
             }
         }
@@ -714,7 +713,7 @@ class Transaction {
         if (trs.requester_public_key) { //wxm block database
             valid = await this.verifySignature(trs, trs.requester_public_key, trs.signature); //wxm block database
         } else {
-            valid = await this.verifySignature(trs, trs.sender_public_key, trs.signature);
+            valid = await this.verifySignature(trs, trs.senderPublicKey, trs.signature);
         }
 
         if (!valid) {
@@ -758,12 +757,12 @@ class Transaction {
         }
 
         if (trs.requester_public_key) {
-            multisignatures.push(trs.sender_public_key);
+            multisignatures.push(trs.senderPublicKey);
         }
 
         //wxm TODO
         // 此处应该用this._assets.方法（trs.type） 来判断是否能够进入下面处理
-        if (trs.signatures && trs.type !== 13) { //TransactionTypes.OUT_TRANSFER
+        if (trs.signatures && trs.type !== DdnUtils.assetTypes.DAPP_OUT) { // 13 ?
             for (let d = 0; d < trs.signatures.length; d++) {
                 let verify = false;
 
@@ -784,7 +783,7 @@ class Transaction {
         }
 
         // Check sender
-        if (trs.sender_id != sender.address) { //wxm block database
+        if (trs.senderId != sender.address) { //wxm block database
             throw new Error(`Invalid sender id: ${trs.id}`);
         }
 
