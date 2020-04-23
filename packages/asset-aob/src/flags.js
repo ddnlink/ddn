@@ -2,13 +2,13 @@ import Asset from '@ddn/asset-base';
 import DdnUtils from '@ddn/utils';
 
 class Flags extends Asset.Base {
-    
+
     //flag_type: 1: 设置acl对应值，2：设置writeoff对应值
     async propsMapping() {
         return [
-            {field: 'str1', prop: 'currency', required: true},
-            {field: 'int1', prop: 'flag', minValue: 0, maxValue: 2, required: true},
-            {field: 'int2', prop: 'flag_type', minValue: 1, maxValue: 2, required: true}
+            { field: 'str1', prop: 'currency', required: true },
+            { field: 'int1', prop: 'flag', minValue: 0, maxValue: 2, required: true },
+            { field: 'int2', prop: 'flag_type', minValue: 1, maxValue: 2, required: true }
         ];
     }
 
@@ -21,18 +21,18 @@ class Flags extends Asset.Base {
         if (!DdnUtils.bignum.isZero(trs.amount)) {
             throw new Error("Invalid transaction amount")
         }
-    
+
         const flagsObj = await this.getAssetObject(trs);
 
         const assetInst = await this.getAssetInstanceByName("AobAsset");
-        const queryResult = await assetInst.queryAsset({name: flagsObj.currency}, null, false, 1, 1);
+        const queryResult = await assetInst.queryAsset({ name: flagsObj.currency }, null, false, 1, 1);
         if (queryResult.length <= 0) {
             throw new Error(`AOB Asset not found: ${flagsObj.currency}`);
         }
         const assetInfo = queryResult[0];
 
         const issuerInst = await this.getAssetInstanceByName("AobIssuer");
-        const queryResult2 = await issuerInst.queryAsset({name: assetInfo.issuer_name}, null, false, 1, 1);
+        const queryResult2 = await issuerInst.queryAsset({ name: assetInfo.issuer_name }, null, false, 1, 1);
         if (queryResult2.length <= 0) {
             throw new Error(`AOB Issuer not found: ${assetInfo.issuer_name}`);
         }
@@ -95,7 +95,7 @@ class Flags extends Asset.Base {
         }
 
         const assetInst = await this.getAssetInstanceByName("AobAsset");
-        await assetInst.update(updateObj, {name: flagsObj.currency}, dbTrans);
+        await assetInst.update(updateObj, { name: flagsObj.currency }, dbTrans);
     }
 
     async undo(trs, block, sender, dbTrans) {
@@ -110,7 +110,7 @@ class Flags extends Asset.Base {
         }
 
         const assetInst = await this.getAssetInstanceByName("AobAsset");
-        await assetInst.update(updateObj, {name: flagsObj.currency}, dbTrans);
+        await assetInst.update(updateObj, { name: flagsObj.currency }, dbTrans);
     }
 
 }

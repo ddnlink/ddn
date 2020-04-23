@@ -30,6 +30,20 @@ class DdnSchema {
         this._attachFormatExt("format-ext");
     }
 
+    /**
+     * 将自定义的验证格式加载进来，格式如下：
+     * export default {
+     *       // 名称必须有，验证逻辑中使用
+     *       name: "ip", 
+     *
+     *       // 具体的验证方法
+     *       validate(value) {
+     *           return true;
+     *       }
+     *   };
+     * 
+     * @param {string} dir 与本文件同级的路径名
+     */
     _attachFormatExt(dir) {
         const extPath = path.resolve(__dirname, dir);
 
@@ -42,7 +56,8 @@ class DdnSchema {
                 const pos = item.lastIndexOf(".");
                 if (pos >= 0) {
                     const ext = item.substring(pos);
-                    if (ext.toLowerCase() == ".js") {
+                    // TODO: 2020.4.23 这里写死了只能是 `.js` 文件, 因为下面使用的`require`方法。如果编译使用，源文件可以是其他格式，注意优化调整
+                    if (ext.toLowerCase() == ".js") { 
                         const extFormat = global._require_runtime_(itemPath);
                         if (extFormat != null &&
                             typeof(extFormat.name) == "string" &&

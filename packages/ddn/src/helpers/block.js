@@ -6,7 +6,7 @@ import ByteBuffer from 'bytebuffer';
 import config from '../config';
 import transactionsLib from '../transactions';
 import accounts from './account.js';
-const { bignum } = DdnUtils;
+const { bignum, assetTypes } = DdnUtils;
 
 function getBytes(block, skipSignature) {
 	// const size = 4 + 4 + 8 + 4 + 8 + 8 + 8 + 4 + 32 + 32 + 64;
@@ -99,7 +99,7 @@ export default {
 					break;
 				}
 				const trs = {
-					type: 0,
+					type: assetTypes.TRANSFER,
 					nethash,
 					amount: bignum.multiply(bignum.new(parts[1]), 100000000),
 					fee: '0',
@@ -110,16 +110,16 @@ export default {
 				};
 				totalAmount = bignum.plus(totalAmount, trs.amount);
 
-				var bytes = transactionsLib.getTransactionBytes(trs);
+				// let bytes = transactionsLib.getTransactionBytes(trs);
 				trs.signature = cryptoLib.sign(sender.keypair, bytes);
-				bytes = transactionsLib.getTransactionBytes(trs);
+				let bytes = transactionsLib.getTransactionBytes(trs);
 				trs.id = cryptoLib.getId(bytes);
 
 				transactions.push(trs);
 			}
 		} else {
 			const balanceTransaction = {
-				type: 0,
+				type: assetTypes.TRANSFER,
 				nethash,
 				amount: config.totalAmount,
 				fee: '0',
@@ -131,7 +131,7 @@ export default {
 
 			totalAmount = bignum.plus(totalAmount, balanceTransaction.amount);
 
-			var bytes = transactionsLib.getTransactionBytes(balanceTransaction);
+			let bytes = transactionsLib.getTransactionBytes(balanceTransaction);
 			balanceTransaction.signature = cryptoLib.sign(sender.keypair, bytes);
 			bytes = transactionsLib.getTransactionBytes(balanceTransaction);
 			balanceTransaction.id = cryptoLib.getId(bytes);
@@ -140,14 +140,14 @@ export default {
 		}
 
         // make delegates
-        for (var i = 0; i < 101; i++) {
+        for (let i = 0; i < 101; i++) {
 			const delegate = accounts.account(cryptoLib.generateSecret(), tokenPrefix);
 			delegates.push(delegate);
 
 			const username = `${tokenName}_${i + 1}`;
 
 			const transaction = {
-				type: 2,
+				type: assetTypes.DELEGATE,
 				nethash,
 				amount: '0',
 				fee: '0',
@@ -162,7 +162,7 @@ export default {
 				}
 			};
 
-			bytes = transactionsLib.getTransactionBytes(transaction);
+			let bytes = transactionsLib.getTransactionBytes(transaction);
 			transaction.signature = cryptoLib.sign(sender.keypair, bytes);
 			bytes = transactionsLib.getTransactionBytes(transaction);
 			transaction.id = cryptoLib.getId(bytes);
@@ -174,7 +174,7 @@ export default {
         const votes = delegates.map(({keypair}) => `+${keypair.publicKey}`);
 
         const voteTransaction = {
-			type: 3,
+			type: assetTypes.VOTE,
 			nethash,
 			amount: '0',
 			fee: '0',
@@ -189,7 +189,7 @@ export default {
 			}
 		};
 
-        bytes = transactionsLib.getTransactionBytes(voteTransaction);
+        let bytes = transactionsLib.getTransactionBytes(voteTransaction);
         voteTransaction.signature = cryptoLib.sign(keypair, bytes);
         bytes = transactionsLib.getTransactionBytes(voteTransaction);
         voteTransaction.id = cryptoLib.getId(bytes);
@@ -199,7 +199,7 @@ export default {
         let dappTransaction = null;
         if (dapp) {
 			dappTransaction = {
-				type: 5,
+				type: assetTypes.DAPP,
 				amount: '0',
 				fee: '0',
 				timestamp: 0,
@@ -211,7 +211,7 @@ export default {
 				}
 			};
 
-			bytes = transactionsLib.getTransactionBytes(dappTransaction);
+			let bytes = transactionsLib.getTransactionBytes(dappTransaction);
 			dappTransaction.signature = cryptoLib.sign(keypair, bytes);
 			bytes = transactionsLib.getTransactionBytes(dappTransaction);
 			dappTransaction.id = cryptoLib.getId(bytes);
@@ -244,7 +244,7 @@ export default {
         payloadHash = payloadHash.digest();
 
         const block = {
-			version: 0,
+			version: assetTypes.TRANSFER,
 			total_amount: totalAmount,  //wxm block database
 			total_fee: '0', //wxm block database
 			reward: '0',
@@ -275,7 +275,7 @@ export default {
 		for (const i in genesisBlock.transactions) {
 			const tx = genesisBlock.transactions[i];
 
-			if (tx.type == 5) {
+			if (tx.type == assetTypes.DAPP) {
 				if (tx.asset.dapp.name == dapp.name) {
 					throw new Error(`DApp with name '${dapp.name}' already exists in genesis block`);
 				}
@@ -291,7 +291,7 @@ export default {
 		}
 
 		const dappTransaction = {
-			type: 5,
+			type: assetTypes.DAPP,
 			amount: '0',
 			fee: '0',
 			timestamp: 0,

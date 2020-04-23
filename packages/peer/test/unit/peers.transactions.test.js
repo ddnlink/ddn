@@ -119,7 +119,7 @@ describe("POST /peer/transactions", () => {
     it("Using invalid passphrase. Should fail", async done => {
         const transaction = await node.ddn.transaction.createTransaction(node.Daccount.address, 1, message, node.Gaccount.password);
         transaction.recipientId = node.Daccount.address;
-        transaction.id = node.ddn.crypto.getId(transaction); // 这里提供是不对的
+        transaction.id = await node.ddn.crypto.getId(transaction); // 这里提供是不对的
         node.peer.post("/transactions")
             .set("Accept", "application/json")
             .set("version", node.version)
@@ -165,7 +165,7 @@ describe("POST /peer/transactions", () => {
     it("Usin fake signature. Should fail", async done => {
         const transaction = await node.ddn.transaction.createTransaction(node.Daccount.address, 1, message, node.Gaccount.password);
         transaction.signature = crypto.randomBytes(64).toString("hex");
-        transaction.id = node.ddn.crypto.getId(transaction);
+        transaction.id = await node.ddn.crypto.getId(transaction);
         node.peer.post("/transactions")
             .set("Accept", "application/json")
             .set("version", node.version)
@@ -186,9 +186,31 @@ describe("POST /peer/transactions", () => {
             });
     });
 
-    it("Using invalid publicKey and signature. Should fail", async done => {
+    it("Using invalid signature. Should fail", async done => {
         const transaction = await node.ddn.transaction.createTransaction(node.Daccount.address, 1, message, node.Gaccount.password);
         transaction.signature = node.randomPassword();
+        node.peer.post("/transactions")
+            .set("Accept", "application/json")
+            .set("version", node.version)
+            .set("nethash", node.config.nethash)
+            .set("port", node.config.port)
+            .send({
+                transaction
+            })
+            .expect("Content-Type", /json/)
+            .expect(200)
+            .end((err, {
+                body
+            }) => {
+                debug('invalid signature', JSON.stringify(body));
+                node.expect(body).to.have.property("success").to.be.false;
+                node.expect(body).to.have.property("error").to.include('should match format "signature"');
+                done();
+            });
+    });
+
+    it("Using invalid publicKey. Should fail", async done => {
+        const transaction = await node.ddn.transaction.createTransaction(node.Daccount.address, 1, message, node.Gaccount.password);
         transaction.senderPublicKey = node.randomPassword();
         node.peer.post("/transactions")
             .set("Accept", "application/json")
@@ -203,9 +225,9 @@ describe("POST /peer/transactions", () => {
             .end((err, {
                 body
             }) => {
-                // console.log(JSON.stringify(res.body));
+                debug('invalid publicKey', JSON.stringify(body));
                 node.expect(body).to.have.property("success").to.be.false;
-                node.expect(body).to.have.property("error");
+                node.expect(body).to.have.property("error").to.include('should match format "publicKey"');
                 done();
             });
     });

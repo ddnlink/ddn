@@ -345,7 +345,7 @@ class PeerService {
             this.logger.error("transaction parse error", {
                 raw: JSON.stringify(body),
                 trs: transaction,
-                error: e // DdnUtils.system.getErrorMsg(e)
+                error: e.message
             });
 
             if (peerIp && headers["port"] > 0 && headers["port" < 65536]) {
@@ -365,7 +365,7 @@ class PeerService {
 
             return {
                 success: false,
-                error: "Invalid transaction body"
+                error: DdnUtils.system.getErrorMsg(e.message) // "Invalid transaction body"
             };
         }
 
