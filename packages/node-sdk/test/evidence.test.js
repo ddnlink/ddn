@@ -1,27 +1,29 @@
-var Buffer = require("buffer/").Buffer;
-var ddn = require("../index.js");
+// import Buffer from "buffer";
+import ddn from "../";
 
-describe("DDN evidence.js", function () {
-    var evidence = ddn.evidence;
+// const Buffer = Buffer.Buffer;
 
-    it("should be object", function () {
+describe("DDN evidence.js", () => {
+    const evidence = ddn.evidence;
+
+    it("should be object", () => {
         (evidence).should.be.type("object");
     });
 
-    it("should have properties", function () {
+    it("should have properties", () => {
         (evidence).should.have.property("createEvidence");
     })
 
-    describe("#createEvidence", function () {
-        var createEvidence = evidence.createEvidence;
-        var trs = null;
+    describe("#createEvidence", () => {
+        const createEvidence = evidence.createEvidence;
+        let trs = null;
 
-        it("should be a function", function () {
+        it("should be a function", () => {
             (createEvidence).should.be.type("function");
         });
 
-        it("should create evidence without second signature", function () {
-            var evidence = {
+        it("should create evidence without second signature", () => {
+            const evidence = {
                 ipid: "IPIDasdf20180501221md",
 				title: "Evidencetitle",
 				hash: "contenthash",
@@ -30,30 +32,30 @@ describe("DDN evidence.js", function () {
                 tags: "test, article",
 				size: 12,
 				type: "html"
-            }
+            };
             trs = createEvidence(evidence, "secret");
             (trs).should.be.ok;
         });
 
-        describe("returned evidence", function () {
-            it("should be object", function () {
+        describe("returned evidence", () => {
+            it("should be object", () => {
                 (trs).should.be.type("object");
             });
 
-            it("should have id as string", function () {
+            it("should have id as string", () => {
                 (trs.id).should.be.type("string");
             });
 
-            it("should have type as number and eqaul 0", function () {
+            it("should have type as number and eqaul 0", () => {
                 (trs.type).should.be.type("number").and.equal(20);
             });
 
-            it("should have timestamp as number", function () {
+            it("should have timestamp as number", () => {
                 (trs.timestamp).should.be.type("number").and.not.NaN;
             });
 
-            it("should have senderPublicKey as hex string", function () {
-                (trs.senderPublicKey).should.be.type("string").and.match(function () {
+            it("should have senderPublicKey as hex string", () => {
+                (trs.senderPublicKey).should.be.type("string").and.match(() => {
                     try {
                         Buffer.from(trs.senderPublicKey, "hex")
                     } catch (e) {
@@ -64,16 +66,16 @@ describe("DDN evidence.js", function () {
                 })
             });
 
-            it("should have empty asset object", function () {
+            it("should have empty asset object", () => {
                 (trs.asset).should.be.type("object").and.empty;
             });
 
-            it("should does not have second signature", function () {
+            it("should does not have second signature", () => {
                 (trs).should.not.have.property("signSignature");
             });
 
-            it("should have signature as hex string", function () {
-                (trs.signature).should.be.type("string").and.match(function () {
+            it("should have signature as hex string", () => {
+                (trs.signature).should.be.type("string").and.match(() => {
                     try {
                         Buffer.from(trs.signature, "hex")
                     } catch (e) {
@@ -84,8 +86,8 @@ describe("DDN evidence.js", function () {
                 })
             });
 
-            it("should be signed correctly", function () {
-                var result = ddn.crypto.verify(trs);
+            it("should be signed correctly", () => {
+                const result = ddn.crypto.verify(trs);
                 (result).should.be.ok;
             });
 

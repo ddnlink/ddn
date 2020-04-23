@@ -1,10 +1,11 @@
+import DdnUtils from '@ddn/utils';
+
 import crypto from "./crypto.js";
 import constants from "../constants.js";
 
 import slots from "../time/slots.js";
 import options from '../options';
 import addressHelper from '../address.js';
-import DdnUtils from '@ddn/utils';
 
 const { bignum } = DdnUtils;
 

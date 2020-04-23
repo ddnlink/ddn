@@ -64,6 +64,8 @@ class AssetUtils {
     }
 
     static isTypeValueExists(typeValue) {
+        console.log('isTypeValueExists, global.assets - typeValue', global.assets, typeValue);
+        
         return !!global.assets.transTypeNames[typeValue];
     }
 

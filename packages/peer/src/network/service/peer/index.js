@@ -32,23 +32,23 @@ class PeerService {
         headers["port"] = parseInt(headers["port"]);
 
         const validateErrors = await this.ddnSchema.validate({
-                type: "object",
-                properties: {
-                    os: {
-                        type: "string",
-                        maxLength: 64
-                    },
-                    nethash: {
-                        type: "string",
-                        maxLength: 8
-                    },
-                    version: {
-                        type: "string",
-                        maxLength: 11
-                    }
+            type: "object",
+            properties: {
+                os: {
+                    type: "string",
+                    maxLength: 64
                 },
-                required: ["nethash", "version"]
+                nethash: {
+                    type: "string",
+                    maxLength: 8
+                },
+                version: {
+                    type: "string",
+                    maxLength: 11
+                }
             },
+            required: ["nethash", "version"]
+        },
             headers
         );
         if (validateErrors) {
@@ -136,44 +136,44 @@ class PeerService {
         }
 
         const validateErrors = await this.ddnSchema.validate({
-                type: "object",
-                properties: {
-                    height: {
-                        type: "string"
-                    },
-                    id: {
-                        type: "string",
-                        maxLength: 64
-                    },
-                    timestamp: {
-                        type: "integer"
-                    },
-                    generator_public_key: {
-                        type: "string",
-                        format: "publicKey"
-                    },
-                    address: {
-                        type: "string"
-                    },
-                    hash: {
-                        type: "string",
-                        format: "hex"
-                    },
-                    signature: {
-                        type: "string",
-                        format: "signature"
-                    }
+            type: "object",
+            properties: {
+                height: {
+                    type: "string"
                 },
-                required: [
-                    "height",
-                    "id",
-                    "timestamp",
-                    "generator_public_key",
-                    "address",
-                    "hash",
-                    "signature"
-                ]
+                id: {
+                    type: "string",
+                    maxLength: 64
+                },
+                timestamp: {
+                    type: "integer"
+                },
+                generator_public_key: {
+                    type: "string",
+                    format: "publicKey"
+                },
+                address: {
+                    type: "string"
+                },
+                hash: {
+                    type: "string",
+                    format: "hex"
+                },
+                signature: {
+                    type: "string",
+                    format: "signature"
+                }
             },
+            required: [
+                "height",
+                "id",
+                "timestamp",
+                "generator_public_key",
+                "address",
+                "hash",
+                "signature"
+            ]
+        },
             body.propose
         );
 
@@ -197,23 +197,23 @@ class PeerService {
         body
     }) {
         const validateErrors = await this.ddnSchema.validate({
-                type: "object",
-                properties: {
-                    height: {
-                        type: "string"
-                    },
-                    id: {
-                        type: "string",
-                        maxLength: 64
-                    },
-                    signatures: {
-                        type: "array",
-                        minLength: 1,
-                        maxLength: 101
-                    }
+            type: "object",
+            properties: {
+                height: {
+                    type: "string"
                 },
-                required: ["height", "id", "signatures"]
+                id: {
+                    type: "string",
+                    maxLength: 64
+                },
+                signatures: {
+                    type: "array",
+                    minLength: 1,
+                    maxLength: 101
+                }
             },
+            required: ["height", "id", "signatures"]
+        },
             body
         );
         if (validateErrors) {
@@ -256,24 +256,24 @@ class PeerService {
         body
     }) {
         const validateErrors = await this.ddnSchema.validate({
-                type: "object",
-                properties: {
-                    signature: {
-                        type: "object",
-                        properties: {
-                            transaction: {
-                                type: "string"
-                            },
-                            signature: {
-                                type: "string",
-                                format: "signature"
-                            }
+            type: "object",
+            properties: {
+                signature: {
+                    type: "object",
+                    properties: {
+                        transaction: {
+                            type: "string"
                         },
-                        required: ["transaction", "signature"]
-                    }
-                },
-                required: ["signature"]
+                        signature: {
+                            type: "string",
+                            format: "signature"
+                        }
+                    },
+                    required: ["transaction", "signature"]
+                }
             },
+            required: ["signature"]
+        },
             body
         );
         if (validateErrors) {
@@ -326,8 +326,8 @@ class PeerService {
         const peerIp = headers["x-forwarded-for"] || connection.remoteAddress;
         const peerStr = peerIp ?
             `${peerIp}:${
-                  isNaN(headers["port"]) ? "unknown" : headers["port"]
-              }` :
+            isNaN(headers["port"]) ? "unknown" : headers["port"]
+            }` :
             "unknown";
         if (typeof body.transaction == "string") {
             body.transaction = this.protobuf.decodeTransaction(
@@ -343,7 +343,7 @@ class PeerService {
             transaction.asset = transaction.asset || {};
         } catch (e) {
             this.logger.error("transaction parse error", {
-                raw: body,
+                raw: JSON.stringify(body),
                 trs: transaction,
                 error: e // DdnUtils.system.getErrorMsg(e)
             });
@@ -357,7 +357,7 @@ class PeerService {
                 );
                 this.logger.log(
                     `Received transaction ${
-                        transaction ? transaction.id : "null"
+                    transaction ? transaction.id : "null"
                     } is not valid, ban 60 min`,
                     peerStr
                 );
@@ -383,51 +383,51 @@ class PeerService {
         return new Promise((resolve, reject) => {
             this.balancesSequence.add(
                 async cb => {
-                        if (
-                            await this.runtime.transaction.hasUnconfirmedTransaction(
-                                transaction
-                            )
-                        ) {
-                            return cb(
-                                `The transaction ${transaction.id} is in process already..`
-                            ); // Note: please get it.
-                        }
-
-                        this.logger.log(
-                            `Received transaction ${transaction.id} from peer ${peerStr}`
-                        );
-
-                        try {
-                            const transactions = await this.runtime.transaction.receiveTransactions(
-                                [transaction]
-                            );
-                            cb(null, transactions);
-                        } catch (exp) {
-                            cb(exp);
-                        }
-                    },
-                    (err, transactions) => {
-                        let result = {
-                            success: true
-                        };
-
-                        if (err) {
-                            this.logger.warn(
-                                `Receive invalid transaction, id is ${
-                                transaction.id
-                            }, ${DdnUtils.system.getErrorMsg(err)}`
-                            );
-                            this._invalidTrsCache.set(transaction.id, true);
-                            result = {
-                                success: false,
-                                error: err.message ? err.message : err
-                            };
-                        } else if (transactions && transactions.length > 0) {
-                            result.transactionId = transactions[0].id;
-                        }
-
-                        resolve(result);
+                    if (
+                        await this.runtime.transaction.hasUnconfirmedTransaction(
+                            transaction
+                        )
+                    ) {
+                        return cb(
+                            `The transaction ${transaction.id} is in process already..`
+                        ); // Note: please get it.
                     }
+
+                    this.logger.log(
+                        `Received transaction ${transaction.id} from peer ${peerStr}`
+                    );
+
+                    try {
+                        const transactions = await this.runtime.transaction.receiveTransactions(
+                            [transaction]
+                        );
+                        cb(null, transactions);
+                    } catch (exp) {
+                        cb(exp);
+                    }
+                },
+                (err, transactions) => {
+                    let result = {
+                        success: true
+                    };
+
+                    if (err) {
+                        this.logger.warn(
+                            `Receive invalid transaction, id is ${
+                            transaction.id
+                            }, ${DdnUtils.system.getErrorMsg(err)}`
+                        );
+                        this._invalidTrsCache.set(transaction.id, true);
+                        result = {
+                            success: false,
+                            error: err.message ? err.message : err
+                        };
+                    } else if (transactions && transactions.length > 0) {
+                        result.transactionId = transactions[0].id;
+                    }
+
+                    resolve(result);
+                }
             );
         });
     }

@@ -1,7 +1,6 @@
 import Asset from '@ddn/asset-base';
 import DdnUtils from '@ddn/utils';
 import assert from 'assert';
-const { deprecated } = DdnUtils;
 
 class Aob extends Asset.Base {
     async propsMapping() {
