@@ -2,7 +2,6 @@ import inquirer from "inquirer";
 import fs from "fs";
 import path from "path";
 
-// FIXME: 2020.4.22 ./modules/ 文件夹已经转移
 const contractsPath = path.join(".", "modules", "contracts");
 
 function addContract() {
