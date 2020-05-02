@@ -333,7 +333,7 @@ class Peer {
             return true;
         }
 
-        const compatibleVersion = this.tokenSetting[this.config.net]
+        const compatibleVersion = this.constants[this.config.net]
             .compatibleVersion;
 
         const numsCompatible = compatibleVersion.split(".").map(Number);

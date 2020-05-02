@@ -193,7 +193,7 @@ class RootRouter {
     }
 
     async getFee() {
-        const fee = DdnUtils.bignum.multiply(100, this.tokenSetting.fixedPoint);
+        const fee = DdnUtils.bignum.multiply(100, this.constants.fixedPoint);
         return { fee };
     }
 

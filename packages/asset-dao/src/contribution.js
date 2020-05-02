@@ -71,14 +71,14 @@ class Contribution extends Asset.Base {
             || contribution.received_address.length > 128) {
             throw new Error('received_address is undefined or too long, don`t more than 128 characters.');
         }
-        if (!DdnUtils.address.isAddress(contribution.received_address)) {
+        if (!this.address.isAddress(contribution.received_address)) {
             throw new Error("Invalid contribution's received_address");
         }
         if (!contribution.sender_address
             || contribution.sender_address.length > 128) {
             throw new Error('sender_address is undefined or too long, don`t more than 128 characters.');
         }
-        if (!DdnUtils.address.isAddress(contribution.sender_address)) {
+        if (!this.address.isAddress(contribution.sender_address)) {
             throw new Error("Invalid contribution's sender_address");
         }
         if (!contribution.url

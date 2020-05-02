@@ -141,11 +141,14 @@ async function getAssetBytes(transaction) {
     if (Asset.Utils.isTypeValueExists(transaction.type)) {
         const trans = Asset.Utils.getTransactionByTypeValue(transaction.type);
         const transCls = require(trans.package).default[trans.name];
-        let transInst = new transCls({
-            tokenSetting: {
-                tokenName: constants.nethash[options.get('nethash')].tokenName
-            }
-        });
+        // fixme: 这里的 {} 应该不用传，因为有 context 存在？？
+        // let transInst = new transCls({
+        //     constants: {
+        //         // tokenName: constants.nethash[options.get('nethash')].tokenName
+        //         tokenName
+        //     }
+        // });
+        let transInst = new transCls();
         const buf = await transInst.getBytes(transaction);
         transInst = null;
         return buf;
@@ -153,7 +156,7 @@ async function getAssetBytes(transaction) {
     return null;
 }
 
-function getSignatureBytes({public_key}) {
+function getSignatureBytes({ public_key }) {
     const bb = new ByteBuffer(32, true);
     const publicKeyBuffer = Buffer.from(public_key, "hex");
 

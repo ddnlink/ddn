@@ -168,7 +168,7 @@ class RootRouter {
     async getFee(req) {
         //   DdnUtils.bignum update
         //   fee = 5 * constants.fixedPoint;
-        let fee = DdnUtils.bignum.multiply(5, this.tokenSetting.fixedPoint);
+        let fee = DdnUtils.bignum.multiply(5, this.constants.fixedPoint);
         return {fee};
     }
 

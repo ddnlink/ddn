@@ -22,7 +22,7 @@ class Transfer {
   }
 
   async calculateFee(trs, sender) {
-    return this.tokenSetting[this.config.net].fees.send;
+    return this.constants[this.config.net].fees.send;
   }
 
   async verify(trs, {address, lockHeight}) {

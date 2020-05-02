@@ -58,7 +58,7 @@ class OutTransfer extends Asset.Base {
         const transfer = await this.getAssetObject(trs);
         const currency = transfer.currency;
 
-        if (currency != this.tokenSetting.tokenName) {
+        if (currency != this.constants.tokenName) {
             const aobAssetInst = await this.getAssetInstanceByName("AobAsset");
             const aobAssetResult = await aobAssetInst.queryAsset({ name: currency }, null, false, 1, 1);
             if (aobAssetResult.length <= 0) {
@@ -189,12 +189,12 @@ class OutTransfer extends Asset.Base {
 
         _dappOuttransferUnconfirmeds[trs.id] = false;
 
-        if (transfer.currency !== this.tokenSetting.tokenName) {
+        if (transfer.currency !== this.constants.tokenName) {
             this.balanceCache.addAssetBalance(trs.recipientId, transfer.currency, transfer.amount);
 
             await this._updateAssetBalance(transfer.currency, 
                 `-${transfer.amount}`, transfer.dapp_id, dbTrans);
-            await this._updateAssetBalance(this.tokenSetting.tokenName,
+            await this._updateAssetBalance(this.constants.tokenName,
                 `-${trs.fee}`, transfer.dapp_id, dbTrans);
             await this._updateAssetBalance(transfer.currency,
                 transfer.amount, trs.recipientId, dbTrans);   //wxm block database
@@ -211,7 +211,7 @@ class OutTransfer extends Asset.Base {
             }, dbTrans);
 
             var minusSum = DdnUtils.bignum.minus(0, amount, trs.fee);
-            await this._updateAssetBalance(this.tokenSetting.tokenName,
+            await this._updateAssetBalance(this.constants.tokenName,
                 minusSum.toString(), transfer.dapp_id, dbTrans);
         }
     }
@@ -221,12 +221,12 @@ class OutTransfer extends Asset.Base {
 
         _dappOuttransferUnconfirmeds[trs.id] = true;
 
-        if (transfer.currency !== this.tokenSetting.tokenName) {
+        if (transfer.currency !== this.constants.tokenName) {
             this.balanceCache.addAssetBalance(trs.recipientId, transfer.currency, transfer.amount);    //wxm block database
 
             await this._updateAssetBalance(transfer.currency, 
                 transfer.amount, transfer.dapp_id, dbTrans);
-            await this._updateAssetBalance(this.tokenSetting.tokenName,
+            await this._updateAssetBalance(this.constants.tokenName,
                 trs.fee, transfer.dapp_id, dbTrans);
             await this._updateAssetBalance(transfer.currency,
                 `-${transfer.amount}`, trs.recipientId, dbTrans);   //wxm block database
@@ -242,7 +242,7 @@ class OutTransfer extends Asset.Base {
                 block_id: block.id,  //wxm block database
                 round: await this.runtime.round.calc(block.height)
             }, dbTrans);
-            await this._updateAssetBalance(this.tokenSetting.tokenName,
+            await this._updateAssetBalance(this.constants.tokenName,
                 sum, transfer.dapp_id, dbTrans);
         }
     }
@@ -254,7 +254,7 @@ class OutTransfer extends Asset.Base {
         
         const balance = this.balanceCache.getAssetBalance(transfer.dapp_id, transfer.currency) || 0;
         const fee = trs.fee;
-        if (transfer.currency === this.tokenSetting.tokenName) {
+        if (transfer.currency === this.constants.tokenName) {
             const amount = DdnUtils.bignum.plus(transfer.amount, fee);
             if (DdnUtils.bignum.isLessThan(balance, amount)) {
                 throw new Error('Insufficient balance');
@@ -263,14 +263,14 @@ class OutTransfer extends Asset.Base {
             this.balanceCache.addAssetBalance(transfer.dapp_id, 
                 transfer.currency, DdnUtils.bignum.minus(0, amount).toString());//DdnUtils.bignum update -amount
         } else {
-            const ddnBalance = this.balanceCache.getAssetBalance(transfer.dapp_id, this.tokenSetting.tokenName) || 0;
+            const ddnBalance = this.balanceCache.getAssetBalance(transfer.dapp_id, this.constants.tokenName) || 0;
             if (DdnUtils.bignum.isLessThan(ddnBalance, fee)) {
                 throw new Error('Insufficient balance')
             }
             if (DdnUtils.bignum.isLessThan(balance, transfer.amount)) {
                 throw new Error('Insufficient asset balance')
             }
-            this.balanceCache.addAssetBalance(transfer.dapp_id, this.tokenSetting.tokenName, `-${fee}`);
+            this.balanceCache.addAssetBalance(transfer.dapp_id, this.constants.tokenName, `-${fee}`);
             this.balanceCache.addAssetBalance(transfer.dapp_id, transfer.currency, `-${transfer.amount}`);
         }
     }
@@ -280,11 +280,11 @@ class OutTransfer extends Asset.Base {
 
         const transfer = await this.getAssetObject(trs);
         const fee = trs.fee;
-        if (transfer.currency === this.tokenSetting.tokenName) {
+        if (transfer.currency === this.constants.tokenName) {
             const amount = DdnUtils.bignum.plus(transfer.amount, fee);
             this.balanceCache.addAssetBalance(transfer.dapp_id, transfer.currency, amount.toString());
         } else {
-            this.balanceCache.addAssetBalance(transfer.dapp_id, this.tokenSetting.tokenName, fee);
+            this.balanceCache.addAssetBalance(transfer.dapp_id, this.constants.tokenName, fee);
             this.balanceCache.addAssetBalance(transfer.dapp_id, transfer.currency, transfer.amount);
         }
     }

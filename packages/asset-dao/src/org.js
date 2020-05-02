@@ -138,7 +138,7 @@ class Org extends Asset.Base {
         } else {
             throw new Error(`Invalid asset state type: ${org.state}`);
         }
-        if (!DdnUtils.address.isAddress(sender.address)) {
+        if (!this.address.isAddress(sender.address)) {
             throw new Error('Invalid address');
         }
         if (!DdnUtils.bignum.isZero(trs.amount)) {
@@ -154,7 +154,7 @@ class Org extends Asset.Base {
         if (org.name && org.name.lenght > 64) {
             throw new Error('Name is too long，don`t more than 64 bit.');
         }
-        if (!DdnUtils.address.isAddress(org.address)) {
+        if (!this.address.isAddress(org.address)) {
             throw new Error('Invalid org address');
         }
         if (org.address != sender.address) {

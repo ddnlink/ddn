@@ -29,7 +29,7 @@ class InTransfer extends Asset.Base {
         // eslint-disable-next-line require-atomic-updates
         trs.asset[assetJsonName] = data[assetJsonName];
 
-        if (data[assetJsonName].currency === this.tokenSetting.tokenName) {
+        if (data[assetJsonName].currency === this.constants.tokenName) {
             // eslint-disable-next-line require-atomic-updates
             trs.amount = data.amount + "";
             delete data[assetJsonName].amount;
@@ -43,12 +43,12 @@ class InTransfer extends Asset.Base {
             throw new Error("Invalid recipient")
         }
 
-        if (!DdnUtils.address.isAddress(sender.address)) {
+        if (!this.address.isAddress(sender.address)) {
             throw new Error("Invalid address")
         }
 
         const inTransfer = await this.getAssetObject(trs);
-        if (inTransfer.currency !== this.tokenSetting.tokenName) {
+        if (inTransfer.currency !== this.constants.tokenName) {
             if ((typeof (trs.amount) != "undefined" && !DdnUtils.bignum.isZero(trs.amount)) ||
                 (typeof (inTransfer.amount) == "undefined" || DdnUtils.bignum.isZero(inTransfer.amount))) {
                 throw new Error("Invalid transfer amount")
@@ -72,7 +72,7 @@ class InTransfer extends Asset.Base {
         }
 
         const currency = inTransfer.currency;
-        if (currency != this.tokenSetting.tokenName) {
+        if (currency != this.constants.tokenName) {
             const aobAssetInst = await this.getAssetInstanceByName("AobAsset");
             const aobAssetResult = await aobAssetInst.queryAsset({ name: currency }, null, false, 1, 1);
             if (aobAssetResult.length <= 0) {
@@ -109,8 +109,8 @@ class InTransfer extends Asset.Base {
         var buf = Buffer.from([]);
         const dappId = Buffer.from(transfer.dapp_id, 'utf8');
         // again !!!
-        // if (trs.asset.inTransfer.currency !== this.library.tokenSetting.tokenName) {
-        if (transfer.currency !== this.tokenSetting.tokenName) {
+        // if (trs.asset.inTransfer.currency !== this.library.constants.tokenName) {
+        if (transfer.currency !== this.constants.tokenName) {
             let currency = Buffer.from(transfer.currency, 'utf8');
             const amount = Buffer.from(transfer.amount, 'utf8');
             buf = Buffer.concat([buf, dappId, currency, amount]);
@@ -164,7 +164,7 @@ class InTransfer extends Asset.Base {
         const asset = await this.getAssetObject(trs);
         const dappId = asset.dapp_id;
 
-        if (asset.currency === this.tokenSetting.tokenName) {
+        if (asset.currency === this.constants.tokenName) {
             this.balanceCache.addAssetBalance(dappId, asset.currency, trs.amount);
             await this._updateAssetBalance(asset.currency, trs.amount, dappId, dbTrans);
         } else {
@@ -179,7 +179,7 @@ class InTransfer extends Asset.Base {
         const transfer = await this.getAssetObject(trs);
         const dappId = asset.dapp_id;
 
-        if (transfer.currency === this.tokenSetting.tokenName) {
+        if (transfer.currency === this.constants.tokenName) {
             this.balanceCache.addAssetBalance(dappId, transfer.currency, `-${trs.amount}`);
             await this._updateAssetBalance(transfer.currency, `-${trs.amount}`, dappId, dbTrans);
         } else {
@@ -191,7 +191,7 @@ class InTransfer extends Asset.Base {
 
     async applyUnconfirmed(trs, sender) {
         const transfer = await this.getAssetObject(trs);
-        if (transfer.currency != this.tokenSetting.tokenName) {
+        if (transfer.currency != this.constants.tokenName) {
             const balance = this.balanceCache.getAssetBalance(sender.address, transfer.currency) || 0;
             const surplus = DdnUtils.bignum.minus(balance, transfer.amount);
             if (DdnUtils.bignum.isLessThan(surplus, 0)) {
@@ -203,7 +203,7 @@ class InTransfer extends Asset.Base {
 
     async undoUnconfirmed(trs, sender) {
         const transfer = await this.getAssetObject(trs);
-        if (transfer.currency != this.tokenSetting.tokenName) {
+        if (transfer.currency != this.constants.tokenName) {
             this.balanceCache.addAssetBalance(sender.address, transfer.currency, transfer.amount);
         }
     }

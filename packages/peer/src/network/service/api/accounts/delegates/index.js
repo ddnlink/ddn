@@ -77,7 +77,7 @@ class RootRouter {
 
     async getFee(req) {
         return {
-            fee: bignum.multiply(1, this.tokenSetting.fixedPoint)
+            fee: bignum.multiply(1, this.constants.fixedPoint)
         };
     }
 

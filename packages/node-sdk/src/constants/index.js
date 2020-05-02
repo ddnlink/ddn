@@ -5,6 +5,6 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-const ddn = require('./constants.ddn');
+import ddn from './constants.ddn';
 
-module.exports = ddn;
+export default ddn;

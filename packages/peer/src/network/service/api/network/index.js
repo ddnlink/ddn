@@ -12,9 +12,9 @@ class RootRouter {
     async get(req) {
         return {
             nethash: this.config.nethash,
-            tokenName: this.tokenSetting.tokenName,
-            tokenPrefix: this.tokenSetting.tokenPrefix,
-            beginDate: this.tokenSetting[this.config.net].beginDate
+            tokenName: this.constants.tokenName,
+            tokenPrefix: this.constants.tokenPrefix,
+            beginDate: this.constants[this.config.net].beginDate
         };
     }
 }

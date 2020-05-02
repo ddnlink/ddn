@@ -29,7 +29,7 @@ class Transfer extends Asset.Base {
     }
 
     async verify(trs, sender) {
-        if (!DdnUtils.Address.isAddress(trs.recipientId)) {
+        if (!this.address.isAddress(trs.recipientId)) {
             throw new Error('Invalid recipient');
         }
         if (!DdnUtils.bignum.isZero(trs.amount)) {

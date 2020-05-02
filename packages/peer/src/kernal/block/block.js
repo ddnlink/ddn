@@ -6,18 +6,18 @@ import os from "os";
 
 import ip from "ip";
 import assert from "assert";
-import crypto from "crypto";
 import ed from "ed25519";
 import ByteBuffer from "bytebuffer";
 import DdnUtils from "@ddn/utils";
+import crypto from "crypto";
+
 import BlockStatus from "./block-status";
 
 const {
     assetTypes,
     runtimeState,
     system,
-    bignum,
-    address
+    bignum
 } = DdnUtils;
 
 let _singleton;
@@ -60,7 +60,7 @@ class Block {
     }
 
     async calculateFee() {
-        return this.tokenSetting[this.config.net].fees.send;
+        return this.constants[this.config.net].fees.send;
     }
 
     getBlockStatus() {
@@ -254,7 +254,8 @@ class Block {
                 payload_length: parseInt(raw.b_payloadLength), //wxm block database
                 payload_hash: raw.b_payloadHash, //wxm block database
                 generator_public_key: raw.b_generatorPublicKey, //wxm block database
-                generator_id: address.generateBase58CheckAddress(raw.b_generatorPublicKey), //wxm block database
+                generator_id: this.address.generateAddress(raw.b_generatorPublicKey), //imfly
+                // generator_id: address.generateB÷ase58CheckAddress(raw.b_generatorPublicKey), //wxm block database
                 block_signature: raw.b_blockSignature, //wxm block database
                 confirmations: raw.b_confirmations
             };
@@ -301,7 +302,7 @@ class Block {
         for (const transaction of transactions) {
             const bytes = await this.runtime.transaction.getBytes(transaction);
 
-            if (size + bytes.length > this.tokenSetting.maxPayloadLength) {
+            if (size + bytes.length > this.constants.maxPayloadLength) {
                 break;
             }
 
@@ -752,11 +753,11 @@ class Block {
             throw new Error(`Can't verify block timestamp: ${block.id}`);
         }
 
-        if (block.payload_length > this.tokenSetting.maxPayloadLength) {
+        if (block.payload_length > this.constants.maxPayloadLength) {
             throw new Error(`Can't verify payload length of block: ${block.id}`);
         }
 
-        if (block.transactions.length != block.number_of_transactions || block.transactions.length > this.tokenSetting.maxTxsPerBlock) {
+        if (block.transactions.length != block.number_of_transactions || block.transactions.length > this.constants.maxTxsPerBlock) {
             throw new Error(`Invalid amount of block assets: ${block.id}`);
         }
 
@@ -961,7 +962,7 @@ class Block {
 
         const ready = [];
 
-        const transactions = await this.runtime.transaction.getUnconfirmedTransactionList(false, this.tokenSetting.maxTxsPerBlock);
+        const transactions = await this.runtime.transaction.getUnconfirmedTransactionList(false, this.constants.maxTxsPerBlock);
         for (let i = 0; i < transactions.length; i++) {
             const transaction = transactions[i];
             const sender = await this.runtime.account.getAccountByPublicKey(transaction.senderPublicKey);

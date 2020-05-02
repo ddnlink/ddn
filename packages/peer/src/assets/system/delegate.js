@@ -30,7 +30,7 @@ class Delegate {
 
 	async calculateFee(trs, sender) {
 		// Bignum update
-		return DdnUtils.bignum.multiply(100, this.tokenSetting.fixedPoint);
+		return DdnUtils.bignum.multiply(100, this.constants.fixedPoint);
 	}
 
 	async verify(trs, {is_delegate}) {
@@ -67,7 +67,7 @@ class Delegate {
             throw new Error('Username is too long. Maximum is 20 characters');
 		}
 
-		if (DdnUtils.address.isAddress(username)) {
+		if (this.address.isAddress(username)) {
             throw new Error('Username can not be a potential address');
 		}
 

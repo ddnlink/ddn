@@ -94,15 +94,16 @@ class Account {
     }
 
     isAddress(address) {
-        return DdnUtils.address.isAddress(address);
+        return this.address.isAddress(address);
     }
 
     /**
+     * TODO: 使用 crypto.generateAddress(publicKey, tokenPrefix);
      * 根据公钥生成钱包地址
      * @param {*} publicKey
      */
     generateAddressByPublicKey(publicKey) {
-        return DdnUtils.address.generateBase58CheckAddress(publicKey);
+        return this.address.generateAddress(publicKey);
     }
 
     /**

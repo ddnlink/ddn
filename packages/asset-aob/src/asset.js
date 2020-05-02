@@ -61,7 +61,7 @@ class Aob extends Asset.Base {
     }
 
     async calculateFee() {
-        return DdnUtils.bignum.multiply(500, this.tokenSetting.fixedPoint);
+        return DdnUtils.bignum.multiply(500, this.constants.fixedPoint);
     }
 
     async verify(trs, sender) {

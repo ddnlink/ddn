@@ -16,6 +16,7 @@ import bluebird from 'bluebird';
 
 import {getConfigFile, requireFile} from '@ddn/core/lib/getUserConfig';
 import DdnUtils from '@ddn/utils';
+import DdnCrepto from '@ddn/utils';
 import ddn from '../';
 
 // TODO 包的整理规划需要进一步明确原则，根据通用性确定是否写成npm包
@@ -23,7 +24,7 @@ import {DappCategory, DappType} from '@ddn/asset-dapp';
 
 import constants from './constants';
 
-const { bignum, address } = DdnUtils;
+const { bignum } = DdnUtils;
 
 // Node configuration
 const baseDir = path.resolve(process.cwd(), './examples/fun-tests');
@@ -291,7 +292,7 @@ function genNormalAccount() {
   const password = randomPassword();
   const keys = ddn.crypto.getKeys(password);
   return {
-    address: address.generateBase58CheckAddress(keys.public_key),
+    address: DdnCrepto.generateAddress(keys.public_key, constants.tokenPrefix),
     public_key: keys.public_key,
     password
   };
@@ -395,6 +396,9 @@ function getRealTime(epochTime) {
   const t = Math.floor(d.getTime() / 1000) * 1000;
   return t + epochTime * 1000;
 }
+
+// 初始化
+ddn.init();
 
 export default {
   api,

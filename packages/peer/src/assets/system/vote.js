@@ -29,7 +29,7 @@ class Vote {
 	async calculateFee(trs, sender) {
         // DdnUtils.bignum update
         // return 0.1 * constants.fixedPoint;
-        return DdnUtils.bignum.multiply(0.1, this.tokenSetting.fixedPoint);
+        return DdnUtils.bignum.multiply(0.1, this.constants.fixedPoint);
 	}
 
 	async verify(trs, sender) {

@@ -1,4 +1,8 @@
-module.exports = {
+/**
+ * Please use yourself constants file
+ * Note: Once the mainnet is online, this file can no longer be changed.
+ */
+export default {
   maxAmount: 100000000,
   maxPayloadLength: 8 * 1024 * 1024,
   blockHeaderLength: 248,
@@ -12,7 +16,7 @@ module.exports = {
   maxSignaturesLength: 196 * 256,
   maxConfirmations : 77 * 100,
   confirmationLength: 77,
-  fixedPoint : Math.pow(10, 8),
+  fixedPoint : 10 ** 8,
   totalAmount: "10000000000000000", //Bignum update
   maxTxsPerBlock: 500,
   tokenName: 'DDN',
@@ -29,7 +33,7 @@ module.exports = {
       "200000000", // Milestone 3
       "100000000"  // Milestone 4
     ],
-    beginDate: new Date(Date.UTC(2017, 10, 20, 12, 20, 20, 20)), // testnet
+    beginDate: new Date(Date.UTC(2020, 0, 12, 14, 28, 0, 0)), // testnet 2020年1（从0开始）月12日22点（+8）
     rewardDistance: 3000000, // Distance between each milestone
     rewardOffset: 1, // Start rewards at block (n)60480
     compatibleVersion: '0.0.0', // Peer isCompatible?
@@ -76,4 +80,4 @@ module.exports = {
       data: "10000000"
     },
   }
-}
+};

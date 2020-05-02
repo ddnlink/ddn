@@ -1,5 +1,6 @@
+// 对应 ./constants/config.ddn 这个设计更好？
 import ddnCrypto from '@ddn/crypto';
-import constants from './constants';
+import constants from './constants/index';
 
 const address = {
     isAddress: (address) => {
@@ -7,7 +8,7 @@ const address = {
     },
 
     // fixme: 将所有 generateBase58CheckAddress -> generateAddress
-    generateAddress(publicKey) {
+    generateAddress(publicKey) {        
         return ddnCrypto.generateAddress(publicKey, constants.tokenPrefix)
     },
 

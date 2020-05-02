@@ -3,21 +3,28 @@ import options from "./options";
 import constants from "./constants";
 
 export default {
+    getTokenPreifx() {
+        return constants.nethash[options.get("nethash")].tokenPrefix; // D
+    },
+
     isAddress(address) {
-        const NORMAL_PREFIX =
-            constants.nethash[options.get("nethash")].tokenPrefix; // D
-        return ddnCrypto.isAddress(address, NORMAL_PREFIX);
+        const tokenPrefix = this.getTokenPreifx();
+        return ddnCrypto.isAddress(address, tokenPrefix);
     },
 
     // TODO: delete it
-    isBase58CheckAddress(address) {
-        return this.isAddress(address);
+    // isBase58CheckAddress(address) {
+    //     return this.isAddress(address);
+    // },
+
+    // fixme: 将所有 generateBase58CheckAddress -> generateAddress
+    generateAddress(publicKey) {        
+        const tokenPrefix = this.getTokenPreifx();
+        return ddnCrypto.generateAddress(publicKey, tokenPrefix)
     },
 
     generateBase58CheckAddress(publicKey) {
-        const NORMAL_PREFIX =
-            constants.nethash[options.get("nethash")].tokenPrefix; // D
-
-        return ddnCrypto.generateAddress(publicKey, NORMAL_PREFIX);
+        const tokenPrefix = this.getTokenPreifx();
+        return ddnCrypto.generateAddress(publicKey, tokenPrefix);
     }
 };

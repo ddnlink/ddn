@@ -96,7 +96,7 @@ class Confirmation extends Asset.Base {
             || confirmation.received_address.length > 128) {
             throw new Error('received_address is undefined or too long, don`t more than 128 characters.');
         }
-        if (!DdnUtils.address.isAddress(confirmation.received_address)) {
+        if (!this.address.isAddress(confirmation.received_address)) {
             throw new Error("Invalid confirmation's received_address");
         }
 
@@ -104,7 +104,7 @@ class Confirmation extends Asset.Base {
             || confirmation.sender_address.length > 128) {
             throw new Error('senderAddress is undefined or too long, don`t more than 128 characters.');
         }
-        if (!DdnUtils.address.isAddress(confirmation.sender_address)) {
+        if (!this.address.isAddress(confirmation.sender_address)) {
             throw new Error("Invalid confirmation's senderAddress");
         }
 

@@ -7,6 +7,7 @@ import Asset from '@ddn/asset-base';
 import Bus from '../lib/bus';
 import protobuf from '../lib/protobuf';
 import Sequence from '../lib/sequence';
+import Address from '../helpers/address';
 import BalanceManager from '../helpers/balance-manager';
 import database from '../db/database';
 import dbParams from '../db/db-params';
@@ -27,6 +28,12 @@ class Context
 
         //系统配置JSON对象
         this.config = options.configObject;
+
+        //区块链基本配置
+        this.constants = constants;
+
+        //地址操作 常用操作和常量放在上下文
+        this.address = new Address(constants.tokenPrefix);
 
         //创世区块JSON对象
         this.genesisblock = options.genesisblockObject;
@@ -79,9 +86,6 @@ class Context
 
         //数据库参数对象，Key/Value类型
         this.dbParams = await this._buildDataParams(this.dao);
-
-        //FIXME: 币种基本配置
-        this.tokenSetting = constants;
 
         //运行时核心逻辑处理模块组
         this.runtime = {};

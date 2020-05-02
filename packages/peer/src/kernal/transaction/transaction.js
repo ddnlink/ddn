@@ -628,7 +628,7 @@ class Transaction {
     }
 
     async receiveTransactions(transactions) {
-        if (this._unconfirmedNumber > this.tokenSetting.maxTxsPerBlock) {
+        if (this._unconfirmedNumber > this.constants.maxTxsPerBlock) {
             throw new Error("Too many transactions");
         }
 
@@ -793,7 +793,7 @@ class Transaction {
         }
         // Check amount
         if (DdnUtils.bignum.isLessThan(trs.amount, 0) ||
-            DdnUtils.bignum.isGreaterThan(trs.amount, DdnUtils.bignum.multiply(this.tokenSetting.maxAmount, this.tokenSetting.fixedPoint)) ||
+            DdnUtils.bignum.isGreaterThan(trs.amount, DdnUtils.bignum.multiply(this.constants.maxAmount, this.constants.fixedPoint)) ||
             `${trs.amount}`.includes(".") || `${trs.amount}`.includes("e")) {
             throw new Error(`Invalid transaction amount: ${trs.id}`);
         }

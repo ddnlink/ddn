@@ -1,5 +1,14 @@
-import Asset from '@ddn/asset-base';
+/*
+ * Filename: ./ddn/packages/asset-aob/src/acl.js
+ * Path: ./ddn/packages/asset-aob
+ * Created Date: Sunday, March 1st 2019, 6:51:07 pm
+ * Author: DDN
+ * 
+ * Copyright (c) 2019 DDN FOUNDATION
+ */
+
 import ByteBuffer from 'bytebuffer';
+import Asset from '@ddn/asset-base';
 import DdnUtils from '@ddn/utils';
 
 class Acl extends Asset.Base {
@@ -61,7 +70,7 @@ class Acl extends Asset.Base {
             if (sender.address == listItem) {
                 throw new Error("Issuer should not be in ACL list");
             }
-            if (!DdnUtils.address.isAddress(listItem)) {
+            if (!this.address.isAddress(listItem)) {
                 throw new Error("Acl contains invalid address");
             }
             if (duplicateCheckObj[listItem]) {

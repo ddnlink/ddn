@@ -1,3 +1,4 @@
+// import DdnCrypto from "@ddn/crypto";
 import ddn from "../lib";
 import node from "../lib/test";
 import slots from "../lib/time/slots";
@@ -1250,10 +1251,10 @@ describe("Node SDK", () => {
 
 	describe('crypto sha256 and address', () => {
 		it('should be equal to the expected address', () => {
-			ddn.crypto.generateAddress('7a91b9bfc0ea185bf3ade9d264da273f7fe19bf71008210b1d7239c82dd3ad20').to.equal('AFbYJhiJb3DXzHy5ZP24mKw21M2dCBJCXP')
+			ddn.crypto.generateAddress('7a91b9bfc0ea185bf3ade9d264da273f7fe19bf71008210b1d7239c82dd3ad20').to.equal('DFbYJhiJb3DXzHy5ZP24mKw21M2dCBJCXP')
 			const publicKeyBuffer = Buffer.from('7a91b9bfc0ea185bf3ade9d264da273f7fe19bf71008210b1d7239c82dd3ad20', 'hex');
 			const address = ddn.crypto.generateAddress(publicKeyBuffer)
-			expect(address).to.equal('AFbYJhiJb3DXzHy5ZP24mKw21M2dCBJCXP')
+			expect(address).to.equal('DFbYJhiJb3DXzHy5ZP24mKw21M2dCBJCXP')
 		})
 	})
 

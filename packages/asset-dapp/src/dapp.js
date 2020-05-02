@@ -88,7 +88,7 @@ class Dapp extends Asset.Base {
     }
 
     async calculateFee() {
-        return DdnUtils.bignum.multiply(100, this.tokenSetting.fixedPoint);
+        return DdnUtils.bignum.multiply(100, this.constants.fixedPoint);
     }
 
     async verify(trs) {

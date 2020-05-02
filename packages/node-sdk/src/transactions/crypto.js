@@ -1,3 +1,5 @@
+// TODO: 这个文件应该 使用 @ddn/crypto 替代
+
 import sha256 from "fast-sha256";
 import Asset from '@ddn/asset-base';
 import Mnemonic from 'bitcore-mnemonic';
@@ -7,7 +9,7 @@ import DdnUtils from "@ddn/utils";
 import nacl from 'tweetnacl';
 
 import addressHelper from '../address.js';
-import options from '../options';
+// import options from '../options';
 import constants from '../constants';
 
 
@@ -50,11 +52,14 @@ async function getAssetBytes(transaction) {
         const trans = Asset.Utils.getTransactionByTypeValue(transaction.type);
         const transCls = require(trans.package).default[trans.name];
         
-        let transInst = new transCls({
-            tokenSetting: {
-                tokenName: constants.nethash[options.get('nethash')].tokenName
-            }
-        });
+        // fixme: 这里的 {} 应该不用传，因为有 context 存在？？
+        // let transInst = new transCls({
+        //     constants: {
+        //         tokenName: constants.nethash[options.get('nethash')].tokenName
+        //     }
+        // });
+       
+        let transInst = new transCls();
         const buf = await transInst.getBytes(transaction);
         transInst = null;
         return buf;
@@ -245,7 +250,7 @@ async function getFee(transaction) {
                 const trans = Asset.Utils.getTransactionByTypeValue(transaction.type);
                 const transCls = require(trans.package).default[trans.name];
                 let transInst = new transCls({
-                    tokenSetting: {
+                    constants: {
                         fixedPoint: 100000000
                     }
                 });
@@ -341,10 +346,10 @@ function getKeys(secret) {
     }
 }
 
-//根据公钥生成账户地址
+//根据公钥生成账户地址 fixme: delete it
 function generateAddress(public_key) {
-    return addressHelper.generateBase58CheckAddress(public_key)
-}
+    return addressHelper.generateBase58CheckAddress(public_key) // -> ../address.js -> crypto.generateAddress() 请直接使用 crypto
+} 
 
 //生成助记词
 function generatePhasekey()

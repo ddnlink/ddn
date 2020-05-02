@@ -86,13 +86,13 @@ class Exchange extends Asset.Base {
         if (!daoUtil.isOrgId(asset.org_id.toLowerCase())) {
             throw new Error('exchange org id not allow: ' + asset.org_id.toLowerCase());
         }
-        if (!DdnUtils.address.isAddress(sender.address)) {
+        if (!this.address.isAddress(sender.address)) {
             throw new Error('Invalid address');
         }
-        if (!DdnUtils.address.isAddress(asset.sender_address)) {
+        if (!this.address.isAddress(asset.sender_address)) {
             throw new Error('senderAddress id not allow');
         }
-        if (!DdnUtils.address.isAddress(asset.received_address)) {
+        if (!this.address.isAddress(asset.received_address)) {
             throw new Error('receivedAddress id not allow');
         }
         if (asset.sender_address === asset.received_address) {
