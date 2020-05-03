@@ -1,4 +1,10 @@
 export default {
+  nethash: '0ab796cd', // 标定该链的版本
+  tokenName: 'DDN',
+  tokenPrefix: 'D',
+  foundAddress: 'DLjrrVwnmMXstcAYVjcrpwyYb3kY1ehABU',
+  walletUrl: 'http://wallet.ddn.link',
+
   maxAmount: 100000000,
   maxPayloadLength: 8 * 1024 * 1024,
   blockHeaderLength: 248,
@@ -10,16 +16,12 @@ export default {
   requestLength: 104,
   signatureLength: 196,
   maxSignaturesLength: 196 * 256,
-  maxConfirmations : 77 * 100,
+  maxConfirmations: 77 * 100,
   confirmationLength: 77,
-  fixedPoint : 10 ** 8,
+  fixedPoint: 10 ** 8,
   totalAmount: "10000000000000000", //Bignum update
   maxTxsPerBlock: 500,
-  tokenName: 'DDN',
-  tokenPrefix: 'D',
-  foundAddress: 'DLjrrVwnmMXstcAYVjcrpwyYb3kY1ehABU',
 
-  walletUrl: 'http://wallet.ddn.link',
   testnet: {
     rewardRatio: 0.2,
     milestones: [
@@ -36,15 +38,25 @@ export default {
 
     // Fees for transacton
     fees: {
-      send: "10000000", //Bignum update
+      send: "10000000", 
       vote: "100000000",
       secondSignature: "500000000",
       delegate: "2500000000",
-      multisignature: "500000000",
+      multiSignature: "500000000",
       dappRegistration: "2500000000",
       dappWithdrawal: "10000000",
       dappDeposit: "10000000",
-      data: "10000000"
+      data: "10000000",
+
+      // todo: 测试中提供的费用
+      username: "10000000",
+      multiTransfer: "10000000",
+      dapp: "10000000000",
+  
+      // dao
+      evidence: "10000000", // fixme
+      org: "10000000",
+      exchange: "10000000",
     },
   },
 
@@ -73,7 +85,17 @@ export default {
       dappRegistration: "2500000000",
       dappWithdrawal: "10000000",
       dappDeposit: "10000000",
-      data: "10000000"
+      data: "10000000",
+
+      // todo: 测试中提供的费用
+      username: "10000000",
+      multiTransfer: "10000000",
+      dapp: "10000000000",
+  
+      // dao
+      evidence: "10000000", // fixme
+      org: "10000000",
+      exchange: "10000000",
     },
   }
 };

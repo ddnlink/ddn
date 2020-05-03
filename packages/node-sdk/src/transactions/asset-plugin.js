@@ -1,13 +1,13 @@
 import Asset from '@ddn/asset-base';
 import DdnUtils from '@ddn/utils';
-import crypto from './crypto';
+import crypto from '../utils/crypto';
 import slots from '../time/slots';
 import options from '../options';
 
 async function createPluginAsset(trsType, assetInfo, secret, secondSecret) {
     const keys = crypto.getKeys(secret);
 
-    // var fee = assetInfo.fee || constants.fees.org;
+    // var fee = assetInfo.fee || constants.net.fees.org;
     delete assetInfo.fee;
     const transaction = {
         type: trsType,

@@ -1,5 +1,5 @@
 import DdnUtils from '@ddn/utils';
-import crypto from './crypto';
+import crypto from '../utils/crypto';
 import constants from '../constants';
 import slots from '../time/slots';
 import options from '../options';
@@ -21,7 +21,7 @@ function createExchange(trsopt, exchange, secret, secondSecret) {
 		throw new Error('Invalid orgId format');
 	}
 
-	const fee = constants.fees.exchange;
+	const fee = constants.net.fees.exchange;
 
 	const transaction = Object.assign({
 		type: DdnUtils.assetTypes.DAO_EXCHANGE,

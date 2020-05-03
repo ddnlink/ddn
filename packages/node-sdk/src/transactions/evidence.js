@@ -1,6 +1,6 @@
 import DdnUtils from '@ddn/utils';
 
-import crypto from './crypto';
+import crypto from '../utils/crypto';
 import constants from '../constants';
 import slots from '../time/slots';
 import options from '../options';
@@ -22,7 +22,7 @@ function createEvidence(evidence, secret, secondSecret) {
 		throw new Error('Invalid ipid format');
 	}
 
-	const fee = constants.fees.evidence;
+	const fee = constants.net.fees.evidence;
 
 	const transaction = {
 		type: DdnUtils.assetTypes.EVIDENCE, // 10 -> 20

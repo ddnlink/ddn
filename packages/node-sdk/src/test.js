@@ -22,7 +22,7 @@ import ddn from '../';
 // TODO 包的整理规划需要进一步明确原则，根据通用性确定是否写成npm包
 import {DappCategory, DappType} from '@ddn/asset-dapp';
 
-import constants from './constants';
+import Constants from './constants';
 
 const { bignum } = DdnUtils;
 
@@ -39,6 +39,10 @@ const normalizer = 100000000; // Use this to convert DDN amount to normal value
 const blockTime = 10000; // Block time in miliseconds
 const blockTimePlus = 12000; // Block time + 2 seconds in miliseconds
 const version = '2.0.0'; // peer version
+
+// 简化常量调用
+const constants = Constants;
+constants.net = Constants[config.net];
 
 // Holds Fee amounts for different transaction types
 const Fees = {
@@ -384,8 +388,8 @@ function EIFY(fn, receiver) {
   });
 }
 
-function beginEpochTime() {
-  return constants[config.net].beginDate;
+function beginEpochTime() {   
+  return constants.net.beginDate;
 }
 
 function getRealTime(epochTime) {
@@ -399,6 +403,8 @@ function getRealTime(epochTime) {
 
 // 初始化
 ddn.init();
+
+console.log('constants.net.beginDate= ', constants.net.beginDate);
 
 export default {
   api,

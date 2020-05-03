@@ -1,11 +1,10 @@
 import DdnUtils from '@ddn/utils';
 
-import crypto from "./crypto.js";
-import constants from "../constants.js";
+import crypto from '../utils/crypto';
+import constants from "../constants";
 
 import slots from "../time/slots.js";
 import options from '../options';
-import addressHelper from '../address.js';
 
 const { bignum } = DdnUtils;
 
@@ -15,8 +14,8 @@ function createMultiTransfer(outputs, secret, secondSecret, cb) {
 	if (!outputs || outputs.length == 0) {
 		throw new Error('Invalid fileHash format')
 	}
-	const sender = addressHelper.generateBase58CheckAddress(keys.public_key);
-	const fee = constants.fees.multitransfer;
+	const sender = crypto.generateAddress(keys.public_key);
+	const fee = constants.net.fees.multiTransfer;
 	let amount = bignum.new(0);   //bignum update
 	const recipientId = [];
 	for (let i = 0; i < outputs.length; i++) {
@@ -25,7 +24,7 @@ function createMultiTransfer(outputs, secret, secondSecret, cb) {
 			return cb("output recipient or amount null");
 		}
 
-		if (!addressHelper.isAddress(output.recipientId)) {
+		if (!crypto.isAddress(output.recipientId)) {
 			return cb("Invalid output recipient");
 		}
 

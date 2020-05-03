@@ -1,4 +1,4 @@
-import crypto from "./crypto";
+import crypto from '../utils/crypto';
 import constants from "../constants";
 import DdnUtils from '@ddn/utils';
 import slots from "../time/slots";
@@ -23,7 +23,7 @@ async function createSignature(secret, secondSecret, oldSecondSecret) {
 		type: DdnUtils.assetTypes.SIGNATURE,
 		nethash: options.get('nethash'),
 		amount: "0",    //Bignum update
-		fee: constants.fees.secondsignature,
+		fee: constants.net.fees.secondSignature,
 		recipientId: null,
 		senderPublicKey: keys.public_key,
 		timestamp: slots.getTime() - options.get('clientDriftSeconds'),

@@ -1,12 +1,12 @@
 import DdnUtils from '@ddn/utils';
 
-import crypto from "./crypto"; // TODO: @ddn/crypto
+import crypto from '../utils/crypto'; // TODO: @ddn/crypto
 import constants from "../constants";
 import slots from "../time/slots";
 import options from '../options';
 
 function calculateFee(amount) {
-    const min = constants.fees.send;
+    const min = constants.net.fees.send;
     
     const fee = DdnUtils.bignum.multiply(amount, 0.0001).toFixed(0);
 
@@ -22,7 +22,7 @@ async function createTransaction(recipientId, amount, message, secret, second_se
 		type: DdnUtils.assetTypes.TRANSFER,
 		nethash: options.get('nethash'),
 		amount: `${amount}`,
-		fee: constants.fees.send,
+		fee: constants.net.fees.send,
 		recipientId: recipientId,
 		message,
 		timestamp: slots.getTime() - options.get('clientDriftSeconds'),

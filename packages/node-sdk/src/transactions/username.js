@@ -1,4 +1,4 @@
-import crypto from "./crypto";
+import crypto from '../utils/crypto';
 import constants from "../constants";
 import DdnUtils from '@ddn/utils';
 import slots from "../time/slots";
@@ -10,7 +10,7 @@ function createUsername(name, secret, secondSecret) {
     if (!name || name.length == 0) {
         throw new Error('Invalid name format')
     }
-    const fee = constants.fees.username;
+    const fee = constants.net.fees.username;
 
     const transaction = {
         type: DdnUtils.assetTypes.USERINFO,

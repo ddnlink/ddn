@@ -640,6 +640,7 @@ class Transaction {
         return transactions;
     }
 
+    // TODO: 注意使用 @ddn/crypto 的对应方法重构 2020.5.3
     async verifyBytes(bytes, publicKey, signature) {
         const data2 = Buffer.allocUnsafe(bytes.length);
         for (let i = 0; i < data2.length; i++) {

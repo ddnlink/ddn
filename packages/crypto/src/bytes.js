@@ -67,7 +67,6 @@ async function getBytes(transaction, skipSignature, skipSecondSignature) {
 
     // +32
     const senderPublicKeyBuffer = Buffer.from(transaction.senderPublicKey, "hex");
-    // var senderPublicKeyBuffer = Buffer.from(transaction.senderPublicKey, "hex");
     for (let i = 0; i < senderPublicKeyBuffer.length; i++) {
         bb.writeByte(senderPublicKeyBuffer[i]);
     }
@@ -128,6 +127,9 @@ async function getBytes(transaction, skipSignature, skipSecondSignature) {
 
     // competifined browser
     const arrayBuffer = new Uint8Array(bb.toArrayBuffer());
+
+    // return arrayBuffer;
+
     const buffer = [];
 
     for (let i = 0; i < arrayBuffer.length; i++) {
@@ -168,6 +170,6 @@ function getSignatureBytes({ public_key }) {
     return new Uint8Array(bb.toArrayBuffer());
 }
 
-export default {
+export {
     getBytes
 }

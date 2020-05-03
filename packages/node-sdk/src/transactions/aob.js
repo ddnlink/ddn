@@ -1,6 +1,6 @@
 import DdnUtils from "@ddn/utils";
 
-import crypto from "./crypto";
+import crypto from '../utils/crypto';
 // import crypto from "@ddn/crypto";
 import constants from "../constants";
 import slots from "../time/slots";
@@ -57,7 +57,7 @@ export default {
                 desc
             }
         };
-        const fee = bignum.multiply(100, constants.coin);
+        const fee = bignum.multiply(100, constants.fixedPoint);
         return createTransaction(
             asset,
             fee,
@@ -93,8 +93,8 @@ export default {
                 allow_writeoff: allowWriteoff
             }
         };
-        // var fee = (500 + (Math.floor(bytes.length / 200) + 1) * 0.1) * constants.coin
-        const fee = bignum.multiply(500, constants.coin);
+        // var fee = (500 + (Math.floor(bytes.length / 200) + 1) * 0.1) * constants.fixedPoint
+        const fee = bignum.multiply(500, constants.fixedPoint);
         return createTransaction(
             asset,
             fee,
@@ -114,7 +114,7 @@ export default {
                 flag
             }
         };
-        const fee = bignum.multiply(0.1, constants.coin);
+        const fee = bignum.multiply(0.1, constants.fixedPoint);
         return createTransaction(
             asset,
             fee,
@@ -135,7 +135,7 @@ export default {
                 list
             }
         };
-        const fee = bignum.multiply(0.2, constants.coin);
+        const fee = bignum.multiply(0.2, constants.fixedPoint);
         return createTransaction(
             asset,
             fee,
@@ -154,7 +154,7 @@ export default {
                 amount: `${amount}`
             }
         };
-        const fee = bignum.multiply(0.1, constants.coin);
+        const fee = bignum.multiply(0.1, constants.fixedPoint);
         return createTransaction(
             asset,
             fee,
@@ -180,7 +180,7 @@ export default {
                 amount: `${amount}`
             }
         };
-        const fee = bignum.multiply(0.1, constants.coin);
+        const fee = bignum.multiply(0.1, constants.fixedPoint);
         return createTransaction(
             asset,
             fee,

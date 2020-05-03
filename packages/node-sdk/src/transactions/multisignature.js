@@ -1,6 +1,6 @@
 import DdnUtils from '@ddn/utils';
 
-import crypto from "./crypto";
+import crypto from '../utils/crypto';
 import constants from "../constants";
 import slots from "../time/slots";
 import options from '../options';
@@ -19,7 +19,7 @@ function createMultisignature(keysgroup, lifetime, min, secret, secondSecret) {
 		type: DdnUtils.assetTypes.MULTISIGNATURE, // MULTISIGNATURE
 		nethash: options.get('nethash'),
 		amount: "0",    //Bignum update
-		fee: constants.fees.multisignature,
+		fee: constants.net.fees.multiSignature,
 		recipientId: null,
 		senderPublicKey: keys.public_key,
 		timestamp: slots.getTime() - options.get('clientDriftSeconds'),

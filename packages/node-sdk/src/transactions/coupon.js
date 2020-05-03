@@ -1,16 +1,15 @@
 import DdnUtils from '@ddn/utils';
 
-import crypto from './crypto';
+import crypto from '../utils/crypto';
 import constants from '../constants';
 
 import options from '../options';
 import slots from '../time/slots';
-import addressHelper from '../address';
 
 function createIssuerAuditorBuy(received_address, amount, secret, secondSecret) {
     const keys = crypto.getKeys(secret);
     
-    const fee = constants.fees.send;
+    const fee = constants.net.fees.send;
 
     const transaction = {
         type: DdnUtils.assetTypes.COUPON_ISSUER_AUDITOR_BUY,
@@ -22,7 +21,7 @@ function createIssuerAuditorBuy(received_address, amount, secret, secondSecret) 
         timestamp: slots.getTime() - options.get('clientDriftSeconds'),
         asset: {
             couponIssuerAuditorBuy: {
-                address: addressHelper.generateBase58CheckAddress(keys.public_key),
+                address: crypto.generateAddress(keys.public_key),
             }
         }        
     };
@@ -40,7 +39,7 @@ function createIssuerAuditorBuy(received_address, amount, secret, secondSecret) 
 function createIssuerApply(orgName, org_id, orgOwner, orgOwnerPhone, secret, secondSecret) {
     const keys = crypto.getKeys(secret);
 
-    const fee = constants.fees.send;
+    const fee = constants.net.fees.send;
 
     const transaction = {
         type: DdnUtils.assetTypes.COUPON_ISSUER_APPLY,
@@ -52,7 +51,7 @@ function createIssuerApply(orgName, org_id, orgOwner, orgOwnerPhone, secret, sec
         timestamp: slots.getTime() - options.get('clientDriftSeconds'),
         asset: {
             couponIssuerApply: {
-                address: addressHelper.generateBase58CheckAddress(keys.public_key),
+                address: crypto.generateAddress(keys.public_key),
                 orgName,
                 org_id,
                 orgOwner,
@@ -74,7 +73,7 @@ function createIssuerApply(orgName, org_id, orgOwner, orgOwnerPhone, secret, sec
 function createIssuerUpdate(orgName, org_id, orgOwner, orgOwnerPhone, secret, secondSecret) {
     const keys = crypto.getKeys(secret);
     
-    const fee = constants.fees.send;
+    const fee = constants.net.fees.send;
 
     const transaction = {
         type: DdnUtils.assetTypes.COUPON_ISSUER_UPDATE,
@@ -86,7 +85,7 @@ function createIssuerUpdate(orgName, org_id, orgOwner, orgOwnerPhone, secret, se
         timestamp: slots.getTime() - options.get('clientDriftSeconds'),
         asset: {
             couponIssuerUpdate: {
-                address: addressHelper.generateBase58CheckAddress(keys.public_key),
+                address: crypto.generateAddress(keys.public_key),
                 orgName,
                 org_id,
                 orgOwner,
@@ -108,7 +107,7 @@ function createIssuerUpdate(orgName, org_id, orgOwner, orgOwnerPhone, secret, se
 function createIssuerCheck(address, orgName, org_id, orgOwner, orgOwnerPhone, state, secret, secondSecret) {
     const keys = crypto.getKeys(secret);
     
-    const fee = constants.fees.send;
+    const fee = constants.net.fees.send;
 
     const transaction = {
         type: DdnUtils.assetTypes.COUPON_ISSUER_CHECK,
@@ -143,7 +142,7 @@ function createIssuerCheck(address, orgName, org_id, orgOwner, orgOwnerPhone, st
 function createIssuerFreeze(address, orgName, org_id, orgOwner, orgOwnerPhone, secret, secondSecret) {
     const keys = crypto.getKeys(secret);
     
-    const fee = constants.fees.send;
+    const fee = constants.net.fees.send;
 
     const transaction = {
         type: DdnUtils.assetTypes.COUPON_ISSUER_FREEZE,
@@ -177,7 +176,7 @@ function createIssuerFreeze(address, orgName, org_id, orgOwner, orgOwnerPhone, s
 function createIssuerUnfreeze(address, orgName, org_id, orgOwner, orgOwnerPhone, state, secret, secondSecret) {
     const keys = crypto.getKeys(secret);
     
-    const fee = constants.fees.send;
+    const fee = constants.net.fees.send;
 
     const transaction = {
         type: DdnUtils.assetTypes.COUPON_ISSUER_UNFREEZE,
@@ -213,7 +212,7 @@ function createIssueNew(goodsName, goodsSpecs, goodsUnit, goodsNum, unitPrice,
     batchValue, issueNum, issueTime, expireTime, secret, secondSecret) {
     const keys = crypto.getKeys(secret);
     
-    const fee = constants.fees.send;
+    const fee = constants.net.fees.send;
 
     const transaction = {
         type: DdnUtils.assetTypes.COUPON_ISSUE_NEW,
@@ -225,7 +224,7 @@ function createIssueNew(goodsName, goodsSpecs, goodsUnit, goodsNum, unitPrice,
         timestamp: slots.getTime() - options.get('clientDriftSeconds'),
         asset: {
             couponIssueNew: {
-                address: addressHelper.generateBase58CheckAddress(keys.public_key),
+                address: crypto.generateAddress(keys.public_key),
                 goodsName,
                 goodsSpecs,
                 goodsUnit,
@@ -253,7 +252,7 @@ function createIssueClose(goodsName, goodsSpecs, goodsUnit, goodsNum, unitPrice,
     batchValue, issueNum, issueTime, expireTime, secret, secondSecret) {
     const keys = crypto.getKeys(secret);
     
-    const fee = constants.fees.send;
+    const fee = constants.net.fees.send;
 
     const transaction = {
         type: DdnUtils.assetTypes.COUPON_ISSUE_CLOSE,
@@ -265,7 +264,7 @@ function createIssueClose(goodsName, goodsSpecs, goodsUnit, goodsNum, unitPrice,
         timestamp: slots.getTime() - options.get('clientDriftSeconds'),
         asset: {
             couponIssueClose: {
-                address: addressHelper.generateBase58CheckAddress(keys.public_key),
+                address: crypto.generateAddress(keys.public_key),
                 goodsName,
                 goodsSpecs,
                 goodsUnit,
@@ -293,7 +292,7 @@ function createIssueReopen(goodsName, goodsSpecs, goodsUnit, goodsNum, unitPrice
     batchValue, issueNum, issueTime, expireTime, secret, secondSecret) {
     const keys = crypto.getKeys(secret);
     
-    const fee = constants.fees.send;
+    const fee = constants.net.fees.send;
 
     const transaction = {
         type: DdnUtils.assetTypes.COUPON_ISSUE_REOPEN,
@@ -305,7 +304,7 @@ function createIssueReopen(goodsName, goodsSpecs, goodsUnit, goodsNum, unitPrice
         timestamp: slots.getTime() - options.get('clientDriftSeconds'),
         asset: {
             couponIssueReopen: {
-                address: addressHelper.generateBase58CheckAddress(keys.public_key),
+                address: crypto.generateAddress(keys.public_key),
                 goodsName,
                 goodsSpecs,
                 goodsUnit,
@@ -334,7 +333,7 @@ function createExchangeBuy(batchValue, code, received_address,
 
     const keys = crypto.getKeys(secret);
     
-    const fee = constants.fees.send;
+    const fee = constants.net.fees.send;
 
     const transaction = {
         type: DdnUtils.assetTypes.COUPON_EXCH_BUY,
@@ -348,7 +347,7 @@ function createExchangeBuy(batchValue, code, received_address,
             couponExcBuy: {
                 batchValue,
                 code,
-                sender_address: addressHelper.generateBase58CheckAddress(keys.public_key),
+                sender_address: crypto.generateAddress(keys.public_key),
                 received_address,
                 price
             }
@@ -370,7 +369,7 @@ function createExchangePay(batchValue, code, received_address,
 
     const keys = crypto.getKeys(secret);
     
-    const fee = constants.fees.send;
+    const fee = constants.net.fees.send;
 
     const transaction = {
         type: DdnUtils.assetTypes.COUPON_EXCH_PAY,
@@ -384,7 +383,7 @@ function createExchangePay(batchValue, code, received_address,
             couponExcPay: {
                 batchValue,
                 code,
-                sender_address: addressHelper.generateBase58CheckAddress(keys.public_key),
+                sender_address: crypto.generateAddress(keys.public_key),
                 received_address,
                 price: "0"
             }
@@ -406,7 +405,7 @@ function createExchangeTransferConfirm(batchValue, code, received_address,
 
     const keys = crypto.getKeys(secret);
     
-    const fee = constants.fees.send;
+    const fee = constants.net.fees.send;
 
     const transaction = {
         type: DdnUtils.assetTypes.COUPON_EXCH_TRANSFER_CONFIRM,
@@ -420,7 +419,7 @@ function createExchangeTransferConfirm(batchValue, code, received_address,
             couponExcTransferConfirm: {
                 batchValue,
                 code,
-                sender_address: addressHelper.generateBase58CheckAddress(keys.public_key),
+                sender_address: crypto.generateAddress(keys.public_key),
                 received_address,
                 price,
                 related_trs_id,
@@ -444,7 +443,7 @@ function createExchangeTransferAsk(batchValue, code, received_address,
 
     const keys = crypto.getKeys(secret);
     
-    const fee = constants.fees.send;
+    const fee = constants.net.fees.send;
 
     const transaction = {
         type: DdnUtils.assetTypes.COUPON_EXCH_TRANSFER_ASK,
@@ -458,7 +457,7 @@ function createExchangeTransferAsk(batchValue, code, received_address,
             couponExcTransferAsk: {
                 batchValue,
                 code,
-                sender_address: addressHelper.generateBase58CheckAddress(keys.public_key),
+                sender_address: crypto.generateAddress(keys.public_key),
                 received_address,
                 price
             }

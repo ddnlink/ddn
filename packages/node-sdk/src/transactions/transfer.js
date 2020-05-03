@@ -1,4 +1,4 @@
-import crypto from "./crypto";
+import crypto from '../utils/crypto';
 import constants from "../constants";
 import DdnUtils from '@ddn/utils';
 import slots from "../time/slots";
@@ -13,7 +13,7 @@ function createInTransfer(dappId, currency, amount, secret, secondSecret) {
 		type: DdnUtils.assetTypes.DAPP_IN,
 		nethash,
 		amount: "0",    //Bignum update
-		fee: constants.fees.send,
+		fee: constants.net.fees.send,
 		recipientId: null,
 		senderPublicKey: keys.public_key,
 		timestamp: slots.getTime() - options.get('clientDriftSeconds'),
@@ -49,7 +49,7 @@ function createOutTransfer(recipientId, dappId, transactionId, currency, amount,
     nethash,
 		type: DdnUtils.assetTypes.DAPP_OUT,
 		amount: "0",    //Bignum update
-		fee: constants.fees.send,
+		fee: constants.net.fees.send,
 		recipientId: recipientId,
 		senderPublicKey: keys.public_key,
 		timestamp: slots.getTime() - options.get('clientDriftSeconds'),

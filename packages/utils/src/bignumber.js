@@ -14,6 +14,13 @@ export default {
     },
 
     /**
+     * 判断数据类型是 BigNumber
+     */
+    isBigNumber(...args) {
+        return BigNumber.isBigNumber(args[0]);
+    },
+    
+    /**
      * 加法操作
      */
     plus(...args) {
@@ -241,7 +248,6 @@ export default {
         return new BigNumber(hex.join(''), 16);
     },
 
-    // TODO: var -> let 2019.11.24
     toBuffer(currBignumber, opts) {
         currBignumber = new BigNumber(currBignumber);
 

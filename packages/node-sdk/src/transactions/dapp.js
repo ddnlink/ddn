@@ -1,7 +1,7 @@
 import ByteBuffer from 'bytebuffer';
 import DdnUtils from '@ddn/utils';
 
-import crypto from "./crypto";
+import crypto from '../utils/crypto';
 import constants from "../constants";
 import slots from "../time/slots";
 import globalOptions from '../options';
@@ -13,7 +13,7 @@ function createDApp(options, secret, secondSecret) {
     nethash: globalOptions.get('nethash'),
 		type: DdnUtils.assetTypes.DAPP,
 		amount: "0",    //Bignum update
-		fee: constants.fees.dapp,
+		fee: constants.net.fees.dapp,
 		recipientId: null,
 		senderPublicKey: keys.public_key,
 		timestamp: slots.getTime() - globalOptions.get('clientDriftSeconds'),

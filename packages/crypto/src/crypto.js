@@ -62,30 +62,31 @@ function getKeys(secret) {
 }
 
 // TODO: sign(keypair, data) -> sign(data, keypair)
-function sign(transaction, {private_key}) {
-    const hash = getHash(transaction);
+function sign(transaction, {privateKey}) {
+    const hash = getHash(transaction, true, true);
     const signature = nacl.sign.detached(
         hash,
-        Buffer.from(private_key, "hex")
+        Buffer.from(privateKey, "hex")
     );
-    // if (!transaction.signature) {
-    //     // eslint-disable-next-line require-atomic-updates
-    //     transaction.signature = bufToHex(signature);
-    // } else {
+    if (!transaction.signature) {
+        // eslint-disable-next-line require-atomic-updates
+        transaction.signature = bufToHex(signature);
+    } else {
         return bufToHex(signature);
-    // }
+    }
 }
 
-function secondSign(transaction, {private_key}) {
+function secondSign(transaction, {privateKey}) {
     const hash = getHash(transaction);
-    const signature = nacl.sign.detached(hash, Buffer.from(private_key, "hex"));
+    const signature = nacl.sign.detached(hash, Buffer.from(privateKey, "hex"));
     // eslint-disable-next-line require-atomic-updates
     transaction.sign_signature = Buffer.from(signature).toString("hex")    //wxm block database
 }
 
 // hex
-function getId(data) {
-    return getHash(data).toString("hex");
+async function getId(data) {
+    const hash = await getHash(data);
+    return hash.toString("hex");
 }
 
 // 生成助记词 == node-sdk.crypto.generatePhasekey()
@@ -130,29 +131,95 @@ function generateAddress(publicKey, tokenPrefix) {
     return tokenPrefix + base58check.encode(h2);
 }
 
+// note: tweetnacl 包的所有方法必须使用 Uint8Array 类型的参数，其他的 buffer 类型不能使用。
 async function getHash(trs, skipSignature, skipSecondSignature) {
     const bytes = await getBytes(trs, skipSignature, skipSecondSignature);
-    return Buffer.from(sha256.hash(bytes));
+    return new Uint8Array(sha256.hash(bytes));
+    // return Buffer.from(sha256.hash(bytes));
 }
 
 function bufToHex(data) {
     return Buffer.from(data).toString("hex");
 }
 
+// 验证，计划重构： peer/src/kernal/transaction.js  2020.5.3
+function verifyBytes(bytes, signature, public_key) {
+    const hash = sha256Bytes(Buffer.from(bytes, 'hex'));
+    const signatureBuffer = Buffer.from(signature, "hex");
+    const publicKeyBuffer = Buffer.from(public_key, "hex");
+    const res = nacl.sign.detached.verify(hash, signatureBuffer, publicKeyBuffer);
+    return res
+}
+
+async function verify(transaction) {
+    let remove = 64;
+
+    if (transaction.signSignature) {
+        remove = 128;
+    }
+
+    const bytes = await getBytes(transaction);
+    const data2 = Buffer.allocUnsafe(bytes.length - remove);
+
+    for (let i = 0; i < data2.length; i++) {
+        data2[i] = bytes[i];
+    }
+
+    const hash = sha256Bytes(data2);
+
+    const signatureBuffer = Buffer.from(transaction.signature, "hex");
+    const senderPublicKeyBuffer = Buffer.from(transaction.senderPublicKey, "hex");
+    const res = nacl.sign.detached.verify(hash, signatureBuffer, senderPublicKeyBuffer);
+
+    return res;
+}
+
+async function verifySecondSignature(transaction, public_key) {
+    const bytes = await getBytes(transaction);
+    const data2 = Buffer.allocUnsafe(bytes.length - 64);
+
+    for (let i = 0; i < data2.length; i++) {
+        data2[i] = bytes[i];
+    }
+
+    const hash = sha256Bytes(data2);
+
+    const signSignatureBuffer = Buffer.from(transaction.signSignature, "hex");
+    const publicKeyBuffer = Buffer.from(public_key, "hex");
+    const res = nacl.sign.detached.verify(hash, signSignatureBuffer, publicKeyBuffer);
+
+    return res;
+}
+
+
+function sha256Bytes(data) {
+    return Buffer.from(sha256.hash(data));
+}
+
 export default {
+    randomString,
+    randomNethash,
+
+    getBytes,
     keypair,
     getKeys,
     getId,
-    randomString,
-    randomNethash,
-    generateSecret,
+    getHash,
+
+    generateSecret, // 重构： generatePhasekey() -> generateSecret()
     isValidSecret,
     generateAddress,
-    base58check,
     isAddress,
+
+    base58check,
 
     // packages
     sha256,
     sign,
-    secondSign
+    secondSign,
+
+    // 验证： 前端验证，底层也会验证
+    verify, 
+    verifySecondSignature,
+    verifyBytes
 };
