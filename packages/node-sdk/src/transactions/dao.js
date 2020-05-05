@@ -33,7 +33,7 @@ function isOrgId(dao_id) {
 function createOrg(org, secret, second_secret) {
   const keys = crypto.getKeys(secret);
 
-  const sender = crypto.generateAddress(keys.public_key);
+  const sender = crypto.generateAddress(keys.publicKey);
 
   if (!org.address) {
     org.address = sender;
@@ -77,8 +77,8 @@ function createOrg(org, secret, second_secret) {
     amount: "0",
     fee: bignum.multiply(feeBase, 100000000).toString(),   //bignum update feeBase * 100000000,
     recipientId: null,
-    senderPublicKey: keys.public_key,
-    senderPublicKey: keys.public_key,
+    senderPublicKey: keys.publicKey,
+    senderPublicKey: keys.publicKey,
     timestamp: slots.getTime() - options.get('clientDriftSeconds'),
     asset: {
       org
@@ -105,8 +105,8 @@ function createTransfer(address, amount, secret, second_secret) {
     amount, // fixme 1000000000 ????
     fee: `${fee}`,
     recipientId: address,
-    senderPublicKey: keys.public_key,
-    senderPublicKey: keys.public_key,
+    senderPublicKey: keys.publicKey,
+    senderPublicKey: keys.publicKey,
     timestamp: slots.getTime() - options.get('clientDriftSeconds')
   };
 
@@ -164,8 +164,8 @@ function createConfirmation(trsAmount, confirmation, secret, second_secret) {
     amount: `${amount}`,
     fee: `${fee}`,
     recipientId,
-    senderPublicKey: keys.public_key,
-    senderPublicKey: keys.public_key,
+    senderPublicKey: keys.publicKey,
+    senderPublicKey: keys.publicKey,
     timestamp: slots.getTime() - options.get('clientDriftSeconds'),
     asset: {
       daoConfirmation: confirmation
@@ -221,8 +221,8 @@ function createContribution(contribution, secret, second_secret) {
     amount: "0",
     fee: `${fee}`,
     recipientId: null,
-    senderPublicKey: keys.public_key,
-    // senderPublicKey: keys.public_key,
+    senderPublicKey: keys.publicKey,
+    // senderPublicKey: keys.publicKey,
     timestamp: slots.getTime() - options.get('clientDriftSeconds'),
     asset: {
       daoContribution: contribution

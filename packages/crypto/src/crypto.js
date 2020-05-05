@@ -62,8 +62,10 @@ function getKeys(secret) {
 }
 
 // TODO: sign(keypair, data) -> sign(data, keypair)
-function sign(transaction, {privateKey}) {
-    const hash = getHash(transaction, true, true);
+async function sign(transaction, {privateKey}) {
+    const hash = await getHash(transaction, true, true);
+    console.log('hash typeof', typeof hash);
+    
     const signature = nacl.sign.detached(
         hash,
         Buffer.from(privateKey, "hex")
@@ -76,8 +78,8 @@ function sign(transaction, {privateKey}) {
     }
 }
 
-function secondSign(transaction, {privateKey}) {
-    const hash = getHash(transaction);
+async function secondSign(transaction, {privateKey}) {
+    const hash = await getHash(transaction);
     const signature = nacl.sign.detached(hash, Buffer.from(privateKey, "hex"));
     // eslint-disable-next-line require-atomic-updates
     transaction.sign_signature = Buffer.from(signature).toString("hex")    //wxm block database
@@ -143,10 +145,10 @@ function bufToHex(data) {
 }
 
 // 验证，计划重构： peer/src/kernal/transaction.js  2020.5.3
-function verifyBytes(bytes, signature, public_key) {
+function verifyBytes(bytes, signature, publicKey) {
     const hash = sha256Bytes(Buffer.from(bytes, 'hex'));
     const signatureBuffer = Buffer.from(signature, "hex");
-    const publicKeyBuffer = Buffer.from(public_key, "hex");
+    const publicKeyBuffer = Buffer.from(publicKey, "hex");
     const res = nacl.sign.detached.verify(hash, signatureBuffer, publicKeyBuffer);
     return res
 }
@@ -174,7 +176,7 @@ async function verify(transaction) {
     return res;
 }
 
-async function verifySecondSignature(transaction, public_key) {
+async function verifySecondSignature(transaction, publicKey) {
     const bytes = await getBytes(transaction);
     const data2 = Buffer.allocUnsafe(bytes.length - 64);
 
@@ -185,7 +187,7 @@ async function verifySecondSignature(transaction, public_key) {
     const hash = sha256Bytes(data2);
 
     const signSignatureBuffer = Buffer.from(transaction.signSignature, "hex");
-    const publicKeyBuffer = Buffer.from(public_key, "hex");
+    const publicKeyBuffer = Buffer.from(publicKey, "hex");
     const res = nacl.sign.detached.verify(hash, signSignatureBuffer, publicKeyBuffer);
 
     return res;

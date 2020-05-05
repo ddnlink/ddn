@@ -35,7 +35,7 @@ async function openAccount(account) {
 
                 if (body.account != null) {
                     account.address = body.account.address;
-                    account.public_key = body.account.public_key;
+                    account.publicKey = body.account.publicKey;
                     account.balance = body.account.balance;
                 }
 

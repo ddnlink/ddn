@@ -30,7 +30,7 @@ function createEvidence(evidence, secret, secondSecret) {
 		amount: "0",   
 		fee,
 		recipientId: null,
-		senderPublicKey: keys.public_key,
+		senderPublicKey: keys.publicKey,
 		// senderPublicKey: keys.publicKey,
 		// senderPublicKey: keys.publicKey,
 		timestamp: slots.getTime() - options.get('clientDriftSeconds'),

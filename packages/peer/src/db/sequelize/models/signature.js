@@ -7,7 +7,7 @@ export default connection => {
             primaryKey: true,
             allowNull: false
         },
-        public_key: {
+        publicKey: {
             type: Sequelize.STRING(32),
             allowNull: false
         }

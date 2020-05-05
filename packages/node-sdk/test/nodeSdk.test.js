@@ -825,7 +825,7 @@ describe("Node SDK", () => {
 				expect(createVote).to.be.a("function");
 			});
 
-            it("should create vote", () => {
+            describe("should create vote", () => {
 				vt = createVote(publicKeys, "secret", "second secret");
 	
 				it("should be ok", () => {

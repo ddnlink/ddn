@@ -58,7 +58,7 @@
     "asset": {
         "delegate": {
             "username": "64b",
-            "public_key": "50f6a2f6e65bc96eeefaa1f93b6a8e2da6462e878125c8b449ef32fad00cae2e",
+            "publicKey": "50f6a2f6e65bc96eeefaa1f93b6a8e2da6462e878125c8b449ef32fad00cae2e",
             "address": "DHmH9A4DNanW5t2vuVWHVnW4NowJCJS37V"
         }
     }
@@ -162,7 +162,7 @@
     "asset": {
         "signature": {
             "transaction_id": "52f5b9132bbd0fd6fbe6214959ee58bb5f9cf736b51f6abead08e95f9b9fc97e",
-            "public_key": "618bb63dde5fdba45274753bf56e934a8d22448c0954028395a5bb70b32f8ed9"
+            "publicKey": "618bb63dde5fdba45274753bf56e934a8d22448c0954028395a5bb70b32f8ed9"
         }
     }
 }, {

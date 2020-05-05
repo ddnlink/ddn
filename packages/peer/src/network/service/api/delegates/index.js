@@ -81,7 +81,7 @@ class RootRouter {
         const voter = await this.runtime.account.getAccountByAddress(query.address);
         if (voter && voter.delegates) {
             delegates.map(item => {
-                item.voted = (voter.delegates.includes(item.public_key));
+                item.voted = (voter.delegates.includes(item.publicKey));
             });
         }
 
@@ -109,9 +109,9 @@ class RootRouter {
         }
 
         const result = await this.runtime.delegate.getDelegates(query);
-        const delegate = result.delegates.find(({ public_key, username }) => {
+        const delegate = result.delegates.find(({ publicKey, username }) => {
             if (query.publicKey) {
-                return public_key == query.publicKey;
+                return publicKey == query.publicKey;
             }
             if (query.username) {
                 return username == query.username;
@@ -172,7 +172,7 @@ class RootRouter {
                                     '$in': addresses
                                 },
                                 sort: [['balance', 'ASC']]
-                            }, ['address', 'balance', 'public_key', 'username']);
+                            }, ['address', 'balance', 'publicKey', 'username']);
                         }
                         catch (e) {
                             return reject(e);
@@ -269,7 +269,7 @@ class RootRouter {
                         return cb(err);
                     }
 
-                    if (!requester || !requester.public_key) {  //wxm block database
+                    if (!requester || !requester.publicKey) {  //wxm block database
                         return cb("Invalid requester");
                     }
 
@@ -277,7 +277,7 @@ class RootRouter {
                         return cb("Invalid second passphrase");
                     }
 
-                    if (requester.public_key == account.public_key) {   //wxm block database
+                    if (requester.publicKey == account.publicKey) {   //wxm block database
                         return cb("Incorrect requester");
                     }
 

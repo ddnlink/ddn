@@ -69,8 +69,8 @@ class Transaction {
             type: data.type,
             amount: "0",
             nethash: this.config.nethash,
-            senderPublicKey: data.sender.public_key,
-            requester_public_key: data.requester ? data.requester.public_key.toString('hex') : null,
+            senderPublicKey: data.sender.publicKey,
+            requester_public_key: data.requester ? data.requester.publicKey.toString('hex') : null,
             timestamp: this.runtime.slot.getTime(),
             asset: {},
             message: data.message,
@@ -598,7 +598,7 @@ class Transaction {
         }
 
         await this.runtime.account.setAccount({
-            public_key: transaction.senderPublicKey
+            publicKey: transaction.senderPublicKey
         });
         const sender = await this.runtime.account.getAccountByPublicKey(transaction.senderPublicKey);
 
@@ -697,7 +697,7 @@ class Transaction {
                 throw new Error("Failed to verify signature, 4");
             }
 
-            if (sender.public_key != trs.senderPublicKey) {
+            if (sender.publicKey != trs.senderPublicKey) {
                 throw new Error("Invalid public key")
             }
         }

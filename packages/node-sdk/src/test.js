@@ -278,7 +278,7 @@ function randomName(...args) {
 function randomAccount() {
   const account = {
     'address': '',
-    'public_key': '',
+    'publicKey': '',
     'password': '',
     'secondPassword': '',
     'username': '',
@@ -296,14 +296,14 @@ function genNormalAccount() {
   const password = randomPassword();
   const keys = ddn.crypto.getKeys(password);
   return {
-    address: DdnCrepto.generateAddress(keys.public_key, constants.tokenPrefix),
-    public_key: keys.public_key,
+    address: DdnCrepto.generateAddress(keys.publicKey, constants.tokenPrefix),
+    publicKey: keys.publicKey,
     password
   };
 }
 
 function randomTid() {
-  return genNormalAccount().public_key
+  return genNormalAccount().publicKey
 }
 
 // Used to create random transaction accounts (holds additional info to regular account)

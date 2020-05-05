@@ -79,7 +79,7 @@ class MultisignaturesRouter {
                     return cb("Account " + publicKey + " not found");
                 }
 
-                // account.public_key = publicKey;
+                // account.publicKey = publicKey;
 
                 if (account.second_signature && !body.secondSecret) {
                     return cb("Invalid second passphrase");
@@ -197,7 +197,7 @@ class MultisignaturesRouter {
                     throw new Error("Permission to sign transaction denied");
                 }
             } else {
-                if (account.public_key != keypair.publicKey.toString('hex') ||
+                if (account.publicKey != keypair.publicKey.toString('hex') ||
                     transaction.senderPublicKey != keypair.publicKey.toString('hex')) { //wxm block database
                     throw new Error("Permission to sign transaction denied");
                 }
@@ -313,7 +313,7 @@ class MultisignaturesRouter {
                     break;
                 }
 
-                if ((sender.public_key == query.publicKey && sender.u_multisignatures.length > 0) ||
+                if ((sender.publicKey == query.publicKey && sender.u_multisignatures.length > 0) ||
                     sender.u_multisignatures.includes(query.publicKey) ||
                     sender.multisignatures.includes(query.publicKey)) {
                     const min = sender.u_multimin || sender.multimin;

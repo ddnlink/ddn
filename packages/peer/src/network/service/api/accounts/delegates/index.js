@@ -39,8 +39,8 @@ class RootRouter {
         if (account.delegates) {
             const delegates = await this.runtime.account.getAccountList({
                 is_delegate: 1,  //wxm block database
-                sort: [['vote', 'DESC'], ['public_key', 'ASC']]  //wxm block database
-            }, ["username", "address", "public_key", "vote", "missedblocks", "producedblocks"]);
+                sort: [['vote', 'DESC'], ['publicKey', 'ASC']]  //wxm block database
+            }, ["username", "address", "publicKey", "vote", "missedblocks", "producedblocks"]);
 
             let limit = query.limit || this.config.settings.delegateNumber;
             const offset = query.offset || 0;
@@ -68,7 +68,7 @@ class RootRouter {
                 delegates[i].productivity = (!outsider) ? parseFloat(Math.floor(percent * 100) / 100).toFixed(2) : 0;
             }
 
-            const result = delegates.filter(({public_key}) => account.delegates.includes(public_key));
+            const result = delegates.filter(({publicKey}) => account.delegates.includes(publicKey));
             return { success: true, delegates: result };
         } else {
             return { success: true, delegates: [] };
@@ -150,7 +150,7 @@ class RootRouter {
                         return cb(err);
                     }
 
-                    if (!requester || !requester.public_key) {
+                    if (!requester || !requester.publicKey) {
                         return cb("Invalid requester");
                     }
 
@@ -158,7 +158,7 @@ class RootRouter {
                         return cb("Invalid second passphrase");
                     }
 
-                    if (requester.public_key == account.public_key) {
+                    if (requester.publicKey == account.publicKey) {
                         return cb("Invalid requester");
                     }
 

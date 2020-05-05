@@ -14,7 +14,7 @@ async function createVote(keyList, secret, secondSecret) {
 		amount: "0", 
 		fee: constants.net.fees.vote,
 		recipientId: null,
-		senderPublicKey: keys.public_key,
+		senderPublicKey: keys.publicKey,
 		timestamp: slots.getTime() - options.get('clientDriftSeconds'),
 		asset: {
 			vote: {

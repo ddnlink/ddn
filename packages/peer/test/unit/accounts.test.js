@@ -49,7 +49,7 @@ describe("POST /accounts/open", () => {
         node.expect(res.body).to.have.property("success").to.be.true;
         node.expect(res.body).to.have.property("account").that.is.an("object");
         node.expect(res.body.account.address).to.equal(AccountTest.address);
-        node.expect(res.body.account.public_key).to.equal(AccountTest.publicKey);
+        node.expect(res.body.account.publicKey).to.equal(AccountTest.publicKey);
         AccountTest.balance = res.body.account.balance;
     });
 

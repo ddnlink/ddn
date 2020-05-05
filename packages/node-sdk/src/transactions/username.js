@@ -18,7 +18,7 @@ function createUsername(name, secret, secondSecret) {
         amount: "0", //Bignum update
         fee: `${fee}`,
         recipientId: null,
-        senderPublicKey: keys.public_key,
+        senderPublicKey: keys.publicKey,
         timestamp: slots.getTime() - options.get('clientDriftSeconds'),
         asset: {
             userinfo: {

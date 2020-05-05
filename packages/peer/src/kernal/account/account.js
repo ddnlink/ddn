@@ -29,7 +29,7 @@ class Account {
             u_second_signature: Boolean,
             u_username: String,
             address: String,
-            public_key: String,
+            publicKey: String,
             second_public_key: String,
             balance: Number,
             u_balance: Number,
@@ -114,8 +114,8 @@ class Account {
     async setAccount(data, dbTrans) {
         let address = data.address || null;
         if (address === null) {
-            if (data.public_key) { //wxm block database
-                address = this.generateAddressByPublicKey(data.public_key); //wxm block database
+            if (data.publicKey) { //wxm block database
+                address = this.generateAddressByPublicKey(data.publicKey); //wxm block database
                 delete data.isGenesis;
             } else {
                 this.logger.debug('setAccount error and data is:', data);
@@ -150,8 +150,8 @@ class Account {
         const account = await this.getAccount({
             address
         });
-        if (account && !account.public_key) {
-            account.public_key = publicKey;
+        if (account && !account.publicKey) {
+            account.publicKey = publicKey;
         }
         return account;
     }
@@ -552,8 +552,8 @@ class Account {
         const insert_object = {};
         const remove_object = {};
 
-        if (!address && diff.public_key) {
-            address = this.generateAddressByPublicKey(diff.public_key); //wxm block database
+        if (!address && diff.publicKey) {
+            address = this.generateAddressByPublicKey(diff.publicKey); //wxm block database
         }
 
         if (diff['balance']) {

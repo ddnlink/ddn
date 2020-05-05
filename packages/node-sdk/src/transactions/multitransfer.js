@@ -14,7 +14,7 @@ function createMultiTransfer(outputs, secret, secondSecret, cb) {
 	if (!outputs || outputs.length == 0) {
 		throw new Error('Invalid fileHash format')
 	}
-	const sender = crypto.generateAddress(keys.public_key);
+	const sender = crypto.generateAddress(keys.publicKey);
 	const fee = constants.net.fees.multiTransfer;
 	let amount = bignum.new(0);   //bignum update
 	const recipientId = [];
@@ -51,7 +51,7 @@ function createMultiTransfer(outputs, secret, secondSecret, cb) {
 		amount: amount.toString(),  //bignum update amount,
 		fee: `${fee}`,
 		recipientId: recipientId.join('|'),
-		senderPublicKey: keys.public_key,
+		senderPublicKey: keys.publicKey,
 		timestamp: slots.getTime() - options.get('clientDriftSeconds'),
 		asset: {
 			output: {

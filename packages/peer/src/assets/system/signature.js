@@ -18,7 +18,7 @@ class Signatures {
 		trs.recipientId = null;
 		trs.amount = "0";   //DdnUtils.bignum update
 		trs.asset.signature = {
-			public_key: second_keypair.publicKey.toString('hex')
+			publicKey: second_keypair.publicKey.toString('hex')
 		};
 		return trs;
     }
@@ -38,7 +38,7 @@ class Signatures {
 		}
 
 		try {
-			if (!trs.asset.signature.public_key || Buffer.from(trs.asset.signature.public_key, 'hex').length != 32) {
+			if (!trs.asset.signature.publicKey || Buffer.from(trs.asset.signature.publicKey, 'hex').length != 32) {
                 throw new Error('Invalid signature length');
 			}
 		} catch (e) {
@@ -55,7 +55,7 @@ class Signatures {
 	async getBytes({asset}) {
 		try {
 			var bb = new ByteBuffer(32, true);
-			const publicKeyBuffer = Buffer.from(asset.signature.public_key, 'hex');
+			const publicKeyBuffer = Buffer.from(asset.signature.publicKey, 'hex');
 
 			for (let i = 0; i < publicKeyBuffer.length; i++) {
 				bb.writeByte(publicKeyBuffer[i]);
@@ -77,7 +77,7 @@ class Signatures {
             address,
             second_signature: 1,
             u_second_signature: 0,
-            second_public_key: asset.signature.public_key
+            second_public_key: asset.signature.publicKey
         };
         await this.runtime.account.setAccount(data, dbTrans);
 
@@ -123,12 +123,12 @@ class Signatures {
         const validateErros = await this.ddnSchema.validate({
             type: 'object',
             properties: {
-                public_key: {
+                publicKey: {
                     type: 'string',
                     format: 'publicKey'
                 }
             },
-            required: [ 'public_key' ]
+            required: [ 'publicKey' ]
         }, trs.asset.signature);
         if (validateErros) {
             throw new Error(validateErros[0].message);
@@ -143,7 +143,7 @@ class Signatures {
 		} else {
 			const signature = {
 				transaction_id: t_id,
-				public_key: s_publicKey
+				publicKey: s_publicKey
 			};
 
 			return { signature };
@@ -151,10 +151,10 @@ class Signatures {
 	}
 
 	async dbSave({id, asset}, dbTrans) {
-		// var public_key = Buffer.from(trs.asset.signature.public_key, 'hex');
+		// var publicKey = Buffer.from(trs.asset.signature.publicKey, 'hex');
 		const obj = {
 			transaction_id: id,
-			public_key: asset.signature.public_key
+			publicKey: asset.signature.publicKey
         };
 
         return new Promise((resolve, reject) => {

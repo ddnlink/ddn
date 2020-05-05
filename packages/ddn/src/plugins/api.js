@@ -264,7 +264,7 @@ function listdiffvotes(options) {
             return;
         }
 
-        var publicKey = result.delegate.public_key;
+        var publicKey = result.delegate.publicKey;
         var params = {
           address: result.delegate.address,
           limit: options.limit || 101,

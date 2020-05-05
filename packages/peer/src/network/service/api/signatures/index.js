@@ -91,7 +91,7 @@ class RootRouter {
                         return cb(err);
                     }
 
-                    if (!requester || !requester.public_key) {
+                    if (!requester || !requester.publicKey) {
                         return cb("Invalid requester");
                     }
 
@@ -99,7 +99,7 @@ class RootRouter {
                         return cb("Invalid second passphrase");
                     }
 
-                    if (requester.public_key == account.public_key) {
+                    if (requester.publicKey == account.publicKey) {
                         return cb("Invalid requester");
                     }
 

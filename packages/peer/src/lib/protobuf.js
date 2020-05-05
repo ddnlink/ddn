@@ -123,12 +123,12 @@ class Protobuf {
     switch (obj.type) {
         case DdnUtils.assetTypes.DELEGATE:
             if (obj.asset.delegate) {
-                obj.asset.delegate.public_key = Buffer.from(obj.asset.delegate.public_key, 'hex');   //wxm block database
+                obj.asset.delegate.publicKey = Buffer.from(obj.asset.delegate.publicKey, 'hex');   //wxm block database
             }
             break;
         case DdnUtils.assetTypes.SIGNATURE:
             if (obj.asset.signature) {
-                obj.asset.signature.public_key = Buffer.from(obj.asset.signature.public_key, 'hex'); //wxm block database
+                obj.asset.signature.publicKey = Buffer.from(obj.asset.signature.publicKey, 'hex'); //wxm block database
             }
             break;
     }
@@ -147,12 +147,12 @@ class Protobuf {
     switch (obj.type) {
         case DdnUtils.assetTypes.DELEGATE:
             if (obj.asset.delegate) {
-                obj.asset.delegate.public_key = Buffer.from(obj.asset.delegate.public_key, "base64").toString("hex");    // obj.asset.delegate.public_key.toString('hex');  //wxm block database
+                obj.asset.delegate.publicKey = Buffer.from(obj.asset.delegate.publicKey, "base64").toString("hex");    // obj.asset.delegate.publicKey.toString('hex');  //wxm block database
             }
             break;
         case DdnUtils.assetTypes.SIGNATURE:
             if (obj.asset.signature) {
-                obj.asset.signature.public_key = Buffer.from(obj.asset.signature.public_key, "base64").toString("hex");  // obj.asset.signature.public_key.toString('hex');    //wxm block database
+                obj.asset.signature.publicKey = Buffer.from(obj.asset.signature.publicKey, "base64").toString("hex");  // obj.asset.signature.publicKey.toString('hex');    //wxm block database
             }
             break;
     }

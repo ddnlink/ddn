@@ -304,7 +304,7 @@ function signBytes(bytes, {privateKey}) {
 //     return res;
 // }
 
-// function verifySecondSignature(transaction, public_key) {
+// function verifySecondSignature(transaction, publicKey) {
 //     const bytes = getBytes(transaction);
 //     const data2 = Buffer.allocUnsafe(bytes.length - 64);
 
@@ -315,7 +315,7 @@ function signBytes(bytes, {privateKey}) {
 //     const hash = sha256Bytes(data2);
 
 //     const signSignatureBuffer = Buffer.from(transaction.signSignature, "hex");
-//     const publicKeyBuffer = Buffer.from(public_key, "hex");
+//     const publicKeyBuffer = Buffer.from(publicKey, "hex");
 //     const res = nacl.sign.detached.verify(hash, signSignatureBuffer, publicKeyBuffer);
 
 //     return res;
@@ -328,14 +328,14 @@ function signBytes(bytes, {privateKey}) {
 //     const keypair = nacl.sign.keyPair.fromSeed(hash);
 
 //     return {
-//         public_key: Buffer.from(keypair.publicKey).toString("hex"),
+//         publicKey: Buffer.from(keypair.publicKey).toString("hex"),
 //         privateKey: Buffer.from(keypair.secretKey).toString("hex")
 //     }
 // }
 
 //根据公钥生成账户地址 fixme: delete it
-// function generateAddress(public_key) {
-//     return addressHelper.generateBase58CheckAddress(public_key) // -> ../address.js -> crypto.generateAddress() 请直接使用 crypto
+// function generateAddress(publicKey) {
+//     return addressHelper.generateBase58CheckAddress(publicKey) // -> ../address.js -> crypto.generateAddress() 请直接使用 crypto
 // } 
 
 // 生成助记词，重构： generatePhasekey() -> generateSecret()

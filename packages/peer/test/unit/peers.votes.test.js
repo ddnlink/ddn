@@ -68,8 +68,8 @@ describe("POST /peer/transactions", () => {
             .expect(200)
             .end(async (err, {body}) => {
                 node.expect(body).to.have.property("success").to.be.true;
-                delegate1_pubKey = body.delegates[0].public_key;
-                delegate2_pubKey = body.delegates[1].public_key;
+                delegate1_pubKey = body.delegates[0].publicKey;
+                delegate2_pubKey = body.delegates[1].publicKey;
                 const votes = [];
                 votes.push(`+${delegate1_pubKey}`);
                 votes.push(`+${delegate2_pubKey}`);
@@ -234,7 +234,7 @@ describe("POST /peer/transactions", () => {
 
     // 不能投给普通用户
     it("Voting for an common user. Should be fail", async done => {
-        const transaction = await node.ddn.vote.createVote([`+${account.public_key}`], account.password);
+        const transaction = await node.ddn.vote.createVote([`+${account.publicKey}`], account.password);
         node.onNewBlock(err => {
             node.expect(err).to.be.not.ok;
             node.peer.post("/transactions")

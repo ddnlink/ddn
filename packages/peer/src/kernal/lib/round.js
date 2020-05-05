@@ -105,7 +105,7 @@ class Round {
 
     async tick(block, dbTrans) {
         await this.runtime.account.merge(null, {
-            public_key: block.generator_public_key,  //wxm block database
+            publicKey: block.generator_public_key,  //wxm block database
             producedblocks: 1,
             block_id: block.id,  //wxm block database
             round: await this.calc(block.height)
@@ -181,7 +181,7 @@ class Round {
             }
 
             await this.runtime.account.merge(null, {
-                public_key: delegate,   //wxm block database
+                publicKey: delegate,   //wxm block database
                 balance: changeBalance.toString(),
                 u_balance: changeBalance.toString(),
                 block_id: block.id,  //wxm block database
@@ -255,7 +255,7 @@ class Round {
         };
 
         await this.runtime.account.merge(null, {
-            public_key: block.generator_public_key,    //wxm block database
+            publicKey: block.generator_public_key,    //wxm block database
             producedblocks: -1,
             block_id: block.id,  //wxm block database
             round: await this.calc(block.height)
@@ -350,7 +350,7 @@ class Round {
     //       }
 
     //       modules.accounts.mergeAccountAndGet({
-    //         public_key: delegate,   //wxm block database
+    //         publicKey: delegate,   //wxm block database
     //         balance: DdnUtils.bignum.minus(0, changeBalance).toString(),    //DdnUtils.bignum update -changeBalance,
     //         u_balance: DdnUtils.bignum.minus(0, changeBalance).toString(),  //DdnUtils.bignum update -changeBalance,
     //         block_id: block.id,  //wxm block database

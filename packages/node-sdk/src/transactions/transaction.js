@@ -30,7 +30,7 @@ async function createTransaction(recipientId, amount, message, secret, second_se
 	};
 
 	const keys = crypto.getKeys(secret);
-	transaction.senderPublicKey = keys.public_key;
+	transaction.senderPublicKey = keys.publicKey;
 
 	await crypto.sign(transaction, keys);
 
@@ -56,7 +56,7 @@ async function createLock(height, secret, second_secret) {
 	};
 
 	const keys = crypto.getKeys(secret);
-	transaction.senderPublicKey = keys.public_key;
+	transaction.senderPublicKey = keys.publicKey;
 
 	await crypto.sign(transaction, keys);
 

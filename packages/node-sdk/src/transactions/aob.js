@@ -31,7 +31,7 @@ async function createTransaction(
         amount: "0",
         fee: `${fee}`,
         recipientId: recipientId,
-        senderPublicKey: keys.public_key,
+        senderPublicKey: keys.publicKey,
         timestamp: getClientFixedTime(),
         message,
         asset

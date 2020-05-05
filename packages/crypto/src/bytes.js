@@ -158,9 +158,9 @@ async function getAssetBytes(transaction) {
     return null;
 }
 
-function getSignatureBytes({ public_key }) {
+function getSignatureBytes({ publicKey }) {
     const bb = new ByteBuffer(32, true);
-    const publicKeyBuffer = Buffer.from(public_key, "hex");
+    const publicKeyBuffer = Buffer.from(publicKey, "hex");
 
     for (let i = 0; i < publicKeyBuffer.length; i++) {
         bb.writeByte(publicKeyBuffer[i]);

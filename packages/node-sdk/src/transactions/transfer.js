@@ -15,7 +15,7 @@ function createInTransfer(dappId, currency, amount, secret, secondSecret) {
 		amount: "0",    //Bignum update
 		fee: constants.net.fees.send,
 		recipientId: null,
-		senderPublicKey: keys.public_key,
+		senderPublicKey: keys.publicKey,
 		timestamp: slots.getTime() - options.get('clientDriftSeconds'),
 		asset: {
 			in: {
@@ -51,7 +51,7 @@ function createOutTransfer(recipientId, dappId, transactionId, currency, amount,
 		amount: "0",    //Bignum update
 		fee: constants.net.fees.send,
 		recipientId: recipientId,
-		senderPublicKey: keys.public_key,
+		senderPublicKey: keys.publicKey,
 		timestamp: slots.getTime() - options.get('clientDriftSeconds'),
 		asset: {
 			outTransfer: {

@@ -29,7 +29,7 @@ function createExchange(trsopt, exchange, secret, secondSecret) {
 		amount: "0",    //Bignum update
 		fee: `${fee}`,
 		recipientId: null,
-		senderPublicKey: keys.public_key,
+		senderPublicKey: keys.publicKey,
 		// senderPublicKey: keys.publicKey,
 		timestamp: slots.getTime() - options.get('clientDriftSeconds'),
 		asset: {

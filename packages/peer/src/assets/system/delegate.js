@@ -18,7 +18,7 @@ class Delegate {
 		trs.amount = "0";   //Bignum update
 		trs.asset.delegate = {
 			username,
-			public_key: sender.public_key   //wxm block database
+			publicKey: sender.publicKey   //wxm block database
 		};
 
 		if (trs.asset.delegate.username) {
@@ -165,12 +165,12 @@ class Delegate {
         const validateErrors = await this.ddnSchema.validate({
             type: 'object',
             properties: {
-                public_key: {
+                publicKey: {
                     type: 'string',
                     format: 'publicKey'
                 }
             },
-            required: ['public_key']
+            required: ['publicKey']
         }, trs.asset.delegate);
         if (validateErrors) {
             throw new Error(`Can't verify delegate transaction, incorrect parameters: ${validateErrors[0].schemaPath} ${validateErrors[0].message}`);
@@ -185,7 +185,7 @@ class Delegate {
 		} else {
 			const delegate = {
 				username: d_username,
-				public_key: t_senderPublicKey,   //wxm block database
+				publicKey: t_senderPublicKey,   //wxm block database
 				address: t_senderId
 			};
 

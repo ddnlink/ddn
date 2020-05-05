@@ -81,8 +81,8 @@ describe('dapp transfer', () => {
     // node.ddn.init();
 
     const delegateAccounts = genNormalAccounts(5)
-    const public_key = delegateAccounts.map(a => a.public_key)
-    const dapp = extend(true, { delegates: public_key, unlock_delegates: 3 }, DAPP_TEMPLATE)
+    const publicKey = delegateAccounts.map(a => a.publicKey)
+    const dapp = extend(true, { delegates: publicKey, unlock_delegates: 3 }, DAPP_TEMPLATE)
     dapp.name = node.randomUsername()
     dapp.link = dapp.link.replace('ddn', node.randomUsername())
     let dappId = ''

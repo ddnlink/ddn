@@ -15,7 +15,7 @@ async function createPluginAsset(trsType, assetInfo, secret, secondSecret) {
         amount: assetInfo.amount ? `${assetInfo.amount}` : "0",
         // fee: fee + "",
         recipientId: assetInfo.recipientId ? assetInfo.recipientId : null,
-        senderPublicKey: keys.public_key,
+        senderPublicKey: keys.publicKey,
         timestamp: slots.getTime() - options.get('clientDriftSeconds'),
         message: assetInfo.message ? `${assetInfo.message}` : null,
         asset: {}
@@ -33,7 +33,7 @@ async function createPluginAsset(trsType, assetInfo, secret, secondSecret) {
     // fix 这个是创建二级密码使用的 这个条件是否应该再次检查一下或优化一下
     if (assetInfo.secondSecret && trsType === DdnUtils.assetTypes.SIGNATURE) { // == 1
         const secondSecretKeys = crypto.getKeys(assetInfo.secondSecret);
-        assetInfo = { public_key: secondSecretKeys.public_key };
+        assetInfo = { publicKey: secondSecretKeys.publicKey };
         delete transaction.message;
     }
 

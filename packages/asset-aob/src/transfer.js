@@ -397,14 +397,14 @@ class Transfer extends Asset.Base {
                     } catch (e) {
                         return cb(e);
                     }
-                    if (!requester || !requester.public_key) {
+                    if (!requester || !requester.publicKey) {
                         return cb('Invalid requester');
                     }
                     if (requester.second_signature && !body.secondSecret) {
                         return cb('Invalid second passphrase');
                     }
 
-                    if (requester.public_key === account.public_key) {
+                    if (requester.publicKey === account.publicKey) {
                         return cb('Invalid requester');
                     }
 
