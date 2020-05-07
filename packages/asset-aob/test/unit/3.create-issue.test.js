@@ -10,7 +10,7 @@ describe("AOB Test", () => {
         node.ddn.init();
     })
 
-    it("发行资产 Should be ok", async () => {
+    it("发行资产 Should be ok", async (done) => {
         const obj = {
             currency: "DDD.NCR",
             aobAmount: "50000000",
@@ -23,31 +23,26 @@ describe("AOB Test", () => {
 
         // console.log('transaction:', transaction)
 
-        await new Promise((resolve, reject) => {
-            node.peer.post("/transactions")
-                .set("Accept", "application/json")
-                .set("version", node.version)
-                .set("nethash", node.config.nethash)
-                .set("port", node.config.port)
-                .send({
-                    transaction
-                })
-                .expect("Content-Type", /json/)
-                .expect(200)
-                .end((err, {
-                    body
-                }) => {
-                    console.log(body);
+        node.peer.post("/transactions")
+            .set("Accept", "application/json")
+            .set("version", node.version)
+            .set("nethash", node.config.nethash)
+            .set("port", node.config.port)
+            .send({
+                transaction
+            })
+            .expect("Content-Type", /json/)
+            .expect(200)
+            .end((err, {
+                body
+            }) => {
+                console.log(body);
 
-                    if (err) {
-                        return reject(err);
-                    }
+                node.expect(err).to.be.not.ok;
+                node.expect(body).to.have.property("success").to.be.true;
 
-                    node.expect(body).to.have.property("success").to.be.true;
-
-                    resolve();
-                });
-        });
+                done();
+            });
     })
 
 });

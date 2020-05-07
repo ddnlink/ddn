@@ -64,7 +64,7 @@ function getKeys(secret) {
 // TODO: sign(keypair, data) -> sign(data, keypair)
 async function sign(transaction, {privateKey}) {
     const hash = await getHash(transaction, true, true);
-    console.log('hash typeof', typeof hash);
+    // console.log('hash typeof', typeof hash);
     
     const signature = nacl.sign.detached(
         hash,
@@ -88,6 +88,8 @@ async function secondSign(transaction, {privateKey}) {
 // hex
 async function getId(data) {
     const hash = await getHash(data);
+    console.log('hash: ', hash);
+    
     return hash.toString("hex");
 }
 
@@ -136,8 +138,8 @@ function generateAddress(publicKey, tokenPrefix) {
 // note: tweetnacl 包的所有方法必须使用 Uint8Array 类型的参数，其他的 buffer 类型不能使用。
 async function getHash(trs, skipSignature, skipSecondSignature) {
     const bytes = await getBytes(trs, skipSignature, skipSecondSignature);
-    return new Uint8Array(sha256.hash(bytes));
-    // return Buffer.from(sha256.hash(bytes));
+    // return new Uint8Array(sha256.hash(bytes));
+    return Buffer.from(sha256.hash(bytes));
 }
 
 function bufToHex(data) {

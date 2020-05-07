@@ -20,7 +20,7 @@ beforeAll(async () => {
     debug('open account response', res.body)
     node.expect(res.body).to.have.property("success").to.be.true;
     node.expect(res.body).to.have.property("account").that.is.an("object");
-    node.expect(res.body.account.balance).to.be.equal(0);
+    node.expect(res.body.account.balance).be.equal(0);
 });
 
 describe("PUT /delegates without funds", () => {
@@ -153,7 +153,7 @@ describe("PUT /accounts/delegates with funds", () => {
                     // console.log(JSON.stringify(res.body));
                     node.expect(body).to.have.property("success").to.be.true;
                     if (body.success == true && body.account != null) {
-                        node.expect(`${body.account.balance}`).to.be.equal(node.RANDOM_COIN);
+                        node.expect(`${body.account.balance}`).be.equal(node.RANDOM_COIN);
                     } else {
                         // console.log("Failed to open account or account object is null");
                         // console.log("Sent: secret: " + Raccount.password);
@@ -497,7 +497,7 @@ describe("PUT /delegates with funds", () => {
                         // console.log(JSON.stringify(res.body));
                         node.expect(body).to.have.property("success").to.be.true;
                         if (body.success == true && body.account != null) {
-                            node.expect(body.account.balance).to.be.equal(`${node.RANDOM_COIN}`);
+                            node.expect(body.account.balance).be.equal(`${node.RANDOM_COIN}`);
                         } else {
                             // console.log("Failed to open account or account object is null");
                             // console.log("Sent: secret: " + R2account.password);

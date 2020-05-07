@@ -128,8 +128,6 @@ async function getBytes(transaction, skipSignature, skipSecondSignature) {
     // competifined browser
     const arrayBuffer = new Uint8Array(bb.toArrayBuffer());
 
-    // return arrayBuffer;
-
     const buffer = [];
 
     for (let i = 0; i < arrayBuffer.length; i++) {

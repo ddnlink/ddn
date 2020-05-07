@@ -656,7 +656,7 @@ describe("Node SDK", () => {
 				});
 
 				it("should does not have second signature", () => {
-					expect(trs).should.not.have.property("signSignature");
+					expect(trs).not.have.property("signSignature");
 				});
 
 				it("should have signature as hex string", () => {
@@ -713,7 +713,7 @@ describe("Node SDK", () => {
 				});
 
 				it("should have timestamp as number", () => {
-					expect(trs.timestamp).to.be.a("number").and.not.NaN;
+					expect(trs.timestamp).to.be.a("number").not.NaN;
 				});
 
 				it("should have senderPublicKey as hex string", () => {

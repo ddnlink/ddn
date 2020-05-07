@@ -13,8 +13,6 @@ let contributionPrice = "0";
 
 describe('Confirmations Test', () => {
 
-    // node.ddn.init();
-
     beforeAll((done) => {
         const getOrgIdUrl = `/dao/orgs/address/${node.Gaccount.address}`;
         node.api.get(getOrgIdUrl)
@@ -23,15 +21,14 @@ describe('Confirmations Test', () => {
             .set("nethash", node.config.nethash)
             .set("port", node.config.port)
             .expect(200)
-            .end((err, {body}) => {
+            .end((err, {
+                body
+            }) => {
                 debug("getOrgIdUrl: ", JSON.stringify(body));
-                
+
                 node.expect(err).to.be.not.ok;
                 node.expect(body).to.have.property("success").to.be.true;
-
-                if (body.success) {
-                    orgId = body.data.org.org_id;
-                }
+                orgId = body.data.org.org_id;
             });
 
         const getContributionTrsIdUrl = `/dao/contributions?received_address=${node.Gaccount.address}&pagesize=1`;
@@ -41,16 +38,16 @@ describe('Confirmations Test', () => {
             .set("nethash", node.config.nethash)
             .set("port", node.config.port)
             .expect(200)
-            .end((err, {body}) => {
+            .end((err, {
+                body
+            }) => {
                 debug(JSON.stringify(body));
 
                 node.expect(err).to.be.not.ok;
                 node.expect(body).to.have.property("success").to.be.true;
 
-                if (body.success) {
-                    contributionTrsId = body.data.rows[0].transaction_id;
-                    contributionPrice = body.data.rows[0].price;
-                }
+                contributionTrsId = body.data.rows[0].transaction_id;
+                contributionPrice = body.data.rows[0].price;
 
                 done();
             });
@@ -74,31 +71,24 @@ describe('Confirmations Test', () => {
 
             // transaction = createConfirmation(confirmation, node.Gaccount.password, null, contributionPrice);
             transaction = await node.ddn.assetPlugin.createPluginAsset(43, confirmation, node.Gaccount.password);
-            await new Promise((resolve, reject) => {
-                node.peer.post("/transactions")
-                    .set("Accept", "application/json")
-                    .set("version", node.version)
-                    .set("nethash", node.config.nethash)
-                    .set("port", node.config.port)
-                    .send({
-                        transaction
-                    })
-                    .expect("Content-Type", /json/)
-                    .expect(200)
-                    .end((err, {body}) => {
-                        if (err) {
-                            return reject(err);
-                        }
-
-                        debug(JSON.stringify(body));
-
-                        node.expect(body).to.have.property("success").to.be.true;
-
-                        resolve();
-                    });
-            })
-
-            done();
+            node.peer.post("/transactions")
+                .set("Accept", "application/json")
+                .set("version", node.version)
+                .set("nethash", node.config.nethash)
+                .set("port", node.config.port)
+                .send({
+                    transaction
+                })
+                .expect("Content-Type", /json/)
+                .expect(200)
+                .end((err, {
+                    body
+                }) => {
+                    node.expect(err).to.be.not.ok;
+                    debug(JSON.stringify(body));
+                    node.expect(body).to.have.property("success").to.be.true;
+                    done();
+                });
         });
     });
 
@@ -124,8 +114,11 @@ describe('Confirmations Test', () => {
                 .send(confirmation)
                 .expect("Content-Type", /json/)
                 .expect(200)
-                .end((err, {body}) => {
+                .end((err, {
+                    body
+                }) => {
                     debug(JSON.stringify(body));
+                    node.expect(err).to.be.not.ok;
 
                     node.expect(body).to.have.property("success").to.be.false;
                     node.expect(body).to.have.property("error").to.contain("The contribution has been confirmed");
@@ -150,8 +143,11 @@ describe('Confirmations Test', () => {
                 .set("port", node.config.port)
                 .expect("Content-Type", /json/)
                 .expect(200)
-                .end((err, {body}) => {
+                .end((err, {
+                    body
+                }) => {
                     debug(JSON.stringify(body));
+                    node.expect(err).to.be.not.ok;
 
                     node.expect(body).to.have.property("success").to.be.true;
                     done();
@@ -175,9 +171,11 @@ describe('Confirmations Test', () => {
                 .set("port", node.config.port)
                 .expect("Content-Type", /json/)
                 .expect(200)
-                .end((err, {body}) => {
+                .end((err, {
+                    body
+                }) => {
                     debug(JSON.stringify(body));
-
+                    node.expect(err).to.be.not.ok;
                     node.expect(body).to.have.property("success").to.be.true;
                     done();
                 });

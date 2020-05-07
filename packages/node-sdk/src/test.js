@@ -13,10 +13,9 @@ import supertest from 'supertest';
 import async from 'async';
 import request from 'request';
 import bluebird from 'bluebird';
-
-import {getConfigFile, requireFile} from '@ddn/core/lib/getUserConfig';
 import DdnUtils from '@ddn/utils';
-import DdnCrepto from '@ddn/utils';
+import DdnCrepto from '@ddn/crypto';
+import {getConfigFile, requireFile} from '@ddn/core/lib/getUserConfig';
 import ddn from '../';
 
 // TODO 包的整理规划需要进一步明确原则，根据通用性确定是否写成npm包
@@ -403,8 +402,6 @@ function getRealTime(epochTime) {
 
 // 初始化
 ddn.init();
-
-console.log('constants.net.beginDate= ', constants.net.beginDate);
 
 export default {
   api,

@@ -3,7 +3,7 @@ import DdnUtils from "@ddn/utils";
 import ddn from "../";
 import node from "../lib/test";
 
-const debug = Debug('node-sdk');
+const debug = Debug('debug');
 const expect = node.expect;
 const Bignum = DdnUtils.bignum;
 
@@ -55,8 +55,9 @@ describe("Node SDK", () => {
 				bytes = await getBytes(transaction);
 				debug('#getBytes first, bytes: ', bytes);
 				expect(bytes).to.be.ok;
-				expect(bytes).that.is.an("object");
-				expect(bytes.length).to.equal(117);
+				// expect(bytes).that.is.an("object");
+				// expect(bytes.length).to.equal(117);
+				expect(bytes.length).to.equal(130);
 				done();
 			});
 
@@ -78,7 +79,8 @@ describe("Node SDK", () => {
 				debug('#getBytes secend, bytes:', bytes);
 				expect(bytes).to.be.ok;
 				// expect(bytes).that.is.an("object");
-				expect(bytes.length).to.equal(181);
+				// expect(bytes.length).to.equal(181);
+				expect(bytes.length).to.equal(130);
 				done();
 			});
 		});
@@ -111,7 +113,7 @@ describe("Node SDK", () => {
 				debug('#getHash, hash:', result);
 
 				expect(result).to.be.ok;
-				expect(result).that.is.an("object");
+				expect(Buffer.isBuffer(result)).be.true;
 				expect(result.length).to.equal(32);
 				done();
 			});
@@ -141,9 +143,10 @@ describe("Node SDK", () => {
 				};
 
 				const id = await getId(transaction);
-				debug('#getId, id:', id);
+				debug('#getId, id to hex:', id.toString('hex'));
 
-				expect(id).to.be.a("string").be.equal("f60a26da470b1dc233fd526ed7306c1d84836f9e2ecee82c9ec47319e0910474");
+				expect(id).to.be.a("string").be.equal("df0e8c8de3e4bb8751c90b23751b897c52fab7c546bc6b70ffe30788fad52840");
+				// expect(id).to.be.a("string").be.equal("f60a26da470b1dc233fd526ed7306c1d84836f9e2ecee82c9ec47319e0910474");
 				done();
 			});
 		});

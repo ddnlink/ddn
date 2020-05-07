@@ -207,7 +207,7 @@ describe('GET /api/transactions', () => {
                     node.expect(body).to.have.property('transactions').that.is.an('array');
                     node.expect(body.transactions).to.have.length.within(transactionCount, limit);
                     if (body.transactions.length > 0) {
-                        node.expect(body.transactions[0].timestamp).to.be.equal(offsetTimestamp);
+                        node.expect(body.transactions[0].timestamp).be.equal(offsetTimestamp);
                     }
                     done();
                 });

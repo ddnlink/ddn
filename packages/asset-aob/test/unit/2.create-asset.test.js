@@ -11,9 +11,9 @@ async function createPluginAsset(type, asset, secret, secondSecret) {
 describe("AOB Test", () => {
 
     // 加载插件
-    node.ddn.init();
+    // node.ddn.init();
 
-    test("注册资产 Should be ok", async () => {
+    test("注册资产 Should be ok", async (done) => {
         const obj = {
             name: "DDD.NCR",
             desc: "DDD新币种",
@@ -32,27 +32,27 @@ describe("AOB Test", () => {
 
         // console.log('transaction:', transaction)
 
-        await new Promise((resolve, reject) => {
-            node.peer.post("/transactions")
-                .set("Accept", "application/json")
-                .set("version", node.version)
-                .set("nethash", node.config.nethash)
-                .set("port", node.config.port)
-                .send({ transaction })
-                .expect("Content-Type", /json/)
-                .expect(200)
-                .end((err, { body }) => {
-                    // console.log('res.body', res.body);
+        node.peer.post("/transactions")
+            .set("Accept", "application/json")
+            .set("version", node.version)
+            .set("nethash", node.config.nethash)
+            .set("port", node.config.port)
+            .send({
+                transaction
+            })
+            .expect("Content-Type", /json/)
+            .expect(200)
+            .end((err, {
+                body
+            }) => {
+                // console.log('res.body', res.body);
 
-                    if (err) {
-                        return reject(err);
-                    }
+                node.expect(err).to.be.not.ok;
+                node.expect(body).to.have.property("success").to.be.true;
 
-                    node.expect(body).to.have.property("success").to.be.true;
+                done();
+            });
 
-                    resolve();
-                });
-        });
     })
 
 });
