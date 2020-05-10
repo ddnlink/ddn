@@ -6,13 +6,13 @@ import constants from "../constants";
 import slots from "../time/slots";
 import globalOptions from '../options';
 
-function createDApp(options, secret, secondSecret) {
+async function createDApp(options, secret, secondSecret) {
 	const keys = crypto.getKeys(secret);
 
 	const transaction = {
-    nethash: globalOptions.get('nethash'),
+		nethash: globalOptions.get('nethash'),
 		type: DdnUtils.assetTypes.DAPP,
-		amount: "0",    //Bignum update
+		amount: "0",  
 		fee: constants.net.fees.dapp,
 		recipientId: null,
 		senderPublicKey: keys.publicKey,
@@ -32,14 +32,14 @@ function createDApp(options, secret, secondSecret) {
 		}
 	};
 
-	crypto.sign(transaction, keys);
+	await crypto.sign(transaction, keys);
 
 	if (secondSecret) {
 		const secondKeys = crypto.getKeys(secondSecret);
-		crypto.secondSign(transaction, secondKeys);
+		await crypto.secondSign(transaction, secondKeys);
 	}
 
-	// transaction.id = crypto.getId(transaction);
+	transaction.id = await crypto.getId(transaction);
 	return transaction;
 }
 
@@ -72,7 +72,7 @@ function createInnerTransaction(options, secret) {
 	let args = options.args;
 	if (args instanceof Array) args = JSON.stringify(args)
 	const trs = {
-    nethash: globalOptions.get('nethash'),
+		nethash: globalOptions.get('nethash'),
 		fee: options.fee,
 		timestamp: slots.getTime() - globalOptions.get('clientDriftSeconds'),
 		senderPublicKey: keys.publicKey,

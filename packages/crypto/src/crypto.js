@@ -158,7 +158,9 @@ function verifyBytes(bytes, signature, publicKey) {
 async function verify(transaction) {
     let remove = 64;
 
-    if (transaction.signSignature) {
+    // console.log("transaction", transaction);
+    
+    if (transaction.sign_signature) {
         remove = 128;
     }
 
@@ -188,7 +190,7 @@ async function verifySecondSignature(transaction, publicKey) {
 
     const hash = sha256Bytes(data2);
 
-    const signSignatureBuffer = Buffer.from(transaction.signSignature, "hex");
+    const signSignatureBuffer = Buffer.from(transaction.sign_signature, "hex");
     const publicKeyBuffer = Buffer.from(publicKey, "hex");
     const res = nacl.sign.detached.verify(hash, signSignatureBuffer, publicKeyBuffer);
 

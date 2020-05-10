@@ -25,6 +25,7 @@ const {
 
     verify, 
     verifySecondSignature,
+    verifyBytes
  } = DdnCrypto;
 
 function toLocalBuffer(buf) {
@@ -375,7 +376,8 @@ export default {
     // 验证
     verify, 
     verifySecondSignature,
-    
+    verifyBytes,
+
     fixedPoint, // 测试和前端用
     signBytes,
     toLocalBuffer, // 测试和前端用

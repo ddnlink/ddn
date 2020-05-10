@@ -39,7 +39,7 @@ async function createTransaction(recipientId, amount, message, secret, second_se
 		await crypto.secondSign(transaction, secondKeys);
 	}
 
-	// transaction.id = await crypto.getId(transaction);
+	transaction.id = await crypto.getId(transaction);
 	return transaction;
 }
 
