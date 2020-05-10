@@ -25,19 +25,19 @@ beforeAll(async () => {
     let res = await node.openAccountAsync({ secret: Account1.password, secondSecret: Account1.secondPassword });
     node.expect(res.body).to.have.property('success').to.be.true
     Account1.address = res.body.account.address
-    Account1.publicKey = res.body.account.public_key
+    Account1.publicKey = res.body.account.publicKey
     Account1.balance = res.body.account.balance
 
     res = await node.openAccountAsync({ secret: Account2.password, secondSecret: Account2.secondPassword })
     node.expect(res.body).to.have.property('success').to.be.true
     Account2.address = res.body.account.address
-    Account2.publicKey = res.body.account.public_key
+    Account2.publicKey = res.body.account.publicKey
     Account2.balance = res.body.account.balance
 
     res = await node.openAccountAsync({ secret: Account3.password, secondSecret: Account3.secondPassword })
     node.expect(res.body).to.have.property('success').to.be.true
     Account3.address = res.body.account.address
-    Account3.publicKey = res.body.account.public_key
+    Account3.publicKey = res.body.account.publicKey
     Account3.balance = res.body.account.balance
 
     let randomCoin = node.randomCoin();
@@ -207,7 +207,7 @@ describe('GET /api/transactions', () => {
                     node.expect(body).to.have.property('transactions').that.is.an('array');
                     node.expect(body.transactions).to.have.length.within(transactionCount, limit);
                     if (body.transactions.length > 0) {
-                        node.expect(body.transactions[0].timestamp).to.be.equal(offsetTimestamp);
+                        node.expect(body.transactions[0].timestamp).be.equal(offsetTimestamp);
                     }
                     done();
                 });

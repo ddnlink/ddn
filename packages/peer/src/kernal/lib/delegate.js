@@ -70,7 +70,7 @@ class Delegate {
         }
 
         const accounts = await this.runtime.account.getAccountList({
-            public_key: { //wxm block database
+            publicKey: { //wxm block database
                 '$in': delegatePublicKeys
             },
             limit: delegatePublicKeys.length
@@ -78,11 +78,11 @@ class Delegate {
         if (accounts && accounts.length == delegatePublicKeys.length) {
             accounts.forEach(account => {
                 if (account.is_delegate) {
-                    this._myDelegateKeypairs[account.public_key] = delegateKeypairs[account.public_key]; //wxm block database
+                    this._myDelegateKeypairs[account.publicKey] = delegateKeypairs[account.publicKey]; //wxm block database
                     this._myDelegateNum++;
                     this.logger.info(`Forging enabled on account: ${account.address}`);
                 } else {
-                    this.logger.info(`Delegate with this public key not found: ${account.public_key}`);   //wxm block database
+                    this.logger.info(`Delegate with this public key not found: ${account.publicKey}`);   //wxm block database
                 }
             });
         } else {
@@ -130,7 +130,7 @@ class Delegate {
                 }
 
                 const account2 = await this.runtime.account.getAccount({
-                    public_key: publicKey2,
+                    publicKey: publicKey2,
                     is_delegate: 1
                 });
                 if (!account2) {
@@ -156,8 +156,8 @@ class Delegate {
         const delegates = await this.runtime.account.getAccountList({
             is_delegate: 1,  //wxm block database
             // sort: {"vote": -1, "publicKey": 1},
-            sort: [['vote', 'DESC'], ['public_key', 'ASC']] //wxm block database
-        }, ["username", "address", "public_key", "vote", "missedblocks", "producedblocks", "fees", "rewards", "balance"]);
+            sort: [['vote', 'DESC'], ['publicKey', 'ASC']] //wxm block database
+        }, ["username", "address", "publicKey", "vote", "missedblocks", "producedblocks", "fees", "rewards", "balance"]);
 
         let limit = query.limit || this.config.settings.delegateNumber;
 		const offset = query.offset || 0;
@@ -207,15 +207,15 @@ class Delegate {
         const delegates = await this.runtime.account.getAccountList({
             is_delegate: 1,  //wxm block database
             // sort: {"vote": -1, "publicKey": 1},
-            sort: [['vote', 'DESC'], ['public_key', 'ASC']], //wxm block database
+            sort: [['vote', 'DESC'], ['publicKey', 'ASC']], //wxm block database
             limit: this.config.settings.delegateNumber
-        }, ["public_key"]);
+        }, ["publicKey"]);
 
         if (!delegates || !delegates.length) {
             throw new Error("No active delegates found");
         }
 
-        return delegates.map(({public_key}) => public_key);
+        return delegates.map(({publicKey}) => publicKey);
     }
 
     /**

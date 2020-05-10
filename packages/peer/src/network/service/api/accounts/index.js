@@ -35,7 +35,7 @@ class AccountService {
                 address: query.address,
                 u_balance: 0,
                 balance: 0,
-                public_key: '',
+                publicKey: '',
                 u_second_signature: '',
                 second_signature: '',
                 second_public_key: '',
@@ -53,7 +53,7 @@ class AccountService {
                 address: account.address,
                 unconfirmed_balance: account.u_balance,
                 balance: account.balance,
-                public_key: account.public_key,
+                publicKey: account.publicKey,
                 username: account.username,
                 unconfirmed_signature: account.u_second_signature,
                 second_signature: account.second_signature,
@@ -114,10 +114,10 @@ class AccountService {
         }
 
         var account = await this.runtime.account.getAccountByAddress(query.address);
-        if (!account || !account.public_key) {
+        if (!account || !account.publicKey) {
             throw new Error("Account does not have a public key");
         }
-        return { success: true, publicKey: account.public_key };
+        return { success: true, publicKey: account.publicKey };
     }
 
     async postGeneratePublicKey(req) {
@@ -138,15 +138,15 @@ class AccountService {
 
         var hash = crypto.createHash('sha256').update(body.secret, 'utf8').digest();
         var keypair = ed.MakeKeypair(hash);
-        var public_key = keypair.publicKey.toString('hex')
-        var address = this.runtime.account.generateAddressByPublicKey(public_key);
+        var publicKey = keypair.publicKey.toString('hex')
+        var address = this.runtime.account.generateAddressByPublicKey(publicKey);
         var account = await this.runtime.account.getAccountByAddress(address);
         if (!account) {
             account = {
                 address,
                 u_balance: 0,
                 balance: 0,
-                public_key,
+                publicKey,
                 u_second_public_key: '',
                 second_signature: '',
                 second_public_key: '',
@@ -157,7 +157,7 @@ class AccountService {
 
         return {
             success: true,
-            publicKey: account ? account.public_key : null
+            publicKey: account ? account.publicKey : null
         }
     }
 
@@ -212,7 +212,7 @@ class AccountService {
         var accounts = queryResult.map(fullAccount => ({
             address: fullAccount.address,
             balance: fullAccount.balance,
-            public_key: fullAccount.public_key
+            publicKey: fullAccount.publicKey
         }));
         return {success: true, accounts};
     }
@@ -250,15 +250,15 @@ class AccountService {
 
         var hash = crypto.createHash('sha256').update(body.secret, 'utf8').digest();
         var keypair = ed.MakeKeypair(hash);
-        var public_key = keypair.publicKey.toString('hex');
-        var address = this.runtime.account.generateAddressByPublicKey(public_key);
+        var publicKey = keypair.publicKey.toString('hex');
+        var address = this.runtime.account.generateAddressByPublicKey(publicKey);
         var account = await this.runtime.account.getAccountByAddress(address);
         if (!account) {
             account = {
                 address,
                 u_balance: 0,
                 balance: 0,
-                public_key,
+                publicKey,
                 u_second_signature: '',
                 second_signature: '',
                 second_public_key: '',
@@ -273,7 +273,7 @@ class AccountService {
                 address: account.address,
                 unconfirmed_balance: account.u_balance,
                 balance: account.balance,
-                public_key: account.public_key,
+                publicKey: account.publicKey,
                 unconfirmed_signature: account.u_second_signature,
                 second_signature: account.second_signature,
                 second_public_key: account.second_public_key,
@@ -307,7 +307,7 @@ class AccountService {
                 address,
                 u_balance: 0,
                 balance: 0,
-                public_key: body.publicKey,
+                publicKey: body.publicKey,
                 u_second_signature: '',
                 second_signature: '',
                 second_public_key: '',
@@ -320,7 +320,7 @@ class AccountService {
             address: account.address,
             unconfirmed_balance: account.u_balance,
             balance: account.balance,
-            public_key: account.public_key,
+            publicKey: account.publicKey,
             unconfirmed_signature: account.u_second_signature,
             second_signature: account.second_signature,
             second_public_key: account.second_public_key,

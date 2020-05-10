@@ -1,11 +1,10 @@
 import DdnUtils from '@ddn/utils';
 
-import crypto from './crypto';
+import crypto from '../utils/crypto';
 import constants from '../constants';
 
 import slots from '../time/slots';
 import options from '../options';
-import addressHelper from '../address';
 
 const { bignum } = DdnUtils;
 
@@ -34,7 +33,7 @@ function isOrgId(dao_id) {
 function createOrg(org, secret, second_secret) {
   const keys = crypto.getKeys(secret);
 
-  const sender = addressHelper.generateBase58CheckAddress(keys.public_key);
+  const sender = crypto.generateAddress(keys.publicKey);
 
   if (!org.address) {
     org.address = sender;
@@ -78,8 +77,8 @@ function createOrg(org, secret, second_secret) {
     amount: "0",
     fee: bignum.multiply(feeBase, 100000000).toString(),   //bignum update feeBase * 100000000,
     recipientId: null,
-    senderPublicKey: keys.public_key,
-    senderPublicKey: keys.public_key,
+    senderPublicKey: keys.publicKey,
+    senderPublicKey: keys.publicKey,
     timestamp: slots.getTime() - options.get('clientDriftSeconds'),
     asset: {
       org
@@ -99,15 +98,15 @@ function createOrg(org, secret, second_secret) {
 
 function createTransfer(address, amount, secret, second_secret) {
   const keys = crypto.getKeys(secret);
-  const fee = constants.fees.org;
+  const fee = constants.net.fees.org;
   const transaction = {
     type: DdnUtils.assetTypes.TRANSFER,
     nethash: options.get('nethash'),
     amount, // fixme 1000000000 ????
     fee: `${fee}`,
     recipientId: address,
-    senderPublicKey: keys.public_key,
-    senderPublicKey: keys.public_key,
+    senderPublicKey: keys.publicKey,
+    senderPublicKey: keys.publicKey,
     timestamp: slots.getTime() - options.get('clientDriftSeconds')
   };
 
@@ -148,7 +147,7 @@ function createConfirmation(trsAmount, confirmation, secret, second_secret) {
     throw new Error('Invalid state format');
   }
 
-  let fee = constants.fees.org;
+  let fee = constants.net.fees.org;
   if (confirmation.state == 0) {
     fee = "0"
   }
@@ -165,8 +164,8 @@ function createConfirmation(trsAmount, confirmation, secret, second_secret) {
     amount: `${amount}`,
     fee: `${fee}`,
     recipientId,
-    senderPublicKey: keys.public_key,
-    senderPublicKey: keys.public_key,
+    senderPublicKey: keys.publicKey,
+    senderPublicKey: keys.publicKey,
     timestamp: slots.getTime() - options.get('clientDriftSeconds'),
     asset: {
       daoConfirmation: confirmation
@@ -213,7 +212,7 @@ function createContribution(contribution, secret, second_secret) {
     throw new Error('Invalid url format');
   }
 
-  const fee = constants.fees.org;
+  const fee = constants.net.fees.org;
   // contribution.sender_address = contribution.sender_address
   // contribution.received_address = contribution.received_address
   const transaction = {
@@ -222,8 +221,8 @@ function createContribution(contribution, secret, second_secret) {
     amount: "0",
     fee: `${fee}`,
     recipientId: null,
-    senderPublicKey: keys.public_key,
-    // senderPublicKey: keys.public_key,
+    senderPublicKey: keys.publicKey,
+    // senderPublicKey: keys.publicKey,
     timestamp: slots.getTime() - options.get('clientDriftSeconds'),
     asset: {
       daoContribution: contribution

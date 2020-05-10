@@ -94,7 +94,7 @@ class Multisignature {
             }
         }
 
-        if (trs.asset.multisignature.keysgroup.includes(`+${sender.public_key}`)) { //wxm block database
+        if (trs.asset.multisignature.keysgroup.includes(`+${sender.publicKey}`)) { //wxm block database
             throw new Error('Unable to sign transaction using own public key');
         }
 
@@ -174,7 +174,7 @@ class Multisignature {
 
             await this.runtime.account.setAccount({
                 address,
-                public_key: key, //wxm block database
+                publicKey: key, //wxm block database
                 block_id: id //wxm 这里要直接将block_id更新进去，否则的话，如果不进行转账操作，将出现block_id为空，导致重启失败的问题
             }, dbTrans);
         }

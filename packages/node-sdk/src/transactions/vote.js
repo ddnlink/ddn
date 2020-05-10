@@ -1,6 +1,6 @@
 import DdnUtils from '@ddn/utils';
 
-import crypto from "./crypto";
+import crypto from '../utils/crypto';
 import constants from "../constants";
 import slots from "../time/slots";
 import options from '../options';
@@ -12,9 +12,9 @@ async function createVote(keyList, secret, secondSecret) {
 		type: DdnUtils.assetTypes.VOTE,
 		nethash: options.get('nethash'),
 		amount: "0", 
-		fee: constants.fees.vote,
+		fee: constants.net.fees.vote,
 		recipientId: null,
-		senderPublicKey: keys.public_key,
+		senderPublicKey: keys.publicKey,
 		timestamp: slots.getTime() - options.get('clientDriftSeconds'),
 		asset: {
 			vote: {

@@ -13,7 +13,6 @@ const deprecated = depd('@ddn');
 export default {
     assetTypes,
     runtimeState,
-    // address,
     amount,
     limitCache,
     system,

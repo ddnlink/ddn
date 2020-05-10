@@ -53,13 +53,13 @@ async function openAccount({ password, secondPassword, name }, i) {
                 node.expect(body).to.have.property("success").to.be.true;
                 if (body.account != null && i != null) {
                     Accounts[i].address = body.account.address;
-                    Accounts[i].public_key = body.account.public_key;
+                    Accounts[i].publicKey = body.account.publicKey;
                 } else if (name == "noddn") {
                     NoDDNAccount.address = body.account.address;
-                    NoDDNAccount.public_key = body.account.public_key;
+                    NoDDNAccount.publicKey = body.account.publicKey;
                 } else if (name == "multi") {
                     MultisigAccount.address = body.account.address;
-                    MultisigAccount.public_key = body.account.public_key;
+                    MultisigAccount.publicKey = body.account.publicKey;
                     debug("Open MultisigAccount", MultisigAccount);
                     debug("Open body.account", body.account);
                 }
@@ -162,7 +162,7 @@ async function makeKeysGroup() {
     debug("makeKeysGroup Accounts", Accounts[0], Accounts[1]);
     const keysgroup = [];
     for (let i = 0; i < totalMembers; i++) {
-        const member = `+${Accounts[i].public_key}`;
+        const member = `+${Accounts[i].publicKey}`;
         keysgroup.push(member);
     }
     return keysgroup;
@@ -664,7 +664,7 @@ describe("PUT /multisignatures", () => {
 //         // node.onNewBlock(function (err) {
 //         node.api
 //             .get(
-//                 `/multisignatures/pending?publicKey=${MultisigAccount.public_key}`
+//                 `/multisignatures/pending?publicKey=${MultisigAccount.publicKey}`
 //             )
 //             .set("Accept", "application/json")
 //             .expect("Content-Type", /json/)
@@ -681,7 +681,7 @@ describe("PUT /multisignatures", () => {
 //                     // debug(MultisigAccount.publicKey);
 //                     if (
 //                         body.transactions[i].transaction.senderPublicKey ==
-//                         MultisigAccount.public_key
+//                         MultisigAccount.publicKey
 //                     ) {
 //                         flag += 1;
 //                         node.expect(body.transactions[i].transaction)
@@ -706,7 +706,7 @@ describe("PUT /multisignatures", () => {
 //                             .to.equal(MultiSigTX.txId);
 //                         node.expect(body.transactions[i].transaction)
 //                             .to.have.property("senderPublicKey")
-//                             .to.equal(MultisigAccount.public_key);
+//                             .to.equal(MultisigAccount.publicKey);
 //                         node.expect(body.transactions[i])
 //                             .to.have.property("lifetime")
 //                             .to.equal(Number(MultiSigTX.lifetime));

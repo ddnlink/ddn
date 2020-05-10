@@ -290,7 +290,7 @@ class TransactionService {
                         return cb(err);
                     }
 
-                    if (!requester || !requester.public_key) { //wxm block database
+                    if (!requester || !requester.publicKey) { //wxm block database
                         return cb("Invalid requester");
                     }
 
@@ -298,7 +298,7 @@ class TransactionService {
                         return cb("Invalid second passphrase");
                     }
 
-                    if (requester.public_key == account.public_key) { //wxm block database
+                    if (requester.publicKey == account.publicKey) { //wxm block database
                         return cb("Invalid requester");
                     }
 

@@ -37,7 +37,7 @@ beforeAll(done => {
             node.expect(body).to.have.property("success").to.be.true;
             if (body.success == true && body.account != null) {
                 Account1.address = body.account.address;
-                Account1.public_key = body.account.public_key;
+                Account1.publicKey = body.account.publicKey;
                 Account1.balance = body.account.balance;
             } else {
                 debug("Unable to open account1, tests will fail");
@@ -63,7 +63,7 @@ beforeAll(done => {
             node.expect(body).to.have.property("success").to.be.true;
             if (body.success == true && body.account != null) {
                 Account2.address = body.account.address;
-                Account2.public_key = body.account.public_key;
+                Account2.publicKey = body.account.publicKey;
                 Account2.balance = body.account.balance;
             } else {
                 debug("Unable to open account2, tests will fail");
@@ -89,7 +89,7 @@ beforeAll(done => {
             node.expect(body).to.have.property("success").to.be.true;
             if (body.success == true && body.account != null) {
                 Account3.address = body.account.address;
-                Account3.public_key = body.account.public_key;
+                Account3.publicKey = body.account.publicKey;
                 Account3.balance = body.account.balance;
             } else {
                 debug("Unable to open account3, tests will fail");
@@ -115,7 +115,7 @@ beforeAll(done => {
             node.expect(body).to.have.property("success").to.be.true;
             if (body.success == true && body.account != null) {
                 Account4.address = body.account.address;
-                Account4.public_key = body.account.public_key;
+                Account4.publicKey = body.account.publicKey;
                 Account4.balance = body.account.balance;
             } else {
                 debug("Unable to open account4, tests will fail");
@@ -141,7 +141,7 @@ beforeAll(done => {
             node.expect(body).to.have.property("success").to.be.true;
             if (body.success == true && body.account != null) {
                 Account5.address = body.account.address;
-                Account5.public_key = body.account.public_key;
+                Account5.publicKey = body.account.publicKey;
                 Account5.balance = body.account.balance;
             } else {
                 debug("Unable to open account5, tests will fail");
@@ -505,11 +505,11 @@ describe("PUT /dapps", () => {
 
     it("Using valid Link. Should be ok", done => {
         const delegates = [
-            Account1.public_key,
-            Account2.public_key,
-            Account3.public_key,
-            Account4.public_key,
-            Account5.public_key
+            Account1.publicKey,
+            Account2.publicKey,
+            Account3.publicKey,
+            Account4.publicKey,
+            Account5.publicKey
         ];
 
         node.onNewBlock(() => {

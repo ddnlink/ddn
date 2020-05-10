@@ -1,4 +1,4 @@
-import crypto from "./crypto";
+import crypto from '../utils/crypto';
 import constants from "../constants";
 import DdnUtils from '@ddn/utils';
 import slots from "../time/slots";
@@ -11,14 +11,14 @@ async function createDelegate(username, secret, secondSecret) {
 		type: DdnUtils.assetTypes.DELEGATE,
 		nethash: options.get('nethash'),
 		amount: "0",
-		fee: constants.fees.delegate,
+		fee: constants.net.fees.delegate,
 		recipientId: null,
-		senderPublicKey: keys.public_key,
+		senderPublicKey: keys.publicKey,
 		timestamp: slots.getTime() - options.get('clientDriftSeconds'),
 		asset: {
 			delegate: {
 				username,
-				public_key: keys.public_key
+				publicKey: keys.publicKey
 			}
 		}
 	};

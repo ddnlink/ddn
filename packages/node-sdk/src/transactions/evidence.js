@@ -1,6 +1,6 @@
 import DdnUtils from '@ddn/utils';
 
-import crypto from './crypto';
+import crypto from '../utils/crypto';
 import constants from '../constants';
 import slots from '../time/slots';
 import options from '../options';
@@ -11,7 +11,7 @@ import options from '../options';
  * @param {*} secret 
  * @param {*} secondSecret 
  */
-function createEvidence(evidence, secret, secondSecret) {
+async function createEvidence(evidence, secret, secondSecret) {
 	const keys = crypto.getKeys(secret);
 
 	if (typeof evidence !== 'object') {
@@ -22,7 +22,7 @@ function createEvidence(evidence, secret, secondSecret) {
 		throw new Error('Invalid ipid format');
 	}
 
-	const fee = constants.fees.evidence;
+	const fee = constants.net.fees.evidence;
 
 	const transaction = {
 		type: DdnUtils.assetTypes.EVIDENCE, // 10 -> 20
@@ -30,23 +30,21 @@ function createEvidence(evidence, secret, secondSecret) {
 		amount: "0",   
 		fee,
 		recipientId: null,
-		senderPublicKey: keys.public_key,
-		// senderPublicKey: keys.publicKey,
-		// senderPublicKey: keys.publicKey,
+		senderPublicKey: keys.publicKey,
 		timestamp: slots.getTime() - options.get('clientDriftSeconds'),
 		asset: {
 			evidence
 		}
 	};
 
-	crypto.sign(transaction, keys);
+	await crypto.sign(transaction, keys);
 
 	if (secondSecret) {
 		const secondKeys = crypto.getKeys(secondSecret);
-		crypto.secondSign(transaction, secondKeys);
+		await crypto.secondSign(transaction, secondKeys);
 	}
 
-	// transaction.id = crypto.getId(transaction);
+	transaction.id = await crypto.getId(transaction);
 	return transaction;
 }
 

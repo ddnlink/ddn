@@ -20,7 +20,7 @@ beforeAll(async () => {
     debug('open account response', res.body)
     node.expect(res.body).to.have.property("success").to.be.true;
     node.expect(res.body).to.have.property("account").that.is.an("object");
-    node.expect(res.body.account.balance).to.be.equal(0);
+    node.expect(res.body.account.balance).be.equal(0);
 });
 
 describe("PUT /delegates without funds", () => {
@@ -62,7 +62,7 @@ describe("PUT /accounts/delegates without funds", () => {
                 node.expect(body).to.have.property("success").to.be.true;
                 node.expect(body).to.have.property("account").that.is.an("object");
                 Raccount.address = body.account.address;
-                Raccount.public_key = body.account.public_key;
+                Raccount.publicKey = body.account.publicKey;
                 Raccount.balance = body.account.balance;
 
                 node.onNewBlock(err => {
@@ -153,7 +153,7 @@ describe("PUT /accounts/delegates with funds", () => {
                     // console.log(JSON.stringify(res.body));
                     node.expect(body).to.have.property("success").to.be.true;
                     if (body.success == true && body.account != null) {
-                        node.expect(`${body.account.balance}`).to.be.equal(node.RANDOM_COIN);
+                        node.expect(`${body.account.balance}`).be.equal(node.RANDOM_COIN);
                     } else {
                         // console.log("Failed to open account or account object is null");
                         // console.log("Sent: secret: " + Raccount.password);
@@ -250,7 +250,7 @@ describe("PUT /accounts/delegates with funds", () => {
                 if (body.success == true && body.transaction != null) {
                     node.expect(body.transaction.type).to.equal(node.AssetTypes.VOTE);
                     node.expect(body.transaction.amount).to.equal("0");
-                    node.expect(body.transaction.senderPublicKey).to.equal(Raccount.public_key);
+                    node.expect(body.transaction.senderPublicKey).to.equal(Raccount.publicKey);
                     node.expect(body.transaction.fee).to.equal(node.Fees.voteFee);
                 } else {
                     // console.log("Transaction failed or transaction object is null");
@@ -305,7 +305,7 @@ describe("PUT /accounts/delegates with funds", () => {
                     if (body.success == true && body.transaction != null) {
                         node.expect(body.transaction.type).to.equal(node.AssetTypes.VOTE);
                         node.expect(body.transaction.amount).to.equal("0");
-                        node.expect(body.transaction.senderPublicKey).to.equal(Raccount.public_key);
+                        node.expect(body.transaction.senderPublicKey).to.equal(Raccount.publicKey);
                         node.expect(body.transaction.fee).to.equal(node.Fees.voteFee);
                     } else {
                         // console.log("Expected success but got error");
@@ -451,7 +451,7 @@ describe("PUT /delegates with funds", () => {
                 node.expect(body).to.have.property("success").to.be.true;
                 node.expect(body).to.have.property("account").that.is.an("object");
                 R2account.address = body.account.address;
-                R2account.public_key = body.account.public_key;
+                R2account.publicKey = body.account.publicKey;
                 R2account.balance = body.account.balance;
 
                 node.onNewBlock(err => {
@@ -497,7 +497,7 @@ describe("PUT /delegates with funds", () => {
                         // console.log(JSON.stringify(res.body));
                         node.expect(body).to.have.property("success").to.be.true;
                         if (body.success == true && body.account != null) {
-                            node.expect(body.account.balance).to.be.equal(`${node.RANDOM_COIN}`);
+                            node.expect(body.account.balance).be.equal(`${node.RANDOM_COIN}`);
                         } else {
                             // console.log("Failed to open account or account object is null");
                             // console.log("Sent: secret: " + R2account.password);
@@ -623,7 +623,7 @@ describe("PUT /delegates with funds", () => {
                     if (body.success == true && body.transaction != null) {
                         node.expect(body.transaction.fee).to.equal(node.Fees.delegateRegistrationFee);
                         node.expect(body.transaction.asset.delegate.username).to.equal(R2account.username.toLowerCase());
-                        node.expect(body.transaction.asset.delegate.public_key).to.equal(R2account.public_key);
+                        node.expect(body.transaction.asset.delegate.publicKey).to.equal(R2account.publicKey);
                         node.expect(body.transaction.type).to.equal(node.AssetTypes.DELEGATE);
                         node.expect(body.transaction.amount).to.equal("0");
                     } else {
@@ -706,7 +706,7 @@ describe("GET /delegates", () => {
                             node.expect(body.delegates[i].vote).to.be.at.most(body.delegates[i + 1].vote);
                             node.expect(body.delegates[i]).to.have.property("username");
                             node.expect(body.delegates[i]).to.have.property("address");
-                            node.expect(body.delegates[i]).to.have.property("public_key");
+                            node.expect(body.delegates[i]).to.have.property("publicKey");
                             node.expect(body.delegates[i]).to.have.property("vote");
                             node.expect(body.delegates[i]).to.have.property("rate");
                             node.expect(body.delegates[i]).to.have.property("productivity");
@@ -784,7 +784,7 @@ describe("GET /accounts/delegates?address=", () => {
                 node.expect(body.delegates).to.have.length.of.at.least(1);
                 node.expect(body.delegates[0]).to.have.property("username");
                 node.expect(body.delegates[0]).to.have.property("address");
-                node.expect(body.delegates[0]).to.have.property("public_key");
+                node.expect(body.delegates[0]).to.have.property("publicKey");
                 node.expect(body.delegates[0]).to.have.property("vote");
                 node.expect(body.delegates[0]).to.have.property("rate");
                 node.expect(body.delegates[0]).to.have.property("productivity");

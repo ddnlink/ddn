@@ -73,7 +73,7 @@ class Dapp extends Asset.Base {
         // eslint-disable-next-line require-atomic-updates
         trs.asset[assetJsonName] = data[assetJsonName];
 
-        // {
+        // trs.asset[assetJsonName] = {
         //     category: data.category,
         //     name: data.name,
         //     description: data.description,
@@ -84,6 +84,8 @@ class Dapp extends Asset.Base {
         //     delegates: data.delegates,
         //     unlock_delegates: data.unlock_delegates
         // };
+        console.log("trs data:", trs);
+        
         return trs;
     }
 
@@ -237,8 +239,8 @@ class Dapp extends Asset.Base {
         bb.writeInt(dapp.type);
         bb.writeInt(dapp.category);
         if (dapp.delegates) {
-            // bb.writeString(dapp.delegates.join(','));
-            bb.writeString(dapp.delegates);
+            bb.writeString(dapp.delegates.join(','));
+            // bb.writeString(dapp.delegates);
         }
         if (dapp.unlock_delegates || dapp.unlock_delegates === 0) {
             bb.writeInt(dapp.unlock_delegates);
@@ -305,9 +307,10 @@ class Dapp extends Asset.Base {
     }
 
     async attachApi(router) {
+        const self = this;
         router.put("/", async (req, res) => {
             try {
-                const result = await this.putDapp(req);
+                const result = await self.putDapp(req);
                 res.json(result);
             } catch (err) {
                 res.json({ success: false, error: err.message || err.toString() });
@@ -316,7 +319,7 @@ class Dapp extends Asset.Base {
 
         router.get("/", async (req, res) => {
             try {
-                const result = await this.getDappList(req, res);
+                const result = await self.getDappList(req, res);
                 res.json(result);
             } catch (err) {
                 res.json({ success: false, error: err.message || err.toString() });
@@ -326,7 +329,7 @@ class Dapp extends Asset.Base {
         // 2020.4.21 验证: 使用 get api/dapps/get -> get api/dapps/:id ?
         router.get("/:id", async (req, res) => {
             try {
-                const result = await this.getDappById(req);
+                const result = await self.getDappById(req);
                 res.json(result);
             } catch (err) {
                 res.json({ success: false, error: err.message || err.toString() });
@@ -335,7 +338,7 @@ class Dapp extends Asset.Base {
 
         router.get("/installedIds", async (req, res) => {
             try {
-                const result = await this.getInstalledDappIds();
+                const result = await self.getInstalledDappIds();
                 res.json({ success: true, ids: result });
             } catch (err) {
                 res.json({ success: false, error: err.message || err.toString() });
@@ -344,7 +347,7 @@ class Dapp extends Asset.Base {
 
         router.get("/installed", async (req, res) => {
             try {
-                const result = await this.getInstalled();
+                const result = await self.getInstalled();
                 res.json(result);
             } catch (err) {
                 res.json({ success: false, error: err.message || err.toString() });
@@ -353,7 +356,7 @@ class Dapp extends Asset.Base {
 
         router.post("/install", async (req, res) => {
             try {
-                const result = await this.postInstallDapp(req, res);
+                const result = await self.postInstallDapp(req, res);
                 res.json(result);
             } catch (err) {
                 res.json({ success: false, error: err.message || err.toString() });
@@ -362,7 +365,7 @@ class Dapp extends Asset.Base {
 
         router.post("/uninstall", async (req, res) => {
             try {
-                const result = await this.postUninstallDapp(req, res);
+                const result = await self.postUninstallDapp(req, res);
                 res.json(result);
             } catch (err) {
                 res.json({ success: false, error: err.message || err.toString() });
@@ -371,7 +374,7 @@ class Dapp extends Asset.Base {
 
         router.post("/launch", async (req, res) => {
             try {
-                const result = await this.postLaunchDapp(req, res);
+                const result = await self.postLaunchDapp(req, res);
                 res.json(result);
             } catch (err) {
                 res.json({ success: false, error: err.message || err.toString() });
@@ -380,7 +383,7 @@ class Dapp extends Asset.Base {
 
         router.get("/launch/lasterror", async (req, res) => {
             try {
-                const result = await this.getLaunchDappLastError(req, res);
+                const result = await self.getLaunchDappLastError(req, res);
                 res.json(result);
             } catch (err) {
                 res.json({ success: false, error: err.message || err.toString() });
@@ -389,7 +392,7 @@ class Dapp extends Asset.Base {
 
         router.post("/stop", async (req, res) => {
             try {
-                const result = await this.postStopDapp(req, res);
+                const result = await self.postStopDapp(req, res);
                 res.json(result);
             } catch (err) {
                 res.json({ success: false, error: err.message || err.toString() });
@@ -445,7 +448,7 @@ class Dapp extends Asset.Base {
 
         router.get("/balances/:dappid", async (req, res) => {
             try {
-                const result = await this.getDappBalances(req);
+                const result = await self.getDappBalances(req);
                 res.json(result);
             } catch (err) {
                 res.json({ success: false, error: err.message || err.toString() });
@@ -454,7 +457,7 @@ class Dapp extends Asset.Base {
 
         router.get("/balances/:dappid/:currency", async (req, res) => {
             try {
-                const result = await this.getDappBalance(req);
+                const result = await self.getDappBalance(req);
                 res.json(result);
             } catch (err) {
                 res.json({ success: false, error: err.message || err.toString() });
@@ -759,6 +762,7 @@ class Dapp extends Asset.Base {
             },
             required: ["id"]
         }, body);
+
         if (validateErrors) {
             throw new Error(`Invalid parameters: ${validateErrors[0].schemaPath} ${validateErrors[0].message}`);
         }
@@ -896,7 +900,7 @@ class Dapp extends Asset.Base {
 
     // 支持 ?id=abc 和 /abc 两种格式
     async getDappById(req) {
-        const query = req.params; 
+        const query = req.params;
 
         const validateErrors = await this.ddnSchema.validate({
             type: "object",
@@ -917,7 +921,7 @@ class Dapp extends Asset.Base {
         return { success: true, dapp };
     }
 
-    async checkDappPath() {
+    checkDappPath() {
         if (!fs.existsSync(this.config.dappsDir)) {
             fs.mkdirSync(this.config.dappsDir);
         }
@@ -944,22 +948,10 @@ class Dapp extends Asset.Base {
     async getInstalledDappIds() {
         const self = this;
 
-        return new Promise((resolve, reject) => {
-            try {
-                self.checkDappPath();
-            }
-            catch (err) {
-                return reject(err);
-            }
+        self.checkDappPath();
+        const files = fs.readdirSync(self.config.dappsDir);
+        return files;
 
-            fs.readdir(self.config.dappsDir, (err, files) => {
-                if (err) {
-                    return reject(err);
-                }
-
-                resolve(files);
-            });
-        });
     }
 
     async getInstalled() {

@@ -36,7 +36,7 @@
     "asset": {
         "delegate": {
             "username": "DDN_52",
-            "public_key": "920f7eda502f075c0f47f9e54ce64af23f58ee9aa0356ef298aea4449ee43521",
+            "publicKey": "920f7eda502f075c0f47f9e54ce64af23f58ee9aa0356ef298aea4449ee43521",
             "address": "DQ11atXWTzYrGcLRkavkcUESEvHJayTZ9j"
         }
     }
@@ -60,7 +60,7 @@
     "asset": {
         "delegate": {
             "username": "DDN_22",
-            "public_key": "1d46b650c85d4a094b8e7ddb015bcaa6cb0c878f65daf6c5e4a625660bdb144d",
+            "publicKey": "1d46b650c85d4a094b8e7ddb015bcaa6cb0c878f65daf6c5e4a625660bdb144d",
             "address": "DFqLucJLQTpPuCJTTANVkezEw21hMmyZem"
         }
     }
@@ -84,7 +84,7 @@
     "asset": {
         "delegate": {
             "username": "DDN_7",
-            "public_key": "1d49710c34177b9fa2d45f216d1b7d0a93b0bea237d578007af0789c146ec46a",
+            "publicKey": "1d49710c34177b9fa2d45f216d1b7d0a93b0bea237d578007af0789c146ec46a",
             "address": "DGuxqbgks7AAppLXAuzFC9PMZw1D3CdCWp"
         }
     }
@@ -108,7 +108,7 @@
     "asset": {
         "delegate": {
             "username": "DDN_29",
-            "public_key": "fcc6e3d79cb4d56d4fcf209d201f5a4dee53a46dbe0f5c012a64b5299e470d95",
+            "publicKey": "fcc6e3d79cb4d56d4fcf209d201f5a4dee53a46dbe0f5c012a64b5299e470d95",
             "address": "D5YcZCabEZtrB2xurRntkYprAKSaEuXVPZ"
         }
     }
@@ -132,7 +132,7 @@
     "asset": {
         "delegate": {
             "username": "DDN_5",
-            "public_key": "b23198a54e3eef0b1ef20696a1e4e07283efdea1a375e21f0f068e0a39f6fe0a",
+            "publicKey": "b23198a54e3eef0b1ef20696a1e4e07283efdea1a375e21f0f068e0a39f6fe0a",
             "address": "D31wRMYjiSmDEDjYMVbdH23cDtouGdaA8o"
         }
     }
@@ -156,7 +156,7 @@
     "asset": {
         "delegate": {
             "username": "DDN_17",
-            "public_key": "34a8e217288e725b8e15c5531d52bfddc9c425dab0e2f88c348535aab686a10e",
+            "publicKey": "34a8e217288e725b8e15c5531d52bfddc9c425dab0e2f88c348535aab686a10e",
             "address": "DJxNsvUgK9rjr917HKVpQeVAhp1B8n19uo"
         }
     }
@@ -180,7 +180,7 @@
     "asset": {
         "delegate": {
             "username": "DDN_8",
-            "public_key": "1d8a8748ffa5147e1a7e2f49c4fdf063a7277929aee6edce015de21d8ebabf9f",
+            "publicKey": "1d8a8748ffa5147e1a7e2f49c4fdf063a7277929aee6edce015de21d8ebabf9f",
             "address": "DMdFm43fGuUKgA7aSvGrSCq32zfJxAtfiE"
         }
     }
@@ -204,7 +204,7 @@
     "asset": {
         "delegate": {
             "username": "DDN_55",
-            "public_key": "5a723b2531e44fcdd574db1dd81fde1985c2cae177e90c25c2de92857b70d331",
+            "publicKey": "5a723b2531e44fcdd574db1dd81fde1985c2cae177e90c25c2de92857b70d331",
             "address": "D5UrihXtki3EYeG55mmvyd5tCKRRKbcZZh"
         }
     }
@@ -228,7 +228,7 @@
     "asset": {
         "delegate": {
             "username": "DDN_94",
-            "public_key": "e0e3f352fa38cf899cf7cebea60329e7654564511d98532868f6e1c2e3855a4d",
+            "publicKey": "e0e3f352fa38cf899cf7cebea60329e7654564511d98532868f6e1c2e3855a4d",
             "address": "Df4jHc2v3wxPcrPPe3JFGQx1xcEevUtwf"
         }
     }
@@ -252,7 +252,7 @@
     "asset": {
         "delegate": {
             "username": "DDN_89",
-            "public_key": "86a8bbc858ee9b084b7cbc35bf7b4b01de34def7c2379250fa54b3fb66daa58e",
+            "publicKey": "86a8bbc858ee9b084b7cbc35bf7b4b01de34def7c2379250fa54b3fb66daa58e",
             "address": "D5aqt8np4eL32P7bst5Xa3PrgURNFvX2dD"
         }
     }

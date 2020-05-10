@@ -3,7 +3,7 @@ import init from './init';
 export default {
     init,
 
-	crypto : require("./transactions/crypto").default,
+	crypto : require("./utils/crypto").default,
 	dapp: require("./transactions/dapp").default,
 	transfer: require("./transactions/transfer").default,
 	delegate : require("./transactions/delegate").default,

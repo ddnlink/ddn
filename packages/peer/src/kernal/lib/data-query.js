@@ -190,7 +190,7 @@ class DataQuery {
                     transaction_id: {
                         "$in": transactionIds
                     }
-                }, [['public_key', 's_publicKey'],
+                }, [['publicKey', 's_publicKey'],
                     ['transaction_id', 't_id']
                 ], null, (err, rows) => {
                     if (err) {

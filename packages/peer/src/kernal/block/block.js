@@ -128,6 +128,7 @@ class Block {
         return bb.toBuffer();
     }
 
+    // TODO: 2020.5.5 使用 @ddn/crypto 对应方法替代
     getHash(block) {
         return crypto.createHash('sha256').update(this.getBytes(block)).digest();
     }
@@ -553,7 +554,7 @@ class Block {
                         for (let i = 0; i < sortedTrs.length; i++) {
                             const transaction = sortedTrs[i];
                             const updatedAccountInfo = await this.runtime.account.setAccount({
-                                public_key: transaction.senderPublicKey,
+                                publicKey: transaction.senderPublicKey,
                                 isGenesis: block.height == 1
                             }, dbTrans);
 
@@ -911,7 +912,7 @@ class Block {
                             const transaction = block.transactions[i];
 
                             await this.runtime.account.setAccount({
-                                public_key: transaction.senderPublicKey
+                                publicKey: transaction.senderPublicKey
                             });
 
                             transaction.id = await this.runtime.transaction.getId(transaction);

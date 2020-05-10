@@ -71,12 +71,12 @@ message AssetTransfer {
 }
 
 message AssetSignature {
-  required bytes public_key = 1;
+  required bytes publicKey = 1;
 }
 
 message AssetDelegate {
   required string username = 1;
-  required bytes public_key = 2;
+  required bytes publicKey = 2;
 }
 
 message AssetVote {

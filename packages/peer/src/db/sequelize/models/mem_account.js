@@ -28,7 +28,7 @@ export default connection => connection.define('mem_account', {
     primaryKey: true,
     allowNull: false
   },
-  public_key: {
+  publicKey: {
     type: Sequelize.STRING(64), // 原类型:binary,size:32
   },
   second_public_key: {

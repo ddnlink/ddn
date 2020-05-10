@@ -1,4 +1,4 @@
-import crypto from "./crypto";
+import crypto from '../utils/crypto';
 import constants from "../constants";
 import slots from "../time/slots";
 import options from '../options';
@@ -12,7 +12,7 @@ function createDomain(name, address, secret, secondSecret) {
   if (!address || address.length == 0) {
     throw new Error('Invalid name format')
   }
-  const fee = constants.fees.domain;
+  const fee = constants.net.fees.domain;
   
 	const transaction = {
 		type: 18,
@@ -20,7 +20,7 @@ function createDomain(name, address, secret, secondSecret) {
 		amount: "0",    //Bignum update
 		fee: `${fee}`,
 		recipientId: null,
-		senderPublicKey: keys.public_key,
+		senderPublicKey: keys.publicKey,
 		timestamp: slots.getTime() - options.get('clientDriftSeconds'),
 		asset: {
 			domain: {
