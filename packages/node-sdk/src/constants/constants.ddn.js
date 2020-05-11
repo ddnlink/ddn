@@ -5,6 +5,8 @@ export default {
   foundAddress: 'DLjrrVwnmMXstcAYVjcrpwyYb3kY1ehABU',
   walletUrl: 'http://wallet.ddn.link',
 
+  interval: 10, // 10ms
+  delegates: 101, // number
   maxAmount: 100000000,
   maxPayloadLength: 8 * 1024 * 1024,
   blockHeaderLength: 248,

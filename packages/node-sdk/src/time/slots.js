@@ -1,22 +1,31 @@
-import options from '../options';
 import constants from '../constants';
 
+
+const interval = constants.interval;
+const delegates = constants.delegates;
+
+/**
+ * 周期开始时间
+ */
+function beginEpochTime() {
+	return constants.net.beginDate;
+}
+
+/**
+ * 周期时间
+ * @param {time} time 为空时，默认为当前时间开始计算
+ */
 function getEpochTime(time) {
 	if (time === undefined) {
 		time = (new Date()).getTime();
 	}
 	const d = beginEpochTime();
+	
 	const t = d.getTime();
+	console.log("t, time", t, time);
+
 	return Math.floor((time - t) / 1000);
 }
-
-function beginEpochTime() {
-	// return options.get('nethash') == 'b11fa2f2' ? new Date(Date.UTC(2017, 11, 20, 4, 0, 0, 0)) : new Date(Date.UTC(2017, 10, 20, 12, 20, 20, 20));
-	return constants.net.beginDate;
-}
-
-const interval = 10;
-const delegates = 101;
 
 function getTime(time) {
 	return getEpochTime(time);

@@ -470,7 +470,7 @@ export default {
   // DAO
   randomOrgId,
   randomIpId,
-  constants,
+  constants
 
   getRealTime
 };

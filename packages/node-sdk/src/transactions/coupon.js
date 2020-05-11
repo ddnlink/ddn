@@ -6,7 +6,7 @@ import constants from '../constants';
 import options from '../options';
 import slots from '../time/slots';
 
-function createIssuerAuditorBuy(received_address, amount, secret, secondSecret) {
+async function createIssuerAuditorBuy(received_address, amount, secret, secondSecret) {
     const keys = crypto.getKeys(secret);
     
     const fee = constants.net.fees.send;
@@ -26,17 +26,19 @@ function createIssuerAuditorBuy(received_address, amount, secret, secondSecret) 
         }        
     };
     
-    crypto.sign(transaction, keys);
+    await crypto.sign(transaction, keys);
     
     if (secondSecret) {
         const secondKeys = crypto.getKeys(secondSecret);
-        crypto.secondSign(transaction, secondKeys);
+        await crypto.secondSign(transaction, secondKeys);
     }
+
+	transaction.id = await crypto.getId(transaction);
 
     return transaction;
 }
 
-function createIssuerApply(orgName, org_id, orgOwner, orgOwnerPhone, secret, secondSecret) {
+async function createIssuerApply(orgName, org_id, orgOwner, orgOwnerPhone, secret, secondSecret) {
     const keys = crypto.getKeys(secret);
 
     const fee = constants.net.fees.send;
@@ -60,17 +62,19 @@ function createIssuerApply(orgName, org_id, orgOwner, orgOwnerPhone, secret, sec
         }
     };
 
-	crypto.sign(transaction, keys);
+	await crypto.sign(transaction, keys);
 	
 	if (secondSecret) {
 		const secondKeys = crypto.getKeys(secondSecret);
-		crypto.secondSign(transaction, secondKeys);
-	}
+		await crypto.secondSign(transaction, secondKeys);
+    }
+    
+	transaction.id = await crypto.getId(transaction);
 
     return transaction;
 }
 
-function createIssuerUpdate(orgName, org_id, orgOwner, orgOwnerPhone, secret, secondSecret) {
+async function createIssuerUpdate(orgName, org_id, orgOwner, orgOwnerPhone, secret, secondSecret) {
     const keys = crypto.getKeys(secret);
     
     const fee = constants.net.fees.send;
@@ -94,17 +98,19 @@ function createIssuerUpdate(orgName, org_id, orgOwner, orgOwnerPhone, secret, se
         }
     };
 
-    crypto.sign(transaction, keys);
+    await crypto.sign(transaction, keys);
     
     if (secondSecret) {
         const secondKeys = crypto.getKeys(secondSecret);
-        crypto.secondSign(transaction, secondKeys);
+        await crypto.secondSign(transaction, secondKeys);
     }
+
+	transaction.id = await crypto.getId(transaction);
 
     return transaction;
 }
 
-function createIssuerCheck(address, orgName, org_id, orgOwner, orgOwnerPhone, state, secret, secondSecret) {
+async function createIssuerCheck(address, orgName, org_id, orgOwner, orgOwnerPhone, state, secret, secondSecret) {
     const keys = crypto.getKeys(secret);
     
     const fee = constants.net.fees.send;
@@ -129,17 +135,18 @@ function createIssuerCheck(address, orgName, org_id, orgOwner, orgOwnerPhone, st
         }
     };
 
-    crypto.sign(transaction, keys);
+    await crypto.sign(transaction, keys);
     
     if (secondSecret) {
         const secondKeys = crypto.getKeys(secondSecret);
-        crypto.secondSign(transaction, secondKeys);
+        await crypto.secondSign(transaction, secondKeys);
     }
+	transaction.id = await crypto.getId(transaction);
 
     return transaction;
 }
 
-function createIssuerFreeze(address, orgName, org_id, orgOwner, orgOwnerPhone, secret, secondSecret) {
+async function createIssuerFreeze(address, orgName, org_id, orgOwner, orgOwnerPhone, secret, secondSecret) {
     const keys = crypto.getKeys(secret);
     
     const fee = constants.net.fees.send;
@@ -163,17 +170,18 @@ function createIssuerFreeze(address, orgName, org_id, orgOwner, orgOwnerPhone, s
         }
     };
 
-    crypto.sign(transaction, keys);
+    await crypto.sign(transaction, keys);
     
     if (secondSecret) {
         const secondKeys = crypto.getKeys(secondSecret);
-        crypto.secondSign(transaction, secondKeys);
+        await crypto.secondSign(transaction, secondKeys);
     }
+	transaction.id = await crypto.getId(transaction);
 
     return transaction;
 }
 
-function createIssuerUnfreeze(address, orgName, org_id, orgOwner, orgOwnerPhone, state, secret, secondSecret) {
+async function createIssuerUnfreeze(address, orgName, org_id, orgOwner, orgOwnerPhone, state, secret, secondSecret) {
     const keys = crypto.getKeys(secret);
     
     const fee = constants.net.fees.send;
@@ -198,17 +206,19 @@ function createIssuerUnfreeze(address, orgName, org_id, orgOwner, orgOwnerPhone,
         }
     };
 
-    crypto.sign(transaction, keys);
+    await crypto.sign(transaction, keys);
     
     if (secondSecret) {
         const secondKeys = crypto.getKeys(secondSecret);
-        crypto.secondSign(transaction, secondKeys);
+        await crypto.secondSign(transaction, secondKeys);
     }
+
+	transaction.id = await crypto.getId(transaction);
 
     return transaction;
 }
 
-function createIssueNew(goodsName, goodsSpecs, goodsUnit, goodsNum, unitPrice, 
+async function createIssueNew(goodsName, goodsSpecs, goodsUnit, goodsNum, unitPrice, 
     batchValue, issueNum, issueTime, expireTime, secret, secondSecret) {
     const keys = crypto.getKeys(secret);
     
@@ -238,17 +248,18 @@ function createIssueNew(goodsName, goodsSpecs, goodsUnit, goodsNum, unitPrice,
         }
     };
 
-    crypto.sign(transaction, keys);
+    await crypto.sign(transaction, keys);
     
     if (secondSecret) {
         const secondKeys = crypto.getKeys(secondSecret);
-        crypto.secondSign(transaction, secondKeys);
+        await crypto.secondSign(transaction, secondKeys);
     }
+	transaction.id = await crypto.getId(transaction);
 
     return transaction;
 }
 
-function createIssueClose(goodsName, goodsSpecs, goodsUnit, goodsNum, unitPrice, 
+async function createIssueClose(goodsName, goodsSpecs, goodsUnit, goodsNum, unitPrice, 
     batchValue, issueNum, issueTime, expireTime, secret, secondSecret) {
     const keys = crypto.getKeys(secret);
     
@@ -278,17 +289,18 @@ function createIssueClose(goodsName, goodsSpecs, goodsUnit, goodsNum, unitPrice,
         }
     };
 
-    crypto.sign(transaction, keys);
+    await crypto.sign(transaction, keys);
     
     if (secondSecret) {
         const secondKeys = crypto.getKeys(secondSecret);
-        crypto.secondSign(transaction, secondKeys);
+        await crypto.secondSign(transaction, secondKeys);
     }
+	transaction.id = await crypto.getId(transaction);
 
     return transaction;
 }
 
-function createIssueReopen(goodsName, goodsSpecs, goodsUnit, goodsNum, unitPrice, 
+async function createIssueReopen(goodsName, goodsSpecs, goodsUnit, goodsNum, unitPrice, 
     batchValue, issueNum, issueTime, expireTime, secret, secondSecret) {
     const keys = crypto.getKeys(secret);
     
@@ -318,17 +330,18 @@ function createIssueReopen(goodsName, goodsSpecs, goodsUnit, goodsNum, unitPrice
         }
     };
 
-    crypto.sign(transaction, keys);
+    await crypto.sign(transaction, keys);
     
     if (secondSecret) {
         const secondKeys = crypto.getKeys(secondSecret);
-        crypto.secondSign(transaction, secondKeys);
+        await crypto.secondSign(transaction, secondKeys);
     }
+	transaction.id = await crypto.getId(transaction);
 
     return transaction;
 }
 
-function createExchangeBuy(batchValue, code, received_address, 
+async function createExchangeBuy(batchValue, code, received_address, 
     price, secret, secondSecret) {
 
     const keys = crypto.getKeys(secret);
@@ -354,17 +367,18 @@ function createExchangeBuy(batchValue, code, received_address,
         }
     };
 
-    crypto.sign(transaction, keys);
+    await crypto.sign(transaction, keys);
     
     if (secondSecret) {
         const secondKeys = crypto.getKeys(secondSecret);
-        crypto.secondSign(transaction, secondKeys);
+        await crypto.secondSign(transaction, secondKeys);
     }
+	transaction.id = await crypto.getId(transaction);
 
     return transaction;
 }
 
-function createExchangePay(batchValue, code, received_address, 
+async function createExchangePay(batchValue, code, received_address, 
     secret, secondSecret) {
 
     const keys = crypto.getKeys(secret);
@@ -390,17 +404,18 @@ function createExchangePay(batchValue, code, received_address,
         }
     };
 
-    crypto.sign(transaction, keys);
+    await crypto.sign(transaction, keys);
     
     if (secondSecret) {
         const secondKeys = crypto.getKeys(secondSecret);
-        crypto.secondSign(transaction, secondKeys);
+        await crypto.secondSign(transaction, secondKeys);
     }
+	transaction.id = await crypto.getId(transaction);
 
     return transaction;
 }
 
-function createExchangeTransferConfirm(batchValue, code, received_address, 
+async function createExchangeTransferConfirm(batchValue, code, received_address, 
     price, related_trs_id, state, secret, secondSecret) {
 
     const keys = crypto.getKeys(secret);
@@ -428,17 +443,18 @@ function createExchangeTransferConfirm(batchValue, code, received_address,
         }
     };
 
-    crypto.sign(transaction, keys);
+    await crypto.sign(transaction, keys);
     
     if (secondSecret) {
         const secondKeys = crypto.getKeys(secondSecret);
-        crypto.secondSign(transaction, secondKeys);
+        await crypto.secondSign(transaction, secondKeys);
     }
+	transaction.id = await crypto.getId(transaction);
 
     return transaction;
 }
 
-function createExchangeTransferAsk(batchValue, code, received_address, 
+async function createExchangeTransferAsk(batchValue, code, received_address, 
     price, secret, secondSecret) {
 
     const keys = crypto.getKeys(secret);
@@ -464,12 +480,13 @@ function createExchangeTransferAsk(batchValue, code, received_address,
         }
     };
 
-    crypto.sign(transaction, keys);
+    await crypto.sign(transaction, keys);
     
     if (secondSecret) {
         const secondKeys = crypto.getKeys(secondSecret);
-        crypto.secondSign(transaction, secondKeys);
+        await crypto.secondSign(transaction, secondKeys);
     }
+	transaction.id = await crypto.getId(transaction);
 
     return transaction;
 }

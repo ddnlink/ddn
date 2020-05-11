@@ -800,7 +800,8 @@ class Transaction {
         }
         // Check timestamp
         if (this.runtime.slot.getSlotNumber(trs.timestamp) > this.runtime.slot.getSlotNumber()) {
-            this.logger.info('this.runtime.slot.getSlotNumber(trs.timestamp)=', {
+            this.logger.error('Invalid transaction timestamp:', {
+                o: trs.timestamp,
                 a: this.runtime.slot.getSlotNumber(trs.timestamp),
                 b: this.runtime.slot.getSlotNumber()
             })

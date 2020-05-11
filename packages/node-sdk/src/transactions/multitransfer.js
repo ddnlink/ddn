@@ -8,7 +8,7 @@ import options from '../options';
 
 const { bignum } = DdnUtils;
 
-function createMultiTransfer(outputs, secret, secondSecret, cb) {
+async function createMultiTransfer(outputs, secret, secondSecret, cb) {
 	const keys = crypto.getKeys(secret);
 
 	if (!outputs || outputs.length == 0) {
@@ -60,14 +60,14 @@ function createMultiTransfer(outputs, secret, secondSecret, cb) {
 		},
 	};
 
-	crypto.sign(transaction, keys)
+	await crypto.sign(transaction, keys)
 
 	if (secondSecret) {
 		const secondKeys = crypto.getKeys(secondSecret);
-		crypto.secondSign(transaction, secondKeys)
+		await crypto.secondSign(transaction, secondKeys)
 	}
-	// transaction.id = crypto.getId(transaction)
-	return transaction
+	transaction.id = crypto.getId(transaction);
+	return transaction;
 }
 
 export default {

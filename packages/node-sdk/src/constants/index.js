@@ -5,6 +5,9 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import ddn from './constants.ddn';
+import constants from './constants.ddn';
+import options from '../options';
 
-export default ddn;
+constants.net = constants[options.get('net')];
+
+export default constants;
