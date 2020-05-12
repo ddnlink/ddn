@@ -57,7 +57,7 @@ class Issuer extends Asset.Base {
        * 自定义资产Api
        */
     async attachApi(router) {
-        router.get('/issuers', async (req, res) => {
+        router.get('/', async (req, res) => {
             try {
                 const result = await this.getList(req, res);
                 res.json(result);
@@ -65,7 +65,7 @@ class Issuer extends Asset.Base {
                 res.json({ success: false, error: err.message || err.toString() });
             }
         });
-        router.get('/issuers/:name', async (req, res) => {
+        router.get('/:name', async (req, res) => {
             try {
                 const result = await this.getOneByName(req, res);
                 res.json(result);

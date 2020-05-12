@@ -1,5 +1,8 @@
+import Debug from 'debug';
 import node from '@ddn/node-sdk/lib/test';
 
+const debug = Debug('debug');
+const expect = node.expect;
 // async function createTransfer(address, amount, secret) {
 //     return node.ddn.dao.createTransfer(address, amount, secret)
 // }
@@ -15,7 +18,7 @@ describe("AOB Test", () => {
 
     test("注册资产 Should be ok", async (done) => {
         const obj = {
-            name: "DDD.NCR",
+            name: node.randomIssuerName,
             desc: "DDD新币种",
             maximum: "100000000",
             precision: 2,
@@ -45,10 +48,10 @@ describe("AOB Test", () => {
             .end((err, {
                 body
             }) => {
-                // console.log('res.body', res.body);
+                debug('body',body);
 
-                node.expect(err).to.be.not.ok;
-                node.expect(body).to.have.property("success").to.be.true;
+                expect(err).to.be.not.ok;
+                expect(body).to.have.property("success").to.be.true;
 
                 done();
             });

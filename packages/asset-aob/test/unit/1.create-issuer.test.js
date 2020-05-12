@@ -2,7 +2,8 @@
 import Debug from 'debug';
 import node from '@ddn/node-sdk/lib/test';
 
-const debug = Debug('aob');
+const debug = Debug('debug');
+const expect = node.expect;
 
 async function createTransfer(address, amount, secret) {
     return await node.ddn.transaction.createTransaction(address, amount, null, secret);
@@ -18,103 +19,90 @@ async function createPluginAsset(type, asset, secret, secondSecret) {
 
 describe("AOB Test", () => {
 
-    beforeAll(async () => {
+    beforeAll(async (done) => {
         node.ddn.init();
 
         const transaction = await createTransfer(node.Eaccount.address, "10000000000000", node.Gaccount.password);
 
-        await new Promise((resolve, reject) => {
-            node.peer.post("/transactions")
-                .set("Accept", "application/json")
-                .set("version", node.version)
-                .set("nethash", node.config.nethash)
-                .set("port", node.config.port)
-                .send({
-                    transaction
-                })
-                .expect("Content-Type", /json/)
-                .expect(200)
-                .end((err, { body }) => {
-                    // console.log('/transactions res.body', res.body);
+        node.peer.post("/transactions")
+            .set("Accept", "application/json")
+            .set("version", node.version)
+            .set("nethash", node.config.nethash)
+            .set("port", node.config.port)
+            .send({
+                transaction
+            })
+            .expect("Content-Type", /json/)
+            .expect(200)
+            .end((err, { body }) => {
+                // console.log('/transactions res.body', res.body);
 
-                    if (err) {
-                        return reject(err);
-                    }
+                expect(err).to.be.not.ok;
 
-                    node.expect(body).to.have.property("success").to.be.true;
+                expect(body).to.have.property("success").to.be.true;
 
-                    resolve();
-                });
-        });
+                done();
+            });
     });
+});
 
-    test("设置二级密码 Should be ok", async () => {
-        await node.onNewBlockAsync()
+test("设置二级密码 Should be ok", async (done) => {
+    await node.onNewBlockAsync()
 
-        const issuer = await createSignature(node.Eaccount.password, "DDD12345");
+    const issuer = await createSignature(node.Eaccount.password, "DDD12345");
 
-        await new Promise((resolve, reject) => {
-            node.peer.post("/transactions")
-                .set("Accept", "application/json")
-                .set("version", node.version)
-                .set("nethash", node.config.nethash)
-                .set("port", node.config.port)
-                .send({
-                    transaction: issuer
-                })
-                .expect("Content-Type", /json/)
-                .expect(200)
-                .end((err, { body }) => {
-                    if (err) {
-                        return reject(err);
-                    }
+    node.peer.post("/transactions")
+        .set("Accept", "application/json")
+        .set("version", node.version)
+        .set("nethash", node.config.nethash)
+        .set("port", node.config.port)
+        .send({
+            transaction: issuer
+        })
+        .expect("Content-Type", /json/)
+        .expect(200)
+        .end((err, { body }) => {
+            debug('设置二级密码', body);
 
-                    node.expect(body).to.have.property("success").to.be.true;
+            expect(err).to.be.not.ok;
+            expect(body).to.have.property("success").to.be.true;
 
-                    resolve();
-                });
+            done();
         });
-    })
+})
 
-    test("注册发行商 Should be ok", async () => {
-        await node.onNewBlockAsync();
+test("注册发行商 Should be ok", async (done) => {
+    await node.onNewBlockAsync();
 
-        const issuer = {
-            name: "DDD",
-            desc: "J G V",
-            issuer_id: node.Eaccount.address,
-            fee: '10000000000',
-        };
+    const issuer = {
+        name: node.randomIssuerName(),
+        desc: "J G V",
+        issuer_id: node.Eaccount.address,
+        fee: '10000000000',
+    };
 
-        const transaction = await createPluginAsset(60, issuer, node.Eaccount.password, "DDD12345");
+    const transaction = await createPluginAsset(60, issuer, node.Eaccount.password, "DDD12345");
 
-        // var transaction = node.ddn.aob.createIssuer("DDD", "J G V", node.Eaccount.password, "DDD12345");
+    // var transaction = node.ddn.aob.createIssuer("DDD", "J G V", node.Eaccount.password, "DDD12345");
 
-        // console.log('注册发行商创建的transaction', transaction)
+    // console.log('注册发行商创建的transaction', transaction)
 
-        await new Promise((resolve, reject) => {
-            node.peer.post("/transactions")
-                .set("Accept", "application/json")
-                .set("version", node.version)
-                .set("nethash", node.config.nethash)
-                .set("port", node.config.port)
-                .send({ transaction })
-                .expect("Content-Type", /json/)
-                .expect(200)
-                .end((err, { body }) => {
-                    debug(body);
+    node.peer.post("/transactions")
+        .set("Accept", "application/json")
+        .set("version", node.version)
+        .set("nethash", node.config.nethash)
+        .set("port", node.config.port)
+        .send({ transaction })
+        .expect("Content-Type", /json/)
+        .expect(200)
+        .end((err, { body }) => {
+            debug(body);
 
-                    if (err) {
-                        return reject(err);
-                    }
+            expect(err).to.be.not.ok;
+            expect(body).to.have.property("success").to.be.true;
 
-                    node.expect(body).to.have.property("success").to.be.true;
-
-                    resolve();
-                });
+            done();
         });
-    })
-
 });
 
 
@@ -138,7 +126,7 @@ describe("AOB Test", () => {
 //             .expect(200)
 //             .end(function (err, res) {
 //                 console.log(JSON.stringify(res.body));
-//                 node.expect(res.body).to.have.property('success').to.be.true;
+//                 expect(res.body).to.have.property('success').to.be.true;
 //                 account = res.body;
 //                 console.log("创建测试账户Test成功", account);
 
@@ -166,7 +154,7 @@ describe("AOB Test", () => {
 //             .expect(200)
 //             .end(function (err, res) {
 //                 console.log(JSON.stringify(res.body));
-//                 node.expect(res.body).to.have.property("success").to.be.true;
+//                 expect(res.body).to.have.property("success").to.be.true;
 
 //                 done();
 //             });
@@ -189,7 +177,7 @@ describe("AOB Test", () => {
     //             .expect(200)
     //             .end(function (err, res) {
     //                 console.log(JSON.stringify(res.body));
-    //                 node.expect(res.body).to.have.property("success").to.be.true;
+    //                 expect(res.body).to.have.property("success").to.be.true;
 
     //                 done();
     //             }
@@ -217,7 +205,7 @@ describe("AOB Test", () => {
     //             .expect(200)
     //             .end(function (err, res) {
     //                 console.log(JSON.stringify(res.body));
-    //                 node.expect(res.body).to.have.property("success").to.be.true;
+    //                 expect(res.body).to.have.property("success").to.be.true;
 
     //                 done();
     //             }
@@ -245,7 +233,7 @@ describe("AOB Test", () => {
     //             .expect(200)
     //             .end(function (err, res) {
     //                 console.log(JSON.stringify(res.body));
-    //                 node.expect(res.body).to.have.property("success").to.be.true;
+    //                 expect(res.body).to.have.property("success").to.be.true;
 
     //                 done();
     //             }
