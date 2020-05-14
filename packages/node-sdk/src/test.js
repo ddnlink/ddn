@@ -265,18 +265,15 @@ function randomName(...args) {
   // Convert arguments to Array
   const array = Array.prototype.slice.apply(args);
 
-  let max = 16;
+  let size = 16;
   if(array.length > 2) {
-    max = array.shift();
+    size = array.pop();
   }
 
   let name = array[0];
   const random = array[1];
 
-  let size = randomNumber(1, max);
-  if (name.length > 0) {
-    size = size - 1
-  }
+//   let size = randomNumber(1, max);
 
   for (let i = 0; i < size; i++){
     name += random.charAt(Math.floor(Math.random() * random.length));

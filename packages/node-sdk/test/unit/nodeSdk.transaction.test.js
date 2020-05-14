@@ -1,6 +1,6 @@
 // import DdnCrypto from "@ddn/crypto";
-import ddn from "../lib";
-import node from "../lib/test";
+import ddn from "../../lib";
+import node from "../../lib/test";
 import Debug from "debug";
 
 const debug = Debug("debug");

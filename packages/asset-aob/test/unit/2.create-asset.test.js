@@ -3,22 +3,15 @@ import node from '@ddn/node-sdk/lib/test';
 
 const debug = Debug('debug');
 const expect = node.expect;
-// async function createTransfer(address, amount, secret) {
-//     return node.ddn.dao.createTransfer(address, amount, secret)
-// }
 
 async function createPluginAsset(type, asset, secret, secondSecret) {
     return await node.ddn.assetPlugin.createPluginAsset(type, asset, secret, secondSecret)
 }
 
 describe("AOB Test", () => {
-
-    // 加载插件
-    // node.ddn.init();
-
     test("注册资产 Should be ok", async (done) => {
         const obj = {
-            name: node.randomIssuerName,
+            name: node.randomIssuerName('DDN.', 3).toUpperCase(),
             desc: "DDD新币种",
             maximum: "100000000",
             precision: 2,
@@ -33,7 +26,7 @@ describe("AOB Test", () => {
 
         // var transaction = node.ddn.aob.createAsset("DDD.NCR", "DDD新币种", "100000000", 2, '', 0, 0, 0, node.Eaccount.password, "DDD12345");
 
-        // console.log('transaction:', transaction)
+        debug('transaction:', transaction)
 
         node.peer.post("/transactions")
             .set("Accept", "application/json")
@@ -48,14 +41,12 @@ describe("AOB Test", () => {
             .end((err, {
                 body
             }) => {
-                debug('body',body);
+                debug('body', body);
 
                 expect(err).to.be.not.ok;
                 expect(body).to.have.property("success").to.be.true;
 
                 done();
             });
-
     })
-
 });

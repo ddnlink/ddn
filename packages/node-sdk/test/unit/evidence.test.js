@@ -2,8 +2,8 @@
 import Debug from "debug";
 import DdnUtils from '@ddn/utils';
 
-import ddn from "../";
-import node from "../lib/test";
+import ddn from "../../lib";
+import node from "../../lib/test";
 // const Buffer = Buffer.Buffer;
 const debug = Debug('evidence');
 
