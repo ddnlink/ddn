@@ -1,4 +1,8 @@
+import Debug from 'debug';
 import node from '@ddn/node-sdk/lib/test';
+
+const debug = Debug('debug');
+const expect = node.expect;
 
 async function createPluginAsset(type, asset, secret, secondSecret) {
     return await node.ddn.assetPlugin.createPluginAsset(type, asset, secret, secondSecret)
@@ -32,11 +36,11 @@ describe("AOB Test", () => {
             .end((err, {
                 body
             }) => {
-                // console.log(res.body);
+                debug(body);
 
-                node.expect(err).to.be.not.ok;
+                expect(err).to.be.not.ok;
 
-                node.expect(body).to.have.property("success").to.be.true;
+                expect(body).to.have.property("success").to.be.true;
 
                 done();
             });

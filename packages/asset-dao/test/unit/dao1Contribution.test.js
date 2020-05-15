@@ -15,60 +15,51 @@ describe('Contributions Test', () => {
 
     let orgId = "";
 
-    beforeAll(async () => {
-        node.ddn.init();
+    beforeAll(async (done) => {
 
         const transaction = await createTransfer(node.Daccount.address, 10000000000, node.Gaccount.password);
-        await new Promise((resolve, reject) => {
-            node.peer.post("/transactions")
-                .set("Accept", "application/json")
-                .set("version", node.version)
-                .set("nethash", node.config.nethash)
-                .set("port", node.config.port)
-                .send({
-                    transaction
-                })
-                .expect("Content-Type", /json/)
-                .expect(200)
-                .end((err, {body}) => {
-                    debug(JSON.stringify(body))
-                    node.expect(body).to.have.property("success").to.be.true;
-
-                    if (err) {
-                        reject(err);
-                    } else {
-                        resolve();
-                    }
-                });
-        });
+        node.peer.post("/transactions")
+            .set("Accept", "application/json")
+            .set("version", node.version)
+            .set("nethash", node.config.nethash)
+            .set("port", node.config.port)
+            .send({
+                transaction
+            })
+            .expect("Content-Type", /json/)
+            .expect(200)
+            .end((err, {
+                body
+            }) => {
+                debug(JSON.stringify(body))
+                node.expect(err).to.be.not.ok;
+                node.expect(body).to.have.property("success").to.be.true;
+                done();
+            });
 
         const getOrgIdUrl = `/dao/orgs/address/${node.Gaccount.address}`;
-        await new Promise((resolve, reject) => {
-            node.api.get(getOrgIdUrl)
-                .set("Accept", "application/json")
-                .set("version", node.version)
-                .set("nethash", node.config.nethash)
-                .set("port", node.config.port)
-                .expect(200)
-                .end((err, {body}) => {
-                    debug(JSON.stringify(body));
+        node.api.get(getOrgIdUrl)
+            .set("Accept", "application/json")
+            .set("version", node.version)
+            .set("nethash", node.config.nethash)
+            .set("port", node.config.port)
+            .expect(200)
+            .end((err, {
+                body
+            }) => {
+                debug(JSON.stringify(body));
+                node.expect(err).to.be.not.ok;
+                node.expect(body).to.have.property("success").to.be.true;
 
-                    node.expect(body).to.have.property("success").to.be.true;
+                if (body.success) {
+                    orgId = body.data.org.org_id;
+                }
 
-                    if (err) {
-                        return reject(err);
-                    }
-
-                    if (body.success) {
-                        orgId = body.data.org.org_id;
-                    }
-
-                    resolve();
-                });
-        })
+                done();
+            });
     });
 
-    it("POST peers/transactions", async () => {
+    it("POST peers/transactions", async (done) => {
         await node.onNewBlockAsync();
 
         contribution = {
@@ -80,29 +71,26 @@ describe('Contributions Test', () => {
         }
 
         transaction = await node.ddn.assetPlugin.createPluginAsset(42, contribution, node.Daccount.password);
-        await new Promise((resolve, reject) => {
-            node.peer.post("/transactions")
-                .set("Accept", "application/json")
-                .set("version", node.version)
-                .set("nethash", node.config.nethash)
-                .set("port", node.config.port)
-                .send({
-                    transaction
-                })
-                .expect("Content-Type", /json/)
-                .expect(200)
-                .end((err, {body}) => {
-                    debug(JSON.stringify(body));
+        node.peer.post("/transactions")
+            .set("Accept", "application/json")
+            .set("version", node.version)
+            .set("nethash", node.config.nethash)
+            .set("port", node.config.port)
+            .send({
+                transaction
+            })
+            .expect("Content-Type", /json/)
+            .expect(200)
+            .end((err, {
+                body
+            }) => {
+                debug(JSON.stringify(body));
+                node.expect(err).to.be.not.ok;
 
-                    node.expect(body).to.have.property("success").to.be.true;
+                node.expect(body).to.have.property("success").to.be.true;
 
-                    if (err) {
-                        return reject(err);
-                    }
-
-                    resolve();
-                });
-        })
+                done();
+            });
     });
 
     it("PUT /api/dao/contributions/:orgId", (done) => {
@@ -124,8 +112,11 @@ describe('Contributions Test', () => {
                 .send(contribution)
                 .expect("Content-Type", /json/)
                 .expect(200)
-                .end((err, {body}) => {
+                .end((err, {
+                    body
+                }) => {
                     debug(JSON.stringify(body));
+                    node.expect(err).to.be.not.ok;
 
                     node.expect(body).to.have.property("success").to.be.true;
                     done();
@@ -147,8 +138,11 @@ describe('Contributions Test', () => {
                 .set("port", node.config.port)
                 .expect("Content-Type", /json/)
                 .expect(200)
-                .end((err, {body}) => {
+                .end((err, {
+                    body
+                }) => {
                     debug(JSON.stringify(body));
+                    node.expect(err).to.be.not.ok;
 
                     node.expect(body).to.have.property("success").to.be.true;
                     done();
@@ -169,7 +163,9 @@ describe('Contributions Test', () => {
                 .set("port", node.config.port)
                 .expect("Content-Type", /json/)
                 .expect(200)
-                .end((err, {body}) => {
+                .end((err, {
+                    body
+                }) => {
                     debug(JSON.stringify(body));
 
                     node.expect(body).to.have.property("success").to.be.true;
@@ -194,8 +190,11 @@ describe('Contributions Test', () => {
                 .set("port", node.config.port)
                 .expect("Content-Type", /json/)
                 .expect(200)
-                .end((err, {body}) => {
+                .end((err, {
+                    body
+                }) => {
                     debug(JSON.stringify(body));
+                    node.expect(err).to.be.not.ok;
 
                     node.expect(body).to.have.property("success").to.be.true;
                     done();
@@ -217,8 +216,11 @@ describe('Contributions Test', () => {
                 .set("port", node.config.port)
                 .expect("Content-Type", /json/)
                 .expect(200)
-                .end((err, {body}) => {
+                .end((err, {
+                    body
+                }) => {
                     debug(JSON.stringify(body));
+                    node.expect(err).to.be.not.ok;
 
                     node.expect(body).to.have.property("success").to.be.true;
                     done();

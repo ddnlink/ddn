@@ -1,5 +1,5 @@
-import node from "../lib/test";
-import slots from "../lib/time/slots";
+import node from "../../lib/test";
+import slots from "../../lib/time/slots";
 import Debug from "debug";
 
 const debug = Debug("debug");

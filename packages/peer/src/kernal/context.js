@@ -14,8 +14,7 @@ import dbParams from '../db/db-params';
 import DdnSchema from '../schema/ddn-schema';
 import constants from '../constants';
 
-class Context
-{
+class Context {
     async init(options) {
         if (!options.configObject.publicIp) {
             options.configObject.publicIp = DdnUtils.system.getPublicIp();

@@ -99,7 +99,7 @@ function genOptions() {
 
 async function main() {
     global._require_runtime_ = m => {
-        if (typeof(global._require_native_) == "function") {
+        if (typeof (global._require_native_) == "function") {
             return global._require_native_(m);
         } else {
             return require(m).default || require(m); // 兼容 ESM
@@ -108,14 +108,12 @@ async function main() {
 
     let peer;
 
-    try
-    {
+    try {
         let options = genOptions();
         peer = new DdnPeer();
         await peer.run(options);
     }
-    catch (err)
-    {
+    catch (err) {
         console.error(DdnUtils.system.getErrorMsg(err));
 
         if (peer) {

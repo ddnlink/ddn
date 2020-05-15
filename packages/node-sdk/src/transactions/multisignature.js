@@ -12,7 +12,7 @@ function signTransaction(trs, secret) {
 	return signature;
 }
 
-function createMultisignature(keysgroup, lifetime, min, secret, secondSecret) {
+async function createMultisignature(keysgroup, lifetime, min, secret, secondSecret) {
 	const keys = crypto.getKeys(secret);
 
 	const transaction = {
@@ -32,14 +32,14 @@ function createMultisignature(keysgroup, lifetime, min, secret, secondSecret) {
 		}
 	};
 
-	crypto.sign(transaction, keys);
+	await crypto.sign(transaction, keys);
 
 	if (secondSecret) {
 		const secondKeys = crypto.getKeys(secondSecret);
-		crypto.secondSign(transaction, secondKeys);
+		await crypto.secondSign(transaction, secondKeys);
 	}
 
-	// transaction.id = crypto.getId(transaction);
+	transaction.id = await crypto.getId(transaction);
 	return transaction;
 }
 

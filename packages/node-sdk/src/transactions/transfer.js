@@ -6,7 +6,7 @@ import options from '../options';
 
 const nethash = options.get('nethash');
 
-function createInTransfer(dappId, currency, amount, secret, secondSecret) {
+async function createInTransfer(dappId, currency, amount, secret, secondSecret) {
 	const keys = crypto.getKeys(secret);
 
 	const transaction = {
@@ -31,18 +31,18 @@ function createInTransfer(dappId, currency, amount, secret, secondSecret) {
 		transaction.asset.in.amount = String(amount)
 	}
 
-	crypto.sign(transaction, keys);
+	await crypto.sign(transaction, keys);
 
 	if (secondSecret) {
 		const secondKeys = crypto.getKeys(secondSecret);
-		crypto.secondSign(transaction, secondKeys);
+		await crypto.secondSign(transaction, secondKeys);
 	}
 
-	// transaction.id = crypto.getId(transaction);
+	transaction.id = crypto.getId(transaction);
 	return transaction;
 }
 
-function createOutTransfer(recipientId, dappId, transactionId, currency, amount, secret, secondSecret) {
+async function createOutTransfer(recipientId, dappId, transactionId, currency, amount, secret, secondSecret) {
 	const keys = crypto.getKeys(secret);
 
 	const transaction = {
@@ -63,14 +63,14 @@ function createOutTransfer(recipientId, dappId, transactionId, currency, amount,
 		}
 	};
 
-	crypto.sign(transaction, keys);
+	await crypto.sign(transaction, keys);
 
 	if (secondSecret) {
 		const secondKeys = crypto.getKeys(secondSecret);
-		crypto.secondSign(transaction, secondKeys);
+		await crypto.secondSign(transaction, secondKeys);
 	}
 
-	// transaction.id = crypto.getId(transaction);
+	transaction.id = crypto.getId(transaction);
 	return transaction;
 }
 

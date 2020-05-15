@@ -32,6 +32,8 @@ beforeAll(done => {
         .expect("Content-Type", /json/)
         .expect(200)
         .end((err, { body }) => {
+            node.expect(err).be.not.ok;
+
             // debug(JSON.stringify(res.body));
             debug(`Opening Account 1 with password: ${Account1.password}`);
             node.expect(body).to.have.property("success").to.be.true;
@@ -58,6 +60,8 @@ beforeAll(done => {
         .expect("Content-Type", /json/)
         .expect(200)
         .end((err, { body }) => {
+            node.expect(err).be.not.ok;
+
             // debug("register second password");
             debug(`Opening Account 2 with password: ${Account2.password}`);
             node.expect(body).to.have.property("success").to.be.true;
@@ -84,6 +88,8 @@ beforeAll(done => {
         .expect("Content-Type", /json/)
         .expect(200)
         .end((err, { body }) => {
+            node.expect(err).be.not.ok;
+
             // debug(JSON.stringify(res.body));
             debug(`Opening Account 3 with password: ${Account3.password}`);
             node.expect(body).to.have.property("success").to.be.true;
@@ -110,6 +116,8 @@ beforeAll(done => {
         .expect("Content-Type", /json/)
         .expect(200)
         .end((err, { body }) => {
+            node.expect(err).be.not.ok;
+
             // debug(JSON.stringify(res.body));
             debug(`Opening Account 4 with password: ${Account4.password}`);
             node.expect(body).to.have.property("success").to.be.true;
@@ -136,6 +144,8 @@ beforeAll(done => {
         .expect("Content-Type", /json/)
         .expect(200)
         .end((err, { body }) => {
+            node.expect(err).be.not.ok;
+
             // debug(JSON.stringify(res.body));
             debug(`Opening Account 5 with password: ${Account5.password}`);
             node.expect(body).to.have.property("success").to.be.true;
@@ -166,6 +176,8 @@ beforeAll(done => {
             .expect("Content-Type", /json/)
             .expect(200)
             .end((err, { body }) => {
+                node.expect(err).be.not.ok;
+
                 // debug(JSON.stringify(res.body));
                 node.expect(body).to.have.property("success").to.be.true;
                 if (body.success == true && body.transactionId != null) {
@@ -195,6 +207,8 @@ beforeAll(done => {
             .expect("Content-Type", /json/)
             .expect(200)
             .end((err, { body }) => {
+                node.expect(err).be.not.ok;
+
                 node.expect(body).to.have.property("success").to.be.true;
                 if (body.success == true && body.transactionId != null) {
                     Account2.transactions.push(transactionCount);
@@ -230,6 +244,8 @@ beforeAll(done => {
     // Wait for new block to ensure all data has been received
     node.onNewBlock(err => {
         // Add 2nd password for Account 2
+        node.expect(err).be.not.ok;
+
         node.api.put("/signatures")
             .set("Accept", "application/json")
             .send({
@@ -239,6 +255,8 @@ beforeAll(done => {
             .expect("Content-Type", /json/)
             .expect(200)
             .end((err, { body }) => {
+                node.expect(err).be.not.ok;
+
                 node.expect(body).to.have.property("success").to.be.true;
                 node.expect(body).to.have.property("transaction").that.is.an("object");
                 done();
@@ -270,6 +288,8 @@ describe("PUT /dapps", () => {
             .expect(200)
             .end((err, { body }) => {
                 debug('PUT /dapps 01', body);
+                node.expect(err).be.not.ok;
+
                 node.expect(body).to.have.property("success").to.be.false;
                 node.expect(body).to.have.property("error");
                 done();
@@ -292,6 +312,8 @@ describe("PUT /dapps", () => {
             .expect("Content-Type", /json/)
             .expect(200)
             .end((err, { body }) => {
+                node.expect(err).be.not.ok;
+
                 debug('PUT /dapps 02', JSON.stringify(body));
                 node.expect(body).to.have.property("success").to.be.false;
                 node.expect(body).to.have.property("error");
@@ -314,6 +336,8 @@ describe("PUT /dapps", () => {
             .expect("Content-Type", /json/)
             .expect(200)
             .end((err, { body }) => {
+                node.expect(err).be.not.ok;
+
                 debug('PUT /dapps 03', JSON.stringify(body));
                 node.expect(body).to.have.property("success").to.be.false;
                 node.expect(body).to.have.property("error");
@@ -336,6 +360,8 @@ describe("PUT /dapps", () => {
             .expect("Content-Type", /json/)
             .expect(200)
             .end((err, { body }) => {
+                node.expect(err).be.not.ok;
+
                 debug('PUT /dapps 04', JSON.stringify(body));
                 node.expect(body).to.have.property("success").to.be.false;
                 node.expect(body).to.have.property("error");
@@ -359,6 +385,8 @@ describe("PUT /dapps", () => {
             .expect("Content-Type", /json/)
             .expect(200)
             .end((err, { body }) => {
+                node.expect(err).be.not.ok;
+
                 debug('PUT /dapps 05', JSON.stringify(body));
                 node.expect(body).to.have.property("success").to.be.false;
                 node.expect(body).to.have.property("error");
@@ -472,6 +500,8 @@ describe("PUT /dapps", () => {
             .expect("Content-Type", /json/)
             .expect(200)
             .end((err, { body }) => {
+                node.expect(err).be.not.ok;
+
                 debug('PUT /dapps 10', JSON.stringify(body));
                 node.expect(body).to.have.property("success").to.be.false;
                 done();
@@ -497,6 +527,8 @@ describe("PUT /dapps", () => {
             .expect("Content-Type", /json/)
             .expect(200)
             .end((err, { body }) => {
+                node.expect(err).be.not.ok;
+
                 debug('PUT /dapps 11', JSON.stringify(body));
                 node.expect(body).to.have.property("success").to.be.false;
                 done();
@@ -542,6 +574,8 @@ describe("PUT /dapps", () => {
 
     it("Using existing dapp name. Should fail", done => {
         node.onNewBlock(err => {
+            node.expect(err).be.not.ok;
+
             node.api.put("/dapps")
                 .set("Accept", "application/json")
                 .send({
@@ -557,6 +591,8 @@ describe("PUT /dapps", () => {
                 .expect("Content-Type", /json/)
                 .expect(200)
                 .end((err, { body }) => {
+                    node.expect(err).be.not.ok;
+
                     debug('PUT /dapps 13', body);
                     node.expect(body).to.have.property("success").to.be.false;
                     done();
@@ -566,6 +602,8 @@ describe("PUT /dapps", () => {
 
     it("Using existing dapp link. Should fail", done => {
         node.onNewBlock(err => {
+            node.expect(err).be.not.ok;
+
             node.api.put("/dapps")
                 .set("Accept", "application/json")
                 .send({
@@ -581,12 +619,14 @@ describe("PUT /dapps", () => {
                 .expect("Content-Type", /json/)
                 .expect(200)
                 .end((err, { body }) => {
+                    node.expect(err).be.not.ok;
+
                     debug('PUT /dapps 14', JSON.stringify(body));
                     node.expect(body).to.have.property("success").to.be.false;
                     node.expect(body).to.have.property("error");
                     done();
                 });
-                done();
+            done();
         });
     });
 });

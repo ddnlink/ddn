@@ -30,7 +30,7 @@ function isOrgId(dao_id) {
   }
 }
 
-function createOrg(org, secret, second_secret) {
+async function createOrg(org, secret, second_secret) {
   const keys = crypto.getKeys(secret);
 
   const sender = crypto.generateAddress(keys.publicKey);
@@ -78,25 +78,24 @@ function createOrg(org, secret, second_secret) {
     fee: bignum.multiply(feeBase, 100000000).toString(),   //bignum update feeBase * 100000000,
     recipientId: null,
     senderPublicKey: keys.publicKey,
-    senderPublicKey: keys.publicKey,
     timestamp: slots.getTime() - options.get('clientDriftSeconds'),
     asset: {
       org
     }
   };
 
-  crypto.sign(transaction, keys);
+  await crypto.sign(transaction, keys);
 
   if (second_secret) {
     const secondKeys = crypto.getKeys(second_secret);
-    crypto.secondSign(transaction, secondKeys);
+    await crypto.secondSign(transaction, secondKeys);
   }
 
-  // transaction.id = crypto.getId(transaction);
+  transaction.id = crypto.getId(transaction);
   return transaction;
 }
 
-function createTransfer(address, amount, secret, second_secret) {
+async function createTransfer(address, amount, secret, second_secret) {
   const keys = crypto.getKeys(secret);
   const fee = constants.net.fees.org;
   const transaction = {
@@ -106,21 +105,21 @@ function createTransfer(address, amount, secret, second_secret) {
     fee: `${fee}`,
     recipientId: address,
     senderPublicKey: keys.publicKey,
-    senderPublicKey: keys.publicKey,
     timestamp: slots.getTime() - options.get('clientDriftSeconds')
   };
+  transaction.id = crypto.getId(transaction);
 
-  crypto.sign(transaction, keys);
+  await crypto.sign(transaction, keys);
 
   if (second_secret) {
     const secondKeys = crypto.getKeys(second_secret);
-    crypto.secondSign(transaction, secondKeys);
+    await crypto.secondSign(transaction, secondKeys);
   }
 
   return transaction;
 }
 
-function createConfirmation(trsAmount, confirmation, secret, second_secret) {
+async function createConfirmation(trsAmount, confirmation, secret, second_secret) {
   const keys = crypto.getKeys(secret);
 
   if (typeof (confirmation) !== 'object') {
@@ -165,21 +164,20 @@ function createConfirmation(trsAmount, confirmation, secret, second_secret) {
     fee: `${fee}`,
     recipientId,
     senderPublicKey: keys.publicKey,
-    senderPublicKey: keys.publicKey,
     timestamp: slots.getTime() - options.get('clientDriftSeconds'),
     asset: {
       daoConfirmation: confirmation
     }
   };
 
-  crypto.sign(transaction, keys);
+  await crypto.sign(transaction, keys);
 
   if (second_secret) {
     const secondKeys = crypto.getKeys(second_secret);
-    crypto.secondSign(transaction, secondKeys);
+    await crypto.secondSign(transaction, secondKeys);
   }
 
-  // transaction.id = crypto.getId(transaction);
+  transaction.id = crypto.getId(transaction);
   return transaction;
 }
 
@@ -189,7 +187,7 @@ function createConfirmation(trsAmount, confirmation, secret, second_secret) {
  * @param {*} secret 
  * @param {*} second_secret 
  */
-function createContribution(contribution, secret, second_secret) {
+async function createContribution(contribution, secret, second_secret) {
   const keys = crypto.getKeys(secret);
 
   if (typeof (contribution) !== 'object') {
@@ -229,14 +227,14 @@ function createContribution(contribution, secret, second_secret) {
     }
   };
 
-  crypto.sign(transaction, keys);
+  await crypto.sign(transaction, keys);
 
   if (second_secret) {
     const secondKeys = crypto.getKeys(second_secret);
-    crypto.secondSign(transaction, secondKeys);
+    await crypto.secondSign(transaction, secondKeys);
   }
 
-  // transaction.id = crypto.getId(transaction);
+  transaction.id = crypto.getId(transaction);
   return transaction;
 }
 

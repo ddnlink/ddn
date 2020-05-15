@@ -241,30 +241,39 @@ function randomUsername() {
   return randomName('', 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@$&_.');
 }
 
-function randomIssuerName() {
-  return randomName('', 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz');
+function randomIssuerName(prefix, max) {
+  if (!prefix) {
+    prefix = ''; // 不能超过 12?
+  }
+
+  if (!max) {
+    max = 10; // 不能超过 12?
+  }
+  
+  return randomName(prefix, 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz', max); 
 }
 
 function randomCapitalUsername() {
   return randomName(constants.tokenPrefix, 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@$&_.');
 }
 
+/**
+ * 产生随机字符串
+ * @param  {...any} args 常用参数为 randomName('D', 'abc...', 5)
+ */
 function randomName(...args) {
   // Convert arguments to Array
   const array = Array.prototype.slice.apply(args);
 
-  let max = 16;
+  let size = 16;
   if(array.length > 2) {
-    max = array.shift();
+    size = array.pop();
   }
 
   let name = array[0];
   const random = array[1];
 
-  let size = randomNumber(1, max);
-  if (name.length > 0) {
-    size = size - 1
-  }
+//   let size = randomNumber(1, max);
 
   for (let i = 0; i < size; i++){
     name += random.charAt(Math.floor(Math.random() * random.length));

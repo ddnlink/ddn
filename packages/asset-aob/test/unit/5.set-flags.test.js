@@ -1,56 +1,54 @@
+import Debug from 'debug';
 import node from '@ddn/node-sdk/lib/test';
+
+const debug = Debug('debug');
+const expect = node.expect;
 
 async function createPluginAsset(type, asset, secret, secondSecret) {
     return await node.ddn.assetPlugin.createPluginAsset(type, asset, secret, secondSecret)
 }
 
-describe("AOB Test", () => {
-    // 加载插件
-    beforeAll((done) => {
-        node.ddn.init();
-        done();
-    })
+function randomCurrencName() {
+    return node.randomIssuerName("DDN.", 3);
+}
 
-    it("开启白名单 Should be ok", async () => {
+describe("AOB Test", () => {
+    it("开启白名单 Should be ok", async (done) => {
         const obj = {
-            currency: "DDD.NCR",
+            currency: randomCurrencName(),
             flag: 1,
             flag_type: 1
         };
         const transaction = await createPluginAsset(62, obj, node.Eaccount.password, "DDD12345");
-        await new Promise((resolve, reject) => {
-            node.peer.post("/transactions")
-                .set("Accept", "application/json")
-                .set("version", node.version)
-                .set("nethash", node.config.nethash)
-                .set("port", node.config.port)
-                .send({
-                    transaction
-                })
-                .expect("Content-Type", /json/)
-                .expect(200)
-                .end((err, {
-                    body
-                }) => {
-                    // console.log('res.body', res.body);
+        node.peer.post("/transactions")
+            .set("Accept", "application/json")
+            .set("version", node.version)
+            .set("nethash", node.config.nethash)
+            .set("port", node.config.port)
+            .send({
+                transaction
+            })
+            .expect("Content-Type", /json/)
+            .expect(200)
+            .end((err, {
+                body
+            }) => {
+                debug('body', body);
 
-                    if (err) {
-                        return reject(err);
-                    }
+                expect(err).be.not.ok;
 
-                    node.expect(body).to.have.property("success").to.be.true;
+                expect(body).to.have.property("success").to.be.true;
 
-                    resolve();
-                });
-        });
+                done();
+            });
     })
 
-    it("资产转账 Should be fail", async () => {
+    it("资产转账 Should be fail", async (done) => {
         await node.onNewBlockAsync();
 
         const obj = {
             recipientId: node.Daccount.address,
-            currency: "DDD.NCR",
+            currency: randomCurrencName(),
             aobAmount: "10",
             message: '测试转账',
             fee: '0',
@@ -58,77 +56,72 @@ describe("AOB Test", () => {
 
         const transaction = await createPluginAsset(65, obj, node.Eaccount.password, "DDD12345");
 
-        // var transaction = node.ddn.aob.createTransfer("DDD.NCR", "10", node.Daccount.address, "测试转账", node.Eaccount.password, "DDD12345");
-        // console.log('transaction', transaction)
+        // var transaction = node.ddn.aob.createTransfer(randomCurrencName(), "10", node.Daccount.address, "测试转账", node.Eaccount.password, "DDD12345");
+        debug('transaction', transaction)
 
-        await new Promise((resolve, reject) => {
-            node.peer.post("/transactions")
-                .set("Accept", "application/json")
-                .set("version", node.version)
-                .set("nethash", node.config.nethash)
-                .set("port", node.config.port)
-                .send({
-                    transaction
-                })
-                .expect("Content-Type", /json/)
-                .expect(200)
-                .end((err, {
-                    body
-                }) => {
-                    // console.log(res.body);
+        node.peer.post("/transactions")
+            .set("Accept", "application/json")
+            .set("version", node.version)
+            .set("nethash", node.config.nethash)
+            .set("port", node.config.port)
+            .send({
+                transaction
+            })
+            .expect("Content-Type", /json/)
+            .expect(200)
+            .end((err, {
+                body
+            }) => {
+                debug(body);
 
-                    if (err) {
-                        return reject(err);
-                    }
+                expect(err).to.be.not.ok;
 
-                    node.expect(body).to.have.property("success").to.be.false;
-                    node.expect(body).to.have.property("error").equal("Permission not allowed.");
+                expect(body).to.have.property("success").to.be.false;
+                expect(body).to.have.property("error").equal("Permission not allowed.");
 
-                    resolve();
-                });
-        });
+                done();
+            });
+
     })
 
-    it("关闭白名单 Should be ok", async () => {
+    it("关闭白名单 Should be ok", async (done) => {
         const obj = {
-            currency: "DDD.NCR",
+            currency: randomCurrencName(),
             flag: 2,
             flag_type: 1
         };
         const transaction = await createPluginAsset(62, obj, node.Eaccount.password, "DDD12345");
-        await new Promise((resolve, reject) => {
-            node.peer.post("/transactions")
-                .set("Accept", "application/json")
-                .set("version", node.version)
-                .set("nethash", node.config.nethash)
-                .set("port", node.config.port)
-                .send({
-                    transaction
-                })
-                .expect("Content-Type", /json/)
-                .expect(200)
-                .end((err, {
-                    body
-                }) => {
-                    // console.log('res.body', res.body);
 
-                    if (err) {
-                        return reject(err);
-                    }
+        node.peer.post("/transactions")
+            .set("Accept", "application/json")
+            .set("version", node.version)
+            .set("nethash", node.config.nethash)
+            .set("port", node.config.port)
+            .send({
+                transaction
+            })
+            .expect("Content-Type", /json/)
+            .expect(200)
+            .end((err, {
+                body
+            }) => {
+                debug('body', body);
 
-                    node.expect(body).to.have.property("success").to.be.true;
+                expect(err).be.not.ok;
 
-                    resolve();
-                });
-        });
+                expect(body).to.have.property("success").to.be.true;
+
+                done();
+            });
+
     })
 
-    it("资产转账 Should be ok", async () => {
+    it("资产转账 Should be ok", async (done) => {
         await node.onNewBlockAsync();
 
         const obj = {
             recipientId: node.Daccount.address,
-            currency: "DDD.NCR",
+            currency: randomCurrencName(),
             aobAmount: "10",
             message: '测试转账',
             fee: '0',
@@ -136,45 +129,43 @@ describe("AOB Test", () => {
 
         const transaction = await createPluginAsset(65, obj, node.Eaccount.password, "DDD12345");
 
-        // var transaction = node.ddn.aob.createTransfer("DDD.NCR", "10", node.Daccount.address, "测试转账", node.Eaccount.password, "DDD12345");
-        // console.log('transaction', transaction)
+        // var transaction = node.ddn.aob.createTransfer(randomCurrencName(), "10", node.Daccount.address, "测试转账", node.Eaccount.password, "DDD12345");
+        debug('transaction', transaction)
 
-        await new Promise((resolve, reject) => {
-            node.peer.post("/transactions")
-                .set("Accept", "application/json")
-                .set("version", node.version)
-                .set("nethash", node.config.nethash)
-                .set("port", node.config.port)
-                .send({
-                    transaction
-                })
-                .expect("Content-Type", /json/)
-                .expect(200)
-                .end((err, {
-                    body
-                }) => {
-                    // console.log(res.body);
 
-                    if (err) {
-                        return reject(err);
-                    }
+        node.peer.post("/transactions")
+            .set("Accept", "application/json")
+            .set("version", node.version)
+            .set("nethash", node.config.nethash)
+            .set("port", node.config.port)
+            .send({
+                transaction
+            })
+            .expect("Content-Type", /json/)
+            .expect(200)
+            .end((err, {
+                body
+            }) => {
+                debug(body);
 
-                    node.expect(body).to.have.property("success").to.be.true;
+                expect(err).be.not.ok;
 
-                    resolve();
-                });
-        });
+                expect(body).to.have.property("success").to.be.true;
+
+                done();
+            });
+
     })
 
     // it ("注销资产", async() => {
     //     var obj = {
-    //         currency: "DDD.NCR",
+    //         currency: randomCurrencName(),
     //         flag: 1,
     //         flag_type: 2
     //     }
     //     var transaction = await createPluginAsset(62, obj, node.Eaccount.password, "DDD12345");
 
-    //     await new Promise((resolve, reject) => {
+    //     
     //         node.peer.post("/transactions")
     //             .set("Accept", "application/json")
     //             .set("version", node.version)
@@ -184,15 +175,15 @@ describe("AOB Test", () => {
     //             .expect("Content-Type", /json/)
     //             .expect(200)
     //             .end(function (err, res) {
-    //     // console.log('res.body', res.body);
+    //     debug('body', body);
 
     //                 if (err) {
     //                     return reject(err);
     //                 }
 
-    //                 node.expect(res.body).to.have.property("success").to.be.true;
+    //                 expect(body).to.have.property("success").to.be.true;
 
-    //                 resolve();
+    //                 done();
     //             });
     //     });
     // })

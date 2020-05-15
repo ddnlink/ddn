@@ -1,7 +1,6 @@
 import DdnUtils from "@ddn/utils";
 
 import crypto from '../utils/crypto';
-// import crypto from "@ddn/crypto";
 import constants from "../constants";
 import slots from "../time/slots";
 import options from "../options";
@@ -37,20 +36,20 @@ async function createTransaction(
         asset
     };
 
-    crypto.sign(transaction, keys);
+    await crypto.sign(transaction, keys);
 
     if (secondSecret) {
         const secondKeys = crypto.getKeys(secondSecret);
-        crypto.secondSign(transaction, secondKeys);
+        await crypto.secondSign(transaction, secondKeys);
     }
 
     // FIXME: 这里提供的id与写入时的id不一致，记得修改
-    // transaction.id = await crypto.getId(transaction);
+    transaction.id = await crypto.getId(transaction);
     return transaction;
 }
 
 export default {
-    createIssuer(name, desc, secret, secondSecret) {
+    async createIssuer(name, desc, secret, secondSecret) {
         const asset = {
             aobIssuer: {
                 name,
@@ -58,7 +57,7 @@ export default {
             }
         };
         const fee = bignum.multiply(100, constants.fixedPoint);
-        return createTransaction(
+        const trs = await createTransaction(
             asset,
             fee,
             DdnUtils.assetTypes.AOB_ISSUER,
@@ -67,9 +66,10 @@ export default {
             secret,
             secondSecret
         );
+        return trs;
     },
 
-    createAsset(
+    async createAsset(
         name,
         desc,
         maximum,
@@ -95,7 +95,7 @@ export default {
         };
         // var fee = (500 + (Math.floor(bytes.length / 200) + 1) * 0.1) * constants.fixedPoint
         const fee = bignum.multiply(500, constants.fixedPoint);
-        return createTransaction(
+        return await createTransaction(
             asset,
             fee,
             DdnUtils.assetTypes.AOB_ASSET,
@@ -106,7 +106,7 @@ export default {
         );
     },
 
-    createFlags(currency, flagType, flag, secret, secondSecret) {
+    async createFlags(currency, flagType, flag, secret, secondSecret) {
         const asset = {
             aobFlags: {
                 currency,
@@ -115,7 +115,7 @@ export default {
             }
         };
         const fee = bignum.multiply(0.1, constants.fixedPoint);
-        return createTransaction(
+        return await createTransaction(
             asset,
             fee,
             DdnUtils.assetTypes.AOB_FLAGS,
@@ -126,7 +126,7 @@ export default {
         );
     },
 
-    createAcl(currency, operator, flag, list, secret, secondSecret) {
+    async createAcl(currency, operator, flag, list, secret, secondSecret) {
         const asset = {
             aobAcl: {
                 currency,
@@ -136,7 +136,7 @@ export default {
             }
         };
         const fee = bignum.multiply(0.2, constants.fixedPoint);
-        return createTransaction(
+        return await createTransaction(
             asset,
             fee,
             DdnUtils.assetTypes.AOB_ACL,
@@ -147,7 +147,7 @@ export default {
         );
     },
 
-    createIssue(currency, amount, secret, secondSecret) {
+    async createIssue(currency, amount, secret, secondSecret) {
         const asset = {
             aobIssue: {
                 currency,
@@ -155,7 +155,7 @@ export default {
             }
         };
         const fee = bignum.multiply(0.1, constants.fixedPoint);
-        return createTransaction(
+        return await createTransaction(
             asset,
             fee,
             DdnUtils.assetTypes.AOB_ISSUE,
@@ -166,7 +166,7 @@ export default {
         );
     },
 
-    createTransfer(
+    async createTransfer(
         currency,
         amount,
         recipientId,
@@ -181,7 +181,7 @@ export default {
             }
         };
         const fee = bignum.multiply(0.1, constants.fixedPoint);
-        return createTransaction(
+        return await createTransaction(
             asset,
             fee,
             DdnUtils.assetTypes.AOB_TRANSFER,

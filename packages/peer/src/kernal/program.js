@@ -11,10 +11,10 @@ import DdnUtils from '@ddn/utils';
 import extend from 'extend2';
 
 import Logger from '../logger';
-import Context from'./context';
+import Context from './context';
 import Block from './block/block';
-import Transaction from'./transaction/transaction';
-import Account from'./account/account';
+import Transaction from './transaction/transaction';
+import Account from './account/account';
 import Slot from './lib/slot';
 import Round from './lib/round';
 import Delegate from './lib/delegate';
@@ -27,8 +27,7 @@ import MultiSignature from './lib/multisignature';
 import DataQuery from './lib/data-query';
 import defaultConfig from '../config.default.js';
 
-class Program
-{
+class Program {
     async _init(options) {
 
         options.logger = new Logger({
@@ -78,14 +77,12 @@ class Program
      */
     _checkProcessState() {
         if (this._context.isDaemonMode) {
-            try
-            {
+            try {
                 var fd = fs.openSync(this._pid_file, 'wx');
                 fs.writeSync(fd, process.pid);
                 fs.closeSync(fd);
             }
-            catch (err)
-            {
+            catch (err) {
                 console.log('Failed: DDN server already started');
                 process.exit(1);
                 return;
@@ -103,14 +100,12 @@ class Program
      * 释放文件锁
      */
     _resetProcessState() {
-        try
-        {
+        try {
             if (fs.existsSync(this._pid_file)) {
                 fs.unlinkSync(this._pid_file);
             }
         }
-        catch (err)
-        {
+        catch (err) {
             console.error(DdnUtils.system.getErrorMsg(err));
         }
     }
@@ -157,7 +152,7 @@ class Program
     async run(options) {
         //如果是后台模式，禁止输出
         if (options.isDaemonMode) {
-            require('daemon')({cwd: process.cwd()});
+            require('daemon')({ cwd: process.cwd() });
         }
 
         // 提供系统默认配置文件
@@ -194,7 +189,7 @@ class Program
             process.emit('cleanup');
         });
 
-        if (typeof(gc) === 'function') {
+        if (typeof (gc) === 'function') {
             setInterval(() => {
                 // eslint-disable-next-line no-undef
                 gc();
@@ -226,12 +221,10 @@ class Program
         await this._context.runtime.block.handleGenesisBlock();
 
         //初始化账户以及余额
-        try
-        {
+        try {
             await this._context.runtime.account.initAccountsAndBalances();
         }
-        catch (err)
-        {
+        catch (err) {
             this._context.logger.error('Failed to load blockchain', DdnUtils.system.getErrorMsg(err));
             return process.exit(1);
         }
@@ -271,7 +264,7 @@ class Program
         await this.startForgeBlockTask();
     }
 
-    async _blockchainReady () {
+    async _blockchainReady() {
         if (!this._blockchainReadyFired &&
             this._context.runtime.state == DdnUtils.runtimeState.Ready) {
 
@@ -285,19 +278,17 @@ class Program
      * 获取一个有效节点（非本机自己）
      */
     async getValidPeer() {
-        try
-        {
+        try {
             const publicIp = this._context.config.publicIp || "127.0.0.1";
             const publicIpLongValue = ip.toLong(publicIp);
             const port = this._context.config.port;
-            const result = await this._context.runtime.peer.queryList(null, {state: {$gt: 0}, "$not": {ip: publicIpLongValue, port: port}}, 1);
+            const result = await this._context.runtime.peer.queryList(null, { state: { $gt: 0 }, "$not": { ip: publicIpLongValue, port: port } }, 1);
             if (result && result.length) {
                 return result[0];
             }
         }
-        catch (err)
-        {
-          this._context.logger.warn("Error: " + err);
+        catch (err) {
+            this._context.logger.warn("Error: " + err);
         }
         return null;
     }
@@ -309,7 +300,7 @@ class Program
         const validPeer = await this.getValidPeer();
         if (validPeer) {
             try {
-                await(async() => {
+                await (async () => {
                     if (this._peerSyncCounter == 0) {
                         await this._context.runtime.peer.syncPeersList();
                         this._peerSyncCounter = 3;
@@ -319,8 +310,7 @@ class Program
                     await this._context.runtime.peer.restoreBanState();
                 })();
             }
-            catch (err)
-            {
+            catch (err) {
                 this._context.logger.warn("The peer sync task error: " + err);
             }
 
@@ -333,18 +323,15 @@ class Program
     /**
      * 签名同步任务（轮询）
      */
-    async startSignaturesSyncTask()
-    {
+    async startSignaturesSyncTask() {
         const validPeer = await this.getValidPeer();
         if (validPeer) {
-            try
-            {
-                await (async() => {
+            try {
+                await (async () => {
                     await this._context.runtime.peer.syncSignatures();
                 })();
             }
-            catch (err)
-            {
+            catch (err) {
                 this._context.logger.warn("The signatures sync task error: " + err);
             }
 
@@ -357,13 +344,11 @@ class Program
     /**
      * 同步未确认交易（轮询）
      */
-    async startUnconfirmedTransactionSyncTask()
-    {
+    async startUnconfirmedTransactionSyncTask() {
         const validPeer = await this.getValidPeer();
         if (validPeer) {
-            try
-            {
-                await (async() => {
+            try {
+                await (async () => {
                     if (this._context.runtime.state == DdnUtils.runtimeState.Syncing) {
                         return;
                     }
@@ -371,8 +356,7 @@ class Program
                     await this._context.runtime.peer.syncUnconfirmedTransactions();
                 })();
             }
-            catch (err)
-            {
+            catch (err) {
                 this._context.logger.warn("The unconfirmed transaction sync task error: " + err);
             }
 
@@ -388,9 +372,8 @@ class Program
     async startBlockDataSyncTask() {
         const validPeer = await this.getValidPeer();
         if (validPeer) {
-            try
-            {
-                await (async() => {
+            try {
+                await (async () => {
                     if (this._context.runtime.state == DdnUtils.runtimeState.Syncing) {
                         return;
                     }
@@ -428,8 +411,7 @@ class Program
                     }
                 })();
             }
-            catch (err)
-            {
+            catch (err) {
                 this._context.logger.warn("The block sync task error: " + err);
             }
 
@@ -490,13 +472,11 @@ class Program
             await new Promise((resolve) => {
                 this._context.sequence.add(async (cb) => {
                     if (this._context.runtime.slot.getSlotNumber(forgeDelegateInfo.time) == this._context.runtime.slot.getSlotNumber() &&
-                        this._context.runtime.block.getLastBlock().timestamp < forgeDelegateInfo.time ) {
-                        try
-                        {
+                        this._context.runtime.block.getLastBlock().timestamp < forgeDelegateInfo.time) {
+                        try {
                             await this._context.runtime.block.generateBlock(forgeDelegateInfo.keypair, forgeDelegateInfo.time);
                         }
-                        catch (err)
-                        {
+                        catch (err) {
                             this._context.logger.error("铸造区块异常: " + DdnUtils.system.getErrorMsg(err));
                         }
                     }

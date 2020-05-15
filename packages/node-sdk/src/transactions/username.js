@@ -4,7 +4,7 @@ import DdnUtils from '@ddn/utils';
 import slots from "../time/slots";
 import options from '../options';
 
-function createUsername(name, secret, secondSecret) {
+async function createUsername(name, secret, secondSecret) {
     const keys = crypto.getKeys(secret);
 
     if (!name || name.length == 0) {
@@ -27,14 +27,14 @@ function createUsername(name, secret, secondSecret) {
         },
     };
 
-    crypto.sign(transaction, keys)
+    await crypto.sign(transaction, keys)
 
     if (secondSecret) {
         const secondKeys = crypto.getKeys(secondSecret);
-        crypto.secondSign(transaction, secondKeys)
+        await crypto.secondSign(transaction, secondKeys)
     }
-    // transaction.id = crypto.getId(transaction)
-    return transaction
+    transaction.id = crypto.getId(transaction)
+    return transaction;
 }
 
 export default {

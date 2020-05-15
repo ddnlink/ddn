@@ -1,5 +1,5 @@
-import ddn from "../";
-import node from "../lib/test";
+import ddn from "../../lib";
+import node from "../../lib/test";
 import Debug from "debug";
 
 const debug = Debug("debug");

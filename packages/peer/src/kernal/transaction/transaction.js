@@ -759,7 +759,7 @@ class Transaction {
             multisignatures.push(trs.senderPublicKey);
         }
 
-        //wxm TODO
+        // wxm TODO
         // 此处应该用this._assets.方法（trs.type） 来判断是否能够进入下面处理
         if (trs.signatures && trs.type !== DdnUtils.assetTypes.DAPP_OUT) { // 13 ?
             for (let d = 0; d < trs.signatures.length; d++) {
@@ -800,7 +800,8 @@ class Transaction {
         }
         // Check timestamp
         if (this.runtime.slot.getSlotNumber(trs.timestamp) > this.runtime.slot.getSlotNumber()) {
-            this.logger.info('this.runtime.slot.getSlotNumber(trs.timestamp)=', {
+            this.logger.error('Invalid transaction timestamp:', {
+                o: trs.timestamp,
                 a: this.runtime.slot.getSlotNumber(trs.timestamp),
                 b: this.runtime.slot.getSlotNumber()
             })
@@ -822,7 +823,6 @@ class Transaction {
         let bytes = await this.getBytes(trs, false, true);
         return await this.verifyBytes(bytes, publicKey, signature);
     }
-
 }
 
 export default Transaction;

@@ -1,8 +1,8 @@
-// not passed
+// passed
 import Debug from 'debug';
 import node from '@ddn/node-sdk/lib/test';
 
-const debug = Debug('aob');
+const debug = Debug('debug');
 
 async function createTransfer(address, amount, secret) {
     return await node.ddn.transaction.createTransaction(address, amount, null, secret);
@@ -18,103 +18,93 @@ async function createPluginAsset(type, asset, secret, secondSecret) {
 
 describe("AOB Test", () => {
 
-    beforeAll(async () => {
-        node.ddn.init();
-
+    beforeAll(async (done) => {
         const transaction = await createTransfer(node.Eaccount.address, "10000000000000", node.Gaccount.password);
 
-        await new Promise((resolve, reject) => {
-            node.peer.post("/transactions")
-                .set("Accept", "application/json")
-                .set("version", node.version)
-                .set("nethash", node.config.nethash)
-                .set("port", node.config.port)
-                .send({
-                    transaction
-                })
-                .expect("Content-Type", /json/)
-                .expect(200)
-                .end((err, { body }) => {
-                    // console.log('/transactions res.body', res.body);
+        node.peer.post("/transactions")
+            .set("Accept", "application/json")
+            .set("version", node.version)
+            .set("nethash", node.config.nethash)
+            .set("port", node.config.port)
+            .send({
+                transaction
+            })
+            .expect("Content-Type", /json/)
+            .expect(200)
+            .end((err, {
+                body
+            }) => {
+                debug('/transactions body', body);
+                node.expect(err).be.not.ok;
 
-                    if (err) {
-                        return reject(err);
-                    }
+                node.expect(body).to.have.property("success").to.be.true;
 
-                    node.expect(body).to.have.property("success").to.be.true;
-
-                    resolve();
-                });
-        });
+                done();
+            });
     });
 
-    test("设置二级密码 Should be ok", async () => {
+    test("设置二级密码 Should be ok", async (done) => {
         await node.onNewBlockAsync()
 
-        const issuer = await createSignature(node.Eaccount.password, "DDD12345");
+        const issuer = await createSignature(node.Eaccount.password, "DDN12345");
 
-        await new Promise((resolve, reject) => {
-            node.peer.post("/transactions")
-                .set("Accept", "application/json")
-                .set("version", node.version)
-                .set("nethash", node.config.nethash)
-                .set("port", node.config.port)
-                .send({
-                    transaction: issuer
-                })
-                .expect("Content-Type", /json/)
-                .expect(200)
-                .end((err, { body }) => {
-                    if (err) {
-                        return reject(err);
-                    }
+        node.peer.post("/transactions")
+            .set("Accept", "application/json")
+            .set("version", node.version)
+            .set("nethash", node.config.nethash)
+            .set("port", node.config.port)
+            .send({
+                transaction: issuer
+            })
+            .expect("Content-Type", /json/)
+            .expect(200)
+            .end((err, {
+                body
+            }) => {
+                node.expect(err).be.not.ok;
 
-                    node.expect(body).to.have.property("success").to.be.true;
-
-                    resolve();
-                });
-        });
+                node.expect(body).to.have.property("success").to.be.true;
+                done();
+            });
     })
 
-    test("注册发行商 Should be ok", async () => {
+    test("注册发行商 Should be ok", async (done) => {
         await node.onNewBlockAsync();
 
         const issuer = {
-            name: "DDD",
+            name: "DDN",
             desc: "J G V",
             issuer_id: node.Eaccount.address,
             fee: '10000000000',
         };
 
-        const transaction = await createPluginAsset(60, issuer, node.Eaccount.password, "DDD12345");
+        const transaction = await createPluginAsset(60, issuer, node.Eaccount.password, "DDN12345");
 
-        // var transaction = node.ddn.aob.createIssuer("DDD", "J G V", node.Eaccount.password, "DDD12345");
+        // var transaction = node.ddn.aob.createIssuer("DDN", "J G V", node.Eaccount.password, "DDN12345");
 
         // console.log('注册发行商创建的transaction', transaction)
 
-        await new Promise((resolve, reject) => {
-            node.peer.post("/transactions")
-                .set("Accept", "application/json")
-                .set("version", node.version)
-                .set("nethash", node.config.nethash)
-                .set("port", node.config.port)
-                .send({ transaction })
-                .expect("Content-Type", /json/)
-                .expect(200)
-                .end((err, { body }) => {
-                    debug(body);
+        node.peer.post("/transactions")
+            .set("Accept", "application/json")
+            .set("version", node.version)
+            .set("nethash", node.config.nethash)
+            .set("port", node.config.port)
+            .send({
+                transaction
+            })
+            .expect("Content-Type", /json/)
+            .expect(200)
+            .end((err, {
+                body
+            }) => {
+                debug(body);
 
-                    if (err) {
-                        return reject(err);
-                    }
+                node.expect(err).be.not.ok;
+                node.expect(body).to.have.property("success").to.be.true;
 
-                    node.expect(body).to.have.property("success").to.be.true;
-
-                    resolve();
-                });
-        });
+                done();
+            });
     })
-
 });
 
 
@@ -172,85 +162,85 @@ describe("AOB Test", () => {
 //             });
 //     });
 
-    // test("注册资产", (done) => {
-    //     node.onNewBlock(err => {
+// test("注册资产", (done) => {
+//     node.onNewBlock(err => {
 
-    //         var issuer = node.ddn.aob.createAsset("DDD.NCR", "DDD新币种", "100000000", 2, '', 0, 0, 0, account.secret, "DDD12345");
+//         var issuer = node.ddn.aob.createAsset("DDN.NCR", "DDN新币种", "100000000", 2, '', 0, 0, 0, account.secret, "DDN12345");
 
-    //         node.peer.post("/transactions")
-    //             .set("Accept", "application/json")
-    //             .set("version", node.version)
-    //             .set("nethash", node.config.nethash)
-    //             .set("port", node.config.port)
-    //             .send({
-    //                 transaction: issuer
-    //             })
-    //             .expect("Content-Type", /json/)
-    //             .expect(200)
-    //             .end(function (err, res) {
-    //                 console.log(JSON.stringify(res.body));
-    //                 node.expect(res.body).to.have.property("success").to.be.true;
+//         node.peer.post("/transactions")
+//             .set("Accept", "application/json")
+//             .set("version", node.version)
+//             .set("nethash", node.config.nethash)
+//             .set("port", node.config.port)
+//             .send({
+//                 transaction: issuer
+//             })
+//             .expect("Content-Type", /json/)
+//             .expect(200)
+//             .end(function (err, res) {
+//                 console.log(JSON.stringify(res.body));
+//                 node.expect(res.body).to.have.property("success").to.be.true;
 
-    //                 done();
-    //             }
-    //         );
+//                 done();
+//             }
+//         );
 
-    //     })
-    // })
-
-
-    // test("发行资产", (done) => {
-
-    //     node.onNewBlock(err => {
-
-    //         var issuer = node.ddn.aob.createIssue("DDD.NCR", "100000", account.secret, "DDD12345");
-
-    //         node.peer.post("/transactions")
-    //             .set("Accept", "application/json")
-    //             .set("version", node.version)
-    //             .set("nethash", node.config.nethash)
-    //             .set("port", node.config.port)
-    //             .send({
-    //                 transaction: issuer
-    //             })
-    //             .expect("Content-Type", /json/)
-    //             .expect(200)
-    //             .end(function (err, res) {
-    //                 console.log(JSON.stringify(res.body));
-    //                 node.expect(res.body).to.have.property("success").to.be.true;
-
-    //                 done();
-    //             }
-    //         );
-
-    //     })
-    // })
+//     })
+// })
 
 
-    // test("发行资产-测试转账", (done) => {
+// test("发行资产", (done) => {
 
-    //     node.onNewBlock(err => {
+//     node.onNewBlock(err => {
 
-    //         var issuer = node.ddn.aob.createTransfer("DDD.NCR", "10", node.Daccount.address, "测试转账", account.secret, "DDD12345");
+//         var issuer = node.ddn.aob.createIssue("DDN.NCR", "100000", account.secret, "DDN12345");
 
-    //         node.peer.post("/transactions")
-    //             .set("Accept", "application/json")
-    //             .set("version", node.version)
-    //             .set("nethash", node.config.nethash)
-    //             .set("port", node.config.port)
-    //             .send({
-    //                 transaction: issuer
-    //             })
-    //             .expect("Content-Type", /json/)
-    //             .expect(200)
-    //             .end(function (err, res) {
-    //                 console.log(JSON.stringify(res.body));
-    //                 node.expect(res.body).to.have.property("success").to.be.true;
+//         node.peer.post("/transactions")
+//             .set("Accept", "application/json")
+//             .set("version", node.version)
+//             .set("nethash", node.config.nethash)
+//             .set("port", node.config.port)
+//             .send({
+//                 transaction: issuer
+//             })
+//             .expect("Content-Type", /json/)
+//             .expect(200)
+//             .end(function (err, res) {
+//                 console.log(JSON.stringify(res.body));
+//                 node.expect(res.body).to.have.property("success").to.be.true;
 
-    //                 done();
-    //             }
-    //         );
-    //     })
-    // })
+//                 done();
+//             }
+//         );
+
+//     })
+// })
+
+
+// test("发行资产-测试转账", (done) => {
+
+//     node.onNewBlock(err => {
+
+//         var issuer = node.ddn.aob.createTransfer("DDN.NCR", "10", node.Daccount.address, "测试转账", account.secret, "DDN12345");
+
+//         node.peer.post("/transactions")
+//             .set("Accept", "application/json")
+//             .set("version", node.version)
+//             .set("nethash", node.config.nethash)
+//             .set("port", node.config.port)
+//             .send({
+//                 transaction: issuer
+//             })
+//             .expect("Content-Type", /json/)
+//             .expect(200)
+//             .end(function (err, res) {
+//                 console.log(JSON.stringify(res.body));
+//                 node.expect(res.body).to.have.property("success").to.be.true;
+
+//                 done();
+//             }
+//         );
+//     })
+// })
 
 // });

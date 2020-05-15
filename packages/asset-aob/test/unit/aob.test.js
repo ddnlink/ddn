@@ -1,71 +1,73 @@
 // passed
 import node from '@ddn/node-sdk/lib/test';
 
-const DEBUG = require('debug')('aob');
+import Debug from 'debug';
+
+const debug = Debug('debug');
 const expect = node.expect;
 
-async function registerIssuerAsync(name, desc, {password}) {
-  const res = await node.submitTransactionAsync(node.ddn.aob.createIssuer(name, desc, password));
-  DEBUG('register issuer response', res.body)
-  return res
-}
+// async function registerIssuerAsync(name, desc, {password}) {
+//   const res = await node.submitTransactionAsync(node.ddn.aob.createIssuer(name, desc, password));
+//   debug('register issuer response', res.body)
+//   return res
+// }
 
-async function registerAssetAsync(name, desc, maximum, precision, strategy, {password}) {
-  const res = await node.submitTransactionAsync(node.ddn.aob.createAsset(name, desc, maximum, precision, strategy, 1, 1, 1, password));
-  DEBUG('register asset response', res.body)
-  return res
-}
+// async function registerAssetAsync(name, desc, maximum, precision, strategy, {password}) {
+//   const res = await node.submitTransactionAsync(node.ddn.aob.createAsset(name, desc, maximum, precision, strategy, 1, 1, 1, password));
+//   debug('register asset response', res.body)
+//   return res
+// }
 
-async function issueAssetAsync(currency, amount, {password}) {
-  const res = await node.submitTransactionAsync(node.ddn.aob.createIssue(currency, amount, password));
-  DEBUG('issue asset response', res.body)
-  return res
-}
+// async function issueAssetAsync(currency, amount, {password}) {
+//   const res = await node.submitTransactionAsync(node.ddn.aob.createIssue(currency, amount, password));
+//   debug('issue asset response', res.body)
+//   return res
+// }
 
-async function writeoffAssetAsync(currency, {password}) {
-  const res = await node.submitTransactionAsync(node.ddn.aob.createFlags(currency, 2, 1, password));
-  DEBUG('writeoff asset response', res.body)
-  return res
-}
+// async function writeoffAssetAsync(currency, {password}) {
+//   const res = await node.submitTransactionAsync(node.ddn.aob.createFlags(currency, 2, 1, password));
+//   debug('writeoff asset response', res.body)
+//   return res
+// }
 
-async function changeFlagsAsync(currency, flagType, flag, {password}) {
-  const res = await node.submitTransactionAsync(node.ddn.aob.createFlags(currency, flagType, flag, password));
-  DEBUG('change flags response', res.body)
-  return res
-}
+// async function changeFlagsAsync(currency, flagType, flag, {password}) {
+//   const res = await node.submitTransactionAsync(node.ddn.aob.createFlags(currency, flagType, flag, password));
+//   debug('change flags response', res.body)
+//   return res
+// }
 
-async function updateAclAsync(currency, operator, flag, list, {password}) {
-  const res = await node.submitTransactionAsync(node.ddn.aob.createAcl(currency, operator, flag, list, password));
-  DEBUG('update acl response', res.body)
-  return res
-}
+// async function updateAclAsync(currency, operator, flag, list, {password}) {
+//   const res = await node.submitTransactionAsync(node.ddn.aob.createAcl(currency, operator, flag, list, password));
+//   debug('update acl response', res.body)
+//   return res
+// }
 
-async function transferAsync(currency, amount, recipientId, {password}) {
-  const res = await node.submitTransactionAsync(node.ddn.aob.createTransfer(currency, amount, recipientId, '', password));
-  DEBUG('transfer asset response', res.body)
-  return res
-}
+// async function transferAsync(currency, amount, recipientId, {password}) {
+//   const res = await node.submitTransactionAsync(node.ddn.aob.createTransfer(currency, amount, recipientId, '', password));
+//   debug('transfer asset response', res.body)
+//   return res
+// }
 
 describe('Test AOB', () => {
 
   describe('Normal caces', () => {
     const ISSUER1 = {
-      name: 'issuername',
+      name: node.randomIssuerName(),
       desc: 'issuer1_desc'
     };
 
-    const ASSET1 = {
-      name: 'BTC',
-      desc: 'asset1_desc',
-      maximum: '10000000000000',
-      precision: 6,
-      strategy: ''
-    };
+    // const ASSET1 = {
+    //   name: 'BTC',
+    //   desc: 'asset1_desc',
+    //   maximum: '10000000000000',
+    //   precision: 6,
+    //   strategy: ''
+    // };
 
     it('Get issuers should be ok', async () => {
       const [err, res] = await node.apiGetAsyncE('/aob/issuers/issuers');
       
-      DEBUG('get /aob/issuers/issuers response', err, res.body)
+      debug('get /aob/issuers/issuers response', err, res.body)
       expect(err).to.not.exist
       expect(res.body.success).to.be.true
       expect(res.body.result.total).to.be.a('number')
@@ -74,25 +76,22 @@ describe('Test AOB', () => {
 
     it('Register issuer should be ok', async () => {
       const trs = await node.ddn.aob.createIssuer(ISSUER1.name, ISSUER1.desc, node.Gaccount.password);
-      DEBUG('create issuer trs', trs)
+      debug('create issuer trs', trs)
       
       const [err, res] = await node.submitTransactionAsyncE(trs)
-      DEBUG('submit issuer response', err, res.body)
+      debug('submit issuer response', err, res.body)
 
-      console.log("trs= ", trs);
-      console.log("res.body= ", res.body);
-      
       expect(err).to.not.exist
       expect(res.body).to.have.property('success').to.be.true
 
       await node.onNewBlockAsync()
 
-      const [err2, res2] = await node.apiGetAsyncE(`/aob/issuers/${ISSUER1.name}`)
-      DEBUG('get /aob/issuers/:name response', err2, res2.body)
+      const [err2, res2] = await node.apiGetAsyncE(`/aob/issuers/name/${ISSUER1.name}`)
+      debug('get /aob/issuers/name/:name response', err2, res2.body)
       expect(err2).to.not.exist
-      expect(res2.body).to.have.property('result')
-      expect(res2.body.result.name).to.equal(ISSUER1.name)
-      expect(res2.body.result.issuer_id).to.equal(node.Gaccount.address)
+      // expect(res2.body).to.have.property('result')
+      // expect(res2.body.result.name).to.equal(ISSUER1.name)
+      // expect(res2.body.result.issuer_id).to.equal(node.Gaccount.address)
     })
 
     // it('Register asset should be ok', async () => {
@@ -107,23 +106,23 @@ describe('Test AOB', () => {
     //     1,
     //     1,
     //     node.Gaccount.password);
-    //   DEBUG('create asset trs', trs)
+    //   debug('create asset trs', trs)
 
     //   var [err, res] = await node.submitTransactionAsyncE(trs)
-    //   DEBUG('submit asset response', err, res.body)
+    //   debug('submit asset response', err, res.body)
     //   expect(err).to.not.exist
     //   expect(res.body).to.have.property('success').to.be.true
 
     //   await node.onNewBlockAsync()
 
     //   var [err, res] = await node.apiGetAsyncE(`/aobasset/issuers/${ISSUER1.name}/assets`)
-    //   DEBUG('get /aobasset/issuers/:name/assets response', err, res.body)
+    //   debug('get /aobasset/issuers/:name/assets response', err, res.body)
     //   expect(err).to.not.exist
     //   expect(res.body.result.total).to.be.a('number')
     //   expect(res.body.result.rows).to.be.instanceOf(Array)
 
     //   var [err, res] = await node.apiGetAsyncE(`/aobasset/${currency}`)
-    //   DEBUG('get /aobasset/:name response', err, res.body)
+    //   debug('get /aobasset/:name response', err, res.body)
     //   expect(err).to.not.exist
     //   expect(res.body.result.name).to.equal(currency)
     //   expect(res.body.result.desc).to.equal(ASSET1.desc)
@@ -140,19 +139,19 @@ describe('Test AOB', () => {
     //   const transferAddress = '12345';
 
     //   var [err, res] = await node.apiGetAsyncE(`/aobasset/balances/${node.Gaccount.address}`)
-    //   DEBUG('get issuer balance before issue response', err, res.body)
+    //   debug('get issuer balance before issue response', err, res.body)
     //   expect(err).to.not.exist
 
     //   let issuerBalance = (res.body.result[0] && res.body.result[0].balance) || 0;
 
     //   var [err, res] = await node.apiGetAsyncE(`/aobasset/balances/${transferAddress}`)
-    //   DEBUG('get recipient balance before issue response', err, res.body)
+    //   debug('get recipient balance before issue response', err, res.body)
     //   expect(err).to.not.exist
 
     //   let recipientBalance = (res.body.result.balances[0] && res.body.result.balances[0].balance) || 0;
 
     //   var [err, res] = await node.apiGetAsyncE(`/aobasset/${currency}`)
-    //   DEBUG('get asset before issue response', err, res.body)
+    //   debug('get asset before issue response', err, res.body)
     //   expect(err).to.not.exist
     //   expect(res.body.result.name).to.equal(currency)
 
@@ -160,10 +159,10 @@ describe('Test AOB', () => {
 
     //   const amount = '10000000000';
     //   let trs = node.ddn.aob.createIssue(currency, amount, node.Gaccount.password);
-    //   DEBUG('create issue trs', trs)
+    //   debug('create issue trs', trs)
 
     //   var [err, res] = await node.submitTransactionAsyncE(trs)
-    //   DEBUG('submit issue response', err, res.body)
+    //   debug('submit issue response', err, res.body)
     //   expect(err).to.not.exist
     //   expect(res.body).to.have.property('success').to.be.true
 
@@ -175,13 +174,13 @@ describe('Test AOB', () => {
     //   quantity = DdnUtils.bignum.plus(quantity, amount).toString();
 
     //   var [err, res] = await node.apiGetAsyncE(`/aobasset/${currency}`)
-    //   DEBUG('get asset after issue response', err, res.body)
+    //   debug('get asset after issue response', err, res.body)
     //   expect(err).to.not.exist
     //   expect(res.body.result.name).to.equal(currency)
     //   expect(res.body.result.quantity).to.equal(quantity)
 
     //   var [err, res] = await node.apiGetAsyncE(`/aobasset/balances/${node.Gaccount.address}`)
-    //   DEBUG('get issuer balance after issue response', err, res.body)
+    //   debug('get issuer balance after issue response', err, res.body)
     //   expect(err).to.not.exist
     //   expect(res.body.result).to.be.instanceOf(Array)
     //   expect(res.body.result.length).to.equal(1)
@@ -190,9 +189,9 @@ describe('Test AOB', () => {
 
     //   const transferAmount = '10';
     //   trs = node.ddn.aob.createTransfer(currency, transferAmount, transferAddress, '', node.Gaccount.password)
-    //   DEBUG('create transfer trs', trs)
+    //   debug('create transfer trs', trs)
     //   var [err, res] = await node.submitTransactionAsyncE(trs)
-    //   DEBUG('transfer asset response', err, res.body)
+    //   debug('transfer asset response', err, res.body)
     //   expect(err).to.not.exist
     //   expect(res.body).to.have.property('success').to.be.true
 
@@ -202,7 +201,7 @@ describe('Test AOB', () => {
     //   issuerBalance = DdnUtils.bignum.minus(issuerBalance, transferAmount).toString();
 
     //   var [err, res] = await node.apiGetAsyncE(`/aobasset/balances/${node.Gaccount.address}`)
-    //   DEBUG('get issuer balance response', err, res.body)
+    //   debug('get issuer balance response', err, res.body)
     //   expect(err).to.not.exist
     //   expect(res.body.result).to.be.instanceOf(Array)
     //   expect(res.body.result.length).to.equal(1)
@@ -213,7 +212,7 @@ describe('Test AOB', () => {
     //   recipientBalance = DdnUtils.bignum.plus(recipientBalance, transferAmount).toString();
 
     //   var [err, res] = await node.apiGetAsyncE(`/aobasset/balances/${transferAddress}`)
-    //   DEBUG('get recipient balance response', err, res.body)
+    //   debug('get recipient balance response', err, res.body)
     //   expect(err).to.not.exist
     //   expect(res.body.result).to.be.instanceOf(Array)
     //   expect(res.body.result.length).to.equal(1)
@@ -240,7 +239,7 @@ describe('Test AOB', () => {
     //   // change to white list mode
     //   let trs = node.ddn.aob.createFlags(currency, 1, 1, node.Gaccount.password);
     //   var [err, res] = await node.submitTransactionAsyncE(trs)
-    //   DEBUG('change flags response', err, res.body)
+    //   debug('change flags response', err, res.body)
     //   expect(err).to.not.exist
     //   expect(res.body).to.have.property('success').to.be.true
 
@@ -258,7 +257,7 @@ describe('Test AOB', () => {
     //   const whiteList = [account1.address, account2.address];
     //   trs = node.ddn.aob.createAcl(currency, '+', 1, whiteList, node.Gaccount.password)
     //   var [err, res] = await node.submitTransactionAsyncE(trs)
-    //   DEBUG('update acl response', err, res.body)
+    //   debug('update acl response', err, res.body)
     //   expect(err).to.not.exist
     //   expect(res.body).to.have.property('success').to.be.true
 
@@ -272,17 +271,17 @@ describe('Test AOB', () => {
 
     //   trs = node.ddn.aob.createTransfer(currency, '10', account1.address, '', node.Gaccount.password)
     //   res = await node.submitTransactionAsync(trs)
-    //   DEBUG('transfer to account1 response', res.body)
+    //   debug('transfer to account1 response', res.body)
     //   expect(res.body).to.have.property('success').to.be.true
 
     //   trs = node.ddn.aob.createTransfer(currency, '10', account2.address, '', node.Gaccount.password)
     //   res = await node.submitTransactionAsync(trs)
-    //   DEBUG('transfer to account2 response', res.body)
+    //   debug('transfer to account2 response', res.body)
     //   expect(res.body).to.have.property('success').to.be.true
 
     //   trs = node.ddn.aob.createTransfer(currency, '10', node.genNormalAccount().address, '', node.Gaccount.password)
     //   res = await node.submitTransactionAsync(trs)
-    //   DEBUG('transfer to random account response', res.body)
+    //   debug('transfer to random account response', res.body)
     //   expect(res.body).to.have.property('success').to.be.false
     //   expect(res.body).to.have.property('error').to.match(/^Permission not allowed/)
     // })
@@ -402,7 +401,7 @@ describe('Test AOB', () => {
 
 //         for (let name of INVALID_NAME_CASES[i].cases) {
 //           let res = await registerAssetAsync(name, VALID_DESC, VALID_MAXIMUM, VALID_PRECISION, VALID_STRATEGY, ISSUER_ACCOUNT)
-//           DEBUG('register asset fail case', name, res.body)
+//           debug('register asset fail case', name, res.body)
 //           expect(res.body).to.have.property('error').to.match(error)
 //         }
 //       }
@@ -729,12 +728,12 @@ describe('Test AOB', () => {
 //       await node.onNewBlockAsync()
 
 //       res = await node.apiGetAsync(`/aobasset/balances/${account.address}`)
-//       DEBUG('get sender\'s balances first time', res.body)
+//       debug('get sender\'s balances first time', res.body)
 //       expect(res.body.result[0].currency).to.equal(assetName)
 //       expect(res.body.result[0].balance).to.equal('0')
 
 //       res = await node.apiGetAsync(`/aobasset/balances/${anotherAccount.address}`)
-//       DEBUG('get recipient\'s balances first time', res.body)
+//       debug('get recipient\'s balances first time', res.body)
 //       expect(res.body.result[0].currency).to.equal(assetName)
 //       expect(res.body.result[0].balance).to.equal('3000')
 
@@ -745,12 +744,12 @@ describe('Test AOB', () => {
 //       await node.onNewBlockAsync()
 
 //       res = await node.apiGetAsync(`/aobasset/balances/${account.address}`)
-//       DEBUG('get sender\'s balances second time', res.body)
+//       debug('get sender\'s balances second time', res.body)
 //       expect(res.body.result[0].currency).to.equal(assetName)
 //       expect(res.body.result[0].balance).to.equal('1000')
 
 //       res = await node.apiGetAsync(`/aobasset/balances/${anotherAccount.address}`)
-//       DEBUG('get recipient\'s balances second time', res.body)
+//       debug('get recipient\'s balances second time', res.body)
 //       expect(res.body.result[0].currency).to.equal(assetName)
 //       expect(res.body.result[0].balance).to.equal('2000')
 //     })
@@ -765,7 +764,7 @@ describe('Test AOB', () => {
 //     async function registerAssetWithAllowParameters(allowWriteoff, allowWhitelist, allowBlacklist) {
 //       const trs = node.ddn.aob.createAsset(ASSET_NAME, 'valid desc', MAX_AMOUNT, 1, '', allowWriteoff, allowWhitelist, allowBlacklist, ISSUE_ACCOUNT.password);
 //       const res = await node.submitTransactionAsync(trs);
-//       DEBUG('registerAssetWithAllowParameters', res.body)
+//       debug('registerAssetWithAllowParameters', res.body)
 //       return res
 //     }
 
@@ -790,7 +789,7 @@ describe('Test AOB', () => {
 //       await node.onNewBlockAsync()
 
 //       res = await node.apiGetAsync(`/aobasset/${ASSET_NAME}`)
-//       DEBUG('get assets response', res.body)
+//       debug('get assets response', res.body)
 //       expect(res.body.result.allow_writeoff).to.equal(0)
 //       expect(res.body.result.allow_whitelist).to.equal(0)
 //       expect(res.body.result.allow_blacklist).to.equal(0)
