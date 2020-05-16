@@ -61,7 +61,7 @@ function getKeys(secret) {
     return keypair(secret);
 }
 
-// TODO: sign(keypair, data) -> sign(data, keypair)
+// TODO: sign(keypair, transaction) -> sign(transaction, keypair)
 async function sign(transaction, {privateKey}) {
     const hash = await getHash(transaction, true, true);
     // console.log('hash typeof', typeof hash);
@@ -72,9 +72,11 @@ async function sign(transaction, {privateKey}) {
     );
     if (!transaction.signature) {
         // eslint-disable-next-line require-atomic-updates
-        transaction.signature = bufToHex(signature);
+        // transaction.signature = bufToHex(signature);
+        transaction.signature = signature;
     } else {
-        return bufToHex(signature);
+        return signature;
+        // return bufToHex(signature);
     }
 }
 
@@ -82,12 +84,20 @@ async function secondSign(transaction, {privateKey}) {
     const hash = await getHash(transaction);
     const signature = nacl.sign.detached(hash, Buffer.from(privateKey, "hex"));
     // eslint-disable-next-line require-atomic-updates
-    transaction.sign_signature = Buffer.from(signature).toString("hex")    //wxm block database
+    // transaction.sign_signature = Buffer.from(signature).toString("hex")    //wxm block database
+    if (!transaction.sign_signature) {
+        // eslint-disable-next-line require-atomic-updates
+        transaction.sign_signature = signature;
+        // transaction.sign_signature = bufToHex(signature);
+    } else {
+        return signature;
+        // return bufToHex(signature);
+    }
 }
 
 // hex
-async function getId(data) {
-    const hash = await getHash(data);
+async function getId(transaction) {
+    const hash = await getHash(transaction);
     console.log('hash: ', hash);
     
     return hash.toString("hex");
@@ -138,7 +148,6 @@ function generateAddress(publicKey, tokenPrefix) {
 // note: tweetnacl 包的所有方法必须使用 Uint8Array 类型的参数，其他的 buffer 类型不能使用。
 async function getHash(trs, skipSignature, skipSecondSignature) {
     const bytes = await getBytes(trs, skipSignature, skipSecondSignature);
-    // return new Uint8Array(sha256.hash(bytes));
     return Buffer.from(sha256.hash(bytes));
 }
 
@@ -149,6 +158,7 @@ function bufToHex(data) {
 // 验证，计划重构： peer/src/kernal/transaction.js  2020.5.3
 function verifyBytes(bytes, signature, publicKey) {
     const hash = sha256Bytes(Buffer.from(bytes, 'hex'));
+    // const arrayHash = new Uint8Array(hash);
     const signatureBuffer = Buffer.from(signature, "hex");
     const publicKeyBuffer = Buffer.from(publicKey, "hex");
     const res = nacl.sign.detached.verify(hash, signatureBuffer, publicKeyBuffer);

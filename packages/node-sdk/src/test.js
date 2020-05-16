@@ -77,7 +77,7 @@ const Gaccount = {
   "address": "DCE3q83WTqk58Y3hU9GDStn7MmqWU9xHbK",
   "password": "enter boring shaft rent essence foil trick vibrant fabric quote indoor output",
   'publicKey': '2e6d978c5e6f1fbfc5a27abd964d9b6adc352daa81e31d9098a4f5ee3d7f885e',
-  'balance': 10000000000000000
+  'balance': '10000000000000000'
 };
 
 // Random DDN Amount
@@ -209,7 +209,7 @@ function addPeers(numOfPeers, cb) {
         'nethash': config.nethash,
         'os': os
       }
-    }, (err, {statusCode}, body) => {
+    }, (err, {statusCode, body}) => {
       if (err || statusCode != 200) {
         return next(err || 'Status code is not 200 (getHeight)');
       } else {
@@ -232,7 +232,6 @@ function randomNumber(min, max) {
 
 // Calculates the expected fee from a transaction
 function expectedFee(amount) {
-//bignum update   return parseInt(Fees.transactionFee);
     return Fees.transactionFee;
 }
 

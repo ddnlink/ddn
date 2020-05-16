@@ -9,6 +9,7 @@ import sha256 from "fast-sha256";
 import ed from 'ed25519';
 import extend from 'util-extend';
 import DdnUtils from '@ddn/utils';
+import DdnCrypto from '@ddn/crypto';
 import Assets from '../../assets';
 
 let _singleton;
@@ -94,8 +95,11 @@ class Transaction {
 
     // TODO: delete it
     async sign(keypair, trs) {
-        const hash = await this.getHash(trs);
-        return ed.Sign(hash, keypair).toString('hex');
+        // const hash = await this.getHash(trs);
+        // return ed.Sign(hash, keypair).toString('hex');
+        this.logger.debug('sign: ', trs, keypair);
+        const sign = await DdnCrypto.sign(trs, keypair);
+        return sign;
     }
 
     /**
@@ -197,8 +201,9 @@ class Transaction {
 
         const validateErrors = await this.ddnSchema.validateTransaction(trs);
         if (validateErrors) {
-            this.logger.error(`Failed to normalize transaction: ${validateErrors[0].schemaPath} ${validateErrors[0].message}`);
-            throw new Error(validateErrors[0].message);
+            this.logger.error(`Failed to normalize transaction: ${trs.type} ${validateErrors[0].schemaPath} ${validateErrors[0].message}`);
+            this.logger.error(`Failed to normalize transaction: ${trs}`);
+            throw new Error(`Failed to normalize transaction: ${validateErrors[0].schemaPath} ${validateErrors[0].message}`);
         }
 
         return await this._assets.call(trs.type, "objectNormalize", trs);
@@ -460,16 +465,14 @@ class Transaction {
             return this._assets.call(trs.type, "apply", trs, block, sender);
         }
 
-        //DdnUtils.bignum update   const amount = trs.amount + trs.fee;
         const amount = DdnUtils.bignum.plus(trs.amount, trs.fee);
 
-        //DdnUtils.bignum update   if (trs.blockId != genesisblock.block.id && sender.balance < amount) {
         if (trs.block_id != this.genesisblock.id && DdnUtils.bignum.isLessThan(sender.balance, amount)) { //wxm block database
             throw new Error(`Insufficient balance: ${sender.balance}`)
         }
 
         const accountInfo = await this.runtime.account.merge(sender.address, {
-            balance: DdnUtils.bignum.minus(0, amount), //DdnUtils.bignum update  -amount
+            balance: DdnUtils.bignum.minus(0, amount), 
             block_id: block.id, //wxm block database
             round: await this.runtime.round.calc(block.height)
         }, dbTrans);
@@ -661,14 +664,20 @@ class Transaction {
         if (!signature) {
             return false;
         }
-        const bytes = await this.getBytes(trs, true, true);
-        return await this.verifyBytes(bytes, publicKey, signature);
+        const bytes = await DdnCrypto.getBytes(trs, true, true);
+        // const bytes = await this.getBytes(trs, true, true);
+        return await DdnCrypto.verifyBytes(bytes, publicKey, signature);
     }
 
+    // fixme: 2020.5.15
     async multisign(keypair, trs) {
-        const bytes = await this.getBytes(trs, true, true);
-        const hash = crypto.createHash('sha256').update(bytes).digest();
-        return ed.Sign(hash, keypair).toString('hex');
+        // const bytes = await this.getBytes(trs, true, true);
+        // const hash = crypto.createHash('sha256').update(bytes).digest();
+        // console.log('multisign hash........', hash);
+
+        // return ed.Sign(hash, keypair).toString('hex');
+        const sign = await DdnCrypto.sign(trs, keypair);
+        return sign;
     }
 
     async verify(trs, sender, requester) {
@@ -685,7 +694,6 @@ class Transaction {
             const lastBlock = this.runtime.block.getLastBlock();
 
             const isLockedType = await this._assets.isSupportLock(trs.type);
-            //DdnUtils.bignum update if (sender.lockHeight && lastBlock && lastBlock.height + 1 <= sender.lockHeight && isLockedType) {
             if (isLockedType && sender.lock_height && lastBlock && DdnUtils.bignum.isLessThanOrEqualTo(DdnUtils.bignum.plus(lastBlock.height, 1), sender.lock_height)) {
                 throw new Error('Account is locked');
                 // return cb('Account is locked')

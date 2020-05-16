@@ -2,10 +2,10 @@
  * not passed
  */
 import node from "@ddn/node-sdk/lib/test";
-
 import Debug from "debug";
 
-const debug = Debug("multisignatures");
+const debug = Debug("debug");
+const expect = node.expect;
 
 const totalMembers = node.randomNumber(2, 16);
 const requiredSignatures = node.randomNumber(2, totalMembers + 1);
@@ -50,7 +50,7 @@ async function openAccount({ password, secondPassword, name }, i) {
                     );
                 }
 
-                node.expect(body).to.have.property("success").to.be.true;
+                expect(body).to.have.property("success").to.be.true;
                 if (body.account != null && i != null) {
                     Accounts[i].address = body.account.address;
                     Accounts[i].publicKey = body.account.publicKey;
@@ -92,7 +92,7 @@ async function sendDDN({ address }, i) {
 
                 // debug(JSON.stringify(res.body));
                 debug(`sendDDN Sending ${randomCoin} DDN to ${address}`);
-                node.expect(body).to.have.property("success").to.be.true;
+                expect(body).to.have.property("success").to.be.true;
                 if (body.success == true && i != null) {
                     // fixme: Bignumber
                     Accounts[i].balance = randomCoin / node.normalizer;
@@ -122,9 +122,9 @@ async function sendDDNfromMultisigAccount(amount, recipient) {
 
                 debug('sendDDNfromMultisigAccount: ', JSON.stringify(body));
                 debug("Sending " + amount + " DDN to " + recipient);
-                node.expect(body).to.have.property("success").to.be.true;
+                expect(body).to.have.property("success").to.be.true;
                 if (body.success == true) {
-                    node.expect(body).to.have.property("transactionId");
+                    expect(body).to.have.property("transactionId");
                 }
 
                 resolve(body.transactionId);
@@ -148,7 +148,7 @@ async function confirmTransaction({ password }, id) {
                     return reject(err);
                 }
                 // debug("Signing Tx ID = " + id + " from account with password = " + account.password + " Got reply: " + JSON.stringify(res.body));
-                node.expect(body).to.have.property("success").to.be.true;
+                expect(body).to.have.property("success").to.be.true;
 
                 resolve();
             });
@@ -226,8 +226,8 @@ describe("PUT /multisignatures", () => {
     //         .expect(200)
     //         .end((err, { body }) => {
     //             debug("keysgroup", JSON.stringify(body));
-    //             node.expect(body).to.have.property("success").to.be.false;
-    //             node.expect(body).to.have.property("error");
+    //             expect(body).to.have.property("success").to.be.false;
+    //             expect(body).to.have.property("error");
     //             done();
     //         });
     // });
@@ -246,8 +246,8 @@ describe("PUT /multisignatures", () => {
     //         .expect(200)
     //         .end((err, { body }) => {
     //             // debug(JSON.stringify(res.body));
-    //             node.expect(body).to.have.property("success").to.be.false;
-    //             node.expect(body).to.have.property("error");
+    //             expect(body).to.have.property("success").to.be.false;
+    //             expect(body).to.have.property("error");
     //             done();
     //         });
     // });
@@ -268,8 +268,8 @@ describe("PUT /multisignatures", () => {
     //         .expect(200)
     //         .end((err, { body }) => {
     //             // debug(JSON.stringify(res.body));
-    //             node.expect(body).to.have.property("success").to.be.false;
-    //             node.expect(body).to.have.property("error");
+    //             expect(body).to.have.property("success").to.be.false;
+    //             expect(body).to.have.property("error");
     //             done();
     //         });
     // });
@@ -287,8 +287,8 @@ describe("PUT /multisignatures", () => {
     //         .expect(200)
     //         .end((err, { body }) => {
     //             // debug(JSON.stringify(res.body));
-    //             node.expect(body).to.have.property("success").to.be.false;
-    //             node.expect(body).to.have.property("error");
+    //             expect(body).to.have.property("success").to.be.false;
+    //             expect(body).to.have.property("error");
     //             done();
     //         });
     // });
@@ -307,8 +307,8 @@ describe("PUT /multisignatures", () => {
     //         .expect(200)
     //         .end((err, { body }) => {
     //             // debug(JSON.stringify(res.body));
-    //             node.expect(body).to.have.property("success").to.be.false;
-    //             node.expect(body).to.have.property("error");
+    //             expect(body).to.have.property("success").to.be.false;
+    //             expect(body).to.have.property("error");
     //             done();
     //         });
     // });
@@ -326,8 +326,8 @@ describe("PUT /multisignatures", () => {
     //         .expect(200)
     //         .end((err, { body }) => {
     //             // debug(JSON.stringify(res.body));
-    //             node.expect(body).to.have.property("success").to.be.false;
-    //             node.expect(body).to.have.property("error");
+    //             expect(body).to.have.property("success").to.be.false;
+    //             expect(body).to.have.property("error");
     //             done();
     //         });
     // });
@@ -346,8 +346,8 @@ describe("PUT /multisignatures", () => {
     //         .expect(200)
     //         .end((err, { body }) => {
     //             // debug(JSON.stringify(res.body));
-    //             node.expect(body).to.have.property("success").to.be.false;
-    //             node.expect(body).to.have.property("error");
+    //             expect(body).to.have.property("success").to.be.false;
+    //             expect(body).to.have.property("error");
     //             done();
     //         });
     // });
@@ -365,8 +365,8 @@ describe("PUT /multisignatures", () => {
     //         .expect(200)
     //         .end((err, { body }) => {
     //             // debug(JSON.stringify(res.body));
-    //             node.expect(body).to.have.property("success").to.be.false;
-    //             node.expect(body).to.have.property("error");
+    //             expect(body).to.have.property("success").to.be.false;
+    //             expect(body).to.have.property("error");
     //             done();
     //         });
     // });
@@ -385,8 +385,8 @@ describe("PUT /multisignatures", () => {
     //         .expect(200)
     //         .end((err, { body }) => {
     //             // debug(JSON.stringify(res.body));
-    //             node.expect(body).to.have.property("success").to.be.false;
-    //             node.expect(body).to.have.property("error");
+    //             expect(body).to.have.property("success").to.be.false;
+    //             expect(body).to.have.property("error");
     //             done();
     //         });
     // });
@@ -405,8 +405,8 @@ describe("PUT /multisignatures", () => {
     //         .expect(200)
     //         .end((err, { body }) => {
     //             // debug(JSON.stringify(res.body));
-    //             node.expect(body).to.have.property("success").to.be.false;
-    //             node.expect(body).to.have.property("error");
+    //             expect(body).to.have.property("success").to.be.false;
+    //             expect(body).to.have.property("error");
     //             done();
     //         });
     // });
@@ -425,8 +425,8 @@ describe("PUT /multisignatures", () => {
     //         .expect(200)
     //         .end((err, { body }) => {
     //             // debug(JSON.stringify(res.body));
-    //             node.expect(body).to.have.property("success").to.be.false;
-    //             node.expect(body).to.have.property("error");
+    //             expect(body).to.have.property("success").to.be.false;
+    //             expect(body).to.have.property("error");
     //             done();
     //         });
     // });
@@ -445,8 +445,8 @@ describe("PUT /multisignatures", () => {
     //         .expect(200)
     //         .end((err, { body }) => {
     //             // debug(JSON.stringify(res.body));
-    //             node.expect(body).to.have.property("success").to.be.false;
-    //             node.expect(body).to.have.property("error");
+    //             expect(body).to.have.property("success").to.be.false;
+    //             expect(body).to.have.property("error");
     //             done();
     //         });
     // });
@@ -465,8 +465,8 @@ describe("PUT /multisignatures", () => {
     //         .expect(200)
     //         .end((err, { body }) => {
     //             // debug(JSON.stringify(res.body));
-    //             node.expect(body).to.have.property("success").to.be.false;
-    //             node.expect(body).to.have.property("error");
+    //             expect(body).to.have.property("success").to.be.false;
+    //             expect(body).to.have.property("error");
     //             done();
     //         });
     // });
@@ -484,8 +484,8 @@ describe("PUT /multisignatures", () => {
     //         .expect(200)
     //         .end((err, { body }) => {
     //             // debug(JSON.stringify(res.body));
-    //             node.expect(body).to.have.property("success").to.be.false;
-    //             node.expect(body).to.have.property("error");
+    //             expect(body).to.have.property("success").to.be.false;
+    //             expect(body).to.have.property("error");
     //             done();
     //         });
     // });
@@ -504,8 +504,8 @@ describe("PUT /multisignatures", () => {
     //         .expect(200)
     //         .end((err, { body }) => {
     //             // debug(JSON.stringify(res.body));
-    //             node.expect(body).to.have.property("success").to.be.false;
-    //             node.expect(body).to.have.property("error");
+    //             expect(body).to.have.property("success").to.be.false;
+    //             expect(body).to.have.property("error");
     //             done();
     //         });
     // });
@@ -524,8 +524,8 @@ describe("PUT /multisignatures", () => {
     //         .expect(200)
     //         .end((err, { body }) => {
     //             // debug(JSON.stringify(res.body));
-    //             node.expect(body).to.have.property("success").to.be.false;
-    //             node.expect(body).to.have.property("error");
+    //             expect(body).to.have.property("success").to.be.false;
+    //             expect(body).to.have.property("error");
     //             done();
     //         });
     // });
@@ -544,8 +544,8 @@ describe("PUT /multisignatures", () => {
     //         .expect(200)
     //         .end((err, { body }) => {
     //             // debug(JSON.stringify(res.body));
-    //             node.expect(body).to.have.property("success").to.be.false;
-    //             node.expect(body).to.have.property("error");
+    //             expect(body).to.have.property("success").to.be.false;
+    //             expect(body).to.have.property("error");
     //             done();
     //         });
     // });
@@ -566,8 +566,8 @@ describe("PUT /multisignatures", () => {
     //         .expect(200)
     //         .end((err, { body }) => {
     //             // debug(JSON.stringify(res.body));
-    //             node.expect(body).to.have.property("success").to.be.false;
-    //             node.expect(body).to.have.property("error");
+    //             expect(body).to.have.property("success").to.be.false;
+    //             expect(body).to.have.property("error");
     //             done();
     //         });
     // });
@@ -588,8 +588,8 @@ describe("PUT /multisignatures", () => {
     //         .expect(200)
     //         .end((err, { body }) => {
     //             debug('/multisignatures min is a string', JSON.stringify(body));
-    //             node.expect(body).to.have.property("success").to.be.false;
-    //             node.expect(body).to.have.property("error");
+    //             expect(body).to.have.property("success").to.be.false;
+    //             expect(body).to.have.property("error");
     //             done();
     //         });
     // });
@@ -609,8 +609,8 @@ describe("PUT /multisignatures", () => {
             .expect(200)
             .end((err, { body }) => {
                 debug("should be ok: ", JSON.stringify(body));
-                node.expect(body).to.have.property("success").to.be.true;
-                node.expect(body).to.have.property("transactionId");
+                expect(body).to.have.property("success").to.be.true;
+                expect(body).to.have.property("transactionId");
                 if (body.success == true && body.transactionId != null) {
                     MultiSigTX.txId = body.transactionId;
                     MultiSigTX.lifetime = life;
@@ -618,7 +618,7 @@ describe("PUT /multisignatures", () => {
                     MultiSigTX.min = requiredSignatures;
                 } else {
                     console.log("Transaction failed or transactionId null");
-                    node.expect("test").to.equal("failed");
+                    expect("test").to.equal("failed");
                 }
                 done();
             });
@@ -636,8 +636,8 @@ describe("PUT /multisignatures", () => {
 //             .expect(200)
 //             .end((err, { body }) => {
 //                 debug("GET /multisignatures/pending", JSON.stringify(body));
-//                 node.expect(body).to.have.property("success").to.be.false;
-//                 node.expect(body).to.have.property("error");
+//                 expect(body).to.have.property("success").to.be.false;
+//                 expect(body).to.have.property("error");
 //                 done();
 //             });
 //     });
@@ -650,12 +650,12 @@ describe("PUT /multisignatures", () => {
 //             .expect(200)
 //             .end((err, { body }) => {
 //                 // debug(JSON.stringify(res.body));
-//                 node.expect(body).to.have.property("success");
-//                 node.expect(body).to.have.property("success").to.be.true;
-//                 node.expect(body)
+//                 expect(body).to.have.property("success");
+//                 expect(body).to.have.property("success").to.be.true;
+//                 expect(body)
 //                     .to.have.property("transactions")
 //                     .that.is.an("array");
-//                 node.expect(body.transactions.length).to.equal(0);
+//                 expect(body.transactions.length).to.equal(0);
 //                 done();
 //             });
 //     });
@@ -671,11 +671,11 @@ describe("PUT /multisignatures", () => {
 //             .expect(200)
 //             .end((err, { body }) => {
 //                 // debug('res.body', res.body)
-//                 node.expect(body).to.have.property("success").to.be.true;
-//                 node.expect(body)
+//                 expect(body).to.have.property("success").to.be.true;
+//                 expect(body)
 //                     .to.have.property("transactions")
 //                     .that.is.an("array");
-//                 node.expect(body.transactions.length).to.be.at.least(1);
+//                 expect(body.transactions.length).to.be.at.least(1);
 //                 let flag = 0;
 //                 for (let i = 0; i < body.transactions.length; i++) {
 //                     // debug(MultisigAccount.publicKey);
@@ -684,16 +684,16 @@ describe("PUT /multisignatures", () => {
 //                         MultisigAccount.publicKey
 //                     ) {
 //                         flag += 1;
-//                         node.expect(body.transactions[i].transaction)
+//                         expect(body.transactions[i].transaction)
 //                             .to.have.property("type")
 //                             .to.equal(node.AssetTypes.MULTISIGNATURE);
-//                         node.expect(body.transactions[i].transaction)
+//                         expect(body.transactions[i].transaction)
 //                             .to.have.property("amount")
 //                             .to.equal("0");
-//                         node.expect(body.transactions[i].transaction)
+//                         expect(body.transactions[i].transaction)
 //                             .to.have.property("asset")
 //                             .that.is.an("object");
-//                         node.expect(body.transactions[i].transaction)
+//                         expect(body.transactions[i].transaction)
 //                             .to.have.property("fee")
 //                             .to.equal(
 //                                 String(
@@ -701,21 +701,21 @@ describe("PUT /multisignatures", () => {
 //                                         (Keys.length + 1)
 //                                 )
 //                             );
-//                         node.expect(body.transactions[i].transaction)
+//                         expect(body.transactions[i].transaction)
 //                             .to.have.property("id")
 //                             .to.equal(MultiSigTX.txId);
-//                         node.expect(body.transactions[i].transaction)
+//                         expect(body.transactions[i].transaction)
 //                             .to.have.property("senderPublicKey")
 //                             .to.equal(MultisigAccount.publicKey);
-//                         node.expect(body.transactions[i])
+//                         expect(body.transactions[i])
 //                             .to.have.property("lifetime")
 //                             .to.equal(Number(MultiSigTX.lifetime));
-//                         node.expect(body.transactions[i])
+//                         expect(body.transactions[i])
 //                             .to.have.property("min")
 //                             .to.equal(MultiSigTX.min);
 //                     }
 //                 }
-//                 node.expect(flag).to.equal(1);
+//                 expect(flag).to.equal(1);
 //                 done();
 //             });
 //         // });
@@ -735,7 +735,7 @@ describe("PUT /multisignatures", () => {
 //             .expect(200)
 //             .end((err, { body }) => {
 //                 // debug(JSON.stringify(res.body));
-//                 node.expect(body).to.have.property("success").to.be.false;
+//                 expect(body).to.have.property("success").to.be.false;
 //                 done();
 //             });
 //     });
@@ -752,7 +752,7 @@ describe("PUT /multisignatures", () => {
 //             .expect(200)
 //             .end((err, { body }) => {
 //                 // debug(JSON.stringify(res.body));
-//                 node.expect(body).to.have.property("success").to.be.false;
+//                 expect(body).to.have.property("success").to.be.false;
 //                 done();
 //             });
 //     });
@@ -769,7 +769,7 @@ describe("PUT /multisignatures", () => {
 //             .expect(200)
 //             .end((err, { body }) => {
 //                 // debug(JSON.stringify(res.body));
-//                 node.expect(body).to.have.property("success").to.be.false;
+//                 expect(body).to.have.property("success").to.be.false;
 //                 done();
 //             });
 //     });
@@ -786,7 +786,7 @@ describe("PUT /multisignatures", () => {
 //             .expect(200)
 //             .end((err, { body }) => {
 //                 // debug(JSON.stringify(res.body));
-//                 node.expect(body).to.have.property("success").to.be.false;
+//                 expect(body).to.have.property("success").to.be.false;
 //                 done();
 //             });
 //     });
@@ -828,8 +828,8 @@ describe("PUT /multisignatures", () => {
 //                     return done(err);
 //                 }
 
-//                 node.expect(body).to.have.property("success").to.be.true;
-//                 node.expect(body)
+//                 expect(body).to.have.property("success").to.be.true;
+//                 expect(body)
 //                     .to.have.property("transaction")
 //                     .that.is.an("object");
 

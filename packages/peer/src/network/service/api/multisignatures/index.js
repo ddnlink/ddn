@@ -2,9 +2,10 @@
  * MultisignaturesRouter接口
  * wangxm   2019-03-27
  */
-import crypto from 'crypto';
+// import crypto from 'crypto';
+// import ed from 'ed25519';
 
-import ed from 'ed25519';
+import crypto from '@ddn/crypto';
 import DdnUtils from '@ddn/utils';
 
 class MultisignaturesRouter {
@@ -14,6 +15,10 @@ class MultisignaturesRouter {
         this._context = context;
     }
 
+    /**
+     * 在现有账户基础上，创建多重签名账号
+     * @param {*} req 'min', 'lifetime', 'keysgroup', 'secret' 是必须的
+     */
     async put(req) {
         const body = Object.assign({}, req.body, req.query);
         const validateErrors = await this.ddnSchema.validate({
@@ -52,21 +57,31 @@ class MultisignaturesRouter {
             required: ['min', 'lifetime', 'keysgroup', 'secret']
         }, body);
         if (validateErrors) {
-            throw new Error(validateErrors[0].message);
+            return {
+                success: false,
+                error: `Validation error: ${validateErrors[0].schemaPath} ${validateErrors[0].message}`
+            };
+            // throw new Error(validateErrors[0].message);
         }
 
-        const hash = crypto.createHash('sha256').update(body.secret, 'utf8').digest();
-        const keypair = ed.MakeKeypair(hash);
+        // const hash = crypto.createHash('sha256').update(body.secret, 'utf8').digest();
+        // const keypair = ed.MakeKeypair(hash);
 
+        const keypair = crypto.getKeys(body.secret);
+
+        // publicKey就是用户密钥产生的公钥
         if (body.publicKey) {
             if (keypair.publicKey.toString('hex') != body.publicKey) {
                 throw new Error("Invalid passphrase");
             }
         }
 
+        console.log('body:', body);
+
         return new Promise((resolve, reject) => {
             this.balancesSequence.add(async (cb) => {
-                const publicKey = keypair.publicKey;
+                const publicKey = keypair.publicKey.toString('hex');
+
                 let account;
 
                 try {
@@ -87,8 +102,9 @@ class MultisignaturesRouter {
 
                 let second_keypair = null;
                 if (account.second_signature) {
-                    const secondHash = crypto.createHash('sha256').update(body.secondSecret, 'utf8').digest();
-                    second_keypair = ed.MakeKeypair(secondHash);
+                    // const secondHash = crypto.createHash('sha256').update(body.secondSecret, 'utf8').digest();
+                    // second_keypair = ed.MakeKeypair(secondHash);
+                    second_keypair = crypto.getKeys(body.secondSecret);
                 }
 
                 try {
@@ -102,9 +118,14 @@ class MultisignaturesRouter {
                         lifetime: body.lifetime
                     });
 
+                    console.log('body', body);
+                    console.log('trs', transaction);
+                    
                     const transactions = await this.runtime.transaction.receiveTransactions([transaction]);
                     cb(null, transactions);
                 } catch (e) {
+                    console.log('e', e);
+
                     return cb(e);
                 }
             }, (err, transactions) => {
@@ -154,7 +175,11 @@ class MultisignaturesRouter {
             required: ['transactionId', 'secret']
         }, body);
         if (validateErrors) {
-            throw new Error(validateErrors[0].message);
+            return {
+                success: false,
+                error: `Validation error: ${validateErrors[0].schemaPath} ${validateErrors[0].message}`
+            };
+            // throw new Error(validateErrors[0].message);
         }
 
         const transaction = await this.runtime.transaction.getUnconfirmedTransaction(body.transactionId);
@@ -168,15 +193,17 @@ class MultisignaturesRouter {
             }
         }
 
-        const hash = crypto.createHash('sha256').update(body.secret, 'utf8').digest();
-        var keypair = ed.MakeKeypair(hash);
+        // const hash = crypto.createHash('sha256').update(body.secret, 'utf8').digest();
+        // var keypair = ed.MakeKeypair(hash);
+        const keypair = crypto.getKeys(body.secret);
 
         const sign = await this.runtime.transaction.multisign(keypair, transaction);
-
+        
         if (transaction.type == DdnUtils.assetTypes.MULTISIGNATURE) {
             if ((!transaction.asset.multisignature.keysgroup.includes(`+${keypair.publicKey.toString('hex')}`)) ||
                 (transaction.signatures && transaction.signatures.includes(sign.toString('hex')))) {
-                throw new Error("Permission to sign transaction denied");
+                // 是多重签名交易（asset），但签名者不属于签名组里的人，也不在交易的多个签名里
+                throw new Error("1. Permission to sign transaction denied");
             }
 
             setImmediate(async () => {
@@ -194,17 +221,22 @@ class MultisignaturesRouter {
 
             if (!transaction.requester_public_key) { //wxm block database
                 if (!account.multisignatures.includes(keypair.publicKey.toString('hex'))) {
-                    throw new Error("Permission to sign transaction denied");
+                    // 不是多重签名交易，交易也没有接收方，交易发起者的多重签名里，也不包含该交易发起者的公钥（transaction.senderId ！== keypair.publicKey）
+                    console.log('trs', transaction);
+                    
+                    throw new Error("2. Permission to sign transaction denied");
                 }
             } else {
                 if (account.publicKey != keypair.publicKey.toString('hex') ||
-                    transaction.senderPublicKey != keypair.publicKey.toString('hex')) { //wxm block database
-                    throw new Error("Permission to sign transaction denied");
+                    transaction.senderPublicKey != keypair.publicKey.toString('hex')) { 
+                    // 交易有接收方，但交易发起者与当前操作的用户不一致
+                    throw new Error("3. Permission to sign transaction denied");
                 }
             }
 
             if (transaction.signatures && transaction.signatures.includes(sign)) {
-                throw new Error("Permission to sign transaction denied");
+                // 已经签过名
+                throw new Error("4. Permission to sign transaction denied");
             }
 
             setImmediate(async () => {
@@ -264,7 +296,11 @@ class MultisignaturesRouter {
             required: ['publicKey']
         }, query);
         if (validateErrors) {
-            throw new Error(validateErrors[0].message);
+            return {
+                success: false,
+                error: `Validation error: ${validateErrors[0].schemaPath} ${validateErrors[0].message}`
+            };
+            // throw new Error(validateErrors[0].message);
         }
 
         let transactions = await this.runtime.transaction.getUnconfirmedTransactionList();
@@ -352,7 +388,11 @@ class MultisignaturesRouter {
             required: ['publicKey']
         }, query);
         if (validateErrors) {
-            throw new Error(validateErrors[0].message);
+            return {
+                success: false,
+                error: `Validation error: ${validateErrors[0].schemaPath} ${validateErrors[0].message}`
+            };
+            // throw new Error(validateErrors[0].message);
         }
 
         return new Promise((resolve, reject) => {

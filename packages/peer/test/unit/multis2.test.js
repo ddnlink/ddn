@@ -2,6 +2,10 @@
  * not passed
  */
 import node from "@ddn/node-sdk/lib/test";
+import Debug from "debug";
+
+const debug = Debug("debug");
+const expect = node.expect;
 
 async function createTransfer(address, amount, secret, second_secret) {
     return await node.ddn.transaction.createTransaction(address, amount, null, secret, second_secret)
@@ -23,11 +27,14 @@ async function multiSign({
             .end((err, {
                 body
             }) => {
+                // expect(err).be.not.ok;
                 if (err) {
-                    return reject(err);
+                    reject(err);
                 }
 
-                console.log(`${address} sign:${JSON.stringify(body)}`);
+                debug('trsId:', trsId);
+
+                debug(`${address} sign: ${JSON.stringify(body)}`);
 
                 node.expect(body).to.have.property("success").to.be.true;
 
@@ -36,12 +43,12 @@ async function multiSign({
     });
 }
 
-const accounts = [];
-let multiTrsId;
 
 describe("PUT /multisignatures", () => {
+    const accounts = [];
+    let multiTrsId;
 
-    it("POST /transactions", async () => {
+    it("POST /transactions", async (done) => {
         var account = {
             secret: "daughter aerobic reduce buyer awful prefer crowd exercise pretty outer chaos museum",
             publicKey: "9bec291262250709a981f24201326227ef0a7d2d30645aa2254ef1fe984aa285",
@@ -60,45 +67,46 @@ describe("PUT /multisignatures", () => {
 
         // accounts.push(account3);
 
-        const transaction = await createTransfer(node.Daccount.address, 100000000, node.Eaccount.password);
-        await new Promise((resolve, reject) => {
-            node.peer.post("/transactions")
-                .set("Accept", "application/json")
-                .set("version", node.version)
-                .set("nethash", node.config.nethash)
-                .set("port", node.config.port)
-                .send({
-                    transaction
-                })
-                .expect("Content-Type", /json/)
-                .expect(200)
-                .end((err, {
-                    body
-                }) => {
-                    node.expect(body).to.have.property("success").to.be.true;
+        const transaction = await createTransfer(node.Eaccount.address, '100000000', node.Gaccount.password);
+        node.peer.post("/transactions")
+            .set("Accept", "application/json")
+            .set("version", node.version)
+            .set("nethash", node.config.nethash)
+            .set("port", node.config.port)
+            .send({
+                transaction
+            })
+            .expect("Content-Type", /json/)
+            .expect(200)
+            .end(async (err, {
+                body
+            }) => {
+                debug('body', body);
 
-                    multiTrsId = body.transactionId;
+                expect(err).to.be.not.ok;
+                expect(body).to.have.property("success").to.be.true;
 
-                    if (err) {
-                        reject(err);
-                    } else {
-                        resolve();
+                multiTrsId = body.transactionId;
+                debug('multiTrsId', multiTrsId);
+
+                let result = false;
+
+                for (let i = 0; i < accounts.length; i++) {
+
+                    try {
+                        const account = accounts[i];
+                        await multiSign(account, multiTrsId);
+                        // debug(account);
+                        result = true;
+                    } catch (err) {
+                        result = false;
                     }
-                });
-        });
+                }
+                expect(result).to.be.true;
+                done();
+            });
 
-        let result = false;
 
-        for (let i = 0; i < accounts.length; i++) {
-            try {
-                const account = accounts[i];
-                await multiSign(account, multiTrsId);
-                result = true;
-            } catch (err) {
-                result = false;
-            }
-        }
-        // todo: ...
-    })
+    });
 
-})
+});

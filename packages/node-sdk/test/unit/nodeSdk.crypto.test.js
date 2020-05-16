@@ -164,7 +164,7 @@ describe("Node SDK", () => {
 
 			it("should return BigNumber", async (done) => {
 				const fee = await getFee({ amount: "100000", type: 0 });    //Bignum update
-                
+
 				debug('fee: ', fee);
 				expect(Bignum.isBigNumber(fee)).to.be.true;
 				expect(fee).to.be.not.NaN;
@@ -228,6 +228,15 @@ describe("Node SDK", () => {
 			it("should be a function", () => {
 				expect(sign).to.be.a("function");
 			});
+
+			it("should be ok", async () => {
+				const k = crypto.getKeys('test');
+				const m = new Uint8Array(100);
+
+				const sig = await sign(m, k);
+				debug('sig', sig);
+				expect(sig.length).to.equal(64)
+			})
 		});
 
 		describe("#secondSign", () => {
@@ -261,7 +270,7 @@ describe("Node SDK", () => {
 				expect(keys).to.have.property("publicKey");
 				expect(keys).to.have.property("privateKey");
 				expect(keys.publicKey).to.be.a("string")
-				
+
 				// .and.match(() => {
 				// 	try {
 				// 		Buffer.from(keys.publicKey, "hex");
@@ -273,7 +282,7 @@ describe("Node SDK", () => {
 				// });
 
 				expect(keys.privateKey).to.be.a("string")
-				
+
 				// .and.match(() => {
 				// 	try {
 				// 		Buffer.from(keys.privateKey, "hex");
