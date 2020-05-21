@@ -74,7 +74,7 @@ const Eaccount = { // wly 修改数据库名称后重新生成
 };
 
 const Gaccount = {
-  "address": "DCE3q83WTqk58Y3hU9GDStn7MmqWU9xHbK",
+  "address": "DCsewRJvY46egBYvtGcyj4Qryn6tCvAzy",
   "password": "enter boring shaft rent essence foil trick vibrant fabric quote indoor output",
   'publicKey': '2e6d978c5e6f1fbfc5a27abd964d9b6adc352daa81e31d9098a4f5ee3d7f885e',
   'balance': '10000000000000000'

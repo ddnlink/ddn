@@ -1,4 +1,4 @@
-import crypto from '@ddn/crypto';
+import DdnCrypto from '@ddn/crypto';
 
 export default {
 	account(secret, tokenPrefix) {
@@ -6,8 +6,8 @@ export default {
 			tokenPrefix = 'D';
 		}
 		
-		const kp = crypto.keypair(secret);
-		const address = crypto.generateAddress(Buffer.from(kp.publicKey, 'hex'), tokenPrefix);
+		const kp = DdnCrypto.getKeys(secret);
+		const address = DdnCrypto.generateAddress(Buffer.from(kp.publicKey, 'hex'), tokenPrefix);
 
 		return {
 			keypair: kp,
@@ -16,5 +16,5 @@ export default {
 		};
 	},
 	
-	isValidSecret: crypto.isValidSecret
+	isValidSecret: DdnCrypto.isValidSecret
 };

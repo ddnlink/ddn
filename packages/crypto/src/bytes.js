@@ -1,5 +1,4 @@
 import ByteBuffer from "bytebuffer";
-import DdnUtils from '@ddn/utils';
 import Asset from '@ddn/asset-base';
 
 // TODO: 注意扩展更多交易类型
@@ -68,8 +67,10 @@ async function getBytes(transaction, skipSignature, skipSecondSignature) {
         64; // args or unused
 
     const bb = new ByteBuffer(size + assetSize, true);
-
     // const bb = new ByteBuffer(1, true);
+    
+    console.log('transaction 107', transaction);
+    
     bb.writeByte(transaction.type); // +1
     bb.writeInt(transaction.timestamp); // +4
     bb.writeString(transaction.nethash); // +8
@@ -134,16 +135,18 @@ async function getBytes(transaction, skipSignature, skipSecondSignature) {
 
     bb.flip();
 
+    return bb.toBuffer();
+
     // competifined browser
-    const arrayBuffer = new Uint8Array(bb.toArrayBuffer());
+    // const arrayBuffer = new Uint8Array(bb.toArrayBuffer());
 
-    const buffer = [];
+    // const buffer = [];
 
-    for (let i = 0; i < arrayBuffer.length; i++) {
-        buffer[i] = arrayBuffer[i];
-    }
+    // for (let i = 0; i < arrayBuffer.length; i++) {
+    //     buffer[i] = arrayBuffer[i];
+    // }
 
-    return Buffer.from(buffer);
+    // return Buffer.from(buffer);
 }
 
 async function getAssetBytes(transaction) {

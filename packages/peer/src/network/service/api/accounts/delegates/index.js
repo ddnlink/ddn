@@ -1,8 +1,7 @@
-import crypto from 'crypto';
-import ed from 'ed25519';
+import DdnCrypto from '@ddn/crypto';
 import DdnUtils from '@ddn/utils';
 
-const {assetTypes, bignum} = DdnUtils;
+const { assetTypes, bignum } = DdnUtils;
 
 /**
  * RootRouter接口
@@ -68,7 +67,7 @@ class RootRouter {
                 delegates[i].productivity = (!outsider) ? parseFloat(Math.floor(percent * 100) / 100).toFixed(2) : 0;
             }
 
-            const result = delegates.filter(({publicKey}) => account.delegates.includes(publicKey));
+            const result = delegates.filter(({ publicKey }) => account.delegates.includes(publicKey));
             return { success: true, delegates: result };
         } else {
             return { success: true, delegates: [] };
@@ -104,27 +103,24 @@ class RootRouter {
             throw new Error(validateErrors[0].message);
         }
 
-        const hash = crypto.createHash('sha256').update(body.secret, 'utf8').digest();
-        const keypair = ed.MakeKeypair(hash);
+        const keypair = DdnCrypto.getKeys(body.secret);
 
         if (body.publicKey) {
-            if (keypair.publicKey.toString('hex') != body.publicKey) {
+            if (keypair.publicKey != body.publicKey) {
                 throw new Error("Invalid passphrase");
             }
         }
 
         return new Promise((resolve, reject) => {
-            this.balancesSequence.add(async(cb) => {
+            this.balancesSequence.add(async (cb) => {
                 if (body.multisigAccountPublicKey &&
-                    body.multisigAccountPublicKey != keypair.publicKey.toString('hex')) {
+                    body.multisigAccountPublicKey != keypair.publicKey) {
 
-                    var account;
-                    try
-                    {
+                    let account;
+                    try {
                         account = await this.runtime.account.getAccountByPublicKey(body.multisigAccountPublicKey);
                     }
-                    catch (err)
-                    {
+                    catch (err) {
                         return cb(err);
                     }
 
@@ -136,17 +132,15 @@ class RootRouter {
                         return cb("Account does not have multisignatures enabled");
                     }
 
-                    if (!account.multisignatures.includes(keypair.publicKey.toString('hex'))) {
+                    if (!account.multisignatures.includes(keypair.publicKey)) {
                         return cb("Account does not belong to multisignature group");
                     }
 
                     let requester;
-                    try
-                    {
+                    try {
                         requester = await this.runtime.account.getAccountByPublicKey(keypair.publicKey);
                     }
-                    catch (err)
-                    {
+                    catch (err) {
                         return cb(err);
                     }
 
@@ -164,12 +158,11 @@ class RootRouter {
 
                     let second_keypair = null;
                     if (requester.second_signature) {
-                      var secondHash = crypto.createHash('sha256').update(body.secondSecret, 'utf8').digest();
-                      second_keypair = ed.MakeKeypair(secondHash);
+                        second_keypair = DdnCrypto.getKeys(body.secondSecret);
                     }
 
                     try {
-                        var transaction = await this.runtime.transaction.create({
+                        const transaction = await this.runtime.transaction.create({
                             type: assetTypes.VOTE,
                             votes: body.delegates,
                             sender: account,
@@ -177,19 +170,17 @@ class RootRouter {
                             second_keypair,
                             requester: keypair
                         });
-                        var transactions = await this.runtime.transaction.receiveTransactions([transaction]);
+                        const transactions = await this.runtime.transaction.receiveTransactions([transaction]);
                         cb(null, transactions);
                     } catch (err) {
                         cb(err);
                     }
                 } else {
-                    var account;
-                    try
-                    {
-                        account = await this.runtime.account.getAccountByPublicKey(keypair.publicKey.toString('hex'));
+                    let account;
+                    try {
+                        account = await this.runtime.account.getAccountByPublicKey(keypair.publicKey);
                     }
-                    catch (err)
-                    {
+                    catch (err) {
                         return cb(err);
                     }
 
@@ -203,19 +194,18 @@ class RootRouter {
 
                     let second_keypair = null;
                     if (account.second_signature) {
-                        var secondHash = crypto.createHash('sha256').update(body.secondSecret, 'utf8').digest();
-                        second_keypair = ed.MakeKeypair(secondHash);
+                        second_keypair = DdnCrypto.getKeys(body.secondSecret);
                     }
 
                     try {
-                        var transaction = await this.runtime.transaction.create({
-                              type: assetTypes.VOTE,
-                              votes: body.delegates,
-                              sender: account,
-                              keypair,
-                              second_keypair
+                        const transaction = await this.runtime.transaction.create({
+                            type: assetTypes.VOTE,
+                            votes: body.delegates,
+                            sender: account,
+                            keypair,
+                            second_keypair
                         });
-                        var transactions = await this.runtime.transaction.receiveTransactions([transaction]);
+                        const transactions = await this.runtime.transaction.receiveTransactions([transaction]);
                         cb(null, transactions);
                     } catch (e) {
                         cb(e);

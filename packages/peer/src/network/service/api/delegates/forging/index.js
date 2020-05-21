@@ -1,6 +1,5 @@
-import crypto from 'crypto';
+import DdnCrypto from '@ddn/crypto';
 import DdnUtils from '@ddn/utils';
-import ed from 'ed25519';
 
 /**
  * RootRouter接口
@@ -68,14 +67,15 @@ class RootRouter {
             return {success: false, error: "Access denied"};
         }
 
-        const keypair = ed.MakeKeypair(crypto.createHash('sha256').update(body.secret, 'utf8').digest());
+        const keypair = DdnCrypto.getKeys(body.secret);
+
         if (body.publicKey) {
-            if (keypair.publicKey.toString('hex') != body.publicKey) {
+            if (keypair.publicKey != body.publicKey) {
                 return {success: false, error: "Invalid passphrase"};
             }
         }
 
-        const myDelegate = await this.runtime.delegate.getMyDelegateByPublicKey(keypair.publicKey.toString('hex'));
+        const myDelegate = await this.runtime.delegate.getMyDelegateByPublicKey(keypair.publicKey);
         if (myDelegate) {
             return {success: false, error: "Forging is already enabled"};
         }
@@ -83,7 +83,7 @@ class RootRouter {
         let account;
         try
         {
-            account = await this.runtime.account.getAccountByPublicKey(keypair.publicKey.toString('hex'));
+            account = await this.runtime.account.getAccountByPublicKey(keypair.publicKey);
         }
         catch (err)
         {
@@ -127,14 +127,14 @@ class RootRouter {
             return {success: false, error: "Access denied"};
         }
 
-        const keypair = ed.MakeKeypair(crypto.createHash('sha256').update(body.secret, 'utf8').digest());
+        const keypair = DdnCrypto.getKeys(body.secret);
         if (body.publicKey) {
-            if (keypair.publicKey.toString('hex') != body.publicKey) {
+            if (keypair.publicKey != body.publicKey) {
                 return {success: false, error: "Invalid passphrase"};
             }
         }
 
-        const myDelegate = await this.runtime.delegate.getMyDelegateByPublicKey(keypair.publicKey.toString('hex'));
+        const myDelegate = await this.runtime.delegate.getMyDelegateByPublicKey(keypair.publicKey);
         if (!myDelegate) {
             return {success: false, error: "Delegate not found"};
         }
@@ -142,7 +142,7 @@ class RootRouter {
         let account;
         try
         {
-            account = await this.runtime.account.getAccountByPublicKey(keypair.publicKey.toString('hex'));
+            account = await this.runtime.account.getAccountByPublicKey(keypair.publicKey);
         }
         catch (err)
         {
@@ -150,7 +150,7 @@ class RootRouter {
         }
 
         if (account && account.is_delegate) {  //wxm block database
-            await this.runtime.delegate.disableForgedByPublicKey(keypair.publicKey.toString('hex'));
+            await this.runtime.delegate.disableForgedByPublicKey(keypair.publicKey);
             this.logger.info(`Forging disabled on account: ${account.address}`);
             return {success: true, address: account.address};
         } else {

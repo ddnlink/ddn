@@ -2,10 +2,9 @@
  * Delegate
  * wangxm   2018-01-08
  */
-import crypto from 'crypto';
+import DdnCrypto from '@ddn/crypto';
 
 import util from 'util';
-import ed from 'ed25519';
 import DdnUtils from '@ddn/utils';
 
 let _singleton;
@@ -64,9 +63,11 @@ class Delegate {
         const delegateKeypairs = {};
         const delegatePublicKeys = [];
         for (let i = 0; i < secrets.length; i++) {
-            const keypair = ed.MakeKeypair(crypto.createHash('sha256').update(secrets[i], 'utf8').digest());
-            delegateKeypairs[keypair.publicKey.toString('hex')] = keypair;
-            delegatePublicKeys.push(keypair.publicKey.toString('hex'));
+            const keypair = DdnCrypto.getKeys(secrets[i]); 
+
+            delegateKeypairs[keypair.publicKey] = keypair;
+
+            delegatePublicKeys.push(keypair.publicKey);
         }
 
         const accounts = await this.runtime.account.getAccountList({
@@ -75,6 +76,7 @@ class Delegate {
             },
             limit: delegatePublicKeys.length
         });
+
         if (accounts && accounts.length == delegatePublicKeys.length) {
             accounts.forEach(account => {
                 if (account.is_delegate) {
@@ -225,7 +227,7 @@ class Delegate {
         const truncDelegateList = await this.getDelegatePublickKeysSortByVote();
         const seedSource = await this.runtime.round.calc(height).toString();
         //wxm 对查询返回的受托人列表进行乱序处理
-        let currentSeed = crypto.createHash('sha256').update(seedSource, 'utf8').digest();
+        let currentSeed = DdnCrypto.createHash(seedSource);
         for (let i = 0, delCount = truncDelegateList.length; i < delCount; i++) {
           for (let x = 0; x < 4 && i < delCount; i++, x++) {
             const newIndex = currentSeed[x] % delCount;
@@ -233,7 +235,7 @@ class Delegate {
             truncDelegateList[newIndex] = truncDelegateList[i];
             truncDelegateList[i] = b;
           }
-          currentSeed = crypto.createHash('sha256').update(currentSeed).digest();
+          currentSeed = DdnCrypto.createHash(currentSeed);
         }
 
         return truncDelegateList;

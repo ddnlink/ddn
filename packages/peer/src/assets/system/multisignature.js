@@ -78,8 +78,8 @@ class Multisignature {
                             } else {
                                 verify = await this.runtime.transaction.verifySignature(
                                     trs,
-                                    trs.asset.multisignature.keysgroup[s].substring(1),
-                                    trs.signatures[d]
+                                    trs.signatures[d],
+                                    trs.asset.multisignature.keysgroup[s].substring(1)
                                 );
                             }
                         }

@@ -1,8 +1,10 @@
+import DdnCrypto from '@ddn/crypto';
+
 import Asset from '@ddn/asset-base';
 import DdnUtils from '@ddn/utils';
 import daoUtil from './daoUtil';
-import crypto from 'crypto';
-import ed from 'ed25519';
+// import crypto from 'crypto';
+// import ed from 'ed25519';
 
 /**
   * 确认交易
@@ -225,7 +227,7 @@ class Confirmation extends Asset.Base {
         const where = {
             trs_type: await this.getTransactionType()
         };
-        
+
         where.sender_address = org.address;
         if (req.query.url) {
             where.url = req.query.url.toLowerCase();
@@ -241,11 +243,11 @@ class Confirmation extends Asset.Base {
 
         return await new Promise((resolve, reject) => {
             this.queryAsset(where, [], true, pageIndex, pageSize)
-            .then(rows => {
-                resolve({success: true, state: 0, data: rows});
-            }).catch(err => {
-                reject(err);
-            });
+                .then(rows => {
+                    resolve({ success: true, state: 0, data: rows });
+                }).catch(err => {
+                    reject(err);
+                });
         })
     }
 
@@ -288,10 +290,9 @@ class Confirmation extends Asset.Base {
         if (validateErrors) {
             throw new Error(`Invalid parameters: ${validateErrors[0].schemaPath} ${validateErrors[0].message}`);
         }
+        const keypair = DdnCrypto.getKeys(body.secret);
 
-        const hash = crypto.createHash('sha256').update(body.secret, 'utf8').digest();
-        const keypair = ed.MakeKeypair(hash);
-        // var senderPublicKey = keypair.publicKey.toString('hex')
+        // var senderPublicKey = keypair.publicKey
 
         const contributionInst = await this.getAssetInstanceByName("Contribution");
         const contributionRecords = await contributionInst.queryAsset({
@@ -311,23 +312,23 @@ class Confirmation extends Asset.Base {
 
             return new Promise((resolve, reject) => {
                 this.balancesSequence.add(async (cb) => {
-                    if (body.multisigAccountPublicKey && body.multisigAccountPublicKey != keypair.publicKey.toString('hex')) {
+                    if (body.multisigAccountPublicKey && body.multisigAccountPublicKey != keypair.publicKey) {
                         let account;
                         try {
                             account = await this.runtime.account.getAccountByPublicKey(body.multisigAccountPublicKey);
                         } catch (e) {
                             return cb(e);
                         }
-    
+
                         if (!account) {
                             return cb("Multisignature account not found");
                         }
-    
+
                         if (!account.multisignatures) {
                             return cb("Account does not have multisignatures enabled");
                         }
-    
-                        if (account.multisignatures.indexOf(keypair.publicKey.toString('hex')) < 0) {
+
+                        if (account.multisignatures.indexOf(keypair.publicKey) < 0) {
                             return cb("Account does not belong to multisignature group");
                         }
 
@@ -337,25 +338,26 @@ class Confirmation extends Asset.Base {
                         } catch (e) {
                             return cb(e);
                         }
-    
+
                         if (!requester || !requester.publicKey) {
                             return cb("Invalid requester");
                         }
-    
+
                         if (requester.second_signature && !body.secondSecret) {
                             return cb("Invalid second passphrase");
                         }
-    
+
                         if (requester.publicKey == account.publicKey) {
                             return cb("Invalid requester");
                         }
 
                         let second_keypair = null;
                         if (requester.second_signature) {
-                            const secondHash = crypto.createHash('sha256').update(body.secondSecret, 'utf8').digest();
-                            second_keypair = ed.MakeKeypair(secondHash);
+                            // const secondHash = crypto.createHash('sha256').update(body.secondSecret, 'utf8').digest();
+                            // second_keypair = ed.MakeKeypair(secondHash);
+                            second_keypair = DdnCrypto.getKeys(body.secondSecret);
                         }
-    
+
                         confirmation.sender_address = account.address;
 
                         try {
@@ -368,9 +370,9 @@ class Confirmation extends Asset.Base {
                             };
                             const assetJsonName = await this.getAssetJsonName();
                             data[assetJsonName] = confirmation;
-    
+
                             const transaction = await this.runtime.transaction.create(data);
-    
+
                             const transactions = await this.runtime.transaction.receiveTransactions([transaction]);
                             cb(null, transactions);
                         } catch (e) {
@@ -379,27 +381,28 @@ class Confirmation extends Asset.Base {
                     } else {
                         let account;
                         try {
-                            account = await this.runtime.account.getAccountByPublicKey(keypair.publicKey.toString('hex'));
+                            account = await this.runtime.account.getAccountByPublicKey(keypair.publicKey);
                         } catch (e) {
                             return cb(e);
                         }
-    
+
                         if (!account) {
                             return cb("Account not found");
                         }
-    
+
                         if (account.second_signature && !body.secondSecret) {
                             return cb("Invalid second passphrase");
                         }
 
                         let second_keypair = null;
                         if (account.secondSignature) {
-                            const secondHash = crypto.createHash('sha256').update(body.secondSecret, 'utf8').digest();
-                            second_keypair = ed.MakeKeypair(secondHash);
+                            // const secondHash = crypto.createHash('sha256').update(body.secondSecret, 'utf8').digest();
+                            // second_keypair = ed.MakeKeypair(secondHash);
+                            second_keypair = DdnCrypto.getKeys(body.secondSecret);
                         }
-    
+
                         confirmation.sender_address = account.address;
-        
+
                         try {
                             let data = {
                                 type: await this.getTransactionType(),
@@ -409,9 +412,9 @@ class Confirmation extends Asset.Base {
                             }
                             const assetJsonName = await this.getAssetJsonName();
                             data[assetJsonName] = confirmation;
-    
+
                             const transaction = await this.runtime.transaction.create(data);
-    
+
                             const transactions = await this.runtime.transaction.receiveTransactions([transaction]);
                             cb(null, transactions);
                         } catch (e) {
@@ -422,7 +425,7 @@ class Confirmation extends Asset.Base {
                     if (err) {
                         return reject(err);
                     }
-    
+
                     resolve({
                         success: true,
                         transactionId: transactions[0].id

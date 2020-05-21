@@ -5,7 +5,7 @@
 // import crypto from 'crypto';
 // import ed from 'ed25519';
 
-import crypto from '@ddn/crypto';
+import DdnCrypto from '@ddn/crypto';
 import DdnUtils from '@ddn/utils';
 
 class MultisignaturesRouter {
@@ -64,14 +64,11 @@ class MultisignaturesRouter {
             // throw new Error(validateErrors[0].message);
         }
 
-        // const hash = crypto.createHash('sha256').update(body.secret, 'utf8').digest();
-        // const keypair = ed.MakeKeypair(hash);
-
-        const keypair = crypto.getKeys(body.secret);
+        const keypair = DdnCrypto.getKeys(body.secret);
 
         // publicKey就是用户密钥产生的公钥
         if (body.publicKey) {
-            if (keypair.publicKey.toString('hex') != body.publicKey) {
+            if (keypair.publicKey != body.publicKey) {
                 throw new Error("Invalid passphrase");
             }
         }
@@ -80,12 +77,12 @@ class MultisignaturesRouter {
 
         return new Promise((resolve, reject) => {
             this.balancesSequence.add(async (cb) => {
-                const publicKey = keypair.publicKey.toString('hex');
+                const publicKey = keypair.publicKey;
 
                 let account;
 
                 try {
-                    account = await this.runtime.account.getAccountByPublicKey(publicKey); // .toString('hex')
+                    account = await this.runtime.account.getAccountByPublicKey(publicKey); // 
                 } catch (err) {
                     return cb(err);
                 }
@@ -102,9 +99,7 @@ class MultisignaturesRouter {
 
                 let second_keypair = null;
                 if (account.second_signature) {
-                    // const secondHash = crypto.createHash('sha256').update(body.secondSecret, 'utf8').digest();
-                    // second_keypair = ed.MakeKeypair(secondHash);
-                    second_keypair = crypto.getKeys(body.secondSecret);
+                    second_keypair = DdnCrypto.getKeys(body.secondSecret);
                 }
 
                 try {
@@ -188,19 +183,17 @@ class MultisignaturesRouter {
         }
 
         if (body.publicKey) {
-            if (keypair.publicKey.toString('hex') != body.publicKey) {
+            if (keypair.publicKey != body.publicKey) {
                 throw new Error("Invalid passphrase");
             }
         }
 
-        // const hash = crypto.createHash('sha256').update(body.secret, 'utf8').digest();
-        // var keypair = ed.MakeKeypair(hash);
-        const keypair = crypto.getKeys(body.secret);
+        const keypair = DdnCrypto.getKeys(body.secret);
 
-        const sign = await this.runtime.transaction.multisign(keypair, transaction);
+        const sign = await this.runtime.transaction.multisign(transaction, keypair);
         
         if (transaction.type == DdnUtils.assetTypes.MULTISIGNATURE) {
-            if ((!transaction.asset.multisignature.keysgroup.includes(`+${keypair.publicKey.toString('hex')}`)) ||
+            if ((!transaction.asset.multisignature.keysgroup.includes(`+${keypair.publicKey}`)) ||
                 (transaction.signatures && transaction.signatures.includes(sign.toString('hex')))) {
                 // 是多重签名交易（asset），但签名者不属于签名组里的人，也不在交易的多个签名里
                 throw new Error("1. Permission to sign transaction denied");
@@ -220,15 +213,15 @@ class MultisignaturesRouter {
             }
 
             if (!transaction.requester_public_key) { //wxm block database
-                if (!account.multisignatures.includes(keypair.publicKey.toString('hex'))) {
+                if (!account.multisignatures.includes(keypair.publicKey)) {
                     // 不是多重签名交易，交易也没有接收方，交易发起者的多重签名里，也不包含该交易发起者的公钥（transaction.senderId ！== keypair.publicKey）
                     console.log('trs', transaction);
                     
                     throw new Error("2. Permission to sign transaction denied");
                 }
             } else {
-                if (account.publicKey != keypair.publicKey.toString('hex') ||
-                    transaction.senderPublicKey != keypair.publicKey.toString('hex')) { 
+                if (account.publicKey != keypair.publicKey ||
+                    transaction.senderPublicKey != keypair.publicKey) { 
                     // 交易有接收方，但交易发起者与当前操作的用户不一致
                     throw new Error("3. Permission to sign transaction denied");
                 }
@@ -323,7 +316,7 @@ class MultisignaturesRouter {
                     let signature = item.signatures[i];
 
                     try {
-                        verify = await this.runtime.transaction.verifySignature(item, query.publicKey, signature);
+                        verify = await this.runtime.transaction.verifySignature(item, signature, query.publicKey);
                     } catch (e) {
                         this.logger.error('/multisignatures/pending verify fail, error is ', e.stack)
                         verify = false;

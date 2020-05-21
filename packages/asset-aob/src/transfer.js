@@ -1,8 +1,10 @@
+import _ from 'lodash';
+
 import Asset from '@ddn/asset-base';
 import DdnUtils from '@ddn/utils';
-import crypto from 'crypto';
-import ed from 'ed25519';
-import _ from 'lodash';
+import DdnCrypto from '@ddn/crypto';
+// import crypto from 'crypto';
+// import ed from 'ed25519';
 
 class Transfer extends Asset.Base {
     async propsMapping() {
@@ -352,8 +354,9 @@ class Transfer extends Asset.Base {
             throw new Error(`Invalid parameters: ${validateErrors[0].schemaPath} ${validateErrors[0].message}`);
         }
 
-        const hash = crypto.createHash('sha256').update(body.secret, 'utf8').digest();
-        const keypair = ed.MakeKeypair(hash);
+        // const hash = crypto.createHash('sha256').update(body.secret, 'utf8').digest();
+        // const keypair = ed.MakeKeypair(hash);
+        const keypair = DdnCrypto.getKeys(body.secret);
 
         if (body.publicKey) {
             if (keypair.publicKey.toString('hex') !== body.publicKey) {
@@ -410,8 +413,9 @@ class Transfer extends Asset.Base {
 
                     let second_keypair = null;
                     if (requester.second_signature) {
-                        const secondHash = crypto.createHash('sha256').update(body.secondSecret, 'utf8').digest();
-                        second_keypair = ed.MakeKeypair(secondHash);
+                        // const secondHash = crypto.createHash('sha256').update(body.secondSecret, 'utf8').digest();
+                        // second_keypair = ed.MakeKeypair(secondHash);
+                        second_keypair = DdnCrypto.getKeys(body.secondSecret);
                     }
 
                     try {
@@ -451,8 +455,9 @@ class Transfer extends Asset.Base {
 
                     let second_keypair = null;
                     if (account.second_signature) {
-                        const secondHash = crypto.createHash('sha256').update(body.secondSecret, 'utf8').digest();
-                        second_keypair = ed.MakeKeypair(secondHash);
+                        // const secondHash = crypto.createHash('sha256').update(body.secondSecret, 'utf8').digest();
+                        // second_keypair = ed.MakeKeypair(secondHash);
+                        second_keypair = DdnCrypto.getKeys(body.secondSecret);
                     }
 
                     try {

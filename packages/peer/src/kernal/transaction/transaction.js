@@ -4,9 +4,9 @@
  */
 
 import ByteBuffer from "bytebuffer";
-import crypto from 'crypto';
-import sha256 from "fast-sha256";
-import ed from 'ed25519';
+// import crypto from 'crypto';
+// import sha256 from "fast-sha256";
+// import ed from 'ed25519';
 import extend from 'util-extend';
 import DdnUtils from '@ddn/utils';
 import DdnCrypto from '@ddn/crypto';
@@ -86,106 +86,11 @@ class Transaction {
             trs.sign_signature = await this.sign(trs, data.second_keypair);
         }
 
-        trs.id = await this.getId(trs);
+        trs.id = await DdnCrypto.getId(trs);
 
         trs.fee = `${await this._assets.call(trs.type, "calculateFee", trs, data.sender)}`;
 
         return trs;
-    }
-
-    // TODO: delete it
-    async sign(keypair, trs) {
-        // const hash = await this.getHash(trs);
-        // return ed.Sign(hash, keypair).toString('hex');
-        this.logger.debug('sign: ', trs, keypair);
-        const sign = await DdnCrypto.sign(trs, keypair);
-        return sign;
-    }
-
-    /**
-     * 获取交易序列化之后的字节流内容
-     * @param {*} trs
-     */
-    async getBytes(trs, skipSignature, skipSecondSignature) {
-        if (!this._assets.hasType(trs.type)) {
-            throw Error(`Unknown transaction type: ${trs.type}`);
-        }
-
-        const assetBytes = await this._assets.call(trs.type, "getBytes", trs, skipSignature, skipSecondSignature);
-        const assetSize = assetBytes ? assetBytes.length : 0;
-
-        const size = 1 + // type (int)
-            4 + // timestamp (int)
-            8 + // nethash 8
-            32 + // senderPublicKey (int)
-            32 + // requesterPublicKey (long)
-            8 + // recipientId (long)
-            8 + // amount (long)
-            64 + // message
-            64; // args or unused
-
-        const bb = new ByteBuffer(size + assetSize, true);
-
-        bb.writeByte(trs.type);
-        bb.writeInt(trs.timestamp);
-        bb.writeString(trs.nethash);
-
-        this.logger.debug('peer/src/kernal/transaciton trs: ', trs)
-        const senderPublicKeyBuffer = Buffer.from(trs.senderPublicKey, 'hex');
-        for (let i = 0; i < senderPublicKeyBuffer.length; i++) {
-            bb.writeByte(senderPublicKeyBuffer[i]);
-        }
-
-        if (trs.requester_public_key) {
-            const requesterPublicKey = Buffer.from(trs.requester_public_key, 'hex');
-            for (let i = 0; i < requesterPublicKey.length; i++) {
-                bb.writeByte(requesterPublicKey[i]);
-            }
-        }
-
-        if (trs.recipientId) {
-            bb.writeString(trs.recipientId);
-        } else {
-            for (let i = 0; i < 8; i++) {
-                bb.writeByte(0);
-            }
-        }
-
-        bb.writeString(trs.amount);
-
-        if (trs.message) {
-            bb.writeString(trs.message);
-        }
-
-        if (trs.args) {
-            for (let i = 0; i < trs.args.length; ++i) {
-                bb.writeString(trs.args[i])
-            }
-        }
-
-        if (assetSize > 0) {
-            for (let i = 0; i < assetSize; i++) {
-                bb.writeByte(assetBytes[i]);
-            }
-        }
-
-        if (!skipSignature && trs.signature) {
-            const signatureBuffer = Buffer.from(trs.signature, 'hex');
-            for (let i = 0; i < signatureBuffer.length; i++) {
-                bb.writeByte(signatureBuffer[i]);
-            }
-        }
-
-        if (!skipSecondSignature && trs.sign_signature) { //wxm block database
-            const signSignatureBuffer = Buffer.from(trs.sign_signature, 'hex');
-            for (let i = 0; i < signSignatureBuffer.length; i++) {
-                bb.writeByte(signSignatureBuffer[i]);
-            }
-        }
-
-        bb.flip();
-
-        return bb.toBuffer();
     }
 
     async objectNormalize(trs) {
@@ -472,7 +377,7 @@ class Transaction {
         }
 
         const accountInfo = await this.runtime.account.merge(sender.address, {
-            balance: DdnUtils.bignum.minus(0, amount), 
+            balance: DdnUtils.bignum.minus(0, amount),
             block_id: block.id, //wxm block database
             round: await this.runtime.round.calc(block.height)
         }, dbTrans);
@@ -511,15 +416,6 @@ class Transaction {
         return result;
     }
 
-    async getHash(trs) {
-        const bytes = await this.getBytes(trs);
-        return Buffer.from(sha256.hash(bytes));
-    }
-
-    async getId(trs) {
-        const result = await this.getHash(trs);
-        return result.toString('hex');
-    }
 
     async process(trs, sender, requester) {
         if (!this._assets.hasType(trs.type)) {
@@ -528,7 +424,7 @@ class Transaction {
 
         let txId;
         try {
-            txId = await this.getId(trs);
+            txId = await DdnCrypto.getId(trs);
         } catch (e) {
             this.logger.error('Invalid transaction id, err: ', e)
             throw new Error("Invalid transaction id");
@@ -557,11 +453,11 @@ class Transaction {
         }
 
         if (trs.requester_public_key) { //wxm block database
-            if (!await this.verifySignature(trs, trs.requester_public_key, trs.signature)) { //wxm block database
+            if (!await this.verifySignature(trs, trs.signature, trs.requester_public_key)) { //wxm block database
                 throw new Error("Failed to verify signature, 2");
             }
         } else {
-            if (!await this.verifySignature(trs, trs.senderPublicKey, trs.signature)) { //wxm block database
+            if (!await this.verifySignature(trs, trs.signature, trs.senderPublicKey)) { //wxm block database
                 throw new Error("Failed to verify signature, 3");
             }
         }
@@ -592,7 +488,8 @@ class Transaction {
         }
 
         if (!transaction.id) {
-            transaction.id = await this.runtime.transaction.getId(transaction);
+            // transaction.id = await this.runtime.transaction.getId(transaction); 2020.5.18
+            transaction.id = await DdnCrypto.getId(transaction);
         }
 
         // Check transaction indexes
@@ -643,34 +540,129 @@ class Transaction {
         return transactions;
     }
 
-    // TODO: 注意使用 @ddn/crypto 的对应方法重构 2020.5.3
-    async verifyBytes(bytes, publicKey, signature) {
-        const data2 = Buffer.allocUnsafe(bytes.length);
-        for (let i = 0; i < data2.length; i++) {
-            data2[i] = bytes[i];
-        }
-
-        // Note: how to
-        const hash = crypto.createHash('sha256').update(data2).digest();
-        const signatureBuffer = Buffer.from(signature, 'hex');
-        const publicKeyBuffer = Buffer.from(publicKey, 'hex');
-        return ed.Verify(hash, signatureBuffer || ' ', publicKeyBuffer || ' ');
+    //////// TODO: delete it /////////////////////////////////
+    async sign(keypair, trs) {
+        // const hash = await this.getHash(trs);
+        // return ed.Sign(hash, keypair).toString('hex');
+        return await DdnCrypto.sign(trs, keypair);
     }
 
-    async verifySignature(trs, publicKey, signature) {
+    // TODO: delete it
+    /**
+     * 获取交易序列化之后的字节流内容
+     * @param {*} trs
+     */
+    async getBytes(trs, skipSignature, skipSecondSignature) {
+        if (!this._assets.hasType(trs.type)) {
+            throw Error(`Unknown transaction type: ${trs.type}`);
+        }
+
+        const assetBytes = await this._assets.call(trs.type, "getBytes", trs, skipSignature, skipSecondSignature);
+        const assetSize = assetBytes ? assetBytes.length : 0;
+
+        const size = 1 + // type (int)
+            4 + // timestamp (int)
+            8 + // nethash 8
+            32 + // senderPublicKey (int)
+            32 + // requesterPublicKey (long)
+            8 + // recipientId (long)
+            8 + // amount (long)
+            64 + // message
+            64; // args or unused
+
+        const bb = new ByteBuffer(size + assetSize, true);
+
+        bb.writeByte(trs.type);
+        bb.writeInt(trs.timestamp);
+        bb.writeString(trs.nethash);
+
+        const senderPublicKeyBuffer = Buffer.from(trs.senderPublicKey, 'hex');
+        for (let i = 0; i < senderPublicKeyBuffer.length; i++) {
+            bb.writeByte(senderPublicKeyBuffer[i]);
+        }
+
+        if (trs.requester_public_key) {
+            const requesterPublicKey = Buffer.from(trs.requester_public_key, 'hex');
+            for (let i = 0; i < requesterPublicKey.length; i++) {
+                bb.writeByte(requesterPublicKey[i]);
+            }
+        }
+
+        if (trs.recipientId) {
+            bb.writeString(trs.recipientId);
+        } else {
+            for (let i = 0; i < 8; i++) {
+                bb.writeByte(0);
+            }
+        }
+
+        bb.writeString(trs.amount);
+
+        if (trs.message) {
+            bb.writeString(trs.message);
+        }
+
+        if (trs.args) {
+            for (let i = 0; i < trs.args.length; ++i) {
+                bb.writeString(trs.args[i])
+            }
+        }
+
+        if (assetSize > 0) {
+            for (let i = 0; i < assetSize; i++) {
+                bb.writeByte(assetBytes[i]);
+            }
+        }
+
+        if (!skipSignature && trs.signature) {
+            const signatureBuffer = Buffer.from(trs.signature, 'hex');
+            for (let i = 0; i < signatureBuffer.length; i++) {
+                bb.writeByte(signatureBuffer[i]);
+            }
+        }
+
+        if (!skipSecondSignature && trs.sign_signature) { //wxm block database
+            const signSignatureBuffer = Buffer.from(trs.sign_signature, 'hex');
+            for (let i = 0; i < signSignatureBuffer.length; i++) {
+                bb.writeByte(signSignatureBuffer[i]);
+            }
+        }
+
+        bb.flip();
+
+        return bb.toBuffer();
+    }
+
+    async getHash(trs) {
+        return await DdnCrypto.getHash(trs);
+    }
+
+    // TODO: 注意使用 @ddn/crypto 的对应方法重构 2020.5.3
+    // async verifyBytes(bytes, publicKey, signature) {
+    async verifyBytes(bytes, signature, publicKey) {
+        return DdnCrypto.verifyBytes(bytes, signature, publicKey);
+    }
+
+    /**
+     * 验证签名方法，可以用于多重签名交易
+     * @param {object} trs 交易
+     * @param {string} signature 签名，如果是多重签名账户，可能是其他用户的签名
+     * @param {string} publicKey 公钥
+     */
+    async verifySignature(trs, signature, publicKey) {
         if (!this._assets.hasType(trs.type)) {
             throw new Error(`Unknown transaction type ${trs.type}`)
         }
         if (!signature) {
             return false;
         }
-        const bytes = await DdnCrypto.getBytes(trs, true, true);
-        // const bytes = await this.getBytes(trs, true, true);
-        return await DdnCrypto.verifyBytes(bytes, publicKey, signature);
+        // const bytes = await DdnCrypto.getBytes(trs, true, true);
+        const bytes = await this.getBytes(trs, true, true);
+        return DdnCrypto.verifyBytes(bytes, signature, publicKey);
     }
 
     // fixme: 2020.5.15
-    async multisign(keypair, trs) {
+    async multisign(trs, keypair) {
         // const bytes = await this.getBytes(trs, true, true);
         // const hash = crypto.createHash('sha256').update(bytes).digest();
         // console.log('multisign hash........', hash);
@@ -718,9 +710,9 @@ class Transaction {
         // Verify signature
         let valid = false;
         if (trs.requester_public_key) { //wxm block database
-            valid = await this.verifySignature(trs, trs.requester_public_key, trs.signature); //wxm block database
+            valid = await this.verifySignature(trs, trs.signature, trs.requester_public_key); //wxm block database
         } else {
-            valid = await this.verifySignature(trs, trs.senderPublicKey, trs.signature);
+            valid = await this.verifySignature(trs, trs.signature, trs.senderPublicKey);
         }
 
         if (!valid) {
@@ -733,12 +725,12 @@ class Transaction {
 
         // Verify second signature
         if (!trs.requester_public_key && sender.second_signature && !DdnUtils.bignum.isEqualTo(sender.second_signature, 0)) {
-            valid = await this.verifySecondSignature(trs, sender.second_public_key, trs.sign_signature);
+            valid = await this.verifySecondSignature(trs, sender.second_public_key);
             if (!valid) {
                 throw new Error(`Failed to verify second signature: ${trs.id}`);
             }
         } else if (trs.requester_public_key && requester.second_signature && !DdnUtils.bignum.isEqualTo(requester.second_signature, 0)) { //wxm block database
-            valid = await this.verifySecondSignature(trs, requester.second_public_key, trs.sign_signature); //wxm block database
+            valid = await this.verifySecondSignature(trs, requester.second_public_key); //wxm block database
             if (!valid) {
                 throw new Error(`Failed to verify second signature: ${trs.id}`);
             }
@@ -778,7 +770,7 @@ class Transaction {
                         continue;
                     }
 
-                    if (await this.verifySignature(trs, multisignatures[s], trs.signatures[d])) {
+                    if (await this.verifySignature(trs, trs.signatures[d], multisignatures[s])) {
                         verify = true;
                     }
                 }
@@ -819,17 +811,19 @@ class Transaction {
         return await this._assets.call(trs.type, "verify", trs, sender);
     }
 
-    async verifySecondSignature(trs, publicKey, signature) {
+    // TODO: 与 @ddn/crypto 同名方法不同
+    async verifySecondSignature(trs, publicKey) {
         if (!this._assets.hasType(trs.type)) {
             throw Error(`Unknown transaction type ${trs.type}`);
         }
 
-        if (!signature) {
+        if (!trs.signature) {
             return false;
         }
 
-        let bytes = await this.getBytes(trs, false, true);
-        return await this.verifyBytes(bytes, publicKey, signature);
+        // let bytes = await DdnCrypto.getBytes(trs, false, true);
+        const bytes = await this.getBytes(trs, false, true);
+        return await this.verifyBytes(bytes, trs.signature, publicKey);
     }
 }
 

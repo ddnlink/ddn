@@ -4,12 +4,11 @@
  *  Copyright (c) 2019 DDN FOUNDATION. All rights reserved.
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
-
+import ByteBuffer from 'bytebuffer';
 import Asset from '@ddn/asset-base';
 import DdnUtils from '@ddn/utils';
-import ByteBuffer from 'bytebuffer';
-import crypto from 'crypto';
-import ed from 'ed25519';
+import DdnCrypto from '@ddn/crypto';
+
 import daoUtil from './daoUtil.js';
 
 /**
@@ -295,8 +294,7 @@ class Exchange extends Asset.Base {
             throw new Error(`Invalid parameters: ${validateErrors[0].schemaPath} ${validateErrors[0].message}`);
         }
 
-        const hash = crypto.createHash('sha256').update(body.secret, 'utf8').digest();
-        const keypair = ed.MakeKeypair(hash);
+        const keypair = DdnCrypto.getKeys(body.secret);
 
         if (body.publicKey) {
             if (keypair.publicKey.toString('hex') != body.publicKey) {
@@ -357,8 +355,7 @@ class Exchange extends Asset.Base {
             
                     let second_keypair = null;
                     if (requester.second_signature) {
-                        const secondHash = crypto.createHash('sha256').update(body.secondSecret, 'utf8').digest();
-                        second_keypair = ed.MakeKeypair(secondHash);
+                         second_keypair = DdnCrypto.getKeys(body.secondSecret);
                     }
 
                     try {
@@ -399,8 +396,7 @@ class Exchange extends Asset.Base {
 
                     let second_keypair = null;
                     if (account.secondSignature) {
-                        const secondHash = crypto.createHash('sha256').update(body.secondSecret, 'utf8').digest();
-                        second_keypair = ed.MakeKeypair(secondHash);
+                        second_keypair = DdnCrypto.getKeys(body.secondSecret);
                     }
 
                     try {

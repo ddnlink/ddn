@@ -5,6 +5,7 @@
 import ip from "ip";
 
 import DdnUtils from "@ddn/utils";
+import DdnCrypto from "@ddn/crypto";
 
 class PeerService {
     constructor(context) {
@@ -370,7 +371,8 @@ class PeerService {
         }
 
         if (!transaction.id) {
-            transaction.id = await this.runtime.transaction.getId(transaction);
+            // transaction.id = await this.runtime.transaction.getId(transaction); 20205.18
+            transaction.id = await DdnCrypto.getId(transaction);
         }
 
         if (this._invalidTrsCache.has(transaction.id)) {
@@ -406,7 +408,7 @@ class PeerService {
                     } catch (exp) {
                         this.logger.error(
                             `Receive invalid transaction, transaction is ${
-                            transaction
+                            JSON.stringify(transaction)
                             }, ${DdnUtils.system.getErrorMsg(exp)}`
                         );
                         cb(exp);
@@ -419,9 +421,7 @@ class PeerService {
 
                     if (err) {
                         this.logger.error(
-                            `Receive invalid transaction, id is ${
-                            transaction.id
-                            }, ${DdnUtils.system.getErrorMsg(err)}`
+                            `Receive invalid transaction, id is ${transaction.id}, ${DdnUtils.system.getErrorMsg(err)}`
                         );
                         this._invalidTrsCache.set(transaction.id, true);
                         result = {

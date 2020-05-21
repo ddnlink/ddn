@@ -1,15 +1,15 @@
+
+import path from 'path';
+import fs from 'fs';
+import request from 'request';
+import DecompressZip from 'decompress-zip';
+import DdnCrypto from '@ddn/crypto';
 import Asset from '@ddn/asset-base';
 import { Sandbox } from '@ddn/ddn-sandbox';
 import DdnUtils from '@ddn/utils';
 import valid_url from 'valid-url';
 import ByteBuffer from 'bytebuffer';
 import dappCategory from './dapp/dapp-category.js';
-import crypto from 'crypto';
-import ed from 'ed25519';
-import path from 'path';
-import fs from 'fs';
-import request from 'request';
-import DecompressZip from 'decompress-zip';
 
 const WITNESS_CLUB_DAPP_NAME = 'DDN-FOUNDATION'
 
@@ -1240,8 +1240,7 @@ class Dapp extends Asset.Base {
             throw new Error(`Invalid parameters: ${validateErrors[0].schemaPath} ${validateErrors[0].message}`);
         }
 
-        const hash = crypto.createHash('sha256').update(body.secret, 'utf8').digest();
-        const keypair = ed.MakeKeypair(hash);
+        const keypair = DdnCrypto.getKeys(body.secret);
 
         if (body.publicKey) {
             if (keypair.publicKey.toString('hex') != body.publicKey) {
@@ -1268,8 +1267,7 @@ class Dapp extends Asset.Base {
 
                 let second_keypair = null;
                 if (account.secondSignature) {
-                    const secondHash = crypto.createHash('sha256').update(body.secondSecret, 'utf8').digest();
-                    second_keypair = ed.MakeKeypair(secondHash);
+                    second_keypair = DdnCrypto.getKeys(body.secondSecret);
                 }
 
                 try {
