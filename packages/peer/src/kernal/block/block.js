@@ -6,11 +6,11 @@ import os from "os";
 
 import ip from "ip";
 import assert from "assert";
-import ed from "ed25519";
+import nacl from 'tweetnacl';
+
 import ByteBuffer from "bytebuffer";
 import DdnUtils from "@ddn/utils";
-import crypto from "crypto";
-
+import DdnCrypto from "@ddn/crypto";
 import BlockStatus from "./block-status";
 
 const {
@@ -128,19 +128,18 @@ class Block {
         return bb.toBuffer();
     }
 
-    // TODO: 2020.5.5 使用 @ddn/crypto 对应方法替代
     getHash(block) {
-        return crypto.createHash('sha256').update(this.getBytes(block)).digest();
+        return DdnCrypto.createHash(this.getBytes(block));
     }
 
-    sign(block, keypair) {
+    // 2020.5.20 使用 NaCI 替代
+    sign(block, {privateKey}) {
         const hash = this.getHash(block);
-        return ed.Sign(hash, keypair).toString('hex');
+        return Buffer.from(nacl.sign.detached(hash, Buffer.from(privateKey, "hex"))).toString('hex');
     }
 
     getId(block) {
-        const hash = crypto.createHash('sha256').update(this.getBytes(block)).digest();
-        return hash.toString('hex')
+        return this.getHash(block).toString('hex')
     }
 
     async objectNormalize(block) {
@@ -173,6 +172,7 @@ class Block {
      */
     async handleGenesisBlock() {
         const genesisblock = this.genesisblock;
+        
         return new Promise((resolve, reject) => {
             this.dao.findOneByPrimaryKey("block", genesisblock.id, null, (err, row) => {
                 if (err) {
@@ -298,7 +298,7 @@ class Block {
         let size = 0;
 
         const blockTransactions = [];
-        const payloadHash = crypto.createHash('sha256');
+        let payloadBytes = '';
 
         for (const transaction of transactions) {
             const bytes = await this.runtime.transaction.getBytes(transaction);
@@ -313,15 +313,17 @@ class Block {
             totalAmount = bignum.plus(totalAmount, transaction.amount);
 
             blockTransactions.push(transaction);
-            payloadHash.update(bytes);
+            payloadBytes += bytes;
         }
+
+        const payloadHash = DdnCrypto.createHash(payloadBytes); //payloadHash.update(bytes); // 类似 push？
 
         let block = {
             version: 0,
             total_amount: totalAmount.toString(), //Bignum update
             total_fee: totalFee.toString(), //Bignum update
             reward: reward.toString(), //Bignum update
-            payload_hash: payloadHash.digest().toString('hex'),
+            payload_hash: payloadHash.toString('hex'),
             timestamp: data.timestamp,
             number_of_transactions: blockTransactions.length,
             payload_length: size,
@@ -697,10 +699,11 @@ class Block {
             for (let i = 0; i < data2.length; i++) {
                 data2[i] = data[i];
             }
-            const hash = crypto.createHash('sha256').update(data2).digest();
+            const hash = DdnCrypto.createHash(data2);
             const blockSignatureBuffer = Buffer.from(block.block_signature, 'hex');
             const generatorPublicKeyBuffer = Buffer.from(block.generator_public_key, 'hex');
-            res = ed.Verify(hash, blockSignatureBuffer || ' ', generatorPublicKeyBuffer || ' ');
+            res = nacl.sign.detached.verify(hash, blockSignatureBuffer || ' ', generatorPublicKeyBuffer || ' ');
+            // res = ed.Verify(hash, blockSignatureBuffer || ' ', generatorPublicKeyBuffer || ' ');
         } catch (e) {
             this.logger.error(e);
             throw Error(e.toString());
@@ -766,7 +769,7 @@ class Block {
 
         let totalFee = bignum.new(0);
 
-        const payloadHash = crypto.createHash('sha256');
+        let payloadBytes = '';
         const appliedTransactions = {};
 
         for (const i in block.transactions) {
@@ -783,13 +786,14 @@ class Block {
             }
 
             appliedTransactions[transaction.id] = transaction;
-            payloadHash.update(bytes);
+            payloadBytes += bytes;
             totalAmount = bignum.plus(totalAmount, transaction.amount);
 
             totalFee = bignum.plus(totalFee, transaction.fee);
         }
+        const payloadHash = DdnCrypto.createHash(payloadBytes);
 
-        if (payloadHash.digest().toString('hex') !== block.payload_hash) {
+        if (payloadHash.toString('hex') !== block.payload_hash) {
             throw new Error(`Invalid payload hash: ${block.id}`)
         }
 
@@ -915,7 +919,8 @@ class Block {
                                 publicKey: transaction.senderPublicKey
                             });
 
-                            transaction.id = await this.runtime.transaction.getId(transaction);
+                            // transaction.id = await this.runtime.transaction.getId(transaction); 2020.5.18
+                            transaction.id = await DdnCrypto.getId(transaction);
                             transaction.block_id = block.id; //wxm block database
 
                             const existsTrs = existsTrsIds.find((item) => {
@@ -1020,7 +1025,7 @@ class Block {
 
             let propose;
             try {
-                propose = this.runtime.consensus.createPropose(keypair, block, serverAddr);
+                propose = await this.runtime.consensus.createPropose(keypair, block, serverAddr);
             } catch (e) {
                 throw new Error(`Failed to create propose: ${e.toString()}`);
             }
@@ -1214,11 +1219,12 @@ class Block {
     }
 
     async loadBlocksOffset(limit, offset, verify) {
-        const newLimit = limit + (offset || 0);
-        const params = {
-            limit: newLimit,
-            offset: offset || 0
-        };
+        // fixme: delete it
+        // const newLimit = limit + (offset || 0);
+        // const params = {
+        //     limit: newLimit,
+        //     offset: offset || 0
+        // };
 
         this.logger.debug(`loadBlockOffset limit: ${limit}, offset: ${offset}, verify: ${verify}`);
 
@@ -1226,7 +1232,7 @@ class Block {
             this.dbSequence.add(async (cb) => {
                 const where = {
                     height: {
-                        $gte: offset || 0
+                        '$gte': offset || 0
                     }
                 }
 

@@ -1,5 +1,4 @@
 import ByteBuffer from "bytebuffer";
-import DdnUtils from '@ddn/utils';
 import Asset from '@ddn/asset-base';
 
 // TODO: 注意扩展更多交易类型
@@ -7,60 +6,71 @@ async function getBytes(transaction, skipSignature, skipSecondSignature) {
     let assetSize = 0;
     let assetBytes = null;
 
-    switch (transaction.type) {
-        case DdnUtils.assetTypes.SIGNATURE: // Signature
-            {
-                assetBytes = getSignatureBytes(transaction.asset.signature);
-                break;
-            }
+    // FIXME: 建议将 crypto 放在 context 里，并将peer/src/kernal/transaciton方法统一过来
+    // switch (transaction.type) {
+    //     case DdnUtils.assetTypes.SIGNATURE: // Signature
+    //         {
+    //             assetBytes = getSignatureBytes(transaction.asset.signature);
+    //             break;
+    //         }
 
-        case DdnUtils.assetTypes.DELEGATE: // Delegate
-            {
-                assetBytes = Buffer.from(transaction.asset.delegate.username, "utf8");
-                break;
-            }
+    //     case DdnUtils.assetTypes.DELEGATE: // Delegate
+    //         {
+    //             assetBytes = Buffer.from(transaction.asset.delegate.username, "utf8");
+    //             break;
+    //         }
 
-        case DdnUtils.assetTypes.VOTE: // Vote
-            {
-                assetBytes = Buffer.from(transaction.asset.vote.votes.join(""), "utf8");
-                break;
-            }
+    //     case DdnUtils.assetTypes.VOTE: // Vote
+    //         {
+    //             assetBytes = Buffer.from(transaction.asset.vote.votes.join(""), "utf8");
+    //             break;
+    //         }
 
-        case DdnUtils.assetTypes.MULTISIGNATURE: // Multi-Signature
-            {
-                let keysgroupBuffer = Buffer.from(transaction.asset.multisignature.keysgroup.join(""), "utf8");
-                let bb = new ByteBuffer(1 + 1 + keysgroupBuffer.length, true);
+    //     case DdnUtils.assetTypes.MULTISIGNATURE: // Multi-Signature
+    //         {
+    //             let keysgroupBuffer = Buffer.from(transaction.asset.multisignature.keysgroup.join(""), "utf8");
+    //             let bb = new ByteBuffer(1 + 1 + keysgroupBuffer.length, true);
 
-                bb.writeByte(transaction.asset.multisignature.min);
-                bb.writeByte(transaction.asset.multisignature.lifetime);
+    //             bb.writeByte(transaction.asset.multisignature.min);
+    //             bb.writeByte(transaction.asset.multisignature.lifetime);
 
-                for (let i = 0; i < keysgroupBuffer.length; i++) {
-                    bb.writeByte(keysgroupBuffer[i]);
-                }
+    //             for (let i = 0; i < keysgroupBuffer.length; i++) {
+    //                 bb.writeByte(keysgroupBuffer[i]);
+    //             }
 
-                bb.flip();
+    //             bb.flip();
 
-                assetBytes = bb.toBuffer();
-                break;
-            }
+    //             assetBytes = bb.toBuffer();
+    //             break;
+    //         }
 
-        default:
-            {
-                assetBytes = await getAssetBytes(transaction);
-            }
-    }
+    //     default:
+    //         {
+    //             assetBytes = await getAssetBytes(transaction);
+    //         }
+    // }
 
+    assetBytes = await getAssetBytes(transaction);
     if (transaction.__assetBytes__) {
         assetBytes = transaction.__assetBytes__;
     }
     if (assetBytes) assetSize = assetBytes.length
 
-    // fixme: please delete follower +32
-    // if (transaction.requesterPublicKey) {
-    // 	assetSize += 32;
-    // }
+    const size = 1 + // type (int)
+        4 + // timestamp (int)
+        8 + // nethash 8
+        32 + // senderPublicKey (int)
+        32 + // requesterPublicKey (long)
+        8 + // recipientId (long)
+        8 + // amount (long)
+        64 + // message
+        64; // args or unused
 
-    const bb = new ByteBuffer(1, true);
+    const bb = new ByteBuffer(size + assetSize, true);
+    // const bb = new ByteBuffer(1, true);
+    
+    console.log('transaction 107', transaction);
+    
     bb.writeByte(transaction.type); // +1
     bb.writeInt(transaction.timestamp); // +4
     bb.writeString(transaction.nethash); // +8
@@ -125,16 +135,18 @@ async function getBytes(transaction, skipSignature, skipSecondSignature) {
 
     bb.flip();
 
+    return bb.toBuffer();
+
     // competifined browser
-    const arrayBuffer = new Uint8Array(bb.toArrayBuffer());
+    // const arrayBuffer = new Uint8Array(bb.toArrayBuffer());
 
-    const buffer = [];
+    // const buffer = [];
 
-    for (let i = 0; i < arrayBuffer.length; i++) {
-        buffer[i] = arrayBuffer[i];
-    }
+    // for (let i = 0; i < arrayBuffer.length; i++) {
+    //     buffer[i] = arrayBuffer[i];
+    // }
 
-    return Buffer.from(buffer);
+    // return Buffer.from(buffer);
 }
 
 async function getAssetBytes(transaction) {
@@ -156,17 +168,17 @@ async function getAssetBytes(transaction) {
     return null;
 }
 
-function getSignatureBytes({ publicKey }) {
-    const bb = new ByteBuffer(32, true);
-    const publicKeyBuffer = Buffer.from(publicKey, "hex");
+// function getSignatureBytes({ publicKey }) {
+//     const bb = new ByteBuffer(32, true);
+//     const publicKeyBuffer = Buffer.from(publicKey, "hex");
 
-    for (let i = 0; i < publicKeyBuffer.length; i++) {
-        bb.writeByte(publicKeyBuffer[i]);
-    }
+//     for (let i = 0; i < publicKeyBuffer.length; i++) {
+//         bb.writeByte(publicKeyBuffer[i]);
+//     }
 
-    bb.flip();
-    return new Uint8Array(bb.toArrayBuffer());
-}
+//     bb.flip();
+//     return new Uint8Array(bb.toArrayBuffer());
+// }
 
 export {
     getBytes

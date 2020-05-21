@@ -39,7 +39,7 @@ async function genAccount() {
 }
 
 export default function (program) {
-  program
+	program
 		.command("crypto")
 		.description("crypto operations")
 		.option("-p, --pubkey", "generate public key from secret")

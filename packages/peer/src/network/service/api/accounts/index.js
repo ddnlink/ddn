@@ -1,21 +1,19 @@
-const crypto = require('crypto');
-const ed = require('ed25519');
-const Mnemonic = require('bitcore-mnemonic');
+import DdnCrypto from '@ddn/crypto';
+import Mnemonic from 'bitcore-mnemonic';
 
 /**
  * AccountService 接口
  * wangxm   2019-03-22
  */
 class AccountService {
-
     constructor(context) {
         Object.assign(this, context);
         this._context = context;
     }
 
     async get(req) {
-        var query = Object.assign({}, req.body, req.query);
-        var validateErrors = await this.ddnSchema.validate({
+        const query = Object.assign({}, req.body, req.query);
+        const validateErrors = await this.ddnSchema.validate({
             type: "object",
             properties: {
                 address: {
@@ -29,7 +27,7 @@ class AccountService {
             throw new Error(validateErrors[0].message);
         }
 
-        var account = await this.runtime.account.getAccountByAddress(query.address);
+        let account = await this.runtime.account.getAccountByAddress(query.address);
         if (!account) {
             account = {
                 address: query.address,
@@ -46,7 +44,7 @@ class AccountService {
             };
         }
 
-        var lastBlock = this.runtime.block.getLastBlock();
+        const lastBlock = this.runtime.block.getLastBlock();
         return {
             success: true,
             account: {
@@ -60,10 +58,10 @@ class AccountService {
                 second_public_key: account.second_public_key,
                 multisignatures: account.multisignatures,
                 u_multisignatures: account.u_multisignatures,
-                lock_height: account.lock_height + ""
+                lock_height: `${account.lock_height}`
             },
             latestBlock: {
-                height: lastBlock.height + "",
+                height: `${lastBlock.height}`,
                 timestamp: lastBlock.timestamp
             },
             version: await this.runtime.peer.version()
@@ -71,8 +69,8 @@ class AccountService {
     }
 
     async getGetBalance(req) {
-        var query = Object.assign({}, req.body, req.query);
-        var validateErrors = await this.ddnSchema.validate({
+        const query = Object.assign({}, req.body, req.query);
+        const validateErrors = await this.ddnSchema.validate({
             type: "object",
             properties: {
                 address: {
@@ -91,15 +89,15 @@ class AccountService {
             throw new Error("Invalid address");
         }
 
-        var account = await this.runtime.account.getAccountByAddress(query.address);
-        var balance = account ? account.balance : 0;
-        var unconfirmedBalance = account ? account.u_balance : 0;
+        const account = await this.runtime.account.getAccountByAddress(query.address);
+        const balance = account ? account.balance : 0;
+        const unconfirmedBalance = account ? account.u_balance : 0;
         return { success: true, balance, unconfirmedBalance };
     }
 
     async getGetPublicKey(req) {
-        var query = Object.assign({}, req.body, req.query);
-        var validateErrors = await this.ddnSchema.validate({
+        const query = Object.assign({}, req.body, req.query);
+        const validateErrors = await this.ddnSchema.validate({
             type: "object",
             properties: {
                 address: {
@@ -113,7 +111,7 @@ class AccountService {
             throw new Error(validateErrors[0].message);
         }
 
-        var account = await this.runtime.account.getAccountByAddress(query.address);
+        const account = await this.runtime.account.getAccountByAddress(query.address);
         if (!account || !account.publicKey) {
             throw new Error("Account does not have a public key");
         }
@@ -121,8 +119,8 @@ class AccountService {
     }
 
     async postGeneratePublicKey(req) {
-        var body = req.body;
-        var validateErrors = await this.ddnSchema.validate({
+        const body = req.body;
+        const validateErrors = await this.ddnSchema.validate({
             type: "object",
             properties: {
                 secret: {
@@ -136,11 +134,11 @@ class AccountService {
             throw new Error(validateErrors[0].message);
         }
 
-        var hash = crypto.createHash('sha256').update(body.secret, 'utf8').digest();
-        var keypair = ed.MakeKeypair(hash);
-        var publicKey = keypair.publicKey.toString('hex')
-        var address = this.runtime.account.generateAddressByPublicKey(publicKey);
-        var account = await this.runtime.account.getAccountByAddress(address);
+        const keypair = DdnCrypto.getKeys(body.secret);
+
+        const publicKey = keypair.publicKey;
+        const address = this.runtime.account.generateAddressByPublicKey(publicKey);
+        let account = await this.runtime.account.getAccountByAddress(address);
         if (!account) {
             account = {
                 address,
@@ -162,27 +160,28 @@ class AccountService {
     }
 
     async getNew(req) {
-        var query = Object.assign({}, req.body, req.query);
+        const query = Object.assign({}, req.body, req.query);
         let ent = Number(query.ent);
-        if ([128, 256, 384].indexOf(ent) === -1) {
+        if (![128, 256, 384].includes(ent)) {
             ent = 128
         }
 
-        var secret = new Mnemonic(ent).toString();
-        var keypair = ed.MakeKeypair(crypto.createHash('sha256').update(secret, 'utf8').digest());
-        var address = this.runtime.account.generateAddressByPublicKey(keypair.publicKey);
+        const secret = new Mnemonic(ent).toString();
+        const keypair = DdnCrypto.getKeys(secret);
+
+        const address = this.runtime.account.generateAddressByPublicKey(keypair.publicKey);
 
         return {
             secret,
-            publicKey: keypair.publicKey.toString('hex'),
-            privateKey: keypair.privateKey.toString('hex'),
+            publicKey: keypair.publicKey,
+            privateKey: keypair.privateKey,
             address
         };
     }
 
     async getTop(req) {
-        var query = Object.assign({}, req.body, req.query);
-        var validateErrors = await this.ddnSchema.validate({
+        const query = Object.assign({}, req.body, req.query);
+        const validateErrors = await this.ddnSchema.validate({
             type: "object",
             properties: {
                 limit: {
@@ -204,21 +203,21 @@ class AccountService {
             query.limit = 100;
         }
         
-        var queryResult = await this.runtime.account.getAccountList({
+        const queryResult = await this.runtime.account.getAccountList({
             sort: [['balance', 'DESC']],    //wxm block database
             offset: query.offset,
             limit: query.limit
         });
-        var accounts = queryResult.map(fullAccount => ({
-            address: fullAccount.address,
-            balance: fullAccount.balance,
-            publicKey: fullAccount.publicKey
+        const accounts = queryResult.map(({address, balance, publicKey}) => ({
+            address,
+            balance,
+            publicKey
         }));
         return {success: true, accounts};
     }
 
     async getCount(req) {
-        var count = await new Promise((resolve, reject) => {
+        const count = await new Promise((resolve, reject) => {
             this.dao.count('mem_account', null,
                 (err, count) => {
                 if (err) {
@@ -232,8 +231,8 @@ class AccountService {
     }
 
     async postOpen(req) {
-        var body = req.body;
-        var validateErrors = await this.ddnSchema.validate({
+        const body = req.body;
+        const validateErrors = await this.ddnSchema.validate({
             type: "object",
             properties: {
                 secret: {
@@ -248,11 +247,11 @@ class AccountService {
             throw new Error(validateErrors[0].message);
         }
 
-        var hash = crypto.createHash('sha256').update(body.secret, 'utf8').digest();
-        var keypair = ed.MakeKeypair(hash);
-        var publicKey = keypair.publicKey.toString('hex');
-        var address = this.runtime.account.generateAddressByPublicKey(publicKey);
-        var account = await this.runtime.account.getAccountByAddress(address);
+        const keypair = DdnCrypto.getKeys(body.secret);
+        
+        const publicKey = keypair.publicKey;
+        const address = this.runtime.account.generateAddressByPublicKey(publicKey);
+        let account = await this.runtime.account.getAccountByAddress(address);
         if (!account) {
             account = {
                 address,
@@ -285,8 +284,8 @@ class AccountService {
     }
 
     async postOpen2(req) {
-        var body = req.body;
-        var validateErrors = await this.ddnSchema.validate({
+        const body = req.body;
+        const validateErrors = await this.ddnSchema.validate({
             type: "object",
             properties: {
                 publicKey: {
@@ -300,8 +299,8 @@ class AccountService {
             throw new Error(validateErrors[0].message);
         }
 
-        var address = this.runtime.account.generateAddressByPublicKey(body.publicKey);
-        var account = await this.runtime.account.getAccountByAddress(address);
+        const address = this.runtime.account.generateAddressByPublicKey(body.publicKey);
+        let account = await this.runtime.account.getAccountByAddress(address);
         if (!account) {
             account = {
                 address,
@@ -316,7 +315,7 @@ class AccountService {
             };
         }
 
-        var accountData = {
+        const accountData = {
             address: account.address,
             unconfirmed_balance: account.u_balance,
             balance: account.balance,
@@ -329,13 +328,13 @@ class AccountService {
             lock_height: account.lock_height || 0
         };
 
-        var lastBlock = this.runtime.block.getLastBlock();
+        const lastBlock = this.runtime.block.getLastBlock();
 
         return {
             success: true,
             account: accountData,
             latestBlock: {
-              height: lastBlock.height + "",
+              height: `${lastBlock.height}`,
               timestamp: lastBlock.timestamp
             },
             version: await this.runtime.peer.version()
@@ -343,4 +342,4 @@ class AccountService {
     }
 }
 
-module.exports = AccountService;
+export default AccountService;

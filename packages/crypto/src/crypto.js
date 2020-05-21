@@ -6,7 +6,6 @@
  *--------------------------------------------------------------------------------------------*/
 
 import nacl from 'tweetnacl';
-import sha256 from "fast-sha256";
 import RIPEMD160 from "ripemd160";
 import Mnemonic from "bitcore-mnemonic";
 import base58check from "./base58check";
@@ -47,8 +46,17 @@ function randomString(max) {
 
 // 根据助记词生成密钥对
 function keypair(secret) {
-    const hash = Buffer.from(sha256.hash(Buffer.from(secret)))
-    const keypair = nacl.sign.keyPair.fromSeed(hash);
+    return getKeys(secret);
+}
+
+// 兼容处理
+function getKeys(secret) {
+    const hash = createHash(Buffer.from(secret));
+    
+    const m = new Uint8Array(nacl.sign.seedLength);
+    for (let i = 0; i < m.length; i++) m[i] = hash[i];
+    
+    const keypair = nacl.sign.keyPair.fromSeed(m);
 
     return {
         publicKey: bufToHex(keypair.publicKey),
@@ -56,40 +64,27 @@ function keypair(secret) {
     }
 }
 
-// 兼容处理
-function getKeys(secret) {
-    return keypair(secret);
-}
-
-// TODO: sign(keypair, data) -> sign(data, keypair)
-async function sign(transaction, {privateKey}) {
+// TODO: sign(keypair, transaction) -> sign(transaction, keypair)
+async function sign(transaction, {privateKey}) {    
     const hash = await getHash(transaction, true, true);
-    // console.log('hash typeof', typeof hash);
     
     const signature = nacl.sign.detached(
         hash,
         Buffer.from(privateKey, "hex")
     );
-    if (!transaction.signature) {
-        // eslint-disable-next-line require-atomic-updates
-        transaction.signature = bufToHex(signature);
-    } else {
-        return bufToHex(signature);
-    }
+
+    return bufToHex(signature);
 }
 
 async function secondSign(transaction, {privateKey}) {
     const hash = await getHash(transaction);
     const signature = nacl.sign.detached(hash, Buffer.from(privateKey, "hex"));
-    // eslint-disable-next-line require-atomic-updates
-    transaction.sign_signature = Buffer.from(signature).toString("hex")    //wxm block database
+    return bufToHex(signature);
 }
 
 // hex
-async function getId(data) {
-    const hash = await getHash(data);
-    console.log('hash: ', hash);
-    
+async function getId(transaction) {
+    const hash = await getHash(transaction);
     return hash.toString("hex");
 }
 
@@ -130,25 +125,22 @@ function generateAddress(publicKey, tokenPrefix) {
     if (typeof publicKey === "string") {
         publicKey = Buffer.from(publicKey, "hex");
     }
-    const h1 = sha256.hash(publicKey);
+    const h1 = nacl.hash(publicKey);
+    
     const h2 = new RIPEMD160().update(Buffer.from(h1)).digest();
     return tokenPrefix + base58check.encode(h2);
 }
 
-// note: tweetnacl 包的所有方法必须使用 Uint8Array 类型的参数，其他的 buffer 类型不能使用。
+// note: tweetnacl 包的所有方法必须使用 Uint8Array 类型的参数。
 async function getHash(trs, skipSignature, skipSecondSignature) {
     const bytes = await getBytes(trs, skipSignature, skipSecondSignature);
-    // return new Uint8Array(sha256.hash(bytes));
-    return Buffer.from(sha256.hash(bytes));
-}
-
-function bufToHex(data) {
-    return Buffer.from(data).toString("hex");
+    return Buffer.from(nacl.hash(bytes));
 }
 
 // 验证，计划重构： peer/src/kernal/transaction.js  2020.5.3
 function verifyBytes(bytes, signature, publicKey) {
-    const hash = sha256Bytes(Buffer.from(bytes, 'hex'));
+    const hash = createHash(Buffer.from(bytes, 'hex'));
+    // const arrayHash = new Uint8Array(hash);
     const signatureBuffer = Buffer.from(signature, "hex");
     const publicKeyBuffer = Buffer.from(publicKey, "hex");
     const res = nacl.sign.detached.verify(hash, signatureBuffer, publicKeyBuffer);
@@ -158,8 +150,6 @@ function verifyBytes(bytes, signature, publicKey) {
 async function verify(transaction) {
     let remove = 64;
 
-    // console.log("transaction", transaction);
-    
     if (transaction.sign_signature) {
         remove = 128;
     }
@@ -171,7 +161,7 @@ async function verify(transaction) {
         data2[i] = bytes[i];
     }
 
-    const hash = sha256Bytes(data2);
+    const hash = createHash(data2);
 
     const signatureBuffer = Buffer.from(transaction.signature, "hex");
     const senderPublicKeyBuffer = Buffer.from(transaction.senderPublicKey, "hex");
@@ -188,7 +178,7 @@ async function verifySecondSignature(transaction, publicKey) {
         data2[i] = bytes[i];
     }
 
-    const hash = sha256Bytes(data2);
+    const hash = createHash(data2);
 
     const signSignatureBuffer = Buffer.from(transaction.sign_signature, "hex");
     const publicKeyBuffer = Buffer.from(publicKey, "hex");
@@ -197,9 +187,20 @@ async function verifySecondSignature(transaction, publicKey) {
     return res;
 }
 
+/**
+ * 使用中注意 data 格式，默认是字符串，如果是涉密字段（经过 buffer、签名、加密的字段）都是可以直接使用的
+ * 返回值为 Buffer
+ * @param {String}  data 需要 hash 的数据，格式为 unit8Arrary, 这里的方法与 crypto.createHash('sha256').update(strBuffer).digest() 相似，结果不同
+ */
+function createHash(data) {
+    if (!(data instanceof Buffer)) {
+        data = Buffer.from(data);
+    }
+    return Buffer.from(nacl.hash(data));
+}
 
-function sha256Bytes(data) {
-    return Buffer.from(sha256.hash(data));
+function bufToHex(data) {
+    return Buffer.from(data).toString("hex");
 }
 
 export default {
@@ -220,7 +221,7 @@ export default {
     base58check,
 
     // packages
-    sha256,
+    createHash,
     sign,
     secondSign,
 

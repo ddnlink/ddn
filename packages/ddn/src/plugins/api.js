@@ -1,14 +1,13 @@
 import fs from 'fs';
-import crypto from 'crypto';
-import cryptoLib from '@ddn/crypto';
+import DdnCrypto from '@ddn/crypto';
 import ddnJS from '@ddn/node-sdk';
-import Api from '../helpers/api.js';
-import blockHelper from '../helpers/block.js';
+import Api from '../helpers/api';
+import blockHelper from '../helpers/block';
 
 let globalOptions;
 
 function getApi() {
-  return new Api({host: globalOptions.host, port: globalOptions.port, mainnet: !!globalOptions.main});
+  return new Api({ host: globalOptions.host, port: globalOptions.port, mainnet: !!globalOptions.main });
 }
 
 function pretty(obj) {
@@ -16,13 +15,13 @@ function pretty(obj) {
 }
 
 function openAccount(secret) {
-  getApi().post('/api/accounts/open', {secret: secret}, function (err, result) {
+  getApi().post('/api/accounts/open', { secret: secret }, function (err, result) {
     console.log(err || pretty(result.account));
   });
 }
 
 function openAccountByPublicKey(publicKey) {
-  getApi().post('/api/accounts/open2', {publicKey: publicKey}, function (err, result) {
+  getApi().post('/api/accounts/open2', { publicKey: publicKey }, function (err, result) {
     console.log(err || pretty(result.account));
   });
 }
@@ -40,14 +39,14 @@ function getBlockStatus() {
 }
 
 function getBalance(address) {
-  var params = {address: address};
+  var params = { address: address };
   getApi().get('/api/accounts/getBalance', params, function (err, result) {
     console.log(err || result.balance);
   });
 }
 
 function getAccount(address) {
-  var params = {address: address};
+  var params = { address: address };
   getApi().get('/api/accounts/', params, function (err, result) {
     console.log(err || pretty(result.account));
   });
@@ -82,21 +81,21 @@ function getDelegatesCount() {
 }
 
 function getVoters(publicKey) {
-  var params = {publicKey: publicKey};
+  var params = { publicKey: publicKey };
   getApi().get('/api/delegates/voters', params, function (err, result) {
     console.log(err || pretty(result.accounts));
   });
 }
 
 function getDelegateByPublicKey(publicKey) {
-  var params = {publicKey: publicKey};
+  var params = { publicKey: publicKey };
   getApi().get('/api/delegates/get', params, function (err, result) {
     console.log(err || pretty(result.delegate));
   });
 }
 
 function getDelegateByUsername(username) {
-  var params = {username: username};
+  var params = { username: username };
   getApi().get('/api/delegates/get', params, function (err, result) {
     console.log(err || pretty(result.delegate));
   });
@@ -118,14 +117,14 @@ function getBlocks(options) {
 }
 
 function getBlockById(id) {
-  var params = {id: id};
+  var params = { id: id };
   getApi().get('/api/blocks/get', params, function (err, result) {
     console.log(err || pretty(result.block));
   });
 }
 
 function getBlockByHeight(height) {
-  var params = {height: height};
+  var params = { height: height };
   getApi().get('/api/blocks/get', params, function (err, result) {
     console.log(err || pretty(result.block));
   });
@@ -177,7 +176,7 @@ function getTransactions(options) {
 }
 
 function getTransaction(id) {
-  var params = {id: id};
+  var params = { id: id };
   getApi().get('/api/transactions/get', params, function (err, result) {
     console.log(err || pretty(result.transaction));
   });
@@ -230,17 +229,15 @@ async function registerDelegate(options) {
 }
 
 async function vote(secret, publicKeys, op, secondSecret) {
-    if (!secret)
-    {
-        console.log("secret required.");
-        return;
-    }
+  if (!secret) {
+    console.log("secret required.");
+    return;
+  }
 
-    if (!publicKeys)
-    {
-        console.log("publicKeys required.");
-        return;
-    }
+  if (!publicKeys) {
+    console.log("publicKeys required.");
+    return;
+  }
 
   var votes = publicKeys.split(',').map(function (el) {
     return op + el;
@@ -256,57 +253,54 @@ async function vote(secret, publicKeys, op, secondSecret) {
 }
 
 function listdiffvotes(options) {
-    var params = {username: options.username};
-    getApi().get('/api/delegates/get', params, function (err, result) {
-        if (err)
-        {
-            console.log(err);
-            return;
+  var params = { username: options.username };
+  getApi().get('/api/delegates/get', params, function (err, result) {
+    if (err) {
+      console.log(err);
+      return;
+    }
+
+    var publicKey = result.delegate.publicKey;
+    var params = {
+      address: result.delegate.address,
+      limit: options.limit || 101,
+      offset: options.offset || 0,
+    };
+    getApi().get('/api/accounts/delegates', params, function (err, result) {
+      if (err) {
+        console.log(err);
+        return;
+      }
+
+      var names_a = [];
+      for (var i = 0; i < result.delegates.length; ++i) {
+        names_a[i] = result.delegates[i].username;
+      }
+      var a = new Set(names_a);
+      var params = { publicKey: publicKey };
+      getApi().get('/api/delegates/voters', params, function (err, result) {
+        if (err) {
+          console.log(err);
+          return;
         }
 
-        var publicKey = result.delegate.publicKey;
-        var params = {
-          address: result.delegate.address,
-          limit: options.limit || 101,
-          offset: options.offset || 0,
-        };
-        getApi().get('/api/accounts/delegates', params, function (err, result) {
-            if (err)
-            {
-                console.log(err);
-                return;
-            }
-            
-            var names_a = [];
-            for (var i = 0; i < result.delegates.length; ++i) {
-                names_a[i] = result.delegates[i].username;
-            }
-            var a = new Set(names_a);
-            var params = {publicKey: publicKey};
-            getApi().get('/api/delegates/voters', params, function (err, result) {
-                if (err)
-                {
-                    console.log(err);
-                    return;
-                }
-
-                var names_b = [];
-                for (var i = 0; i < result.accounts.length; ++i) {
-                    names_b[i] = result.accounts[i].username;
-                }
-                var b = new Set(names_b);
-                var diffab = [...a].filter(x => {
-                    return x != null && !b.has(x);
-                });
-                var diffba = [...b].filter(x => {
-                    return x != null && !a.has(x);
-                });
-                
-                console.log('you voted but doesn\'t vote you: \n\t', JSON.stringify(diffab));
-                console.log('\nvoted you but you don\'t voted: \n\t', JSON.stringify(diffba));
-            });
+        var names_b = [];
+        for (var i = 0; i < result.accounts.length; ++i) {
+          names_b[i] = result.accounts[i].username;
+        }
+        var b = new Set(names_b);
+        var diffab = [...a].filter(x => {
+          return x != null && !b.has(x);
         });
+        var diffba = [...b].filter(x => {
+          return x != null && !a.has(x);
+        });
+
+        console.log('you voted but doesn\'t vote you: \n\t', JSON.stringify(diffab));
+        console.log('\nvoted you but you don\'t voted: \n\t', JSON.stringify(diffba));
+      });
     });
+  });
 }
 
 function upvote(options) {
@@ -332,21 +326,21 @@ async function registerDapp(options) {
   ddnJS.init.init(options.nethash);
   var dapp = JSON.parse(fs.readFileSync(options.metafile, 'utf8'));
   var trs = await ddnJS.assetPlugin.createPluginAsset(11, dapp, options.secret, options.secondSecret);
-//   var trs = ddnJS.dapp.createDApp(dapp, options.secret, options.secondSecret);
+  //   var trs = ddnJS.dapp.createDApp(dapp, options.secret, options.secondSecret);
   getApi().broadcastTransaction(trs, function (err, result) {
     console.log(err || result.transactionId)
   });
 }
 
 async function deposit(options) {
-    ddnJS.init.init(options.nethash);
-    const dapp = {
-        dapp_id: options.dapp,
-        currency: options.currency,
-        amount: options.amount
-    };
-    const trs = await ddnJS.assetPlugin.createPluginAsset(12, dapp, options.secret, options.secondSecret);
-//   var trs = ddnJS.transfer.createInTransfer(options.dapp, options.currency, options.amount, options.secret, options.secondSecret)
+  ddnJS.init.init(options.nethash);
+  const dapp = {
+    dapp_id: options.dapp,
+    currency: options.currency,
+    amount: options.amount
+  };
+  const trs = await ddnJS.assetPlugin.createPluginAsset(12, dapp, options.secret, options.secondSecret);
+  //   var trs = ddnJS.transfer.createInTransfer(options.dapp, options.currency, options.amount, options.secret, options.secondSecret)
   getApi().broadcastTransaction(trs, function (err, result) {
     console.log(err || result.transactionId)
   });
@@ -364,7 +358,7 @@ function dappTransaction(options) {
 }
 
 async function lock(options) {
-    ddnJS.init.init(options.nethash);
+  ddnJS.init.init(options.nethash);
   var trs = await ddnJS.transaction.createLock(options.height, options.secret, options.secondSecret)
   getApi().broadcastTransaction(trs, function (err, result) {
     console.log(err || result.transactionId)
@@ -384,7 +378,7 @@ function getFullBlockByHeight(height) {
 }
 
 async function getTransactionBytes(options) {
-    ddnJS.init.init(options.nethash);
+  ddnJS.init.init(options.nethash);
   try {
     var trs = JSON.parse(fs.readFileSync(options.file))
   } catch (e) {
@@ -398,7 +392,7 @@ async function getTransactionBytes(options) {
 }
 
 async function getTransactionId(options) {
-    ddnJS.init.init(options.nethash);
+  ddnJS.init.init(options.nethash);
   try {
     var trs = JSON.parse(fs.readFileSync(options.file))
   } catch (e) {
@@ -410,23 +404,27 @@ async function getTransactionId(options) {
 }
 
 async function getBlockPayloadHash(options) {
-    ddnJS.init.init(options.nethash);
+  ddnJS.init.init(options.nethash);
+  let block;
   try {
-    var block = JSON.parse(fs.readFileSync(options.file))
+    block = JSON.parse(fs.readFileSync(options.file))
   } catch (e) {
     console.log('Invalid transaction format')
     return
   }
-  var payloadHash = crypto.createHash('sha256');
+  let payloadBytes = ''; 
   for (let i = 0; i < block.transactions.length; ++i) {
-    payloadHash.update(await ddnJS.crypto.getBytes(block.transactions[i]))
+    payloadBytes += await ddnJS.crypto.getBytes(block.transactions[i]);
   }
-  console.log(payloadHash.digest().toString('hex'))
+  const payloadHash = DdnCrypto.createHash(payloadBytes);
+
+  console.log(payloadHash.toString('hex'))
 }
 
 function getBlockBytes(options) {
+  let block;
   try {
-    var block = JSON.parse(fs.readFileSync(options.file))
+    block = JSON.parse(fs.readFileSync(options.file))
   } catch (e) {
     console.log('Invalid transaction format')
     return
@@ -435,37 +433,38 @@ function getBlockBytes(options) {
 }
 
 function getBlockId(options) {
+  let block;
   try {
-    var block = JSON.parse(fs.readFileSync(options.file))
+    block = JSON.parse(fs.readFileSync(options.file))
   } catch (e) {
     console.log('Invalid transaction format')
     return
   }
-  var bytes = blockHelper.getBytes(block)
-  console.log(cryptoLib.getId(bytes))
+  const bytes = blockHelper.getBytes(block)
+  console.log(DdnCrypto.getId(bytes))
 }
 
 function verifyBytes(options) {
   console.log(ddnJS.crypto.verifyBytes(options.bytes, options.signature, options.publicKey))
 }
 
-export default function(program) {
+export default function (program) {
   globalOptions = program;
-  
+
   program
     .command("getHeight")
     .description("get block height")
     .action(getHeight);
-    
- program
+
+  program
     .command("getBlockstatus")
     .description("get block status")
-    .action(getBlockStatus);   
-  
- program
-   .command("openAccount [secret]")
-   .description("open your account and get the infomation by secret")
-   .action(openAccount);
+    .action(getBlockStatus);
+
+  program
+    .command("openAccount [secret]")
+    .description("open your account and get the infomation by secret")
+    .action(openAccount);
 
   program
     .command("openAccountByPublickey [publickey]")
@@ -476,24 +475,24 @@ export default function(program) {
     .command("getBalance [address]")
     .description("get balance by address")
     .action(getBalance);
-    
+
   program
     .command("getAccount [address]")
     .description("get account by address")
     .action(getAccount);
-     
+
   program
     .command("getVotedDelegates [address]")
     .description("get delegates voted by address")
     .option("-o, --offset <n>", "")
     .option("-l, --limit <n>", "")
     .action(getVotedDelegates);
-    
+
   program
     .command("getDelegatesCount")
     .description("get delegates count")
     .action(getDelegatesCount);
-    
+
   program
     .command("getDelegates")
     .description("get delegates")
@@ -501,12 +500,12 @@ export default function(program) {
     .option("-l, --limit <n>", "")
     .option("-s, --sort <field:mode>", "rate:asc, vote:desc, ...")
     .action(getDelegates);
-    
+
   program
     .command("getVoters [publicKey]")
     .description("get voters of a delegate by public key")
     .action(getVoters);
-    
+
   program
     .command("getDelegateByPublickey [publicKey]")
     .description("get delegate by public key")
@@ -516,7 +515,7 @@ export default function(program) {
     .command("getDelegateByUsername [username]")
     .description("get delegate by username")
     .action(getDelegateByUsername);
-    
+
   program
     .command("getBlocks")
     .description("get blocks")
@@ -528,17 +527,17 @@ export default function(program) {
     .option("-g, --generatorPublicKey <publicKey>", "")
     .option("-s, --sort <field:mode>", "height:asc, totalAmount:asc, totalFee:asc")
     .action(getBlocks);
-    
+
   program
     .command("getBlockById [id]")
     .description("get block by id")
     .action(getBlockById);
-    
+
   program
     .command("getBlockByHeight [height]")
     .description("get block by height")
     .action(getBlockByHeight);
-    
+
   program
     .command("getPeers")
     .description("get peers")
@@ -550,14 +549,14 @@ export default function(program) {
     .option("-p, --port <n>", "")
     .option("--os <os>", "")
     .action(getPeers);
-    
+
   program
     .command("getUnconfirmedTransactions")
     .description("get unconfirmed transactions")
     .option("-k, --key <sender public key>", "")
     .option("-a, --address <address>", "")
     .action(getUnconfirmedTransactions);
-    
+
   program
     .command("getTransactions")
     .description("get transactions")
@@ -573,12 +572,12 @@ export default function(program) {
     .option("--senderId <id>", "")
     .option("--recipientId <id>", "")
     .action(getTransactions);
-    
+
   program
     .command("getTransaction [id]")
     .description("get transactions")
     .action(getTransaction);
-    
+
   program
     .command("sendToken")
     .description("send token to some address")
@@ -589,7 +588,7 @@ export default function(program) {
     .option("-m, --message <message>", "")
     .option("-n, --nethash <nethash>", "fl6ybowg")
     .action(sendMoney);
-  
+
   program
     .command("sendAsset")
     .description("send asset to some address")
@@ -600,7 +599,7 @@ export default function(program) {
     .option("-t, --to <address>", "")
     .option("-m, --message <message>", "")
     .action(sendAsset);
-  
+
   program
     .command("registerDelegate")
     .description("register delegate")
@@ -608,7 +607,7 @@ export default function(program) {
     .option("-s, --secondSecret <secret>", "")
     .option("-u, --username <username>", "")
     .action(registerDelegate);
-    
+
   program
     .command("listDiffVotes")
     .description("list the votes each other")
@@ -622,7 +621,7 @@ export default function(program) {
     .option("-s, --secondSecret <secret>", "")
     .option("-p, --publicKeys <public key list>", "")
     .action(upvote);
-    
+
   program
     .command("downVote")
     .description("cancel vote for delegates")
@@ -630,7 +629,7 @@ export default function(program) {
     .option("-s, --secondSecret <secret>", "")
     .option("-p, --publicKeys <public key list>", "")
     .action(downvote);
-    
+
   program
     .command("setSecondsecret")
     .description("set second secret")
@@ -638,7 +637,7 @@ export default function(program) {
     .option("--newSecondSecret <secret>", "")
     .option("--oldSecondSecret <secret>", "")
     .action(setSecondSecret);
-    
+
   program
     .command("registerDapp")
     .description("register a dapp")
@@ -646,7 +645,7 @@ export default function(program) {
     .option("-s, --secondSecret <secret>", "")
     .option("-f, --metafile <metafile>", "dapp meta file")
     .action(registerDapp);
-  
+
   program
     .command("deposit")
     .description("deposit assets to an app")
@@ -679,7 +678,7 @@ export default function(program) {
     .command("getFullBlockById [id]")
     .description("get full block by block id")
     .action(getFullBlockById);
-  
+
   program
     .command("getFullBlockByHeight [height]")
     .description("get full block by block height")
@@ -690,31 +689,31 @@ export default function(program) {
     .description("get transaction bytes")
     .option("-f, --file <file>", "transaction file")
     .action(getTransactionBytes)
-  
+
   program
     .command("getTransactionId")
     .description("get transaction id")
     .option("-f, --file <file>", "transaction file")
     .action(getTransactionId)
-  
+
   program
     .command("getBlockBytes")
     .description("get block bytes")
     .option("-f, --file <file>", "block file")
     .action(getBlockBytes)
-  
+
   program
     .command("getBlockPayloadHash")
     .description("get block bytes")
     .option("-f, --file <file>", "block file")
     .action(getBlockPayloadHash)
-  
+
   program
     .command("getBlockId")
     .description("get block id")
     .option("-f, --file <file>", "block file")
     .action(getBlockId)
-  
+
   program
     .command("verifyBytes")
     .description("verify bytes/signature/publickey")

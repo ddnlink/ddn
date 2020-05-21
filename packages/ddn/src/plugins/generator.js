@@ -1,14 +1,19 @@
-var chalk = require('chalk');
-var ora = require('ora');
-var fs = require('fs');
+
+import fs from "fs";
+import DdnCrypto from "@ddn/crypto";
 import path from "path";
 
-var inquirer = require('inquirer');
-var shell = require('shelljs');
-var symbols = require('log-symbols');
-var child_process = require('child_process');
-var handlebars = require('handlebars');
+import inquirer from 'inquirer';
+import shell from 'shelljs';
+import symbols from 'log-symbols';
+import child_process from 'child_process';
+import handlebars from 'handlebars';
+import chalk from 'chalk';
+import ora from 'ora';
 import valid_url from "valid-url";
+
+import accountHelper from "../helpers/account";
+import blockHelper from "../helpers/block";
 
 const dappCategories = [
     "Common",
@@ -251,6 +256,11 @@ function generateBlockchain(type, name) {
     tempaleBlockchain(type, name);
 }
 
+// TODO: 产生合约交易
+function generateContract(name) {
+
+}
+
 function tempaleBlockchain(type, name) {
     if (!fs.existsSync(name)) {
         console.log('创建项目...');
@@ -308,9 +318,63 @@ function tempaleBlockchain(type, name) {
     }
 }
 
-// TODO: 产生合约交易
-function generateContract(name) {
+function writeFileSync(file, obj) {
+    const content = (typeof obj === "string" ? obj : JSON.stringify(obj, null, 2));
+    fs.writeFileSync(file, content, "utf8");
+}
 
+function appendFileSync(file, obj) {
+    const content = (typeof obj === "string" ? obj : JSON.stringify(obj, null, 2));
+    fs.appendFileSync(file, content, "utf8");
+}
+
+function genGenesisBlock(options) {
+    
+    const defaultSecret = "enter boring shaft rent essence foil trick vibrant fabric quote indoor output";
+    const secret = (options && options.default) ?  defaultSecret : DdnCrypto.generateSecret();
+    const genesisAccount = accountHelper.account(secret, options.tokenPrefix);
+
+    let index = 0;
+    const Daccount = {};
+    const Eaccount = {};
+
+    // let newBlockInfo;
+    blockHelper.new(genesisAccount, options.nethash, options.tokenName, options.tokenPrefix, null, options.file)
+        .then(function (newBlockInfo) {
+            const delegateSecrets = newBlockInfo.delegates.map(i => {
+                const rv = (Math.random() * 100 + index).toFixed(0) % 3;
+                if (rv == 0) {
+                    Daccount.address = i.address;
+                    Daccount.publicKey = i.keypair.publicKey;
+                    Daccount.password = i.secret;
+                } else if (rv == 2) {
+                    Eaccount.address = i.address;
+                    Eaccount.publicKey = i.keypair.publicKey;
+                    Eaccount.password = i.secret;
+                }
+                index++;
+
+                return i.secret;
+            });
+
+            genesisAccount.nethash = newBlockInfo.nethash;
+            const filename = options.file || "./genesisBlock";
+
+            writeFileSync(filename + ".json", newBlockInfo.block);
+
+            const logFile = filename + ".log";
+            writeFileSync(logFile, "genesis account:\n");
+            appendFileSync(logFile, genesisAccount);
+            appendFileSync(logFile, "\nDaccount:\n");
+            appendFileSync(logFile, Daccount);
+            appendFileSync(logFile, "\nEaccount:\n");
+            appendFileSync(logFile, Eaccount);
+            appendFileSync(logFile, "\ndelegates secrets:\n");
+            appendFileSync(logFile, delegateSecrets);
+            console.log(`New genesis block and related account has been created, please see the two files: ${filename} and ${logFile}`);
+        }).catch(function (err) {
+            console.log('err=', err);
+        });
 }
 
 export default function (program) {
@@ -334,4 +398,14 @@ export default function (program) {
                     break;
             }
         });
+
+    program
+        .command("createGenesis")
+        .description("create genesis block")
+        .option("-f, --file <file>", "genesis accounts balance file")
+        .option("-d, --default", "genesisAccount`s secret, default is the testnet secret")
+        .option("-n, --nethash <nethash>", "default to generate a new nethash")
+        .option("-p, --tokenPrefix <prefix>", "default is `D`")
+        .option("-t, --tokenName <name>", "default is `DDN`")
+        .action(genGenesisBlock);
 }

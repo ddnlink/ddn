@@ -1,6 +1,7 @@
-import crypto from 'crypto';
+import nacl from 'tweetnacl';
+
 import fs from 'fs';
-import cryptoLib from '@ddn/crypto';
+import DdnCrypto from '@ddn/crypto';
 import DdnUtils from '@ddn/utils';
 import ByteBuffer from 'bytebuffer';
 import config from '../config';
@@ -8,22 +9,24 @@ import transactionsLib from '../transactions';
 import accounts from './account.js';
 const { bignum, assetTypes } = DdnUtils;
 
+// 针对区块的
 function getBytes(block, skipSignature) {
 	// const size = 4 + 4 + 8 + 4 + 8 + 8 + 8 + 4 + 32 + 32 + 64;
 	const size =
-	4 + // version (int)
-    4 + // timestamp (int)
-    64 + // previousBlock 64
-    4 + // numberOfTransactions (int)
-    64 + // totalAmount (long)
-    64 + // totalFee (long)
-    64 + // reward (long)
-    4 + // payloadLength (int)
-    32 + // payloadHash
-    32 + // generatorPublicKey
-	64; // blockSignature or unused
-	
+		4 + // version (int)
+		4 + // timestamp (int)
+		64 + // previousBlock 64
+		4 + // numberOfTransactions (int)
+		64 + // totalAmount (long)
+		64 + // totalFee (long)
+		64 + // reward (long)
+		4 + // payloadLength (int)
+		32 + // payloadHash
+		32 + // generatorPublicKey
+		64; // blockSignature or unused
+
 	const bb = new ByteBuffer(size, true);
+	
 	bb.writeInt(block.version);
 	bb.writeInt(block.timestamp);
 
@@ -34,7 +37,7 @@ function getBytes(block, skipSignature) {
 	}
 
 	bb.writeInt(block.number_of_transactions);    //wxm block database
-	
+
 	bb.writeString(bignum.new(block.total_amount).toString());   //wxm block database
 	bb.writeString(bignum.new(block.total_fee).toString());  //wxm block database
 	bb.writeString(bignum.new(block.reward).toString());
@@ -60,36 +63,52 @@ function getBytes(block, skipSignature) {
 	}
 
 	bb.flip();
-	const b = bb.toBuffer();
 
-	return b;
+	return bb.toBuffer();
+}
+
+// for block
+function getHash(block) {
+	return Buffer.from(nacl.hash(getBytes(block)));
+}
+
+function sign(block,  {privateKey}) {
+	const hash = getHash(block);
+
+	const data = nacl.sign.detached(hash, Buffer.from(privateKey, "hex"));
+	return Buffer.from(data).toString("hex");
+}
+
+function getId(block) {
+	return getHash(block).toString('hex')
 }
 
 export default {
 	getBytes,
-	new({address, keypair}, nethash, tokenName, tokenPrefix, dapp, accountsFile) {
-        let payloadLength = 0;
-        let payloadHash = crypto.createHash('sha256');
-        let transactions = [];
-        let totalAmount = '0';
-        const delegates = [];
+	async new({ address, keypair }, nethash, tokenName, tokenPrefix, dapp, accountsFile) {
+		let payloadLength = 0;
+		// let payloadBytes = new ByteBuffer(1, true); 
+		let payloadHash = null; 
+		let transactions = [];
+		let totalAmount = '0';
+		const delegates = [];
 
-        if (!nethash) {
-			nethash = cryptoLib.randomNethash();
+		if (!nethash) {
+			nethash = DdnCrypto.randomNethash();
 		}
 
-        if (!tokenName) {
+		if (!tokenName) {
 			tokenName = 'DDN';
 		}
 
-        if (!tokenPrefix) {
+		if (!tokenPrefix) {
 			tokenPrefix = 'D';
 		}
 
-        const sender = accounts.account(cryptoLib.generateSecret(), tokenPrefix);
+		const sender = accounts.account(DdnCrypto.generateSecret(), tokenPrefix);
 
-        // fund recipient account
-        if (accountsFile && fs.existsSync(accountsFile)) {
+		// fund recipient account
+		if (accountsFile && fs.existsSync(accountsFile)) {
 			const lines = fs.readFileSync(accountsFile, 'utf8').split('\n');
 			for (let i in lines) {
 				const parts = lines[i].split('  ');
@@ -110,10 +129,8 @@ export default {
 				};
 				totalAmount = bignum.plus(totalAmount, trs.amount);
 
-				// let bytes = transactionsLib.getTransactionBytes(trs);
-				trs.signature = cryptoLib.sign(sender.keypair, bytes);
-				let bytes = transactionsLib.getTransactionBytes(trs);
-				trs.id = cryptoLib.getId(bytes);
+				trs.signature = await DdnCrypto.sign(trs, sender.keypair);
+				trs.id = await DdnCrypto.getId(trs);
 
 				transactions.push(trs);
 			}
@@ -131,17 +148,14 @@ export default {
 
 			totalAmount = bignum.plus(totalAmount, balanceTransaction.amount);
 
-			let bytes = transactionsLib.getTransactionBytes(balanceTransaction);
-			balanceTransaction.signature = cryptoLib.sign(sender.keypair, bytes);
-			bytes = transactionsLib.getTransactionBytes(balanceTransaction);
-			balanceTransaction.id = cryptoLib.getId(bytes);
-
+			balanceTransaction.signature = await DdnCrypto.sign(balanceTransaction, sender.keypair);
+			balanceTransaction.id = await DdnCrypto.getId(balanceTransaction);
 			transactions.push(balanceTransaction);
 		}
 
-        // make delegates
-        for (let i = 0; i < 101; i++) {
-			const delegate = accounts.account(cryptoLib.generateSecret(), tokenPrefix);
+		// make delegates
+		for (let i = 0; i < 101; i++) {
+			const delegate = accounts.account(DdnCrypto.generateSecret(), tokenPrefix);
 			delegates.push(delegate);
 
 			const username = `${tokenName}_${i + 1}`;
@@ -162,18 +176,16 @@ export default {
 				}
 			};
 
-			let bytes = transactionsLib.getTransactionBytes(transaction);
-			transaction.signature = cryptoLib.sign(sender.keypair, bytes);
-			bytes = transactionsLib.getTransactionBytes(transaction);
-			transaction.id = cryptoLib.getId(bytes);
+			transaction.signature = await DdnCrypto.sign(transaction, sender.keypair);
+			transaction.id = await DdnCrypto.getId(transaction);
 
 			transactions.push(transaction);
 		}
 
-        // make votes
-        const votes = delegates.map(({keypair}) => `+${keypair.publicKey}`);
+		// make votes
+		const votes = delegates.map(({ keypair }) => `+${keypair.publicKey}`);
 
-        const voteTransaction = {
+		const voteTransaction = {
 			type: assetTypes.VOTE,
 			nethash,
 			amount: '0',
@@ -189,15 +201,14 @@ export default {
 			}
 		};
 
-        let bytes = transactionsLib.getTransactionBytes(voteTransaction);
-        voteTransaction.signature = cryptoLib.sign(keypair, bytes);
-        bytes = transactionsLib.getTransactionBytes(voteTransaction);
-        voteTransaction.id = cryptoLib.getId(bytes);
+		voteTransaction.signature = await DdnCrypto.sign(voteTransaction, sender.keypair);
+		console.log('voteTransaction.signature 132', voteTransaction.signature);
+		voteTransaction.id = await DdnCrypto.getId(voteTransaction);
 
-        transactions.push(voteTransaction);
+		transactions.push(voteTransaction);
 
-        let dappTransaction = null;
-        if (dapp) {
+		let dappTransaction = null;
+		if (dapp) {
 			dappTransaction = {
 				type: assetTypes.DAPP,
 				amount: '0',
@@ -211,15 +222,13 @@ export default {
 				}
 			};
 
-			let bytes = transactionsLib.getTransactionBytes(dappTransaction);
-			dappTransaction.signature = cryptoLib.sign(keypair, bytes);
-			bytes = transactionsLib.getTransactionBytes(dappTransaction);
-			dappTransaction.id = cryptoLib.getId(bytes);
-
+			dappTransaction.signature = await DdnCrypto.sign(dappTransaction, sender.keypair);
+			dappTransaction.id = await DdnCrypto.getId(dappTransaction);
+			console.log('dappTransaction.signature 132', dappTransaction.signature);
 			transactions.push(dappTransaction);
 		}
 
-        transactions = transactions.sort(function compare(a, b) {
+		transactions = transactions.sort(function compare(a, b) {
 			if (a.type != b.type) {
 				if (a.type == 1) {
 					return 1;
@@ -235,15 +244,16 @@ export default {
 			return a.id.localeCompare(b.id);
 		});
 
-        transactions.forEach(tx => {
-			bytes = transactionsLib.getTransactionBytes(tx);
+		let payloadBytes = '';
+		transactions.forEach(async tx => {
+			let bytes = transactionsLib.getTransactionBytes(tx);
+			payloadBytes += bytes;
 			payloadLength += bytes.length;
-			payloadHash.update(bytes);
 		});
 
-        payloadHash = payloadHash.digest();
+		payloadHash = DdnCrypto.createHash(payloadBytes); // payloadHash.digest();
 
-        const block = {
+		const block = {
 			version: assetTypes.TRANSFER,
 			total_amount: totalAmount,  //wxm block database
 			total_fee: '0', //wxm block database
@@ -258,20 +268,18 @@ export default {
 			height: '1'
 		};
 
-        bytes = getBytes(block);
-        block.block_signature = cryptoLib.sign(sender.keypair, bytes);  //wxm block database
-        bytes = getBytes(block);
-        block.id = cryptoLib.getId(bytes);
+		block.block_signature = sign(block, sender.keypair);  //wxm block database
+		block.id = getId(block);
 
-        return {
+		return {
 			block,
 			dapp: dappTransaction,
 			delegates,
 			nethash
 		};
-    },
+	},
 
-	from(genesisBlock, {address, keypair}, dapp) {
+	async from(genesisBlock, { address, keypair }, dapp) {
 		for (const i in genesisBlock.transactions) {
 			const tx = genesisBlock.transactions[i];
 
@@ -303,24 +311,24 @@ export default {
 			}
 		};
 
+		// let bytes = transactionsLib.getTransactionBytes(dappTransaction);
+		await DdnCrypto.sign(dappTransaction, keypair);
+		dappTransaction.id = await DdnCrypto.getId(dappTransaction);
 		let bytes = transactionsLib.getTransactionBytes(dappTransaction);
-		dappTransaction.signature = cryptoLib.sign(keypair, bytes);
-		bytes = transactionsLib.getTransactionBytes(dappTransaction);
-		dappTransaction.id = cryptoLib.getId(bytes);
 
 		genesisBlock.payloadLength += bytes.length;
-		const payloadHash = crypto.createHash('sha256').update(Buffer.from(genesisBlock.payloadHash, 'hex'));
-		payloadHash.update(bytes);
-		genesisBlock.payloadHash = payloadHash.digest().toString('hex');
+		bytes.writeByte(Buffer.from(genesisBlock.payloadHash, 'hex'));
+		const payloadHash = DdnCrypto.createHash(bytes);
+		genesisBlock.payloadHash = payloadHash.toString('hex');
 
 		genesisBlock.transactions.push(dappTransaction);
 		genesisBlock.numberOfTransactions += 1;
-		genesisBlock.generatorPublicKey = sender.keypair.publicKey;
+		genesisBlock.generatorPublicKey = keypair.publicKey;
 
 		bytes = getBytes(genesisBlock);
-		genesisBlock.blockSignature = cryptoLib.sign(sender.keypair, bytes);
+		genesisBlock.blockSignature = sign(genesisBlock, keypair); // fixme...
 		bytes = getBytes(genesisBlock);
-		genesisBlock.id = cryptoLib.getId(bytes);
+		genesisBlock.id = getId(bytes);
 
 		return {
 			block: genesisBlock,

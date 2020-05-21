@@ -27,20 +27,18 @@ class MultiSignature {
                 transaction.signatures = transaction.signatures || [];
                 transaction.signatures.push(tx.signature);
 
-                setImmediate(async() => {
-                    try
-                    {
+                setImmediate(async () => {
+                    try {
                         await this.runtime.peer.broadcast.broadcastNewSignature({
                             signature: tx.signature,
                             transaction: transaction.id
                         });
                     }
-                    catch (err)
-                    {
+                    catch (err) {
                         this.logger.error(`Broadcast new signature failed: ${DdnUtils.system.getErrorMsg(err)}`);
                     }
                 });
-          
+
                 cb(null, transaction);
             }, (err, transaction) => {
                 if (err) {
@@ -50,7 +48,7 @@ class MultiSignature {
                 }
             });
         });
-        
+
         const transaction = await this.runtime.transaction.getUnconfirmedTransaction(tx.transaction);
 
         if (!transaction) {
@@ -66,31 +64,27 @@ class MultiSignature {
 
             // Find public key
             let verify = false;
-            try
-            {
-                for (var i = 0; i < transaction.asset.multisignature.keysgroup.length && !verify; i++) {
+            try {
+                for (let i = 0; i < transaction.asset.multisignature.keysgroup.length && !verify; i++) {
                     const key = transaction.asset.multisignature.keysgroup[i].substring(1);
-                    verify = await this.runtime.transaction.verifySignature(transaction, key, tx.signature);
+                    verify = await this.runtime.transaction.verifySignature(transaction, tx.signature, key);
                 }
             }
-            catch (e)
-            {
+            catch (e) {
                 verify = false;
             }
 
             if (!verify) {
                 throw new Error("Failed to verify signature");
             }
-          
+
             await done();
         } else {
             let account;
-            try
-            {
+            try {
                 account = await this.runtime.account.getAccountByAddress(transaction.senderId);
             }
-            catch (err)
-            {
+            catch (err) {
                 throw new Error(`Multisignature account not found: ${err}`);
             }
 
@@ -118,22 +112,20 @@ class MultiSignature {
             } catch (e) {
                 throw new Error(`Failed to verify signature: ${e}`);
             }
-        
+
             if (!verify) {
                 throw new Error("Failed to verify signature");
             }
-        
+
             setImmediate(async () => {
-                try
-                {
+                try {
                     await this.runtime.socketio.emit('multisignatures/singature/change', {});
                 }
-                catch (err)
-                {
+                catch (err) {
                     this.logger.error("socket emit error: multisignatures/singature/change");
                 }
             });
-    
+
             await done();
         }
     }

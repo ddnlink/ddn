@@ -1,5 +1,4 @@
-import crypto from 'crypto';
-import ed from 'ed25519';
+import DdnCrypto from '@ddn/crypto';
 import DdnUtils from '@ddn/utils';
 
 /**
@@ -241,8 +240,7 @@ class TransactionService {
             throw new Error(validateErrors[0].message);
         }
 
-        const hash = crypto.createHash('sha256').update(body.secret, 'utf8').digest();
-        const keypair = ed.MakeKeypair(hash);
+        const keypair = DdnCrypto.getKeys(body.secret);
         if (body.publicKey) {
             if (keypair.publicKey.toString('hex') != body.publicKey) {
                 throw new Error("Invalid passphrase");
@@ -304,8 +302,7 @@ class TransactionService {
 
                     let second_keypair = null;
                     if (requester.second_signature && !DdnUtils.bignum.isEqualTo(requester.second_signature, 0)) { //wxm block database
-                        const secondHash = crypto.createHash('sha256').update(body.secondSecret, 'utf8').digest();
-                        second_keypair = ed.MakeKeypair(secondHash);
+                        second_keypair = DdnCrypto.getKeys(body.secondSecret);
                     }
 
                     try {
@@ -343,8 +340,7 @@ class TransactionService {
 
                     let second_keypair = null;
                     if (account.second_signature) {
-                        const secondHash = crypto.createHash('sha256').update(body.secondSecret, 'utf8').digest();
-                        second_keypair = ed.MakeKeypair(secondHash);
+                        second_keypair = DdnCrypto.getKeys(body.secondSecret);
                     }
 
                     try {

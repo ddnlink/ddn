@@ -1,8 +1,8 @@
-import cryptoLib from '@ddn/crypto';
+import nacl from 'tweetnacl';
+import DdnCrypto from '@ddn/crypto';
 import ByteBuffer from 'bytebuffer';
-import crypto from 'crypto';
-import dappTransactionsLib from '../dapptransactions.js';
-import accounts from './account.js';
+import dappTransactionsLib from '../dapptransactions';
+import accounts from './account';
 
 function getBytes(block, skipSignature) {
 	const size = 8 + 4 + 4 + 4 + 32 + 32 + 8 + 4 + 4 + 64;
@@ -17,11 +17,11 @@ function getBytes(block, skipSignature) {
 	bb.writeInt(block.payloadLength);
 
 	const ph = Buffer.from(block.payloadHash, 'hex');
-	for (var i = 0; i < ph.length; i++) {
+	for (let i = 0; i < ph.length; i++) {
 		bb.writeByte(ph[i]);
 	}
 
-	var pb = Buffer.from(block.delegate, 'hex');
+	const pb = Buffer.from(block.delegate, 'hex');
 	for (let i = 0; i < pb.length; i++) {
 		bb.writeByte(pb[i]);
 	}
@@ -34,21 +34,37 @@ function getBytes(block, skipSignature) {
 	bb.writeInt(block.count);
 
 	if (!skipSignature && block.signature) {
-		var pb = Buffer.from(block.signature, 'hex');
-		for (var i = 0; i < pb.length; i++) {
+		const pb = Buffer.from(block.signature, 'hex');
+		for (let i = 0; i < pb.length; i++) {
 			bb.writeByte(pb[i]);
 		}
 	}
 
 	bb.flip();
-	const b = bb.toBuffer();
 
-	return b;
+	return bb.toBuffer();
+}
+
+// from ../block.js
+function getHash(block) {
+	return Buffer.from(nacl.hash(getBytes(block)));
+}
+
+function sign(block,  {privateKey}) {
+	const hash = getHash(block);
+
+	const data = nacl.sign.detached(hash, Buffer.from(privateKey, "hex"));
+	return Buffer.from(data).toString("hex");
+}
+
+function getId(block) {
+	return getHash(block).toString('hex')
 }
 
 export default {
-	new({keypair, address}, publicKeys, assetInfo) {
-		const sender = accounts.account(cryptoLib.generateSecret());
+	async new({keypair, address}, publicKeys, assetInfo) {
+		const sender = accounts.account(DdnCrypto.generateSecret());
+		let payloadBytes = ''; 
 
 		const block = {
 			delegate: keypair.publicKey,
@@ -58,7 +74,7 @@ export default {
 			transactions: [],
 			timestamp: 0,
 			payloadLength: 0,
-			payloadHash: crypto.createHash('sha256')
+			payloadHash: null
 		};
 
 		if (assetInfo) {
@@ -73,22 +89,20 @@ export default {
 					address
 				])
 			};
-			bytes = dappTransactionsLib.getTransactionBytes(assetTrs);
-			assetTrs.signature = cryptoLib.sign(sender.keypair, bytes);
+			const bytes = dappTransactionsLib.getTransactionBytes();
+			assetTrs.signature = await DdnCrypto.sign(assetTrs, sender.keypair);
 			block.payloadLength += bytes.length;
-			block.payloadHash.update(bytes);
+			payloadBytes += bytes;
 
-			bytes = dappTransactionsLib.getTransactionBytes(assetTrs);
-			assetTrs.id = cryptoLib.getId(bytes);
+			assetTrs.id = await DdnCrypto.getId(assetTrs); 
 			block.transactions.push(assetTrs);
 		}
 		block.count = block.transactions.length;
 
-		block.payloadHash = block.payloadHash.digest().toString('hex');
-		bytes = getBytes(block);
-		block.signature = cryptoLib.sign(keypair, bytes);
-		bytes = getBytes(block);
-		block.id = cryptoLib.getId(bytes);
+		block.payloadHash = DdnCrypto.createHash(payloadBytes);
+
+		block.signature = sign(block, keypair); // fixme 应该是 block 的
+		block.id = getId(block);
 
 		return block;
 	}

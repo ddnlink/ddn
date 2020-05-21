@@ -122,7 +122,7 @@ class OutTransfer extends Asset.Base {
         try {
             for (let i in trs.signatures) {
                 for (let j in dapp.delegates) {
-                    if (await this.runtime.transaction.verifyBytes(bytes, dapp.delegates[j], trs.signatures[i])) {
+                    if (await this.runtime.transaction.verifyBytes(bytes, trs.signatures[i], dapp.delegates[j])) {
                         validSignatureNumber++;
                         break;
                     }

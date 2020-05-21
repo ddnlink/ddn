@@ -3,9 +3,8 @@
  * wangxm   2018-01-08
  */
 import ByteBuffer from "bytebuffer";
-
-import crypto from "crypto";
-import ed from 'ed25519';
+import nacl from 'tweetnacl';
+import DdnCrypto from "@ddn/crypto";
 import assert from 'assert';
 import ip from 'ip';
 
@@ -53,10 +52,10 @@ class Consensus {
 
         bytes.flip();
 
-        return crypto.createHash('sha256').update(bytes.toBuffer()).digest();
+        return DdnCrypto.createHash(bytes.toBuffer());
     }
 
-    createPropose(keypair, {generator_public_key, height, id, timestamp}, address) {
+    async createPropose(keypair, {generator_public_key, height, id, timestamp}, address) {
         assert(keypair.publicKey.toString("hex") == generator_public_key);
         const propose = {
             height,
@@ -67,7 +66,7 @@ class Consensus {
         };
         const hash = this.getProposeHash(propose);
         propose.hash = hash.toString("hex");
-        propose.signature = ed.Sign(hash, keypair).toString("hex");
+        propose.signature = await DdnCrypto.sign(hash, keypair);
         return propose;
     }
 
@@ -80,7 +79,7 @@ class Consensus {
         try {
             const signature = Buffer.from(propose.signature, "hex");
             const publicKey = Buffer.from(propose.generator_public_key, "hex");    //wxm block database
-            if (ed.Verify(hash, signature, publicKey)) {
+            if (nacl.sign.detached.verify(hash, signature, publicKey)) {
                 return;
             } else {
                 throw new Error("Vefify signature failed");
@@ -168,7 +167,7 @@ class Consensus {
         bytes.writeString(id)
 
         bytes.flip();
-        return crypto.createHash('sha256').update(bytes.toBuffer()).digest();
+        return DdnCrypto.createHash(bytes.toBuffer());
     }
 
     createVotes(keypairs, {height, id}) {
@@ -178,12 +177,14 @@ class Consensus {
             id,
             signatures: []
         };
+
         keypairs.forEach(el => {
             votes.signatures.push({
                 key: el.publicKey.toString('hex'),
-                sig: ed.Sign(hash, el).toString('hex')
+                sig: nacl.sign.detached(hash, Buffer.from(el.privateKey, "hex"))
             });
         });
+
         return votes;
     }
 
@@ -192,7 +193,7 @@ class Consensus {
             const hash = this.getVoteHash(height, id);
             const signature = Buffer.from(sig, "hex");
             const publicKey = Buffer.from(key, "hex");
-            return ed.Verify(hash, signature, publicKey);
+            return nacl.sign.detached.verify(hash, signature, publicKey);
         } catch (e) {
             return false;
         }

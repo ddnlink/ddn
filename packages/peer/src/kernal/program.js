@@ -6,9 +6,9 @@ import assert from 'assert';
 import path from 'path';
 import fs from 'fs';
 import ip from 'ip';
-import crypto from 'crypto';
-import DdnUtils from '@ddn/utils';
 import extend from 'extend2';
+import DdnCrypto from '@ddn/crypto';
+import DdnUtils from '@ddn/utils';
 
 import Logger from '../logger';
 import Context from './context';
@@ -129,21 +129,21 @@ class Program {
      * 校验创世区块的数据
      */
     async _checkGenesisBlock() {
-        var block = this._context.genesisblock;
+        const block = this._context.genesisblock;
 
-        const payloadHash = crypto.createHash('sha256');
+        let payloadBytes = ''; 
         let payloadLength = 0;
 
         for (const trs of block.transactions) {
             const bytes = await this._context.runtime.transaction.getBytes(trs);
             payloadLength += bytes.length;
-            payloadHash.update(bytes);
+            payloadBytes += bytes;
         }
-
+        const payloadHash = DdnCrypto.createHash(payloadBytes);
         const id = this._context.runtime.block.getId(block);
 
         assert.equal(payloadLength, block.payload_length, 'Unexpected payloadLength');
-        assert.equal(payloadHash.digest().toString('hex'), block.payload_hash, 'Unexpected payloadHash');
+        assert.equal(payloadHash.toString('hex'), block.payload_hash, 'Unexpected payloadHash');
         assert.equal(id, block.id, 'Unexpected block id');
 
         return true;

@@ -157,15 +157,15 @@ dataquery | 对象 | 交易/区块数据查询类
 
 ##### 接收交易数据并处理，等待进行区块铸造<br/>receiveTransactions(transactions)
 
-##### 根据交易字节流和公钥验证签名是否正确<br/>verifyBytes(bytes, publicKey, signature)
+##### 根据交易字节流和公钥验证签名是否正确<br/>verifyBytes(bytes, signature, publicKey)
 
-##### 验证交易签名的正确性<br/>verifySignature(trs, publicKey, signature)
+##### 验证交易签名的正确性<br/>verifySignature(trs, signature, publicKey)
 
-##### 对交易进行多重签名<br/>multisign(keypair, trs)
+##### 对交易进行多重签名<br/>multisign(trs, keypair)
 
 ##### 验证交易的合法性（包括签名、二级密码等）<br/>verify(trs, sender, requester)
 
-##### 验证交易二级密码正确性<br/>verifySecondSignature(trs, publicKey, signature)
+##### 验证交易二级密码正确性<br/>verifySecondSignature(trs, signature, publicKey)
 
 ## 6. 账户相关操作类
 ##### 初始化账户信息及账户余额数据<br/>initAccountsAndBalances()
