@@ -5,13 +5,13 @@ import Debug from 'debug';
 import node from "@ddn/node-sdk/lib/test";
 import constants from '../../lib/constants';
 
-const debug = Debug('accounts');
+const debug = Debug('debug');
 // Account info for password "ddntest"
 // New account does not have publickey in db
 const AccountTest = {
-    "address": `${constants.tokenPrefix}4tEjMLbAMcwgLpcsmTW4rLyz3maZdBRtZ`,
+    "address": `${constants.tokenPrefix}MdK787kHokiVGtU6aNuthQDmzaRPR22tp`,
     "balance": 0,
-    "publicKey": "4ebfcc2c652fbc27cfbedb8c985566cd673a5e0e32e266434a0030d28e332984",
+    "publicKey": "69469a3907debf306dc5a607563cb288f0fe31e2e50f9ad680dbb0ac07448d4e",
     "secondSignature": "",
     "secondPublicKey": "",
     "multisignatures": "",
@@ -155,6 +155,8 @@ describe("GET /accounts/getPublicKey", () => {
             .expect("Content-Type", /json/)
             .expect(200)
             .end((err, {body}) => {
+                debug('GET /accounts/getPublicKey 1', body);
+                node.expect(err).be.not.ok;
                 node.expect(body).to.have.property("success").to.be.true;
                 node.expect(body).to.have.property("publicKey");
                 node.expect(body.publicKey).to.equal(Gaccount.publicKey);
@@ -168,7 +170,7 @@ describe("GET /accounts/getPublicKey", () => {
             .expect("Content-Type", /json/)
             .expect(200)
             .end((err, {body}) => {
-                // console.log(JSON.stringify(res.body));
+                debug('GET /accounts/getPublicKey 2', body);
                 node.expect(body).to.have.property("success").to.be.false;
                 node.expect(body).to.have.property("error");
                 done();
@@ -181,7 +183,7 @@ describe("GET /accounts/getPublicKey", () => {
             .expect("Content-Type", /json/)
             .expect(200)
             .end((err, {body}) => {
-                // console.log(JSON.stringify(res.body));
+                debug('GET /accounts/getPublicKey 3', body);
                 node.expect(body).to.have.property("success").to.be.false;
                 node.expect(body).to.have.property("error");
                 // expect(res.body.error).to.contain("Provide valid DDN address");
@@ -198,7 +200,8 @@ describe("GET /accounts/getPublicKey", () => {
             .expect("Content-Type", /json/)
             .expect(200)
             .end((err, {body}) => {
-                // console.log(JSON.stringify(res.body));
+                debug('post /accounts/generatePublicKey', body);
+
                 node.expect(body).to.have.property("success").to.be.true;
                 node.expect(body).to.have.property("publicKey");
                 node.expect(body.publicKey).to.equal(AccountTest.publicKey);

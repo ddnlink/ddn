@@ -564,6 +564,7 @@ describe("PUT /dapps", () => {
                 .expect(200)
                 .end((err, { body }) => {
                     debug('PUT /dapps 12', body);
+                    node.expect(err).be.not.ok;
                     node.expect(body).to.have.property("success").to.be.true;
                     node.expect(body).to.have.property("transactionId");
                     DappToInstall.transactionId = body.transactionId;

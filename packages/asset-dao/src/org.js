@@ -400,7 +400,7 @@ class Org extends Asset.Base {
 
         return new Promise((resolve, reject) => {
             this.balancesSequence.add(async(cb) => {
-                if (body.multisigAccountPublicKey && body.multisigAccountPublicKey != keypair.publicKey.toString('hex')) {
+                if (body.multisigAccountPublicKey && body.multisigAccountPublicKey != keypair.publicKey) {
                     let account;
                     try {
                         account = await this.runtime.account.getAccountByPublicKey(body.multisigAccountPublicKey);
@@ -465,7 +465,7 @@ class Org extends Asset.Base {
                 } else {
                     let account;
                     try {
-                        account = await this.runtime.account.getAccountByPublicKey(keypair.publicKey.toString('hex'));
+                        account = await this.runtime.account.getAccountByPublicKey(keypair.publicKey);
                     } catch (e) {
                         return cb(e);
                     }

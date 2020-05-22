@@ -199,6 +199,7 @@ class Account {
         delete filter.sort;
 
         if (typeof (filter.address) == "string" && !this.isAddress(filter.address)) {
+            this.logger.error('account address', filter.address);
             throw new Error('Invalid address getAccount');
         }
 
@@ -769,7 +770,7 @@ class Account {
                 var accountInfo = await this.getAccountByAddress(address);
                 resolve(accountInfo);
             } catch (err) {
-                console.log('!!!!!!! merge sql error: ' + err);
+                this.logger.error('!!!!!!! merge sql error: ' + err);
                 reject(err);
             }
         })

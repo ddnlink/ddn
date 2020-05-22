@@ -61,19 +61,15 @@ class MultisignaturesRouter {
                 success: false,
                 error: `Validation error: ${validateErrors[0].schemaPath} ${validateErrors[0].message}`
             };
-            // throw new Error(validateErrors[0].message);
         }
 
         const keypair = DdnCrypto.getKeys(body.secret);
 
-        // publicKey就是用户密钥产生的公钥
         if (body.publicKey) {
             if (keypair.publicKey != body.publicKey) {
                 throw new Error("Invalid passphrase");
             }
         }
-
-        console.log('body:', body);
 
         return new Promise((resolve, reject) => {
             this.balancesSequence.add(async (cb) => {
@@ -113,14 +109,10 @@ class MultisignaturesRouter {
                         lifetime: body.lifetime
                     });
 
-                    console.log('body', body);
-                    console.log('trs', transaction);
-                    
                     const transactions = await this.runtime.transaction.receiveTransactions([transaction]);
                     cb(null, transactions);
                 } catch (e) {
-                    console.log('e', e);
-
+                    this.logger.error('create multisignatures error', e);
                     return cb(e);
                 }
             }, (err, transactions) => {
@@ -131,7 +123,7 @@ class MultisignaturesRouter {
                         try {
                             await this.runtime.socketio.emit('multisignatures/change', {});
                         } catch (err2) {
-                            this.logger.error("socket emit error: multisignatures/change");
+                            this.logger.error("socket emit error: multisignatures/change", err2);
                         }
                     });
 
@@ -174,7 +166,6 @@ class MultisignaturesRouter {
                 success: false,
                 error: `Validation error: ${validateErrors[0].schemaPath} ${validateErrors[0].message}`
             };
-            // throw new Error(validateErrors[0].message);
         }
 
         const transaction = await this.runtime.transaction.getUnconfirmedTransaction(body.transactionId);
@@ -215,8 +206,7 @@ class MultisignaturesRouter {
             if (!transaction.requester_public_key) { //wxm block database
                 if (!account.multisignatures.includes(keypair.publicKey)) {
                     // 不是多重签名交易，交易也没有接收方，交易发起者的多重签名里，也不包含该交易发起者的公钥（transaction.senderId ！== keypair.publicKey）
-                    console.log('trs', transaction);
-                    
+                    this.logger.error('multisignatures trs', transaction);
                     throw new Error("2. Permission to sign transaction denied");
                 }
             } else {
@@ -293,7 +283,6 @@ class MultisignaturesRouter {
                 success: false,
                 error: `Validation error: ${validateErrors[0].schemaPath} ${validateErrors[0].message}`
             };
-            // throw new Error(validateErrors[0].message);
         }
 
         let transactions = await this.runtime.transaction.getUnconfirmedTransactionList();

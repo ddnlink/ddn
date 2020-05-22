@@ -114,7 +114,7 @@ describe("Node SDK", () => {
 
 				expect(result).to.be.ok;
 				expect(Buffer.isBuffer(result)).be.true;
-				expect(result.length).to.equal(32);
+				expect(result.length).to.equal(64);
 				done();
 			});
 		});
@@ -130,7 +130,7 @@ describe("Node SDK", () => {
 				expect(getId).to.be.a("function");
 			});
 
-			it("should return string id and be equal to 13987348420913138422", async (done) => {
+			it("should return string id and be equal to 23e9d76cdaf4ad10c8f1a9a416a386ec5a19110c489b9ba0d9b00d5890fcfe92a060f28c19132f795c444ed7c2fc63c7e98bd855d67a46487db60df747c19830", async (done) => {
 				const transaction = {
 					nethash: '0ab796cd',
 					type: 0,
@@ -145,7 +145,7 @@ describe("Node SDK", () => {
 				const id = await getId(transaction);
 				debug('#getId, id to hex:', id.toString('hex'));
 
-				expect(id).to.be.a("string").be.equal("df0e8c8de3e4bb8751c90b23751b897c52fab7c546bc6b70ffe30788fad52840");
+				expect(id).to.be.a("string").be.equal("23e9d76cdaf4ad10c8f1a9a416a386ec5a19110c489b9ba0d9b00d5890fcfe92a060f28c19132f795c444ed7c2fc63c7e98bd855d67a46487db60df747c19830");
 				// expect(id).to.be.a("string").be.equal("f60a26da470b1dc233fd526ed7306c1d84836f9e2ecee82c9ec47319e0910474");
 				done();
 			});
@@ -230,12 +230,23 @@ describe("Node SDK", () => {
 			});
 
 			it("should be ok", async () => {
-				const k = crypto.getKeys('test');
-				const m = new Uint8Array(100);
+				const kp = crypto.getKeys('test');
+				const transaction = {
+					nethash: '0ab796cd',
+					type: 0,
+					amount: "1000", //Bignum update
+					recipientId: "D9EWvxNF89StC8UAS3WHrgXX8fCGyAaoU",
+					timestamp: 141738,
+					asset: {},
+					senderPublicKey: "5d036a858ce89f844491762eb89e2bfbd50a4a0a0da658e4b2628b25b117ae09",
+					signature: "618a54975212ead93df8c881655c625544bce8ed7ccdfe6f08a42eecfb1adebd051307be5014bb051617baf7815d50f62129e70918190361e5d4dd4796541b0a"
+				};
 
-				const sig = await sign(m, k);
+				transaction.id = await crypto.getId(transaction);
+
+				const sig = await sign(transaction, kp);
 				debug('sig', sig);
-				expect(sig.length).to.equal(64)
+				expect(sig.length).to.equal(128); // 64 ??
 			})
 		});
 
@@ -312,7 +323,7 @@ describe("Node SDK", () => {
 
 				expect(address).to.be.ok;
 				expect(address).to.be.a("string");
-				expect(address).to.equal("DFkctfgZFkaATGRhGbj72wzJqACvMyzQ1U");
+				expect(address).to.equal("DFAZqQx6BxVyW63EqfZQBZYa1CTg7qH3oJ");
 			});
 		});
 
@@ -344,11 +355,11 @@ describe("Node SDK", () => {
 	describe('crypto sha256 and address', () => {
 		it('should be equal to the expected address', () => {
 			const address = ddn.crypto.generateAddress('7a91b9bfc0ea185bf3ade9d264da273f7fe19bf71008210b1d7239c82dd3ad20')
-			expect(address).to.equal('DFbYJhiJb3DXzHy5ZP24mKw21M2dCBJCXP');
+			expect(address).to.equal('D6hS16kpFkVZv1TaBCrZQ3Wt7Tawa7MjuA');
 
 			const publicKeyBuffer = Buffer.from('7a91b9bfc0ea185bf3ade9d264da273f7fe19bf71008210b1d7239c82dd3ad20', 'hex');
 			const address2 = ddn.crypto.generateAddress(publicKeyBuffer)
-			expect(address2).to.equal('DFbYJhiJb3DXzHy5ZP24mKw21M2dCBJCXP')
+			expect(address2).to.equal('D6hS16kpFkVZv1TaBCrZQ3Wt7Tawa7MjuA')
 		})
 	})
 

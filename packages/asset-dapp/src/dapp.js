@@ -84,7 +84,6 @@ class Dapp extends Asset.Base {
         //     delegates: data.delegates,
         //     unlock_delegates: data.unlock_delegates
         // };
-        console.log("trs data:", trs);
         
         return trs;
     }

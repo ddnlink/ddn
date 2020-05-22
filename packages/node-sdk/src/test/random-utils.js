@@ -1,4 +1,4 @@
-
+import _ from "lodash";
 /**
  * 产生随机字符串
  * @param  {...any} args 常用参数为 randomName('D', 'abc...', 5)

@@ -65,7 +65,7 @@ describe('Test AOB', () => {
     // };
 
     it('Get issuers should be ok', async () => {
-      const [err, res] = await node.apiGetAsyncE('/aob/issuers/issuers');
+      const [err, res] = await node.apiGetAsyncE('/aob/issuers');
       
       debug('get /aob/issuers/issuers response', err, res.body)
       expect(err).to.not.exist

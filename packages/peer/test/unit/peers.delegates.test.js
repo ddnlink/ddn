@@ -31,6 +31,8 @@ describe("POST /peer/transactions", () => {
                 .end((err, {
                     body
                 }) => {
+                    node.expect(err).to.be.not.ok;
+
                     account.address = body.account.address;
                     node.api.put("/transactions")
                         .set("Accept", "application/json")
@@ -45,6 +47,7 @@ describe("POST /peer/transactions", () => {
                         .expect("Content-Type", /json/)
                         .expect(200)
                         .end((err, res) => {
+                            node.expect(err).to.be.not.ok;
                             node.onNewBlock(async err => {
                                 node.expect(err).to.be.not.ok;
                                 const transaction = await node.ddn.delegate.createDelegate(crypto.randomBytes(64).toString("hex"), account.password);
@@ -135,6 +138,7 @@ describe("POST /peer/transactions", () => {
                     body
                 }) => {
                     console.log(JSON.stringify(body));
+                    node.expect(err).to.be.not.ok;
                     node.expect(body).to.have.property("success").to.be.true;
                     done();
                 });
@@ -154,6 +158,8 @@ describe("POST /peer/transactions", () => {
                 .end((err, {
                     body
                 }) => {
+                    node.expect(err).to.be.not.ok;
+
                     account2.address = body.account.address;
                     // console.log(account2);
                     node.api.put("/transactions")
@@ -170,6 +176,8 @@ describe("POST /peer/transactions", () => {
                         .expect(200)
                         .end((err, res) => {
                             // console.log(res.body);
+                            node.expect(err).to.be.not.ok;
+
                             node.onNewBlock(async err => {
                                 node.expect(err).to.be.not.ok;
                                 account2.username = node.randomDelegateName().toLowerCase();
@@ -190,6 +198,8 @@ describe("POST /peer/transactions", () => {
                                         body
                                     }) => {
                                         // console.log(res.body);
+                                        node.expect(err).to.be.not.ok;
+
                                         node.expect(body).to.have.property("success").to.be.true;
 
                                         account2.username = node.randomDelegateName().toLowerCase();
@@ -209,6 +219,8 @@ describe("POST /peer/transactions", () => {
                                                 body
                                             }) => {
                                                 // console.log(JSON.stringify(res.body));
+                                                node.expect(err).to.be.not.ok;
+
                                                 node.expect(body).to.have.property("success").to.be.false;
                                                 done();
                                             });

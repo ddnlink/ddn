@@ -15,7 +15,7 @@ async function createTransfer(address, amount, secret) {
 }
 
 describe("crypto", () => {
-    describe("#sha256.hash", function() {
+    describe("#sha256.hash", function () {
         it("sha256.hash is crypto.createHash('sha256') ", () => {
             const str = 'data';
             const h1 = crypto
@@ -50,7 +50,7 @@ describe("crypto", () => {
 
             debug('result1= ', result1);
             debug('result2= ', result2);
-            
+
             expect(result1).toEqual(result2);
         });
     });
@@ -62,7 +62,7 @@ describe("crypto", () => {
             expect(typeof getHash).toBe("function");
         })
 
-        it("length should be 64", async function() {
+        it("length should be 64", async function () {
             const trs = await createTransfer(node.Eaccount.address, "10000000000000", node.Gaccount.password);
             const hash = await getHash(trs);
             debug(hash);
@@ -77,7 +77,7 @@ describe("crypto", () => {
             expect(typeof sign).toBe("function");
         })
 
-        it("length should be 64", async function() {
+        it("length should be 64", async function () {
             const keypair = await ddnCrypto.getKeys('secret');
             const trs = await createTransfer(node.Eaccount.address, "10000000000000", node.Gaccount.password);
             const signature = await sign(trs, keypair);
@@ -93,21 +93,21 @@ describe("crypto", () => {
         });
     })
 
-    describe("#generateAddress", function() {
+    describe("#generateAddress", function () {
         const generateAddress = ddnCrypto.generateAddress;
 
-        it("should be a function", function() {
+        it("should be a function", function () {
             expect(typeof generateAddress).toBe("function");
         });
 
-        it("should generate address by publicKey", function() {
+        it("should generate address by publicKey", function () {
             const kp = ddnCrypto.getKeys("secret");
             const address = ddnCrypto.generateAddress(kp.publicKey, "D");
 
-            const kp2 = ddnCrypto.getKeys("enter boring shaft rent essence foil trick vibrant fabric quote indoor output"); 
+            const kp2 = ddnCrypto.getKeys("enter boring shaft rent essence foil trick vibrant fabric quote indoor output");
             const address2 = ddnCrypto.generateAddress(kp2.publicKey, "D");
             debug('address2', address2);
-            expect(kp2.publicKey).toStrictEqual('daeee33def7eef0c7ba06ec66eda7204437ba88ace8f04e4a6aa4d7bfbd18bc1'); 
+            expect(kp2.publicKey).toStrictEqual('daeee33def7eef0c7ba06ec66eda7204437ba88ace8f04e4a6aa4d7bfbd18bc1');
             expect(address2).toEqual('DC5kJzMdNDhrnupWX2NGafzMoiwdHiySBe');
             // expect(address).toEqual("DFkctfgZFkaATGRhGbj72wzJqACvMyzQ1U");
             expect(address).toEqual("DFAZqQx6BxVyW63EqfZQBZYa1CTg7qH3oJ");
@@ -136,19 +136,38 @@ describe("crypto", () => {
             expect(kp.publicKey).toEqual('1c4fd85dc2a0752864d1454bdc37a9e7f9a09fa2c83f1f8d4da9d9bfdd38ed65'); // 2be3d7a21dd9715d949c58910b38d01a063cfe8159320aa426b2249a6aaf1340
             expect(address).toEqual('DLNxuHtMwn7MrmcSmatFLHb9YPgfZ5uxMr');
         });
+    });
 
-        it('#getKeys should be ok', () => {
+    describe("#getKeys", function () {
+        it('The same secret should get a same keyPairs', () => {
             const secret = "you cousin patch lemon luxury picture impact lens slogan exotic purse hole";
             const kp = ddnCrypto.getKeys(secret);
             const kp1 = ddnCrypto.getKeys(secret);
-            const kp2 = ddnCrypto.getKeys(secret);
 
-            console.log(kp.publicKey, kp1.publicKey, kp2.publicKey);
-            
-            expect(kp.publicKey).toEqual('1c4fd85dc2a0752864d1454bdc37a9e7f9a09fa2c83f1f8d4da9d9bfdd38ed65'); 
-            expect(kp1.publicKey).toEqual('1c4fd85dc2a0752864d1454bdc37a9e7f9a09fa2c83f1f8d4da9d9bfdd38ed65'); 
-            expect(kp2.publicKey).toEqual('1c4fd85dc2a0752864d1454bdc37a9e7f9a09fa2c83f1f8d4da9d9bfdd38ed65'); 
+            debug(kp.publicKey, kp1.publicKey);
+
+            expect(kp.publicKey).toEqual('1c4fd85dc2a0752864d1454bdc37a9e7f9a09fa2c83f1f8d4da9d9bfdd38ed65');
+            expect(kp.publicKey).toEqual(kp1.publicKey);
         });
+
+
+        it('Multi toString("hex") should be not equal', done => {
+            const Phasekey = ddnCrypto.generateSecret();
+            const publicKey = ddnCrypto.getKeys(Phasekey).publicKey;
+
+            node.expect(publicKey).to.be.a('string');
+
+            const publicKey2 = publicKey.toString('hex');
+            const publicKey3 = publicKey2.toString('hex');
+            
+            debug('Multi toString("hex") publicKey', publicKey, publicKey2, publicKey3);
+
+            expect(publicKey).toEqual(publicKey2);
+            expect(publicKey2).toEqual(publicKey3);
+
+            done()
+        })
+
     });
 
 

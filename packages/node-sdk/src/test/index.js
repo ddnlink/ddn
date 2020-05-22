@@ -111,10 +111,8 @@ function _getHeight(url, cb) {
     type: 'GET',
     url: `${url}/api/blocks/getHeight`,
     json: true
-  }, (err, { statusCode }, body) => {
-    if (err || statusCode != 200) {
-      console.log("body===", body);
-
+  }, (err, res, body) => {
+    if (err || res.statusCode != 200) {
       return cb(err || 'Status code is not 200 (getHeight)');
     } else {
       return cb(null, body.height);

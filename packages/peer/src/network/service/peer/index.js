@@ -375,7 +375,7 @@ class PeerService {
         }
 
         if (this._invalidTrsCache.has(transaction.id)) {
-            
+
             return {
                 success: false,
                 error: `The transaction ${transaction.id} is in process alreay.`
@@ -405,11 +405,6 @@ class PeerService {
                         );
                         cb(null, transactions);
                     } catch (exp) {
-                        this.logger.error(
-                            `Receive invalid transaction, transaction is ${
-                            JSON.stringify(transaction)
-                            }, ${DdnUtils.system.getErrorMsg(exp)}`
-                        );
                         cb(exp);
                     }
                 },
@@ -419,14 +414,19 @@ class PeerService {
                     };
 
                     if (err) {
+                        // 这里的错误就是上面 catch 的 exp，所以统一在这里处理就好
                         this.logger.error(
-                            `Receive invalid transaction, id is ${transaction.id}, ${DdnUtils.system.getErrorMsg(err)}`
+                            `Receive invalid transaction, transaction is ${
+                            JSON.stringify(transaction)
+                            }, ${DdnUtils.system.getErrorMsg(err)}`
                         );
+                        
                         this._invalidTrsCache.set(transaction.id, true);
                         result = {
                             success: false,
                             error: err.message ? err.message : err
                         };
+                        
                     } else if (transactions && transactions.length > 0) {
                         result.transactionId = transactions[0].id;
                     }

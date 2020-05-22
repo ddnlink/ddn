@@ -41,14 +41,6 @@ describe('address', () => {
     done()
   })
 
-  it('getKeys should be ok', done => {
-    publicKey = crypto.getKeys(Phasekey).publicKey;
-    debug('address.test.js addr', publicKey);
-    node.expect(publicKey).to.be.a('string');
-
-    done()
-  })
-
   it('Normal address should be ok', done => {
     const addr = crypto.generateAddress(publicKey, tokenPrefix);
     debug('address.test.js addr', addr);

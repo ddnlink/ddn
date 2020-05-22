@@ -12,7 +12,7 @@ const Eaccount = {
 };
 
 const Gaccount = {
-    "address": "C5kJzMdNDhrnupWX2NGafzMoiwdHiySBe",
+    "address": "DC5kJzMdNDhrnupWX2NGafzMoiwdHiySBe",
     "password": "enter boring shaft rent essence foil trick vibrant fabric quote indoor output",
     'publicKey': 'daeee33def7eef0c7ba06ec66eda7204437ba88ace8f04e4a6aa4d7bfbd18bc1',
     'balance': '10000000000000000'
