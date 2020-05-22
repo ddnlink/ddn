@@ -64,7 +64,12 @@ function getKeys(secret) {
     }
 }
 
-// TODO: sign(keypair, transaction) -> sign(transaction, keypair)
+/**
+ * Usage:
+ * trs.signature = await sign(trs, keypair);
+ * @param {object} transaction to be signed 
+ * @param {object} param1 keypair.privateKey
+ */
 async function sign(transaction, {privateKey}) {    
     const hash = await getHash(transaction, true, true);
     
@@ -76,6 +81,12 @@ async function sign(transaction, {privateKey}) {
     return bufToHex(signature);
 }
 
+/**
+ * Usage:
+ * trs.sign_signature = await secondSign(trs, keypair)
+ * @param {object} transaction to be signed 
+ * @param {object} param1 keypair.privateKey
+ */
 async function secondSign(transaction, {privateKey}) {
     const hash = await getHash(transaction);
     const signature = nacl.sign.detached(hash, Buffer.from(privateKey, "hex"));

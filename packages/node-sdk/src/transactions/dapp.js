@@ -32,11 +32,11 @@ async function createDApp(options, secret, secondSecret) {
 		}
 	};
 
-	await crypto.sign(transaction, keys);
+	transaction.signature = await crypto.sign(transaction, keys);
 
 	if (secondSecret) {
 		const secondKeys = crypto.getKeys(secondSecret);
-		await crypto.secondSign(transaction, secondKeys);
+		transaction.sign_signature = await crypto.secondSign(transaction, secondKeys);
 	}
 
 	transaction.id = await crypto.getId(transaction);
@@ -49,7 +49,7 @@ function getDAppTransactionBytes(trs, skipSignature) {
 	bb.writeString(trs.fee)
 
 	const senderPublicKeyBuffer = Buffer.from(trs.senderPublicKey, 'hex');
-	for (var i = 0; i < senderPublicKeyBuffer.length; i++) {
+	for (let i = 0; i < senderPublicKeyBuffer.length; i++) {
 		bb.writeByte(senderPublicKeyBuffer[i]);
 	}
 
@@ -59,7 +59,7 @@ function getDAppTransactionBytes(trs, skipSignature) {
 
 	if (!skipSignature && trs.signature) {
 		const signatureBuffer = Buffer.from(trs.signature, 'hex');
-		for (var i = 0; i < signatureBuffer.length; i++) {
+		for (let i = 0; i < signatureBuffer.length; i++) {
 			bb.writeByte(signatureBuffer[i]);
 		}
 	}
@@ -79,7 +79,7 @@ function createInnerTransaction(options, secret) {
 		type: options.type,
 		args
 	};
-	trs.signature = crypto.signBytes(getDAppTransactionBytes(trs), keys)
+	trs.signature = crypto.signBytes(getDAppTransactionBytes(trs), keys) // .sign?
 	return trs
 }
 

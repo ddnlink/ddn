@@ -3,7 +3,7 @@ import constants from "../constants";
 import slots from "../time/slots";
 import options from '../options';
 
-function createDomain(name, address, secret, secondSecret) {
+async function createDomain(name, address, secret, secondSecret) {
 	const keys = crypto.getKeys(secret);
 
   if (!name || name.length == 0) {
@@ -30,13 +30,14 @@ function createDomain(name, address, secret, secondSecret) {
 		},
 	};
 
-	crypto.sign(transaction, keys)
+	transaction.signature = await crypto.sign(transaction, keys)
 
 	if (secondSecret) {
 		const secondKeys = crypto.getKeys(secondSecret);
-		crypto.secondSign(transaction, secondKeys)
+		transaction.sign_signature = await crypto.secondSign(transaction, secondKeys)
 	}
-	// transaction.id = crypto.getId(transaction)
+
+	transaction.id = await crypto.getId(transaction)
 	return transaction
 }
 

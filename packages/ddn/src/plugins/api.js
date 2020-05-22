@@ -432,7 +432,7 @@ function getBlockBytes(options) {
   console.log(blockHelper.getBytes(block, true).toString('hex'))
 }
 
-function getBlockId(options) {
+async function getBlockId(options) {
   let block;
   try {
     block = JSON.parse(fs.readFileSync(options.file))
@@ -441,7 +441,7 @@ function getBlockId(options) {
     return
   }
   const bytes = blockHelper.getBytes(block)
-  console.log(DdnCrypto.getId(bytes))
+  console.log(await DdnCrypto.getId(bytes))
 }
 
 function verifyBytes(options) {
@@ -712,7 +712,7 @@ export default function (program) {
     .command("getBlockId")
     .description("get block id")
     .option("-f, --file <file>", "block file")
-    .action(getBlockId)
+    .action(getBlockId) // todo: async
 
   program
     .command("verifyBytes")

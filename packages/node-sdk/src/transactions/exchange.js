@@ -10,7 +10,7 @@ import options from '../options';
  * @param {*} secret 
  * @param {*} secondSecret 
  */
-function createExchange(trsopt, exchange, secret, secondSecret) {
+async function createExchange(trsopt, exchange, secret, secondSecret) {
 	const keys = crypto.getKeys(secret);
 
 	if (typeof exchange !== 'object') {
@@ -37,14 +37,14 @@ function createExchange(trsopt, exchange, secret, secondSecret) {
 		}
 	}, trsopt||{});
 
-	crypto.sign(transaction, keys);
+	transaction.signature = await crypto.sign(transaction, keys);
 
 	if (secondSecret) {
 		const secondKeys = crypto.getKeys(secondSecret);
-		crypto.secondSign(transaction, secondKeys);
+		transaction.sign_signature = await crypto.secondSign(transaction, secondKeys);
 	}
 
-	// transaction.id = crypto.getId(transaction);
+	transaction.id = await crypto.getId(transaction);
 	return transaction;
 }
 

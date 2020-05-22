@@ -371,7 +371,6 @@ class PeerService {
         }
 
         if (!transaction.id) {
-            // transaction.id = await this.runtime.transaction.getId(transaction); 20205.18
             transaction.id = await DdnCrypto.getId(transaction);
         }
 

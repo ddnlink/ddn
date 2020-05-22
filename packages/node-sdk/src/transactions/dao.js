@@ -84,14 +84,14 @@ async function createOrg(org, secret, second_secret) {
     }
   };
 
-  await crypto.sign(transaction, keys);
+  transaction.signature = await crypto.sign(transaction, keys);
 
   if (second_secret) {
     const secondKeys = crypto.getKeys(second_secret);
-    await crypto.secondSign(transaction, secondKeys);
+    transaction.sign_signature = await crypto.secondSign(transaction, secondKeys);
   }
 
-  transaction.id = crypto.getId(transaction);
+  transaction.id = await crypto.getId(transaction);
   return transaction;
 }
 
@@ -107,14 +107,15 @@ async function createTransfer(address, amount, secret, second_secret) {
     senderPublicKey: keys.publicKey,
     timestamp: slots.getTime() - options.get('clientDriftSeconds')
   };
-  transaction.id = crypto.getId(transaction);
-
-  await crypto.sign(transaction, keys);
+  
+  transaction.signature = await crypto.sign(transaction, keys);
 
   if (second_secret) {
     const secondKeys = crypto.getKeys(second_secret);
-    await crypto.secondSign(transaction, secondKeys);
+    transaction.sign_signature = await crypto.secondSign(transaction, secondKeys);
   }
+
+  transaction.id = await crypto.getId(transaction);
 
   return transaction;
 }
@@ -170,11 +171,11 @@ async function createConfirmation(trsAmount, confirmation, secret, second_secret
     }
   };
 
-  await crypto.sign(transaction, keys);
+  transaction.signature = await crypto.sign(transaction, keys);
 
   if (second_secret) {
     const secondKeys = crypto.getKeys(second_secret);
-    await crypto.secondSign(transaction, secondKeys);
+    transaction.sign_signature = await crypto.secondSign(transaction, secondKeys);
   }
 
   transaction.id = crypto.getId(transaction);
@@ -227,11 +228,11 @@ async function createContribution(contribution, secret, second_secret) {
     }
   };
 
-  await crypto.sign(transaction, keys);
+  transaction.signature = await crypto.sign(transaction, keys);
 
   if (second_secret) {
     const secondKeys = crypto.getKeys(second_secret);
-    await crypto.secondSign(transaction, secondKeys);
+    transaction.sign_signature = await crypto.secondSign(transaction, secondKeys);
   }
 
   transaction.id = crypto.getId(transaction);

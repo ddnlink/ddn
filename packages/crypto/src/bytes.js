@@ -69,8 +69,6 @@ async function getBytes(transaction, skipSignature, skipSecondSignature) {
     const bb = new ByteBuffer(size + assetSize, true);
     // const bb = new ByteBuffer(1, true);
     
-    console.log('transaction 107', transaction);
-    
     bb.writeByte(transaction.type); // +1
     bb.writeInt(transaction.timestamp); // +4
     bb.writeString(transaction.nethash); // +8

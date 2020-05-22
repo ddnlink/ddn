@@ -312,7 +312,7 @@ export default {
 		};
 
 		// let bytes = transactionsLib.getTransactionBytes(dappTransaction);
-		await DdnCrypto.sign(dappTransaction, keypair);
+		dappTransaction.signature = await DdnCrypto.sign(dappTransaction, keypair);
 		dappTransaction.id = await DdnCrypto.getId(dappTransaction);
 		let bytes = transactionsLib.getTransactionBytes(dappTransaction);
 

@@ -21,7 +21,7 @@ const AccountTest = {
 };
 
 const Gaccount = node.Gaccount;
-Gaccount.balance = '9990881532094328';
+Gaccount.balance = '10000000000000000';
 
 describe("POST /accounts/open", () => {
 

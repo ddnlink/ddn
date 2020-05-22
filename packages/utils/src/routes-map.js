@@ -3,7 +3,8 @@
  * https://github.com/AlbertoFdzM/express-list-endpoints/blob/develop/src/index.js
  */
 
-const fs = require('fs');
+import fs from 'fs';
+
 // const chalk = require('chalk');
 // var debug = require('debug')('express-list-endpoints')
 const regexpExpressRegexp = /^\/\^\\\/(?:(:?[\w\\.-]*(?:\\\/:?[\w\\.-]*)*)|(\(\?:\(\[\^\\\/]\+\?\)\)))\\\/.*/;
@@ -27,21 +28,17 @@ const getRouteMethods = route => {
 /**
  * Returns true if found regexp related with express params
  */
-const hasParams = pathRegexp => {
-  return regexpExpressParam.test(pathRegexp)
-};
+const hasParams = pathRegexp => regexpExpressParam.test(pathRegexp);
 
 /**
  * @param {Object} route Express route object to be parsed
  * @param {string} basePath The basePath the route is on
  * @return {Object} Endpoint info
  */
-const parseExpressRoute = (route, basePath) => {
-  return {
-    path: basePath + (basePath && route.path === '/' ? '' : route.path),
-    methods: getRouteMethods(route)
-  }
-};
+const parseExpressRoute = (route, basePath) => ({
+  path: basePath + (basePath && route.path === '/' ? '' : route.path),
+  methods: getRouteMethods(route)
+});
 
 const parseExpressPath = (expressPathRegexp, params) => {
   let parsedPath = regexpExpressRegexp.exec(expressPathRegexp);
@@ -102,9 +99,7 @@ const parseEndpoints = (app, basePath, endpoints) => {
  * @returns {Array} Updated endpoints array
  */
 const addEndpoint = (endpoints, newEndpoint) => {
-  const foundEndpointIdx = endpoints.findIndex(({ path }) => {
-    return path === newEndpoint.path;
-  });
+  const foundEndpointIdx = endpoints.findIndex(({ path }) => path === newEndpoint.path);
 
   if (foundEndpointIdx > -1) {
     const foundEndpoint = endpoints[foundEndpointIdx];
@@ -132,15 +127,15 @@ const getEndpoints = app => {
  * @param {object} app the express/route instance
  * @param {string} filename filename to write routes to
  */
-const routeMap = function (app, filename, logger) {
+const routeMap = (app, filename, logger) => {
   if (typeof filename === 'object') {
     logger = filename;
     filename = null;
   }
 
   let routes = ['All Apis List:  '];
-  getEndpoints(app).forEach((endpoint) => {
-    routes.push(endpoint.methods.join(' ') + '  ' + endpoint.path);
+  getEndpoints(app).forEach(({methods, path}) => {
+    routes.push(`${methods.join(' ')}  ${path}`);
   });
 
   routes.push(`\n Created at: ${Date()}`);

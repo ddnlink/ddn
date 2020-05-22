@@ -26,11 +26,11 @@ async function createIssuerAuditorBuy(received_address, amount, secret, secondSe
         }        
     };
     
-    await crypto.sign(transaction, keys);
+    transaction.signature = await crypto.sign(transaction, keys);
     
     if (secondSecret) {
         const secondKeys = crypto.getKeys(secondSecret);
-        await crypto.secondSign(transaction, secondKeys);
+        transaction.sign_signature = await crypto.secondSign(transaction, secondKeys);
     }
 
 	transaction.id = await crypto.getId(transaction);
@@ -62,11 +62,11 @@ async function createIssuerApply(orgName, org_id, orgOwner, orgOwnerPhone, secre
         }
     };
 
-	await crypto.sign(transaction, keys);
+	transaction.signature = await crypto.sign(transaction, keys);
 	
 	if (secondSecret) {
 		const secondKeys = crypto.getKeys(secondSecret);
-		await crypto.secondSign(transaction, secondKeys);
+		transaction.sign_signature = await crypto.secondSign(transaction, secondKeys);
     }
     
 	transaction.id = await crypto.getId(transaction);
@@ -98,11 +98,11 @@ async function createIssuerUpdate(orgName, org_id, orgOwner, orgOwnerPhone, secr
         }
     };
 
-    await crypto.sign(transaction, keys);
+    transaction.signature = await crypto.sign(transaction, keys);
     
     if (secondSecret) {
         const secondKeys = crypto.getKeys(secondSecret);
-        await crypto.secondSign(transaction, secondKeys);
+        transaction.sign_signature = await crypto.secondSign(transaction, secondKeys);
     }
 
 	transaction.id = await crypto.getId(transaction);
@@ -135,11 +135,11 @@ async function createIssuerCheck(address, orgName, org_id, orgOwner, orgOwnerPho
         }
     };
 
-    await crypto.sign(transaction, keys);
+    transaction.signature = await crypto.sign(transaction, keys);
     
     if (secondSecret) {
         const secondKeys = crypto.getKeys(secondSecret);
-        await crypto.secondSign(transaction, secondKeys);
+        transaction.sign_signature = await crypto.secondSign(transaction, secondKeys);
     }
 	transaction.id = await crypto.getId(transaction);
 
@@ -170,11 +170,11 @@ async function createIssuerFreeze(address, orgName, org_id, orgOwner, orgOwnerPh
         }
     };
 
-    await crypto.sign(transaction, keys);
+    transaction.signature = await crypto.sign(transaction, keys);
     
     if (secondSecret) {
         const secondKeys = crypto.getKeys(secondSecret);
-        await crypto.secondSign(transaction, secondKeys);
+        transaction.sign_signature = await crypto.secondSign(transaction, secondKeys);
     }
 	transaction.id = await crypto.getId(transaction);
 
@@ -206,11 +206,11 @@ async function createIssuerUnfreeze(address, orgName, org_id, orgOwner, orgOwner
         }
     };
 
-    await crypto.sign(transaction, keys);
+    transaction.signature = await crypto.sign(transaction, keys);
     
     if (secondSecret) {
         const secondKeys = crypto.getKeys(secondSecret);
-        await crypto.secondSign(transaction, secondKeys);
+        transaction.sign_signature = await crypto.secondSign(transaction, secondKeys);
     }
 
 	transaction.id = await crypto.getId(transaction);
@@ -248,11 +248,11 @@ async function createIssueNew(goodsName, goodsSpecs, goodsUnit, goodsNum, unitPr
         }
     };
 
-    await crypto.sign(transaction, keys);
+    transaction.signature = await crypto.sign(transaction, keys);
     
     if (secondSecret) {
         const secondKeys = crypto.getKeys(secondSecret);
-        await crypto.secondSign(transaction, secondKeys);
+        transaction.sign_signature = await crypto.secondSign(transaction, secondKeys);
     }
 	transaction.id = await crypto.getId(transaction);
 
@@ -289,11 +289,11 @@ async function createIssueClose(goodsName, goodsSpecs, goodsUnit, goodsNum, unit
         }
     };
 
-    await crypto.sign(transaction, keys);
+    transaction.signature = await crypto.sign(transaction, keys);
     
     if (secondSecret) {
         const secondKeys = crypto.getKeys(secondSecret);
-        await crypto.secondSign(transaction, secondKeys);
+        transaction.sign_signature = await crypto.secondSign(transaction, secondKeys);
     }
 	transaction.id = await crypto.getId(transaction);
 
@@ -330,11 +330,11 @@ async function createIssueReopen(goodsName, goodsSpecs, goodsUnit, goodsNum, uni
         }
     };
 
-    await crypto.sign(transaction, keys);
+    transaction.signature = await crypto.sign(transaction, keys);
     
     if (secondSecret) {
         const secondKeys = crypto.getKeys(secondSecret);
-        await crypto.secondSign(transaction, secondKeys);
+        transaction.sign_signature = await crypto.secondSign(transaction, secondKeys);
     }
 	transaction.id = await crypto.getId(transaction);
 
@@ -367,11 +367,11 @@ async function createExchangeBuy(batchValue, code, received_address,
         }
     };
 
-    await crypto.sign(transaction, keys);
+    transaction.signature = await crypto.sign(transaction, keys);
     
     if (secondSecret) {
         const secondKeys = crypto.getKeys(secondSecret);
-        await crypto.secondSign(transaction, secondKeys);
+        transaction.sign_signature = await crypto.secondSign(transaction, secondKeys);
     }
 	transaction.id = await crypto.getId(transaction);
 
@@ -404,11 +404,11 @@ async function createExchangePay(batchValue, code, received_address,
         }
     };
 
-    await crypto.sign(transaction, keys);
+    transaction.signature = await crypto.sign(transaction, keys);
     
     if (secondSecret) {
         const secondKeys = crypto.getKeys(secondSecret);
-        await crypto.secondSign(transaction, secondKeys);
+        transaction.sign_signature = await crypto.secondSign(transaction, secondKeys);
     }
 	transaction.id = await crypto.getId(transaction);
 
@@ -443,11 +443,11 @@ async function createExchangeTransferConfirm(batchValue, code, received_address,
         }
     };
 
-    await crypto.sign(transaction, keys);
+    transaction.signature = await crypto.sign(transaction, keys);
     
     if (secondSecret) {
         const secondKeys = crypto.getKeys(secondSecret);
-        await crypto.secondSign(transaction, secondKeys);
+        transaction.sign_signature = await crypto.secondSign(transaction, secondKeys);
     }
 	transaction.id = await crypto.getId(transaction);
 
@@ -480,11 +480,11 @@ async function createExchangeTransferAsk(batchValue, code, received_address,
         }
     };
 
-    await crypto.sign(transaction, keys);
+    transaction.signature = await crypto.sign(transaction, keys);
     
     if (secondSecret) {
         const secondKeys = crypto.getKeys(secondSecret);
-        await crypto.secondSign(transaction, secondKeys);
+        transaction.sign_signature = await crypto.secondSign(transaction, secondKeys);
     }
 	transaction.id = await crypto.getId(transaction);
 

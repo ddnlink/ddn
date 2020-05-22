@@ -329,7 +329,6 @@ function appendFileSync(file, obj) {
 }
 
 function genGenesisBlock(options) {
-    
     const defaultSecret = "enter boring shaft rent essence foil trick vibrant fabric quote indoor output";
     const secret = (options && options.default) ?  defaultSecret : DdnCrypto.generateSecret();
     const genesisAccount = accountHelper.account(secret, options.tokenPrefix);

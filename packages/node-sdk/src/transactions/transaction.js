@@ -32,11 +32,11 @@ async function createTransaction(recipientId, amount, message, secret, second_se
 	const keys = crypto.getKeys(secret);
 	transaction.senderPublicKey = keys.publicKey;
 
-	await crypto.sign(transaction, keys);
+	transaction.signature = await crypto.sign(transaction, keys);
 
 	if (second_secret) {
 		const secondKeys = crypto.getKeys(second_secret);
-		await crypto.secondSign(transaction, secondKeys);
+		transaction.sign_signature = await crypto.secondSign(transaction, secondKeys);
 	}
 
 	transaction.id = await crypto.getId(transaction);
@@ -58,14 +58,14 @@ async function createLock(height, secret, second_secret) {
 	const keys = crypto.getKeys(secret);
 	transaction.senderPublicKey = keys.publicKey;
 
-	await crypto.sign(transaction, keys);
+	transaction.signature = await crypto.sign(transaction, keys);
 
 	if (second_secret) {
 		const secondKeys = crypto.getKeys(second_secret);
-		await crypto.secondSign(transaction, secondKeys);
+		transaction.sign_signature =await crypto.secondSign(transaction, secondKeys);
 	}
 
-	// transaction.id = await crypto.getId(transaction);
+	transaction.id = await crypto.getId(transaction);
 	return transaction;
 }
 

@@ -7,21 +7,42 @@
 
 import path from 'path';
 
-import _ from 'lodash';
-import chai, {expect}  from 'chai';
+import chai, { expect } from 'chai';
 import supertest from 'supertest';
 import async from 'async';
 import request from 'request';
 import bluebird from 'bluebird';
 import DdnUtils from '@ddn/utils';
-import DdnCrepto from '@ddn/crypto';
-import {getConfigFile, requireFile} from '@ddn/core/lib/getUserConfig';
-import ddn from '../';
+import DdnCrypto from "@ddn/crypto";
+import { getConfigFile, requireFile } from '@ddn/core/lib/getUserConfig';
+import ddn from '../../lib';
+
+import {
+  randomProperty,
+  randomName,
+  randomDelegateName,
+  randomCoin,
+  randomPassword,
+  randomAccount,
+  randomTxAccount,
+  randomUsername,
+  randomIssuerName,
+  randomNumber,
+  randomizeSelection,
+  randomOrgId,
+  randomIpId
+} from './random-utils';
+
+import {
+  Daccount,
+  Eaccount,
+  Gaccount
+} from './accout-utils';
 
 // TODO 包的整理规划需要进一步明确原则，根据通用性确定是否写成npm包
-import {DappCategory, DappType} from '@ddn/asset-dapp';
+import { DappCategory, DappType } from '@ddn/asset-dapp';
 
-import Constants from './constants';
+import Constants from '../constants';
 
 const { bignum } = DdnUtils;
 
@@ -53,77 +74,44 @@ const Fees = {
   dappAddFee: "10000000000"
 };
 
+// Calculates the expected fee from a transaction
+function expectedFee(amount) {
+  return Fees.transactionFee;
+}
+
+function randomCapitalUsername() {
+  return randomName(constants.tokenPrefix, 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@$&_.');
+}
+
+function genNormalAccount() {
+  const password = randomPassword();
+  const keys = DdnCrypto.getKeys(password);
+  return {
+    address: DdnCrypto.generateAddress(keys.publicKey, constants.tokenPrefix),
+    publicKey: keys.publicKey,
+    password
+  };
+}
+
+function randomTid() {
+  return genNormalAccount().publicKey
+}
+
 const guestbookDapp = {
   icon: 'http://ebookchain.org/static/media/logo.5e78d8c2.png',
   link: 'http://www.ebookchain.org/dapp-demo.zip'
-};
-
-const Daccount = { // -wly 修改数据库字段后
-  'address': 'DJS57PDiq2srYdL5eqzUt7oAZ4WvEkVT9q',
-  'publicKey': 'ae19cd4f38454a22cb976383f092211b3735dc54d7002c1c084c48a187834e85',
-  'password': 'toward weapon judge twice two wine salmon primary attract public stool crawl',
-  'secondPassword': '',
-  'balance': 0,
-  'delegateName': 'TestDelegate',
-};
-
-const Eaccount = { // wly 修改数据库名称后重新生成
-  'address': 'DLbsdFXJNVa68SCAJxtGMaGdfBWkPALZzJ',
-  'publicKey': '0b5cfb77f401c818f7ebf02a0e88d52a28d3e4e24643e8a080c0c20ac45d0b9c',
-  'password': 'elite sunset cake shaft human cradle remember select flame panther tongue ancient',
-};
-
-const Gaccount = {
-  "address": "DCsewRJvY46egBYvtGcyj4Qryn6tCvAzy",
-  "password": "enter boring shaft rent essence foil trick vibrant fabric quote indoor output",
-  'publicKey': '2e6d978c5e6f1fbfc5a27abd964d9b6adc352daa81e31d9098a4f5ee3d7f885e',
-  'balance': '10000000000000000'
 };
 
 // Random DDN Amount
 //bignum update var RANDOM_COIN = Math.floor(Math.random() * (100000 * 100000000)) + 1;
 const RANDOM_COIN = bignum.plus(bignum.floor(bignum.multiply(Math.random(), 100000, 100000000)), 1).toString();
 
-// Used to create random delegates names
-function randomDelegateName() {
-  return randomName(20, '', 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789');
-}
-
-// Randomize a property from within an object
-function randomProperty(obj, needKey) {
-  const keys = Object.keys(obj);
-
-  if (!needKey) {
-    return obj[keys[keys.length * Math.random() << 0]];
-  } else {
-    return keys[keys.length * Math.random() << 0];
-  }
-}
-
-// Randomizes DDN amount
-function randomCoin() {
-  return `${Math.floor(Math.random() * (10000 * 100000000)) + (1000 * 100000000)}`;
-}
-
-// Dao
-function randomOrgId() {
-  const name = randomName(15, '', 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789');
-  return `DAO1${name}M`; // >= 5 bit
-}
-
-function randomIpId() {
-  const name = randomName(15, '', 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789');
-  const date = new Date;
-  const time = `${date.getFullYear()}${date.getUTCMonth()}${date.getUTCDate()}`;
-  return `IPID${time}${name}A`; // >= 5 bit
-}
-
 function _getHeight(url, cb) {
   request({
     type: 'GET',
     url: `${url}/api/blocks/getHeight`,
     json: true
-  }, (err, {statusCode}, body) => {
+  }, (err, { statusCode }, body) => {
     if (err || statusCode != 200) {
       console.log("body===", body);
 
@@ -158,7 +146,7 @@ function waitForNewBlock(height, cb) {
         type: 'GET',
         url: `${baseUrl}/api/blocks/getHeight`,
         json: true
-      }, (err, {statusCode}, body) => {
+      }, (err, { statusCode }, body) => {
         if (err || statusCode != 200) {
           return cb(err || 'Got incorrect status');
         }
@@ -174,10 +162,10 @@ function waitForNewBlock(height, cb) {
     () => actualHeight == height,
     err => {
       if (err) {
-          cb(err);
+        cb(err);
         // return setImmediate(cb, err);
       } else {
-          cb(null, height);
+        cb(null, height);
         // return setImmediate(cb, null, height);
       }
     }
@@ -209,7 +197,7 @@ function addPeers(numOfPeers, cb) {
         'nethash': config.nethash,
         'os': os
       }
-    }, (err, {statusCode, body}) => {
+    }, (err, { statusCode }) => {
       if (err || statusCode != 200) {
         return next(err || 'Status code is not 200 (getHeight)');
       } else {
@@ -218,114 +206,6 @@ function addPeers(numOfPeers, cb) {
       }
     })
   }, err => cb(err));
-}
-
-// Used to randomize selecting from within an array. Requires array length
-function randomizeSelection(length) {
-  return Math.floor(Math.random() * length);
-}
-
-// Returns a random number between min (inclusive) and max (exclusive)
-function randomNumber(min, max) {
-  return Math.floor(Math.random() * (max - min) + min);
-}
-
-// Calculates the expected fee from a transaction
-function expectedFee(amount) {
-    return Fees.transactionFee;
-}
-
-// Used to create random usernames
-function randomUsername() {
-  return randomName('', 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@$&_.');
-}
-
-function randomIssuerName(prefix, max) {
-  if (!prefix) {
-    prefix = ''; // 不能超过 12?
-  }
-
-  if (!max) {
-    max = 10; // 不能超过 12?
-  }
-  
-  return randomName(prefix, 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz', max); 
-}
-
-function randomCapitalUsername() {
-  return randomName(constants.tokenPrefix, 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@$&_.');
-}
-
-/**
- * 产生随机字符串
- * @param  {...any} args 常用参数为 randomName('D', 'abc...', 5)
- */
-function randomName(...args) {
-  // Convert arguments to Array
-  const array = Array.prototype.slice.apply(args);
-
-  let size = 16;
-  if(array.length > 2) {
-    size = array.pop();
-  }
-
-  let name = array[0];
-  const random = array[1];
-
-//   let size = randomNumber(1, max);
-
-  for (let i = 0; i < size; i++){
-    name += random.charAt(Math.floor(Math.random() * random.length));
-  }
-
-  return name;
-}
-
-// Used to create random basic accounts
-function randomAccount() {
-  const account = {
-    'address': '',
-    'publicKey': '',
-    'password': '',
-    'secondPassword': '',
-    'username': '',
-    'balance': 0
-  };
-
-  account.password = randomPassword();
-  account.secondPassword = randomPassword();
-  account.username = randomDelegateName();
-
-  return account;
-}
-
-function genNormalAccount() {
-  const password = randomPassword();
-  const keys = ddn.crypto.getKeys(password);
-  return {
-    address: DdnCrepto.generateAddress(keys.publicKey, constants.tokenPrefix),
-    publicKey: keys.publicKey,
-    password
-  };
-}
-
-function randomTid() {
-  return genNormalAccount().publicKey
-}
-
-// Used to create random transaction accounts (holds additional info to regular account)
-function randomTxAccount() {
-  return _.defaults(randomAccount(), {
-    sentAmount: '',
-    paidFee: '',
-    totalPaidFee: '',
-    transactions: []
-  })
-}
-
-// Used to create random passwords
-function randomPassword() {
-  return Math.random().toString(36).substring(7);
 }
 
 function submitTransaction(trs, cb) {
@@ -395,7 +275,7 @@ function EIFY(fn, receiver) {
   });
 }
 
-function beginEpochTime() {   
+function beginEpochTime() {
   return constants.net.beginDate;
 }
 
@@ -425,7 +305,7 @@ export default {
   Eaccount,
 
   //wxm TODO 此处使用新的类型
-//   TxTypes: TxTypes,
+  //   TxTypes: TxTypes,
   AssetTypes: DdnUtils.assetTypes,
 
   //wxm TODO 此处应该使用对应npm包提供的对象

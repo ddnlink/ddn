@@ -3,8 +3,6 @@ import _ from 'lodash';
 import Asset from '@ddn/asset-base';
 import DdnUtils from '@ddn/utils';
 import DdnCrypto from '@ddn/crypto';
-// import crypto from 'crypto';
-// import ed from 'ed25519';
 
 class Transfer extends Asset.Base {
     async propsMapping() {
@@ -38,7 +36,7 @@ class Transfer extends Asset.Base {
             throw new Error('Invalid transaction amount');
         }
         const assetData = trs.asset.aobTransfer;
-        const error = DdnUtils.Amount.validate(assetData.amount);
+        const error = DdnUtils.amount.validate(assetData.amount);
         if (error) {
             throw new Error(error);
         }

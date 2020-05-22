@@ -36,14 +36,13 @@ async function createTransaction(
         asset
     };
 
-    await crypto.sign(transaction, keys);
+    transaction.signature = await crypto.sign(transaction, keys);
 
     if (secondSecret) {
         const secondKeys = crypto.getKeys(secondSecret);
-        await crypto.secondSign(transaction, secondKeys);
+        transaction.sign_signature = await crypto.secondSign(transaction, secondKeys);
     }
 
-    // FIXME: 这里提供的id与写入时的id不一致，记得修改
     transaction.id = await crypto.getId(transaction);
     return transaction;
 }

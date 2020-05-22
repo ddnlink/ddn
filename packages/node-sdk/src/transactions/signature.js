@@ -8,7 +8,7 @@ function newSignature(secondSecret) {
 	const keys = crypto.getKeys(secondSecret);
 
 	const signature = {
-		publicKey: keys.publicKey
+		publicKey: keys.publicKey // ??
 	};
 
 	return signature;
@@ -32,17 +32,15 @@ async function createSignature(secret, secondSecret, oldSecondSecret) {
 		}
     };
 
-    await crypto.sign(transaction, keys);
+    transaction.signature = await crypto.sign(transaction, keys);
 
     // FIXME: 这里的逻辑是要修改二次密码？不该使用old* 
 	if (oldSecondSecret) {
-	// if (secondSecret) {
         const secondKeys = crypto.getKeys(oldSecondSecret); 
-        // const secondKeys = crypto.getKeys(secondSecret); 
-		await crypto.secondSign(transaction, secondKeys); 
+		transaction.sign_signature = await crypto.secondSign(transaction, secondKeys); 
     }
     
-    // transaction.id = await crypto.getId(transaction);
+    transaction.id = await crypto.getId(transaction);
 
 	return transaction;
 }

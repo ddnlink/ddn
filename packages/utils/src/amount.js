@@ -1,4 +1,4 @@
-import DdnUtil from '@ddn/utils';
+import bignum from '../lib/bignumber';
 
 const amount = {
   validate(amount) {
@@ -6,23 +6,24 @@ const amount = {
     if (!/^[1-9][0-9]*$/.test(amount)) return 'Amount should be integer'
     let bnAmount;
     try {
-      bnAmount = DdnUtil.bignum.new(amount);
+      bnAmount = bignum.new(amount);
     } catch (e) {
       return 'Failed to convert'
     }
-    if (DdnUtil.bignum.isLessThan(bnAmount, 1) || 
-        DdnUtil.bignum.isGreaterThan(bnAmount, '1e48')) {
-        return 'Invalid amount range'
+    if (bignum.isLessThan(bnAmount, 1) ||
+      bignum.isGreaterThan(bnAmount, '1e48')) {
+      return 'Invalid amount range'
     }
     return null
   },
+
   calcRealAmount(amount, precision) {
-    let ba = DdnUtil.bignum.new(amount);
+    let ba = bignum.new(amount);
     while (precision > 0) {
       if (precision > 8) {
-        ba = DdnUtil.bignum.divide(ba, 10 ** 8);
+        ba = bignum.divide(ba, 10 ** 8);
       } else {
-        ba = DdnUtil.bignum.divide(ba, 10 ** precision);
+        ba = bignum.divide(ba, 10 ** precision);
       }
       precision -= 8;
     }

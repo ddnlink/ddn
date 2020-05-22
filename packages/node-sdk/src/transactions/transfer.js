@@ -31,14 +31,14 @@ async function createInTransfer(dappId, currency, amount, secret, secondSecret) 
 		transaction.asset.in.amount = String(amount)
 	}
 
-	await crypto.sign(transaction, keys);
+	transaction.signature = await crypto.sign(transaction, keys);
 
 	if (secondSecret) {
 		const secondKeys = crypto.getKeys(secondSecret);
-		await crypto.secondSign(transaction, secondKeys);
+		transaction.sign_signature = await crypto.secondSign(transaction, secondKeys);
 	}
 
-	transaction.id = crypto.getId(transaction);
+	transaction.id = await crypto.getId(transaction);
 	return transaction;
 }
 
@@ -63,14 +63,14 @@ async function createOutTransfer(recipientId, dappId, transactionId, currency, a
 		}
 	};
 
-	await crypto.sign(transaction, keys);
+	transaction.signature = await crypto.sign(transaction, keys);
 
 	if (secondSecret) {
 		const secondKeys = crypto.getKeys(secondSecret);
-		await crypto.secondSign(transaction, secondKeys);
+		transaction.sign_signature = await crypto.secondSign(transaction, secondKeys);
 	}
 
-	transaction.id = crypto.getId(transaction);
+	transaction.id = await crypto.getId(transaction);
 	return transaction;
 }
 
