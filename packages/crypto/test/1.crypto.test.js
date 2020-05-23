@@ -2,8 +2,7 @@
 import sha256 from "fast-sha256";
 import crypto from "crypto";
 import ddnCrypto from "../lib";
-import RIPEMD160 from "ripemd160";
-import base58check from "../lib/base58check";
+
 import { Buffer } from "buffer";
 import Debug from 'debug';
 import node from '@ddn/node-sdk/lib/test';
@@ -93,51 +92,6 @@ describe("crypto", () => {
         });
     })
 
-    describe("#generateAddress", function () {
-        const generateAddress = ddnCrypto.generateAddress;
-
-        it("should be a function", function () {
-            expect(typeof generateAddress).toBe("function");
-        });
-
-        it("should generate address by publicKey", function () {
-            const kp = ddnCrypto.getKeys("secret");
-            const address = ddnCrypto.generateAddress(kp.publicKey, "D");
-
-            const kp2 = ddnCrypto.getKeys("enter boring shaft rent essence foil trick vibrant fabric quote indoor output");
-            const address2 = ddnCrypto.generateAddress(kp2.publicKey, "D");
-            debug('address2', address2);
-            expect(kp2.publicKey).toStrictEqual('daeee33def7eef0c7ba06ec66eda7204437ba88ace8f04e4a6aa4d7bfbd18bc1');
-            expect(address2).toEqual('DC5kJzMdNDhrnupWX2NGafzMoiwdHiySBe');
-            // expect(address).toEqual("DFkctfgZFkaATGRhGbj72wzJqACvMyzQ1U");
-            expect(address).toEqual("DFAZqQx6BxVyW63EqfZQBZYa1CTg7qH3oJ");
-        });
-
-        it('should be ok', () => {
-            // 1. 获得一个随机字符串，也称为助记词
-            // const secret = ddnCrypto.generateSecret();
-            const secret = "you cousin patch lemon luxury picture impact lens slogan exotic purse hole";
-            // 2. 产生公私钥对
-            // const kp = ddnCrypto.keypair(secret); 
-            const kp = ddnCrypto.getKeys(secret);
-
-            // 3. 对公钥进行sha256 hash 计算
-            const hashPubKey = Buffer.from(sha256.hash(kp.publicKey));
-
-            // 4. 进一步进行RIPEMD-160哈希计算
-            const Ripemd160 = new RIPEMD160().update(hashPubKey).digest();
-
-            // 5. 使用Base58Check编码将结果从字节字符串转换为base58字符串
-            const strBase58 = base58check.encode(Ripemd160);
-
-            // 6. 在上述转码后的前直接添加前缀（比如：D)
-            const address = "D" + strBase58;
-
-            expect(kp.publicKey).toEqual('1c4fd85dc2a0752864d1454bdc37a9e7f9a09fa2c83f1f8d4da9d9bfdd38ed65'); // 2be3d7a21dd9715d949c58910b38d01a063cfe8159320aa426b2249a6aaf1340
-            expect(address).toEqual('DLNxuHtMwn7MrmcSmatFLHb9YPgfZ5uxMr');
-        });
-    });
-
     describe("#getKeys", function () {
         it('The same secret should get a same keyPairs', () => {
             const secret = "you cousin patch lemon luxury picture impact lens slogan exotic purse hole";
@@ -169,6 +123,5 @@ describe("crypto", () => {
         })
 
     });
-
 
 });

@@ -887,6 +887,7 @@ describe("GET /delegates/voters", () => {
                 .expect(200)
                 .end((err, {body}) => {
                     // console.log(JSON.stringify(res.body));
+                    node.expect(err).be.not.ok;
                     node.expect(body).to.have.property("success").to.be.true;
                     node.expect(body).to.have.property("accounts").that.is.an("array");
                     let flag = 0;

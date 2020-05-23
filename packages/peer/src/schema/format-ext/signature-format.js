@@ -3,6 +3,7 @@ export default {
     name: "signature",
 
     validate(str) {
+        // 允许空
         if (str.length == 0) {
             return true;
         }

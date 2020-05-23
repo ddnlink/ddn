@@ -365,8 +365,8 @@ class Transaction {
             throw new Error(`Transaction is not ready: ${trs.id}`);
         }
 
-        //wxm 这个逻辑应该去掉，不应该这么使用序号特殊处理，如果必须，应该是用assetTypes.type枚举
-        if (trs.type === 7) {
+        //wxm 这个逻辑应该去掉，不应该这么使用序号特殊处理，如果必须，应该是用assetTypes.type枚举 FIXME: 2020.5
+        if (trs.type === DdnUtils.assetTypes.DAPP_OUT) {
             return this._assets.call(trs.type, "apply", trs, block, sender);
         }
 
@@ -638,7 +638,6 @@ class Transaction {
     }
 
     // TODO: 注意使用 @ddn/crypto 的对应方法重构 2020.5.3
-    // async verifyBytes(bytes, publicKey, signature) {
     async verifyBytes(bytes, signature, publicKey) {
         return DdnCrypto.verifyBytes(bytes, signature, publicKey);
     }
@@ -661,15 +660,8 @@ class Transaction {
         return DdnCrypto.verifyBytes(bytes, signature, publicKey);
     }
 
-    // fixme: 2020.5.15
     async multisign(trs, keypair) {
-        // const bytes = await this.getBytes(trs, true, true);
-        // const hash = crypto.createHash('sha256').update(bytes).digest();
-        // console.log('multisign hash........', hash);
-
-        // return ed.Sign(hash, keypair).toString('hex');
-        const sign = await DdnCrypto.sign(trs, keypair);
-        return sign;
+        return await DdnCrypto.sign(trs, keypair);
     }
 
     async verify(trs, sender, requester) {
@@ -792,7 +784,8 @@ class Transaction {
         if (!DdnUtils.bignum.isEqualTo(trs.fee, fee)) {
             throw new Error(`Invalid transaction type/fee: ${trs.id}`);
         }
-        // Check amount
+
+        // amount 需要整理成 正整数 形式，不包含科学计数法和点号，范围在 0 ~ totalAmount 之间
         if (DdnUtils.bignum.isLessThan(trs.amount, 0) ||
             DdnUtils.bignum.isGreaterThan(trs.amount, DdnUtils.bignum.multiply(this.constants.maxAmount, this.constants.fixedPoint)) ||
             `${trs.amount}`.includes(".") || `${trs.amount}`.includes("e")) {

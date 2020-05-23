@@ -282,7 +282,7 @@ describe('Test Dao', () => {
                 .end((err, {body}) => {
                     // console.log(JSON.stringify(res.body));
                     node.expect(body).to.have.property('success').to.be.false;
-                    node.expect(body.error).to.equal("Invalid parameters: should NOT be longer than 20 characters");
+                    node.expect(body.error).to.equal("Invalid parameters: #/properties/orgId/maxLength should NOT be longer than 20 characters");
                     done();
                 });
         })

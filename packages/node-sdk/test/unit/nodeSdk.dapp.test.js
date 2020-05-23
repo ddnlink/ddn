@@ -5,7 +5,7 @@ import Debug from "debug";
 const debug = Debug("debug");
 const expect = node.expect;
 
-describe("dapp.js", () => {
+describe("node-sdk dapp.js", () => {
 	const dapp = ddn.dapp;
 
 	it("should be object", () => {
@@ -43,12 +43,14 @@ describe("dapp.js", () => {
 		});
 
 		it("should create dapp without second signature", async () => {
+			// options.delegates = options.delegates.join(',');
 			trs = await createDApp(options, "secret", null);
 			debug('createDApp: ', trs);
 			expect(trs).to.be.ok;
 		});
 
 		it("should create delegate with second signature", async () => {
+			// options.delegates = options.delegates.join(',');
 			trs = await createDApp(options, "secret", "secret 2");
 			debug('createDApp: ', trs);
 

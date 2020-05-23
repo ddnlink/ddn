@@ -1,19 +1,22 @@
 /**
  * passed
  */
+import Debug from "debug";
 import node from "@ddn/node-sdk/lib/test";
 
 import crypto from "crypto";
+
+const debug = Debug('debug');
 
 const account = node.randomAccount();
 const account2 = node.randomAccount();
 
 describe("POST /peer/transactions", () => {
 
-    beforeAll(done => {
-        node.ddn.init();
-        done();
-    })
+    // beforeAll(done => {
+    //     node.ddn.init();
+    //     done();
+    // })
 
     describe("Registering a delegate", () => {
 
@@ -31,6 +34,7 @@ describe("POST /peer/transactions", () => {
                 .end((err, {
                     body
                 }) => {
+                    debug("invalid username, open user", body);
                     node.expect(err).to.be.not.ok;
 
                     account.address = body.account.address;
@@ -46,8 +50,10 @@ describe("POST /peer/transactions", () => {
                         })
                         .expect("Content-Type", /json/)
                         .expect(200)
-                        .end((err, res) => {
+                        .end((err, { body }) => {
+                            debug("invalid username, transfer ddn to the user", body);
                             node.expect(err).to.be.not.ok;
+
                             node.onNewBlock(async err => {
                                 node.expect(err).to.be.not.ok;
                                 const transaction = await node.ddn.delegate.createDelegate(crypto.randomBytes(64).toString("hex"), account.password);
@@ -66,7 +72,8 @@ describe("POST /peer/transactions", () => {
                                     .end((err, {
                                         body
                                     }) => {
-                                        // console.log(JSON.stringify(res.body));
+                                        debug("invalid username to registration delegate", body);
+                                        node.expect(err).to.be.not.ok;
                                         node.expect(body).to.have.property("success").to.be.false;
                                         done();
                                     });
@@ -92,7 +99,8 @@ describe("POST /peer/transactions", () => {
                 .end((err, {
                     body
                 }) => {
-                    // console.log(JSON.stringify(res.body));
+                    debug("no funds", body);
+                    node.expect(err).to.be.not.ok;
                     node.expect(body).to.have.property("success").to.be.false;
                     done();
                 });
@@ -114,34 +122,40 @@ describe("POST /peer/transactions", () => {
                 .end((err, {
                     body
                 }) => {
-                    // console.log(JSON.stringify(res.body));
+                    debug("uppercase username", body);
+                    node.expect(err).to.be.not.ok;
                     node.expect(body).to.have.property("success").to.be.false;
                     done();
                 });
         });
 
         it("When account has funds. Username is lowercase. Should be ok", async done => {
+            debug("account.username 1", account.username);
             account.username = node.randomDelegateName().toLowerCase();
             const transaction = await node.ddn.delegate.createDelegate(account.username, account.password);
-
-            node.peer.post("/transactions")
-                .set("Accept", "application/json")
-                .set("version", node.version)
-                .set("nethash", node.config.nethash)
-                .set("port", node.config.port)
-                .send({
-                    transaction
-                })
-                .expect("Content-Type", /json/)
-                .expect(200)
-                .end((err, {
-                    body
-                }) => {
-                    console.log(JSON.stringify(body));
-                    node.expect(err).to.be.not.ok;
-                    node.expect(body).to.have.property("success").to.be.true;
-                    done();
-                });
+            debug("account.username 2", account.username);
+            
+            node.onNewBlock(err => {
+                node.expect(err).to.be.not.ok;
+                node.peer.post("/transactions")
+                    .set("Accept", "application/json")
+                    .set("version", node.version)
+                    .set("nethash", node.config.nethash)
+                    .set("port", node.config.port)
+                    .send({
+                        transaction
+                    })
+                    .expect("Content-Type", /json/)
+                    .expect(200)
+                    .end((err, {
+                        body
+                    }) => {
+                        debug("lowercase username", body);
+                        node.expect(err).to.be.not.ok;
+                        node.expect(body).to.have.property("success").to.be.true;
+                        done();
+                    });
+            })
         });
 
         it("Twice within the same block. Should fail", done => {
@@ -174,8 +188,8 @@ describe("POST /peer/transactions", () => {
                         })
                         .expect("Content-Type", /json/)
                         .expect(200)
-                        .end((err, res) => {
-                            // console.log(res.body);
+                        .end((err, { body }) => {
+
                             node.expect(err).to.be.not.ok;
 
                             node.onNewBlock(async err => {
@@ -197,7 +211,7 @@ describe("POST /peer/transactions", () => {
                                     .end(async (err, {
                                         body
                                     }) => {
-                                        // console.log(res.body);
+                                        debug("Twice 1", body);
                                         node.expect(err).to.be.not.ok;
 
                                         node.expect(body).to.have.property("success").to.be.true;
@@ -218,7 +232,7 @@ describe("POST /peer/transactions", () => {
                                             .end((err, {
                                                 body
                                             }) => {
-                                                // console.log(JSON.stringify(res.body));
+                                                debug("Twice 2", body);
                                                 node.expect(err).to.be.not.ok;
 
                                                 node.expect(body).to.have.property("success").to.be.false;

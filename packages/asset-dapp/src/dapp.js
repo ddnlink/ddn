@@ -84,7 +84,7 @@ class Dapp extends Asset.Base {
         //     delegates: data.delegates,
         //     unlock_delegates: data.unlock_delegates
         // };
-        
+
         return trs;
     }
 
@@ -182,14 +182,20 @@ class Dapp extends Asset.Base {
             }
         }
 
-        const delegatesArr = dapp.delegates ? dapp.delegates.split(',') : [];
-        if (!dapp.delegates || delegatesArr.length < 5 ||
-            delegatesArr.length > this.config.settings.delegateNumber) {
-            throw new Error("Invalid dapp delegates")
-        }
-        for (let i in delegatesArr) {
-            if (delegatesArr[i].length != 64) {
-                throw new Error("Invalid dapp delegates format")
+        if (!dapp.delegates) {
+            throw new Error("Have no dapp delegates");
+        } else {
+            let delegatesArr = []
+            delegatesArr = typeof dapp.delegates === 'string' ? dapp.delegates.split(',') : dapp.delegates;
+            if (delegatesArr.length < 5 ||
+                delegatesArr.length > this.config.settings.delegateNumber) {
+                throw new Error("Invalid dapp delegates amount");
+            }
+
+            for (let i in delegatesArr) {
+                if (delegatesArr[i].length != 64) {
+                    throw new Error("Invalid dapp delegates format")
+                }
             }
         }
 
@@ -238,8 +244,11 @@ class Dapp extends Asset.Base {
         bb.writeInt(dapp.type);
         bb.writeInt(dapp.category);
         if (dapp.delegates) {
-            bb.writeString(dapp.delegates.join(','));
-            // bb.writeString(dapp.delegates);
+            if (dapp.delegates instanceof Array) {
+                dapp.delegates = dapp.delegates.join(',');
+            }
+
+            bb.writeString(dapp.delegates);
         }
         if (dapp.unlock_delegates || dapp.unlock_delegates === 0) {
             bb.writeInt(dapp.unlock_delegates);
@@ -459,6 +468,8 @@ class Dapp extends Asset.Base {
                 const result = await self.getDappBalance(req);
                 res.json(result);
             } catch (err) {
+                self.logger.error('getDappBalance err', err);
+                console.log('getDappBalance err', err);
                 res.json({ success: false, error: err.message || err.toString() });
             }
         });
@@ -482,6 +493,8 @@ class Dapp extends Asset.Base {
     }
 
     async getDappBalance(req) {
+        console.log('dapp.js req.params:', req.params);
+
         const dappId = req.params.dappid;
         const currency = req.params.currency;
 
@@ -489,8 +502,10 @@ class Dapp extends Asset.Base {
             this.dao.findOne("mem_asset_balance", { address: dappId, currency },
                 ['balance'], (err, row) => {
                     if (err) {
+                        console.log('err', err);
                         return reject(err);
                     }
+                    console.log('row', row);
 
                     resolve({ success: true, result: { currency, balance: row.balance } });
                 });

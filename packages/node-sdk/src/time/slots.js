@@ -20,10 +20,7 @@ function getEpochTime(time) {
 		time = (new Date()).getTime();
 	}
 	const d = beginEpochTime();
-	
 	const t = d.getTime();
-	console.log("t, time", t, time);
-
 	return Math.floor((time - t) / 1000);
 }
 

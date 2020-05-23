@@ -10,7 +10,7 @@ import {
     requireFile
 } from '@ddn/core/lib/getUserConfig';
 
-const debug = Debug('peer');
+const debug = Debug('debug');
 
 const genesisblockFile = path.resolve(process.cwd(), './examples/fun-tests/config/genesisBlock.json');
 const genesisblock = requireFile(genesisblockFile);
@@ -35,7 +35,8 @@ describe("GET /blocks/getHeight", () => {
             .end((err, {
                 body
             }) => {
-                // debug(JSON.stringify(body));
+                debug("getHeight", JSON.stringify(body));
+                node.expect(err).be.not.ok;
                 node.expect(body).to.have.property("success").to.be.true;
                 if (body.success == true && body.height != null) {
                     node.expect(body).to.have.property("height").to.be.above(0);
@@ -43,13 +44,12 @@ describe("GET /blocks/getHeight", () => {
                         block.blockHeight = body.height;
                         if (DdnUtils.bignum.isGreaterThan(body.height, 100)) {
                             testBlocksUnder100 = true;
-                            done();
                         }
                     } else {
                         debug("Request failed or height is null");
-                        done();
                     }
                 }
+                done()
             });
     });
 });
@@ -133,12 +133,10 @@ describe("GET /blocks", () => {
                     block.generatorPublicKey = body.blocks[0].generator_public_key;
                     block.totalAmount = body.blocks[0].total_amount;
                     block.totalFee = body.blocks[0].total_fee;
-
-                    done();
                 } else {
                     console.log("Request failed or blocks array is null");
-                    done();
                 }
+                done();
             });
     });
 

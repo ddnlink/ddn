@@ -2,7 +2,7 @@ export default {
   nethash: '0ab796cd', // 标定该链的版本
   tokenName: 'DDN',
   tokenPrefix: 'D',
-  foundAddress: 'DLjrrVwnmMXstcAYVjcrpwyYb3kY1ehABU',
+  foundAddress: 'DLjrrVwnmMXstcAYVjcrpwyYb3kY1ehABU', // Please protect its private key
   walletUrl: 'http://wallet.ddn.link',
 
   interval: 10, // 10ms
@@ -21,7 +21,7 @@ export default {
   maxConfirmations: 77 * 100,
   confirmationLength: 77,
   fixedPoint: 10 ** 8,
-  totalAmount: "10000000000000000", //Bignum update
+  totalAmount: "10000000000000000", // = maxAmount * fixedPoint
   maxTxsPerBlock: 500,
 
   testnet: {

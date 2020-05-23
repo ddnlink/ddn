@@ -374,11 +374,11 @@ class PeerService {
             transaction.id = await DdnCrypto.getId(transaction);
         }
 
+        // 对缓存的非法交易直接返回
         if (this._invalidTrsCache.has(transaction.id)) {
-
             return {
                 success: false,
-                error: `The transaction ${transaction.id} is in process alreay.`
+                error: `The transaction ${transaction.id} is invalid, don't commit it again.`
             };
         }
 
@@ -392,7 +392,7 @@ class PeerService {
                     ) {
                         return cb(
                             `The transaction ${transaction.id} is in process already..`
-                        ); // Note: please get it.
+                        ); // 这里是正常交易，仅是未确认
                     }
 
                     this.logger.log(
@@ -408,6 +408,7 @@ class PeerService {
                         cb(exp);
                     }
                 },
+
                 (err, transactions) => {
                     let result = {
                         success: true
@@ -420,13 +421,14 @@ class PeerService {
                             JSON.stringify(transaction)
                             }, ${DdnUtils.system.getErrorMsg(err)}`
                         );
-                        
+
+                        // 缓存非法交易
                         this._invalidTrsCache.set(transaction.id, true);
                         result = {
                             success: false,
                             error: err.message ? err.message : err
                         };
-                        
+
                     } else if (transactions && transactions.length > 0) {
                         result.transactionId = transactions[0].id;
                     }

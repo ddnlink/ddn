@@ -160,7 +160,7 @@ class DAO {
             .upsert(modelObj, options)
             .then(() => {
               if (typeof cb == "function") {
-                cb(null, modelObj); 
+                cb(null, modelObj);
                 return null;
               }
             })
@@ -650,11 +650,12 @@ class DAO {
     this._getModel(modelName)
       .findOne(options)
       .then(data => {
+        // console.log('data', data);
+        
         cb(null, data ? data.toJSON() : null);
         return null;
       })
       .catch(cb);
-      return null;
   }
 
   static count(modelName, where, dbTrans, cb) {

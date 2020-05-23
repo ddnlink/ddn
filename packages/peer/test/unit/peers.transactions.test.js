@@ -1,9 +1,10 @@
 /**
  * passed
  */
-import node from "@ddn/node-sdk/lib/test";
-
 import Debug from 'debug';
+
+import node from "@ddn/node-sdk/lib/test";
+import DdnUtils from "@ddn/utils";
 
 import crypto from "crypto";
 import path from 'path';
@@ -11,7 +12,7 @@ import {
     requireFile
 } from '@ddn/core/lib/getUserConfig';
 
-const debug = Debug('peer');
+const debug = Debug('debug');
 
 const message = "test";
 
@@ -51,8 +52,6 @@ describe("POST /peer/transactions", () => {
     it("Using same valid transaction with correct nethash in headers. Should be ok", async done => {
         const transaction = await node.ddn.transaction.createTransaction(node.Daccount.address, 1, message, node.Gaccount.password);
 
-        debug('transaction= ', transaction);
-
         node.peer.post("/transactions")
             .set("Accept", "application/json")
             .set("version", node.version)
@@ -66,7 +65,7 @@ describe("POST /peer/transactions", () => {
             .end((err, {
                 body
             }) => {
-                console.log(JSON.stringify(body));
+                console.log("correct nethash", JSON.stringify(body));
                 node.expect(body).to.have.property("success").to.be.true;
                 done();
             });
@@ -87,9 +86,9 @@ describe("POST /peer/transactions", () => {
             .end((err, {
                 body
             }) => {
-                // console.log(JSON.stringify(res.body));
+                debug("undefined recipientId", JSON.stringify(body));
                 node.expect(body).to.have.property("success").to.be.false;
-                node.expect(body).to.have.property("error");
+                node.expect(body).to.have.property("error").to.contain("Invalid recipient");
                 done();
             });
     });
@@ -109,15 +108,15 @@ describe("POST /peer/transactions", () => {
             .end((err, {
                 body
             }) => {
-                // console.log(JSON.stringify(res.body));
+                debug("negative amount", JSON.stringify(body));
                 node.expect(body).to.have.property("success").to.be.false;
-                node.expect(body).to.have.property("error");
+                node.expect(body).to.have.property("error").to.contain("Invalid transaction amount");
                 done();
             });
     });
 
     it("Using invalid passphrase. Should fail", async done => {
-        const transaction = await node.ddn.transaction.createTransaction(node.Daccount.address, 1, message, node.Gaccount.password);
+        const transaction = await node.ddn.transaction.createTransaction(node.Daccount.address, 1, message, '');
         transaction.recipientId = node.Daccount.address;
         transaction.id = await node.ddn.crypto.getId(transaction); // 这里提供是不对的
         node.peer.post("/transactions")
@@ -133,7 +132,7 @@ describe("POST /peer/transactions", () => {
             .end((err, {
                 body
             }) => {
-                // console.log(JSON.stringify(res.body));
+                debug("invalid passphrase", JSON.stringify(body));
                 node.expect(body).to.have.property("success").to.be.false;
                 node.expect(body).to.have.property("error");
                 done();
@@ -155,9 +154,9 @@ describe("POST /peer/transactions", () => {
             .end((err, {
                 body
             }) => {
-                // console.log(JSON.stringify(res.body));
+                debug(JSON.stringify(body));
                 node.expect(body).to.have.property("success").to.be.false;
-                node.expect(body).to.have.property("error");
+                node.expect(body).to.have.property("error").to.contain("Insufficient balance");
                 done();
             });
     });
@@ -179,7 +178,7 @@ describe("POST /peer/transactions", () => {
             .end((err, {
                 body
             }) => {
-                // console.log(JSON.stringify(res.body));
+                debug(JSON.stringify(body));
                 node.expect(body).to.have.property("success").to.be.false;
                 node.expect(body).to.have.property("error");
                 done();
@@ -232,9 +231,10 @@ describe("POST /peer/transactions", () => {
             });
     });
 
-    it("Using very large amount and genesis block id. Should fail", async done => {
-        const transaction = await node.ddn.transaction.createTransaction(node.Daccount.address, node.constants.totalAmount, message, node.Gaccount.password);
-        transaction.blockId = genesisblock.id;
+    it("Using very larger than totalAmount and genesis block id. Should fail", async done => {
+        const largeAmount = DdnUtils.bignum.plus(node.constants.totalAmount, 1);
+        const transaction = await node.ddn.transaction.createTransaction(node.Daccount.address, largeAmount, message, node.Gaccount.password);
+        transaction.block_id = genesisblock.id;
 
         node.peer.post("/transactions")
             .set("Accept", "application/json")
@@ -249,7 +249,7 @@ describe("POST /peer/transactions", () => {
             .end((err, {
                 body
             }) => {
-                // console.log(JSON.stringify(res.body));
+                debug("large amount", JSON.stringify(body));
                 node.expect(body).to.have.property("success").to.be.false;
                 done()
             });
@@ -270,7 +270,7 @@ describe("POST /peer/transactions", () => {
             .end((err, {
                 body
             }) => {
-                // console.log(JSON.stringify(res.body));
+                debug(JSON.stringify(body));
                 node.expect(body).to.have.property("success").to.be.false;
                 node.expect(body).to.have.property("error");
                 done();
@@ -292,7 +292,7 @@ describe("POST /peer/transactions", () => {
             .end((err, {
                 body
             }) => {
-                // console.log(JSON.stringify(res.body));
+                debug(JSON.stringify(body));
                 node.expect(body).to.have.property("success").to.be.false;
                 node.expect(body).to.have.property("error");
                 done();

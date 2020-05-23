@@ -37,21 +37,24 @@ describe('NaCI', () => {
         expect(cryptoHash).be.not.equal(naclHash);
     })
 
-    it("crypto.createHash('sha256').update(bytes) == push ?", () => {
+    it("crypto.createHash('sha256').update(bytes) == push", () => {
         let strBuffer = Buffer.from('test');
-        let hashes = crypto.createHash('sha256').update(strBuffer);
+        let hashStrs = 'test';
+        
+        let hashes = crypto.createHash('sha256');
+        hashes.update(strBuffer);
 
         [1, 2, 3].forEach(e => {
             strBuffer = Buffer.from('tt'+ e);
-            hashes = crypto.createHash('sha256').update(strBuffer);
-            console.log("hashes" + e, hashes.digest());
-            
+            hashStrs += 'tt'+ e;
+            hashes.update(strBuffer);
         });
-	// console.log(Buffer.from(privateKey, "hex") instanceof Uint8Array);
-	// const tmp = new Uint8Array(hash.length);
-	// for (var i = 0; i < tmp.length; i++) tmp[i] = hash[i];
-        const result = hashes.digest();
-        expect(result).to.be.equal('')
+
+        debug('hashStrs', hashStrs);
+        const hashUpdate = hashes.digest();
+        const hashStrsUpdate = crypto.createHash('sha256').update(Buffer.from(hashStrs)).digest();
+
+        expect(hashUpdate.toString()).to.be.equal(hashStrsUpdate.toString());
     })
 
     it("#createHash should be ok, and return a Buffer, Uint8Array too.", (done) => {
