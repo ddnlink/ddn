@@ -341,6 +341,7 @@ class PeerService {
             transaction = await this.runtime.transaction.objectNormalize(
                 body.transaction
             );
+
             transaction.asset = transaction.asset || {};
         } catch (e) {
             this.logger.error("transaction parse error", {
@@ -392,7 +393,7 @@ class PeerService {
                     ) {
                         return cb(
                             `The transaction ${transaction.id} is in process already..`
-                        ); // 这里是正常交易，仅是未确认
+                        ); // 这里是正常交易，仅是未确认, 
                     }
 
                     this.logger.log(
@@ -416,7 +417,7 @@ class PeerService {
 
                     if (err) {
                         // 这里的错误就是上面 catch 的 exp，所以统一在这里处理就好
-                        this.logger.error(
+                        this.logger.debug(
                             `Receive invalid transaction, transaction is ${
                             JSON.stringify(transaction)
                             }, ${DdnUtils.system.getErrorMsg(err)}`
@@ -424,6 +425,7 @@ class PeerService {
 
                         // 缓存非法交易
                         this._invalidTrsCache.set(transaction.id, true);
+
                         result = {
                             success: false,
                             error: err.message ? err.message : err

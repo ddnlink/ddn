@@ -7,8 +7,10 @@ import options from '../options';
 async function createPluginAsset(trsType, assetInfo, secret, secondSecret) {
     const keys = crypto.getKeys(secret);
 
+    console.log("createPluginAsset assetInfo 1", assetInfo);
+    
     // var fee = assetInfo.fee || constants.net.fees.org;
-    delete assetInfo.fee;
+    // delete assetInfo.fee;
     const transaction = {
         type: trsType,
         nethash: options.get('nethash'),
@@ -39,6 +41,9 @@ async function createPluginAsset(trsType, assetInfo, secret, secondSecret) {
 
     const assetJsonName = Asset.Utils.getAssetJsonName(trsType);
     transaction.asset[assetJsonName] = assetInfo;
+
+    console.log("createPluginAsset assetInfo 2", assetInfo);
+
     if (assetInfo.fee) {
         transaction.fee = assetInfo.fee;
     } else {

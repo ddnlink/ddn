@@ -112,7 +112,7 @@ class Loader {
                 await assetInst.attachApi(router);
             }
 
-            // rustful api, for example: new api: /api/aobassets -> old api: /api/aobasset/list
+            // rustful api, for example: new api: /api/aob/assets -> old api: /api/aobasset/list
             this._assetsApi.push({
                 path: `/api/${apiSubPathed}`,
                 router,
@@ -178,9 +178,9 @@ class Loader {
 
             assetInst.queryAsset(where, orders, false, 1, 1)
                 .then(rows => {
-                    res.status(200).json({success: true, state: 0, data: rows && rows.length > 0 ? rows[0] : null});
+                    res.status(200).json({success: true, data: rows && rows.length > 0 ? rows[0] : null});
                 }).catch(err => {
-                    res.status(200).json({success: false, state: -1, error: err.toString()});
+                    res.status(200).json({success: false, error: err.toString()});
                 });
         };
 
@@ -233,12 +233,12 @@ class Loader {
                     }
                 }
             }
-
+            // console.log("loader.js router", where, orders, pageIndex, pageSize)
             assetInst.queryAsset(where, orders, true, pageIndex, pageSize)
                 .then(rows => {
-                    res.status(200).json({success: true, state: 0, data: rows});
+                    res.status(200).json({success: true, data: rows});
                 }).catch(err => {
-                    res.status(200).json({success: false, state: -1, error: err.toString()});
+                    res.status(200).json({success: false, error: err.toString()});
                 });
         };
 

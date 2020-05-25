@@ -136,6 +136,7 @@ class Program {
 
         for (const trs of block.transactions) {
             const bytes = await this._context.runtime.transaction.getBytes(trs);
+            // const bytes = await DdnCrypto.getBytes(trs);
             payloadLength += bytes.length;
             payloadBytes += bytes;
         }

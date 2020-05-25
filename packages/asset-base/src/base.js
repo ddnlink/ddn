@@ -430,7 +430,7 @@ class AssetBase {
                 }
             }
 
-            orders.forEach(async orderItem => {
+            for (const orderItem of orders) {
                 if (CommonUtils.isArray(orderItem)) {
                     if (orderItem.length == 2) {
                         if (typeof (orderItem[0]) == "string" && typeof (orderItem[1]) == "string") {
@@ -458,7 +458,7 @@ class AssetBase {
                         newOrders.push(orderItem);
                     }
                 }
-            });
+            }
         } else {
             //如果传入排序参数不是数组，就直接使用，这里其实有隐患，这里使用的字段名只能使用真正的数据库字段名，str1..str9等等，不能用prop名称
             newOrders = orders;
@@ -468,16 +468,17 @@ class AssetBase {
             pageIndex, pageSize, newOrders, returnTotal, attributes);
 
         const rows = data && data.rows ? data.rows : data;
+
         if (rows && rows.length > 0) {
             const rowObjs = [];
 
-            rows.forEach(async rowInfo => {
+            for (const rowInfo of rows) {
                 const rowObj = await assetInst.dbRead(rowInfo);
                 if (rowObj) {
                     const assetName = AssetUtils.getAssetJsonName(rowInfo.asset_trs_type);
                     rowObjs.push(rowObj[assetName]);
                 }
-            });
+            }
 
             if (returnTotal) {
                 return {
@@ -497,47 +498,6 @@ class AssetBase {
                 return [];
             }
         }
-
-        // return new Promise((resolve, reject) => {
-        //     this.library.model.getAssetBase(newConds, 
-        //         assetInst.hasExtProps(), pageIndex, pageSize, 
-        //         newOrders, returnTotal, attributes, (err, data) => {
-        //             if (err) {
-        //                 reject(err);
-        //             }
-
-        //             var rows = data && data.rows ? data.rows : data;
-        //             if (rows && rows.length > 0) {
-        //                 var rowObjs = [];
-        //                 for (var i = 0; i < rows.length; i++) {
-        //                     var rowInfo = rows[i];
-        //                     var rowObj = assetInst.dbRead(rowInfo);
-        //                     if (rowObj) {
-        //                         var assetName = AssetUtils.getAssetJsonName(rowInfo.asset_trs_type);
-        //                         rowObjs.push(rowObj[assetName]);
-        //                     }
-        //                 }
-        //                 if (returnTotal) {
-        //                     resolve({
-        //                         rows: rowObjs,
-        //                         total: data.total
-        //                     });
-        //                 } else {
-        //                     resolve(rowObjs);
-        //                 }
-        //             } else {
-        //                 if (returnTotal) {
-        //                     resolve({
-        //                         rows: [],
-        //                         total: 0
-        //                     });
-        //                 } else {
-        //                     resolve([]);
-        //                 }
-        //             }
-        //         }
-        //     );
-        // });
     }
 
     /**

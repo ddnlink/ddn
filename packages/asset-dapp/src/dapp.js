@@ -1334,7 +1334,7 @@ class Dapp extends Asset.Base {
     }
 
     async onNewBlock(block) {
-        Object.keys(_dappLaunched).forEach(async (dappId) => {
+        for (const dappId of Object.keys(_dappLaunched)) {
             const sandbox = _dappLaunched[dappId];
             if (sandbox) {
                 try {
@@ -1363,7 +1363,7 @@ class Dapp extends Asset.Base {
                     this.logger.error(err2);
                 }
             }
-        });
+        }
     }
 }
 

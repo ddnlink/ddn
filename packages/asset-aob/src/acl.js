@@ -14,10 +14,10 @@ import DdnUtils from '@ddn/utils';
 class Acl extends Asset.Base {
     async propsMapping() {
         return [
-            {field: 'str1', prop: 'currency', required: true},
-            {field: 'int1', prop: 'flag', minValue: 0, maxValue: 1, required: true},
-            {field: 'str2', prop: 'operator', minLen: 1, maxLen: 1, required: true},
-            {field: 'str10', prop: 'list', required: true}
+            { field: 'str1', prop: 'currency', required: true },
+            { field: 'int1', prop: 'flag', minValue: 0, maxValue: 1, required: true },
+            { field: 'str2', prop: 'operator', minLen: 1, maxLen: 1, required: true },
+            { field: 'str10', prop: 'list', required: true }
         ];
     }
 
@@ -31,8 +31,7 @@ class Acl extends Asset.Base {
         // for (let i = 0; i < aclObj.list.length; ++i) {
         //     bb.writeString(aclObj.list[i]);
         // }
-        if (aclObj.list)
-        {
+        if (aclObj.list) {
             bb.writeString(aclObj.list);
         }
         bb.flip();
@@ -80,13 +79,14 @@ class Acl extends Asset.Base {
         }
 
         const assetInst = await this.getAssetInstanceByName("AobAsset");
-        const queryResult = await assetInst.queryAsset({currency: aclObj.currency}, null, false, 1, 1);
+        const queryResult = await assetInst.queryAsset({ currency: aclObj.currency }, null, false, 1, 1);
         if (queryResult.length <= 0) {
             throw new Error(`AOB Asset not found: ${aclObj.currency}`);
         }
 
         // FIXME: return queryResult[0];
         // const assetInfo = queryResult[0];
+        return trs; // imfly 2020.5.24 验证必须返回 trs
     }
 
     async applyUnconfirmed(trs, sender, dbTrans) {
@@ -119,34 +119,37 @@ class Acl extends Asset.Base {
         });
     }
 
-    // FIXME: delete async
+    // FIXME: 2020.5.24
+    // https://eslint.org/docs/rules/no-async-promise-executor
     async _insertList(modelName, currency, list, trans) {
-        return new Promise(
-            async(resolve, reject) => {
-            for (var i = 0; i < list.length; i++) {
-                const item = list[i];
-                try {
-                    await this._insertItem(modelName, currency, item, trans);
-                } catch (err) {
-                    return reject(err);
-                }
-            }
-            resolve(true);
-        });
+        for (var i = 0; i < list.length; i++) {
+            let item = list[i];
+            Promise.resolve(this._insertItem(modelName, currency, item, trans));
+        }
+        // return new Promise(
+        //     async(resolve, reject) => {
+        //     for (var i = 0; i < list.length; i++) {
+        //         let item = list[i];
+        //         try {
+        //             await this._insertItem(modelName, currency, item, trans);
+        //         } catch (err) {
+        //             return reject(err);
+        //         }
+        //     }
+        //     resolve(true);
+        // });
     }
 
     async _addList(modelName, currency, list, dbTrans) {
         if (!dbTrans) {
             const self = this;
-            await new Promise(async(resolve, reject) => {
+            await new Promise(async (resolve, reject) => {
                 this.dao.transaction(async (trans, done) => {
-                    try
-                    {
+                    try {
                         await self._insertList(modelName, currency, list, trans);
                         done();
                     }
-                    catch (err2)
-                    {
+                    catch (err2) {
                         done(err2);
                     }
                 }, err => {

@@ -1,3 +1,4 @@
+import ByteBuffer from 'bytebuffer';
 import Asset from "@ddn/asset-base";
 
 class Evidence extends Asset.Base {
@@ -41,7 +42,26 @@ class Evidence extends Asset.Base {
             trs.asset.evidence.description = ""
         }
 
+        console.log('evidence trs', trs);
+
         return trs;
+    }
+
+    async getBytes(trs) {
+        const asset = await this.getAssetObject(trs);
+
+        const bb = new ByteBuffer(1, true);
+        bb.writeString(asset.ipid);
+        bb.writeString(asset.title);
+        bb.writeString(asset.tags);
+        bb.writeString(asset.author);
+        bb.writeString(asset.url);
+        bb.writeString(asset.size);
+        bb.writeString(asset.type); // eg: .html, .doc
+        bb.writeString(asset.hash);
+        bb.flip();
+
+        return bb.toBuffer();
     }
 
     async verify(trs, sender) {

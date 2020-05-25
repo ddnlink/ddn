@@ -4,9 +4,6 @@
  */
 
 import ByteBuffer from "bytebuffer";
-// import crypto from 'crypto';
-// import sha256 from "fast-sha256";
-// import ed from 'ed25519';
 import extend from 'util-extend';
 import DdnUtils from '@ddn/utils';
 import DdnCrypto from '@ddn/crypto';
@@ -432,8 +429,6 @@ class Transaction {
 
         if (trs.id && trs.id != txId) {
             // FIXME: 这里没有要求从Asset插件端传ID，不然会出错，请确认
-            // this.logger.error('Incorrect transaction id, txId: ', txId);
-            // this.logger.error('Incorrect transaction id, trs.id: ', trs.id);
             throw new Error("Incorrect transaction id");
         } else {
             trs.id = txId;
@@ -542,8 +537,6 @@ class Transaction {
 
     //////// TODO: delete it /////////////////////////////////
     async sign(keypair, trs) {
-        // const hash = await this.getHash(trs);
-        // return ed.Sign(hash, keypair).toString('hex');
         return await DdnCrypto.sign(trs, keypair);
     }
 
@@ -680,7 +673,6 @@ class Transaction {
             const isLockedType = await this._assets.isSupportLock(trs.type);
             if (isLockedType && sender.lock_height && lastBlock && DdnUtils.bignum.isLessThanOrEqualTo(DdnUtils.bignum.plus(lastBlock.height, 1), sender.lock_height)) {
                 throw new Error('Account is locked');
-                // return cb('Account is locked')
             }
         }
 
@@ -782,7 +774,7 @@ class Transaction {
         const fee = `${await this._assets.call(trs.type, "calculateFee", trs, sender)}`;
 
         if (!DdnUtils.bignum.isEqualTo(trs.fee, fee)) {
-            throw new Error(`Invalid transaction type/fee: ${trs.id}`);
+            throw new Error(`Invalid transaction fee: ${trs.id}`);
         }
 
         // amount 需要整理成 正整数 形式，不包含科学计数法和点号，范围在 0 ~ totalAmount 之间

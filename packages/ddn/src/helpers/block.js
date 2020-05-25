@@ -245,11 +245,12 @@ export default {
 		});
 
 		let payloadBytes = '';
-		transactions.forEach(async tx => {
+		
+		for (const tx of transactions) {
 			let bytes = transactionsLib.getTransactionBytes(tx);
 			payloadBytes += bytes;
 			payloadLength += bytes.length;
-		});
+		}
 
 		payloadHash = DdnCrypto.createHash(payloadBytes); // payloadHash.digest();
 

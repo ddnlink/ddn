@@ -2,7 +2,7 @@ import Debug from 'debug';
 import DdnUtil from '@ddn/utils';
 import node from '@ddn/node-sdk/lib/test';
 
-const debug = Debug('evidence');
+const debug = Debug('debug');
 
 // 这里有两种创建存证交易的方法
 const createEvidence = node.ddn.evidence.createEvidence;
@@ -15,6 +15,7 @@ describe('Test createEvidence', () => {
 
     let transaction;
     let evidence;
+    let evidence2;
 
     beforeAll(done => {
         const ipid = node.randomIpId();
@@ -30,12 +31,28 @@ describe('Test createEvidence', () => {
             "tags": "world,cup,test"
         }
 
+        const ipid2 = node.randomIpId();
+        evidence2 = {
+            "ipid": ipid2,
+            "title": node.randomUsername(),
+            "description": `${ipid} has been evidence.`,
+            "hash": "f082022ee664008a1f15d62514811dfd",
+            "author": "Evanlai",
+            "size": "2448kb",
+            "type": "html",
+            "url": "dat://f76e1e82cf4eab4bf173627ff93662973c6fab110c70fb0f86370873a9619aa6+18/public/test.html",
+            "tags": "world,cup,test",
+            ext: "china",
+            ext1: 12345,
+            ext2: new Date()
+        }
+
+        node.expect(evidence).to.be.not.equal(evidence2);
         done();
     })
 
     it("CreateEvidence Should be ok", async (done) => {
         transaction = await createEvidence(evidence, node.Gaccount.password);
-        debug("CreateEvidence, transaction: ", transaction);
 
         node.peer.post("/transactions")
             .set("Accept", "application/json")
@@ -57,11 +74,11 @@ describe('Test createEvidence', () => {
             });
     });
 
-    it('Get /evidences/:ipid should be ok', done => {
+    it('Get /evidences/ipid/:ipid should be ok', done => {
         node.onNewBlock(err => {
             node.expect(err).to.be.not.ok;
 
-            node.api.get(`/evidences/${evidence.ipid}`)
+            node.api.get(`/evidences/ipid/${evidence.ipid}`)
                 .set("Accept", "application/json")
                 .set("version", node.version)
                 .set("nethash", node.config.nethash)
@@ -71,113 +88,51 @@ describe('Test createEvidence', () => {
                 .end((err, {
                     body
                 }) => {
-                    debug(JSON.stringify(body.transaction));
+                    debug(`/evidences/ipid/${evidence.ipid}`, JSON.stringify(body));
 
                     node.expect(err).to.be.not.ok;
                     node.expect(body).to.have.property('success').to.be.true;
-                    node.expect(body).to.have.property('transaction');
+                    node.expect(body).to.have.property('data').not.null;
 
-                    node.expect(body.transaction.fee).to.equal(transaction.fee);
-                    node.expect(body.transaction.recipientId).to.equal('');
-                    node.expect(body.transaction.type).to.equal(transaction.type);
-                    node.expect(body.transaction.asset.evidence.type).to.equal(transaction.asset.evidence.type);
+                    node.expect(body.data).to.have.property('transaction_id');
+
+                    node.expect(body.data.transaction_type).to.equal(transaction.type);
+                    node.expect(body.data.ipid).to.equal(evidence.ipid);
 
                     done();
                 });
         })
     })
-})
 
 
-describe('Asset puglin Test', () => {
+    describe('Asset puglin Test', () => {
 
-    const ipid = `ipid${new Date().getTime()}`;
+        it("POST peers/transactions, Should be ok", async (done) => {
 
-    it("POST peers/transactions, Should be ok", async (done) => {
-        // node.ddn.init();
+            const transaction = await createPluginAsset(DdnUtil.assetTypes.EVIDENCE, evidence2, node.Gaccount.password);
 
-        const assetEvidence = {
-            ipid,
-            title: "新增资产说明文档",
-            hash: "askdfh12483ashkjfdh128347ahsdfjk1",
-            author: "wangxm",
-            url: "http://www.ebookchain.org",
-            type: ".doc",
+            node.peer.post("/transactions")
+                .set("Accept", "application/json")
+                .set("version", node.version)
+                .set("nethash", node.config.nethash)
+                .set("port", node.config.port)
+                .send({
+                    transaction
+                })
+                .expect("Content-Type", /json/)
+                .expect(200)
+                .end((err, {
+                    body
+                }) => {
+                    debug('Asset puglin body: ', JSON.stringify(body));
+                    node.expect(err).to.be.not.ok;
+                    node.expect(body).have.property("success").be.true;
 
-            //amount: "1000000000",
-            receive_address: node.Daccount.address,
+                    done();
+                });
 
-            ext: "china",
-            ext1: 12345,
-            ext2: new Date()
-        };
-
-        const transaction = await createPluginAsset(DdnUtil.assetTypes.EVIDENCE, assetEvidence, node.Gaccount.password);
-
-        node.peer.post("/transactions")
-            .set("Accept", "application/json")
-            .set("version", node.version)
-            .set("nethash", node.config.nethash)
-            .set("port", node.config.port)
-            .send({
-                transaction
-            })
-            .expect("Content-Type", /json/)
-            .expect(200)
-            .end((err, {
-                body
-            }) => {
-                debug('Asset puglin body: ', JSON.stringify(body));
-                node.expect(err).to.be.not.ok;
-                node.expect(body).have.property("success").be.true;
-
-                done();
-            });
+        });
 
     });
+})
 
-    // it("POST peers/transactions agin, Should fail", async () => {
-    //     const assetEvidence = {
-    //         ipid,
-    //         title: "新增资产说明文档",
-    //         hash: "askdfh12483ashkjfdh128347ahsdfjk1",
-    //         author: "wangxm",
-    //         url: "http://www.ebookchain.org",
-    //         type: ".doc",
-
-    //         //amount: "1000000000",
-    //         receive_address: node.Daccount.address,
-
-    //         ext: "china",
-    //         ext1: 12345,
-    //         ext2: new Date()
-    //     };
-
-    //     const transaction = await createPluginAsset(DdnUtil.assetTypes.EVIDENCE, assetEvidence, node.Gaccount.password);
-
-    //     await new Promise((resolve, reject) => {
-    //         node.peer.post("/transactions")
-    //             .set("Accept", "application/json")
-    //             .set("version", node.version)
-    //             .set("nethash", node.config.nethash)
-    //             .set("port", node.config.port)
-    //             .send({
-    //                 transaction
-    //             })
-    //             .expect("Content-Type", /json/)
-    //             .expect(200)
-    //             .end((err, {body}) => {
-    //                 // console.log(JSON.stringify(res.body));
-
-    //                 node.expect(body).to.have.property("success").to.be.false;
-
-    //                 if (err) {
-    //                     reject(err);
-    //                 } else {
-    //                     resolve();
-    //                 }
-    //         });
-    //     });
-    // });
-
-});

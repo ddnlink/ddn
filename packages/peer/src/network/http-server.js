@@ -294,7 +294,7 @@ class HttpServer {
     }, inst) {
         const rootPath = await this._getBasePath();
         let basePath = currDir.toLowerCase().replace(rootPath.toLowerCase(), "");
-        basePath = basePath.replace(".js", "");
+        basePath = basePath.replace(".js", ""); // .ts??
         basePath = basePath.replace(/\\/g, "/");
         if (!basePath.startsWith("/")) {
             basePath = `/${basePath}`;
@@ -368,7 +368,7 @@ class HttpServer {
     }
 
     async _getBasePath() {
-        return path.resolve(__dirname, "service");
+        return path.resolve(__dirname, "service"); // todo：这里暂时写死，后期扩展下
     }
 
     /**

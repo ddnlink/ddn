@@ -302,7 +302,7 @@ class Block {
 
         for (const transaction of transactions) {
             const bytes = await this.runtime.transaction.getBytes(transaction);
-
+            // const bytes = await DdnCrypto.getBytes(transaction);
             if (size + bytes.length > this.constants.maxPayloadLength) {
                 break;
             }
@@ -777,6 +777,7 @@ class Block {
             let bytes;
             try {
                 bytes = await this.runtime.transaction.getBytes(transaction);
+                // bytes = await DdnCrypto.getBytes(transaction);
             } catch (e) {
                 throw new Error(`Failed to get transaction bytes: ${e.toString()}`);
             }
