@@ -41,18 +41,18 @@ class RootRouter {
                 sort: [['vote', 'DESC'], ['publicKey', 'ASC']]  //wxm block database
             }, ["username", "address", "publicKey", "vote", "missedblocks", "producedblocks"]);
 
-            let limit = query.limit || this.config.settings.delegateNumber;
-            const offset = query.offset || 0;
-            let orderField = query.orderBy;
+            // let limit = query.limit || this.config.settings.delegateNumber;
+            // const offset = query.offset || 0;
+            // let orderField = query.orderBy;
 
-            orderField = orderField ? orderField.split(':') : null;
-            limit = limit > this.config.settings.delegateNumber ? this.config.settings.delegateNumber : limit;
+            // orderField = orderField ? orderField.split(':') : null;
+            // limit = limit > this.config.settings.delegateNumber ? this.config.settings.delegateNumber : limit;
 
-            const orderBy = orderField ? orderField[0] : null;
-            const sortMode = orderField && orderField.length == 2 ? orderField[1] : 'asc';
-            const count = delegates.length;
-            const length = Math.min(limit, count);
-            const realLimit = Math.min(offset + limit, count);
+            // const orderBy = orderField ? orderField[0] : null;
+            // const sortMode = orderField && orderField.length == 2 ? orderField[1] : 'asc';
+            // const count = delegates.length;
+            // const length = Math.min(limit, count);
+            // const realLimit = Math.min(offset + limit, count);
 
             const lastBlock = this.runtime.block.getLastBlock();
             const totalSupply = this.runtime.block.getBlockStatus().calcSupply(lastBlock.height);
@@ -80,8 +80,13 @@ class RootRouter {
         };
     }
 
+    /**
+     * 投票
+     * @param {object} req form 对象，{ secret: 投票者密钥, publicKey: 投票者公钥 }
+     */
     async put(req) {
         const body = req.body;
+        
         const validateErrors = await this.ddnSchema.validate({
             type: "object",
             properties: {
@@ -105,6 +110,7 @@ class RootRouter {
 
         const keypair = DdnCrypto.getKeys(body.secret);
 
+        // 密钥和公钥都是投票者的
         if (body.publicKey) {
             if (keypair.publicKey != body.publicKey) {
                 throw new Error("Invalid passphrase");

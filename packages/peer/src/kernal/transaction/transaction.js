@@ -449,11 +449,12 @@ class Transaction {
 
         if (trs.requester_public_key) { //wxm block database
             if (!await this.verifySignature(trs, trs.signature, trs.requester_public_key)) { //wxm block database
-                throw new Error("Failed to verify signature, 2");
+                throw new Error("Failed to verify requester signature, 2");
             }
         } else {
+            
             if (!await this.verifySignature(trs, trs.signature, trs.senderPublicKey)) { //wxm block database
-                throw new Error("Failed to verify signature, 3");
+                throw new Error("Failed to verify senderPublicKey signature, 3");
             }
         }
 
@@ -483,7 +484,6 @@ class Transaction {
         }
 
         if (!transaction.id) {
-            // transaction.id = await this.runtime.transaction.getId(transaction); 2020.5.18
             transaction.id = await DdnCrypto.getId(transaction);
         }
 
@@ -650,7 +650,9 @@ class Transaction {
         }
         // const bytes = await DdnCrypto.getBytes(trs, true, true);
         const bytes = await this.getBytes(trs, true, true);
-        return DdnCrypto.verifyBytes(bytes, signature, publicKey);
+        const result = DdnCrypto.verifyBytes(bytes, signature, publicKey);
+        
+        return result;
     }
 
     async multisign(trs, keypair) {

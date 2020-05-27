@@ -117,6 +117,7 @@ async function getBytes(transaction, skipSignature, skipSecondSignature) {
         }
     }
 
+    // +64 验证的时候要减去
     if (!skipSignature && transaction.signature) {
         let signatureBuffer = Buffer.from(transaction.signature, "hex");
         for (let i = 0; i < signatureBuffer.length; i++) {
@@ -124,6 +125,7 @@ async function getBytes(transaction, skipSignature, skipSecondSignature) {
         }
     }
 
+    // +64 验证的时候要再次减去
     if (!skipSecondSignature && transaction.sign_signature) {  //wxm block database
         let signSignatureBuffer = Buffer.from(transaction.sign_signature, "hex"); //wxm block database
         for (let i = 0; i < signSignatureBuffer.length; i++) {
