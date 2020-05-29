@@ -77,10 +77,12 @@ class Transaction {
 
         trs = await this._assets.call(trs.type, "create", data, trs);
 
-        // trs.signature = await cryptoLib.sign(trs, data.keypair);
-        trs.signature = await this.sign(data.keypair, trs);
+        // await DdnCrypto.sign(trs, keypair)
+        trs.signature = await DdnCrypto.sign(trs, data.keypair);
+        // trs.signature = await this.sign(data.keypair, trs);
         if (data.sender.second_signature && data.second_keypair) {
-            trs.sign_signature = await this.sign(trs, data.second_keypair);
+            // trs.sign_signature = await this.sign(trs, data.second_keypair);
+            trs.sign_signature = await DdnCrypto.sign(trs, data.second_keypair);
         }
 
         trs.id = await DdnCrypto.getId(trs);
@@ -104,7 +106,7 @@ class Transaction {
         const validateErrors = await this.ddnSchema.validateTransaction(trs);
         if (validateErrors) {
             this.logger.error(`Failed to normalize transaction: ${trs.type} ${validateErrors[0].schemaPath} ${validateErrors[0].message}`);
-            this.logger.error(`Failed to normalize transaction: ${trs}`);
+            this.logger.debug(`Failed to normalize transaction: ${trs}`);
             throw new Error(`Failed to normalize transaction: ${validateErrors[0].schemaPath} ${validateErrors[0].message}`);
         }
 
@@ -414,7 +416,9 @@ class Transaction {
     }
 
 
-    async process(trs, sender, requester) {
+    async process(trs, sender) {
+        console.log("process:", trs, sender);
+        
         if (!this._assets.hasType(trs.type)) {
             throw new Error(`Unknown transaction type ${trs.type}`);
         }
@@ -443,16 +447,13 @@ class Transaction {
         // Verify that requester in multisignature
         if (trs.requester_public_key) { //wxm block database
             if (!sender.multisignatures.includes(trs.requester_public_key)) { //wxm block database
-                throw new Error("Failed to verify signature, 1");
+                throw new Error("Failed to verify requester`s signature in multisignatures, 1");
             }
-        }
-
-        if (trs.requester_public_key) { //wxm block database
+ 
             if (!await this.verifySignature(trs, trs.signature, trs.requester_public_key)) { //wxm block database
-                throw new Error("Failed to verify requester signature, 2");
+                throw new Error("Failed to verify requester`s signature, 2");
             }
         } else {
-            
             if (!await this.verifySignature(trs, trs.signature, trs.senderPublicKey)) { //wxm block database
                 throw new Error("Failed to verify senderPublicKey signature, 3");
             }
@@ -466,6 +467,7 @@ class Transaction {
                 id: trs.id
             }, (err, count) => {
                 if (err) {
+                    this.logger.error('Database error');
                     return reject("Database error");
                 }
 
@@ -680,7 +682,7 @@ class Transaction {
 
         if (trs.requester_public_key) {
             if (!sender.multisignatures.includes(trs.requester_public_key)) {
-                throw new Error("Failed to verify signature, 4");
+                throw new Error("Failed toverify requester multi signatures 4");
             }
 
             if (sender.publicKey != trs.senderPublicKey) {
@@ -702,7 +704,7 @@ class Transaction {
         }
 
         if (!valid) {
-            throw new Error("Failed to verify signature, 5");
+            throw new Error("Failed to verify requester or sender signature, 5");
         }
 
         if (trs.nethash && trs.nethash != this.config.nethash) {
@@ -713,12 +715,12 @@ class Transaction {
         if (!trs.requester_public_key && sender.second_signature && !DdnUtils.bignum.isEqualTo(sender.second_signature, 0)) {
             valid = await this.verifySecondSignature(trs, sender.second_public_key);
             if (!valid) {
-                throw new Error(`Failed to verify second signature: ${trs.id}`);
+                throw new Error(`Failed to verify sender second signature: ${trs.id}`);
             }
         } else if (trs.requester_public_key && requester.second_signature && !DdnUtils.bignum.isEqualTo(requester.second_signature, 0)) { //wxm block database
             valid = await this.verifySecondSignature(trs, requester.second_public_key); //wxm block database
             if (!valid) {
-                throw new Error(`Failed to verify second signature: ${trs.id}`);
+                throw new Error(`Failed to verify requester second signature: ${trs.id}`);
             }
         }
 
