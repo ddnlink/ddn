@@ -25,7 +25,7 @@ class RootRouter {
             required: ["generatorPublicKey"]
         }, query);
         if (validateErrors) {
-            throw new Error(validateErrors[0].message);
+            throw new Error(`Invalid parameters: ${validateErrors[0].schemaPath} ${validateErrors[0].message}`);
         }
 
         const account = await this.runtime.account.getAccountByPublicKey(query.generatorPublicKey);

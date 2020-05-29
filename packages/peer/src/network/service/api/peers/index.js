@@ -75,7 +75,7 @@ class RootRouter {
         var query = Object.assign({}, req.body, req.query);
         var validateErrors = await this.ddnSchema.validatePeers(query);
         if (validateErrors) {
-            throw new Error(validateErrors[0].message);
+            throw new Error(`Invalid parameters: ${validateErrors[0].schemaPath} ${validateErrors[0].message}`);
         }
 
         try {
@@ -115,7 +115,7 @@ class RootRouter {
             required: ['ip', 'port']
         }, query);
         if (validateErrors) {
-            throw new Error(validateErrors[0].message);
+            throw new Error(`Invalid parameters: ${validateErrors[0].schemaPath} ${validateErrors[0].message}`);
         }
 
         try {

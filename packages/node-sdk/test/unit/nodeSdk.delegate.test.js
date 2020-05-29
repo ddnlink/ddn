@@ -115,7 +115,8 @@ describe("delegate.js", () => {
 
 			it("should be second signed correctly", async () => {
 				const result = await ddn.crypto.verifySecondSignature(trs, secondKeys.publicKey);
-				expect(result).to.be.ok;
+				debug("second signed", result);
+				expect(result).to.be.true;
 			});
 
 			it("should not be signed correctly now", async () => {

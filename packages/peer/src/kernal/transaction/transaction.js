@@ -2,7 +2,7 @@
  * 交易核心方法和处理逻辑
  * wangxm   2018-12-28
  */
-
+import nacl from 'tweetnacl';
 import ByteBuffer from "bytebuffer";
 import extend from 'util-extend';
 import DdnUtils from '@ddn/utils';
@@ -30,7 +30,7 @@ class Transaction {
         this._assets = Assets.singleton(context);
     }
 
-    async execAssetFunc(funcName) {
+    async execAssetFunc() {
         const args = [];
         for (let i = 0; i < arguments.length; i++) {
             args.push(arguments[i]);
@@ -52,7 +52,7 @@ class Transaction {
 
     async create(data) {
         if (!this._assets.hasType(data.type)) {
-            throw new Error(`Unknown transaction type ${trs.type}`);
+            throw new Error(`Unknown transaction type 1 ${trs.type}`);
         }
 
         if (!data.sender) {
@@ -68,7 +68,7 @@ class Transaction {
             amount: "0",
             nethash: this.config.nethash,
             senderPublicKey: data.sender.publicKey,
-            requester_public_key: data.requester ? data.requester.publicKey.toString('hex') : null,
+            requester_public_key: data.requester ? data.requester.publicKey.toString('hex') : null, // 仅适用于多重签名
             timestamp: this.runtime.slot.getTime(),
             asset: {},
             message: data.message,
@@ -77,12 +77,11 @@ class Transaction {
 
         trs = await this._assets.call(trs.type, "create", data, trs);
 
-        // await DdnCrypto.sign(trs, keypair)
-        trs.signature = await DdnCrypto.sign(trs, data.keypair);
-        // trs.signature = await this.sign(data.keypair, trs);
+        // trs.signature = await DdnCrypto.sign(trs, data.keypair);
+        trs.signature = await this.sign(trs, data.keypair);
         if (data.sender.second_signature && data.second_keypair) {
-            // trs.sign_signature = await this.sign(trs, data.second_keypair);
-            trs.sign_signature = await DdnCrypto.sign(trs, data.second_keypair);
+            trs.sign_signature = await this.sign(trs, data.second_keypair);
+            // trs.sign_signature = await DdnCrypto.sign(trs, data.second_keypair);
         }
 
         trs.id = await DdnCrypto.getId(trs);
@@ -94,7 +93,7 @@ class Transaction {
 
     async objectNormalize(trs) {
         if (!this._assets.hasType(trs.type)) {
-            throw Error(`Unknown transaction type ${trs.type}`);
+            throw Error(`Unknown transaction type 2 ${trs.type}`);
         }
 
         for (const p in trs) {
@@ -118,7 +117,7 @@ class Transaction {
      */
     async serializeTransaction2Db(trs, dbTrans) {
         if (!this._assets.hasType(trs.type)) {
-            throw Error(`Unknown transaction type: ${trs.type}`);
+            throw Error(`Unknown transaction type 3 : ${trs.type}`);
         }
 
         const newTrans = {
@@ -182,7 +181,7 @@ class Transaction {
             };
 
             if (!this._assets.hasType(trs.type)) {
-                throw Error(`Unknown transaction type ${trs.type}`);
+                throw Error(`Unknown transaction type 4 ${trs.type}`);
             }
 
             const asset = await this._assets.call(trs.type, "dbRead", raw);
@@ -196,7 +195,7 @@ class Transaction {
 
     async undo(trs, block, sender, dbTrans) {
         if (!this._assets.hasType(trs.type)) {
-            throw new Error(`Unknown transaction type ${trs.type}`);
+            throw new Error(`Unknown transaction type 5 ${trs.type}`);
         }
 
         //wxm TODO 这里不应该使用特定的类型，应该有通用的方式
@@ -246,7 +245,7 @@ class Transaction {
         await this.removeUnconfirmedTransaction(transaction.id);
 
         if (!this._assets.hasType(transaction.type)) {
-            throw new Error(`Unknown transaction type ${transaction.type}`);
+            throw new Error(`Unknown transaction type 6 ${transaction.type}`);
         }
 
         //wxm TODO
@@ -291,7 +290,7 @@ class Transaction {
             }
 
             if (!this._assets.hasType(trs.type)) {
-                throw new Error(`Unknown transaction type ${trs.type}`);
+                throw new Error(`Unknown transaction type 7 ${trs.type}`);
             }
 
             if (!trs.requester_public_key && sender.second_signature && !DdnUtils.bignum.isEqualTo(sender.second_signature, 0) &&
@@ -345,7 +344,7 @@ class Transaction {
 
     async ready(trs, sender) {
         if (!this._assets.hasType(trs.type)) {
-            throw Error(`Unknown transaction type ${trs.type}`);
+            throw Error(`Unknown transaction type 8 ${trs.type}`);
         }
 
         if (!sender) {
@@ -357,7 +356,7 @@ class Transaction {
 
     async apply(trs, block, sender, dbTrans) {
         if (!this._assets.hasType(trs.type)) {
-            throw new Error(`Unknown transaction type ${trs.type}`);
+            throw new Error(`Unknown transaction type 9 ${trs.type}`);
         }
 
         if (!await this.ready(trs, sender)) {
@@ -417,10 +416,8 @@ class Transaction {
 
 
     async process(trs, sender) {
-        console.log("process:", trs, sender);
-        
         if (!this._assets.hasType(trs.type)) {
-            throw new Error(`Unknown transaction type ${trs.type}`);
+            throw new Error(`Unknown transaction type 10 ${trs.type}`);
         }
 
         let txId;
@@ -449,12 +446,13 @@ class Transaction {
             if (!sender.multisignatures.includes(trs.requester_public_key)) { //wxm block database
                 throw new Error("Failed to verify requester`s signature in multisignatures, 1");
             }
- 
+
             if (!await this.verifySignature(trs, trs.signature, trs.requester_public_key)) { //wxm block database
                 throw new Error("Failed to verify requester`s signature, 2");
             }
         } else {
             if (!await this.verifySignature(trs, trs.signature, trs.senderPublicKey)) { //wxm block database
+
                 throw new Error("Failed to verify senderPublicKey signature, 3");
             }
         }
@@ -538,18 +536,32 @@ class Transaction {
     }
 
     //////// TODO: delete it /////////////////////////////////
-    async sign(keypair, trs) {
-        return await DdnCrypto.sign(trs, keypair);
+    async sign(trs, {privateKey}) {
+        const hash = await this.getHash(trs, true, true);
+        const signature = nacl.sign.detached(
+            hash,
+            Buffer.from(privateKey, "hex")
+        );
+        return Buffer.from(signature).toString("hex");
+        // return await DdnCrypto.sign(trs, keypair);
     }
 
-    // TODO: delete it
+    async multisign(trs, {privateKey}) {
+        const hash = await this.getHash(trs, true, true);
+        const signature = nacl.sign.detached(
+            hash,
+            Buffer.from(privateKey, "hex")
+        );
+        return Buffer.from(signature).toString("hex");
+    }
+
     /**
      * 获取交易序列化之后的字节流内容
      * @param {*} trs
      */
     async getBytes(trs, skipSignature, skipSecondSignature) {
         if (!this._assets.hasType(trs.type)) {
-            throw Error(`Unknown transaction type: ${trs.type}`);
+            throw Error(`Unknown transaction type 11 ${trs.type}`);
         }
 
         const assetBytes = await this._assets.call(trs.type, "getBytes", trs, skipSignature, skipSecondSignature);
@@ -628,8 +640,11 @@ class Transaction {
         return bb.toBuffer();
     }
 
-    async getHash(trs) {
-        return await DdnCrypto.getHash(trs);
+    async getHash(trs, skipSignature, skipSecondSignature) {
+        const bytes = await this.getBytes(trs, skipSignature, skipSecondSignature);
+        return Buffer.from(nacl.hash(bytes));
+    
+        // return await DdnCrypto.getHash(trs);
     }
 
     // TODO: 注意使用 @ddn/crypto 的对应方法重构 2020.5.3
@@ -645,25 +660,22 @@ class Transaction {
      */
     async verifySignature(trs, signature, publicKey) {
         if (!this._assets.hasType(trs.type)) {
-            throw new Error(`Unknown transaction type ${trs.type}`)
+            throw new Error(`Unknown transaction type 12 ${trs.type}`)
         }
         if (!signature) {
             return false;
         }
-        // const bytes = await DdnCrypto.getBytes(trs, true, true);
-        const bytes = await this.getBytes(trs, true, true);
-        const result = DdnCrypto.verifyBytes(bytes, signature, publicKey);
-        
-        return result;
-    }
 
-    async multisign(trs, keypair) {
-        return await DdnCrypto.sign(trs, keypair);
+        const bytes = await this.getBytes(trs, true, true);
+
+        const result = DdnCrypto.verifyBytes(bytes, signature, publicKey);
+
+        return result;
     }
 
     async verify(trs, sender, requester) {
         if (!this._assets.hasType(trs.type)) {
-            throw new Error(`Unknown transaction type ${trs.type}`)
+            throw new Error(`Unknown transaction type 13 ${trs.type}`)
         }
 
         // Check sender
@@ -803,16 +815,16 @@ class Transaction {
     // TODO: 与 @ddn/crypto 同名方法不同
     async verifySecondSignature(trs, publicKey) {
         if (!this._assets.hasType(trs.type)) {
-            throw Error(`Unknown transaction type ${trs.type}`);
+            throw Error(`Unknown transaction type 14 ${trs.type}`);
         }
 
-        if (!trs.signature) {
+        if (!trs.sign_signature) {
             return false;
         }
 
         // let bytes = await DdnCrypto.getBytes(trs, false, true);
         const bytes = await this.getBytes(trs, false, true);
-        return await this.verifyBytes(bytes, trs.signature, publicKey);
+        return await this.verifyBytes(bytes, trs.sign_signature, publicKey);
     }
 }
 

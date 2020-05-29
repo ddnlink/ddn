@@ -78,7 +78,7 @@ class TransactionService {
             }
         }, query);
         if (validateErrors) {
-            throw new Error(validateErrors[0].message);
+            throw new Error(`Invalid parameters: ${validateErrors[0].schemaPath} ${validateErrors[0].message}`);
         }
 
         const where = {};
@@ -176,7 +176,7 @@ class TransactionService {
             required: ['id']
         }, query);
         if (validateErrors) {
-            throw new Error(validateErrors[0].message);
+            throw new Error(`Invalid parameters: ${validateErrors[0].schemaPath} ${validateErrors[0].message}`);
         }
 
         const rows = await this.runtime.dataquery.queryFullTransactionData({
@@ -237,7 +237,7 @@ class TransactionService {
             required: ["secret", "amount", "recipientId"]
         }, body);
         if (validateErrors) {
-            throw new Error(validateErrors[0].message);
+            throw new Error(`Invalid parameters: ${validateErrors[0].schemaPath} ${validateErrors[0].message}`);
         }
 
         const keypair = DdnCrypto.getKeys(body.secret);
@@ -309,10 +309,10 @@ class TransactionService {
                         const transaction = await this.runtime.transaction.create({
                             type: DdnUtils.assetTypes.TRANSFER,
                             amount: body.amount,
-                            sender: account,
+                            sender: account, // 发送者是多重签名账号
                             recipientId: recipientId,
                             keypair,
-                            requester: keypair,
+                            requester: keypair, // 请求者是当前登录账号
                             second_keypair,
                             message: body.message
                         });
@@ -347,12 +347,13 @@ class TransactionService {
                         const transaction = await this.runtime.transaction.create({
                             type: DdnUtils.assetTypes.TRANSFER,
                             amount: body.amount,
-                            sender: account,
+                            sender: account, // 发送者是当前登录账号，请求者为空
                             recipientId: recipientId,
                             keypair,
                             second_keypair,
                             message: body.message
                         });
+                        
                         const transactions = await this.runtime.transaction.receiveTransactions([transaction]);
                         cb(null, transactions);
                     } catch (err) {

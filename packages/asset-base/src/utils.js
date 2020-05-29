@@ -67,6 +67,7 @@ class AssetUtils {
     // 尝试重构 kernal/trsaction.js 的 !this._assets.hasType(trs.type）使用
     static isTypeValueExists(typeValue) {
         // console.log('isTypeValueExists, global.assets - typeValue', global.assets, typeValue);
+        // console.log('isTypeValueExists, global.assets.transTypeNames[typeValue]', global.assets.transTypeNames[7]);
         
         return !!(global.assets && global.assets.transTypeNames[typeValue]);
     }

@@ -24,7 +24,7 @@ class AccountService {
             required: ["address"]
         }, query);
         if (validateErrors) {
-            throw new Error(validateErrors[0].message);
+            throw new Error(`Invalid parameters: ${validateErrors[0].schemaPath} ${validateErrors[0].message}`);
         }
 
         let account = await this.runtime.account.getAccountByAddress(query.address);
@@ -82,7 +82,7 @@ class AccountService {
             required: ["address"]
         }, query);
         if (validateErrors) {
-            throw new Error(validateErrors[0].message);
+            throw new Error(`Invalid parameters: ${validateErrors[0].schemaPath} ${validateErrors[0].message}`);
         }
 
         if (!this.runtime.account.isAddress(query.address)) {
@@ -108,7 +108,7 @@ class AccountService {
             required: ["address"]
         }, query);
         if (validateErrors) {
-            throw new Error(validateErrors[0].message);
+            throw new Error(`Invalid parameters: ${validateErrors[0].schemaPath} ${validateErrors[0].message}`);
         }
 
         const account = await this.runtime.account.getAccountByAddress(query.address);
@@ -131,7 +131,7 @@ class AccountService {
             required: ["secret"]
         }, body);
         if (validateErrors) {
-            throw new Error(validateErrors[0].message);
+            throw new Error(`Invalid parameters: ${validateErrors[0].schemaPath} ${validateErrors[0].message}`);
         }
 
         const keypair = DdnCrypto.getKeys(body.secret);
@@ -196,7 +196,7 @@ class AccountService {
             }
         }, query);
         if (validateErrors) {
-            throw new Error(validateErrors[0].message);
+            throw new Error(`Invalid parameters: ${validateErrors[0].schemaPath} ${validateErrors[0].message}`);
         }
 
         if (!query.limit) {
@@ -244,7 +244,7 @@ class AccountService {
             required: ["secret"]
         }, body);
         if (validateErrors) {
-            throw new Error(validateErrors[0].message);
+            throw new Error(`Invalid parameters: ${validateErrors[0].schemaPath} ${validateErrors[0].message}`);
         }
 
         const keypair = DdnCrypto.getKeys(body.secret);
@@ -296,7 +296,7 @@ class AccountService {
             required: ["publicKey"]
         }, body);
         if (validateErrors) {
-            throw new Error(validateErrors[0].message);
+            throw new Error(`Invalid parameters: ${validateErrors[0].schemaPath} ${validateErrors[0].message}`);
         }
 
         const address = this.runtime.account.generateAddressByPublicKey(body.publicKey);

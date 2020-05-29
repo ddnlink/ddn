@@ -88,7 +88,7 @@ async function sign(transaction, {privateKey}) {
  * @param {object} param1 keypair.privateKey
  */
 async function secondSign(transaction, {privateKey}) {
-    const hash = await getHash(transaction);
+    const hash = await getHash(transaction, false, true);
     const signature = nacl.sign.detached(hash, Buffer.from(privateKey, "hex"));
     return bufToHex(signature);
 }
@@ -170,14 +170,6 @@ async function verify(transaction) {
     }
 
     return verifyBytes(data2, transaction.signature, transaction.senderPublicKey)
-    // fixme 2020.5.25 这里 应该使用 getHash 才对啊
-    // const hash = createHash(data2);
-
-    // const signatureBuffer = Buffer.from(transaction.signature, "hex");
-    // const senderPublicKeyBuffer = Buffer.from(transaction.senderPublicKey, "hex");
-    // const res = nacl.sign.detached.verify(hash, signatureBuffer, senderPublicKeyBuffer);
-
-    // return res;
 }
 
 /**
@@ -186,23 +178,12 @@ async function verify(transaction) {
  * @param {string} publicKey 二次签名公钥
  */
 async function verifySecondSignature(transaction, publicKey) {
-    const bytes = await getBytes(transaction);
-    const data2 = Buffer.allocUnsafe(bytes.length - 64);
-
-    for (let i = 0; i < data2.length; i++) {
-        data2[i] = bytes[i];
+    if (!transaction.sign_signature) {
+        return false;
     }
+    const bytes = await getBytes(transaction, false, true);
 
-    return verifyBytes(data2, transaction.signature, publicKey)
-    // fixme 2020.5.25 这里 应该使用 getHash 才对啊
-
-    // const hash = createHash(data2);
-
-    // const signSignatureBuffer = Buffer.from(transaction.sign_signature, "hex");
-    // const publicKeyBuffer = Buffer.from(publicKey, "hex");
-    // const res = nacl.sign.detached.verify(hash, signSignatureBuffer, publicKeyBuffer);
-
-    // return res;
+    return verifyBytes(bytes, transaction.sign_signature, publicKey)
 }
 
 // note: tweetnacl 包的所有方法必须使用 Uint8Array 类型的参数。

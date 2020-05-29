@@ -37,7 +37,7 @@ class RootRouter {
             required: ["secret", "secondSecret"]
         }, body);
         if (validateErrors) {
-            throw new Error(validateErrors[0].message);
+            throw new Error(`Invalid parameters: ${validateErrors[0].schemaPath} ${validateErrors[0].message}`);
         }
 
         const keypair = DdnCrypto.getKeys(body.secret);

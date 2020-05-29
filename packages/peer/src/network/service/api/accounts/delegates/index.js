@@ -27,7 +27,7 @@ class RootRouter {
             required: ["address"]
         }, query);
         if (validateErrors) {
-            throw new Error(validateErrors[0].message);
+            throw new Error(`Invalid parameters: ${validateErrors[0].schemaPath} ${validateErrors[0].message}`);
         }
 
         const account = await this.runtime.account.getAccountByAddress(query.address);
@@ -105,7 +105,7 @@ class RootRouter {
             }
         }, body);
         if (validateErrors) {
-            throw new Error(validateErrors[0].message);
+            throw new Error(`Invalid parameters: ${validateErrors[0].schemaPath} ${validateErrors[0].message}`);
         }
 
         const keypair = DdnCrypto.getKeys(body.secret);

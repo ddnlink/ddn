@@ -153,7 +153,7 @@ class Consensus {
         }, votes);
         if (validateErrors) {
             this.logger.error(`Consensus.normalizeVotes: ${validateErrors[0].message}`);
-            throw new Error(validateErrors[0].message);
+            throw new Error(`Invalid parameters: ${validateErrors[0].schemaPath} ${validateErrors[0].message}`);
         }
 
         return votes;

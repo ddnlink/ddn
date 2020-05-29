@@ -36,7 +36,7 @@ class RootRouter {
             }
         }, query);
         if (validateErrors) {
-            throw new Error(validateErrors[0].message);
+            throw new Error(`Invalid parameters: ${validateErrors[0].schemaPath} ${validateErrors[0].message}`);
         }
 
         const result = await this.runtime.delegate.getDelegates(query);
@@ -104,7 +104,7 @@ class RootRouter {
             }
         }, query);
         if (validateErrors) {
-            throw new Error(validateErrors[0].message);
+            throw new Error(`Invalid parameters: ${validateErrors[0].schemaPath} ${validateErrors[0].message}`);
         }
 
         const result = await this.runtime.delegate.getDelegates(query);
@@ -150,7 +150,7 @@ class RootRouter {
             required: ['publicKey']
         }, query);
         if (validateErrors) {
-            throw new Error(validateErrors[0].message);
+            throw new Error(`Invalid parameters: ${validateErrors[0].schemaPath} ${validateErrors[0].message}`);
         }
 
         return new Promise((resolve, reject) => {
@@ -180,8 +180,6 @@ class RootRouter {
                         const lastBlock = this.runtime.block.getLastBlock();
                         const totalSupply = this.runtime.block.getBlockStatus().calcSupply(lastBlock.height);
                         rows.forEach(row => {
-                            // FIXME: 2020.4.22 这里显然应该是 bignum
-                            // row.weight = row.balance / totalSupply * 100;
                             row.weight = DdnUtils.bignum.divide(row.balance, DdnUtils.bignum.multiply(totalSupply, 100))
                         });
 
@@ -196,6 +194,9 @@ class RootRouter {
         return { fee };
     }
 
+    /**
+     * Register delegate
+    */
     async put(req) {
         const body = req.body;
 
@@ -220,10 +221,10 @@ class RootRouter {
                     type: "string"
                 }
             },
-            required: ["secret"]
+            required: ["secret", "username"]
         }, body);
         if (validateErrors) {
-            throw new Error(validateErrors[0].message);
+            throw new Error(`Invalid parameters: ${validateErrors[0].schemaPath} ${validateErrors[0].message}`);
         }
 
         const keypair = DdnCrypto.getKeys(body.secret);

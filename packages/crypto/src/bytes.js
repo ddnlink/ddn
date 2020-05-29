@@ -1,54 +1,9 @@
 import ByteBuffer from "bytebuffer";
 import Asset from '@ddn/asset-base';
 
-// TODO: 注意扩展更多交易类型
 async function getBytes(transaction, skipSignature, skipSecondSignature) {
     let assetSize = 0;
     let assetBytes = null;
-
-    // FIXME: 建议将 crypto 放在 context 里，并将peer/src/kernal/transaciton方法统一过来
-    // switch (transaction.type) {
-    //     case DdnUtils.assetTypes.SIGNATURE: // Signature
-    //         {
-    //             assetBytes = getSignatureBytes(transaction.asset.signature);
-    //             break;
-    //         }
-
-    //     case DdnUtils.assetTypes.DELEGATE: // Delegate
-    //         {
-    //             assetBytes = Buffer.from(transaction.asset.delegate.username, "utf8");
-    //             break;
-    //         }
-
-    //     case DdnUtils.assetTypes.VOTE: // Vote
-    //         {
-    //             assetBytes = Buffer.from(transaction.asset.vote.votes.join(""), "utf8");
-    //             break;
-    //         }
-
-    //     case DdnUtils.assetTypes.MULTISIGNATURE: // Multi-Signature
-    //         {
-    //             let keysgroupBuffer = Buffer.from(transaction.asset.multisignature.keysgroup.join(""), "utf8");
-    //             let bb = new ByteBuffer(1 + 1 + keysgroupBuffer.length, true);
-
-    //             bb.writeByte(transaction.asset.multisignature.min);
-    //             bb.writeByte(transaction.asset.multisignature.lifetime);
-
-    //             for (let i = 0; i < keysgroupBuffer.length; i++) {
-    //                 bb.writeByte(keysgroupBuffer[i]);
-    //             }
-
-    //             bb.flip();
-
-    //             assetBytes = bb.toBuffer();
-    //             break;
-    //         }
-
-    //     default:
-    //         {
-    //             assetBytes = await getAssetBytes(transaction);
-    //         }
-    // }
 
     assetBytes = await getAssetBytes(transaction);
     if (transaction.__assetBytes__) {
@@ -153,6 +108,7 @@ async function getAssetBytes(transaction) {
     if (Asset.Utils.isTypeValueExists(transaction.type)) {
         const trans = Asset.Utils.getTransactionByTypeValue(transaction.type);
         const transCls = require(trans.package).default[trans.name];
+        
         let transInst = new transCls();
         const buf = await transInst.getBytes(transaction);
         transInst = null;

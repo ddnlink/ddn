@@ -152,7 +152,7 @@ class Block {
         const validateErrors = await this.ddnSchema.validateBlock(block);
         if (validateErrors) {
             this.logger.error(validateErrors[0].message);
-            throw new Error(validateErrors[0].message);
+            throw new Error(`Invalid parameters: ${validateErrors[0].schemaPath} ${validateErrors[0].message}`);
         }
 
         try {
@@ -1356,7 +1356,7 @@ class Block {
             }
         }, query);
         if (validateErrors) {
-            throw new Error(validateErrors[0].message);
+            throw new Error(`Invalid parameters: ${validateErrors[0].schemaPath} ${validateErrors[0].message}`);
         }
 
         let where = null;
