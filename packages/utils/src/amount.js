@@ -10,11 +10,12 @@ const amount = {
     } catch (e) {
       return 'Failed to convert'
     }
+
     if (bignum.isLessThan(bnAmount, 1) ||
       bignum.isGreaterThan(bnAmount, '1e48')) {
-      return 'Invalid amount range'
+      return 'Invalid amount range';
     }
-    return null
+    return false;
   },
 
   calcRealAmount(amount, precision) {

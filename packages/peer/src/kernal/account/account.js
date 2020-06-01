@@ -199,7 +199,7 @@ class Account {
         delete filter.sort;
 
         if (typeof (filter.address) == "string" && !this.isAddress(filter.address)) {
-            this.logger.error('account address', filter.address);
+            this.logger.debug('account address', filter.address);
             throw new Error('Invalid address getAccount');
         }
 
@@ -466,6 +466,8 @@ class Account {
                 u_delegates: this.dao.db_str("delegates"),
                 u_multisignatures: this.dao.db_str("multisignatures")
             }, {}, async (err, result) => {
+                this.logger.debug('checkAccounts result', result);
+
                 if (err) {
                     this.logger.error(err);
                     this.logger.info("Failed to verify db integrity 1");

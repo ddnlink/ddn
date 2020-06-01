@@ -1,21 +1,17 @@
 import Asset from '@ddn/asset-base';
-import DdnUtils from '@ddn/utils';
 import crypto from '../utils/crypto';
 import slots from '../time/slots';
 import options from '../options';
+import constants from '../constants';
 
 async function createPluginAsset(trsType, assetInfo, secret, secondSecret) {
     const keys = crypto.getKeys(secret);
 
-    console.log("createPluginAsset assetInfo 1", assetInfo);
-    
-    // var fee = assetInfo.fee || constants.net.fees.org;
-    // delete assetInfo.fee;
     const transaction = {
         type: trsType,
         nethash: options.get('nethash'),
         amount: assetInfo.amount ? `${assetInfo.amount}` : "0",
-        // fee: fee + "",
+        fee: '',
         recipientId: assetInfo.recipientId ? assetInfo.recipientId : null,
         senderPublicKey: keys.publicKey,
         timestamp: slots.getTime() - options.get('clientDriftSeconds'),
@@ -23,33 +19,39 @@ async function createPluginAsset(trsType, assetInfo, secret, secondSecret) {
         asset: {}
     };
 
+    // 整理 amount，recipientId，message 字段
     delete assetInfo.amount;
     delete assetInfo.recipientId;
     delete assetInfo.message;
 
+    // 整理资产自己的数量
     if (assetInfo.aobAmount) {
         assetInfo.amount = assetInfo.aobAmount;
         delete assetInfo.aobAmount;
     }
-
-    // fix 这个是创建二级密码使用的 这个条件是否应该再次检查一下或优化一下
-    if (assetInfo.secondSecret && trsType === DdnUtils.assetTypes.SIGNATURE) { // == 1
-        const secondSecretKeys = crypto.getKeys(assetInfo.secondSecret);
-        assetInfo = { publicKey: secondSecretKeys.publicKey };
-        delete transaction.message;
-    }
-
-    const assetJsonName = Asset.Utils.getAssetJsonName(trsType);
-    transaction.asset[assetJsonName] = assetInfo;
-
-    console.log("createPluginAsset assetInfo 2", assetInfo);
-
+       
+    // 计算资产费用
+    // fixme: 这里的 fee 应该与对应的 trsType 对应，不然就是默认 send 交易费用
+    // const fee = assetInfo.fee || constants.net.fees.send;
+    // delete assetInfo.fee;
     if (assetInfo.fee) {
         transaction.fee = assetInfo.fee;
+        delete assetInfo.fee;
     } else {
         transaction.fee = await crypto.getFee(transaction);
     }
     
+    // fix 2020.5.31 这个是创建二级密码使用的 这个条件是否应该再次检查一下或优化一下
+    // if (assetInfo.secondSecret && trsType === DdnUtils.assetTypes.SIGNATURE) { // == 1
+    //     const secondSecretKeys = crypto.getKeys(assetInfo.secondSecret);
+    //     // assetInfo = { publicKey: secondSecretKeys.publicKey };
+    //     assetInfo.publicKey = secondSecretKeys.publicKey;
+    //     delete transaction.message; // 
+    // }
+
+    const assetJsonName = Asset.Utils.getAssetJsonName(trsType);
+    transaction.asset[assetJsonName] = assetInfo;
+
     transaction.signature = await crypto.sign(transaction, keys);
 
     if (secondSecret) {

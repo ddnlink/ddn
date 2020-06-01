@@ -1,4 +1,6 @@
 import _ from "lodash";
+// import DdnUtils from '@ddn/utils';
+
 /**
  * 产生随机字符串
  * @param  {...any} args 常用参数为 randomName('D', 'abc...', 5)
@@ -42,7 +44,9 @@ function randomProperty(obj, needKey) {
 
 // Randomizes DDN amount
 function randomCoin() {
+    // const { bignum } = DdnUtils;
     return `${Math.floor(Math.random() * (10000 * 100000000)) + (1000 * 100000000)}`;
+    // return bignum.plus(bignum.floor(bignum.multiply(Math.random(), 100000, 100000000)), 1).toString();
 }
 
 // Dao

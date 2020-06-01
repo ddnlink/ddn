@@ -114,13 +114,14 @@ describe("PUT /accounts/delegates without funds", () => {
 
 // 投票，需要费用
 describe("PUT /accounts/delegates with funds", () => {
+    const randomCoin = node.randomCoin();
 
     beforeAll(done => {
         node.api.put("/transactions")
             .set("Accept", "application/json")
             .send({
                 secret: node.Gaccount.password,
-                amount: `${node.RANDOM_COIN}`,
+                amount: `${randomCoin}`,
                 recipientId: Raccount.address
             })
             .expect("Content-Type", /json/)
@@ -131,9 +132,7 @@ describe("PUT /accounts/delegates with funds", () => {
                 node.expect(body).to.have.property("success").to.be.true;
                 node.expect(body).to.have.property("transactionId");
                 node.expect(body.transactionId).to.be.a('string');
-                // fixme: Bignumber
-                //DdnUtils.bignum update Raccount.amount += node.RANDOM_COIN;
-                Raccount.amount = DdnUtils.bignum.plus(Raccount.amount, node.RANDOM_COIN).toString();
+                Raccount.amount = DdnUtils.bignum.plus(Raccount.amount, randomCoin).toString();
                 done();
             });
     });
@@ -154,7 +153,7 @@ describe("PUT /accounts/delegates with funds", () => {
                     node.expect(err).be.not.ok;
                     node.expect(body).to.have.property("success").to.be.true;
                     if (body.success == true && body.account != null) {
-                        node.expect(`${body.account.balance}`).be.equal(node.RANDOM_COIN);
+                        node.expect(`${body.account.balance}`).be.equal(randomCoin);
                     } else {
                         node.expect("TEST").to.equal("FAILED");
                     }
@@ -452,6 +451,7 @@ describe("PUT /accounts/delegates with funds", () => {
 
 // 注册，有费用
 describe("PUT /delegates with funds", () => {
+    const randomCoin = node.randomCoin();
 
     beforeAll(done => {
         node.api.post("/accounts/open")
@@ -476,7 +476,7 @@ describe("PUT /delegates with funds", () => {
                         .set('Accept', 'application/json')
                         .send({
                             secret: node.Gaccount.password,
-                            amount: `${node.RANDOM_COIN}`,
+                            amount: `${randomCoin}`,
                             recipientId: R2account.address
                         })
                         .expect('Content-Type', /json/)
@@ -488,11 +488,11 @@ describe("PUT /delegates with funds", () => {
                             node.expect(body).to.have.property("transactionId");
                             if (body.success == true && body.transactionId != null) {
                                 node.expect(body.transactionId).to.be.a('string');
-                                //DdnUtils.bignum update R2account.amount += node.RANDOM_COIN;
-                                R2account.amount = DdnUtils.bignum.plus(R2account.amount, node.RANDOM_COIN).toString();
+                                //DdnUtils.bignum update R2account.amount += node.randomCoin;
+                                R2account.amount = DdnUtils.bignum.plus(R2account.amount, randomCoin).toString();
                             } else {
                                 debug("Transaction failed or transactionId is null");
-                                debug("Sent: secret: " + node.Gaccount.password + ", amount: " + node.RANDOM_COIN + ", recipientId: " + R2account.address);
+                                debug("Sent: secret: " + node.Gaccount.password + ", amount: " + randomCoin + ", recipientId: " + R2account.address);
                                 node.expect("TEST").to.equal("FAILED");
                             }
                             done();
@@ -515,7 +515,7 @@ describe("PUT /delegates with funds", () => {
                         node.expect(err).be.not.ok;
                         node.expect(body).to.have.property("success").to.be.true;
                         if (body.success == true && body.account != null) {
-                            node.expect(body.account.balance).be.equal(`${node.RANDOM_COIN}`);
+                            node.expect(body.account.balance).be.equal(`${randomCoin}`);
                         } else {
                             debug("Failed to open account or account object is null");
                             debug("Sent: secret: " + R2account.password);

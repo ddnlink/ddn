@@ -39,11 +39,12 @@ describe("POST /peer/transactions", () => {
                 }
 
                 // Send random DDN amount from genesis account to Random account
+                const randomCoin = node.randomCoin();
                 node.api.put("/transactions")
                     .set("Accept", "application/json")
                     .send({
                         secret: node.Gaccount.password,
-                        amount: node.RANDOM_COIN,
+                        amount: `${randomCoin}`,
                         recipientId: voterAccount.address
                     })
                     .expect("Content-Type", /json/)
@@ -56,9 +57,9 @@ describe("POST /peer/transactions", () => {
                         node.expect(body).to.have.property("transactionId");
                         if (body.success == true && body.transactionId != null) {
                             node.expect(body.transactionId).to.be.a('string');
-                            voterAccount.amount = DdnUtils.bignum.plus(voterAccount.amount, node.RANDOM_COIN).toString();
+                            voterAccount.amount = DdnUtils.bignum.plus(voterAccount.amount, randomCoin).toString();
                         } else {
-                            debug("Sent: secret: " + node.Gaccount.password + ", amount: " + node.RANDOM_COIN + ", recipientId: " + voterAccount.address);
+                            debug("Sent: secret: " + node.Gaccount.password + ", amount: " + randomCoin + ", recipientId: " + voterAccount.address);
                             node.expect("TEST").to.equal("FAILED");
                         }
                         node.onNewBlock(done);

@@ -452,7 +452,8 @@ class Transaction {
             }
         } else {
             if (!await this.verifySignature(trs, trs.signature, trs.senderPublicKey)) { //wxm block database
-
+                // console.log(trs);
+                
                 throw new Error("Failed to verify senderPublicKey signature, 3");
             }
         }
@@ -790,7 +791,7 @@ class Transaction {
         const fee = `${await this._assets.call(trs.type, "calculateFee", trs, sender)}`;
 
         if (!DdnUtils.bignum.isEqualTo(trs.fee, fee)) {
-            throw new Error(`Invalid transaction fee: ${trs.id}`);
+            throw new Error(`Invalid transaction fee: trs.fee: ${trs.fee}, asset.fee: ${fee}`);
         }
 
         // amount 需要整理成 正整数 形式，不包含科学计数法和点号，范围在 0 ~ totalAmount 之间

@@ -111,7 +111,7 @@ class AssetBase {
      * @param {*} sender 
      */
     async calculateFee() {
-        return DdnUtils.bignum.multiply(0.1, 100000000);
+        return DdnUtils.bignum.multiply(0.1, 100000000); // fixme: 这里应该可以定制 2020.5.31
     }
 
     /**
@@ -306,7 +306,7 @@ class AssetBase {
                                         reject(err2);
                                     } else {
                                         if (rows2 && rows2.length > 0) {
-                                            const obj = _.indexBy(rows2, 'transaction_id');
+                                            const obj = _.keyBy(rows2, 'transaction_id');
                                             if (returnTotal) {
                                                 result.rows = _.map(result.rows, num => {
                                                     num = _.extend(num, obj[num.asset_trs_id]);
@@ -351,7 +351,9 @@ class AssetBase {
                 let assetValue = AssetUtils.getTypeValue(asset);
                 assetTrans = AssetUtils.getTransactionByTypeValue(assetValue);
             }
+
             if (assetTrans) {
+                // Fixme: 2020.5.31 这里没有 npm i 相关的包，require 不到，所以尽量不要提供 Asset 参数
                 const assetCls = require(assetTrans.package)[assetTrans.name];
                 assetInst = new assetCls(this._context, assetTrans);
             }
@@ -403,7 +405,6 @@ class AssetBase {
                 }
             }
         }
-
         //解析排序条件
         orders = orders || [];
         let newOrders = [];
@@ -518,6 +519,7 @@ class AssetBase {
                 assetTrans = AssetUtils.getTransactionByTypeValue(assetValue);
             }
             if (assetTrans) {
+
                 const assetCls = require(assetTrans.package)[assetTrans.name];
                 assetInst = new assetCls(this._context, assetTrans);
             }
@@ -1008,7 +1010,7 @@ class AssetBase {
             }
         }
 
-        return new Promise((resolve, reject) => {
+        return new Promise((resolve, reject) => {            
             this.dao.insert("trs_asset", assetInst, dbTrans, (err, result) => {
                 if (err) {
                     reject(err);

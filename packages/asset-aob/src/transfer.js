@@ -40,17 +40,20 @@ class Transfer extends Asset.Base {
         if (error) {
             throw new Error(error);
         }
+
         const assetInst = await this.getAssetInstanceByName("AobAsset");
         const data = await assetInst.queryAsset({
             name: assetData.currency
         }, null, null, 1, 1);
         if (data.length <= 0) {
-            throw new Error('Asset not exists');
+            throw new Error(`Asset ${assetData.currency} not exists`);
         }
+
         const assetDetail = data[0];
         if (assetDetail.writeoff == "1") {
             throw new Error('Asset already writeoff');
         }
+        
         if (assetDetail.allow_whitelist == "0" &&
             assetDetail.allow_blacklist == "0") {
             return trs;
@@ -253,6 +256,7 @@ class Transfer extends Asset.Base {
         const balance = this.balanceCache.getAssetBalance(
             sender.address, transfer.currency,
         ) || 0;
+
         const surplus = DdnUtils.bignum.minus(balance, transfer.amount);
         if (DdnUtils.bignum.isLessThan(surplus, 0)) {
             throw new Error('Insufficient asset balance');

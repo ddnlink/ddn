@@ -34,8 +34,8 @@ class AssetUtils {
                         currTrans.package = currAsset;
 
                         global.assets.transConfigs.push(currTrans);
-                        global.assets.transTypeValues[currTrans.name] = currTrans;
-                        global.assets.transTypeNames[currTrans.type] = currTrans;
+                        global.assets.transTypeValues[currTrans.name] = currTrans; // typeValue -> trans.name
+                        global.assets.transTypeNames[currTrans.type] = currTrans; // typeName -> trans.type
                     });
                 }
             }
@@ -66,9 +66,6 @@ class AssetUtils {
     // TODO: 此处与 peer/src/assets/loader.js 的 hasType(trs.type） 相当
     // 尝试重构 kernal/trsaction.js 的 !this._assets.hasType(trs.type）使用
     static isTypeValueExists(typeValue) {
-        // console.log('isTypeValueExists, global.assets - typeValue', global.assets, typeValue);
-        // console.log('isTypeValueExists, global.assets.transTypeNames[typeValue]', global.assets.transTypeNames[7]);
-        
         return !!(global.assets && global.assets.transTypeNames[typeValue]);
     }
 

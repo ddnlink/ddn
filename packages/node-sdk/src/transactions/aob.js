@@ -28,7 +28,7 @@ async function createTransaction(
         type,
         nethash: options.get("nethash"),
         amount: "0",
-        fee: `${fee}`,
+        fee: fee.toString(),
         recipientId: recipientId,
         senderPublicKey: keys.publicKey,
         timestamp: getClientFixedTime(),
@@ -117,7 +117,7 @@ export default {
         return await createTransaction(
             asset,
             fee,
-            DdnUtils.assetTypes.AOB_FLAGS,
+            DdnUtils.assetTypes.AOB_FLAG,
             null,
             null,
             secret,
@@ -134,7 +134,7 @@ export default {
                 list
             }
         };
-        const fee = bignum.multiply(0.2, constants.fixedPoint);
+        const fee = bignum.multiply(0.1, constants.fixedPoint);
         return await createTransaction(
             asset,
             fee,
