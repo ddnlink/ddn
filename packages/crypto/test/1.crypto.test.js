@@ -105,7 +105,7 @@ describe("crypto", () => {
         });
 
 
-        it('Multi toString("hex") should be not equal', done => {
+        it('Multi toString("hex") should be equal', done => {
             const Phasekey = ddnCrypto.generateSecret();
             const publicKey = ddnCrypto.getKeys(Phasekey).publicKey;
 

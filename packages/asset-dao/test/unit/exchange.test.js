@@ -3,7 +3,7 @@ import DdnUtil from '@ddn/utils';
 
 import node from '@ddn/node-sdk/lib/test';
 
-const debug = Debug('dao');
+const debug = Debug('debug');
 
 const Account1 = node.randomTxAccount();
 const Account2 = node.randomTxAccount();

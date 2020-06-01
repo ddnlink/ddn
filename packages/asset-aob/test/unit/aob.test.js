@@ -1,10 +1,10 @@
 // passed
-import node from '@ddn/node-sdk/lib/test';
+// import node from '@ddn/node-sdk/lib/test';
 
-import Debug from 'debug';
+// import Debug from 'debug';
 
-const debug = Debug('debug');
-const expect = node.expect;
+// const debug = Debug('debug');
+// const expect = node.expect;
 
 // async function registerIssuerAsync(name, desc, {password}) {
 //   const res = await node.submitTransactionAsync(node.ddn.aob.createIssuer(name, desc, password));
@@ -48,245 +48,245 @@ const expect = node.expect;
 //   return res
 // }
 
-describe('Test AOB', () => {
+// describe('Test AOB', () => {
 
-  describe('Normal caces', () => {
-    const ISSUER1 = {
-      name: node.randomIssuerName(),
-      desc: 'issuer1_desc'
-    };
+//   describe('Normal caces', () => {
+//     // const ISSUER1 = {
+//     //   name: node.randomIssuerName(),
+//     //   desc: 'issuer1_desc'
+//     // };
 
-    // const ASSET1 = {
-    //   name: 'BTC',
-    //   desc: 'asset1_desc',
-    //   maximum: '10000000000000',
-    //   precision: 6,
-    //   strategy: ''
-    // };
+//     // const ASSET1 = {
+//     //   name: 'BTC',
+//     //   desc: 'asset1_desc',
+//     //   maximum: '10000000000000',
+//     //   precision: 6,
+//     //   strategy: ''
+//     // };
 
-    it('Get issuers should be ok', async () => {
-      const [err, res] = await node.apiGetAsyncE('/aob/issuers');
+//     // it('Get issuers should be ok', async () => {
+//     //   const [err, res] = await node.apiGetAsyncE('/aob/issuers');
       
-      debug('get /aob/issuers/issuers response', err, res.body)
-      expect(err).to.not.exist
-      expect(res.body.success).to.be.true
-      expect(res.body.result.total).to.be.a('number')
-      expect(res.body.result.rows).to.be.instanceOf(Array)
-    })
+//     //   debug('get /aob/issuers/issuers response', err, res.body)
+//     //   expect(err).to.not.exist
+//     //   expect(res.body.success).to.be.true
+//     //   expect(res.body.result.total).to.be.a('number')
+//     //   expect(res.body.result.rows).to.be.instanceOf(Array)
+//     // })
 
-    it('Register issuer should be ok', async () => {
-      const trs = await node.ddn.aob.createIssuer(ISSUER1.name, ISSUER1.desc, node.Gaccount.password);
-      debug('create issuer trs', trs)
+//     // it('Register issuer should be ok', async () => {
+//     //   const trs = await node.ddn.aob.createIssuer(ISSUER1.name, ISSUER1.desc, node.Gaccount.password);
+//     //   debug('create issuer trs', trs)
       
-      const [err, res] = await node.submitTransactionAsyncE(trs)
-      debug('submit issuer response', err, res.body)
+//     //   const [err, res] = await node.submitTransactionAsyncE(trs)
+//     //   debug('submit issuer response', err, res.body)
 
-      expect(err).to.not.exist
-      expect(res.body).to.have.property('success').to.be.true
+//     //   expect(err).to.not.exist
+//     //   expect(res.body).to.have.property('success').to.be.true
 
-      await node.onNewBlockAsync()
+//     //   await node.onNewBlockAsync()
 
-      const [err2, res2] = await node.apiGetAsyncE(`/aob/issuers/name/${ISSUER1.name}`)
-      debug('get /aob/issuers/name/:name response', err2, res2.body)
-      expect(err2).to.not.exist
-      // expect(res2.body).to.have.property('result')
-      // expect(res2.body.result.name).to.equal(ISSUER1.name)
-      // expect(res2.body.result.issuer_id).to.equal(node.Gaccount.address)
-    })
+//     //   const [err2, res2] = await node.apiGetAsyncE(`/aob/issuers/name/${ISSUER1.name}`)
+//     //   debug('get /aob/issuers/name/:name response', err2, res2.body)
+//     //   expect(err2).to.not.exist
+//     //   // expect(res2.body).to.have.property('result')
+//     //   // expect(res2.body.result.name).to.equal(ISSUER1.name)
+//     //   // expect(res2.body.result.issuer_id).to.equal(node.Gaccount.address)
+//     // })
 
-    // it('Register asset should be ok', async () => {
-    //   const currency = `${ISSUER1.name}.${ASSET1.name}`;
-    //   const trs = node.ddn.aob.createAsset(
-    //     currency,
-    //     ASSET1.desc,
-    //     ASSET1.maximum,
-    //     ASSET1.precision,
-    //     ASSET1.strategy,
-    //     1,
-    //     1,
-    //     1,
-    //     node.Gaccount.password);
-    //   debug('create asset trs', trs)
+//     // it('Register asset should be ok', async () => {
+//     //   const currency = `${ISSUER1.name}.${ASSET1.name}`;
+//     //   const trs = node.ddn.aob.createAsset(
+//     //     currency,
+//     //     ASSET1.desc,
+//     //     ASSET1.maximum,
+//     //     ASSET1.precision,
+//     //     ASSET1.strategy,
+//     //     1,
+//     //     1,
+//     //     1,
+//     //     node.Gaccount.password);
+//     //   debug('create asset trs', trs)
 
-    //   var [err, res] = await node.submitTransactionAsyncE(trs)
-    //   debug('submit asset response', err, res.body)
-    //   expect(err).to.not.exist
-    //   expect(res.body).to.have.property('success').to.be.true
+//     //   var [err, res] = await node.submitTransactionAsyncE(trs)
+//     //   debug('submit asset response', err, res.body)
+//     //   expect(err).to.not.exist
+//     //   expect(res.body).to.have.property('success').to.be.true
 
-    //   await node.onNewBlockAsync()
+//     //   await node.onNewBlockAsync()
 
-    //   var [err, res] = await node.apiGetAsyncE(`/aobasset/issuers/${ISSUER1.name}/assets`)
-    //   debug('get /aobasset/issuers/:name/assets response', err, res.body)
-    //   expect(err).to.not.exist
-    //   expect(res.body.result.total).to.be.a('number')
-    //   expect(res.body.result.rows).to.be.instanceOf(Array)
+//     //   var [err, res] = await node.apiGetAsyncE(`/aobasset/issuers/${ISSUER1.name}/assets`)
+//     //   debug('get /aobasset/issuers/:name/assets response', err, res.body)
+//     //   expect(err).to.not.exist
+//     //   expect(res.body.result.total).to.be.a('number')
+//     //   expect(res.body.result.rows).to.be.instanceOf(Array)
 
-    //   var [err, res] = await node.apiGetAsyncE(`/aobasset/${currency}`)
-    //   debug('get /aobasset/:name response', err, res.body)
-    //   expect(err).to.not.exist
-    //   expect(res.body.result.name).to.equal(currency)
-    //   expect(res.body.result.desc).to.equal(ASSET1.desc)
-    //   expect(res.body.result.maximum).to.equal(ASSET1.maximum)
-    //   expect(res.body.result.precision).to.equal(ASSET1.precision)
-    //   expect(res.body.result.issuer_id).to.equal(node.Gaccount.address)
-    //   expect(res.body.result.quantity).to.equal('0')
-    //   expect(res.body.result.acl).to.equal(0)
-    //   expect(res.body.result.writeoff).to.equal(0)
-    // })
+//     //   var [err, res] = await node.apiGetAsyncE(`/aobasset/${currency}`)
+//     //   debug('get /aobasset/:name response', err, res.body)
+//     //   expect(err).to.not.exist
+//     //   expect(res.body.result.name).to.equal(currency)
+//     //   expect(res.body.result.desc).to.equal(ASSET1.desc)
+//     //   expect(res.body.result.maximum).to.equal(ASSET1.maximum)
+//     //   expect(res.body.result.precision).to.equal(ASSET1.precision)
+//     //   expect(res.body.result.issuer_id).to.equal(node.Gaccount.address)
+//     //   expect(res.body.result.quantity).to.equal('0')
+//     //   expect(res.body.result.acl).to.equal(0)
+//     //   expect(res.body.result.writeoff).to.equal(0)
+//     // })
 
-    // it('Issue and transfer asset should be ok', async () => {
-    //   const currency = `${ISSUER1.name}.${ASSET1.name}`;
-    //   const transferAddress = '12345';
+//     // it('Issue and transfer asset should be ok', async () => {
+//     //   const currency = `${ISSUER1.name}.${ASSET1.name}`;
+//     //   const transferAddress = '12345';
 
-    //   var [err, res] = await node.apiGetAsyncE(`/aobasset/balances/${node.Gaccount.address}`)
-    //   debug('get issuer balance before issue response', err, res.body)
-    //   expect(err).to.not.exist
+//     //   var [err, res] = await node.apiGetAsyncE(`/aobasset/balances/${node.Gaccount.address}`)
+//     //   debug('get issuer balance before issue response', err, res.body)
+//     //   expect(err).to.not.exist
 
-    //   let issuerBalance = (res.body.result[0] && res.body.result[0].balance) || 0;
+//     //   let issuerBalance = (res.body.result[0] && res.body.result[0].balance) || 0;
 
-    //   var [err, res] = await node.apiGetAsyncE(`/aobasset/balances/${transferAddress}`)
-    //   debug('get recipient balance before issue response', err, res.body)
-    //   expect(err).to.not.exist
+//     //   var [err, res] = await node.apiGetAsyncE(`/aobasset/balances/${transferAddress}`)
+//     //   debug('get recipient balance before issue response', err, res.body)
+//     //   expect(err).to.not.exist
 
-    //   let recipientBalance = (res.body.result.balances[0] && res.body.result.balances[0].balance) || 0;
+//     //   let recipientBalance = (res.body.result.balances[0] && res.body.result.balances[0].balance) || 0;
 
-    //   var [err, res] = await node.apiGetAsyncE(`/aobasset/${currency}`)
-    //   debug('get asset before issue response', err, res.body)
-    //   expect(err).to.not.exist
-    //   expect(res.body.result.name).to.equal(currency)
+//     //   var [err, res] = await node.apiGetAsyncE(`/aobasset/${currency}`)
+//     //   debug('get asset before issue response', err, res.body)
+//     //   expect(err).to.not.exist
+//     //   expect(res.body.result.name).to.equal(currency)
 
-    //   let quantity = res.body.asset.quantity;
+//     //   let quantity = res.body.asset.quantity;
 
-    //   const amount = '10000000000';
-    //   let trs = node.ddn.aob.createIssue(currency, amount, node.Gaccount.password);
-    //   debug('create issue trs', trs)
+//     //   const amount = '10000000000';
+//     //   let trs = node.ddn.aob.createIssue(currency, amount, node.Gaccount.password);
+//     //   debug('create issue trs', trs)
 
-    //   var [err, res] = await node.submitTransactionAsyncE(trs)
-    //   debug('submit issue response', err, res.body)
-    //   expect(err).to.not.exist
-    //   expect(res.body).to.have.property('success').to.be.true
+//     //   var [err, res] = await node.submitTransactionAsyncE(trs)
+//     //   debug('submit issue response', err, res.body)
+//     //   expect(err).to.not.exist
+//     //   expect(res.body).to.have.property('success').to.be.true
 
-    //   await node.onNewBlockAsync()
+//     //   await node.onNewBlockAsync()
 
-    // //DdnUtils.bignum update   issuerBalance = DdnUtils.bignum(issuerBalance).plus(amount).toString()
-    //   issuerBalance = DdnUtils.bignum.plus(issuerBalance, amount).toString();
-    // //DdnUtils.bignum update   quantity = DdnUtils.bignum(quantity).plus(amount).toString()
-    //   quantity = DdnUtils.bignum.plus(quantity, amount).toString();
+//     // //DdnUtils.bignum update   issuerBalance = DdnUtils.bignum(issuerBalance).plus(amount).toString()
+//     //   issuerBalance = DdnUtils.bignum.plus(issuerBalance, amount).toString();
+//     // //DdnUtils.bignum update   quantity = DdnUtils.bignum(quantity).plus(amount).toString()
+//     //   quantity = DdnUtils.bignum.plus(quantity, amount).toString();
 
-    //   var [err, res] = await node.apiGetAsyncE(`/aobasset/${currency}`)
-    //   debug('get asset after issue response', err, res.body)
-    //   expect(err).to.not.exist
-    //   expect(res.body.result.name).to.equal(currency)
-    //   expect(res.body.result.quantity).to.equal(quantity)
+//     //   var [err, res] = await node.apiGetAsyncE(`/aobasset/${currency}`)
+//     //   debug('get asset after issue response', err, res.body)
+//     //   expect(err).to.not.exist
+//     //   expect(res.body.result.name).to.equal(currency)
+//     //   expect(res.body.result.quantity).to.equal(quantity)
 
-    //   var [err, res] = await node.apiGetAsyncE(`/aobasset/balances/${node.Gaccount.address}`)
-    //   debug('get issuer balance after issue response', err, res.body)
-    //   expect(err).to.not.exist
-    //   expect(res.body.result).to.be.instanceOf(Array)
-    //   expect(res.body.result.length).to.equal(1)
-    //   expect(res.body.result[0].currency).to.equal(currency)
-    //   expect(res.body.result[0].balance).to.equal(issuerBalance)
+//     //   var [err, res] = await node.apiGetAsyncE(`/aobasset/balances/${node.Gaccount.address}`)
+//     //   debug('get issuer balance after issue response', err, res.body)
+//     //   expect(err).to.not.exist
+//     //   expect(res.body.result).to.be.instanceOf(Array)
+//     //   expect(res.body.result.length).to.equal(1)
+//     //   expect(res.body.result[0].currency).to.equal(currency)
+//     //   expect(res.body.result[0].balance).to.equal(issuerBalance)
 
-    //   const transferAmount = '10';
-    //   trs = node.ddn.aob.createTransfer(currency, transferAmount, transferAddress, '', node.Gaccount.password)
-    //   debug('create transfer trs', trs)
-    //   var [err, res] = await node.submitTransactionAsyncE(trs)
-    //   debug('transfer asset response', err, res.body)
-    //   expect(err).to.not.exist
-    //   expect(res.body).to.have.property('success').to.be.true
+//     //   const transferAmount = '10';
+//     //   trs = node.ddn.aob.createTransfer(currency, transferAmount, transferAddress, '', node.Gaccount.password)
+//     //   debug('create transfer trs', trs)
+//     //   var [err, res] = await node.submitTransactionAsyncE(trs)
+//     //   debug('transfer asset response', err, res.body)
+//     //   expect(err).to.not.exist
+//     //   expect(res.body).to.have.property('success').to.be.true
 
-    //   await node.onNewBlockAsyncE()
+//     //   await node.onNewBlockAsyncE()
 
-    // //DdnUtils.bignum update   issuerBalance = DdnUtils.bignum(issuerBalance).sub(transferAmount).toString()
-    //   issuerBalance = DdnUtils.bignum.minus(issuerBalance, transferAmount).toString();
+//     // //DdnUtils.bignum update   issuerBalance = DdnUtils.bignum(issuerBalance).sub(transferAmount).toString()
+//     //   issuerBalance = DdnUtils.bignum.minus(issuerBalance, transferAmount).toString();
 
-    //   var [err, res] = await node.apiGetAsyncE(`/aobasset/balances/${node.Gaccount.address}`)
-    //   debug('get issuer balance response', err, res.body)
-    //   expect(err).to.not.exist
-    //   expect(res.body.result).to.be.instanceOf(Array)
-    //   expect(res.body.result.length).to.equal(1)
-    //   expect(res.body.result[0].currency).to.equal(currency)
-    //   expect(res.body.result[0].balance).to.equal(issuerBalance)
+//     //   var [err, res] = await node.apiGetAsyncE(`/aobasset/balances/${node.Gaccount.address}`)
+//     //   debug('get issuer balance response', err, res.body)
+//     //   expect(err).to.not.exist
+//     //   expect(res.body.result).to.be.instanceOf(Array)
+//     //   expect(res.body.result.length).to.equal(1)
+//     //   expect(res.body.result[0].currency).to.equal(currency)
+//     //   expect(res.body.result[0].balance).to.equal(issuerBalance)
 
-    // //DdnUtils.bignum update   recipientBalance = DdnUtils.bignum(recipientBalance).plus(transferAmount).toString()
-    //   recipientBalance = DdnUtils.bignum.plus(recipientBalance, transferAmount).toString();
+//     // //DdnUtils.bignum update   recipientBalance = DdnUtils.bignum(recipientBalance).plus(transferAmount).toString()
+//     //   recipientBalance = DdnUtils.bignum.plus(recipientBalance, transferAmount).toString();
 
-    //   var [err, res] = await node.apiGetAsyncE(`/aobasset/balances/${transferAddress}`)
-    //   debug('get recipient balance response', err, res.body)
-    //   expect(err).to.not.exist
-    //   expect(res.body.result).to.be.instanceOf(Array)
-    //   expect(res.body.result.length).to.equal(1)
-    //   expect(res.body.result[0].currency).to.equal(currency)
-    //   expect(res.body.result[0].balance).to.equal(recipientBalance)
+//     //   var [err, res] = await node.apiGetAsyncE(`/aobasset/balances/${transferAddress}`)
+//     //   debug('get recipient balance response', err, res.body)
+//     //   expect(err).to.not.exist
+//     //   expect(res.body.result).to.be.instanceOf(Array)
+//     //   expect(res.body.result.length).to.equal(1)
+//     //   expect(res.body.result[0].currency).to.equal(currency)
+//     //   expect(res.body.result[0].balance).to.equal(recipientBalance)
 
-    // })
+//     // })
 
-    // it('Update flags and acl should be ok', async () => {
-    //   const currency = `${ISSUER1.name}.${ASSET1.name}`;
+//     // it('Update flags and acl should be ok', async () => {
+//     //   const currency = `${ISSUER1.name}.${ASSET1.name}`;
 
-    //   var [err, res] = await node.apiGetAsyncE(`/aobasset/${currency}`)
-    //   expect(err).to.not.exist
-    //   expect(res.body.result.name).to.equal(currency)
-    //   expect(res.body.result.acl).to.equal(0)
+//     //   var [err, res] = await node.apiGetAsyncE(`/aobasset/${currency}`)
+//     //   expect(err).to.not.exist
+//     //   expect(res.body.result.name).to.equal(currency)
+//     //   expect(res.body.result.acl).to.equal(0)
 
-    //   // get white list before update acl
-    //   res = await node.apiGetAsync(`/aobasset/${currency}/acl/1`)
-    //   expect(res.body.result.total).to.be.a('number')
-    //   expect(res.body.result.rows).to.be.instanceOf(Array)
-    //   const origCount = res.body.count;
-    //   expect(origCount >= 0).to.be.ok
+//     //   // get white list before update acl
+//     //   res = await node.apiGetAsync(`/aobasset/${currency}/acl/1`)
+//     //   expect(res.body.result.total).to.be.a('number')
+//     //   expect(res.body.result.rows).to.be.instanceOf(Array)
+//     //   const origCount = res.body.count;
+//     //   expect(origCount >= 0).to.be.ok
 
-    //   // change to white list mode
-    //   let trs = node.ddn.aob.createFlags(currency, 1, 1, node.Gaccount.password);
-    //   var [err, res] = await node.submitTransactionAsyncE(trs)
-    //   debug('change flags response', err, res.body)
-    //   expect(err).to.not.exist
-    //   expect(res.body).to.have.property('success').to.be.true
+//     //   // change to white list mode
+//     //   let trs = node.ddn.aob.createFlags(currency, 1, 1, node.Gaccount.password);
+//     //   var [err, res] = await node.submitTransactionAsyncE(trs)
+//     //   debug('change flags response', err, res.body)
+//     //   expect(err).to.not.exist
+//     //   expect(res.body).to.have.property('success').to.be.true
 
 
-    //   await node.onNewBlockAsyncE()
+//     //   await node.onNewBlockAsyncE()
 
-    //   var [err, res] = await node.apiGetAsyncE(`/aobasset/${currency}`)
-    //   expect(err).to.not.exist
-    //   expect(res.body.result.name).to.equal(currency)
-    //   expect(res.body.result.acl).to.equal(1)
+//     //   var [err, res] = await node.apiGetAsyncE(`/aobasset/${currency}`)
+//     //   expect(err).to.not.exist
+//     //   expect(res.body.result.name).to.equal(currency)
+//     //   expect(res.body.result.acl).to.equal(1)
 
-    //   // add address to white list
-    //   const account1 = node.genNormalAccount();
-    //   const account2 = node.genNormalAccount();
-    //   const whiteList = [account1.address, account2.address];
-    //   trs = node.ddn.aob.createAcl(currency, '+', 1, whiteList, node.Gaccount.password)
-    //   var [err, res] = await node.submitTransactionAsyncE(trs)
-    //   debug('update acl response', err, res.body)
-    //   expect(err).to.not.exist
-    //   expect(res.body).to.have.property('success').to.be.true
+//     //   // add address to white list
+//     //   const account1 = node.genNormalAccount();
+//     //   const account2 = node.genNormalAccount();
+//     //   const whiteList = [account1.address, account2.address];
+//     //   trs = node.ddn.aob.createAcl(currency, '+', 1, whiteList, node.Gaccount.password)
+//     //   var [err, res] = await node.submitTransactionAsyncE(trs)
+//     //   debug('update acl response', err, res.body)
+//     //   expect(err).to.not.exist
+//     //   expect(res.body).to.have.property('success').to.be.true
 
-    //   await node.onNewBlockAsync()
+//     //   await node.onNewBlockAsync()
 
-    //   // get white list
-    //   res = await node.apiGetAsync(`/aobasset/${currency}/acl/1`)
-    //   expect(res.body.total).to.be.a('number')
-    //   expect(res.body.result.rows).to.be.instanceOf(Array)
-    //   expect(res.body.result.total == origCount + 2).to.be.ok
+//     //   // get white list
+//     //   res = await node.apiGetAsync(`/aobasset/${currency}/acl/1`)
+//     //   expect(res.body.total).to.be.a('number')
+//     //   expect(res.body.result.rows).to.be.instanceOf(Array)
+//     //   expect(res.body.result.total == origCount + 2).to.be.ok
 
-    //   trs = node.ddn.aob.createTransfer(currency, '10', account1.address, '', node.Gaccount.password)
-    //   res = await node.submitTransactionAsync(trs)
-    //   debug('transfer to account1 response', res.body)
-    //   expect(res.body).to.have.property('success').to.be.true
+//     //   trs = node.ddn.aob.createTransfer(currency, '10', account1.address, '', node.Gaccount.password)
+//     //   res = await node.submitTransactionAsync(trs)
+//     //   debug('transfer to account1 response', res.body)
+//     //   expect(res.body).to.have.property('success').to.be.true
 
-    //   trs = node.ddn.aob.createTransfer(currency, '10', account2.address, '', node.Gaccount.password)
-    //   res = await node.submitTransactionAsync(trs)
-    //   debug('transfer to account2 response', res.body)
-    //   expect(res.body).to.have.property('success').to.be.true
+//     //   trs = node.ddn.aob.createTransfer(currency, '10', account2.address, '', node.Gaccount.password)
+//     //   res = await node.submitTransactionAsync(trs)
+//     //   debug('transfer to account2 response', res.body)
+//     //   expect(res.body).to.have.property('success').to.be.true
 
-    //   trs = node.ddn.aob.createTransfer(currency, '10', node.genNormalAccount().address, '', node.Gaccount.password)
-    //   res = await node.submitTransactionAsync(trs)
-    //   debug('transfer to random account response', res.body)
-    //   expect(res.body).to.have.property('success').to.be.false
-    //   expect(res.body).to.have.property('error').to.match(/^Permission not allowed/)
-    // })
+//     //   trs = node.ddn.aob.createTransfer(currency, '10', node.genNormalAccount().address, '', node.Gaccount.password)
+//     //   res = await node.submitTransactionAsync(trs)
+//     //   debug('transfer to random account response', res.body)
+//     //   expect(res.body).to.have.property('success').to.be.false
+//     //   expect(res.body).to.have.property('error').to.match(/^Permission not allowed/)
+//     // })
 
-  })
+//   })
 
 //   describe('Register issuer fail cases', () => {
 
@@ -755,6 +755,9 @@ describe('Test AOB', () => {
 //     })
 //   })
 
+/**
+ * ok........
+ */
 //   describe('Test modify permission', () => {
 //     const ISSUE_ACCOUNT = node.genNormalAccount();
 //     const ISSUER_NAME = node.randomIssuerName();
@@ -808,4 +811,264 @@ describe('Test AOB', () => {
 //     })
 //   })
 
-})
+// })
+
+// backed
+
+// import Debug from 'debug';
+// import node from '@ddn/node-sdk/lib/test';
+
+// const debug = Debug('debug');
+// const expect = node.expect;
+
+// async function createPluginAsset(type, asset, secret, secondSecret) {
+//     return await node.ddn.assetPlugin.createPluginAsset(type, asset, secret, secondSecret)
+// }
+
+// function randomCurrencName() {
+//     return node.randomIssuerName("DDN.", 3);
+// }
+
+// describe("AOB Test", () => {
+//     // 加载插件
+//     node.ddn.init();
+
+//     it("开启白名单 Should be ok", async (done) => {
+//         const obj = {
+//             currency: randomCurrencName(),
+//             flag: 1,
+//             flag_type: 1
+//         };
+//         const transaction = await createPluginAsset(62, obj, node.Eaccount.password, "DDD12345");
+//         node.peer.post("/transactions")
+//             .set("Accept", "application/json")
+//             .set("version", node.version)
+//             .set("nethash", node.config.nethash)
+//             .set("port", node.config.port)
+//             .send({ transaction })
+//             .expect("Content-Type", /json/)
+//             .expect(200)
+//             .end((err, { body }) => {
+//                 // console.log('body', body);
+
+//                 expect(err).be.not.ok;
+
+//                 expect(body).to.have.property("success").to.be.true;
+
+//                 done();
+//             });
+//     })
+
+//     it("资产转账 Should be fail", async (done) => {
+//         await node.onNewBlockAsync();
+
+//         const obj = {
+//             recipientId: node.Daccount.address,
+//             currency: randomCurrencName(),
+//             aobAmount: "10",
+//             message: '测试转账',
+//             fee: '0',
+//         };
+
+//         const transaction = await createPluginAsset(65, obj, node.Eaccount.password, "DDD12345");
+//         node.peer.post("/transactions")
+//             .set("Accept", "application/json")
+//             .set("version", node.version)
+//             .set("nethash", node.config.nethash)
+//             .set("port", node.config.port)
+//             .send({ transaction })
+//             .expect("Content-Type", /json/)
+//             .expect(200)
+//             .end((err, { body }) => {
+//                 debug(body);
+
+//                 expect(err).be.not.ok;
+//                 expect(body).to.have.property("success").to.be.false;
+//                 expect(body).to.have.property("error").equal("Permission not allowed.");
+
+//                 done();
+//             });
+//     })
+
+//     it("增加Daccount到白名单 Should be ok", async (done) => {
+//         const obj = {
+//             currency: randomCurrencName(),
+//             flag: 1,
+//             operator: "+",
+//             list: [
+//                 node.Daccount.address
+//             ].join(",")
+//         };
+//         const transaction = await createPluginAsset(63, obj, node.Eaccount.password, "DDD12345");
+//         node.peer.post("/transactions")
+//             .set("Accept", "application/json")
+//             .set("version", node.version)
+//             .set("nethash", node.config.nethash)
+//             .set("port", node.config.port)
+//             .send({ transaction })
+//             .expect("Content-Type", /json/)
+//             .expect(200)
+//             .end((err, { body }) => {
+//                 debug('body', body);
+
+//                 expect(err).be.not.ok;
+
+//                 expect(body).to.have.property("success").to.be.true;
+
+//                 done();
+//             });
+//     });
+
+//     it("资产转账 Should be ok", async (done) => {
+//         await node.onNewBlockAsync();
+
+//         const obj = {
+//             recipientId: node.Daccount.address,
+//             currency: randomCurrencName(),
+//             aobAmount: "10",
+//             message: '测试转账',
+//             fee: '0',
+//         };
+
+//         const transaction = await createPluginAsset(65, obj, node.Eaccount.password, "DDD12345");
+//         node.peer.post("/transactions")
+//             .set("Accept", "application/json")
+//             .set("version", node.version)
+//             .set("nethash", node.config.nethash)
+//             .set("port", node.config.port)
+//             .send({ transaction })
+//             .expect("Content-Type", /json/)
+//             .expect(200)
+//             .end((err, { body }) => {
+//                 debug(body);
+//                 expect(err).be.not.ok;
+
+//                 expect(body).to.have.property("success").to.be.true;
+
+//                 done();
+//             });
+//     })
+
+//     it("在白名单删除Daccount Should be ok", async (done) => {
+//         const obj = {
+//             currency: randomCurrencName(),
+//             flag: 1,
+//             operator: "-",
+//             list: [
+//                 node.Daccount.address
+//             ].join(",")
+//         };
+//         const transaction = await createPluginAsset(63, obj, node.Eaccount.password, "DDD12345");
+
+//         node.peer.post("/transactions")
+//             .set("Accept", "application/json")
+//             .set("version", node.version)
+//             .set("nethash", node.config.nethash)
+//             .set("port", node.config.port)
+//             .send({ transaction })
+//             .expect("Content-Type", /json/)
+//             .expect(200)
+//             .end((err, { body }) => {
+//                 debug('body', body);
+
+//                 expect(err).be.not.ok;
+
+//                 expect(body).to.have.property("success").to.be.true;
+
+//                 done();
+//             });
+//     });
+
+//     it("资产转账 Should be fail", async (done) => {
+//         await node.onNewBlockAsync();
+
+//         const obj = {
+//             recipientId: node.Daccount.address,
+//             currency: randomCurrencName(),
+//             aobAmount: "10",
+//             message: '测试转账',
+//             fee: '0',
+//         };
+
+//         const transaction = await createPluginAsset(65, obj, node.Eaccount.password, "DDD12345");
+
+//         node.peer.post("/transactions")
+//             .set("Accept", "application/json")
+//             .set("version", node.version)
+//             .set("nethash", node.config.nethash)
+//             .set("port", node.config.port)
+//             .send({ transaction })
+//             .expect("Content-Type", /json/)
+//             .expect(200)
+//             .end((err, { body }) => {
+//                 debug(body);
+
+//                 expect(err).be.not.ok;
+
+//                 expect(body).to.have.property("success").to.be.false;
+//                 expect(body).to.have.property("error").equal("Permission not allowed.");
+
+//                 done();
+//             });
+//     })
+
+//     it("关闭白名单 Should be ok", async (done) => {
+//         const obj = {
+//             currency: randomCurrencName(),
+//             flag: 2,
+//             flag_type: 1
+//         };
+//         const transaction = await createPluginAsset(62, obj, node.Eaccount.password, "DDD12345");
+
+//         node.peer.post("/transactions")
+//             .set("Accept", "application/json")
+//             .set("version", node.version)
+//             .set("nethash", node.config.nethash)
+//             .set("port", node.config.port)
+//             .send({ transaction })
+//             .expect("Content-Type", /json/)
+//             .expect(200)
+//             .end((err, { body }) => {
+//                 // console.log('body', body);
+
+//                 expect(err).be.not.ok;
+
+//                 expect(body).to.have.property("success").to.be.true;
+
+//                 done();
+//             });
+//     })
+
+//     it("资产转账 Should be ok", async (done) => {
+//         await node.onNewBlockAsync();
+
+//         const obj = {
+//             recipientId: node.Daccount.address,
+//             currency: randomCurrencName(),
+//             aobAmount: "10",
+//             message: '测试转账',
+//             fee: '0',
+//         };
+
+//         const transaction = await createPluginAsset(65, obj, node.Eaccount.password, "DDD12345");
+
+//         node.peer.post("/transactions")
+//             .set("Accept", "application/json")
+//             .set("version", node.version)
+//             .set("nethash", node.config.nethash)
+//             .set("port", node.config.port)
+//             .send({ transaction })
+//             .expect("Content-Type", /json/)
+//             .expect(200)
+//             .end((err, { body }) => {
+//                 debug(body);
+
+//                 expect(err).be.not.ok;
+
+//                 expect(body).to.have.property("success").to.be.true;
+
+//                 done();
+//             });
+//     })
+
+// });

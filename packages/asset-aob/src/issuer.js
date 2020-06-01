@@ -1,6 +1,10 @@
 import Asset from '@ddn/asset-base';
 import DdnUtils from '@ddn/utils';
 
+/**
+ * AoB 发行商
+ * 一个用户仅能注册成为一个发行商
+ */
 class Issuer extends Asset.Base {
     async propsMapping() {
         return [
@@ -32,14 +36,18 @@ class Issuer extends Asset.Base {
         const trans = await super.verify(trs, sender);
 
         const issuerObj = await this.getAssetObject(trs);
+
         // 验证是否存在重复数据
         const data1 = await this.queryAsset({
             name: issuerObj.name
         }, null, null, 1, 1);
+
         const data2 = await this.queryAsset({
             issuer_id: trs.senderId,
         }, null, null, 1, 1);
+
         const results = data1.concat(data2);
+
         if (results && results.length > 0) {
             throw new Error('Issuer name/issuer_id already exists');
         } else {
@@ -68,6 +76,8 @@ class Issuer extends Asset.Base {
         router.get('/:name', async (req, res) => {
             try {
                 const result = await this.getOneByName(req, res);
+                // console.log('name.....', result);
+
                 res.json(result);
             } catch (err) {
                 res.json({ success: false, error: err.message || err.toString() });
@@ -75,17 +85,22 @@ class Issuer extends Asset.Base {
         });
     }
 
+    // FIXME: 2020.5.30 下面的方法没有被调用！！
     async getList(req) {
         // 确定页数相关
         const pageIndex = req.query.pageindex || 1;
         const pageSize = req.query.pagesize || 50;
         const result = await this.queryAsset(null, null, true, pageIndex, pageSize);
+        console.log('getList result', result);
+
         return { success: true, result };
     }
 
     async getOneByName(req) {
         const name = req.params.name;
         const data = await this.queryAsset({ name }, null, false, 1, 1);
+        console.log('getOneByName data', data);
+
         return { success: true, result: data[0] };
     }
 
@@ -100,12 +115,10 @@ class Issuer extends Asset.Base {
                     if (rows && rows.length) {
                         for (var i = 0; i < rows.length; i++) {
                             const row = rows[i];
-                            try
-                            {
+                            try {
                                 this.balanceCache.setAssetBalance(row.address, row.currency, row.balance);
                             }
-                            catch (err2)
-                            {
+                            catch (err2) {
                                 return reject(err2);
                             }
                         }

@@ -90,7 +90,7 @@ class OutTransfer extends Asset.Base {
         return trs;
     }
 
-    async process(trs, _sender, _cb) {
+    async process(trs) {
         var dapp = null;
 
         const transfer = await this.getAssetObject(trs);

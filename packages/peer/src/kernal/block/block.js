@@ -152,7 +152,7 @@ class Block {
         const validateErrors = await this.ddnSchema.validateBlock(block);
         if (validateErrors) {
             this.logger.error(validateErrors[0].message);
-            throw new Error(validateErrors[0].message);
+            throw new Error(`Invalid parameters: ${validateErrors[0].schemaPath} ${validateErrors[0].message}`);
         }
 
         try {
@@ -743,6 +743,7 @@ class Block {
 
         if (block.previous_block != this._lastBlock.id) {
             await this.runtime.delegate.fork(block, 1);
+            this.logger.error('Incorrect previous block hash', block.previous_block, this._lastBlock.id)
             throw new Error('Incorrect previous block hash');
         }
 
@@ -920,8 +921,8 @@ class Block {
                                 publicKey: transaction.senderPublicKey
                             });
 
-                            // transaction.id = await this.runtime.transaction.getId(transaction); 2020.5.18
-                            transaction.id = await DdnCrypto.getId(transaction);
+                            // transaction.id = await this.runtime.transaction.getId(transaction); // 2020.5.18
+                            transaction.id = await DdnCrypto.getId(transaction); // 2020.5.18
                             transaction.block_id = block.id; //wxm block database
 
                             const existsTrs = existsTrsIds.find((item) => {
@@ -1241,6 +1242,7 @@ class Block {
                     const blocksData = await this.runtime.dataquery.queryFullBlockData(where, limit || 1, 0, [
                         ['height', 'asc']
                     ]);
+
                     const blocks = await this._parseObjectFromFullBlocksData(blocksData);
                     for (let i = 0; i < blocks.length; i++) {
                         const block = blocks[i];
@@ -1267,6 +1269,7 @@ class Block {
                 }
             }, err => {
                 if (err) {
+                    this.logger.error("loadBlocksOffset:", err);
                     reject(err);
                 } else {
                     resolve(this.getLastBlock());
@@ -1356,7 +1359,7 @@ class Block {
             }
         }, query);
         if (validateErrors) {
-            throw new Error(validateErrors[0].message);
+            throw new Error(`Invalid parameters: ${validateErrors[0].schemaPath} ${validateErrors[0].message}`);
         }
 
         let where = null;

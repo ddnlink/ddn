@@ -102,10 +102,6 @@ const guestbookDapp = {
   link: 'http://www.ebookchain.org/dapp-demo.zip'
 };
 
-// Random DDN Amount
-//bignum update var RANDOM_COIN = Math.floor(Math.random() * (100000 * 100000000)) + 1;
-const RANDOM_COIN = bignum.plus(bignum.floor(bignum.multiply(Math.random(), 100000, 100000000)), 1).toString();
-
 function _getHeight(url, cb) {
   request({
     type: 'GET',
@@ -297,7 +293,7 @@ export default {
   supertest,
   expect,
   version,
-  RANDOM_COIN,
+  randomCoin,
   Gaccount,
   Daccount,
   Eaccount,
@@ -317,7 +313,6 @@ export default {
   blockTimePlus,
   randomProperty,
   randomDelegateName,
-  randomCoin,
   randomPassword,
   randomAccount,
   randomTxAccount,

@@ -24,31 +24,36 @@ class Issue extends Asset.Base {
 
         // 检查参数
         if (trs.recipientId) {
-            throw new Error('Invalid recipient');
+            throw new Error('Invalid AoB Issue transaction recipient');
         }
+
+        // 主交易数量应该为 
         if (!DdnUtils.bignum.isZero(trs.amount)) {
-            throw new Error('Invalid transaction amount');
+            throw new Error('Invalid AoB Issue transaction amount');
         }
+
         const { amount } = assetIssue;
         const error = DdnUtils.amount.validate(amount);
         if (error) {
-            throw new Error('Invalid transaction amount');
+            throw new Error(`Invalid AoB Issue transaction amount: ${error}`);
         }
+
         // (1)得到资产数据
         // (1)查询到asset的数据列表
         let result;
         const assetInst = await this.getAssetInstanceByName("AobAsset");
-        result = await assetInst.queryAsset({
-            name: assetIssue.currency
-        }, null, null, 1, 1);
+
+        const name = assetIssue.currency;
+        result = await assetInst.queryAsset({ name }, null, false, 1, 1);
 
         // (2)查询到issuer的数据列表
         const issuerInst = await this.getAssetInstanceByName("AobIssuer");
         let issuerData = await issuerInst.queryAsset({
             name: { "$in": _.map(result, 'issuer_name') }
-        }, null, null, 1, 1000);
-        issuerData = _.indexBy(issuerData, 'name');
+        }, null, false, 1, 1000);
 
+        issuerData = _.keyBy(issuerData, 'name');
+        
         let result2;
         result2 = _.map(result, (num) => {
             const num2 = num;
@@ -70,7 +75,7 @@ class Issue extends Asset.Base {
                 }
             });
         });
-        trData = _.indexBy(trData, 'id');
+        trData = _.keyBy(trData, 'id');
 
         let result3;
         result3 = _.map(result2, (num) => {
@@ -83,7 +88,7 @@ class Issue extends Asset.Base {
         let blockData = await new Promise((resolve) => {
             this.dao.findList('block', {
                 id: {
-                    "$in": _.map(result, 'block_id'),
+                    "$in": _.map(result3, 'block_id'), // result - result3
                 },
             }, null, null, (err, rows) => {
                 if (err) {
@@ -93,7 +98,7 @@ class Issue extends Asset.Base {
                 }
             });
         });
-        blockData = _.indexBy(blockData, 'id');
+        blockData = _.keyBy(blockData, 'id');
 
         let result4;
         result4 = _.map(result3, (num) => {
@@ -117,6 +122,7 @@ class Issue extends Asset.Base {
         if (!result5) {
             throw new Error('Asset not exists --- from asset-aob -> issue.verify');
         }
+
         if (result5.issuer_id !== sender.address) {
             throw new Error('Permission not allowed --- from asset-aob -> issue.verify');
         }
@@ -133,7 +139,6 @@ class Issue extends Asset.Base {
         const genesisHeight = result5.height;
         const height = DdnUtils.bignum.plus(this.runtime.block.getLastBlock().height, 1);
         if (strategy) {
-            // FIXME: 这里的mathjs.bignumber应该‘安全’地修改为Bignum
             const context = {
                 maximum: mathjs.bignumber(maximum),
                 precision,

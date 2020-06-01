@@ -74,25 +74,38 @@ class Aob extends Asset.Base {
         }
         const issuerName = nameParts[0];
         const tokenName = nameParts[1];
+
+        // token Name 3~6 个大写字母 
         if (!tokenName || !/^[A-Z]{3,6}$/.test(tokenName)) {
-            throw new Error('Invalid asset currency name form asset-aob');
+            throw new Error('Invalid asset token name form asset-aob');
         }
+
+        // 必须有描述
         if (!asset.desc) {
             throw new Error('Invalid asset desc form asset-aob');
         }
+
         if (asset.desc.length > 4096) {
             throw new Error('Invalid asset desc size form asset-aob');
         }
+
+        // 精度在 0~16 位之间，通常 8 个精度就够用了
         if (asset.precision > 16 || asset.precision < 0) {
             throw new Error('Invalid asset precision form asset-aob');
         }
+
+        // 最大值
         const error = DdnUtils.amount.validate(asset.maximum);
         if (error) {
             throw new Error(error);
         }
+
+        // 策略不长于 256 字节
         if (asset.strategy && asset.strategy.length > 256) {
             throw new Error('Invalid asset strategy size form asset-aob');
         }
+
+        // allow_writeoff, allow_whitelist, allow_blacklist 仅能是 '1'或'0'
         if (asset.allow_writeoff !== '0' && asset.allow_writeoff !== '1') {
             throw new Error('Asset allowWriteoff is not valid form asset-aob');
         }
@@ -102,18 +115,26 @@ class Aob extends Asset.Base {
         if (asset.allow_blacklist !== '0' && asset.allow_blacklist !== '1') {
             throw new Error('Asset allowBlacklist is not valid form asset-aob');
         }
-        const assetData = await this.queryAsset({ name: asset.name }, null, null, 1, 1);
+
+        // Asset 唯一
+        const assetData = await this.queryAsset({ name: asset.name }, null, false, 1, 1);
         if (assetData && assetData.length > 0) {
             throw new Error('asset->name Double register form asset-aob');
         }
+
+        // issuer 注册商必须
         const issuerInst = await this.getAssetInstanceByName("AobIssuer");
-        const issuerData = await issuerInst.queryAsset({ name: issuerName }, null, null, 1, 1);
+        const issuerData = await issuerInst.queryAsset({ name: issuerName }, null, false, 1, 1);
+        
         if (!issuerData || !(issuerData && issuerData.length > 0)) {
             throw new Error('Issuer not exists form asset-aob');
         }
+
+        // 权限仅限于注册商
         if (issuerData[0].issuer_id !== sender.address) {
             throw new Error('Permission not allowed form asset-aob');
         }
+
         return trs;
     }
 
@@ -159,14 +180,15 @@ class Aob extends Asset.Base {
             }
         });
 
-        router.get('/list', async (req, res) => {
-            try {
-                const result = await this.getList(req, res);
-                res.json(result);
-            } catch (err) {
-                res.json({ success: false, error: err.message || err.toString() });
-            }
-        });
+        // TODO: delete it
+        // router.get('/list', async (req, res) => {
+        //     try {
+        //         const result = await this.getList(req, res);
+        //         res.json(result);
+        //     } catch (err) {
+        //         res.json({ success: false, error: err.message || err.toString() });
+        //     }
+        // });
 
         router.get('/:name', async (req, res) => {
             try {

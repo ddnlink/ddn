@@ -374,7 +374,7 @@ class MultisignaturesRouter {
                 success: false,
                 error: `Validation error: ${validateErrors[0].schemaPath} ${validateErrors[0].message}`
             };
-            // throw new Error(validateErrors[0].message);
+            // throw new Error(`Invalid parameters: ${validateErrors[0].schemaPath} ${validateErrors[0].message}`);
         }
 
         return new Promise((resolve, reject) => {

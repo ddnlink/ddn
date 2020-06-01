@@ -332,7 +332,7 @@ class Confirmation extends Asset.Base {
                             return cb("Account does not belong to multisignature group");
                         }
 
-                        var requester;
+                        let requester;
                         try {
                             requester = await this.runtime.account.getAccountByPublicKey(keypair.publicKey);
                         } catch (e) {
@@ -396,8 +396,6 @@ class Confirmation extends Asset.Base {
 
                         let second_keypair = null;
                         if (account.secondSignature) {
-                            // const secondHash = crypto.createHash('sha256').update(body.secondSecret, 'utf8').digest();
-                            // second_keypair = ed.MakeKeypair(secondHash);
                             second_keypair = DdnCrypto.getKeys(body.secondSecret);
                         }
 

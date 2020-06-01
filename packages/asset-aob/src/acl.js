@@ -28,18 +28,26 @@ class Acl extends Asset.Base {
         bb.writeString(aclObj.currency);
         bb.writeString(aclObj.operator);
         bb.writeByte(aclObj.flag);
-        // for (let i = 0; i < aclObj.list.length; ++i) {
-        //     bb.writeString(aclObj.list[i]);
-        // }
+
         if (aclObj.list) {
+            // Fixme: 限定了 list 必须是 string
+            //     if (aclObj.list instanceof Array) {
+            //         for (let i = 0; i < aclObj.list.length; ++i) {
+            //             bb.writeString(aclObj.list[i]);
+            //         }
+            //     } else {
             bb.writeString(aclObj.list);
+            //     }
         }
+
         bb.flip();
 
         return bb.toBuffer()
     }
 
     async verify(trs, sender) {
+        await super.verify(trs, sender);
+
         if (trs.recipientId) {
             throw new Error("Invalid recipient")
         }
@@ -58,6 +66,7 @@ class Acl extends Asset.Base {
             throw new Error("Invalid acl flag");
         }
 
+        // 只能有 0~10 个管理
         const listArr = aclObj.list ? aclObj.list.split(',') : [];
         if (listArr.length <= 0 || listArr.length > 10) {
             throw new Error("Invalid acl list");
@@ -79,14 +88,26 @@ class Acl extends Asset.Base {
         }
 
         const assetInst = await this.getAssetInstanceByName("AobAsset");
-        const queryResult = await assetInst.queryAsset({ currency: aclObj.currency }, null, false, 1, 1);
+        const queryResult = await assetInst.queryAsset({ name: aclObj.currency }, null, false, 1, 1); // AobAsset 没有 currency 字段
         if (queryResult.length <= 0) {
             throw new Error(`AOB Asset not found: ${aclObj.currency}`);
         }
 
-        // FIXME: return queryResult[0];
-        // const assetInfo = queryResult[0];
-        return trs; // imfly 2020.5.24 验证必须返回 trs
+        const assetInfo = queryResult[0];
+        // console.log('asset', assetInfo);
+        // console.log('aclObj', aclObj);
+
+        // 是否允许启用白名单(0:否，1:是)
+        if (assetInfo.allow_whitelist == "0" && aclObj.flag == 1) {
+            throw new Error("Whitelist not allowed");
+        }
+
+        // 是否允许启用黑名单(0:否，1:是)
+        if (assetInfo.allow_blacklist == "0" && aclObj.flag == 0) {
+            throw new Error("Blacklist not allowed");
+        }
+
+        return trs;
     }
 
     async applyUnconfirmed(trs, sender, dbTrans) {
@@ -122,9 +143,9 @@ class Acl extends Asset.Base {
     // FIXME: 2020.5.24
     // https://eslint.org/docs/rules/no-async-promise-executor
     async _insertList(modelName, currency, list, trans) {
-        for (var i = 0; i < list.length; i++) {
+        for (let i = 0; i < list.length; i++) {
             let item = list[i];
-            Promise.resolve(this._insertItem(modelName, currency, item, trans));
+            Promise.resolve(await this._insertItem(modelName, currency, item, trans));
         }
         // return new Promise(
         //     async(resolve, reject) => {
@@ -143,7 +164,7 @@ class Acl extends Asset.Base {
     async _addList(modelName, currency, list, dbTrans) {
         if (!dbTrans) {
             const self = this;
-            await new Promise(async (resolve, reject) => {
+            await new Promise((resolve, reject) => {
                 this.dao.transaction(async (trans, done) => {
                     try {
                         await self._insertList(modelName, currency, list, trans);

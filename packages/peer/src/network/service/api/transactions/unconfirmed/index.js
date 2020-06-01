@@ -24,7 +24,7 @@ class RootRouter {
             }
         }, query);
         if (validateErrors) {
-            throw new Error(validateErrors[0].message);
+            throw new Error(`Invalid parameters: ${validateErrors[0].schemaPath} ${validateErrors[0].message}`);
         }
 
         var transactions = await this.runtime.transaction.getUnconfirmedTransactionList(true);
@@ -57,7 +57,7 @@ class RootRouter {
             required: ['id']
         }, query);
         if (validateErrors) {
-            throw new Error(validateErrors[0].message);
+            throw new Error(`Invalid parameters: ${validateErrors[0].schemaPath} ${validateErrors[0].message}`);
         }
 
         var unconfirmedTransaction = await this.runtime.transaction.getUnconfirmedTransaction(query.id);

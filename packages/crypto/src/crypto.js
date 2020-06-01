@@ -88,7 +88,7 @@ async function sign(transaction, {privateKey}) {
  * @param {object} param1 keypair.privateKey
  */
 async function secondSign(transaction, {privateKey}) {
-    const hash = await getHash(transaction);
+    const hash = await getHash(transaction, false, true);
     const signature = nacl.sign.detached(hash, Buffer.from(privateKey, "hex"));
     return bufToHex(signature);
 }
@@ -142,25 +142,22 @@ function generateAddress(publicKey, tokenPrefix) {
     return tokenPrefix + base58check.encode(h2);
 }
 
-// note: tweetnacl 包的所有方法必须使用 Uint8Array 类型的参数。
-async function getHash(trs, skipSignature, skipSecondSignature) {
-    const bytes = await getBytes(trs, skipSignature, skipSecondSignature);
-    return Buffer.from(nacl.hash(bytes));
-}
-
 // 验证，计划重构： peer/src/kernal/transaction.js  2020.5.3
 function verifyBytes(bytes, signature, publicKey) {
-    const hash = createHash(Buffer.from(bytes, 'hex'));
-    // const arrayHash = new Uint8Array(hash);
+    const hash = createHash(bytes);
+
     const signatureBuffer = Buffer.from(signature, "hex");
     const publicKeyBuffer = Buffer.from(publicKey, "hex");
     const res = nacl.sign.detached.verify(hash, signatureBuffer, publicKeyBuffer);
     return res
 }
 
+// 验证签名 
+// todo: 本方法并没有被实际使用，请参考 peer/kernal/transaction/transaction.js的 verifySignature 重构
 async function verify(transaction) {
     let remove = 64;
 
+    // 如果有二次签名就先减掉
     if (transaction.sign_signature) {
         remove = 128;
     }
@@ -172,30 +169,27 @@ async function verify(transaction) {
         data2[i] = bytes[i];
     }
 
-    const hash = createHash(data2);
-
-    const signatureBuffer = Buffer.from(transaction.signature, "hex");
-    const senderPublicKeyBuffer = Buffer.from(transaction.senderPublicKey, "hex");
-    const res = nacl.sign.detached.verify(hash, signatureBuffer, senderPublicKeyBuffer);
-
-    return res;
+    return verifyBytes(data2, transaction.signature, transaction.senderPublicKey)
 }
 
+/**
+ * 二次签名验证
+ * @param {object} transaction 交易数据
+ * @param {string} publicKey 二次签名公钥
+ */
 async function verifySecondSignature(transaction, publicKey) {
-    const bytes = await getBytes(transaction);
-    const data2 = Buffer.allocUnsafe(bytes.length - 64);
-
-    for (let i = 0; i < data2.length; i++) {
-        data2[i] = bytes[i];
+    if (!transaction.sign_signature) {
+        return false;
     }
+    const bytes = await getBytes(transaction, false, true);
 
-    const hash = createHash(data2);
+    return verifyBytes(bytes, transaction.sign_signature, publicKey)
+}
 
-    const signSignatureBuffer = Buffer.from(transaction.sign_signature, "hex");
-    const publicKeyBuffer = Buffer.from(publicKey, "hex");
-    const res = nacl.sign.detached.verify(hash, signSignatureBuffer, publicKeyBuffer);
-
-    return res;
+// note: tweetnacl 包的所有方法必须使用 Uint8Array 类型的参数。
+async function getHash(trs, skipSignature, skipSecondSignature) {
+    const bytes = await getBytes(trs, skipSignature, skipSecondSignature);
+    return Buffer.from(nacl.hash(bytes));
 }
 
 /**

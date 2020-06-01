@@ -5,7 +5,7 @@ import Debug from 'debug';
 import DdnUtils from '@ddn/utils';
 import node from "@ddn/node-sdk/lib/test";
 
-const debug = Debug('delegates');
+const debug = Debug('debug');
 
 let Raccount = node.randomAccount();
 while (Raccount.username === Raccount.username.toUpperCase()) {
@@ -16,13 +16,14 @@ const R2account = node.randomAccount();
 R2account.username = Raccount.username.toUpperCase();
 
 beforeAll(async () => {
-    const res = await node.openAccountAsync({ secret: Raccount.password });
-    debug('open account response', res.body)
-    node.expect(res.body).to.have.property("success").to.be.true;
-    node.expect(res.body).to.have.property("account").that.is.an("object");
-    node.expect(res.body.account.balance).be.equal(0);
+    const { body } = await node.openAccountAsync({ secret: Raccount.password });
+    debug('open account response', body)
+    node.expect(body).to.have.property("success").to.be.true;
+    node.expect(body).to.have.property("account").that.is.an("object");
+    node.expect(body.account.balance).be.equal(0);
 });
 
+// 注册受托人，没有费用失败
 describe("PUT /delegates without funds", () => {
 
     it("Using valid parameters. Should fail", done => {
@@ -34,19 +35,19 @@ describe("PUT /delegates without funds", () => {
             })
             .expect("Content-Type", /json/)
             .expect(200)
-            .end((err, {body}) => {
-                debug('register delegates response', body)
+            .end((err, { body }) => {
+                debug('register delegates without funds', body)
+                node.expect(err).be.not.ok;
                 node.expect(body).to.have.property("success").to.be.false;
                 node.expect(body).to.have.property("error");
-                // node.expect(res.body.error).to.match(/Insufficient balance:/);
-		body.error = "Account not found";
+                // node.expect(body.error).to.match(/Insufficient balance:/);
+                node.expect(body.error).to.contain("Account not found");
                 done();
             });
     });
 });
 
-// TODO test 0ddn<account's balance<100ddn
-
+// 投票，没有 funds 不成功
 describe("PUT /accounts/delegates without funds", () => {
 
     it("When upvoting. Should fail", done => {
@@ -57,8 +58,9 @@ describe("PUT /accounts/delegates without funds", () => {
             })
             .expect("Content-Type", /json/)
             .expect(200)
-            .end((err, {body}) => {
-                // console.log(JSON.stringify(res.body));
+            .end((err, { body }) => {
+                debug(JSON.stringify(body));
+                node.expect(err).be.not.ok;
                 node.expect(body).to.have.property("success").to.be.true;
                 node.expect(body).to.have.property("account").that.is.an("object");
                 Raccount.address = body.account.address;
@@ -75,20 +77,21 @@ describe("PUT /accounts/delegates without funds", () => {
                         })
                         .expect("Content-Type", /json/)
                         .expect(200)
-                        .end((err, {body}) => {
-                            // console.log(JSON.stringify(res.body));
+                        .end((err, { body }) => {
+                            debug("upvoting without funds fail", JSON.stringify(body));
+                            node.expect(err).be.not.ok;
                             node.expect(body).to.have.property("success").to.be.false;
                             node.expect(body).to.have.property("error");
-			                body.error = "Account not found";
+                            node.expect(body.error).to.contain("Account not found");
                             done();
                         });
                 });
             });
     });
-// TODO test 0ddn<account's balance<100ddn
 
     it("When downvoting. Should fail", done => {
         node.onNewBlock(err => {
+            node.expect(err).be.not.ok;
             node.api.put("/accounts/delegates")
                 .set("Accept", "application/json")
                 .send({
@@ -97,43 +100,39 @@ describe("PUT /accounts/delegates without funds", () => {
                 })
                 .expect("Content-Type", /json/)
                 .expect(200)
-                .end((err, {body}) => {
-                    // console.log(JSON.stringify(res.body));
+                .end((err, { body }) => {
+                    debug("downvoting without funds fail", JSON.stringify(body));
+                    node.expect(err).be.not.ok;
                     node.expect(body).to.have.property("success").to.be.false;
                     node.expect(body).to.have.property("error");
-		            body.error = "Account not found";
+                    node.expect(body.error).to.contain("Account not found");
                     done();
                 });
         });
     });
 });
 
+// 投票，需要费用
 describe("PUT /accounts/delegates with funds", () => {
+    const randomCoin = node.randomCoin();
 
     beforeAll(done => {
         node.api.put("/transactions")
             .set("Accept", "application/json")
             .send({
                 secret: node.Gaccount.password,
-                amount: `${node.RANDOM_COIN}`,
+                amount: `${randomCoin}`,
                 recipientId: Raccount.address
             })
             .expect("Content-Type", /json/)
             .expect(200)
-            .end((err, {body}) => {
-                // debug('give money response', JSON.stringify(res.body));
+            .end((err, { body }) => {
+                node.expect(err).be.not.ok;
+                debug('give money', JSON.stringify(body));
                 node.expect(body).to.have.property("success").to.be.true;
                 node.expect(body).to.have.property("transactionId");
-                if (body.success == true && body.transactionId != null) {
-                    node.expect(body.transactionId).to.be.a('string');
-                    // fixme: Bignumber
-                    //DdnUtils.bignum update Raccount.amount += node.RANDOM_COIN;
-                    Raccount.amount = DdnUtils.bignum.plus(Raccount.amount, node.RANDOM_COIN).toString();
-                } else {
-                    // console.log("Transaction failed or transactionId is null");
-                    // console.log("Sent: secret: " + node.Gaccount.password + ", amount: " + node.RANDOM_COIN + ", recipientId: " + Raccount.address);
-                    node.expect("TEST").to.equal("FAILED");
-                }
+                node.expect(body.transactionId).to.be.a('string');
+                Raccount.amount = DdnUtils.bignum.plus(Raccount.amount, randomCoin).toString();
                 done();
             });
     });
@@ -149,14 +148,13 @@ describe("PUT /accounts/delegates with funds", () => {
                 })
                 .expect("Content-Type", /json/)
                 .expect(200)
-                .end((err, {body}) => {
-                    // console.log(JSON.stringify(res.body));
+                .end((err, { body }) => {
+                    debug(JSON.stringify(body));
+                    node.expect(err).be.not.ok;
                     node.expect(body).to.have.property("success").to.be.true;
                     if (body.success == true && body.account != null) {
-                        node.expect(`${body.account.balance}`).be.equal(node.RANDOM_COIN);
+                        node.expect(`${body.account.balance}`).be.equal(randomCoin);
                     } else {
-                        // console.log("Failed to open account or account object is null");
-                        // console.log("Sent: secret: " + Raccount.password);
                         node.expect("TEST").to.equal("FAILED");
                     }
                     done();
@@ -167,6 +165,7 @@ describe("PUT /accounts/delegates with funds", () => {
     it("When upvoting same delegate multiple times. Should fail", done => {
         const votedDelegate = `'+${node.Eaccount.publicKey}','+${node.Eaccount.publicKey}'`;
         node.onNewBlock(err => {
+            node.expect(err).be.not.ok;
             node.api.put("/accounts/delegates")
                 .set("Accept", "application/json")
                 .send({
@@ -175,13 +174,12 @@ describe("PUT /accounts/delegates with funds", () => {
                 })
                 .expect("Content-Type", /json/)
                 .expect(200)
-                .end((err, {body}) => {
-                    // console.log(JSON.stringify(res.body));
+                .end((err, { body }) => {
+                    debug(JSON.stringify(body));
+                    node.expect(err).be.not.ok;
                     node.expect(body).to.have.property("success").to.be.false;
                     node.expect(body).to.have.property("error");
-                    if (body.success == true) {
-                        // console.log("Sent: secret:" + Raccount.password + ", delegates: [" + votedDelegate + "]");
-                    }
+
                     done();
                 });
         });
@@ -190,6 +188,7 @@ describe("PUT /accounts/delegates with funds", () => {
     it("When downvoting same delegate multiple times. Should fail", done => {
         const votedDelegate = `'-${node.Eaccount.publicKey}','-${node.Eaccount.publicKey}'`;
         node.onNewBlock(err => {
+            node.expect(err).be.not.ok;
             node.api.put("/accounts/delegates")
                 .set("Accept", "application/json")
                 .send({
@@ -198,11 +197,12 @@ describe("PUT /accounts/delegates with funds", () => {
                 })
                 .expect("Content-Type", /json/)
                 .expect(200)
-                .end((err, {body}) => {
-                    // console.log(JSON.stringify(res.body));
+                .end((err, { body }) => {
+                    debug(JSON.stringify(body));
+                    node.expect(err).be.not.ok;
                     node.expect(body).to.have.property("success").to.be.false;
                     node.expect(body).to.have.property("error");
-                    if (body.success == true) {
+                    if (body.success) {
                         console.log(`Sent: secret:${Raccount.password}, delegates: [${votedDelegate}]`);
                     }
                     done();
@@ -214,6 +214,7 @@ describe("PUT /accounts/delegates with funds", () => {
         const votedDelegate = `'+${node.Eaccount.publicKey}','-${node.Eaccount.publicKey}'`;
 
         node.onNewBlock(err => {
+            node.expect(err).be.not.ok;
             node.api.put("/accounts/delegates")
                 .set("Accept", "application/json")
                 .send({
@@ -222,12 +223,13 @@ describe("PUT /accounts/delegates with funds", () => {
                 })
                 .expect("Content-Type", /json/)
                 .expect(200)
-                .end((err, {body}) => {
-                    // console.log('upvoting and downvoting within same request',JSON.stringify(res.body));
+                .end((err, { body }) => {
+                    debug('upvoting and downvoting within same request', JSON.stringify(body));
+                    node.expect(err).be.not.ok;
                     node.expect(body).to.have.property("success").to.be.false;
                     node.expect(body).to.have.property("error");
-                    if (body.success == true) {
-                        // console.log("Sent: secret:" + Raccount.password + ", delegates: [" + votedDelegate) + "]";
+                    if (body.success) {
+                        debug("Sent: secret:" + Raccount.password + ", delegates: [" + votedDelegate) + "]";
                     }
                     done();
                 });
@@ -243,8 +245,9 @@ describe("PUT /accounts/delegates with funds", () => {
             })
             .expect("Content-Type", /json/)
             .expect(200)
-            .end((err, {body}) => {
-                // console.log(JSON.stringify(res.body));
+            .end((err, { body }) => {
+                debug(JSON.stringify(body));
+                node.expect(err).be.not.ok;
                 node.expect(body).to.have.property("success").to.be.true;
                 node.expect(body).to.have.property("transaction").that.is.an("object");
                 if (body.success == true && body.transaction != null) {
@@ -253,8 +256,8 @@ describe("PUT /accounts/delegates with funds", () => {
                     node.expect(body.transaction.senderPublicKey).to.equal(Raccount.publicKey);
                     node.expect(body.transaction.fee).to.equal(node.Fees.voteFee);
                 } else {
-                    // console.log("Transaction failed or transaction object is null");
-                    // console.log("Sent: secret: " + Raccount.password + ", delegates: [+" + node.Eaccount.publicKey + "]");
+                    debug("Transaction failed or transaction object is null");
+                    debug("Sent: secret: " + Raccount.password + ", delegates: [+" + node.Eaccount.publicKey + "]");
                     node.expect("TEST").to.equal("FAILED");
                 }
                 done();
@@ -263,6 +266,7 @@ describe("PUT /accounts/delegates with funds", () => {
 
     it("When upvoting again from same account. Should fail", done => {
         node.onNewBlock(err => {
+            node.expect(err).be.not.ok;
             node.api.put("/accounts/delegates")
                 .set("Accept", "application/json")
                 .send({
@@ -271,15 +275,16 @@ describe("PUT /accounts/delegates with funds", () => {
                 })
                 .expect("Content-Type", /json/)
                 .expect(200)
-                .end((err, {body}) => {
-                    // console.log(JSON.stringify(res.body));
+                .end((err, { body }) => {
+                    debug(JSON.stringify(body));
+                    node.expect(err).be.not.ok;
                     node.expect(body).to.have.property("success").to.be.false;
                     node.expect(body).to.have.property("error");
                     if (body.success == false && body.error != null) {
                         node.expect(body.error.toLowerCase()).to.contain("already voted");
                     } else {
-                        // console.log("Expected error but got success");
-                        // console.log("Sent: secret: " + Raccount.password + ", delegates: [+" + node.Eaccount.publicKey + "]");
+                        debug("Expected error but got success");
+                        debug("Sent: secret: " + Raccount.password + ", delegates: [+" + node.Eaccount.publicKey + "]");
                         node.expect("TEST").to.equal("FAILED");
                     }
                     done();
@@ -298,8 +303,9 @@ describe("PUT /accounts/delegates with funds", () => {
                 })
                 .expect("Content-Type", /json/)
                 .expect(200)
-                .end((err, {body}) => {
-                    // console.log(JSON.stringify(res.body));
+                .end((err, { body }) => {
+                    debug(JSON.stringify(body));
+                    node.expect(err).be.not.ok;
                     node.expect(body).to.have.property("success").to.be.true;
                     node.expect(body).to.have.property("transaction").that.is.an("object");
                     if (body.success == true && body.transaction != null) {
@@ -308,8 +314,8 @@ describe("PUT /accounts/delegates with funds", () => {
                         node.expect(body.transaction.senderPublicKey).to.equal(Raccount.publicKey);
                         node.expect(body.transaction.fee).to.equal(node.Fees.voteFee);
                     } else {
-                        // console.log("Expected success but got error");
-                        // console.log("Sent: secret: " + Raccount.password + ", delegates: [-" + node.Eaccount.publicKey + "]");
+                        debug("Expected success but got error");
+                        debug("Sent: secret: " + Raccount.password + ", delegates: [-" + node.Eaccount.publicKey + "]");
                         node.expect("TEST").to.equal("FAILED");
                     }
                     done();
@@ -319,6 +325,7 @@ describe("PUT /accounts/delegates with funds", () => {
 
     it("When downvoting again from same account. Should fail", done => {
         node.onNewBlock(err => {
+            node.expect(err).be.not.ok;
             node.api.put("/accounts/delegates")
                 .set("Accept", "application/json")
                 .send({
@@ -327,15 +334,16 @@ describe("PUT /accounts/delegates with funds", () => {
                 })
                 .expect("Content-Type", /json/)
                 .expect(200)
-                .end((err, {body}) => {
-                    // console.log(JSON.stringify(res.body));
+                .end((err, { body }) => {
+                    debug(JSON.stringify(body));
+                    node.expect(err).be.not.ok;
                     node.expect(body).to.have.property("success").to.be.false;
                     node.expect(body).to.have.property("error");
                     if (body.success == false && body.error != null) {
                         node.expect(body.error.toLowerCase()).to.contain("not voted");
                     } else {
-                        // console.log("Expected error but got success");
-                        // console.log("Sent: secret: " + Raccount.password + ", delegates: [-" + node.Eaccount.publicKey + "]");
+                        debug("Expected error but got success");
+                        debug("Sent: secret: " + Raccount.password + ", delegates: [-" + node.Eaccount.publicKey + "]");
                         node.expect("TEST").to.equal("FAILED");
                     }
                     done();
@@ -352,8 +360,9 @@ describe("PUT /accounts/delegates with funds", () => {
             })
             .expect("Content-Type", /json/)
             .expect(200)
-            .end((err, {body}) => {
-                // console.log(JSON.stringify(res.body));
+            .end((err, { body }) => {
+                debug(JSON.stringify(body));
+                node.expect(err).be.not.ok;
                 node.expect(body).to.have.property("success").to.be.false;
                 node.expect(body).to.have.property("error");
                 done();
@@ -369,8 +378,9 @@ describe("PUT /accounts/delegates with funds", () => {
             })
             .expect("Content-Type", /json/)
             .expect(200)
-            .end((err, {body}) => {
-                // console.log(JSON.stringify(res.body));
+            .end((err, { body }) => {
+                debug(JSON.stringify(body));
+                node.expect(err).be.not.ok;
                 node.expect(body).to.have.property("success").to.be.false;
                 node.expect(body).to.have.property("error");
                 done();
@@ -387,8 +397,9 @@ describe("PUT /accounts/delegates with funds", () => {
                 })
                 .expect("Content-Type", /json/)
                 .expect(200)
-                .end((err, {body}) => {
-                    // console.log(JSON.stringify(res.body));
+                .end((err, { body }) => {
+                    debug(JSON.stringify(body));
+                    node.expect(err).be.not.ok;
                     node.expect(body).to.have.property("success").to.be.false;
                     node.expect(body).to.have.property("error");
                     done();
@@ -406,8 +417,9 @@ describe("PUT /accounts/delegates with funds", () => {
                 })
                 .expect("Content-Type", /json/)
                 .expect(200)
-                .end((err, {body}) => {
-                    // console.log(JSON.stringify(res.body));
+                .end((err, { body }) => {
+                    debug(JSON.stringify(body));
+                    node.expect(err).be.not.ok;
                     node.expect(body).to.have.property("success").to.be.false;
                     node.expect(body).to.have.property("error");
                     done();
@@ -416,7 +428,7 @@ describe("PUT /accounts/delegates with funds", () => {
     });
 
     it("Without any delegates. Should fail", function (done) {
-        
+
         setTimeout(() => {
             node.api.put("/accounts/delegates")
                 .set("Accept", "application/json")
@@ -426,8 +438,9 @@ describe("PUT /accounts/delegates with funds", () => {
                 })
                 .expect("Content-Type", /json/)
                 .expect(200)
-                .end((err, {body}) => {
-                    // console.log(JSON.stringify(res.body));
+                .end((err, { body }) => {
+                    debug(JSON.stringify(body));
+                    node.expect(err).be.not.ok;
                     node.expect(body).to.have.property("success").to.be.false;
                     node.expect(body).to.have.property("error");
                     done();
@@ -436,7 +449,9 @@ describe("PUT /accounts/delegates with funds", () => {
     });
 });
 
+// 注册，有费用
 describe("PUT /delegates with funds", () => {
+    const randomCoin = node.randomCoin();
 
     beforeAll(done => {
         node.api.post("/accounts/open")
@@ -446,8 +461,9 @@ describe("PUT /delegates with funds", () => {
             })
             .expect("Content-Type", /json/)
             .expect(200)
-            .end((err, {body}) => {
-                // console.log(JSON.stringify(res.body));
+            .end((err, { body }) => {
+                debug(JSON.stringify(body));
+                node.expect(err).be.not.ok;
                 node.expect(body).to.have.property("success").to.be.true;
                 node.expect(body).to.have.property("account").that.is.an("object");
                 R2account.address = body.account.address;
@@ -460,22 +476,23 @@ describe("PUT /delegates with funds", () => {
                         .set('Accept', 'application/json')
                         .send({
                             secret: node.Gaccount.password,
-                            amount: `${node.RANDOM_COIN}`,
+                            amount: `${randomCoin}`,
                             recipientId: R2account.address
                         })
                         .expect('Content-Type', /json/)
                         .expect(200)
-                        .end((err, {body}) => {
-                            // console.log(JSON.stringify(res.body));
+                        .end((err, { body }) => {
+                            debug(JSON.stringify(body));
+                            node.expect(err).be.not.ok;
                             node.expect(body).to.have.property("success").to.be.true;
                             node.expect(body).to.have.property("transactionId");
                             if (body.success == true && body.transactionId != null) {
                                 node.expect(body.transactionId).to.be.a('string');
-                                //DdnUtils.bignum update R2account.amount += node.RANDOM_COIN;
-                                R2account.amount = DdnUtils.bignum.plus(R2account.amount, node.RANDOM_COIN).toString();
+                                //DdnUtils.bignum update R2account.amount += node.randomCoin;
+                                R2account.amount = DdnUtils.bignum.plus(R2account.amount, randomCoin).toString();
                             } else {
-                                // console.log("Transaction failed or transactionId is null");
-                                // console.log("Sent: secret: " + node.Gaccount.password + ", amount: " + node.RANDOM_COIN + ", recipientId: " + R2account.address);
+                                debug("Transaction failed or transactionId is null");
+                                debug("Sent: secret: " + node.Gaccount.password + ", amount: " + randomCoin + ", recipientId: " + R2account.address);
                                 node.expect("TEST").to.equal("FAILED");
                             }
                             done();
@@ -493,14 +510,15 @@ describe("PUT /delegates with funds", () => {
                     })
                     .expect('Content-Type', /json/)
                     .expect(200)
-                    .end((err, {body}) => {
-                        // console.log(JSON.stringify(res.body));
+                    .end((err, { body }) => {
+                        debug(JSON.stringify(body));
+                        node.expect(err).be.not.ok;
                         node.expect(body).to.have.property("success").to.be.true;
                         if (body.success == true && body.account != null) {
-                            node.expect(body.account.balance).be.equal(`${node.RANDOM_COIN}`);
+                            node.expect(body.account.balance).be.equal(`${randomCoin}`);
                         } else {
-                            // console.log("Failed to open account or account object is null");
-                            // console.log("Sent: secret: " + R2account.password);
+                            debug("Failed to open account or account object is null");
+                            debug("Sent: secret: " + R2account.password);
                             node.expect("TEST").to.equal("FAILED");
                         }
                         done();
@@ -518,8 +536,9 @@ describe("PUT /delegates with funds", () => {
             })
             .expect("Content-Type", /json/)
             .expect(200)
-            .end((err, {body}) => {
-                // console.log(JSON.stringify(res.body));
+            .end((err, { body }) => {
+                debug(JSON.stringify(body));
+                node.expect(err).be.not.ok;
                 node.expect(body).to.have.property("success").to.be.false;
                 node.expect(body).to.have.property("error");
                 done();
@@ -527,7 +546,7 @@ describe("PUT /delegates with funds", () => {
     });
 
     it("Using invalid pasphrase. Should fail", function (done) {
-        
+
         setTimeout(() => {
             node.api.put("/delegates")
                 .set("Accept", "application/json")
@@ -537,8 +556,9 @@ describe("PUT /delegates with funds", () => {
                 })
                 .expect("Content-Type", /json/)
                 .expect(200)
-                .end((err, {body}) => {
-                    // console.log(JSON.stringify(res.body));
+                .end((err, { body }) => {
+                    debug(JSON.stringify(body));
+                    node.expect(err).be.not.ok;
                     node.expect(body).to.have.property("success").to.be.false;
                     node.expect(body).to.have.property("error");
                     done();
@@ -547,7 +567,7 @@ describe("PUT /delegates with funds", () => {
     });
 
     it("Using invalid username. Should fail", function (done) {
-        
+
         setTimeout(() => {
             node.api.put("/delegates")
                 .set("Accept", "application/json")
@@ -557,8 +577,9 @@ describe("PUT /delegates with funds", () => {
                 })
                 .expect("Content-Type", /json/)
                 .expect(200)
-                .end((err, {body}) => {
-                    // console.log(JSON.stringify(res.body));
+                .end((err, { body }) => {
+                    debug(JSON.stringify(body));
+                    node.expect(err).be.not.ok;
                     node.expect(body).to.have.property("success").to.be.false;
                     node.expect(body).to.have.property("error");
                     done();
@@ -567,7 +588,7 @@ describe("PUT /delegates with funds", () => {
     });
 
     it("Using username longer than 20 characters. Should fail", function (done) {
-        
+
         setTimeout(() => {
             node.api.put("/delegates")
                 .set("Accept", "application/json")
@@ -577,8 +598,9 @@ describe("PUT /delegates with funds", () => {
                 })
                 .expect("Content-Type", /json/)
                 .expect(200)
-                .end((err, {body}) => {
-                    // console.log(JSON.stringify(res.body));
+                .end((err, { body }) => {
+                    debug(JSON.stringify(body));
+                    node.expect(err).be.not.ok;
                     node.expect(body).to.have.property("success").to.be.false;
                     node.expect(body).to.have.property("error");
                     done();
@@ -587,7 +609,7 @@ describe("PUT /delegates with funds", () => {
     });
 
     it("Using blank username. Should fail", function (done) {
-        
+
         setTimeout(() => {
             node.api.put("/delegates")
                 .set("Accept", "application/json")
@@ -597,8 +619,9 @@ describe("PUT /delegates with funds", () => {
                 })
                 .expect("Content-Type", /json/)
                 .expect(200)
-                .end((err, {body}) => {
-                    // console.log(JSON.stringify(res.body));
+                .end((err, { body }) => {
+                    debug(JSON.stringify(body));
+                    node.expect(err).be.not.ok;
                     node.expect(body).to.have.property("success").to.be.false;
                     node.expect(body).to.have.property("error");
                     done();
@@ -608,6 +631,7 @@ describe("PUT /delegates with funds", () => {
 
     it(`Using uppercase username: ${R2account.username}. Should be ok and delegate should be registered in lower case`, done => {
         node.onNewBlock(err => {
+            node.expect(err).be.not.ok;
             node.api.put('/delegates')
                 .set('Accept', 'application/json')
                 .send({
@@ -616,8 +640,9 @@ describe("PUT /delegates with funds", () => {
                 })
                 .expect("Content-Type", /json/)
                 .expect(200)
-                .end((err, {body}) => {
-                    // console.log(JSON.stringify(res.body));
+                .end((err, { body }) => {
+                    debug(JSON.stringify(body));
+                    node.expect(err).be.not.ok;
                     node.expect(body).to.have.property("success").to.be.true;
                     node.expect(body).to.have.property("transaction").that.is.an("object");
                     if (body.success == true && body.transaction != null) {
@@ -647,8 +672,9 @@ describe("PUT /delegates with funds", () => {
                 })
                 .expect('Content-Type', /json/)
                 .expect(200)
-                .end((err, {body}) => {
-                    // console.log(JSON.stringify(res.body));
+                .end((err, { body }) => {
+                    debug(JSON.stringify(body));
+                    node.expect(err).be.not.ok;
                     node.expect(body).to.have.property("success").to.be.false;
                     node.expect(body).to.have.property("error");
                     done();
@@ -659,10 +685,10 @@ describe("PUT /delegates with funds", () => {
     it(`Using existing username but different case: ${R2account.username}. Should fail`, done => {
         node.onNewBlock(err => {
             node.expect(err).to.be.not.ok;
-            // console.log(JSON.stringify({
-            //    secret: R2account.password,
-            //    username: R2account.username
-            // }));
+            debug(JSON.stringify({
+                secret: R2account.password,
+                username: R2account.username
+            }));
             node.api.put('/delegates')
                 .set('Accept', 'application/json')
                 .send({
@@ -671,8 +697,9 @@ describe("PUT /delegates with funds", () => {
                 })
                 .expect("Content-Type", /json/)
                 .expect(200)
-                .end((err, {body}) => {
-                    // console.log(JSON.stringify(res.body));
+                .end((err, { body }) => {
+                    debug(JSON.stringify(body));
+                    node.expect(err).be.not.ok;
                     node.expect(body).to.have.property("success").to.be.false;
                     node.expect(body).to.have.property("error");
                     done();
@@ -681,6 +708,7 @@ describe("PUT /delegates with funds", () => {
     });
 });
 
+// 检索受托人
 describe("GET /delegates", () => {
 
     it("Using no parameters. Should be ok", done => {
@@ -691,15 +719,16 @@ describe("GET /delegates", () => {
             .set("Accept", "application/json")
             .expect("Content-Type", /json/)
             .expect(200)
-            .end((err, {body}) => {
-                // console.log(JSON.stringify(res.body));
+            .end((err, { body }) => {
+                debug(JSON.stringify(body));
+                node.expect(err).be.not.ok;
                 node.expect(body).to.have.property("success").to.be.true;
                 node.expect(body).to.have.property("delegates").that.is.an("array");
                 node.expect(body).to.have.property("totalCount").that.is.at.least(0);
                 node.expect(body.delegates).to.have.length.of.at.most(limit);
                 const num_of_delegates = body.delegates.length;
-                // console.log("Limit is " + limit + ". Number of delegates returned is: " + num_of_delegates);
-                // console.log("Total Number of delegates returned is: " + res.body.totalCount);
+                debug("Limit is " + limit + ". Number of delegates returned is: " + num_of_delegates);
+                debug("Total Number of delegates returned is: " + body.totalCount);
                 if (num_of_delegates >= 1) {
                     for (let i = 0; i < num_of_delegates; i++) {
                         if (body.delegates[i + 1] != null) {
@@ -713,7 +742,7 @@ describe("GET /delegates", () => {
                         }
                     }
                 } else {
-                    // console.log("Got 0 delegates");
+                    debug("Got 0 delegates");
                     node.expect("TEST").to.equal("FAILED");
                 }
                 done();
@@ -728,15 +757,16 @@ describe("GET /delegates", () => {
             .set("Accept", "application/json")
             .expect("Content-Type", /json/)
             .expect(200)
-            .end((err, {body}) => {
-                // console.log(JSON.stringify(res.body));
+            .end((err, { body }) => {
+                debug(JSON.stringify(body));
+                node.expect(err).be.not.ok;
                 node.expect(body).to.have.property("success").to.be.true;
                 node.expect(body).to.have.property("delegates").that.is.an("array");
                 node.expect(body).to.have.property("totalCount").that.is.at.least(0);
                 node.expect(body.delegates).to.have.length.of.at.most(limit);
                 const num_of_delegates = body.delegates.length;
-                // console.log("Limit is: " + limit + ". Number of delegates returned is: " + num_of_delegates);
-                // console.log("Total Number of delegates returned is: " + res.body.totalCount);
+                debug("Limit is: " + limit + ". Number of delegates returned is: " + num_of_delegates);
+                debug("Total Number of delegates returned is: " + body.totalCount);
                 if (num_of_delegates >= 1) {
                     for (let i = 0; i < num_of_delegates; i++) {
                         if (body.delegates[i + 1] != null) {
@@ -744,7 +774,7 @@ describe("GET /delegates", () => {
                         }
                     }
                 } else {
-                    // console.log("Got 0 delegates");
+                    debug("Got 0 delegates");
                     node.expect("TEST").to.equal("FAILED");
                 }
                 done();
@@ -761,8 +791,9 @@ describe("GET /delegates", () => {
             .set("Accept", "application/json")
             .expect("Content-Type", /json/)
             .expect(200)
-            .end((err, {body}) => {
-                // console.log(JSON.stringify(res.body));
+            .end((err, { body }) => {
+                debug(JSON.stringify(body));
+                node.expect(err).be.not.ok;
                 node.expect(body).to.have.property("success").to.be.false;
                 node.expect(body).to.have.property("error");
                 done();
@@ -777,8 +808,9 @@ describe("GET /accounts/delegates?address=", () => {
             .set("Accept", "application/json")
             .expect("Content-Type", /json/)
             .expect(200)
-            .end((err, {body}) => {
-                debug('get delegates using invalid address response', body)
+            .end((err, { body }) => {
+                debug('get delegates using invalid address', body)
+                node.expect(err).be.not.ok;
                 node.expect(body).to.have.property("success").to.be.true;
                 node.expect(body).to.have.property("delegates").that.is.an("array");
                 node.expect(body.delegates).to.have.length.of.at.least(1);
@@ -797,8 +829,9 @@ describe("GET /accounts/delegates?address=", () => {
             .set("Accept", "application/json")
             .expect("Content-Type", /json/)
             .expect(200)
-            .end((err, {body}) => {
-                // console.log(JSON.stringify(res.body));
+            .end((err, { body }) => {
+                debug(JSON.stringify(body));
+                node.expect(err).be.not.ok;
                 node.expect(body).to.have.property("success").to.be.false;
                 node.expect(body).to.have.property("error");
                 done();
@@ -813,8 +846,9 @@ describe("GET /delegates/count", () => {
             .set("Accept", "application/json")
             .expect("Content-Type", /json/)
             .expect(200)
-            .end((err, {body}) => {
-                // console.log(JSON.stringify(res.body));
+            .end((err, { body }) => {
+                debug(JSON.stringify(body));
+                node.expect(err).be.not.ok;
                 node.expect(body).to.have.property("success").to.be.true;
                 node.expect(body).to.have.property("count").to.least(101);  //此处数量根据运行次数会有测试案例新增的受托人进来，但至少101个
                 done();
@@ -825,10 +859,10 @@ describe("GET /delegates/count", () => {
 describe("GET /delegates/voters", () => {
 
     beforeAll(done => {
-        // console.log(JSON.stringify({
-        //    secret: Raccount.password,
-        //    delegates: ["+" + node.Eaccount.publicKey]
-        // }));
+        debug(JSON.stringify({
+            secret: Raccount.password,
+            delegates: ["+" + node.Eaccount.publicKey]
+        }));
         node.onNewBlock(err => {
             node.expect(err).to.be.not.ok;
             node.api.put("/accounts/delegates")
@@ -839,8 +873,9 @@ describe("GET /delegates/voters", () => {
                 })
                 .expect("Content-Type", /json/)
                 .expect(200)
-                .end((err, {body}) => {
-                    // console.log(JSON.stringify(res.body));
+                .end((err, { body }) => {
+                    debug(JSON.stringify(body));
+                    node.expect(err).be.not.ok;
                     node.expect(body).to.have.property("success").to.be.true;
                     done();
                 });
@@ -852,8 +887,9 @@ describe("GET /delegates/voters", () => {
             .set("Accept", "application/json")
             .expect("Content-Type", /json/)
             .expect(200)
-            .end((err, {body}) => {
-                // console.log(JSON.stringify(res.body));
+            .end((err, { body }) => {
+                debug(JSON.stringify(body));
+                node.expect(err).be.not.ok;
                 node.expect(body).to.have.property("success");
                 if (body.success == false) {
                     node.expect(body).to.have.property("error");
@@ -871,8 +907,9 @@ describe("GET /delegates/voters", () => {
             .set("Accept", "application/json")
             .expect("Content-Type", /json/)
             .expect(200)
-            .end((err, {body}) => {
-                // console.log(JSON.stringify(res.body));
+            .end((err, { body }) => {
+                debug(JSON.stringify(body));
+                node.expect(err).be.not.ok;
                 node.expect(body).to.have.property("success").to.be.false;
                 node.expect(body).to.have.property("error");
                 done();
@@ -881,12 +918,13 @@ describe("GET /delegates/voters", () => {
 
     it("Using valid publicKey. Should be ok", done => {
         node.onNewBlock(err => {
+            node.expect(err).be.not.ok;
             node.api.get(`/delegates/voters?publicKey=${node.Eaccount.publicKey}`)
                 .set("Accept", "application/json")
                 .expect("Content-Type", /json/)
                 .expect(200)
-                .end((err, {body}) => {
-                    // console.log(JSON.stringify(res.body));
+                .end((err, { body }) => {
+                    debug(JSON.stringify(body));
                     node.expect(err).be.not.ok;
                     node.expect(body).to.have.property("success").to.be.true;
                     node.expect(body).to.have.property("accounts").that.is.an("array");

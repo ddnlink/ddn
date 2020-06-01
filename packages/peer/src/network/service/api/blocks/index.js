@@ -54,7 +54,7 @@ class BlockService {
             }
         }, query);
         if (validateErrors) {
-            throw new Error(validateErrors[0].message);
+            throw new Error(`Invalid parameters: ${validateErrors[0].schemaPath} ${validateErrors[0].message}`);
         }
 
         const where = {};
@@ -150,7 +150,7 @@ class BlockService {
             }
         }, query);
         if (validateErrors) {
-            throw new Error(validateErrors[0].message);
+            throw new Error(`Invalid parameters: ${validateErrors[0].schemaPath} ${validateErrors[0].message}`);
         }
 
         const block = await this.runtime.block.querySimpleBlockData(query);
@@ -181,7 +181,7 @@ class BlockService {
             }
         }, query);
         if (validateErrors) {
-            throw new Error(validateErrors[0].message);
+            throw new Error(`Invalid parameters: ${validateErrors[0].schemaPath} ${validateErrors[0].message}`);
         }
 
         const blocksData = await this.runtime.dataquery.queryFullBlockData(query, 1, 0, null);

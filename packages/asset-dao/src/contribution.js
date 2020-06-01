@@ -176,7 +176,7 @@ class Contribution extends Asset.Base {
         }
 
         const where = {
-            trs_type: this.getTransactionType()
+            trs_type: await this.getTransactionType()
         };
         where.received_address = org.address;
         if (req.query.url) {

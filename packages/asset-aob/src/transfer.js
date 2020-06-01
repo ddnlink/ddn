@@ -40,17 +40,20 @@ class Transfer extends Asset.Base {
         if (error) {
             throw new Error(error);
         }
+
         const assetInst = await this.getAssetInstanceByName("AobAsset");
         const data = await assetInst.queryAsset({
             name: assetData.currency
         }, null, null, 1, 1);
         if (data.length <= 0) {
-            throw new Error('Asset not exists');
+            throw new Error(`Asset ${assetData.currency} not exists`);
         }
+
         const assetDetail = data[0];
         if (assetDetail.writeoff == "1") {
             throw new Error('Asset already writeoff');
         }
+        
         if (assetDetail.allow_whitelist == "0" &&
             assetDetail.allow_blacklist == "0") {
             return trs;
@@ -253,6 +256,7 @@ class Transfer extends Asset.Base {
         const balance = this.balanceCache.getAssetBalance(
             sender.address, transfer.currency,
         ) || 0;
+
         const surplus = DdnUtils.bignum.minus(balance, transfer.amount);
         if (DdnUtils.bignum.isLessThan(surplus, 0)) {
             throw new Error('Insufficient asset balance');
@@ -390,6 +394,7 @@ class Transfer extends Asset.Base {
                     if (account.multisignatures.indexOf(keypair.publicKey.toString('hex')) < 0) {
                         return cb('Account does not belong to multisignature group');
                     }
+
                     let requester;
                     try {
                         requester = await this.runtime.account.getAccountByPublicKey(keypair.publicKey);
@@ -403,24 +408,23 @@ class Transfer extends Asset.Base {
                         return cb('Invalid second passphrase');
                     }
 
+                    // 请求者不是多重签名账号才对
                     if (requester.publicKey === account.publicKey) {
                         return cb('Invalid requester');
                     }
 
                     let second_keypair = null;
                     if (requester.second_signature) {
-                        // const secondHash = crypto.createHash('sha256').update(body.secondSecret, 'utf8').digest();
-                        // second_keypair = ed.MakeKeypair(secondHash);
                         second_keypair = DdnCrypto.getKeys(body.secondSecret);
                     }
 
                     try {
                         const data = {
                             type: await this.getTransactionType(),
-                            sender: account,
+                            sender: account, // 多重签名账号
                             keypair,
-                            requester: keypair,
-                            second_keypair,
+                            requester: keypair, // 真正的请求者
+                            second_keypair, // requester的
                             recipientId: body.recipientId,
                             message: body.message
                         };
@@ -428,7 +432,6 @@ class Transfer extends Asset.Base {
                         data[assetJsonName] = transfer;
 
                         const transaction = await this.runtime.transaction.create(data);
-
                         const transactions = await this.runtime.transaction.receiveTransactions([transaction]);
                         cb(null, transactions);
                     } catch (e) {
@@ -451,8 +454,6 @@ class Transfer extends Asset.Base {
 
                     let second_keypair = null;
                     if (account.second_signature) {
-                        // const secondHash = crypto.createHash('sha256').update(body.secondSecret, 'utf8').digest();
-                        // second_keypair = ed.MakeKeypair(secondHash);
                         second_keypair = DdnCrypto.getKeys(body.secondSecret);
                     }
 

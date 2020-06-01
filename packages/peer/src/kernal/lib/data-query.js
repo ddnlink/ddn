@@ -215,7 +215,7 @@ class DataQuery {
                 }, [['min', 'm_min'],
                     ['lifetime', 'm_lifetime'],
                     ['keysgroup', 'm_keysgroup'],
-                    ['transactionId', 't_id']
+                    ['transaction_id', 't_id']
                 ], null, (err, rows) => {
                     if (err) {
                         reject(err);
