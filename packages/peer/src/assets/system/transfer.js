@@ -17,8 +17,6 @@ class Transfer {
         amount
     }, trs) {
         trs.recipientId = recipientId; //wxm block database
-        // DdnUtil.bignum update
-        // trs.amount = data.amount;
         trs.amount = `${amount}`;
 
         return trs;

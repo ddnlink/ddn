@@ -16,7 +16,7 @@ class Signatures {
 
     async create({second_keypair}, trs) {
 		trs.recipientId = null;
-		trs.amount = "0";   //DdnUtils.bignum update
+		trs.amount = "0";  
 		trs.asset.signature = {
 			publicKey: second_keypair.publicKey.toString('hex')
 		};
@@ -32,7 +32,6 @@ class Signatures {
             throw new Error('Invalid transaction asset');
 		}
 
-		//DdnUtils.bignum update if (trs.amount != 0) {
         if (!DdnUtils.bignum.isZero(trs.amount)) {
             throw new Error('Invalid transaction amount')
 		}

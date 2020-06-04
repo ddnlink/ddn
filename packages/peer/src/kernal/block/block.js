@@ -301,8 +301,7 @@ class Block {
         let payloadBytes = '';
 
         for (const transaction of transactions) {
-            const bytes = await this.runtime.transaction.getBytes(transaction);
-            // const bytes = await DdnCrypto.getBytes(transaction);
+            const bytes = await DdnCrypto.getBytes(transaction);
             if (size + bytes.length > this.constants.maxPayloadLength) {
                 break;
             }
@@ -316,7 +315,7 @@ class Block {
             payloadBytes += bytes;
         }
 
-        const payloadHash = DdnCrypto.createHash(payloadBytes); //payloadHash.update(bytes); // 类似 push？
+        const payloadHash = DdnCrypto.createHash(Buffer.from(payloadBytes)); //payloadHash.update(bytes); // 类似 push？
 
         let block = {
             version: 0,
@@ -741,6 +740,7 @@ class Block {
             throw new Error(`Got exception while verify block signature: ${e.toString()}`);
         }
 
+        // FIXME: 每次重启服务都会出现该错误 2020.6.2
         if (block.previous_block != this._lastBlock.id) {
             await this.runtime.delegate.fork(block, 1);
             this.logger.error('Incorrect previous block hash', block.previous_block, this._lastBlock.id)
@@ -777,8 +777,7 @@ class Block {
             const transaction = block.transactions[i];
             let bytes;
             try {
-                bytes = await this.runtime.transaction.getBytes(transaction);
-                // bytes = await DdnCrypto.getBytes(transaction);
+                bytes = await DdnCrypto.getBytes(transaction);
             } catch (e) {
                 throw new Error(`Failed to get transaction bytes: ${e.toString()}`);
             }
@@ -793,7 +792,7 @@ class Block {
 
             totalFee = bignum.plus(totalFee, transaction.fee);
         }
-        const payloadHash = DdnCrypto.createHash(payloadBytes);
+        const payloadHash = DdnCrypto.createHash(Buffer.from(payloadBytes));
 
         if (payloadHash.toString('hex') !== block.payload_hash) {
             throw new Error(`Invalid payload hash: ${block.id}`)

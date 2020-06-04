@@ -23,7 +23,7 @@ class Multisignature {
         lifetime
     }, trs) {
         trs.recipientId = null; //wxm block database
-        trs.amount = "0"; 
+        trs.amount = "0";
         trs.asset.multisignature = {
             min,
             keysgroup,

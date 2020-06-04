@@ -4,25 +4,25 @@ import DdnUtils from '@ddn/utils';
 import slots from "../time/slots";
 import options from '../options';
 
-function newSignature(secondSecret) {
+function signSignature(secondSecret) {
 	const keys = crypto.getKeys(secondSecret);
 
 	const signature = {
-		publicKey: keys.publicKey // ??
+		publicKey: keys.publicKey
 	};
 
 	return signature;
 }
 
-async function createSignature(secret, secondSecret, oldSecondSecret) {
+async function createSignature(secret, secondSecret) {
     const keys = crypto.getKeys(secret);
 
-    const signature = newSignature(secondSecret);
+    const signature = signSignature(secondSecret);
 
 	const transaction = {
 		type: DdnUtils.assetTypes.SIGNATURE,
 		nethash: options.get('nethash'),
-		amount: "0",    //Bignum update
+		amount: "0",    
 		fee: constants.net.fees.secondSignature,
 		recipientId: null,
 		senderPublicKey: keys.publicKey,
@@ -33,13 +33,6 @@ async function createSignature(secret, secondSecret, oldSecondSecret) {
     };
 
     transaction.signature = await crypto.sign(transaction, keys);
-
-    // FIXME: 这里的逻辑是要修改二次密码？不该使用old* 
-	if (oldSecondSecret) {
-        const secondKeys = crypto.getKeys(oldSecondSecret); 
-		transaction.sign_signature = await crypto.secondSign(transaction, secondKeys); 
-    }
-    
     transaction.id = await crypto.getId(transaction);
 
 	return transaction;

@@ -13,13 +13,13 @@ export default connection => connection.define('mem_asset_balance', {
         type: Sequelize.STRING(22),
     },
 }, {
-        timestamps: false,
-        indexes: [
-            {
-                unique: true,
-                name: "address_currency_index",
-                fields: ['address', 'currency'],
-            },
-        ],
-    }
+    timestamps: false,
+    indexes: [
+        {
+            unique: true,
+            name: "address_currency_index",
+            fields: ['address', 'currency'],
+        },
+    ],
+}
 );

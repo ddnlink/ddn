@@ -151,9 +151,11 @@ class Account {
         const account = await this.getAccount({
             address
         });
+
         if (account && !account.publicKey) {
             account.publicKey = publicKey;
         }
+
         return account;
     }
 
@@ -166,23 +168,6 @@ class Account {
     }
 
     async getAccountList(filter, fields) {
-        // if (typeof (fields) == 'undefined' || fields == null) {
-        //     fields = this.fields.map(function (field) {
-        //       return field.alias || field.field;
-        //     });
-        // }
-
-        // const realFields = this.fields.filter(function (field) {
-        //     return fields.indexOf(field.alias || field.field) != -1;
-        // });
-
-        // const realConv = {};
-        // Object.keys(this.conv).forEach(function (key) {
-        //     if (fields.indexOf(key) != -1) {
-        //       realConv[key] = this.conv[key];
-        //     }
-        // }.bind(this));
-
         let limit, offset, sort;
 
         if (filter.limit > 0) {
@@ -202,10 +187,6 @@ class Account {
             this.logger.debug('account address', filter.address);
             throw new Error('Invalid address getAccount');
         }
-
-        // const newFields = realFields.map(({
-        //     field
-        // }) => field)
 
         // shuai 2019-11-20
         return new Promise(async (resolve, reject) => {
