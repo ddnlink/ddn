@@ -15,9 +15,11 @@ while (Raccount.username === Raccount.username.toUpperCase()) {
 const R2account = node.randomAccount();
 R2account.username = Raccount.username.toUpperCase();
 
+jest.setTimeout(50000);
+
 beforeAll(async () => {
     const { body } = await node.openAccountAsync({ secret: Raccount.password });
-    debug('open account response', body)
+    debug('open accountRaccount', body)
     node.expect(body).to.have.property("success").to.be.true;
     node.expect(body).to.have.property("account").that.is.an("object");
     node.expect(body.account.balance).be.equal(0);
@@ -40,14 +42,13 @@ describe("PUT /delegates without funds", () => {
                 node.expect(err).be.not.ok;
                 node.expect(body).to.have.property("success").to.be.false;
                 node.expect(body).to.have.property("error");
-                // node.expect(body.error).to.match(/Insufficient balance:/);
                 node.expect(body.error).to.contain("Account not found");
                 done();
             });
     });
 });
 
-// 投票，没有 funds 不成功
+// 投票，没钱不好使
 describe("PUT /accounts/delegates without funds", () => {
 
     it("When upvoting. Should fail", done => {
@@ -152,11 +153,8 @@ describe("PUT /accounts/delegates with funds", () => {
                     debug(JSON.stringify(body));
                     node.expect(err).be.not.ok;
                     node.expect(body).to.have.property("success").to.be.true;
-                    if (body.success == true && body.account != null) {
-                        node.expect(`${body.account.balance}`).be.equal(randomCoin);
-                    } else {
-                        node.expect("TEST").to.equal("FAILED");
-                    }
+                    node.expect(`${body.account.balance}`).be.equal(randomCoin);
+
                     done();
                 });
         });
@@ -183,7 +181,7 @@ describe("PUT /accounts/delegates with funds", () => {
                     done();
                 });
         });
-    });
+    }, 50000);
 
     it("When downvoting same delegate multiple times. Should fail", done => {
         const votedDelegate = `'-${node.Eaccount.publicKey}','-${node.Eaccount.publicKey}'`;
@@ -202,13 +200,11 @@ describe("PUT /accounts/delegates with funds", () => {
                     node.expect(err).be.not.ok;
                     node.expect(body).to.have.property("success").to.be.false;
                     node.expect(body).to.have.property("error");
-                    if (body.success) {
-                        console.log(`Sent: secret:${Raccount.password}, delegates: [${votedDelegate}]`);
-                    }
+
                     done();
                 });
         });
-    });
+    }, 50000);
 
     it("When upvoting and downvoting within same request. Should fail", done => {
         const votedDelegate = `'+${node.Eaccount.publicKey}','-${node.Eaccount.publicKey}'`;
@@ -228,41 +224,34 @@ describe("PUT /accounts/delegates with funds", () => {
                     node.expect(err).be.not.ok;
                     node.expect(body).to.have.property("success").to.be.false;
                     node.expect(body).to.have.property("error");
-                    if (body.success) {
-                        debug("Sent: secret:" + Raccount.password + ", delegates: [" + votedDelegate) + "]";
-                    }
+
                     done();
                 });
         });
-    });
+    }, 50000);
 
     it("When upvoting. Should be ok", done => {
         node.api.put("/accounts/delegates")
             .set("Accept", "application/json")
             .send({
                 secret: Raccount.password,
-                delegates: [`+${node.Eaccount.publicKey}`]
+                delegates: ["+" + node.Eaccount.publicKey]
             })
             .expect("Content-Type", /json/)
             .expect(200)
             .end((err, { body }) => {
-                debug(JSON.stringify(body));
+                debug("upvoting ok", JSON.stringify(body));
                 node.expect(err).be.not.ok;
                 node.expect(body).to.have.property("success").to.be.true;
                 node.expect(body).to.have.property("transaction").that.is.an("object");
-                if (body.success == true && body.transaction != null) {
-                    node.expect(body.transaction.type).to.equal(node.AssetTypes.VOTE);
-                    node.expect(body.transaction.amount).to.equal("0");
-                    node.expect(body.transaction.senderPublicKey).to.equal(Raccount.publicKey);
-                    node.expect(body.transaction.fee).to.equal(node.Fees.voteFee);
-                } else {
-                    debug("Transaction failed or transaction object is null");
-                    debug("Sent: secret: " + Raccount.password + ", delegates: [+" + node.Eaccount.publicKey + "]");
-                    node.expect("TEST").to.equal("FAILED");
-                }
+                node.expect(body.transaction.type).to.equal(node.AssetTypes.VOTE);
+                node.expect(body.transaction.amount).to.equal("0");
+                node.expect(body.transaction.senderPublicKey).to.equal(Raccount.publicKey);
+                node.expect(body.transaction.fee).to.equal(node.Fees.voteFee);
+
                 done();
             });
-    });
+    }, 50000);
 
     it("When upvoting again from same account. Should fail", done => {
         node.onNewBlock(err => {
@@ -276,21 +265,16 @@ describe("PUT /accounts/delegates with funds", () => {
                 .expect("Content-Type", /json/)
                 .expect(200)
                 .end((err, { body }) => {
-                    debug(JSON.stringify(body));
+                    debug("upvoting again, fail", JSON.stringify(body));
                     node.expect(err).be.not.ok;
                     node.expect(body).to.have.property("success").to.be.false;
                     node.expect(body).to.have.property("error");
-                    if (body.success == false && body.error != null) {
-                        node.expect(body.error.toLowerCase()).to.contain("already voted");
-                    } else {
-                        debug("Expected error but got success");
-                        debug("Sent: secret: " + Raccount.password + ", delegates: [+" + node.Eaccount.publicKey + "]");
-                        node.expect("TEST").to.equal("FAILED");
-                    }
+                    node.expect(body.error.toLowerCase()).to.contain("already voted");
+
                     done();
                 });
         });
-    });
+    }, 50000);
 
     it("When downvoting. Should be ok", done => {
         node.onNewBlock(err => {
@@ -304,24 +288,19 @@ describe("PUT /accounts/delegates with funds", () => {
                 .expect("Content-Type", /json/)
                 .expect(200)
                 .end((err, { body }) => {
-                    debug(JSON.stringify(body));
+                    debug("downvoting ok", JSON.stringify(body));
                     node.expect(err).be.not.ok;
                     node.expect(body).to.have.property("success").to.be.true;
                     node.expect(body).to.have.property("transaction").that.is.an("object");
-                    if (body.success == true && body.transaction != null) {
-                        node.expect(body.transaction.type).to.equal(node.AssetTypes.VOTE);
-                        node.expect(body.transaction.amount).to.equal("0");
-                        node.expect(body.transaction.senderPublicKey).to.equal(Raccount.publicKey);
-                        node.expect(body.transaction.fee).to.equal(node.Fees.voteFee);
-                    } else {
-                        debug("Expected success but got error");
-                        debug("Sent: secret: " + Raccount.password + ", delegates: [-" + node.Eaccount.publicKey + "]");
-                        node.expect("TEST").to.equal("FAILED");
-                    }
+                    node.expect(body.transaction.type).to.equal(node.AssetTypes.VOTE);
+                    node.expect(body.transaction.amount).to.equal("0");
+                    node.expect(body.transaction.senderPublicKey).to.equal(Raccount.publicKey);
+                    node.expect(body.transaction.fee).to.equal(node.Fees.voteFee);
+
                     done();
                 });
         });
-    });
+    }, 50000);
 
     it("When downvoting again from same account. Should fail", done => {
         node.onNewBlock(err => {
@@ -335,21 +314,16 @@ describe("PUT /accounts/delegates with funds", () => {
                 .expect("Content-Type", /json/)
                 .expect(200)
                 .end((err, { body }) => {
-                    debug(JSON.stringify(body));
+                    debug("downvoting again, fail", JSON.stringify(body));
                     node.expect(err).be.not.ok;
                     node.expect(body).to.have.property("success").to.be.false;
                     node.expect(body).to.have.property("error");
-                    if (body.success == false && body.error != null) {
-                        node.expect(body.error.toLowerCase()).to.contain("not voted");
-                    } else {
-                        debug("Expected error but got success");
-                        debug("Sent: secret: " + Raccount.password + ", delegates: [-" + node.Eaccount.publicKey + "]");
-                        node.expect("TEST").to.equal("FAILED");
-                    }
+                    node.expect(body.error.toLowerCase()).to.contain("not voted");
+
                     done();
                 });
         });
-    });
+    }, 50000);
 
     it("When upvoting using a blank pasphrase. Should fail", done => {
         node.api.put("/accounts/delegates")
@@ -361,7 +335,7 @@ describe("PUT /accounts/delegates with funds", () => {
             .expect("Content-Type", /json/)
             .expect(200)
             .end((err, { body }) => {
-                debug(JSON.stringify(body));
+                debug("upvoting using a blank pasphrase, fail", JSON.stringify(body));
                 node.expect(err).be.not.ok;
                 node.expect(body).to.have.property("success").to.be.false;
                 node.expect(body).to.have.property("error");
@@ -379,7 +353,7 @@ describe("PUT /accounts/delegates with funds", () => {
             .expect("Content-Type", /json/)
             .expect(200)
             .end((err, { body }) => {
-                debug(JSON.stringify(body));
+                debug("downvoting using a blank pasphrase", JSON.stringify(body));
                 node.expect(err).be.not.ok;
                 node.expect(body).to.have.property("success").to.be.false;
                 node.expect(body).to.have.property("error");
@@ -398,7 +372,7 @@ describe("PUT /accounts/delegates with funds", () => {
                 .expect("Content-Type", /json/)
                 .expect(200)
                 .end((err, { body }) => {
-                    debug(JSON.stringify(body));
+                    debug("upvoting without any delegates, fail", JSON.stringify(body));
                     node.expect(err).be.not.ok;
                     node.expect(body).to.have.property("success").to.be.false;
                     node.expect(body).to.have.property("error");
@@ -418,7 +392,7 @@ describe("PUT /accounts/delegates with funds", () => {
                 .expect("Content-Type", /json/)
                 .expect(200)
                 .end((err, { body }) => {
-                    debug(JSON.stringify(body));
+                    debug("downvoting without any delegates", JSON.stringify(body));
                     node.expect(err).be.not.ok;
                     node.expect(body).to.have.property("success").to.be.false;
                     node.expect(body).to.have.property("error");
@@ -429,28 +403,26 @@ describe("PUT /accounts/delegates with funds", () => {
 
     it("Without any delegates. Should fail", function (done) {
 
-        setTimeout(() => {
-            node.api.put("/accounts/delegates")
-                .set("Accept", "application/json")
-                .send({
-                    secret: Raccount.password,
-                    delegates: ""
-                })
-                .expect("Content-Type", /json/)
-                .expect(200)
-                .end((err, { body }) => {
-                    debug(JSON.stringify(body));
-                    node.expect(err).be.not.ok;
-                    node.expect(body).to.have.property("success").to.be.false;
-                    node.expect(body).to.have.property("error");
-                    done();
-                });
-        }, 3000);
+        node.api.put("/accounts/delegates")
+            .set("Accept", "application/json")
+            .send({
+                secret: Raccount.password,
+                delegates: ""
+            })
+            .expect("Content-Type", /json/)
+            .expect(200)
+            .end((err, { body }) => {
+                debug("Without any delegates, fail", JSON.stringify(body));
+                node.expect(err).be.not.ok;
+                node.expect(body).to.have.property("success").to.be.false;
+                node.expect(body).to.have.property("error");
+                done();
+            });
     });
 });
 
 // 注册，有费用
-describe("PUT /delegates with funds", () => {
+describe("PUT /delegates to regist with funds", () => {
     const randomCoin = node.randomCoin();
 
     beforeAll(done => {
@@ -482,19 +454,14 @@ describe("PUT /delegates with funds", () => {
                         .expect('Content-Type', /json/)
                         .expect(200)
                         .end((err, { body }) => {
-                            debug(JSON.stringify(body));
+                            debug("transfer ok", JSON.stringify(body));
                             node.expect(err).be.not.ok;
                             node.expect(body).to.have.property("success").to.be.true;
                             node.expect(body).to.have.property("transactionId");
-                            if (body.success == true && body.transactionId != null) {
-                                node.expect(body.transactionId).to.be.a('string');
-                                //DdnUtils.bignum update R2account.amount += node.randomCoin;
-                                R2account.amount = DdnUtils.bignum.plus(R2account.amount, randomCoin).toString();
-                            } else {
-                                debug("Transaction failed or transactionId is null");
-                                debug("Sent: secret: " + node.Gaccount.password + ", amount: " + randomCoin + ", recipientId: " + R2account.address);
-                                node.expect("TEST").to.equal("FAILED");
-                            }
+                            node.expect(body.transactionId).to.be.a('string');
+                            //DdnUtils.bignum update R2account.amount += node.randomCoin;
+                            R2account.amount = DdnUtils.bignum.plus(R2account.amount, randomCoin).toString();
+
                             done();
                         });
                 });
@@ -514,13 +481,8 @@ describe("PUT /delegates with funds", () => {
                         debug(JSON.stringify(body));
                         node.expect(err).be.not.ok;
                         node.expect(body).to.have.property("success").to.be.true;
-                        if (body.success == true && body.account != null) {
-                            node.expect(body.account.balance).be.equal(`${randomCoin}`);
-                        } else {
-                            debug("Failed to open account or account object is null");
-                            debug("Sent: secret: " + R2account.password);
-                            node.expect("TEST").to.equal("FAILED");
-                        }
+                        node.expect(body.account.balance).be.equal(`${randomCoin}`);
+
                         done();
                     });
             });
@@ -547,86 +509,77 @@ describe("PUT /delegates with funds", () => {
 
     it("Using invalid pasphrase. Should fail", function (done) {
 
-        setTimeout(() => {
-            node.api.put("/delegates")
-                .set("Accept", "application/json")
-                .send({
-                    secret: [],
-                    username: Raccount.username
-                })
-                .expect("Content-Type", /json/)
-                .expect(200)
-                .end((err, { body }) => {
-                    debug(JSON.stringify(body));
-                    node.expect(err).be.not.ok;
-                    node.expect(body).to.have.property("success").to.be.false;
-                    node.expect(body).to.have.property("error");
-                    done();
-                });
-        }, 3000);
+        node.api.put("/delegates")
+            .set("Accept", "application/json")
+            .send({
+                secret: [],
+                username: Raccount.username
+            })
+            .expect("Content-Type", /json/)
+            .expect(200)
+            .end((err, { body }) => {
+                debug(JSON.stringify(body));
+                node.expect(err).be.not.ok;
+                node.expect(body).to.have.property("success").to.be.false;
+                node.expect(body).to.have.property("error");
+                done();
+            });
     });
 
     it("Using invalid username. Should fail", function (done) {
 
-        setTimeout(() => {
-            node.api.put("/delegates")
-                .set("Accept", "application/json")
-                .send({
-                    secret: Raccount.password,
-                    username: "~!@#$%^&*()_+.,?/"
-                })
-                .expect("Content-Type", /json/)
-                .expect(200)
-                .end((err, { body }) => {
-                    debug(JSON.stringify(body));
-                    node.expect(err).be.not.ok;
-                    node.expect(body).to.have.property("success").to.be.false;
-                    node.expect(body).to.have.property("error");
-                    done();
-                });
-        }, 1000);
+        node.api.put("/delegates")
+            .set("Accept", "application/json")
+            .send({
+                secret: Raccount.password,
+                username: "~!@#$%^&*()_+.,?/"
+            })
+            .expect("Content-Type", /json/)
+            .expect(200)
+            .end((err, { body }) => {
+                debug(JSON.stringify(body));
+                node.expect(err).be.not.ok;
+                node.expect(body).to.have.property("success").to.be.false;
+                node.expect(body).to.have.property("error");
+                done();
+            });
     });
 
     it("Using username longer than 20 characters. Should fail", function (done) {
 
-        setTimeout(() => {
-            node.api.put("/delegates")
-                .set("Accept", "application/json")
-                .send({
-                    secret: Raccount.password,
-                    username: "ABCDEFGHIJKLMNOPQRSTU"
-                })
-                .expect("Content-Type", /json/)
-                .expect(200)
-                .end((err, { body }) => {
-                    debug(JSON.stringify(body));
-                    node.expect(err).be.not.ok;
-                    node.expect(body).to.have.property("success").to.be.false;
-                    node.expect(body).to.have.property("error");
-                    done();
-                });
-        }, 1000);
+        node.api.put("/delegates")
+            .set("Accept", "application/json")
+            .send({
+                secret: Raccount.password,
+                username: "ABCDEFGHIJKLMNOPQRSTU"
+            })
+            .expect("Content-Type", /json/)
+            .expect(200)
+            .end((err, { body }) => {
+                debug(JSON.stringify(body));
+                node.expect(err).be.not.ok;
+                node.expect(body).to.have.property("success").to.be.false;
+                node.expect(body).to.have.property("error");
+                done();
+            });
     });
 
     it("Using blank username. Should fail", function (done) {
-
-        setTimeout(() => {
-            node.api.put("/delegates")
-                .set("Accept", "application/json")
-                .send({
-                    secret: Raccount.password,
-                    username: ""
-                })
-                .expect("Content-Type", /json/)
-                .expect(200)
-                .end((err, { body }) => {
-                    debug(JSON.stringify(body));
-                    node.expect(err).be.not.ok;
-                    node.expect(body).to.have.property("success").to.be.false;
-                    node.expect(body).to.have.property("error");
-                    done();
-                });
-        }, 1000);
+        node.api.put("/delegates")
+            .set("Accept", "application/json")
+            .send({
+                secret: Raccount.password,
+                username: ""
+            })
+            .expect("Content-Type", /json/)
+            .expect(200)
+            .end((err, { body }) => {
+                debug("blank username, fail", JSON.stringify(body));
+                node.expect(err).be.not.ok;
+                node.expect(body).to.have.property("success").to.be.false;
+                node.expect(body).to.have.property("error");
+                done();
+            });
     });
 
     it(`Using uppercase username: ${R2account.username}. Should be ok and delegate should be registered in lower case`, done => {
@@ -641,21 +594,16 @@ describe("PUT /delegates with funds", () => {
                 .expect("Content-Type", /json/)
                 .expect(200)
                 .end((err, { body }) => {
-                    debug(JSON.stringify(body));
+                    debug("uppercase username, ok", JSON.stringify(body));
                     node.expect(err).be.not.ok;
                     node.expect(body).to.have.property("success").to.be.true;
                     node.expect(body).to.have.property("transaction").that.is.an("object");
-                    if (body.success == true && body.transaction != null) {
-                        node.expect(body.transaction.fee).to.equal(node.Fees.delegateRegistrationFee);
-                        node.expect(body.transaction.asset.delegate.username).to.equal(R2account.username.toLowerCase());
-                        node.expect(body.transaction.asset.delegate.publicKey).to.equal(R2account.publicKey);
-                        node.expect(body.transaction.type).to.equal(node.AssetTypes.DELEGATE);
-                        node.expect(body.transaction.amount).to.equal("0");
-                    } else {
-                        console.log("Transaction failed or transaction object is null");
-                        console.log(`Sent: secret: ${Raccount.password}, username: ${Raccount.username}`);
-                        node.expect("TEST").to.equal("FAILED");
-                    }
+                    node.expect(body.transaction.fee).to.equal(node.Fees.delegateRegistrationFee);
+                    node.expect(body.transaction.asset.delegate.username).to.equal(R2account.username.toLowerCase());
+                    node.expect(body.transaction.asset.delegate.publicKey).to.equal(R2account.publicKey);
+                    node.expect(body.transaction.type).to.equal(node.AssetTypes.DELEGATE);
+                    node.expect(body.transaction.amount).to.equal("0");
+
                     done();
                 });
         });
@@ -673,7 +621,7 @@ describe("PUT /delegates with funds", () => {
                 .expect('Content-Type', /json/)
                 .expect(200)
                 .end((err, { body }) => {
-                    debug(JSON.stringify(body));
+                    debug("same account, fail", JSON.stringify(body));
                     node.expect(err).be.not.ok;
                     node.expect(body).to.have.property("success").to.be.false;
                     node.expect(body).to.have.property("error");
@@ -698,7 +646,7 @@ describe("PUT /delegates with funds", () => {
                 .expect("Content-Type", /json/)
                 .expect(200)
                 .end((err, { body }) => {
-                    debug(JSON.stringify(body));
+                    debug("different case, fail", JSON.stringify(body));
                     node.expect(err).be.not.ok;
                     node.expect(body).to.have.property("success").to.be.false;
                     node.expect(body).to.have.property("error");
@@ -720,7 +668,7 @@ describe("GET /delegates", () => {
             .expect("Content-Type", /json/)
             .expect(200)
             .end((err, { body }) => {
-                debug(JSON.stringify(body));
+                debug("get /delegates? no parameters, ok", JSON.stringify(body));
                 node.expect(err).be.not.ok;
                 node.expect(body).to.have.property("success").to.be.true;
                 node.expect(body).to.have.property("delegates").that.is.an("array");
@@ -758,7 +706,7 @@ describe("GET /delegates", () => {
             .expect("Content-Type", /json/)
             .expect(200)
             .end((err, { body }) => {
-                debug(JSON.stringify(body));
+                debug("/delegates? valid parameters ok", JSON.stringify(body));
                 node.expect(err).be.not.ok;
                 node.expect(body).to.have.property("success").to.be.true;
                 node.expect(body).to.have.property("delegates").that.is.an("array");
@@ -792,7 +740,7 @@ describe("GET /delegates", () => {
             .expect("Content-Type", /json/)
             .expect(200)
             .end((err, { body }) => {
-                debug(JSON.stringify(body));
+                debug("/delegates? valid parameters fail", JSON.stringify(body));
                 node.expect(err).be.not.ok;
                 node.expect(body).to.have.property("success").to.be.false;
                 node.expect(body).to.have.property("error");
@@ -809,7 +757,7 @@ describe("GET /accounts/delegates?address=", () => {
             .expect("Content-Type", /json/)
             .expect(200)
             .end((err, { body }) => {
-                debug('get delegates using invalid address', body)
+                debug('get delegates valid address ok')
                 node.expect(err).be.not.ok;
                 node.expect(body).to.have.property("success").to.be.true;
                 node.expect(body).to.have.property("delegates").that.is.an("array");
@@ -830,7 +778,7 @@ describe("GET /accounts/delegates?address=", () => {
             .expect("Content-Type", /json/)
             .expect(200)
             .end((err, { body }) => {
-                debug(JSON.stringify(body));
+                debug("invalid address fail", JSON.stringify(body));
                 node.expect(err).be.not.ok;
                 node.expect(body).to.have.property("success").to.be.false;
                 node.expect(body).to.have.property("error");
@@ -847,7 +795,7 @@ describe("GET /delegates/count", () => {
             .expect("Content-Type", /json/)
             .expect(200)
             .end((err, { body }) => {
-                debug(JSON.stringify(body));
+                debug("GET /delegates/count", JSON.stringify(body));
                 node.expect(err).be.not.ok;
                 node.expect(body).to.have.property("success").to.be.true;
                 node.expect(body).to.have.property("count").to.least(101);  //此处数量根据运行次数会有测试案例新增的受托人进来，但至少101个
@@ -874,7 +822,8 @@ describe("GET /delegates/voters", () => {
                 .expect("Content-Type", /json/)
                 .expect(200)
                 .end((err, { body }) => {
-                    debug(JSON.stringify(body));
+                    // debug(JSON.stringify(body));
+                    debug("/accounts/delegates");
                     node.expect(err).be.not.ok;
                     node.expect(body).to.have.property("success").to.be.true;
                     done();
@@ -888,15 +837,10 @@ describe("GET /delegates/voters", () => {
             .expect("Content-Type", /json/)
             .expect(200)
             .end((err, { body }) => {
-                debug(JSON.stringify(body));
+                debug("get votes no publicKey fail", JSON.stringify(body));
                 node.expect(err).be.not.ok;
                 node.expect(body).to.have.property("success");
-                if (body.success == false) {
-                    node.expect(body).to.have.property("error");
-                } else {
-                    node.expect(body).to.have.property("accounts").that.is.an("array");
-                    node.expect(body.accounts.length).to.equal(0);
-                }
+                node.expect(body).to.have.property("error");
 
                 done();
             });
@@ -908,7 +852,7 @@ describe("GET /delegates/voters", () => {
             .expect("Content-Type", /json/)
             .expect(200)
             .end((err, { body }) => {
-                debug(JSON.stringify(body));
+                debug("get votes invalid publicKey fail", JSON.stringify(body));
                 node.expect(err).be.not.ok;
                 node.expect(body).to.have.property("success").to.be.false;
                 node.expect(body).to.have.property("error");
@@ -924,16 +868,14 @@ describe("GET /delegates/voters", () => {
                 .expect("Content-Type", /json/)
                 .expect(200)
                 .end((err, { body }) => {
-                    debug(JSON.stringify(body));
+                    debug("get votes valid publicKey ok", JSON.stringify(body));
                     node.expect(err).be.not.ok;
                     node.expect(body).to.have.property("success").to.be.true;
                     node.expect(body).to.have.property("accounts").that.is.an("array");
                     let flag = 0;
-                    if (body.success == true && body.accounts != null) {
-                        for (let i = 0; i < body.accounts.length; i++) {
-                            if (body.accounts[i].address == Raccount.address) {
-                                flag = 1;
-                            }
+                    for (let i = 0; i < body.accounts.length; i++) {
+                        if (body.accounts[i].address == Raccount.address) {
+                            flag = 1;
                         }
                     }
                     node.expect(flag).to.equal(1);

@@ -41,7 +41,7 @@ export default {
     // Fees for transacton
     fees: {
       send: "10000000", 
-      vote: "100000000",
+      vote: "10000000",
       secondSignature: "500000000",
       delegate: "2500000000",
       multiSignature: "500000000",
@@ -79,8 +79,8 @@ export default {
 
     // Fees for transacton
     fees: {
-      send: "10000000", //Bignum update
-      vote: "100000000",
+      send: "10000000", 
+      vote: "10000000",
       secondSignature: "500000000",
       delegate: "2500000000",
       multisignature: "500000000",

@@ -416,7 +416,7 @@ async function getBlockPayloadHash(options) {
   for (let i = 0; i < block.transactions.length; ++i) {
     payloadBytes += await ddnJS.crypto.getBytes(block.transactions[i]);
   }
-  const payloadHash = DdnCrypto.createHash(payloadBytes);
+  const payloadHash = DdnCrypto.createHash(Buffer.from(payloadBytes));
 
   console.log(payloadHash.toString('hex'))
 }

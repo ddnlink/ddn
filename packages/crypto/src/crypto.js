@@ -72,11 +72,7 @@ function getKeys(secret) {
  */
 async function sign(transaction, {privateKey}) {    
     const hash = await getHash(transaction, true, true);
-    
-    const signature = nacl.sign.detached(
-        hash,
-        Buffer.from(privateKey, "hex")
-    );
+    const signature = nacl.sign.detached(hash, Buffer.from(privateKey, "hex"));
 
     return bufToHex(signature);
 }
@@ -143,9 +139,22 @@ function generateAddress(publicKey, tokenPrefix) {
 }
 
 // 验证，计划重构： peer/src/kernal/transaction.js  2020.5.3
+/**
+ * 该方法验证使用私钥签名的字节信息是否正确，参数公钥与私钥对应，即：私钥签名的信息，公钥可以验证通过
+ * @param {hash} bytes 字节流 hash 值   
+ * @param {string} signature 签名
+ * @param {string} publicKey 公钥
+ */
 function verifyBytes(bytes, signature, publicKey) {
     const hash = createHash(bytes);
+    
+    const signatureBuffer = Buffer.from(signature, "hex");
+    const publicKeyBuffer = Buffer.from(publicKey, "hex");
+    const res = nacl.sign.detached.verify(hash, signatureBuffer, publicKeyBuffer);
+    return res
+}
 
+function verifyHash(hash, signature, publicKey) {
     const signatureBuffer = Buffer.from(signature, "hex");
     const publicKeyBuffer = Buffer.from(publicKey, "hex");
     const res = nacl.sign.detached.verify(hash, signatureBuffer, publicKeyBuffer);
@@ -154,22 +163,23 @@ function verifyBytes(bytes, signature, publicKey) {
 
 // 验证签名 
 // todo: 本方法并没有被实际使用，请参考 peer/kernal/transaction/transaction.js的 verifySignature 重构
-async function verify(transaction) {
-    let remove = 64;
+async function verify(transaction, signature, senderPublicKey) {
+    // let remove = 64;
 
-    // 如果有二次签名就先减掉
-    if (transaction.sign_signature) {
-        remove = 128;
+    // // 如果有二次签名就先减掉
+    if (transaction.signature) {
+        return false;
     }
 
-    const bytes = await getBytes(transaction);
-    const data2 = Buffer.allocUnsafe(bytes.length - remove);
+    // const bytes = await getBytes(transaction);
+    // const data2 = Buffer.allocUnsafe(bytes.length - remove);
 
-    for (let i = 0; i < data2.length; i++) {
-        data2[i] = bytes[i];
-    }
+    // for (let i = 0; i < data2.length; i++) {
+    //     data2[i] = bytes[i];
+    // }
 
-    return verifyBytes(data2, transaction.signature, transaction.senderPublicKey)
+    const bytes = await getBytes(transaction, true, true);
+    return verifyBytes(bytes, signature, senderPublicKey)
 }
 
 /**
@@ -186,21 +196,26 @@ async function verifySecondSignature(transaction, publicKey) {
     return verifyBytes(bytes, transaction.sign_signature, publicKey)
 }
 
-// note: tweetnacl 包的所有方法必须使用 Uint8Array 类型的参数。
+/**
+ * 获得交易数据的哈希值
+ * 等于 getBytes + createHash
+ * 
+ * note: tweetnacl 包的所有方法必须使用 Uint8Array 类型的参数。
+ * @param {object} trs 交易数据
+ * @param {boolean} skipSignature 跳过签名
+ * @param {boolean} skipSecondSignature 跳过二次签名
+ */
 async function getHash(trs, skipSignature, skipSecondSignature) {
     const bytes = await getBytes(trs, skipSignature, skipSecondSignature);
-    return Buffer.from(nacl.hash(bytes));
+    return createHash(bytes);
 }
 
 /**
- * 使用中注意 data 格式，默认是字符串，如果是涉密字段（经过 buffer、签名、加密的字段）都是可以直接使用的
+ * 使用中注意 data 格式，默认是unit8Arrary，如果是涉密字段（经过 buffer、签名、加密的字段）都是可以直接使用的，不然就要对其简单处理 Buffer.from(data)
  * 返回值为 Buffer
  * @param {String}  data 需要 hash 的数据，格式为 unit8Arrary, 这里的方法与 crypto.createHash('sha256').update(strBuffer).digest() 相似，结果不同
  */
 function createHash(data) {
-    if (!(data instanceof Buffer)) {
-        data = Buffer.from(data);
-    }
     return Buffer.from(nacl.hash(data));
 }
 
@@ -233,5 +248,6 @@ export default {
     // 验证： 前端验证，底层也会验证
     verify, 
     verifySecondSignature,
-    verifyBytes
+    verifyBytes,
+    verifyHash
 };

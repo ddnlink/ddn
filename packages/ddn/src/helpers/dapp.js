@@ -99,7 +99,7 @@ export default {
 		}
 		block.count = block.transactions.length;
 
-		block.payloadHash = DdnCrypto.createHash(payloadBytes);
+		block.payloadHash = DdnCrypto.createHash(Buffer.from(payloadBytes));
 
 		block.signature = sign(block, keypair); // fixme 应该是 block 的
 		block.id = getId(block);

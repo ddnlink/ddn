@@ -94,7 +94,7 @@ describe("delegate.js", () => {
 				expect(trs).to.have.property("sign_signature").to.be.a("string")
 				// .and.match(() => {
 				// 	try {
-				// 		Buffer.from(trs.signSignature, "hex");
+				// 		Buffer.from(trs.sign_signature, "hex");
 				// 	} catch (e) {
 				// 		return false;
 				// 	}

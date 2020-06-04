@@ -66,6 +66,7 @@ class Assets {
      */
     async call(type, method) {
         const asset = this._loader.getAsset(type);
+        
         if (asset && typeof(asset[method]) == "function") {
             const args = [];
             for (let i = 2; i < arguments.length; i++) {

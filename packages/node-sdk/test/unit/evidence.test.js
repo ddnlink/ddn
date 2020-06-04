@@ -88,7 +88,7 @@ describe("DDN evidence.js", () => {
             });
 
             it("should does not have second signature", (done) => {
-                expect(trs).not.have.property("signSignature");
+                expect(trs).not.have.property("sign_signature");
                 done();
             });
 

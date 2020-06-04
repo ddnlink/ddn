@@ -135,12 +135,12 @@ class Program {
         let payloadLength = 0;
 
         for (const trs of block.transactions) {
-            const bytes = await this._context.runtime.transaction.getBytes(trs);
-            // const bytes = await DdnCrypto.getBytes(trs);
+            const bytes = await DdnCrypto.getBytes(trs);
             payloadLength += bytes.length;
             payloadBytes += bytes;
         }
-        const payloadHash = DdnCrypto.createHash(payloadBytes);
+
+        const payloadHash = DdnCrypto.createHash(Buffer.from(payloadBytes));
         const id = this._context.runtime.block.getId(block);
 
         assert.equal(payloadLength, block.payload_length, 'Unexpected payloadLength');

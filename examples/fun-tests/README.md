@@ -107,23 +107,9 @@ node app.js --help
     "publicKey": "daeee33def7eef0c7ba06ec66eda7204437ba88ace8f04e4a6aa4d7bfbd18bc1",
     "privateKey": "cd4737a82bc9525fb763452bc0dd34585454cd5ed301dbcde2b7ba3478a8d32cdaeee33def7eef0c7ba06ec66eda7204437ba88ace8f04e4a6aa4d7bfbd18bc1"
   },
-  "address": "[*]C5kJzMdNDhrnupWX2NGafzMoiwdHiySBe", // before version 3.3.0：[*]CE3q83WTqk58Y3hU9GDStn7MmqWU9xHbK
+  "address": "[*]C5kJzMdNDhrnupWX2NGafzMoiwdHiySBe",
   "secret": "enter boring shaft rent essence foil trick vibrant fabric quote indoor output",
   "nethash": "0ab796cd"
-}
-
-// Daccount:
-{
-  "address": "DA2atc9kiaGXJa34s6VGh3b81WZe3tqpD",
-  "publicKey": "905ad2f41a99cd994e6efa32351d08109bc7a55e09d2c6946661c9011d053b82",
-  "password": "always mix crane height attract crack school barrel valve control depend year"
-}
-
-// Eaccount:
-{
-  "address": "D9EWvxNF89StC8UAS3WHrgXX8fCGyAaoU",
-  "publicKey": "afa5f212a588e861132543d9d31e67b06fb6b6e25ce796cc42dde4e6affc4209",
-  "password": "worth false mirror digital clerk repair search neck joke patient village crumble"
 }
 ```
 

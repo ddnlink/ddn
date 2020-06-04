@@ -247,12 +247,13 @@ export default {
 		let payloadBytes = '';
 		
 		for (const tx of transactions) {
-			let bytes = transactionsLib.getTransactionBytes(tx);
+			let bytes = await DdnCrypto.getBytes(tx);
+			// let bytes = transactionsLib.getTransactionBytes(tx);
 			payloadBytes += bytes;
 			payloadLength += bytes.length;
 		}
 
-		payloadHash = DdnCrypto.createHash(payloadBytes); // payloadHash.digest();
+		payloadHash = DdnCrypto.createHash(Buffer.from(payloadBytes)); // payloadHash.digest();
 
 		const block = {
 			version: assetTypes.TRANSFER,

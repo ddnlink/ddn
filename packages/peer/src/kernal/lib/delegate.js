@@ -227,7 +227,7 @@ class Delegate {
         const truncDelegateList = await this.getDelegatePublickKeysSortByVote();
         const seedSource = await this.runtime.round.calc(height).toString();
         //wxm 对查询返回的受托人列表进行乱序处理
-        let currentSeed = DdnCrypto.createHash(seedSource);
+        let currentSeed = DdnCrypto.createHash(Buffer.from(seedSource));
         for (let i = 0, delCount = truncDelegateList.length; i < delCount; i++) {
           for (let x = 0; x < 4 && i < delCount; i++, x++) {
             const newIndex = currentSeed[x] % delCount;
@@ -235,7 +235,7 @@ class Delegate {
             truncDelegateList[newIndex] = truncDelegateList[i];
             truncDelegateList[i] = b;
           }
-          currentSeed = DdnCrypto.createHash(currentSeed);
+          currentSeed = DdnCrypto.createHash(Buffer.from(currentSeed));
         }
 
         return truncDelegateList;

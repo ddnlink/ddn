@@ -193,7 +193,7 @@ describe("node-sdk dapp.js", () => {
 				const data1 = 'a1b2c3d4';
 				const secret = 'secret1';
 				const keys = ddn.crypto.getKeys(secret);
-				let signature = ddn.crypto.signBytes(data1, keys);
+				let signature = ddn.crypto.signBytes(Buffer.from(data1), keys);
 				let result = ddn.crypto.verifyBytes(data1, signature, keys.publicKey);
 				expect(result).to.be.ok
 

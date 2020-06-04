@@ -119,8 +119,7 @@ class OutTransfer extends Asset.Base {
         }
 
         let validSignatureNumber = 0;
-        const bytes = await this.runtime.transaction.getBytes(trs, true, true);
-        // const bytes = await DdnCrypto.getBytes(trs, true, true);
+        const bytes = await DdnCrypto.getBytes(trs, true, true);
         try {
             for (let i in trs.signatures) {
                 for (let j in dapp.delegates) {

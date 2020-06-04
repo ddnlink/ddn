@@ -75,7 +75,7 @@ class Transaction {
             args: data.args
         };
 
-        trs = await this._assets.call(trs.type, "create", data, trs);
+        trs = await this._assets.call(trs.type, "create", data, trs); // 对应各个 asset 交易类型的 async create(data, trs) 方法
 
         // trs.signature = await DdnCrypto.sign(trs, data.keypair);
         trs.signature = await this.sign(trs, data.keypair);
@@ -444,17 +444,15 @@ class Transaction {
         // Verify that requester in multisignature
         if (trs.requester_public_key) { //wxm block database
             if (!sender.multisignatures.includes(trs.requester_public_key)) { //wxm block database
-                throw new Error("Failed to verify requester`s signature in multisignatures, 1");
+                throw new Error("Failed to verify requester`s signature in multisignatures");
             }
 
             if (!await this.verifySignature(trs, trs.signature, trs.requester_public_key)) { //wxm block database
-                throw new Error("Failed to verify requester`s signature, 2");
+                throw new Error("Failed to verify requester`s signature");
             }
         } else {
             if (!await this.verifySignature(trs, trs.signature, trs.senderPublicKey)) { //wxm block database
-                // console.log(trs);
-                
-                throw new Error("Failed to verify senderPublicKey signature, 3");
+                throw new Error("Failed to verify senderPublicKey signature here.");
             }
         }
 
@@ -520,7 +518,6 @@ class Transaction {
                 }
             });
         }
-        // library.bus.message('unconfirmedTransaction', transaction, broadcast);
     }
 
     async receiveTransactions(transactions) {
@@ -537,7 +534,7 @@ class Transaction {
     }
 
     //////// TODO: delete it /////////////////////////////////
-    async sign(trs, {privateKey}) {
+    async sign(trs, { privateKey }) {
         const hash = await this.getHash(trs, true, true);
         const signature = nacl.sign.detached(
             hash,
@@ -547,7 +544,7 @@ class Transaction {
         // return await DdnCrypto.sign(trs, keypair);
     }
 
-    async multisign(trs, {privateKey}) {
+    async multisign(trs, { privateKey }) {
         const hash = await this.getHash(trs, true, true);
         const signature = nacl.sign.detached(
             hash,
@@ -556,96 +553,9 @@ class Transaction {
         return Buffer.from(signature).toString("hex");
     }
 
-    /**
-     * 获取交易序列化之后的字节流内容
-     * @param {*} trs
-     */
-    async getBytes(trs, skipSignature, skipSecondSignature) {
-        if (!this._assets.hasType(trs.type)) {
-            throw Error(`Unknown transaction type 11 ${trs.type}`);
-        }
-
-        const assetBytes = await this._assets.call(trs.type, "getBytes", trs, skipSignature, skipSecondSignature);
-        const assetSize = assetBytes ? assetBytes.length : 0;
-
-        const size = 1 + // type (int)
-            4 + // timestamp (int)
-            8 + // nethash 8
-            32 + // senderPublicKey (int)
-            32 + // requesterPublicKey (long)
-            8 + // recipientId (long)
-            8 + // amount (long)
-            64 + // message
-            64; // args or unused
-
-        const bb = new ByteBuffer(size + assetSize, true);
-
-        bb.writeByte(trs.type);
-        bb.writeInt(trs.timestamp);
-        bb.writeString(trs.nethash);
-
-        const senderPublicKeyBuffer = Buffer.from(trs.senderPublicKey, 'hex');
-        for (let i = 0; i < senderPublicKeyBuffer.length; i++) {
-            bb.writeByte(senderPublicKeyBuffer[i]);
-        }
-
-        if (trs.requester_public_key) {
-            const requesterPublicKey = Buffer.from(trs.requester_public_key, 'hex');
-            for (let i = 0; i < requesterPublicKey.length; i++) {
-                bb.writeByte(requesterPublicKey[i]);
-            }
-        }
-
-        if (trs.recipientId) {
-            bb.writeString(trs.recipientId);
-        } else {
-            for (let i = 0; i < 8; i++) {
-                bb.writeByte(0);
-            }
-        }
-
-        bb.writeString(trs.amount);
-
-        if (trs.message) {
-            bb.writeString(trs.message);
-        }
-
-        if (trs.args) {
-            for (let i = 0; i < trs.args.length; ++i) {
-                bb.writeString(trs.args[i])
-            }
-        }
-
-        if (assetSize > 0) {
-            for (let i = 0; i < assetSize; i++) {
-                bb.writeByte(assetBytes[i]);
-            }
-        }
-
-        if (!skipSignature && trs.signature) {
-            const signatureBuffer = Buffer.from(trs.signature, 'hex');
-            for (let i = 0; i < signatureBuffer.length; i++) {
-                bb.writeByte(signatureBuffer[i]);
-            }
-        }
-
-        if (!skipSecondSignature && trs.sign_signature) { //wxm block database
-            const signSignatureBuffer = Buffer.from(trs.sign_signature, 'hex');
-            for (let i = 0; i < signSignatureBuffer.length; i++) {
-                bb.writeByte(signSignatureBuffer[i]);
-            }
-        }
-
-        bb.flip();
-
-        return bb.toBuffer();
-    }
-
     async getHash(trs, skipSignature, skipSecondSignature) {
-        const bytes = await this.getBytes(trs, skipSignature, skipSecondSignature);
+        const bytes = await DdnCrypto.getBytes(trs, skipSignature, skipSecondSignature);
         return Buffer.from(nacl.hash(bytes));
-    
-        // return await DdnCrypto.getHash(trs);
     }
 
     // TODO: 注意使用 @ddn/crypto 的对应方法重构 2020.5.3
@@ -654,9 +564,9 @@ class Transaction {
     }
 
     /**
-     * 验证签名方法，可以用于多重签名交易
+     * 验证签名方法
      * @param {object} trs 交易
-     * @param {string} signature 签名，如果是多重签名账户，可能是其他用户的签名
+     * @param {string} signature 签名
      * @param {string} publicKey 公钥
      */
     async verifySignature(trs, signature, publicKey) {
@@ -667,9 +577,13 @@ class Transaction {
             return false;
         }
 
-        const bytes = await this.getBytes(trs, true, true);
+        // fixme：2020.6.2 这里的验证方法需要统一,
+        // 原方法，1.delegates.test.js 无法验证通过
+        // const hash = await DdnCrypto.getBytes(trs, true, true);
+        // const result = DdnCrypto.verifyBytes(hash, signature, publicKey);
 
-        const result = DdnCrypto.verifyBytes(bytes, signature, publicKey);
+        const hash = await DdnCrypto.getHash(trs, true, true);
+        const result = DdnCrypto.verifyHash(hash, signature, publicKey);
 
         return result;
     }
@@ -823,8 +737,8 @@ class Transaction {
             return false;
         }
 
-        // let bytes = await DdnCrypto.getBytes(trs, false, true);
-        const bytes = await this.getBytes(trs, false, true);
+        let bytes = await DdnCrypto.getBytes(trs, false, true);
+        // const bytes = await this.getBytes(trs, false, true);
         return await this.verifyBytes(bytes, trs.sign_signature, publicKey);
     }
 }

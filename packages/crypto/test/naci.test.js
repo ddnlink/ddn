@@ -65,7 +65,7 @@ describe('NaCI', () => {
         debug(hash1);
         expect(hash1 instanceof Buffer).be.true;
         expect(hash1 instanceof Uint8Array).be.true;
-        expect(hash1.toString()).be.equal(hash2.toString());
+        expect(hash2).be.not.ok;
         done();
     })
 })
