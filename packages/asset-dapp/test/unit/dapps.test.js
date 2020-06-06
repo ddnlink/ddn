@@ -255,7 +255,7 @@ beforeAll(done => {
                 debug('signatures', body);
                 node.expect(err).be.not.ok;
 
-                // node.expect(body).to.have.property("success").to.be.true;
+                node.expect(body).to.have.property("success").to.be.true;
                 node.expect(body).to.have.property("transaction").that.is.an("object");
                 done();
             });
@@ -295,7 +295,9 @@ describe("PUT /dapps", () => {
     //         });
     // });
 
-    it("Category is number, Using invalid Category, Should fail", done => {
+    it("Category is number, Using invalid Category, Should fail", async done => {
+        await node.onNewBlockAsync();
+
         node.api.put("/dapps")
             .set("Accept", "application/json")
             .set("version", node.version)

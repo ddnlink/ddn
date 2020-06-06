@@ -146,6 +146,11 @@ function generateAddress(publicKey, tokenPrefix) {
  * @param {string} publicKey 公钥
  */
 function verifyBytes(bytes, signature, publicKey) {
+    // 保证字节类型
+    if (!(bytes instanceof Buffer)) {
+        bytes = Buffer.from(bytes);
+    }
+
     const hash = createHash(bytes);
     
     const signatureBuffer = Buffer.from(signature, "hex");
@@ -163,23 +168,17 @@ function verifyHash(hash, signature, publicKey) {
 
 // 验证签名 
 // todo: 本方法并没有被实际使用，请参考 peer/kernal/transaction/transaction.js的 verifySignature 重构
-async function verify(transaction, signature, senderPublicKey) {
-    // let remove = 64;
-
-    // // 如果有二次签名就先减掉
-    if (transaction.signature) {
+async function verify(transaction, senderPublicKey) {
+    if (!transaction.signature) {
         return false;
     }
 
-    // const bytes = await getBytes(transaction);
-    // const data2 = Buffer.allocUnsafe(bytes.length - remove);
-
-    // for (let i = 0; i < data2.length; i++) {
-    //     data2[i] = bytes[i];
-    // }
+    if (!senderPublicKey) {
+        senderPublicKey = transaction.senderPublicKey;
+    }
 
     const bytes = await getBytes(transaction, true, true);
-    return verifyBytes(bytes, signature, senderPublicKey)
+    return verifyBytes(bytes, transaction.signature, senderPublicKey)
 }
 
 /**
@@ -192,7 +191,6 @@ async function verifySecondSignature(transaction, publicKey) {
         return false;
     }
     const bytes = await getBytes(transaction, false, true);
-
     return verifyBytes(bytes, transaction.sign_signature, publicKey)
 }
 

@@ -178,7 +178,7 @@ describe("transaction.js", () => {
 
 			it("should have sign_signature as hex string", () => {
 				expect(trs.sign_signature).to.be.a("string")
-				// .and.match(() => {
+				// .to.match(() => {
 				// 	try {
 				// 		Buffer.from(trs.sign_signature, "hex");
 				// 	} catch (e) {

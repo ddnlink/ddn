@@ -182,10 +182,10 @@ class Dapp extends Asset.Base {
             }
         }
 
+        let delegatesArr = []
         if (!dapp.delegates) {
             throw new Error("Have no dapp delegates");
         } else {
-            let delegatesArr = []
             delegatesArr = typeof dapp.delegates === 'string' ? dapp.delegates.split(',') : dapp.delegates;
             if (delegatesArr.length < 5 ||
                 delegatesArr.length > this.config.settings.delegateNumber) {

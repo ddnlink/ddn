@@ -43,7 +43,7 @@ export default {
       send: "10000000", 
       vote: "100000000",
       secondSignature: "500000000",
-      delegate: "2500000000",
+      delegate: "10000000000",
       multiSignature: "500000000",
       dappRegistration: "2500000000",
       dappWithdrawal: "10000000",

@@ -191,7 +191,6 @@ describe("Registering a delegate", () => {
                             node.expect(err).to.be.not.ok;
                             account2.username = node.randomDelegateName().toLowerCase();
                             const transaction = await node.ddn.delegate.createDelegate(account2.username, account2.password);
-                            // console.log(transaction);
 
                             node.peer.post("/transactions")
                                 .set("Accept", "application/json")

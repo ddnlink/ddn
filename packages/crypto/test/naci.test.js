@@ -58,14 +58,12 @@ describe('NaCI', () => {
     })
 
     it("#createHash should be ok, and return a Buffer, Uint8Array too.", (done) => {
-        const buf = Buffer.from('test');
+        const buf = Buffer.from('test'); // 转化一下
         const hash1 = DdnCrypto.createHash(buf);
-        const hash2 = DdnCrypto.createHash('test');
 
         debug(hash1);
         expect(hash1 instanceof Buffer).be.true;
         expect(hash1 instanceof Uint8Array).be.true;
-        expect(hash2).be.not.ok;
         done();
     })
 })

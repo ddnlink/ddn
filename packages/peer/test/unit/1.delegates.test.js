@@ -577,7 +577,7 @@ describe("PUT /delegates to regist with funds", () => {
                 debug("blank username, fail", JSON.stringify(body));
                 node.expect(err).be.not.ok;
                 node.expect(body).to.have.property("success").to.be.false;
-                node.expect(body).to.have.property("error");
+                node.expect(body).to.have.property("error").to.match(/^Username is undefined/);
                 done();
             });
     });
@@ -839,8 +839,9 @@ describe("GET /delegates/voters", () => {
             .end((err, { body }) => {
                 debug("get votes no publicKey fail", JSON.stringify(body));
                 node.expect(err).be.not.ok;
-                node.expect(body).to.have.property("success");
-                node.expect(body).to.have.property("error");
+                node.expect(body).to.have.property("success").be.true;
+                node.expect(body).to.have.property("accounts");
+                node.expect(body.accounts.length).to.be.equal(0);
 
                 done();
             });
