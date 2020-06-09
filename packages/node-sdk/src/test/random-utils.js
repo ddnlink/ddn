@@ -17,8 +17,6 @@ function randomName(...args) {
     let name = array[0];
     const random = array[1];
 
-    //   let size = randomNumber(1, max);
-
     for (let i = 0; i < size; i++) {
         name += random.charAt(Math.floor(Math.random() * random.length));
     }
@@ -73,8 +71,11 @@ function randomNumber(min, max) {
 }
 
 // Used to create random usernames
-function randomUsername() {
-    return randomName('', 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@$&_.');
+function randomUsername(max) {
+    if (!max) {
+        max = 16;
+    }
+    return randomName('', 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@$&_.', max);
 }
 
 function randomIssuerName(prefix, max) {

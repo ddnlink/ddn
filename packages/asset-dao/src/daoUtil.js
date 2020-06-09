@@ -19,8 +19,8 @@ function isOrgId(daoId) {
 }
 
 async function updateOrg(context, org, dbTrans) {
-    if (org.org_id) {
-        org.org_id = org.org_id.toLowerCase();
+    if (org.orgId) {
+        org.orgId = org.orgId.toLowerCase();
     }
 
     return new Promise((resolve, reject) => {
@@ -36,35 +36,41 @@ async function updateOrg(context, org, dbTrans) {
 
 async function getEffectiveOrg(context, where) {
     return new Promise((resolve, reject) => {
-        context.dao.findOne("mem_org", where,
-            ["transaction_id", "org_id", "name", "address", "tags", "url", "state", "timestamp"],
-            null, (err, result) => {
+        context.dao.findList("mem_org", where,
+            ["transaction_id", "orgId", "name", "address", "tags", "url", "state", "timestamp"],
+            ['timestamp'], 
+            (err, result) => {
                 if (err) {
                     return reject(err);
                 }
 
-                resolve(result);
-            });
+                resolve(result[0])
+            })
     });
 }
 
 async function getEffectiveOrgByAddress(context, address) {
-    return await getEffectiveOrg(context, { address: address });
+    return await getEffectiveOrg(context, {
+        address: address
+    });
 }
 
 async function getEffectiveOrgByOrgId(context, orgId) {
-    return await getEffectiveOrg(context, { org_id: orgId.toLowerCase() });
+    return await getEffectiveOrg(context, {
+        orgId: orgId.toLowerCase()
+    });
 }
 
 async function exchangeOrg(context, orgId, address, dbTrans) {
-    var org = {
+    const org = {
         address: address,
         state: 1
     };
 
     return new Promise((resolve, reject) => {
-        context.dao.update("mem_org", org,
-            { org_id: orgId.toLowerCase() },
+        context.dao.update("mem_org", org, {
+                orgId: orgId.toLowerCase()
+            },
             dbTrans, (err, result) => {
                 if (err) {
                     return reject(err);

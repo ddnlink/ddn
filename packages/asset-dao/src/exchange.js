@@ -30,7 +30,7 @@ class Exchange extends Asset.Base {
     async propsMapping() {
         return [{
             field: 'str1',
-            prop: 'org_id',
+            prop: 'orgId',
             required: true,
         }, {
             field: 'str2',
@@ -63,7 +63,7 @@ class Exchange extends Asset.Base {
 
         const assetJsonName = await this.getAssetJsonName(trs.type);
         trans.asset[assetJsonName] = {
-            org_id: data[assetJsonName].org_id.toLowerCase(),
+            orgId: data[assetJsonName].orgId.toLowerCase(),
             price: data[assetJsonName].price || '0',
             state: data[assetJsonName].state,
             exchange_trs_id: data[assetJsonName].exchange_trs_id,
@@ -82,8 +82,8 @@ class Exchange extends Asset.Base {
     async verify(trs, sender) {
         const asset = await this.getAssetObject(trs);
         // check org id
-        if (!daoUtil.isOrgId(asset.org_id.toLowerCase())) {
-            throw new Error('exchange org id not allow: ' + asset.org_id.toLowerCase());
+        if (!daoUtil.isOrgId(asset.orgId.toLowerCase())) {
+            throw new Error('exchange org id not allow: ' + asset.orgId.toLowerCase());
         }
         if (!this.address.isAddress(sender.address)) {
             throw new Error('Invalid address');
@@ -113,25 +113,25 @@ class Exchange extends Asset.Base {
                 throw new Error('not need confirm exchange trs_id');
             } else {
                 // TODO: 判断媒体号是否由 sender 注册
-                var effectiveOrgInfo = await daoUtil.getEffectiveOrgByOrgId(this._context, asset.org_id);
+                var effectiveOrgInfo = await daoUtil.getEffectiveOrgByOrgId(this._context, asset.orgId);
                 if (!effectiveOrgInfo) {
-                    throw new Error(`Org "${asset.org_id}" not exists`);
+                    throw new Error(`Org "${asset.orgId}" not exists`);
                 }
 
                 if (effectiveOrgInfo.address !== sender.address) {
-                    throw new Error(`Org "${asset.org_id}" not belong to you`);
+                    throw new Error(`Org "${asset.orgId}" not belong to you`);
                 }
 
-                // this.modules.dao.__private.getEffectiveOrgByOrgId(asset.org_id, (err, org) => {
+                // this.modules.dao.__private.getEffectiveOrgByOrgId(asset.orgId, (err, org) => {
                 //     // console.log(err, org)
                 //     if (err) {
                 //         return setImmediate(cb, err);
                 //     }
                 //     if (!org) {
-                //         return setImmediate(cb, `Org "${asset.org_id}" not exists`);
+                //         return setImmediate(cb, `Org "${asset.orgId}" not exists`);
                 //     }
                 //     if (org.address !== sender.address) {
-                //         return setImmediate(cb, `Org "${asset.org_id}" not belong to you`);
+                //         return setImmediate(cb, `Org "${asset.orgId}" not belong to you`);
                 //     }
                 //     return setImmediate(cb); // ok
                 // });
@@ -153,7 +153,7 @@ class Exchange extends Asset.Base {
                 throw new Error('confirm exchange already exists: ' + asset.exchange_trs_id)
             }
 
-            const latestExchangeRequestList = await this.queryAsset({ trs_type: await this.getTransactionType(), org_id: asset.org_id.toLowerCase() }, 
+            const latestExchangeRequestList = await this.queryAsset({ trs_type: await this.getTransactionType(), orgId: asset.orgId.toLowerCase() }, 
                 [['trs_timestamp', 'DESC']], false, 1, 1, null);
             const latestExchangeRequestObj = latestExchangeRequestList[0];
 
@@ -163,7 +163,7 @@ class Exchange extends Asset.Base {
             }
 
             // console.log(latestExchangeRequestObj)
-            if (latestExchangeRequestObj.org_id.toLowerCase() !== asset.org_id.toLowerCase()) {
+            if (latestExchangeRequestObj.orgId.toLowerCase() !== asset.orgId.toLowerCase()) {
                 throw new Error('confirm exchange orgId atypism: ' + asset.exchange_trs_id)
             }
             // DdnUtils.bignum update if (result.price !== trs.amount)
@@ -194,7 +194,7 @@ class Exchange extends Asset.Base {
     async getBytes(trs) {
         const asset = await this.getAssetObject(trs);   // trs.asset.exchange;
         const bb = new ByteBuffer();
-        bb.writeString(asset.org_id.toLowerCase());
+        bb.writeString(asset.orgId.toLowerCase());
         bb.writeString(asset.exchange_trs_id);
         bb.writeString(asset.price);
         bb.writeInt8(asset.state);
@@ -206,9 +206,9 @@ class Exchange extends Asset.Base {
 
     async applyUnconfirmed(trs, sender, dbTrans) {
         const assetObj = await this.getAssetObject(trs);
-        const key = `${sender.address}:${trs.type}:${assetObj.org_id}:${assetObj.state}`;
+        const key = `${sender.address}:${trs.type}:${assetObj.orgId}:${assetObj.state}`;
         if (assetObj.state == 0 && this.oneoff.has(key)) {
-            throw new Error(`The exchange ${assetObj.org_id} is in process already.`);
+            throw new Error(`The exchange ${assetObj.orgId} is in process already.`);
         }
 
         await super.applyUnconfirmed(trs, sender, dbTrans);
@@ -221,7 +221,7 @@ class Exchange extends Asset.Base {
     async undoUnconfirmed(trs, sender, dbTrans) {
         const assetObj = await this.getAssetObject(trs);
         if (assetObj.state == 1) {
-            const key = `${sender.address}:${trs.type}:${assetObj.org_id}:${assetObj.state}`;
+            const key = `${sender.address}:${trs.type}:${assetObj.orgId}:${assetObj.state}`;
             this.oneoff.delete(key);
         }
 
@@ -234,7 +234,7 @@ class Exchange extends Asset.Base {
         const asset = await this.getAssetObject(trs);
         if (asset.state == 1) {
             result = await daoUtil.exchangeOrg(this._context, 
-                asset.org_id, asset.sender_address, dbTrans);
+                asset.orgId, asset.sender_address, dbTrans);
         }
         return result;
     }
@@ -303,7 +303,7 @@ class Exchange extends Asset.Base {
         }
         
         const exchange = {
-            org_id: body.orgId,
+            orgId: body.orgId,
             price: body.price,
             received_address: body.receivedAddress,
             exchange_trs_id: body.exchangeTrsId || "",

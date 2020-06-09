@@ -205,7 +205,7 @@
             "transaction_id": "b628a55c514dc2f4d2cedadb72bd0492df7715041d0d65cb49c5d4afe7d7f3e7",
             "transaction_type": 40,
             "timestamp": 6774528,
-            "org_id": "dao1bbwq2ezzm",
+            "orgId": "dao1bbwq2ezzm",
             "name": "8a@SRL80",
             "address": "DCsewRJvY46egBYvtGcyj4Qryn6tCvAzy",
             "tags": "world,cup,test",

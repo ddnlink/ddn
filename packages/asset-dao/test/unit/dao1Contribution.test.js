@@ -52,7 +52,7 @@ describe('Contributions Test', () => {
                 node.expect(body).to.have.property("success").to.be.true;
 
                 if (body.success) {
-                    orgId = body.data.org.org_id;
+                    orgId = body.data.org.orgId;
                 }
 
                 done();

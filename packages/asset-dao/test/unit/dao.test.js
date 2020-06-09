@@ -1,23 +1,20 @@
 import Debug from 'debug';
+import DdnUtils from '@ddn/utils';
 import node from '@ddn/node-sdk/lib/test';
 
-const debug = Debug('dao');
+const debug = Debug('debug');
 
 const Gaccount = node.Gaccount;
 // const createOrg = node.ddn.dao.createOrg;
-// fix 接口没有了，需要写到ddn-dao包中，无法确定正确写法
 describe('Test Dao', () => {
 
+    // 通用接口
     describe('post /peer/transactions', () => {
 
-        // 加载插件
-        node.ddn.init();
-
         // Common api
-        it("Using valid parameters to create a orgId is ok.", async () => {
+        it("Using valid parameters to create a orgId is ok.", async (done) => {
             const orgs = {
-                "org_id": node.randomOrgId().toLowerCase(),
-                // "orgId": node.randomOrgId(),
+                "orgId": node.randomOrgId().toLowerCase(),
                 "name": node.randomUsername(),
                 "state": 0,
                 "url": "dat://f76e1e82cf4eab4bf173627ff93662973c6fab110c70fb0f86370873a9619aa6+18/public/test.html",
@@ -26,37 +23,33 @@ describe('Test Dao', () => {
             }
 
             // const transaction = createOrg(orgs, Gaccount.password);
-            const transaction = await node.ddn.assetPlugin.createPluginAsset(40, orgs, Gaccount.password)
-            await new Promise((resolve, reject) => {
-                node.peer.post("/transactions")
-                    .set("Accept", "application/json")
-                    .set("version", node.version)
-                    .set("nethash", node.config.nethash)
-                    .set("port", node.config.port)
-                    .send({
-                        transaction
-                    })
-                    .expect("Content-Type", /json/)
-                    .expect(200)
-                    .end((err, {body}) => {
-                        debug(JSON.stringify(body));
+            const transaction = await node.ddn.assetPlugin.createPluginAsset(DdnUtils.assetTypes.DAO_ORG, orgs, Gaccount.password)
+            debug("valid parameters ok, trs:", transaction);
 
-                        if (err) {
-                            return reject(err);
-                        }
-
-                        node.expect(body).to.have.property("success").to.be.true;
-
-                        resolve();
-                    });
-            })
+            node.peer.post("/transactions")
+                .set("Accept", "application/json")
+                .set("version", node.version)
+                .set("nethash", node.config.nethash)
+                .set("port", node.config.port)
+                .send({
+                    transaction
+                })
+                .expect("Content-Type", /json/)
+                .expect(200)
+                .end((err, {
+                    body
+                }) => {
+                    debug("valid parameters ok", JSON.stringify(body));
+                    node.expect(err).to.be.not.ok;
+                    node.expect(body).to.have.property("success").to.be.true;
+                    done();
+                });
         });
 
         // Common api
-        it("Fee is less to create a orgId is fail.", async () => {
+        it("Fee is less to create a orgId is fail.", async (done) => {
             const orgs = {
-                "org_id": node.randomOrgId().toLowerCase(),
-                // "orgId": node.randomOrgId(),
+                "orgId": node.randomOrgId().toLowerCase(),
                 "name": node.randomUsername(),
                 "state": 0,
                 "url": "dat://f76e1e82cf4eab4bf173627ff93662973c6fab110c70fb0f86370873a9619aa6+18/public/test.html",
@@ -64,39 +57,38 @@ describe('Test Dao', () => {
                 "address": node.Eaccount.address
             }
             const transaction = await node.ddn.assetPlugin.createPluginAsset(40, orgs, node.Eaccount.password)
-            await new Promise((resolve, reject) => {
-                node.peer.post("/transactions")
-                    .set("Accept", "application/json")
-                    .set("version", node.version)
-                    .set("nethash", node.config.nethash)
-                    .set("port", node.config.port)
-                    .send({
-                        transaction
-                    })
-                    .expect("Content-Type", /json/)
-                    .expect(200)
-                    .end((err, {body}) => {
-                        if (err) {
-                            return reject(err);
-                        }
+            node.peer.post("/transactions")
+                .set("Accept", "application/json")
+                .set("version", node.version)
+                .set("nethash", node.config.nethash)
+                .set("port", node.config.port)
+                .send({
+                    transaction
+                })
+                .expect("Content-Type", /json/)
+                .expect(200)
+                .end((err, {
+                    body
+                }) => {
+                    debug("Fee is less", JSON.stringify(body));
 
-                        // console.log(JSON.stringify(res.body));
-                        node.expect(body).to.have.property("success").to.be.false;
-                        node.expect(body.error).to.include("Insufficient balance");
+                    node.expect(err).to.be.not.ok;
+                    node.expect(body).to.have.property("success").to.be.false;
+                    node.expect(body.error).to.include("Insufficient balance");
 
-                        resolve();
-                    });
-            });
+                    done();
+                });
         });
 
     })
+
     // special api
     describe('PUT /api/dao/orgs to create a orgId', () => {
         let org;
 
         beforeAll(done => {
             org = {
-                "org_id": node.randomOrgId(),
+                "orgId": node.randomOrgId(),
                 // "orgId": node.randomOrgId(),
                 "name": node.randomUsername(),
                 "state": 0, // Default to create
@@ -112,7 +104,7 @@ describe('Test Dao', () => {
                 .set('Accept', 'application/json')
                 .send({
                     secret: Gaccount.password,
-                    orgId: org.org_id,
+                    orgId: org.orgId,
                     // orgId: org.orgId,
                     name: org.name,
                     url: org.url,
@@ -121,7 +113,9 @@ describe('Test Dao', () => {
                 })
                 .expect('Content-Type', /json/)
                 .expect(200)
-                .end((err, {body}) => {
+                .end((err, {
+                    body
+                }) => {
                     debug("put /api/dao/orgs", JSON.stringify(body));
                     node.expect(body).to.have.property('success').to.be.true;
                     node.expect(body).to.have.property('transactionId');
@@ -130,54 +124,53 @@ describe('Test Dao', () => {
         });
 
         // Update name
-        it('Update the Org`s name in the save 10s is fails', done => {
+        it('Update the Org`s name in the save 10s is fail', done => {
             node.api.put('/dao/orgs')
                 .set('Accept', 'application/json')
                 .send({
                     secret: Gaccount.password,
-                    orgId: org.org_id,
-                    // orgId: org.orgId,
+                    orgId: org.orgId,
                     name: node.randomUsername(),
                     state: 1,
                     tags: org.tags
                 })
                 .expect('Content-Type', /json/)
                 .expect(200)
-                .end((err, {body}) => {
-                    // console.log(JSON.stringify(res.body));
+                .end((err, {
+                    body
+                }) => {
+                    debug("Update the Org`s name in the save 10s", JSON.stringify(body));
                     node.expect(body).to.have.property('success').to.be.false;
-                    node.expect(body).to.have.property('error');
+                    node.expect(body).to.have.property('error').include(`Org ${org.orgId.toLowerCase()} not exists`);
                     done();
                 });
         });
 
-        it('Get /dao/orgs/orgid/:orgId should be ok if Org`s name is not modified', done => {
+        it('Get /dao/orgs/:orgId when Org`s name is not modified should be ok', done => {
             node.onNewBlock(err => {
                 node.expect(err).to.be.not.ok;
-                node.api.get(`/dao/orgs/orgid/${org.org_id.toLowerCase()}`)
-                    // node.api.get("/dao/" + org.orgId)
+                node.api.get(`/dao/orgs/${org.orgId.toLowerCase()}`)
                     .set("Accept", "application/json")
                     .set("version", node.version)
                     .set("nethash", node.config.nethash)
                     .set("port", node.config.port)
                     .expect("Content-Type", /json/)
                     .expect(200)
-                    .end((err, {body}) => {
-                        // console.log(JSON.stringify(res.body));
+                    .end((err, {
+                        body
+                    }) => {
+                        debug("Org`s name is not modified ok", JSON.stringify(body));
 
                         node.expect(body).to.have.property('success').to.be.true;
                         node.expect(body).to.have.property("data").that.is.an("object");
                         node.expect(body.data).to.have.property("org").that.is.an("object");
 
                         node.expect(body.data.org).to.have.property('transaction_id');
-                        node.expect(body.data.org).to.have.property('org_id');
+                        node.expect(body.data.org).to.have.property('orgId');
 
-                        node.expect(body.data.org.org_id).to.equal(org.org_id.toLowerCase());
-                        // node.expect(res.body.org.org_id).to.equal(org.orgId.toLowerCase());
+                        node.expect(body.data.org.orgId).to.equal(org.orgId.toLowerCase());
                         node.expect(body.data.org.name).to.equal(org.name);
                         node.expect(body.data.org.state).to.equal(org.state);
-                        // node.expect(res.body).to.have.property('balance');
-                        // node.expect(res.body).to.have.property('unconfirmedBalance');
 
                         done();
                     });
@@ -185,57 +178,60 @@ describe('Test Dao', () => {
         });
 
         it('Update the Org`s name in a new block is ok', done => {
+            const newName = node.randomUsername();
+            debug('newname ', newName);
+            
             node.onNewBlock(err => {
-                const name = node.randomUsername();
                 node.api.put('/dao/orgs')
                     .set('Accept', 'application/json')
                     .send({
                         secret: Gaccount.password,
-                        orgId: org.org_id,
-                        // orgId: org.orgId,
-                        name,
-                        state: 1,
+                        orgId: org.orgId,
+                        name: newName,
+                        state: 1, // 允许修改
                         tags: org.tags
                     })
                     .expect('Content-Type', /json/)
                     .expect(200)
-                    .end((err, {body}) => {
-                        // console.log(JSON.stringify(res.body));
+                    .end(async (err, {
+                        body
+                    }) => {
+                        debug("Update the Org`s name ok", JSON.stringify(body));
                         node.expect(body).to.have.property('success').to.be.true;
                         node.expect(body).to.have.property('transactionId');
+
                         done();
                     });
             })
         });
 
-        it('Get /dao/orgs/orgid/:orgId should be ok if Org`s name has been modified', done => {
+        it('Get /dao/orgs/:orgId should be ok if Org`s name has been modified', done => {
             node.onNewBlock(err => {
                 node.expect(err).to.be.not.ok;
-                node.api.get(`/dao/orgs/orgid/${org.org_id.toLowerCase()}`)
-                    // node.api.get("/dao/" + org.orgId)
+
+                node.api.get(`/dao/orgs/${org.orgId.toLowerCase()}`)
                     .set("Accept", "application/json")
                     .set("version", node.version)
                     .set("nethash", node.config.nethash)
                     .set("port", node.config.port)
                     .expect("Content-Type", /json/)
                     .expect(200)
-                    .end((err, {body}) => {
-                        // console.log(JSON.stringify(res.body));
+                    .end((err, {
+                        body
+                    }) => {
+                        debug("Org`s name is modified ok", JSON.stringify(body));
 
                         node.expect(body).to.have.property('success').to.be.true;
                         node.expect(body).to.have.property("data").that.is.an("object");
                         node.expect(body.data).to.have.property("org").that.is.an("object");
 
                         node.expect(body.data.org).to.have.property('transaction_id');
-                        node.expect(body.data.org).to.have.property('org_id');
+                        node.expect(body.data.org).to.have.property('orgId');
 
-                        node.expect(body.data.org.org_id).to.equal(org.org_id.toLowerCase());
-                        // node.expect(res.body.org.org_id).to.equal(org.orgId.toLowerCase());
+                        node.expect(body.data.org.orgId).to.equal(org.orgId.toLowerCase());
                         node.expect(body.data.org.name).to.not.equal(org.name); // name 已经更改
                         node.expect(body.data.org.state).to.equal(1);
                         node.expect(body.data.org.state).to.not.equal(org.state);
-                        // node.expect(res.body).to.have.property('balance');
-                        // node.expect(res.body).to.have.property('unconfirmedBalance');
 
                         done();
                     });
@@ -248,7 +244,7 @@ describe('Test Dao', () => {
                     .set('Accept', 'application/json')
                     .send({
                         secret: Gaccount.password,
-                        orgId: org.org_id.toLowerCase(),
+                        orgId: org.orgId.toLowerCase(),
                         // orgId: org.orgId,
                         // name: node.randomUsername(),
                         tags: `${org.tags}, add`,
@@ -256,7 +252,9 @@ describe('Test Dao', () => {
                     })
                     .expect('Content-Type', /json/)
                     .expect(200)
-                    .end((err, {body}) => {
+                    .end((err, {
+                        body
+                    }) => {
                         // console.log(JSON.stringify(res.body));
                         node.expect(body).to.have.property('success').to.be.true;
                         node.expect(body).to.have.property('transactionId');
@@ -270,7 +268,7 @@ describe('Test Dao', () => {
                 .set('Accept', 'application/json')
                 .send({
                     secret: Gaccount.password,
-                    orgId: `${org.org_id}asdefasdfs123456789M`,
+                    orgId: `${org.orgId}asdefasdfs123456789M`,
                     // orgId: org.orgId + "asdefasdfs123456789M",
                     name: org.name,
                     url: org.url,
@@ -279,7 +277,9 @@ describe('Test Dao', () => {
                 })
                 .expect('Content-Type', /json/)
                 .expect(200)
-                .end((err, {body}) => {
+                .end((err, {
+                    body
+                }) => {
                     // console.log(JSON.stringify(res.body));
                     node.expect(body).to.have.property('success').to.be.false;
                     node.expect(body.error).to.equal("Invalid parameters: #/properties/orgId/maxLength should NOT be longer than 20 characters");
@@ -301,7 +301,9 @@ describe('Test Dao', () => {
                 })
                 .expect('Content-Type', /json/)
                 .expect(200)
-                .end((err, {body}) => {
+                .end((err, {
+                    body
+                }) => {
                     // console.log(JSON.stringify(res.body));
                     node.expect(body).to.have.property('success').to.be.false;
                     node.expect(body.error).to.include("Insufficient balance");
@@ -361,7 +363,9 @@ describe('Test Dao', () => {
                 .set("port", node.config.port)
                 .expect("Content-Type", /json/)
                 .expect(200)
-                .end((err, {body}) => {
+                .end((err, {
+                    body
+                }) => {
                     debug(JSON.stringify(body));
 
                     node.expect(body).to.have.property('success').to.be.true;
@@ -375,16 +379,19 @@ describe('Test Dao', () => {
                 });
         });
 
+        // TODO：/dao/orgs/all? -> /dao/orgs/?
         it('Given filter should be ok', done => {
-            node.api.get("/dao/orgs?pagesize=10&pageindex=1")
+            node.api.get("/dao/orgs/all?pagesize=10&pageindex=1")
                 .set("Accept", "application/json")
                 .set("version", node.version)
                 .set("nethash", node.config.nethash)
                 .set("port", node.config.port)
                 .expect("Content-Type", /json/)
                 .expect(200)
-                .end((err, {body}) => {
-                    debug(JSON.stringify(body));
+                .end((err, {
+                    body
+                }) => {
+                    debug("Given filter ok", JSON.stringify(body));
 
                     node.expect(body).to.have.property('success').to.be.true;
 

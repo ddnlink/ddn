@@ -28,7 +28,7 @@ describe('Confirmations Test', () => {
 
                 node.expect(err).to.be.not.ok;
                 node.expect(body).to.have.property("success").to.be.true;
-                orgId = body.data.org.org_id;
+                orgId = body.data.org.orgId;
             });
 
         const getContributionTrsIdUrl = `/dao/contributions?received_address=${node.Gaccount.address}&pagesize=1`;

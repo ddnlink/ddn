@@ -52,11 +52,13 @@ async function getFee(transaction) {
             if (Asset.Utils.isTypeValueExists(transaction.type)) {
                 const trans = Asset.Utils.getTransactionByTypeValue(transaction.type);
                 const transCls = require(trans.package).default[trans.name];
+                // fixme 2020.6.8 整理常量
                 let transInst = new transCls({
                     constants: {
                         fixedPoint: 100000000
                     }
                 });
+
                 fee = await transInst.calculateFee(transaction);
                 transInst = null;
             }

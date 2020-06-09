@@ -125,7 +125,7 @@ describe('Put /transactions', () => {
                     node.expect(body).to.have.property("success").to.be.true;
 
                     if (body.success && body.data && body.data.rows && body.data.rows.length) {
-                        orgId = body.data.rows[0].org_id;
+                        orgId = body.data.rows[0].orgId;
                         // orgId = body.orgId;
                     } else {
                         return reject("未查找到符合要求的Org数据。");
@@ -138,13 +138,13 @@ describe('Put /transactions', () => {
 
     it("Create exchange with state = 0, Should be ok", async (done) => {
         exchange = {
-            "org_id": orgId,
+            "orgId": orgId,
             "price": exchangePrice,
             "received_address": Account1.address,
         };
 
         exchange = Object.assign({
-            "org_id": "",
+            "orgId": "",
             // "orgId": "",
             "exchange_trs_id": "",
             "state": 0,
@@ -280,7 +280,7 @@ describe('PUT /dao/exchanges', () => {
                 node.expect(body).to.have.property("success").to.be.true;
 
                 if (body.success && body.data && body.data.rows && body.data.rows.length) {
-                    orgId = body.data.rows[0].org_id;
+                    orgId = body.data.rows[0].orgId;
                     // orgId = body.orgId;
                 } else {
                     debug("未查找到符合要求的Org数据。");
