@@ -166,7 +166,6 @@ class Exchange extends Asset.Base {
             if (latestExchangeRequestObj.orgId.toLowerCase() !== asset.orgId.toLowerCase()) {
                 throw new Error('confirm exchange orgId atypism: ' + asset.exchange_trs_id)
             }
-            // DdnUtils.bignum update if (result.price !== trs.amount)
             if (!DdnUtils.bignum.isEqualTo(latestExchangeRequestObj.price, trs.amount)) {
                 throw new Error('confirm exchange amount & price atypism: ' + asset.exchange_trs_id)
             }
@@ -193,6 +192,8 @@ class Exchange extends Asset.Base {
 
     async getBytes(trs) {
         const asset = await this.getAssetObject(trs);   // trs.asset.exchange;
+        console.log("trs", trs);
+        
         const bb = new ByteBuffer();
         bb.writeString(asset.orgId.toLowerCase());
         bb.writeString(asset.exchange_trs_id);
@@ -278,9 +279,7 @@ class Exchange extends Asset.Base {
                     maxLength: 100
                 },
                 exchangeTrsId: {
-                    type: "string",
-                    minLength: 0,
-                    maxLength: 100
+                    type: "string"
                 },
                 receivedAddress: {
                     type: "string",
@@ -379,7 +378,7 @@ class Exchange extends Asset.Base {
                 } else {
                     let account;
                     try {
-                        account = await this.runtime.account.getAccountByPublicKey(keypair.publicKey.toString('hex'));
+                        account = await this.runtime.account.getAccountByPublicKey(keypair.publicKey);
                     } catch (e) {
                         return cb(e);
                     }

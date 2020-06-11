@@ -245,8 +245,6 @@ class Contribution extends Asset.Base {
             throw new Error(`Invalid parameters: ${validateErrors[0].schemaPath} ${validateErrors[0].message}`);
         }
 
-        // const hash = crypto.createHash('sha256').update(body.secret, 'utf8').digest();
-        // const keypair = ed.MakeKeypair(hash);
         const keypair = DdnCrypto.getKeys(body.secret);
 
         // const senderPublicKey = keypair.publicKey.toString('hex')
@@ -301,8 +299,6 @@ class Contribution extends Asset.Base {
 
                     let second_keypair = null;
                     if (requester.second_signature) {
-                        // const secondHash = crypto.createHash('sha256').update(body.secondSecret, 'utf8').digest();
-                        // second_keypair = ed.MakeKeypair(secondHash);
                         second_keypair = DdnCrypto.getKeys(body.secondSecret);
                     }
 
@@ -344,8 +340,6 @@ class Contribution extends Asset.Base {
 
                     let second_keypair = null;
                     if (account.secondSignature) {
-                        // const secondHash = crypto.createHash('sha256').update(body.secondSecret, 'utf8').digest();
-                        // second_keypair = ed.MakeKeypair(secondHash);
                         second_keypair = DdnCrypto.getKeys(body.secondSecret);
                     }
 

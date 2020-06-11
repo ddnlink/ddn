@@ -2,6 +2,7 @@ import Debug from 'debug';
 import DdnUtil from '@ddn/utils';
 
 import node from '@ddn/node-sdk/lib/test';
+import { toString } from 'hast-util-to-string';
 
 const debug = Debug('debug');
 
@@ -106,7 +107,7 @@ describe('Put /transactions', () => {
         Account1Balance = await sendDDN(Account1);
 
         await new Promise((resolve, reject) => {
-            const getOrgIdUrl = `/orgs/getlist?pagesize=1&address=${node.Gaccount.address}`;
+            const getOrgIdUrl = `/dao/orgs/all?pagesize=1&address=${node.Gaccount.address}`;
             node.api.get(getOrgIdUrl)
                 .set("Accept", "application/json")
                 .set("version", node.version)
@@ -140,18 +141,20 @@ describe('Put /transactions', () => {
         exchange = {
             "orgId": orgId,
             "price": exchangePrice,
+            "state": 0,
+            "exchange_trs_id": "",
             "received_address": Account1.address,
+            "sender_address": node.Gaccount.address
         };
 
-        exchange = Object.assign({
-            "orgId": "",
-            // "orgId": "",
-            "exchange_trs_id": "",
-            "state": 0,
-            "price": "98765",
-            "sender_address": node.Gaccount.address
-            // "receivedAddress": node.Daccount.address,
-        }, exchange)
+        // exchange = Object.assign({
+        //     "orgId": "",
+        //     "exchange_trs_id": "",
+        //     "state": 0,
+        //     "price": "98765",
+        //     "sender_address": node.Gaccount.address
+        //     // "receivedAddress": node.Daccount.address,
+        // }, exchange)
 
         transaction = await node.ddn.assetPlugin.createPluginAsset(41, exchange, node.Gaccount.password)
         node.peer.post("/transactions")
@@ -167,7 +170,7 @@ describe('Put /transactions', () => {
             .end((err, {
                 body
             }) => {
-                debug(JSON.stringify(body));
+                debug("exchange with state = 0, ok", JSON.stringify(body));
 
                 node.expect(err).to.be.not.ok;
 
@@ -204,7 +207,7 @@ describe('Put /transactions', () => {
             .end((err, {
                 body
             }) => {
-                debug(JSON.stringify(body));
+                debug("exchange with state = 1, ok", JSON.stringify(body));
 
                 node.expect(err).to.be.not.ok;
 
@@ -223,7 +226,8 @@ describe('Put /transactions', () => {
 
         const fee = "10000000";
         const nowBalance = DdnUtil.bignum.minus(Account1Balance, exchangePrice, fee);
-        node.expect(Account1.balance.toString()).to.equal(nowBalance.toString());
+        const result = DdnUtil.bignum.minus(Account1.balance, nowBalance);
+        node.expect(result.toString()).to.equal('0');
     })
 
     it("Create exchange with state = 1 again, Should be fail", async (done) => {
@@ -247,7 +251,7 @@ describe('Put /transactions', () => {
             .end((err, {
                 body
             }) => {
-                debug(JSON.stringify(body));
+                debug("exchange with state = 1 again, fail", JSON.stringify(body));
 
                 node.expect(err).to.be.not.ok;
 
@@ -263,7 +267,7 @@ describe('PUT /dao/exchanges', () => {
     let orgId = "";
 
     beforeAll(async (done) => {
-        const getOrgIdUrl = `/orgs/getlist?pagesize=1&address=${node.Gaccount.address}`;
+        const getOrgIdUrl = `/dao/orgs/all?pagesize=1&address=${node.Gaccount.address}`;
         node.api.get(getOrgIdUrl)
             .set("Accept", "application/json")
             .set("version", node.version)
@@ -273,19 +277,13 @@ describe('PUT /dao/exchanges', () => {
             .end((err, {
                 body
             }) => {
-                debug(JSON.stringify(body));
+                debug("get /dao/orgs/all? ok", JSON.stringify(body));
 
                 node.expect(err).to.be.not.ok;
 
                 node.expect(body).to.have.property("success").to.be.true;
 
-                if (body.success && body.data && body.data.rows && body.data.rows.length) {
-                    orgId = body.data.rows[0].orgId;
-                    // orgId = body.orgId;
-                } else {
-                    debug("未查找到符合要求的Org数据。");
-                    done();
-                }
+                orgId = body.data.rows[0].orgId;
 
                 done();
             });
@@ -302,12 +300,12 @@ describe('PUT /dao/exchanges', () => {
             .end((err, {
                 body
             }) => {
-                debug(JSON.stringify(body));
+                debug("put /dao/exchanges no parameters, fail", JSON.stringify(body));
 
                 node.expect(err).to.be.not.ok;
 
                 node.expect(body).to.have.property("success").to.be.false;
-                node.expect(body).to.have.property("error").to.contain("Invalid parameters");
+                node.expect(body).to.have.property("error").to.include("Invalid parameters");
 
                 done();
             });
@@ -327,7 +325,7 @@ describe('PUT /dao/exchanges', () => {
             .end((err, {
                 body
             }) => {
-                debug(JSON.stringify(body));
+                debug("put /dao/exchanges, State=0, valid parameters, ok", JSON.stringify(body));
 
                 node.expect(err).to.be.not.ok;
 
@@ -359,7 +357,7 @@ describe('PUT /dao/exchanges', () => {
             .end((err, {
                 body
             }) => {
-                debug(JSON.stringify(body));
+                debug("State=1, Account2 no exists, fail", JSON.stringify(body));
 
                 node.expect(err).to.be.not.ok;
 
@@ -392,7 +390,7 @@ describe('PUT /dao/exchanges', () => {
             .end((err, {
                 body
             }) => {
-                debug(JSON.stringify(body));
+                debug("Account2 balance < 700000000, fail", JSON.stringify(body));
 
                 node.expect(err).to.be.not.ok;
 
@@ -426,7 +424,7 @@ describe('PUT /dao/exchanges', () => {
             .end((err, {
                 body
             }) => {
-                debug(JSON.stringify(body));
+                debug("Account2 balance > 700000000, ok", JSON.stringify(body));
 
                 node.expect(err).to.be.not.ok;
 
@@ -435,5 +433,5 @@ describe('PUT /dao/exchanges', () => {
 
                 done();
             });
-    })
+    }, 30000)
 });

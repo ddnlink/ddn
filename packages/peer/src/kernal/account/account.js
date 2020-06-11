@@ -147,7 +147,7 @@ class Account {
     async getAccountByPublicKey(publicKey) {
         publicKey = publicKey.toString('hex');
         const address = this.generateAddressByPublicKey(publicKey);
-        this.logger.info('getAccountByPublicKey, publicKey -> address; ' + publicKey + " -> " + address);
+        this.logger.debug('getAccountByPublicKey, publicKey -> address; ' + publicKey + " -> " + address);
         const account = await this.getAccount({
             address
         });
