@@ -279,6 +279,7 @@ class AssetBase {
         // ---！wly修改
         pageIndex = pageIndex || 1;
         pageSize = pageSize || 50;
+
         let limit = pageSize;
         let offset = (pageIndex - 1) * pageSize;
 

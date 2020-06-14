@@ -36,23 +36,22 @@ class Loader {
     }
 
     _registerAsset(type, inst, assetName) {
-        if (inst && typeof(inst.create) == 'function' &&
-            typeof(inst.getBytes) == 'function' &&
-            typeof(inst.calculateFee) == 'function' &&
-            typeof(inst.verify) == 'function' &&
-            typeof(inst.objectNormalize) == 'function' &&
-            typeof(inst.dbRead) == 'function' &&
-            typeof(inst.apply) == 'function' &&
-            typeof(inst.undo) == 'function' &&
-            typeof(inst.applyUnconfirmed) == 'function' &&
-            typeof(inst.undoUnconfirmed) == 'function' &&
-            typeof(inst.ready) == 'function' &&
-            typeof(inst.process) == 'function') {
+        if (inst && typeof (inst.create) == 'function' &&
+            typeof (inst.getBytes) == 'function' &&
+            typeof (inst.calculateFee) == 'function' &&
+            typeof (inst.verify) == 'function' &&
+            typeof (inst.objectNormalize) == 'function' &&
+            typeof (inst.dbRead) == 'function' &&
+            typeof (inst.apply) == 'function' &&
+            typeof (inst.undo) == 'function' &&
+            typeof (inst.applyUnconfirmed) == 'function' &&
+            typeof (inst.undoUnconfirmed) == 'function' &&
+            typeof (inst.ready) == 'function' &&
+            typeof (inst.process) == 'function') {
 
             this._assets[this._getAssetKey(type)] = inst;
 
-            if (assetName)
-            {
+            if (assetName) {
                 this._assetsNames[assetName.toLowerCase()] = inst;
             }
         } else {
@@ -78,16 +77,12 @@ class Loader {
      * 根据资产配置名称获取资产实例
      * @param {*} assetName
      */
-    findInstanceByName(assetName)
-    {
-        if (assetName)
-        {
+    findInstanceByName(assetName) {
+        if (assetName) {
             const keys = Object.getOwnPropertyNames(this._assetsNames)
-            for (const p in keys)
-            {
+            for (const p in keys) {
                 const key = keys[p];
-                if (key.toLowerCase() == assetName.toLowerCase())
-                {
+                if (key.toLowerCase() == assetName.toLowerCase()) {
                     return this._assetsNames[key];
                 }
             }
@@ -108,7 +103,7 @@ class Loader {
 
             const router = express.Router();
             const apis = await this._attachAssetPluginApiRouter(router, assetConfig, assetInst);
-            if (typeof(assetInst.attachApi) == "function") {
+            if (typeof (assetInst.attachApi) == "function") {
                 await assetInst.attachApi(router);
             }
 
@@ -118,7 +113,7 @@ class Loader {
                 router,
                 apis
             });
-            
+
             // TODO: deprecated, delete it for next version.
             // this._assetsApi.push({
             //     path: `/api/${apiSubPath}`,
@@ -140,7 +135,7 @@ class Loader {
     }
 
     _assetAssetPluginApiDetail(assetType, paramName, assetInst) {
-        const func = ({params, query}, res, next) => {
+        const func = ({ params, query }, res, next) => {
             const parseSortItem = (sort, item) => {
                 const subItems = item.split("=");
                 if (subItems.length == 2) {
@@ -178,9 +173,9 @@ class Loader {
 
             assetInst.queryAsset(where, orders, false, 1, 1)
                 .then(rows => {
-                    res.status(200).json({success: true, data: rows && rows.length > 0 ? rows[0] : null});
+                    res.status(200).json({ success: true, data: rows && rows.length > 0 ? rows[0] : null });
                 }).catch(err => {
-                    res.status(200).json({success: false, error: err.toString()});
+                    res.status(200).json({ success: false, error: err.toString() });
                 });
         };
 
@@ -188,7 +183,7 @@ class Loader {
     }
 
     _assetAssetPluginApiList(assetType, paramName, assetInst) {
-        const func = ({params, query}, res, next) => {
+        const func = ({ params, query }, res, next) => {
             const parseSortItem = (sort, item) => {
                 const subItems = item.split(":");
                 if (subItems.length == 2) {
@@ -204,17 +199,22 @@ class Loader {
             if (paramName) {
                 where[paramName] = params[paramName];
             }
+
+            const pageIndex = query.pageindex || 1;
+            const pageSize = query.pagesize || 50;
+            delete query.pageindex;
+            delete query.pagesize;
+
+            const orders = [];
+            let sortItems = query.sort;
+            delete query.sort;
+
+            // 请求参数 /?pagesize=1&sort=id 不在 where 里
             if (query) {
                 for (const p in query) {
                     where[p] = query[p];
                 }
             }
-
-            const pageIndex = query.pageindex || 1;
-            const pageSize = query.pagesize || 50;
-
-            const orders = [];
-            let sortItems = query.sort;
 
             if (sortItems) {
                 if (!sortItems.splice) {
@@ -233,12 +233,12 @@ class Loader {
                     }
                 }
             }
-            // console.log("loader.js router", where, orders, pageIndex, pageSize)
+  
             assetInst.queryAsset(where, orders, true, pageIndex, pageSize)
                 .then(rows => {
-                    res.status(200).json({success: true, data: rows});
+                    res.status(200).json({ success: true, data: rows });
                 }).catch(err => {
-                    res.status(200).json({success: false, error: err.toString()});
+                    res.status(200).json({ success: false, error: err.toString() });
                 });
         };
 
@@ -246,7 +246,7 @@ class Loader {
     }
 
     // TODO: 优化路由，使其更符合 rustful api
-    async _attachAssetPluginApiRouter(router, {type}, assetInst) {
+    async _attachAssetPluginApiRouter(router, { type }, assetInst) {
         const allApis = [];
 
         const props = await assetInst.propsMapping();
@@ -270,19 +270,19 @@ class Loader {
         router.get("/transaction/:trs_id", this._assetAssetPluginApiDetail(type, "trs_id", assetInst));
         allApis.push("/transaction/:trs_id");
 
-        // note: GET  /api/aob/assets/list -> GET  /api/aob/assets 是否有冲突，需要测试确认
+        // FIXME: GET  /api/aob/assets/list -> GET  /api/aob/assets 是有冲突的
         router.get("/", this._assetAssetPluginApiList(type, null, assetInst));
         allApis.push("/");
 
         return allApis;
     }
 
-    async _addAsesstModels () {
+    async _addAsesstModels() {
         const { dao } = this;
         const assetsPackageList = [];
         for (let i = 0; i < this.assetPlugins.getTransactionCount(); i++) {
             const trans = this.assetPlugins.getTransactionByIndex(i);
-            if(!assetsPackageList.includes(trans.package)){
+            if (!assetsPackageList.includes(trans.package)) {
                 assetsPackageList.push(trans.package);
             }
         }
@@ -291,18 +291,18 @@ class Loader {
             let assetModels;
             try {
                 assetModels = global._require_runtime_(`${packageName}/lib/define-models`) || [];
-            } catch (err){
+            } catch (err) {
                 this.logger.info(`${packageName} 资产包不包含自定义数据模型内容。`);
                 return;
             }
 
             if (assetModels) {
-                assetModels.map(({name, data}) => {
+                assetModels.map(({ name, data }) => {
                     // 挂载方法
                     dao.buildModel(name, data);
                     // 创建表
                     dao.createTable(name, false, (err) => {
-                        if(err){
+                        if (err) {
                             this.logger.err(`${packageName} 资产包自定义数据模型生成失败。`, err);
                             process.emit('cleanup');
                         }
@@ -363,7 +363,7 @@ class Loader {
             const key = keys[p];
             const inst = this._assets[key];
             if (inst != null &&
-                typeof(inst[funcName]) == "function") {
+                typeof (inst[funcName]) == "function") {
                 try {
                     await inst[funcName](...args);
                 } catch (err) {

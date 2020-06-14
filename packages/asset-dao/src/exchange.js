@@ -192,7 +192,6 @@ class Exchange extends Asset.Base {
 
     async getBytes(trs) {
         const asset = await this.getAssetObject(trs);   // trs.asset.exchange;
-        console.log("trs", trs);
         
         const bb = new ByteBuffer();
         bb.writeString(asset.orgId.toLowerCase());

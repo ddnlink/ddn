@@ -51,7 +51,7 @@ class RootRouter {
                 id: {
                     type: 'string',
                     minLength: 1,
-                    maxLength: 64
+                    maxLength: 128
                 }
             },
             required: ['id']

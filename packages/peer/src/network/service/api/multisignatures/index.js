@@ -87,7 +87,8 @@ class MultisignaturesRouter {
                     return cb("Account " + publicKey + " not found");
                 }
 
-                // account.publicKey = publicKey;
+                // fixme: getAccountByPublicKey 方法已经处理
+                account.publicKey = publicKey;
 
                 if (account.second_signature && !body.secondSecret) {
                     return cb("Invalid second passphrase");
@@ -112,7 +113,7 @@ class MultisignaturesRouter {
                     const transactions = await this.runtime.transaction.receiveTransactions([transaction]);
                     cb(null, transactions);
                 } catch (e) {
-                    this.logger.error('create multisignatures error', e);
+                    this.logger.error('create multisignatures error', DdnUtils.system.getErrorMsg(e));
                     return cb(e);
                 }
             }, (err, transactions) => {
@@ -123,7 +124,7 @@ class MultisignaturesRouter {
                         try {
                             await this.runtime.socketio.emit('multisignatures/change', {});
                         } catch (err2) {
-                            this.logger.error("socket emit error: multisignatures/change", err2);
+                            this.logger.error("socket emit error: multisignatures/change", DdnUtils.system.getErrorMsg(err2));
                         }
                     });
 
@@ -307,7 +308,7 @@ class MultisignaturesRouter {
                     try {
                         verify = await this.runtime.transaction.verifySignature(item, signature, query.publicKey);
                     } catch (e) {
-                        this.logger.error('/multisignatures/pending verify fail, error is ', e.stack)
+                        this.logger.error('/multisignatures/pending verify fail, error is ', DdnUtils.system.getErrorMsg(e))
                         verify = false;
                     }
 
@@ -374,7 +375,6 @@ class MultisignaturesRouter {
                 success: false,
                 error: `Validation error: ${validateErrors[0].schemaPath} ${validateErrors[0].message}`
             };
-            // throw new Error(`Invalid parameters: ${validateErrors[0].schemaPath} ${validateErrors[0].message}`);
         }
 
         return new Promise((resolve, reject) => {
@@ -386,7 +386,7 @@ class MultisignaturesRouter {
                 ], //wxm block database   library.dao.db_fn('group_concat', library.dao.db_col('accountId'))
                 null, async (err, rows) => {
                     if (err) {
-                        this.logger.error(err.toString());
+                        this.logger.error(DdnUtils.system.getErrorMsg(err));
                         return reject("Database error");
                     }
 
@@ -422,7 +422,7 @@ class MultisignaturesRouter {
                             accounts: rows
                         });
                     } catch (e) {
-                        this.logger.error(e);
+                        this.logger.error(DdnUtils.system.getErrorMsg(e));
                         return reject(e);
                     }
                 });

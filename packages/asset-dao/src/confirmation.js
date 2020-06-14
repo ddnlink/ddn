@@ -3,8 +3,6 @@ import DdnCrypto from '@ddn/crypto';
 import Asset from '@ddn/asset-base';
 import DdnUtils from '@ddn/utils';
 import daoUtil from './daoUtil';
-// import crypto from 'crypto';
-// import ed from 'ed25519';
 
 /**
   * 确认交易
@@ -22,15 +20,15 @@ class Confirmation extends Asset.Base {
     // eslint-disable-next-line class-methods-use-this
     async propsMapping() {
         return [{
-            field: 'str4',
+            field: 'str2', // 34 < 64
             prop: 'received_address',
         },
         {
-            field: 'str5',
+            field: 'str3',
             prop: 'sender_address',
         },
         {
-            field: 'str6',
+            field: 'str6', // 256
             prop: 'url',
         },
         {
@@ -38,7 +36,7 @@ class Confirmation extends Asset.Base {
             prop: 'state',
         },
         {
-            field: 'str2',
+            field: 'str4', // 128
             prop: 'contribution_trs_id',
         }
         ];
@@ -64,13 +62,18 @@ class Confirmation extends Asset.Base {
 
     async calculateFee(trs) {
         const confirmation = await this.getAssetObject(trs);
+        let feeBase;
         if (confirmation.state === 0) {
-            return '0'; // 拒绝稿件时手续费为0
+            feeBase = '0'; // 拒绝稿件时手续费为0
         }
-        return "100000000";
+
+        const result = DdnUtils.bignum.multiply(feeBase, this.constants.fixedPoint).toString();
+
+        return result;
     }
 
     async verify(trs) {
+
         const confirmation = await this.getAssetObject(trs);
         if (!trs.asset || !confirmation) {
             throw new Error('Invalid transaction asset "Contribution"');
@@ -95,8 +98,8 @@ class Confirmation extends Asset.Base {
         }
 
         if (!confirmation.received_address
-            || confirmation.received_address.length > 128) {
-            throw new Error('received_address is undefined or too long, don`t more than 128 characters.');
+            || confirmation.received_address.length > 34) {
+            throw new Error('received_address is undefined or too long, don`t more than 34 characters.');
         }
         if (!this.address.isAddress(confirmation.received_address)) {
             throw new Error("Invalid confirmation's received_address");
@@ -117,8 +120,8 @@ class Confirmation extends Asset.Base {
         }
 
         if (!confirmation.contribution_trs_id
-            || confirmation.contribution_trs_id.length > 64) {
-            throw new Error('contribution_trs_id is undefined or too long, don`t more than 256 characters.');
+            || confirmation.contribution_trs_id.length > 128) {
+            throw new Error('contribution_trs_id is undefined or too long, don`t more than 128 characters.');
         }
 
         // (1)查询getConfirmation是否存在

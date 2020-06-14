@@ -81,7 +81,7 @@ describe("POST /peer/transactions", () => {
                 votes.push(`+${delegate1_pubKey}`);
                 votes.push(`+${delegate2_pubKey}`);
                 const transaction = await node.ddn.vote.createVote(votes, voterAccount.password);
-                debug('createVote transaction', transaction);
+                // debug('createVote transaction', transaction);
                 if (transaction !== null) {
                     node.peer.post("/transactions")
                         .set("Accept", "application/json")
@@ -131,6 +131,8 @@ describe("POST /peer/transactions", () => {
     });
 
     it("Removing votes from a delegate. Should be ok", async done => {
+        await node.onNewBlockAsync();
+        
         const transaction = await node.ddn.vote.createVote([`-${delegate1_pubKey}`], voterAccount.password);
         node.peer.post("/transactions")
             .set("Accept", "application/json")
@@ -145,7 +147,7 @@ describe("POST /peer/transactions", () => {
             .end((err, { body }) => {
                 node.expect(err).to.be.not.ok;
 
-                debug(JSON.stringify(body));
+                debug("Removing votes, ok", JSON.stringify(body));
                 node.expect(body).to.have.property("success").to.be.true;
                 done();
             });
@@ -156,6 +158,7 @@ describe("POST /peer/transactions", () => {
             node.expect(err).to.be.not.ok;
 
             const transaction = await node.ddn.vote.createVote([`-${delegate2_pubKey}`], voterAccount.password);
+            debug("Removing votes, ok", JSON.stringify(transaction));
             node.peer.post("/transactions")
                 .set("Accept", "application/json")
                 .set("version", node.version)

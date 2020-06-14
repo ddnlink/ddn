@@ -1,1074 +1,761 @@
 // passed
-// import node from '@ddn/node-sdk/lib/test';
-
-// import Debug from 'debug';
-
-// const debug = Debug('debug');
-// const expect = node.expect;
-
-// async function registerIssuerAsync(name, desc, {password}) {
-//   const res = await node.submitTransactionAsync(node.ddn.aob.createIssuer(name, desc, password));
-//   debug('register issuer response', res.body)
-//   return res
-// }
-
-// async function registerAssetAsync(name, desc, maximum, precision, strategy, {password}) {
-//   const res = await node.submitTransactionAsync(node.ddn.aob.createAsset(name, desc, maximum, precision, strategy, 1, 1, 1, password));
-//   debug('register asset response', res.body)
-//   return res
-// }
-
-// async function issueAssetAsync(currency, amount, {password}) {
-//   const res = await node.submitTransactionAsync(node.ddn.aob.createIssue(currency, amount, password));
-//   debug('issue asset response', res.body)
-//   return res
-// }
-
-// async function writeoffAssetAsync(currency, {password}) {
-//   const res = await node.submitTransactionAsync(node.ddn.aob.createFlags(currency, 2, 1, password));
-//   debug('writeoff asset response', res.body)
-//   return res
-// }
-
-// async function changeFlagsAsync(currency, flagType, flag, {password}) {
-//   const res = await node.submitTransactionAsync(node.ddn.aob.createFlags(currency, flagType, flag, password));
-//   debug('change flags response', res.body)
-//   return res
-// }
-
-// async function updateAclAsync(currency, operator, flag, list, {password}) {
-//   const res = await node.submitTransactionAsync(node.ddn.aob.createAcl(currency, operator, flag, list, password));
-//   debug('update acl response', res.body)
-//   return res
-// }
-
-// async function transferAsync(currency, amount, recipientId, {password}) {
-//   const res = await node.submitTransactionAsync(node.ddn.aob.createTransfer(currency, amount, recipientId, '', password));
-//   debug('transfer asset response', res.body)
-//   return res
-// }
-
-// describe('Test AOB', () => {
-
-//   describe('Normal caces', () => {
-//     // const ISSUER1 = {
-//     //   name: node.randomIssuerName(),
-//     //   desc: 'issuer1_desc'
-//     // };
-
-//     // const ASSET1 = {
-//     //   name: 'BTC',
-//     //   desc: 'asset1_desc',
-//     //   maximum: '10000000000000',
-//     //   precision: 6,
-//     //   strategy: ''
-//     // };
-
-//     // it('Get issuers should be ok', async () => {
-//     //   const [err, res] = await node.apiGetAsyncE('/aob/issuers');
-      
-//     //   debug('get /aob/issuers/issuers response', err, res.body)
-//     //   expect(err).to.not.exist
-//     //   expect(res.body.success).to.be.true
-//     //   expect(res.body.result.total).to.be.a('number')
-//     //   expect(res.body.result.rows).to.be.instanceOf(Array)
-//     // })
-
-//     // it('Register issuer should be ok', async () => {
-//     //   const trs = await node.ddn.aob.createIssuer(ISSUER1.name, ISSUER1.desc, node.Gaccount.password);
-//     //   debug('create issuer trs', trs)
-      
-//     //   const [err, res] = await node.submitTransactionAsyncE(trs)
-//     //   debug('submit issuer response', err, res.body)
-
-//     //   expect(err).to.not.exist
-//     //   expect(res.body).to.have.property('success').to.be.true
-
-//     //   await node.onNewBlockAsync()
-
-//     //   const [err2, res2] = await node.apiGetAsyncE(`/aob/issuers/name/${ISSUER1.name}`)
-//     //   debug('get /aob/issuers/name/:name response', err2, res2.body)
-//     //   expect(err2).to.not.exist
-//     //   // expect(res2.body).to.have.property('result')
-//     //   // expect(res2.body.result.name).to.equal(ISSUER1.name)
-//     //   // expect(res2.body.result.issuer_id).to.equal(node.Gaccount.address)
-//     // })
-
-//     // it('Register asset should be ok', async () => {
-//     //   const currency = `${ISSUER1.name}.${ASSET1.name}`;
-//     //   const trs = node.ddn.aob.createAsset(
-//     //     currency,
-//     //     ASSET1.desc,
-//     //     ASSET1.maximum,
-//     //     ASSET1.precision,
-//     //     ASSET1.strategy,
-//     //     1,
-//     //     1,
-//     //     1,
-//     //     node.Gaccount.password);
-//     //   debug('create asset trs', trs)
-
-//     //   var [err, res] = await node.submitTransactionAsyncE(trs)
-//     //   debug('submit asset response', err, res.body)
-//     //   expect(err).to.not.exist
-//     //   expect(res.body).to.have.property('success').to.be.true
-
-//     //   await node.onNewBlockAsync()
-
-//     //   var [err, res] = await node.apiGetAsyncE(`/aobasset/issuers/${ISSUER1.name}/assets`)
-//     //   debug('get /aobasset/issuers/:name/assets response', err, res.body)
-//     //   expect(err).to.not.exist
-//     //   expect(res.body.result.total).to.be.a('number')
-//     //   expect(res.body.result.rows).to.be.instanceOf(Array)
-
-//     //   var [err, res] = await node.apiGetAsyncE(`/aobasset/${currency}`)
-//     //   debug('get /aobasset/:name response', err, res.body)
-//     //   expect(err).to.not.exist
-//     //   expect(res.body.result.name).to.equal(currency)
-//     //   expect(res.body.result.desc).to.equal(ASSET1.desc)
-//     //   expect(res.body.result.maximum).to.equal(ASSET1.maximum)
-//     //   expect(res.body.result.precision).to.equal(ASSET1.precision)
-//     //   expect(res.body.result.issuer_id).to.equal(node.Gaccount.address)
-//     //   expect(res.body.result.quantity).to.equal('0')
-//     //   expect(res.body.result.acl).to.equal(0)
-//     //   expect(res.body.result.writeoff).to.equal(0)
-//     // })
-
-//     // it('Issue and transfer asset should be ok', async () => {
-//     //   const currency = `${ISSUER1.name}.${ASSET1.name}`;
-//     //   const transferAddress = '12345';
-
-//     //   var [err, res] = await node.apiGetAsyncE(`/aobasset/balances/${node.Gaccount.address}`)
-//     //   debug('get issuer balance before issue response', err, res.body)
-//     //   expect(err).to.not.exist
-
-//     //   let issuerBalance = (res.body.result[0] && res.body.result[0].balance) || 0;
-
-//     //   var [err, res] = await node.apiGetAsyncE(`/aobasset/balances/${transferAddress}`)
-//     //   debug('get recipient balance before issue response', err, res.body)
-//     //   expect(err).to.not.exist
-
-//     //   let recipientBalance = (res.body.result.balances[0] && res.body.result.balances[0].balance) || 0;
-
-//     //   var [err, res] = await node.apiGetAsyncE(`/aobasset/${currency}`)
-//     //   debug('get asset before issue response', err, res.body)
-//     //   expect(err).to.not.exist
-//     //   expect(res.body.result.name).to.equal(currency)
-
-//     //   let quantity = res.body.asset.quantity;
-
-//     //   const amount = '10000000000';
-//     //   let trs = node.ddn.aob.createIssue(currency, amount, node.Gaccount.password);
-//     //   debug('create issue trs', trs)
-
-//     //   var [err, res] = await node.submitTransactionAsyncE(trs)
-//     //   debug('submit issue response', err, res.body)
-//     //   expect(err).to.not.exist
-//     //   expect(res.body).to.have.property('success').to.be.true
-
-//     //   await node.onNewBlockAsync()
-
-//     // //DdnUtils.bignum update   issuerBalance = DdnUtils.bignum(issuerBalance).plus(amount).toString()
-//     //   issuerBalance = DdnUtils.bignum.plus(issuerBalance, amount).toString();
-//     // //DdnUtils.bignum update   quantity = DdnUtils.bignum(quantity).plus(amount).toString()
-//     //   quantity = DdnUtils.bignum.plus(quantity, amount).toString();
-
-//     //   var [err, res] = await node.apiGetAsyncE(`/aobasset/${currency}`)
-//     //   debug('get asset after issue response', err, res.body)
-//     //   expect(err).to.not.exist
-//     //   expect(res.body.result.name).to.equal(currency)
-//     //   expect(res.body.result.quantity).to.equal(quantity)
-
-//     //   var [err, res] = await node.apiGetAsyncE(`/aobasset/balances/${node.Gaccount.address}`)
-//     //   debug('get issuer balance after issue response', err, res.body)
-//     //   expect(err).to.not.exist
-//     //   expect(res.body.result).to.be.instanceOf(Array)
-//     //   expect(res.body.result.length).to.equal(1)
-//     //   expect(res.body.result[0].currency).to.equal(currency)
-//     //   expect(res.body.result[0].balance).to.equal(issuerBalance)
-
-//     //   const transferAmount = '10';
-//     //   trs = node.ddn.aob.createTransfer(currency, transferAmount, transferAddress, '', node.Gaccount.password)
-//     //   debug('create transfer trs', trs)
-//     //   var [err, res] = await node.submitTransactionAsyncE(trs)
-//     //   debug('transfer asset response', err, res.body)
-//     //   expect(err).to.not.exist
-//     //   expect(res.body).to.have.property('success').to.be.true
-
-//     //   await node.onNewBlockAsyncE()
-
-//     // //DdnUtils.bignum update   issuerBalance = DdnUtils.bignum(issuerBalance).sub(transferAmount).toString()
-//     //   issuerBalance = DdnUtils.bignum.minus(issuerBalance, transferAmount).toString();
-
-//     //   var [err, res] = await node.apiGetAsyncE(`/aobasset/balances/${node.Gaccount.address}`)
-//     //   debug('get issuer balance response', err, res.body)
-//     //   expect(err).to.not.exist
-//     //   expect(res.body.result).to.be.instanceOf(Array)
-//     //   expect(res.body.result.length).to.equal(1)
-//     //   expect(res.body.result[0].currency).to.equal(currency)
-//     //   expect(res.body.result[0].balance).to.equal(issuerBalance)
-
-//     // //DdnUtils.bignum update   recipientBalance = DdnUtils.bignum(recipientBalance).plus(transferAmount).toString()
-//     //   recipientBalance = DdnUtils.bignum.plus(recipientBalance, transferAmount).toString();
-
-//     //   var [err, res] = await node.apiGetAsyncE(`/aobasset/balances/${transferAddress}`)
-//     //   debug('get recipient balance response', err, res.body)
-//     //   expect(err).to.not.exist
-//     //   expect(res.body.result).to.be.instanceOf(Array)
-//     //   expect(res.body.result.length).to.equal(1)
-//     //   expect(res.body.result[0].currency).to.equal(currency)
-//     //   expect(res.body.result[0].balance).to.equal(recipientBalance)
-
-//     // })
-
-//     // it('Update flags and acl should be ok', async () => {
-//     //   const currency = `${ISSUER1.name}.${ASSET1.name}`;
-
-//     //   var [err, res] = await node.apiGetAsyncE(`/aobasset/${currency}`)
-//     //   expect(err).to.not.exist
-//     //   expect(res.body.result.name).to.equal(currency)
-//     //   expect(res.body.result.acl).to.equal(0)
-
-//     //   // get white list before update acl
-//     //   res = await node.apiGetAsync(`/aobasset/${currency}/acl/1`)
-//     //   expect(res.body.result.total).to.be.a('number')
-//     //   expect(res.body.result.rows).to.be.instanceOf(Array)
-//     //   const origCount = res.body.count;
-//     //   expect(origCount >= 0).to.be.ok
-
-//     //   // change to white list mode
-//     //   let trs = node.ddn.aob.createFlags(currency, 1, 1, node.Gaccount.password);
-//     //   var [err, res] = await node.submitTransactionAsyncE(trs)
-//     //   debug('change flags response', err, res.body)
-//     //   expect(err).to.not.exist
-//     //   expect(res.body).to.have.property('success').to.be.true
-
-
-//     //   await node.onNewBlockAsyncE()
-
-//     //   var [err, res] = await node.apiGetAsyncE(`/aobasset/${currency}`)
-//     //   expect(err).to.not.exist
-//     //   expect(res.body.result.name).to.equal(currency)
-//     //   expect(res.body.result.acl).to.equal(1)
-
-//     //   // add address to white list
-//     //   const account1 = node.genNormalAccount();
-//     //   const account2 = node.genNormalAccount();
-//     //   const whiteList = [account1.address, account2.address];
-//     //   trs = node.ddn.aob.createAcl(currency, '+', 1, whiteList, node.Gaccount.password)
-//     //   var [err, res] = await node.submitTransactionAsyncE(trs)
-//     //   debug('update acl response', err, res.body)
-//     //   expect(err).to.not.exist
-//     //   expect(res.body).to.have.property('success').to.be.true
-
-//     //   await node.onNewBlockAsync()
-
-//     //   // get white list
-//     //   res = await node.apiGetAsync(`/aobasset/${currency}/acl/1`)
-//     //   expect(res.body.total).to.be.a('number')
-//     //   expect(res.body.result.rows).to.be.instanceOf(Array)
-//     //   expect(res.body.result.total == origCount + 2).to.be.ok
-
-//     //   trs = node.ddn.aob.createTransfer(currency, '10', account1.address, '', node.Gaccount.password)
-//     //   res = await node.submitTransactionAsync(trs)
-//     //   debug('transfer to account1 response', res.body)
-//     //   expect(res.body).to.have.property('success').to.be.true
-
-//     //   trs = node.ddn.aob.createTransfer(currency, '10', account2.address, '', node.Gaccount.password)
-//     //   res = await node.submitTransactionAsync(trs)
-//     //   debug('transfer to account2 response', res.body)
-//     //   expect(res.body).to.have.property('success').to.be.true
-
-//     //   trs = node.ddn.aob.createTransfer(currency, '10', node.genNormalAccount().address, '', node.Gaccount.password)
-//     //   res = await node.submitTransactionAsync(trs)
-//     //   debug('transfer to random account response', res.body)
-//     //   expect(res.body).to.have.property('success').to.be.false
-//     //   expect(res.body).to.have.property('error').to.match(/^Permission not allowed/)
-//     // })
-
-//   })
-
-//   describe('Register issuer fail cases', () => {
-
-//     it('Invalid parameters', async () => {
-//       const account = node.genNormalAccount();
-//       let res = await registerIssuerAsync('', 'normal desc', account);
-//       expect(res.body).to.have.property('error').to.match(/^Invalid transaction body/)
-
-//       res = await registerIssuerAsync('long_name-aaaaaaaaaaaaaa', 'normal desc', account)
-//       expect(res.body).to.have.property('error').to.match(/^Invalid transaction body/)
-
-//       res = await registerIssuerAsync('normalname', '', account)
-//       expect(res.body).to.have.property('error').to.match(/^Invalid transaction body/)
-
-//       const largeString = Buffer.allocUnsafe(5000).toString();
-//       res = await registerIssuerAsync('normalname', largeString, account)
-//       expect(res.body).to.have.property('error').to.match(/^Invalid transaction body/)
-
-//       res = await registerIssuerAsync('invalid_name', 'normal desc', account)
-//       expect(res.body).to.have.property('error').to.match(/^Invalid transaction body/)
-
-//       res = await registerIssuerAsync('invalid.name', 'normal desc', account)
-//       expect(res.body).to.have.property('error').to.match(/^Invalid transaction body/)
-//     })
-
-//     it('Insufficient balance', async () => {
-//       const account = node.genNormalAccount();
-//       const res = await registerIssuerAsync(node.randomIssuerName(), 'normal desc', account);
-//       expect(res.body).to.have.property('error').to.match(/^Insufficient balance/)
-//     })
-
-//     it('Double submit', async () => {
-//       const account = node.genNormalAccount();
-//       const anotherAccount = node.genNormalAccount();
-//       await node.giveMoneyAndWaitAsync([account.address, anotherAccount.address])
-
-//       const registeredName = node.randomIssuerName();
-//       let res = await registerIssuerAsync(registeredName, 'normal desc', account);
-//       expect(res.body).to.have.property('success').to.be.true
-
-//       res = await registerIssuerAsync(node.randomIssuerName(), 'normal desc', account)
-//       expect(res.body).to.have.property('error').to.match(/^Double submit/)
-
-//       res = await registerIssuerAsync(registeredName, 'normal desc', anotherAccount)
-//       expect(res.body).to.have.property('error').to.match(/^Double submit/)
-//     })
-
-//     it('Double register', async () => {
-//       const account = node.genNormalAccount();
-//       const anotherAccount = node.genNormalAccount();
-//       await node.giveMoneyAndWaitAsync([account.address, anotherAccount.address])
-
-//       const registeredName = node.randomIssuerName();
-//       let res = await registerIssuerAsync(registeredName, 'normal desc', account);
-//       expect(res.body).to.have.property('success').to.be.true
-//       await node.onNewBlockAsync()
-
-//       res = await registerIssuerAsync(node.randomIssuerName(), 'normal desc', account)
-//       expect(res.body).to.have.property('error').to.match(/^Double register/)
-
-//       res = await registerIssuerAsync(registeredName, 'normal desc', anotherAccount)
-//       expect(res.body).to.have.property('error').to.match(/^Double register/)
-//     })
-//   })
-
-//   describe('Register asset fail cases', () => {
-//     const ISSUER_ACCOUNT = node.genNormalAccount();
-//     const ISSUER_NAME = node.randomIssuerName();
-//     const VALID_ASSET_NAME = `${ISSUER_NAME}.BTC`;
-//     const VALID_DESC = 'valid desc';
-//     const VALID_MAXIMUM = '10000000';
-//     const VALID_PRECISION = 3;
-//     const VALID_STRATEGY = '';
-
-//     beforeAll(async () => {
-//       await node.giveMoneyAndWaitAsync([ISSUER_ACCOUNT.address])
-//     })
-
-//     it('Invalid asset name', async () => {
-//       const INVALID_NAME_CASES = [
-//         {
-//           error: /^Invalid transaction body/,
-//           cases: [
-//             '',
-//             'ab',
-//             '12345678901234567890123'
-//           ]
-//         },
-//         {
-//           error: /^Invalid asset full name/,
-//           cases: [
-//             'huoding_BTC',
-//             'ddn BTC',
-//             'huo.ding.BTC'
-//           ]
-//         },
-//         {
-//           error: /^Invalid asset currency name/,
-//           cases: [
-//             'ddn.',
-//             'ddn.B',
-//             'ddn.BT',
-//             'ddn.BTC1',
-//             'ddn.btc',
-//             'ddn.BT-C',
-//             'ddn.LONGNAME',
-//           ]
-//         }
-//       ];
-//       for (let i = 0; i < INVALID_NAME_CASES.length; ++i) {
-//         let error = INVALID_NAME_CASES[i].error
-
-//         for (let name of INVALID_NAME_CASES[i].cases) {
-//           let res = await registerAssetAsync(name, VALID_DESC, VALID_MAXIMUM, VALID_PRECISION, VALID_STRATEGY, ISSUER_ACCOUNT)
-//           debug('register asset fail case', name, res.body)
-//           expect(res.body).to.have.property('error').to.match(error)
-//         }
-//       }
-//     })
-
-//     it('Invalid asset desc', async () => {
-//       let res = await registerAssetAsync(VALID_ASSET_NAME, '', VALID_MAXIMUM, VALID_PRECISION, VALID_STRATEGY, ISSUER_ACCOUNT);
-//       expect(res.body).to.have.property('error').to.match(/^Invalid transaction body/)
-
-//       const largeDesc = Buffer.allocUnsafe(5000).toString();
-//       res = await registerAssetAsync(VALID_ASSET_NAME, largeDesc, VALID_MAXIMUM, VALID_PRECISION, VALID_STRATEGY, ISSUER_ACCOUNT)
-//       expect(res.body).to.have.property('error').to.match(/^Invalid transaction body/)
-//     })
-
-//     it('Invalid asset maximum', async () => {
-//       let res = await registerAssetAsync(VALID_ASSET_NAME, VALID_DESC, '', VALID_PRECISION, VALID_STRATEGY, ISSUER_ACCOUNT);
-//       expect(res.body).to.have.property('error').to.match(/^Invalid transaction body/)
-
-//       res = await registerAssetAsync(VALID_ASSET_NAME, VALID_DESC, '0', VALID_PRECISION, VALID_STRATEGY, ISSUER_ACCOUNT)
-//       expect(res.body).to.have.property('error').to.match(/^Amount should be integer/)
-
-//       res = await registerAssetAsync(VALID_ASSET_NAME, VALID_DESC, '-1', VALID_PRECISION, VALID_STRATEGY, ISSUER_ACCOUNT)
-//       expect(res.body).to.have.property('error').to.match(/^Amount should be integer/)
-
-//       res = await registerAssetAsync(VALID_ASSET_NAME, VALID_DESC, '1e49', VALID_PRECISION, VALID_STRATEGY, ISSUER_ACCOUNT)
-//       expect(res.body).to.have.property('error').to.match(/^Amount should be integer/)
-
-//       res = await registerAssetAsync(VALID_ASSET_NAME, VALID_DESC, 'NaN', VALID_PRECISION, VALID_STRATEGY, ISSUER_ACCOUNT)
-//       expect(res.body).to.have.property('error').to.match(/^Amount should be integer/)
-
-//       res = await registerAssetAsync(VALID_ASSET_NAME, VALID_DESC, '1000000000000000000000000000000000000000000000001', VALID_PRECISION, VALID_STRATEGY, ISSUER_ACCOUNT)
-//       expect(res.body).to.have.property('error').to.match(/^Invalid amount range/)
-
-//       res = await registerAssetAsync(VALID_ASSET_NAME, VALID_DESC, 'invalid_number', VALID_PRECISION, VALID_STRATEGY, ISSUER_ACCOUNT)
-//       expect(res.body).to.have.property('error').to.match(/^Amount should be integer/)
-
-//       res = await registerAssetAsync(VALID_ASSET_NAME, VALID_DESC, '1000.5', VALID_PRECISION, VALID_STRATEGY, ISSUER_ACCOUNT)
-//       expect(res.body).to.have.property('error').to.match(/^Amount should be integer/)
-//     })
-
-//     it('Invalid asset precision', async () => {
-//       let res = await registerAssetAsync(VALID_ASSET_NAME, VALID_DESC, VALID_MAXIMUM, -1, VALID_STRATEGY, ISSUER_ACCOUNT);
-//       expect(res.body).to.have.property('error').to.match(/^Invalid transaction body/)
-
-//       res = await registerAssetAsync(VALID_ASSET_NAME, VALID_DESC, VALID_MAXIMUM, 17, VALID_STRATEGY, ISSUER_ACCOUNT)
-//       expect(res.body).to.have.property('error').to.match(/^Invalid transaction body/)
-//     })
-
-//     it('Invalid asset strategy', async () => {
-//       const largeString = Buffer.allocUnsafe(300).toString();
-//       const res = await registerAssetAsync(VALID_ASSET_NAME, VALID_DESC, VALID_MAXIMUM, VALID_PRECISION, largeString, ISSUER_ACCOUNT);
-//       expect(res.body).to.have.property('error').to.match(/^Invalid transaction body/)
-//     })
-
-//     it('Issuer not exist', async () => {
-//       const account = node.genNormalAccount();
-//       const name = `${node.randomIssuerName()}.BTC`;
-//       const res = await registerAssetAsync(name, VALID_DESC, VALID_MAXIMUM, VALID_PRECISION, VALID_STRATEGY, ISSUER_ACCOUNT);
-//       expect(res.body).to.have.property('error').to.match(/^Issuer not exists/)
-//     })
-
-//     it('Double submit and double register', async () => {
-//       const account = node.genNormalAccount();
-//       await node.giveMoneyAndWaitAsync([account.address])
-
-//       const issuerName = node.randomIssuerName();
-//       const assetName = `${issuerName}.BTC`;
-//       let res = await registerIssuerAsync(issuerName, 'normal desc', account);
-//       expect(res.body).to.have.property('success').to.be.true
-//       await node.onNewBlockAsync()
-
-//       res = await registerAssetAsync(assetName, VALID_DESC, VALID_MAXIMUM, VALID_PRECISION, VALID_STRATEGY, account)
-//       expect(res.body).to.have.property('success').to.be.true
-
-//       res = await registerAssetAsync(assetName, VALID_DESC, VALID_MAXIMUM, VALID_PRECISION + 1, VALID_STRATEGY, account)
-//       expect(res.body).to.have.property('error').to.match(/^Double submit/)
-//       await node.onNewBlockAsync()
-//       res = await registerAssetAsync(assetName, VALID_DESC, VALID_MAXIMUM, VALID_PRECISION, VALID_STRATEGY, account)
-//       expect(res.body).to.have.property('error').to.match(/^Double register/)
-//     })
-//   })
-
-//   describe('Parameter validate fail cases', () => {
-//     const ISSUE_ACCOUNT = node.genNormalAccount();
-//     const ASSET_NAME = 'NotExistName.BTC';
-
-//     it('should fail to issue if amount is invalid', async () => {
-//       let res = await issueAssetAsync(ASSET_NAME, '', ISSUE_ACCOUNT);
-//       expect(res.body).to.have.property('error').to.match(/^Invalid transaction body/)
-
-//       res = await issueAssetAsync(ASSET_NAME, '0', ISSUE_ACCOUNT)
-//       expect(res.body).to.have.property('error').to.match(/^Amount should be integer/)
-
-//       res = await issueAssetAsync(ASSET_NAME, 'invalid_number', ISSUE_ACCOUNT)
-//       expect(res.body).to.have.property('error').to.match(/^Amount should be integer/)
-
-//       res = await issueAssetAsync(ASSET_NAME, '1000.5', ISSUE_ACCOUNT)
-//       expect(res.body).to.have.property('error').to.match(/^Amount should be integer/)
-//     })
-
-//     it('should fail to change flags if parameters is invalid', async () => {
-//       let res = await changeFlagsAsync(ASSET_NAME, -1, 1, ISSUE_ACCOUNT);
-//       expect(res.body).to.have.property('error').to.match(/^Invalid asset flag type/)
-
-//       res = await changeFlagsAsync(ASSET_NAME, 1, -1, ISSUE_ACCOUNT)
-//       expect(res.body).to.have.property('error').to.match(/^Invalid asset flag/)
-
-//       res = await changeFlagsAsync(ASSET_NAME, 2, -1, ISSUE_ACCOUNT)
-//       expect(res.body).to.have.property('error').to.match(/^Invalid asset flag/)
-//     })
-
-//     it('should fail to update acl if parameters is invalid', async () => {
-//       const validFlag = 0;
-//       const validOperator = '+';
-//       const validList = [node.genNormalAccount().address];
-//       let res = await updateAclAsync(ASSET_NAME, '+-', validFlag, validList, ISSUE_ACCOUNT);
-//       expect(res.body).to.have.property('error').to.match(/^Invalid transaction body/)
-
-//       res = await updateAclAsync(ASSET_NAME, '|', validFlag, validList, ISSUE_ACCOUNT)
-//       expect(res.body).to.have.property('error').to.match(/^Invalid acl operator/)
-
-//       res = await updateAclAsync(ASSET_NAME, validOperator, -1, validList, ISSUE_ACCOUNT)
-//       expect(res.body).to.have.property('error').to.match(/^Invalid acl flag/)
-
-//       res = await updateAclAsync(ASSET_NAME, validOperator, validFlag, [], ISSUE_ACCOUNT)
-//       expect(res.body).to.have.property('error').to.match(/^Invalid acl list/)
-
-//       const bigList = [];
-//       for (let i = 0; i < 11; ++i) {
-//         bigList.push(node.genNormalAccount().address)
-//       }
-//       res = await updateAclAsync(ASSET_NAME, validOperator, validFlag, bigList, ISSUE_ACCOUNT)
-//       expect(res.body).to.have.property('error').to.match(/^Invalid acl list/)
-
-//       const unUniqList = ['123', '123'];
-//       res = await updateAclAsync(ASSET_NAME, validOperator, validFlag, unUniqList, ISSUE_ACCOUNT)
-//       expect(res.body).to.have.property('error').to.match(/^Invalid transaction body/)
-
-//       res = await updateAclAsync(ASSET_NAME, validOperator, validFlag, [ISSUE_ACCOUNT.address], ISSUE_ACCOUNT)
-//       expect(res.body).to.have.property('error').to.match(/^Issuer should not be in ACL list/)
-
-//       res = await updateAclAsync(ASSET_NAME, validOperator, validFlag, ['invalid address'], ISSUE_ACCOUNT)
-//       expect(res.body).to.have.property('error').to.match(/^Acl contains invalid address/)
-//     })
-
-//     it('should fail to do anything if asset not exists', async () => {
-//       const notExistAssetName = 'NotExistName.CNY';
-//       let res = await issueAssetAsync(notExistAssetName, '1', ISSUE_ACCOUNT);
-//       expect(res.body).to.have.property('error').to.match(/^Asset not exists/)
-
-//       res = await changeFlagsAsync(notExistAssetName, 1, 1, ISSUE_ACCOUNT)
-//       expect(res.body).to.have.property('error').to.match(/^Asset not exists/)
-
-//       res = await updateAclAsync(notExistAssetName, '+', 0, ['123'], ISSUE_ACCOUNT)
-//       expect(res.body).to.have.property('error').to.match(/^Asset not exists/)
-
-//       res = await transferAsync(notExistAssetName, '1', '123', ISSUE_ACCOUNT)
-//       expect(res.body).to.have.property('error').to.match(/^Asset not exists/)
-//     })
-//   })
-
-//   describe('Asset operation fail cases', () => {
-//     const ISSUE_ACCOUNT = node.genNormalAccount();
-//     const ISSUER_NAME = node.randomIssuerName();
-//     const ASSET_NAME = `${ISSUER_NAME}.GOLD`;
-//     const MAX_AMOUNT = '100000';
-
-//     beforeAll(async () => {
-//       await node.giveMoneyAndWaitAsync([ISSUE_ACCOUNT.address])
-//       let res = await registerIssuerAsync(ISSUER_NAME, 'valid desc', ISSUE_ACCOUNT);
-//       expect(res.body).to.have.property('success').to.be.true
-//       await node.onNewBlockAsync()
-
-//       res = await registerAssetAsync(ASSET_NAME, 'valid desc', MAX_AMOUNT, 1, '', ISSUE_ACCOUNT)
-//       expect(res.body).to.have.property('success').to.be.true
-//       await node.onNewBlockAsync()
-//     })
-
-//     it('should have no permission to operate if asset belongs to other account', async () => {
-//       const account = node.genNormalAccount();
-//       let res = await issueAssetAsync(ASSET_NAME, '1', account);
-//       expect(res.body).to.have.property('error').to.match(/^Permission not allowed/)
-
-//       res = await changeFlagsAsync(ASSET_NAME, 1, 1, account)
-//       expect(res.body).to.have.property('error').to.match(/^Permission not allowed/)
-
-//       res = await updateAclAsync(ASSET_NAME, '+', 0, [node.genNormalAccount().address], account)
-//       expect(res.body).to.have.property('error').to.match(/^Permission not allowed/)
-//     })
-
-//     it('should fail to issue if amount exceed the limit', async () => {
-//     //DdnUtils.bignum update   var res = await issueAssetAsync(ASSET_NAME, DdnUtils.bignum(MAX_AMOUNT).plus(1).toString(), ISSUE_ACCOUNT)
-//       const res = await issueAssetAsync(ASSET_NAME,
-//         DdnUtils.bignum.plus(MAX_AMOUNT, 1).toString(), ISSUE_ACCOUNT);
-
-//       expect(res.body).to.have.property('error').to.match(/^Exceed issue limit/)
-//     })
-
-//     it('should fail to double submit issuing', async () => {
-//       let res = await issueAssetAsync(ASSET_NAME, '1', ISSUE_ACCOUNT);
-//       expect(res.body).to.have.property('success').to.be.true
-//       res = await issueAssetAsync(ASSET_NAME, '2', ISSUE_ACCOUNT)
-//       expect(res.body).to.have.property('error').to.match(/^Double submit/)
-
-//       await node.onNewBlockAsync()
-//     })
-
-//     it('should fail to double set flag', async () => {
-//       // default acl flag is 0
-//       const res = await changeFlagsAsync(ASSET_NAME, 1, 0, ISSUE_ACCOUNT);
-//       expect(res.body).to.have.property('error').to.match(/^Flag double set/)
-//     })
-
-//     it('should fail to double submit flags', async () => {
-//       let res = await changeFlagsAsync(ASSET_NAME, 1, 1, ISSUE_ACCOUNT);
-//       expect(res.body).to.have.property('success').to.be.true
-//       res = await changeFlagsAsync(ASSET_NAME, 2, 1, ISSUE_ACCOUNT)
-//       expect(res.body).to.have.property('error').to.match(/^Double submit/)
-
-//       await node.onNewBlockAsync()
-//     })
-
-//     it('should fail to doulbe submit acl', async () => {
-//       let res = await updateAclAsync(ASSET_NAME, '+', 0, [node.genNormalAccount().address], ISSUE_ACCOUNT);
-//       expect(res.body).to.have.property('success').to.be.true
-//       res = await updateAclAsync(ASSET_NAME, '+', 0, [node.genNormalAccount().address], ISSUE_ACCOUNT)
-//       expect(res.body).to.have.property('error').to.match(/^Double submit/)
-
-//       await node.onNewBlockAsync()
-//     })
-
-//     it('should fail to add acl if some address is already in acl', async () => {
-//       const address1 = node.genNormalAccount().address;
-//       const address2 = node.genNormalAccount().address;
-//       let res = await updateAclAsync(ASSET_NAME, '+', 0, [address1], ISSUE_ACCOUNT);
-//       expect(res.body).to.have.property('success').to.be.true
-//       await node.onNewBlockAsync()
-
-//       res = await updateAclAsync(ASSET_NAME, '+', 0, [address1, address2], ISSUE_ACCOUNT)
-//       expect(res.body).to.have.property('error').to.match(/^Double add acl address/)
-
-//       res = await updateAclAsync(ASSET_NAME, '+', 1, [address1, address2], ISSUE_ACCOUNT)
-//       expect(res.body).to.have.property('success').to.be.true
-
-//       await node.onNewBlockAsync()
-
-//       res = await updateAclAsync(ASSET_NAME, '-', 0, [address1, address2], ISSUE_ACCOUNT)
-//       expect(res.body).to.have.property('success').to.be.true
-
-//       await node.onNewBlockAsync()
-//     })
-
-//     it('should fail to do anything if asset is writeoff', async () => {
-//       let res = await writeoffAssetAsync(ASSET_NAME, ISSUE_ACCOUNT);
-//       expect(res.body).to.have.property('success').to.be.true
-//       await node.onNewBlockAsync()
-
-//       res = await issueAssetAsync(ASSET_NAME, '1', ISSUE_ACCOUNT)
-//       expect(res.body).to.have.property('error').to.match(/^Asset already writeoff/)
-
-//       res = await changeFlagsAsync(ASSET_NAME, 1, 1, ISSUE_ACCOUNT)
-//       expect(res.body).to.have.property('error').to.match(/^Asset already writeoff/)
-//       await node.onNewBlockAsync()
-
-//       res = await updateAclAsync(ASSET_NAME, '+', 0, [node.genNormalAccount().address], ISSUE_ACCOUNT)
-//       expect(res.body).to.have.property('error').to.match(/^Asset already writeoff/)
-
-//       res = await transferAsync(ASSET_NAME, '1', node.genNormalAccount().address, ISSUE_ACCOUNT)
-//       expect(res.body).to.have.property('error').to.match(/^Asset already writeoff/)
-//     })
-//   })
-
-//   describe('Test issue strategy', () => {
-//     async function registerAssetWithStrategyAsync(maximum, strategy) {
-//       const account = node.genNormalAccount();
-//       const issuerName = node.randomIssuerName();
-//       const assetName = `${issuerName}.NAME`;
-//       await node.giveMoneyAndWaitAsync([account.address])
-//       let res = await registerIssuerAsync(issuerName, 'valid desc', account);
-//       expect(res.body).to.have.property('success').to.be.true
-//       await node.onNewBlockAsync()
-
-//       res = await registerAssetAsync(assetName, 'valid desc', maximum, 1, strategy, account)
-//       expect(res.body).to.have.property('success').to.be.true
-//       await node.onNewBlockAsync()
-//       return {
-//         account,
-//         issuerName,
-//         assetName
-//       };
-//     }
-//     it('normal cases should be ok', async () => {
-//       const assetInfo = await registerAssetWithStrategyAsync('10000', 'quantity <= maximum / 10 * (height - genesisHeight)');
-//       console.log(assetInfo)
-//       const account = assetInfo.account;
-//       const assetName = assetInfo.assetName;
-
-//       let res = await issueAssetAsync(assetName, '1001', account);
-//       expect(res.body).to.have.property('error').to.match(/^Strategy not allowed/)
-
-//       res = await issueAssetAsync(assetName, '1000', account)
-//       expect(res.body).to.have.property('success').to.be.true
-
-//       await node.onNewBlockAsync()
-//       res = await issueAssetAsync(assetName, '1001', account)
-//       expect(res.body).to.have.property('error').to.match(/^Strategy not allowed/)
-
-//       await node.onNewBlockAsync()
-//       res = await issueAssetAsync(assetName, '2000', account)
-//       expect(res.body).to.have.property('success').to.be.true
-
-//       await node.onNewBlockAsync()
-
-//       const anotherAccount = node.genNormalAccount();
-//       await node.giveMoneyAndWaitAsync([anotherAccount.address])
-//       res = await transferAsync(assetName, '3001', anotherAccount.address, account)
-//       expect(res.body).to.have.property('error').to.match(/^Insufficient asset balance/)
-
-//       res = await transferAsync(assetName, '3000', anotherAccount.address, account)
-//       expect(res.body).to.have.property('success').to.be.true
-//       res = await transferAsync(assetName, '1', anotherAccount.address, account)
-//       expect(res.body).to.have.property('error').to.match(/^Insufficient asset balance/)
-
-//       await node.onNewBlockAsync()
-
-//       res = await node.apiGetAsync(`/aobasset/balances/${account.address}`)
-//       debug('get sender\'s balances first time', res.body)
-//       expect(res.body.result[0].currency).to.equal(assetName)
-//       expect(res.body.result[0].balance).to.equal('0')
-
-//       res = await node.apiGetAsync(`/aobasset/balances/${anotherAccount.address}`)
-//       debug('get recipient\'s balances first time', res.body)
-//       expect(res.body.result[0].currency).to.equal(assetName)
-//       expect(res.body.result[0].balance).to.equal('3000')
-
-//       res = await transferAsync(assetName, '1000', account.address, anotherAccount)
-//       expect(res.body).to.have.property('success').to.be.true
-//       res = await transferAsync(assetName, '2001', account.address, anotherAccount)
-//       expect(res.body).to.have.property('error').to.match(/^Insufficient asset balance/)
-//       await node.onNewBlockAsync()
-
-//       res = await node.apiGetAsync(`/aobasset/balances/${account.address}`)
-//       debug('get sender\'s balances second time', res.body)
-//       expect(res.body.result[0].currency).to.equal(assetName)
-//       expect(res.body.result[0].balance).to.equal('1000')
-
-//       res = await node.apiGetAsync(`/aobasset/balances/${anotherAccount.address}`)
-//       debug('get recipient\'s balances second time', res.body)
-//       expect(res.body.result[0].currency).to.equal(assetName)
-//       expect(res.body.result[0].balance).to.equal('2000')
-//     })
-//   })
-
-/**
- * ok........
- */
-//   describe('Test modify permission', () => {
-//     const ISSUE_ACCOUNT = node.genNormalAccount();
-//     const ISSUER_NAME = node.randomIssuerName();
-//     const ASSET_NAME = `${ISSUER_NAME}.SILVER`;
-//     const MAX_AMOUNT = '100000';
-
-//     async function registerAssetWithAllowParameters(allowWriteoff, allowWhitelist, allowBlacklist) {
-//       const trs = node.ddn.aob.createAsset(ASSET_NAME, 'valid desc', MAX_AMOUNT, 1, '', allowWriteoff, allowWhitelist, allowBlacklist, ISSUE_ACCOUNT.password);
-//       const res = await node.submitTransactionAsync(trs);
-//       debug('registerAssetWithAllowParameters', res.body)
-//       return res
-//     }
-
-//     it('Invalid allow parameters', async () => {
-//       let res = await registerAssetWithAllowParameters(-1, 1, 1);
-//       expect(res.body).to.have.property('error').to.match(/^Asset allowWriteoff is not valid/)
-
-//       res = await registerAssetWithAllowParameters(1, 2, 1)
-//       expect(res.body).to.have.property('error').to.match(/^Invalid transaction body/)
-
-//       res = await registerAssetWithAllowParameters(1, 1, 999)
-//       expect(res.body).to.have.property('error').to.match(/^Invalid transaction body/)
-//     })
-
-//     it('Flags modifing should be denied with special asset parameters', async () => {
-//       await node.giveMoneyAndWaitAsync([ISSUE_ACCOUNT.address])
-//       let res = await registerIssuerAsync(ISSUER_NAME, 'valid desc', ISSUE_ACCOUNT);
-//       expect(res.body).to.have.property('success').to.be.true
-//       await node.onNewBlockAsync()
-
-//       res = registerAssetWithAllowParameters(0, 0, 0)
-//       await node.onNewBlockAsync()
-
-//       res = await node.apiGetAsync(`/aobasset/${ASSET_NAME}`)
-//       debug('get assets response', res.body)
-//       expect(res.body.result.allow_writeoff).to.equal(0)
-//       expect(res.body.result.allow_whitelist).to.equal(0)
-//       expect(res.body.result.allow_blacklist).to.equal(0)
-
-//       res = await writeoffAssetAsync(ASSET_NAME, ISSUE_ACCOUNT)
-//       expect(res.body).to.have.property('error').to.match(/^Writeoff not allowed/)
-
-//       res = await changeFlagsAsync(ASSET_NAME, 1, 1, ISSUE_ACCOUNT)
-//       expect(res.body).to.have.property('error').to.match(/^Whitelist not allowed/)
-
-//       res = await updateAclAsync(ASSET_NAME, '+', 0, [node.genNormalAccount().address], ISSUE_ACCOUNT)
-//       expect(res.body).to.have.property('error').to.match(/^Blacklist not allowed/)
-
-//       res = await updateAclAsync(ASSET_NAME, '+', 1, [node.genNormalAccount().address], ISSUE_ACCOUNT)
-//       expect(res.body).to.have.property('error').to.match(/^Whitelist not allowed/)
-//     })
-//   })
-
-// })
-
-// backed
-
-// import Debug from 'debug';
-// import node from '@ddn/node-sdk/lib/test';
-
-// const debug = Debug('debug');
-// const expect = node.expect;
-
-// async function createPluginAsset(type, asset, secret, secondSecret) {
-//     return await node.ddn.assetPlugin.createPluginAsset(type, asset, secret, secondSecret)
-// }
-
-// function randomCurrencName() {
-//     return node.randomIssuerName("DDN.", 3);
-// }
-
-// describe("AOB Test", () => {
-//     // 加载插件
-//     node.ddn.init();
-
-//     it("开启白名单 Should be ok", async (done) => {
-//         const obj = {
-//             currency: randomCurrencName(),
-//             flag: 1,
-//             flag_type: 1
-//         };
-//         const transaction = await createPluginAsset(62, obj, node.Eaccount.password, "DDD12345");
-//         node.peer.post("/transactions")
-//             .set("Accept", "application/json")
-//             .set("version", node.version)
-//             .set("nethash", node.config.nethash)
-//             .set("port", node.config.port)
-//             .send({ transaction })
-//             .expect("Content-Type", /json/)
-//             .expect(200)
-//             .end((err, { body }) => {
-//                 // console.log('body', body);
-
-//                 expect(err).be.not.ok;
-
-//                 expect(body).to.have.property("success").to.be.true;
-
-//                 done();
-//             });
-//     })
-
-//     it("资产转账 Should be fail", async (done) => {
-//         await node.onNewBlockAsync();
-
-//         const obj = {
-//             recipientId: node.Daccount.address,
-//             currency: randomCurrencName(),
-//             aobAmount: "10",
-//             message: '测试转账',
-//             fee: '0',
-//         };
-
-//         const transaction = await createPluginAsset(65, obj, node.Eaccount.password, "DDD12345");
-//         node.peer.post("/transactions")
-//             .set("Accept", "application/json")
-//             .set("version", node.version)
-//             .set("nethash", node.config.nethash)
-//             .set("port", node.config.port)
-//             .send({ transaction })
-//             .expect("Content-Type", /json/)
-//             .expect(200)
-//             .end((err, { body }) => {
-//                 debug(body);
-
-//                 expect(err).be.not.ok;
-//                 expect(body).to.have.property("success").to.be.false;
-//                 expect(body).to.have.property("error").equal("Permission not allowed.");
-
-//                 done();
-//             });
-//     })
-
-//     it("增加Daccount到白名单 Should be ok", async (done) => {
-//         const obj = {
-//             currency: randomCurrencName(),
-//             flag: 1,
-//             operator: "+",
-//             list: [
-//                 node.Daccount.address
-//             ].join(",")
-//         };
-//         const transaction = await createPluginAsset(63, obj, node.Eaccount.password, "DDD12345");
-//         node.peer.post("/transactions")
-//             .set("Accept", "application/json")
-//             .set("version", node.version)
-//             .set("nethash", node.config.nethash)
-//             .set("port", node.config.port)
-//             .send({ transaction })
-//             .expect("Content-Type", /json/)
-//             .expect(200)
-//             .end((err, { body }) => {
-//                 debug('body', body);
-
-//                 expect(err).be.not.ok;
-
-//                 expect(body).to.have.property("success").to.be.true;
-
-//                 done();
-//             });
-//     });
-
-//     it("资产转账 Should be ok", async (done) => {
-//         await node.onNewBlockAsync();
-
-//         const obj = {
-//             recipientId: node.Daccount.address,
-//             currency: randomCurrencName(),
-//             aobAmount: "10",
-//             message: '测试转账',
-//             fee: '0',
-//         };
-
-//         const transaction = await createPluginAsset(65, obj, node.Eaccount.password, "DDD12345");
-//         node.peer.post("/transactions")
-//             .set("Accept", "application/json")
-//             .set("version", node.version)
-//             .set("nethash", node.config.nethash)
-//             .set("port", node.config.port)
-//             .send({ transaction })
-//             .expect("Content-Type", /json/)
-//             .expect(200)
-//             .end((err, { body }) => {
-//                 debug(body);
-//                 expect(err).be.not.ok;
-
-//                 expect(body).to.have.property("success").to.be.true;
-
-//                 done();
-//             });
-//     })
-
-//     it("在白名单删除Daccount Should be ok", async (done) => {
-//         const obj = {
-//             currency: randomCurrencName(),
-//             flag: 1,
-//             operator: "-",
-//             list: [
-//                 node.Daccount.address
-//             ].join(",")
-//         };
-//         const transaction = await createPluginAsset(63, obj, node.Eaccount.password, "DDD12345");
-
-//         node.peer.post("/transactions")
-//             .set("Accept", "application/json")
-//             .set("version", node.version)
-//             .set("nethash", node.config.nethash)
-//             .set("port", node.config.port)
-//             .send({ transaction })
-//             .expect("Content-Type", /json/)
-//             .expect(200)
-//             .end((err, { body }) => {
-//                 debug('body', body);
-
-//                 expect(err).be.not.ok;
-
-//                 expect(body).to.have.property("success").to.be.true;
-
-//                 done();
-//             });
-//     });
-
-//     it("资产转账 Should be fail", async (done) => {
-//         await node.onNewBlockAsync();
-
-//         const obj = {
-//             recipientId: node.Daccount.address,
-//             currency: randomCurrencName(),
-//             aobAmount: "10",
-//             message: '测试转账',
-//             fee: '0',
-//         };
-
-//         const transaction = await createPluginAsset(65, obj, node.Eaccount.password, "DDD12345");
-
-//         node.peer.post("/transactions")
-//             .set("Accept", "application/json")
-//             .set("version", node.version)
-//             .set("nethash", node.config.nethash)
-//             .set("port", node.config.port)
-//             .send({ transaction })
-//             .expect("Content-Type", /json/)
-//             .expect(200)
-//             .end((err, { body }) => {
-//                 debug(body);
-
-//                 expect(err).be.not.ok;
-
-//                 expect(body).to.have.property("success").to.be.false;
-//                 expect(body).to.have.property("error").equal("Permission not allowed.");
-
-//                 done();
-//             });
-//     })
-
-//     it("关闭白名单 Should be ok", async (done) => {
-//         const obj = {
-//             currency: randomCurrencName(),
-//             flag: 2,
-//             flag_type: 1
-//         };
-//         const transaction = await createPluginAsset(62, obj, node.Eaccount.password, "DDD12345");
-
-//         node.peer.post("/transactions")
-//             .set("Accept", "application/json")
-//             .set("version", node.version)
-//             .set("nethash", node.config.nethash)
-//             .set("port", node.config.port)
-//             .send({ transaction })
-//             .expect("Content-Type", /json/)
-//             .expect(200)
-//             .end((err, { body }) => {
-//                 // console.log('body', body);
-
-//                 expect(err).be.not.ok;
-
-//                 expect(body).to.have.property("success").to.be.true;
-
-//                 done();
-//             });
-//     })
-
-//     it("资产转账 Should be ok", async (done) => {
-//         await node.onNewBlockAsync();
-
-//         const obj = {
-//             recipientId: node.Daccount.address,
-//             currency: randomCurrencName(),
-//             aobAmount: "10",
-//             message: '测试转账',
-//             fee: '0',
-//         };
-
-//         const transaction = await createPluginAsset(65, obj, node.Eaccount.password, "DDD12345");
-
-//         node.peer.post("/transactions")
-//             .set("Accept", "application/json")
-//             .set("version", node.version)
-//             .set("nethash", node.config.nethash)
-//             .set("port", node.config.port)
-//             .send({ transaction })
-//             .expect("Content-Type", /json/)
-//             .expect(200)
-//             .end((err, { body }) => {
-//                 debug(body);
-
-//                 expect(err).be.not.ok;
-
-//                 expect(body).to.have.property("success").to.be.true;
-
-//                 done();
-//             });
-//     })
-
-// });
+import Debug from 'debug';
+import DdnUtils from "@ddn/utils";
+import node from '@ddn/node-sdk/lib/test';
+
+const expect = node.expect;
+const debug = Debug('debug');
+
+async function createTransfer(address, amount, secret) {
+    return await node.ddn.transaction.createTransaction(address, amount, null, secret);
+}
+
+async function createPluginAsset(type, asset, secret, secondSecret) {
+    return await node.ddn.assetPlugin.createPluginAsset(type, asset, secret, secondSecret)
+}
+
+describe("AOB Test", () => {
+
+    // 先创建两个发行商账户
+    let IssuerAccount1 = node.randomAccount();
+    let IssuerAccount2 = node.randomAccount();
+    debug('IssuerAccount', IssuerAccount1);
+
+    // 先给发行商想个名字
+    const issuerName = node.randomIssuerName('', 5);
+    const issuerName2 = node.randomIssuerName();
+    debug('issuerName', issuerName);
+
+    // 开始前，得把发行商账号 IssuerAccount 注册到链上(登录一下即可)
+    beforeAll((done) => {
+        node.api.post("/accounts/open")
+            .set("Accept", "application/json")
+            .set("version", node.version)
+            .set("nethash", node.config.nethash)
+            .set("port", node.config.port)
+            .send({
+                secret: IssuerAccount1.password
+            })
+            .expect("Content-Type", /json/)
+            .expect(200)
+            .end(function (err, { body }) {
+                debug("create account", JSON.stringify(body));
+                expect(err).be.not.ok;
+                expect(body).to.have.property('success').to.be.true;
+                IssuerAccount1.address = body.account.address;
+                IssuerAccount1.publicKey = body.account.publicKey;
+
+                done();
+            });
+    });
+
+    // 注册发行商要花钱
+    beforeAll(async (done) => {
+        // 转账给它
+        const transaction = await createTransfer(IssuerAccount1.address, node.randomCoin(), node.Gaccount.password);
+
+        node.peer.post("/transactions")
+            .set("Accept", "application/json")
+            .set("version", node.version)
+            .set("nethash", node.config.nethash)
+            .set("port", node.config.port)
+            .send({
+                transaction
+            })
+            .expect("Content-Type", /json/)
+            .expect(200)
+            .end((err, {
+                body
+            }) => {
+                debug('transfer', transaction);
+                debug('transfer body', body);
+                expect(err).be.not.ok;
+
+                expect(body).to.have.property("success").to.be.true;
+                expect(body).to.have.property("transactionId").to.be.a('string');
+
+                done();
+            });
+    });
+
+    describe("Register Issuer", () => {
+        it("Should be ok", async (done) => {
+            await node.onNewBlockAsync();
+
+            const transaction = await node.ddn.aob.createIssuer(issuerName, "J G V", IssuerAccount1.password);
+            debug('注册发行商创建的transaction 1', transaction);
+
+            node.peer.post("/transactions")
+                .set("Accept", "application/json")
+                .set("version", node.version)
+                .set("nethash", node.config.nethash)
+                .set("port", node.config.port)
+                .send({
+                    transaction
+                })
+                .expect("Content-Type", /json/)
+                .expect(200)
+                .end((err, {
+                    body
+                }) => {
+                    debug('Register Issuer ok', body);
+
+                    expect(err).be.not.ok;
+                    expect(body).to.have.property("success").to.be.true;
+
+                    done();
+                });
+        })
+
+        it("with the same name again, Should be fail", async (done) => {
+            await node.onNewBlockAsync();
+
+            const transaction = await node.ddn.aob.createIssuer(issuerName, "J G V", IssuerAccount2.password);
+            debug('注册发行商创建的transaction 2', transaction);
+
+            node.peer.post("/transactions")
+                .set("Accept", "application/json")
+                .set("version", node.version)
+                .set("nethash", node.config.nethash)
+                .set("port", node.config.port)
+                .send({
+                    transaction
+                })
+                .expect("Content-Type", /json/)
+                .expect(200)
+                .end((err, {
+                    body
+                }) => {
+                    debug('Register Issuer with same name fail', body);
+
+                    expect(err).be.not.ok;
+                    expect(body).to.have.property("success").to.be.false;
+                    expect(body).to.have.property("error").to.contain('Issuer name/issuer_id already exists');
+
+                    done();
+                });
+        })
+
+        it("with the same IssuerAccount1 again, Should be fail", async (done) => {
+            await node.onNewBlockAsync();
+
+            const transaction = await node.ddn.aob.createIssuer(issuerName2, "J G V", IssuerAccount1.password);
+            debug('注册发行商创建的transaction 3', transaction);
+
+            node.peer.post("/transactions")
+                .set("Accept", "application/json")
+                .set("version", node.version)
+                .set("nethash", node.config.nethash)
+                .set("port", node.config.port)
+                .send({
+                    transaction
+                })
+                .expect("Content-Type", /json/)
+                .expect(200)
+                .end((err, {
+                    body
+                }) => {
+                    debug('Register Issuer with same IssuerAccount1 fail', body);
+
+                    expect(err).be.not.ok;
+                    expect(body).to.have.property("success").to.be.false;
+                    expect(body).to.have.property("error").to.contain('Issuer name/issuer_id already exists');
+
+                    done();
+                });
+        })
+
+        it("with IssuerAccount2 who no money, Should be fail", async (done) => {
+            await node.onNewBlockAsync();
+
+            const transaction = await node.ddn.aob.createIssuer(issuerName2, "J G V", IssuerAccount2.password);
+            debug('注册发行商创建的transaction 3', transaction);
+
+            node.peer.post("/transactions")
+                .set("Accept", "application/json")
+                .set("version", node.version)
+                .set("nethash", node.config.nethash)
+                .set("port", node.config.port)
+                .send({
+                    transaction
+                })
+                .expect("Content-Type", /json/)
+                .expect(200)
+                .end((err, {
+                    body
+                }) => {
+                    debug('Register Issuer with no money IssuerAccount2 fail', body);
+
+                    expect(err).be.not.ok;
+                    expect(body).to.have.property("success").to.be.false;
+                    expect(body).to.have.property("error").to.contain('Insufficient balance');
+
+                    done();
+                });
+        });
+    });
+
+    describe("Get issuers", () => {
+
+        it('Get issuers should be ok', async () => {
+            const [err, res] = await node.apiGetAsyncE('/aob/issuers');
+
+            debug('get /aob/issuers/issuers response', err, res.body)
+            expect(err).to.not.ok;
+            expect(res.body.success).to.be.true
+            if (res.body.data) {
+                expect(res.body.data.total).to.be.a('number')
+                expect(res.body.data.rows).to.be.instanceOf(Array)
+            }
+        })
+
+        it('Register issuer should be ok', async () => {
+            const [err, res] = await node.apiGetAsyncE(`/aob/issuers/name/${issuerName}`)
+            debug('issuerName', issuerName)
+            debug('get /aob/issuers/name/:name response', err, res.body)
+            expect(err).to.not.ok;
+            expect(res.body).to.have.property('data')
+            if (res.body.data) {
+                expect(res.body.data.name).to.equal(issuerName)
+                expect(res.body.data.issuer_id).to.equal(IssuerAccount1.address)
+            }
+        })
+
+    })
+
+    let currency; // 名字本就是 assetName;
+    describe("Register Asset", () => {
+        test("Should be ok", async (done) => {
+            currency = issuerName + "." + node.randomIssuerName('', 3).toUpperCase();
+            debug('currency', currency);
+
+            var transaction = await node.ddn.aob.createAsset(currency, "DDD新币种", "100000000", 2, '', '0', '0', '0', IssuerAccount1.password);
+
+            debug('Asset transaction:', transaction)
+
+            node.peer.post("/transactions")
+                .set("Accept", "application/json")
+                .set("version", node.version)
+                .set("nethash", node.config.nethash)
+                .set("port", node.config.port)
+                .send({
+                    transaction
+                })
+                .expect("Content-Type", /json/)
+                .expect(200)
+                .end((err, {
+                    body
+                }) => {
+                    debug('asset register ok', body);
+
+                    expect(err).to.be.not.ok;
+                    expect(body).to.have.property("success").to.be.true;
+
+                    done();
+                });
+        })
+    });
+
+    // 发行资产，即增加市场流通数量
+    describe("Add asset issues", () => {
+
+        it("Should be ok", async (done) => {
+            // 等 1 次确认
+            await node.onNewBlockAsync();
+            const obj = {
+                currency,
+                aobAmount: "100000"
+            }
+
+            const transaction = await createPluginAsset(DdnUtils.assetTypes.AOB_ISSUE, obj, IssuerAccount1.password);
+
+            // const transaction = await node.ddn.aob.createIssue(currency, "100000", IssuerAccount1.password);
+            debug('Add issue transaction:', transaction)
+
+            node.peer.post("/transactions")
+                .set("Accept", "application/json")
+                .set("version", node.version)
+                .set("nethash", node.config.nethash)
+                .set("port", node.config.port)
+                .send({
+                    transaction
+                })
+                .expect("Content-Type", /json/)
+                .expect(200)
+                .end((err, {
+                    body
+                }) => {
+                    debug("Add issue", body);
+
+                    expect(err).to.be.not.ok;
+                    expect(body).to.have.property("success").to.be.true;
+
+                    done();
+                });
+        })
+
+    });
+
+    // 资产转账
+    describe("Transfer Issue", () => {
+
+        it("Should be ok", async (done) => {
+            // 等 1 次确认
+            await node.onNewBlockAsync();
+
+            const obj = {
+                recipientId: IssuerAccount1.address,
+                currency,
+                aobAmount: "10",
+                message: '测试转账',
+            };
+
+            // const transaction = await createPluginAsset(65, obj, IssuerAccount1.password);
+            const transaction = await createPluginAsset(DdnUtils.assetTypes.AOB_TRANSFER, obj, IssuerAccount1.password);
+
+            node.peer.post("/transactions")
+                .set("Accept", "application/json")
+                .set("version", node.version)
+                .set("nethash", node.config.nethash)
+                .set("port", node.config.port)
+                .send({
+                    transaction
+                })
+                .expect("Content-Type", /json/)
+                .expect(200)
+                .end((err, {
+                    body
+                }) => {
+                    debug(body);
+
+                    expect(err).to.be.not.ok;
+                    expect(body).to.have.property("success").to.be.true;
+
+                    done();
+                });
+
+        })
+    });
+
+    // 测试权限
+    describe('Modify permission', () => {
+        const ISSUE_ACCOUNT = node.genNormalAccount();
+        const ISSUER_NAME = node.randomIssuerName();
+        const ASSET_NAME = `${ISSUER_NAME}.CNY`;
+        const MAX_AMOUNT = '100000';
+
+        async function registerIssuerAsync(name, desc, { password }) {
+            const trs = await node.ddn.aob.createIssuer(name, desc, password);
+            const res = await node.submitTransactionAsync(trs);
+            debug('register issuer response', res.body)
+            return res
+        }
+
+        // 只能在注册的时候开启/关闭黑白名单
+        async function registerAssetWithAllowParameters(allowWriteoff, allowWhitelist, allowBlacklist) {
+            const trs = await node.ddn.aob.createAsset(ASSET_NAME, 'valid desc', MAX_AMOUNT, 1, '', allowWriteoff + '', allowWhitelist + '', allowBlacklist + '', ISSUE_ACCOUNT.password);
+            const res = await node.submitTransactionAsync(trs);
+            debug('registerAssetWithAllowParameters', res.body)
+            return res
+        }
+
+        async function writeoffAssetAsync(currency, { password }) {
+            const trs = await node.ddn.aob.createFlags(currency, 2, 1, password);
+            const res = await node.submitTransactionAsync(trs);
+            debug('writeoff asset response', res.body)
+            return res
+        }
+
+        async function changeFlagsAsync(currency, flagType, flag, { password }) {
+            const trs = await node.ddn.aob.createFlags(currency, flagType, flag, password);
+
+            const res = await node.submitTransactionAsync(trs);
+            debug('change flags response', res.body)
+            return res
+        }
+
+        async function updateAclAsync(currency, operator, flag, list, { password }) {
+            const trs = await node.ddn.aob.createAcl(currency, operator, flag, list, password);
+            const res = await node.submitTransactionAsync(trs);
+            debug('update acl response', res.body)
+            return res
+        }
+
+        it('Invalid allow parameters', async (done) => {
+            let res = await registerAssetWithAllowParameters(-1, 1, 1);
+            expect(res.body).to.have.property('error').to.match(/^Asset allowWriteoff is not valid/)
+
+            res = await registerAssetWithAllowParameters(1, 2, 1)
+            expect(res.body).to.have.property('error').to.match(/^Asset allowWhitelist is not valid form asset-aob/)
+
+            res = await registerAssetWithAllowParameters(1, 1, 999)
+            expect(res.body).to.have.property('error').to.match(/^Asset allowBlacklist is not valid form asset-aob/)
+
+            done();
+        })
+
+        // 仅仅改变 flag 是无法启用黑白名单的，需要在创建资产的时候就要决定是否开启
+        it('Flags modifing should be denied with special asset parameters', async (done) => {
+            const ISSUE_ACCOUNT = node.genNormalAccount();
+            const ISSUER_NAME = node.randomIssuerName();
+            const ASSET_NAME = `${ISSUER_NAME}.CNY`;
+
+            async function registerAssetWithAllowParameters(allowWriteoff, allowWhitelist, allowBlacklist) {
+                const trs = await node.ddn.aob.createAsset(ASSET_NAME, 'valid desc', MAX_AMOUNT, 1, '', allowWriteoff + '', allowWhitelist + '', allowBlacklist + '', ISSUE_ACCOUNT.password);
+                const res = await node.submitTransactionAsync(trs);
+                debug('registerAssetWithAllowParameters 2', res.body)
+                return res
+            }
+
+            await node.giveMoneyAndWaitAsync([ISSUE_ACCOUNT.address])
+            let res = await registerIssuerAsync(ISSUER_NAME, 'valid desc', ISSUE_ACCOUNT);
+            expect(res.body).to.have.property('success').to.be.true
+
+            await node.onNewBlockAsync()
+
+            res = registerAssetWithAllowParameters(0, 0, 0)
+            await node.onNewBlockAsync()
+
+            res = await node.apiGetAsync(`/aob/assets/${ASSET_NAME}`)
+            debug('get assets response', ASSET_NAME, res.body)
+            expect(res.body.result.allow_writeoff).to.equal("0")
+            expect(res.body.result.allow_whitelist).to.equal('0')
+            expect(res.body.result.allow_blacklist).to.equal('0')
+
+            // 开启注销或黑白名单功能
+            res = await writeoffAssetAsync(ASSET_NAME, ISSUE_ACCOUNT)
+            expect(res.body).to.have.property('error').to.match(/^Writeoff not allowed/)
+
+            res = await changeFlagsAsync(ASSET_NAME, 1, 1, ISSUE_ACCOUNT)
+            expect(res.body).to.have.property('error').to.match(/^Whitelist not allowed/)
+
+            // 改变用户权限
+            res = await updateAclAsync(ASSET_NAME, '+', 0, [node.genNormalAccount().address].join(','), ISSUE_ACCOUNT)
+            expect(res.body).to.have.property('error').to.match(/^Blacklist not allowed/)
+
+            res = await updateAclAsync(ASSET_NAME, '+', 1, [node.genNormalAccount().address].join(','), ISSUE_ACCOUNT)
+            expect(res.body).to.have.property('error').to.match(/^Whitelist not allowed/)
+
+            done();
+        }, 50000) // 这里运行了多个 onNewBlockAsync 时间超过了 30s 所以必然超时（20000ms），只能修改时间
+
+        // 白名单开关，开启白名单
+        describe("use whitelist to set acl", () => {
+
+            const IssuerAccountWhitelist = node.genNormalAccount();
+            const ISSUER_NAME = node.randomIssuerName();
+            const currency = `${ISSUER_NAME}.CNY`;
+            const MAX_AMOUNT = '100000';
+
+            async function registerAssetWithAllowParameters(allowWriteoff, allowWhitelist, allowBlacklist) {
+                const trs = await node.ddn.aob.createAsset(currency, 'valid desc', MAX_AMOUNT, 1, '', allowWriteoff + '', allowWhitelist + '', allowBlacklist + '', IssuerAccountWhitelist.password);
+                const res = await node.submitTransactionAsync(trs);
+                debug('registerAssetWithAllowParameters 3', res.body)
+                return res
+            }
+
+            it('Valid allow parameters', async () => {
+                await node.giveMoneyAndWaitAsync([IssuerAccountWhitelist.address])
+                let res = await registerIssuerAsync(ISSUER_NAME, 'valid desc', IssuerAccountWhitelist);
+                expect(res.body).to.have.property('success').to.be.true
+
+                await node.onNewBlockAsync()
+
+                // 开启
+                res = await registerAssetWithAllowParameters(1, 1, 1);
+                debug('Valid allow parameters', res.body)
+                expect(res.body).to.have.property('success')
+            }, 50000)
+
+            // 发行资产，即增加市场流通数量
+            it("Add asset issues, Should be ok", async (done) => {
+                // 等 1 次确认
+                await node.onNewBlockAsync();
+
+                const obj = {
+                    currency,
+                    aobAmount: "100000"
+                }
+
+                const transaction = await createPluginAsset(DdnUtils.assetTypes.AOB_ISSUE, obj, IssuerAccountWhitelist.password);
+
+                // const transaction = await node.ddn.aob.createIssue(currency, "100000", IssuerAccount1.password);
+                debug('Add issue transaction 2:', transaction)
+
+                node.peer.post("/transactions")
+                    .set("Accept", "application/json")
+                    .set("version", node.version)
+                    .set("nethash", node.config.nethash)
+                    .set("port", node.config.port)
+                    .send({
+                        transaction
+                    })
+                    .expect("Content-Type", /json/)
+                    .expect(200)
+                    .end((err, {
+                        body
+                    }) => {
+                        debug("Add issue 2", body);
+
+                        expect(err).to.be.not.ok;
+                        expect(body).to.have.property("success").to.be.true;
+
+                        done();
+                    });
+            })
+
+            it("take on whitelist, Should be ok", async (done) => {
+                await node.onNewBlockAsync();
+
+                const obj = {
+                    currency,
+                    flag: 1, // 开启白名单
+                    flag_type: 1 // 黑白名单
+                };
+                const transaction = await createPluginAsset(DdnUtils.assetTypes.AOB_FLAG, obj, IssuerAccountWhitelist.password);
+                node.peer.post("/transactions")
+                    .set("Accept", "application/json")
+                    .set("version", node.version)
+                    .set("nethash", node.config.nethash)
+                    .set("port", node.config.port)
+                    .send({
+                        transaction
+                    })
+                    .expect("Content-Type", /json/)
+                    .expect(200)
+                    .end((err, {
+                        body
+                    }) => {
+                        debug('take on whitelist ok', body);
+
+                        expect(err).be.not.ok;
+                        expect(body).to.have.property("success").to.be.true;
+
+                        done();
+                    });
+            })
+
+            // 不在白名单里，所以没有权限
+            it("Transfer outside whitelist firstly, Should be fail", async (done) => {
+                await node.onNewBlockAsync();
+
+                const obj = {
+                    recipientId: node.Daccount.address,
+                    currency,
+                    aobAmount: "10",
+                    message: '测试转账失败',
+                };
+
+                const transaction = await createPluginAsset(DdnUtils.assetTypes.AOB_TRANSFER, obj, IssuerAccountWhitelist.password);
+
+                // var transaction = node.ddn.aob.createTransfer(randomCurrencName(), "10", IssuerAccountWhitelist.address, "测试转账", IssuerAccountWhitelist.password);
+                debug('transaction', transaction)
+
+                node.peer.post("/transactions")
+                    .set("Accept", "application/json")
+                    .set("version", node.version)
+                    .set("nethash", node.config.nethash)
+                    .set("port", node.config.port)
+                    .send({
+                        transaction
+                    })
+                    .expect("Content-Type", /json/)
+                    .expect(200)
+                    .end((err, {
+                        body
+                    }) => {
+                        debug('No permission fail', body);
+
+                        expect(err).to.be.not.ok;
+
+                        expect(body).to.have.property("success").to.be.false;
+                        expect(body).to.have.property("error").equal("Permission not allowed.");
+
+                        done();
+                    });
+            })
+
+            it(`Add ${node.Daccount.address} to whitelist, Should be ok`, async (done) => {
+                const obj = {
+                    currency,
+                    flag: 1,
+                    operator: "+",
+                    list: [
+                        node.Daccount.address
+                    ].join(",")
+                };
+                const transaction = await createPluginAsset(63, obj, IssuerAccountWhitelist.password); // AobAcl - 63
+                node.peer.post("/transactions")
+                    .set("Accept", "application/json")
+                    .set("version", node.version)
+                    .set("nethash", node.config.nethash)
+                    .set("port", node.config.port)
+                    .send({ transaction })
+                    .expect("Content-Type", /json/)
+                    .expect(200)
+                    .end((err, { body }) => {
+                        debug('add to whitelist ok', body);
+
+                        expect(err).be.not.ok;
+
+                        expect(body).to.have.property("success").to.be.true;
+
+                        done();
+                    });
+            });
+
+            it("Transfer in whitelist, Should be ok", async (done) => {
+                await node.onNewBlockAsync();
+
+                const obj = {
+                    recipientId: node.Daccount.address,
+                    currency,
+                    aobAmount: "10",
+                    message: '测试转账',
+                };
+
+                const transaction = await createPluginAsset(65, obj, IssuerAccountWhitelist.password);
+                node.peer.post("/transactions")
+                    .set("Accept", "application/json")
+                    .set("version", node.version)
+                    .set("nethash", node.config.nethash)
+                    .set("port", node.config.port)
+                    .send({ transaction })
+                    .expect("Content-Type", /json/)
+                    .expect(200)
+                    .end((err, { body }) => {
+                        debug('Transfer in whitelist', body);
+                        expect(err).be.not.ok;
+
+                        expect(body).to.have.property("success").to.be.true;
+
+                        done();
+                    });
+            })
+
+            it("Delete from whitelist, Should be ok", async (done) => {
+                const obj = {
+                    currency,
+                    flag: 1,
+                    operator: "-",
+                    list: [
+                        node.Daccount.address
+                    ].join(",")
+                };
+                const transaction = await createPluginAsset(63, obj, IssuerAccountWhitelist.password);
+
+                node.peer.post("/transactions")
+                    .set("Accept", "application/json")
+                    .set("version", node.version)
+                    .set("nethash", node.config.nethash)
+                    .set("port", node.config.port)
+                    .send({ transaction })
+                    .expect("Content-Type", /json/)
+                    .expect(200)
+                    .end((err, { body }) => {
+                        debug('Delete from whitelist', body);
+
+                        expect(err).be.not.ok;
+
+                        expect(body).to.have.property("success").to.be.true;
+
+                        done();
+                    });
+            });
+
+            it("Transfer outside whitelist, Should be fail again", async (done) => {
+                await node.onNewBlockAsync();
+
+                const obj = {
+                    recipientId: node.Daccount.address,
+                    currency,
+                    aobAmount: "10",
+                    message: '测试转账',
+                };
+
+                const transaction = await createPluginAsset(65, obj, IssuerAccountWhitelist.password);
+
+                node.peer.post("/transactions")
+                    .set("Accept", "application/json")
+                    .set("version", node.version)
+                    .set("nethash", node.config.nethash)
+                    .set("port", node.config.port)
+                    .send({ transaction })
+                    .expect("Content-Type", /json/)
+                    .expect(200)
+                    .end((err, { body }) => {
+                        debug('Transfer outside whitelist', body);
+
+                        expect(err).be.not.ok;
+
+                        expect(body).to.have.property("success").to.be.false;
+                        expect(body).to.have.property("error").equal("Permission not allowed.");
+
+                        done();
+                    });
+            })
+
+            it("Take off whitelist, Should be ok", async (done) => {
+                const obj = {
+                    currency,
+                    flag: 0, // 关闭
+                    flag_type: 1
+                };
+                const transaction = await createPluginAsset(DdnUtils.assetTypes.AOB_FLAG, obj, IssuerAccountWhitelist.password);
+
+                node.peer.post("/transactions")
+                    .set("Accept", "application/json")
+                    .set("version", node.version)
+                    .set("nethash", node.config.nethash)
+                    .set("port", node.config.port)
+                    .send({
+                        transaction
+                    })
+                    .expect("Content-Type", /json/)
+                    .expect(200)
+                    .end((err, {
+                        body
+                    }) => {
+                        debug('Take off whitelist', body);
+
+                        expect(err).be.not.ok;
+                        expect(body).to.have.property("success").to.be.true;
+
+                        done();
+                    });
+
+            })
+
+            it("资产转账 Should be ok", async (done) => {
+                await node.onNewBlockAsync();
+
+                const obj = {
+                    recipientId: node.Daccount.address,
+                    currency,
+                    aobAmount: "10",
+                    message: '测试转账',
+                };
+
+                const transaction = await createPluginAsset(65, obj, IssuerAccountWhitelist.password);
+
+                node.peer.post("/transactions")
+                    .set("Accept", "application/json")
+                    .set("version", node.version)
+                    .set("nethash", node.config.nethash)
+                    .set("port", node.config.port)
+                    .send({ transaction })
+                    .expect("Content-Type", /json/)
+                    .expect(200)
+                    .end((err, { body }) => {
+                        debug(body);
+
+                        expect(err).be.not.ok;
+
+                        expect(body).to.have.property("success").to.be.true;
+
+                        done();
+                    });
+            })
+        });
+    });
+});

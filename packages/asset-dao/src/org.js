@@ -116,8 +116,7 @@ class Org extends Asset.Base {
         if (assetObj.state === 1) {
             feeBase = parseInt(feeBase / 10, 10); // change info
         }
-        // DdnUtils.bignum update
-        const result = DdnUtils.bignum.multiply(feeBase, 100000000).toString();
+        const result = DdnUtils.bignum.multiply(feeBase, this.constants.fixedPoint).toString();
         return result;
     }
 

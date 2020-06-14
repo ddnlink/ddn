@@ -1,8 +1,8 @@
+// no pass
 import Debug from 'debug';
 import DdnUtil from '@ddn/utils';
 
 import node from '@ddn/node-sdk/lib/test';
-import { toString } from 'hast-util-to-string';
 
 const debug = Debug('debug');
 
@@ -97,9 +97,6 @@ describe('Put /transactions', () => {
     let orgId = "";
 
     beforeAll(async () => {
-
-        // 加载插件
-        node.ddn.init();
 
         await openAccount(Account1);
         await openAccount(Account2);
@@ -401,13 +398,10 @@ describe('PUT /dao/exchanges', () => {
             });
     })
 
-    // it("Send random DDN to Account2, should be ok.", async () => {
-    // });
-
     it("State=1, Account2 balance > 700000000, should be ok.", async (done) => {
         await sendDDN(Account2);
 
-        await node.onNewBlockAsync();
+        // await node.onNewBlockAsync();
 
         node.api.put("/dao/exchanges")
             .set('Accept', 'application/json')

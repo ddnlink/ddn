@@ -27,8 +27,6 @@ class Vote {
 	}
 
 	async calculateFee(trs, sender) {
-        // DdnUtils.bignum update
-        // return 0.1 * constants.fixedPoint;
         return DdnUtils.bignum.multiply(0.1, this.constants.fixedPoint);
 	}
 
@@ -55,8 +53,11 @@ class Vote {
             return null;
         }
 
-        const bb = new ByteBuffer();
-        bb.writeUTF8String(asset.vote.votes.join(''));
+		const bb = new ByteBuffer();
+		const votes = asset.vote.votes.join('');
+		console.log('vote.js asset.vote.votes.join', votes);
+		
+        bb.writeUTF8String(votes);
         bb.flip();
 		return bb.toBuffer();
 	}

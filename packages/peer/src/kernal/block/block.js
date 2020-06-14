@@ -542,12 +542,14 @@ class Block {
         const doApplyBlock = async () => {
             this.logger.debug("doApplyBlock is starting");
 
-            const sortedTrs = block.transactions.sort((a, b) => {
-                if (a.type == 1) {
-                    return 1;
-                }
-                return 0;
-            });
+            // const sortedTrs = block.transactions.sort((a, b) => {
+            //     if (a.type == 1) {
+            //         return 1;
+            //     }
+            //     return 0;
+            // });
+
+            const sortedTrs = this._sortTransactions(block.transactions);
 
             return new Promise((resolve, reject) => {
                 this.dao.transaction(async (dbTrans, done) => {
