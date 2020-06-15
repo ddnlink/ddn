@@ -59,7 +59,7 @@ async function getFee(transaction) {
                 });
 
                 fee = await transInst.calculateFee(transaction);
-                console.log("crypto getFee", fee);
+                console.log("crypto getFee, fixedPoint", fee, fixedPoint, transInst);
 
                 transInst = null;
             }

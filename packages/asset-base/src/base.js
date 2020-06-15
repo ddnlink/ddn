@@ -420,7 +420,7 @@ class AssetBase {
                         return "transaction_id";
                     } else if (pName == "trs_type") {
                         return "transaction_type";
-                    } else if (pName == "trs_timestamp") {
+                    } else if (pName == "trs_timestamp" || pName == "timestamp") {
                         return "timestamp";
                     } else if (pName == "$or" || pName == "$and" || pName == "$in" || pName == "$like" ||
                         pName == "$in" || pName == "$lt" || pName == "$lte" || pName == "$gt" || pName == "$gte") {

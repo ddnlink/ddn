@@ -124,6 +124,8 @@ describe("Registering a delegate", () => {
     });
 
     it("When account has funds. Username is lowercase. Should be ok", async done => {
+        await node.onNewBlockAsync();
+        
         debug("account.username 1", account.username);
         account.username = node.randomDelegateName().toLowerCase();
         const transaction = await node.ddn.delegate.createDelegate(account.username, account.password);

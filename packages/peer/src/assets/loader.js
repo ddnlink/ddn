@@ -233,7 +233,7 @@ class Loader {
                     }
                 }
             }
-  
+
             assetInst.queryAsset(where, orders, true, pageIndex, pageSize)
                 .then(rows => {
                     res.status(200).json({ success: true, data: rows });

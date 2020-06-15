@@ -175,10 +175,20 @@ class Contribution extends Asset.Base {
             throw new Error(`Invalid parameters: ${validateErrors[0].schemaPath} ${validateErrors[0].message}`);
         }
 
+        const parseSortItem = (sort, item) => {
+            const subItems = item.split(":");
+            if (subItems.length == 2) {
+                if (subItems[0].replace(/\s*/, "") != "") {
+                    sort.push(subItems);
+                }
+            }
+        };
+
         const where = {
             trs_type: await this.getTransactionType()
         };
         where.received_address = org.address;
+
         if (req.query.url) {
             where.url = req.query.url.toLowerCase();
         }
@@ -188,16 +198,39 @@ class Contribution extends Asset.Base {
             }
         }
 
+        // 这里是否需要固定排序
+        const orders = [];
+        let sortItems = req.query.sort;
+        delete req.query.sort;
+
         var pageIndex = req.query.pageindex || 1;
         var pageSize = req.query.pagesize || 50;
 
+        if (sortItems) {
+            if (!sortItems.splice) {
+                sortItems = [sortItems];
+            }
+
+            for (let i = 0; i < sortItems.length; i++) {
+                const sortItem = sortItems[i];
+                if (sortItem.replace(/\s*/, "") != "") {
+                    const pos = sortItem.indexOf(":");
+                    if (pos >= 0) {
+                        parseSortItem(orders, sortItem);
+                    } else {
+                        orders.push(sortItem);
+                    }
+                }
+            }
+        }
+
         return await new Promise((resolve, reject) => {
-            this.queryAsset(where, [], true, pageIndex, pageSize)
-            .then(rows => {
-                resolve({success: true, state: 0, data: rows});
-            }).catch(err => {
-                reject(err);
-            });
+            this.queryAsset(where, orders, true, pageIndex, pageSize)
+                .then(rows => {
+                    resolve({ success: true, state: 0, data: rows });
+                }).catch(err => {
+                    reject(err);
+                });
         })
     }
 

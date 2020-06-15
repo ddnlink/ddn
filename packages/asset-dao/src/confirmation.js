@@ -10,7 +10,7 @@ import daoUtil from './daoUtil';
   * @senderAddress 投稿者的钱包地址
   * @url 文章的dat地址
   * @state 0-不接受，1-确认接收
-  * @contributionTrsId 投稿的交易id
+  * @contributionTrsId 投稿的交易id，关联到投稿内容
   * @transactionId 交易id
   *
   * @amout 等于投稿时作者设定的 @price 的数量
@@ -62,7 +62,7 @@ class Confirmation extends Asset.Base {
 
     async calculateFee(trs) {
         const confirmation = await this.getAssetObject(trs);
-        let feeBase;
+        let feeBase = "1";
         if (confirmation.state === 0) {
             feeBase = '0'; // 拒绝稿件时手续费为0
         }
@@ -76,7 +76,7 @@ class Confirmation extends Asset.Base {
 
         const confirmation = await this.getAssetObject(trs);
         if (!trs.asset || !confirmation) {
-            throw new Error('Invalid transaction asset "Contribution"');
+            throw new Error('Invalid transaction asset "DaoContribution"');
         }
 
         if (confirmation.state === 0) {
@@ -128,12 +128,13 @@ class Confirmation extends Asset.Base {
         const confirmationRecords = await super.queryAsset({
             contribution_trs_id: confirmation.contribution_trs_id,
         }, null, false, 1, 1);
+
         if (confirmationRecords && confirmationRecords.length >= 1) {
             throw new Error(`The contribution has been confirmed: ${confirmation.contribution_trs_id}`);
         }
 
         // (2)如果不存在则继续查询
-        const contributionInst = await this.getAssetInstanceByName("Contribution");
+        const contributionInst = await this.getAssetInstanceByName("DaoContribution");
 
         const contributionRecords = await contributionInst.queryAsset({
             trs_id: confirmation.contribution_trs_id,
@@ -249,6 +250,7 @@ class Confirmation extends Asset.Base {
                 .then(rows => {
                     resolve({ success: true, state: 0, data: rows });
                 }).catch(err => {
+                    this.logger.error('confirmation error', err);
                     reject(err);
                 });
         })
@@ -297,7 +299,7 @@ class Confirmation extends Asset.Base {
 
         // var senderPublicKey = keypair.publicKey
 
-        const contributionInst = await this.getAssetInstanceByName("Contribution");
+        const contributionInst = await this.getAssetInstanceByName("DaoContribution");
         const contributionRecords = await contributionInst.queryAsset({
             trs_id: body.contributionTrsId,
         }, null, false, 1, 1);
@@ -356,8 +358,6 @@ class Confirmation extends Asset.Base {
 
                         let second_keypair = null;
                         if (requester.second_signature) {
-                            // const secondHash = crypto.createHash('sha256').update(body.secondSecret, 'utf8').digest();
-                            // second_keypair = ed.MakeKeypair(secondHash);
                             second_keypair = DdnCrypto.getKeys(body.secondSecret);
                         }
 

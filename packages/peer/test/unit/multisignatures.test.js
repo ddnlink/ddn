@@ -1,5 +1,5 @@
 /**
- * not passed
+ * passed
  */
 import node from "@ddn/node-sdk/lib/test";
 import Debug from "debug";
@@ -605,7 +605,7 @@ describe("PUT /multisignatures", () => {
                 MultiSigTX.min = requiredSignatures;
                 done();
             });
-    }, 70000);
+    });
 });
 
 describe("GET /multisignatures/pending", () => {

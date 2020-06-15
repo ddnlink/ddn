@@ -423,6 +423,10 @@ class PeerService {
                             JSON.stringify(transaction)
                             }, ${DdnUtils.system.getErrorMsg(err)}`
                         );
+                        
+                        this.logger.error(
+                            `Receive invalid transaction, transaction type: ${JSON.stringify(transaction.type)}, sender_address: ${JSON.stringify(transaction.sender_address)}, ${DdnUtils.system.getErrorMsg(err)}`
+                        );
 
                         // 缓存非法交易
                         this._invalidTrsCache.set(transaction.id, true);
