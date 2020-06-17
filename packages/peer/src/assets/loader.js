@@ -271,7 +271,7 @@ class Loader {
         allApis.push("/transaction/:trs_id");
 
         // FIXME: GET  /api/aob/assets/list -> GET  /api/aob/assets 是有冲突的
-        router.get("/", this._assetAssetPluginApiList(type, null, assetInst));
+        router.get("/list", this._assetAssetPluginApiList(type, null, assetInst));
         allApis.push("/");
 
         return allApis;

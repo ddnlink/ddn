@@ -44,8 +44,6 @@ async function createPluginAsset(trsType, assetInfo, secret, secondSecret) {
         transaction.fee = await crypto.getFee(transaction);
     }
 
-    console.log("transaction.fee", transaction.fee);
-    
     transaction.signature = await crypto.sign(transaction, keys);
    
     // fix 2020.5.31 这个是创建二级密码使用的 这个条件是否应该再次检查一下或优化一下

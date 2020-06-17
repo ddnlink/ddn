@@ -868,47 +868,82 @@ class Dapp extends Asset.Base {
             throw new Error(`Invalid parameters: ${validateErrors[0].schemaPath} ${validateErrors[0].message}`);
         }
 
+        const where = {
+            trs_type: await this.getTransactionType()
+        };
+
         const orders = [];
 
-        const sort = query.sort;
+        let sort = query.sort || query.orderBy; 
+
+        const parseSortItem = (orders, item) => {
+            const subItems = item.split(":");
+            if (subItems.length == 2) {
+                if (subItems[0].replace(/\s*/, "") != "") {
+                    orders.push(subItems);
+                }
+            }
+        };
+
         if (sort) {
-            const sortItems = sort.split(",");
-            if (sortItems.length > 0) {
-                for (let i = 0; i < sortItems.length; i++) {
-                    const sortItem = sortItems[i];
-                    const sortItemExprs = sortItem.split(" ");
-                    if (sortItemExprs.length == 1) {
-                        if (sortItemExprs[0].trim() == "") {
-                            throw new Error("Invalid sort params: " + sortItem);
-                        }
-                        else {
-                            orders.push(sortItemExprs[0].trim());
-                        }
-                    }
-                    else if (sortItemExprs.length == 2) {
-                        if (sortItemExprs[0].trim() == "" ||
-                            sortItemExprs[1].trim() == "") {
-                            throw new Error("Invalid sort params: " + sortItem);
-                        }
-                        else {
-                            orders.push([sortItemExprs[0].trim(), sortItemExprs[1].trim()]);
-                        }
-                    }
-                    else {
-                        throw new Error("Invalid sort params: " + sortItem);
+            if (!sort.splice) {
+                sort = [sort];
+            }
+
+            for (let i = 0; i < sort.length; i++) {
+                const sortItem = sort[i];
+                if (sortItem.replace(/\s*/, "") != "") {
+                    const pos = sortItem.indexOf(":");
+                    if (pos >= 0) {
+                        parseSortItem(orders, sortItem);
+                    } else {
+                        orders.push(sortItem);
                     }
                 }
             }
         }
 
-        const pageindex = query.pageindex || 1;
-        const pagesize = query.pagesize || 100;
+        // if (sort) {
+        //     const sortItems = sort.split(",");
+        //     if (sortItems.length > 0) {
+        //         for (let i = 0; i < sortItems.length; i++) {
+        //             const sortItem = sortItems[i];
+        //             const sortItemExprs = sortItem.split(" ");
+        //             if (sortItemExprs.length == 1) {
+        //                 if (sortItemExprs[0].trim() == "") {
+        //                     throw new Error("Invalid sort params: " + sortItem);
+        //                 }
+        //                 else {
+        //                     orders.push(sortItemExprs[0].trim());
+        //                 }
+        //             }
+        //             else if (sortItemExprs.length == 2) {
+        //                 if (sortItemExprs[0].trim() == "" ||
+        //                     sortItemExprs[1].trim() == "") {
+        //                     throw new Error("Invalid sort params: " + sortItem);
+        //                 }
+        //                 else {
+        //                     orders.push([sortItemExprs[0].trim(), sortItemExprs[1].trim()]);
+        //                 }
+        //             }
+        //             else {
+        //                 throw new Error("Invalid sort params: " + sortItem);
+        //             }
+        //         }
+        //     }
+        // }
+
+        const pageIndex = query.pageindex || 1;
+        const pageSize = query.pagesize || 100;
 
         delete query.sort;
         delete query.pageindex;
         delete query.pagesize;
 
-        const result = await this.queryAsset(query, orders, true, pageindex, pagesize);
+        const limit = query.limit || pageSize || 10;
+        const offset = query.offset || (pageIndex - 1) * pageSize;
+
+        const result = await this.queryAsset(where, orders, true, offset, limit);
         return { success: true, result };
     }
 

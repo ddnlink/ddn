@@ -91,7 +91,7 @@ class Issuer extends Asset.Base {
         const pageIndex = req.query.pageindex || 1;
         const pageSize = req.query.pagesize || 50;
         const result = await this.queryAsset(null, null, true, pageIndex, pageSize);
-        console.log('getList result', result);
+        // console.log('getList result', result);
 
         return { success: true, result };
     }

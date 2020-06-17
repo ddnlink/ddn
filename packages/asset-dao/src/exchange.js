@@ -72,6 +72,8 @@ class Exchange extends Asset.Base {
         };
 
         if (data[assetJsonName].state == 1) {
+            console.log('data[assetJsonName]', data[assetJsonName]);
+
             trans.amount = trans.asset[assetJsonName].price;
             trans.recipientId = trans.asset[assetJsonName].received_address;
         }
@@ -121,54 +123,54 @@ class Exchange extends Asset.Base {
                 if (effectiveOrgInfo.address !== sender.address) {
                     throw new Error(`Org "${asset.orgId}" not belong to you`);
                 }
-
-                // this.modules.dao.__private.getEffectiveOrgByOrgId(asset.orgId, (err, org) => {
-                //     // console.log(err, org)
-                //     if (err) {
-                //         return setImmediate(cb, err);
-                //     }
-                //     if (!org) {
-                //         return setImmediate(cb, `Org "${asset.orgId}" not exists`);
-                //     }
-                //     if (org.address !== sender.address) {
-                //         return setImmediate(cb, `Org "${asset.orgId}" not belong to you`);
-                //     }
-                //     return setImmediate(cb); // ok
-                // });
             }
         } else if (asset.state === 1) {
             if (!asset.exchange_trs_id) {
                 throw new Error('must give confirm exchange trs_id');
             }
 
-            const exchangeRequestList = await this.queryAsset({ trs_id: asset.exchange_trs_id }, 
+            // 获取出售记录
+            const exchangeRequestList = await this.queryAsset({ trs_id: asset.exchange_trs_id },
                 [['trs_timestamp', 'DESC']], false, 1, 1, null);
             if (!(exchangeRequestList && exchangeRequestList.length)) {
                 throw new Error('request exchange not find: ' + asset.exchange_trs_id)
             }
+            const exchangeRequestObj = exchangeRequestList[0];
+            console.log("exchangeRequestObj", exchangeRequestObj);
 
-            const confirmExchangeList = await this.queryAsset({ exchange_trs_id: asset.exchange_trs_id }, 
-                [['trs_timestamp', 'DESC']], false, 1, 1, null);
+            // 获取对应的购买记录
+            const confirmExchangeList = await this.queryAsset({ exchange_trs_id: asset.exchange_trs_id },
+                [['trs_timestamp', 'DESC']], false, 1, 10, null);
+
+            console.log("confirmExchangeList", confirmExchangeList);
+
             if (confirmExchangeList && confirmExchangeList.length) {
                 throw new Error('confirm exchange already exists: ' + asset.exchange_trs_id)
             }
 
-            const latestExchangeRequestList = await this.queryAsset({ trs_type: await this.getTransactionType(), orgId: asset.orgId.toLowerCase() }, 
+            // 获取该组织号的最新出售交易
+            const latestExchangeRequestList = await this.queryAsset({ trs_type: await this.getTransactionType(), orgId: asset.orgId.toLowerCase() },
                 [['trs_timestamp', 'DESC']], false, 1, 1, null);
             const latestExchangeRequestObj = latestExchangeRequestList[0];
 
-            const exchangeRequestObj = exchangeRequestList[0];
+            // 不是一条记录了
             if (latestExchangeRequestObj.transaction_id != exchangeRequestObj.transaction_id) {
                 throw new Error("request exchange is expired: " + asset.exchange_trs_id);
             }
 
-            // console.log(latestExchangeRequestObj)
+            //  fimxe: 这条记录应该永远不会发生啊
             if (latestExchangeRequestObj.orgId.toLowerCase() !== asset.orgId.toLowerCase()) {
-                throw new Error('confirm exchange orgId atypism: ' + asset.exchange_trs_id)
+                throw new Error('confirm exchange orgId invalid, exchange_trs_id: ' + asset.exchange_trs_id)
             }
-            if (!DdnUtils.bignum.isEqualTo(latestExchangeRequestObj.price, trs.amount)) {
-                throw new Error('confirm exchange amount & price atypism: ' + asset.exchange_trs_id)
+
+            // 这里把 trs.amount 去掉，因为在 create 的时候，就会默认添加 trs.amount 属性；改为价格与记录相等，确保按照价格购买和转账；
+            // if (!DdnUtils.bignum.isEqualTo(latestExchangeRequestObj.price, trs.amount)) {
+            //     throw new Error('confirm exchange amount != price, exchange_trs_id: ' + asset.exchange_trs_id)
+            // }
+            if (!DdnUtils.bignum.isEqualTo(latestExchangeRequestObj.price, asset.price)) {
+                throw new Error('confirm exchange amount != price, exchange_trs_id: ' + asset.exchange_trs_id)
             }
+
             // address is ok
             if (latestExchangeRequestObj.received_address !== asset.sender_address) {
                 throw new Error('confirm exchange senderAddress error: ' + asset.exchange_trs_id);
@@ -192,7 +194,7 @@ class Exchange extends Asset.Base {
 
     async getBytes(trs) {
         const asset = await this.getAssetObject(trs);   // trs.asset.exchange;
-        
+
         const bb = new ByteBuffer();
         bb.writeString(asset.orgId.toLowerCase());
         bb.writeString(asset.exchange_trs_id);
@@ -233,7 +235,7 @@ class Exchange extends Asset.Base {
         var result = await super.dbSave(trs, dbTrans);
         const asset = await this.getAssetObject(trs);
         if (asset.state == 1) {
-            result = await daoUtil.exchangeOrg(this._context, 
+            result = await daoUtil.exchangeOrg(this._context,
                 asset.orgId, asset.sender_address, dbTrans);
         }
         return result;
@@ -245,7 +247,7 @@ class Exchange extends Asset.Base {
                 const result = await this.putExchange(req, res);
                 res.json(result);
             } catch (err) {
-                res.json({success: false, error: err.message || err.toString()});
+                res.json({ success: false, error: err.message || err.toString() });
             }
         });
     }
@@ -299,7 +301,7 @@ class Exchange extends Asset.Base {
                 throw new Error("Invalid passphrase");
             }
         }
-        
+
         const exchange = {
             orgId: body.orgId,
             price: body.price,
@@ -342,18 +344,18 @@ class Exchange extends Asset.Base {
                     if (!requester || !requester.publicKey) {
                         return cb("Invalid requester");
                     }
-            
+
                     if (requester.second_signature && !body.secondSecret) {
                         return cb("Invalid second passphrase");
                     }
-            
+
                     if (requester.publicKey == account.publicKey) {
                         return cb("Invalid requester");
                     }
-            
+
                     let second_keypair = null;
                     if (requester.second_signature) {
-                         second_keypair = DdnCrypto.getKeys(body.secondSecret);
+                        second_keypair = DdnCrypto.getKeys(body.secondSecret);
                     }
 
                     try {
@@ -368,7 +370,7 @@ class Exchange extends Asset.Base {
                         data[assetJsonName] = exchange;
 
                         let transaction = await this.runtime.transaction.create(data);
-                  
+
                         let transactions = await this.runtime.transaction.receiveTransactions([transaction]);
                         cb(null, transactions);
                     } catch (e) {
@@ -385,7 +387,7 @@ class Exchange extends Asset.Base {
                     if (!account) {
                         return cb("Account not found");
                     }
-              
+
                     if (account.second_signature && !body.secondSecret) {
                         return cb("Invalid second passphrase");
                     }
@@ -419,7 +421,7 @@ class Exchange extends Asset.Base {
                     return reject(err);
                 }
 
-                resolve({success: true, transactionId: transactions[0].id});
+                resolve({ success: true, transactionId: transactions[0].id });
             });
         });
     }

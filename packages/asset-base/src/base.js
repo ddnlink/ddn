@@ -862,6 +862,8 @@ class AssetBase {
      */
     async applyUnconfirmed({ type, id }) {
         const key = `${type}_${id}`;
+        console.log("base.js key,  this.oneoff", key, this.oneoff);
+        
         if (this.oneoff.has(key)) {
             throw new Error(`The transaction has been confirmed: ${id}.`);
         }

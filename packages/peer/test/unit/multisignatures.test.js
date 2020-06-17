@@ -7,7 +7,7 @@ import Debug from "debug";
 const debug = Debug("debug");
 const expect = node.expect;
 
-const totalMembers = node.randomNumber(2, 16);
+const totalMembers = 3; // node.randomNumber(2, 16);
 const requiredSignatures = node.randomNumber(2, totalMembers + 1);
 
 const NoDDNAccount = node.randomAccount();
