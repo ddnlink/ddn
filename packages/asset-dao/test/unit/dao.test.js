@@ -181,7 +181,7 @@ describe('Test Dao', () => {
         it('Update the Org`s name in a new block is ok', done => {
             const newName = node.randomUsername();
             debug('newname ', newName);
-            
+
             node.onNewBlock(err => {
                 node.api.put('/dao/orgs')
                     .set('Accept', 'application/json')
@@ -371,18 +371,17 @@ describe('Test Dao', () => {
 
                     node.expect(body).to.have.property('success').to.be.true;
 
-                    node.expect(body).to.have.property("data").that.is.an("object");
+                    node.expect(body).to.have.property("result").that.is.an("object");
 
-                    node.expect(body.data).to.have.property('rows').that.is.an("array");
-                    node.expect(body.data).to.have.property('total');
+                    node.expect(body.result).to.have.property('rows').that.is.an("array");
+                    node.expect(body.result).to.have.property('total');
 
                     done();
                 });
         });
 
-        // TODO：/dao/orgs/all? -> /dao/orgs/?
         it('Given filter should be ok', done => {
-            node.api.get("/dao/orgs/all?pagesize=10&pageindex=1")
+            node.api.get("/dao/orgs?pagesize=10&pageindex=1")
                 .set("Accept", "application/json")
                 .set("version", node.version)
                 .set("nethash", node.config.nethash)
@@ -395,11 +394,12 @@ describe('Test Dao', () => {
                     debug("Given filter ok", JSON.stringify(body));
 
                     node.expect(body).to.have.property('success').to.be.true;
+                    node.expect(body).to.have.property("result").that.is.an("object");
 
-                    node.expect(body).to.have.property("data").that.is.an("object");
-
-                    node.expect(body.data).to.have.property('rows').that.is.an("array");
-                    node.expect(body.data).to.have.property('total');
+                    if (body.result) {
+                        node.expect(body.result).to.have.property('rows').that.is.an("array");
+                        node.expect(body.result).to.have.property('total');
+                    }
 
                     done();
                 });

@@ -97,11 +97,6 @@ function randomTid() {
   return genNormalAccount().publicKey
 }
 
-const guestbookDapp = {
-  icon: 'http://ebookchain.org/static/media/logo.5e78d8c2.png',
-  link: 'http://www.ebookchain.org/dapp-demo.zip'
-};
-
 function _getHeight(url, cb) {
   request({
     type: 'GET',
@@ -306,7 +301,6 @@ export default {
   DappType,
   DappCategory,
 
-  guestbookDapp,
   Fees,
   normalizer,
   blockTime,

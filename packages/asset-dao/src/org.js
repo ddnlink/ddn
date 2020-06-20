@@ -264,9 +264,7 @@ class Org extends Asset.Base {
      * 自定义资产Api
      */
     async attachApi(router) {
-        // TODO: 2020.6.9 该方法如果使用 '/' 将与 asset.base 提供的根目录方法冲突，优化
-        // get /api/dao/orgs/all -> get /api/dao/orgs(与父目录冲突)
-        router.get("/all", async(req, res) => {
+        router.get("/", async(req, res) => {
             try {
                 const result = await this.getOrgList(req, res);
                 res.json(result);
@@ -287,16 +285,6 @@ class Org extends Asset.Base {
         router.get("/:orgId", async(req, res) => {
             try {
                 const result = await this.getOrgByOrgId(req, res);
-                res.json(result);
-            } catch (err) {
-                res.json({success: false, error: err.message || err.toString()});
-            }
-        });
-
-        // TODO: delete it, == /
-        router.get("/getlist", async(req, res) => {
-            try {
-                const result = await this.getOrgList(req, res);
                 res.json(result);
             } catch (err) {
                 res.json({success: false, error: err.message || err.toString()});
@@ -609,11 +597,10 @@ class Org extends Asset.Base {
                     return reject(err);
                 }
 
-                resolve({success: true, data: result});
+                resolve({success: true, result});
             });
         });
     }
-
 }
 
 export default Org;

@@ -92,12 +92,12 @@ describe('Test createEvidence', () => {
 
                     node.expect(err).to.be.not.ok;
                     node.expect(body).to.have.property('success').to.be.true;
-                    node.expect(body).to.have.property('data').not.null;
+                    node.expect(body).to.have.property('result').not.null;
 
-                    node.expect(body.data).to.have.property('transaction_id');
+                    node.expect(body.result).to.have.property('transaction_id');
 
-                    node.expect(body.data.transaction_type).to.equal(transaction.type);
-                    node.expect(body.data.ipid).to.equal(evidence.ipid);
+                    node.expect(body.result.transaction_type).to.equal(transaction.type);
+                    node.expect(body.result.ipid).to.equal(evidence.ipid);
 
                     done();
                 });

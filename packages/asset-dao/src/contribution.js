@@ -126,7 +126,7 @@ class Contribution extends Asset.Base {
             }
         });
 
-        router.get("/:orgId/list", async (req, res) => {
+        router.get("/:orgId/all", async (req, res) => {
             try {
                 const result = await this.getContributionsByOrgId(req, res);
                 res.json(result);

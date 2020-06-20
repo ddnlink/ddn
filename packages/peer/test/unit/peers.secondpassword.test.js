@@ -13,6 +13,8 @@ async function createTransfer(address, amount, secret, secondPassword) {
     return await node.ddn.transaction.createTransaction(address, amount, null, secret, secondPassword);
 }
 
+jest.setTimeout(50000)
+
 describe("Test second passphrase", () => {
 
     let account;

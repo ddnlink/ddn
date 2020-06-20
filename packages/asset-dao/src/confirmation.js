@@ -178,7 +178,7 @@ class Confirmation extends Asset.Base {
             }
         });
 
-        router.get("/:orgId/list", async (req, res) => {
+        router.get("/:orgId/all", async (req, res) => {
             try {
                 const result = await this.getConfirmationsByOrgId(req, res);
                 res.json(result);

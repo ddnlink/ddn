@@ -2,13 +2,12 @@
  * DDN沙盒
  * wangxm   2019-06-20
  */
-import {NodeVM} from 'vm2';
+import { NodeVM } from 'vm2';
 
 import path from 'path';
 import fs from 'fs';
 
-function main()
-{
+function main() {
     const options = process.argv;
     const dappPath = options[2];
     const args = options.slice(3);
@@ -28,18 +27,21 @@ function main()
     });
 
     const _entry = path.join(dappPath, "index.js");
-    const _code = fs.readFileSync(_entry);
+    let _code = null;
 
-    try
-    {
-        vm.run(_code, _entry);
-    }
-    catch (err)
-    {
-        process.stderr.write(`${err}`);
-    }
+    if (fs.existsSync(_entry)) {
+        _code = fs.readFileSync(_entry);
+        try {
+            vm.run(_code, _entry);
+        }
+        catch (err) {
+            process.stderr.write(`${err}`);
+        }
 
-    process.stdin.read();
+        process.stdin.read();
+    } else {
+        console.log("Dapp has no init.js");
+    }
 }
 
 main();

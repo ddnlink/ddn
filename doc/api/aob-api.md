@@ -288,7 +288,7 @@ JSON返回示例：
 
 
 #### **2.1.8 其它接口**  
-get /peer/list  //查找dapp peer   
+get /peer/all  //查找dapp peer   
 get /peer/blocks/common //查找common block   
 ...    
 

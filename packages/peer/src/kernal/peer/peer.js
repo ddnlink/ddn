@@ -266,7 +266,7 @@ class Peer {
         let data;
         try {
             data = await this.request({
-                api: "/list",
+                api: "/all",
                 method: "GET"
             });
         } catch (err) {

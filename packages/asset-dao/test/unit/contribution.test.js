@@ -127,11 +127,11 @@ describe('Contributions Test', () => {
     });
 
     // 检索投稿者投过的记录
-    it("GET /api/dao/contributions?sender_address= should be ok", (done) => {
+    it("GET /api/dao/contributions/all?sender_address= should be ok", (done) => {
         node.onNewBlock(err => {
             node.expect(err).to.be.not.ok;
 
-            let reqUrl = "/dao/contributions";
+            let reqUrl = "/dao/contributions/all";
             reqUrl += `?sender_address=${node.Daccount.address}`;
 
             node.api.get(reqUrl)
@@ -144,7 +144,7 @@ describe('Contributions Test', () => {
                 .end((err, {
                     body
                 }) => {
-                    debug("GET /api/dao/contributions?sender_address=", JSON.stringify(body));
+                    debug("GET /api/dao/contributions/all?sender_address=", JSON.stringify(body));
                     node.expect(err).to.be.not.ok;
 
                     node.expect(body).to.have.property("success").to.be.true;
@@ -154,11 +154,11 @@ describe('Contributions Test', () => {
     });
 
     // 检索组织号收到的投稿记录
-    it("GET /api/dao/contributions/:orgId/list", (done) => {
+    it("GET /api/dao/contributions/:orgId/all", (done) => {
         node.onNewBlock(err => {
             node.expect(err).to.be.not.ok;
 
-            const reqUrl = `/dao/contributions/${orgId}/list`;
+            const reqUrl = `/dao/contributions/${orgId}/all`;
 
             node.api.get(reqUrl)
                 .set("Accept", "application/json")
@@ -179,13 +179,13 @@ describe('Contributions Test', () => {
     });
 
     // 可以根据文章 url 以及投稿人的公钥检索
-    it("GET /api/dao/contributions/:orgId/list?url should be ok", (done) => {
+    it("GET /api/dao/contributions/:orgId/all?url should be ok", (done) => {
         node.onNewBlock(err => {
             node.expect(err).to.be.not.ok;
 
             const keys = node.ddn.crypto.getKeys(node.Gaccount.password);
 
-            let reqUrl = `/dao/contributions/${orgId}/list`;
+            let reqUrl = `/dao/contributions/${orgId}/all`;
             reqUrl += `?senderPublicKey=${keys.publicKey}&url=${encodeURIComponent("dat://f76e1e82cf4eab4bf173627ff93662973c6fab110c70fb0f86370873a9619aa6+18/public/test.html")}`;
 
             node.api.get(reqUrl)
@@ -198,7 +198,7 @@ describe('Contributions Test', () => {
                 .end((err, {
                     body
                 }) => {
-                    debug("GET /api/dao/contributions/:orgId/list?", JSON.stringify(body));
+                    debug("GET /api/dao/contributions/:orgId/all?", JSON.stringify(body));
                     node.expect(err).to.be.not.ok;
 
                     node.expect(body).to.have.property("success").to.be.true;
@@ -208,11 +208,11 @@ describe('Contributions Test', () => {
     })
 
     // 根据收稿地址检索全部收稿记录
-    it("GET /api/dao/contributions", (done) => {
+    it("GET /api/dao/contributions/all", (done) => {
         node.onNewBlock(err => {
             node.expect(err).to.be.not.ok;
 
-            let reqUrl = "/dao/contributions";
+            let reqUrl = "/dao/contributions/all";
             reqUrl += `?received_address=${node.Gaccount.address}`;
 
             node.api.get(reqUrl)
@@ -225,7 +225,7 @@ describe('Contributions Test', () => {
                 .end((err, {
                     body
                 }) => {
-                    debug("GET /api/dao/contributions", JSON.stringify(body));
+                    debug("GET /api/dao/contributions/all", JSON.stringify(body));
                     node.expect(err).to.be.not.ok;
 
                     node.expect(body).to.have.property("success").to.be.true;
@@ -249,7 +249,7 @@ describe('Confirmations Test', () => {
     beforeAll((done) => {
         // Fixme:  2020.6.15 得使用一个标识，保证检索到的就是没有确认的才行
         // const getContributionTrsIdUrl = `/dao/contributions?received_address=${node.Gaccount.address}&pagesize=1&sort=timestamp:desc`;
-        const getContributionTrsIdUrl = `/dao/contributions/${orgId}/list?received_address=${node.Gaccount.address}&pagesize=1&sort=timestamp:desc`;
+        const getContributionTrsIdUrl = `/dao/contributions/${orgId}/all?received_address=${node.Gaccount.address}&pagesize=1&sort=timestamp:desc`;
         node.api.get(getContributionTrsIdUrl)
             .set("Accept", "application/json")
             .set("version", node.version)
@@ -348,13 +348,13 @@ describe('Confirmations Test', () => {
         });
     })
 
-    it("GET /api/dao/confirmations/:orgId/list", (done) => {
+    it("GET /api/dao/confirmations/:orgId/all", (done) => {
         node.onNewBlock(err => {
             node.expect(err).to.be.not.ok;
 
             const keys = node.ddn.crypto.getKeys(node.Gaccount.password);
 
-            let reqUrl = `/dao/confirmations/${orgId}/list`;
+            let reqUrl = `/dao/confirmations/${orgId}/all`;
             reqUrl += `?senderPublicKey=${keys.publicKey}`;
 
             node.api.get(reqUrl)
@@ -376,13 +376,13 @@ describe('Confirmations Test', () => {
         });
     })
 
-    it("GET /api/dao/confirmations/:orgId/list?url", (done) => {
+    it("GET /api/dao/confirmations/:orgId/all?url", (done) => {
         node.onNewBlock(err => {
             node.expect(err).to.be.not.ok;
 
             const keys = node.ddn.crypto.getKeys(node.Daccount.password);
 
-            let reqUrl = `/dao/confirmations/${orgId}/list`;
+            let reqUrl = `/dao/confirmations/${orgId}/all`;
             reqUrl += `?senderPublicKey=${keys.publicKey}&url=${encodeURIComponent("dat://f76e1e82cf4eab4bf173627ff93662973c6fab110c70fb0f86370873a9619aa6+18/public/test.html")}`;
 
             node.api.get(reqUrl)

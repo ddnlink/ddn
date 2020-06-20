@@ -115,7 +115,7 @@ class PeerService {
         };
     }
 
-    async getList(req) {
+    async getAll(req) {
         let peers;
         try {
             peers = await this.runtime.peer.queryDappPeers();
@@ -425,7 +425,7 @@ class PeerService {
                         );
                         
                         this.logger.error(
-                            `Receive invalid transaction, transaction type: ${JSON.stringify(transaction.type)}, sender_address: ${JSON.stringify(transaction.sender_address)}, ${DdnUtils.system.getErrorMsg(err)}`
+                            `Receive invalid transaction, transaction type: ${JSON.stringify(transaction.type)}, ${DdnUtils.system.getErrorMsg(err)}`
                         );
 
                         // 缓存非法交易

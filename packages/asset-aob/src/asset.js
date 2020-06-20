@@ -180,16 +180,6 @@ class Aob extends Asset.Base {
             }
         });
 
-        // TODO: delete it
-        // router.get('/list', async (req, res) => {
-        //     try {
-        //         const result = await this.getList(req, res);
-        //         res.json(result);
-        //     } catch (err) {
-        //         res.json({ success: false, error: err.message || err.toString() });
-        //     }
-        // });
-
         router.get('/:name', async (req, res) => {
             try {
                 const result = await this.getOneByName(req, res);

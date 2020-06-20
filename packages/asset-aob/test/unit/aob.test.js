@@ -214,10 +214,10 @@ describe("AOB Test", () => {
             debug('issuerName', issuerName)
             debug('get /aob/issuers/name/:name response', err, res.body)
             expect(err).to.not.ok;
-            expect(res.body).to.have.property('data')
-            if (res.body.data) {
-                expect(res.body.data.name).to.equal(issuerName)
-                expect(res.body.data.issuer_id).to.equal(IssuerAccount1.address)
+            expect(res.body).to.have.property('result')
+            if (res.body.result) {
+                expect(res.body.result.name).to.equal(issuerName)
+                expect(res.body.result.issuer_id).to.equal(IssuerAccount1.address)
             }
         })
 

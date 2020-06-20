@@ -19,10 +19,10 @@ assetInfo: {
                 name: DappName, //Dapp名称
                 type: node.DappType.DAPP,   //Dapp类型
                 category: node.randomProperty(node.DappCategory),   //Dapp分类
-                link: node.guestbookDapp.link,  //Dapp程序包链接
+                link: dappDemo.link,  //Dapp程序包链接
                 description: "A dapp added via API autotest",   //描述
                 tags: "handy dizzy pear airplane alike wonder nifty curve young probable tart concentrate", //标签，空格分隔
-                icon: node.guestbookDapp.icon,  //Dapp Logo链接
+                icon: dappDemo.icon,  //Dapp Logo链接
                 delegates: delegates.join(","), //Dapp 受托人公钥串，多个用逗号分隔
                 unlock_delegates: 3 //转出操作需要的最小受托人确认数
            }  

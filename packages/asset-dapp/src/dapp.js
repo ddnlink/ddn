@@ -73,18 +73,6 @@ class Dapp extends Asset.Base {
         // eslint-disable-next-line require-atomic-updates
         trs.asset[assetJsonName] = data[assetJsonName];
 
-        // trs.asset[assetJsonName] = {
-        //     category: data.category,
-        //     name: data.name,
-        //     description: data.description,
-        //     tags: data.tags,
-        //     type: data.dapp_type,
-        //     link: data.link,
-        //     icon: data.icon,
-        //     delegates: data.delegates,
-        //     unlock_delegates: data.unlock_delegates
-        // };
-
         return trs;
     }
 
@@ -335,7 +323,7 @@ class Dapp extends Asset.Base {
         });
 
         // 2020.4.21 验证: 使用 get api/dapps/get -> get api/dapps/:id ?
-        router.get("/:id", async (req, res) => {
+        router.get("/dappId/:id", async (req, res) => {
             try {
                 const result = await self.getDappById(req);
                 res.json(result);
@@ -493,8 +481,6 @@ class Dapp extends Asset.Base {
     }
 
     async getDappBalance(req) {
-        console.log('dapp.js req.params:', req.params);
-
         const dappId = req.params.dappid;
         const currency = req.params.currency;
 
@@ -874,7 +860,7 @@ class Dapp extends Asset.Base {
 
         const orders = [];
 
-        let sort = query.sort || query.orderBy; 
+        let sort = query.sort || query.orderBy;
 
         const parseSortItem = (orders, item) => {
             const subItems = item.split(":");
@@ -1007,41 +993,32 @@ class Dapp extends Asset.Base {
         const ids = await this.getInstalledDappIds();
         if (ids && ids.length) {
             const dapps = await this.queryAsset({ trs_id: { "$in": ids } }, null, false, 1, ids.length);
-            return { success: true, dapps };
+            return { success: true, result: {rows: dapps} };
         }
-        return { success: true, dapps: [] };
+        return { success: true, result: {rows: []} };
     }
 
     async downloadDapp(source, target) {
         const downloadErr = await new Promise((resolve, reject) => {
-            request(source, (err) => {
-                if (err) {
-                    return reject(err);
+            const downloadRequest = request.get(source);
+
+            downloadRequest.on("response", (res) => {
+                if (res.statusCode != 200) {
+                    return reject(`Faile to download dapp ${source} with err code: ${res.statusCode}`)
                 }
+            });
 
-                const downloadRequest = request.get({
-                    url: source,
-                    timeout: 3000
-                });
+            downloadRequest.on("error", (err) => {
+                return reject(`Failed to download dapp ${source} with error: ${err.message}`);
+            });
 
-                downloadRequest.on("response", (res) => {
-                    if (res.statusCode != 200) {
-                        return reject(`Faile to download dapp ${source} with err code: ${res.statusCode}`)
-                    }
-                });
+            const file = fs.createWriteStream(target);
+            file.on("finish", () => {
+                file.close();
+                resolve();
+            });
 
-                downloadRequest.on("error", (err) => {
-                    return reject(`Failed to download dapp ${source} with error: ${err.message}`);
-                });
-
-                const file = fs.createWriteStream(target);
-                file.on("finish", () => {
-                    file.close();
-                    resolve();
-                });
-
-                downloadRequest.pipe(file);
-            })
+            downloadRequest.pipe(file);
         });
 
         return new Promise((resolve, reject) => {
@@ -1069,7 +1046,8 @@ class Dapp extends Asset.Base {
 
             unzipper.extract({
                 path: extractpath,
-                strip: 1
+                strip: 1,
+                filter: ( file ) => file.type !== 'Directory',
             });
         });
     }
@@ -1102,7 +1080,7 @@ class Dapp extends Asset.Base {
         }
         catch (err) {
             this.delDir(dappPath);
-            throw err;
+            throw new Error(err);
         }
 
         try {
@@ -1110,7 +1088,7 @@ class Dapp extends Asset.Base {
         }
         catch (err) {
             this.delDir(dappPath);
-            throw err;
+            throw new Error(err);
         }
 
         return dappPath;
@@ -1215,11 +1193,6 @@ class Dapp extends Asset.Base {
         try {
             const dapp = await this.getDappByTransactionId(body.id);
             const dappPath = await this.installDApp(dapp);
-
-            // if (dapp.type == 0) {
-            //     // no need to install node dependencies
-            // } else {
-            // }
 
             await this._removeLaunchedMarkFile(dappPath);
 
