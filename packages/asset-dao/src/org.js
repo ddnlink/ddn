@@ -34,7 +34,7 @@ class Org extends Asset.Base {
     async propsMapping() {
         return [{
             field: 'str1',
-            prop: 'orgId',
+            prop: 'org_id',
             required: true,
         },
         {
@@ -65,7 +65,7 @@ class Org extends Asset.Base {
     /**
      * 创建组织号
      * data.asset.org 字段 6 个：
-     * @orgId 自治组织号（比如：媒体号） 5-20，5位以下逐年开放注册；媒体号 midiumId 是自治组织的一种，可以以M为后缀，其他的以此类推，必须；
+     * @org_id 自治组织号（比如：媒体号） 5-20，5位以下逐年开放注册；媒体号 midiumId 是自治组织的一种，可以以M为后缀，其他的以此类推，必须；
      * @name 组织名称，支持汉字，可修改（需要花费fee, **修改的字段信息同步存储在trs交易表的冗余字段args里**)，允许空；
      * @address 绑定的钱包地址（用于接收投稿、转账等），允许空；
      * @url 自治组织主页、媒体号主页地址等，允许空；
@@ -96,8 +96,8 @@ class Org extends Asset.Base {
         let feeBase = 1;
         const assetObj = await this.getAssetObject(trs);
         
-        const orgId = assetObj.orgId;
-        const olen = orgId.length;
+        const org_id = assetObj.org_id;
+        const olen = org_id.length;
         const feeLenMap = {
             10: 50,
             9: 100,
@@ -146,7 +146,7 @@ class Org extends Asset.Base {
             throw new Error('Expect asset org, got invalid transaction asset');
         }
         // check org id
-        if (!daoUtil.isOrgId(org.orgId)) {
+        if (!daoUtil.isOrgId(org.org_id)) {
             throw new Error('exchange org id not allow');
         }
         if (org.name && org.name.lenght > 64) {
@@ -176,8 +176,8 @@ class Org extends Asset.Base {
                 }
             }
         }
-        // orgId length open by year
-        const olen = org.orgId.length;
+        // org_id length open by year
+        const olen = org.org_id.length;
         const yyyyNum = parseInt(new Date().getFullYear(), 10);
         if (olen <= 4) {
             throw new Error('Org id with 4 length not open in this year');
@@ -187,17 +187,17 @@ class Org extends Asset.Base {
             }
         }
 
-        const memOrg = await daoUtil.getEffectiveOrgByOrgId(this._context, org.orgId);
+        const memOrg = await daoUtil.getEffectiveOrgByOrgId(this._context, org.org_id);
         if (org.state === 0) {
             if (memOrg) {
-                throw new Error(`Org ${org.orgId} already exists`);
+                throw new Error(`Org ${org.org_id} already exists`);
             }
         } else if (org.state === 1) {
             if (!memOrg) {
-                throw new Error(`Org ${org.orgId} not exists`);
+                throw new Error(`Org ${org.org_id} not exists`);
             }
             if (sender.address !== memOrg.address) {
-                throw new Error(`Org ${org.orgId} not belong to you`);
+                throw new Error(`Org ${org.org_id} not belong to you`);
             }
         }
         return trs;
@@ -205,9 +205,9 @@ class Org extends Asset.Base {
 
     async applyUnconfirmed(trs, sender, dbTrans) {
         const assetObj = await this.getAssetObject(trs);
-        const key = `${sender.address}:${trs.type}:${assetObj.orgId}:${assetObj.state}`;
+        const key = `${sender.address}:${trs.type}:${assetObj.org_id}:${assetObj.state}`;
         if (assetObj.state == 0 && this.oneoff.has(key)) {
-            throw new Error(`The org ${assetObj.orgId} is in process already.`);
+            throw new Error(`The org ${assetObj.org_id} is in process already.`);
         }
 
         await super.applyUnconfirmed(trs, sender, dbTrans);
@@ -220,7 +220,7 @@ class Org extends Asset.Base {
     async undoUnconfirmed(trs, sender, dbTrans) {
         const assetObj = await this.getAssetObject(trs);
         if (assetObj.state == 0) {
-            const key = `${sender.address}:${trs.type}:${assetObj.orgId}:${assetObj.state}`;
+            const key = `${sender.address}:${trs.type}:${assetObj.org_id}:${assetObj.state}`;
             this.oneoff.delete(key);
         }
 
@@ -235,7 +235,7 @@ class Org extends Asset.Base {
             return null;
         }
         try {
-            bb.writeUTF8String(org.orgId.toLowerCase());
+            bb.writeUTF8String(org.org_id.toLowerCase());
             bb.writeUTF8String(org.name ? org.name : '');
             bb.writeUTF8String(org.address ? org.address : '');
             bb.writeUTF8String(org.url ? org.url : '');
@@ -252,8 +252,8 @@ class Org extends Asset.Base {
         const org = await this.getAssetObject(trs);
         org.transaction_id = trs.id;
         org.timestamp = trs.timestamp;
-        if (org.orgId) {
-            org.orgId = org.orgId.toLowerCase();
+        if (org.org_id) {
+            org.org_id = org.org_id.toLowerCase();
         }
 
         await super.dbSave(trs, dbTrans);
@@ -282,7 +282,7 @@ class Org extends Asset.Base {
             }
         });
 
-        router.get("/:orgId", async(req, res) => {
+        router.get("/:org_id", async(req, res) => {
             try {
                 const result = await this.getOrgByOrgId(req, res);
                 res.json(result);
@@ -294,7 +294,7 @@ class Org extends Asset.Base {
         router.get("/address/:address", async(req, res) => {
             try {
                 const result = await daoUtil.getEffectiveOrgByAddress(this._context, req.params.address)
-                res.json({success: true, data: {org: result}});
+                res.json({success: true, result: {org: result}});
             } catch (err) {
                 res.json({success: false, error: err.message || err.toString()});
             }
@@ -321,7 +321,7 @@ class Org extends Asset.Base {
                     type: "string",
                     format: "publicKey"
                 },
-                orgId: {
+                org_id: {
                     type: "string",
                     minLength: 1,
                     maxLength: 20
@@ -352,7 +352,7 @@ class Org extends Asset.Base {
                     maximum: 1,
                 }
             },
-            required: ['secret', 'orgId', 'state']
+            required: ['secret', 'org_id', 'state']
         }, body);
         if (validateErrors) {
             throw new Error(`Invalid parameters: ${validateErrors[0].schemaPath} ${validateErrors[0].message}`);
@@ -368,7 +368,7 @@ class Org extends Asset.Base {
 
         const address = this.runtime.account.generateAddressByPublicKey(keypair.publicKey);
         const org = {
-            orgId: body.orgId.toLowerCase().trim(),
+            org_id: body.org_id.toLowerCase().trim(),
             name: body.name,
             url: body.url,
             tags: body.tags,
@@ -377,7 +377,7 @@ class Org extends Asset.Base {
         };
 
         if (body.state == 1) {
-            const currOrg = await daoUtil.getEffectiveOrgByOrgId(this._context, body.orgId);
+            const currOrg = await daoUtil.getEffectiveOrgByOrgId(this._context, body.org_id);
             if (currOrg) {
                 org.name = org.name || currOrg.name;
                 org.url = org.url || currOrg.url;
@@ -505,8 +505,8 @@ class Org extends Asset.Base {
      * @param {*} res 
      */
     async getOrgByOrgId(req) {
-        const orgInfo = await daoUtil.getEffectiveOrgByOrgId(this._context, req.params.orgId);
-        return {success: true, data: {org: orgInfo}}; 
+        const orgInfo = await daoUtil.getEffectiveOrgByOrgId(this._context, req.params.org_id);
+        return {success: true, result: {org: orgInfo}}; 
     }
 
     /**
@@ -529,7 +529,7 @@ class Org extends Asset.Base {
                     minimum: 1,
                     maximum: 100,
                 },
-                orgId: {
+                org_id: {
                     type: "string",
                     minLength: 1,
                     maxLength: 20
@@ -567,7 +567,7 @@ class Org extends Asset.Base {
         }
 
         const where = {
-            orgId: query.orgId,
+            org_id: query.org_id,
             name: query.name,
             address: query.address,
             url: query.url,
@@ -590,7 +590,7 @@ class Org extends Asset.Base {
 
         return new Promise((resolve, reject) => {
             this.dao.findPage("mem_org", where, limit, offset, true, [
-                'transaction_id', 'orgId', 'name', 'address', 'tags', 
+                'transaction_id', 'org_id', 'name', 'address', 'tags', 
                 'url', 'state', 'timestamp'], orders, (err, result) => {
                 if (err) {
                     this.logger.error('this.dao.findPage error', err)

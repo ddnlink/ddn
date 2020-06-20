@@ -38,7 +38,7 @@ async function createIssuerAuditorBuy(received_address, amount, secret, secondSe
     return transaction;
 }
 
-async function createIssuerApply(orgName, orgId, orgOwner, orgOwnerPhone, secret, secondSecret) {
+async function createIssuerApply(orgName, org_id, orgOwner, orgOwnerPhone, secret, secondSecret) {
     const keys = crypto.getKeys(secret);
 
     const fee = constants.net.fees.send;
@@ -55,7 +55,7 @@ async function createIssuerApply(orgName, orgId, orgOwner, orgOwnerPhone, secret
             couponIssuerApply: {
                 address: crypto.generateAddress(keys.publicKey),
                 orgName,
-                orgId,
+                org_id,
                 orgOwner,
                 orgOwnerPhone
             }
@@ -74,7 +74,7 @@ async function createIssuerApply(orgName, orgId, orgOwner, orgOwnerPhone, secret
     return transaction;
 }
 
-async function createIssuerUpdate(orgName, orgId, orgOwner, orgOwnerPhone, secret, secondSecret) {
+async function createIssuerUpdate(orgName, org_id, orgOwner, orgOwnerPhone, secret, secondSecret) {
     const keys = crypto.getKeys(secret);
     
     const fee = constants.net.fees.send;
@@ -91,7 +91,7 @@ async function createIssuerUpdate(orgName, orgId, orgOwner, orgOwnerPhone, secre
             couponIssuerUpdate: {
                 address: crypto.generateAddress(keys.publicKey),
                 orgName,
-                orgId,
+                org_id,
                 orgOwner,
                 orgOwnerPhone
             }
@@ -110,7 +110,7 @@ async function createIssuerUpdate(orgName, orgId, orgOwner, orgOwnerPhone, secre
     return transaction;
 }
 
-async function createIssuerCheck(address, orgName, orgId, orgOwner, orgOwnerPhone, state, secret, secondSecret) {
+async function createIssuerCheck(address, orgName, org_id, orgOwner, orgOwnerPhone, state, secret, secondSecret) {
     const keys = crypto.getKeys(secret);
     
     const fee = constants.net.fees.send;
@@ -127,7 +127,7 @@ async function createIssuerCheck(address, orgName, orgId, orgOwner, orgOwnerPhon
             couponIssuerCheck: {
                 address,
                 orgName,
-                orgId,
+                org_id,
                 orgOwner,
                 orgOwnerPhone,
                 state
@@ -146,7 +146,7 @@ async function createIssuerCheck(address, orgName, orgId, orgOwner, orgOwnerPhon
     return transaction;
 }
 
-async function createIssuerFreeze(address, orgName, orgId, orgOwner, orgOwnerPhone, secret, secondSecret) {
+async function createIssuerFreeze(address, orgName, org_id, orgOwner, orgOwnerPhone, secret, secondSecret) {
     const keys = crypto.getKeys(secret);
     
     const fee = constants.net.fees.send;
@@ -163,7 +163,7 @@ async function createIssuerFreeze(address, orgName, orgId, orgOwner, orgOwnerPho
             couponIssuerFreeze: {
                 address,
                 orgName,
-                orgId,
+                org_id,
                 orgOwner,
                 orgOwnerPhone
             }
@@ -181,7 +181,7 @@ async function createIssuerFreeze(address, orgName, orgId, orgOwner, orgOwnerPho
     return transaction;
 }
 
-async function createIssuerUnfreeze(address, orgName, orgId, orgOwner, orgOwnerPhone, state, secret, secondSecret) {
+async function createIssuerUnfreeze(address, orgName, org_id, orgOwner, orgOwnerPhone, state, secret, secondSecret) {
     const keys = crypto.getKeys(secret);
     
     const fee = constants.net.fees.send;
@@ -198,7 +198,7 @@ async function createIssuerUnfreeze(address, orgName, orgId, orgOwner, orgOwnerP
             couponIssuerUnfreeze: {
                 address,
                 orgName,
-                orgId,
+                org_id,
                 orgOwner,
                 orgOwnerPhone,
                 state

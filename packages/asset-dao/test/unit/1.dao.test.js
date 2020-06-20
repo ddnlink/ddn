@@ -7,15 +7,18 @@ const debug = Debug('debug');
 
 const Gaccount = node.Gaccount;
 // const createOrg = node.ddn.dao.createOrg;
+
+jest.setTimeout(50000);
+
 describe('Test Dao', () => {
 
     // 通用接口
     describe('post /peer/transactions', () => {
 
         // Common api
-        it("Using valid parameters to create a orgId is ok.", async (done) => {
+        it("Using valid parameters to create a org_id is ok.", async (done) => {
             const orgs = {
-                "orgId": node.randomOrgId().toLowerCase(),
+                "org_id": node.randomOrgId().toLowerCase(),
                 "name": node.randomUsername(),
                 "state": 0,
                 "url": "dat://f76e1e82cf4eab4bf173627ff93662973c6fab110c70fb0f86370873a9619aa6+18/public/test.html",
@@ -48,9 +51,9 @@ describe('Test Dao', () => {
         });
 
         // Common api
-        it("Fee is less to create a orgId is fail.", async (done) => {
+        it("Fee is less to create a org_id is fail.", async (done) => {
             const orgs = {
-                "orgId": node.randomOrgId().toLowerCase(),
+                "org_id": node.randomOrgId().toLowerCase(),
                 "name": node.randomUsername(),
                 "state": 0,
                 "url": "dat://f76e1e82cf4eab4bf173627ff93662973c6fab110c70fb0f86370873a9619aa6+18/public/test.html",
@@ -83,14 +86,14 @@ describe('Test Dao', () => {
 
     })
 
-    // special api
-    describe('PUT /api/dao/orgs to create a orgId', () => {
+    // 创建组织号
+    describe('PUT /api/dao/orgs to create a org_id', () => {
         let org;
 
         beforeAll(done => {
             org = {
-                "orgId": node.randomOrgId(),
-                // "orgId": node.randomOrgId(),
+                "org_id": node.randomOrgId(),
+                // "org_id": node.randomOrgId(),
                 "name": node.randomUsername(),
                 "state": 0, // Default to create
                 "url": "dat://f76e1e82cf4eab4bf173627ff93662973c6fab110c70fb0f86370873a9619aa6+18/public/test.html",
@@ -105,8 +108,8 @@ describe('Test Dao', () => {
                 .set('Accept', 'application/json')
                 .send({
                     secret: Gaccount.password,
-                    orgId: org.orgId,
-                    // orgId: org.orgId,
+                    org_id: org.org_id,
+                    // org_id: org.org_id,
                     name: org.name,
                     url: org.url,
                     state: 0,
@@ -124,13 +127,13 @@ describe('Test Dao', () => {
                 });
         });
 
-        // Update name
+        //  change name
         it('Update the Org`s name in the save 10s is fail', done => {
             node.api.put('/dao/orgs')
                 .set('Accept', 'application/json')
                 .send({
                     secret: Gaccount.password,
-                    orgId: org.orgId,
+                    org_id: org.org_id,
                     name: node.randomUsername(),
                     state: 1,
                     tags: org.tags
@@ -142,15 +145,15 @@ describe('Test Dao', () => {
                 }) => {
                     debug("Update the Org`s name in the save 10s", JSON.stringify(body));
                     node.expect(body).to.have.property('success').to.be.false;
-                    node.expect(body).to.have.property('error').include(`Org ${org.orgId.toLowerCase()} not exists`);
+                    node.expect(body).to.have.property('error').include(`Org ${org.org_id.toLowerCase()} not exists`);
                     done();
                 });
         });
 
-        it('Get /dao/orgs/:orgId when Org`s name is not modified should be ok', done => {
+        it('Get /dao/orgs/:org_id when Org`s name is not modified should be ok', done => {
             node.onNewBlock(err => {
                 node.expect(err).to.be.not.ok;
-                node.api.get(`/dao/orgs/${org.orgId.toLowerCase()}`)
+                node.api.get(`/dao/orgs/${org.org_id.toLowerCase()}`)
                     .set("Accept", "application/json")
                     .set("version", node.version)
                     .set("nethash", node.config.nethash)
@@ -163,15 +166,15 @@ describe('Test Dao', () => {
                         debug("Org`s name is not modified ok", JSON.stringify(body));
 
                         node.expect(body).to.have.property('success').to.be.true;
-                        node.expect(body).to.have.property("data").that.is.an("object");
-                        node.expect(body.data).to.have.property("org").that.is.an("object");
+                        node.expect(body).to.have.property("result").that.is.an("object");
+                        node.expect(body.result).to.have.property("org").that.is.an("object");
 
-                        node.expect(body.data.org).to.have.property('transaction_id');
-                        node.expect(body.data.org).to.have.property('orgId');
+                        node.expect(body.result.org).to.have.property('transaction_id');
+                        node.expect(body.result.org).to.have.property('org_id');
 
-                        node.expect(body.data.org.orgId).to.equal(org.orgId.toLowerCase());
-                        node.expect(body.data.org.name).to.equal(org.name);
-                        node.expect(body.data.org.state).to.equal(org.state);
+                        node.expect(body.result.org.org_id).to.equal(org.org_id.toLowerCase());
+                        node.expect(body.result.org.name).to.equal(org.name);
+                        node.expect(body.result.org.state).to.equal(org.state);
 
                         done();
                     });
@@ -187,7 +190,7 @@ describe('Test Dao', () => {
                     .set('Accept', 'application/json')
                     .send({
                         secret: Gaccount.password,
-                        orgId: org.orgId,
+                        org_id: org.org_id,
                         name: newName,
                         state: 1, // 允许修改
                         tags: org.tags
@@ -206,11 +209,11 @@ describe('Test Dao', () => {
             })
         });
 
-        it('Get /dao/orgs/:orgId should be ok if Org`s name has been modified', done => {
+        it('Get /dao/orgs/:org_id should be ok if Org`s name has been modified', done => {
             node.onNewBlock(err => {
                 node.expect(err).to.be.not.ok;
 
-                node.api.get(`/dao/orgs/${org.orgId.toLowerCase()}`)
+                node.api.get(`/dao/orgs/${org.org_id.toLowerCase()}`)
                     .set("Accept", "application/json")
                     .set("version", node.version)
                     .set("nethash", node.config.nethash)
@@ -223,30 +226,31 @@ describe('Test Dao', () => {
                         debug("Org`s name is modified ok", JSON.stringify(body));
 
                         node.expect(body).to.have.property('success').to.be.true;
-                        node.expect(body).to.have.property("data").that.is.an("object");
-                        node.expect(body.data).to.have.property("org").that.is.an("object");
+                        node.expect(body).to.have.property("result").that.is.an("object");
+                        node.expect(body.result).to.have.property("org").that.is.an("object");
 
-                        node.expect(body.data.org).to.have.property('transaction_id');
-                        node.expect(body.data.org).to.have.property('orgId');
+                        node.expect(body.result.org).to.have.property('transaction_id');
+                        node.expect(body.result.org).to.have.property('org_id');
 
-                        node.expect(body.data.org.orgId).to.equal(org.orgId.toLowerCase());
-                        node.expect(body.data.org.name).to.not.equal(org.name); // name 已经更改
-                        node.expect(body.data.org.state).to.equal(1);
-                        node.expect(body.data.org.state).to.not.equal(org.state);
+                        node.expect(body.result.org.org_id).to.equal(org.org_id.toLowerCase());
+                        node.expect(body.result.org.name).to.not.equal(org.name); // name 已经更改
+                        node.expect(body.result.org.state).to.equal(1);
+                        node.expect(body.result.org.state).to.not.equal(org.state);
 
                         done();
                     });
             });
         })
 
-        it('Update the orgId`s tags in a new block is ok', done => {
+        // change tags
+        it('Update the org_id`s tags in a new block is ok', done => {
             node.onNewBlock(err => {
                 node.api.put('/dao/orgs')
                     .set('Accept', 'application/json')
                     .send({
                         secret: Gaccount.password,
-                        orgId: org.orgId.toLowerCase(),
-                        // orgId: org.orgId,
+                        org_id: org.org_id.toLowerCase(),
+                        // org_id: org.org_id,
                         // name: node.randomUsername(),
                         tags: `${org.tags}, add`,
                         state: 1,
@@ -264,13 +268,14 @@ describe('Test Dao', () => {
             })
         });
 
-        it(' "orgId" more than 20, should be fails. ', done => {
+        // org_id < 20
+        it(' "org_id" more than 20, should be fails. ', done => {
             node.api.put('/dao/orgs')
                 .set('Accept', 'application/json')
                 .send({
                     secret: Gaccount.password,
-                    orgId: `${org.orgId}asdefasdfs123456789M`,
-                    // orgId: org.orgId + "asdefasdfs123456789M",
+                    org_id: `${org.org_id}asdefasdfs123456789M`,
+                    // org_id: org.org_id + "asdefasdfs123456789M",
                     name: org.name,
                     url: org.url,
                     state: org.state,
@@ -283,7 +288,7 @@ describe('Test Dao', () => {
                 }) => {
                     // console.log(JSON.stringify(res.body));
                     node.expect(body).to.have.property('success').to.be.false;
-                    node.expect(body.error).to.equal("Invalid parameters: #/properties/orgId/maxLength should NOT be longer than 20 characters");
+                    node.expect(body.error).to.equal("Invalid parameters: #/properties/org_id/maxLength should NOT be longer than 20 characters");
                     done();
                 });
         })
@@ -293,8 +298,7 @@ describe('Test Dao', () => {
                 .set('Accept', 'application/json')
                 .send({
                     secret: node.Eaccount.password,
-                    orgId: node.randomOrgId(),
-                    // orgId: node.randomOrgId(),
+                    org_id: node.randomOrgId(),
                     name: org.name,
                     url: org.url,
                     state: org.state,
@@ -355,6 +359,7 @@ describe('Test Dao', () => {
         // });
     }) // end describe
 
+    // 查询接口
     describe('GET api/dao', () => {
         it('No params should be ok', done => {
             node.api.get("/dao/orgs")
@@ -405,5 +410,4 @@ describe('Test Dao', () => {
                 });
         });
     })
-
 })

@@ -201,7 +201,7 @@ message BlockVoteSignature {
 
 message AssetOrg {
   optional string address = 1;
-  required string orgId = 2;
+  required string org_id = 2;
   optional string name = 3;
   optional string tags = 4;
   optional string url = 5;
@@ -209,7 +209,7 @@ message AssetOrg {
 }
 
 message AssetExchange {
-  required string orgId = 1;
+  required string org_id = 1;
   required string exchange_trs_id = 2;
   required string sender_address = 3;
   required string received_address = 4;

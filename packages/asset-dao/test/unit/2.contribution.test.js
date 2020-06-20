@@ -9,7 +9,9 @@ async function createTransfer(address, amount, secret, second_secret) {
     return await node.ddn.transaction.createTransaction(address, amount, null, secret, second_secret)
 }
 
-let orgId = "";
+jest.setTimeout(50000);
+
+let org_id = "";
 
 // 投稿测试
 describe('Contributions Test', () => {
@@ -52,8 +54,8 @@ describe('Contributions Test', () => {
                 node.expect(err).to.be.not.ok;
                 node.expect(body).to.have.property("success").to.be.true;
 
-                orgId = body.data.org.orgId;
-                debug('orgId', JSON.stringify(orgId));
+                org_id = body.result.org.org_id;
+                debug('org_id', JSON.stringify(org_id));
 
                 done();
             });
@@ -95,7 +97,7 @@ describe('Contributions Test', () => {
     });
 
     // 使用接口投稿
-    it("PUT /api/dao/contributions/:orgId to contribute should be ok", (done) => {
+    it("PUT /api/dao/contributions/:org_id to contribute should be ok", (done) => {
         node.onNewBlock(err => {
             node.expect(err).to.be.not.ok;
 
@@ -106,7 +108,7 @@ describe('Contributions Test', () => {
                 secret: node.Daccount.password
             }
 
-            node.api.put(`/dao/contributions/${orgId}`)
+            node.api.put(`/dao/contributions/${org_id}`)
                 .set("Accept", "application/json")
                 .set("version", node.version)
                 .set("nethash", node.config.nethash)
@@ -117,7 +119,7 @@ describe('Contributions Test', () => {
                 .end((err, {
                     body
                 }) => {
-                    debug("PUT /api/dao/contributions/:orgId", JSON.stringify(body));
+                    debug("PUT /api/dao/contributions/:org_id", JSON.stringify(body));
                     node.expect(err).to.be.not.ok;
 
                     node.expect(body).to.have.property("success").to.be.true;
@@ -154,11 +156,11 @@ describe('Contributions Test', () => {
     });
 
     // 检索组织号收到的投稿记录
-    it("GET /api/dao/contributions/:orgId/all", (done) => {
+    it("GET /api/dao/contributions/:org_id/all", (done) => {
         node.onNewBlock(err => {
             node.expect(err).to.be.not.ok;
 
-            const reqUrl = `/dao/contributions/${orgId}/all`;
+            const reqUrl = `/dao/contributions/${org_id}/all`;
 
             node.api.get(reqUrl)
                 .set("Accept", "application/json")
@@ -179,13 +181,13 @@ describe('Contributions Test', () => {
     });
 
     // 可以根据文章 url 以及投稿人的公钥检索
-    it("GET /api/dao/contributions/:orgId/all?url should be ok", (done) => {
+    it("GET /api/dao/contributions/:org_id/all?url should be ok", (done) => {
         node.onNewBlock(err => {
             node.expect(err).to.be.not.ok;
 
             const keys = node.ddn.crypto.getKeys(node.Gaccount.password);
 
-            let reqUrl = `/dao/contributions/${orgId}/all`;
+            let reqUrl = `/dao/contributions/${org_id}/all`;
             reqUrl += `?senderPublicKey=${keys.publicKey}&url=${encodeURIComponent("dat://f76e1e82cf4eab4bf173627ff93662973c6fab110c70fb0f86370873a9619aa6+18/public/test.html")}`;
 
             node.api.get(reqUrl)
@@ -198,7 +200,7 @@ describe('Contributions Test', () => {
                 .end((err, {
                     body
                 }) => {
-                    debug("GET /api/dao/contributions/:orgId/all?", JSON.stringify(body));
+                    debug("GET /api/dao/contributions/:org_id/all?", JSON.stringify(body));
                     node.expect(err).to.be.not.ok;
 
                     node.expect(body).to.have.property("success").to.be.true;
@@ -241,15 +243,15 @@ describe('Confirmations Test', () => {
     let transaction;
     let confirmation;
     
-    // let orgId = "";
-    let contributionTrsId = "";
+    // let org_id = "";
+    let contribution_trs_id = "";
     let contributionPrice = "0";
     
     // 先获得组织号下的全部收稿
     beforeAll((done) => {
         // Fixme:  2020.6.15 得使用一个标识，保证检索到的就是没有确认的才行
         // const getContributionTrsIdUrl = `/dao/contributions?received_address=${node.Gaccount.address}&pagesize=1&sort=timestamp:desc`;
-        const getContributionTrsIdUrl = `/dao/contributions/${orgId}/all?received_address=${node.Gaccount.address}&pagesize=1&sort=timestamp:desc`;
+        const getContributionTrsIdUrl = `/dao/contributions/${org_id}/all?received_address=${node.Gaccount.address}&pagesize=1&sort=timestamp:desc`;
         node.api.get(getContributionTrsIdUrl)
             .set("Accept", "application/json")
             .set("version", node.version)
@@ -265,8 +267,8 @@ describe('Confirmations Test', () => {
                 node.expect(body).to.have.property("success").to.be.true;
 
                 // 确保获取最新投稿
-                contributionTrsId = body.data.rows[0].transaction_id;
-                contributionPrice = body.data.rows[0].price;
+                contribution_trs_id = body.result.rows[0].transaction_id;
+                contributionPrice = body.result.rows[0].price;
 
                 done();
             });
@@ -283,7 +285,7 @@ describe('Confirmations Test', () => {
                 sender_address: node.Gaccount.address,
                 received_address: node.Daccount.address,
                 url: "dat://f76e1e82cf4eab4bf173627ff93662973c6fab110c70fb0f86370873a9619aa6+18/public/test.html",
-                contribution_trs_id: contributionTrsId, //确保每次运行都是新的投稿id，才能通过测试
+                contribution_trs_id, //确保每次运行都是新的投稿id，才能通过测试
                 state,
                 amount: state == 1 ? contributionPrice : "0",
                 recipientId: state == 1 ? node.Daccount.address : "",
@@ -313,7 +315,7 @@ describe('Confirmations Test', () => {
     });
 
     // 接口：确认交易
-    it("PUT /api/dao/confirmations/ again should be already confirmed ok", (done) => {
+    it("PUT /api/dao/confirmations/ again should be fail", (done) => {
         node.onNewBlock(err => {
             node.expect(err).to.be.not.ok;
 
@@ -322,7 +324,7 @@ describe('Confirmations Test', () => {
             confirmation = {
                 title: 'test title',
                 url: "dat://f76e1e82cf4eab4bf173627ff93662973c6fab110c70fb0f86370873a9619aa6+18/public/test.html",
-                contributionTrsId, // 同样的投稿 id
+                contribution_trs_id, // 同样的投稿 id
                 state,
                 secret: node.Gaccount.password
             }
@@ -348,13 +350,13 @@ describe('Confirmations Test', () => {
         });
     })
 
-    it("GET /api/dao/confirmations/:orgId/all", (done) => {
+    it("GET /api/dao/confirmations/:org_id/all", (done) => {
         node.onNewBlock(err => {
             node.expect(err).to.be.not.ok;
 
             const keys = node.ddn.crypto.getKeys(node.Gaccount.password);
 
-            let reqUrl = `/dao/confirmations/${orgId}/all`;
+            let reqUrl = `/dao/confirmations/${org_id}/all`;
             reqUrl += `?senderPublicKey=${keys.publicKey}`;
 
             node.api.get(reqUrl)
@@ -376,13 +378,13 @@ describe('Confirmations Test', () => {
         });
     })
 
-    it("GET /api/dao/confirmations/:orgId/all?url", (done) => {
+    it("GET /api/dao/confirmations/:org_id/all?url", (done) => {
         node.onNewBlock(err => {
             node.expect(err).to.be.not.ok;
 
             const keys = node.ddn.crypto.getKeys(node.Daccount.password);
 
-            let reqUrl = `/dao/confirmations/${orgId}/all`;
+            let reqUrl = `/dao/confirmations/${org_id}/all`;
             reqUrl += `?senderPublicKey=${keys.publicKey}&url=${encodeURIComponent("dat://f76e1e82cf4eab4bf173627ff93662973c6fab110c70fb0f86370873a9619aa6+18/public/test.html")}`;
 
             node.api.get(reqUrl)

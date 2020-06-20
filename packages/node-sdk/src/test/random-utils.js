@@ -49,7 +49,7 @@ function randomCoin() {
 
 // Dao
 function randomOrgId() {
-    const name = randomName('', 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789', 15);
+    const name = randomName('', 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789', 10);
     return `DAO1${name}M`; // >= 5 bit
 }
 

@@ -91,7 +91,7 @@ async function sendDDN({
 }
 
 describe('Put /transactions', () => {
-    let orgId = "";
+    let org_id = "";
 
     beforeAll(async (done) => {
 
@@ -103,8 +103,8 @@ describe('Put /transactions', () => {
 
         debug("Account1Balance", Account1Balance);
 
-        // 获取 orgId
-        const getOrgIdUrl = `/dao/orgs/all?pagesize=1&address=${node.Gaccount.address}`;
+        // 获取 org_id
+        const getOrgIdUrl = `/dao/orgs?pagesize=1&address=${node.Gaccount.address}`;
         node.api.get(getOrgIdUrl)
             .set("Accept", "application/json")
             .set("version", node.version)
@@ -114,10 +114,10 @@ describe('Put /transactions', () => {
             .end((err, {
                 body 
             }) => {
-                debug(JSON.stringify(body));
+                debug("getOrgIdUrl", getOrgIdUrl, JSON.stringify(body));
 
                 node.expect(body).to.have.property("success").to.be.true;
-                orgId = body.data.rows[0].orgId;
+                org_id = body.result.rows[0].org_id;
 
                 done();
             });
@@ -126,22 +126,13 @@ describe('Put /transactions', () => {
     // 0 状态 - 发起出售交易
     it("Create exchange to sell with state = 0, Should be ok", async (done) => {
         exchange = {
-            "orgId": orgId,
+            "org_id": org_id,
             "price": exchangePrice,
             "state": 0,
             "exchange_trs_id": "",
             "received_address": Account1.address,
             "sender_address": node.Gaccount.address
         };
-
-        // exchange = Object.assign({
-        //     "orgId": "",
-        //     "exchange_trs_id": "",
-        //     "state": 0,
-        //     "price": "98765",
-        //     "sender_address": node.Gaccount.address
-        //     // "receivedAddress": node.Daccount.address,
-        // }, exchange)
 
         transaction = await node.ddn.assetPlugin.createPluginAsset(DdnUtil.assetTypes.DAO_EXCHANGE, exchange, node.Gaccount.password) // 41
         node.peer.post("/transactions")
@@ -209,18 +200,7 @@ describe('Put /transactions', () => {
             });
     });
 
-    // it("Account1 balance calculate, Should be ok.", async () => {
-    //     await node.onNewBlockAsync();
-
-    //     await openAccount(Account1);
-    //     node.expect(Account1).to.have.property("balance");
-
-    //     const fee = "10000000";
-    //     const nowBalance = DdnUtil.bignum.minus(Account1Balance, exchangePrice, fee);
-    //     const result = DdnUtil.bignum.minus(Account1.balance, nowBalance);
-    //     node.expect(result.toString()).to.equal('0');
-    // })
-
+    // fixme: 2020.6.20
     it("Create exchange to buy with state = 1 again, Should be fail", async (done) => {
         await node.onNewBlockAsync();
 
@@ -256,7 +236,7 @@ describe('Put /transactions', () => {
 })
 
 // describe('PUT /dao/exchanges', () => {
-//     let orgId = "";
+//     let org_id = "";
 
 //     beforeAll(async (done) => {
 //         const getOrgIdUrl = `/dao/orgs/all?pagesize=1&address=${node.Gaccount.address}`;
@@ -275,7 +255,7 @@ describe('Put /transactions', () => {
 
 //                 node.expect(body).to.have.property("success").to.be.true;
 
-//                 orgId = body.data.rows[0].orgId;
+//                 org_id = body.result.rows[0].org_id;
 
 //                 done();
 //             });
@@ -308,7 +288,7 @@ describe('Put /transactions', () => {
 //             .set('Accept', 'application/json')
 //             .send({
 //                 secret: node.Gaccount.password,
-//                 orgId,
+//                 org_id,
 //                 price: exchangePrice,
 //                 receivedAddress: Account2.address
 //             })
@@ -338,7 +318,7 @@ describe('Put /transactions', () => {
 //             .set('Accept', 'application/json')
 //             .send({
 //                 secret: Account2.password,
-//                 orgId,
+//                 org_id,
 //                 price: exchangePrice,
 //                 exchangeTrsId: exchange.exchange_trs_id,
 //                 receivedAddress: node.Gaccount.address,
@@ -371,7 +351,7 @@ describe('Put /transactions', () => {
 //             .set('Accept', 'application/json')
 //             .send({
 //                 secret: Account2.password,
-//                 orgId,
+//                 org_id,
 //                 price: exchangePrice,
 //                 exchangeTrsId: exchange.exchange_trs_id,
 //                 receivedAddress: node.Gaccount.address,
@@ -402,7 +382,7 @@ describe('Put /transactions', () => {
 //             .set('Accept', 'application/json')
 //             .send({
 //                 secret: Account2.password,
-//                 orgId,
+//                 org_id,
 //                 price: exchangePrice,
 //                 exchangeTrsId: exchange.exchange_trs_id,
 //                 receivedAddress: node.Gaccount.address,

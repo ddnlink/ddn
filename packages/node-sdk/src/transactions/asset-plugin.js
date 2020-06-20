@@ -46,13 +46,6 @@ async function createPluginAsset(trsType, assetInfo, secret, secondSecret) {
 
     transaction.signature = await crypto.sign(transaction, keys);
    
-    // fix 2020.5.31 这个是创建二级密码使用的 这个条件是否应该再次检查一下或优化一下
-    // if (assetInfo.secondSecret && trsType === DdnUtils.assetTypes.SIGNATURE) { // == 1
-    //     const secondSecretKeys = crypto.getKeys(assetInfo.secondSecret);
-    //     assetInfo.publicKey = secondSecretKeys.publicKey;
-    //     delete transaction.message; // 
-    // }
-
     if (secondSecret) {
         const secondKeys = crypto.getKeys(secondSecret);
         transaction.sign_signature = await crypto.secondSign(transaction, secondKeys);

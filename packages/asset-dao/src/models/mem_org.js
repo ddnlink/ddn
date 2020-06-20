@@ -7,7 +7,7 @@ export default function(connection) {
             primaryKey: true,
             allowNull: false
         },
-        orgId: {
+        org_id: {
             type: Sequelize.STRING(20),
             allowNull: false
         },
@@ -39,7 +39,7 @@ export default function(connection) {
 		indexes: [
 			{
                 unique: true,
-				fields: ['orgId']
+				fields: ['org_id']
 			},
 			{
 				fields: ['address']

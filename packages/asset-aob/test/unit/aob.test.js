@@ -14,6 +14,8 @@ async function createPluginAsset(type, asset, secret, secondSecret) {
     return await node.ddn.assetPlugin.createPluginAsset(type, asset, secret, secondSecret)
 }
 
+jest.setTimeout(50000);
+
 describe("AOB Test", () => {
 
     // 先创建两个发行商账户

@@ -451,7 +451,7 @@ class TransactionService {
         }
         return {
             success: true,
-            data: dataArr,
+            result: dataArr,
         };
 
     }

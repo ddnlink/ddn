@@ -705,10 +705,11 @@ describe("GET /multisignatures/pending", () => {
     });
 });
 
-describe("PUT /multisignatures/sign", () => {
+// 多重签名
+describe("POST /multisignatures/sign", () => {
     it("Using invalid passphrase. Should fail", done => {
         node.api
-            .put("/multisignatures/sign")
+            .post("/multisignatures/sign")
             .set("Accept", "application/json")
             .send({
                 secret: 1234,
@@ -725,7 +726,7 @@ describe("PUT /multisignatures/sign", () => {
 
     it("Using null passphrase. Should fail", done => {
         node.api
-            .put("/multisignatures/sign")
+            .post("/multisignatures/sign")
             .set("Accept", "application/json")
             .send({
                 secret: null,
@@ -742,7 +743,7 @@ describe("PUT /multisignatures/sign", () => {
 
     it("Using undefined passphrase. Should fail", done => {
         node.api
-            .put("/multisignatures/sign")
+            .post("/multisignatures/sign")
             .set("Accept", "application/json")
             .send({
                 secret: undefined,
@@ -759,7 +760,7 @@ describe("PUT /multisignatures/sign", () => {
 
     it("Using random passphrase. Should fail (account is not associated)", done => {
         node.api
-            .put("/multisignatures/sign")
+            .post("/multisignatures/sign")
             .set("Accept", "application/json")
             .send({
                 secret: "Just 4 R4nd0m P455W0RD",

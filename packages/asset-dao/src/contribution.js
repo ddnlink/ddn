@@ -117,7 +117,16 @@ class Contribution extends Asset.Base {
     }
 
     async attachApi(router) {
-        router.put("/:orgId", async (req, res) => {
+        router.get("/", async (req, res) => {
+            try {
+                const result = await this.getContributions(req, res);
+                res.json(result);
+            } catch (err) {
+                res.json({ success: false, error: err.message || err.toString() });
+            }
+        });
+
+        router.put("/:org_id", async (req, res) => {
             try {
                 const result = await this.putContribution(req, res);
                 res.json(result);
@@ -126,7 +135,7 @@ class Contribution extends Asset.Base {
             }
         });
 
-        router.get("/:orgId/all", async (req, res) => {
+        router.get("/:org_id/all", async (req, res) => {
             try {
                 const result = await this.getContributionsByOrgId(req, res);
                 res.json(result);
@@ -136,11 +145,108 @@ class Contribution extends Asset.Base {
         });
     }
 
+    async getContributions(req) {
+        const validateErrors = await this.ddnSchema.validate({
+            type: 'object',
+            properties: {
+                senderPublicKey: {
+                    type: "string"
+                },
+                multisigAccountPublicKey: {
+                    type: "string",
+                    format: "publicKey"
+                },
+                url: {
+                    type: "string"
+                },
+                timestamp: {
+                    type: 'integer'
+                },
+                pageIndex: {
+                    type: 'integer',
+                    minimum: 1
+                },
+                pageSize: {
+                    type: 'integer',
+                    minimum: 1,
+                    maximum: 500
+                }
+            },
+            required: []
+        }, req.query);
+        if (validateErrors) {
+            throw new Error(`Invalid parameters: ${validateErrors[0].schemaPath} ${validateErrors[0].message}`);
+        }
+
+        const parseSortItem = (sort, item) => {
+            const subItems = item.split(":");
+            if (subItems.length == 2) {
+                if (subItems[0].replace(/\s*/, "") != "") {
+                    sort.push(subItems);
+                }
+            }
+        };
+
+        const where = {
+            trs_type: await this.getTransactionType()
+        };
+
+        if (req.query.senderPublicKey) {
+            where.senderPublicKey = req.query.senderPublicKey;
+        }
+        if (req.query.multisigAccountPublicKey) {
+            where.multisigAccountPublicKey = req.query.multisigAccountPublicKey;
+        }
+        if (req.query.url) {
+            where.url = req.query.url.toLowerCase();
+        }
+        if (req.query.timestamp) {
+            where.timestamp = {
+                "$gt": req.query.timestamp
+            }
+        }
+
+        // 这里是否需要固定排序
+        const orders = [];
+        let sortItems = req.query.sort;
+        delete req.query.sort;
+
+        var pageIndex = req.query.pageindex || 1;
+        var pageSize = req.query.pagesize || 50;
+
+        if (sortItems) {
+            if (!sortItems.splice) {
+                sortItems = [sortItems];
+            }
+
+            for (let i = 0; i < sortItems.length; i++) {
+                const sortItem = sortItems[i];
+                if (sortItem.replace(/\s*/, "") != "") {
+                    const pos = sortItem.indexOf(":");
+                    if (pos >= 0) {
+                        parseSortItem(orders, sortItem);
+                    } else {
+                        orders.push(sortItem);
+                    }
+                }
+            }
+        }
+
+        return await new Promise((resolve, reject) => {
+            this.queryAsset(where, orders, true, pageIndex, pageSize)
+                .then(rows => {
+                    resolve({ success: true, state: 0, result: rows });
+                }).catch(err => {
+                    reject(err);
+                });
+        })
+    }
+
     async getContributionsByOrgId(req) {
-        const orgId = req.params.orgId;
-        const org = await daoUtil.getEffectiveOrgByOrgId(this._context, orgId);
+        const org_id = req.params.org_id;
+        const org = await daoUtil.getEffectiveOrgByOrgId(this._context, org_id);
         if (!org) {
-            throw new Error("Org not found: " + orgId);
+            throw new Error("Org not found: " + org_id);
         }
 
         const validateErrors = await this.ddnSchema.validate({
@@ -227,7 +333,7 @@ class Contribution extends Asset.Base {
         return await new Promise((resolve, reject) => {
             this.queryAsset(where, orders, true, pageIndex, pageSize)
                 .then(rows => {
-                    resolve({ success: true, state: 0, data: rows });
+                    resolve({ success: true, state: 0, result: rows });
                 }).catch(err => {
                     reject(err);
                 });
@@ -235,10 +341,10 @@ class Contribution extends Asset.Base {
     }
 
     async putContribution(req) {
-        const orgId = req.params.orgId;
-        const org = await daoUtil.getEffectiveOrgByOrgId(this._context, orgId);
+        const org_id = req.params.org_id;
+        const org = await daoUtil.getEffectiveOrgByOrgId(this._context, org_id);
         if (!org) {
-            throw new Error("Org not found: " + orgId);
+            throw new Error("Org not found: " + org_id);
         }
 
         const body = req.body;

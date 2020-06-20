@@ -1,4 +1,4 @@
-// no pass, Async callback was not invoked within the 20000ms timeout
+// passed
 import Debug from 'debug';
 import DdnUtils from '@ddn/utils';
 
@@ -1002,7 +1002,7 @@ describe("POST /dapps/install", () => {
 describe("GET /dapps/installed", () => {
 
     it("Should be ok", done => {
-        // let flag = 0;
+        let flag = 0;
 
         node.api.get("/dapps/installed")
             .expect("Content-Type", /json/)
@@ -1012,15 +1012,15 @@ describe("GET /dapps/installed", () => {
                 node.expect(body).to.have.property("success").to.be.true;
                 node.expect(body).to.have.property("result");
                 node.expect(body.result).to.have.property("rows").that.is.an("array");
-                // const dapps = body.result.rows;
-                // for (let i = 0; i < dapps.length; i++) {
-                //     if (dapps[i] != null) {
-                //         if (dapps[i].transactionId == DappToInstall.transactionId) {
-                //             flag += 1;
-                //         }
-                //     }
-                // }
-                // node.expect(flag).to.equal(1);
+                const dapps = body.result.rows;
+                for (let i = 0; i < dapps.length; i++) {
+                    if (dapps[i] != null) {
+                        if (dapps[i].transactionId == DappToInstall.transactionId) {
+                            flag += 1;
+                        }
+                    }
+                }
+                node.expect(flag).to.equal(1);
                 done();
             });
     });

@@ -43,12 +43,12 @@ async function createOrg(org, secret, second_secret) {
     throw new Error('The first argument should be a object!');
   }
 
-  org.orgId = org.orgId.toLowerCase()
-  if (!isOrgId(org.orgId) || !org.orgId || org.orgId.length == 0) {
-    throw new Error('Invalid orgId format');
+  org.org_id = org.org_id.toLowerCase()
+  if (!isOrgId(org.org_id) || !org.org_id || org.org_id.length == 0) {
+    throw new Error('Invalid org_id format');
   }
 
-  const olen = org.orgId.length;
+  const olen = org.org_id.length;
   let feeBase = 1;
   if (olen > 10) {
     feeBase = 10

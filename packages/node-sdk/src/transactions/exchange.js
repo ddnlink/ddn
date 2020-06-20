@@ -17,8 +17,8 @@ async function createExchange(trsopt, exchange, secret, secondSecret) {
 		throw new Error('The first argument should be a object!');
 	}
 
-	if (!exchange.orgId || exchange.orgId.length == 0) {
-		throw new Error('Invalid orgId format');
+	if (!exchange.org_id || exchange.org_id.length == 0) {
+		throw new Error('Invalid org_id format');
 	}
 
 	const fee = constants.net.fees.exchange;

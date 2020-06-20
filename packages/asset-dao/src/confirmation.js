@@ -10,7 +10,7 @@ import daoUtil from './daoUtil';
   * @senderAddress 投稿者的钱包地址
   * @url 文章的dat地址
   * @state 0-不接受，1-确认接收
-  * @contributionTrsId 投稿的交易id，关联到投稿内容
+  * @contribution_trs_id 投稿的交易id，关联到投稿内容
   * @transactionId 交易id
   *
   * @amout 等于投稿时作者设定的 @price 的数量
@@ -178,7 +178,7 @@ class Confirmation extends Asset.Base {
             }
         });
 
-        router.get("/:orgId/all", async (req, res) => {
+        router.get("/:org_id/all", async (req, res) => {
             try {
                 const result = await this.getConfirmationsByOrgId(req, res);
                 res.json(result);
@@ -189,10 +189,10 @@ class Confirmation extends Asset.Base {
     }
 
     async getConfirmationsByOrgId(req) {
-        const orgId = req.params.orgId;
-        const org = await daoUtil.getEffectiveOrgByOrgId(this._context, orgId);
+        const org_id = req.params.org_id;
+        const org = await daoUtil.getEffectiveOrgByOrgId(this._context, org_id);
         if (!org) {
-            throw new Error("Org not found: " + orgId);
+            throw new Error("Org not found: " + org_id);
         }
 
         const validateErrors = await this.ddnSchema.validate({
@@ -242,13 +242,13 @@ class Confirmation extends Asset.Base {
             }
         }
 
-        var pageIndex = req.query.pageindex || 1;
-        var pageSize = req.query.pagesize || 50;
+        const pageIndex = req.query.pageindex || 1;
+        const pageSize = req.query.pagesize || 50;
 
         return await new Promise((resolve, reject) => {
             this.queryAsset(where, [], true, pageIndex, pageSize)
                 .then(rows => {
-                    resolve({ success: true, state: 0, data: rows });
+                    resolve({ success: true, state: 0, result: rows });
                 }).catch(err => {
                     this.logger.error('confirmation error', err);
                     reject(err);
@@ -276,7 +276,7 @@ class Confirmation extends Asset.Base {
                     type: "string",
                     format: "publicKey"
                 },
-                contributionTrsId: {
+                contribution_trs_id: {
                     type: "string"
                 },
                 url: {
@@ -290,26 +290,26 @@ class Confirmation extends Asset.Base {
                     maximum: 1
                 }
             },
-            required: ['secret', 'contributionTrsId', 'state']
+            required: ['secret', 'contribution_trs_id', 'state']
         }, body);
         if (validateErrors) {
             throw new Error(`Invalid parameters: ${validateErrors[0].schemaPath} ${validateErrors[0].message}`);
         }
         const keypair = DdnCrypto.getKeys(body.secret);
 
-        // var senderPublicKey = keypair.publicKey
+        // const senderPublicKey = keypair.publicKey
 
         const contributionInst = await this.getAssetInstanceByName("DaoContribution");
         const contributionRecords = await contributionInst.queryAsset({
-            trs_id: body.contributionTrsId,
+            trs_id: body.contribution_trs_id,
         }, null, false, 1, 1);
 
         if (contributionRecords && contributionRecords.length) {
             const contribution = contributionRecords[0];
 
-            var confirmation = {
+            const confirmation = {
                 received_address: contribution.sender_address || "",
-                contribution_trs_id: body.contributionTrsId,
+                contribution_trs_id: body.contribution_trs_id,
                 url: body.url || contribution.url || "",
                 state: body.state,
                 price: body.state == 1 ? contribution.price : "0"
@@ -434,7 +434,7 @@ class Confirmation extends Asset.Base {
                 })
             });
         } else {
-            throw new Error("The contribution is not find: " + body.contributionTrsId);
+            throw new Error("The contribution is not find: " + body.contribution_trs_id);
         }
     }
 }
