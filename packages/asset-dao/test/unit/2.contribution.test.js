@@ -9,7 +9,7 @@ async function createTransfer(address, amount, secret, second_secret) {
     return await node.ddn.transaction.createTransaction(address, amount, null, secret, second_secret)
 }
 
-jest.setTimeout(50000);
+  jest.setTimeout(50000);
 
 let org_id = "";
 

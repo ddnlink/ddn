@@ -5,15 +5,17 @@
         "node": true,
         "jest": true
     },
-    "extends": "eslint:recommended",
-    "globals": {
-        "Atomics": "readonly",
-        "SharedArrayBuffer": "readonly"
-    },
+    "extends": [
+        "airbnb-base" //"airbnb" //"standard", //  "eslint:recommended",//
+    ],
+    "parser": "@typescript-eslint/parser",
     "parserOptions": {
-        "sourceType": "module",
-        "ecmaVersion": 2018
+        "ecmaVersion": 2018,
+        "sourceType": "module"
     },
+    "plugins": [
+        "@typescript-eslint"
+    ],
     "rules": {
     }
 }

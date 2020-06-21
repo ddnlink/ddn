@@ -57,7 +57,11 @@ export default function(originOpts = {}) {
       ...(moduleNameMapper || {}),
       ...(userModuleNameMapper || {}),
     },
-    testPathIgnorePatterns: ['/node_modules/'],
+    testPathIgnorePatterns: [
+      '/node_modules/',
+      '/examples/',
+    ],
+    testSequencer: require.resolve('./testSequencer.js'),
     ...(restUserJestConfig || {}),
   };
 
