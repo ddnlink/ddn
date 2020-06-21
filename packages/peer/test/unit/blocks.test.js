@@ -39,7 +39,10 @@ describe("GET /blocks/getHeight", () => {
                 node.expect(err).be.not.ok;
                 node.expect(body).to.have.property("success").to.be.true;
                 if (body.success == true && body.height != null) {
-                    node.expect(body).to.have.property("height").to.be.above(0);
+                    node.expect(body).to.have.property("height");
+                    const result = DdnUtils.bignum.isGreaterThan(body.height, '0');
+                    node.expect(result).be.true;
+
                     if (body.success == true) {
                         block.blockHeight = body.height;
                         if (DdnUtils.bignum.isGreaterThan(body.height, 100)) {
@@ -192,7 +195,7 @@ describe("GET /blocks", () => {
             .end((err, {
                 body
             }) => {
-                // debug(JSON.stringify(body));
+                debug("generatorPublicKey", JSON.stringify(body));
                 node.expect(body).to.have.property("success").to.be.true;
                 node.expect(body).to.have.property("blocks").that.is.an("array");
                 for (let i = 0; i < body.blocks.length; i++) {
@@ -262,7 +265,7 @@ describe("GET /blocks", () => {
                     .end((err, {
                         body
                     }) => {
-                        // debug(JSON.stringify(body));
+                        debug(`/blocks?previousBlock=${previousBlock}`, JSON.stringify(body));
                         node.expect(body).to.have.property("success").to.be.true;
                         node.expect(body).to.have.property("blocks").that.is.an("array");
                         node.expect(body.blocks).to.have.length(1);
