@@ -1,6 +1,6 @@
 {
   "name": "@ddn/utils",
-  "version": "0.0.8",
+  "version": "0.1.0",
   "description": "DDN utils.",
   "main": "./lib/index.js",
   "repository": {
@@ -16,7 +16,7 @@
     "lib"
   ],
   "dependencies": {
-    "@ddn/crypto": "^0.1.0",
+    "@ddn/crypto": "^0.2.0",
     "bignumber.js": "^7.2.1",
     "depd": "^2.0.0",
     "ip": "^1.1.5",
