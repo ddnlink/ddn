@@ -1,4 +1,4 @@
 
 export default {
-  history: 'hash',
+  history: 'hash'
 }

@@ -1,15 +1,15 @@
 /**
  * passed
  */
-import node from "@ddn/node-sdk/lib/test";
+import node from '@ddn/node-sdk/lib/test'
 
-import Tmdb from '../../lib/helpers/tmdb';
+import Tmdb from '../../lib/helpers/tmdb'
 
 describe('tmdb', () => {
   it('normal test', done => {
-    const data = new Map;
+    const data = new Map()
     data.set(1, 1)
-    const db = new Tmdb(data);
+    const db = new Tmdb(data)
     db.set([2], 2)
     node.expect(db.log.length).to.equal(1)
     db.set([3], 3)
@@ -36,7 +36,7 @@ describe('tmdb', () => {
   })
 
   it('test multi key path', done => {
-    const db = new Tmdb;
+    const db = new Tmdb()
     db.set(['alice', 1], 1)
     db.set(['alice', 2], 2)
     node.expect(db.get(['alice', 1])).to.equal(1)

@@ -1,11 +1,11 @@
 export default {
 
-    name: "int64",
+  name: 'int64',
 
-    // FIXME: value?
-    validate(value) {
-        console.log("int64 haha......................");
-        return false;
-    }
+  // FIXME: value?
+  validate (value) {
+    console.log('int64 haha......................')
+    return false
+  }
 
-};
+}

@@ -1,55 +1,55 @@
-/*---------------------------------------------------------------------------------------------
+/* ---------------------------------------------------------------------------------------------
  *  Created by DDN Team on Wed Mar 14 2017 16:9:11
  *
  *  Copyright (c) 2019 DDN Foundation. All rights reserved.
  *  Licensed under the MIT License. See License.txt in the project root for license information.
- *--------------------------------------------------------------------------------------------*/
+ *-------------------------------------------------------------------------------------------- */
 
 export default {
-  reverse(diff) {
-    const copyDiff = diff.slice();
+  reverse (diff) {
+    const copyDiff = diff.slice()
     for (let i = 0; i < copyDiff.length; i++) {
-      const math = copyDiff[i][0] == '-' ? '+' : '-';
-      copyDiff[i] = math + copyDiff[i].slice(1);
+      const math = copyDiff[i][0] == '-' ? '+' : '-'
+      copyDiff[i] = math + copyDiff[i].slice(1)
     }
-    return copyDiff;
+    return copyDiff
   },
 
-  merge(source, diff) {
-    let res = source ? source.slice() : [];
+  merge (source, diff) {
+    let res = source ? source.slice() : []
 
     for (let i = 0; i < diff.length; i++) {
-      const math = diff[i][0];
-      const publicKey = diff[i].slice(1);
+      const math = diff[i][0]
+      const publicKey = diff[i].slice(1)
 
-      if (math == "+") {
-        res = res || [];
+      if (math == '+') {
+        res = res || []
 
-        let index = -1;
+        let index = -1
         if (res) {
-          index = res.indexOf(publicKey);
+          index = res.indexOf(publicKey)
         }
         if (index != -1) {
-          return false;
+          return false
         }
 
-        res.push(publicKey);
+        res.push(publicKey)
       }
 
-      if (math == "-") {
-        let index = -1;
+      if (math == '-') {
+        let index = -1
         if (res) {
-          index = res.indexOf(publicKey);
+          index = res.indexOf(publicKey)
         }
         if (index == -1) {
-          return false;
+          return false
         }
-        res.splice(index, 1);
+        res.splice(index, 1)
         if (!res.length) {
-          res = null;
+          res = null
         }
       }
     }
-    return res;
+    return res
   }
-};
+}

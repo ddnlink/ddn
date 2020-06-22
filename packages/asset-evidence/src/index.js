@@ -1,5 +1,5 @@
-import Evidence from "./evidence";
+import Evidence from './evidence'
 
 export default {
-    Evidence
-};
+  Evidence
+}

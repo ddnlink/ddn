@@ -1,3 +1,3 @@
-export function add(input) {
-  return input + 1;
+export function add (input) {
+  return input + 1
 }

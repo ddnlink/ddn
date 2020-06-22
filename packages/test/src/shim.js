@@ -1,9 +1,9 @@
-import 'core-js/stable';
-import 'regenerator-runtime/runtime';
+import 'core-js/stable'
+import 'regenerator-runtime/runtime'
 
 /* eslint-disable import/first */
 global.requestAnimationFrame =
   global.requestAnimationFrame ||
-  function requestAnimationFrame(callback) {
-    setTimeout(callback, 0);
-  };
+  function requestAnimationFrame (callback) {
+    setTimeout(callback, 0)
+  }

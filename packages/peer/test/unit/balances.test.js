@@ -1,13 +1,13 @@
 /**
  * passed
  */
-import node from "@ddn/node-sdk/lib/test";
+import node from '@ddn/node-sdk/lib/test'
 
-import BalanceManager from '../../lib/helpers/balance-manager.js';
+import BalanceManager from '../../lib/helpers/balance-manager.js'
 
 describe('balance cache manager', () => {
   it('normal test', done => {
-    const balances = new BalanceManager;
+    const balances = new BalanceManager()
     balances.setNativeBalance('1', 10)
     balances.setNativeBalance('2', '1000')
     node.expect(balances.getNativeBalance('1')).to.equal('10')

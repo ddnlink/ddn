@@ -1,22 +1,22 @@
 /**
  * 节点数据库
  */
-import Sequelize from 'sequelize';
+import Sequelize from 'sequelize'
 
 export default connection => connection.define('peer', {
   ip: {
     type: Sequelize.INTEGER, // 原类型:INTEGER
     allowNull: false,
-    unique: 'peer_ip+port',
+    unique: 'peer_ip+port'
   },
   port: {
-    type: Sequelize.INTEGER, // 原类型:TINYINT     
+    type: Sequelize.INTEGER, // 原类型:TINYINT
     allowNull: false,
-    unique: 'peer_ip+port',
+    unique: 'peer_ip+port'
   },
   state: {
-    type: Sequelize.INTEGER, // 原类型:TINYINT  
-    allowNull: false,
+    type: Sequelize.INTEGER, // 原类型:TINYINT
+    allowNull: false
   },
   os: {
     type: Sequelize.STRING(64) // 原类型:VARCHAR,size:64
@@ -26,14 +26,14 @@ export default connection => connection.define('peer', {
   },
   clock: {
     type: Sequelize.INTEGER // 原类型:INT
-  },
+  }
 }, {
   timestamps: false,
   indexes: [
-      {
-          unique: true,
-          name: 'peer_index',
-          fields: ['ip', 'port']
-      }
+    {
+      unique: true,
+      name: 'peer_index',
+      fields: ['ip', 'port']
+    }
   ]
-});
+})

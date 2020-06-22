@@ -1,10 +1,10 @@
 export default {
 
-    name: "listDelegates",
+  name: 'listDelegates',
 
-    validate(obj) {
-        obj.limit = 101;
-        return true;
-    }
+  validate (obj) {
+    obj.limit = 101
+    return true
+  }
 
-};
+}

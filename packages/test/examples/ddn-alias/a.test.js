@@ -1,6 +1,6 @@
-import { add } from './count';
+import { add } from './count'
 
 it('count', () => {
-  console.log('test log-----');
-  expect(add(1)).toBe(2);
-});
+  console.log('test log-----')
+  expect(add(1)).toBe(2)
+})

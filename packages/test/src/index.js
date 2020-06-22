@@ -1,22 +1,22 @@
-import jest from 'jest';
-import { options as CliOptions } from 'jest-cli/build/cli/args';
-import { join } from 'path';
-import { existsSync } from 'fs';
+import jest from 'jest'
+import { options as CliOptions } from 'jest-cli/build/cli/args'
+import { join } from 'path'
+import { existsSync } from 'fs'
 
-const debug = require('debug')('test');
+const debug = require('debug')('test')
 
-process.env.NODE_ENV = 'test';
+process.env.NODE_ENV = 'test'
 
-export default function(originOpts = {}) {
-  const opts = { ...originOpts };
-  const { cwd = process.cwd(), moduleNameMapper } = opts;
-  let transformInclude = opts.transformInclude || [];
+export default function (originOpts = {}) {
+  const opts = { ...originOpts }
+  const { cwd = process.cwd(), moduleNameMapper } = opts
+  let transformInclude = opts.transformInclude || []
   if (typeof transformInclude === 'string') {
-    transformInclude = [transformInclude];
+    transformInclude = [transformInclude]
   }
 
-  const jestConfigFile = join(cwd, 'jest.config.js');
-  let userJestConfig = {};
+  const jestConfigFile = join(cwd, 'jest.config.js')
+  let userJestConfig = {}
   if (existsSync(jestConfigFile)) {
     userJestConfig = require(jestConfigFile); // eslint-disable-line
   }
@@ -25,26 +25,26 @@ export default function(originOpts = {}) {
     moduleNameMapper: userModuleNameMapper,
     extraSetupFiles,
     ...restUserJestConfig
-  } = userJestConfig;
+  } = userJestConfig
 
   const config = {
     rootDir: process.cwd(),
     setupFiles: [
       require.resolve('./shim.js'),
       require.resolve('./setupTests.js'),
-      ...(extraSetupFiles || []),
+      ...(extraSetupFiles || [])
     ],
     resolver: require.resolve('jest-pnp-resolver'),
     transform: {
       '\\.(t|j)sx?$': require.resolve('./transformers/jsTransformer'),
-      '\\.svg$': require.resolve('./transformers/fileTransformer'),
+      '\\.svg$': require.resolve('./transformers/fileTransformer')
     },
     transformIgnorePatterns: [
       // 加 [^/]*? 是为了兼容 tnpm 的目录结构
       // 比如：_ddn-test@1.5.5@test
       `node_modules/(?!([^/]*?ddn|[^/]*?test|[^/]*?enzyme-adapter-react-16|${transformInclude.join(
-        '|',
-      )})/)`,
+        '|'
+      )})/)`
     ],
     testMatch: ['**/?*.(spec|test|e2e).(j|t)s?(x)'],
     moduleFileExtensions: ['js', 'jsx', 'ts', 'tsx', 'json'],
@@ -52,50 +52,50 @@ export default function(originOpts = {}) {
     moduleNameMapper: {
       '\\.(css|less|sass|scss)$': require.resolve('identity-obj-proxy'),
       '\\.(jpg|jpeg|png|gif|eot|otf|webp|svg|ttf|woff|woff2|mp4|webm|wav|mp3|m4a|aac|oga)$': require.resolve(
-        './fileMock.js',
+        './fileMock.js'
       ),
       ...(moduleNameMapper || {}),
-      ...(userModuleNameMapper || {}),
+      ...(userModuleNameMapper || {})
     },
     testPathIgnorePatterns: [
       '/node_modules/',
-      '/examples/',
+      '/examples/'
     ],
     testSequencer: require.resolve('./testSequencer.js'),
-    ...(restUserJestConfig || {}),
-  };
+    ...(restUserJestConfig || {})
+  }
 
-  delete opts.transformInclude;
+  delete opts.transformInclude
 
   // Convert alias option into real one
   Object.keys(CliOptions).forEach(name => {
-    const { alias } = CliOptions[name] || {};
+    const { alias } = CliOptions[name] || {}
     if (alias && opts[alias]) {
-      opts[name] = opts[alias];
-      delete opts[alias];
+      opts[name] = opts[alias]
+      delete opts[alias]
     }
-  });
+  })
 
   return new Promise((resolve, reject) => {
     jest
       .runCLI(
         {
           config: JSON.stringify(config),
-          ...opts,
+          ...opts
         },
-        [cwd],
+        [cwd]
       )
       .then(result => {
-        debug(result);
-        const { results } = result;
+        debug(result)
+        const { results } = result
         if (results.success) {
-          resolve();
+          resolve()
         } else {
-          reject(new Error('Jest failed'));
+          reject(new Error('Jest failed'))
         }
       })
       .catch(e => {
-        console.log(e);
-      });
-  });
+        console.log(e)
+      })
+  })
 }
