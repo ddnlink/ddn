@@ -10,7 +10,7 @@ import extend from 'extend2'
 import DdnCrypto from '@ddn/crypto'
 import DdnUtils from '@ddn/utils'
 
-import Logger from '../logger'
+import { Logger } from '../logger'
 import Context from './context'
 import Block from './block/block'
 import Transaction from './transaction/transaction'
@@ -29,7 +29,7 @@ import defaultConfig from '../config.default.js'
 
 class Program {
   async _init (options) {
-    options.logger = new Logger({
+    options.logger = Logger({
       filename: path.join(options.baseDir, 'logs', 'debug.log'),
       echo: options.isDaemonMode ? null : options.configObject.logLevel,
       errorLevel: options.configObject.logLevel
