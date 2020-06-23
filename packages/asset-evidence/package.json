@@ -19,6 +19,10 @@
   "author": "wangxm",
   "license": "MIT",
   "dependencies": {
-    "@ddn/asset-base": "^0.2.0"
+    "@ddn/asset-base": "^0.2.0",
+    "@ddn/utils": "^0.1.0"
+  },
+  "devDependencies": {
+    "@ddn/node-sdk": "^0.2.0"
   }
 }

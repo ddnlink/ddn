@@ -20,9 +20,9 @@
   ],
   "dependencies": {
     "@ddn/asset-base": "^0.2.0",
+    "@ddn/crypto": "^0.2.0",
     "@ddn/utils": "^0.1.0",
     "bytebuffer": "^5.0.1",
-    "ed25519": "0.0.4",
     "sequelize": "^5.8.7",
     "valid-url": "^1.0.9"
   },

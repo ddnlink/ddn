@@ -1,6 +1,7 @@
 {
   "name": "ddn",
-  "version": "3.5.0",
+  "version": "3.5.2",
+  "private": true,
   "repository": {
     "type": "git",
     "url": "git+https://github.com/ddnlink/ddn.git"

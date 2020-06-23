@@ -7,7 +7,6 @@
 
 const crypto = require('crypto')
 const ByteBuffer = require('bytebuffer')
-const ed = require('ed25519')
 const node = require('./variables.js')
 
 function getBytes (trs) {
@@ -33,30 +32,6 @@ function getBytes (trs) {
 }
 
 describe('benchmarks', function () {
-  const secret = node.randomPassword()
-  const keypair = ed.MakeKeypair(crypto.createHash('sha256').update(secret).digest())
-
-  it('ed25519 verify and sign', function (done) {
-    const COUNT = 10000
-    const signatures = new Array(COUNT)
-    const dataHash = crypto.createHash('sha256').update(node.randomPassword()).digest()
-    const label = 'time usage for ' + COUNT + ' signs'
-    console.time(label)
-    for (let i = 0; i < COUNT; ++i) {
-      signatures[i] = ed.Sign(dataHash, keypair)
-    }
-    console.timeEnd(label)
-
-    const label2 = 'time usage for ' + COUNT + ' verifys'
-    console.time(label2)
-    for (let i = 0; i < COUNT; ++i) {
-      const ok = ed.Verify(dataHash, signatures[i], keypair.publicKey)
-    }
-    console.timeEnd(label2)
-
-    done()
-  })
-
   it('sha256', function (done) {
     const COUNT = 10000
     const bytes = Buffer.allocUnsafe(256)

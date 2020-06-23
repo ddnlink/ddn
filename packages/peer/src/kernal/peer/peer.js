@@ -163,7 +163,7 @@ class Peer {
 
       if (this.config.publicIp) {
         const localIp = ip.toLong(this.config.publicIp)
-        if (localIp == peer.ip && this.config.port == peer.port) {
+        if (localIp === peer.ip && this.config.port === peer.port) {
           return
         }
       }
@@ -329,7 +329,7 @@ class Peer {
 
   async isCompatible (version) {
     const nums = `${version}`.split('.').map(Number)
-    if (nums.length != 3) {
+    if (nums.length !== 3) {
       return true
     }
 
@@ -349,7 +349,7 @@ class Peer {
 
   async remove (pip, port) {
     const isStaticPeer = this.config.peers.list.find(
-      peer => peer.ip == ip.fromLong(pip) && peer.port == port
+      peer => peer.ip === ip.fromLong(pip) && peer.port === port
     )
     if (isStaticPeer) {
       this.logger.info("Peer in white list, can't remove.")
@@ -402,13 +402,13 @@ class Peer {
      */
   async changeState (pip, port, state, timeoutSeconds) {
     const isStaticPeer = this.config.peers.list.find(
-      peer => peer.ip == ip.fromLong(pip) && peer.port == port
+      peer => peer.ip === ip.fromLong(pip) && peer.port === port
     )
     if (isStaticPeer) {
       this.logger.info("Peer in white list, the state can't change.")
     } else {
       let clock = null
-      if (state == 0) {
+      if (state === 0) {
         clock = Date.now() + (timeoutSeconds || 1) * 1000
       }
 
@@ -452,8 +452,8 @@ class Peer {
       const peer = peers[0]
       const peerIp = ip.fromLong(peer.ip)
       if (
-        (peerIp == '127.0.0.1' || peerIp == this.config.publicIp) &&
-                peer.port == this.config.port &&
+        (peerIp === '127.0.0.1' || peerIp === this.config.publicIp) &&
+                peer.port === this.config.port &&
                 !allowSelf
       ) {
         if (peers.length > 1) {

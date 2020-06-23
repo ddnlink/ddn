@@ -20,12 +20,15 @@
   "license": "MIT",
   "dependencies": {
     "@ddn/asset-base": "^0.2.0",
+    "@ddn/crypto": "^0.2.0",
     "@ddn/sandbox": "^0.1.0",
     "@ddn/utils": "^0.1.0",
     "async": "^2.6.1",
     "decompress-zip": "^0.2.2",
-    "ed25519": "0.0.4",
     "request": "^2.88.0",
     "valid-url": "^1.0.9"
+  },
+  "devDependencies": {
+    "@ddn/node-sdk": "^0.2.0"
   }
 }

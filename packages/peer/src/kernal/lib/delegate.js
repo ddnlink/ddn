@@ -76,7 +76,7 @@ class Delegate {
       limit: delegatePublicKeys.length
     })
 
-    if (accounts && accounts.length == delegatePublicKeys.length) {
+    if (accounts && accounts.length === delegatePublicKeys.length) {
       accounts.forEach(account => {
         if (account.is_delegate) {
           this._myDelegateKeypairs[account.publicKey] = delegateKeypairs[account.publicKey] // wxm block database

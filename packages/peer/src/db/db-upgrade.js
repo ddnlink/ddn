@@ -25,7 +25,7 @@ class DBUpgrade {
          *
          * 逻辑很简单，代码很崩溃，下一版本要改成async/await
          */
-    _context.dbParams.get('version', (err, currVersion) => {
+    _context.dbParams.get('version', (_err, currVersion) => {
       const migrations = self.getVersionChanges()
       const versionList = Object.keys(migrations).sort().filter(ver => ver > currVersion)
       return async.eachSeries(versionList, (ver, cb2) => {

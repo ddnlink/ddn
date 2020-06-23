@@ -3,8 +3,6 @@
  *
  *  Copyright (c) 2017 DDN.link. All rights reserved.
  *  Licensed under the MIT License. See License.txt in the project root for license information.
- *
- *  All transaction-types.js -> @ddn/utils/asset-types.js
  *-------------------------------------------------------------------------------------------- */
 
 export default {

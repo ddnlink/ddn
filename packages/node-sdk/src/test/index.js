@@ -103,7 +103,7 @@ function _getHeight (url, cb) {
     url: `${url}/api/blocks/getHeight`,
     json: true
   }, (err, res, body) => {
-    if (err || res.statusCode != 200) {
+    if (err || res.statusCode !== 200) {
       return cb(err || 'Status code is not 200 (getHeight)')
     } else {
       return cb(null, body.height)
@@ -136,7 +136,7 @@ function waitForNewBlock (height, cb) {
         url: `${baseUrl}/api/blocks/getHeight`,
         json: true
       }, (err, { statusCode }, body) => {
-        if (err || statusCode != 200) {
+        if (err || statusCode !== 200) {
           return cb(err || 'Got incorrect status')
         }
 
@@ -148,7 +148,7 @@ function waitForNewBlock (height, cb) {
         setTimeout(cb, 1000)
       })
     },
-    () => actualHeight == height,
+    () => actualHeight === height,
     err => {
       if (err) {
         cb(err)
@@ -187,7 +187,7 @@ function addPeers (numOfPeers, cb) {
         os: os
       }
     }, (err, { statusCode }) => {
-      if (err || statusCode != 200) {
+      if (err || statusCode !== 200) {
         return next(err || 'Status code is not 200 (getHeight)')
       } else {
         i++

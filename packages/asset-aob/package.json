@@ -20,10 +20,10 @@
   "license": "MIT",
   "dependencies": {
     "@ddn/asset-base": "^0.2.0",
+    "@ddn/crypto": "^0.2.0",
     "@ddn/node-sdk": "^0.2.0",
     "@ddn/utils": "^0.1.0",
     "async": "^2.6.1",
-    "ed25519": "0.0.4",
     "lodash": "^4.17.15",
     "mathjs": "^5.4.0",
     "sequelize": "^4.42.0"

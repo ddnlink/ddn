@@ -22,6 +22,7 @@
     "@ddn/asset-dao": "^0.2.0",
     "@ddn/asset-dapp": "^0.2.0",
     "@ddn/asset-evidence": "^0.1.0",
+    "@ddn/core": "^0.1.0",
     "@ddn/crypto": "^0.2.0",
     "@ddn/utils": "^0.1.0",
     "JSONStream": "^1.3.1",

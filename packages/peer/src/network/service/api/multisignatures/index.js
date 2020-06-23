@@ -2,9 +2,6 @@
  * MultisignaturesRouter接口
  * wangxm   2019-03-27
  */
-// import crypto from 'crypto';
-// import ed from 'ed25519';
-
 import DdnCrypto from '@ddn/crypto'
 import DdnUtils from '@ddn/utils'
 

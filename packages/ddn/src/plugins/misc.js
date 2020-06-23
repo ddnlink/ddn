@@ -42,7 +42,7 @@ function peerstat () {
           })
         }
       })
-    }, (err, results) => {
+    }, (_err, results) => {
       const heightMap = {}
       const errorMap = {}
       for (let i = 0; i < results.length; ++i) {
@@ -84,10 +84,10 @@ function peerstat () {
         })
         return peerAddrs.join(',')
       }
-      console.log('======================================')
+
       for (let i = 0; i < normalList.length; ++i) {
         const item = normalList[i]
-        if (i == 0) {
+        if (i === 0) {
           console.log(`${item.peers.length} height: ${item.height}`)
         } else {
           console.log(`${item.peers.length} height: ${item.height}`, joinPeerAddrs(item.peers))
@@ -170,14 +170,14 @@ function ipstat () {
     async.mapLimit(peers, 5, ({ ip }, next) => {
       const url = `http://ip.taobao.com/service/getIpInfo.php?ip=${ip}`
       request(url, (err, { statusCode }, body) => {
-        if (err || statusCode != 200) {
+        if (err || statusCode !== 200) {
           console.error('Failed to get ip info:', err)
           next(null, {})
         } else {
           next(null, JSON.parse(body).data)
         }
       })
-    }, (err, ips) => {
+    }, (_err, ips) => {
       for (let i = 0; i < ips.length; ++i) {
         const ip = ips[i]
         if (ip.country_id) {

@@ -263,7 +263,7 @@ class Program {
 
   async _blockchainReady () {
     if (!this._blockchainReadyFired &&
-            this._context.runtime.state == DdnUtils.runtimeState.Ready) {
+            this._context.runtime.state === DdnUtils.runtimeState.Ready) {
       // 通知资产系统已就绪事件
       await this._context.runtime.transaction.execAssetFunc('onBlockchainReady')
       this._blockchainReadyFired = true
@@ -296,7 +296,7 @@ class Program {
     if (validPeer) {
       try {
         await (async () => {
-          if (this._peerSyncCounter == 0) {
+          if (this._peerSyncCounter === 0) {
             await this._context.runtime.peer.syncPeersList()
             this._peerSyncCounter = 3
           }
@@ -342,7 +342,7 @@ class Program {
     if (validPeer) {
       try {
         await (async () => {
-          if (this._context.runtime.state == DdnUtils.runtimeState.Syncing) {
+          if (this._context.runtime.state === DdnUtils.runtimeState.Syncing) {
             return
           }
 
@@ -366,7 +366,7 @@ class Program {
     if (validPeer) {
       try {
         await (async () => {
-          if (this._context.runtime.state == DdnUtils.runtimeState.Syncing) {
+          if (this._context.runtime.state === DdnUtils.runtimeState.Syncing) {
             return
           }
 
@@ -420,7 +420,7 @@ class Program {
      */
   async startForgeBlockTask () {
     await (async () => {
-      if (this._context.runtime.state != DdnUtils.runtimeState.Ready) {
+      if (this._context.runtime.state !== DdnUtils.runtimeState.Ready) {
         return
       }
 
@@ -444,7 +444,7 @@ class Program {
 
       const lastBlock = this._context.runtime.block.getLastBlock()
 
-      if (currentSlot == this._context.runtime.slot.getSlotNumber(lastBlock.timestamp)) {
+      if (currentSlot === this._context.runtime.slot.getSlotNumber(lastBlock.timestamp)) {
         // library.logger.debug('Loop:', 'lastBlock is in the same slot');
         return
       }
@@ -462,7 +462,7 @@ class Program {
 
       await new Promise((resolve) => {
         this._context.sequence.add(async (cb) => {
-          if (this._context.runtime.slot.getSlotNumber(forgeDelegateInfo.time) == this._context.runtime.slot.getSlotNumber() &&
+          if (this._context.runtime.slot.getSlotNumber(forgeDelegateInfo.time) === this._context.runtime.slot.getSlotNumber() &&
                         this._context.runtime.block.getLastBlock().timestamp < forgeDelegateInfo.time) {
             try {
               await this._context.runtime.block.generateBlock(forgeDelegateInfo.keypair, forgeDelegateInfo.time)
