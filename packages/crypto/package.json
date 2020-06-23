@@ -1,6 +1,6 @@
 {
   "name": "@ddn/crypto",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Crypto for DDN",
   "keywords": [
     "crypto",
@@ -35,6 +35,6 @@
     "tweetnacl": "^1.0.2"
   },
   "devDependencies": {
-    "@ddn/node-sdk": "^0.2.0"
+    "@ddn/node-sdk": "^0.2.1"
   }
 }
