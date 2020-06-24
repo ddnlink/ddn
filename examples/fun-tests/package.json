@@ -1,6 +1,6 @@
 {
   "name": "example",
-  "version": "1.2.2",
+  "version": "1.2.3",
   "main": "./app.js",
   "private": true,
   "repository": {
@@ -49,7 +49,7 @@
   "dependencies": {
     "@ddn/core": "^0.1.0",
     "@ddn/node-sdk": "^0.2.2",
-    "@ddn/peer": "^0.2.2",
+    "@ddn/peer": "^0.2.3",
     "@ddn/utils": "^0.1.2",
     "commander": "2.6.0",
     "lodash": "^4.17.11"
