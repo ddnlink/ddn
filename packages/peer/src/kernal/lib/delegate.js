@@ -3,8 +3,6 @@
  * wangxm   2018-01-08
  */
 import DdnCrypto from '@ddn/crypto'
-
-import util from 'util'
 import DdnUtils from '@ddn/utils'
 
 let _singleton
@@ -56,7 +54,7 @@ class Delegate {
   async prepare () {
     let secrets = null
     if (this.config.forging.secret) {
-      secrets = util.isArray(this.config.forging.secret) ? this.config.forging.secret : [this.config.forging.secret]
+      secrets = Array.isArray(this.config.forging.secret) ? this.config.forging.secret : [this.config.forging.secret]
     }
 
     const delegateKeypairs = {}
@@ -92,7 +90,7 @@ class Delegate {
   }
 
   async checkDelegates (publicKey, votes) {
-    if (util.isArray(votes)) {
+    if (Array.isArray(votes)) {
       const account = await this.runtime.account.getAccountByPublicKey(publicKey)
       if (!account) {
         throw new Error('Account not found')
@@ -110,9 +108,9 @@ class Delegate {
           throw new Error('Invalid math operator')
         }
 
-        if (math == '+') {
+        if (math === '+') {
           additions += 1
-        } else if (math == '-') {
+        } else if (math === '-') {
           removals += 1
         }
 
@@ -123,10 +121,10 @@ class Delegate {
           throw new Error('Invalid public key')
         }
 
-        if (math == '+' && (account.delegates !== null && account.delegates.includes(publicKey2))) {
+        if (math === '+' && (account.delegates !== null && account.delegates.includes(publicKey2))) {
           throw new Error('Failed to add vote, account has already voted for this delegate')
         }
-        if (math == '-' && (account.delegates === null || !account.delegates.includes(publicKey2))) {
+        if (math === '-' && (account.delegates === null || !account.delegates.includes(publicKey2))) {
           throw new Error('Failed to remove vote, account has not voted for this delegate')
         }
 
@@ -151,12 +149,11 @@ class Delegate {
 
   async getDelegates (query) {
     if (!query) {
-      throw 'Missing query argument'
+      throw new Error('Missing query argument')
     }
 
     const delegates = await this.runtime.account.getAccountList({
       is_delegate: 1, // wxm block database
-      // sort: {"vote": -1, "publicKey": 1},
       sort: [['vote', 'DESC'], ['publicKey', 'ASC']] // wxm block database
     }, ['username', 'address', 'publicKey', 'vote', 'missedblocks', 'producedblocks', 'fees', 'rewards', 'balance'])
 
@@ -168,7 +165,7 @@ class Delegate {
     limit = limit > this.config.settings.delegateNumber ? this.config.settings.delegateNumber : limit
 
     const orderBy = orderField ? orderField[0] : null
-    const sortMode = orderField && orderField.length == 2 ? orderField[1] : 'asc'
+    const sortMode = orderField && orderField.length === 2 ? orderField[1] : 'asc'
 
     const count = delegates.length
     // const length = Math.min(limit, count);
@@ -179,7 +176,7 @@ class Delegate {
 
     for (let i = 0; i < delegates.length; i++) {
       delegates[i].rate = i + 1
-      delegates[i].approval = (delegates[i].vote / totalSupply) * 100
+      delegates[i].approval = delegates[i].vote / totalSupply // TODO: bigNumber?? 2020.6.24
       delegates[i].approval = Math.round(delegates[i].approval * 1e2) / 1e2
 
       let percent = 100 - (delegates[i].missedblocks / ((delegates[i].producedblocks + delegates[i].missedblocks) / 100))
@@ -283,7 +280,7 @@ class Delegate {
     const activeDelegates = await this.getDisorderDelegatePublicKeys(height)
     const currentSlot = this.runtime.slot.getSlotNumber(timestamp)
     const delegateKey = activeDelegates[currentSlot % this.config.settings.delegateNumber]
-    if (delegateKey && generator_public_key == delegateKey) {
+    if (delegateKey && generator_public_key === delegateKey) {
       return
     }
     throw new Error(`Failed to verify slot, expected delegate: ${delegateKey}`)
@@ -293,7 +290,7 @@ class Delegate {
     const activeDelegates = await this.getDisorderDelegatePublicKeys(height)
     const currentSlot = this.runtime.slot.getSlotNumber(timestamp)
     const delegateKey = activeDelegates[currentSlot % this.config.settings.delegateNumber]
-    if (delegateKey && generator_public_key == delegateKey) {
+    if (delegateKey && generator_public_key === delegateKey) {
       return
     }
     throw new Error('Failed to validate propose slot')

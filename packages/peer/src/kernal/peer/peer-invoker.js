@@ -2,8 +2,6 @@
  * PeerInvoker
  * wangxm   2019-01-14
  */
-import util from 'util'
-
 import request from 'request'
 import ip from 'ip'
 import extend from 'extend'
@@ -61,7 +59,7 @@ class PeerInvoker {
       forever: true
     }
 
-    if (util.isObject(args.data) || util.isArray(args.data)) {
+    if ((args.data !== null && typeof args.data === 'object') || Array.isArray(args.data)) {
       req.json = args.data
     } else {
       req.body = args.data
@@ -69,14 +67,14 @@ class PeerInvoker {
 
     return new Promise((resolve, reject) => {
       request(req, async (err, res, body) => {
-        if (err || res.statusCode != 200) {
+        if (err || res.statusCode !== 200) {
           this.logger.debug('Request', {
             url: req.url,
             statusCode: res ? res.statusCode : 'unknown',
             err: err || res.body.error
           })
 
-          if (err && (err.code == 'ETIMEDOUT' || err.code == 'ESOCKETTIMEDOUT' || err.code == 'ECONNREFUSED')) {
+          if (err && (err.code === 'ETIMEDOUT' || err.code === 'ESOCKETTIMEDOUT' || err.code === 'ECONNREFUSED')) {
             await this.runtime.peer.remove(peer.ip, peer.port)
             this.logger.info(`Removing peer ${req.method} ${req.url}`)
           } else {
@@ -120,7 +118,7 @@ class PeerInvoker {
           const port = res.headers.port
           const version = res.headers.version
 
-          if (port > 0 && port <= 65535 && version == this.config.version) {
+          if (port > 0 && port <= 65535 && version === this.config.version) {
             await this.runtime.peer.update({
               ip: peer.ip,
               port,

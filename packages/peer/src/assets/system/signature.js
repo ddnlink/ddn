@@ -2,8 +2,6 @@
  * Signatures
  * wangxm   2019-03-25
  */
-import util from 'util'
-
 import DdnUtils from '@ddn/utils'
 import ByteBuffer from 'bytebuffer'
 
@@ -168,7 +166,7 @@ class Signatures {
   }
 
   ready ({ signatures }, { multisignatures, multimin }) {
-    if (util.isArray(multisignatures) && multisignatures.length) {
+    if (Array.isArray(multisignatures) && multisignatures.length) {
       if (!signatures) {
         return false
       }

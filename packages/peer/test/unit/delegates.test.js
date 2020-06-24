@@ -48,7 +48,7 @@ describe('PUT /delegates without funds', () => {
 })
 
 // 投票，没钱不好使
-describe('PUT /accounts/delegates without funds', () => {
+describe('PUT /accounts/votes without funds', () => {
   it('When upvoting. Should fail', done => {
     node.api.post('/accounts/open')
       .set('Accept', 'application/json')
@@ -68,7 +68,7 @@ describe('PUT /accounts/delegates without funds', () => {
 
         node.onNewBlock(err => {
           node.expect(err).to.be.not.ok
-          node.api.put('/accounts/delegates')
+          node.api.put('/accounts/votes')
             .set('Accept', 'application/json')
             .send({
               secret: Raccount.password,
@@ -91,7 +91,7 @@ describe('PUT /accounts/delegates without funds', () => {
   it('When downvoting. Should fail', done => {
     node.onNewBlock(err => {
       node.expect(err).be.not.ok
-      node.api.put('/accounts/delegates')
+      node.api.put('/accounts/votes')
         .set('Accept', 'application/json')
         .send({
           secret: Raccount.password,
@@ -112,7 +112,7 @@ describe('PUT /accounts/delegates without funds', () => {
 })
 
 // 投票，需要费用
-describe('PUT /accounts/delegates with funds', () => {
+describe('PUT /accounts/votes with funds', () => {
   const randomCoin = node.randomCoin()
 
   beforeAll(done => {
@@ -162,7 +162,7 @@ describe('PUT /accounts/delegates with funds', () => {
     const votedDelegate = `'+${node.Eaccount.publicKey}','+${node.Eaccount.publicKey}'`
     node.onNewBlock(err => {
       node.expect(err).be.not.ok
-      node.api.put('/accounts/delegates')
+      node.api.put('/accounts/votes')
         .set('Accept', 'application/json')
         .send({
           secret: Raccount.password,
@@ -185,7 +185,7 @@ describe('PUT /accounts/delegates with funds', () => {
     const votedDelegate = `'-${node.Eaccount.publicKey}','-${node.Eaccount.publicKey}'`
     node.onNewBlock(err => {
       node.expect(err).be.not.ok
-      node.api.put('/accounts/delegates')
+      node.api.put('/accounts/votes')
         .set('Accept', 'application/json')
         .send({
           secret: Raccount.password,
@@ -209,7 +209,7 @@ describe('PUT /accounts/delegates with funds', () => {
 
     node.onNewBlock(err => {
       node.expect(err).be.not.ok
-      node.api.put('/accounts/delegates')
+      node.api.put('/accounts/votes')
         .set('Accept', 'application/json')
         .send({
           secret: Raccount.password,
@@ -229,7 +229,7 @@ describe('PUT /accounts/delegates with funds', () => {
   }, 50000)
 
   it('When upvoting. Should be ok', done => {
-    node.api.put('/accounts/delegates')
+    node.api.put('/accounts/votes')
       .set('Accept', 'application/json')
       .send({
         secret: Raccount.password,
@@ -254,7 +254,7 @@ describe('PUT /accounts/delegates with funds', () => {
   it('When upvoting again from same account. Should fail', done => {
     node.onNewBlock(err => {
       node.expect(err).be.not.ok
-      node.api.put('/accounts/delegates')
+      node.api.put('/accounts/votes')
         .set('Accept', 'application/json')
         .send({
           secret: Raccount.password,
@@ -277,7 +277,7 @@ describe('PUT /accounts/delegates with funds', () => {
   it('When downvoting. Should be ok', done => {
     node.onNewBlock(err => {
       node.expect(err).to.be.not.ok
-      node.api.put('/accounts/delegates')
+      node.api.put('/accounts/votes')
         .set('Accept', 'application/json')
         .send({
           secret: Raccount.password,
@@ -303,7 +303,7 @@ describe('PUT /accounts/delegates with funds', () => {
   it('When downvoting again from same account. Should fail', done => {
     node.onNewBlock(err => {
       node.expect(err).be.not.ok
-      node.api.put('/accounts/delegates')
+      node.api.put('/accounts/votes')
         .set('Accept', 'application/json')
         .send({
           secret: Raccount.password,
@@ -324,7 +324,7 @@ describe('PUT /accounts/delegates with funds', () => {
   }, 50000)
 
   it('When upvoting using a blank pasphrase. Should fail', done => {
-    node.api.put('/accounts/delegates')
+    node.api.put('/accounts/votes')
       .set('Accept', 'application/json')
       .send({
         secret: '',
@@ -342,7 +342,7 @@ describe('PUT /accounts/delegates with funds', () => {
   })
 
   it('When downvoting using a blank pasphrase. Should fail', done => {
-    node.api.put('/accounts/delegates')
+    node.api.put('/accounts/votes')
       .set('Accept', 'application/json')
       .send({
         secret: '',
@@ -361,7 +361,7 @@ describe('PUT /accounts/delegates with funds', () => {
 
   it('When upvoting without any delegates. Should fail', done => {
     node.onNewBlock(() => {
-      node.api.put('/accounts/delegates')
+      node.api.put('/accounts/votes')
         .set('Accept', 'application/json')
         .send({
           secret: Raccount.password,
@@ -381,7 +381,7 @@ describe('PUT /accounts/delegates with funds', () => {
 
   it('When downvoting without any delegates. Should fail', done => {
     node.onNewBlock(() => {
-      node.api.put('/accounts/delegates')
+      node.api.put('/accounts/votes')
         .set('Accept', 'application/json')
         .send({
           secret: Raccount.password,
@@ -400,7 +400,7 @@ describe('PUT /accounts/delegates with funds', () => {
   })
 
   it('Without any delegates. Should fail', function (done) {
-    node.api.put('/accounts/delegates')
+    node.api.put('/accounts/votes')
       .set('Accept', 'application/json')
       .send({
         secret: Raccount.password,
@@ -742,9 +742,9 @@ describe('GET /delegates', () => {
   })
 })
 
-describe('GET /accounts/delegates?address=', () => {
+describe('GET /accounts/votes?address=', () => {
   it('Using valid address. Should be ok', done => {
-    node.api.get(`/accounts/delegates?address=${node.Gaccount.address}`)
+    node.api.get(`/accounts/votes?address=${node.Gaccount.address}`)
       .set('Accept', 'application/json')
       .expect('Content-Type', /json/)
       .expect(200)
@@ -765,7 +765,7 @@ describe('GET /accounts/delegates?address=', () => {
   })
 
   it('Using invalid address. Should fail', done => {
-    node.api.get('/accounts/delegates?address=NOTaDdnAddress')
+    node.api.get('/accounts/votes?address=NOTaDdnAddress')
       .set('Accept', 'application/json')
       .expect('Content-Type', /json/)
       .expect(200)
@@ -803,7 +803,7 @@ describe('GET /delegates/voters', () => {
     }))
     node.onNewBlock(err => {
       node.expect(err).to.be.not.ok
-      node.api.put('/accounts/delegates')
+      node.api.put('/accounts/votes')
         .set('Accept', 'application/json')
         .send({
           secret: Raccount.password,
@@ -813,7 +813,7 @@ describe('GET /delegates/voters', () => {
         .expect(200)
         .end((err, { body }) => {
           // debug(JSON.stringify(body));
-          debug('/accounts/delegates')
+          debug('/accounts/votes')
           node.expect(err).be.not.ok
           node.expect(body).to.have.property('success').to.be.true
           done()

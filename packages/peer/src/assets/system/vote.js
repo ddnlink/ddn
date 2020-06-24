@@ -4,8 +4,6 @@
  *  Copyright (c) 2019 DDN Foundation. All rights reserved.
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *-------------------------------------------------------------------------------------------- */
-import util from 'util'
-
 import ByteBuffer from 'bytebuffer'
 import Diff from '../../lib/diff.js'
 import DdnUtils from '@ddn/utils'
@@ -136,7 +134,7 @@ class Vote {
   async dbSave ({ asset, id }, dbTrans) {
     return new Promise((resolve, reject) => {
       this.dao.insert('vote', {
-        votes: util.isArray(asset.vote.votes) ? asset.vote.votes.join(',') : null,
+        votes: Array.isArray(asset.vote.votes) ? asset.vote.votes.join(',') : null,
         transaction_id: id
       }, dbTrans, (err, result) => {
         if (err) {
@@ -149,7 +147,7 @@ class Vote {
   }
 
   async ready ({ signatures }, { multisignatures, multimin }) {
-    if (util.isArray(multisignatures) && multisignatures.length) {
+    if (Array.isArray(multisignatures) && multisignatures.length) {
       if (!signatures) {
         return false
       }

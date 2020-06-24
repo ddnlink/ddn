@@ -2,8 +2,6 @@
  * 受托人资产交易
  * wangxm   2018-12-28
  */
-import util from 'util'
-
 import ByteBuffer from 'bytebuffer'
 import DdnUtils from '@ddn/utils'
 
@@ -28,7 +26,7 @@ class Delegate {
     return trs
   }
 
-  async calculateFee (trs, sender) {
+  async calculateFee () {
     // Bignum update
     return DdnUtils.bignum.multiply(100, this.constants.fixedPoint)
   }
@@ -83,7 +81,7 @@ class Delegate {
     return trs
   }
 
-  async process (trs, sender) {
+  async process (trs) {
     return trs
   }
 
@@ -102,7 +100,7 @@ class Delegate {
     return false
   }
 
-  async apply ({ asset }, block, { address }, dbTrans) {
+  async apply ({ asset }, { address }, dbTrans) {
     const data = {
       address,
       u_is_delegate: 0, // wxm block database
@@ -120,7 +118,7 @@ class Delegate {
     return await this.runtime.account.getAccountByAddress(address)
   }
 
-  async undo ({ asset }, block, { address, nameexist }, dbTrans) {
+  async undo ({ asset }, { address, nameexist }, dbTrans) {
     const data = {
       address,
       u_is_delegate: 1, // wxm block database
@@ -138,7 +136,7 @@ class Delegate {
     return await this.runtime.account.getAccountByAddress(address)
   }
 
-  async applyUnconfirmed ({ asset, type }, { isDelegate, address }, dbTrans) {
+  async applyUnconfirmed ({ asset, type }, { isDelegate, address }) {
     if (isDelegate) {
       throw new Error('Account is already a delegate')
     }
@@ -153,7 +151,7 @@ class Delegate {
     this.oneoff.set(idKey, true)
   }
 
-  async undoUnconfirmed ({ asset, type }, { address }, dbTrans) {
+  async undoUnconfirmed ({ asset, type }, { address }) {
     const nameKey = `${asset.delegate.name}:${type}`
     const idKey = `${address}:${type}`
     this.oneoff.delete(nameKey)
@@ -212,7 +210,7 @@ class Delegate {
   }
 
   async ready ({ signatures }, { multisignatures, multimin }) {
-    if (util.isArray(multisignatures) && multisignatures.length) {
+    if (Array.isArray(multisignatures) && multisignatures.length) {
       if (!signatures) {
         return false
       }

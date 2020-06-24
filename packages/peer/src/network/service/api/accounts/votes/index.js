@@ -13,6 +13,7 @@ class RootRouter {
     this._context = context
   }
 
+  // 用户所投的节点情况
   async get (req) {
     const query = Object.assign({}, req.body, req.query)
     const validateErrors = await this.ddnSchema.validate({
@@ -40,24 +41,13 @@ class RootRouter {
         sort: [['vote', 'DESC'], ['publicKey', 'ASC']] // wxm block database
       }, ['username', 'address', 'publicKey', 'vote', 'missedblocks', 'producedblocks'])
 
-      // let limit = query.limit || this.config.settings.delegateNumber;
-      // const offset = query.offset || 0;
-      // let orderField = query.orderBy;
-
-      // orderField = orderField ? orderField.split(':') : null;
-      // limit = limit > this.config.settings.delegateNumber ? this.config.settings.delegateNumber : limit;
-
-      // const orderBy = orderField ? orderField[0] : null;
-      // const sortMode = orderField && orderField.length == 2 ? orderField[1] : 'asc';
-      // const count = delegates.length;
-      // const length = Math.min(limit, count);
-      // const realLimit = Math.min(offset + limit, count);
-
       const lastBlock = this.runtime.block.getLastBlock()
       const totalSupply = this.runtime.block.getBlockStatus().calcSupply(lastBlock.height)
 
       for (let i = 0; i < delegates.length; i++) {
         delegates[i].rate = i + 1
+        // console.log('delegates[i].vote, totalSupply', delegates[i].vote, totalSupply)
+
         delegates[i].approval = ((delegates[i].vote / totalSupply) * 100).toFixed(2)
 
         let percent = 100 - (delegates[i].missedblocks / ((delegates[i].producedblocks + delegates[i].missedblocks) / 100))
@@ -111,7 +101,7 @@ class RootRouter {
 
     // 密钥和公钥都是投票者的
     if (body.publicKey) {
-      if (keypair.publicKey != body.publicKey) {
+      if (keypair.publicKey !== body.publicKey) {
         throw new Error('Invalid passphrase')
       }
     }
@@ -119,7 +109,7 @@ class RootRouter {
     return new Promise((resolve, reject) => {
       this.balancesSequence.add(async (cb) => {
         if (body.multisigAccountPublicKey &&
-                    body.multisigAccountPublicKey != keypair.publicKey) {
+                    body.multisigAccountPublicKey !== keypair.publicKey) {
           let account
           try {
             account = await this.runtime.account.getAccountByPublicKey(body.multisigAccountPublicKey)

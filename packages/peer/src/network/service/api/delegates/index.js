@@ -43,7 +43,7 @@ class RootRouter {
     function compareNumber (a, b) {
       const sorta = parseFloat(a[result.orderBy])
       const sortb = parseFloat(b[result.orderBy])
-      if (result.sortMode == 'asc') {
+      if (result.sortMode === 'asc') {
         return sorta - sortb
       } else {
         return sortb - sorta
@@ -53,7 +53,7 @@ class RootRouter {
     function compareString (a, b) {
       const sorta = a[result.orderBy]
       const sortb = b[result.orderBy]
-      if (result.sortMode == 'asc') {
+      if (result.sortMode === 'asc') {
         return sorta.localeCompare(sortb)
       } else {
         return sortb.localeCompare(sorta)
@@ -109,10 +109,10 @@ class RootRouter {
     const result = await this.runtime.delegate.getDelegates(query)
     const delegate = result.delegates.find(({ publicKey, username }) => {
       if (query.publicKey) {
-        return publicKey == query.publicKey
+        return publicKey === query.publicKey
       }
       if (query.username) {
-        return username == query.username
+        return username === query.username
       }
       return false
     })
@@ -227,7 +227,7 @@ class RootRouter {
     const keypair = DdnCrypto.getKeys(body.secret)
 
     if (body.publicKey) {
-      if (keypair.publicKey != body.publicKey) {
+      if (keypair.publicKey !== body.publicKey) {
         throw new Error('Invalid passphrase')
       }
     }
@@ -235,7 +235,7 @@ class RootRouter {
     return new Promise((resolve, reject) => {
       this.balancesSequence.add(async (cb) => {
         if (body.multisigAccountPublicKey &&
-                    body.multisigAccountPublicKey != keypair.publicKey) {
+                    body.multisigAccountPublicKey !== keypair.publicKey) {
           var account
           try {
             account = await this.runtime.account.getAccountByPublicKey(body.multisigAccountPublicKey)
@@ -270,7 +270,7 @@ class RootRouter {
             return cb('Invalid second passphrase')
           }
 
-          if (requester.publicKey == account.publicKey) { // wxm block database
+          if (requester.publicKey === account.publicKey) { // wxm block database
             return cb('Incorrect requester')
           }
 

@@ -2,8 +2,6 @@
  * Signatures
  * wangxm   2019-03-25
  */
-import util from 'util'
-
 import DdnUtils from '@ddn/utils'
 import ByteBuffer from 'bytebuffer'
 import Diff from '../../lib/diff'
@@ -44,7 +42,7 @@ class Multisignature {
       throw new Error(`Invalid transaction asset: ${trs.id}`)
     }
 
-    if (!util.isArray(trs.asset.multisignature.keysgroup)) {
+    if (!Array.isArray(trs.asset.multisignature.keysgroup)) {
       throw new Error(`Invalid transaction asset: ${trs.id}`)
     }
 
@@ -327,7 +325,7 @@ class Multisignature {
       return false
     }
 
-    if (util.isArray(multisignatures) && !multisignatures.length) {
+    if (Array.isArray(multisignatures) && !multisignatures.length) {
       const ready = signatures.length == asset.multisignature.keysgroup.length
       if (!ready) {
         this.logger.warn(`The number of multisignature signatures is less than ${asset.multisignature.keysgroup.length}`)

@@ -2,8 +2,6 @@
  * 转账资产交易
  * wangxm   2018-12-28
  */
-import util from 'util'
-
 import DdnUtil from '@ddn/utils' // DdnUtil.bignum update
 
 class Transfer {
@@ -42,7 +40,7 @@ class Transfer {
       throw new Error('Invalid transaction amount')
     }
 
-    if (trs.recipientId == address) {
+    if (trs.recipientId === address) {
       // wxm block database
       throw new Error('Invalid recipientId, cannot be your self')
     }
@@ -101,26 +99,6 @@ class Transfer {
       },
       dbTrans
     )
-
-    // self.modules.accounts.setAccountAndGet({ address: trs.recipientId }, dbTrans, (err, recipient) => { //wxm block database
-    // 	if (err) {
-    // 		return cb(err);
-    // 	}
-
-    // 	self.modules.accounts.mergeAccountAndGet(
-    // 		{
-    // 			address: trs.recipientId,   //wxm block database
-    // 			balance: trs.amount,
-    // 			u_balance: trs.amount,
-    // 			block_id: block.id,  //wxm block database
-    // 			round: self.modules.round.calc(block.height).toString()
-    // 		},
-    // 		dbTrans,
-    // 		(err) => {
-    // 			cb(err);
-    // 		}
-    // 	);
-    // });
   }
 
   async undo ({
@@ -146,30 +124,6 @@ class Transfer {
       },
       dbTrans
     )
-
-    // if (typeof dbTrans === 'function') {
-    // 	cb = dbTrans;
-    // 	dbTrans = null
-    // }
-    // self.modules.accounts.setAccountAndGet({ address: trs.recipientId }, dbTrans, (err, recipient) => { //wxm block database
-    // 	if (err) {
-    // 		return cb(err);
-    // 	}
-
-    // 	self.modules.accounts.mergeAccountAndGet(
-    // 		{
-    // 			address: trs.recipientId,   //wxm block database
-    // 			balance: `-${trs.amount}`,
-    // 			u_balance: `-${trs.amount}`,
-    // 			block_id: block.id,  //wxm block database
-    // 			round: self.modules.round.calc(block.height).toString()
-    // 		},
-    // 		dbTrans,
-    // 		(err) => {
-    // 			cb(err);
-    // 		}
-    // 	);
-    // });
   }
 
   async applyUnconfirmed (trs, sender, dbTrans) {
@@ -197,7 +151,7 @@ class Transfer {
     multisignatures,
     multimin
   }) {
-    if (util.isArray(multisignatures) && multisignatures.length) {
+    if (Array.isArray(multisignatures) && multisignatures.length) {
       if (!signatures) {
         return false
       }
