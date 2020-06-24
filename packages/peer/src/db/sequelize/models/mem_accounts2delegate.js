@@ -1,14 +1,14 @@
-import Sequelize from 'sequelize';
+import Sequelize from 'sequelize'
 
 export default connection => connection.define('mem_accounts2delegate', {
   account_id: {
     type: Sequelize.STRING(50), // 原类型:varchar,size:50
-    allowNull: false,
+    allowNull: false
   },
   dependent_id: {
     type: Sequelize.STRING(64), // 原类型:varchar,size:64
-    allowNull: false,
-  },
+    allowNull: false
+  }
 }, {
-  timestamps: false,
-});
+  timestamps: false
+})

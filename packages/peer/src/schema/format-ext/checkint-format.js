@@ -1,16 +1,16 @@
 export default {
 
-    name: "checkInt",
+  name: 'checkInt',
 
-    validate(value) {
-        if (isNaN(value) || 
-            parseInt(value) != value || 
+  validate (value) {
+    if (isNaN(value) ||
+            parseInt(value) != value ||
             isNaN(parseInt(value, 10))) {
-            return false;
-        }
-
-        value = parseInt(value);
-        return true;
+      return false
     }
 
-};
+    value = parseInt(value)
+    return true
+  }
+
+}

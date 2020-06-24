@@ -1,8 +1,8 @@
-const path = require('path');
+const path = require('path')
 
 module.exports = {
-  process(src, filename) {
-    const assetFilename = JSON.stringify(path.basename(filename));
+  process (src, filename) {
+    const assetFilename = JSON.stringify(path.basename(filename))
 
     if (filename.match(/\.svg$/)) {
       return `module.exports = {
@@ -17,9 +17,9 @@ module.exports = {
             children: ${assetFilename}
           })
         }),
-      };`;
+      };`
     }
 
-    return `module.exports = ${assetFilename};`;
-  },
-};
+    return `module.exports = ${assetFilename};`
+  }
+}

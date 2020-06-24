@@ -1,8 +1,8 @@
 /**
  * passed
  */
-import node from "@ddn/node-sdk/lib/test";
-import amount from '../../lib/helpers/amount';
+import node from '@ddn/node-sdk/lib/test'
+import amount from '../../lib/helpers/amount'
 
 describe('amount', () => {
   it('normal test', done => {

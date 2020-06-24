@@ -1,8 +1,8 @@
-const babelJest = require('babel-jest');
-const { dirname } = require('path');
-const { compatDirname } = require('umi-utils');
+const babelJest = require('babel-jest')
+const { dirname } = require('path')
+const { compatDirname } = require('umi-utils')
 
-const cwd = process.cwd();
+const cwd = process.cwd()
 
 module.exports = babelJest.createTransformer({
   presets: [
@@ -10,10 +10,10 @@ module.exports = babelJest.createTransformer({
     [
       require.resolve('babel-preset-umi'),
       {
-        transformRuntime: false,
+        transformRuntime: false
         // ...(process.env.TARGETS === 'node' ? { targets: { node: 8 } } : {}),
-      },
-    ],
+      }
+    ]
   ],
   plugins: [
     [
@@ -24,26 +24,26 @@ module.exports = babelJest.createTransformer({
           react: compatDirname(
             'react/package',
             cwd,
-            dirname(require.resolve('react/package.json')),
+            dirname(require.resolve('react/package.json'))
           ),
           'react-dom': compatDirname(
             'react-dom/package',
             cwd,
-            dirname(require.resolve('react-dom/package.json')),
+            dirname(require.resolve('react-dom/package.json'))
           ),
           enzyme: compatDirname(
             'enzyme/package.json',
             cwd,
-            dirname(require.resolve('enzyme/package.json')),
+            dirname(require.resolve('enzyme/package.json'))
           ),
           'enzyme-adapter-react-16': compatDirname(
             'enzyme-adapter-react-16/package.json',
             cwd,
-            dirname(require.resolve('enzyme-adapter-react-16/package.json')),
-          ),
-        },
+            dirname(require.resolve('enzyme-adapter-react-16/package.json'))
+          )
+        }
       },
-      'test',
-    ],
-  ],
-});
+      'test'
+    ]
+  ]
+})

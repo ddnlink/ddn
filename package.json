@@ -1,6 +1,7 @@
 {
   "name": "ddn",
-  "version": "3.4.54",
+  "version": "3.5.2",
+  "private": true,
   "repository": {
     "type": "git",
     "url": "git+https://github.com/ddnlink/ddn.git"
@@ -31,7 +32,7 @@
     "clean": "lerna clean -y",
     "publish": "./scripts/publish.js",
     "test": "./packages/test/bin/test.js",
-    "lint": "eslint --fix --ext .js packages",
+    "lint": "eslint --fix --ext .js packages/**/src packages/**/test",
     "doc:dev": "dumi dev",
     "doc:build": "dumi build",
     "doc:deploy": "bash ./scripts/deploy_doc.sh"
@@ -51,18 +52,27 @@
   "engines": {
     "node": ">=8.6.0"
   },
-  "private": true,
   "workspaces": [
     "packages/*",
     "examples/fun-tests"
   ],
   "devDependencies": {
     "@types/jest": "^25.1.3",
+    "@typescript-eslint/eslint-plugin": "^3.3.0",
+    "@typescript-eslint/parser": "^3.3.0",
     "dumi": "^1.0.3",
-    "eslint": "^6.7.0",
+    "eslint": "^7.3.0",
+    "eslint-config-airbnb-base": "^14.2.0",
+    "eslint-config-standard": "^14.1.1",
+    "eslint-plugin-import": "^2.21.2",
+    "eslint-plugin-node": "^11.1.0",
+    "eslint-plugin-promise": "^4.2.1",
+    "eslint-plugin-standard": "^4.0.1",
     "father-build": "^1.17.2",
-    "lerna": "^3.18.1",
-    "supertest": "^4.0.2",
-    "git-cz": "^4.3.1"
+    "git-cz": "^4.3.1",
+    "lerna": "^3.18.1"
+  },
+  "publishConfig": {
+    "access": "public"
   }
 }

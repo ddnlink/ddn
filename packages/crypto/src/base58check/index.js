@@ -1,23 +1,23 @@
 'use strict'
 
-import sha256 from 'fast-sha256';
-import base58 from './bs58.js';
+import sha256 from 'fast-sha256'
+import base58 from './bs58.js'
 
 // SHA256(SHA256(buffer))
-function sha256x2(buffer) {
+function sha256x2 (buffer) {
   return Buffer.from(sha256.hash(sha256.hash(buffer)))
 }
 
 // Encode a buffer as a base58-check encoded string
-function encode(payload) {
+function encode (payload) {
   const checksum = sha256x2(payload)
   return base58.encode(Buffer.concat([
-      payload,
-      checksum
-    ], payload.length + 4))
+    payload,
+    checksum
+  ], payload.length + 4))
 }
 
-function decodeRaw(buffer) {
+function decodeRaw (buffer) {
   const payload = buffer.slice(0, -4)
   const checksum = buffer.slice(-4)
   const newChecksum = sha256x2(payload)
@@ -31,14 +31,14 @@ function decodeRaw(buffer) {
 }
 
 // Decode a base58-check encoded string to a buffer, no result if checksum is wrong
-function decodeUnsafe(string) {
+function decodeUnsafe (string) {
   const buffer = base58.decodeUnsafe(string)
   if (!buffer) return
 
   return decodeRaw(buffer)
 }
 
-function decode(string) {
+function decode (string) {
   const buffer = base58.decode(string)
   const payload = decodeRaw(buffer)
   if (!payload) throw new Error('Invalid checksum')

@@ -1,3 +1,3 @@
-import Program from './kernal/program';
+import Program from './kernal/program'
 
-export default Program;
+export default Program

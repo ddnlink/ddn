@@ -1,6 +1,6 @@
 {
   "name": "example",
-  "version": "1.1.0",
+  "version": "1.2.4",
   "main": "./app.js",
   "private": true,
   "repository": {
@@ -47,10 +47,10 @@
     "build-localnet": "./node_modules/.bin/gulp linux-build-local"
   },
   "dependencies": {
-    "@ddn/core": "^0.0.6",
-    "@ddn/node-sdk": "^0.1.0",
-    "@ddn/peer": "^0.1.0",
-    "@ddn/utils": "^0.0.8",
+    "@ddn/core": "^0.1.0",
+    "@ddn/node-sdk": "^0.2.2",
+    "@ddn/peer": "^0.2.4",
+    "@ddn/utils": "^0.1.2",
     "commander": "2.6.0",
     "lodash": "^4.17.11"
   },

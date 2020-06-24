@@ -1,81 +1,81 @@
-import request from 'request';
-import config from '../config';
+import request from 'request'
+import config from '../config'
 
-function resultHandler(cb) {
+function resultHandler (cb) {
   return (err, res, body) => {
     if (err) {
-      cb(`Request error: ${err}`);
+      cb(`Request error: ${err}`)
     } else if (res.statusCode != 200) {
-      let msg = `Unexpected status code: ${res.statusCode}`;
+      let msg = `Unexpected status code: ${res.statusCode}`
       if (body.error) {
-        msg += ", ";
-        msg += body.error;
+        msg += ', '
+        msg += body.error
       }
-      cb(msg);
+      cb(msg)
     } else {
       if (!body.success) {
-        cb(`Server error: ${body.error || body.message}`);
+        cb(`Server error: ${body.error || body.message}`)
       } else {
-        cb(null, body);
+        cb(null, body)
       }
     }
-  };
+  }
 }
 
 class Api {
-  constructor(options) {
-    this.options = options || {};
-    this.mainnet = this.options.mainnet;
-    this.host = this.options.host || "127.0.0.1";
-    this.port = this.options.port || (this.mainnet ? 8000 : 8001);
-    this.baseUrl = `http://${this.host}:${this.port}`;
-    this.nethash = config.nethash;
+  constructor (options) {
+    this.options = options || {}
+    this.mainnet = this.options.mainnet
+    this.host = this.options.host || '127.0.0.1'
+    this.port = this.options.port || (this.mainnet ? 8000 : 8001)
+    this.baseUrl = `http://${this.host}:${this.port}`
+    this.nethash = config.nethash
   }
 
-  get(path, params, cb) {
-    let qs = null;
+  get (path, params, cb) {
+    let qs = null
     if (typeof params === 'function') {
-      cb = params;
+      cb = params
     } else {
-      qs = params;
+      qs = params
     }
     request({
-      method: "GET",
+      method: 'GET',
       url: this.baseUrl + path,
       json: true,
       qs
-    }, resultHandler(cb));
+    }, resultHandler(cb))
   }
 
-  put(path, data, cb) {
+  put (path, data, cb) {
     request({
-      method: "PUT",
+      method: 'PUT',
       url: this.baseUrl + path,
       json: data
-    }, resultHandler(cb));
+    }, resultHandler(cb))
   }
 
-  post(path, data, cb) {
+  post (path, data, cb) {
     request({
-      method: "POST",
+      method: 'POST',
       url: this.baseUrl + path,
       json: data
-    }, resultHandler(cb));
+    }, resultHandler(cb))
   }
 
-  broadcastTransaction(trs, cb) {
+  broadcastTransaction (trs, cb) {
     request({
-      method: "POST",
+      method: 'POST',
       url: `${this.baseUrl}/peer/transactions`,
       headers: {
         nethash: this.nethash,
-        version: ""
+        version: ''
       },
       json: {
         transaction: trs
       }
-    }, resultHandler(cb));
+    }, resultHandler(cb))
   }
 }
 
-export default Api;
+export default Api

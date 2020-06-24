@@ -1,20 +1,20 @@
 /**
- * 
+ *
  * https://github.com/AlbertoFdzM/express-list-endpoints/blob/develop/src/index.js
  */
 
-import fs from 'fs';
+import fs from 'fs'
 
 // const chalk = require('chalk');
 // var debug = require('debug')('express-list-endpoints')
-const regexpExpressRegexp = /^\/\^\\\/(?:(:?[\w\\.-]*(?:\\\/:?[\w\\.-]*)*)|(\(\?:\(\[\^\\\/]\+\?\)\)))\\\/.*/;
-const regexpExpressParam = /\(\?:\(\[\^\\\/]\+\?\)\)/g;
+const regexpExpressRegexp = /^\/\^\\\/(?:(:?[\w\\.-]*(?:\\\/:?[\w\\.-]*)*)|(\(\?:\(\[\^\\\/]\+\?\)\)))\\\/.*/
+const regexpExpressParam = /\(\?:\(\[\^\\\/]\+\?\)\)/g
 
 /**
  * Returns all the verbs detected for the passed route
  */
 const getRouteMethods = route => {
-  const methods = [];
+  const methods = []
 
   for (const method in route.methods) {
     if (method === '_all') continue
@@ -23,12 +23,12 @@ const getRouteMethods = route => {
   }
 
   return methods
-};
+}
 
 /**
  * Returns true if found regexp related with express params
  */
-const hasParams = pathRegexp => regexpExpressParam.test(pathRegexp);
+const hasParams = pathRegexp => regexpExpressParam.test(pathRegexp)
 
 /**
  * @param {Object} route Express route object to be parsed
@@ -38,15 +38,15 @@ const hasParams = pathRegexp => regexpExpressParam.test(pathRegexp);
 const parseExpressRoute = (route, basePath) => ({
   path: basePath + (basePath && route.path === '/' ? '' : route.path),
   methods: getRouteMethods(route)
-});
+})
 
 const parseExpressPath = (expressPathRegexp, params) => {
-  let parsedPath = regexpExpressRegexp.exec(expressPathRegexp);
-  let parsedRegexp = expressPathRegexp;
-  let paramIdx = 0;
+  let parsedPath = regexpExpressRegexp.exec(expressPathRegexp)
+  let parsedRegexp = expressPathRegexp
+  let paramIdx = 0
 
   while (hasParams(parsedRegexp)) {
-    const paramId = `:${params[paramIdx].name}`;
+    const paramId = `:${params[paramIdx].name}`
 
     parsedRegexp = parsedRegexp
       .toString()
@@ -62,22 +62,22 @@ const parseExpressPath = (expressPathRegexp, params) => {
   parsedPath = parsedPath[1].replace(/\\\//g, '/')
 
   return parsedPath
-};
+}
 
 const parseEndpoints = (app, basePath, endpoints) => {
-  const stack = app.stack || (app._router && app._router.stack);
+  const stack = app.stack || (app._router && app._router.stack)
 
   endpoints = endpoints || []
   basePath = basePath || ''
 
   stack.forEach(stackItem => {
     if (stackItem.route) {
-      const endpoint = parseExpressRoute(stackItem.route, basePath);
+      const endpoint = parseExpressRoute(stackItem.route, basePath)
 
       endpoints = addEndpoint(endpoints, endpoint)
     } else if (stackItem.name === 'router' || stackItem.name === 'bound dispatch') {
       if (regexpExpressRegexp.test(stackItem.regexp)) {
-        const parsedPath = parseExpressPath(stackItem.regexp, stackItem.keys);
+        const parsedPath = parseExpressPath(stackItem.regexp, stackItem.keys)
 
         parseEndpoints(stackItem.handle, `${basePath}/${parsedPath}`, endpoints)
       } else {
@@ -87,7 +87,7 @@ const parseEndpoints = (app, basePath, endpoints) => {
   })
 
   return endpoints
-};
+}
 
 /**
  * Ensures the path of the new endpoint isn't yet in the array.
@@ -99,10 +99,10 @@ const parseEndpoints = (app, basePath, endpoints) => {
  * @returns {Array} Updated endpoints array
  */
 const addEndpoint = (endpoints, newEndpoint) => {
-  const foundEndpointIdx = endpoints.findIndex(({ path }) => path === newEndpoint.path);
+  const foundEndpointIdx = endpoints.findIndex(({ path }) => path === newEndpoint.path)
 
   if (foundEndpointIdx > -1) {
-    const foundEndpoint = endpoints[foundEndpointIdx];
+    const foundEndpoint = endpoints[foundEndpointIdx]
 
     foundEndpoint.methods = foundEndpoint.methods.concat(newEndpoint.methods)
   } else {
@@ -117,41 +117,41 @@ const addEndpoint = (endpoints, newEndpoint) => {
  * @param {Object} app the express/route instance to get the endpoints from
  */
 const getEndpoints = app => {
-  const endpoints = parseEndpoints(app);
+  const endpoints = parseEndpoints(app)
 
   return endpoints
-};
+}
 
 /**
- * 
+ *
  * @param {object} app the express/route instance
  * @param {string} filename filename to write routes to
  */
 const routeMap = (app, filename, logger) => {
   if (typeof filename === 'object') {
-    logger = filename;
-    filename = null;
+    logger = filename
+    filename = null
   }
 
-  let routes = ['All Apis List:  '];
-  getEndpoints(app).forEach(({methods, path}) => {
-    routes.push(`${methods.join(' ')}  ${path}`);
-  });
+  const routes = ['All Apis List:  ']
+  getEndpoints(app).forEach(({ methods, path }) => {
+    routes.push(`${methods.join(' ')}  ${path}`)
+  })
 
-  routes.push(`\n Created at: ${Date()}`);
+  routes.push(`\n Created at: ${Date()}`)
 
   if (typeof filename === 'string') {
     return fs.writeFile(filename, routes.join('\n'), (error) => {
-      if (error) throw error;
-      if (logger) logger.info(`Printed routes to ${filename} at ${Date()}`);
-    });
+      if (error) throw error
+      if (logger) logger.info(`Printed routes to ${filename} at ${Date()}`)
+    })
   }
 
   if (logger) {
-    logger.info(routes.join('\n'));
+    logger.info(routes.join('\n'))
   } else {
-    console.log(routes.join('\n'));
+    console.log(routes.join('\n'))
   }
-};
+}
 
-export default routeMap;
+export default routeMap

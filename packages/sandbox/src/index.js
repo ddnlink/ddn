@@ -1,1 +1,1 @@
-export { sandbox as default } from './sandbox';
+export { sandbox as default } from './sandbox'

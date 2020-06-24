@@ -21,17 +21,17 @@ export default {
   maxConfirmations: 77 * 100,
   confirmationLength: 77,
   fixedPoint: 10 ** 8,
-  totalAmount: "10000000000000000", // = maxAmount * fixedPoint
+  totalAmount: '10000000000000000', // = maxAmount * fixedPoint
   maxTxsPerBlock: 500,
 
   testnet: {
     rewardRatio: 0.2,
     milestones: [
-      "500000000", // Initial Reward    Bignum update
-      "400000000", // Milestone 1
-      "300000000", // Milestone 2
-      "200000000", // Milestone 3
-      "100000000"  // Milestone 4
+      '500000000', // Initial Reward    Bignum update
+      '400000000', // Milestone 1
+      '300000000', // Milestone 2
+      '200000000', // Milestone 3
+      '100000000' // Milestone 4
     ],
     beginDate: new Date(Date.UTC(2017, 10, 20, 12, 20, 20, 20)), // testnet
     rewardDistance: 3000000, // Distance between each milestone
@@ -40,38 +40,38 @@ export default {
 
     // Fees for transacton
     fees: {
-      send: "10000000", 
-      vote: "10000000",
-      secondSignature: "500000000",
-      delegate: "10000000000",
-      multiSignature: "500000000",
-      dappRegistration: "2500000000",
-      dappWithdrawal: "10000000",
-      dappDeposit: "10000000",
-      data: "10000000",
+      send: '10000000',
+      vote: '10000000',
+      secondSignature: '500000000',
+      delegate: '10000000000',
+      multiSignature: '500000000',
+      dappRegistration: '2500000000',
+      dappWithdrawal: '10000000',
+      dappDeposit: '10000000',
+      data: '10000000',
 
       // todo: 测试中提供的费用
-      username: "10000000",
-      multiTransfer: "10000000",
-      dapp: "10000000000",
-  
+      username: '10000000',
+      multiTransfer: '10000000',
+      dapp: '10000000000',
+
       // dao
-      evidence: "10000000", // fixme
-      org: "10000000",
-      exchange: "10000000",
-    },
+      evidence: '10000000', // fixme
+      org: '10000000',
+      exchange: '10000000'
+    }
   },
 
   mainnet: {
     rewardRatio: 0.2,
     milestones: [
-      "500000000", // Initial Reward      Bignum update
-      "400000000", // Milestone 1
-      "300000000", // Milestone 2
-      "200000000", // Milestone 3
-      "100000000"  // Milestone 4
+      '500000000', // Initial Reward      Bignum update
+      '400000000', // Milestone 1
+      '300000000', // Milestone 2
+      '200000000', // Milestone 3
+      '100000000' // Milestone 4
     ],
-    beginDate: new Date(Date.UTC(2017, 11, 20, 4, 0, 0, 0)),  // 主网上线：2017年12月20日中午12点（+8)
+    beginDate: new Date(Date.UTC(2017, 11, 20, 4, 0, 0, 0)), // 主网上线：2017年12月20日中午12点（+8)
     rewardDistance: 3000000, // Distance between each milestone
     rewardOffset: 1, // Start rewards at block (n)
     // If you have some different thing, Please set the compatibleVersion.
@@ -79,25 +79,25 @@ export default {
 
     // Fees for transacton
     fees: {
-      send: "10000000", 
-      vote: "10000000",
-      secondSignature: "500000000",
-      delegate: "10000000000",
-      multisignature: "500000000",
-      dappRegistration: "2500000000",
-      dappWithdrawal: "10000000",
-      dappDeposit: "10000000",
-      data: "10000000",
+      send: '10000000',
+      vote: '10000000',
+      secondSignature: '500000000',
+      delegate: '10000000000',
+      multisignature: '500000000',
+      dappRegistration: '2500000000',
+      dappWithdrawal: '10000000',
+      dappDeposit: '10000000',
+      data: '10000000',
 
       // todo: 测试中提供的费用
-      username: "10000000",
-      multiTransfer: "10000000",
-      dapp: "10000000000",
-  
+      username: '10000000',
+      multiTransfer: '10000000',
+      dapp: '10000000000',
+
       // dao
-      evidence: "10000000", // fixme
-      org: "10000000",
-      exchange: "10000000",
-    },
+      evidence: '10000000', // fixme
+      org: '10000000',
+      exchange: '10000000'
+    }
   }
-};
+}

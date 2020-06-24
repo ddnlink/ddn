@@ -1,13 +1,13 @@
 /**
  * passed
  */
-import node from "@ddn/node-sdk/lib/test";
+import node from '@ddn/node-sdk/lib/test'
 
-import BufferCache from '../../lib/helpers/buffer-cache';
+import BufferCache from '../../lib/helpers/buffer-cache'
 
 describe('BufferCache', () => {
   it('normal test', async () => {
-    let bc = new BufferCache({
+    const bc = new BufferCache({
       maxCacheNumber: 10,
       refreshInterval: 1000,
       clearInterval: 2000
@@ -15,11 +15,11 @@ describe('BufferCache', () => {
     bc.set('k1', 1)
     node.expect(bc.has('k1')).to.be.true
     for (let i = 0; i < 9; ++i) {
-      let key = `k${i+2}`
+      const key = `k${i + 2}`
       bc.set(key, 1)
       node.expect(bc.has(key)).to.be.true
     }
-    function f() {
+    function f () {
       bc.set('k11', 1)
     }
     node.expect(f).to.throw(Error, /Cache limit exceeded/)
