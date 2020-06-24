@@ -94,5 +94,6 @@
   },
   "devDependencies": {
     "@ddn/node-sdk": "^0.2.2"
-  }
+  },
+  "gitHead": "788717950b74becdd7f4ad07b5d467b224424d1c"
 }

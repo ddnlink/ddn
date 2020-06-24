@@ -20,8 +20,7 @@
   "command": {
     "publish": {
       "ignoreChanges": ["ignored-file", "*.md"],
-      "message": "chore(release): publish %s",
-      "registry": "https://npm.pkg.github.com"
+      "message": "chore(release): publish %s"
     },
     "git-tag-version": false
   },
