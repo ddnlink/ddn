@@ -4,7 +4,7 @@ export default {
 
   validate (value) {
     if (isNaN(value) ||
-            parseInt(value) != value ||
+            parseInt(value) !== value ||
             isNaN(parseInt(value, 10))) {
       return false
     }

@@ -108,14 +108,14 @@ describe('GET /api/transactions', () => {
       .set('Accept', 'application/json')
       .expect('Content-Type', /json/)
       .expect(200)
-      .end((err, { body }) => {
+      .end((_err, { body }) => {
         // console.log(JSON.stringify(res.body));
         node.expect(body).to.have.property('success').to.be.true
         node.expect(body).to.have.property('transactions').that.is.an('array')
         node.expect(body.transactions).to.have.length.within(1, limit)
         if (body.transactions.length > 0) {
           for (let i = 0; i < body.transactions.length; i++) {
-            if (body.transactions[i + 1] != null) {
+            if (body.transactions[i + 1] !== null) {
               // DdnUtils.bignum update node.expect(res.body.transactions[i].amount).to.be.at.most(res.body.transactions[i + 1].amount);
               const bRet = DdnUtils.bignum.isLessThanOrEqualTo(body.transactions[i].amount, body.transactions[i + 1].amount)
               node.expect(bRet).to.be.true
@@ -141,7 +141,7 @@ describe('GET /api/transactions', () => {
       .set('Accept', 'application/json')
       .expect('Content-Type', /json/)
       .expect(200)
-      .end((err, { body }) => {
+      .end((_err, { body }) => {
         // console.log(JSON.stringify(res.body));
         node.expect(body).to.have.property('success').to.be.false
         node.expect(body).to.have.property('error')
@@ -150,19 +150,18 @@ describe('GET /api/transactions', () => {
   })
 
   it('Ordered by ascending timestamp. Should be ok', done => {
-    const senderId = ''
     const blockId = ''
     const recipientId = ''
     const limit = 100
     const offset = 0
     const orderBy = 't_timestamp:asc'
 
-    node.onNewBlock(err => {
+    node.onNewBlock(_err => {
       node.api.get(`/transactions?blockId=${blockId}&recipientId=${recipientId}&limit=${limit}&offset=${offset}&orderBy=${orderBy}`)
         .set('Accept', 'application/json')
         .expect('Content-Type', /json/)
         .expect(200)
-        .end((err, { body }) => {
+        .end((_err, { body }) => {
           // console.log(JSON.stringify(res.body));
           node.expect(body).to.have.property('success').to.be.true
           node.expect(body).to.have.property('transactions').that.is.an('array')
@@ -170,9 +169,9 @@ describe('GET /api/transactions', () => {
           if (body.transactions.length > 0) {
             let flag = 0
             for (let i = 0; i < body.transactions.length; i++) {
-              if (body.transactions[i + 1] != null) {
+              if (body.transactions[i + 1] !== null) {
                 node.expect(body.transactions[i].timestamp).to.be.at.most(body.transactions[i + 1].timestamp)
-                if (flag == 0) {
+                if (flag === 0) {
                   offsetTimestamp = body.transactions[i + 1].timestamp
                   flag = 1
                 }
@@ -195,12 +194,12 @@ describe('GET /api/transactions', () => {
     const offset = 1
     const orderBy = 't_timestamp:asc'
 
-    node.onNewBlock(err => {
+    node.onNewBlock(_err => {
       node.api.get(`/transactions?blockId=${blockId}&recipientId=${recipientId}&limit=${limit}&offset=${offset}&orderBy=${orderBy}`)
         .set('Accept', 'application/json')
         .expect('Content-Type', /json/)
         .expect(200)
-        .end((err, { body }) => {
+        .end((_err, { body }) => {
           // console.log(JSON.stringify(res.body));
           node.expect(body).to.have.property('success').to.be.true
           node.expect(body).to.have.property('transactions').that.is.an('array')
@@ -214,7 +213,6 @@ describe('GET /api/transactions', () => {
   })
 
   it('Using string offset. Should fail', done => {
-    const senderId = ''
     const blockId = ''
     const recipientId = ''
     const limit = 100
@@ -225,7 +223,7 @@ describe('GET /api/transactions', () => {
       .set('Accept', 'application/json')
       .expect('Content-Type', /json/)
       .expect(200)
-      .end((err, { body }) => {
+      .end((_err, { body }) => {
         // console.log(JSON.stringify(res.body));
         node.expect(body).to.have.property('success').to.be.false
         node.expect(body).to.have.property('error')
@@ -244,13 +242,13 @@ describe('GET /api/transactions', () => {
       .set('Accept', 'application/json')
       .expect('Content-Type', /json/)
       .expect(200)
-      .end((err, { body }) => {
+      .end((_err, { body }) => {
         // console.log(JSON.stringify(res.body));
         node.expect(body).to.have.property('success').to.be.true
         node.expect(body).to.have.property('transactions').that.is.an('array')
         if (body.transactions.length > 0) {
           for (let i = 0; i < body.transactions.length; i++) {
-            if (body.transactions[i + 1] != null) {
+            if (body.transactions[i + 1] !== null) {
               const bRet = DdnUtils.bignum.isGreaterThanOrEqualTo(body.transactions[i].amount, body.transactions[i + 1].amount)
               // node.expect(res.body.transactions[i].amount).to.be.at.most(res.body.transactions[i + 1].amount);
               node.expect(bRet).to.be.true
@@ -273,7 +271,7 @@ describe('GET /api/transactions', () => {
       .set('Accept', 'application/json')
       .expect('Content-Type', /json/)
       .expect(200)
-      .end((err, { body }) => {
+      .end((_err, { body }) => {
         // console.log(JSON.stringify(res.body));
         node.expect(body).to.have.property('success').to.be.false
         node.expect(body).to.have.property('error')
@@ -295,7 +293,7 @@ describe('GET /api/transactions', () => {
         .set('Accept', 'application/json')
         .expect('Content-Type', /json/)
         .expect(200)
-        .end((err, { body }) => {
+        .end((_err, { body }) => {
           // console.log(JSON.stringify(res.body));
           node.expect(body).to.have.property('success').to.be.false
           node.expect(body).to.have.property('error')
@@ -319,11 +317,11 @@ describe('PUT /api/transactions', () => {
         })
         .expect('Content-Type', /json/)
         .expect(200)
-        .end((err, { body }) => {
+        .end((_err, { body }) => {
           // console.log(JSON.stringify(res.body));
           node.expect(body).to.have.property('success').to.be.true
           node.expect(body).to.have.property('transactionId')
-          if (body.success == true && body.transactionId != null) {
+          if (body.success === true && body.transactionId !== null) {
             expectedFee = node.expectedFee(amountToSend)
 
             // DdnUtils.bignum update Account1.balance -= (amountToSend + expectedFee);
@@ -366,7 +364,7 @@ describe('PUT /api/transactions', () => {
       })
       .expect('Content-Type', /json/)
       .expect(200)
-      .end((err, { body }) => {
+      .end((_err, { body }) => {
         // console.log(JSON.stringify(res.body));
         node.expect(body).to.have.property('success').to.be.false
         node.expect(body).to.have.property('error')
@@ -385,7 +383,7 @@ describe('PUT /api/transactions', () => {
       })
       .expect('Content-Type', /json/)
       .expect(200)
-      .end((err, { body }) => {
+      .end((_err, { body }) => {
         // console.log(JSON.stringify(res.body));
         node.expect(body).to.have.property('success').to.be.false
         node.expect(body).to.have.property('error')
@@ -404,7 +402,7 @@ describe('PUT /api/transactions', () => {
         })
         .expect('Content-Type', /json/)
         .expect(200)
-        .end((err, { body }) => {
+        .end((_err, { body }) => {
           // console.log(JSON.stringify(res.body));
           node.expect(body).to.have.property('success').to.be.false
           node.expect(body).to.have.property('error')
@@ -424,7 +422,7 @@ describe('PUT /api/transactions', () => {
         })
         .expect('Content-Type', /json/)
         .expect(200)
-        .end((err, { body }) => {
+        .end((_err, { body }) => {
           // console.log(JSON.stringify(res.body));
           node.expect(body).to.have.property('success').to.be.false
           node.expect(body).to.have.property('error')
@@ -444,7 +442,7 @@ describe('PUT /api/transactions', () => {
         })
         .expect('Content-Type', /json/)
         .expect(200)
-        .end((err, { body }) => {
+        .end((_err, { body }) => {
           // console.log(JSON.stringify(res.body));
           node.expect(body).to.have.property('success').to.be.false
           node.expect(body).to.have.property('error')
@@ -464,7 +462,7 @@ describe('PUT /api/transactions', () => {
         })
         .expect('Content-Type', /json/)
         .expect(200)
-        .end((err, { body }) => {
+        .end((_err, { body }) => {
           // console.log(JSON.stringify(res.body));
           node.expect(body).to.have.property('success').to.be.false
           node.expect(body).to.have.property('error')
@@ -484,7 +482,7 @@ describe('PUT /api/transactions', () => {
         })
         .expect('Content-Type', /json/)
         .expect(200)
-        .end((err, { body }) => {
+        .end((_err, { body }) => {
           node.expect(body).to.have.property('success').to.be.true
           node.expect(body).to.have.property('transactionId')
           done()
@@ -502,7 +500,7 @@ describe('PUT /api/transactions', () => {
       })
       .expect('Content-Type', /json/)
       .expect(200)
-      .end((err, { body }) => {
+      .end((_err, { body }) => {
         // console.log(JSON.stringify(res.body));
         node.expect(body).to.have.property('success').to.be.false
         node.expect(body).to.have.property('error')
@@ -520,7 +518,7 @@ describe('PUT /api/transactions', () => {
       })
       .expect('Content-Type', /json/)
       .expect(200)
-      .end((err, { body }) => {
+      .end((_err, { body }) => {
         // console.log(JSON.stringify(res.body));
         node.expect(body).to.have.property('success').to.be.false
         node.expect(body).to.have.property('error')
@@ -536,10 +534,10 @@ describe('GET /transactions/get?id=', () => {
       .set('Accept', 'application/json')
       .expect('Content-Type', /json/)
       .expect(200)
-      .end((err, { body }) => {
+      .end((_err, { body }) => {
         node.expect(body).to.have.property('success').to.be.true
         node.expect(body).to.have.property('transaction').that.is.an('object')
-        if (body.success == true && body.transaction.id != null) {
+        if (body.success === true && body.transaction.id !== null) {
           node.expect(body.transaction.id).to.equal(transactionInCheck.txId)
           node.expect(body.transaction.amount / node.normalizer).to.equal(transactionInCheck.nettoSent)
           node.expect(`${body.transaction.fee / node.normalizer}`).to.equal(transactionInCheck.fee)
@@ -559,7 +557,7 @@ describe('GET /transactions/get?id=', () => {
       .set('Accept', 'application/json')
       .expect('Content-Type', /json/)
       .expect(200)
-      .end((err, { body }) => {
+      .end((_err, { body }) => {
         // console.log(JSON.stringify(res.body));
         node.expect(body).to.have.property('success').to.be.false
         node.expect(body).to.have.property('error')
@@ -574,12 +572,12 @@ describe('GET /transactions', () => {
       .set('Accept', 'application/json')
       .expect('Content-Type', /json/)
       .expect(200)
-      .end((err, { body }) => {
+      .end((_err, { body }) => {
         // console.log(JSON.stringify(res.body));
         node.expect(body).to.have.property('success').to.be.true
-        if (body.success == true && body.transactions != null) {
+        if (body.success === true && body.transactions !== null) {
           for (let i = 0; i < body.transactions.length; i++) {
-            if (body.transactions[i] != null) {
+            if (body.transactions[i] !== null) {
               node.expect(body.transactions[i].type).to.equal(node.AssetTypes.TRANSFER)
             }
           }
@@ -598,11 +596,11 @@ describe('GET /transactions/unconfirmed/get?id=', () => {
       .set('Accept', 'application/json')
       .expect('Content-Type', /json/)
       .expect(200)
-      .end((err, { body }) => {
+      .end((_err, { body }) => {
         // console.log(JSON.stringify(res.body));
         node.expect(body).to.have.property('success')
-        if (body.success == true) {
-          if (body.transaction != null) {
+        if (body.success === true) {
+          if (body.transaction !== null) {
             node.expect(body.transaction.id).to.equal(transactionList[transactionCount - 1].txId)
           }
         } else {
@@ -620,7 +618,7 @@ describe('GET /transactions/unconfirmed', () => {
       .set('Accept', 'application/json')
       .expect('Content-Type', /json/)
       .expect(200)
-      .end((err, { body }) => {
+      .end((_err, { body }) => {
         // console.log(JSON.stringify(res.body));
         node.expect(body).to.have.property('success').to.be.true
         node.expect(body).to.have.property('transactions').that.is.an('array')
@@ -640,7 +638,7 @@ describe('PUT /signatures', () => {
         })
         .expect('Content-Type', /json/)
         .expect(200)
-        .end((err, { body }) => {
+        .end((_err, { body }) => {
           node.expect(body).to.have.property('success').to.be.false
           node.expect(body).to.have.property('error')
           done()
@@ -658,7 +656,7 @@ describe('PUT /signatures', () => {
         })
         .expect('Content-Type', /json/)
         .expect(200)
-        .end((err, { body }) => {
+        .end((_err, { body }) => {
           // console.log(JSON.stringify(res.body));
           node.expect(body).to.have.property('success').to.be.false
           node.expect(body).to.have.property('error')
@@ -676,7 +674,7 @@ describe('PUT /signatures', () => {
         })
         .expect('Content-Type', /json/)
         .expect(200)
-        .end((err, { body }) => {
+        .end((_err, { body }) => {
           // console.log(JSON.stringify(res.body));
           node.expect(body).to.have.property('success').to.be.false
           node.expect(body).to.have.property('error')
@@ -695,11 +693,11 @@ describe('PUT /signatures', () => {
         })
         .expect('Content-Type', /json/)
         .expect(200)
-        .end((err, { body }) => {
+        .end((_err, { body }) => {
           // console.log(JSON.stringify(res.body));
           node.expect(body).to.have.property('success').to.be.true
           node.expect(body).to.have.property('transaction').that.is.an('object')
-          if (body.success == true && body.transaction != null) {
+          if (body.success === true && body.transaction !== null) {
             // console.log(Account1)
             node.expect(body.transaction).to.have.property('type').to.equal(node.AssetTypes.SIGNATURE)
             node.expect(body.transaction).to.have.property('senderPublicKey').to.equal(Account1.publicKey)
@@ -743,7 +741,7 @@ describe('PUT /transactions (with second passphase now enabled)', () => {
         })
         .expect('Content-Type', /json/)
         .expect(200)
-        .end((err, { body }) => {
+        .end((_err, { body }) => {
           // console.log(JSON.stringify(res.body));
           node.expect(body).to.have.property('success').to.be.false
           node.expect(body).to.have.property('error')
@@ -765,7 +763,7 @@ describe('PUT /transactions (with second passphase now enabled)', () => {
         })
         .expect('Content-Type', /json/)
         .expect(200)
-        .end((err, { body }) => {
+        .end((_err, { body }) => {
           node.expect(body).to.have.property('success').to.be.false
           node.expect(body).to.have.property('error')
           done()
@@ -785,7 +783,7 @@ describe('PUT /delegates (with second passphase now enabled)', () => {
         })
         .expect('Content-Type', /json/)
         .expect(200)
-        .end((err, { body }) => {
+        .end((_err, { body }) => {
           node.expect(body).to.have.property('success').to.be.false
           node.expect(body).to.have.property('error')
           done()

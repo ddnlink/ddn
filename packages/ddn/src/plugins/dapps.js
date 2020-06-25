@@ -73,7 +73,7 @@ async function createDAppMetaFile () {
       required: true,
       validate: function (value) {
         var done = this.async()
-        if (value.length == 0) {
+        if (value.length === 0) {
           done('DApp name is too short, minimum is 1 character')
           return
         }
@@ -133,7 +133,7 @@ async function createDAppMetaFile () {
           done('Invalid DApp link, must be a valid url')
           return
         }
-        if (value.indexOf('.zip') != value.length - 4) {
+        if (value.indexOf('.zip') !== value.length - 4) {
           done('Invalid DApp link, does not link to zip file')
           return
         }
@@ -155,7 +155,7 @@ async function createDAppMetaFile () {
           return done('Invalid DApp icon, must be a valid url')
         }
         var extname = path.extname(value)
-        if (['.png', '.jpg', '.jpeg'].indexOf(extname) == -1) {
+        if (['.png', '.jpg', '.jpeg'].indexOf(extname) === -1) {
           return done('Invalid DApp icon file type')
         }
         if (value.length > 160) {
@@ -174,7 +174,7 @@ async function createDAppMetaFile () {
 
         var publicKeys = value.split(',')
 
-        if (publicKeys.length == 0) {
+        if (publicKeys.length === 0) {
           done('DApp requires at least 1 delegate public key')
           return
         }
@@ -182,7 +182,7 @@ async function createDAppMetaFile () {
         for (var i in publicKeys) {
           try {
             var b = Buffer.from(publicKeys[i], 'hex')
-            if (b.length != 32) {
+            if (b.length !== 32) {
               done('Invalid public key: ' + publicKeys[i])
               return
             }

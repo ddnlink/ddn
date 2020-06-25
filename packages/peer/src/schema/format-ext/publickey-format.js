@@ -4,13 +4,13 @@ export default {
 
   validate (str) {
     // 允许空
-    if (str.length == 0) {
+    if (str.length === 0) {
       return true
     }
 
     try {
       const publicKey = Buffer.from(str, 'hex')
-      return publicKey.length == 32
+      return publicKey.length === 32
     } catch (e) {
       return false
     }

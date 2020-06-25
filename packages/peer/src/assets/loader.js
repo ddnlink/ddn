@@ -176,7 +176,7 @@ class Loader {
     for (const p in keys) {
       const key = keys[p]
       const inst = this._assets[key]
-      if (inst != null &&
+      if (inst !== null &&
                 typeof (inst[funcName]) === 'function') {
         try {
           await inst[funcName](...args)

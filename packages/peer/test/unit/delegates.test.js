@@ -672,7 +672,7 @@ describe('GET /delegates', () => {
         debug('Total Number of delegates returned is: ' + body.totalCount)
         if (num_of_delegates >= 1) {
           for (let i = 0; i < num_of_delegates; i++) {
-            if (body.delegates[i + 1] != null) {
+            if (body.delegates[i + 1] !== null) {
               node.expect(body.delegates[i].vote).to.be.at.most(body.delegates[i + 1].vote)
               node.expect(body.delegates[i]).to.have.property('username')
               node.expect(body.delegates[i]).to.have.property('address')
@@ -710,7 +710,7 @@ describe('GET /delegates', () => {
         debug('Total Number of delegates returned is: ' + body.totalCount)
         if (num_of_delegates >= 1) {
           for (let i = 0; i < num_of_delegates; i++) {
-            if (body.delegates[i + 1] != null) {
+            if (body.delegates[i + 1] !== null) {
               node.expect(body.delegates[i].rate).to.be.at.least(body.delegates[i + 1].rate)
             }
           }
@@ -865,7 +865,7 @@ describe('GET /delegates/voters', () => {
           node.expect(body).to.have.property('accounts').that.is.an('array')
           let flag = 0
           for (let i = 0; i < body.accounts.length; i++) {
-            if (body.accounts[i].address == Raccount.address) {
+            if (body.accounts[i].address === Raccount.address) {
               flag = 1
             }
           }

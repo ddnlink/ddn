@@ -42,7 +42,7 @@ class RootRouter {
     const keypair = DdnCrypto.getKeys(body.secret)
 
     if (body.publicKey) {
-      if (keypair.publicKey != body.publicKey) {
+      if (keypair.publicKey !== body.publicKey) {
         throw new Error('Invalid passphrase')
       }
     }
@@ -50,7 +50,7 @@ class RootRouter {
     return new Promise((resolve, reject) => {
       this.balancesSequence.add(async (cb) => {
         if (body.multisigAccountPublicKey &&
-                    body.multisigAccountPublicKey != keypair.publicKey) {
+                    body.multisigAccountPublicKey !== keypair.publicKey) {
           let account
           try {
             account = await this.runtime.account.getAccountByPublicKey(body.multisigAccountPublicKey)
@@ -89,7 +89,7 @@ class RootRouter {
             return cb('Invalid second passphrase')
           }
 
-          if (requester.publicKey == account.publicKey) {
+          if (requester.publicKey === account.publicKey) {
             return cb('Invalid requester')
           }
 

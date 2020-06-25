@@ -290,10 +290,10 @@ function listdiffvotes (options) {
         }
         var b = new Set(names_b)
         var diffab = [...a].filter(x => {
-          return x != null && !b.has(x)
+          return x !== null && !b.has(x)
         })
         var diffba = [...b].filter(x => {
-          return x != null && !a.has(x)
+          return x !== null && !a.has(x)
         })
 
         console.log('you voted but doesn\'t vote you: \n\t', JSON.stringify(diffab))

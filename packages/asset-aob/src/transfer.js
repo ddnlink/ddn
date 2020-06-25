@@ -50,21 +50,21 @@ class Transfer extends Asset.Base {
     }
 
     const assetDetail = data[0]
-    if (assetDetail.writeoff == '1') {
+    if (assetDetail.writeoff === '1') {
       throw new Error('Asset already writeoff')
     }
 
-    if (assetDetail.allow_whitelist == '0' &&
-            assetDetail.allow_blacklist == '0') {
+    if (assetDetail.allow_whitelist === '0' &&
+            assetDetail.allow_blacklist === '0') {
       return trs
     }
 
-    if (assetDetail.acl == 0) { // 检查黑白名单
+    if (assetDetail.acl === 0) { // 检查黑白名单
       if (await this.isInBlackList(assetData.currency, sender.address) ||
                 await this.isInBlackList(assetData.currency, trs.recipientId)) {
         throw new Error('Permission not allowed')
       }
-    } else if (assetDetail.acl == 1) { // 检查白名单
+    } else if (assetDetail.acl === 1) { // 检查白名单
       const issuerInst = await this.getAssetInstanceByName('AobIssuer')
       const data2 = await issuerInst.queryAsset({
         name: assetDetail.issuer_name
@@ -74,9 +74,9 @@ class Transfer extends Asset.Base {
       }
       const issuerInfo = data2[0]
 
-      if (((sender.address != issuerInfo.issuer_id) &&
+      if (((sender.address !== issuerInfo.issuer_id) &&
                 !(await this.isInWhiteList(assetData.currency, sender.address))) ||
-                ((trs.recipientId != issuerInfo.issuer_id) &&
+                ((trs.recipientId !== issuerInfo.issuer_id) &&
                     !(await this.isInWhiteList(assetData.currency, trs.recipientId)))) {
         throw new Error('Permission not allowed.')
       }

@@ -71,7 +71,7 @@ class Exchange extends Asset.Base {
       received_address: data[assetJsonName].received_address
     }
 
-    if (data[assetJsonName].state == 1) {
+    if (data[assetJsonName].state === 1) {
       console.log('data[assetJsonName]', data[assetJsonName])
 
       trans.amount = trans.asset[assetJsonName].price
@@ -156,7 +156,7 @@ class Exchange extends Asset.Base {
       const latestExchangeRequestObj = latestExchangeRequestList[0]
 
       // 不是一条记录了
-      if (latestExchangeRequestObj.transaction_id != exchangeRequestObj.transaction_id) {
+      if (latestExchangeRequestObj.transaction_id !== exchangeRequestObj.transaction_id) {
         throw new Error('request exchange is expired: ' + asset.exchange_trs_id)
       }
 
@@ -167,10 +167,10 @@ class Exchange extends Asset.Base {
 
       // 这里把 trs.amount 去掉，因为在 create 的时候，就会默认添加 trs.amount 属性；改为价格与记录相等，确保按照价格购买和转账；
       // if (!DdnUtils.bignum.isEqualTo(latestExchangeRequestObj.price, trs.amount)) {
-      //     throw new Error('confirm exchange amount != price, exchange_trs_id: ' + asset.exchange_trs_id)
+      //     throw new Error('confirm exchange amount !== price, exchange_trs_id: ' + asset.exchange_trs_id)
       // }
       if (!DdnUtils.bignum.isEqualTo(latestExchangeRequestObj.price, asset.price)) {
-        throw new Error('confirm exchange amount != price, exchange_trs_id: ' + asset.exchange_trs_id)
+        throw new Error('confirm exchange amount !== price, exchange_trs_id: ' + asset.exchange_trs_id)
       }
 
       // address is ok
@@ -211,20 +211,20 @@ class Exchange extends Asset.Base {
   async applyUnconfirmed (trs, sender, dbTrans) {
     const assetObj = await this.getAssetObject(trs)
     const key = `${sender.address}:${trs.type}:${assetObj.org_id}:${assetObj.state}`
-    if (assetObj.state == 0 && this.oneoff.has(key)) {
+    if (assetObj.state === 0 && this.oneoff.has(key)) {
       throw new Error(`The exchange ${assetObj.org_id} is in process already.`)
     }
 
     await super.applyUnconfirmed(trs, sender, dbTrans)
 
-    if (assetObj.state == 1) {
+    if (assetObj.state === 1) {
       this.oneoff.set(key, true)
     }
   }
 
   async undoUnconfirmed (trs, sender, dbTrans) {
     const assetObj = await this.getAssetObject(trs)
-    if (assetObj.state == 1) {
+    if (assetObj.state === 1) {
       const key = `${sender.address}:${trs.type}:${assetObj.org_id}:${assetObj.state}`
       this.oneoff.delete(key)
     }
@@ -236,7 +236,7 @@ class Exchange extends Asset.Base {
   async dbSave (trs, dbTrans) {
     var result = await super.dbSave(trs, dbTrans)
     const asset = await this.getAssetObject(trs)
-    if (asset.state == 1) {
+    if (asset.state === 1) {
       result = await daoUtil.exchangeOrg(this._context,
         asset.org_id, asset.sender_address, dbTrans)
     }
@@ -299,7 +299,7 @@ class Exchange extends Asset.Base {
     const keypair = DdnCrypto.getKeys(body.secret)
 
     if (body.publicKey) {
-      if (keypair.publicKey.toString('hex') != body.publicKey) {
+      if (keypair.publicKey.toString('hex') !== body.publicKey) {
         throw new Error('Invalid passphrase')
       }
     }
@@ -314,7 +314,7 @@ class Exchange extends Asset.Base {
 
     return new Promise((resolve, reject) => {
       this.balancesSequence.add(async (cb) => {
-        if (body.multisigAccountPublicKey && body.multisigAccountPublicKey != keypair.publicKey.toString('hex')) {
+        if (body.multisigAccountPublicKey && body.multisigAccountPublicKey !== keypair.publicKey.toString('hex')) {
           let account
           try {
             account = await this.runtime.account.getAccountByPublicKey(body.multisigAccountPublicKey)
@@ -351,7 +351,7 @@ class Exchange extends Asset.Base {
             return cb('Invalid second passphrase')
           }
 
-          if (requester.publicKey == account.publicKey) {
+          if (requester.publicKey === account.publicKey) {
             return cb('Invalid requester')
           }
 

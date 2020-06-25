@@ -149,7 +149,7 @@ class AssetBase {
      * 判断是否包含Json扩展属性
      */
   async hasExtProps () {
-    if (this.isHasExtProps != null && typeof (this.isHasExtProps) !== 'undefined') {
+    if (this.isHasExtProps !== null && typeof (this.isHasExtProps) !== 'undefined') {
       return this.isHasExtProps
     }
 
@@ -158,7 +158,7 @@ class AssetBase {
 
     mapping.forEach(item => {
       if (item) {
-        if (item.field && item.field.substring(item.field.length - 4, item.field.length) == '_ext') {
+        if (item.field && item.field.substring(item.field.length - 4, item.field.length) === '_ext') {
           this.isHasExtProps = true
         }
       }
@@ -173,7 +173,7 @@ class AssetBase {
       const props = await this.propsMapping()
 
       for (const currProp of props) {
-        if (currProp.prop.toLowerCase() == propName.toLowerCase()) {
+        if (currProp.prop.toLowerCase() === propName.toLowerCase()) {
           if (!this.propsMappingItems) {
             this.propsMappingItems = {}
           }
@@ -196,7 +196,7 @@ class AssetBase {
       const props = await this.propsMapping()
 
       for (const currProp of props) {
-        if (currProp.field.toLowerCase() == fieldName.toLowerCase()) {
+        if (currProp.field.toLowerCase() === fieldName.toLowerCase()) {
           if (!this.propsMappingItems) {
             this.propsMappingItems = {}
           }
@@ -368,15 +368,15 @@ class AssetBase {
 
     propsMapping.forEach(propMapping => {
       const field = propMapping.field
-      if (field != 'str_ext' &&
-                field != 'int_ext' &&
-                field != 'timestamp_ext') {
+      if (field !== 'str_ext' &&
+                field !== 'int_ext' &&
+                field !== 'timestamp_ext') {
         attributes.push([field, `asset_${field}`])
       }
     })
 
     let useDefaultTrsType = true
-    if (typeof (defaultTrsType) !== 'undefined' && defaultTrsType != null) {
+    if (typeof (defaultTrsType) !== 'undefined' && defaultTrsType !== null) {
       useDefaultTrsType = !!defaultTrsType
     }
 
@@ -393,11 +393,11 @@ class AssetBase {
         newConds[condProp.field] = where[p]
       } else {
         const pName = p.toLowerCase()
-        if (pName == 'trs_id' || pName == 'transaction_id') {
+        if (pName === 'trs_id' || pName === 'transaction_id') {
           newConds.transaction_id = where[p]
-        } else if (pName == 'trs_type' || pName == 'transaction_type') {
+        } else if (pName === 'trs_type' || pName === 'transaction_type') {
           newConds.transaction_type = where[p]
-        } else if (pName == 'trs_timestamp' || pName == 'timestamp') {
+        } else if (pName === 'trs_timestamp' || pName === 'timestamp') {
           newConds.timestamp = where[p]
         } else {
           newConds[pName] = where[p]
@@ -414,14 +414,14 @@ class AssetBase {
           return condProp.field
         } else {
           const pName = prop.toLowerCase()
-          if (pName == 'trs_id') {
+          if (pName === 'trs_id') {
             return 'transaction_id'
-          } else if (pName == 'trs_type') {
+          } else if (pName === 'trs_type') {
             return 'transaction_type'
-          } else if (pName == 'trs_timestamp' || pName == 'timestamp') {
+          } else if (pName === 'trs_timestamp' || pName === 'timestamp') {
             return 'timestamp'
-          } else if (pName == '$or' || pName == '$and' || pName == '$in' || pName == '$like' ||
-                        pName == '$in' || pName == '$lt' || pName == '$lte' || pName == '$gt' || pName == '$gte') {
+          } else if (pName === '$or' || pName === '$and' || pName === '$in' || pName === '$like' ||
+                        pName === '$in' || pName === '$lt' || pName === '$lte' || pName === '$gt' || pName === '$gte') {
             newConds[pName] = where[pName]
           } else {
             this.logger.warn(`Invalid order field: ${prop}`)
@@ -432,7 +432,7 @@ class AssetBase {
 
       for (const orderItem of orders) {
         if (CommonUtils.isArray(orderItem)) {
-          if (orderItem.length == 2) {
+          if (orderItem.length === 2) {
             if (typeof (orderItem[0]) === 'string' && typeof (orderItem[1]) === 'string') {
               const fieldName = await getFieldName(orderItem[0])
               if (fieldName) {
@@ -531,11 +531,11 @@ class AssetBase {
         newObj[condProp.field] = obj[p]
       } else {
         const pName = p.toLowerCase()
-        if (pName == 'trs_id') {
+        if (pName === 'trs_id') {
           newObj.transaction_id = obj[p]
-        } else if (pName == 'trs_type') {
+        } else if (pName === 'trs_type') {
           newObj.transaction_type = obj[p]
-        } else if (pName == 'trs_timestamp') {
+        } else if (pName === 'trs_timestamp') {
           newObj.timestamp = obj[p]
         }
       }
@@ -551,11 +551,11 @@ class AssetBase {
         newWhere[condProp.field] = where[p]
       } else {
         const pName = p.toLowerCase()
-        if (pName == 'trs_id' || pName == 'transaction_id') {
+        if (pName === 'trs_id' || pName === 'transaction_id') {
           newWhere.transaction_id = where[p]
-        } else if (pName == 'trs_type' || pName == 'transaction_type') {
+        } else if (pName === 'trs_type' || pName === 'transaction_type') {
           newWhere.transaction_type = where[p]
-        } else if (pName == 'trs_timestamp' || pName == 'timestamp') {
+        } else if (pName === 'trs_timestamp' || pName === 'timestamp') {
           newWhere.timestamp = where[p]
         }
       }
@@ -604,11 +604,11 @@ class AssetBase {
         newWhere[condProp.field] = where[p]
       } else {
         const pName = p.toLowerCase()
-        if (pName == 'trs_id' || pName == 'transaction_id') {
+        if (pName === 'trs_id' || pName === 'transaction_id') {
           newWhere.transaction_id = where[p]
-        } else if (pName == 'trs_type' || pName == 'transaction_type') {
+        } else if (pName === 'trs_type' || pName === 'transaction_type') {
           newWhere.transaction_type = where[p]
-        } else if (pName == 'trs_timestamp' || pName == 'timestamp') {
+        } else if (pName === 'trs_timestamp' || pName === 'timestamp') {
           newWhere.timestamp = where[p]
         }
       }
@@ -644,9 +644,9 @@ class AssetBase {
         const itemRule = _assetFiledRules[item.field]
         let fieldType = item.field.replace(/[0-9]/g, '')
         fieldType = fieldType.replace(/_ext$/, '')
-        if (fieldType == 'str') {
+        if (fieldType === 'str') {
           const strValue = asset[item.prop]
-          if (strValue != null && typeof (strValue) !== 'undefined') {
+          if (strValue !== null && typeof (strValue) !== 'undefined') {
             if (typeof (strValue) !== 'string') {
               var err = `The '${item.prop}' attribute type of '${assetJsonName}' must be a string.`
               throw new Error(err)
@@ -659,7 +659,7 @@ class AssetBase {
               maxLen = itemRule.maxLen
             }
 
-            if (minLen != null && typeof (minLen) !== 'undefined') {
+            if (minLen !== null && typeof (minLen) !== 'undefined') {
               try {
                 minLen = parseInt(minLen)
               } catch (err3) {
@@ -672,7 +672,7 @@ class AssetBase {
                 throw new Error(err)
               }
             }
-            if (maxLen != null && typeof (maxLen) !== 'undefined') {
+            if (maxLen !== null && typeof (maxLen) !== 'undefined') {
               if (strValue.length > maxLen) {
                 const err = `The '${item.prop}' attribute max length of '${assetJsonName}' must be less than ${maxLen}`
                 throw new Error(err)
@@ -682,23 +682,23 @@ class AssetBase {
             const err = `The '${item.prop}' attribute of '${assetJsonName}' is required.`
             throw new Error(err)
           }
-        } else if (fieldType == 'int') {
+        } else if (fieldType === 'int') {
           const intValue = asset[item.prop]
-          if (intValue != null && typeof (intValue) !== 'undefined') {
+          if (intValue !== null && typeof (intValue) !== 'undefined') {
             if (typeof (intValue) !== 'number') {
               const err = `The '${item.prop}' attribute type of '${assetJsonName}' must be a integer.`
               throw new Error(err)
             }
 
             if (itemRule) {
-              if (itemRule.maxValue != null && typeof (itemRule.maxValue) !== 'undefined') {
+              if (itemRule.maxValue !== null && typeof (itemRule.maxValue) !== 'undefined') {
                 if (intValue > itemRule.maxValue) {
                   const err = `The '${item.prop}' attribute max value of '${assetJsonName}' must be less than ${itemRule.maxValue}`
                   throw new Error(err)
                 }
               }
 
-              if (itemRule.minValue != null && typeof (itemRule.minValue) !== 'undefined') {
+              if (itemRule.minValue !== null && typeof (itemRule.minValue) !== 'undefined') {
                 if (intValue < itemRule.minValue) {
                   const err = `The '${item.prop}' attribute min value of '${assetJsonName}' must be greater than ${itemRule.maxValue}`
                   throw new Error(err)
@@ -709,9 +709,9 @@ class AssetBase {
             const err = `The '${item.prop}' attribute of '${assetJsonName}' is required.`
             throw new Error(err)
           }
-        } else if (fieldType == 'timestamp') {
+        } else if (fieldType === 'timestamp') {
           const timestampValue = asset[item.prop]
-          if (timestampValue != null && typeof (timestampValue) !== 'undefined') {
+          if (timestampValue !== null && typeof (timestampValue) !== 'undefined') {
             if (typeof (timestampValue) !== 'object' && typeof (timestampValue.getDate) !== 'function') {
               try {
                 // FIXME: 你要干嘛？
@@ -780,13 +780,13 @@ class AssetBase {
       if (item && item.required) {
         let fieldType = item.field.replace(/[0-9]/g, '')
         fieldType = fieldType.replace(/_ext$/, '')
-        if (fieldType == 'str') {
+        if (fieldType === 'str') {
           const strValue = asset[item.prop]
           bb.writeUTF8String(strValue)
-        } else if (fieldType == 'int') {
+        } else if (fieldType === 'int') {
           const intValue = asset[item.prop]
           bb.writeInt(intValue)
-        } else if (fieldType == 'timestamp') {
+        } else if (fieldType === 'timestamp') {
           const timestampValue = asset[item.prop]
           bb.writeUTF8String(CommonUtils.formatDate('yyyy-MM-dd hh:mm:ss', timestampValue))
         }
@@ -892,11 +892,11 @@ class AssetBase {
 
       let fieldType = currProp.field.replace(/[0-9]/g, '')
       fieldType = fieldType.replace(/_ext$/, '')
-      if (fieldType == 'str') {
+      if (fieldType === 'str') {
         propsRules[currProp.prop].type = 'string'
-      } else if (fieldType == 'int') {
+      } else if (fieldType === 'int') {
         propsRules[currProp.prop].type = 'integer'
-      } else if (fieldType == 'timestamp') {
+      } else if (fieldType === 'timestamp') {
         propsRules[currProp.prop].type = 'string'
         propsRules[currProp.prop].format = 'datetime'
       }
@@ -938,7 +938,7 @@ class AssetBase {
 
           let fieldType = mapping.field.replace(/[0-9]/g, '')
           fieldType = fieldType.replace(/_ext$/, '')
-          if (fieldType == 'str') {
+          if (fieldType === 'str') {
             result[mapping.prop] = raw[`asset_${mapping.field}`] || ''
           } else {
             result[mapping.prop] = raw[`asset_${mapping.field}`]
@@ -947,7 +947,7 @@ class AssetBase {
       }
 
       const json = raw.asset_ext_json
-      if (json != null && typeof (json) !== 'undefined' && json != '') {
+      if (json !== null && typeof (json) !== 'undefined' && json !== '') {
         try {
           const jsonObj = JSON.parse(json)
           Object.assign(result, jsonObj)
@@ -993,9 +993,9 @@ class AssetBase {
           assetInst[item.field] = itemValue
 
           const fieldType = item.field.replace(/[0-9]/g, '')
-          if (fieldType == 'str_ext' ||
-                        fieldType == 'int_ext' ||
-                        fieldType == 'timestamp_ext') {
+          if (fieldType === 'str_ext' ||
+                        fieldType === 'int_ext' ||
+                        fieldType === 'timestamp_ext') {
             hasJsonExt = true
             jsonExtObj[item.prop] = itemValue
           }

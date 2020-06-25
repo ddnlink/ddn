@@ -45,7 +45,7 @@ class Consensus {
     bytes.writeInt(propose.timestamp)
 
     const parts = propose.address.split(':')
-    assert(parts.length == 2)
+    assert(parts.length === 2)
     bytes.writeInt(ip.toLong(parts[0]))
     bytes.writeInt(Number(parts[1]))
 
@@ -55,7 +55,7 @@ class Consensus {
   }
 
   async createPropose (keypair, { generator_public_key, height, id, timestamp }, address) {
-    assert(keypair.publicKey.toString('hex') == generator_public_key)
+    assert(keypair.publicKey.toString('hex') === generator_public_key)
     const propose = {
       height,
       id,
@@ -71,7 +71,7 @@ class Consensus {
 
   acceptPropose (propose) {
     const hash = this.getProposeHash(propose)
-    if (propose.hash != hash.toString('hex')) {
+    if (propose.hash !== hash.toString('hex')) {
       throw new Error('Propose hash is not correct')
     }
 
@@ -99,7 +99,7 @@ class Consensus {
   }
 
   addPendingVotes ({ height, id, signatures }) {
-    if (!this._pendingBlock || this._pendingBlock.height != height || this._pendingBlock.id != id) {
+    if (!this._pendingBlock || this._pendingBlock.height !== height || this._pendingBlock.id !== id) {
       return this._pendingVotes
     }
 
@@ -129,7 +129,7 @@ class Consensus {
     if (!this._pendingBlock) {
       return false
     }
-    return this.runtime.slot.getSlotNumber(this._pendingBlock.timestamp) == this.runtime.slot.getSlotNumber(timestamp)
+    return this.runtime.slot.getSlotNumber(this._pendingBlock.timestamp) === this.runtime.slot.getSlotNumber(timestamp)
   }
 
   async normalizeVotes (votes) {

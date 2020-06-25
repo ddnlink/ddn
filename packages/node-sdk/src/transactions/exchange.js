@@ -17,7 +17,7 @@ async function createExchange (trsopt, exchange, secret, secondSecret) {
     throw new Error('The first argument should be a object!')
   }
 
-  if (!exchange.org_id || exchange.org_id.length == 0) {
+  if (!exchange.org_id || exchange.org_id.length === 0) {
     throw new Error('Invalid org_id format')
   }
 

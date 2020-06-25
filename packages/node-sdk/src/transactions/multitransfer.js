@@ -11,7 +11,7 @@ const { bignum } = DdnUtils
 async function createMultiTransfer (outputs, secret, secondSecret, cb) {
   const keys = crypto.getKeys(secret)
 
-  if (!outputs || outputs.length == 0) {
+  if (!outputs || outputs.length === 0) {
     throw new Error('Invalid fileHash format')
   }
   const sender = crypto.generateAddress(keys.publicKey)
@@ -34,7 +34,7 @@ async function createMultiTransfer (outputs, secret, secondSecret, cb) {
       return cb('Invalid output amount')
     }
 
-    if (output.recipientId == sender) {
+    if (output.recipientId === sender) {
       return cb('Invalid output recipientId, cannot be your self')
     }
 

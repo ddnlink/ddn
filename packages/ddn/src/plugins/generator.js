@@ -45,7 +45,7 @@ async function createDAppMetaFile (name) {
       required: true,
       validate: function (value) {
         var done = this.async()
-        if (value.length == 0) {
+        if (value.length === 0) {
           done('DApp name is too short, minimum is 1 character')
           return
         }
@@ -105,7 +105,7 @@ async function createDAppMetaFile (name) {
           done('Invalid DApp link, must be a valid url')
           return
         }
-        if (value.indexOf('.zip') != value.length - 4) {
+        if (value.indexOf('.zip') !== value.length - 4) {
           done('Invalid DApp link, does not link to zip file')
           return
         }
@@ -127,7 +127,7 @@ async function createDAppMetaFile (name) {
           return done('Invalid DApp icon, must be a valid url')
         }
         var extname = path.extname(value)
-        if (['.png', '.jpg', '.jpeg'].indexOf(extname) == -1) {
+        if (['.png', '.jpg', '.jpeg'].indexOf(extname) === -1) {
           return done('Invalid DApp icon file type')
         }
         if (value.length > 160) {
@@ -146,7 +146,7 @@ async function createDAppMetaFile (name) {
 
         var publicKeys = value.split(',')
 
-        if (publicKeys.length == 0) {
+        if (publicKeys.length === 0) {
           done('DApp requires at least 1 delegate public key')
           return
         }
@@ -156,7 +156,7 @@ async function createDAppMetaFile (name) {
             var b = Buffer.from(publicKeys[i])
             // console.log(b.length); // 66
 
-            if (b.length != 32) {
+            if (b.length !== 32) {
               done('Invalid public key: ' + publicKeys[i])
               return
             }
@@ -340,11 +340,11 @@ function genGenesisBlock (options) {
     .then(function (newBlockInfo) {
       const delegateSecrets = newBlockInfo.delegates.map(i => {
         const rv = (Math.random() * 100 + index).toFixed(0) % 3
-        if (rv == 0) {
+        if (rv === 0) {
           Daccount.address = i.address
           Daccount.publicKey = i.keypair.publicKey
           Daccount.password = i.secret
-        } else if (rv == 2) {
+        } else if (rv === 2) {
           Eaccount.address = i.address
           Eaccount.publicKey = i.keypair.publicKey
           Eaccount.password = i.secret

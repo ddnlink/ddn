@@ -339,31 +339,31 @@ class DataQuery {
           for (let j = 0; j < trsRows.length; j++) {
             const trsItem = trsRows[j]
 
-            if (trsItem.b_id == blockItem.b_id) {
+            if (trsItem.b_id === blockItem.b_id) {
               blocksResult.push(Object.assign(trsItem, blockItem || null))
               blocksResultMap[trsItem.t_id] = blocksResult[blocksResult.length - 1]
 
               trsIds.push(trsItem.t_id)
 
-              if (trsItem.t_type == DdnUtils.assetTypes.DELEGATE) {
+              if (trsItem.t_type === DdnUtils.assetTypes.DELEGATE) {
                 delegateTrsIds.push(trsItem.t_id)
               }
-              if (trsItem.t_type == DdnUtils.assetTypes.VOTE) {
+              if (trsItem.t_type === DdnUtils.assetTypes.VOTE) {
                 voteTrsIds.push(trsItem.t_id)
               }
-              if (trsItem.t_type == DdnUtils.assetTypes.SIGNATURE) {
+              if (trsItem.t_type === DdnUtils.assetTypes.SIGNATURE) {
                 signatureTrsIds.push(trsItem.t_id)
               }
-              if (trsItem.t_type == DdnUtils.assetTypes.MULTISIGNATURE) {
+              if (trsItem.t_type === DdnUtils.assetTypes.MULTISIGNATURE) {
                 multiSignatureTrsIds.push(trsItem.t_id)
               }
-              if (trsItem.t_type == DdnUtils.assetTypes.DAPP) {
+              if (trsItem.t_type === DdnUtils.assetTypes.DAPP) {
                 dappTrsIds.push(trsItem.t_id)
               }
-              if (trsItem.t_type == DdnUtils.assetTypes.DAPP_IN) {
+              if (trsItem.t_type === DdnUtils.assetTypes.DAPP_IN) {
                 dappIntransferTrsIds.push(trsItem.t_id)
               }
-              if (trsItem.t_type == DdnUtils.assetTypes.DAPP_OUT) {
+              if (trsItem.t_type === DdnUtils.assetTypes.DAPP_OUT) {
                 dappOuttransferTrsIds.push(trsItem.t_id)
               }
             } else {
@@ -518,25 +518,25 @@ class DataQuery {
         transactionsMap[trsItem.t_id] = trsItem
         trsIds.push(trsItem.t_id)
 
-        if (trsItem.t_type == DdnUtils.assetTypes.DELEGATE) {
+        if (trsItem.t_type === DdnUtils.assetTypes.DELEGATE) {
           delegateTrsIds.push(trsItem.t_id)
         }
-        if (trsItem.t_type == DdnUtils.assetTypes.VOTE) {
+        if (trsItem.t_type === DdnUtils.assetTypes.VOTE) {
           voteTrsIds.push(trsItem.t_id)
         }
-        if (trsItem.t_type == DdnUtils.assetTypes.SIGNATURE) {
+        if (trsItem.t_type === DdnUtils.assetTypes.SIGNATURE) {
           signatureTrsIds.push(trsItem.t_id)
         }
-        if (trsItem.t_type == DdnUtils.assetTypes.MULTISIGNATURE) {
+        if (trsItem.t_type === DdnUtils.assetTypes.MULTISIGNATURE) {
           multiSignatureTrsIds.push(trsItem.t_id)
         }
-        if (trsItem.t_type == DdnUtils.assetTypes.DAPP) {
+        if (trsItem.t_type === DdnUtils.assetTypes.DAPP) {
           dappTrsIds.push(trsItem.t_id)
         }
-        if (trsItem.t_type == DdnUtils.assetTypes.DAPP_IN) {
+        if (trsItem.t_type === DdnUtils.assetTypes.DAPP_IN) {
           dappIntransferTrsIds.push(trsItem.t_id)
         }
-        if (trsItem.t_type == DdnUtils.assetTypes.DAPP_OUT) {
+        if (trsItem.t_type === DdnUtils.assetTypes.DAPP_OUT) {
           dappOuttransferTrsIds.push(trsItem.t_id)
         }
       }

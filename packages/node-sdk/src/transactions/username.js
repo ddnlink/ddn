@@ -7,7 +7,7 @@ import options from '../options'
 async function createUsername (name, secret, secondSecret) {
   const keys = crypto.getKeys(secret)
 
-  if (!name || name.length == 0) {
+  if (!name || name.length === 0) {
     throw new Error('Invalid name format')
   }
   const fee = constants.net.fees.username

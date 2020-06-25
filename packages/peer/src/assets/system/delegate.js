@@ -36,7 +36,7 @@ class Delegate {
       throw new Error('Invalid recipient')
     }
 
-    // Bignum update if (trs.amount != 0) {
+    // Bignum update if (trs.amount !== 0) {
     if (!DdnUtils.bignum.isZero(trs.amount)) {
       throw new Error('Invalid transaction amount')
     }
@@ -57,7 +57,7 @@ class Delegate {
 
     const username = String(trs.asset.delegate.username).toLowerCase().trim()
 
-    if (username == '') {
+    if (username === '') {
       throw new Error('Empty username')
     }
 

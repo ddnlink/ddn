@@ -293,8 +293,8 @@ class Peer {
         }
 
         if (
-          ip.toLong('127.0.0.1') == peer.ip ||
-                    peer.port == 0 ||
+          ip.toLong('127.0.0.1') === peer.ip ||
+                    peer.port === 0 ||
                     peer.port > 65535
         ) {
           continue

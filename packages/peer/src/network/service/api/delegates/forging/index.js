@@ -69,7 +69,7 @@ class RootRouter {
     const keypair = DdnCrypto.getKeys(body.secret)
 
     if (body.publicKey) {
-      if (keypair.publicKey != body.publicKey) {
+      if (keypair.publicKey !== body.publicKey) {
         return { success: false, error: 'Invalid passphrase' }
       }
     }
@@ -124,7 +124,7 @@ class RootRouter {
 
     const keypair = DdnCrypto.getKeys(body.secret)
     if (body.publicKey) {
-      if (keypair.publicKey != body.publicKey) {
+      if (keypair.publicKey !== body.publicKey) {
         return { success: false, error: 'Invalid passphrase' }
       }
     }

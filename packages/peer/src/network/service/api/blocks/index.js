@@ -11,7 +11,7 @@ class BlockService {
   }
 
   async get (req) {
-    if (this.runtime.state != DdnUtils.runtimeState.Ready) {
+    if (this.runtime.state !== DdnUtils.runtimeState.Ready) {
       throw new Error('Blockchain is loading')
     }
 
@@ -89,8 +89,8 @@ class BlockService {
       sorts[0].push(sortField)
 
       let sortMethod = 'desc'
-      if (sortItems.length == 2) {
-        sortMethod = sortItems[1] == 'desc' ? 'desc' : 'asc'
+      if (sortItems.length === 2) {
+        sortMethod = sortItems[1] === 'desc' ? 'desc' : 'asc'
       }
       sorts[0].push(sortMethod)
 
@@ -123,7 +123,7 @@ class BlockService {
   }
 
   async getGet (req) {
-    if (this.runtime.state != DdnUtils.runtimeState.Ready) {
+    if (this.runtime.state !== DdnUtils.runtimeState.Ready) {
       throw new Error('Blockchain is loading')
     }
 
@@ -158,7 +158,7 @@ class BlockService {
   }
 
   async getFull (req) {
-    if (this.runtime.state != DdnUtils.runtimeState.Ready) {
+    if (this.runtime.state !== DdnUtils.runtimeState.Ready) {
       throw new Error('Blockchain is loading')
     }
 
@@ -193,7 +193,7 @@ class BlockService {
   }
 
   async getGetFee (req) {
-    if (this.runtime.state != DdnUtils.runtimeState.Ready) {
+    if (this.runtime.state !== DdnUtils.runtimeState.Ready) {
       throw new Error('Blockchain is loading')
     }
 
@@ -202,7 +202,7 @@ class BlockService {
   }
 
   async getGetMilestone (req) {
-    if (this.runtime.state != DdnUtils.runtimeState.Ready) {
+    if (this.runtime.state !== DdnUtils.runtimeState.Ready) {
       throw new Error('Blockchain is loading')
     }
 
@@ -212,7 +212,7 @@ class BlockService {
   }
 
   async getGetReward (req) {
-    if (this.runtime.state != DdnUtils.runtimeState.Ready) {
+    if (this.runtime.state !== DdnUtils.runtimeState.Ready) {
       throw new Error('Blockchain is loading')
     }
 
@@ -222,7 +222,7 @@ class BlockService {
   }
 
   async getGetSupply (req) {
-    if (this.runtime.state != DdnUtils.runtimeState.Ready) {
+    if (this.runtime.state !== DdnUtils.runtimeState.Ready) {
       throw new Error('Blockchain is loading')
     }
 
@@ -232,7 +232,7 @@ class BlockService {
   }
 
   async getGetHeight (req) {
-    if (this.runtime.state != DdnUtils.runtimeState.Ready) {
+    if (this.runtime.state !== DdnUtils.runtimeState.Ready) {
       throw new Error('Blockchain is loading')
     }
 
@@ -244,7 +244,7 @@ class BlockService {
   }
 
   async getGetStatus (req) {
-    if (this.runtime.state != DdnUtils.runtimeState.Ready) {
+    if (this.runtime.state !== DdnUtils.runtimeState.Ready) {
       throw new Error('Blockchain is loading')
     }
 

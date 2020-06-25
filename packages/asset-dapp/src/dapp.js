@@ -96,7 +96,7 @@ class Dapp extends Asset.Base {
 
     let foundCategory = false
     for (const i in dappCategory) {
-      if (dappCategory[i] == dapp.category) {
+      if (dappCategory[i] === dapp.category) {
         foundCategory = true
         break
       }
@@ -114,9 +114,9 @@ class Dapp extends Asset.Base {
       const length = dapp.icon.length
 
       if (
-        dapp.icon.indexOf('.png') != length - 4 &&
-                dapp.icon.indexOf('.jpg') != length - 4 &&
-                dapp.icon.indexOf('.jpeg') != length - 5
+        dapp.icon.indexOf('.png') !== length - 4 &&
+                dapp.icon.indexOf('.jpg') !== length - 4 &&
+                dapp.icon.indexOf('.jpeg') !== length - 5
       ) {
         throw new Error('Invalid icon file type')
       }
@@ -134,7 +134,7 @@ class Dapp extends Asset.Base {
       throw new Error('Invalid dapp link')
     }
 
-    if (dapp.link.indexOf('.zip') != dapp.link.length - 4) {
+    if (dapp.link.indexOf('.zip') !== dapp.link.length - 4) {
       throw new Error('Invalid dapp file type')
     }
 
@@ -142,7 +142,7 @@ class Dapp extends Asset.Base {
       throw new Error('Dapp link is too long. Maximum is 160 characters')
     }
 
-    if (!dapp.name || dapp.name.trim().length == 0 || dapp.name.trim() != dapp.name) {
+    if (!dapp.name || dapp.name.trim().length === 0 || dapp.name.trim() !== dapp.name) {
       throw new Error('Missing dapp name')
     }
 
@@ -164,7 +164,7 @@ class Dapp extends Asset.Base {
       tags = tags.map(tag => tag.trim()).sort()
 
       for (let i = 0; i < tags.length - 1; i++) {
-        if (tags[i + 1] == tags[i]) {
+        if (tags[i + 1] === tags[i]) {
           throw new Error(`Encountered duplicate tags: ${tags[i]}`)
         }
       }
@@ -181,7 +181,7 @@ class Dapp extends Asset.Base {
       }
 
       for (const i in delegatesArr) {
-        if (delegatesArr[i].length != 64) {
+        if (delegatesArr[i].length !== 64) {
           throw new Error('Invalid dapp delegates format')
         }
       }
@@ -618,7 +618,7 @@ class Dapp extends Asset.Base {
     }
 
     const sandbox = new Sandbox(this._context, id, async (type, data) => {
-      if (type == 'close' || type == 'error') {
+      if (type === 'close' || type === 'error') {
         try {
           await this.stopDapp(dapp)
         } catch (err) {
@@ -626,7 +626,7 @@ class Dapp extends Asset.Base {
         }
       }
 
-      if (type == 'error' || type == 'stderr_data') {
+      if (type === 'error' || type === 'stderr_data') {
         _dappLaunchedLastError[id] = data && data.message ? data.message : data.toString()
       }
     })
@@ -858,8 +858,8 @@ class Dapp extends Asset.Base {
 
     const parseSortItem = (orders, item) => {
       const subItems = item.split(':')
-      if (subItems.length == 2) {
-        if (subItems[0].replace(/\s*/, '') != '') {
+      if (subItems.length === 2) {
+        if (subItems[0].replace(/\s*/, '') !== '') {
           orders.push(subItems)
         }
       }
@@ -872,7 +872,7 @@ class Dapp extends Asset.Base {
 
       for (let i = 0; i < sort.length; i++) {
         const sortItem = sort[i]
-        if (sortItem.replace(/\s*/, '') != '') {
+        if (sortItem.replace(/\s*/, '') !== '') {
           const pos = sortItem.indexOf(':')
           if (pos >= 0) {
             parseSortItem(orders, sortItem)
@@ -889,17 +889,17 @@ class Dapp extends Asset.Base {
     //         for (let i = 0; i < sortItems.length; i++) {
     //             const sortItem = sortItems[i];
     //             const sortItemExprs = sortItem.split(" ");
-    //             if (sortItemExprs.length == 1) {
-    //                 if (sortItemExprs[0].trim() == "") {
+    //             if (sortItemExprs.length === 1) {
+    //                 if (sortItemExprs[0].trim() === "") {
     //                     throw new Error("Invalid sort params: " + sortItem);
     //                 }
     //                 else {
     //                     orders.push(sortItemExprs[0].trim());
     //                 }
     //             }
-    //             else if (sortItemExprs.length == 2) {
-    //                 if (sortItemExprs[0].trim() == "" ||
-    //                     sortItemExprs[1].trim() == "") {
+    //             else if (sortItemExprs.length === 2) {
+    //                 if (sortItemExprs[0].trim() === "" ||
+    //                     sortItemExprs[1].trim() === "") {
     //                     throw new Error("Invalid sort params: " + sortItem);
     //                 }
     //                 else {
@@ -996,7 +996,7 @@ class Dapp extends Asset.Base {
       const downloadRequest = request.get(source)
 
       downloadRequest.on('response', (res) => {
-        if (res.statusCode != 200) {
+        if (res.statusCode !== 200) {
           return reject(`Faile to download dapp ${source} with err code: ${res.statusCode}`)
         }
       })
@@ -1256,7 +1256,7 @@ class Dapp extends Asset.Base {
     const keypair = DdnCrypto.getKeys(body.secret)
 
     if (body.publicKey) {
-      if (keypair.publicKey.toString('hex') != body.publicKey) {
+      if (keypair.publicKey.toString('hex') !== body.publicKey) {
         throw new Error('Invalid passphrase')
       }
     }

@@ -37,7 +37,7 @@ class PeerBroadcast {
         const result = await this.runtime.peer.request(options, dappId, false)
         if (result && result.body) {
           broadcastPeers.push(peer)
-          if (broadcastPeers.length == num) {
+          if (broadcastPeers.length === num) {
             break
           }
         }

@@ -311,12 +311,12 @@ class Confirmation extends Asset.Base {
         contribution_trs_id: body.contribution_trs_id,
         url: body.url || contribution.url || '',
         state: body.state,
-        price: body.state == 1 ? contribution.price : '0'
+        price: body.state === 1 ? contribution.price : '0'
       }
 
       return new Promise((resolve, reject) => {
         this.balancesSequence.add(async (cb) => {
-          if (body.multisigAccountPublicKey && body.multisigAccountPublicKey != keypair.publicKey) {
+          if (body.multisigAccountPublicKey && body.multisigAccountPublicKey !== keypair.publicKey) {
             let account
             try {
               account = await this.runtime.account.getAccountByPublicKey(body.multisigAccountPublicKey)
@@ -351,7 +351,7 @@ class Confirmation extends Asset.Base {
               return cb('Invalid second passphrase')
             }
 
-            if (requester.publicKey == account.publicKey) {
+            if (requester.publicKey === account.publicKey) {
               return cb('Invalid requester')
             }
 

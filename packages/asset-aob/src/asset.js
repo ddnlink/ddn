@@ -161,7 +161,7 @@ class Aob extends Asset.Base {
   async dbSave (trs, dbTrans) {
     const asset = await this.getAssetObject(trs)
     const nameParts = asset.name.split('.')
-    assert(nameParts.length == 2)
+    assert(nameParts.length === 2)
     asset.issuer_name = nameParts[0]
     asset.quantity = asset.quantity || '0'
     await super.dbSave(trs, dbTrans)

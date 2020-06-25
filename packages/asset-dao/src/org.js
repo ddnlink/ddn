@@ -155,7 +155,7 @@ class Org extends Asset.Base {
     if (!this.address.isAddress(org.address)) {
       throw new Error('Invalid org address')
     }
-    if (org.address != sender.address) {
+    if (org.address !== sender.address) {
       throw new Error("Org'address must be same with sender'address")
     }
     if (org.url && !isUri(org.url)) {
@@ -206,20 +206,20 @@ class Org extends Asset.Base {
   async applyUnconfirmed (trs, sender, dbTrans) {
     const assetObj = await this.getAssetObject(trs)
     const key = `${sender.address}:${trs.type}:${assetObj.org_id}:${assetObj.state}`
-    if (assetObj.state == 0 && this.oneoff.has(key)) {
+    if (assetObj.state === 0 && this.oneoff.has(key)) {
       throw new Error(`The org ${assetObj.org_id} is in process already.`)
     }
 
     await super.applyUnconfirmed(trs, sender, dbTrans)
 
-    if (assetObj.state == 0) {
+    if (assetObj.state === 0) {
       this.oneoff.set(key, true)
     }
   }
 
   async undoUnconfirmed (trs, sender, dbTrans) {
     const assetObj = await this.getAssetObject(trs)
-    if (assetObj.state == 0) {
+    if (assetObj.state === 0) {
       const key = `${sender.address}:${trs.type}:${assetObj.org_id}:${assetObj.state}`
       this.oneoff.delete(key)
     }
@@ -361,7 +361,7 @@ class Org extends Asset.Base {
     const keypair = DdnCrypto.getKeys(body.secret)
 
     if (body.publicKey) {
-      if (keypair.publicKey.toString('hex') != body.publicKey) {
+      if (keypair.publicKey.toString('hex') !== body.publicKey) {
         throw new Error('Invalid passphrase')
       }
     }
@@ -376,7 +376,7 @@ class Org extends Asset.Base {
       address: body.address || address
     }
 
-    if (body.state == 1) {
+    if (body.state === 1) {
       const currOrg = await daoUtil.getEffectiveOrgByOrgId(this._context, body.org_id)
       if (currOrg) {
         org.name = org.name || currOrg.name
@@ -388,7 +388,7 @@ class Org extends Asset.Base {
 
     return new Promise((resolve, reject) => {
       this.balancesSequence.add(async (cb) => {
-        if (body.multisigAccountPublicKey && body.multisigAccountPublicKey != keypair.publicKey) {
+        if (body.multisigAccountPublicKey && body.multisigAccountPublicKey !== keypair.publicKey) {
           let account
           try {
             account = await this.runtime.account.getAccountByPublicKey(body.multisigAccountPublicKey)
@@ -423,7 +423,7 @@ class Org extends Asset.Base {
             return cb('Invalid second passphrase')
           }
 
-          if (requester.publicKey == account.publicKey) {
+          if (requester.publicKey === account.publicKey) {
             return cb('Invalid requester')
           }
 

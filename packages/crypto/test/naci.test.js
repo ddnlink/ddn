@@ -36,7 +36,7 @@ describe('NaCI', () => {
     expect(cryptoHash).be.not.equal(naclHash)
   })
 
-  it("crypto.createHash('sha256').update(bytes) == push", () => {
+  it("crypto.createHash('sha256').update(bytes) === push", () => {
     let strBuffer = Buffer.from('test')
     let hashStrs = 'test'
 

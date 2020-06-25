@@ -9,6 +9,7 @@ const expect = node.expect
 describe('transaction.js', () => {
   const transaction = ddn.transaction
 
+  debug('start')
   it('should be object', () => {
     expect(transaction).that.is.an('object')
   })

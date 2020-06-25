@@ -140,7 +140,7 @@ class HttpServer {
           return value
         }
 
-        if (isNaN(value) || parseInt(value) != value || isNaN(parseInt(value, radix))) {
+        if (isNaN(value) || parseInt(value) !== value || isNaN(parseInt(value, radix))) {
           return value
         }
 
@@ -165,7 +165,7 @@ class HttpServer {
     }, res, next) => {
       const parts = url.split('/')
       if (parts.length > 1) {
-        if (parts[1] == 'peer') {
+        if (parts[1] === 'peer') {
           res.set(commonHeaders)
         }
       }
@@ -191,7 +191,7 @@ class HttpServer {
         const host = headers.host
         if (host) {
           const hostItems = host.split(':')
-          if (hostItems && hostItems.length == 2) {
+          if (hostItems && hostItems.length === 2) {
             port = hostItems[1]
           }
         }
@@ -217,14 +217,14 @@ class HttpServer {
       res.setHeader('Content-Security-Policy', "frame-ancestors 'none'")
 
       if (parts.length > 1) {
-        if (parts[1] == 'api') {
+        if (parts[1] === 'api') {
           if (this.config.api.access.whiteList.length > 0 &&
                         !this.config.api.access.whiteList.includes(ip)) {
             res.sendStatus(403)
           } else {
             next()
           }
-        } else if (parts[1] == 'peer') {
+        } else if (parts[1] === 'peer') {
           if (this.config.peers.blackList.length > 0 &&
                         this.config.peers.blackList.includes(ip)) {
             res.sendStatus(403)
@@ -273,7 +273,7 @@ class HttpServer {
         const pos = item.lastIndexOf('.')
         if (pos >= 0) {
           const ext = item.substring(pos)
-          if (ext.toLowerCase() == '.js') {
+          if (ext.toLowerCase() === '.js') {
             const Kls = global._require_runtime_(subPath)
             const inst = new Kls(this._context)
             await this._mountRouter(subPath, Kls, inst)

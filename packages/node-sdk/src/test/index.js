@@ -140,7 +140,7 @@ function waitForNewBlock (height, cb) {
           return cb(err || 'Got incorrect status')
         }
 
-        // bignum update if (height + 1 == body.height) {
+        // bignum update if (height + 1 === body.height) {
         if (bignum.isEqualTo(bignum.plus(height, 1), body.height)) {
           height = body.height
         }

@@ -88,7 +88,7 @@ class Evidence extends Asset.Base {
             if (err) {
               reject(err)
             } else {
-              if (senderId != sender.address) {
+              if (senderId !== sender.address) {
                 return reject(
                                     `The evidence ipid ${assetObj.ipid} has been registered by ${senderId}`
                 )

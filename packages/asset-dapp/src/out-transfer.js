@@ -58,7 +58,7 @@ class OutTransfer extends Asset.Base {
     const transfer = await this.getAssetObject(trs)
     const currency = transfer.currency
 
-    if (currency != this.constants.tokenName) {
+    if (currency !== this.constants.tokenName) {
       const aobAssetInst = await this.getAssetInstanceByName('AobAsset')
       const aobAssetResult = await aobAssetInst.queryAsset({ name: currency }, null, false, 1, 1)
       if (aobAssetResult.length <= 0) {
@@ -66,21 +66,21 @@ class OutTransfer extends Asset.Base {
       }
 
       const aobAssetDetail = aobAssetResult[0]
-      if (aobAssetDetail.writeoff == '1') {
+      if (aobAssetDetail.writeoff === '1') {
         throw new Error('Asset already writeoff')
       }
 
-      if (aobAssetDetail.allow_whitelist == '1' || aobAssetDetail.allow_blacklist == '1') {
+      if (aobAssetDetail.allow_whitelist === '1' || aobAssetDetail.allow_blacklist === '1') {
         const aobTransferInst = await this.getAssetInstanceByName('AobTransfer')
         if (await aobTransferInst.isInBlackList(currency, sender.address)) {
           throw new Error('Permission not allowed')
         }
 
         // wxm TODO Aob中需增加isInBlackList方法
-        // const aclTable = aobAssetDetail.acl == 0 ? 'acl_black' : 'acl_white';
+        // const aclTable = aobAssetDetail.acl === 0 ? 'acl_black' : 'acl_white';
         // library.model.checkAcl(aclTable, currency, sender.address, null, (err, isInList) => {
         //     if (err) return cb(`Database error when query acl: ${err}`);
-        //     if ((aobAssetDetail.acl == 0) == isInList) return cb('Permission not allowed')
+        //     if ((aobAssetDetail.acl === 0) === isInList) return cb('Permission not allowed')
         //     cb();
         // })
       }

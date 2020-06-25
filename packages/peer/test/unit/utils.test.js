@@ -79,16 +79,16 @@ describe('Constants params', () => {
 
   it('transaction sort should be stable', function (done) {
     const sortBy = function (a, b) {
-      if (a.type != b.type) {
-        if (a.type == 1) {
+      if (a.type !== b.type) {
+        if (a.type === 1) {
           return 1
         }
-        if (b.type == 1) {
+        if (b.type === 1) {
           return -1
         }
         return a.type - b.type
       }
-      if (a.amount != b.amount) {
+      if (a.amount !== b.amount) {
         return a.amount - b.amount
       }
       return a.id.localeCompare(b.id)

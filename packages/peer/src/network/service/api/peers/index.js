@@ -36,8 +36,8 @@ class RootRouter {
     if (filter.hasOwnProperty('orderBy')) {
       var sort = filter.orderBy.split(':')
       sortBy = sort[0].replace(/[^\w\s]/gi, '')
-      if (sort.length == 2) {
-        sortMethod = sort[1] == 'desc' ? 'desc' : 'asc'
+      if (sort.length === 2) {
+        sortMethod = sort[1] === 'desc' ? 'desc' : 'asc'
       } else {
         sortMethod = 'desc'
       }

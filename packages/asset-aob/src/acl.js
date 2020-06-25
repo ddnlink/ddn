@@ -58,11 +58,11 @@ class Acl extends Asset.Base {
 
     const aclObj = await this.getAssetObject(trs)
 
-    if (['+', '-'].indexOf(aclObj.operator) == -1) {
+    if (['+', '-'].indexOf(aclObj.operator) === -1) {
       throw new Error('Invalid acl operator')
     }
 
-    if ([0, 1, 2].indexOf(aclObj.flag) == -1) {
+    if ([0, 1, 2].indexOf(aclObj.flag) === -1) {
       throw new Error('Invalid acl flag')
     }
 
@@ -75,7 +75,7 @@ class Acl extends Asset.Base {
     const duplicateCheckObj = {}
     for (var i = 0; i < listArr.length; i++) {
       const listItem = listArr[i]
-      if (sender.address == listItem) {
+      if (sender.address === listItem) {
         throw new Error('Issuer should not be in ACL list')
       }
       if (!this.address.isAddress(listItem)) {
@@ -98,12 +98,12 @@ class Acl extends Asset.Base {
     // console.log('aclObj', aclObj);
 
     // 是否允许启用白名单(0:否，1:是)
-    if (assetInfo.allow_whitelist == '0' && aclObj.flag == 1) {
+    if (assetInfo.allow_whitelist === '0' && aclObj.flag === 1) {
       throw new Error('Whitelist not allowed')
     }
 
     // 是否允许启用黑名单(0:否，1:是)
-    if (assetInfo.allow_blacklist == '0' && aclObj.flag == 0) {
+    if (assetInfo.allow_blacklist === '0' && aclObj.flag === 0) {
       throw new Error('Blacklist not allowed')
     }
 
@@ -202,12 +202,12 @@ class Acl extends Asset.Base {
 
   async apply (trs, block, sender, dbTrans) {
     const aclObj = await this.getAssetObject(trs)
-    const modelName = aclObj.flag == 0 ? 'acl_black' : 'acl_white'
+    const modelName = aclObj.flag === 0 ? 'acl_black' : 'acl_white'
 
     const listArr = aclObj.list ? aclObj.list.split(',') : []
-    if (aclObj.operator == '+') {
+    if (aclObj.operator === '+') {
       await this._addList(modelName, aclObj.currency, listArr, dbTrans)
-    } else if (aclObj.operator == '-') {
+    } else if (aclObj.operator === '-') {
       await this._removeList(modelName, aclObj.currency, listArr, dbTrans)
     }
     return trs
@@ -215,12 +215,12 @@ class Acl extends Asset.Base {
 
   async undo (trs, block, sender, dbTrans) {
     const aclObj = await this.getAssetObject(trs)
-    const modelName = aclObj.flag == 0 ? 'acl_black' : 'acl_white'
+    const modelName = aclObj.flag === 0 ? 'acl_black' : 'acl_white'
 
     const listArr = aclObj.list ? aclObj.list.split(',') : []
-    if (aclObj.operator == '+') {
+    if (aclObj.operator === '+') {
       await this._removeList(modelName, aclObj.currency, listArr, dbTrans)
-    } else if (aclObj.operator == '-') {
+    } else if (aclObj.operator === '-') {
       await this._addList(modelName, aclObj.currency, listArr, dbTrans)
     }
     return trs

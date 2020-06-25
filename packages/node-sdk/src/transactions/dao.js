@@ -19,7 +19,7 @@ function isOrgId (dao_id) {
     return false
   }
   if (/^[0-9a-z_]{1,20}$/g.test(dao_id)) {
-    if (dao_id.charAt(0) == '_' || dao_id.charAt(dao_id.length - 1) == '_') {
+    if (dao_id.charAt(0) === '_' || dao_id.charAt(dao_id.length - 1) === '_') {
       return false // not start or end with _
     } else {
       return true
@@ -43,7 +43,7 @@ async function createOrg (org, secret, second_secret) {
   }
 
   org.org_id = org.org_id.toLowerCase()
-  if (!isOrgId(org.org_id) || !org.org_id || org.org_id.length == 0) {
+  if (!isOrgId(org.org_id) || !org.org_id || org.org_id.length === 0) {
     throw new Error('Invalid org_id format')
   }
 
@@ -51,23 +51,23 @@ async function createOrg (org, secret, second_secret) {
   let feeBase = 1
   if (olen > 10) {
     feeBase = 10
-  } else if (olen == 10) {
+  } else if (olen === 10) {
     feeBase = 50
-  } else if (olen == 9) {
+  } else if (olen === 9) {
     feeBase = 100
-  } else if (olen == 8) {
+  } else if (olen === 8) {
     feeBase = 200
-  } else if (olen == 7) {
+  } else if (olen === 7) {
     feeBase = 400
-  } else if (olen == 6) {
+  } else if (olen === 6) {
     feeBase = 800
-  } else if (olen == 5) {
+  } else if (olen === 5) {
     feeBase = 1600
   } else { // length <= 4
     feeBase = 999999 // not allow
   }
 
-  if (org.state == 1) {
+  if (org.state === 1) {
     feeBase = parseInt(feeBase / 10)
   }
   const transaction = {
@@ -126,33 +126,33 @@ async function createConfirmation (trsAmount, confirmation, secret, second_secre
     throw new Error('The first argument should be a object!')
   }
 
-  if (!confirmation.sender_address || confirmation.sender_address.length == 0) {
+  if (!confirmation.sender_address || confirmation.sender_address.length === 0) {
     throw new Error('Invalid sender_address format')
   }
 
-  if (!confirmation.received_address || confirmation.received_address.length == 0) {
+  if (!confirmation.received_address || confirmation.received_address.length === 0) {
     throw new Error('Invalid received_address format')
   }
 
-  if (!confirmation.contribution_trs_id || confirmation.contribution_trs_id.length == 0) {
+  if (!confirmation.contribution_trs_id || confirmation.contribution_trs_id.length === 0) {
     throw new Error('Invalid contribution_trs_id format')
   }
 
-  if (!confirmation.url || confirmation.url.length == 0) {
+  if (!confirmation.url || confirmation.url.length === 0) {
     throw new Error('Invalid url format')
   }
 
-  if (confirmation.state != 0 && confirmation.state != 1) {
+  if (confirmation.state !== 0 && confirmation.state !== 1) {
     throw new Error('Invalid state format')
   }
 
   let fee = constants.net.fees.org
-  if (confirmation.state == 0) {
+  if (confirmation.state === 0) {
     fee = '0'
   }
   let amount = '0'
   let recipientId = ''
-  if (confirmation.state == 1) {
+  if (confirmation.state === 1) {
     amount = trsAmount
     recipientId = confirmation.received_address
   }
@@ -194,19 +194,19 @@ async function createContribution (contribution, secret, second_secret) {
     throw new Error('The first argument should be a object!')
   }
 
-  if (!contribution.title || contribution.title.length == 0) {
+  if (!contribution.title || contribution.title.length === 0) {
     throw new Error('Invalid title format')
   }
 
-  if (!contribution.sender_address || contribution.sender_address.length == 0) {
+  if (!contribution.sender_address || contribution.sender_address.length === 0) {
     throw new Error('Invalid sender_address format')
   }
 
-  if (!contribution.received_address || contribution.received_address.length == 0) {
+  if (!contribution.received_address || contribution.received_address.length === 0) {
     throw new Error('Invalid received_address format')
   }
 
-  if (!contribution.url || contribution.url.length == 0) {
+  if (!contribution.url || contribution.url.length === 0) {
     throw new Error('Invalid url format')
   }
 

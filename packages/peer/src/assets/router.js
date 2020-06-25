@@ -62,8 +62,8 @@ class Router {
     const func = ({ params, query }, res, next) => {
       const parseSortItem = (sort, item) => {
         const subItems = item.split('=')
-        if (subItems.length == 2) {
-          if (subItems[0].replace(/\s*/, '') != '') {
+        if (subItems.length === 2) {
+          if (subItems[0].replace(/\s*/, '') !== '') {
             sort.push(subItems)
           }
         }
@@ -84,7 +84,7 @@ class Router {
 
         for (let i = 0; i < sortItems.length; i++) {
           const sortItem = sortItems[i]
-          if (sortItem.replace(/\s*/, '') != '') {
+          if (sortItem.replace(/\s*/, '') !== '') {
             const pos = sortItem.indexOf('=')
             if (pos >= 0) {
               parseSortItem(orders, sortItem)
@@ -110,8 +110,8 @@ class Router {
     const func = ({ params, query }, res, next) => {
       const parseSortItem = (sort, item) => {
         const subItems = item.split(':')
-        if (subItems.length == 2) {
-          if (subItems[0].replace(/\s*/, '') != '') {
+        if (subItems.length === 2) {
+          if (subItems[0].replace(/\s*/, '') !== '') {
             sort.push(subItems)
           }
         }
@@ -147,7 +147,7 @@ class Router {
 
         for (let i = 0; i < sortItems.length; i++) {
           const sortItem = sortItems[i]
-          if (sortItem.replace(/\s*/, '') != '') {
+          if (sortItem.replace(/\s*/, '') !== '') {
             const pos = sortItem.indexOf(':')
             if (pos >= 0) {
               parseSortItem(orders, sortItem)

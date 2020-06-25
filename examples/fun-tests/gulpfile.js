@@ -57,8 +57,8 @@ function getCmds (osName, net) {
   var result = []
   result.push(format('cd %s && mkdir -p public dapps tmp logs bin config', fullpath))
   result.push(format('cp -r package.json ddnd init .ddnrc.js %s', fullpath))
-  if (net != 'localnet') {
-    if (osName == 'mac') {
+  if (net !== 'localnet') {
+    if (osName === 'mac') {
       result.push(format('sed -i "" "s/testnet/%s/g" %s/ddnd', net, fullpath))
     } else {
       result.push(format('sed -i "s/testnet/%s/g" %s/ddnd', net, fullpath))

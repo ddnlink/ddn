@@ -370,7 +370,7 @@ export const Dao = () => {
       //                 // console.log(JSON.stringify(res.body));
       //                 node.expect(res.body).to.have.property('success').to.be.true;
       //                 node.expect(res.body).to.have.property('transactionId');
-      //                 if (res.body.success == true && res.body.transactionId != null) {
+      //                 if (res.body.success === true && res.body.transactionId !== null) {
       //                     expectedFee = node.expectedFee(amountToSend);
       //                     Account1.balance -= (amountToSend + expectedFee);
       //                     Account2.balance += amountToSend;

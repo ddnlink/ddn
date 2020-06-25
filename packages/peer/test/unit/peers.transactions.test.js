@@ -39,7 +39,7 @@ describe('POST /peer/transactions', () => {
       })
       .expect('Content-Type', /json/)
       .expect(200)
-      .end((err, {
+      .end((_err, {
         body
       }) => {
         debug(JSON.stringify(body))
@@ -62,7 +62,7 @@ describe('POST /peer/transactions', () => {
       })
       .expect('Content-Type', /json/)
       .expect(200)
-      .end((err, {
+      .end((_err, {
         body
       }) => {
         console.log('correct nethash', JSON.stringify(body))
@@ -83,7 +83,7 @@ describe('POST /peer/transactions', () => {
       })
       .expect('Content-Type', /json/)
       .expect(200)
-      .end((err, {
+      .end((_err, {
         body
       }) => {
         debug('undefined recipientId', JSON.stringify(body))
@@ -105,7 +105,7 @@ describe('POST /peer/transactions', () => {
       })
       .expect('Content-Type', /json/)
       .expect(200)
-      .end((err, {
+      .end((_err, {
         body
       }) => {
         debug('negative amount', JSON.stringify(body))
@@ -129,7 +129,7 @@ describe('POST /peer/transactions', () => {
       })
       .expect('Content-Type', /json/)
       .expect(200)
-      .end((err, {
+      .end((_err, {
         body
       }) => {
         debug('invalid passphrase', JSON.stringify(body))
@@ -151,7 +151,7 @@ describe('POST /peer/transactions', () => {
       })
       .expect('Content-Type', /json/)
       .expect(200)
-      .end((err, {
+      .end((_err, {
         body
       }) => {
         debug(JSON.stringify(body))
@@ -175,7 +175,7 @@ describe('POST /peer/transactions', () => {
       })
       .expect('Content-Type', /json/)
       .expect(200)
-      .end((err, {
+      .end((_err, {
         body
       }) => {
         debug(JSON.stringify(body))
@@ -198,7 +198,7 @@ describe('POST /peer/transactions', () => {
       })
       .expect('Content-Type', /json/)
       .expect(200)
-      .end((err, {
+      .end((_err, {
         body
       }) => {
         debug('invalid signature', JSON.stringify(body))
@@ -221,7 +221,7 @@ describe('POST /peer/transactions', () => {
       })
       .expect('Content-Type', /json/)
       .expect(200)
-      .end((err, {
+      .end((_err, {
         body
       }) => {
         debug('invalid publicKey', JSON.stringify(body))
@@ -246,7 +246,7 @@ describe('POST /peer/transactions', () => {
       })
       .expect('Content-Type', /json/)
       .expect(200)
-      .end((err, {
+      .end((_err, {
         body
       }) => {
         debug('large amount', JSON.stringify(body))
@@ -267,7 +267,7 @@ describe('POST /peer/transactions', () => {
       })
       .expect('Content-Type', /json/)
       .expect(200)
-      .end((err, {
+      .end((_err, {
         body
       }) => {
         debug(JSON.stringify(body))
@@ -289,7 +289,7 @@ describe('POST /peer/transactions', () => {
       })
       .expect('Content-Type', /json/)
       .expect(200)
-      .end((err, {
+      .end((_err, {
         body
       }) => {
         debug(JSON.stringify(body))

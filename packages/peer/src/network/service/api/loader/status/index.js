@@ -14,7 +14,7 @@ class RootRouter {
     const count = await this.runtime.block.getCount()
 
     return {
-      loaded: this.runtime.state == DdnUtils.runtimeState.Ready,
+      loaded: this.runtime.state === DdnUtils.runtimeState.Ready,
       now: this.runtime.block.getLastBlock().height,
       blocksCount: count
     }
@@ -23,7 +23,7 @@ class RootRouter {
   async getSync (req) {
     const remotePeerHeight = await this.runtime.peer.request({ api: '/height' })
     return {
-      syncing: this.runtime.state != DdnUtils.runtimeState.Ready,
+      syncing: this.runtime.state !== DdnUtils.runtimeState.Ready,
       blocks: remotePeerHeight.body.height,
       height: this.runtime.block.getLastBlock().height
     }

@@ -241,7 +241,7 @@ class TransactionService {
 
     const keypair = DdnCrypto.getKeys(body.secret)
     if (body.publicKey) {
-      if (keypair.publicKey.toString('hex') != body.publicKey) {
+      if (keypair.publicKey.toString('hex') !== body.publicKey) {
         throw new Error('Invalid passphrase')
       }
     }
@@ -260,7 +260,7 @@ class TransactionService {
           return cb('Recipient not found')
         }
 
-        if (body.multisigAccountPublicKey && body.multisigAccountPublicKey != keypair.publicKey.toString('hex')) {
+        if (body.multisigAccountPublicKey && body.multisigAccountPublicKey !== keypair.publicKey.toString('hex')) {
           let account
           try {
             account = await this.runtime.account.getAccountByPublicKey(body.multisigAccountPublicKey)
@@ -295,7 +295,7 @@ class TransactionService {
             return cb('Invalid second passphrase')
           }
 
-          if (requester.publicKey == account.publicKey) { // wxm block database
+          if (requester.publicKey === account.publicKey) { // wxm block database
             return cb('Invalid requester')
           }
 

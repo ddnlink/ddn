@@ -31,7 +31,7 @@ const MultiSigTX = {
 let accountOpenTurn = 0
 
 async function openAccount ({ password, name }, i) {
-  if (i != null) {
+  if (i !== null) {
     console.log(
             `Opening Account ${i} with password: ${password}`
     )
@@ -40,14 +40,14 @@ async function openAccount ({ password, name }, i) {
   const res = await node.openAccountAsync({ secret: password })
   const body = res.body
 
-  if (body.account != null && i != null) {
+  if (body.account !== null && i !== null) {
     Accounts[i].address = body.account.address
     Accounts[i].publicKey = body.account.publicKey
     debug('Open body.account ' + i, body.account)
-  } else if (name == 'noddn') {
+  } else if (name === 'noddn') {
     NoDDNAccount.address = body.account.address
     NoDDNAccount.publicKey = body.account.publicKey
-  } else if (name == 'multi') {
+  } else if (name === 'multi') {
     MultisigAccount.address = body.account.address
     MultisigAccount.publicKey = body.account.publicKey
     debug('Open MultisigAccount', body.account)
@@ -78,7 +78,7 @@ async function sendDDN ({ address }, i) {
         // debug(JSON.stringify(res.body));
         debug(`sendDDN Sending ${randomCoin} DDN to ${address}`)
         expect(body).to.have.property('success').to.be.true
-        if (body.success == true && i != null) {
+        if (body.success === true && i !== null) {
           // fixme: Bignumber
           Accounts[i].balance = randomCoin / node.normalizer
         }
@@ -108,7 +108,7 @@ async function sendDDNfromMultisigAccount (amount, recipient) {
         debug('sendDDNfromMultisigAccount: ', JSON.stringify(body))
         debug('Sending ' + amount + ' DDN to ' + recipient)
         expect(body).to.have.property('success').to.be.true
-        if (body.success == true) {
+        if (body.success === true) {
           expect(body).to.have.property('transactionId')
         }
 
@@ -157,7 +157,7 @@ jest.setTimeout(50000)
 
 beforeAll(async done => {
   for (let i = 0; i < Accounts.length; i++) {
-    if (Accounts[i] != null) {
+    if (Accounts[i] !== null) {
       await openAccount(Accounts[i], i)
       setTimeout(function () {
         if (accountOpenTurn < totalMembers) {
@@ -174,7 +174,7 @@ beforeAll(async done => {
 // 分别转账
 beforeAll(async done => {
   for (let i = 0; i < Accounts.length; i++) {
-    if (Accounts[i] != null) {
+    if (Accounts[i] !== null) {
       await sendDDN(Accounts[i], i)
     }
   }
@@ -212,7 +212,7 @@ describe('PUT /multisignatures', () => {
       })
       .expect('Content-Type', /json/)
       .expect(200)
-      .end((err, { body }) => {
+      .end((_err, { body }) => {
         debug('keysgroup', JSON.stringify(body))
         expect(body).to.have.property('success').to.be.false
         expect(body).to.have.property('error')
@@ -232,7 +232,7 @@ describe('PUT /multisignatures', () => {
       })
       .expect('Content-Type', /json/)
       .expect(200)
-      .end((err, { body }) => {
+      .end((_err, { body }) => {
         // debug(JSON.stringify(res.body));
         expect(body).to.have.property('success').to.be.false
         expect(body).to.have.property('error')
@@ -254,7 +254,7 @@ describe('PUT /multisignatures', () => {
       })
       .expect('Content-Type', /json/)
       .expect(200)
-      .end((err, { body }) => {
+      .end((_err, { body }) => {
         // debug(JSON.stringify(res.body));
         expect(body).to.have.property('success').to.be.false
         expect(body).to.have.property('error')
@@ -273,7 +273,7 @@ describe('PUT /multisignatures', () => {
       })
       .expect('Content-Type', /json/)
       .expect(200)
-      .end((err, { body }) => {
+      .end((_err, { body }) => {
         // debug(JSON.stringify(res.body));
         expect(body).to.have.property('success').to.be.false
         expect(body).to.have.property('error')
@@ -293,7 +293,7 @@ describe('PUT /multisignatures', () => {
       })
       .expect('Content-Type', /json/)
       .expect(200)
-      .end((err, { body }) => {
+      .end((_err, { body }) => {
         // debug(JSON.stringify(res.body));
         expect(body).to.have.property('success').to.be.false
         expect(body).to.have.property('error')
@@ -312,7 +312,7 @@ describe('PUT /multisignatures', () => {
       })
       .expect('Content-Type', /json/)
       .expect(200)
-      .end((err, { body }) => {
+      .end((_err, { body }) => {
         // debug(JSON.stringify(res.body));
         expect(body).to.have.property('success').to.be.false
         expect(body).to.have.property('error')
@@ -332,7 +332,7 @@ describe('PUT /multisignatures', () => {
       })
       .expect('Content-Type', /json/)
       .expect(200)
-      .end((err, { body }) => {
+      .end((_err, { body }) => {
         // debug(JSON.stringify(res.body));
         expect(body).to.have.property('success').to.be.false
         expect(body).to.have.property('error')
@@ -351,7 +351,7 @@ describe('PUT /multisignatures', () => {
       })
       .expect('Content-Type', /json/)
       .expect(200)
-      .end((err, { body }) => {
+      .end((_err, { body }) => {
         // debug(JSON.stringify(res.body));
         expect(body).to.have.property('success').to.be.false
         expect(body).to.have.property('error')
@@ -371,7 +371,7 @@ describe('PUT /multisignatures', () => {
       })
       .expect('Content-Type', /json/)
       .expect(200)
-      .end((err, { body }) => {
+      .end((_err, { body }) => {
         // debug(JSON.stringify(res.body));
         expect(body).to.have.property('success').to.be.false
         expect(body).to.have.property('error')
@@ -391,7 +391,7 @@ describe('PUT /multisignatures', () => {
       })
       .expect('Content-Type', /json/)
       .expect(200)
-      .end((err, { body }) => {
+      .end((_err, { body }) => {
         // debug(JSON.stringify(res.body));
         expect(body).to.have.property('success').to.be.false
         expect(body).to.have.property('error')
@@ -411,7 +411,7 @@ describe('PUT /multisignatures', () => {
       })
       .expect('Content-Type', /json/)
       .expect(200)
-      .end((err, { body }) => {
+      .end((_err, { body }) => {
         // debug(JSON.stringify(res.body));
         expect(body).to.have.property('success').to.be.false
         expect(body).to.have.property('error')
@@ -431,7 +431,7 @@ describe('PUT /multisignatures', () => {
       })
       .expect('Content-Type', /json/)
       .expect(200)
-      .end((err, { body }) => {
+      .end((_err, { body }) => {
         // debug(JSON.stringify(res.body));
         expect(body).to.have.property('success').to.be.false
         expect(body).to.have.property('error')
@@ -451,7 +451,7 @@ describe('PUT /multisignatures', () => {
       })
       .expect('Content-Type', /json/)
       .expect(200)
-      .end((err, { body }) => {
+      .end((_err, { body }) => {
         // debug(JSON.stringify(res.body));
         expect(body).to.have.property('success').to.be.false
         expect(body).to.have.property('error')
@@ -470,7 +470,7 @@ describe('PUT /multisignatures', () => {
       })
       .expect('Content-Type', /json/)
       .expect(200)
-      .end((err, { body }) => {
+      .end((_err, { body }) => {
         // debug(JSON.stringify(res.body));
         expect(body).to.have.property('success').to.be.false
         expect(body).to.have.property('error')
@@ -490,7 +490,7 @@ describe('PUT /multisignatures', () => {
       })
       .expect('Content-Type', /json/)
       .expect(200)
-      .end((err, { body }) => {
+      .end((_err, { body }) => {
         // debug(JSON.stringify(res.body));
         expect(body).to.have.property('success').to.be.false
         expect(body).to.have.property('error')
@@ -510,7 +510,7 @@ describe('PUT /multisignatures', () => {
       })
       .expect('Content-Type', /json/)
       .expect(200)
-      .end((err, { body }) => {
+      .end((_err, { body }) => {
         // debug(JSON.stringify(res.body));
         expect(body).to.have.property('success').to.be.false
         expect(body).to.have.property('error')
@@ -530,7 +530,7 @@ describe('PUT /multisignatures', () => {
       })
       .expect('Content-Type', /json/)
       .expect(200)
-      .end((err, { body }) => {
+      .end((_err, { body }) => {
         // debug(JSON.stringify(res.body));
         expect(body).to.have.property('success').to.be.false
         expect(body).to.have.property('error')
@@ -552,7 +552,7 @@ describe('PUT /multisignatures', () => {
       })
       .expect('Content-Type', /json/)
       .expect(200)
-      .end((err, { body }) => {
+      .end((_err, { body }) => {
         // debug(JSON.stringify(res.body));
         expect(body).to.have.property('success').to.be.false
         expect(body).to.have.property('error')
@@ -574,7 +574,7 @@ describe('PUT /multisignatures', () => {
       })
       .expect('Content-Type', /json/)
       .expect(200)
-      .end((err, { body }) => {
+      .end((_err, { body }) => {
         debug('/multisignatures min is a string', JSON.stringify(body))
         expect(body).to.have.property('success').to.be.false
         expect(body).to.have.property('error')
@@ -595,7 +595,7 @@ describe('PUT /multisignatures', () => {
       })
       .expect('Content-Type', /json/)
       .expect(200)
-      .end((err, { body }) => {
+      .end((_err, { body }) => {
         debug('should be ok: ', JSON.stringify(body))
         expect(body).to.have.property('success').to.be.true
         expect(body).to.have.property('transactionId')
@@ -617,7 +617,7 @@ describe('GET /multisignatures/pending', () => {
       .set('Accept', 'application/json')
       .expect('Content-Type', /json/)
       .expect(200)
-      .end((err, { body }) => {
+      .end((_err, { body }) => {
         debug('GET /multisignatures/pending', JSON.stringify(body))
         expect(body).to.have.property('success').to.be.false
         expect(body).to.have.property('error')
@@ -631,7 +631,7 @@ describe('GET /multisignatures/pending', () => {
       .set('Accept', 'application/json')
       .expect('Content-Type', /json/)
       .expect(200)
-      .end((err, { body }) => {
+      .end((_err, { body }) => {
         // debug(JSON.stringify(res.body));
         expect(body).to.have.property('success')
         expect(body).to.have.property('success').to.be.true
@@ -652,7 +652,7 @@ describe('GET /multisignatures/pending', () => {
       .set('Accept', 'application/json')
       .expect('Content-Type', /json/)
       .expect(200)
-      .end((err, { body }) => {
+      .end((_err, { body }) => {
         // debug('res.body', res.body)
         expect(body).to.have.property('success').to.be.true
         expect(body)
@@ -717,7 +717,7 @@ describe('POST /multisignatures/sign', () => {
       })
       .expect('Content-Type', /json/)
       .expect(200)
-      .end((err, { body }) => {
+      .end((_err, { body }) => {
         // debug(JSON.stringify(res.body));
         expect(body).to.have.property('success').to.be.false
         done()
@@ -734,7 +734,7 @@ describe('POST /multisignatures/sign', () => {
       })
       .expect('Content-Type', /json/)
       .expect(200)
-      .end((err, { body }) => {
+      .end((_err, { body }) => {
         // debug(JSON.stringify(res.body));
         expect(body).to.have.property('success').to.be.false
         done()
@@ -751,7 +751,7 @@ describe('POST /multisignatures/sign', () => {
       })
       .expect('Content-Type', /json/)
       .expect(200)
-      .end((err, { body }) => {
+      .end((_err, { body }) => {
         // debug(JSON.stringify(res.body));
         expect(body).to.have.property('success').to.be.false
         done()
@@ -768,7 +768,7 @@ describe('POST /multisignatures/sign', () => {
       })
       .expect('Content-Type', /json/)
       .expect(200)
-      .end((err, { body }) => {
+      .end((_err, { body }) => {
         // debug(JSON.stringify(res.body));
         expect(body).to.have.property('success').to.be.false
         done()

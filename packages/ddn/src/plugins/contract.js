@@ -22,7 +22,7 @@ function addContract () {
 
         var className = ''
         for (var i = 0; i < name.length; ++i) {
-          className += i == 0 ? name[i].toUpperCase() : name[i]
+          className += i === 0 ? name[i].toUpperCase() : name[i]
         }
         var exampleContract = fs.readFileSync(
           path.join(__dirname, '..', 'contract-example.js'),

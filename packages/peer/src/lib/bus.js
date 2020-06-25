@@ -45,7 +45,7 @@ class Bus extends EventEmitter {
    */
   unsubscribe (obj) {
     for (let i = 0; i < this._subscribers.length; i++) {
-      if (obj == this._subscribers[i]) {
+      if (obj === this._subscribers[i]) {
         this._subscribers.splice(i, 1)
         break
       }

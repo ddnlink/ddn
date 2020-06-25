@@ -18,7 +18,7 @@ async function createEvidence (evidence, secret, secondSecret) {
     throw new Error('The first argument should be a object!')
   }
 
-  if (!evidence.ipid || evidence.ipid.length == 0) {
+  if (!evidence.ipid || evidence.ipid.length === 0) {
     throw new Error('Invalid ipid format')
   }
 
