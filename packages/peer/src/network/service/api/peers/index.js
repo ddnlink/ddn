@@ -98,6 +98,8 @@ class RootRouter {
 
   async getGet (req) {
     var query = Object.assign({}, req.body, req.query)
+    query.port = Number(query.port)
+
     var validateErrors = await this.ddnSchema.validate({
       type: 'object',
       properties: {

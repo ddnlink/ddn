@@ -13,6 +13,15 @@ class TransactionService {
 
   async get (req) {
     const query = Object.assign({}, req.body, req.query)
+    query.offset = Number(query.offset || 0)
+    query.limit = Number(query.limit || 100)
+    if (typeof query.aob !== 'undefined') {
+      query.aob = Number(query.aob)
+    }
+    if (typeof query.and !== 'undefined') {
+      query.and = Number(query.and)
+    }
+
     const validateErrors = await this.ddnSchema.validate({
       type: 'object',
       properties: {

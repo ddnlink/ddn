@@ -16,6 +16,9 @@ class BlockService {
     }
 
     const query = Object.assign({}, req.body, req.query)
+    query.offset = Number(query.offset || 0)
+    query.limit = Number(query.limit || 100)
+
     const validateErrors = await this.ddnSchema.validate({
       type: 'object',
       properties: {

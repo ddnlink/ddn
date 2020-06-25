@@ -656,12 +656,14 @@ describe('GET /delegates', () => {
     const limit = 10
     const offset = 0
 
-    node.api.get(`/delegates?limit=${limit}&offset=${offset}&orderBy=vote:asc`)
+    const noParameterUrl = `/delegates?limit=${limit}&offset=${offset}&orderBy=vote:asc`;
+    node.api.get(noParameterUrl)
       .set('Accept', 'application/json')
       .expect('Content-Type', /json/)
       .expect(200)
       .end((err, { body }) => {
         debug('get /delegates? no parameters, ok', JSON.stringify(body))
+        debug('noParameterUrl', noParameterUrl)
         node.expect(err).be.not.ok
         node.expect(body).to.have.property('success').to.be.true
         node.expect(body).to.have.property('delegates').that.is.an('array')
