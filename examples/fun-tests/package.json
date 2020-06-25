@@ -1,6 +1,6 @@
 {
-  "name": "example",
-  "version": "1.2.4",
+  "name": "ddn",
+  "version": "3.5.2",
   "main": "./app.js",
   "private": true,
   "repository": {

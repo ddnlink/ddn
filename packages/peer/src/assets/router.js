@@ -1,11 +1,11 @@
 /**
  * 资产路由注册器
+ * 为指定的资产插件生成API路由
  * @Author: wangxm
  * @Date: 2018-12-28 11:08:30
  * @Last Modified by: mikey.zhaopeng
  * @Last Modified time: 2020-04-12 20:34:41
  */
-
 import express from 'express'
 import pluralize from 'pluralize'
 import _ from 'lodash'

@@ -22,7 +22,7 @@
       "ignoreChanges": ["ignored-file", "*.md"],
       "message": "chore(release): publish %s"
     },
-    "git-tag-version": false
+    "skip-git": true
   },
   "useWorkspaces": true,
   "npmClient": "yarn"

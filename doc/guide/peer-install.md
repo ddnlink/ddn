@@ -14,7 +14,7 @@ toc: menu
 
 **建议**
 
-- 系统：ubuntu 16.04.03 LTS x64位操作系统
+- 系统：ubuntu 18.04.03 LTS x64位操作系统
 - CPU： 2C以上
 - 内存：4G以上
 - 带宽：2Mb以上
@@ -38,7 +38,7 @@ $ tar zxvf ddn-linux-2.0.2-mainnet.tar.gz
 测试网testnet
 
 ```
-$ wget http://releases.ddn.link/2.0.2/ddn-linux-2.0.2-mainnet.tar.gz
+$ wget http://releases.ddn.link/ddn-linux-3.5.2-testnet.tar.gz
 $ tar zxvf ddn-linux-2.0.2-testnet.tar.gz
 ```
 

@@ -144,7 +144,7 @@ class Block {
 
   async objectNormalize (block) {
     for (const i in block) {
-      if (block[i] == null || typeof (block[i]) === 'undefined') {
+      if (block[i] === null || typeof (block[i]) === 'undefined') {
         delete block[i]
       }
     }
@@ -348,7 +348,7 @@ class Block {
      * @param {*} votes
      */
   async receiveNewBlock (block, votes) {
-    if (this.runtime.state != runtimeState.Ready) {
+    if (this.runtime.state !== runtimeState.Ready) {
       return
     }
 
@@ -359,16 +359,16 @@ class Block {
 
     await new Promise((resolve, reject) => {
       this.sequence.add(async cb => {
-        if (block.previous_block == this._lastBlock.id && bignum.isEqualTo(bignum.plus(this._lastBlock.height, 1), block.height)) { // wxm block database
+        if (block.previous_block === this._lastBlock.id && bignum.isEqualTo(bignum.plus(this._lastBlock.height, 1), block.height)) { // wxm block database
           this.logger.info(`Received new block id: ${block.id} height: ${block.height} round: ${await this.runtime.round.calc(this.getLastBlock().height)} slot: ${this.runtime.slot.getSlotNumber(block.timestamp)} reward: ${this.getLastBlock().reward}`)
           await this.processBlock(block, votes, true, true, true)
           cb()
-        } else if (block.previous_block != this._lastBlock.id && this._lastBlock.height + 1 == block.height) { // wxm block database
+        } else if (block.previous_block !== this._lastBlock.id && this._lastBlock.height + 1 === block.height) { // wxm block database
           // Fork: Same height but different previous block id
           await this.runtime.delegate.fork(block, 1)
 
           cb('Fork-1')
-        } else if (block.previous_block == this._lastBlock.previous_block && block.height == this._lastBlock.height && block.id != this._lastBlock.id) { // wxm block database
+        } else if (block.previous_block === this._lastBlock.previous_block && block.height === this._lastBlock.height && block.id !== this._lastBlock.id) { // wxm block database
           // Fork: Same height and previous block id, but different block id
           await this.runtime.delegate.fork(block, 5)
 
@@ -393,7 +393,7 @@ class Block {
   }
 
   async receiveVotes (votes) {
-    if (this.runtime.state != runtimeState.Ready) {
+    if (this.runtime.state !== runtimeState.Ready) {
       return
     }
 
@@ -429,7 +429,7 @@ class Block {
      * @param {*} propose
      */
   async receiveNewPropose (propose) {
-    if (this.runtime.state != runtimeState.Ready) {
+    if (this.runtime.state !== runtimeState.Ready) {
       return
     }
 
@@ -440,9 +440,9 @@ class Block {
 
     await new Promise((resolve, reject) => {
       this.sequence.add(async cb => {
-        if (this._lastPropose && this._lastPropose.height == propose.height &&
-                    this._lastPropose.generator_public_key == propose.generator_public_key &&
-                    this._lastPropose.id != propose.id) {
+        if (this._lastPropose && this._lastPropose.height === propose.height &&
+                    this._lastPropose.generator_public_key === propose.generator_public_key &&
+                    this._lastPropose.id !== propose.id) {
           this.logger.warn(`generate different block with the same height, generator: ${propose.generator_public_key}`)
           return cb()
         }
@@ -543,7 +543,7 @@ class Block {
       this.logger.debug('doApplyBlock is starting')
 
       // const sortedTrs = block.transactions.sort((a, b) => {
-      //     if (a.type == 1) {
+      //     if (a.type === 1) {
       //         return 1;
       //     }
       //     return 0;
@@ -558,7 +558,7 @@ class Block {
               const transaction = sortedTrs[i]
               const updatedAccountInfo = await this.runtime.account.setAccount({
                 publicKey: transaction.senderPublicKey,
-                isGenesis: block.height == 1
+                isGenesis: block.height === 1
               }, dbTrans)
 
               const accountInfo = await this.runtime.account.getAccountByAddress(updatedAccountInfo.address)
@@ -594,7 +594,6 @@ class Block {
             if (!result) {
               this.logger.error(`回滚失败或者提交异常，出块失败: ${err}`)
               process.exit(1)
-              return
             } else { // 回滚成功
               this._isActive = false
               reject(err)
@@ -653,7 +652,7 @@ class Block {
 
         const redoTrs = unconfirmedTrs.filter((item) => {
           if (!applyedTrsIdSet.has(item.id)) {
-            if (item.type == assetTypes.MULTISIGNATURE) {
+            if (item.type === assetTypes.MULTISIGNATURE) {
               const curTime = this.runtime.slot.getTime() // (new Date()).getTime();
               const pasttime = Math.ceil((curTime - item.timestamp) / this.config.settings.blockIntervalTime)
 
@@ -692,8 +691,6 @@ class Block {
 
     try {
       const data = this.getBytes(block)
-      // FIXME: Buffer.from 不能使用number作为参数的，但是这里使用数组是不安全的，
-      // 应该使用另外2个，比如：alloc
       const str = data.length - remove
       const data2 = Buffer.allocUnsafe(str)
 
@@ -704,7 +701,6 @@ class Block {
       const blockSignatureBuffer = Buffer.from(block.block_signature, 'hex')
       const generatorPublicKeyBuffer = Buffer.from(block.generator_public_key, 'hex')
       res = nacl.sign.detached.verify(hash, blockSignatureBuffer || ' ', generatorPublicKeyBuffer || ' ')
-      // res = ed.Verify(hash, blockSignatureBuffer || ' ', generatorPublicKeyBuffer || ' ');
     } catch (e) {
       this.logger.error(e)
       throw Error(e.toString())
@@ -724,13 +720,13 @@ class Block {
 
     this.logger.debug(`verifyBlock, id: ${block.id}, h: ${block.height}`)
 
-    if (!block.previous_block && block.height != 1) { // wxm block database
+    if (!block.previous_block && block.height !== 1) { // wxm block database
       throw new Error('Previous block should not be null')
     }
 
     const expectedReward = this._blockStatus.calcReward(block.height)
 
-    if (block.height != 1 && !bignum.isEqualTo(expectedReward, block.reward)) {
+    if (block.height !== 1 && !bignum.isEqualTo(expectedReward, block.reward)) {
       throw new Error('Invalid block reward')
     }
 
@@ -743,7 +739,7 @@ class Block {
     }
 
     // FIXME: 每次重启服务都会出现该错误 2020.6.2
-    if (block.previous_block != this._lastBlock.id) {
+    if (block.previous_block !== this._lastBlock.id) {
       await this.runtime.delegate.fork(block, 1)
       this.logger.error('Incorrect previous block hash', block.previous_block, this._lastBlock.id)
       throw new Error('Incorrect previous block hash')
@@ -764,7 +760,7 @@ class Block {
       throw new Error(`Can't verify payload length of block: ${block.id}`)
     }
 
-    if (block.transactions.length != block.number_of_transactions || block.transactions.length > this.constants.maxTxsPerBlock) {
+    if (block.transactions.length !== block.number_of_transactions || block.transactions.length > this.constants.maxTxsPerBlock) {
       throw new Error(`Invalid amount of block assets: ${block.id}`)
     }
 
@@ -812,7 +808,7 @@ class Block {
       if (!bignum.isEqualTo(block.height, votes.height)) {
         throw new Error('Votes height is not correct')
       }
-      if (block.id != votes.id) {
+      if (block.id !== votes.id) {
         throw new Error('Votes id is not correct')
       }
       if (!votes.signatures || !this.runtime.consensus.hasEnoughVotesRemote(votes)) {
@@ -829,7 +825,6 @@ class Block {
     } catch (err) {
       this.logger.error('Failed to get delegate list while verifying block votes')
       process.exit(-1)
-      return
     }
 
     const publicKeySet = {}
@@ -927,7 +922,7 @@ class Block {
               transaction.block_id = block.id // wxm block database
 
               const existsTrs = existsTrsIds.find((item) => {
-                item.id == transaction.id
+                item.id === transaction.id
               })
               if (existsTrs) {
                 await this.runtime.transaction.removeUnconfirmedTransaction(transaction.id)
@@ -1051,11 +1046,11 @@ class Block {
 
   _sortTransactions (transactions) {
     return transactions.sort((a, b) => {
-      if (a.type != b.type) {
-        if (a.type == 1) {
+      if (a.type !== b.type) {
+        if (a.type === 1) {
           return 1
         }
-        if (b.type == 1) {
+        if (b.type === 1) {
           return -1
         }
         return a.type - b.type
@@ -1084,7 +1079,7 @@ class Block {
       const _block = this.serializeDbData2Block(data[i])
       if (_block) {
         if (!blocks[_block.id]) {
-          if (_block.id == this.genesisblock.id) { // wxm async ok      genesisblock.block.id
+          if (_block.id === this.genesisblock.id) { // wxm async ok      genesisblock.block.id
             _block.generationSignature = (new Array(65)).join('0')
           }
 
@@ -1198,7 +1193,7 @@ class Block {
         if (err) {
           return reject(err)
         } else {
-          if (result && result.height != null &&
+          if (result && result.height !== null &&
                         typeof (result.height) !== 'undefined') {
             this.dao.remove('block', {
               height: {
@@ -1367,7 +1362,7 @@ class Block {
     const keys = ['id', 'height', 'hash']
     for (const i in keys) {
       const key = keys[i]
-      if (typeof (query[key]) !== 'undefined' && query[key] != null) {
+      if (typeof (query[key]) !== 'undefined' && query[key] !== null) {
         where = {
           [key]: query[key]
         }

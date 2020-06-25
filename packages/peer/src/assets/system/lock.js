@@ -66,12 +66,6 @@ class Lock {
       address,
       lock_height: args[0] // bignum update Number(trs.args[0])
     }, dbTrans)
-
-    // self.library.base.account.set(sender.address,
-    // 	{
-    // 		lock_height: trs.args[0]     //bignum update Number(trs.args[0])
-    // 	}, dbTrans,
-    // 	cb);
   }
 
   async undo (trs, block, { address }, dbTrans) {

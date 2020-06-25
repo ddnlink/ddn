@@ -100,7 +100,7 @@ class Delegate {
     return false
   }
 
-  async apply ({ asset }, { address }, dbTrans) {
+  async apply ({ asset }, block, { address }, dbTrans) {
     const data = {
       address,
       u_is_delegate: 0, // wxm block database

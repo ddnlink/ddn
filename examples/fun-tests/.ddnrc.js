@@ -192,7 +192,7 @@ module.exports = {
       },
 
       // SQLite only
-      storage: "blockchain.db",
+      storage: "db/blockchain.db",
 
       // Sequelize will warn you if you're using the default aliases and not limiting them
       // https://sequelize.org/master/manual/querying.html#operators-aliases

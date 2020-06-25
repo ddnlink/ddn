@@ -83,13 +83,11 @@ class Program {
       } catch (err) {
         console.log('Failed: DDN server already started')
         process.exit(1)
-        return
       }
     } else {
       if (fs.existsSync(this._pid_file)) {
         console.log('Failed: DDN server already started')
         process.exit(1)
-        return
       }
     }
   }
@@ -208,7 +206,6 @@ class Program {
     // 验证创世区块数据是否合法
     if (!await this._checkGenesisBlock()) {
       process.exit(1)
-      return
     }
 
     if (!this._context.config.publicIp) {
@@ -434,18 +431,11 @@ class Program {
         return
       }
 
-      // wxm TODO 这里全部改成同步后，不需要再判断这些了，因为这些已经ok了，不ok一定不会执行到这里
-      // if (!privated.loaded || !modules.loader.syncCompleted() || !modules.round.loaded()) {    //wxm   要改成同步完成状态   modules.loader.syncing()
-      //     library.logger.trace('Loop:', 'node not ready');
-      //     return setImmediate(cb);
-      // }
-
       const currentSlot = this._context.runtime.slot.getSlotNumber()
 
       const lastBlock = this._context.runtime.block.getLastBlock()
 
       if (currentSlot === this._context.runtime.slot.getSlotNumber(lastBlock.timestamp)) {
-        // library.logger.debug('Loop:', 'lastBlock is in the same slot');
         return
       }
 
