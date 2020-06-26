@@ -1,6 +1,12 @@
 
 [中文版](./README-zh-CN.md) | [English](./README.md)
 
+ [![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/ddnlink/ddn/blob/master/LICENSE) 
+ [![npm version](https://img.shields.io/npm/v/ddn.svg?style=flat)](https://www.npmjs.com/package/ddn) 
+ [![Downloads](https://img.shields.io/npm/dm/ddn.svg?style=flat)](https://www.npmjs.com/package/ddn) 
+  [![Build Status](https://github.com/ddnlink/ddn/workflows/Node.js%20CI/badge.svg)](https://github.com/ddnlink/ddn/actions)
+ [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](http://docs.ddn.link/#/community/greenpaper)
+ 
 # DDN
 
 DDN, Data Delivery Network, is next generation blockchain system.
