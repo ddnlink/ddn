@@ -15,6 +15,10 @@ class TransactionService {
     const query = Object.assign({}, req.body, req.query)
     query.offset = Number(query.offset || 0)
     query.limit = Number(query.limit || 100)
+
+    if (typeof query.type !== 'undefined') {
+      query.type = Number(query.type)
+    }
     if (typeof query.aob !== 'undefined') {
       query.aob = Number(query.aob)
     }

@@ -104,7 +104,7 @@ describe('GET /peers', () => {
 
         if (body.peers.length > 0) {
           for (let i = 0; i < body.peers.length; i++) {
-            if (body.peers[i + 1] !== null) {
+            if (typeof body.peers[i + 1] !== 'undefined') {
               node.expect(body.peers[i + 1].state).to.at.most(body.peers[i].state)
             }
           }

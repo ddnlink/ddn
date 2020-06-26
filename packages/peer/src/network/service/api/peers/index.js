@@ -1,4 +1,4 @@
-var ip = require('ip')
+import ip from 'ip'
 
 /**
  * RootRouter接口
@@ -11,13 +11,13 @@ class RootRouter {
   }
 
   async queryPeers (filter) {
-    var sortFields = ['ip', 'port', 'state', 'os', 'version']
-    var sortMethod = ''
-    var sortBy = ''
-    var limit = filter.limit || null
-    var offset = filter.offset || null
+    const sortFields = ['ip', 'port', 'state', 'os', 'version']
+    let sortMethod = ''
+    let sortBy = ''
+    const limit = filter.limit || null
+    const offset = filter.offset || null
 
-    var where = {}
+    const where = {}
     if (filter.hasOwnProperty('state') && filter.state !== null) {
       where.state = filter.state
     }
@@ -34,7 +34,7 @@ class RootRouter {
       where.port = filter.port
     }
     if (filter.hasOwnProperty('orderBy')) {
-      var sort = filter.orderBy.split(':')
+      const sort = filter.orderBy.split(':')
       sortBy = sort[0].replace(/[^\w\s]/gi, '')
       if (sort.length === 2) {
         sortMethod = sort[1] === 'desc' ? 'desc' : 'asc'
@@ -44,7 +44,7 @@ class RootRouter {
     }
 
     if (sortBy) {
-      if (sortFields.indexOf(sortBy) < 0) {
+      if (!sortFields.includes(sortBy)) {
         throw new Error('Invalid sort field')
       }
     }
@@ -71,14 +71,25 @@ class RootRouter {
   }
 
   async get (req) {
-    var query = Object.assign({}, req.body, req.query)
-    var validateErrors = await this.ddnSchema.validatePeers(query)
+    const query = Object.assign({}, req.body, req.query)
+    query.limit = Number(query.limit || 10)
+    query.offset = Number(query.offset || 0)
+
+    if (typeof query.state !== 'undefined') {
+      query.state = Number(query.state)
+    }
+
+    if (typeof query.port !== 'undefined') {
+      query.port = Number(query.port)
+    }
+
+    const validateErrors = await this.ddnSchema.validatePeers(query)
     if (validateErrors) {
-      throw new Error(`Invalid parameters: ${validateErrors[0].schemaPath} ${validateErrors[0].message}`)
+      throw new Error(`Invalid parameters 1: ${validateErrors[0].schemaPath} ${validateErrors[0].message}`)
     }
 
     try {
-      var peers = await this.queryPeers(query)
+      const peers = await this.queryPeers(query)
       for (let i = 0; i < peers.rows.length; i++) {
         peers.rows[i].ip = ip.fromLong(peers.rows[i].ip)
       }
@@ -97,10 +108,10 @@ class RootRouter {
   }
 
   async getGet (req) {
-    var query = Object.assign({}, req.body, req.query)
+    const query = Object.assign({}, req.body, req.query)
     query.port = Number(query.port)
 
-    var validateErrors = await this.ddnSchema.validate({
+    const validateErrors = await this.ddnSchema.validate({
       type: 'object',
       properties: {
         ip: {
@@ -120,12 +131,12 @@ class RootRouter {
     }
 
     try {
-      var peers = await this.queryPeers({
+      const peers = await this.queryPeers({
         ip: query.ip,
         port: query.port
       })
 
-      var peer = peers.rows && peers.rows.length ? peers.rows[0] : null
+      const peer = peers.rows && peers.rows.length ? peers.rows[0] : null
       if (peer) {
         peer.ip = ip.fromLong(peer.ip)
       }
@@ -164,4 +175,4 @@ class RootRouter {
   }
 }
 
-module.exports = RootRouter
+export default RootRouter

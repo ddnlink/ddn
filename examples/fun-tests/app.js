@@ -25,6 +25,7 @@ function genOptions () {
     .option('-l, --log <level>', 'Log level')
     .option('-d, --daemon', 'Run ddn node as daemon')
     .option('-e, --execute <path>', 'exe')
+    .option('-r, --reindex', 'verify or not when block loading')
     .option('--dapps <dir>', 'DApps directory')
     .option('--base <dir>', 'Base directory')
     .parse(process.argv)
@@ -68,7 +69,7 @@ function genOptions () {
         }
       })
     } else {
-      configObject.peers.list = []
+      configObject.peers.list = command.peers
     }
   }
 

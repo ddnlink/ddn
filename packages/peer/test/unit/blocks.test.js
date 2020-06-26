@@ -287,7 +287,7 @@ describe('GET /blocks', () => {
         node.expect(body).to.have.property('success').to.be.true
         node.expect(body).to.have.property('blocks').that.is.an('array')
         for (let i = 0; i < body.blocks.length; i++) {
-          if (body.blocks[i + 1] !== null) {
+          if (typeof body.blocks[i + 1] !== 'undefined') {
             const bRet = DdnUtils.bignum.isGreaterThanOrEqualTo(body.blocks[i].height, body.blocks[i + 1].height)
             node.expect(bRet).to.be.true
           }

@@ -1,11 +1,12 @@
 /**
  * passed
  */
+import Debug from 'debug'
 import node from '@ddn/node-sdk/lib/test'
 
 import DdnUtils from '@ddn/utils'
 
-const DEBUG = require('debug')('peer')
+const debug = Debug('debug')
 
 // Account info for a RANDOM account (which we create later) - 0 DDN amount | Will act as delegate
 const Account1 = node.randomTxAccount()
@@ -43,7 +44,7 @@ beforeAll(async () => {
   let randomCoin = node.randomCoin()
   res = await node.giveMoneyAsync(Account1.address, randomCoin)
   expectedFee = node.expectedFee(randomCoin)
-  DEBUG('giveMoneyAsync response', res.body)
+  debug('giveMoneyAsync response', res.body)
 
   node.expect(res.body).to.have.property('success').to.be.true
   Account1.transactions.push(transactionCount)
@@ -115,7 +116,7 @@ describe('GET /api/transactions', () => {
         node.expect(body.transactions).to.have.length.within(1, limit)
         if (body.transactions.length > 0) {
           for (let i = 0; i < body.transactions.length; i++) {
-            if (body.transactions[i + 1] !== null) {
+            if (typeof body.transactions[i + 1] !== 'undefined') {
               // DdnUtils.bignum update node.expect(res.body.transactions[i].amount).to.be.at.most(res.body.transactions[i + 1].amount);
               const bRet = DdnUtils.bignum.isLessThanOrEqualTo(body.transactions[i].amount, body.transactions[i + 1].amount)
               node.expect(bRet).to.be.true
@@ -169,7 +170,7 @@ describe('GET /api/transactions', () => {
           if (body.transactions.length > 0) {
             let flag = 0
             for (let i = 0; i < body.transactions.length; i++) {
-              if (body.transactions[i + 1] !== null) {
+              if (typeof body.transactions[i + 1] !== 'undefined') {
                 node.expect(body.transactions[i].timestamp).to.be.at.most(body.transactions[i + 1].timestamp)
                 if (flag === 0) {
                   offsetTimestamp = body.transactions[i + 1].timestamp
@@ -248,7 +249,7 @@ describe('GET /api/transactions', () => {
         node.expect(body).to.have.property('transactions').that.is.an('array')
         if (body.transactions.length > 0) {
           for (let i = 0; i < body.transactions.length; i++) {
-            if (body.transactions[i + 1] !== null) {
+            if (typeof body.transactions[i + 1] !== 'undefined') {
               const bRet = DdnUtils.bignum.isGreaterThanOrEqualTo(body.transactions[i].amount, body.transactions[i + 1].amount)
               // node.expect(res.body.transactions[i].amount).to.be.at.most(res.body.transactions[i + 1].amount);
               node.expect(bRet).to.be.true
@@ -573,11 +574,12 @@ describe('GET /transactions', () => {
       .expect('Content-Type', /json/)
       .expect(200)
       .end((_err, { body }) => {
-        // console.log(JSON.stringify(res.body));
+        debug('get /transactions?type= ok', JSON.stringify(body))
+
         node.expect(body).to.have.property('success').to.be.true
         if (body.success === true && body.transactions !== null) {
           for (let i = 0; i < body.transactions.length; i++) {
-            if (body.transactions[i] !== null) {
+            if (typeof body.transactions[i] !== 'undefined') {
               node.expect(body.transactions[i].type).to.equal(node.AssetTypes.TRANSFER)
             }
           }
