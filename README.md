@@ -12,7 +12,7 @@ A next generation blockchain system
   <a href="https://www.npmjs.com/package/ddn"><img src="https://img.shields.io/npm/v/ddn.svg?style=flat" alt="npm version"></a>
   <a href="https://www.npmjs.com/package/ddn"><img src="https://img.shields.io/npm/dm/ddn.svg?style=flat" alt="Downloads"></a>
   <a href="https://github.com/ddnlink/ddn/actions"><img src="https://github.com/ddnlink/ddn/workflows/Node.js%20CI/badge.svg" alt="Build Status"></a>
-  <a href="http://docs.ddn.link/#/community/greenpaper"><img src="ttps://img.shields.io/badge/PRs-welcome-brightgreen.svg" alt="PRs Welcome"></a>
+  <a href="http://docs.ddn.link/#/community/greenpaper"><img src="https://img.shields.io/badge/PRs-welcome-brightgreen.svg" alt="PRs Welcome"></a>
 </p>
 
 <p align="center">
