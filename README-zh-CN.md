@@ -1,14 +1,28 @@
-[中文版](./README-zh-CN.md) | [English](./README.md)
+<h1 align="center">
+  <a href="https://ddn.link"><img src="https://avatars3.githubusercontent.com/u/34602359?s=200&v=4" alt="Standard - JavaScript Style Guide" width="200"></a>
+  <br>
+  数据分发网络
+  <br>
+  新一代区块链系统
+  <br>
+</h1>
 
- [![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/ddnlink/ddn/blob/master/LICENSE) 
- [![npm version](https://img.shields.io/npm/v/ddn.svg?style=flat)](https://www.npmjs.com/package/ddn) 
- [![Downloads](https://img.shields.io/npm/dm/ddn.svg?style=flat)](https://www.npmjs.com/package/ddn) 
-  [![Build Status](https://github.com/ddnlink/ddn/workflows/Node.js%20CI/badge.svg)](https://github.com/ddnlink/ddn/actions)
- [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](http://docs.ddn.link/#/community/greenpaper)
- 
-# DDN简介
+<p align="center">
+  <a href="https://github.com/ddnlink/ddn/blob/master/LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="GitHub license"></a>
+  <a href="https://www.npmjs.com/package/ddn"><img src="https://img.shields.io/npm/v/ddn.svg?style=flat" alt="npm version"></a>
+  <a href="https://www.npmjs.com/package/ddn"><img src="https://img.shields.io/npm/dm/ddn.svg?style=flat" alt="Downloads"></a>
+  <a href="https://github.com/ddnlink/ddn/actions"><img src="https://github.com/ddnlink/ddn/workflows/Node.js%20CI/badge.svg" alt="Build Status"></a>
+  <a href="http://docs.ddn.link/#/community/greenpaper"><img src="ttps://img.shields.io/badge/PRs-welcome-brightgreen.svg" alt="PRs Welcome"></a>
+</p>
 
-DDN, 数据分发网络, 是一个成熟的企业级区块链系统，已经服务于版权存证、检验检测、电子医疗等10多个领域。
+<p align="center">
+  <a href="/README-en.md">English</a> •
+  <a href="/README-zhcn.md">简体中文 (Simplified Chinese)</a> •
+</p>
+
+**基于当前版本的测试链**: <http://testnet.ddn.link>
+
+DDN, 是一个成熟的企业级区块链系统，已经服务于版权存证、检验检测、电子医疗等10多个领域。
 
 更多信息，请查看 [官网](https://www.ddn.link) , [docs](http://docs.ddn.link).
 
