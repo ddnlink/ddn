@@ -306,7 +306,7 @@ class Round {
     //         return cb(err);
     //       }
     //       for (let i = 0; i < roundDelegates.length; i++) {
-    //         if (privated.unDelegatesByRound[round].indexOf(roundDelegates[i]) == -1) {
+    //         if (privated.unDelegatesByRound[round].indexOf(roundDelegates[i]) === -1) {
     //           outsiders.push(modules.accounts.generateAddressByPublicKey(roundDelegates[i]));
     //         }
     //       }

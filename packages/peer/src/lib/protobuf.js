@@ -4,7 +4,7 @@
  *  Copyright (c) 2019 DDN Foundation. All rights reserved.
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *-------------------------------------------------------------------------------------------- */
-
+import fs from 'fs'
 import protobuf from 'protobufjs'
 
 import extend from 'extend'
@@ -175,8 +175,8 @@ export default (schemaFile, cb) => {
       const assetTrans = Asset.Utils.getTransactionByIndex(i)
       if (assetTrans) {
         const assetJsonName = Asset.Utils.getAssetJsonName(assetTrans.type)
-        const transCls = global._require_runtime_(assetTrans.package)[assetTrans.name]
-        const transInst = new transCls() // wxm 此处传的都是null，必须保证propsMapping里不要用到这传入的context参数
+        const TransCls = global._require_runtime_(assetTrans.package)[assetTrans.name]
+        const transInst = new TransCls() // wxm 此处传的都是null，必须保证propsMapping里不要用到这传入的context参数
         const props = await transInst.propsMapping()
         const fields = {}
 
@@ -189,7 +189,7 @@ export default (schemaFile, cb) => {
 
           let fieldType = pItem.field.replace(/[0-9]/g, '')
           fieldType = fieldType.replace(/_ext$/, '')
-          if (fieldType == 'int') {
+          if (fieldType === 'int') {
             fields[pItem.prop].type = 'int32'
           } else {
             fields[pItem.prop].type = 'string'
@@ -222,7 +222,12 @@ export default (schemaFile, cb) => {
       return cb(`Failed to read proto file: ${err}`)
     }
 
+    // fs.writeFileSync('./protobuf_root1.json', JSON.stringify(root))
+    // fixme: 2020.6.25 下面的方法将 evidence 重复添加了 2 次
     root = await insertAssetMessage(root)
+
+    // fs.writeFileSync('./protobuf_root2.json', JSON.stringify(root))
+
     cb(null, new Protobuf(root))
   })
 }

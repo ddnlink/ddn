@@ -656,12 +656,14 @@ describe('GET /delegates', () => {
     const limit = 10
     const offset = 0
 
-    node.api.get(`/delegates?limit=${limit}&offset=${offset}&orderBy=vote:asc`)
+    const noParameterUrl = `/delegates?limit=${limit}&offset=${offset}&orderBy=vote:asc`
+    node.api.get(noParameterUrl)
       .set('Accept', 'application/json')
       .expect('Content-Type', /json/)
       .expect(200)
       .end((err, { body }) => {
         debug('get /delegates? no parameters, ok', JSON.stringify(body))
+        debug('noParameterUrl', noParameterUrl)
         node.expect(err).be.not.ok
         node.expect(body).to.have.property('success').to.be.true
         node.expect(body).to.have.property('delegates').that.is.an('array')
@@ -672,7 +674,7 @@ describe('GET /delegates', () => {
         debug('Total Number of delegates returned is: ' + body.totalCount)
         if (num_of_delegates >= 1) {
           for (let i = 0; i < num_of_delegates; i++) {
-            if (body.delegates[i + 1] != null) {
+            if (typeof body.delegates[i + 1] !== 'undefined') {
               node.expect(body.delegates[i].vote).to.be.at.most(body.delegates[i + 1].vote)
               node.expect(body.delegates[i]).to.have.property('username')
               node.expect(body.delegates[i]).to.have.property('address')
@@ -710,7 +712,7 @@ describe('GET /delegates', () => {
         debug('Total Number of delegates returned is: ' + body.totalCount)
         if (num_of_delegates >= 1) {
           for (let i = 0; i < num_of_delegates; i++) {
-            if (body.delegates[i + 1] != null) {
+            if (typeof body.delegates[i + 1] !== 'undefined') {
               node.expect(body.delegates[i].rate).to.be.at.least(body.delegates[i + 1].rate)
             }
           }
@@ -733,7 +735,7 @@ describe('GET /delegates', () => {
       .expect('Content-Type', /json/)
       .expect(200)
       .end((err, { body }) => {
-        debug('/delegates? valid parameters fail', JSON.stringify(body))
+        debug('/delegates? invalid parameters fail', JSON.stringify(body))
         node.expect(err).be.not.ok
         node.expect(body).to.have.property('success').to.be.false
         node.expect(body).to.have.property('error')
@@ -865,7 +867,7 @@ describe('GET /delegates/voters', () => {
           node.expect(body).to.have.property('accounts').that.is.an('array')
           let flag = 0
           for (let i = 0; i < body.accounts.length; i++) {
-            if (body.accounts[i].address == Raccount.address) {
+            if (body.accounts[i].address === Raccount.address) {
               flag = 1
             }
           }

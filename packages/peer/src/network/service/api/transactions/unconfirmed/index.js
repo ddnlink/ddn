@@ -30,8 +30,8 @@ class RootRouter {
     if (query.senderPublicKey || query.address) {
       var result = []
       for (var i = 0; i < transactions.length; i++) {
-        if (transactions[i].senderPublicKey == query.senderPublicKey ||
-                    transactions[i].recipientId == query.address) { // wxm block database
+        if (transactions[i].senderPublicKey === query.senderPublicKey ||
+                    transactions[i].recipientId === query.address) { // wxm block database
           result.push(transactions[i])
         }
       }

@@ -34,7 +34,7 @@ class Signatures {
     }
 
     try {
-      if (!trs.asset.signature.publicKey || Buffer.from(trs.asset.signature.publicKey, 'hex').length != 32) {
+      if (!trs.asset.signature.publicKey || Buffer.from(trs.asset.signature.publicKey, 'hex').length !== 32) {
         throw new Error('Invalid signature length')
       }
     } catch (e) {

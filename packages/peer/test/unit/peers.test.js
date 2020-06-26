@@ -13,7 +13,7 @@ describe('GET /peers/version', () => {
       .set('Accept', 'application/json')
       .expect('Content-Type', /json/)
       .expect(200)
-      .end((err, {
+      .end((_err, {
         body
       }) => {
         debug('version', JSON.stringify(body))
@@ -38,7 +38,7 @@ describe('GET /peers', () => {
       .set('Accept', 'application/json')
       .expect('Content-Type', /json/)
       .expect(200)
-      .end((err, {
+      .end((_err, {
         body
       }) => {
         // debug(JSON.stringify(body));
@@ -54,7 +54,7 @@ describe('GET /peers', () => {
       .set('Accept', 'application/json')
       .expect('Content-Type', /json/)
       .expect(200)
-      .end((err, {
+      .end((_err, {
         body
       }) => {
         // debug(JSON.stringify(body));
@@ -76,7 +76,7 @@ describe('GET /peers', () => {
       .set('Accept', 'application/json')
       .expect('Content-Type', /json/)
       .expect(200)
-      .end((err, {
+      .end((_err, {
         body
       }) => {
         // debug(JSON.stringify(body));
@@ -95,7 +95,7 @@ describe('GET /peers', () => {
       .set('Accept', 'application/json')
       .expect('Content-Type', /json/)
       .expect(200)
-      .end((err, {
+      .end((_err, {
         body
       }) => {
         // debug(JSON.stringify(body));
@@ -104,7 +104,7 @@ describe('GET /peers', () => {
 
         if (body.peers.length > 0) {
           for (let i = 0; i < body.peers.length; i++) {
-            if (body.peers[i + 1] != null) {
+            if (typeof body.peers[i + 1] !== 'undefined') {
               node.expect(body.peers[i + 1].state).to.at.most(body.peers[i].state)
             }
           }
@@ -120,7 +120,7 @@ describe('GET /peers', () => {
       .set('Accept', 'application/json')
       .expect('Content-Type', /json/)
       .expect(200)
-      .end((err, {
+      .end((_err, {
         body
       }) => {
         // debug(JSON.stringify(body));
@@ -142,7 +142,7 @@ describe('GET /peers', () => {
       .set('Accept', 'application/json')
       .expect('Content-Type', /json/)
       .expect(200)
-      .end((err, {
+      .end((_err, {
         body
       }) => {
         // debug(JSON.stringify(body));

@@ -27,7 +27,7 @@ describe('POST /peer/transactions', () => {
         node.expect(err).to.be.not.ok
 
         node.expect(body).to.have.property('success').to.be.true
-        if (body.success == true && body.account != null) {
+        if (body.success === true && body.account !== null) {
           voterAccount.address = body.account.address
           voterAccount.publicKey = body.account.publicKey
           voterAccount.balance = body.account.balance
@@ -54,7 +54,7 @@ describe('POST /peer/transactions', () => {
             debug(JSON.stringify(body))
             node.expect(body).to.have.property('success').to.be.true
             node.expect(body).to.have.property('transactionId')
-            if (body.success == true && body.transactionId != null) {
+            if (body.success === true && body.transactionId !== null) {
               node.expect(body.transactionId).to.be.a('string')
               voterAccount.amount = DdnUtils.bignum.plus(voterAccount.amount, randomCoin).toString()
             } else {
@@ -236,7 +236,7 @@ describe('POST /peer/transactions', () => {
       .end((err, { body }) => {
         node.expect(err).to.be.not.ok
 
-        if (body.success == true && body.account != null) {
+        if (body.success === true && body.account !== null) {
           account.address = body.account.address
           account.publicKey = body.account.publicKey
         } else {

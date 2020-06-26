@@ -53,7 +53,7 @@ class MultiSignature {
       throw new Error('Transaction not found')
     }
 
-    if (transaction.type == DdnUtils.assetTypes.MULTISIGNATURE) {
+    if (transaction.type === DdnUtils.assetTypes.MULTISIGNATURE) {
       transaction.signatures = transaction.signatures || []
 
       if (transaction.asset.multisignature.signatures || transaction.signatures.includes(tx.signature)) {

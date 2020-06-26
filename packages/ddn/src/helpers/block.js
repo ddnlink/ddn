@@ -113,7 +113,7 @@ export default {
       for (const i in lines) {
         const parts = lines[i].split('  ')
 
-        if (parts.length != 2) {
+        if (parts.length !== 2) {
           console.error('Invalid recipient balance format')
           break
         }
@@ -229,11 +229,11 @@ export default {
     }
 
     transactions = transactions.sort(function compare (a, b) {
-      if (a.type != b.type) {
-        if (a.type == 1) {
+      if (a.type !== b.type) {
+        if (a.type === 1) {
           return 1
         }
-        if (b.type == 1) {
+        if (b.type === 1) {
           return -1
         }
         return a.type - b.type
@@ -285,16 +285,16 @@ export default {
     for (const i in genesisBlock.transactions) {
       const tx = genesisBlock.transactions[i]
 
-      if (tx.type == assetTypes.DAPP) {
-        if (tx.asset.dapp.name == dapp.name) {
+      if (tx.type === assetTypes.DAPP) {
+        if (tx.asset.dapp.name === dapp.name) {
           throw new Error(`DApp with name '${dapp.name}' already exists in genesis block`)
         }
 
-        if (tx.asset.dapp.git == dapp.git) {
+        if (tx.asset.dapp.git === dapp.git) {
           throw new Error(`DApp with git '${dapp.git}' already exists in genesis block`)
         }
 
-        if (tx.asset.dapp.link == dapp.link) {
+        if (tx.asset.dapp.link === dapp.link) {
           throw new Error(`DApp with link '${dapp.link}' already exists in genesis block`)
         }
       }

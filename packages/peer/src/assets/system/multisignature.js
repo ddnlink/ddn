@@ -46,7 +46,7 @@ class Multisignature {
       throw new Error(`Invalid transaction asset: ${trs.id}`)
     }
 
-    if (trs.asset.multisignature.keysgroup.length == 0) {
+    if (trs.asset.multisignature.keysgroup.length === 0) {
       throw new Error('Multisignature group must contain at least one member')
     }
 
@@ -69,8 +69,8 @@ class Multisignature {
           let verify = false
           if (trs.signatures) {
             for (let d = 0; d < trs.signatures.length && !verify; d++) {
-              if (trs.asset.multisignature.keysgroup[s][0] != '-' &&
-                                trs.asset.multisignature.keysgroup[s][0] != '+') {
+              if (trs.asset.multisignature.keysgroup[s][0] !== '-' &&
+                                trs.asset.multisignature.keysgroup[s][0] !== '+') {
                 verify = false
               } else {
                 verify = await this.runtime.transaction.verifySignature(
@@ -102,13 +102,13 @@ class Multisignature {
       const math = key[0]
       const publicKey = key.slice(1)
 
-      if (math != '+') {
+      if (math !== '+') {
         throw new Error('Invalid math operator')
       }
 
       try {
         const b = Buffer.from(publicKey, 'hex')
-        if (b.length != 32) {
+        if (b.length !== 32) {
           throw new Error('Invalid public key')
         }
       } catch (e) {
@@ -121,7 +121,7 @@ class Multisignature {
       return p
     }, [])
 
-    if (keysgroup2.length != trs.asset.multisignature.keysgroup.length) {
+    if (keysgroup2.length !== trs.asset.multisignature.keysgroup.length) {
       throw new Error('Multisignature group contains non-unique public keys')
     }
 
@@ -326,7 +326,7 @@ class Multisignature {
     }
 
     if (Array.isArray(multisignatures) && !multisignatures.length) {
-      const ready = signatures.length == asset.multisignature.keysgroup.length
+      const ready = signatures.length === asset.multisignature.keysgroup.length
       if (!ready) {
         this.logger.warn(`The number of multisignature signatures is less than ${asset.multisignature.keysgroup.length}`)
       }

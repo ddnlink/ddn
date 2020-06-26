@@ -13,6 +13,19 @@ class TransactionService {
 
   async get (req) {
     const query = Object.assign({}, req.body, req.query)
+    query.offset = Number(query.offset || 0)
+    query.limit = Number(query.limit || 100)
+
+    if (typeof query.type !== 'undefined') {
+      query.type = Number(query.type)
+    }
+    if (typeof query.aob !== 'undefined') {
+      query.aob = Number(query.aob)
+    }
+    if (typeof query.and !== 'undefined') {
+      query.and = Number(query.and)
+    }
+
     const validateErrors = await this.ddnSchema.validate({
       type: 'object',
       properties: {
@@ -241,7 +254,7 @@ class TransactionService {
 
     const keypair = DdnCrypto.getKeys(body.secret)
     if (body.publicKey) {
-      if (keypair.publicKey.toString('hex') != body.publicKey) {
+      if (keypair.publicKey.toString('hex') !== body.publicKey) {
         throw new Error('Invalid passphrase')
       }
     }
@@ -260,7 +273,7 @@ class TransactionService {
           return cb('Recipient not found')
         }
 
-        if (body.multisigAccountPublicKey && body.multisigAccountPublicKey != keypair.publicKey.toString('hex')) {
+        if (body.multisigAccountPublicKey && body.multisigAccountPublicKey !== keypair.publicKey.toString('hex')) {
           let account
           try {
             account = await this.runtime.account.getAccountByPublicKey(body.multisigAccountPublicKey)
@@ -295,7 +308,7 @@ class TransactionService {
             return cb('Invalid second passphrase')
           }
 
-          if (requester.publicKey == account.publicKey) { // wxm block database
+          if (requester.publicKey === account.publicKey) { // wxm block database
             return cb('Invalid requester')
           }
 

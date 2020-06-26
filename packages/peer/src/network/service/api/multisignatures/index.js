@@ -62,7 +62,7 @@ class MultisignaturesRouter {
     const keypair = DdnCrypto.getKeys(body.secret)
 
     if (body.publicKey) {
-      if (keypair.publicKey != body.publicKey) {
+      if (keypair.publicKey !== body.publicKey) {
         throw new Error('Invalid passphrase')
       }
     }
@@ -171,7 +171,7 @@ class MultisignaturesRouter {
     }
 
     if (body.publicKey) {
-      if (keypair.publicKey != body.publicKey) {
+      if (keypair.publicKey !== body.publicKey) {
         throw new Error('Invalid passphrase')
       }
     }
@@ -180,7 +180,7 @@ class MultisignaturesRouter {
 
     const sign = await this.runtime.transaction.multisign(transaction, keypair)
 
-    if (transaction.type == DdnUtils.assetTypes.MULTISIGNATURE) {
+    if (transaction.type === DdnUtils.assetTypes.MULTISIGNATURE) {
       if ((!transaction.asset.multisignature.keysgroup.includes(`+${keypair.publicKey}`)) ||
                 (transaction.signatures && transaction.signatures.includes(sign.toString('hex')))) {
         // 是多重签名交易（asset），但签名者不属于签名组里的人，也不在交易的多个签名里
@@ -207,8 +207,8 @@ class MultisignaturesRouter {
           throw new Error('2. Permission to sign transaction denied')
         }
       } else {
-        if (account.publicKey != keypair.publicKey ||
-                    transaction.senderPublicKey != keypair.publicKey) {
+        if (account.publicKey !== keypair.publicKey ||
+                    transaction.senderPublicKey !== keypair.publicKey) {
           // 交易有接收方，但交易发起者与当前操作的用户不一致
           throw new Error('3. Permission to sign transaction denied')
         }
@@ -287,7 +287,7 @@ class MultisignaturesRouter {
     if (query.isOutTransfer) {
       transactions = transactions.filter(({
         type
-      }) => type == DdnUtils.assetTypes.DAPP_OUT)
+      }) => type === DdnUtils.assetTypes.DAPP_OUT)
     }
 
     const pendings = []
@@ -318,7 +318,7 @@ class MultisignaturesRouter {
         }
       }
 
-      if (!signed && item.senderPublicKey == query.publicKey) { // wxm block database
+      if (!signed && item.senderPublicKey === query.publicKey) { // wxm block database
         signed = true
       }
 
@@ -328,7 +328,7 @@ class MultisignaturesRouter {
           break
         }
 
-        if ((sender.publicKey == query.publicKey && sender.u_multisignatures.length > 0) ||
+        if ((sender.publicKey === query.publicKey && sender.u_multisignatures.length > 0) ||
                     sender.u_multisignatures.includes(query.publicKey) ||
                     sender.multisignatures.includes(query.publicKey)) {
           const min = sender.u_multimin || sender.multimin

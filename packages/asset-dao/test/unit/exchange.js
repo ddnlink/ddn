@@ -38,7 +38,7 @@ export const Exchange = () => {
           // eslint-disable-next-line no-unused-expressions
           node.expect(body).to.have.property('success').to.be.true
 
-          if (body.account != null) {
+          if (body.account !== null) {
             account.address = body.account.address
             account.publicKey = body.account.publicKey
             account.balance = body.account.balance

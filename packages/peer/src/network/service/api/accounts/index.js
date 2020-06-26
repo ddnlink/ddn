@@ -181,26 +181,11 @@ class AccountService {
 
   async getTop (req) {
     const query = Object.assign({}, req.body, req.query)
-    const validateErrors = await this.ddnSchema.validate({
-      type: 'object',
-      properties: {
-        limit: {
-          type: 'integer',
-          minimum: 0,
-          maximum: 100
-        },
-        offset: {
-          type: 'integer',
-          minimum: 0
-        }
-      }
-    }, query)
-    if (validateErrors) {
-      throw new Error(`Invalid parameters: ${validateErrors[0].schemaPath} ${validateErrors[0].message}`)
-    }
+    const offset = Number(query.offset || 0)
+    const limit = Number(query.limit || 100)
 
-    if (!query.limit) {
-      query.limit = 100
+    if (Number.isNaN(limit) || Number.isNaN(offset)) {
+      throw new Error('Invalid parameters: limit or offset')
     }
 
     const queryResult = await this.runtime.account.getAccountList({

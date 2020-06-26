@@ -9,7 +9,7 @@ export default {
   reverse (diff) {
     const copyDiff = diff.slice()
     for (let i = 0; i < copyDiff.length; i++) {
-      const math = copyDiff[i][0] == '-' ? '+' : '-'
+      const math = copyDiff[i][0] === '-' ? '+' : '-'
       copyDiff[i] = math + copyDiff[i].slice(1)
     }
     return copyDiff
@@ -22,26 +22,26 @@ export default {
       const math = diff[i][0]
       const publicKey = diff[i].slice(1)
 
-      if (math == '+') {
+      if (math === '+') {
         res = res || []
 
         let index = -1
         if (res) {
           index = res.indexOf(publicKey)
         }
-        if (index != -1) {
+        if (index !== -1) {
           return false
         }
 
         res.push(publicKey)
       }
 
-      if (math == '-') {
+      if (math === '-') {
         let index = -1
         if (res) {
           index = res.indexOf(publicKey)
         }
-        if (index == -1) {
+        if (index === -1) {
           return false
         }
         res.splice(index, 1)

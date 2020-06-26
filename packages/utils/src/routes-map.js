@@ -6,7 +6,6 @@
 import fs from 'fs'
 
 // const chalk = require('chalk');
-// var debug = require('debug')('express-list-endpoints')
 const regexpExpressRegexp = /^\/\^\\\/(?:(:?[\w\\.-]*(?:\\\/:?[\w\\.-]*)*)|(\(\?:\(\[\^\\\/]\+\?\)\)))\\\/.*/
 const regexpExpressParam = /\(\?:\(\[\^\\\/]\+\?\)\)/g
 

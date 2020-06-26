@@ -37,12 +37,12 @@ describe('GET /blocks/getHeight', () => {
         debug('getHeight', JSON.stringify(body))
         node.expect(err).be.not.ok
         node.expect(body).to.have.property('success').to.be.true
-        if (body.success == true && body.height != null) {
+        if (body.success === true && body.height !== null) {
           node.expect(body).to.have.property('height')
           const result = DdnUtils.bignum.isGreaterThan(body.height, '0')
           node.expect(result).be.true
 
-          if (body.success == true) {
+          if (body.success === true) {
             block.blockHeight = body.height
             if (DdnUtils.bignum.isGreaterThan(body.height, 100)) {
               testBlocksUnder100 = true
@@ -62,12 +62,12 @@ describe('GET /blocks/getFee', () => {
       .set('Accept', 'application/json')
       .expect('Content-Type', /json/)
       .expect(200)
-      .end((err, {
+      .end((_err, {
         body
       }) => {
         debug('GET /blocks/getFee ', JSON.stringify(body))
         node.expect(body).to.have.property('success').to.be.true
-        if (body.success == true && body.fee != null) {
+        if (body.success === true && body.fee !== null) {
           node.expect(body).to.have.property('fee')
           // node.expect(body.fee).to.equal(node.Fees.transactionFee);
           const result = DdnUtils.bignum.isEqualTo(body.fee, node.Fees.transactionFee)
@@ -91,7 +91,7 @@ describe('GET /blocks/getFee', () => {
 //             .end(function (err, {body}) {
 //                 // debug(JSON.stringify(body));
 //                 node.expect(body).to.have.property("success").to.be.true;
-//                 if (body.success == true && body.nethash != null) {
+//                 if (body.success === true && body.nethash !== null) {
 //                     node.expect(body).to.have.property("nethash");
 //                     node.expect(body.nethash).to.equal(node.config.nethash);
 //                 } else {
@@ -111,12 +111,12 @@ describe('GET /blocks', () => {
       .set('Accept', 'application/json')
       .expect('Content-Type', /json/)
       .expect(200)
-      .end((err, {
+      .end((_err, {
         body
       }) => {
         // debug(JSON.stringify(body));
         node.expect(body).to.have.property('success').to.be.true
-        if (body.success == true && body.blocks != null) {
+        if (body.success === true && body.blocks !== null) {
           node.expect(body).to.have.property('blocks').that.is.an('array')
           node.expect(body).to.have.property('count').to.equal(1)
           node.expect(body.blocks.length).to.equal(1)
@@ -147,12 +147,12 @@ describe('GET /blocks', () => {
         .set('Accept', 'application/json')
         .expect('Content-Type', /json/)
         .expect(200)
-        .end((err, {
+        .end((_err, {
           body
         }) => {
           // debug(JSON.stringify(body));
           node.expect(body).to.have.property('success').to.be.true
-          if (body.success == true && body.blocks != null) {
+          if (body.success === true && body.blocks !== null) {
             node.expect(body).to.have.property('count')
             node.expect(body).to.have.property('blocks').that.is.an('array')
             node.expect(body.blocks.length).to.equal(1)
@@ -189,7 +189,7 @@ describe('GET /blocks', () => {
       .set('Accept', 'application/json')
       .expect('Content-Type', /json/)
       .expect(200)
-      .end((err, {
+      .end((_err, {
         body
       }) => {
         debug('generatorPublicKey', JSON.stringify(body))
@@ -211,7 +211,7 @@ describe('GET /blocks', () => {
       .set('Accept', 'application/json')
       .expect('Content-Type', /json/)
       .expect(200)
-      .end((err, {
+      .end((_err, {
         body
       }) => {
         debug('/blocks?totalFee ', JSON.stringify(body.blocks[0]))
@@ -234,7 +234,7 @@ describe('GET /blocks', () => {
       .set('Accept', 'application/json')
       .expect('Content-Type', /json/)
       .expect(200)
-      .end((err, {
+      .end((_err, {
         body
       }) => {
         // debug('/blocks?totalAmount ', JSON.stringify(body));
@@ -251,7 +251,7 @@ describe('GET /blocks', () => {
   })
 
   it('Using previousBlock. Should be ok', done => {
-    if (block.id != null) {
+    if (block.id !== null) {
       const previousBlock = block.id
       node.onNewBlock(err => {
         node.expect(err).to.be.not.ok
@@ -259,7 +259,7 @@ describe('GET /blocks', () => {
           .set('Accept', 'application/json')
           .expect('Content-Type', /json/)
           .expect(200)
-          .end((err, {
+          .end((_err, {
             body
           }) => {
             debug(`/blocks?previousBlock=${previousBlock}`, JSON.stringify(body))
@@ -280,14 +280,14 @@ describe('GET /blocks', () => {
       .set('Accept', 'application/json')
       .expect('Content-Type', /json/)
       .expect(200)
-      .end((err, {
+      .end((_err, {
         body
       }) => {
         // debug('orderBy', JSON.stringify(body));
         node.expect(body).to.have.property('success').to.be.true
         node.expect(body).to.have.property('blocks').that.is.an('array')
         for (let i = 0; i < body.blocks.length; i++) {
-          if (body.blocks[i + 1] != null) {
+          if (typeof body.blocks[i + 1] !== 'undefined') {
             const bRet = DdnUtils.bignum.isGreaterThanOrEqualTo(body.blocks[i].height, body.blocks[i + 1].height)
             node.expect(bRet).to.be.true
           }
@@ -306,7 +306,7 @@ describe('GET /blocks/get?id=', () => {
       .set('Accept', 'application/json')
       .expect('Content-Type', /json/)
       .expect(200)
-      .end((err, {
+      .end((_err, {
         body
       }) => {
         debug('GET /blocks/id', JSON.stringify(body))
@@ -325,7 +325,7 @@ describe('GET /blocks/get?id=', () => {
       .set('Accept', 'application/json')
       .expect('Content-Type', /json/)
       .expect(200)
-      .end((err, {
+      .end((_err, {
         body
       }) => {
         // debug(JSON.stringify(body));
@@ -340,7 +340,7 @@ describe('GET /blocks/get?id=', () => {
       .set('Accept', 'application/json')
       .expect('Content-Type', /json/)
       .expect(200)
-      .end((err, {
+      .end((_err, {
         body
       }) => {
         // debug(JSON.stringify(body));

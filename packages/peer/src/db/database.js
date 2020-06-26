@@ -35,7 +35,7 @@ class DBUtils {
   }
 
   static fnRandom () {
-    if (this.db_TYPE == 'mysql') {
+    if (this.db_TYPE === 'mysql') {
       return this.db_fn('RAND')
     } else {
       return this.db_fn('RANDOM')
@@ -47,7 +47,7 @@ class DBUtils {
      * @param {*} field 需要求和的字段名
      */
   static fnSum (field) {
-    if (this.db_TYPE == 'postgres') {
+    if (this.db_TYPE === 'postgres') {
       return this.db_fn('SUM', this.db_str('CAST(' + field + ' AS DECIMAL)'))
     } else {
       return this.db_fn('SUM', this.db_col(field))
@@ -59,7 +59,7 @@ class DBUtils {
      * @param {*} field
      */
   static fnGroupConcat (field) {
-    if (this.db_TYPE == 'postgres') {
+    if (this.db_TYPE === 'postgres') {
       return this.db_str('STRING_AGG(CAST(' + field + " AS VARCHAR), ',')")
     } else {
       return this.db_fn('GROUP_CONCAT', this.db_col(field))

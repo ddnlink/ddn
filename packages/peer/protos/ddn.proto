@@ -57,13 +57,12 @@ message Asset {
     AssetAOBAcl aobAcl = 12;
     AssetAOBIssue aobIssue = 13;
     AssetAOBTransfer aobTransfer = 14;
-    AssetMultitransfer output = 15;
-    AssetUserinfo userinfo = 16;
-    AssetEvidence evidence = 17;
-    AssetOrg org = 18;
-    AssetExchange exchange = 19;
-    DaoContribution daoContribution = 20;
-    DaoConfirmation daoConfirmation = 21;
+    AssetUserinfo userinfo = 15;
+    AssetEvidence evidence = 16;
+    DaoOrg daoOrg = 17;
+    DaoExchange daoExchange = 18;
+    DaoContribution daoContribution = 19;
+    DaoConfirmation daoConfirmation = 20;
   }
 }
 
@@ -153,15 +152,6 @@ message AssetAOBTransfer {
   required string amount = 2;
 }
 
-message Output {
-  required string recipientId = 1;
-  required string amount = 2;   //Bignum update int64
-}
-
-message AssetMultitransfer {
-  repeated Output outputs = 1;
-}
-
 message AssetUserinfo {
   required string username = 1;
 }
@@ -199,7 +189,7 @@ message BlockVoteSignature {
   required bytes sig = 2;
 }
 
-message AssetOrg {
+message DaoOrg {
   optional string address = 1;
   required string org_id = 2;
   optional string name = 3;
@@ -208,7 +198,7 @@ message AssetOrg {
   required int32 state = 6;
 }
 
-message AssetExchange {
+message DaoExchange {
   required string org_id = 1;
   required string exchange_trs_id = 2;
   required string sender_address = 3;

@@ -5,7 +5,7 @@ function resultHandler (cb) {
   return (err, res, body) => {
     if (err) {
       cb(`Request error: ${err}`)
-    } else if (res.statusCode != 200) {
+    } else if (res.statusCode !== 200) {
       let msg = `Unexpected status code: ${res.statusCode}`
       if (body.error) {
         msg += ', '

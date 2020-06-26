@@ -85,7 +85,7 @@ class Account {
   async initAccountsAndBalances () {
     const verify = this.config.loading.verifyOnLoading
     const count = await this.runtime.block.getCount()
-    if (verify || count == 1) {
+    if (verify || count === 1) {
       await this.repairAccounts(count, true)
     } else {
       await this.checkAccounts(count)
@@ -119,7 +119,7 @@ class Account {
         address = this.generateAddressByPublicKey(data.publicKey) // wxm block database
         delete data.isGenesis
       } else {
-        this.logger.debug('setAccount error and data is:', data)
+        this.logger.error('setAccount error and data is:', data)
         throw new Error('Missing address or public key in setAccount')
       }
     }
@@ -327,7 +327,7 @@ class Account {
       return new Promise((resolve, reject) => {
         this.dao.findPage('mem_account', null, limit, offset, false, ['address', 'balance'], null, (err, result) => {
           if (err) {
-            reject(`Failed to load native balances: ${err}`)
+            reject(new Error(`Failed to load native balances: ${err}`))
           } else {
             resolve(result)
           }
@@ -482,7 +482,7 @@ class Account {
               this.dao.count('mem_account', {
                 is_delegate: 1 // wxm block database
               }, async (err3, count3) => {
-                if (err3 || count3 == 0) {
+                if (err3 || count3 === 0) {
                   this.logger.error(err || 'No delegates, reload database')
                   this.logger.info('Failed to verify db integrity 3')
 
@@ -572,8 +572,8 @@ class Account {
                 update[value] = this.dao.db_str(`${value} ${DdnUtils.bignum.new(trueValue)}`)
               }
 
-              // DdnUtils.bignum update   if (trueValue !== 0 && value == "balance") {
-              if (!DdnUtils.bignum.isZero(trueValue) && value == 'balance') {
+              // DdnUtils.bignum update   if (trueValue !== 0 && value === "balance") {
+              if (!DdnUtils.bignum.isZero(trueValue) && value === 'balance') {
                 const mem_accounts2delegate = await new Promise((resolve, reject) => {
                   this.dao.findOne('mem_accounts2delegate', {
                     account_id: address // wxm block database
@@ -605,14 +605,14 @@ class Account {
 
               break
             case Array:
-              if (Object.prototype.toString.call(trueValue[0]) == '[object Object]') {
+              if (Object.prototype.toString.call(trueValue[0]) === '[object Object]') {
                 for (let i = 0; i < trueValue.length; i++) {
                   const val = trueValue[i]
-                  if (val.action == '-') {
+                  if (val.action === '-') {
                     delete val.action
                     remove_object[value] = remove_object[value] || []
                     remove_object[value].push(val)
-                  } else if (val.action == '+') {
+                  } else if (val.action === '+') {
                     delete val.action
                     insert_object[value] = insert_object[value] || []
                     insert_object[value].push(val)
@@ -626,11 +626,11 @@ class Account {
                 for (let i = 0; i < trueValue.length; i++) {
                   const math = trueValue[i][0]
                   let val = null
-                  if (math == '-') {
+                  if (math === '-') {
                     val = trueValue[i].slice(1)
                     remove[value] = remove[value] || []
                     remove[value].push(val)
-                  } else if (math == '+') {
+                  } else if (math === '+') {
                     val = trueValue[i].slice(1)
                     insert[value] = insert[value] || []
                     insert[value].push(val)
@@ -639,9 +639,9 @@ class Account {
                     insert[value] = insert[value] || []
                     insert[value].push(val)
                   }
-                  if (value == 'delegates') {
+                  if (value === 'delegates') {
                     const balanceField = 'balance'
-                    // if (math == '-') {
+                    // if (math === '-') {
                     //   balanceField = '-balance';
                     // }
                     const mem_account = await new Promise((resolve, reject) => {

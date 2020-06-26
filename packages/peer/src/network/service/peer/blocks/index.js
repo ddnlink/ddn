@@ -54,7 +54,7 @@ class PeerBlockService {
       }
     }, query)
     if (validateErrors) {
-      return { success: false, error: validateErrors[0].message }
+      return { success: false, error: `Invalid parameters: ${validateErrors[0].schemaPath} ${validateErrors[0].message}` }
     }
 
     let limit = 200
@@ -95,6 +95,11 @@ class PeerBlockService {
   }
 
   async getCommon (req) {
+    const query = req.query
+
+    query.max = Number(query.max)
+    query.min = Number(query.min)
+
     const validateErrors = await this.ddnSchema.validate({
       type: 'object',
       properties: {
@@ -110,12 +115,10 @@ class PeerBlockService {
         }
       },
       required: ['max', 'min', 'ids']
-    }, req.query)
+    }, query)
     if (validateErrors) {
-      return { success: false, error: validateErrors[0].message }
+      return { success: false, error: `Invalid parameters: ${validateErrors[0].schemaPath} ${validateErrors[0].message}` }
     }
-
-    const query = req.query
 
     const max = query.max
     const min = query.min
@@ -123,6 +126,7 @@ class PeerBlockService {
     const escapedIds = ids.map(id => `'${id}'`)
 
     if (!escapedIds.length) {
+      req.headers.port = Number(req.headers.port)
       const validateErrors = await this.ddnSchema.validate({
         type: 'object',
         properties: {

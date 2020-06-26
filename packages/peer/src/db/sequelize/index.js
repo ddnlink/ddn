@@ -26,8 +26,8 @@ class DAO {
       if (pos >= 0) {
         const name = fullName.substring(0, pos)
         const ext = fullName.substring(pos)
-        if (ext.toLowerCase() == '.js') {
-          if (name.toLowerCase() != 'index') {
+        if (ext.toLowerCase() === '.js') {
+          if (name.toLowerCase() !== 'index') {
             const defineModel = require('./models/' + name).default
             this._addModel(name, defineModel(connection))
           }

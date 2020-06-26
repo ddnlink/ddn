@@ -37,7 +37,7 @@ describe('Test second passphrase', () => {
         })
         .expect('Content-Type', /json/)
         .expect(200)
-        .end((err, { body }) => {
+        .end((_err, { body }) => {
           debug('no funds fail', JSON.stringify(body))
           node.expect(body).to.have.property('success').to.be.false
           done()
@@ -55,7 +55,7 @@ describe('Test second passphrase', () => {
         })
         .expect('Content-Type', /json/)
         .expect(200)
-        .end((err, { body }) => {
+        .end((_err, { body }) => {
           account.address = body.account.address
           debug('account', account)
           node.api.put('/transactions')
@@ -72,7 +72,7 @@ describe('Test second passphrase', () => {
             })
             .expect('Content-Type', /json/)
             .expect(200)
-            .end((err, { body }) => {
+            .end((_err, { body }) => {
               debug('Transfer DDN', JSON.stringify(body))
               node.expect(body).to.have.property('success').to.be.true
 
@@ -91,7 +91,7 @@ describe('Test second passphrase', () => {
                   })
                   .expect('Content-Type', /json/)
                   .expect(200)
-                  .end((err, { body }) => {
+                  .end((_err, { body }) => {
                     debug('has funds ok', body)
                     node.expect(body).to.have.property('success').to.be.true
                     done()
@@ -117,7 +117,7 @@ describe('Test second passphrase', () => {
         })
         .expect('Content-Type', /json/)
         .expect(200)
-        .end(async (err, { body }) => {
+        .end(async (_err, { body }) => {
           debug('open account2', JSON.stringify(body))
           account2.address = body.account.address
 
@@ -138,7 +138,7 @@ describe('Test second passphrase', () => {
         })
         .expect('Content-Type', /json/)
         .expect(200)
-        .end((err, { body }) => {
+        .end((_err, { body }) => {
           debug("doesn't have a second passphrase fail", JSON.stringify(body))
           node.expect(body).to.have.property('success').to.be.false
           // Sender account does not have a second signature
@@ -159,7 +159,7 @@ describe('Test second passphrase', () => {
         })
         .expect('Content-Type', /json/)
         .expect(200)
-        .end((err, { body }) => {
+        .end((_err, { body }) => {
           debug('blank second signature fail', JSON.stringify(transaction))
           debug('blank second signature fail', JSON.stringify(body))
           node.expect(body).to.have.property('success').to.be.false
@@ -181,7 +181,7 @@ describe('Test second passphrase', () => {
         })
         .expect('Content-Type', /json/)
         .expect(200)
-        .end((err, { body }) => {
+        .end((_err, { body }) => {
           debug('fake second signature fail', JSON.stringify(transaction))
           debug('fake second signature fail', JSON.stringify(body))
           node.expect(body).to.have.property('success').to.be.false
@@ -201,7 +201,7 @@ describe('Test second passphrase', () => {
         })
         .expect('Content-Type', /json/)
         .expect(200)
-        .end((err, { body }) => {
+        .end((_err, { body }) => {
           debug('valid second signature ok', JSON.stringify(transaction))
           debug('valid second signature ok', JSON.stringify(body))
           node.expect(body).to.have.property('success').to.be.true

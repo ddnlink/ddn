@@ -29,7 +29,7 @@ class Sandbox {
   }
 
   run (args) {
-    if (this._process == null) {
+    if (this._process === null) {
       let params = [this._sandboxVM, this._appPath]
       params = params.concat(args)
 
@@ -37,7 +37,7 @@ class Sandbox {
         cwd: this._appPath,
         stdio: ['pipe', 'pipe', 'pipe', 'ipc']
         // detached: false,
-        // shell: os.platform() == "win32" ? "cmd.exe" : "/bin/sh"
+        // shell: os.platform() === "win32" ? "cmd.exe" : "/bin/sh"
       })
 
       this._process.on('error', (err) => {
@@ -71,7 +71,7 @@ class Sandbox {
   }
 
   stop () {
-    if (this._process != null && !this._process.killed) {
+    if (this._process !== null && !this._process.killed) {
       try {
         this._process.disconnect()
       } catch (err) {

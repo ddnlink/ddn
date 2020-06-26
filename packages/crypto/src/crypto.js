@@ -95,7 +95,7 @@ async function getId (transaction) {
   return hash.toString('hex')
 }
 
-// 生成助记词 == node-sdk.crypto.generatePhasekey()
+// 生成助记词 === node-sdk.crypto.generatePhasekey()
 function generateSecret () {
   return new Mnemonic(Mnemonic.Words.ENGLISH).toString()
 }
@@ -122,7 +122,7 @@ function isAddress (address, tokenPrefix) {
   if (!base58check.decodeUnsafe(address.slice(1))) {
     return false
   }
-  if ([tokenPrefix].indexOf(address[0]) == -1) {
+  if ([tokenPrefix].indexOf(address[0]) === -1) {
     return false
   }
   return true

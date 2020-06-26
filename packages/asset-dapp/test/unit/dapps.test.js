@@ -45,7 +45,7 @@ beforeAll(done => {
       // debug(JSON.stringify(body));
       debug(`Opening Account 1 with password: ${Account1.password}`)
       node.expect(body).to.have.property('success').to.be.true
-      if (body.success == true && body.account != null) {
+      if (body.success === true && body.account !== null) {
         Account1.address = body.account.address
         Account1.publicKey = body.account.publicKey
         Account1.balance = body.account.balance
@@ -73,7 +73,7 @@ beforeAll(done => {
       // debug("register second password");
       debug(`Opening Account 2 with password: ${Account2.password}`)
       node.expect(body).to.have.property('success').to.be.true
-      if (body.success == true && body.account != null) {
+      if (body.success === true && body.account !== null) {
         Account2.address = body.account.address
         Account2.publicKey = body.account.publicKey
         Account2.balance = body.account.balance
@@ -101,7 +101,7 @@ beforeAll(done => {
       // debug(JSON.stringify(body));
       debug(`Opening Account 3 with password: ${Account3.password}`)
       node.expect(body).to.have.property('success').to.be.true
-      if (body.success == true && body.account != null) {
+      if (body.success === true && body.account !== null) {
         Account3.address = body.account.address
         Account3.publicKey = body.account.publicKey
         Account3.balance = body.account.balance
@@ -129,7 +129,7 @@ beforeAll(done => {
       // debug(JSON.stringify(body));
       debug(`Opening Account 4 with password: ${Account4.password}`)
       node.expect(body).to.have.property('success').to.be.true
-      if (body.success == true && body.account != null) {
+      if (body.success === true && body.account !== null) {
         Account4.address = body.account.address
         Account4.publicKey = body.account.publicKey
         Account4.balance = body.account.balance
@@ -157,7 +157,7 @@ beforeAll(done => {
       // debug(JSON.stringify(body));
       debug(`Opening Account 5 with password: ${Account5.password}`)
       node.expect(body).to.have.property('success').to.be.true
-      if (body.success == true && body.account != null) {
+      if (body.success === true && body.account !== null) {
         Account5.address = body.account.address
         Account5.publicKey = body.account.publicKey
         Account5.balance = body.account.balance
@@ -187,7 +187,7 @@ beforeAll(done => {
 
       // debug(JSON.stringify(body));
       node.expect(body).to.have.property('success').to.be.true
-      if (body.success == true && body.transactionId != null) {
+      if (body.success === true && body.transactionId !== null) {
         transactionCount += 1
         Account1.transactions.push(transactionCount)
         Account1.balance += randomCoin
@@ -215,7 +215,7 @@ beforeAll(done => {
       node.expect(err).be.not.ok
 
       node.expect(body).to.have.property('success').to.be.true
-      if (body.success == true && body.transactionId != null) {
+      if (body.success === true && body.transactionId !== null) {
         Account2.transactions.push(transactionCount)
         transactionCount += 1
 
@@ -698,9 +698,9 @@ describe('GET /dapps', () => {
         node.expect(body).to.have.property('result')
         node.expect(body.result).to.have.property('rows').that.is.an('array')
         const dapps = body.result.rows
-        if (dapps[0] != null) {
+        if (dapps[0] !== null) {
           for (let i = 0; i < dapps.length; i++) {
-            if (dapps[i + 1] != null) {
+            if (dapps[i + 1] !== null) {
               node.expect(dapps[i].category).to.be.at.most(dapps[i + 1].category)
             }
           }
@@ -721,9 +721,9 @@ describe('GET /dapps', () => {
         node.expect(body).to.have.property('result')
         node.expect(body.result).to.have.property('rows').that.is.an('array')
         const dapps = body.result.rows
-        if (dapps[0] != null) {
+        if (dapps[0] !== null) {
           for (let i = 0; i < dapps.length; i++) {
-            if (dapps[i + 1] != null) {
+            if (dapps[i + 1] !== null) {
               node.expect(dapps[i].category).to.be.at.least(dapps[i + 1].category)
             }
           }
@@ -770,7 +770,7 @@ describe('GET /dapps', () => {
   it('Using name. Should be ok', done => {
     let name = ''
 
-    if (Dapp != {} && Dapp != null) {
+    if (Dapp !== {} && Dapp !== null) {
       name = Dapp.name
     } else {
       name = 'test'
@@ -782,7 +782,7 @@ describe('GET /dapps', () => {
       .expect(200)
       .end((_err, { body }) => {
         // debug(JSON.stringify(body));
-        if (name == 'test') {
+        if (name === 'test') {
           node.expect(body).to.have.property('success')
         } else {
           node.expect(body).to.have.property('success').to.be.true
@@ -809,7 +809,7 @@ describe('GET /dapps', () => {
         node.expect(body.result).to.have.property('rows').that.is.an('array')
         const dapps = body.result.rows
         for (let i = 0; i < dapps.length; i++) {
-          if (dapps[i] != null) {
+          if (dapps[i] !== null) {
             node.expect(dapps[i].type).to.equal(type)
           }
         }
@@ -848,7 +848,7 @@ describe('GET /dapps', () => {
   //             node.expect(body).to.have.property("result");
   //             node.expect(body.result).to.have.property("rows").that.is.an("array");
   //             const dapps = body.result.rows;
-  //             if (dapps[1] != null) {
+  //             if (dapps[1] !== null) {
   //                 secondDapp = dapps[1];
   //                 debug("offset", offset);
   //                 node.api.get(`/dapps?offset=${offset}`)
@@ -907,7 +907,7 @@ describe('GET /dapps', () => {
 //                 debug('GET /dapps?id= 01', JSON.stringify(body));
 //                 node.expect(body).to.have.property("success").to.be.true;
 //                 node.expect(body).to.have.property("dapp");
-//                 if (body.success == true && body.dapp != null) {
+//                 if (body.success === true && body.dapp !== null) {
 //                     node.expect(body.dapp.transactionId).to.equal(dappId);
 //                 } else {
 //                     // debug(JSON.stringify(body));
@@ -1010,8 +1010,8 @@ describe('GET /dapps/installed', () => {
         node.expect(body.result).to.have.property('rows').that.is.an('array')
         const dapps = body.result.rows
         for (let i = 0; i < dapps.length; i++) {
-          if (dapps[i] != null) {
-            if (dapps[i].transactionId == DappToInstall.transactionId) {
+          if (dapps[i] !== null) {
+            if (dapps[i].transactionId === DappToInstall.transactionId) {
               flag += 1
             }
           }
@@ -1034,8 +1034,8 @@ describe('GET /dapps/installedIds', () => {
         node.expect(body).to.have.property('success').to.be.true
         node.expect(body).to.have.property('ids').that.is.an('array')
         for (let i = 0; i < body.ids.length; i++) {
-          if (body.ids[i] != null) {
-            if (body.ids[i] == DappToInstall.transactionId) {
+          if (body.ids[i] !== null) {
+            if (body.ids[i] === DappToInstall.transactionId) {
               flag += 1
             }
           }
@@ -1158,8 +1158,8 @@ describe('POST /dapps/launch', () => {
             node.expect(body).to.have.property('launched').that.is.an('array')
             let flag = 0
             for (let i = 0; i < body.launched.length; i++) {
-              if (body.launched[i] != null) {
-                if (body.launched[i] == dappId) {
+              if (body.launched[i] !== null) {
+                if (body.launched[i] === dappId) {
                   flag += 1
                 }
               }

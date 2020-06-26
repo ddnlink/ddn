@@ -278,7 +278,7 @@ class Transaction {
   }
 
   async applyUnconfirmed (trs, sender, dbTrans) {
-    if (!sender && trs.block_id != this.genesisblock.id) { // wxm block database
+    if (!sender && trs.block_id !== this.genesisblock.id) { // wxm block database
       throw new Error('Invalid block id')
     } else {
       let requester = null
@@ -294,7 +294,7 @@ class Transaction {
       }
 
       if (!trs.requester_public_key && sender.second_signature && !DdnUtils.bignum.isEqualTo(sender.second_signature, 0) &&
-                !trs.sign_signature && trs.block_id != this.genesisblock.id) { // wxm block database
+                !trs.sign_signature && trs.block_id !== this.genesisblock.id) { // wxm block database
         throw new Error(`Failed second signature: ${trs.id}`)
       }
 
@@ -318,7 +318,7 @@ class Transaction {
       }
 
       const amount = DdnUtils.bignum.plus(trs.amount, trs.fee)
-      if (DdnUtils.bignum.isLessThan(sender.u_balance, amount) && trs.block_id != this.genesisblock.id) { // wxm block database
+      if (DdnUtils.bignum.isLessThan(sender.u_balance, amount) && trs.block_id !== this.genesisblock.id) { // wxm block database
         throw new Error(`Insufficient balance: ${sender.address}`)
       }
 
@@ -362,14 +362,14 @@ class Transaction {
       throw new Error(`Transaction is not ready: ${trs.id}`)
     }
 
-    // wxm 这个逻辑应该去掉，不应该这么使用序号特殊处理，如果必须，应该是用assetTypes.type枚举 FIXME: 2020.5
+    // todo: 2020.6.25 特殊 asset 的处理
     if (trs.type === DdnUtils.assetTypes.DAPP_OUT) {
       return this._assets.call(trs.type, 'apply', trs, block, sender)
     }
 
     const amount = DdnUtils.bignum.plus(trs.amount, trs.fee)
 
-    if (trs.block_id != this.genesisblock.id && DdnUtils.bignum.isLessThan(sender.balance, amount)) { // wxm block database
+    if (trs.block_id !== this.genesisblock.id && DdnUtils.bignum.isLessThan(sender.balance, amount)) { // wxm block database
       throw new Error(`Insufficient balance: ${sender.balance}`)
     }
 
@@ -379,11 +379,12 @@ class Transaction {
       round: await this.runtime.round.calc(block.height)
     }, dbTrans)
     const newSender = Object.assign({}, sender, accountInfo) // wxm block database
+
     await this._assets.call(trs.type, 'apply', trs, block, newSender, dbTrans)
   }
 
   async removeUnconfirmedTransaction (id) {
-    if (this._unconfirmedTransactionsIdIndex[id] == undefined) {
+    if (this._unconfirmedTransactionsIdIndex[id] === undefined) {
       return
     }
     const index = this._unconfirmedTransactionsIdIndex[id]
@@ -426,7 +427,7 @@ class Transaction {
       throw new Error('Invalid transaction id')
     }
 
-    if (trs.id && trs.id != txId) {
+    if (trs.id && trs.id !== txId) {
       // FIXME: 这里没有要求从Asset插件端传ID，不然会出错，请确认
       throw new Error('Incorrect transaction id')
     } else {
@@ -463,11 +464,11 @@ class Transaction {
       }, (err, count) => {
         if (err) {
           this.logger.error('Database error')
-          return reject('Database error')
+          return reject(new Error('Database error'))
         }
 
         if (count) {
-          return reject('Ignoring already confirmed transaction')
+          return reject(new Error('Ignoring already confirmed transaction'))
         }
 
         resolve(trs)
@@ -610,7 +611,7 @@ class Transaction {
         throw new Error('Failed toverify requester multi signatures 4')
       }
 
-      if (sender.publicKey != trs.senderPublicKey) {
+      if (sender.publicKey !== trs.senderPublicKey) {
         throw new Error('Invalid public key')
       }
     }
@@ -632,7 +633,7 @@ class Transaction {
       throw new Error('Failed to verify requester or sender signature, 5')
     }
 
-    if (trs.nethash && trs.nethash != this.config.nethash) {
+    if (trs.nethash && trs.nethash !== this.config.nethash) {
       throw new Error('Failed to verify nethash')
     }
 
@@ -656,13 +657,13 @@ class Transaction {
         return p
       }, [])
 
-      if (signatures.length != trs.signatures.length) {
+      if (signatures.length !== trs.signatures.length) {
         throw new Error('Encountered duplicate signatures')
       }
     }
 
     let multisignatures = sender.multisignatures || sender.u_multisignatures
-    if (multisignatures.length == 0) {
+    if (multisignatures.length === 0) {
       if (trs.asset && trs.asset.multisignature && trs.asset.multisignature.keysgroup) {
         multisignatures = trs.asset.multisignature.keysgroup.map(key => key.slice(1))
       }
@@ -679,7 +680,7 @@ class Transaction {
         let verify = false
 
         for (let s = 0; s < multisignatures.length; s++) {
-          if (trs.requester_public_key && multisignatures[s] == trs.requester_public_key) {
+          if (trs.requester_public_key && multisignatures[s] === trs.requester_public_key) {
             continue
           }
 
@@ -695,7 +696,7 @@ class Transaction {
     }
 
     // Check sender
-    if (trs.senderId != sender.address) { // wxm block database
+    if (trs.senderId !== sender.address) { // wxm block database
       throw new Error(`Invalid sender id: ${trs.id}`)
     }
 

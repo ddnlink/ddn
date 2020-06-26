@@ -71,7 +71,7 @@ class InTransfer extends Asset.Base {
     }
 
     const currency = inTransfer.currency
-    if (currency != this.constants.tokenName) {
+    if (currency !== this.constants.tokenName) {
       const aobAssetInst = await this.getAssetInstanceByName('AobAsset')
       const aobAssetResult = await aobAssetInst.queryAsset({ name: currency }, null, false, 1, 1)
       if (aobAssetResult.length <= 0) {
@@ -79,21 +79,21 @@ class InTransfer extends Asset.Base {
       }
 
       const aobAssetDetail = aobAssetResult[0]
-      if (aobAssetDetail.writeoff == '1') {
+      if (aobAssetDetail.writeoff === '1') {
         throw new Error('Asset already writeoff')
       }
 
-      if (aobAssetDetail.allow_whitelist == '1' || aobAssetDetail.allow_blacklist == '1') {
+      if (aobAssetDetail.allow_whitelist === '1' || aobAssetDetail.allow_blacklist === '1') {
         const aobTransferInst = await this.getAssetInstanceByName('AobTransfer')
         if (await aobTransferInst.isInBlackList(currency, sender.address)) {
           throw new Error('Permission not allowed')
         }
 
         // wxm TODO Aob中需增加isInBlackList方法
-        // const aclTable = assetDetail.acl == 0 ? 'acl_black' : 'acl_white';
+        // const aclTable = assetDetail.acl === 0 ? 'acl_black' : 'acl_white';
         // library.model.checkAcl(aclTable, currency, sender.address, null, (err, isInList) => {
         //     if (err) return cb(`Database error when query acl: ${err}`);
-        //     if ((assetDetail.acl == 0) == isInList) return cb('Permission not allowed')
+        //     if ((assetDetail.acl === 0) === isInList) return cb('Permission not allowed')
         //     cb()
         // })
       }
@@ -188,7 +188,7 @@ class InTransfer extends Asset.Base {
 
   async applyUnconfirmed (trs, sender) {
     const transfer = await this.getAssetObject(trs)
-    if (transfer.currency != this.constants.tokenName) {
+    if (transfer.currency !== this.constants.tokenName) {
       const balance = this.balanceCache.getAssetBalance(sender.address, transfer.currency) || 0
       const surplus = DdnUtils.bignum.minus(balance, transfer.amount)
       if (DdnUtils.bignum.isLessThan(surplus, 0)) {
@@ -200,7 +200,7 @@ class InTransfer extends Asset.Base {
 
   async undoUnconfirmed (trs, sender) {
     const transfer = await this.getAssetObject(trs)
-    if (transfer.currency != this.constants.tokenName) {
+    if (transfer.currency !== this.constants.tokenName) {
       this.balanceCache.addAssetBalance(sender.address, transfer.currency, transfer.amount)
     }
   }

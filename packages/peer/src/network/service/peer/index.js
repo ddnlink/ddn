@@ -101,7 +101,7 @@ class PeerService {
       }
     }
 
-    if (peerIp == '127.0.0.1' || peerIp == this.config.publicIp) {
+    if (peerIp === '127.0.0.1' || peerIp === this.config.publicIp) {
       return next()
     }
 

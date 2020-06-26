@@ -20,9 +20,10 @@
   "command": {
     "publish": {
       "ignoreChanges": ["ignored-file", "*.md"],
-      "message": "chore(release): publish %s"
-    },
-    "git-tag-version": false
+      "message": "chore(release): publish %s",
+      "git-tag-version": false,
+      "push": false
+    }
   },
   "useWorkspaces": true,
   "npmClient": "yarn"

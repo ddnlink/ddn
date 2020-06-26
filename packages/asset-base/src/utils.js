@@ -76,7 +76,7 @@ class AssetUtils {
     for (let i = 0; i < subNames.length; i++) {
       const sn = subNames[i]
       if (sn && !/^\s*$/.test(sn)) {
-        if (i == 0) {
+        if (i === 0) {
           const camelSN = sn.substring(0, 1).toLowerCase() + sn.substring(1)
           result += camelSN
         } else {

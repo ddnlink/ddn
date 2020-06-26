@@ -38,7 +38,7 @@ class Flags extends Asset.Base {
     const issuerInfo = queryResult2[0]
 
     // 资产发行商才有权限
-    if (issuerInfo.issuer_id != sender.address) {
+    if (issuerInfo.issuer_id !== sender.address) {
       throw new Error('Permission not allowed')
     }
 
@@ -48,26 +48,26 @@ class Flags extends Asset.Base {
     }
 
     // 是否允许注销(0:否，1:是)，配合flag_type (1:黑白名单设置，2:注销设置)
-    if (assetInfo.allow_writeoff == '0' && flagsObj.flag_type == 2) {
+    if (assetInfo.allow_writeoff === '0' && flagsObj.flag_type === 2) {
       throw new Error('Writeoff not allowed')
     }
 
     // 是否允许启用白名单(0:否，1:是)
-    if (assetInfo.allow_whitelist == '0' && flagsObj.flag_type == 1 && flagsObj.flag == 1) {
+    if (assetInfo.allow_whitelist === '0' && flagsObj.flag_type === 1 && flagsObj.flag === 1) {
       throw new Error('Whitelist not allowed')
     }
 
     // 是否允许启用黑名单(0:否，1:是)
-    if (assetInfo.allow_blacklist == '0' && flagsObj.flag_type == 1 && flagsObj.flag == 0) {
+    if (assetInfo.allow_blacklist === '0' && flagsObj.flag_type === 1 && flagsObj.flag === 0) {
       throw new Error('Blacklist not allowed')
     }
 
-    if (flagsObj.flag_type == 1) { // acl
-      if (assetInfo.acl == flagsObj.flag) {
+    if (flagsObj.flag_type === 1) { // acl
+      if (assetInfo.acl === flagsObj.flag) {
         throw new Error('Flag acl double set')
       }
-    } else if (flagsObj.flag_type == 2) { // writeoff
-      if (assetInfo.writeoff == flagsObj.flag) {
+    } else if (flagsObj.flag_type === 2) { // writeoff
+      if (assetInfo.writeoff === flagsObj.flag) {
         throw new Error('Flag writeoff double set')
       }
     }
@@ -95,10 +95,10 @@ class Flags extends Asset.Base {
     const flagsObj = await this.getAssetObject(trs)
 
     var updateObj = {}
-    if (flagsObj.flag_type == 1) // acl
+    if (flagsObj.flag_type === 1) // acl
     {
       updateObj.acl = flagsObj.flag
-    } else if (flagsObj.flag_type == 2) { // writeoff
+    } else if (flagsObj.flag_type === 2) { // writeoff
       updateObj.writeoff = flagsObj.flag
     }
 
@@ -110,10 +110,10 @@ class Flags extends Asset.Base {
     const flagsObj = await this.getAssetObject(trs)
 
     var updateObj = {}
-    if (flagsObj.flag_type == 1) // acl
+    if (flagsObj.flag_type === 1) // acl
     {
       updateObj.acl = flagsObj.flag ^ 1
-    } else if (flagsObj.flag_type == 2) { // writeoff
+    } else if (flagsObj.flag_type === 2) { // writeoff
       updateObj.writeoff = flagsObj.flag ^ 1
     }
 

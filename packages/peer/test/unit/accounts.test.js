@@ -32,7 +32,7 @@ describe('POST /accounts/open', () => {
       })
       .expect('Content-Type', /json/)
       .expect(200)
-      .end((err, { body }) => {
+      .end((_err, { body }) => {
         debug('payload', body)
         node.expect(body).to.have.property('success').to.be.false
         node.expect(body).to.have.property('error').to.equal('request entity too large')
@@ -77,7 +77,7 @@ describe('GET /accounts/count', () => {
       .set('Accept', 'application/json')
       .expect('Content-Type', /json/)
       .expect(200)
-      .end((err, { body }) => {
+      .end((_err, { body }) => {
         //   console.log(JSON.stringify(res.body));
         node.expect(body).to.have.property('success').to.be.true
         node.expect(body).to.have.property('count')
@@ -93,7 +93,7 @@ describe('GET /accounts/top', () => {
       .set('Accept', 'application/json')
       .expect('Content-Type', /json/)
       .expect(200)
-      .end((err, { body }) => {
+      .end((_err, { body }) => {
         // console.log(JSON.stringify(res.body));
         node.expect(body).to.have.property('success').to.be.true
         node.expect(body).to.have.property('accounts').that.is.an('Array')
@@ -109,7 +109,7 @@ describe('GET /accounts/getBalance', () => {
       .set('Accept', 'application/json')
       .expect('Content-Type', /json/)
       .expect(200)
-      .end((err, { body }) => {
+      .end((_err, { body }) => {
         // console.log(JSON.stringify(res.body));
         node.expect(body).to.have.property('success').to.be.true
         node.expect(body).to.have.property('balance')
@@ -123,7 +123,7 @@ describe('GET /accounts/getBalance', () => {
       .set('Accept', 'application/json')
       .expect('Content-Type', /json/)
       .expect(200)
-      .end((err, { body }) => {
+      .end((_err, { body }) => {
         node.expect(body).to.have.property('success').to.be.false
         node.expect(body).to.have.property('error')
         done()
@@ -135,7 +135,7 @@ describe('GET /accounts/getBalance', () => {
       .set('Accept', 'application/json')
       .expect('Content-Type', /json/)
       .expect(200)
-      .end((err, { body }) => {
+      .end((_err, { body }) => {
         node.expect(body).to.have.property('success').to.be.false
         node.expect(body).to.have.property('error')
         done()
@@ -164,7 +164,7 @@ describe('GET /accounts/getPublicKey', () => {
       .set('Accept', 'application/json')
       .expect('Content-Type', /json/)
       .expect(200)
-      .end((err, { body }) => {
+      .end((_err, { body }) => {
         debug('GET /accounts/getPublicKey 2', body)
         node.expect(body).to.have.property('success').to.be.false
         node.expect(body).to.have.property('error')
@@ -177,7 +177,7 @@ describe('GET /accounts/getPublicKey', () => {
       .set('Accept', 'application/json')
       .expect('Content-Type', /json/)
       .expect(200)
-      .end((err, { body }) => {
+      .end((_err, { body }) => {
         debug('GET /accounts/getPublicKey 3', body)
         node.expect(body).to.have.property('success').to.be.false
         node.expect(body).to.have.property('error')
@@ -194,7 +194,7 @@ describe('GET /accounts/getPublicKey', () => {
       })
       .expect('Content-Type', /json/)
       .expect(200)
-      .end((err, { body }) => {
+      .end((_err, { body }) => {
         debug('post /accounts/generatePublicKey', body)
 
         node.expect(body).to.have.property('success').to.be.true
@@ -214,7 +214,7 @@ describe('POST /accounts/generatePublicKey', () => {
       })
       .expect('Content-Type', /json/)
       .expect(200)
-      .end((err, { body }) => {
+      .end((_err, { body }) => {
         // console.log(JSON.stringify(res.body));
         node.expect(body).to.have.property('success').to.be.false
         node.expect(body).to.have.property('error')
@@ -229,7 +229,7 @@ describe('POST /accounts/generatePublicKey', () => {
       .send({})
       .expect('Content-Type', /json/)
       .expect(200)
-      .end((err, { body }) => {
+      .end((_err, { body }) => {
         // console.log(JSON.stringify(res.body));
         node.expect(body).to.have.property('success').to.be.false
         node.expect(body).to.have.property('error')
@@ -244,7 +244,7 @@ describe('POST /accounts/generatePublicKey', () => {
       .send('{"invalid"}')
       .expect('Content-Type', /json/)
       .expect(200)
-      .end((err, { body }) => {
+      .end((_err, { body }) => {
         // console.log(JSON.stringify(res.body));
         node.expect(body).to.have.property('success').to.be.false
         node.expect(body).to.have.property('error')
@@ -260,7 +260,7 @@ describe('GET /accounts?address=', () => {
       .set('Accept', 'application/json')
       .expect('Content-Type', /json/)
       .expect(200)
-      .end((err, { body }) => {
+      .end((_err, { body }) => {
         // console.log(JSON.stringify(res.body));
         node.expect(body).to.have.property('success').to.be.true
         node.expect(body).to.have.property('account').that.is.an('object')
@@ -276,7 +276,7 @@ describe('GET /accounts?address=', () => {
       .set('Accept', 'application/json')
       .expect('Content-Type', /json/)
       .expect(200)
-      .end((err, { body }) => {
+      .end((_err, { body }) => {
         // console.log(JSON.stringify(res.body));
         node.expect(body).to.have.property('success').to.be.false
         node.expect(body).to.have.property('error')
@@ -290,7 +290,7 @@ describe('GET /accounts?address=', () => {
       .set('Accept', 'application/json')
       .expect('Content-Type', /json/)
       .expect(200)
-      .end((err, { body }) => {
+      .end((_err, { body }) => {
         // console.log(JSON.stringify(res.body));
         node.expect(body).to.have.property('success').to.be.false
         node.expect(body).to.have.property('error')

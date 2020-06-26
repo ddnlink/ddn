@@ -56,9 +56,9 @@ class DdnSchema {
         if (pos >= 0) {
           const ext = item.substring(pos)
           // TODO: 2020.4.23 这里写死了只能是 `.js` 文件, 因为下面使用的`require`方法。如果编译使用，源文件可以是其他格式，注意优化调整
-          if (ext.toLowerCase() == '.js') {
+          if (ext.toLowerCase() === '.js') {
             const extFormat = global._require_runtime_(itemPath)
-            if (extFormat != null &&
+            if (extFormat !== null &&
                             typeof (extFormat.name) === 'string' &&
                             typeof (extFormat.validate) === 'function') {
               this._ajv.addFormat(extFormat.name, extFormat.validate)

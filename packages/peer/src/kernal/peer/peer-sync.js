@@ -23,7 +23,7 @@ class PeerSync {
 
   async trySyncBlockData () {
     let remotePeerHeight = await this.runtime.peer.request({ api: '/height' })
-    if (remotePeerHeight == false) {
+    if (remotePeerHeight === false) {
       return false
     }
 
@@ -48,7 +48,7 @@ class PeerSync {
       if (DdnUtils.bignum.isLessThan(this.runtime.block.getLastBlock().height, remotePeerHeight.body.height)) {
         let syncLastBlock = null
         const lastBlock = this.runtime.block.getLastBlock()
-        if (lastBlock.id != this.genesisblock.id) {
+        if (lastBlock.id !== this.genesisblock.id) {
           syncLastBlock = await this._addLackBlocks(remotePeerHeight.peer)
         } else {
           syncLastBlock = await this._cloneBlocksFromPeer(remotePeerHeight.peer, lastBlock.id)
@@ -57,7 +57,7 @@ class PeerSync {
         if (syncLastBlock) {
           remotePeerHeight = await this.runtime.peer.request({ api: '/height' })
           if (remotePeerHeight && remotePeerHeight.body &&
-                        syncLastBlock.height == remotePeerHeight.body.height) {
+                        syncLastBlock.height === remotePeerHeight.body.height) {
             return true
           } else {
             return false
@@ -167,14 +167,14 @@ class PeerSync {
     }
 
     // rollback blocks
-    if (lastLackBlock.id != lastBlock.id) {
+    if (lastLackBlock.id !== lastBlock.id) {
       try {
         const currentRound = await this.runtime.round.calc(lastBlock.height)
         const backRound = await this.runtime.round.calc(lastLackBlock.height)
         let backHeight = lastLackBlock.height
 
-        if (currentRound != backRound || DdnUtils.bignum.isEqualTo(DdnUtils.bignum.modulo(lastBlock.height, this.config.settings.delegateNumber), 0)) {
-          if (backRound == 1) {
+        if (currentRound !== backRound || DdnUtils.bignum.isEqualTo(DdnUtils.bignum.modulo(lastBlock.height, this.config.settings.delegateNumber), 0)) {
+          if (backRound === 1) {
             backHeight = 1
           } else {
             // DdnUtils.bignum update backHeight = backHeight - backHeight % 101;
@@ -222,7 +222,7 @@ class PeerSync {
 
   async _cloneBlocksFromPeer (peer, blockId) {
     const peerStr = peer ? `${ip.fromLong(peer.ip)}:${peer.port}` : 'unknown'
-    if (blockId == this.genesisblock.id) {
+    if (blockId === this.genesisblock.id) {
       this.logger.debug(`Loading blocks from genesis from ${peerStr}`)
     }
 
@@ -249,7 +249,7 @@ class PeerSync {
 
       // add two new field: trs.args and trs.message
       // This code is for compatible with old nodes
-      if (blocks[0] && blocks[0].length == 63) {
+      if (blocks[0] && blocks[0].length === 63) {
         blocks.forEach(b => {
           for (var i = 80; i >= 25; --i) {
             b[i] = b[i - 2]
@@ -273,7 +273,7 @@ class PeerSync {
       // wxm block databsae
       // blocks = blocks.map(row2parsed, parseFields(privated.blocksDataFields));
       blocks = await this.runtime.block._parseObjectFromFullBlocksData(blocks)
-      if (blocks.length == 0) {
+      if (blocks.length === 0) {
         break
       } else {
         this.logger.log(`Loading ${blocks.length} blocks from`, peerStr)
@@ -318,7 +318,7 @@ class PeerSync {
       return
     }
 
-    if (data == false) {
+    if (data === false) {
       return
     }
 
@@ -373,7 +373,7 @@ class PeerSync {
       return
     }
 
-    if (data == false) {
+    if (data === false) {
       return
     }
 

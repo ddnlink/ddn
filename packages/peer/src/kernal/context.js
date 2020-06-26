@@ -2,6 +2,8 @@
  * 运行时上下文
  * wangxm   2018-12-25
  */
+import path from 'path'
+import fs from 'fs'
 import DdnUtils from '@ddn/utils'
 import Asset from '@ddn/asset-base'
 import Bus from '../lib/bus'
@@ -28,7 +30,7 @@ class Context {
     // 系统配置JSON对象
     this.config = options.configObject
 
-    // 区块链基本配置
+    // 区块链基本常量配置
     this.constants = constants
 
     // 地址操作 常用操作和常量放在上下文
@@ -54,10 +56,14 @@ class Context {
     // 资产插件配置对象
     this.assetPlugins = Asset.Utils.loadFromObject(options.configObject.assets)
 
-    // console.log('this.assetPlugins= ', this.assetPlugins.isTypeValueExists(40));
-
     // 二进制序列化对象
-    this.protobuf = await this._buildProtobuf(options.protoFile)
+    const protoFile = path.resolve(__dirname, '../..', 'protos', 'ddn.proto')
+    if (!fs.existsSync(protoFile)) {
+      console.error('Failed: DDN proto file does not exists.')
+      process.exit(1)
+    }
+
+    this.protobuf = await this._buildProtobuf(protoFile)
 
     this.sequence = new Sequence({
       name: 'normal',
