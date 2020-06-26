@@ -17,7 +17,7 @@ A next generation blockchain system
 
 <p align="center">
   <a href="/README-en.md">English</a> •
-  <a href="/README-zhcn.md">简体中文 (Simplified Chinese)</a> •
+  <a href="/README-zh-CN.md">简体中文 (Simplified Chinese)</a> •
 </p>
 
 
