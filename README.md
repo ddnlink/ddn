@@ -1,9 +1,9 @@
 <h1 align="center">
-  <a href="https://ddn.link"><img src="https://avatars3.githubusercontent.com/u/34602359?s=200&v=4" alt="Standard - JavaScript Style Guide" width="200"></a>
+  <a href="https://ddn.link"><img src="https://avatars3.githubusercontent.com/u/34602359?s=200&v=4" alt="DDN Blockchain" width="200"></a>
   <br>
   Data Delivery Network
   <br>
-A next generation blockchain system
+  <span style="font-size: 16px;">A next generation blockchain system</span>
   <br>
 </h1>
 

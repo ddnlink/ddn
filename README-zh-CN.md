@@ -1,9 +1,9 @@
 <h1 align="center">
-  <a href="https://ddn.link"><img src="https://avatars3.githubusercontent.com/u/34602359?s=200&v=4" alt="Standard - JavaScript Style Guide" width="200"></a>
+  <a href="https://ddn.link"><img src="https://avatars3.githubusercontent.com/u/34602359?s=200&v=4" alt="DDN Blockchain" width="200"></a>
   <br>
   数据分发网络
   <br>
-  新一代区块链系统
+  <span style="font-size: 16px;">新一代区块链系统</span>
   <br>
 </h1>
 
