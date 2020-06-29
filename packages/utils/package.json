@@ -16,7 +16,6 @@
     "lib"
   ],
   "dependencies": {
-    "@ddn/crypto": "^0.2.5",
     "bignumber.js": "^7.2.1",
     "depd": "^2.0.0",
     "ip": "^1.1.5",
