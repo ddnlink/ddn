@@ -2,15 +2,15 @@
 import Debug from 'debug'
 import DdnUtils from '@ddn/utils'
 
-import ddn from '../../lib'
-import node from '../../lib/test'
-// const Buffer = Buffer.Buffer;
+import DdnJS from '../ddn-js'
+const Tester = DdnUtils.Tester
+
 const debug = Debug('evidence')
 
-const expect = node.expect
+const expect = Tester.expect
 
 describe('DDN evidence.js', () => {
-  const evidence = ddn.evidence
+  const evidence = DdnJS.evidence
 
   it('should be object', () => {
     expect(evidence).that.is.an('object')
@@ -107,7 +107,7 @@ describe('DDN evidence.js', () => {
       })
 
       it('should be signed correctly', (done) => {
-        const result = ddn.crypto.verify(trs)
+        const result = DdnJS.crypto.verify(trs)
         expect(result).be.ok
         done()
       })

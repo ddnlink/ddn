@@ -12,10 +12,12 @@ import supertest from 'supertest'
 import async from 'async'
 import request from 'request'
 import bluebird from 'bluebird'
-import DdnUtils from '@ddn/utils'
+import assetTypes from '../asset-types'
+import bignum from '../bignumber'
+
 import DdnCrypto from '@ddn/crypto'
+import DdnCore from '@ddn/core'
 import { getConfigFile, requireFile } from '@ddn/core/lib/getUserConfig'
-import ddn from '../../lib'
 
 import {
   randomProperty,
@@ -42,10 +44,6 @@ import {
 // TODO 包的整理规划需要进一步明确原则，根据通用性确定是否写成npm包
 import { DappCategory, DappType } from '@ddn/asset-dapp'
 
-import Constants from '../constants'
-
-const { bignum } = DdnUtils
-
 // Node configuration
 const baseDir = path.resolve(process.cwd(), './examples/fun-tests')
 const configFile = getConfigFile(baseDir)
@@ -61,8 +59,8 @@ const blockTimePlus = 12000 // Block time + 2 seconds in miliseconds
 const version = '2.0.0' // peer version
 
 // 简化常量调用
-const constants = Constants
-constants.net = Constants[config.net]
+const constants = DdnCore.constants
+constants.net = constants[config.net]
 
 // Holds Fee amounts for different transaction types
 const Fees = {
@@ -277,14 +275,10 @@ function getRealTime (epochTime) {
   return t + epochTime * 1000
 }
 
-// 初始化
-ddn.init()
-
 export default {
   api,
   chai,
   peer,
-  ddn,
   supertest,
   expect,
   version,
@@ -295,7 +289,7 @@ export default {
 
   // wxm TODO 此处使用新的类型
   //   TxTypes: TxTypes,
-  AssetTypes: DdnUtils.assetTypes,
+  AssetTypes: assetTypes,
 
   // wxm TODO 此处应该使用对应npm包提供的对象
   DappType,

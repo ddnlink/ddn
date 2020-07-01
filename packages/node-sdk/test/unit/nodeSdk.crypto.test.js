@@ -1,15 +1,15 @@
 import Debug from 'debug'
 import DdnUtils from '@ddn/utils'
-import ddn from '../../lib'
-import node from '../../lib/test'
+import DdnJS from '../ddn-js'
+const Tester = DdnUtils.Tester
 
 const debug = Debug('debug')
-const expect = node.expect
+const expect = Tester.expect
 const Bignum = DdnUtils.bignum
 
 describe('Node SDK', () => {
   describe('crypto.js', () => {
-    const crypto = ddn.crypto
+    const crypto = DdnJS.crypto
 
     it('should be ok', () => {
       expect(crypto).to.be.ok
@@ -353,11 +353,11 @@ describe('Node SDK', () => {
 
   describe('crypto sha256 and address', () => {
     it('should be equal to the expected address', () => {
-      const address = ddn.crypto.generateAddress('7a91b9bfc0ea185bf3ade9d264da273f7fe19bf71008210b1d7239c82dd3ad20')
+      const address = DdnJS.crypto.generateAddress('7a91b9bfc0ea185bf3ade9d264da273f7fe19bf71008210b1d7239c82dd3ad20')
       expect(address).to.equal('D6hS16kpFkVZv1TaBCrZQ3Wt7Tawa7MjuA')
 
       const publicKeyBuffer = Buffer.from('7a91b9bfc0ea185bf3ade9d264da273f7fe19bf71008210b1d7239c82dd3ad20', 'hex')
-      const address2 = ddn.crypto.generateAddress(publicKeyBuffer)
+      const address2 = DdnJS.crypto.generateAddress(publicKeyBuffer)
       expect(address2).to.equal('D6hS16kpFkVZv1TaBCrZQ3Wt7Tawa7MjuA')
     })
   })

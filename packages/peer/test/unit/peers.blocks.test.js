@@ -1,14 +1,10 @@
 /**
  * passed
  */
-import node from '@ddn/node-sdk/lib/test'
+import DdnUtil from '@ddn/utils'
+const node = DdnUtil.Tester
 
 describe('test blocks', () => {
-  beforeAll(done => {
-    node.ddn.init()
-    done()
-  })
-
   describe('POST /peer/blocks', () => {
     it('Using invalid nethash in headers. Should fail', done => {
       node.peer.post('/blocks')
@@ -21,7 +17,7 @@ describe('test blocks', () => {
         })
         .expect('Content-Type', /json/)
         .expect(200)
-        .end((err, {
+        .end((_err, {
           body
         }) => {
           // console.log(JSON.stringify(body));
@@ -41,7 +37,7 @@ describe('test blocks', () => {
         .set('port', node.config.port)
         .expect('Content-Type', /json/)
         .expect(200)
-        .end((err, {
+        .end((_err, {
           headers,
           body
         }) => {

@@ -1,12 +1,13 @@
-import ddn from '../../lib'
-import node from '../../lib/test'
 import Debug from 'debug'
+import DdnUtils from '@ddn/utils'
+import DdnJS from '../ddn-js'
+const Tester = DdnUtils.Tester
 
 const debug = Debug('debug')
-const expect = node.expect
+const expect = Tester.expect
 
 describe('delegate.js', () => {
-  const delegate = ddn.delegate
+  const delegate = DdnJS.delegate
 
   it('should be ok', () => {
     expect(delegate).to.be.ok
@@ -33,8 +34,8 @@ describe('delegate.js', () => {
     })
 
     describe('should create delegate', () => {
-      const keys = ddn.crypto.getKeys('secret')
-      const secondKeys = ddn.crypto.getKeys('secret 2')
+      const keys = DdnJS.crypto.getKeys('secret')
+      const secondKeys = DdnJS.crypto.getKeys('secret 2')
 
       it('should be ok', async () => {
         trs = await createDelegate('delegate', 'secret', 'secret 2')
@@ -108,25 +109,25 @@ describe('delegate.js', () => {
       })
 
       it('should be signed correctly', async () => {
-        const result = await ddn.crypto.verify(trs, keys.publicKey)
+        const result = await DdnJS.crypto.verify(trs, keys.publicKey)
         expect(result).to.be.ok
       })
 
       it('should be second signed correctly', async () => {
-        const result = await ddn.crypto.verifySecondSignature(trs, secondKeys.publicKey)
+        const result = await DdnJS.crypto.verifySecondSignature(trs, secondKeys.publicKey)
         debug('second signed', result)
         expect(result).to.be.true
       })
 
       it('should not be signed correctly now', async () => {
         trs.amount = '100'
-        const result = await ddn.crypto.verify(trs, keys.publicKey)
+        const result = await DdnJS.crypto.verify(trs, keys.publicKey)
         expect(result).to.be.not.ok
       })
 
       it('should not be second signed correctly now', async () => {
         trs.amount = '100'
-        const result = await ddn.crypto.verify(trs, secondKeys.publicKey)
+        const result = await DdnJS.crypto.verify(trs, secondKeys.publicKey)
         expect(result).to.be.not.ok
       })
 

@@ -21,8 +21,5 @@
   "dependencies": {
     "@ddn/asset-base": "^0.2.4",
     "@ddn/utils": "^0.1.5"
-  },
-  "devDependencies": {
-    "@ddn/node-sdk": "^0.2.5"
   }
 }

@@ -1,5 +1,5 @@
 {
-  "name": "ddn",
+  "name": "ddn-starter",
   "version": "3.6.0",
   "main": "./app.js",
   "private": true,

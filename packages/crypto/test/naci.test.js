@@ -1,13 +1,13 @@
 import nacl from 'tweetnacl'
 import crypto from 'crypto'
+import DdnUtils from '@ddn/utils'
 import DdnCrypto from '../'
 
-import node from '@ddn/node-sdk/lib/test'
 import Debug from 'debug'
 import { Buffer } from 'buffer'
 
 const debug = Debug('debug')
-const expect = node.expect
+const expect = DdnUtils.Tester.expect
 
 describe('NaCI', () => {
   it('Length is 32', () => {

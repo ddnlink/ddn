@@ -1,7 +1,8 @@
 // Jest mothods
-import node from '@ddn/node-sdk/lib/test'
+import DdnUtils from '@ddn/utils'
+const Tester = DdnUtils.Tester
 
-const expect = node.expect
+const expect = Tester.expect
 
 describe('jest', () => {
   it('should be be.equal, not to.be.equal', (done) => {

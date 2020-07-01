@@ -1,5 +1,5 @@
 // base-x encoding
-// Forked from https://github.com/cryptocoinjs/bs58
+// From https://github.com/cryptocoinjs/bs58
 // Copyright (c) 2011 Google Inc and Copyright (c) 2013 BitPay Inc
 
 function Base (ALPHABET) {

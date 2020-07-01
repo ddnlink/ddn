@@ -1,11 +1,13 @@
 import Debug from 'debug'
 import sha256 from 'fast-sha256'
 import RIPEMD160 from 'ripemd160'
-import node from '@ddn/node-sdk/lib/test'
+// import DdnUtils from '@ddn/utils'
 import crypto from '../lib'
 import base58check from '../lib/base58check'
 
 const debug = Debug('test')
+// const expect = DdnUtils.Tester.expect
+
 const tokenPrefix = 'D'
 
 function isAddress (address) {
@@ -16,28 +18,28 @@ describe('address', () => {
   let Phasekey
 
   it('old 64bit address should be false', done => {
-    node.expect(isAddress('a')).to.be.false
-    node.expect(isAddress('')).to.be.false
-    node.expect(isAddress()).to.be.false
-    node.expect(isAddress(1)).to.be.false
-    node.expect(isAddress('1a')).to.be.false
-    node.expect(isAddress('1234567890123456789012')).to.be.false
+    expect(isAddress('a')).toBeFalsy()
+    expect(isAddress('')).toBeFalsy()
+    expect(isAddress()).toBeFalsy()
+    expect(isAddress(1)).toBeFalsy()
+    expect(isAddress('1a')).toBeFalsy()
+    expect(isAddress('1234567890123456789012')).toBeFalsy()
 
-    node.expect(isAddress('1')).to.be.false
-    node.expect(isAddress('123456')).to.be.false
+    expect(isAddress('1')).toBeFalsy()
+    expect(isAddress('123456')).toBeFalsy()
 
     done()
   })
 
   it('bitcoin Address should be invalid', done => {
-    node.expect(isAddress('14VXPK3foDitWdv132rb3dZJkJUMrMSscp')).to.be.false
+    expect(isAddress('14VXPK3foDitWdv132rb3dZJkJUMrMSscp')).toBeFalsy()
     done()
   })
 
   it('generateSecret should be ok', done => {
     Phasekey = crypto.generateSecret()
     debug('address.test.js addr', Phasekey)
-    node.expect(Phasekey).to.be.a('string')
+    expect(typeof Phasekey).toBe('string')
 
     done()
   })
@@ -78,7 +80,7 @@ describe('address', () => {
       const keyPair = crypto.getKeys(Phasekey)
       const addr = crypto.generateAddress(keyPair.publicKey, tokenPrefix)
       debug('address.test.js addr', addr)
-      node.expect(isAddress(addr)).to.be.true
+      expect(isAddress(addr)).toBeTruthy()
 
       done()
     })

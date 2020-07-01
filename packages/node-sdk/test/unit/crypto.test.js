@@ -1,16 +1,18 @@
 'use strict'
 import sha256 from 'fast-sha256'
 import crypto from 'crypto'
-import ddnCrypto from '../lib'
-
 import { Buffer } from 'buffer'
 import Debug from 'debug'
-import node from '@ddn/node-sdk/lib/test'
+import ddnCrypto from '@ddn/crypto'
+import DdnUtils from '@ddn/utils'
+
+import DdnJS from '../ddn-js'
 
 const debug = Debug('debug')
+const Tester = DdnUtils.Tester
 
 async function createTransfer (address, amount, secret) {
-  return await node.ddn.transaction.createTransaction(address, amount, null, secret)
+  return await DdnJS.transaction.createTransaction(address, amount, null, secret)
 }
 
 describe('crypto', () => {
@@ -62,7 +64,7 @@ describe('crypto', () => {
     })
 
     it('length should be 64', async function () {
-      const trs = await createTransfer(node.Eaccount.address, '10000000000000', node.Gaccount.password)
+      const trs = await createTransfer(Tester.Eaccount.address, '10000000000000', Tester.Gaccount.password)
       const hash = await getHash(trs)
       debug(hash)
       expect(hash.length).toBe(64)
@@ -78,7 +80,7 @@ describe('crypto', () => {
 
     it('length should be 64', async function () {
       const keypair = await ddnCrypto.getKeys('secret')
-      const trs = await createTransfer(node.Eaccount.address, '10000000000000', node.Gaccount.password)
+      const trs = await createTransfer(Tester.Eaccount.address, '10000000000000', Tester.Gaccount.password)
       const signature = await sign(trs, keypair)
       const str = Buffer.from(signature, 'hex') // 必须解密
       expect(str.length).toBe(64)
@@ -108,7 +110,7 @@ describe('crypto', () => {
       const Phasekey = ddnCrypto.generateSecret()
       const publicKey = ddnCrypto.getKeys(Phasekey).publicKey
 
-      node.expect(publicKey).to.be.a('string')
+      Tester.expect(publicKey).to.be.a('string')
 
       const publicKey2 = publicKey.toString('hex')
       const publicKey3 = publicKey2.toString('hex')

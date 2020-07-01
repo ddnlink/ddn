@@ -1,12 +1,13 @@
-import ddn from '../../lib'
-import node from '../../lib/test'
 import Debug from 'debug'
+import DdnUtils from '@ddn/utils'
+import DdnJS from '../ddn-js'
+const Tester = DdnUtils.Tester
 
 const debug = Debug('debug')
-const expect = node.expect
+const expect = Tester.expect
 
 describe('node-sdk dapp.js', () => {
-  const dapp = ddn.dapp
+  const dapp = DdnJS.dapp
 
   it('should be object', () => {
     expect(dapp).that.is.an('object')
@@ -58,7 +59,7 @@ describe('node-sdk dapp.js', () => {
     })
 
     describe('returned dapp', () => {
-      const secondKeys = ddn.crypto.getKeys('secret 2')
+      const secondKeys = DdnJS.crypto.getKeys('secret 2')
 
       it('should be object', () => {
         expect(trs).that.is.an('object')
@@ -166,40 +167,40 @@ describe('node-sdk dapp.js', () => {
       })
 
       it('should be signed correctly', async () => {
-        const result = await ddn.crypto.verify(trs)
+        const result = await DdnJS.crypto.verify(trs)
         debug('signed result:', result)
         expect(result).to.be.ok
       })
 
       it('should not be signed correctly now', async () => {
         trs.amount = '10000'
-        const result = await ddn.crypto.verify(trs)
+        const result = await DdnJS.crypto.verify(trs)
         expect(result).to.be.not.ok
       })
 
       it('should be second signed correctly', async () => {
         trs.amount = '0'
-        const result = await ddn.crypto.verifySecondSignature(trs, secondKeys.publicKey)
+        const result = await DdnJS.crypto.verifySecondSignature(trs, secondKeys.publicKey)
         expect(result).to.be.ok
       })
 
       it('should not be second signed correctly now', async () => {
         trs.amount = '10000'
-        const result = await ddn.crypto.verifySecondSignature(trs, secondKeys.publicKey)
+        const result = await DdnJS.crypto.verifySecondSignature(trs, secondKeys.publicKey)
         expect(result).to.be.not.ok
       })
 
       it('should be ok to verify bytes', () => {
         const data1 = 'a1b2c3d4'
         const secret = 'secret1'
-        const keys = ddn.crypto.getKeys(secret)
-        let signature = ddn.crypto.signBytes(Buffer.from(data1), keys)
-        let result = ddn.crypto.verifyBytes(data1, signature, keys.publicKey)
+        const keys = DdnJS.crypto.getKeys(secret)
+        let signature = DdnJS.crypto.signBytes(Buffer.from(data1), keys)
+        let result = DdnJS.crypto.verifyBytes(data1, signature, keys.publicKey)
         expect(result).to.be.ok
 
         const data2 = Buffer.from('a1b2c3d4', 'hex')
-        signature = ddn.crypto.signBytes(data2, keys)
-        result = ddn.crypto.verifyBytes(data2, signature, keys.publicKey)
+        signature = DdnJS.crypto.signBytes(data2, keys)
+        result = DdnJS.crypto.verifyBytes(data2, signature, keys.publicKey)
         expect(result).to.be.ok
       })
     })

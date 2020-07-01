@@ -2,8 +2,9 @@
  * passed
  */
 import Debug from 'debug'
-import node from '@ddn/node-sdk/lib/test'
+import DdnUtil from '@ddn/utils'
 import constants from '../../lib/constants'
+const node = DdnUtil.Tester
 
 const debug = Debug('debug')
 // Account info for password "ddntest"

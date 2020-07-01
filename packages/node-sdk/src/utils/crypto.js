@@ -51,8 +51,8 @@ async function getFee (transaction) {
       let fee = constants.net.fees.send
       if (Asset.Utils.isTypeValueExists(transaction.type)) {
         const trans = Asset.Utils.getTransactionByTypeValue(transaction.type)
-        const transCls = require(trans.package).default[trans.name]
-        let transInst = new transCls({
+        const TransCls = require(trans.package).default[trans.name]
+        let transInst = new TransCls({
           constants: {
             fixedPoint
           }

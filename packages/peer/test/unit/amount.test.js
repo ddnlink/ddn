@@ -1,8 +1,9 @@
 /**
  * passed
  */
-import node from '@ddn/node-sdk/lib/test'
+import DdnUtil from '@ddn/utils'
 import amount from '../../lib/helpers/amount'
+const node = DdnUtil.Tester
 
 describe('amount', () => {
   it('normal test', done => {

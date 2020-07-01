@@ -1,25 +1,26 @@
-import ddn from '../../lib'
-import node from '../../lib/test'
 import Debug from 'debug'
+import DdnUtils from '@ddn/utils'
+import DdnJS from '../ddn-js'
+const Tester = DdnUtils.Tester
 
 const debug = Debug('debug')
-const expect = node.expect
+const expect = Tester.expect
 
 describe('Node SDK', () => {
   it('should be ok', () => {
-    // (ddn).to.be.ok;
-    expect(ddn).to.be.ok
+    // (DdnJS).to.be.ok;
+    expect(DdnJS).to.be.ok
   })
 
   it('should be object', () => {
-    expect(ddn).that.is.an('object')
+    expect(DdnJS).that.is.an('object')
   })
 
   it('should have properties', () => {
     const properties = ['transaction', 'signature', 'vote', 'delegate', 'dapp', 'crypto']
 
     properties.forEach(property => {
-      expect(ddn).to.have.property(property)
+      expect(DdnJS).to.have.property(property)
     })
   })
 

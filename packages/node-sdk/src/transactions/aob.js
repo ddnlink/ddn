@@ -1,13 +1,11 @@
 import DdnUtils from '@ddn/utils'
+import DdnCrypto from '@ddn/crypto'
 
-import crypto from '../utils/crypto'
 import constants from '../constants'
 import slots from '../time/slots'
 import options from '../options'
 
-const {
-  bignum
-} = DdnUtils
+const { bignum } = DdnUtils
 
 function getClientFixedTime () {
   return slots.getTime() - options.get('clientDriftSeconds')
@@ -22,7 +20,7 @@ async function createTransaction (
   secret,
   secondSecret
 ) {
-  const keys = crypto.getKeys(secret)
+  const keys = DdnCrypto.getKeys(secret)
 
   const transaction = {
     type,
@@ -36,14 +34,15 @@ async function createTransaction (
     asset
   }
 
-  transaction.signature = await crypto.sign(transaction, keys)
+  transaction.signature = await DdnCrypto.sign(transaction, keys)
 
   if (secondSecret) {
-    const secondKeys = crypto.getKeys(secondSecret)
-    transaction.sign_signature = await crypto.secondSign(transaction, secondKeys)
+    const secondKeys = DdnCrypto.getKeys(secondSecret)
+    transaction.sign_signature = await DdnCrypto.secondSign(transaction, secondKeys)
   }
 
-  transaction.id = await crypto.getId(transaction)
+  transaction.id = await DdnCrypto.getId(transaction)
+
   return transaction
 }
 
@@ -65,6 +64,7 @@ export default {
       secret,
       secondSecret
     )
+
     return trs
   },
 
@@ -154,7 +154,7 @@ export default {
       }
     }
     const fee = bignum.multiply(0.1, constants.fixedPoint)
-    return await createTransaction(
+    const trs = await createTransaction(
       asset,
       fee,
       DdnUtils.assetTypes.AOB_ISSUE,
@@ -163,6 +163,8 @@ export default {
       secret,
       secondSecret
     )
+
+    return trs
   },
 
   async createTransfer (

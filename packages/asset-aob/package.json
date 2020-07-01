@@ -21,7 +21,6 @@
   "dependencies": {
     "@ddn/asset-base": "^0.2.4",
     "@ddn/crypto": "^0.2.5",
-    "@ddn/node-sdk": "^0.2.5",
     "@ddn/utils": "^0.1.5",
     "async": "^2.6.1",
     "lodash": "^4.17.15",

@@ -35,6 +35,6 @@
     "tweetnacl": "^1.0.2"
   },
   "devDependencies": {
-    "@ddn/node-sdk": "^0.2.5"
+    "@ddn/utils": "^0.1.5"
   }
 }

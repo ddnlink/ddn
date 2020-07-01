@@ -1,13 +1,13 @@
-// import DdnCrypto from "@ddn/crypto";
-import ddn from '../../lib'
-import node from '../../lib/test'
 import Debug from 'debug'
+import DdnUtils from '@ddn/utils'
+import DdnJS from '../ddn-js'
+const Tester = DdnUtils.Tester
 
 const debug = Debug('debug')
-const expect = node.expect
+const expect = Tester.expect
 
 describe('transaction.js', () => {
-  const transaction = ddn.transaction
+  const transaction = DdnJS.transaction
 
   debug('start')
   it('should be object', () => {
@@ -91,13 +91,13 @@ describe('transaction.js', () => {
       })
 
       it('should be signed correctly', async () => {
-        const result = await ddn.crypto.verify(trs)
+        const result = await DdnJS.crypto.verify(trs)
         expect(result).to.be.ok
       })
 
       it('should not be signed correctly now', async () => {
         trs.amount = '10000'
-        const result = await ddn.crypto.verify(trs)
+        const result = await DdnJS.crypto.verify(trs)
         expect(result).to.be.not.ok
       })
     })
@@ -107,7 +107,7 @@ describe('transaction.js', () => {
     const createTransaction = transaction.createTransaction
     let trs = null
     const secondSecret = 'second secret'
-    const keys = ddn.crypto.getKeys(secondSecret)
+    const keys = DdnJS.crypto.getKeys(secondSecret)
 
     it('should be a function', () => {
       expect(createTransaction).to.be.a('function')
@@ -191,24 +191,24 @@ describe('transaction.js', () => {
       })
 
       it('should be signed correctly', async () => {
-        const result = await ddn.crypto.verify(trs)
+        const result = await DdnJS.crypto.verify(trs)
         expect(result).to.be.ok
       })
 
       it('should be second signed correctly', async () => {
-        const result = await ddn.crypto.verifySecondSignature(trs, keys.publicKey)
+        const result = await DdnJS.crypto.verifySecondSignature(trs, keys.publicKey)
         expect(result).to.be.ok
       })
 
       it('should not be signed correctly now', async () => {
         trs.amount = '10000'
-        const result = await ddn.crypto.verify(trs)
+        const result = await DdnJS.crypto.verify(trs)
         expect(result).to.be.not.ok
       })
 
       it('should not be second signed correctly now', async () => {
         trs.amount = '10000'
-        const result = await ddn.crypto.verifySecondSignature(trs, keys.publicKey)
+        const result = await DdnJS.crypto.verifySecondSignature(trs, keys.publicKey)
         expect(result).to.be.not.ok
       })
     })

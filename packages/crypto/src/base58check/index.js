@@ -1,6 +1,7 @@
 'use strict'
 
 import sha256 from 'fast-sha256'
+// import nacl from 'tweetnacl'
 import base58 from './bs58.js'
 
 // SHA256(SHA256(buffer))

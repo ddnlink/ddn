@@ -12,7 +12,7 @@ class PeerService {
     Object.assign(this, context)
     this._context = context
 
-    this._invalidTrsCache = new DdnUtils.limitCache()
+    this._invalidTrsCache = new DdnUtils.LimitCache()
   }
 
   async filter ({

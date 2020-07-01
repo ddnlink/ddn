@@ -3,7 +3,6 @@
  * wangxm   2018-12-28
  */
 import nacl from 'tweetnacl'
-import ByteBuffer from 'bytebuffer'
 import extend from 'util-extend'
 import DdnUtils from '@ddn/utils'
 import DdnCrypto from '@ddn/crypto'
@@ -52,7 +51,7 @@ class Transaction {
 
   async create (data) {
     if (!this._assets.hasType(data.type)) {
-      throw new Error(`Unknown transaction type 1 ${trs.type}`)
+      throw new Error(`Unknown transaction type 1 ${data.type}`)
     }
 
     if (!data.sender) {
@@ -424,12 +423,12 @@ class Transaction {
       txId = await DdnCrypto.getId(trs)
     } catch (e) {
       this.logger.error('Invalid transaction id, err: ', e)
-      throw new Error('Invalid transaction id')
+      throw new Error('Invalid transaction id 1')
     }
 
     if (trs.id && trs.id !== txId) {
       // FIXME: 这里没有要求从Asset插件端传ID，不然会出错，请确认
-      throw new Error('Incorrect transaction id')
+      throw new Error('Incorrect transaction id 2')
     } else {
       trs.id = txId
     }
@@ -540,7 +539,7 @@ class Transaction {
       Buffer.from(privateKey, 'hex')
     )
     return Buffer.from(signature).toString('hex')
-    // return await DdnCrypto.sign(trs, keypair);
+    // return await DdnCrypto.sign(trs, { privateKey })
   }
 
   async multisign (trs, { privateKey }) {
@@ -575,11 +574,6 @@ class Transaction {
     if (!signature) {
       return false
     }
-
-    // fixme：2020.6.2 这里的验证方法需要统一,
-    // 原方法，1.delegates.test.js 无法验证通过
-    // const hash = await DdnCrypto.getBytes(trs, true, true);
-    // const result = DdnCrypto.verifyBytes(hash, signature, publicKey);
 
     const hash = await DdnCrypto.getHash(trs, true, true)
     const result = DdnCrypto.verifyHash(hash, signature, publicKey)

@@ -1,11 +1,11 @@
 /**
  * passed
  */
-import node from '@ddn/node-sdk/lib/test'
-
+import DdnUtil from '@ddn/utils'
 import Debug from 'debug'
 
 const debug = Debug('peer')
+const node = DdnUtil.Tester
 
 describe('GET /peers/version', () => {
   it('Should be ok', done => {
@@ -29,7 +29,6 @@ describe('GET /peers', () => {
   it('Using empty parameters. Should fail', done => {
     const state = ''
     const os = ''
-    const shared = ''
     const version = ''
     const limit = ''
     const offset = 0

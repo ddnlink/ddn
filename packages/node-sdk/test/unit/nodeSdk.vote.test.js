@@ -1,12 +1,13 @@
-import ddn from '../../lib'
-import node from '../../lib/test'
 import Debug from 'debug'
+import DdnUtils from '@ddn/utils'
+import DdnJS from '../ddn-js'
+const Tester = DdnUtils.Tester
 
 const debug = Debug('debug')
-const expect = node.expect
+const expect = Tester.expect
 
 describe('vote.js', () => {
-  const vote = ddn.vote
+  const vote = DdnJS.vote
   debug('vote')
   it('should be ok', () => {
     expect(vote).to.be.ok
@@ -23,7 +24,7 @@ describe('vote.js', () => {
   describe('#createVote', () => {
     const createVote = vote.createVote
     let vt = null
-    const publicKey = ddn.crypto.getKeys('secret').publicKey
+    const publicKey = DdnJS.crypto.getKeys('secret').publicKey
     const publicKeys = [`+${publicKey}`]
 
     it('should be ok', () => {
@@ -100,24 +101,24 @@ describe('vote.js', () => {
       })
 
       it('should be signed correctly', () => {
-        const result = ddn.crypto.verify(vt)
+        const result = DdnJS.crypto.verify(vt)
         expect(result).to.be.ok
       })
 
       it('should be second signed correctly', () => {
-        const result = ddn.crypto.verifySecondSignature(vt, ddn.crypto.getKeys('second secret').publicKey)
+        const result = DdnJS.crypto.verifySecondSignature(vt, DdnJS.crypto.getKeys('second secret').publicKey)
         expect(result).to.be.ok
       })
 
       it('should not be signed correctly now', async () => {
         vt.amount = '100'
-        const result = await ddn.crypto.verify(vt)
+        const result = await DdnJS.crypto.verify(vt)
         expect(result).to.be.not.ok
       })
 
       it('should not be second signed correctly now', async () => {
         vt.amount = '100'
-        const result = await ddn.crypto.verifySecondSignature(vt, ddn.crypto.getKeys('second secret').publicKey)
+        const result = await DdnJS.crypto.verifySecondSignature(vt, DdnJS.crypto.getKeys('second secret').publicKey)
         expect(result).to.be.not.ok
       })
 

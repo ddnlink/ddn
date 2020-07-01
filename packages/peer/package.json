@@ -91,9 +91,5 @@
     "tracer": "^0.8.11",
     "util-extend": "1.0.3",
     "valid-url": "1.0.9"
-  },
-  "devDependencies": {
-    "@ddn/node-sdk": "^0.2.5"
-  },
-  "gitHead": "788717950b74becdd7f4ad07b5d467b224424d1c"
+  }
 }

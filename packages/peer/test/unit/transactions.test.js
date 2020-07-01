@@ -2,9 +2,9 @@
  * passed
  */
 import Debug from 'debug'
-import node from '@ddn/node-sdk/lib/test'
-
 import DdnUtils from '@ddn/utils'
+
+const node = DdnUtils.Tester
 
 const debug = Debug('debug')
 

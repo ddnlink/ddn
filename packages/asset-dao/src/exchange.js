@@ -138,13 +138,10 @@ class Exchange extends Asset.Base {
         throw new Error('request exchange not find: ' + asset.exchange_trs_id)
       }
       const exchangeRequestObj = exchangeRequestList[0]
-      console.log('exchangeRequestObj', exchangeRequestObj)
 
       // 获取对应的购买记录
       const confirmExchangeList = await this.queryAsset({ exchange_trs_id: asset.exchange_trs_id },
         [['trs_timestamp', 'DESC']], false, 1, 10, null)
-
-      console.log('confirmExchangeList', confirmExchangeList)
 
       if (confirmExchangeList && confirmExchangeList.length) {
         throw new Error('confirm exchange already exists: ' + asset.exchange_trs_id)

@@ -100,7 +100,7 @@ class AssetBase {
      * @param {*} data
      * @param {*} trs
      */
-  async create (trs) {
+  async create (data, trs) {
     return trs
   }
 
@@ -353,8 +353,8 @@ class AssetBase {
 
       if (assetTrans) {
         // Fixme: 2020.5.31 这里没有 npm i 相关的包，require 不到，所以尽量不要提供 Asset 参数
-        const assetCls = require(assetTrans.package)[assetTrans.name]
-        assetInst = new assetCls(this._context, assetTrans)
+        const AssetCls = require(assetTrans.package)[assetTrans.name]
+        assetInst = new AssetCls(this._context, assetTrans)
       }
     }
 
@@ -518,8 +518,8 @@ class AssetBase {
         assetTrans = AssetUtils.getTransactionByTypeValue(assetValue)
       }
       if (assetTrans) {
-        const assetCls = require(assetTrans.package)[assetTrans.name]
-        assetInst = new assetCls(this._context, assetTrans)
+        const AssetCls = require(assetTrans.package)[assetTrans.name]
+        assetInst = new AssetCls(this._context, assetTrans)
       }
     }
     // 解析obj
@@ -588,8 +588,8 @@ class AssetBase {
         assetTrans = AssetUtils.getTransactionByTypeValue(assetValue)
       }
       if (assetTrans) {
-        const assetCls = require(assetTrans.package)[assetTrans.name]
-        assetInst = new assetCls(this._context, assetTrans)
+        const AssetCls = require(assetTrans.package)[assetTrans.name]
+        assetInst = new AssetCls(this._context, assetTrans)
       }
     }
 
@@ -759,7 +759,7 @@ class AssetBase {
      * @param {*} trs
      * @param {*} sender
      */
-  async process (trs) {
+  async process (trs, sender) {
     return trs
   }
 

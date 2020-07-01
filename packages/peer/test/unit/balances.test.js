@@ -1,9 +1,10 @@
 /**
  * passed
  */
-import node from '@ddn/node-sdk/lib/test'
+import DdnUtil from '@ddn/utils'
 
 import BalanceManager from '../../lib/helpers/balance-manager.js'
+const node = DdnUtil.Tester
 
 describe('balance cache manager', () => {
   it('normal test', done => {
