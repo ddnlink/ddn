@@ -1,6 +1,6 @@
 {
   "name": "@ddn/node-sdk",
-  "version": "0.2.6",
+  "version": "0.3.0",
   "description": "DDN Node.js SDK",
   "main": "lib/index.js",
   "directories": {
@@ -19,7 +19,7 @@
   "author": "wxx",
   "license": "MIT",
   "dependencies": {
-    "@ddn/asset-aob": "^0.2.6",
+    "@ddn/asset-aob": "^0.3.0",
     "@ddn/asset-base": "^0.2.5",
     "@ddn/asset-dao": "^0.2.6",
     "@ddn/asset-dapp": "^0.2.6",
