@@ -1,5 +1,7 @@
-DDN链上资产包
-===
+DDN链上资产
+==========
+
+AoB，链上资产，是使用DDN区块链发行新资产的方法。
 
 交易体创建方法：<br/>
 ddnJS.assetPlugin.createPluginAsset(trsType, assetInfo, secret, secondSecret)<br/>
