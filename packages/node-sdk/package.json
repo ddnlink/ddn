@@ -3,13 +3,14 @@
   "version": "0.3.0",
   "description": "DDN Node.js SDK",
   "main": "lib/index.js",
-  "directories": {
-    "test": "test"
-  },
+  "files": [
+    "lib",
+    "ddn.js"
+  ],
   "scripts": {
     "test": "mocha test",
     "build": "browserify build.js -o ddn.js",
-    "build:dev": "browserify -r ./lib -o ddn2.js"
+    "build:dev": "browserify -fs build.js > ddn.js"
   },
   "keywords": [
     "ddn",
@@ -37,6 +38,7 @@
   },
   "devDependencies": {
     "browserify": "^13.1.0",
+    "browserify-fs": "^1.0.0",
     "chai": "^4.2.0",
     "supertest": "^4.0.2",
     "uglify-js": "^2.7.3"

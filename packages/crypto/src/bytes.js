@@ -1,5 +1,4 @@
 import ByteBuffer from 'bytebuffer'
-import Asset from '@ddn/asset-base'
 
 async function getBytes (transaction, skipSignature, skipSecondSignature) {
   let assetSize = 0
@@ -91,25 +90,14 @@ async function getBytes (transaction, skipSignature, skipSecondSignature) {
   bb.flip()
 
   return bb.toBuffer()
-
-  // competifined browser
-  // const arrayBuffer = new Uint8Array(bb.toArrayBuffer());
-
-  // const buffer = [];
-
-  // for (let i = 0; i < arrayBuffer.length; i++) {
-  //     buffer[i] = arrayBuffer[i];
-  // }
-
-  // return Buffer.from(buffer);
 }
 
 async function getAssetBytes (transaction) {
-  if (Asset.Utils.isTypeValueExists(transaction.type)) {
-    const trans = Asset.Utils.getTransactionByTypeValue(transaction.type)
-    const transCls = require(trans.package).default[trans.name]
+  if (global.assets && global.assets.transTypeNames[transaction.type]) {
+    const trans = global.assets.transTypeNames[transaction.type]
+    const TransCls = require(trans.package).default[trans.name]
 
-    let transInst = new transCls()
+    let transInst = new TransCls()
     const buf = await transInst.getBytes(transaction)
     transInst = null
 
