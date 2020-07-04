@@ -3,10 +3,9 @@
  */
 import Debug from 'debug'
 import crypto from 'crypto'
-import DdnJS from '../ddn-js'
-
 import DdnUtils from '@ddn/utils'
-const Tester = DdnUtils.Tester
+import Tester from '@ddn/test-utils'
+import DdnJS from '../ddn-js'
 
 const debug = Debug('debug')
 

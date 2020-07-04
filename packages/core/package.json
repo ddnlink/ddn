@@ -35,5 +35,6 @@
   },
   "devDependencies": {
     "umi-types": "0.5.3"
-  }
+  },
+  "gitHead": "f32e192fd36ba5762774a8f4d440fa02c15cb860"
 }

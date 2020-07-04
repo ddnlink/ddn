@@ -3,14 +3,16 @@
   "version": "0.3.0",
   "description": "DDN Node.js SDK",
   "main": "lib/index.js",
+  "browser": {
+    "@ddn/node-sdk": "ddn.min.js"
+  },
   "files": [
     "lib",
-    "ddn.js"
+    "ddn.min.js"
   ],
   "scripts": {
     "test": "mocha test",
-    "build": "browserify build.js -o ddn.js",
-    "build:dev": "browserify -fs build.js > ddn.js"
+    "build": "browserify lib/index.js -p tinyify > ddn.min.js"
   },
   "keywords": [
     "ddn",
@@ -20,27 +22,20 @@
   "author": "wxx",
   "license": "MIT",
   "dependencies": {
-    "@ddn/asset-aob": "^0.3.0",
-    "@ddn/asset-base": "^0.2.5",
-    "@ddn/asset-dao": "^0.2.6",
-    "@ddn/asset-dapp": "^0.2.6",
-    "@ddn/asset-evidence": "^0.1.6",
-    "@ddn/core": "^0.2.1",
     "@ddn/crypto": "^0.2.6",
     "@ddn/utils": "^0.1.6",
     "JSONStream": "^1.3.1",
     "buffer": "^4.7.0",
     "bytebuffer": "^5.0.1",
     "crypto": "^1.0.1",
+    "long": "^4.0.0",
     "ripemd160": "^2.0.1",
     "through2": "^2.0.3",
     "tweetnacl": "^1.0.2"
   },
   "devDependencies": {
     "browserify": "^13.1.0",
-    "browserify-fs": "^1.0.0",
-    "chai": "^4.2.0",
-    "supertest": "^4.0.2",
-    "uglify-js": "^2.7.3"
-  }
+    "tinyify": "^2.5.2"
+  },
+  "gitHead": "f32e192fd36ba5762774a8f4d440fa02c15cb860"
 }

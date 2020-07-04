@@ -5,7 +5,7 @@ import crypto from 'crypto'
 import path from 'path'
 import Debug from 'debug'
 import DdnUtils from '@ddn/utils'
-
+import Tester from '@ddn/test-utils'
 import DdnJS from '../ddn-js'
 
 import {
@@ -13,7 +13,6 @@ import {
 } from '@ddn/core/lib/getUserConfig'
 
 const debug = Debug('debug')
-const Tester = DdnUtils.Tester
 
 const message = 'test'
 

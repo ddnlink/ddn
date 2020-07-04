@@ -3,10 +3,10 @@
  */
 import Debug from 'debug'
 import DdnUtils from '@ddn/utils'
+import Tester from '@ddn/test-utils'
 import DdnJS from '../ddn-js'
 
 const debug = new Debug('debug')
-const Tester = DdnUtils.Tester
 
 const account = Tester.randomAccount()
 const voterAccount = Tester.randomAccount()

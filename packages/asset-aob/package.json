@@ -26,5 +26,6 @@
     "lodash": "^4.17.15",
     "mathjs": "^5.4.0",
     "sequelize": "^4.42.0"
-  }
+  },
+  "gitHead": "f32e192fd36ba5762774a8f4d440fa02c15cb860"
 }

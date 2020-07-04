@@ -21,5 +21,6 @@
   "dependencies": {
     "@ddn/asset-base": "^0.2.5",
     "@ddn/utils": "^0.1.6"
-  }
+  },
+  "gitHead": "f32e192fd36ba5762774a8f4d440fa02c15cb860"
 }

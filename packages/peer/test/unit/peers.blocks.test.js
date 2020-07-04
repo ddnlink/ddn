@@ -1,8 +1,7 @@
 /**
  * passed
  */
-import DdnUtil from '@ddn/utils'
-const node = DdnUtil.Tester
+import node from '@ddn/test-utils'
 
 describe('test blocks', () => {
   describe('POST /peer/blocks', () => {

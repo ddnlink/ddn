@@ -1,8 +1,8 @@
-import Asset from '@ddn/asset-base'
+// import Asset from '@ddn/asset-base'
 import options from './options'
 
 // fixme: 已经修改为 config.js
-import assetPlugins from './config.asset'
+// import assetPlugins from './config.asset'
 
 /**
  * 用于初始化 Sdk
@@ -18,5 +18,5 @@ export default function (nethash, net) {
     options.set('net', net)
   }
 
-  Asset.Utils.loadFromObject(assetPlugins)
+  // Asset.Utils.loadFromObject(assetPlugins)
 }

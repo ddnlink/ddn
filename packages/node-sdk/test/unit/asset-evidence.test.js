@@ -1,9 +1,9 @@
 import Debug from 'debug'
 import DdnUtils from '@ddn/utils'
+import Tester from '@ddn/test-utils'
 import DdnJS from '../ddn-js'
 
 const debug = Debug('debug')
-const Tester = DdnUtils.Tester
 
 // 这里有两种创建存证交易的方法
 const createEvidence = DdnJS.evidence.createEvidence

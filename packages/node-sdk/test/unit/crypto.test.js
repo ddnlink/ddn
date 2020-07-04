@@ -4,12 +4,10 @@ import crypto from 'crypto'
 import { Buffer } from 'buffer'
 import Debug from 'debug'
 import ddnCrypto from '@ddn/crypto'
-import DdnUtils from '@ddn/utils'
 
 import DdnJS from '../ddn-js'
 
 const debug = Debug('debug')
-const Tester = DdnUtils.Tester
 
 async function createTransfer (address, amount, secret) {
   return await DdnJS.transaction.createTransaction(address, amount, null, secret)

@@ -1,7 +1,7 @@
 import Debug from 'debug'
 import DdnUtils from '@ddn/utils'
+import Tester from '@ddn/test-utils'
 import DdnJS from '../ddn-js'
-const Tester = DdnUtils.Tester
 
 const debug = Debug('debug')
 const expect = Tester.expect

@@ -1,24 +1,35 @@
-# DDN Node.js Library
+# DDN js Library
 
-## About
-这是 DDN 服务端 SDK，不考虑浏览器的兼容性。
+## About 关于
 
-## Install
+这是 DDN javascript SDK，兼容基于Node.js的服务端和浏览器端
+
+## Install 安装
 
 ```
 npm install @ddn/node-sdk --save
 ```
 
-## Import
+## Usage 使用
 
-Node.js
+只要基于 ES6 开发，Node.js或浏览器端都可以这样调用
 
 ```
-var ddnsdk = require('@ddn/node-sdk');
-ddnsdk.init.int('nethash')
+import DdnJS from '@ddn/node-sdk';
+// DdnJS.options.set('nethash', '0ab796cd') 这是默认值
+DdnJS.init()
 ```
-
-
-## Usage
 
 Please reference the [ddn http interface documents](https://github.com/ddnlink/ddn-docs/node-sdk-api.md)
+
+## Develop 开发
+
+注意的是，不建议在其他组件里调用本包，避免循环引用；同时，本包使用的 Http Api，所以不需要引入资产包。
+
+## Release 发布
+
+每次修改发布，请执行一次如下命令，以便打包 web 端文件`ddn.min.js`
+
+```
+$ yarn build
+```

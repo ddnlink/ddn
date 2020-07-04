@@ -1,9 +1,8 @@
 /**
  * passed
  */
-import DdnUtil from '@ddn/utils'
 import Debug from 'debug'
-const node = DdnUtil.Tester
+import node from '@ddn/test-utils'
 
 const debug = Debug('debug')
 const expect = node.expect

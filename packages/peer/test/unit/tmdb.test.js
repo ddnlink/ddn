@@ -1,10 +1,9 @@
 /**
  * passed
  */
-import DdnUtil from '@ddn/utils'
+import node from '@ddn/test-utils'
 
 import Tmdb from '../../lib/helpers/tmdb'
-const node = DdnUtil.Tester
 
 describe('tmdb', () => {
   it('normal test', done => {

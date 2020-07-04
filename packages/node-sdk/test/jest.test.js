@@ -1,6 +1,5 @@
 // Jest mothods
-import DdnUtils from '@ddn/utils'
-const Tester = DdnUtils.Tester
+import Tester from '@ddn/test-utils'
 
 const expect = Tester.expect
 

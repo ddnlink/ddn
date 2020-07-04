@@ -2,9 +2,9 @@
 import Debug from 'debug'
 import DdnUtils from '@ddn/utils'
 import { Transfer } from './dapp/transfer'
+import Tester from '@ddn/test-utils'
 
 const debug = Debug('debug')
-const Tester = DdnUtils.Tester
 
 const dappDemo = {
   icon: 'http://ebookchain.org/static/media/logo.5e78d8c2.png',

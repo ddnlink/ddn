@@ -12,9 +12,8 @@ import supertest from 'supertest'
 import async from 'async'
 import request from 'request'
 import bluebird from 'bluebird'
-import assetTypes from '../asset-types'
-import bignum from '../bignumber'
 
+import DdnUtils from '@ddn/utils'
 import DdnCrypto from '@ddn/crypto'
 import DdnCore from '@ddn/core'
 import { getConfigFile, requireFile } from '@ddn/core/lib/getUserConfig'
@@ -43,6 +42,9 @@ import {
 
 // TODO 包的整理规划需要进一步明确原则，根据通用性确定是否写成npm包
 import { DappCategory, DappType } from '@ddn/asset-dapp'
+
+const assetTypes = DdnUtils.assetTypes
+const bignum = DdnUtils.bignum
 
 // Node configuration
 const baseDir = path.resolve(process.cwd(), './examples/fun-tests')

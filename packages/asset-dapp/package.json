@@ -27,5 +27,6 @@
     "decompress-zip": "^0.2.2",
     "request": "^2.88.0",
     "valid-url": "^1.0.9"
-  }
+  },
+  "gitHead": "f32e192fd36ba5762774a8f4d440fa02c15cb860"
 }

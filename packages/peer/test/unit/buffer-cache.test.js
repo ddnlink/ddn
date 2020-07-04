@@ -1,10 +1,9 @@
 /**
  * passed
  */
-import DdnUtil from '@ddn/utils'
+import node from '@ddn/test-utils'
 
 import BufferCache from '../../lib/helpers/buffer-cache'
-const node = DdnUtil.Tester
 
 describe('BufferCache', () => {
   it('normal test', async () => {

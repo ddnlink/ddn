@@ -1,8 +1,6 @@
 import _ from 'lodash'
 import Debug from 'debug'
-import DdnUtils from '@ddn/utils'
-
-const Tester = DdnUtils.Tester
+import Tester from '@ddn/test-utils'
 
 const debug = Debug('debug')
 const expect = Tester.expect

@@ -3,11 +3,10 @@
  */
 import Debug from 'debug'
 import crypto from 'crypto'
-import DdnUtils from '@ddn/utils'
+import Tester from '@ddn/test-utils'
 import DdnJS from '../ddn-js'
 
 const debug = Debug('debug')
-const Tester = DdnUtils.Tester
 
 const account = Tester.randomAccount()
 const account2 = Tester.randomAccount()

@@ -42,8 +42,6 @@ class Evidence extends Asset.Base {
       trs.asset.evidence.description = ''
     }
 
-    console.log('evidence trs', trs)
-
     return trs
   }
 

@@ -1,13 +1,10 @@
 /**
  * note passed
  */
-import DdnUtil from '@ddn/utils'
-
 import Debug from 'debug'
 import async from 'async'
-
+import node from '@ddn/test-utils'
 const debug = Debug('multinodes')
-const node = DdnUtil.Tester
 
 // 全部启动下面的服务才能测试通过
 const urls = [

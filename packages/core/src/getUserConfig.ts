@@ -22,6 +22,7 @@ export function getConfigFile (cwd) {
       'config/config.js'
     ]
 
+  // const validFiles = files.filter(f => {})
   const validFiles = files.filter(f => existsSync(join(cwd, f)))
 
   assert(

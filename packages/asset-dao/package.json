@@ -25,5 +25,6 @@
     "bytebuffer": "^5.0.1",
     "sequelize": "^5.8.7",
     "valid-url": "^1.0.9"
-  }
+  },
+  "gitHead": "f32e192fd36ba5762774a8f4d440fa02c15cb860"
 }

@@ -1,11 +1,10 @@
 /**
  * passed
  */
-import DdnUtil from '@ddn/utils'
 import Debug from 'debug'
+import node from '@ddn/test-utils'
 
 const debug = Debug('peer')
-const node = DdnUtil.Tester
 
 describe('GET /peers/version', () => {
   it('Should be ok', done => {

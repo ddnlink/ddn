@@ -9,9 +9,9 @@
  * passed
  */
 import DdnUtil from '@ddn/utils'
+import node from '@ddn/test-utils'
 import constants from '../../lib/constants'
 import BlockStatus from '../../lib/kernal/block/block-status'
-const node = DdnUtil.Tester
 
 describe('Constants params', () => {
   it('test block reward', done => {

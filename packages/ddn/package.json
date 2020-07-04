@@ -43,5 +43,6 @@
         "type": "git",
         "url": "https://github.com/ddnlink/ddn/tree/master/packages/ddn"
     },
-    "homepage": "https://github.com/ddnlink/ddn/tree/master/packages/ddn"
+    "homepage": "https://github.com/ddnlink/ddn/tree/master/packages/ddn",
+    "gitHead": "f32e192fd36ba5762774a8f4d440fa02c15cb860"
 }

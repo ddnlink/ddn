@@ -18,10 +18,10 @@
   "dependencies": {
     "@ddn/core": "^0.2.1",
     "bignumber.js": "^7.2.1",
-    "depd": "^2.0.0",
     "ip": "^1.1.5",
     "shelljs": "^0.8.3"
   },
   "author": "wly",
-  "license": "MIT"
+  "license": "MIT",
+  "gitHead": "f32e192fd36ba5762774a8f4d440fa02c15cb860"
 }

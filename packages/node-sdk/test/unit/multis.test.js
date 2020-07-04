@@ -2,11 +2,10 @@
  * passed
  */
 import Debug from 'debug'
-import DdnUtils from '@ddn/utils'
+import Tester from '@ddn/test-utils'
 import DdnJS from '../ddn-js'
 
 const debug = Debug('debug')
-const Tester = DdnUtils.Tester
 
 async function createTransfer (address, amount, secret, second_secret) {
   return await DdnJS.transaction.createTransaction(address, amount, null, secret, second_secret)

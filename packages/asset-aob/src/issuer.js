@@ -99,8 +99,6 @@ class Issuer extends Asset.Base {
   async getOneByName (req) {
     const name = req.params.name
     const data = await this.queryAsset({ name }, null, false, 1, 1)
-    console.log('getOneByName data', data)
-
     return { success: true, result: data[0] }
   }
 

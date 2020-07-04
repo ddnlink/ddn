@@ -1,10 +1,11 @@
 // passed
 import Debug from 'debug'
 import DdnUtils from '@ddn/utils'
+import Tester from '@ddn/test-utils'
 import DdnJS from '../../ddn-js'
 
 const debug = Debug('debug')
-const Tester = DdnUtils.Tester
+
 const Gaccount = Tester.Gaccount
 
 jest.setTimeout(50000)

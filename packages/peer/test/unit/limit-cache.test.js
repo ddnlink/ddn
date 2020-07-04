@@ -2,7 +2,7 @@
  * passed
  */
 import DdnUtil from '@ddn/utils'
-const node = DdnUtil.Tester
+import node from '@ddn/test-utils'
 
 describe('LimitCache', () => {
   it('normal test', done => {
