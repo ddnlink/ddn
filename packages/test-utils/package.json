@@ -6,7 +6,14 @@
   "files": [
     "lib"
   ],
-  "repository": "http://github.com/ddnlink/ddn/tree/master/packages/test-utils",
+  "repository": {
+    "type": "git",
+    "url": "http://github.com/ddnlink/ddn/tree/master/packages/test-utils"
+  },
+  "homepage": "http://github.com/ddnlink/ddn/tree/master/packages/test",
+  "bugs": {
+    "url": "http://github.com/ddnlink/ddn/issues"
+  },
   "author": "limsbase",
   "license": "MIT",
   "dependencies": {
@@ -18,5 +25,6 @@
     "request": "^2.88.2",
     "supertest": "^4.0.2"
   },
-  "gitHead": "29ef555868f39340333d04ed85d8125efbb24ca3"
+  "gitHead": "c83d3689cf78bd221a7380430d6d18e7516348b8"
 }
+
