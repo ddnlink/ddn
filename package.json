@@ -31,7 +31,6 @@
     "changelog": "conventional-changelog -p angular -i CHANGELOG.md -w",
     "chore:update-deps": "sh ./scripts/reinstall_deps.sh",
     "clean": "lerna clean -y",
-    "publish": "./scripts/publish.js",
     "test": "./packages/test/bin/test.js",
     "lint": "eslint --fix --ext .js packages/**/src packages/**/test",
     "doc:dev": "dumi dev",
