@@ -10,7 +10,7 @@
     "type": "git",
     "url": "http://github.com/ddnlink/ddn/tree/master/packages/test-utils"
   },
-  "homepage": "http://github.com/ddnlink/ddn/tree/master/packages/test",
+  "homepage": "http://github.com/ddnlink/ddn/tree/master/packages/test-utils",
   "bugs": {
     "url": "http://github.com/ddnlink/ddn/issues"
   },
