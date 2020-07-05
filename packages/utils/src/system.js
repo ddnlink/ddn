@@ -26,7 +26,8 @@ class System {
   }
 
   static getErrorMsg (err) {
-    return err.stack ? err.stack : (err.message ? err.message : err)
+    // return err.stack ? err.stack : (err.message ? err.message : err)
+    return err.message ? err.message : (err.stack ? err.stack : err)
   }
 
   static exec (cmd) {

@@ -1,8 +1,7 @@
-// import Asset from '@ddn/asset-base'
+import Asset from '@ddn/asset-base'
 import options from './options'
 
-// fixme: 已经修改为 config.js
-// import assetPlugins from './config.asset'
+import assetPlugins from './config.asset'
 
 /**
  * 用于初始化 Sdk
@@ -18,5 +17,6 @@ export default function (nethash, net) {
     options.set('net', net)
   }
 
-  // Asset.Utils.loadFromObject(assetPlugins)
+  // Todo: sdk 不需要完整加载资产插件包，仅仅注册名称即可，这里可以简化成配置式的，让打包之后更小
+  Asset.Utils.loadFromObject(assetPlugins)
 }

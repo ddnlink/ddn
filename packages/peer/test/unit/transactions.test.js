@@ -3,8 +3,7 @@
  */
 import Debug from 'debug'
 import DdnUtils from '@ddn/utils'
-
-const node = DdnUtils.Tester
+import node from '@ddn/test-utils'
 
 const debug = Debug('debug')
 

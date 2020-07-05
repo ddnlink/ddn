@@ -1,12 +1,11 @@
 import Debug from 'debug'
 import sha256 from 'fast-sha256'
 import RIPEMD160 from 'ripemd160'
-// import DdnUtils from '@ddn/utils'
+
 import crypto from '../lib'
 import base58check from '../lib/base58check'
 
 const debug = Debug('test')
-// const expect = DdnUtils.Tester.expect
 
 const tokenPrefix = 'D'
 

@@ -1,10 +1,9 @@
 // no pass
 import Debug from 'debug'
 import DdnUtil from '@ddn/utils'
-
+import Tester from '@ddn/test-utils'
 import DdnJS from '../../ddn-js'
 
-const Tester = DdnUtil.Tester
 const debug = Debug('debug')
 
 const Account1 = Tester.randomTxAccount()

@@ -4,13 +4,11 @@
 import path from 'path'
 import Debug from 'debug'
 import DdnUtils from '@ddn/utils'
+import node from '@ddn/test-utils'
 
-import {
-  requireFile
-} from '@ddn/core/lib/getUserConfig'
+import { requireFile } from '@ddn/core/lib/getUserConfig'
 
 const debug = Debug('debug')
-const node = DdnUtils.Tester
 
 const genesisblockFile = path.resolve(process.cwd(), './examples/fun-tests/config/genesisBlock.json')
 const genesisblock = requireFile(genesisblockFile)

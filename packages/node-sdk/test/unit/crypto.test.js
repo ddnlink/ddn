@@ -4,6 +4,7 @@ import crypto from 'crypto'
 import { Buffer } from 'buffer'
 import Debug from 'debug'
 import ddnCrypto from '@ddn/crypto'
+import node from '@ddn/test-utils'
 
 import DdnJS from '../ddn-js'
 
@@ -62,7 +63,7 @@ describe('crypto', () => {
     })
 
     it('length should be 64', async function () {
-      const trs = await createTransfer(Tester.Eaccount.address, '10000000000000', Tester.Gaccount.password)
+      const trs = await createTransfer(node.Eaccount.address, '10000000000000', node.Gaccount.password)
       const hash = await getHash(trs)
       debug(hash)
       expect(hash.length).toBe(64)
@@ -78,7 +79,7 @@ describe('crypto', () => {
 
     it('length should be 64', async function () {
       const keypair = await ddnCrypto.getKeys('secret')
-      const trs = await createTransfer(Tester.Eaccount.address, '10000000000000', Tester.Gaccount.password)
+      const trs = await createTransfer(node.Eaccount.address, '10000000000000', node.Gaccount.password)
       const signature = await sign(trs, keypair)
       const str = Buffer.from(signature, 'hex') // 必须解密
       expect(str.length).toBe(64)
@@ -108,7 +109,7 @@ describe('crypto', () => {
       const Phasekey = ddnCrypto.generateSecret()
       const publicKey = ddnCrypto.getKeys(Phasekey).publicKey
 
-      Tester.expect(publicKey).to.be.a('string')
+      node.expect(publicKey).to.be.a('string')
 
       const publicKey2 = publicKey.toString('hex')
       const publicKey3 = publicKey2.toString('hex')

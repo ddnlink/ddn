@@ -3,9 +3,9 @@
  */
 import Debug from 'debug'
 import DdnUtils from '@ddn/utils'
+import node from '@ddn/test-utils'
 
 const debug = Debug('debug')
-const node = DdnUtils.Tester
 
 let Raccount = node.randomAccount()
 while (Raccount.username === Raccount.username.toUpperCase()) {

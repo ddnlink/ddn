@@ -1,4 +1,4 @@
-import DdnJS from '../ddn.js'
+import DdnJS from '../ddn.min.js'
 // const DdnJS = require('../build.js')
 
 describe('DdnJS', () => {
