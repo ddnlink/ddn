@@ -1,6 +1,6 @@
 {
   "name": "@ddn/asset-dapp",
-  "version": "0.2.6",
+  "version": "0.2.7",
   "description": "this is asset-dapp package",
   "main": "lib/index.js",
   "repository": {
@@ -19,10 +19,10 @@
   "author": "wly",
   "license": "MIT",
   "dependencies": {
-    "@ddn/asset-base": "^0.2.5",
-    "@ddn/crypto": "^0.2.6",
-    "@ddn/sandbox": "^0.1.2",
-    "@ddn/utils": "^0.1.6",
+    "@ddn/asset-base": "^0.2.6",
+    "@ddn/crypto": "^0.2.7",
+    "@ddn/sandbox": "^0.1.3",
+    "@ddn/utils": "^0.1.7",
     "async": "^2.6.1",
     "decompress-zip": "^0.2.2",
     "request": "^2.88.0",
