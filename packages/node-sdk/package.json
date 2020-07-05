@@ -1,6 +1,6 @@
 {
   "name": "@ddn/node-sdk",
-  "version": "0.3.3",
+  "version": "0.3.4",
   "description": "DDN Node.js SDK",
   "main": "lib/index.js",
   "browser": {
@@ -24,6 +24,14 @@
   ],
   "author": "wxx",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "http://github.com/ddnlink/ddn/tree/master/packages/node-sdk"
+  },
+  "homepage": "http://github.com/ddnlink/ddn/tree/master/packages/node-sdk",
+  "bugs": {
+    "url": "http://github.com/ddnlink/ddn/issues"
+  },
   "dependencies": {
     "@ddn/asset-aob": "^0.2.5",
     "@ddn/asset-base": "^0.2.7",
