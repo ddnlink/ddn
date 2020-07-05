@@ -6,7 +6,6 @@
   "repository": "http://github.com/ddnlink/ddn/tree/master/packages/test-utils",
   "author": "limsbase",
   "license": "MIT",
-  "private": false,
   "dependencies": {
     "@ddn/core": "^0.2.2",
     "@ddn/utils": "^0.1.7"
@@ -15,5 +14,6 @@
     "chai": "^4.2.0",
     "request": "^2.88.2",
     "supertest": "^4.0.2"
-  }
+  },
+  "gitHead": "ee39083b7e1fe9d3a1d1cf9fddd1decd4fabff98"
 }
