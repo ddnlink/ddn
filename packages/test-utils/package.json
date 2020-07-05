@@ -1,6 +1,6 @@
 {
   "name": "@ddn/test-utils",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "Test utils for DDN",
   "main": "lib/index.js",
   "files": [
@@ -27,4 +27,3 @@
   },
   "gitHead": "c83d3689cf78bd221a7380430d6d18e7516348b8"
 }
-

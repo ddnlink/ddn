@@ -1,6 +1,6 @@
 {
   "name": "@ddn/node-sdk",
-  "version": "0.3.2",
+  "version": "0.3.3",
   "description": "DDN Node.js SDK",
   "main": "lib/index.js",
   "browser": {
