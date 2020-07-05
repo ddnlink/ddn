@@ -3,6 +3,9 @@
   "version": "0.0.3",
   "description": "Test utils for DDN",
   "main": "lib/index.js",
+  "files": [
+    "lib"
+  ],
   "repository": "http://github.com/ddnlink/ddn/tree/master/packages/test-utils",
   "author": "limsbase",
   "license": "MIT",
@@ -15,5 +18,5 @@
     "request": "^2.88.2",
     "supertest": "^4.0.2"
   },
-  "gitHead": "bac867cc8a5474ff01c896284615b222f7faef5c"
+  "gitHead": "29ef555868f39340333d04ed85d8125efbb24ca3"
 }
