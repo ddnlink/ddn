@@ -89145,7 +89145,8 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
 
 function getBytes(_x, _x2, _x3) {
   return _getBytes.apply(this, arguments);
-}
+} // 系统需要 Uint8Array
+
 
 function _getBytes() {
   _getBytes = _asyncToGenerator(function* (transaction, skipSignature, skipSecondSignature) {
@@ -89241,9 +89242,20 @@ function _getBytes() {
     }
 
     bb.flip();
-    return bb.toBuffer();
+    return arrayBufferToUnit8Array(bb);
   });
   return _getBytes.apply(this, arguments);
+}
+
+function arrayBufferToUnit8Array(byteBuffer) {
+  const unit8Buffer = new Uint8Array(byteBuffer.toArrayBuffer());
+  const buffer = [];
+
+  for (let i = 0; i < unit8Buffer.length; i++) {
+    buffer[i] = unit8Buffer[i];
+  }
+
+  return Buffer.from(buffer);
 }
 
 function getAssetBytes(_x4) {

@@ -25,8 +25,10 @@ describe('transaction.js', () => {
       expect(createTransaction).to.be.a('function')
     })
 
+    //  DP2kJY3RweZU2jhYpnSbLbxVjgot95bUma 10000000000 asd enter boring shaft rent essence foil trick vibrant fabric quote indoor output
     it('should create transaction without second signature', async () => {
-      trs = await createTransaction('58191285901858109', 1000, '', 'secret')
+      trs = await createTransaction('DP2kJY3RweZU2jhYpnSbLbxVjgot95bUma', '1000', 'asd', 'enter boring shaft rent essence foil trick vibrant fabric quote indoor output')
+      debug('trs', trs)
       expect(trs).to.be.ok
     })
 

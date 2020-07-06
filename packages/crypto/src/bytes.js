@@ -89,7 +89,17 @@ async function getBytes (transaction, skipSignature, skipSecondSignature) {
 
   bb.flip()
 
-  return bb.toBuffer()
+  return arrayBufferToUnit8Array(bb)
+}
+
+// 系统需要 Uint8Array
+function arrayBufferToUnit8Array (byteBuffer) {
+  const unit8Buffer = new Uint8Array(byteBuffer.toArrayBuffer())
+  const buffer = []
+  for (let i = 0; i < unit8Buffer.length; i++) {
+    buffer[i] = unit8Buffer[i]
+  }
+  return Buffer.from(buffer)
 }
 
 async function getAssetBytes (transaction) {
