@@ -1,6 +1,6 @@
 {
   "name": "@ddn/asset-dao",
-  "version": "0.2.8",
+  "version": "0.2.9",
   "description": "this is asset-dao",
   "main": "lib/index.js",
   "author": "wly",
@@ -20,7 +20,7 @@
   ],
   "dependencies": {
     "@ddn/asset-base": "^0.2.7",
-    "@ddn/crypto": "^0.2.8",
+    "@ddn/crypto": "^0.2.9",
     "@ddn/utils": "^0.1.8",
     "bytebuffer": "^5.0.1",
     "sequelize": "^5.8.7",
