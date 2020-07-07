@@ -26,8 +26,11 @@ class System {
   }
 
   static getErrorMsg (err) {
-    // return err.stack ? err.stack : (err.message ? err.message : err)
-    return err.message ? err.message : (err.stack ? err.stack : err)
+    let stack = err
+    if (process.env.NODE_ENV === 'development' & err.stack) {
+      stack = err.stack
+    }
+    return err.message ? err.message : stack
   }
 
   static exec (cmd) {

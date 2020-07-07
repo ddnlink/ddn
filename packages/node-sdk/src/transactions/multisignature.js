@@ -15,11 +15,13 @@ function signTransaction (trs, secret) {
 async function createMultisignature (keysgroup, lifetime, min, secret, secondSecret) {
   const keys = crypto.getKeys(secret)
 
+  const fee = DdnUtils.bignum.multiply(DdnUtils.bignum.plus(keysgroup.length, 1), 5, constants.fixedPoint)
+
   const transaction = {
     type: DdnUtils.assetTypes.MULTISIGNATURE, // MULTISIGNATURE
     nethash: options.get('nethash'),
     amount: '0', // Bignum update
-    fee: constants.net.fees.multiSignature,
+    fee,
     recipientId: null,
     senderPublicKey: keys.publicKey,
     timestamp: slots.getTime() - options.get('clientDriftSeconds'),

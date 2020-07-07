@@ -18,7 +18,7 @@ export default {
   transaction: require('./transactions/transaction').default,
   vote: require('./transactions/vote').default,
   username: require('./transactions/username').default,
-  multitransfer: require('./transactions/multitransfer').default,
+  multisignature: require('./transactions/multisignature').default,
 
   // dapp
   dapp: require('./transactions/dapp').default,

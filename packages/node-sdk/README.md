@@ -16,8 +16,8 @@ npm install @ddn/node-sdk --save
 
 ```
 import DdnJS from '@ddn/node-sdk';
-// DdnJS.options.set('nethash', '0ab796cd') 这是默认值
-DdnJS.init()
+// DdnJS.init('0ab796cd', 'testnet') 这是默认值
+DdnJS.init('0ab796cd')
 ```
 
 Please reference the [ddn http interface documents](https://github.com/ddnlink/ddn-docs/node-sdk-api.md)

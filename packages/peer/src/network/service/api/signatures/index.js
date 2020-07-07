@@ -153,7 +153,7 @@ class RootRouter {
     //   DdnUtils.bignum update
     //   fee = 5 * constants.fixedPoint;
     const fee = DdnUtils.bignum.multiply(5, this.constants.fixedPoint)
-    return { fee }
+    return { success: true, fee }
   }
 }
 

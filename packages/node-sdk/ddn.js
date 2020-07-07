@@ -88635,7 +88635,7 @@ class AssetBase {
 
 var _default = AssetBase;
 exports.default = _default;
-},{"./common-utils":324,"./utils":326,"@ddn/utils":359,"bytebuffer":165,"lodash":246,"react":284}],324:[function(require,module,exports){
+},{"./common-utils":324,"./utils":326,"@ddn/utils":360,"bytebuffer":165,"lodash":246,"react":284}],324:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -89845,7 +89845,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 _constants.default.net = _constants.default[_options.default.get('net')];
 var _default = _constants.default;
 exports.default = _default;
-},{"../options":338,"./constants.ddn":334,"react":284}],336:[function(require,module,exports){
+},{"../options":339,"./constants.ddn":334,"react":284}],336:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -89884,7 +89884,7 @@ var _default = {
   transaction: require('./transactions/transaction').default,
   vote: require('./transactions/vote').default,
   username: require('./transactions/username').default,
-  multitransfer: require('./transactions/multitransfer').default,
+  multisignature: require('./transactions/multisignature').default,
   // dapp
   dapp: require('./transactions/dapp').default,
   // aob
@@ -89898,7 +89898,35 @@ var _default = {
   assetPlugin: require('./transactions/asset-plugin').default
 };
 exports.default = _default;
-},{"./constants":335,"./init":337,"./options":338,"./time/format":339,"./time/slots":340,"./transactions/aob":341,"./transactions/asset-plugin":342,"./transactions/coupon":343,"./transactions/dao":344,"./transactions/dapp":345,"./transactions/delegate":346,"./transactions/evidence":347,"./transactions/exchange":348,"./transactions/multitransfer":349,"./transactions/signature":350,"./transactions/transaction":351,"./transactions/transfer":352,"./transactions/username":353,"./transactions/vote":354,"./utils/crypto":355,"react":284}],337:[function(require,module,exports){
+},{"./constants":335,"./init":338,"./options":339,"./time/format":340,"./time/slots":341,"./transactions/aob":342,"./transactions/asset-plugin":343,"./transactions/coupon":344,"./transactions/dao":345,"./transactions/dapp":346,"./transactions/delegate":347,"./transactions/evidence":348,"./transactions/exchange":349,"./transactions/multisignature":350,"./transactions/signature":351,"./transactions/transaction":352,"./transactions/transfer":353,"./transactions/username":354,"./transactions/vote":355,"./utils/crypto":356,"react":284}],337:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
+
+function _react() {
+  const data = _interopRequireDefault(require("react"));
+
+  _react = function _react() {
+    return data;
+  };
+
+  return data;
+}
+
+var _index = _interopRequireDefault(require("./index"));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+// 输出前端
+// 必须初始化
+_index.default.init('0ab796cd', 'testnet');
+
+var _default = _index.default;
+exports.default = _default;
+},{"./index":336,"react":284}],338:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -89949,7 +89977,7 @@ function _default(nethash, net) {
 
   _assetBase().default.Utils.loadFromObject(_config.default);
 }
-},{"./config.asset":333,"./options":338,"@ddn/asset-base":325,"react":284}],338:[function(require,module,exports){
+},{"./config.asset":333,"./options":339,"@ddn/asset-base":325,"react":284}],339:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -89991,7 +90019,7 @@ var _default = {
 
 };
 exports.default = _default;
-},{"react":284}],339:[function(require,module,exports){
+},{"react":284}],340:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -90105,7 +90133,7 @@ var _default = {
   fullTimestamp
 };
 exports.default = _default;
-},{"./slots":340,"react":284}],340:[function(require,module,exports){
+},{"./slots":341,"react":284}],341:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -90199,7 +90227,7 @@ var _default = {
   beginEpochTime
 };
 exports.default = _default;
-},{"../constants":335,"react":284}],341:[function(require,module,exports){
+},{"../constants":335,"react":284}],342:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -90381,7 +90409,7 @@ var _default = {
 
 };
 exports.default = _default;
-},{"../constants":335,"../options":338,"../time/slots":340,"@ddn/crypto":332,"@ddn/utils":359,"react":284}],342:[function(require,module,exports){
+},{"../constants":335,"../options":339,"../time/slots":341,"@ddn/crypto":332,"@ddn/utils":360,"react":284}],343:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -90483,7 +90511,7 @@ var _default = {
   createPluginAsset
 };
 exports.default = _default;
-},{"../options":338,"../time/slots":340,"../utils/crypto":355,"@ddn/asset-base":325,"react":284}],343:[function(require,module,exports){
+},{"../options":339,"../time/slots":341,"../utils/crypto":356,"@ddn/asset-base":325,"react":284}],344:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -91089,7 +91117,7 @@ var _default = {
   createExchangeTransferConfirm
 };
 exports.default = _default;
-},{"../constants":335,"../options":338,"../time/slots":340,"../utils/crypto":355,"@ddn/utils":359,"react":284}],344:[function(require,module,exports){
+},{"../constants":335,"../options":339,"../time/slots":341,"../utils/crypto":356,"@ddn/utils":360,"react":284}],345:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -91410,7 +91438,7 @@ var _default = {
   createContribution
 };
 exports.default = _default;
-},{"../constants":335,"../options":338,"../time/slots":340,"../utils/crypto":355,"@ddn/utils":359,"react":284}],345:[function(require,module,exports){
+},{"../constants":335,"../options":339,"../time/slots":341,"../utils/crypto":356,"@ddn/utils":360,"react":284}],346:[function(require,module,exports){
 (function (Buffer){
 "use strict";
 
@@ -91556,7 +91584,7 @@ var _default = {
 };
 exports.default = _default;
 }).call(this,require("buffer").Buffer)
-},{"../constants":335,"../options":338,"../time/slots":340,"../utils/crypto":355,"@ddn/utils":359,"buffer":164,"bytebuffer":165,"react":284}],346:[function(require,module,exports){
+},{"../constants":335,"../options":339,"../time/slots":341,"../utils/crypto":356,"@ddn/utils":360,"buffer":164,"bytebuffer":165,"react":284}],347:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -91639,7 +91667,7 @@ var _default = {
   createDelegate
 };
 exports.default = _default;
-},{"../constants":335,"../options":338,"../time/slots":340,"../utils/crypto":355,"@ddn/utils":359,"react":284}],347:[function(require,module,exports){
+},{"../constants":335,"../options":339,"../time/slots":341,"../utils/crypto":356,"@ddn/utils":360,"react":284}],348:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -91735,7 +91763,7 @@ var _default = {
   createEvidence
 };
 exports.default = _default;
-},{"../constants":335,"../options":338,"../time/slots":340,"../utils/crypto":355,"@ddn/utils":359,"react":284}],348:[function(require,module,exports){
+},{"../constants":335,"../options":339,"../time/slots":341,"../utils/crypto":356,"@ddn/utils":360,"react":284}],349:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -91832,7 +91860,7 @@ var _default = {
   createExchange
 };
 exports.default = _default;
-},{"../constants":335,"../options":338,"../time/slots":340,"../utils/crypto":355,"@ddn/utils":359,"react":284}],349:[function(require,module,exports){
+},{"../constants":335,"../options":339,"../time/slots":341,"../utils/crypto":356,"@ddn/utils":360,"react":284}],350:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -91864,7 +91892,7 @@ var _crypto = _interopRequireDefault(require("../utils/crypto"));
 
 var _constants = _interopRequireDefault(require("../constants"));
 
-var _slots = _interopRequireDefault(require("../time/slots.js"));
+var _slots = _interopRequireDefault(require("../time/slots"));
 
 var _options = _interopRequireDefault(require("../options"));
 
@@ -91874,66 +91902,39 @@ function asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) { try
 
 function _asyncToGenerator(fn) { return function () { var self = this, args = arguments; return new Promise(function (resolve, reject) { var gen = fn.apply(self, args); function _next(value) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "next", value); } function _throw(err) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "throw", err); } _next(undefined); }); }; }
 
-const bignum = _utils().default.bignum;
+function signTransaction(trs, secret) {
+  const keys = _crypto.default.getKeys(secret);
 
-function createMultiTransfer(_x, _x2, _x3, _x4) {
-  return _createMultiTransfer.apply(this, arguments);
+  const signature = _crypto.default.sign(trs, keys);
+
+  return signature;
 }
 
-function _createMultiTransfer() {
-  _createMultiTransfer = _asyncToGenerator(function* (outputs, secret, secondSecret, cb) {
+function createMultisignature(_x, _x2, _x3, _x4, _x5) {
+  return _createMultisignature.apply(this, arguments);
+}
+
+function _createMultisignature() {
+  _createMultisignature = _asyncToGenerator(function* (keysgroup, lifetime, min, secret, secondSecret) {
     const keys = _crypto.default.getKeys(secret);
 
-    if (!outputs || outputs.length === 0) {
-      throw new Error('Invalid fileHash format');
-    }
-
-    const sender = _crypto.default.generateAddress(keys.publicKey);
-
-    const fee = _constants.default.net.fees.multiTransfer;
-    let amount = bignum.new(0); // bignum update
-
-    const recipientId = [];
-
-    for (let i = 0; i < outputs.length; i++) {
-      const output = outputs[i];
-
-      if (!output.recipientId || !output.amount) {
-        return cb('output recipient or amount null');
-      }
-
-      if (!_crypto.default.isAddress(output.recipientId)) {
-        return cb('Invalid output recipient');
-      } // bignum update
-      // if (output.amount <= 0) {
-
-
-      if (bignum.isLessThanOrEqualTo(output.amount, 0)) {
-        return cb('Invalid output amount');
-      }
-
-      if (output.recipientId === sender) {
-        return cb('Invalid output recipientId, cannot be your self');
-      } // bignum update
-      // amount += output.amount
-
-
-      amount = bignum.plus(amount, output.amount);
-      recipientId.push(output.recipientId);
-    }
+    const fee = _utils().default.bignum.multiply(_utils().default.bignum.plus(keysgroup.length, 1), 5, _constants.default.fixedPoint);
 
     const transaction = {
-      type: _utils().default.assetTypes.MULTITRANSFER,
+      type: _utils().default.assetTypes.MULTISIGNATURE,
+      // MULTISIGNATURE
       nethash: _options.default.get('nethash'),
-      amount: amount.toString(),
-      // bignum update amount,
-      fee: `${fee}`,
-      recipientId: recipientId.join('|'),
+      amount: '0',
+      // Bignum update
+      fee,
+      recipientId: null,
       senderPublicKey: keys.publicKey,
       timestamp: _slots.default.getTime() - _options.default.get('clientDriftSeconds'),
       asset: {
-        output: {
-          outputs
+        multisignature: {
+          min,
+          lifetime,
+          keysgroup
         }
       }
     };
@@ -91948,14 +91949,15 @@ function _createMultiTransfer() {
     transaction.id = yield _crypto.default.getId(transaction);
     return transaction;
   });
-  return _createMultiTransfer.apply(this, arguments);
+  return _createMultisignature.apply(this, arguments);
 }
 
 var _default = {
-  createMultiTransfer
+  createMultisignature,
+  signTransaction
 };
 exports.default = _default;
-},{"../constants":335,"../options":338,"../time/slots.js":340,"../utils/crypto":355,"@ddn/utils":359,"react":284}],350:[function(require,module,exports){
+},{"../constants":335,"../options":339,"../time/slots":341,"../utils/crypto":356,"@ddn/utils":360,"react":284}],351:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -92038,7 +92040,7 @@ var _default = {
   createSignature
 };
 exports.default = _default;
-},{"../constants":335,"../options":338,"../time/slots":340,"../utils/crypto":355,"@ddn/utils":359,"react":284}],351:[function(require,module,exports){
+},{"../constants":335,"../options":339,"../time/slots":341,"../utils/crypto":356,"@ddn/utils":360,"react":284}],352:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -92177,7 +92179,7 @@ var _default = {
   createLock
 };
 exports.default = _default;
-},{"../constants":335,"../options":338,"../time/slots":340,"../utils/crypto":355,"@ddn/utils":359,"lodash":246,"react":284}],352:[function(require,module,exports){
+},{"../constants":335,"../options":339,"../time/slots":341,"../utils/crypto":356,"@ddn/utils":360,"lodash":246,"react":284}],353:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -92326,7 +92328,7 @@ var _default = {
   signOutTransfer
 };
 exports.default = _default;
-},{"../constants":335,"../options":338,"../time/slots":340,"../utils/crypto":355,"@ddn/utils":359,"react":284}],353:[function(require,module,exports){
+},{"../constants":335,"../options":339,"../time/slots":341,"../utils/crypto":356,"@ddn/utils":360,"react":284}],354:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -92414,7 +92416,7 @@ var _default = {
   createUsername
 };
 exports.default = _default;
-},{"../constants":335,"../options":338,"../time/slots":340,"../utils/crypto":355,"@ddn/utils":359,"react":284}],354:[function(require,module,exports){
+},{"../constants":335,"../options":339,"../time/slots":341,"../utils/crypto":356,"@ddn/utils":360,"react":284}],355:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -92496,7 +92498,7 @@ var _default = {
   createVote
 };
 exports.default = _default;
-},{"../constants":335,"../options":338,"../time/slots":340,"../utils/crypto":355,"@ddn/utils":359,"react":284}],355:[function(require,module,exports){
+},{"../constants":335,"../options":339,"../time/slots":341,"../utils/crypto":356,"@ddn/utils":360,"react":284}],356:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -92707,7 +92709,7 @@ var _default = {
 
 };
 exports.default = _default;
-},{"../constants":335,"@ddn/asset-base":325,"@ddn/crypto":332,"@ddn/utils":359,"buffer/":164,"crypto":175,"react":284,"tweetnacl":317}],356:[function(require,module,exports){
+},{"../constants":335,"@ddn/asset-base":325,"@ddn/crypto":332,"@ddn/utils":360,"buffer/":164,"crypto":175,"react":284,"tweetnacl":317}],357:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -92767,7 +92769,7 @@ const amount = {
 };
 var _default = amount;
 exports.default = _default;
-},{"./bignumber":358,"react":284}],357:[function(require,module,exports){
+},{"./bignumber":359,"react":284}],358:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -92852,7 +92854,7 @@ var _default = {
 
 };
 exports.default = _default;
-},{"react":284}],358:[function(require,module,exports){
+},{"react":284}],359:[function(require,module,exports){
 (function (Buffer){
 "use strict";
 
@@ -93197,7 +93199,7 @@ const bignumber = {
 var _default = bignumber;
 exports.default = _default;
 }).call(this,require("buffer").Buffer)
-},{"bignumber.js":23,"buffer":164,"react":284}],359:[function(require,module,exports){
+},{"bignumber.js":23,"buffer":164,"react":284}],360:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -93241,7 +93243,7 @@ var _default = {
   routesMap: _routesMap.default
 };
 exports.default = _default;
-},{"./amount":356,"./asset-types":357,"./bignumber":358,"./limit-cache":360,"./routes-map":361,"./runtime-states":362,"./system":363,"react":284}],360:[function(require,module,exports){
+},{"./amount":357,"./asset-types":358,"./bignumber":359,"./limit-cache":361,"./routes-map":362,"./runtime-states":363,"./system":364,"react":284}],361:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -93295,7 +93297,7 @@ class LimitCache {
 
 var _default = LimitCache;
 exports.default = _default;
-},{"react":284}],361:[function(require,module,exports){
+},{"react":284}],362:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -93475,7 +93477,7 @@ const routeMap = (app, filename, logger) => {
 
 var _default = routeMap;
 exports.default = _default;
-},{"fs":153,"react":284}],362:[function(require,module,exports){
+},{"fs":153,"react":284}],363:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -93504,7 +93506,8 @@ var _default = {
   Ready: 2
 };
 exports.default = _default;
-},{"react":284}],363:[function(require,module,exports){
+},{"react":284}],364:[function(require,module,exports){
+(function (process){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -93586,8 +93589,13 @@ class System {
   }
 
   static getErrorMsg(err) {
-    // return err.stack ? err.stack : (err.message ? err.message : err)
-    return err.message ? err.message : err.stack ? err.stack : err;
+    let stack = err;
+
+    if (process.env.NODE_ENV === 'development' & err.stack) {
+      stack = err.stack;
+    }
+
+    return err.message ? err.message : stack;
   }
 
   static exec(cmd) {
@@ -93618,4 +93626,5 @@ class System {
 
 var _default = System;
 exports.default = _default;
-},{"ip":243,"os":155,"react":284,"shelljs":311}]},{},[336]);
+}).call(this,require('_process'))
+},{"_process":268,"ip":243,"os":155,"react":284,"shelljs":311}]},{},[337]);

@@ -29,9 +29,7 @@ class Multisignature {
     return trs
   }
 
-  async calculateFee ({
-    asset
-  }, sender) {
+  async calculateFee ({ asset }, sender) {
     return DdnUtils.bignum.multiply(
       DdnUtils.bignum.plus(asset.multisignature.keysgroup.length, 1),
       5, this.constants.fixedPoint)

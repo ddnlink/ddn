@@ -110,8 +110,11 @@ class PeerService {
 
   async getHeight (req) {
     const lastBlock = this.runtime.block.getLastBlock()
+    console.log('lastBlock.height', lastBlock.height)
+
     return {
-      height: lastBlock && lastBlock.height ? lastBlock.height : 0
+      success: true,
+      height: (lastBlock && lastBlock.height) ? lastBlock.height : 0
     }
   }
 
@@ -123,6 +126,7 @@ class PeerService {
       this.logger.error(`${err}`)
     }
     return {
+      success: true,
       peers: peers || []
     }
   }
@@ -220,7 +224,7 @@ class PeerService {
     if (validateErrors) {
       return {
         success: false,
-        error: 'Schema validation error'
+        error: `Schema validation error: ${validateErrors[0].schemaPath} ${validateErrors[0].message}`
       }
     }
 
@@ -393,7 +397,7 @@ class PeerService {
             )
           ) {
             return cb(
-                            `The transaction ${transaction.id} is in process already..`
+               `The transaction ${transaction.id} is in process already..`
             ) // 这里是正常交易，仅是未确认,
           }
 

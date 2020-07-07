@@ -34,6 +34,7 @@ class PeerInvoker {
     if (!peer) {
       peer = await this.runtime.peer.getRandomPeer(dappId, allowSelf)
     }
+    // 本地节点？
     if (!peer) {
       return false
     }

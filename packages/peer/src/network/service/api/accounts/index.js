@@ -172,6 +172,7 @@ class AccountService {
     const address = this.runtime.account.generateAddressByPublicKey(keypair.publicKey)
 
     return {
+      success: true,
       secret,
       publicKey: keypair.publicKey,
       privateKey: keypair.privateKey,

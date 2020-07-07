@@ -697,6 +697,7 @@ class Transaction {
     // Calc fee
     const fee = `${await this._assets.call(trs.type, 'calculateFee', trs, sender)}`
 
+    // trs 需要加密签名，所以从客户端传来的 trs 必须包含 fee 字段，但又不能让用户随意填写，因此这里需要再次计算并验证
     if (!DdnUtils.bignum.isEqualTo(trs.fee, fee)) {
       throw new Error(`Invalid transaction fee: trs.fee: ${trs.fee}, asset.fee: ${fee}`)
     }
