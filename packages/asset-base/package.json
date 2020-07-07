@@ -1,6 +1,6 @@
 {
   "name": "@ddn/asset-base",
-  "version": "0.2.7",
+  "version": "0.2.8",
   "description": "DDN资产基类相关信息",
   "main": "lib/index.js",
   "repository": {
@@ -18,7 +18,7 @@
   "author": "wangxm",
   "license": "MIT",
   "dependencies": {
-    "@ddn/utils": "^0.1.8",
+    "@ddn/utils": "^0.1.9",
     "bytebuffer": "^5.0.1",
     "lodash": "^4.17.15"
   },
