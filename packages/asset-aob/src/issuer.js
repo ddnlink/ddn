@@ -55,6 +55,10 @@ class Issuer extends Asset.Base {
     }
   }
 
+  async getBytes (trs) {
+    return null
+  }
+
   async dbSave (trs, dbTrans) {
     const issuerObj = await this.getAssetObject(trs)
     issuerObj.issuer_id = trs.senderId
@@ -62,8 +66,8 @@ class Issuer extends Asset.Base {
   }
 
   /**
-       * 自定义资产Api
-       */
+   * 自定义资产Api
+   */
   async attachApi (router) {
     router.get('/', async (req, res) => {
       try {
@@ -76,8 +80,6 @@ class Issuer extends Asset.Base {
     router.get('/:name', async (req, res) => {
       try {
         const result = await this.getOneByName(req, res)
-        // console.log('name.....', result);
-
         res.json(result)
       } catch (err) {
         res.json({ success: false, error: err.message || err.toString() })
@@ -85,20 +87,27 @@ class Issuer extends Asset.Base {
     })
   }
 
-  // FIXME: 2020.5.30 下面的方法没有被调用！！
   async getList (req) {
     // 确定页数相关
     const pageIndex = req.query.pageindex || 1
     const pageSize = req.query.pagesize || 50
     const result = await this.queryAsset(null, null, true, pageIndex, pageSize)
-    // console.log('getList result', result);
 
     return { success: true, result }
   }
 
+  /**
+   * 根据用户地址或发行商名称获取发行商记录
+   * @param {*} req 请求对象，包含 `name` 字段，可以说 发行商名称，也可以是 `issuer_id`(其实就是注册发行商的地址公钥）
+   */
   async getOneByName (req) {
     const name = req.params.name
-    const data = await this.queryAsset({ name }, null, false, 1, 1)
+    let where = { name }
+    if (this.address.isAddress(name)) {
+      where = { issuer_id: name }
+    }
+
+    const data = await this.queryAsset(where, null, null, 1, 1)
     return { success: true, result: data[0] }
   }
 

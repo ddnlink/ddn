@@ -80,6 +80,7 @@ describe('AOB Test', () => {
       })
   })
 
+  // 注册发行商
   describe('Register Issuer', () => {
     it('Should be ok', async (done) => {
       await Tester.onNewBlockAsync()

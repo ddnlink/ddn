@@ -90255,15 +90255,7 @@ function _utils() {
   return data;
 }
 
-function _crypto() {
-  const data = _interopRequireDefault(require("@ddn/crypto"));
-
-  _crypto = function _crypto() {
-    return data;
-  };
-
-  return data;
-}
+var _crypto = _interopRequireDefault(require("../utils/crypto"));
 
 var _constants = _interopRequireDefault(require("../constants"));
 
@@ -90289,7 +90281,7 @@ function createTransaction(_x, _x2, _x3, _x4, _x5, _x6, _x7) {
 
 function _createTransaction() {
   _createTransaction = _asyncToGenerator(function* (asset, fee, type, recipientId, message, secret, secondSecret) {
-    const keys = _crypto().default.getKeys(secret);
+    const keys = _crypto.default.getKeys(secret);
 
     const transaction = {
       type,
@@ -90302,15 +90294,15 @@ function _createTransaction() {
       message,
       asset
     };
-    transaction.signature = yield _crypto().default.sign(transaction, keys);
+    transaction.signature = yield _crypto.default.sign(transaction, keys);
 
     if (secondSecret) {
-      const secondKeys = _crypto().default.getKeys(secondSecret);
+      const secondKeys = _crypto.default.getKeys(secondSecret);
 
-      transaction.sign_signature = yield _crypto().default.secondSign(transaction, secondKeys);
-    }
+      transaction.sign_signature = yield _crypto.default.secondSign(transaction, secondKeys);
+    } // transaction.id = await DdnCrypto.getId(transaction)
 
-    transaction.id = yield _crypto().default.getId(transaction);
+
     return transaction;
   });
   return _createTransaction.apply(this, arguments);
@@ -90409,7 +90401,7 @@ var _default = {
 
 };
 exports.default = _default;
-},{"../constants":335,"../options":339,"../time/slots":341,"@ddn/crypto":332,"@ddn/utils":360,"react":284}],343:[function(require,module,exports){
+},{"../constants":335,"../options":339,"../time/slots":341,"../utils/crypto":356,"@ddn/utils":360,"react":284}],343:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {

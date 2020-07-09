@@ -18,20 +18,21 @@ toc: menu
 ## **2 接口**   
 ### **2.1 AOB相关交易** 
 DDN系统的所有写操作都是通过发起一个交易来完成的。 
-交易数据通过一个叫做ddn-js的库来构建，然后再通过一个POST接口发布出去。
+交易数据通过一个叫做@ddn/node-sdk的库来构建，然后再通过一个POST接口发布出去。
 
 POST接口规格如下：
-payload为ddn-js创建出来的交易数据
+payload为@ddn/node-sdk创建出来的交易数据
 接口地址：/peer/transactions  
 请求方式：post   
 支持格式：json  
 公用变量：
 ```
-var DdnJS = require('ddn-js');
+var DdnJS = require('@ddn/node-sdk');
 // 一级密码
-var secret = 'motion group blossom coral upper warrior pattern fragile sister misery palm detect'
+var secret = 'wild corn coil lizard runway flower outside vicious diesel aim slight become'
+<!-- address: DNz4hQjV1KWo8LJwhQya9WANZsrhaziABG -->
 // 二级密码
-var secondSecret = 'erjimima001'
+var secondSecret = 'ddnaobtest001'
 ```
 
 #### **2.1.1 注册资产发行商**
@@ -400,18 +401,21 @@ JSON返回示例：
    
 请求示例：   
 ```js   
-curl -X GET -H "Content-Type: application/json"  'http://localhost:8001/api/aob/issuers/huoding' && echo
+curl -X GET -H "Content-Type: application/json"  'http://localhost:8001/api/aob/issuers/D9qa6bvWASFZrGDXm4DxDsVMr2jx8LwATx' && echo
 ```   
    
 JSON返回示例：   
 ```js  
 {
-	"success": true,
-	"issuer": {
-		"name": "huoding",
-		"desc": "注册资产发行商-测试",
-		"issuerId": "AKKHPvQb2A119LNicCQWLZQDFxhGVEY57a"
-	}
+    "success": true,
+    "result": {
+        "transaction_id": "d09b391710b4b9a608a6357bee57193b9a34c1b1b8198a8fa2d3a42bbb7fe2305fe3953ef63b2329bd90719333fe3d5ffcbf617b3a28c2e7a062dce90cfa45b1",
+        "transaction_type": 60,
+        "timestamp": 82989248,
+        "name": "YgdXSOvacD",
+        "issuer_id": "D9qa6bvWASFZrGDXm4DxDsVMr2jx8LwATx",
+        "desc": "valid desc"
+    }
 }		
 ``` 
 

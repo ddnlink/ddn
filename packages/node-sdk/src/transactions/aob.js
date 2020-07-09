@@ -1,6 +1,6 @@
 import DdnUtils from '@ddn/utils'
-import DdnCrypto from '@ddn/crypto'
-
+// import DdnCrypto from '@ddn/crypto'
+import DdnCrypto from '../utils/crypto'
 import constants from '../constants'
 import slots from '../time/slots'
 import options from '../options'
@@ -26,7 +26,7 @@ async function createTransaction (
     type,
     nethash: options.get('nethash'),
     amount: '0',
-    fee: fee.toString(),
+    fee: `${fee}`,
     recipientId: recipientId,
     senderPublicKey: keys.publicKey,
     timestamp: getClientFixedTime(),
@@ -35,13 +35,12 @@ async function createTransaction (
   }
 
   transaction.signature = await DdnCrypto.sign(transaction, keys)
-
   if (secondSecret) {
     const secondKeys = DdnCrypto.getKeys(secondSecret)
     transaction.sign_signature = await DdnCrypto.secondSign(transaction, secondKeys)
   }
 
-  transaction.id = await DdnCrypto.getId(transaction)
+  // transaction.id = await DdnCrypto.getId(transaction)
 
   return transaction
 }
