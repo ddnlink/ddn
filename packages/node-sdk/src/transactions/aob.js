@@ -86,9 +86,9 @@ export default {
         maximum,
         precision,
         strategy,
-        allow_blacklist: allowBlacklist,
-        allow_whitelist: allowWhitelist,
-        allow_writeoff: allowWriteoff
+        allow_blacklist: `${allowBlacklist}`,
+        allow_whitelist: `${allowWhitelist}`,
+        allow_writeoff: `${allowWriteoff}`
       }
     }
     // var fee = (500 + (Math.floor(bytes.length / 200) + 1) * 0.1) * constants.fixedPoint

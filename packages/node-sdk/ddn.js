@@ -88292,13 +88292,12 @@ class AssetBase {
         }
       }
 
-      bb.flip();
+      bb.flip(); // 插件 使用 bb , 最后 transaction.js 处理成 Uint8Array
+      // if (typeof window !== 'undefined') {
+      //   return new Uint8Array(bb.toArrayBuffer())
+      // } else {
 
-      if (typeof window !== 'undefined') {
-        return new Uint8Array(bb.toArrayBuffer());
-      } else {
-        return bb.toBuffer();
-      }
+      return bb.toBuffer(); // }
     })();
   }
 
@@ -90287,7 +90286,7 @@ function _createTransaction() {
       type,
       nethash: _options.default.get('nethash'),
       amount: '0',
-      fee: fee.toString(),
+      fee: `${fee}`,
       recipientId: recipientId,
       senderPublicKey: keys.publicKey,
       timestamp: getClientFixedTime(),
@@ -90332,9 +90331,9 @@ var _default = {
           maximum,
           precision,
           strategy,
-          allow_blacklist: allowBlacklist,
-          allow_whitelist: allowWhitelist,
-          allow_writeoff: allowWriteoff
+          allow_blacklist: `${allowBlacklist}`,
+          allow_whitelist: `${allowWhitelist}`,
+          allow_writeoff: `${allowWriteoff}`
         }
       }; // var fee = (500 + (Math.floor(bytes.length / 200) + 1) * 0.1) * constants.fixedPoint
 

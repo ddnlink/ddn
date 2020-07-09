@@ -285,7 +285,7 @@ describe('AOB Test', () => {
         .end((err, {
           body
         }) => {
-          debug('Add issue', body)
+          debug('Add issue ', body)
 
           expect(err).to.be.not.ok
           expect(body).to.have.property('success').to.be.true
