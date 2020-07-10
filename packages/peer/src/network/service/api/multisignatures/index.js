@@ -170,13 +170,13 @@ class MultisignaturesRouter {
       throw new Error('Transaction not found')
     }
 
+    const keypair = DdnCrypto.getKeys(body.secret)
+
     if (body.publicKey) {
       if (keypair.publicKey !== body.publicKey) {
         throw new Error('Invalid passphrase')
       }
     }
-
-    const keypair = DdnCrypto.getKeys(body.secret)
 
     const sign = await this.runtime.transaction.multisign(transaction, keypair)
 
@@ -383,7 +383,7 @@ class MultisignaturesRouter {
       null, async (err, rows) => {
         if (err) {
           this.logger.error(DdnUtils.system.getErrorMsg(err))
-          return reject('Database error')
+          return reject(err)
         }
 
         const addresses = rows[0].account_id.split(',') // wxm block database

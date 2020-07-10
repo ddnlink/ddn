@@ -308,7 +308,6 @@ class PeerService {
     }
   }
 
-  // todo: 这个借口太宽泛了
   async postTransactions ({
     headers,
     connection,
@@ -372,7 +371,7 @@ class PeerService {
 
       return {
         success: false,
-        error: DdnUtils.system.getErrorMsg(e.message) // "Invalid transaction body"
+        error: DdnUtils.system.getErrorMsg(e.message)
       }
     }
 

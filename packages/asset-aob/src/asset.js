@@ -69,6 +69,7 @@ class Aob extends Asset.Base {
 
     const asset = await this.getAssetObject(trs)
     const nameParts = (asset.name || '').split('.')
+
     if (nameParts.length !== 2) {
       throw new Error('Invalid asset full name form asset-aob')
     }
@@ -139,23 +140,23 @@ class Aob extends Asset.Base {
   }
 
   async getBytes (trs) {
-    const asset = await this.getAssetObject(trs)
-    let buffer = Buffer.concat([
-      Buffer.from(asset.name, 'utf8'),
-      Buffer.from(asset.desc, 'utf8'),
-      Buffer.from(asset.maximum, 'utf8'),
-      Buffer.from([asset.precision || 0]),
-      Buffer.from(asset.strategy || '', 'utf8'),
-      Buffer.from([asset.allow_writeoff || '0']),
-      Buffer.from([asset.allow_whitelist || '0']),
-      Buffer.from([asset.allow_blacklist || '0'])
-    ])
+    // const asset = await this.getAssetObject(trs)
+    // let buffer = Buffer.concat([
+    //   Buffer.from(asset.name, 'utf8'),
+    //   Buffer.from(asset.desc, 'utf8'),
+    //   Buffer.from(asset.maximum, 'utf8'),
+    //   Buffer.from([asset.precision || 0]),
+    //   Buffer.from(asset.strategy || '', 'utf8'),
+    //   Buffer.from([asset.allow_writeoff || '0']),
+    //   Buffer.from([asset.allow_whitelist || '0']),
+    //   Buffer.from([asset.allow_blacklist || '0'])
+    // ])
 
-    const { strategy } = asset
-    if (strategy) {
-      buffer = Buffer.concat([buffer])
-    }
-    return buffer
+    // if (asset.strategy) {
+    //   buffer = Buffer.concat([Buffer.from(asset.strategy, 'utf8')])
+    // }
+    // return buffer
+    return null
   }
 
   async dbSave (trs, dbTrans) {
@@ -168,12 +169,42 @@ class Aob extends Asset.Base {
   }
 
   /**
-       * 自定义资产Api
-       */
+   * 自定义资产Api
+   */
   async attachApi (router) {
     router.get('/', async (req, res) => {
       try {
         const result = await this.getList(req, res)
+        res.json(result)
+      } catch (err) {
+        res.json({ success: false, error: err.message || err.toString() })
+      }
+    })
+
+    // api/aob/asset/balances/:address
+    router.get('/balances/:address', async (req, res) => {
+      try {
+        const result = await this.getBalances(req, res)
+        res.json(result)
+      } catch (err) {
+        res.json({ success: false, error: err.message || err.toString() })
+      }
+    })
+
+    // api/aob/asset/balances/:address/:currency
+    router.get('/balances/:address/:currency', async (req, res) => {
+      try {
+        const result = await this.getBalance(req, res)
+        res.json(result)
+      } catch (err) {
+        res.json({ success: false, error: err.message || err.toString() })
+      }
+    })
+
+    // 
+    router.get('/issuers/:name/assets', async (req, res) => {
+      try {
+        const result = await this.getIssuerAssets(req, res)
         res.json(result)
       } catch (err) {
         res.json({ success: false, error: err.message || err.toString() })
@@ -192,31 +223,6 @@ class Aob extends Asset.Base {
     router.get('/:name/acl/:flag', async (req, res) => {
       try {
         const result = await this.getAssetAcl(req, res)
-        res.json(result)
-      } catch (err) {
-        res.json({ success: false, error: err.message || err.toString() })
-      }
-    })
-
-    router.get('/balances/:address', async (req, res) => { // 127.0.0.1:8001/api/aobasset/balances/:address
-      try {
-        const result = await this.getBalances(req, res)
-        res.json(result)
-      } catch (err) {
-        res.json({ success: false, error: err.message || err.toString() })
-      }
-    })
-    router.get('/balances/:address/:currency', async (req, res) => { // 127.0.0.1:8001/api/aobasset/balances/:address/:currency
-      try {
-        const result = await this.getBalance(req, res)
-        res.json(result)
-      } catch (err) {
-        res.json({ success: false, error: err.message || err.toString() })
-      }
-    })
-    router.get('/issuers/:name/assets', async (req, res) => {
-      try {
-        const result = await this.getIssuerAssets(req, res)
         res.json(result)
       } catch (err) {
         res.json({ success: false, error: err.message || err.toString() })
@@ -288,7 +294,7 @@ class Aob extends Asset.Base {
     const pageIndex = req.query.pageindex || 1
     const pageSize = req.query.pagesize || 50
     const data = await this.queryAsset({
-      issuerName: name
+      issuer_name: name
     }, null, true, pageIndex, pageSize)
 
     return { success: true, result: data }

@@ -284,7 +284,8 @@ class Transfer extends Asset.Base {
         res.json({ success: false, error: err.message || err.toString() })
       }
     })
-    router.get('/my/:address/', async (req, res) => { // 127.0.0.1:8001/api/aobasset/balances/:address/:currency
+    // 获得我的全部资产交易，包括创建发行商、资产、发行、转账等全部交易类型
+    router.get('/my/:address/', async (req, res) => { // 127.0.0.1:8001/api/aob/transfers/:address/:currency
       try {
         const result = await this.getMyTransactions(req, res)
         res.json(result)
@@ -292,7 +293,7 @@ class Transfer extends Asset.Base {
         res.json({ success: false, error: err.message || err.toString() })
       }
     })
-    router.get('/my/:address/:currency', async (req, res) => { // 127.0.0.1:8001/api/aobasset/balances/:address/:currency
+    router.get('/my/:address/:currency', async (req, res) => { // 127.0.0.1:8001/api/aob/transfers/:address/:currency
       try {
         const result = await this.getMyTransactions(req, res)
         res.json(result)
@@ -300,7 +301,9 @@ class Transfer extends Asset.Base {
         res.json({ success: false, error: err.message || err.toString() })
       }
     })
-    router.get('/:currency', async (req, res) => { // 127.0.0.1:8001/api/aobasset/balances/:address/:currency
+
+    // 获得 currency 的全部转账交易
+    router.get('/:currency', async (req, res) => { // 127.0.0.1:8001/api/aob/transfers/:currency
       try {
         const result = await this.getTransactions(req, res)
         res.json(result)
@@ -486,33 +489,51 @@ class Transfer extends Asset.Base {
     })
   }
 
+  /**
+   * 检索当前账号所有资产交易
+   * @param {*} req address, currence, pageindex, pagesize
+   */
   async getMyTransactions (req) {
     const address = req.params.address
     const currency = req.params.currency
+
+    const type = req.query.type
     const pageindex = req.query.pageindex || 1
     const pagesize = req.query.pagesize || 50
 
     // (1)先查询到对应的transfer中的相关数据表查询到对应数据
-    const where1 = {}
+    const where = {}
     if (currency) {
-      where1.currency = currency
-    } else {
-      where1.$and = [
-        {
-          transaction_type: {
-            $gte: 60
-          }
-        },
-        {
-          transaction_type: {
-            $lte: 65
-          }
-        }
-      ]
+      where.currency = currency
     }
-    const transfer = await this.queryAsset(where1, null, true, pageindex, pagesize, null, false)
+
+    if (type) {
+      where.transaction_type = type
+    }
+
+    // else {
+    //   where.$and = [
+    //     {
+    //       transaction_type: {
+    //         $gte: DdnUtils.assetTypes.AOB_ISSUER
+    //       }
+    //     },
+    //     {
+    //       transaction_type: {
+    //         $lte: DdnUtils.assetTypes.AOB_TRANSFER
+    //       }
+    //     }
+    //   ]
+    // }
+
+    // 这里的调用将会检索全部交易类型
+    // const transfer = await this.queryAsset(where, null, true, pageindex, pagesize, null, false)
+
+    // 这里仅检索transfer
+    const transfer = await this.queryAsset(where, null, true, pageindex, pagesize)
     const tids = _.map(transfer.rows, 'transaction_id')
-    const where2 = { id: { $in: tids }, senderId: address }
+    // const where2 = { id: { $in: tids } } // only senderId?
+    const where2 = { id: { $in: tids }, senderId: address } // only senderId?
     const result = await this.runtime.dataquery.queryFullTransactionData(
       where2, null, null, null, null
     )
@@ -532,6 +553,7 @@ class Transfer extends Asset.Base {
 
   async getTransactions (req) {
     const currency = req.params.currency
+
     const pageindex = req.query.pageindex || 1
     const pagesize = req.query.pagesize || 50
 

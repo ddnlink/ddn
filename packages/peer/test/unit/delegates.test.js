@@ -7,6 +7,7 @@ import node from '@ddn/test-utils'
 
 const debug = Debug('debug')
 
+// 随机建一个操作账号
 let Raccount = node.randomAccount()
 while (Raccount.username === Raccount.username.toUpperCase()) {
   Raccount = node.randomAccount()
@@ -48,7 +49,7 @@ describe('PUT /delegates without funds', () => {
 })
 
 // 投票，没钱不好使
-describe('PUT /accounts/votes without funds', () => {
+describe('PUT /votes without funds', () => {
   it('When upvoting. Should fail', done => {
     node.api.post('/accounts/open')
       .set('Accept', 'application/json')
@@ -58,17 +59,17 @@ describe('PUT /accounts/votes without funds', () => {
       .expect('Content-Type', /json/)
       .expect(200)
       .end((err, { body }) => {
-        debug(JSON.stringify(body))
         node.expect(err).be.not.ok
         node.expect(body).to.have.property('success').to.be.true
         node.expect(body).to.have.property('account').that.is.an('object')
         Raccount.address = body.account.address
         Raccount.publicKey = body.account.publicKey
         Raccount.balance = body.account.balance
+        debug('Raccount', Raccount)
 
         node.onNewBlock(err => {
           node.expect(err).to.be.not.ok
-          node.api.put('/accounts/votes')
+          node.api.put('/votes')
             .set('Accept', 'application/json')
             .send({
               secret: Raccount.password,
@@ -91,7 +92,7 @@ describe('PUT /accounts/votes without funds', () => {
   it('When downvoting. Should fail', done => {
     node.onNewBlock(err => {
       node.expect(err).be.not.ok
-      node.api.put('/accounts/votes')
+      node.api.put('/votes')
         .set('Accept', 'application/json')
         .send({
           secret: Raccount.password,
@@ -112,7 +113,7 @@ describe('PUT /accounts/votes without funds', () => {
 })
 
 // 投票，需要费用
-describe('PUT /accounts/votes with funds', () => {
+describe('PUT /votes with funds', () => {
   const randomCoin = node.randomCoin()
 
   beforeAll(done => {
@@ -162,7 +163,7 @@ describe('PUT /accounts/votes with funds', () => {
     const votedDelegate = `'+${node.Eaccount.publicKey}','+${node.Eaccount.publicKey}'`
     node.onNewBlock(err => {
       node.expect(err).be.not.ok
-      node.api.put('/accounts/votes')
+      node.api.put('/votes')
         .set('Accept', 'application/json')
         .send({
           secret: Raccount.password,
@@ -171,7 +172,7 @@ describe('PUT /accounts/votes with funds', () => {
         .expect('Content-Type', /json/)
         .expect(200)
         .end((err, { body }) => {
-          debug(JSON.stringify(body))
+          debug('upvoting multiple times fail', JSON.stringify(body))
           node.expect(err).be.not.ok
           node.expect(body).to.have.property('success').to.be.false
           node.expect(body).to.have.property('error')
@@ -185,7 +186,7 @@ describe('PUT /accounts/votes with funds', () => {
     const votedDelegate = `'-${node.Eaccount.publicKey}','-${node.Eaccount.publicKey}'`
     node.onNewBlock(err => {
       node.expect(err).be.not.ok
-      node.api.put('/accounts/votes')
+      node.api.put('/votes')
         .set('Accept', 'application/json')
         .send({
           secret: Raccount.password,
@@ -194,7 +195,7 @@ describe('PUT /accounts/votes with funds', () => {
         .expect('Content-Type', /json/)
         .expect(200)
         .end((err, { body }) => {
-          debug(JSON.stringify(body))
+          debug('downvoting multiple times fail', JSON.stringify(body))
           node.expect(err).be.not.ok
           node.expect(body).to.have.property('success').to.be.false
           node.expect(body).to.have.property('error')
@@ -209,7 +210,7 @@ describe('PUT /accounts/votes with funds', () => {
 
     node.onNewBlock(err => {
       node.expect(err).be.not.ok
-      node.api.put('/accounts/votes')
+      node.api.put('/votes')
         .set('Accept', 'application/json')
         .send({
           secret: Raccount.password,
@@ -229,7 +230,7 @@ describe('PUT /accounts/votes with funds', () => {
   }, 50000)
 
   it('When upvoting. Should be ok', done => {
-    node.api.put('/accounts/votes')
+    node.api.put('/votes')
       .set('Accept', 'application/json')
       .send({
         secret: Raccount.password,
@@ -254,7 +255,7 @@ describe('PUT /accounts/votes with funds', () => {
   it('When upvoting again from same account. Should fail', done => {
     node.onNewBlock(err => {
       node.expect(err).be.not.ok
-      node.api.put('/accounts/votes')
+      node.api.put('/votes')
         .set('Accept', 'application/json')
         .send({
           secret: Raccount.password,
@@ -277,7 +278,7 @@ describe('PUT /accounts/votes with funds', () => {
   it('When downvoting. Should be ok', done => {
     node.onNewBlock(err => {
       node.expect(err).to.be.not.ok
-      node.api.put('/accounts/votes')
+      node.api.put('/votes')
         .set('Accept', 'application/json')
         .send({
           secret: Raccount.password,
@@ -303,7 +304,7 @@ describe('PUT /accounts/votes with funds', () => {
   it('When downvoting again from same account. Should fail', done => {
     node.onNewBlock(err => {
       node.expect(err).be.not.ok
-      node.api.put('/accounts/votes')
+      node.api.put('/votes')
         .set('Accept', 'application/json')
         .send({
           secret: Raccount.password,
@@ -324,7 +325,7 @@ describe('PUT /accounts/votes with funds', () => {
   }, 50000)
 
   it('When upvoting using a blank pasphrase. Should fail', done => {
-    node.api.put('/accounts/votes')
+    node.api.put('/votes')
       .set('Accept', 'application/json')
       .send({
         secret: '',
@@ -342,7 +343,7 @@ describe('PUT /accounts/votes with funds', () => {
   })
 
   it('When downvoting using a blank pasphrase. Should fail', done => {
-    node.api.put('/accounts/votes')
+    node.api.put('/votes')
       .set('Accept', 'application/json')
       .send({
         secret: '',
@@ -361,7 +362,7 @@ describe('PUT /accounts/votes with funds', () => {
 
   it('When upvoting without any delegates. Should fail', done => {
     node.onNewBlock(() => {
-      node.api.put('/accounts/votes')
+      node.api.put('/votes')
         .set('Accept', 'application/json')
         .send({
           secret: Raccount.password,
@@ -381,7 +382,7 @@ describe('PUT /accounts/votes with funds', () => {
 
   it('When downvoting without any delegates. Should fail', done => {
     node.onNewBlock(() => {
-      node.api.put('/accounts/votes')
+      node.api.put('/votes')
         .set('Accept', 'application/json')
         .send({
           secret: Raccount.password,
@@ -400,7 +401,7 @@ describe('PUT /accounts/votes with funds', () => {
   })
 
   it('Without any delegates. Should fail', function (done) {
-    node.api.put('/accounts/votes')
+    node.api.put('/votes')
       .set('Accept', 'application/json')
       .send({
         secret: Raccount.password,
@@ -627,7 +628,7 @@ describe('PUT /delegates to regist with funds', () => {
   it(`Using existing username but different case: ${R2account.username}. Should fail`, done => {
     node.onNewBlock(err => {
       node.expect(err).to.be.not.ok
-      debug(JSON.stringify({
+      debug('R2account', JSON.stringify({
         secret: R2account.password,
         username: R2account.username
       }))
@@ -744,9 +745,97 @@ describe('GET /delegates', () => {
   })
 })
 
-describe('GET /accounts/votes?address=', () => {
-  it('Using valid address. Should be ok', done => {
-    node.api.get(`/accounts/votes?address=${node.Gaccount.address}`)
+describe('GET /delegates/count', () => {
+  it('Should be ok', done => {
+    node.api.get('/delegates/count')
+      .set('Accept', 'application/json')
+      .expect('Content-Type', /json/)
+      .expect(200)
+      .end((err, { body }) => {
+        debug('GET /delegates/count', JSON.stringify(body))
+        node.expect(err).be.not.ok
+        node.expect(body).to.have.property('success').to.be.true
+        node.expect(body).to.have.property('count').to.least(101) // 此处数量根据运行次数会有测试案例新增的受托人进来，但至少101个
+        done()
+      })
+  })
+})
+
+// 仅提供检索某地址（账户）或公钥下的账户所投的票
+describe('GET /votes', () => {
+  beforeAll(done => {
+    debug(JSON.stringify({
+      Raccountsecret: Raccount.password,
+      R2accountdelegates: ['+' + R2account.publicKey]
+    }))
+
+    node.onNewBlock(err => {
+      node.expect(err).to.be.not.ok
+      node.api.put('/votes')
+        .set('Accept', 'application/json')
+        .send({
+          secret: Raccount.password,
+          delegates: [`+${R2account.publicKey}`]
+        })
+        .expect('Content-Type', /json/)
+        .expect(200)
+        .end((err, { body }) => {
+          // debug(JSON.stringify(body));
+          debug('/votes')
+          node.expect(err).be.not.ok
+          node.expect(body).to.have.property('success').to.be.true
+          done()
+        })
+    })
+  })
+
+  it('Using no params. Should fail', done => {
+    node.api.get('/votes')
+      .set('Accept', 'application/json')
+      .expect('Content-Type', /json/)
+      .expect(200)
+      .end((err, { body }) => {
+        debug('get votes no params fail', JSON.stringify(body))
+        node.expect(err).be.not.ok
+        node.expect(body).to.have.property('success').be.false
+        node.expect(body).to.have.property('error')
+        node.expect(body.error).to.include('Invalid parameters: address or publicKey is required.')
+        done()
+      })
+  })
+
+  it('Using no address. Should fail', done => {
+    node.api.get('/votes?address=')
+      .set('Accept', 'application/json')
+      .expect('Content-Type', /json/)
+      .expect(200)
+      .end((err, { body }) => {
+        debug('get votes no address fail', JSON.stringify(body))
+        node.expect(err).be.not.ok
+        node.expect(body).to.have.property('success').be.false
+        node.expect(body).to.have.property('error')
+        node.expect(body.error).to.include('Invalid parameters: #/properties/address/minLength should NOT be shorter than 1 characters')
+        done()
+      })
+  })
+
+  it('Using invalid address. Should fail', done => {
+    node.api.get('/votes?address=NotAaddress')
+      .set('Accept', 'application/json')
+      .expect('Content-Type', /json/)
+      .expect(200)
+      .end((err, { body }) => {
+        debug('get votes invalid address fail', JSON.stringify(body))
+        node.expect(err).be.not.ok
+        node.expect(body).to.have.property('success').to.be.false
+        node.expect(body).to.have.property('error')
+        node.expect(body.error).to.include('Invalid address getAccount')
+        done()
+      })
+  })
+
+  it('Using Gaccount address. Should be ok', done => {
+    node.api.get(`/votes?address=${node.Gaccount.address}`)
       .set('Accept', 'application/json')
       .expect('Content-Type', /json/)
       .expect(200)
@@ -766,81 +855,47 @@ describe('GET /accounts/votes?address=', () => {
       })
   })
 
-  it('Using invalid address. Should fail', done => {
-    node.api.get('/accounts/votes?address=NOTaDdnAddress')
+  it('Using valid address. Should be ok', async done => {
+    await node.onNewBlockAsync()
+    node.api.get(`/votes?address=${Raccount.address}`)
       .set('Accept', 'application/json')
       .expect('Content-Type', /json/)
       .expect(200)
       .end((err, { body }) => {
-        debug('invalid address fail', JSON.stringify(body))
-        node.expect(err).be.not.ok
-        node.expect(body).to.have.property('success').to.be.false
-        node.expect(body).to.have.property('error')
-        done()
-      })
-  })
-})
-
-describe('GET /delegates/count', () => {
-  it('Should be ok', done => {
-    node.api.get('/delegates/count')
-      .set('Accept', 'application/json')
-      .expect('Content-Type', /json/)
-      .expect(200)
-      .end((err, { body }) => {
-        debug('GET /delegates/count', JSON.stringify(body))
+        debug('get votes valid address ok', JSON.stringify(body))
         node.expect(err).be.not.ok
         node.expect(body).to.have.property('success').to.be.true
-        node.expect(body).to.have.property('count').to.least(101) // 此处数量根据运行次数会有测试案例新增的受托人进来，但至少101个
+        node.expect(body).to.have.property('delegates').that.is.an('array')
+        let flag = 0
+        debug('body.delegates', body.delegates)
+        debug('R2account.address', R2account.address)
+        for (let i = 0; i < body.delegates.length; i++) {
+          if (body.delegates[i].address === R2account.address) {
+            flag = 1
+          }
+        }
+        node.expect(flag).to.equal(1)
         done()
       })
-  })
-})
-
-describe('GET /delegates/voters', () => {
-  beforeAll(done => {
-    debug(JSON.stringify({
-      secret: Raccount.password,
-      delegates: ['+' + node.Eaccount.publicKey]
-    }))
-    node.onNewBlock(err => {
-      node.expect(err).to.be.not.ok
-      node.api.put('/accounts/votes')
-        .set('Accept', 'application/json')
-        .send({
-          secret: Raccount.password,
-          delegates: [`+${node.Eaccount.publicKey}`]
-        })
-        .expect('Content-Type', /json/)
-        .expect(200)
-        .end((err, { body }) => {
-          // debug(JSON.stringify(body));
-          debug('/accounts/votes')
-          node.expect(err).be.not.ok
-          node.expect(body).to.have.property('success').to.be.true
-          done()
-        })
-    })
   })
 
   it('Using no publicKey. Should fail', done => {
-    node.api.get('/delegates/voters?publicKey=')
+    node.api.get('/votes?publicKey=')
       .set('Accept', 'application/json')
       .expect('Content-Type', /json/)
       .expect(200)
       .end((err, { body }) => {
         debug('get votes no publicKey fail', JSON.stringify(body))
         node.expect(err).be.not.ok
-        node.expect(body).to.have.property('success').be.true
-        node.expect(body).to.have.property('accounts')
-        node.expect(body.accounts.length).to.be.equal(0)
-
+        node.expect(body).to.have.property('success').be.false
+        node.expect(body).to.have.property('error')
+        node.expect(body.error).to.include('Invalid parameters: #/properties/publicKey/minLength should NOT be shorter than 1 characters')
         done()
       })
   })
 
   it('Using invalid publicKey. Should fail', done => {
-    node.api.get('/delegates/voters?publicKey=NotAPublicKey')
+    node.api.get('/votes?publicKey=NotAPublicKey')
       .set('Accept', 'application/json')
       .expect('Content-Type', /json/)
       .expect(200)
@@ -849,31 +904,32 @@ describe('GET /delegates/voters', () => {
         node.expect(err).be.not.ok
         node.expect(body).to.have.property('success').to.be.false
         node.expect(body).to.have.property('error')
+        node.expect(body.error).to.include('Account not found')
         done()
       })
   })
 
-  it('Using valid publicKey. Should be ok', done => {
-    node.onNewBlock(err => {
-      node.expect(err).be.not.ok
-      node.api.get(`/delegates/voters?publicKey=${node.Eaccount.publicKey}`)
-        .set('Accept', 'application/json')
-        .expect('Content-Type', /json/)
-        .expect(200)
-        .end((err, { body }) => {
-          debug('get votes valid publicKey ok', JSON.stringify(body))
-          node.expect(err).be.not.ok
-          node.expect(body).to.have.property('success').to.be.true
-          node.expect(body).to.have.property('accounts').that.is.an('array')
-          let flag = 0
-          for (let i = 0; i < body.accounts.length; i++) {
-            if (body.accounts[i].address === Raccount.address) {
-              flag = 1
-            }
+  it('Using valid publicKey. Should be ok', async done => {
+    await node.onNewBlockAsync()
+    node.api.get(`/votes?publicKey=${Raccount.publicKey}`)
+      .set('Accept', 'application/json')
+      .expect('Content-Type', /json/)
+      .expect(200)
+      .end((err, { body }) => {
+        debug('get votes valid publicKey ok', JSON.stringify(body))
+        node.expect(err).be.not.ok
+        node.expect(body).to.have.property('success').to.be.true
+        node.expect(body).to.have.property('delegates').that.is.an('array')
+        debug('body.delegates', body.delegates)
+        debug('R2account.address', R2account.address)
+        let flag = 0
+        for (let i = 0; i < body.delegates.length; i++) {
+          if (body.delegates[i].address === R2account.address) {
+            flag = 1
           }
-          node.expect(flag).to.equal(1)
-          done()
-        })
-    })
+        }
+        node.expect(flag).to.equal(1)
+        done()
+      })
   })
 })

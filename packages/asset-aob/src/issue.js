@@ -40,11 +40,11 @@ class Issue extends Asset.Base {
 
     // (1)得到资产数据
     // (1)查询到asset的数据列表
-    let result
+    // let result
     const assetInst = await this.getAssetInstanceByName('AobAsset')
 
     const name = assetIssue.currency
-    result = await assetInst.queryAsset({ name }, null, false, 1, 1)
+    const result = await assetInst.queryAsset({ name }, null, false, 1, 1)
 
     // (2)查询到issuer的数据列表
     const issuerInst = await this.getAssetInstanceByName('AobIssuer')
@@ -151,6 +151,10 @@ class Issue extends Asset.Base {
         throw new Error('Strategy not allowed --- from asset-aob -> issue.verify')
       }
     }
+    return null
+  }
+
+  async getBytes (trs) {
     return null
   }
 

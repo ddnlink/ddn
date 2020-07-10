@@ -13,7 +13,10 @@ class RootRouter {
     this._context = context
   }
 
-  // 用户所投的节点情况
+  /**
+   * 获取用户所投的节点信息
+   * @param {*} req address or publicKey
+   */
   async get (req) {
     const query = Object.assign({}, req.body, req.query)
     const validateErrors = await this.ddnSchema.validate({
@@ -22,15 +25,27 @@ class RootRouter {
         address: {
           type: 'string',
           minLength: 1
+        },
+
+        publicKey: {
+          type: 'string',
+          minLength: 1
         }
-      },
-      required: ['address']
+      }
     }, query)
     if (validateErrors) {
       throw new Error(`Invalid parameters: ${validateErrors[0].schemaPath} ${validateErrors[0].message}`)
     }
 
-    const account = await this.runtime.account.getAccountByAddress(query.address)
+    let account
+    if (query.address) {
+      account = await this.runtime.account.getAccountByAddress(query.address)
+    } else if (query.publicKey) {
+      account = await this.runtime.account.getAccountByPublicKey(query.publicKey)
+    } else {
+      throw new Error('Invalid parameters: address or publicKey is required.')
+    }
+
     if (!account) {
       throw new Error('Account not found')
     }
@@ -71,9 +86,9 @@ class RootRouter {
   }
 
   /**
-     * 投票
-     * @param {object} req form 对象，{ secret: 投票者密钥, publicKey: 投票者公钥 }
-     */
+   * 投票
+   * @param {object} req form 对象，{ secret: 投票者密钥, publicKey: 投票者公钥 }
+   */
   async put (req) {
     const body = req.body
 

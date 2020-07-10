@@ -794,11 +794,12 @@ class AssetBase {
     }
     bb.flip()
 
-    if (typeof window !== 'undefined') {
-      return new Uint8Array(bb.toArrayBuffer())
-    } else {
-      return bb.toBuffer()
-    }
+    // 插件 使用 bb , 最后 transaction.js 处理成 Uint8Array
+    // if (typeof window !== 'undefined') {
+    //   return new Uint8Array(bb.toArrayBuffer())
+    // } else {
+    return bb.toBuffer()
+    // }
   }
 
   async isSupportLock () {

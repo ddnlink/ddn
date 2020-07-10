@@ -1,5 +1,4 @@
 import DdnCrypto from '@ddn/crypto'
-import Mnemonic from 'bitcore-mnemonic'
 
 /**
  * AccountService 接口
@@ -161,12 +160,8 @@ class AccountService {
 
   async getNew (req) {
     const query = Object.assign({}, req.body, req.query)
-    let ent = Number(query.ent)
-    if (![128, 256, 384].includes(ent)) {
-      ent = 128
-    }
-
-    const secret = new Mnemonic(ent).toString()
+    const ent = Number(query.ent) ? Number(query.ent) : query.ent
+    const secret = DdnCrypto.generateSecret(ent)
     const keypair = DdnCrypto.getKeys(secret)
 
     const address = this.runtime.account.generateAddressByPublicKey(keypair.publicKey)

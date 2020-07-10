@@ -95,9 +95,13 @@ async function getId (transaction) {
   return hash.toString('hex')
 }
 
-// 生成助记词 === node-sdk.crypto.generatePhasekey()
-function generateSecret () {
-  return new Mnemonic(Mnemonic.Words.ENGLISH).toString()
+/**
+ * 生成助记词
+ * @param {*} ent 该参数可以是 语言词汇表，比如：Mnemonic.Words.ENGLISH(默认)，可以是位数，128 ~ 256 并 ent % 32 == 0
+ */
+function generateSecret (ent) {
+  const param = ent || Mnemonic.Words.ENGLISH
+  return new Mnemonic(param).toString()
 }
 
 function isValidSecret (secret) {
