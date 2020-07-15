@@ -18,6 +18,17 @@ class Transfer extends Asset.Base {
     ]
   }
 
+  async getBytes (trs) {
+    const asset = await this.getAssetObject(trs)
+
+    const buffer = Buffer.concat([
+      Buffer.from(asset.currency, 'utf8'),
+      Buffer.from(asset.amount, 'utf8')
+    ])
+
+    return buffer
+  }
+  
   async create (data, trs) {
     trs.recipientId = data.recipientId
     trs.amount = '0'

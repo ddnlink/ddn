@@ -1,6 +1,6 @@
 class AssetUtils {
   static loadFromObject (assetPlugins) {
-    global.assets = {
+    const assets = {
       transConfigs: [],
       transTypeValues: [],
       transTypeNames: []
@@ -27,18 +27,103 @@ class AssetUtils {
               throw new Error('The asset extends error: type property required.')
             }
 
-            if (global.assets.transTypeNames[currTrans.type]) {
+            if (assets.transTypeNames[currTrans.type]) {
               throw new Error(`The asset extends error: type ${currTrans.type} is conflicting.`)
             }
 
             currTrans.package = currAsset
 
-            global.assets.transConfigs.push(currTrans)
-            global.assets.transTypeValues[currTrans.name] = currTrans // typeValue -> trans.name
-            global.assets.transTypeNames[currTrans.type] = currTrans // typeName -> trans.type
+            assets.transConfigs.push(currTrans)
+            assets.transTypeValues[currTrans.name] = currTrans // typeValue -> trans.name
+            assets.transTypeNames[currTrans.type] = currTrans // typeName -> trans.type
           })
         }
       }
+    }
+
+    global.assets = assets
+    if (typeof window !== 'undefined') {
+      global.assets = window.assets = assets
+    }
+
+    return this
+  }
+
+  /**
+   * 通过一个文件，将全部插件及其交易类型的配置一次性提供
+   * 本方法目的是方便前端打包，主要用于 @ddn/node-sdk 使用
+   * USING：
+   * 
+   * export default [
+   *    "@ddn/asset-aob": {
+   *      transactions: [
+              {
+                  name: "AobIssuer",
+                  type: 60
+              },
+              {
+                  name: "AobAsset",
+                  type: 61
+              },
+              {
+                  name: "AobFlags",
+                  type: 62
+              },
+              {
+                  name: "AobAcl",
+                  type: 63
+              },
+              {
+                  name: "AobIssue",
+                  type: 64
+              },
+              {
+                  name: "AobTransfer",
+                  type: 65
+              }
+          ]
+   *    }
+   * ]
+   * @param {configJson} assetPluginsJson 插件详细配置
+   */
+  static loadFromJson (assetPluginsJson) {
+    const assets = {
+      transConfigs: [],
+      transTypeValues: [],
+      transTypeNames: []
+    }
+
+    for (const p in assetPluginsJson) {
+      const currAsset = assetPluginsJson[p]
+      if (currAsset) {
+        const assetTransactions = currAsset.transactions
+
+        if (assetTransactions && assetTransactions.length > 0) {
+          assetTransactions.forEach(currTrans => {
+            if (!(currTrans.name && !/^\s*$/.test(currTrans.name))) {
+              throw new Error('The asset extends error: name property required.')
+            }
+            if (!(currTrans.type && /^[1-9][0-9]*$/.test(currTrans.type))) {
+              throw new Error('The asset extends error: type property required.')
+            }
+
+            if (assets.transTypeNames[currTrans.type]) {
+              throw new Error(`The asset extends error: type ${currTrans.type} is conflicting.`)
+            }
+
+            currTrans.package = currAsset
+
+            assets.transConfigs.push(currTrans)
+            assets.transTypeValues[currTrans.name] = currTrans // typeValue -> trans.name
+            assets.transTypeNames[currTrans.type] = currTrans // typeName -> trans.type
+          })
+        }
+      }
+    }
+
+    global.assets = assets
+    if (typeof window !== 'undefined') {
+      global.assets = window.assets = assets
     }
 
     return this

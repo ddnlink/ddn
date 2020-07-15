@@ -227,7 +227,6 @@ JSON返回示例：
    
 
 #### **2.1.5 生成公钥**   
-todo
 接口地址：/api/accounts/generatePublickey   
 请求方式：post   
 支持格式：json   
@@ -532,8 +531,6 @@ JSON返回示例：
 	count: 110
 }
 ```    
-   
-   <!-- todo -->
    
 ### **2.2 交易transactions**   
 #### **2.2.1 获取交易信息**   

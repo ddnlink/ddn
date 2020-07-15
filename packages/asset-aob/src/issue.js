@@ -19,6 +19,17 @@ class Issue extends Asset.Base {
     ]
   }
 
+  async getBytes (trs) {
+    const asset = await this.getAssetObject(trs)
+
+    const buffer = Buffer.concat([
+      Buffer.from(asset.currency, 'utf8'),
+      Buffer.from(asset.amount, 'utf8')
+    ])
+
+    return buffer
+  }
+
   async verify (trs, sender) {
     const assetIssue = await this.getAssetObject(trs)
 
@@ -54,8 +65,7 @@ class Issue extends Asset.Base {
 
     issuerData = _.keyBy(issuerData, 'name')
 
-    let result2
-    result2 = _.map(result, (num) => {
+    const result2 = _.map(result, (num) => {
       const num2 = num
       num2.issuer_id = issuerData[num.issuer_name].issuer_id
       return num2
@@ -77,8 +87,7 @@ class Issue extends Asset.Base {
     })
     trData = _.keyBy(trData, 'id')
 
-    let result3
-    result3 = _.map(result2, (num) => {
+    const result3 = _.map(result2, (num) => {
       const num2 = num
       num2.block_id = trData[num.transaction_id].block_id
       return num2
@@ -100,8 +109,7 @@ class Issue extends Asset.Base {
     })
     blockData = _.keyBy(blockData, 'id')
 
-    let result4
-    result4 = _.map(result3, (num) => {
+    const result4 = _.map(result3, (num) => {
       const num2 = num
       num2.height = blockData[num.block_id].height
       return num2
@@ -117,8 +125,7 @@ class Issue extends Asset.Base {
     }
     const count = 0
 
-    let result5
-    result5 = result4[count]
+    const result5 = result4[count]
     if (!result5) {
       throw new Error('Asset not exists --- from asset-aob -> issue.verify')
     }
@@ -151,10 +158,6 @@ class Issue extends Asset.Base {
         throw new Error('Strategy not allowed --- from asset-aob -> issue.verify')
       }
     }
-    return null
-  }
-
-  async getBytes (trs) {
     return null
   }
 

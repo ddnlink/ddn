@@ -3,6 +3,7 @@
   "version": "0.2.10",
   "description": "this is asset-dao",
   "main": "lib/index.js",
+  "module": "dist/index.esm.js",
   "author": "wly",
   "repository": {
     "type": "git",
@@ -16,6 +17,7 @@
   "license": "MIT",
   "files": [
     "lib",
+    "dist",
     ".ddnrc.js"
   ],
   "dependencies": {

@@ -420,7 +420,7 @@ JSON返回示例：
 ``` 
 
 #### **2.2.4 查看指定发行商的资产** 
-接口地址：/api/aob/issuers/:name/assets  
+接口地址：/api/aob/assets/issuers/:name/assets  
 请求方式：get   
 支持格式：urlencoded 
 
@@ -444,7 +444,7 @@ JSON返回示例：
    
 请求示例：   
 ```js   
-curl -X GET -H "Content-Type: application/json"  'http://localhost:8001/api/aob/issuers/huoding/assets?offset=0&limit=2' && echo
+curl -X GET -H "Content-Type: application/json"  'http://localhost:8001/api/aob/assets/issuers/huoding/assets?offset=0&limit=2' && echo
 ```   
    
 JSON返回示例：   

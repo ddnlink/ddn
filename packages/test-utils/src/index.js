@@ -75,15 +75,15 @@ const Fees = {
 }
 
 // Calculates the expected fee from a transaction
-function expectedFee (amount) {
+export function expectedFee (amount) {
   return Fees.transactionFee
 }
 
-function randomCapitalUsername () {
+export function randomCapitalUsername () {
   return randomName(constants.tokenPrefix, 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@$&_.')
 }
 
-function genNormalAccount () {
+export function genNormalAccount () {
   const password = randomPassword()
   const keys = DdnCrypto.getKeys(password)
   return {
@@ -93,7 +93,7 @@ function genNormalAccount () {
   }
 }
 
-function randomTid () {
+export function randomTid () {
   return genNormalAccount().publicKey
 }
 
@@ -112,11 +112,11 @@ function _getHeight (url, cb) {
 }
 
 // Returns current block height
-function getHeight (cb) {
+export function getHeight (cb) {
   _getHeight(baseUrl, cb)
 }
 
-function onNewBlock (cb) {
+export function onNewBlock (cb) {
   getHeight((err, height) => {
     if (err) {
       return cb(err)
@@ -127,7 +127,7 @@ function onNewBlock (cb) {
 }
 
 // Function used to wait until a new block has been created
-function waitForNewBlock (height, cb) {
+export function waitForNewBlock (height, cb) {
   const actualHeight = height
   async.doWhilst(
     cb => {
@@ -162,7 +162,7 @@ function waitForNewBlock (height, cb) {
 }
 
 // Adds peers to local node
-function addPeers (numOfPeers, cb) {
+export function addPeers (numOfPeers, cb) {
   const operatingSystems = ['win32', 'win64', 'ubuntu', 'debian', 'centos']
   const ports = [4000, 5000, 7000, 8000]
 
@@ -197,7 +197,7 @@ function addPeers (numOfPeers, cb) {
   }, err => cb(err))
 }
 
-function submitTransaction (trs, cb) {
+export function submitTransaction (trs, cb) {
   peer.post('/transactions')
     .set('Accept', 'application/json')
     .set('version', version)
@@ -211,14 +211,14 @@ function submitTransaction (trs, cb) {
     .end(cb)
 }
 
-function apiGet (path, cb) {
+export function apiGet (path, cb) {
   api.get(path)
     .expect('Content-Type', /json/)
     .expect(200)
     .end(cb)
 }
 
-function giveMoney (address, amount, cb) {
+export function giveMoney (address, amount, cb) {
   api.put('/transactions')
     .set('Accept', 'application/json')
     .send({
@@ -231,7 +231,7 @@ function giveMoney (address, amount, cb) {
     .end(cb)
 }
 
-async function giveMoneyAndWaitAsync (addresses, amount) {
+export async function giveMoneyAndWaitAsync (addresses, amount) {
   await bluebird.map(addresses, async (address) => {
     const res = await PIFY(giveMoney)(address, amount || randomCoin())
     expect(res.body).to.have.property('success').to.be.true
@@ -239,11 +239,11 @@ async function giveMoneyAndWaitAsync (addresses, amount) {
   await PIFY(onNewBlock)()
 }
 
-function sleep (n, cb) {
+export function sleep (n, cb) {
   setTimeout(cb, n * 1000)
 }
 
-function openAccount (params, cb) {
+export function openAccount (params, cb) {
   api.post('/accounts/open')
     .set('Accept', 'application/json')
     .send(params)
@@ -264,11 +264,11 @@ function EIFY (fn, receiver) {
   })
 }
 
-function beginEpochTime () {
+export function beginEpochTime () {
   return constants.net.beginDate
 }
 
-function getRealTime (epochTime) {
+export function getRealTime (epochTime) {
   if (epochTime === undefined) {
     epochTime = this.getTime()
   }
@@ -276,6 +276,10 @@ function getRealTime (epochTime) {
   const t = Math.floor(d.getTime() / 1000) * 1000
   return t + epochTime * 1000
 }
+
+export * from './random-utils'
+export * from './accout-utils'
+export * from 'chai'
 
 export default {
   api,

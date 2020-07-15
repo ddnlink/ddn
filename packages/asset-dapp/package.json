@@ -3,6 +3,7 @@
   "version": "0.2.10",
   "description": "this is asset-dapp package",
   "main": "lib/index.js",
+  "module": "dist/index.esm.js",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/ddnlink/ddn.git",
@@ -14,6 +15,7 @@
   },
   "files": [
     "lib",
+    "dist",
     ".ddnrc.js"
   ],
   "author": "wly",
@@ -24,6 +26,7 @@
     "@ddn/sandbox": "^0.1.4",
     "@ddn/utils": "^0.1.9",
     "async": "^2.6.1",
+    "bytebuffer": "^5.0.1",
     "decompress-zip": "^0.2.2",
     "request": "^2.88.0",
     "valid-url": "^1.0.9"

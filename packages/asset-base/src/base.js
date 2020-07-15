@@ -12,7 +12,8 @@
  * undoUnconfirmed，ready，process
  */
 import DdnUtils from '@ddn/utils'
-import ByteBuffer from 'bytebuffer'
+
+// import ByteBuffer from 'bytebuffer'
 import _ from 'lodash'
 
 import AssetUtils from './utils'
@@ -768,37 +769,37 @@ class AssetBase {
      * @param {*} trs
      */
   async getBytes (trs) {
-    await this.fieldsIsValid(trs)
+    // await this.fieldsIsValid(trs)
 
-    const assetName = AssetUtils.getAssetJsonName(trs.type)
-    const asset = trs.asset[assetName]
-    const mapping = await this.propsMapping()
+    // const assetName = AssetUtils.getAssetJsonName(trs.type)
+    // const asset = trs.asset[assetName]
+    // const mapping = await this.propsMapping()
 
-    const bb = new ByteBuffer()
-    for (let i = 0; i < mapping.length; i++) {
-      const item = mapping[i]
-      if (item && item.required) {
-        let fieldType = item.field.replace(/[0-9]/g, '')
-        fieldType = fieldType.replace(/_ext$/, '')
-        if (fieldType === 'str') {
-          const strValue = asset[item.prop]
-          bb.writeUTF8String(strValue)
-        } else if (fieldType === 'int') {
-          const intValue = asset[item.prop]
-          bb.writeInt(intValue)
-        } else if (fieldType === 'timestamp') {
-          const timestampValue = asset[item.prop]
-          bb.writeUTF8String(CommonUtils.formatDate('yyyy-MM-dd hh:mm:ss', timestampValue))
-        }
-      }
-    }
-    bb.flip()
+    // const bb = new ByteBuffer()
+    // for (let i = 0; i < mapping.length; i++) {
+    //   const item = mapping[i]
+    //   if (item && item.required) {
+    //     let fieldType = item.field.replace(/[0-9]/g, '')
+    //     fieldType = fieldType.replace(/_ext$/, '')
+    //     if (fieldType === 'str') {
+    //       const strValue = asset[item.prop]
+    //       bb.writeUTF8String(strValue)
+    //     } else if (fieldType === 'int') {
+    //       const intValue = asset[item.prop]
+    //       bb.writeInt(intValue)
+    //     } else if (fieldType === 'timestamp') {
+    //       const timestampValue = asset[item.prop]
+    //       bb.writeUTF8String(CommonUtils.formatDate('yyyy-MM-dd hh:mm:ss', timestampValue))
+    //     }
+    //   }
+    // }
+    // bb.flip()
 
     // 插件 使用 bb , 最后 transaction.js 处理成 Uint8Array
     // if (typeof window !== 'undefined') {
     //   return new Uint8Array(bb.toArrayBuffer())
     // } else {
-    return bb.toBuffer()
+    // return bb.toBuffer()
     // }
   }
 

@@ -69,9 +69,11 @@
     "eslint-plugin-node": "^11.1.0",
     "eslint-plugin-promise": "^4.2.1",
     "eslint-plugin-standard": "^4.0.1",
-    "father-build": "^1.17.2",
+    "father-build": "^1.18.1",
     "git-cz": "^4.3.1",
-    "lerna": "^3.18.1"
+    "lerna": "^3.18.1",
+    "rollup-plugin-node-builtins": "^2.1.2",
+    "rollup-plugin-node-globals": "^1.4.0"
   },
   "publishConfig": {
     "access": "public"

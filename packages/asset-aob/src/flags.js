@@ -11,6 +11,17 @@ class Flags extends Asset.Base {
     ]
   }
 
+  async getBytes (trs) {
+    const asset = await this.getAssetObject(trs)
+    const buffer = Buffer.concat([
+      Buffer.from(asset.currency, 'utf8'),
+      Buffer.from([asset.flag || 0]),
+      Buffer.from([asset.flag_type || '0'])
+    ])
+
+    return buffer
+  }
+
   async verify (trs, sender) {
     await super.verify(trs, sender)
 

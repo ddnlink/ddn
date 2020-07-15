@@ -60,6 +60,24 @@ class Aob extends Asset.Base {
     ]
   }
 
+  async getBytes (trs) {
+    const asset = await this.getAssetObject(trs)
+    let buffer = Buffer.concat([
+      Buffer.from(asset.name, 'utf8'),
+      Buffer.from(asset.desc || '', 'utf8'),
+      Buffer.from(asset.maximum, 'utf8'),
+      Buffer.from([asset.precision || 0]),
+      Buffer.from([asset.allow_writeoff || '0']),
+      Buffer.from([asset.allow_whitelist || '0']),
+      Buffer.from([asset.allow_blacklist || '0'])
+    ])
+
+    if (asset.strategy) {
+      buffer = Buffer.concat([Buffer.from(asset.strategy, 'utf8')])
+    }
+    return buffer
+  }
+
   async calculateFee () {
     return DdnUtils.bignum.multiply(500, this.constants.fixedPoint)
   }
@@ -128,7 +146,7 @@ class Aob extends Asset.Base {
     const issuerData = await issuerInst.queryAsset({ name: issuerName }, null, false, 1, 1)
 
     if (!issuerData || !(issuerData && issuerData.length > 0)) {
-      throw new Error('Issuer not exists form asset-aob')
+      throw new Error('Issuer not exists form asset-aob/asset')
     }
 
     // 权限仅限于注册商
@@ -137,26 +155,6 @@ class Aob extends Asset.Base {
     }
 
     return trs
-  }
-
-  async getBytes (trs) {
-    // const asset = await this.getAssetObject(trs)
-    // let buffer = Buffer.concat([
-    //   Buffer.from(asset.name, 'utf8'),
-    //   Buffer.from(asset.desc, 'utf8'),
-    //   Buffer.from(asset.maximum, 'utf8'),
-    //   Buffer.from([asset.precision || 0]),
-    //   Buffer.from(asset.strategy || '', 'utf8'),
-    //   Buffer.from([asset.allow_writeoff || '0']),
-    //   Buffer.from([asset.allow_whitelist || '0']),
-    //   Buffer.from([asset.allow_blacklist || '0'])
-    // ])
-
-    // if (asset.strategy) {
-    //   buffer = Buffer.concat([Buffer.from(asset.strategy, 'utf8')])
-    // }
-    // return buffer
-    return null
   }
 
   async dbSave (trs, dbTrans) {
@@ -201,7 +199,7 @@ class Aob extends Asset.Base {
       }
     })
 
-    // 
+    //
     router.get('/issuers/:name/assets', async (req, res) => {
       try {
         const result = await this.getIssuerAssets(req, res)

@@ -8,7 +8,7 @@ async function getBytes (transaction, skipSignature, skipSecondSignature) {
   if (transaction.__assetBytes__) {
     assetBytes = transaction.__assetBytes__
   }
-  if (assetBytes) assetSize = assetBytes.length
+  if (assetBytes) assetSize = assetBytes.byteLength
 
   const size = 1 + // type (int)
         4 + // timestamp (int)

@@ -30,16 +30,10 @@ $ yarn bootstrap
 Build first.
 
 ```bash
-$ yarn build
+$ yarn build / -w
 ```
 
-Run it.
-
-```bash
-$ yarn start
-```
-
-or
+Run it in an other terminal.
 
 ```bash
 $ cd examples/fun-tests

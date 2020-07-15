@@ -3,6 +3,7 @@
   "version": "0.1.9",
   "description": "DDN evidence",
   "main": "lib/index.js",
+  "module": "dist/index.esm.js",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/ddnlink/ddn.git",
@@ -14,13 +15,15 @@
   },
   "files": [
     "lib",
+    "dist",
     ".ddnrc.js"
   ],
   "author": "wangxm",
   "license": "MIT",
   "dependencies": {
     "@ddn/asset-base": "^0.2.8",
-    "@ddn/utils": "^0.1.9"
+    "@ddn/utils": "^0.1.9",
+    "bytebuffer": "^5.0.1"
   },
   "gitHead": "c83d3689cf78bd221a7380430d6d18e7516348b8"
 }

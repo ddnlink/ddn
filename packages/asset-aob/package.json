@@ -3,6 +3,7 @@
   "version": "0.3.4",
   "description": "DDN asset on blockchain",
   "main": "lib/index.js",
+  "module": "dist/index.esm.js",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/ddnlink/ddn.git",
@@ -14,6 +15,7 @@
   },
   "files": [
     "lib",
+    "dist",
     ".ddnrc.js"
   ],
   "author": "wangxm",
@@ -22,7 +24,9 @@
     "@ddn/asset-base": "^0.2.8",
     "@ddn/crypto": "^0.2.10",
     "@ddn/utils": "^0.1.9",
+    "assert": "^2.0.0",
     "async": "^2.6.1",
+    "bytebuffer": "^5.0.1",
     "lodash": "^4.17.15",
     "mathjs": "^5.4.0",
     "sequelize": "^4.42.0"

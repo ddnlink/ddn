@@ -1,3 +1,5 @@
+import ByteBuffer from 'bytebuffer'
+
 import Asset from '@ddn/asset-base'
 import DdnUtils from '@ddn/utils'
 
@@ -27,6 +29,27 @@ class Issuer extends Asset.Base {
     ]
   }
 
+  async getBytes (trs) {
+    // const asset = await this.getAssetObject(trs)
+    // // console.log('issuer.js getbytes asset:', asset)
+    // const buffer = Buffer.concat([
+    //   Buffer.from(asset.name, 'utf8'),
+    //   Buffer.from(asset.desc || '', 'utf8')
+    // ])
+
+    // return buffer
+    const issuer = await this.getAssetObject(trs)
+
+    const bb = new ByteBuffer()
+    bb.writeString(issuer.name)
+    bb.writeString(issuer.desc)
+
+    bb.flip()
+
+    console.log('issuer bytes:', bb)
+    return bb.toBuffer()
+  }
+
   async calculateFee () {
     return DdnUtils.bignum.multiply(100, this.constants.fixedPoint)
   }
@@ -53,10 +76,6 @@ class Issuer extends Asset.Base {
     } else {
       return trans
     }
-  }
-
-  async getBytes (trs) {
-    return null
   }
 
   async dbSave (trs, dbTrans) {
