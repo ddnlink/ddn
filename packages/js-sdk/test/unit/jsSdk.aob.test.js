@@ -30,9 +30,9 @@ describe('AOB Test', () => {
   debug('issuerName', issuerName)
 
   // 前端必须对sdk进行初始化，以便加载各个插件
-  beforeAll(() => {
-    DdnJS.init();
-  })
+  // beforeAll(() => {
+  //   DdnJS.init()
+  // })
 
   // 开始前，得把发行商账号 IssuerAccount 注册到链上(登录一下即可)
   beforeAll((done) => {

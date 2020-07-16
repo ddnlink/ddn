@@ -1,7 +1,7 @@
 import Asset from '@ddn/asset-base'
 import crypto from '../utils/crypto'
 import slots from '../time/slots'
-import options from '../options'
+import options from '../utils/options'
 // import constants from '../constants';
 
 async function createPluginAsset (trsType, assetInfo, secret, secondSecret) {

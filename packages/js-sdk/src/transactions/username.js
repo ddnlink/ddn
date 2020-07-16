@@ -2,7 +2,7 @@ import crypto from '../utils/crypto'
 import constants from '../constants'
 import DdnUtils from '@ddn/utils'
 import slots from '../time/slots'
-import options from '../options'
+import options from '../utils/options'
 
 async function createUsername (name, secret, secondSecret) {
   const keys = crypto.getKeys(secret)

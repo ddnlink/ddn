@@ -1,5 +1,5 @@
 import init from './init'
-import options from './options'
+import options from './utils/options'
 import constants from './constants'
 import slots from './time/slots'
 import format from './time/format'

@@ -2,12 +2,11 @@ import nacl from 'tweetnacl'
 import crypto from 'crypto'
 import RIPEMD160 from 'ripemd160'
 import Mnemonic from 'bitcore-mnemonic'
-import base58check from './base58check'
-
-import DdnUtils from '@ddn/utils'
+import DdnCrypto from '@ddn/crypto'
 
 import constants from '../constants'
-import { getBytes } from './bytes.browser'
+import { getBytes } from '../bytes'
+import { getFee } from '../fees'
 
 let Buffer
 if (typeof Buffer === 'undefined') {
@@ -15,58 +14,13 @@ if (typeof Buffer === 'undefined') {
 }
 const fixedPoint = constants.fixedPoint
 
-// const {
-//   verify,
-//   verifySecondSignature,
-//   verifyBytes
-// } = DdnCrypto
+const { base58check } = DdnCrypto
 
 function toLocalBuffer (buf) {
   if (typeof window !== 'undefined') {
     return new Uint8Array(buf.toArrayBuffer())
   } else {
     return buf.toBuffer()
-  }
-}
-
-async function getFee (transaction) {
-  switch (transaction.type) {
-    case DdnUtils.assetTypes.TRANSFER: // Normal
-      return DdnUtils.bignum.multiply(0.1, fixedPoint)
-    case DdnUtils.assetTypes.SIGNATURE: // Signature
-      return DdnUtils.bignum.multiply(100, fixedPoint)
-    case DdnUtils.assetTypes.DELEGATE: // Delegate
-      return DdnUtils.bignum.multiply(10000, fixedPoint)
-    case DdnUtils.assetTypes.VOTE: // Vote
-      return DdnUtils.bignum.new(fixedPoint)
-    case DdnUtils.assetTypes.AOB_ISSUER: // Issuer
-      return DdnUtils.bignum.multiply(100, fixedPoint)
-    case DdnUtils.assetTypes.AOB_ASSET: // Issuer
-      return DdnUtils.bignum.multiply(500, fixedPoint)
-    // case DdnUtils.assetTypes.AOB_FLAG: // Issuer
-    //   return DdnUtils.bignum.multiply(100, fixedPoint)
-    // case DdnUtils.assetTypes.AOB_ACL: // Issuer
-    //   return DdnUtils.bignum.multiply(100, fixedPoint)
-    // case DdnUtils.assetTypes.AOB_ISSUE: // Issuer
-    //   return DdnUtils.bignum.multiply(100, fixedPoint)
-    default: {
-      let fee = constants.net.fees.send
-      // if (Asset.Utils.isTypeValueExists(transaction.type)) {
-        console.log('transaction.type', transaction.type)
-        // const trans = Asset.Utils.getTransactionByTypeValue(transaction.type)
-        // const TransCls = require(trans.package).default[trans.name]
-        // let transInst = new TransCls({
-        //   constants: {
-        //     fixedPoint
-        //   }
-        // })
-
-        // fee = await transInst.calculateFee(transaction)
-
-        // transInst = null
-      // }
-      return fee
-    }
   }
 }
 
@@ -108,7 +62,6 @@ function generateAddress (publicKey) {
     publicKey = Buffer.from(publicKey, 'hex')
   }
   const h1 = nacl.hash(publicKey)
-
   const h2 = new RIPEMD160().update(Buffer.from(h1)).digest()
   return tokenPrefix + base58check.encode(h2)
 }
@@ -201,6 +154,54 @@ function generateMd5Hash (content) {
   return result
 }
 
+// 验证签名
+// todo: 本方法并没有被实际使用，请参考 peer/kernal/transaction/transaction.js的 verifySignature 重构
+async function verify (transaction, senderPublicKey) {
+  if (!transaction.signature) {
+    return false
+  }
+
+  if (!senderPublicKey) {
+    senderPublicKey = transaction.senderPublicKey
+  }
+
+  const bytes = await getBytes(transaction, true, true)
+  return verifyBytes(bytes, transaction.signature, senderPublicKey)
+}
+
+/**
+ * 二次签名验证
+ * @param {object} transaction 交易数据
+ * @param {string} publicKey 二次签名公钥
+ */
+async function verifySecondSignature (transaction, publicKey) {
+  if (!transaction.sign_signature) {
+    return false
+  }
+  const bytes = await getBytes(transaction, false, true)
+  return verifyBytes(bytes, transaction.sign_signature, publicKey)
+}
+
+/**
+ * 该方法验证使用私钥签名的字节信息是否正确，参数公钥与私钥对应，即：私钥签名的信息，公钥可以验证通过
+ * @param {hash} bytes 字节流 hash 值
+ * @param {string} signature 签名
+ * @param {string} publicKey 公钥
+ */
+function verifyBytes (bytes, signature, publicKey) {
+  // 保证字节类型
+  if (!(bytes instanceof Buffer)) {
+    bytes = Buffer.from(bytes)
+  }
+
+  const hash = createHash(bytes)
+
+  const signatureBuffer = Buffer.from(signature, 'hex')
+  const publicKeyBuffer = Buffer.from(publicKey, 'hex')
+  const res = nacl.sign.detached.verify(hash, signatureBuffer, publicKeyBuffer)
+  return res
+}
+
 function bufToHex (data) {
   return Buffer.from(data).toString('hex')
 }
@@ -219,9 +220,9 @@ export default {
   isAddress,
 
   // 验证
-  // verify,
-  // verifySecondSignature,
-  // verifyBytes,
+  verify,
+  verifySecondSignature,
+  verifyBytes,
 
   fixedPoint, // 测试和前端用
   signBytes,

@@ -1,9 +1,10 @@
 import ByteBuffer from 'bytebuffer'
-import assetGetBytes from './assetBytes'
+import assetGetBytes from './assets'
+import { getAsset } from '../utils/asset-util'
 
 let Buffer
-if (typeof Buffer === "undefined") {
-	Buffer = require("buffer").Buffer;
+if (typeof Buffer === 'undefined') {
+  Buffer = require('buffer').Buffer
 }
 
 async function getBytes (transaction, skipSignature, skipSecondSignature) {
@@ -70,7 +71,6 @@ async function getBytes (transaction, skipSignature, skipSecondSignature) {
 
   if (assetSize > 0) {
     for (let i = 0; i < assetSize; i++) {
-      console.log('assetBytes[i]=', assetBytes[i]);
       bb.writeByte(assetBytes[i])
     }
   }
@@ -93,50 +93,15 @@ async function getBytes (transaction, skipSignature, skipSecondSignature) {
 
   bb.flip()
 
-  return new Uint8Array(bb.toArrayBuffer());
+  return new Uint8Array(bb.toArrayBuffer())
 }
-
-// 系统需要 Uint8Array
-// function toLocalBuffer(buf) {
-//   if (typeof window !== 'undefined') {
-//     return new Uint8Array(buf.toArrayBuffer())
-//   } else {
-//     return buf.toBuffer()
-//   }
-// }
 
 async function getAssetBytes (transaction) {
-  if (global.assets && global.assets.transTypeNames[transaction.type]) {
-    const trans = global.assets.transTypeNames[transaction.type]
-
-    const trsName = getAssetJsonName(trans.name)
-    const asset = transaction.asset[trsName]
-
-    console.log('asset', asset)
-    console.log('assetGetBytes[trsName]', assetGetBytes[trsName])
-    if(typeof assetGetBytes[trsName] === 'function') {
-      return await assetGetBytes[trsName](asset)
-    }
+  const { trsName, asset } = await getAsset(transaction)
+  if (asset && typeof assetGetBytes[trsName] === 'function') {
+    return await assetGetBytes[trsName](asset)
   }
   return null
-}
-
-function getAssetJsonName (trsName) {
-  let result = ''
-  const subNames = trsName.split(/[-_]/)
-  for (let i = 0; i < subNames.length; i++) {
-    const sn = subNames[i]
-    if (sn && !/^\s*$/.test(sn)) {
-      if (i === 0) {
-        const camelSN = sn.substring(0, 1).toLowerCase() + sn.substring(1)
-        result += camelSN
-      } else {
-        const camelSN = sn.substring(0, 1).toUpperCase() + sn.substring(1)
-        result += camelSN
-      }
-    }
-  }
-  return result
 }
 
 export {

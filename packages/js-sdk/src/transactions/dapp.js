@@ -4,7 +4,7 @@ import DdnUtils from '@ddn/utils'
 import crypto from '../utils/crypto'
 import constants from '../constants'
 import slots from '../time/slots'
-import globalOptions from '../options'
+import globalOptions from '../utils/options'
 
 async function createDApp (options, secret, secondSecret) {
   const keys = crypto.getKeys(secret)

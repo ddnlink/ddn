@@ -1,5 +1,5 @@
 import Asset from '@ddn/asset-base'
-import options from './options'
+import options from './utils/options'
 
 import assetPlugins from './config.asset'
 

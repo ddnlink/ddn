@@ -4,7 +4,7 @@ import DdnUtils from '@ddn/utils'
 import crypto from '../utils/crypto' // TODO: @ddn/crypto
 import constants from '../constants'
 import slots from '../time/slots'
-import options from '../options'
+import options from '../utils/options'
 
 function calculateFee (amount) {
   const min = constants.net.fees.send

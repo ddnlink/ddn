@@ -46,7 +46,6 @@ class Issuer extends Asset.Base {
 
     bb.flip()
 
-    console.log('issuer bytes:', bb)
     return bb.toBuffer()
   }
 

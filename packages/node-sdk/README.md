@@ -15,7 +15,7 @@ npm install @ddn/node-sdk --save
 只要基于 ES6 开发，Node.js或浏览器端都可以这样调用
 
 ```
-import DdnJS from '@ddn/node-sdk';
+import DdnJS from '@ddn/node-sdk'; // const DdnJS = require('@ddn/node-sdk).default
 // DdnJS.init('0ab796cd', 'testnet') 这是默认值
 DdnJS.init('0ab796cd')
 ```

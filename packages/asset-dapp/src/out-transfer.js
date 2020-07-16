@@ -29,6 +29,25 @@ class OutTransfer extends Asset.Base {
     ]
   }
 
+  async getBytes (trs) {
+    const transfer = await this.getAssetObject(trs)
+
+    let buf = Buffer.from([])
+    const dappId = Buffer.from(transfer.dapp_id, 'utf8')
+
+    // todo: 2020.7.16
+    if (transfer.currency !== this.constants.tokenName) {
+      const currency = Buffer.from(transfer.currency, 'utf8')
+      const amount = Buffer.from(transfer.amount, 'utf8')
+      buf = Buffer.concat([buf, dappId, currency, amount])
+    } else {
+      const currency = Buffer.from(transfer.currency, 'utf8')
+      buf = Buffer.concat([buf, dappId, currency])
+    }
+
+    return buf
+  }
+
   async create (data, trs) {
     trs.recipientId = data.recipientId
     trs.amount = '0'

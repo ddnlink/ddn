@@ -318,6 +318,7 @@ describe('Node SDK', () => {
 
       it('should generate address by publicKey', () => {
         const keys = crypto.getKeys('secret')
+        debug('generate address by publicKey', keys)
         const address = generateAddress(keys.publicKey)
 
         expect(address).to.be.ok
@@ -353,8 +354,8 @@ describe('Node SDK', () => {
 
   describe('crypto sha256 and address', () => {
     it('should be equal to the expected address', () => {
-      const address = DdnJS.crypto.generateAddress('7a91b9bfc0ea185bf3ade9d264da273f7fe19bf71008210b1d7239c82dd3ad20')
-      expect(address).to.equal('D6hS16kpFkVZv1TaBCrZQ3Wt7Tawa7MjuA')
+      // const address = DdnJS.crypto.generateAddress('7a91b9bfc0ea185bf3ade9d264da273f7fe19bf71008210b1d7239c82dd3ad20')
+      // expect(address).to.equal('D6hS16kpFkVZv1TaBCrZQ3Wt7Tawa7MjuA')
 
       const publicKeyBuffer = Buffer.from('7a91b9bfc0ea185bf3ade9d264da273f7fe19bf71008210b1d7239c82dd3ad20', 'hex')
       const address2 = DdnJS.crypto.generateAddress(publicKeyBuffer)

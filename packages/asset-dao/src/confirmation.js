@@ -1,3 +1,4 @@
+import ByteBuffer from 'bytebuffer'
 import DdnCrypto from '@ddn/crypto'
 
 import Asset from '@ddn/asset-base'
@@ -40,6 +41,18 @@ class Confirmation extends Asset.Base {
       prop: 'contribution_trs_id'
     }
     ]
+  }
+
+  async getBytes (trs) {
+    const asset = await this.getAssetObject(trs)
+    const bb = new ByteBuffer()
+    bb.writeUTF8String(asset.received_address)
+    bb.writeUTF8String(asset.sender_address)
+    bb.writeUTF8String(asset.url)
+    bb.writeInt8(asset.state)
+    bb.writeUTF8String(asset.contribution_trs_id)
+    bb.flip()
+    return bb.toBuffer()
   }
 
   async create (data, trs) {

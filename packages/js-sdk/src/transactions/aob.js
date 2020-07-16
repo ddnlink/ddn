@@ -2,7 +2,7 @@ import DdnUtils from '@ddn/utils'
 import DdnCrypto from '../utils/crypto'
 import constants from '../constants'
 import slots from '../time/slots'
-import options from '../options'
+import options from '../utils/options'
 
 const { bignum } = DdnUtils
 

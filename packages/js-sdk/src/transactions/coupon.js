@@ -3,7 +3,7 @@ import DdnUtils from '@ddn/utils'
 import crypto from '../utils/crypto'
 import constants from '../constants'
 
-import options from '../options'
+import options from '../utils/options'
 import slots from '../time/slots'
 
 async function createIssuerAuditorBuy (received_address, amount, secret, secondSecret) {

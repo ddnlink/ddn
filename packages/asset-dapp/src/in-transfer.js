@@ -103,7 +103,7 @@ class InTransfer extends Asset.Base {
   async getBytes (trs) {
     const transfer = await this.getAssetObject(trs)
 
-    var buf = Buffer.from([])
+    let buf = Buffer.from([])
     const dappId = Buffer.from(transfer.dapp_id, 'utf8')
     // again !!!
     // if (trs.asset.inTransfer.currency !== this.library.constants.tokenName) {

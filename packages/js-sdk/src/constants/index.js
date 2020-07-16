@@ -6,7 +6,7 @@
  *-------------------------------------------------------------------------------------------- */
 
 import constants from './constants.ddn'
-import options from '../options'
+import options from '../utils/options'
 
 constants.net = constants[options.get('net')]
 

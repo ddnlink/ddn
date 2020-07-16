@@ -27,7 +27,7 @@ payload为@ddn/node-sdk创建出来的交易数据
 支持格式：json  
 公用变量：
 ```
-var DdnJS = require('@ddn/node-sdk');
+var DdnJS = require('@ddn/node-sdk').default;
 // 一级密码
 var secret = 'wild corn coil lizard runway flower outside vicious diesel aim slight become'
 <!-- address: DNz4hQjV1KWo8LJwhQya9WANZsrhaziABG -->

@@ -2,12 +2,12 @@
 
 ## About 关于
 
-这是 DDN javascript SDK，兼容基于Node.js的服务端和浏览器端
+这是 DDN javascript SDK，兼容浏览器端
 
 ## Install 安装
 
 ```
-npm install @ddn/node-sdk --save
+npm install @ddn/js-sdk --save
 ```
 
 ## Usage 使用
@@ -15,12 +15,12 @@ npm install @ddn/node-sdk --save
 只要基于 ES6 开发，Node.js或浏览器端都可以这样调用
 
 ```
-import DdnJS from '@ddn/node-sdk';
+import DdnJS from '@ddn/js-sdk';
 // DdnJS.init('0ab796cd', 'testnet') 这是默认值
 DdnJS.init('0ab796cd')
 ```
 
-Please reference the [ddn http interface documents](https://github.com/ddnlink/ddn-docs/node-sdk-api.md)
+Please reference the [ddn http interface documents](https://github.com/ddnlink/ddn-docs/js-sdk-api.md)
 
 ## Develop 开发
 
