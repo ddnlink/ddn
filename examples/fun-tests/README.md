@@ -19,26 +19,32 @@ More infomation please visit our [official website](https://www.ddn.link) or [dd
 ## Installation for ubuntu 16.04.x or higher
 
 ```
+# Update
+apt update
+
 # Install dependency package
 sudo apt-get install curl sqlite3 ntp wget git libssl-dev openssl make gcc g++ autoconf automake python build-essential libtool libtool-bin -y
 
+ubuntu 18.04 请将安装 libtool 
+
 # Install nvm
-curl -o- https://raw.githubusercontent.com/creationix/nvm/v0.33.2/install.sh | bash
+curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.35.3/install.sh | bash
 # This loads nvm
 export NVM_DIR="$HOME/.nvm"
 [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh" 
 [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
 
 # Install node and npm for current user.
-nvm install node 8
+nvm install 10.21.0
+
 # check node version and it should be v8.x.x
 node --version
 
 # git clone sourece code
-git clone https://github.com/ddnlink/ddn.git && cd ddn && chmod u+x ddnd
+git clone https://github.com/ddnlink/ddn-starter.git && cd ddn-starter && chmod u+x ddnd
 
 # Install node packages
-npm install
+npm install --production
 ```
 
 ## Installation for Mac 10.01.x or higher
@@ -48,7 +54,7 @@ npm install
 brew install curl sqlite3 ntp wget git libssl-dev openssl make gcc g++ autoconf libtool libtool-bin -y
 
 # Install nvm
-curl -o- https://raw.githubusercontent.com/creationix/nvm/v0.33.2/install.sh | bash
+curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.35.3/install.sh | bash
 # This loads nvm
 export NVM_DIR="$HOME/.nvm"
 [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh" 
@@ -63,7 +69,7 @@ node --version
 git clone https://github.com/ddnlink/ddn.git && cd ddn && chmod u+x ddnd
 
 # Install node packages
-npm install
+npm install --production
 ```
 
 ## Run 
@@ -137,3 +143,6 @@ $ yarn test
 The MIT License (MIT)
 
 Copyright (c) 2016-2019 DDN.link. All rights reserved. See License.txt in the project root for license information.
+
+
+docker run --rm -p 8001:8001 verb/socat TCP-LISTEN:8001,fork TCP-CONNECT:172.17.0.2:8001

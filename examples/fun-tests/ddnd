@@ -28,6 +28,7 @@ function start() {
   else
     rm -f $PROG_DIR/ddn.pid
     node $PROG_DIR/app.js --base $PROG_DIR --daemon $@
+    echo "DDN server is starting"
   fi
 }
 
@@ -80,7 +81,7 @@ function chosenode(){
   fi
 
   if [ i${status[$num]} = i"N" ];then
-    echo "This node has no data,please run ddnd again!"
+    echo "This node has no data, please run ddnd again!"
     exit 2
   fi
 

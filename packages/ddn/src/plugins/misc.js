@@ -23,11 +23,12 @@ function peerstat () {
       console.log('Failed to get peers', err)
       return
     }
+
     async.map(peers, (peer, next) => {
       new Api({
         host: peer.ip,
         port: peer.port
-      }).get('/api/blocks/getHeight', (err, { height }) => {
+      }).get('/api/blocks/getHeight', (err, body) => {
         if (err) {
           console.log('%s:%d %s %d', peer.ip, peer.port, peer.version, err)
           next(null, {
@@ -35,10 +36,10 @@ function peerstat () {
             error: err
           })
         } else {
-          console.log('%s:%d %s %d', peer.ip, peer.port, peer.version, height)
+          console.log('%s:%d %s %d', peer.ip, peer.port, peer.version, body.height)
           next(null, {
             peer,
-            height
+            height: body.height
           })
         }
       })

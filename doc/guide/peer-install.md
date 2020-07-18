@@ -14,7 +14,7 @@ toc: menu
 
 **建议**
 
-- 系统：ubuntu 18.04.03 LTS x64位操作系统
+- 系统：ubuntu 16.04.03 LTS x64位操作系统 及以上
 - CPU： 2C以上
 - 内存：4G以上
 - 带宽：2Mb以上
@@ -44,14 +44,14 @@ $ tar zxvf ddn-linux-2.0.2-testnet.tar.gz
 
 ### 2.2 Preparations 准备工作
 
-PS：主要是安装sqlite3/ntp2等依赖包和库
 
 ```
 # 进入你的安装目录（cd project folder)
 $ cd ~/your/project/
 
 # 在 ubuntu 执行下面的命令
-$ chmod u+x init/*.sh && chmod 755 ddnd && ./ddnd configure
+$ chmod u+x init/*.sh && chmod 755 ddnd && ./ddnd configure # 主要是安装sqlite3/ntp2等依赖包和库
+
 ```
 
 ## 3 Run 运行
@@ -83,7 +83,7 @@ $ tail -f logs/debug.log
 
 ### 4.1 Delegate`s secret 受托人密钥
 
-打开`config.json`, 找到`secret`字段，将`受托人密钥`填进去即可。可配置多个，但不能重复。
+打开`.ddnrc.js`, 找到`secret`字段，将`受托人密钥`填进去即可。可配置多个，但不能重复。
 
 ```jsx | inline
 import React from 'react';

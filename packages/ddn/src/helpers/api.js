@@ -1,3 +1,4 @@
+/* eslint-disable standard/no-callback-literal */
 import request from 'request'
 import config from '../config'
 
@@ -25,7 +26,7 @@ function resultHandler (cb) {
 class Api {
   constructor (options) {
     this.options = options || {}
-    this.mainnet = this.options.mainnet
+    this.mainnet = this.options.mainnet || 'testnet'
     this.host = this.options.host || '127.0.0.1'
     this.port = this.options.port || (this.mainnet ? 8000 : 8001)
     this.baseUrl = `http://${this.host}:${this.port}`
