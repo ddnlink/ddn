@@ -52,7 +52,9 @@ DDN, 是一个成熟的企业级区块链系统，已经服务于版权存证、
 
 ## 案例
 
+- [DDN 官网](https://ddn.link)
 - [DDN 主网](http://mainnet.ddn.link)
+- [DDN 测试网](http://testnet.ddn.link)
 - [DDN 钱包](http://wallet.ddn.link)
 - [DDN手机钱包](https://www.ddn.link/product/wallet)
 

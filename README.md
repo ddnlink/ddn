@@ -49,7 +49,9 @@ More infomation please visit our [official website](https://www.ddn.link) , [doc
 
 ## Examples
 
+- [DDN Site](https://ddn.link)
 - [DDN Mainnet](http://mainnet.ddn.link)
+- [DDN Testnet](http://mainnet.ddn.link)
 - [DDN Wallet](http://wallet.ddn.link)
 - [DDN Mobile Wallet](https://www.ddn.link/product/wallet)
 
