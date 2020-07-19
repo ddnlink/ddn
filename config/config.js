@@ -29,7 +29,7 @@ export default {
         title: '贡献',
         children: ['guide/contributing']
       }
-    ],
+    ]
   },
 
   extraBabelPlugins: [

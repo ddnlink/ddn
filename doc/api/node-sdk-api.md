@@ -1,6 +1,7 @@
 ---
+order: 6
 id: ddn-node-sdk-api
-title: DDN Node-SDK Api
+title: 6. DDN Node-SDK Api
 sidebar_label: DDN Node-SDK Api
 ---
 
