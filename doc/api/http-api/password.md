@@ -1,7 +1,7 @@
 ---
 order: 7
 id: http-api-second-password
-title: 二次签名
+title: 二次密码
 sidebar_label: Http api second password
 ---
 
