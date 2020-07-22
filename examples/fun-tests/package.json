@@ -1,6 +1,6 @@
 {
   "name": "ddn-starter",
-  "version": "3.7.7",
+  "version": "3.7.8",
   "main": "./app.js",
   "private": true,
   "repository": {
@@ -48,8 +48,8 @@
   },
   "dependencies": {
     "@ddn/core": "^0.2.4",
-    "@ddn/node-sdk": "^0.3.8",
-    "@ddn/peer": "^0.5.5",
+    "@ddn/node-sdk": "^0.3.9",
+    "@ddn/peer": "^0.5.6",
     "@ddn/utils": "^0.1.10",
     "commander": "2.6.0",
     "lodash": "^4.17.11"

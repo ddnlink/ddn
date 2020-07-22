@@ -54,7 +54,7 @@
   },
   "workspaces": [
     "packages/*",
-    "examples/*"
+    "examples/fun-tests"
   ],
   "devDependencies": {
     "@types/jest": "^25.1.3",
