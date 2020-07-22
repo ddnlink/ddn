@@ -14,7 +14,6 @@ import BalanceManager from '../helpers/balance-manager'
 import database from '../db/database'
 import dbParams from '../db/db-params'
 import DdnSchema from '../schema/ddn-schema'
-import constants from '../constants'
 
 class Context {
   async init (options) {
@@ -31,10 +30,10 @@ class Context {
     this.config = options.configObject
 
     // 区块链基本常量配置
-    this.constants = constants
+    this.constants = options.constants
 
     // 地址操作 常用操作和常量放在上下文
-    this.address = new Address(constants.tokenPrefix)
+    this.address = new Address(this.constants.tokenPrefix)
 
     // 创世区块JSON对象
     this.genesisblock = options.genesisblockObject

@@ -169,6 +169,7 @@ class Account {
     return null
   }
 
+  // todo: 优化该方法，减少检索处理
   async getAccountList (filter, fields) {
     let limit, offset, sort
 
@@ -186,7 +187,7 @@ class Account {
     delete filter.sort
 
     if (typeof (filter.address) === 'string' && !this.isAddress(filter.address)) {
-      this.logger.debug('account address', filter.address)
+      this.logger.error('account address', filter.address)
       throw new Error('Invalid address getAccount')
     }
 

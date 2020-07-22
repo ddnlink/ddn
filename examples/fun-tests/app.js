@@ -10,6 +10,7 @@ const fs = require('fs')
 const DdnCore = require('@ddn/core').default
 const DdnPeer = require('@ddn/peer').default
 const DdnUtils = require('@ddn/utils').default
+const constants = require('./constants')
 
 /**
  * 整理系统配置文件生成输入参数
@@ -84,6 +85,7 @@ function genOptions () {
   return {
     baseDir,
     configObject,
+    constants,
     genesisblockObject,
     isDaemonMode: !!command.daemon
   }

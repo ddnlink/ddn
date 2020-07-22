@@ -47,7 +47,7 @@ const assetTypes = DdnUtils.assetTypes
 const bignum = DdnUtils.bignum
 
 // Node configuration
-const baseDir = path.resolve(process.cwd(), './examples/fun-tests')
+const baseDir = path.resolve(process.cwd(), './examples/rcp')
 const configFile = getConfigFile(baseDir)
 const config = requireFile(configFile)
 

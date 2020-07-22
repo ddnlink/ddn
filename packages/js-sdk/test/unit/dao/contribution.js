@@ -364,7 +364,7 @@ export const Contribution = () => {
             Tester.expect(err).to.be.not.ok
 
             Tester.expect(body).to.have.property('success').to.be.false
-            node
+            Tester
               .expect(body)
               .to.have.property('error')
               .to.include('The contribution has been confirmed')

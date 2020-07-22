@@ -4,8 +4,6 @@
  */
 import DdnUtils from '@ddn/utils'
 
-import constants from '../../constants'
-
 class RoundChanges {
   constructor (context, round, back) {
     Object.assign(this, context)
@@ -21,7 +19,7 @@ class RoundChanges {
       this._roundRewards = (this.runtime.round._unRewardsByRound[round] || [])
     }
 
-    this._CLUB_BONUS_RATIO = constants[this.config.net].rewardRatio
+    this._CLUB_BONUS_RATIO = context.constants[context.config.net].rewardRatio
   }
 
   at (index) {

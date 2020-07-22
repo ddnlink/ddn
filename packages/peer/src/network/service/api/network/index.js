@@ -18,4 +18,4 @@ class RootRouter {
   }
 }
 
-module.exports = RootRouter
+export default RootRouter;

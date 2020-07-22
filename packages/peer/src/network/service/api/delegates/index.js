@@ -191,7 +191,7 @@ class RootRouter {
 
   async getFee () {
     const fee = DdnUtils.bignum.multiply(100, this.constants.fixedPoint)
-    return { fee }
+    return { success: true, fee }
   }
 
   /**
@@ -239,7 +239,7 @@ class RootRouter {
       this.balancesSequence.add(async (cb) => {
         if (body.multisigAccountPublicKey &&
                     body.multisigAccountPublicKey !== keypair.publicKey) {
-          var account
+          let account
           try {
             account = await this.runtime.account.getAccountByPublicKey(body.multisigAccountPublicKey)
           } catch (err) {

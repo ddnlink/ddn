@@ -53,3 +53,7 @@ screenshot
 blockchain.*
 *.db
 *.db-journal
+
+# custom
+**/**/*.hbl.js
+examples/custom

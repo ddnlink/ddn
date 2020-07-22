@@ -70,25 +70,25 @@ class DdnSchema {
   }
 
   async validateBlock (block) {
-    const schemaFile = path.resolve(__dirname, './ddn-schemas/block.json')
+    const schemaFile = path.resolve(__dirname, './ddn-schemas/block')
     const blockSchema = global._require_runtime_(schemaFile)
     return await this.validate(blockSchema, block)
   }
 
   async validateTransaction (trs) {
-    const schemaFile = path.resolve(__dirname, './ddn-schemas/transaction.json')
+    const schemaFile = path.resolve(__dirname, './ddn-schemas/transaction')
     const transactionSchema = global._require_runtime_(schemaFile)
     return await this.validate(transactionSchema, trs)
   }
 
   async validatePeer (peer) {
-    const schemaFile = path.resolve(__dirname, './ddn-schemas/peer.json')
+    const schemaFile = path.resolve(__dirname, './ddn-schemas/peer')
     const peerSchema = global._require_runtime_(schemaFile)
     return await this.validate(peerSchema, peer)
   }
 
   async validatePeers (peer) {
-    const schemaFile = path.resolve(__dirname, './ddn-schemas/peers.json')
+    const schemaFile = path.resolve(__dirname, './ddn-schemas/peers')
     const peerSchema = global._require_runtime_(schemaFile)
     return await this.validate(peerSchema, peer)
   }

@@ -4,7 +4,6 @@
  */
 import DdnUtils from '@ddn/utils'
 
-import constants from '../../constants'
 import Delegate from '../lib/delegate'
 
 var _singleton
@@ -21,10 +20,9 @@ class BlockStatus {
     Object.assign(this, context)
     this._context = context
 
-    // TODO: constants 使用 global ？
-    this._milestones = constants[context.config.net].milestones
-    this._distance = constants[context.config.net].rewardDistance
-    this._rewardOffset = constants[context.config.net].rewardOffset
+    this._milestones = context.constants[context.config.net].milestones
+    this._distance = context.constants[context.config.net].rewardDistance
+    this._rewardOffset = context.constants[context.config.net].rewardOffset
   }
 
   parseHeight (height) {
@@ -63,7 +61,7 @@ class BlockStatus {
 
     const milestone = this.calcMilestone(heightResult)
 
-    let supply = DdnUtils.bignum.new(constants.totalAmount)
+    let supply = DdnUtils.bignum.new(this.constants.totalAmount)
 
     const rewards = []
 

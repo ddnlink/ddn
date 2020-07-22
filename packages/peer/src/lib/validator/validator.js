@@ -64,9 +64,8 @@ class Validator {
     const field = this.createField(null, value, rules)
     let async
     let finished
-    let report
 
-    report = {}
+    const report = {}
 
     function finish (err, issues, output) {
       finished = true

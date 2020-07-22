@@ -9,8 +9,8 @@ class RootRouter {
   }
 
   async get (req) {
-    var query = Object.assign({}, req.body, req.query)
-    var validateErrors = await this.ddnSchema.validate({
+    const query = Object.assign({}, req.body, req.query);
+    const validateErrors = await this.ddnSchema.validate({
       type: 'object',
       properties: {
         senderPublicKey: {
@@ -21,15 +21,15 @@ class RootRouter {
           type: 'string'
         }
       }
-    }, query)
+    }, query);
     if (validateErrors) {
       throw new Error(`Invalid parameters: ${validateErrors[0].schemaPath} ${validateErrors[0].message}`)
     }
 
-    var transactions = await this.runtime.transaction.getUnconfirmedTransactionList(true)
+    const transactions = await this.runtime.transaction.getUnconfirmedTransactionList(true);
     if (query.senderPublicKey || query.address) {
-      var result = []
-      for (var i = 0; i < transactions.length; i++) {
+      const result = [];
+      for (let i = 0; i < transactions.length; i++) {
         if (transactions[i].senderPublicKey === query.senderPublicKey ||
                     transactions[i].recipientId === query.address) { // wxm block database
           result.push(transactions[i])
@@ -38,13 +38,13 @@ class RootRouter {
 
       return { success: true, transactions: result }
     } else {
-      return { success: true, transactions: transactions }
+      return { success: true, transactions };
     }
   }
 
   async getGet (req) {
-    var query = Object.assign({}, req.body, req.query)
-    var validateErrors = await this.ddnSchema.validate({
+    const query = Object.assign({}, req.body, req.query);
+    const validateErrors = await this.ddnSchema.validate({
       type: 'object',
       properties: {
         id: {
@@ -54,12 +54,12 @@ class RootRouter {
         }
       },
       required: ['id']
-    }, query)
+    }, query);
     if (validateErrors) {
       throw new Error(`Invalid parameters: ${validateErrors[0].schemaPath} ${validateErrors[0].message}`)
     }
 
-    var unconfirmedTransaction = await this.runtime.transaction.getUnconfirmedTransaction(query.id)
+    const unconfirmedTransaction = await this.runtime.transaction.getUnconfirmedTransaction(query.id);
     if (!unconfirmedTransaction) {
       throw new Error('Transaction not found')
     }
@@ -68,4 +68,4 @@ class RootRouter {
   }
 }
 
-module.exports = RootRouter
+export default RootRouter;

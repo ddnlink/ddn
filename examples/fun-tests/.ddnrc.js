@@ -12,7 +12,7 @@ module.exports = {
    * About Peer
   */
   port: 8001,
-  address: "127.0.0.1",
+  address: "0.0.0.0",
   publicIp: "",
   logLevel: "error",
   net: "testnet",

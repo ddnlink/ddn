@@ -4,7 +4,6 @@
  */
 import DdnUtils from '@ddn/utils'
 
-import constants from '../../constants'
 import RoundChanges from './round-changes'
 
 let _singleton
@@ -94,7 +93,6 @@ class Round {
           resolve(result)
         }
       })
-      // library.dbLite.query("delete from mem_round where round = $round", { round }, cb);
     })
   }
 
@@ -124,7 +122,6 @@ class Round {
 
     const nextRound = await this.calc(DdnUtils.bignum.plus(block.height, 1))
 
-    // DdnUtils.bignum update if (round === nextRound && block.height !== 1) {
     if (DdnUtils.bignum.isEqualTo(round, nextRound) && !DdnUtils.bignum.isEqualTo(block.height, 1)) {
       this.logger.debug('Round tick completed', {
         height: block.height
@@ -132,7 +129,6 @@ class Round {
       return
     }
 
-    // DdnUtils.bignum update if (privated.delegatesByRound[round].length !== slots.delegates && block.height !== 1 && block.height !== 101) {
     if (this._delegatesByRound[round].length !== this.config.settings.delegateNumber &&
             !DdnUtils.bignum.isEqualTo(block.height, 1) && !DdnUtils.bignum.isEqualTo(block.height, this.config.settings.delegateNumber)) {
       this.logger.debug('Round tick completed', {
@@ -143,7 +139,6 @@ class Round {
 
     const outsiders = []
 
-    // DdnUtils.bignum update if (block.height === 1) {
     if (!DdnUtils.bignum.isEqualTo(block.height, 1)) {
       const roundDelegates = await this.runtime.delegate.getDisorderDelegatePublicKeys(block.height)
 
@@ -170,9 +165,6 @@ class Round {
       let changeFees = changes.fees
       const changeRewards = changes.rewards
       if (index === this._delegatesByRound[round].length - 1) {
-        // DdnUtils.bignum update
-        // changeBalance += changes.feesRemaining;
-        // changeFees += changes.feesRemaining;
         changeBalance = DdnUtils.bignum.plus(changeBalance, changes.feesRemaining)
         changeFees = DdnUtils.bignum.plus(changeFees, changes.feesRemaining)
       }
@@ -196,8 +188,8 @@ class Round {
     // const BONUS_CURRENCY = constants.tokenName
     this.logger.info(`DDN witness club get new bonus: ${bonus}`)
 
-    await this.runtime.account.merge(constants.foundAddress, {
-      address: constants.foundAddress,
+    await this.runtime.account.merge(this.constants.foundAddress, {
+      address: this.constants.foundAddress,
       balance: DdnUtils.bignum.plus(fees, rewards).toString(), // DdnUtils.bignum update (fees + rewards),
       u_balance: DdnUtils.bignum.plus(fees, rewards).toString(), // DdnUtils.bignum update (fees + rewards),
       fees: fees.toString(),
@@ -260,8 +252,6 @@ class Round {
 
     this._feesByRound[round] = (this._feesByRound[round] || 0)
 
-    // DdnUtils.bignum update
-    // privated.feesByRound[round] -= block.totalFee;
     this._feesByRound[round] = DdnUtils.bignum.minus(this._feesByRound[round], block.totalFee)
 
     this._rewardsByRound[round] = (this._rewardsByRound[round] || [])
@@ -270,7 +260,6 @@ class Round {
     this._delegatesByRound[round] = this._delegatesByRound[round] || []
     this._delegatesByRound[round].pop()
 
-    // DdnUtils.bignum update if (prevRound === round && previousBlock.height !== 1) {
     if (prevRound === round && !DdnUtils.bignum.isEqualTo(previousBlock.b_height, 1)) {
       return done()
     }
@@ -279,7 +268,6 @@ class Round {
     this._unDelegatesByRound[round] = this._unDelegatesByRound[round] || []
     this._unDelegatesByRound[round].pop()
 
-    // DdnUtils.bignum update if (privated.unDelegatesByRound[round].length !== slots.delegates && previousBlock.height !== 1) {
     if (this._unDelegatesByRound[round].length !== this.config.settings.delegateNumber && !DdnUtils.bignum.isEqualTo(previousBlock.b_height, 1)) {
       return done()
     }
@@ -360,11 +348,11 @@ class Round {
     //     const fees = bonus.fees;
     //     const rewards = bonus.rewards;
 
-    //     const BONUS_CURRENCY = constants.tokenName
+    //     const BONUS_CURRENCY = this.constants.tokenName
 
     //     library.logger.info(`DDN witness club get new bonus: ${bonus}`)
     //     modules.accounts.mergeAccountAndGet({
-    //       address: constants.foundAddress,
+    //       address: this.constants.foundAddress,
     //       balance: DdnUtils.bignum.minus(0, fees, rewards).toString(),     //DdnUtils.bignum update -(fees + rewards),
     //       u_balance: DdnUtils.bignum.minus(0, fees, rewards).toString(),       //DdnUtils.bignum update -(fees + rewards),
     //       fees: DdnUtils.bignum.minus(0, fees).toString(),     //DdnUtils.bignum update -fees,

@@ -33,6 +33,7 @@ class RootRouter {
     }
 
     return {
+      success: true,
       fees: `${account.fees}`, // DdnUtils.bignum update
       rewards: `${account.rewards}`,
       forged: DdnUtils.bignum.plus(account.fees, account.rewards).toString()

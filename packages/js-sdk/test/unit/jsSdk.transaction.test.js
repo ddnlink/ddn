@@ -63,7 +63,7 @@ describe('transaction.js', () => {
       })
 
       it('should have recipientId as string and to be equal 58191285901858109', () => {
-        expect(trs.recipientId).to.be.a('string').to.equal('58191285901858109')
+        expect(trs.recipientId).to.be.a('string').to.equal('DP2kJY3RweZU2jhYpnSbLbxVjgot95bUma')
       })
 
       it('should have amount as number and eqaul to 1000', () => {

@@ -2,8 +2,6 @@
  * Slot
  * wangxm   2018-01-07
  */
-import constants from '../../constants'
-
 let _singleton
 
 class Slot {
@@ -17,15 +15,15 @@ class Slot {
   constructor (context) {
     Object.assign(this, context)
     this._context = context
-    this.interval = constants.interval
-    this.delegates = constants.delegates
+    this.interval = this.constants.interval
+    this.delegates = this.constants.delegates
   }
 
   /**
      * 返回区块链启动时间戳
      */
   beginEpochTime () {
-    return constants[this.config.net].beginDate
+    return this.constants[this.config.net].beginDate
   }
 
   /**

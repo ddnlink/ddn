@@ -12,8 +12,8 @@
   "scripts": {
     "test": "mocha test",
     "build": "yarn build:dev & yarn build:prod",
-    "build:dev": "browserify index.js > ./dist/ddn.browserify.js",
-    "build:prod": "browserify index.js -p tinyify > ./dist/ddn.browserify.min.js"
+    "build:dev": "browserify index.js > ./dist/index.browserify.js",
+    "build:prod": "browserify index.js -p tinyify > ./dist/index.browserify.min.js"
   },
   "keywords": [
     "ddn",
