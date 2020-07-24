@@ -48,7 +48,6 @@
   },
   "dependencies": {
     "@ddn/core": "^0.2.4",
-    "@ddn/node-sdk": "^0.3.10",
     "@ddn/peer": "^0.5.7",
     "@ddn/utils": "^0.1.10",
     "commander": "2.6.0",

@@ -283,7 +283,7 @@ class MultisignaturesRouter {
     }
 
     let transactions = await this.runtime.transaction.getUnconfirmedTransactionList()
-    // wxm TODO 此处不应该用DdnUtils.assetTypes.DAPP_OUT，或者单独一个接口道aob包里
+
     if (query.isOutTransfer) {
       transactions = transactions.filter(({
         type
@@ -356,6 +356,7 @@ class MultisignaturesRouter {
 
   async getAccounts (req) {
     const query = Object.assign({}, req.body, req.query)
+
     const validateErrors = await this.ddnSchema.validate({
       type: 'object',
       properties: {
@@ -374,54 +375,59 @@ class MultisignaturesRouter {
     }
 
     return new Promise((resolve, reject) => {
-      this.dao.findList('mem_accounts2multisignature', {
-        dependent_id: query.publicKey // wxm block database
-      }, null, null, false, false,
-      [
-        [this.dao.db_fnGroupConcat('account_id'), 'account_id']
-      ], // wxm block database   library.dao.db_fn('group_concat', library.dao.db_col('accountId'))
-      null, async (err, rows) => {
-        if (err) {
-          this.logger.error(DdnUtils.system.getErrorMsg(err))
-          return reject(err)
-        }
-
-        const addresses = rows[0].account_id.split(',') // wxm block database
-
-        try {
-          const rows = await this.runtime.account.getAccountList({
-            address: {
-              $in: addresses
-            },
-            sort: [
-              ['balance', 'ASC']
-            ] // wxm block database
-          }, ['address', 'balance', 'multisignatures', 'multilifetime', 'multimin'])
-
-          for (let i = 0; i < rows.length; i++) {
-            const account = rows[i]
-
-            const addresses = []
-            for (let j = 0; j < account.multisignatures.length; j++) {
-              addresses.push(this.runtime.account.generateAddressByPublicKey(account.multisignatures[j]))
-            }
-
-            const multisigaccounts = await this.runtime.account.getAccountList({
-              address: {
-                $in: addresses
-              }
-            }, ['address', 'publicKey', 'balance'])
-            account.multisigaccounts = multisigaccounts
+      this.dao.findList('mem_accounts2multisignature',
+        {
+          dependent_id: query.publicKey // wxm block database
+        },
+        null,
+        null,
+        [
+          [this.dao.db_fnGroupConcat('account_id'), 'account_id']
+        ],
+        async (err, rows) => {
+          if (err) {
+            this.logger.error(DdnUtils.system.getErrorMsg(err))
+            return reject(err)
           }
 
-          resolve({
-            accounts: rows
-          })
-        } catch (e) {
-          this.logger.error(DdnUtils.system.getErrorMsg(e))
-          return reject(e)
-        }
-      })
+          const addresses1 = rows[0].account_id.split(',') // wxm block database
+
+          try {
+            const rows = await this.runtime.account.getAccountList({
+              address: {
+                $in: addresses1
+              },
+              sort: [
+                ['balance', 'ASC']
+              ] // wxm block database
+            }, ['address', 'balance', 'multisignatures', 'multilifetime', 'multimin'])
+
+            for (let i = 0; i < rows.length; i++) {
+              const account = rows[i]
+
+              const addresses = []
+              for (let j = 0; j < account.multisignatures.length; j++) {
+                addresses.push(this.runtime.account.generateAddressByPublicKey(account.multisignatures[j]))
+              }
+
+              const multisigaccounts = await this.runtime.account.getAccountList({
+                address: {
+                  $in: addresses
+                }
+              }, ['address', 'publicKey', 'balance'])
+
+              account.multisigaccounts = multisigaccounts
+            }
+
+            resolve({
+              success: true,
+              accounts: rows
+            })
+          } catch (e) {
+            this.logger.error(DdnUtils.system.getErrorMsg(e))
+            return reject(e)
+          }
+        })
     })
   }
 }
