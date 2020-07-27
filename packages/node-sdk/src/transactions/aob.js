@@ -1,13 +1,13 @@
 import DdnUtils from '@ddn/utils'
 import DdnCrypto from '../utils/crypto'
-import constants from '../constants'
 import slots from '../time/slots'
-import options from '../options'
+
+import { config, constants } from '../config'
 
 const { bignum } = DdnUtils
 
 function getClientFixedTime () {
-  return slots.getTime() - options.get('clientDriftSeconds')
+  return slots.getTime() - config.clientDriftSeconds
 }
 
 async function createTransaction (
@@ -23,7 +23,7 @@ async function createTransaction (
 
   const transaction = {
     type,
-    nethash: options.get('nethash'),
+    nethash: config.nethash,
     amount: '0',
     fee: `${fee}`,
     recipientId: recipientId,

@@ -1,20 +1,19 @@
 import Asset from '@ddn/asset-base'
 import crypto from '../utils/crypto'
 import slots from '../time/slots'
-import options from '../options'
-// import constants from '../constants';
+import { config } from '../config'
 
 async function createPluginAsset (trsType, assetInfo, secret, secondSecret) {
   const keys = crypto.getKeys(secret)
 
   const transaction = {
     type: trsType,
-    nethash: options.get('nethash'),
+    nethash: config.nethash,
     amount: assetInfo.amount ? `${assetInfo.amount}` : '0',
     fee: '',
     recipientId: assetInfo.recipientId ? assetInfo.recipientId : null,
     senderPublicKey: keys.publicKey,
-    timestamp: slots.getTime() - options.get('clientDriftSeconds'),
+    timestamp: slots.getTime() - config.clientDriftSeconds,
     message: assetInfo.message ? `${assetInfo.message}` : null,
     asset: {}
   }

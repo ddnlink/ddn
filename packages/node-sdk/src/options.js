@@ -11,6 +11,7 @@ export default {
   get (key) {
     return optionMap[key]
   },
+
   getAll () {
     return optionMap
   }

@@ -1,32 +1,19 @@
 import _ from 'lodash'
 import DdnUtils from '@ddn/utils'
+import { config, constants } from '../config'
 
 import crypto from '../utils/crypto' // TODO: @ddn/crypto
-import constants from '../constants'
 import slots from '../time/slots'
-import options from '../options'
-
-function calculateFee (amount) {
-  const min = constants.net.fees.send
-
-  const fee = DdnUtils.bignum.multiply(amount, 0.0001).toFixed(0)
-
-  if (DdnUtils.bignum.isLessThan(fee, min)) {
-    return min
-  } else {
-    return `${fee}`
-  }
-}
 
 async function createTransaction (recipientId, amount, message, secret, second_secret) {
   const transaction = {
     type: DdnUtils.assetTypes.TRANSFER,
-    nethash: options.get('nethash'),
+    nethash: config.nethash, // <- config.nethash,
     amount: `${amount}`,
-    fee: constants.net.fees.send,
+    fee: constants.net.fees.send, // <- options.get('constants').net.fees.send,
     recipientId: recipientId,
     message,
-    timestamp: slots.getTime() - options.get('clientDriftSeconds'),
+    timestamp: slots.getTime() - config.clientDriftSeconds,
     asset: {}
   }
 
@@ -48,11 +35,11 @@ async function createLock (height, secret, second_secret) {
   const transaction = {
     type: 100, // TODO: update to string lock
     amount: '0',
-    nethash: options.get('nethash'),
+    nethash: config.nethash, // <- config.nethash,
     fee: '10000000',
     recipientId: null,
     args: [String(height)],
-    timestamp: slots.getTime() - options.get('clientDriftSeconds'),
+    timestamp: slots.getTime() - config.clientDriftSeconds,
     asset: {}
   }
 
@@ -72,6 +59,5 @@ async function createLock (height, secret, second_secret) {
 
 export default {
   createTransaction,
-  calculateFee,
   createLock
 }

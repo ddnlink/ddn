@@ -1,9 +1,15 @@
 import getPaths from './getPaths'
-import getUserConfig from './getUserConfig'
-import constants from './constants'
+import getUserConfig, { requireFile, mergeConfigs } from './getUserConfig'
+
+export {
+  getUserConfig,
+  requireFile,
+  mergeConfigs
+}
 
 export default {
   getPaths,
   getUserConfig,
-  constants
+  requireFile,
+  mergeConfigs
 }

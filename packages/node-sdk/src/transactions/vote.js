@@ -1,21 +1,21 @@
 import DdnUtils from '@ddn/utils'
 
 import crypto from '../utils/crypto'
-import constants from '../constants'
+
 import slots from '../time/slots'
-import options from '../options'
+import { config, constants } from '../config'
 
 async function createVote (keyList, secret, secondSecret) {
   const keys = crypto.getKeys(secret)
 
   const transaction = {
     type: DdnUtils.assetTypes.VOTE,
-    nethash: options.get('nethash'),
+    nethash: config.nethash,
     amount: '0',
     fee: constants.net.fees.vote,
     recipientId: null,
     senderPublicKey: keys.publicKey,
-    timestamp: slots.getTime() - options.get('clientDriftSeconds'),
+    timestamp: slots.getTime() - config.clientDriftSeconds,
     asset: {
       vote: {
         votes: keyList

@@ -1,10 +1,8 @@
 import DdnUtils from '@ddn/utils'
 
 import crypto from '../utils/crypto'
-import constants from '../constants'
-
 import slots from '../time/slots.js'
-import options from '../options'
+import { config, constants } from '../config'
 
 const { bignum } = DdnUtils
 
@@ -47,12 +45,12 @@ async function createMultiTransfer (outputs, secret, secondSecret, cb) {
 
   const transaction = {
     type: DdnUtils.assetTypes.MULTITRANSFER,
-    nethash: options.get('nethash'),
+    nethash: config.nethash,
     amount: amount.toString(), // bignum update amount,
     fee: `${fee}`,
     recipientId: recipientId.join('|'),
     senderPublicKey: keys.publicKey,
-    timestamp: slots.getTime() - options.get('clientDriftSeconds'),
+    timestamp: slots.getTime() - config.clientDriftSeconds,
     asset: {
       output: {
         outputs

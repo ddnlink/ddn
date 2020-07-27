@@ -1,20 +1,20 @@
 import crypto from '../utils/crypto'
-import constants from '../constants'
+
 import DdnUtils from '@ddn/utils'
 import slots from '../time/slots'
-import options from '../options'
+import { config, constants } from '../config'
 
 async function createDelegate (username, secret, secondSecret) {
   const keys = crypto.getKeys(secret)
 
   const transaction = {
     type: DdnUtils.assetTypes.DELEGATE,
-    nethash: options.get('nethash'),
+    nethash: config.nethash,
     amount: '0',
     fee: constants.net.fees.delegate,
     recipientId: null,
     senderPublicKey: keys.publicKey,
-    timestamp: slots.getTime() - options.get('clientDriftSeconds'),
+    timestamp: slots.getTime() - config.clientDriftSeconds,
     asset: {
       delegate: {
         username,

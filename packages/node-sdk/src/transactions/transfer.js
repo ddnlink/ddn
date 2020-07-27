@@ -1,10 +1,10 @@
 import crypto from '../utils/crypto'
-import constants from '../constants'
+
 import DdnUtils from '@ddn/utils'
 import slots from '../time/slots'
-import options from '../options'
+import { config, constants } from '../config'
 
-const nethash = options.get('nethash')
+const nethash = config.nethash
 
 async function createInTransfer (dappId, currency, amount, secret, secondSecret) {
   const keys = crypto.getKeys(secret)
@@ -16,7 +16,7 @@ async function createInTransfer (dappId, currency, amount, secret, secondSecret)
     fee: constants.net.fees.send,
     recipientId: null,
     senderPublicKey: keys.publicKey,
-    timestamp: slots.getTime() - options.get('clientDriftSeconds'),
+    timestamp: slots.getTime() - config.clientDriftSeconds,
     asset: {
       in: {
         dapp_id: dappId,
@@ -52,7 +52,7 @@ async function createOutTransfer (recipientId, dappId, transactionId, currency, 
     fee: constants.net.fees.send,
     recipientId: recipientId,
     senderPublicKey: keys.publicKey,
-    timestamp: slots.getTime() - options.get('clientDriftSeconds'),
+    timestamp: slots.getTime() - config.clientDriftSeconds,
     asset: {
       outTransfer: {
         dapp_id: dappId,

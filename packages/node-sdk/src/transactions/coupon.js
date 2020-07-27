@@ -1,9 +1,7 @@
 import DdnUtils from '@ddn/utils'
-
 import crypto from '../utils/crypto'
-import constants from '../constants'
 
-import options from '../options'
+import { config, constants } from '../config'
 import slots from '../time/slots'
 
 async function createIssuerAuditorBuy (received_address, amount, secret, secondSecret) {
@@ -13,12 +11,12 @@ async function createIssuerAuditorBuy (received_address, amount, secret, secondS
 
   const transaction = {
     type: DdnUtils.assetTypes.COUPON_ISSUER_AUDITOR_BUY,
-    nethash: options.get('nethash'),
+    nethash: config.nethash,
     amount,
     fee: `${fee}`,
     recipientId: received_address,
     senderPublicKey: keys.publicKey,
-    timestamp: slots.getTime() - options.get('clientDriftSeconds'),
+    timestamp: slots.getTime() - config.clientDriftSeconds,
     asset: {
       couponIssuerAuditorBuy: {
         address: crypto.generateAddress(keys.publicKey)
@@ -45,12 +43,12 @@ async function createIssuerApply (orgName, org_id, orgOwner, orgOwnerPhone, secr
 
   const transaction = {
     type: DdnUtils.assetTypes.COUPON_ISSUER_APPLY,
-    nethash: options.get('nethash'),
+    nethash: config.nethash,
     amount: '0',
     fee: `${fee}`,
     recipientId: null,
     senderPublicKey: keys.publicKey,
-    timestamp: slots.getTime() - options.get('clientDriftSeconds'),
+    timestamp: slots.getTime() - config.clientDriftSeconds,
     asset: {
       couponIssuerApply: {
         address: crypto.generateAddress(keys.publicKey),
@@ -81,12 +79,12 @@ async function createIssuerUpdate (orgName, org_id, orgOwner, orgOwnerPhone, sec
 
   const transaction = {
     type: DdnUtils.assetTypes.COUPON_ISSUER_UPDATE,
-    nethash: options.get('nethash'),
+    nethash: config.nethash,
     amount: '0',
     fee: `${fee}`,
     recipientId: null,
     senderPublicKey: keys.publicKey,
-    timestamp: slots.getTime() - options.get('clientDriftSeconds'),
+    timestamp: slots.getTime() - config.clientDriftSeconds,
     asset: {
       couponIssuerUpdate: {
         address: crypto.generateAddress(keys.publicKey),
@@ -117,12 +115,12 @@ async function createIssuerCheck (address, orgName, org_id, orgOwner, orgOwnerPh
 
   const transaction = {
     type: DdnUtils.assetTypes.COUPON_ISSUER_CHECK,
-    nethash: options.get('nethash'),
+    nethash: config.nethash,
     amount: '0',
     fee: `${fee}`,
     recipientId: null,
     senderPublicKey: keys.publicKey,
-    timestamp: slots.getTime() - options.get('clientDriftSeconds'),
+    timestamp: slots.getTime() - config.clientDriftSeconds,
     asset: {
       couponIssuerCheck: {
         address,
@@ -153,12 +151,12 @@ async function createIssuerFreeze (address, orgName, org_id, orgOwner, orgOwnerP
 
   const transaction = {
     type: DdnUtils.assetTypes.COUPON_ISSUER_FREEZE,
-    nethash: options.get('nethash'),
+    nethash: config.nethash,
     amount: '0',
     fee: `${fee}`,
     recipientId: null,
     senderPublicKey: keys.publicKey,
-    timestamp: slots.getTime() - options.get('clientDriftSeconds'),
+    timestamp: slots.getTime() - config.clientDriftSeconds,
     asset: {
       couponIssuerFreeze: {
         address,
@@ -188,12 +186,12 @@ async function createIssuerUnfreeze (address, orgName, org_id, orgOwner, orgOwne
 
   const transaction = {
     type: DdnUtils.assetTypes.COUPON_ISSUER_UNFREEZE,
-    nethash: options.get('nethash'),
+    nethash: config.nethash,
     amount: '0',
     fee: `${fee}`,
     recipientId: null,
     senderPublicKey: keys.publicKey,
-    timestamp: slots.getTime() - options.get('clientDriftSeconds'),
+    timestamp: slots.getTime() - config.clientDriftSeconds,
     asset: {
       couponIssuerUnfreeze: {
         address,
@@ -226,12 +224,12 @@ async function createIssueNew (goodsName, goodsSpecs, goodsUnit, goodsNum, unitP
 
   const transaction = {
     type: DdnUtils.assetTypes.COUPON_ISSUE_NEW,
-    nethash: options.get('nethash'),
+    nethash: config.nethash,
     amount: '0',
     fee: `${fee}`,
     recipientId: null,
     senderPublicKey: keys.publicKey,
-    timestamp: slots.getTime() - options.get('clientDriftSeconds'),
+    timestamp: slots.getTime() - config.clientDriftSeconds,
     asset: {
       couponIssueNew: {
         address: crypto.generateAddress(keys.publicKey),
@@ -267,12 +265,12 @@ async function createIssueClose (goodsName, goodsSpecs, goodsUnit, goodsNum, uni
 
   const transaction = {
     type: DdnUtils.assetTypes.COUPON_ISSUE_CLOSE,
-    nethash: options.get('nethash'),
+    nethash: config.nethash,
     amount: '0',
     fee: `${fee}`,
     recipientId: null,
     senderPublicKey: keys.publicKey,
-    timestamp: slots.getTime() - options.get('clientDriftSeconds'),
+    timestamp: slots.getTime() - config.clientDriftSeconds,
     asset: {
       couponIssueClose: {
         address: crypto.generateAddress(keys.publicKey),
@@ -308,12 +306,12 @@ async function createIssueReopen (goodsName, goodsSpecs, goodsUnit, goodsNum, un
 
   const transaction = {
     type: DdnUtils.assetTypes.COUPON_ISSUE_REOPEN,
-    nethash: options.get('nethash'),
+    nethash: config.nethash,
     amount: '0',
     fee: `${fee}`,
     recipientId: null,
     senderPublicKey: keys.publicKey,
-    timestamp: slots.getTime() - options.get('clientDriftSeconds'),
+    timestamp: slots.getTime() - config.clientDriftSeconds,
     asset: {
       couponIssueReopen: {
         address: crypto.generateAddress(keys.publicKey),
@@ -349,12 +347,12 @@ async function createExchangeBuy (batchValue, code, received_address,
 
   const transaction = {
     type: DdnUtils.assetTypes.COUPON_EXCH_BUY,
-    nethash: options.get('nethash'),
+    nethash: config.nethash,
     amount: price,
     fee: `${fee}`,
     recipientId: received_address,
     senderPublicKey: keys.publicKey,
-    timestamp: slots.getTime() - options.get('clientDriftSeconds'),
+    timestamp: slots.getTime() - config.clientDriftSeconds,
     asset: {
       couponExcBuy: {
         batchValue,
@@ -385,12 +383,12 @@ async function createExchangePay (batchValue, code, received_address,
 
   const transaction = {
     type: DdnUtils.assetTypes.COUPON_EXCH_PAY,
-    nethash: options.get('nethash'),
+    nethash: config.nethash,
     amount: '0',
     fee: `${fee}`,
     recipientId: null,
     senderPublicKey: keys.publicKey,
-    timestamp: slots.getTime() - options.get('clientDriftSeconds'),
+    timestamp: slots.getTime() - config.clientDriftSeconds,
     asset: {
       couponExcPay: {
         batchValue,
@@ -421,12 +419,12 @@ async function createExchangeTransferConfirm (batchValue, code, received_address
 
   const transaction = {
     type: DdnUtils.assetTypes.COUPON_EXCH_TRANSFER_CONFIRM,
-    nethash: options.get('nethash'),
+    nethash: config.nethash,
     amount: price,
     fee: `${fee}`,
     recipientId: null,
     senderPublicKey: keys.publicKey,
-    timestamp: slots.getTime() - options.get('clientDriftSeconds'),
+    timestamp: slots.getTime() - config.clientDriftSeconds,
     asset: {
       couponExcTransferConfirm: {
         batchValue,
@@ -459,12 +457,12 @@ async function createExchangeTransferAsk (batchValue, code, received_address,
 
   const transaction = {
     type: DdnUtils.assetTypes.COUPON_EXCH_TRANSFER_ASK,
-    nethash: options.get('nethash'),
+    nethash: config.nethash,
     amount: '0',
     fee: `${fee}`,
     recipientId: null,
     senderPublicKey: keys.publicKey,
-    timestamp: slots.getTime() - options.get('clientDriftSeconds'),
+    timestamp: slots.getTime() - config.clientDriftSeconds,
     asset: {
       couponExcTransferAsk: {
         batchValue,

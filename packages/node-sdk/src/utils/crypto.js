@@ -4,8 +4,7 @@ import crypto from 'crypto'
 import DdnCrypto from '@ddn/crypto'
 import DdnUtils from '@ddn/utils'
 import Asset from '@ddn/asset-base'
-
-import constants from '../constants'
+import { constants } from '../config'
 
 let Buffer
 if (typeof Buffer === 'undefined') {

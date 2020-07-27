@@ -1,8 +1,9 @@
-import constants from '../constants'
+import { constants } from '../config'
 
-const interval = constants.interval
-const delegates = constants.delegates
+// const interval = constants.interval
+// const delegates = constants.delegates
 
+// console.log('options.getAll', options.getAll())
 /**
  * 周期开始时间
  */
@@ -40,11 +41,13 @@ function getSlotNumber (epochTime) {
   if (epochTime === undefined) {
     epochTime = getTime()
   }
+  const interval = constants.interval
 
   return Math.floor(epochTime / interval)
 }
 
 function getSlotTime (slot) {
+  const interval = constants.interval
   return slot * interval
 }
 
@@ -55,12 +58,13 @@ function getNextSlot () {
 }
 
 function getLastSlot (nextSlot) {
+  const delegates = constants.delegates
   return nextSlot + delegates
 }
 
 export default {
-  interval,
-  delegates,
+  // interval,
+  // delegates,
   getTime,
   getRealTime,
   getSlotNumber,

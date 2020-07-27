@@ -1,8 +1,8 @@
 import crypto from '../utils/crypto'
-import constants from '../constants'
+
 import DdnUtils from '@ddn/utils'
 import slots from '../time/slots'
-import options from '../options'
+import { config, constants } from '../config'
 
 async function createUsername (name, secret, secondSecret) {
   const keys = crypto.getKeys(secret)
@@ -14,12 +14,12 @@ async function createUsername (name, secret, secondSecret) {
 
   const transaction = {
     type: DdnUtils.assetTypes.USERINFO,
-    nethash: options.get('nethash'),
+    nethash: config.nethash,
     amount: '0', // Bignum update
     fee: `${fee}`,
     recipientId: null,
     senderPublicKey: keys.publicKey,
-    timestamp: slots.getTime() - options.get('clientDriftSeconds'),
+    timestamp: slots.getTime() - config.clientDriftSeconds,
     asset: {
       userinfo: {
         username: name

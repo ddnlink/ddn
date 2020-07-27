@@ -1,9 +1,9 @@
 import DdnUtils from '@ddn/utils'
 
 import crypto from '../utils/crypto'
-import constants from '../constants'
+
 import slots from '../time/slots'
-import options from '../options'
+import { config, constants } from '../config'
 
 /**
  * Create evidence transaction
@@ -26,12 +26,12 @@ async function createEvidence (evidence, secret, secondSecret) {
 
   const transaction = {
     type: DdnUtils.assetTypes.EVIDENCE, // 10 -> 20
-    nethash: options.get('nethash'),
+    nethash: config.nethash,
     amount: '0',
     fee,
     recipientId: null,
     senderPublicKey: keys.publicKey,
-    timestamp: slots.getTime() - options.get('clientDriftSeconds'),
+    timestamp: slots.getTime() - config.clientDriftSeconds,
     asset: {
       evidence
     }
