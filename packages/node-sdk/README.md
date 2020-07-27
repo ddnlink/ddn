@@ -16,12 +16,12 @@ npm install @ddn/node-sdk --save
 
 ```
 import DdnJS from '@ddn/node-sdk'; // const DdnJS = require('@ddn/node-sdk).default
-// DdnJS.init('0ab796cd', 'testnet') 这是默认值
-DdnJS.init('0ab796cd')
 ```
 
 Please reference the [ddn http interface documents](https://github.com/ddnlink/ddn-docs/node-sdk-api.md)
 
+Note：Please copy `constants` to folder `config` in your project, and copy `.ddnrc.js` to your project`s root folder
+ 
 ## Develop 开发
 
 注意的是，不建议在其他组件里调用本包，避免循环引用；同时，本包使用的 Http Api，所以不需要引入资产包。
