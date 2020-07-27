@@ -1,8 +1,8 @@
 ---
 order: 4
 id: ddn-dapp-api
-title: 4. DDN Dapp Api
-sidebar_label: DDN Dapp Api
+title: 4. 智能合约（Dapp） API
+sidebar_label: DDN Dapp API
 ---
 
 

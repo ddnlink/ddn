@@ -24,7 +24,7 @@ export default {
         title: '框架',
         children: ['guide/framework', 'guide/config', 'guide/database', 'guide/context']
       },
-      
+
       {
         title: '贡献',
         children: ['guide/contributing']
@@ -43,6 +43,7 @@ export default {
     ],
   ],
   resolve: {
-    includes: ['doc']
+    // 文档所在路径
+    includes: ['docs']
   }
 };

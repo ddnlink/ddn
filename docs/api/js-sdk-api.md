@@ -1,68 +1,55 @@
 ---
-order: 6
-id: node-sdk-api
-title: 6. Node SDK Api
-sidebar_label: DDN Node-SDK Api
+order: 7
+id: js-sdk-api
+title: 7. Js SDK API
+sidebar_label: DDN Js-SDK API
 ---
 
 
-## **1. DDN Node-sdk 说明**
+## **1 js-sdk说明**
 
 ### **1.0 特别说明**
 
-本文档适用于那些基于`node.js`开发的应用程序，多数是后台运行的服务端程序，如果您开发浏览器或钱包等前端应用，请移步[`js-sdk`相关文档](./js-sdk-api.md)。
+本文档适用于开发浏览器或钱包等前端应用，如果您开发的服务端程序，请移步[`node-sdk`相关文档](./node-sdk-api.md)。
 
 除非特殊说明，本文档仅仅适合于 `DDN v3.0.0` 以后的版本，当前最新版本为 `DDN v3.5.0`。
 
-文档示例遵从`ES6`语法规范，特别地方会提示`ES5`语法，请注意辨别使用。`ES6`规范会大量使用异步方法，使用`async/await`方法调用。
+文档示例，遵从`ES6`语法规范，特别地方会提示`ES5`语法，请注意辨别使用。`ES6`规范会大量使用异步方法，使用`async/await`方法调用。
 
 ### **1.1 安装**
 
-```
-npm install @ddn/node-sdk --save 
-```
-
-如果使用 `yarn`，命令如下：
+将下面的文件
 
 ```
-$ yarn add -D @ddn/node-sdk
+https://unpkg.com/browse/@ddn/js-sdk@0.0.5/index.browserify.min.js 
 ```
 
-### **1.2 使用**
+放在您工程文件合适的位置
 
-在使用前，请下载对应的主网参数常量文件（文件名字为 `constants.js`)，并放在项目的`config`文件夹下,
+### **1.2 初始化**
 
-了解您所请求的节点信息，写入文件 `.ddnrc.js` 作为节点配置。 上述文件结构如下：
+`js-sdk`在使用前，首先进行初始化。  
 
-```
-project:
-    |__ config
-    |    |___constants.js
-    |____.ddnrc.js
-```
+`init(nethash)`
 
-在您需要调用 `node=sdk`的地方，这样调用：
+- `nethash` 节点网络
 
 ```
-import DdnJS from '@ddn/node-sdk'
-
-或者
-
-const DdnJS = require('@ddn/node-sdk').default // 注意 有个 default 属性
+DdnJS.init('0ab796cd')
 ```
 
 ### **1.3 说明**
-很多函数都需要传入`secret`、`secondSecret`这2个参数，分表代表密码和二级密码，下面章节不再赘述。
-自定义如下全局变量，用于之后章节代码演示。
+很多函数都需要传入secret、secondSecret这2个参数，分表代表密码和二级密码，下面章节不再赘述。
+自定如下全局变量，用于之后章节代码演示。
 
 - `secret` 密码    
 - `publicKey` 公钥    
 - `secondSecret` 二级密码
 
 ```
-> const secret = 'borrow display rebel depart core buzz right distance avocado immense push minor'
-> const publicKey = 'ebd4c62ebe2255b7ad5ee43120a9f9191c76e30928c92cd536351e3cc2c626ed';
-> const secondSecret = 'helloworldDDN';
+> var secret = 'borrow display rebel depart core buzz right distance avocado immense push minor'
+> var publicKey = 'ebd4c62ebe2255b7ad5ee43120a9f9191c76e30928c92cd536351e3cc2c626ed';
+> var secondSecret = 'helloworldDDN';
 ```
 
 
@@ -70,7 +57,7 @@ const DdnJS = require('@ddn/node-sdk').default // 注意 有个 default 属性
 
 ### **2.1 根据密码获取密钥对**
 
-同步方法：`DdnJS.crypto.getKeys(secret)`
+`crypto.getKeys(secret)`
 
 - `secret` 密码
 
@@ -81,25 +68,26 @@ const DdnJS = require('@ddn/node-sdk').default // 注意 有个 default 属性
 
 ### **2.1 根据公钥获取地址**
 
-同步方法：`DdnJS.crypto.getAddress(publicKey)`
+`crypto.getAddress(publicKey)`
 
 - `publicKey`  公钥
 
 ```
 > DdnJS.crypto.getAddress(publicKey);
 'DLbsdFXJNVa68SCAJxtGMaGdfBWkPALZzJ'
+
 ```
 
 ### **2.3 设置二级密码，type=1**
 
-异步方法：`DdnJS.signature.createSignature(secret, secondSecret)`
+`signature.createSignature(secret, secondSecret)`
 `备注` 在主链的交易类型为1
 
 - `secret` 密码    
 - `secondSecret` 二级密码
 
 ```
-> await DdnJS.signature.createSignature(secret, secondSecret)
+> DdnJS.signature.createSignature(secret, secondSecret)
 {
     type: 1,
     nethash: "0ab796cd",
@@ -120,7 +108,7 @@ const DdnJS = require('@ddn/node-sdk').default // 注意 有个 default 属性
 
 ### **2.4 账户锁仓，type=100**
 
-异步方法：`DdnJS.transaction.createLock(height, secret, secondSecret)`
+`transaction.createLock(height, secret, secondSecret)`
 `备注` 在主链的交易类型为100
 
 - `height` 锁仓高度
@@ -128,7 +116,7 @@ const DdnJS = require('@ddn/node-sdk').default // 注意 有个 default 属性
 - `secondSecret` 二级密码
 
 ```
-> await DdnJS.transaction.createLock(8130, secret, secondSecret)
+> DdnJS.transaction.createLock(8130, secret, secondSecret)
 {
     type: 100,
     amount: "0",
@@ -149,7 +137,7 @@ const DdnJS = require('@ddn/node-sdk').default // 注意 有个 default 属性
 
 ### **3.1 在主链转账DDN，type=0**
 
-异步方法：`DdnJS.transaction.createTransaction(recipientId, amount, message, secret, secondSecret)`
+`transaction.createTransaction(recipientId, amount, message, secret, secondSecret)`
 `备注` 在主链的交易类型为0
 
 - `recipientId` 接收者地址
@@ -159,7 +147,7 @@ const DdnJS = require('@ddn/node-sdk').default // 注意 有个 default 属性
 - `secondSecret` 二级密码
 
 ```
-> await DdnJS.transaction.createTransaction(targetAddress, amount, message, secret, secondSecret)
+> DdnJS.transaction.createTransaction(targetAddress, amount, message, secret, secondSecret)
 {
     type: 0,
     nethash: "0ab796cd",
@@ -178,12 +166,12 @@ const DdnJS = require('@ddn/node-sdk').default // 注意 有个 default 属性
 
 ### **3.2 根据交易内容获取交易id**
 
-异步方法：`DdnJS.crypto.getId(transaction)`
+`crypto.getId(transaction)`
 
 - `transaction` 签名后的交易内容
 
 ```
-> await DdnJS.transaction.createTransaction(targetAddress, amount, message, secret, secondSecret)
+> transaction = DdnJS.transaction.createTransaction(targetAddress, amount, message, secret, secondSecret)
 {
     type: 0,
     nethash: "0ab796cd",
@@ -208,15 +196,14 @@ const DdnJS = require('@ddn/node-sdk').default // 注意 有个 default 属性
 
 ### **4.1 资产发行商注册，type=60**
 
-异步方法：`assetPlugin.createPluginAsset(type, assetInfo, secret, secondSecret)`
+`assetPlugin.createPluginAsset(type, assetInfo, secret, secondSecret)`
 ```
-const issuer = {
+var issuer = {
     name: "DDD",    // 发行商名称,唯一标识
     desc: "J G V",  // 发行商描述
     issuer_id: "DLbsdFXJNVa68SCAJxtGMaGdfBWkPALZzJ",
     fee: '10000000000',
 }
-
 await DdnJS.assetPlugin.createPluginAsset(60, issuer, secret, secondSecret)
 {
     type: 60,
@@ -242,9 +229,9 @@ await DdnJS.assetPlugin.createPluginAsset(60, issuer, secret, secondSecret)
 
 ### **4.2 资产注册，type=61**
 
-异步方法：`assetPlugin.createPluginAsset(type, assetInfo, secret, secondSecret)`
+`assetPlugin.createPluginAsset(type, assetInfo, secret, secondSecret)`
 ```
-const obj = {
+var obj = {
     name: "DDD.NCR",    // 资产名称，发行商名.资产名，唯一标识
     desc: "DDD新币种",
     maximum: "100000000",   // 上限
@@ -255,7 +242,6 @@ const obj = {
     allow_writeoff: '1',
     fee: '50000000000'
 }
-
 await DdnJS.assetPlugin.createPluginAsset(61, obj, secret, secondSecret)
 {
     type: 61,
@@ -286,14 +272,13 @@ await DdnJS.assetPlugin.createPluginAsset(61, obj, secret, secondSecret)
 
 ### **4.3 资产设置访问控制列表(acl)模式，type=62**
 
-异步方法：`assetPlugin.createPluginAsset(type, assetInfo, secret, secondSecret)`
+`assetPlugin.createPluginAsset(type, assetInfo, secret, secondSecret)`
 ```
-const obj = {
+var obj = {
     currency: "DDD.NCR",
     flag: 1,    //flag_type=1（0：使用黑名单，1：使用白名单，2：全开放），flag_type=2（0：流通，1：注销）
     flag_type: 1    //1：黑白名单设置，2：注销设置
 }
-
 await DdnJS.assetPlugin.createPluginAsset(62, obj, secret, secondSecret)
 {
     type: 62,
@@ -317,16 +302,14 @@ await DdnJS.assetPlugin.createPluginAsset(62, obj, secret, secondSecret)
 
 ### **4.4 更新访问控制列表(acl)，type=63**
 
-异步方法：`assetPlugin.createPluginAsset(type, assetInfo, secret, secondSecret)`
-
+`assetPlugin.createPluginAsset(type, assetInfo, secret, secondSecret)`
 ```
-const obj = {
+var obj = {
     currency: "DDD.NCR",
     flag: 1,    // 访问控制列表的类型，0：黑名单， 1：白名单
     operator: "+",  // '+'表示增加列表， ‘-’表示删除列表
     list: "DJS57PDiq2srYdL5eqzUt7oAZ4WvEkVT9q"    //黑白名单内容，多个用逗号分隔
 }
-
 await DdnJS.assetPlugin.createPluginAsset(63, obj, secret, secondSecret)
 {
     type: 63,
@@ -351,15 +334,13 @@ await DdnJS.assetPlugin.createPluginAsset(63, obj, secret, secondSecret)
 
 ### **4.5 资产发行，type=64**
 
-异步方法：`assetPlugin.createPluginAsset(type, assetInfo, secret, secondSecret)`
-
+`assetPlugin.createPluginAsset(type, assetInfo, secret, secondSecret)`
 ```
-const obj = {
+var obj = {
     currency: "DDD.NCR",
     aobAmount: "50000000",  // 本次发行量=真实数量（100）*10**精度（3），所有发行量之和需 <= 上限*精度
     fee: '10000000',
 }
-
 await DdnJS.assetPlugin.createPluginAsset(64, obj, secret, secondSecret)
 {
     type: 64,
@@ -382,9 +363,9 @@ await DdnJS.assetPlugin.createPluginAsset(64, obj, secret, secondSecret)
 
 ### **4.6 资产转账，type=65**
 
-异步方法：`assetPlugin.createPluginAsset(type, assetInfo, secret, secondSecret)`
+`assetPlugin.createPluginAsset(type, assetInfo, secret, secondSecret)`
 ```
-const obj = {
+var obj = {
     recipient_id: "DJS57PDiq2srYdL5eqzUt7oAZ4WvEkVT9q",    // 接收地址，需满足前文定义好的acl规则
     currency: "DDD.NCR",
     aobAmount: "10",    // 本次转账数（10000）=真实数量（10）*10**精度（3），需 <= 当前资产发行总量
@@ -413,9 +394,9 @@ await DdnJS.assetPlugin.createPluginAsset(65, obj, secret, secondSecret)
 
 ### **4.7 资产注销，type=62**
 
-异步方法：`assetPlugin.createPluginAsset(type, assetInfo, secret, secondSecret)`
+`assetPlugin.createPluginAsset(type, assetInfo, secret, secondSecret)`
 ```
-const obj = {
+var obj = {
     currency: "DDD.NCR",
     flag: 1,    //flag_type=1（0：使用黑名单，1：使用白名单，2：全开放），flag_type=2（0：流通，1：注销）
     flag_type: 2    //1：黑白名单设置，2：注销设置
@@ -444,7 +425,7 @@ await DdnJS.assetPlugin.createPluginAsset(62, obj, secret, secondSecret)
 ## **5 受托人delegate**
 ### **5.1 注册受托人,type=2**
 
-异步方法：`delegate.createDelegate(username, secret, secondSecret)`
+`delegate.createDelegate(username, secret, secondSecret)`
 `备注` 在主链的交易类型为2
 
 - `username` 受托人名字
@@ -452,7 +433,7 @@ await DdnJS.assetPlugin.createPluginAsset(62, obj, secret, secondSecret)
 - `secondSecret` 二级密码
 
 ```
-> await DdnJS.delegate.createDelegate(userName, secret, secondSecret || undefined)
+> DdnJS.delegate.createDelegate(userName, secret, secondSecret || undefined)
 {
     type: 2,
     nethash: "0ab796cd",
@@ -474,7 +455,7 @@ await DdnJS.assetPlugin.createPluginAsset(62, obj, secret, secondSecret)
 
 ### **5.2 给受托人增加/取消投票，type=3**
 
-异步方法：`vote.createVote(keyList, secret, secondSecret)`
+`vote.createVote(keyList, secret, secondSecret)`
 `备注` 在主链的交易类型为3
 
 - `keyList` 受托人公钥列表
@@ -483,7 +464,7 @@ await DdnJS.assetPlugin.createPluginAsset(62, obj, secret, secondSecret)
 
 ```
 // 投票内容是一个列表，列表中的每一个元素是一个符号加上所选择的受托人的公钥，符号为+表示投票，符号为-表示取消投票
-> await DdnJS.vote.createVote(voteContent, secret, secondSecret || undefined);
+> DdnJS.vote.createVote(voteContent, secret, secondSecret || undefined);
 {
     type: 3,
     nethash: "0ab796cd",
@@ -507,9 +488,9 @@ await DdnJS.assetPlugin.createPluginAsset(62, obj, secret, secondSecret)
 
 ### **6.1 dapp注册，type=11**
 
-异步方法：`assetPlugin.createPluginAsset(type, assetInfo, secret, secondSecret)`
+`assetPlugin.createPluginAsset(type, assetInfo, secret, secondSecret)`
 ```
-const dapp = {
+var dapp = {
     name: "dapp_demo",
     description: "This is the first dapp demo.",
     tags: "dapp demo",
@@ -549,9 +530,9 @@ await DdnJS.assetPlugin.createPluginAsset(11, dapp, secret, secondSecret)
 
 ### **6.2 dapp充值，type=12**
 
-异步方法：`assetPlugin.createPluginAsset(type, assetInfo, secret, secondSecret)`
+`assetPlugin.createPluginAsset(type, assetInfo, secret, secondSecret)`
 ```
-const obj = {
+var obj = {
     dapp_id: "14819b293859529eba5ca7b51cde02b808699fc0b128fd4de94800dc99665a48",
     currency: "DDN",
     amount: "1000000000000"
@@ -579,15 +560,15 @@ await DdnJS.assetPlugin.createPluginAsset(12, obj, secret, secondSecret)
 ### **6.3 dapp提现**
 #### **6.3.1 创建提现交易，type=13**
 
-异步方法：`assetPlugin.createPluginAsset(type, assetInfo, secret, secondSecret)`
+`assetPlugin.createPluginAsset(type, assetInfo, secret, secondSecret)`
 ```
-const obj = {
+var obj = {
     recipient_id: "DLbsdFXJNVa68SCAJxtGMaGdfBWkPALZzJ",
     dapp_id: "14819b293859529eba5ca7b51cde02b808699fc0b128fd4de94800dc99665a48",
     currency: "DDN",
     aobAmount: "100000000"
 }
-const transaction = await DdnJS.assetPlugin.createPluginAsset(12, obj, secret, secondSecret)
+var transaction = await DdnJS.assetPlugin.createPluginAsset(12, obj, secret, secondSecret)
 {
     type: 13,
     nethash: "0ab796cd",
@@ -610,14 +591,14 @@ const transaction = await DdnJS.assetPlugin.createPluginAsset(12, obj, secret, s
 
 #### **6.3.2 受托人对提现交易进行签名**
 
-异步方法：`transfer.signOutTransfer(transaction, secret, secondSecret)`   
+`transfer.signOutTransfer(transaction, secret, secondSecret)`   
 `备注` dapp提现交易，需要多个受托人签名后才能生效。受托人签名的最小数量取决于dapp的注册参数：unlock_delegates。
 
 ```
 // 沿用上一章节《6.3.1 创建提现交易,type=13》的变量
 transaction.signatures = []; // 受托人签名列表
 for (let i = 0; i < dapp.unlock_delegates; i++) {
-    transaction.signatures.push(await DdnJS.transfer.signOutTransfer(transaction, delegates[i].password))    //使用受托人密钥对交易进行签名
+    transaction.signatures.push(await node.ddn.transfer.signOutTransfer(transaction, delegates[i].password))    //使用受托人密钥对交易进行签名
 }
 {
     type: 13,
@@ -645,9 +626,9 @@ for (let i = 0; i < dapp.unlock_delegates; i++) {
 
 ### **7.1 创建存证交易，type=10**
 
-异步方法：`assetPlugin.createPluginAsset(type, assetInfo, secret, secondSecret)`
+`assetPlugin.createPluginAsset(type, assetInfo, secret, secondSecret)`
 ```
-const assetEvidence = {
+var assetEvidence = {
     ipid: "ipid1234567890",
     title: "如何使用DDN进行存证操作",
     hash: "5cfda5e095ec3796f4fa88c93484113d18b6219aea5511231309c",
@@ -689,10 +670,10 @@ await DdnJS.assetPlugin.createPluginAsset(10, assetEvidence, secret, secondSecre
 
 自定义如下已签名的转账交易内容(在主链给D4FN28d1mfjdUG7rtUzEAstFVzPsmWUm2L转账100DDN)，用于下面章节演示。
 ```
-const targetAddress = "D4FN28d1mfjdUG7rtUzEAstFVzPsmWUm2L";  
-const amount = 100*100000000;   //100 DDN
-const message = 'notethis';
-const transaction = await DdnJS.transaction.createTransaction(targetAddress, amount, message, secret, secondSecret)
+var targetAddress = "D4FN28d1mfjdUG7rtUzEAstFVzPsmWUm2L";  
+var amount = 100*100000000;   //100 DDN
+var message = 'notethis';
+var transaction = await DdnJS.transaction.createTransaction(targetAddress, amount, message, secret, secondSecret)
 
 {
     type: 0,
@@ -711,7 +692,7 @@ const transaction = await DdnJS.transaction.createTransaction(targetAddress, amo
 
 ### **8.1 根据交易内容获取字节Buffer对象**
 
-异步方法：`crypto.getBytes(transaction, skipSignature, skipSecondSignature)`
+`crypto.getBytes(transaction, skipSignature, skipSecondSignature)`
 
 - `transaction` 交易内容,可以是签名后也可是未签名的,默认需传入签名后的交易。必传参数
 - `skipSignature` 是否跳过签名计算，默认不跳过。非必传参数
@@ -720,12 +701,12 @@ const transaction = await DdnJS.transaction.createTransaction(targetAddress, amo
 ```
 // 此时transaction.signature和transaction.signSignature都会计算在内
 await DdnJS.crypto.getBytes(transaction) 
-> <Buffer 00 41 6f 4b 03 30 61 62 37 39 36 63 64 2e 6d 97 8c 5e 6f 1f bf c5 a2 7a bd 96 4d 9b 6a dc 35 2d aa 81 e3 1d 90 98 a4 f5 ee 3d 7f 88 5e 44 34 46 4e 32 ... >   // 返回的字节buffer对象
+<Buffer 00 41 6f 4b 03 30 61 62 37 39 36 63 64 2e 6d 97 8c 5e 6f 1f bf c5 a2 7a bd 96 4d 9b 6a dc 35 2d aa 81 e3 1d 90 98 a4 f5 ee 3d 7f 88 5e 44 34 46 4e 32 ... >   // 返回的字节buffer对象
 ```
 
 ### **8.2 根据交易内容获取Hash Buffer对象**
 
-异步方法：`crypto.getHash(transaction, skipSignature, skipSecondSignature)`
+`crypto.getHash(transaction, skipSignature, skipSecondSignature)`
 
 - `transaction` 交易内容,可以是签名后也可是未签名的,默认需传入签名后的交易。必传参数
 - `skipSignature` 是否跳过签名计算，默认不跳过。非必传参数
@@ -734,19 +715,19 @@ await DdnJS.crypto.getBytes(transaction)
 ```
 // 此时transaction.signature和transaction.signSignature都会计算在内
 await DdnJS.crypto.getHash(transaction)
-> <Buffer d5 31 9c 14 43 4c 7d c4 49 80 b5 8e 81 70 cb 45 fe 53 4c 58 6b c0 bc 1d 42 49 1c 22 47 28 42 a1> // 返回的Hash Buffer
+<Buffer d5 31 9c 14 43 4c 7d c4 49 80 b5 8e 81 70 cb 45 fe 53 4c 58 6b c0 bc 1d 42 49 1c 22 47 28 42 a1> // 返回的Hash Buffer
 ```
 
 ### **8.3 对交易Bytes Buffer进行签名**
 
-异步方法：`crypto.signBytes(bytes, keys)`
+`crypto.signBytes(bytes, keys)`
 
 - `bytes` 交易的Bytes Buffer，未签名交易或者一级密码签名但二级密码未签名的交易
 - `keys` 公钥/私钥 密钥对
 
 ```
 // 定义未签名交易
-const transaction = {
+var transaction = {
     type: 0,
     nethash: "0ab796cd",
     amount: "10000000000",
@@ -758,28 +739,28 @@ const transaction = {
 }
 
 // 根据密码，生成
-const keys = await DdnJS.crypto.getKeys(node.Gaccount.password);
+var keys = await node.ddn.crypto.getKeys(node.Gaccount.password);
 {
     "public_key":"2e6d978c5e6f1fbfc5a27abd964d9b6adc352daa81e31d9098a4f5ee3d7f885e","private_key":"863669059023e53d46d92b6a1a7bdaa8a9ff3555d98c07517c2a3a08c89ff9d02e6d978c5e6f1fbfc5a27abd964d9b6adc352daa81e31d9098a4f5ee3d7f885e"
 }
 
 transaction.sender_public_key = keys.public_key;
-> '2e6d978c5e6f1fbfc5a27abd964d9b6adc352daa81e31d9098a4f5ee3d7f885e'
+'2e6d978c5e6f1fbfc5a27abd964d9b6adc352daa81e31d9098a4f5ee3d7f885e'
 
 // 获取交易的Bytes Buffer
-const buf = await DdnJS.crypto.getBytes(transaction);
-> '<Buffer 00 69 6e 4b 03 30 61 62 37 39 36 63 64 2e 6d 97 8c 5e 6f 1f bf c5 a2 7a bd 96 4d 9b 6a dc 35 2d aa 81 e3 1d 90 98 a4 f5 ee 3d 7f 88 5e 44 34 46 4e 32 ... >'
+var buf = await node.ddn.crypto.getBytes(transaction);
+'<Buffer 00 69 6e 4b 03 30 61 62 37 39 36 63 64 2e 6d 97 8c 5e 6f 1f bf c5 a2 7a bd 96 4d 9b 6a dc 35 2d aa 81 e3 1d 90 98 a4 f5 ee 3d 7f 88 5e 44 34 46 4e 32 ... >'
 
 // 通过私钥对交易Bytes Buffer进行签名
-const signature = DdnJS.crypto.signBytes(buf, keys);
-> '785cdcbf205980cd995c44603a0c68aa4a6f5aa1b89d7679712d5925efe7cf4dd721cd7e8e48f3db21a3ea055baec85990dca2886bf651feacd2ed9cf2c2060d'    // 返回值与上面自定义的已签名交易中的签名一致
+var signature = node.ddn.crypto.signBytes(buf, keys);
+'785cdcbf205980cd995c44603a0c68aa4a6f5aa1b89d7679712d5925efe7cf4dd721cd7e8e48f3db21a3ea055baec85990dca2886bf651feacd2ed9cf2c2060d'    // 返回值与上面自定义的已签名交易中的签名一致
 
 transaction.signature = signature;
 ```
 
 ### **8.4 验证交易签名是否和已存在的签名一致**
 
-同步方法：`crypto.verifyBytes(bytes, signature, publicKey)` 返回true/false
+`crypto.verifyBytes(bytes, signature, publicKey)` 返回true/false
 
 - `bytes` 交易的Bytes Buffer，未签名交易或者一级密码签名但二级密码未签名的交易
 - `signature` 待校验的签名
@@ -788,68 +769,94 @@ transaction.signature = signature;
 ```
 // 沿用上一章节《对交易Bytes Buffer进行签名》的变量
 DdnJS.crypto.verifyBytes(buf,transaction.signature,transaction.senderPublicKey)
-> true
+true
 ```
 
 ## **9 其它**
 
-### **9.1 时间相关slot.time**
+### **9.1 全局参数变量options**
 
-#### **9.1.1 DDN主网创世块生成时间**
+#### **9.1.1 设置变量k/v**
+`options.set(key, values)`
 
-同步方法：`utils.slots.beginEpochTime()`
+- `key` 键名
+- `value` 键值
+
+```
+DdnJS.options.set('secret','avocado immense push minor borrow display rebel depart core buzz right distance')
+```
+
+
+#### **9.1.2 根据key获取value**
+
+`options.get(key)`
+
+- `key` 键名
+
+```
+DdnJS.options.get('secret')
+'avocado immense push minor borrow display rebel depart core buzz right distance'
+```
+
+
+#### **9.1.3 获取所有的k/v**
+
+`options.getAll()`
+
+```
+DdnJS.options.getAll()
+{
+    "clientDriftSeconds":5,     // js-sdk内置变量
+    "nethash":"0ab796cd",       // DDN区块链标识值
+    "secret":"avocado immense push minor borrow display rebel depart core buzz right distance"
+}
+```
+
+### **9.2 时间相关slot.time**
+
+#### **9.2.1 DDN主网创世块生成时间**
+
+`utils.slots.beginEpochTime()`
 `备注` 结果为UTC时间,即DDN纪元的开始时间。
 
 ```
 DdnJS.utils.slots.beginEpochTime()
-> 2017-08-20T20:00:00.000Z // DDN主网创世块（block heihgt=1）生成时间，但主网正式运行可以延后（主网正式运行的标志是 生成了block heihgt=2的区块）
+2017-08-20T20:00:00.000Z // DDN主网创世块（block heihgt=1）生成时间，但主网正式运行可以延后（主网正式运行的标志是 生成了block heihgt=2的区块）
 ```
 
 
-#### **9.1.2 根据unix时间戳获获DDN时间戳**
+#### **9.2.2 根据unix时间戳获获DDN时间戳**
 
-同步方法：`utils.slots.getTime(time)` 
+`utils.slots.getTime(time)` 
 `备注` 获得结果叫做EpochTim（DDN时间戳），传入的time相对于DDN纪元经历的秒数
 
 - `time` 如果不传值则取当前时刻的 Unix时间戳*1000 (即单位是毫秒）
 
 ```
 DdnJS.utils.slots.getTime()
-> 40655681 // DDN时间戳
+40655681 // DDN时间戳
 
-const unix_timestamp = 1507713496
-const epochTime = DdnJS.utils.slots.getTime(unix_timestamp * 1000)
-> 40655896    // DDN时间戳
+var unix_timestamp = 1507713496
+var epochTime = DdnJS.utils.slots.getTime(unix_timestamp * 1000)
+40655896    // DDN时间戳
 ```
 
-#### **9.1.3 根据DDN时间戳获取unix时间戳**
+#### **9.2.3 根据DDN时间戳获取unix时间戳**
 
-同步方法：`utils.slots.getRealTime(epochTime)`
+`utils.slots.getRealTime(epochTime)`
 `备注` 返回结果是真实的 unix时间戳* 1000
 
 - `epochTime` DDN时间戳，单位是秒
 
 ```
-const unix_timestamp = 1507713496  // unix时间戳
-const epochTime = DdnJS.utils.slots.getTime(unix_timestamp * 1000)
-> 40655896    // 通过unix时间戳获取到DDN时间戳
+var unix_timestamp = 1507713496  // unix时间戳
+var epochTime = DdnJS.utils.slots.getTime(unix_timestamp * 1000)
+40655896    // 通过unix时间戳获取到DDN时间戳
 
-const real_time = DdnJS.utils.slots.getRealTime(epochTime)
-> 1507713496000 // 通过DDN时间戳获取unix时间戳
+var real_time = DdnJS.utils.slots.getRealTime(epochTime)
+1507713496000 // 通过DDN时间戳获取unix时间戳
 
-const unix_timestamp === real_time / 1000
-> true // 换算结果一致
+var unix_timestamp === real_time / 1000
+true // 换算结果一致
 ```
 
-#### **9.1.4 时间格式化**
-
-同步方法：`DdnJS.utils.format.timeAgo()`
-计算时间戳发生的时间
-
-```
-DdnJS.utils.format.timeAgo(84681568)
-> 24 mins ago 
-```
-
-
-同步方法：`DdnJS.utils.format.fullTimestamp()`

@@ -1,7 +1,7 @@
 ---
 order: 3
 id: aob-api
-title: 3. 链上资产AOB Api
+title: 3. 链上资产(AOB) API
 sidebar_label: Assets on blockchain
 ---
 
