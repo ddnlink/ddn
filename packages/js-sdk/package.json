@@ -4,16 +4,17 @@
   "description": "DDN Node.js SDK",
   "main": "index.js",
   "module": "dist/index.esm.js",
-  "unpkg": "dist/index.browserify.js",
+  "unpkg": "build/index.browserify.js",
   "files": [
     "lib",
-    "dist"
+    "dist",
+    "build"
   ],
   "scripts": {
     "test": "mocha test",
     "build": "yarn build:dev & yarn build:prod",
-    "build:dev": "browserify index.js > ./dist/index.browserify.js",
-    "build:prod": "browserify index.js -p tinyify > ./dist/index.browserify.min.js"
+    "build:dev": "browserify index.js > ./build/index.browserify.js",
+    "build:prod": "browserify index.js -p tinyify > ./build/index.browserify.min.js"
   },
   "keywords": [
     "ddn",
