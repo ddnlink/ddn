@@ -1,13 +1,13 @@
 import _ from 'lodash'
 import Debug from 'debug'
-import Tester from '@ddn/test-utils'
+import { node } from '../ddn-js'
 
 const debug = Debug('debug')
-const expect = Tester.expect
+const expect = node.expect
 
 describe('An example of DDN test, please do test follow me', () => {
   it('should be ok', () => {
-    const name = Tester.randomIssuerName('DDN.', 3)
+    const name = node.randomIssuerName('DDN.', 3)
     debug('name', name)
     expect(name).be.a('string')
   })
@@ -28,15 +28,15 @@ describe("Test all Utils, for example: _.isEmpty('')", () => {
 // D9DT21EowZTAQW3gqHTGXdMKf3HTqKJcTF
 
 async function sendDDN (password, address, coin) {
-  await Tester.onNewBlockAsync()
+  await node.onNewBlockAsync()
 
   const result = await new Promise((resolve, reject) => {
-    const randomCoin = Tester.randomCoin()
+    const randomCoin = node.randomCoin()
     if (!coin) {
       coin = randomCoin
     }
 
-    Tester.api.put('/transactions')
+    node.api.put('/transactions')
       .set('Accept', 'application/json')
       .send({
         secret: password,
@@ -55,13 +55,13 @@ async function sendDDN (password, address, coin) {
         }
 
         debug(`Sending ${coin} DDN to ${address}`)
-        Tester.expect(body).to.have.property('success').to.be.true
+        node.expect(body).to.have.property('success').to.be.true
 
         resolve(coin)
       })
   })
 
-  await Tester.onNewBlockAsync()
+  await node.onNewBlockAsync()
 
   return result
 }
@@ -70,9 +70,9 @@ describe('sendDDN is ok', () => {
   let MultisigAccount
 
   it('open account', async (done) => {
-    MultisigAccount = Tester.randomAccount()
+    MultisigAccount = node.randomAccount()
     MultisigAccount.name = 'multi'
-    const res = await Tester.openAccountAsync({ secret: MultisigAccount.password })
+    const res = await node.openAccountAsync({ secret: MultisigAccount.password })
     const body = res.body
 
     MultisigAccount.address = body.account.address
@@ -83,7 +83,7 @@ describe('sendDDN is ok', () => {
   })
 
   it('A -> B, Should be ok', async (done) => {
-    const result = await sendDDN(Tester.Gaccount.password, MultisigAccount.address, '1000000000')
+    const result = await sendDDN(node.Gaccount.password, MultisigAccount.address, '1000000000')
 
     debug('Coins', result)
 
@@ -92,7 +92,7 @@ describe('sendDDN is ok', () => {
   }, 30000)
 
   it('B -> A, Should be ok', async (done) => {
-    const result = await sendDDN(MultisigAccount.password, Tester.Gaccount.address, '100000000')
+    const result = await sendDDN(MultisigAccount.password, node.Gaccount.address, '100000000')
 
     debug('Coins', result)
 

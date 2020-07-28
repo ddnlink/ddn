@@ -4,9 +4,7 @@ import crypto from 'crypto'
 import { Buffer } from 'buffer'
 import Debug from 'debug'
 import ddnCrypto from '@ddn/crypto'
-import node from '@ddn/test-utils'
-
-import DdnJS from '../ddn-js'
+import { DdnJS, node } from '../ddn-js'
 
 const debug = Debug('debug')
 

@@ -18,11 +18,9 @@ export const config = mergeConfigs(defaultConfig, userConfig)
  */
 const constantsFile = path.resolve(process.cwd(), './config/constants.js')
 const userConstants = requireFile(constantsFile)
-// console.log('userConstants', userConstants);
 
 const constantsMerge = mergeConfigs(defaultConstants, userConstants)
 constantsMerge.net = constantsMerge[config.net]
-// console.log('constantsMerge', constantsMerge);
 
 export const constants = constantsMerge
 

@@ -1,8 +1,7 @@
 // passed
 import Debug from 'debug'
 import DdnUtils from '@ddn/utils'
-import Tester from '@ddn/test-utils'
-import DdnJS from '../../ddn-js'
+import { DdnJS, node } from '../../ddn-js'
 
 const debug = Debug('debug')
 
@@ -29,16 +28,16 @@ export const Contribution = () => {
     beforeAll(async done => {
       // 先要获取组织号
       const transaction = await createTransfer(
-        Tester.Daccount.address,
+        node.Daccount.address,
         10000000000,
-        Tester.Gaccount.password
+        node.Gaccount.password
       )
-      Tester.peer
+      node.peer
         .post('/transactions')
         .set('Accept', 'application/json')
-        .set('version', Tester.version)
-        .set('nethash', Tester.config.nethash)
-        .set('port', Tester.config.port)
+        .set('version', node.version)
+        .set('nethash', node.config.nethash)
+        .set('port', node.config.port)
         .send({
           transaction
         })
@@ -46,22 +45,22 @@ export const Contribution = () => {
         .expect(200)
         .end((err, { body }) => {
           debug(JSON.stringify(body))
-          Tester.expect(err).to.be.not.ok
-          Tester.expect(body).to.have.property('success').to.be.true
+          node.expect(err).to.be.not.ok
+          node.expect(body).to.have.property('success').to.be.true
           done()
         })
 
-      const getOrgIdUrl = `/dao/orgs/address/${Tester.Gaccount.address}`
-      Tester.api
+      const getOrgIdUrl = `/dao/orgs/address/${node.Gaccount.address}`
+      node.api
         .get(getOrgIdUrl)
         .set('Accept', 'application/json')
-        .set('version', Tester.version)
-        .set('nethash', Tester.config.nethash)
-        .set('port', Tester.config.port)
+        .set('version', node.version)
+        .set('nethash', node.config.nethash)
+        .set('port', node.config.port)
         .expect(200)
         .end((err, { body }) => {
-          Tester.expect(err).to.be.not.ok
-          Tester.expect(body).to.have.property('success').to.be.true
+          node.expect(err).to.be.not.ok
+          node.expect(body).to.have.property('success').to.be.true
 
           org_id = body.result.org.org_id
           debug('org_id', JSON.stringify(org_id))
@@ -72,12 +71,12 @@ export const Contribution = () => {
 
     // Daccount 用户投稿给 Gaccount
     it('POST peers/transactions to contribute should be ok', async done => {
-      await Tester.onNewBlockAsync()
+      await node.onNewBlockAsync()
 
       contribution = {
         title: 'from /transactions',
-        sender_address: Tester.Daccount.address,
-        received_address: Tester.Gaccount.address,
+        sender_address: node.Daccount.address,
+        received_address: node.Gaccount.address,
         url:
           'dat://f76e1e82cf4eab4bf173627ff93662973c6fab110c70fb0f86370873a9619aa6+18/public/test.html',
         price: '0'
@@ -86,14 +85,14 @@ export const Contribution = () => {
       transaction = await DdnJS.assetPlugin.createPluginAsset(
         DdnUtils.assetTypes.DAO_CONTRIBUTION,
         contribution,
-        Tester.Daccount.password
+        node.Daccount.password
       ) // 42
-      Tester.peer
+      node.peer
         .post('/transactions')
         .set('Accept', 'application/json')
-        .set('version', Tester.version)
-        .set('nethash', Tester.config.nethash)
-        .set('port', Tester.config.port)
+        .set('version', node.version)
+        .set('nethash', node.config.nethash)
+        .set('port', node.config.port)
         .send({
           transaction
         })
@@ -101,9 +100,9 @@ export const Contribution = () => {
         .expect(200)
         .end((err, { body }) => {
           debug('POST peers/transactions', JSON.stringify(body))
-          Tester.expect(err).to.be.not.ok
+          node.expect(err).to.be.not.ok
 
-          Tester.expect(body).to.have.property('success').to.be.true
+          node.expect(body).to.have.property('success').to.be.true
 
           done()
         })
@@ -111,31 +110,31 @@ export const Contribution = () => {
 
     // 使用接口投稿
     it('PUT /api/dao/contributions/:org_id to contribute should be ok', done => {
-      Tester.onNewBlock(err => {
-        Tester.expect(err).to.be.not.ok
+      node.onNewBlock(err => {
+        node.expect(err).to.be.not.ok
 
         contribution = {
           title: 'from /contributions',
           url:
             'dat://f76e1e82cf4eab4bf173627ff93662973c6fab110c70fb0f86370873a9619aa6+18/public/test.html',
           price: `${(Math.random() * 100).toFixed(0) * 100000000}`,
-          secret: Tester.Daccount.password
+          secret: node.Daccount.password
         }
 
-        Tester.api
+        node.api
           .put(`/dao/contributions/${org_id}`)
           .set('Accept', 'application/json')
-          .set('version', Tester.version)
-          .set('nethash', Tester.config.nethash)
-          .set('port', Tester.config.port)
+          .set('version', node.version)
+          .set('nethash', node.config.nethash)
+          .set('port', node.config.port)
           .send(contribution)
           .expect('Content-Type', /json/)
           .expect(200)
           .end((err, { body }) => {
             debug('PUT /api/dao/contributions/:org_id', JSON.stringify(body))
-            Tester.expect(err).to.be.not.ok
+            node.expect(err).to.be.not.ok
 
-            Tester.expect(body).to.have.property('success').to.be.true
+            node.expect(body).to.have.property('success').to.be.true
             done()
           })
       })
@@ -143,18 +142,18 @@ export const Contribution = () => {
 
     // 检索投稿者投过的记录
     it('GET /api/dao/contributions/all?sender_address= should be ok', done => {
-      Tester.onNewBlock(err => {
-        Tester.expect(err).to.be.not.ok
+      node.onNewBlock(err => {
+        node.expect(err).to.be.not.ok
 
         let reqUrl = '/dao/contributions/all'
-        reqUrl += `?sender_address=${Tester.Daccount.address}`
+        reqUrl += `?sender_address=${node.Daccount.address}`
 
-        Tester.api
+        node.api
           .get(reqUrl)
           .set('Accept', 'application/json')
-          .set('version', Tester.version)
-          .set('nethash', Tester.config.nethash)
-          .set('port', Tester.config.port)
+          .set('version', node.version)
+          .set('nethash', node.config.nethash)
+          .set('port', node.config.port)
           .expect('Content-Type', /json/)
           .expect(200)
           .end((err, { body }) => {
@@ -162,9 +161,9 @@ export const Contribution = () => {
               'GET /api/dao/contributions/all?sender_address=',
               JSON.stringify(body)
             )
-            Tester.expect(err).to.be.not.ok
+            node.expect(err).to.be.not.ok
 
-            Tester.expect(body).to.have.property('success').to.be.true
+            node.expect(body).to.have.property('success').to.be.true
             done()
           })
       })
@@ -172,24 +171,24 @@ export const Contribution = () => {
 
     // 检索组织号收到的投稿记录
     it('GET /api/dao/contributions/:org_id/all', done => {
-      Tester.onNewBlock(err => {
-        Tester.expect(err).to.be.not.ok
+      node.onNewBlock(err => {
+        node.expect(err).to.be.not.ok
 
         const reqUrl = `/dao/contributions/${org_id}/all`
 
-        Tester.api
+        node.api
           .get(reqUrl)
           .set('Accept', 'application/json')
-          .set('version', Tester.version)
-          .set('nethash', Tester.config.nethash)
-          .set('port', Tester.config.port)
+          .set('version', node.version)
+          .set('nethash', node.config.nethash)
+          .set('port', node.config.port)
           .expect('Content-Type', /json/)
           .expect(200)
           .end((err, { body }) => {
             debug(reqUrl, JSON.stringify(body))
-            Tester.expect(err).to.be.not.ok
+            node.expect(err).to.be.not.ok
 
-            Tester.expect(body).to.have.property('success').to.be.true
+            node.expect(body).to.have.property('success').to.be.true
             done()
           })
       })
@@ -197,22 +196,22 @@ export const Contribution = () => {
 
     // 可以根据文章 url 以及投稿人的公钥检索
     it('GET /api/dao/contributions/:org_id/all?url should be ok', done => {
-      Tester.onNewBlock(err => {
-        Tester.expect(err).to.be.not.ok
+      node.onNewBlock(err => {
+        node.expect(err).to.be.not.ok
 
-        const keys = DdnJS.crypto.getKeys(Tester.Gaccount.password)
+        const keys = DdnJS.crypto.getKeys(node.Gaccount.password)
 
         let reqUrl = `/dao/contributions/${org_id}/all`
         reqUrl += `?senderPublicKey=${keys.publicKey}&url=${encodeURIComponent(
           'dat://f76e1e82cf4eab4bf173627ff93662973c6fab110c70fb0f86370873a9619aa6+18/public/test.html'
         )}`
 
-        Tester.api
+        node.api
           .get(reqUrl)
           .set('Accept', 'application/json')
-          .set('version', Tester.version)
-          .set('nethash', Tester.config.nethash)
-          .set('port', Tester.config.port)
+          .set('version', node.version)
+          .set('nethash', node.config.nethash)
+          .set('port', node.config.port)
           .expect('Content-Type', /json/)
           .expect(200)
           .end((err, { body }) => {
@@ -220,9 +219,9 @@ export const Contribution = () => {
               'GET /api/dao/contributions/:org_id/all?',
               JSON.stringify(body)
             )
-            Tester.expect(err).to.be.not.ok
+            node.expect(err).to.be.not.ok
 
-            Tester.expect(body).to.have.property('success').to.be.true
+            node.expect(body).to.have.property('success').to.be.true
             done()
           })
       })
@@ -230,25 +229,25 @@ export const Contribution = () => {
 
     // 根据收稿地址检索全部收稿记录
     it('GET /api/dao/contributions/all', done => {
-      Tester.onNewBlock(err => {
-        Tester.expect(err).to.be.not.ok
+      node.onNewBlock(err => {
+        node.expect(err).to.be.not.ok
 
         let reqUrl = '/dao/contributions/all'
-        reqUrl += `?received_address=${Tester.Gaccount.address}`
+        reqUrl += `?received_address=${node.Gaccount.address}`
 
-        Tester.api
+        node.api
           .get(reqUrl)
           .set('Accept', 'application/json')
-          .set('version', Tester.version)
-          .set('nethash', Tester.config.nethash)
-          .set('port', Tester.config.port)
+          .set('version', node.version)
+          .set('nethash', node.config.nethash)
+          .set('port', node.config.port)
           .expect('Content-Type', /json/)
           .expect(200)
           .end((err, { body }) => {
             debug('GET /api/dao/contributions/all', JSON.stringify(body))
-            Tester.expect(err).to.be.not.ok
+            node.expect(err).to.be.not.ok
 
-            Tester.expect(body).to.have.property('success').to.be.true
+            node.expect(body).to.have.property('success').to.be.true
             done()
           })
       })
@@ -267,20 +266,20 @@ export const Contribution = () => {
     // 先获得组织号下的全部收稿
     beforeAll(done => {
       // Fixme:  2020.6.15 得使用一个标识，保证检索到的就是没有确认的才行
-      // const getContributionTrsIdUrl = `/dao/contributions?received_address=${Tester.Gaccount.address}&pagesize=1&sort=timestamp:desc`;
-      const getContributionTrsIdUrl = `/dao/contributions/${org_id}/all?received_address=${Tester.Gaccount.address}&pagesize=1&sort=timestamp:desc`
-      Tester.api
+      // const getContributionTrsIdUrl = `/dao/contributions?received_address=${node.Gaccount.address}&pagesize=1&sort=timestamp:desc`;
+      const getContributionTrsIdUrl = `/dao/contributions/${org_id}/all?received_address=${node.Gaccount.address}&pagesize=1&sort=timestamp:desc`
+      node.api
         .get(getContributionTrsIdUrl)
         .set('Accept', 'application/json')
-        .set('version', Tester.version)
-        .set('nethash', Tester.config.nethash)
-        .set('port', Tester.config.port)
+        .set('version', node.version)
+        .set('nethash', node.config.nethash)
+        .set('port', node.config.port)
         .expect(200)
         .end((err, { body }) => {
           debug('getContributionTrsIdUrl', getContributionTrsIdUrl)
 
-          Tester.expect(err).to.be.not.ok
-          Tester.expect(body).to.have.property('success').to.be.true
+          node.expect(err).to.be.not.ok
+          node.expect(body).to.have.property('success').to.be.true
 
           // 确保获取最新投稿
           contribution_trs_id = body.result.rows[0].transaction_id
@@ -292,33 +291,33 @@ export const Contribution = () => {
 
     // 通用：确认收稿
     it('POST peers/transactions to confirmate should be ok', done => {
-      Tester.onNewBlock(async err => {
-        Tester.expect(err).to.be.not.ok
+      node.onNewBlock(async err => {
+        node.expect(err).to.be.not.ok
 
         const state = (Math.random() * 100).toFixed(0) % 2
 
         confirmation = {
-          sender_address: Tester.Gaccount.address,
-          received_address: Tester.Daccount.address,
+          sender_address: node.Gaccount.address,
+          received_address: node.Daccount.address,
           url:
             'dat://f76e1e82cf4eab4bf173627ff93662973c6fab110c70fb0f86370873a9619aa6+18/public/test.html',
           contribution_trs_id, // 确保每次运行都是新的投稿id，才能通过测试
           state,
           amount: state === 1 ? contributionPrice : '0',
-          recipientId: state === 1 ? Tester.Daccount.address : ''
+          recipientId: state === 1 ? node.Daccount.address : ''
         }
 
         transaction = await DdnJS.assetPlugin.createPluginAsset(
           DdnUtils.assetTypes.DAO_CONFIRMATION,
           confirmation,
-          Tester.Gaccount.password
+          node.Gaccount.password
         )
-        Tester.peer
+        node.peer
           .post('/transactions')
           .set('Accept', 'application/json')
-          .set('version', Tester.version)
-          .set('nethash', Tester.config.nethash)
-          .set('port', Tester.config.port)
+          .set('version', node.version)
+          .set('nethash', node.config.nethash)
+          .set('port', node.config.port)
           .send({
             transaction
           })
@@ -327,8 +326,8 @@ export const Contribution = () => {
           .end((err, { body }) => {
             debug('contribute, ok', JSON.stringify(body))
 
-            Tester.expect(err).to.be.not.ok
-            Tester.expect(body).to.have.property('success').to.be.true
+            node.expect(err).to.be.not.ok
+            node.expect(body).to.have.property('success').to.be.true
             done()
           })
       })
@@ -336,8 +335,8 @@ export const Contribution = () => {
 
     // 接口：确认交易
     it('PUT /api/dao/confirmations/ again should be fail', done => {
-      Tester.onNewBlock(err => {
-        Tester.expect(err).to.be.not.ok
+      node.onNewBlock(err => {
+        node.expect(err).to.be.not.ok
 
         const state = (Math.random() * 100).toFixed(0) % 2
 
@@ -347,23 +346,23 @@ export const Contribution = () => {
             'dat://f76e1e82cf4eab4bf173627ff93662973c6fab110c70fb0f86370873a9619aa6+18/public/test.html',
           contribution_trs_id, // 同样的投稿 id
           state,
-          secret: Tester.Gaccount.password
+          secret: node.Gaccount.password
         }
 
-        Tester.api
+        node.api
           .put('/dao/confirmations')
           .set('Accept', 'application/json')
-          .set('version', Tester.version)
-          .set('nethash', Tester.config.nethash)
-          .set('port', Tester.config.port)
+          .set('version', node.version)
+          .set('nethash', node.config.nethash)
+          .set('port', node.config.port)
           .send(confirmation)
           .expect('Content-Type', /json/)
           .expect(200)
           .end((err, { body }) => {
             debug('already confirmed ok', JSON.stringify(body))
-            Tester.expect(err).to.be.not.ok
+            node.expect(err).to.be.not.ok
 
-            Tester.expect(body).to.have.property('success').to.be.false
+            node.expect(body).to.have.property('success').to.be.false
             Tester
               .expect(body)
               .to.have.property('error')
@@ -374,55 +373,55 @@ export const Contribution = () => {
     })
 
     it('GET /api/dao/confirmations/:org_id/all', done => {
-      Tester.onNewBlock(err => {
-        Tester.expect(err).to.be.not.ok
+      node.onNewBlock(err => {
+        node.expect(err).to.be.not.ok
 
-        const keys = DdnJS.crypto.getKeys(Tester.Gaccount.password)
+        const keys = DdnJS.crypto.getKeys(node.Gaccount.password)
 
         let reqUrl = `/dao/confirmations/${org_id}/all`
         reqUrl += `?senderPublicKey=${keys.publicKey}`
 
-        Tester.api
+        node.api
           .get(reqUrl)
           .set('Accept', 'application/json')
-          .set('version', Tester.version)
-          .set('nethash', Tester.config.nethash)
-          .set('port', Tester.config.port)
+          .set('version', node.version)
+          .set('nethash', node.config.nethash)
+          .set('port', node.config.port)
           .expect('Content-Type', /json/)
           .expect(200)
           .end((err, { body }) => {
             debug(reqUrl, JSON.stringify(body))
-            Tester.expect(err).to.be.not.ok
+            node.expect(err).to.be.not.ok
 
-            Tester.expect(body).to.have.property('success').to.be.true
+            node.expect(body).to.have.property('success').to.be.true
             done()
           })
       })
     })
 
     it('GET /api/dao/confirmations/:org_id/all?url', done => {
-      Tester.onNewBlock(err => {
-        Tester.expect(err).to.be.not.ok
+      node.onNewBlock(err => {
+        node.expect(err).to.be.not.ok
 
-        const keys = DdnJS.crypto.getKeys(Tester.Daccount.password)
+        const keys = DdnJS.crypto.getKeys(node.Daccount.password)
 
         let reqUrl = `/dao/confirmations/${org_id}/all`
         reqUrl += `?senderPublicKey=${keys.publicKey}&url=${encodeURIComponent(
           'dat://f76e1e82cf4eab4bf173627ff93662973c6fab110c70fb0f86370873a9619aa6+18/public/test.html'
         )}`
 
-        Tester.api
+        node.api
           .get(reqUrl)
           .set('Accept', 'application/json')
-          .set('version', Tester.version)
-          .set('nethash', Tester.config.nethash)
-          .set('port', Tester.config.port)
+          .set('version', node.version)
+          .set('nethash', node.config.nethash)
+          .set('port', node.config.port)
           .expect('Content-Type', /json/)
           .expect(200)
           .end((err, { body }) => {
             debug(reqUrl, JSON.stringify(body))
-            Tester.expect(err).to.be.not.ok
-            Tester.expect(body).to.have.property('success').to.be.true
+            node.expect(err).to.be.not.ok
+            node.expect(body).to.have.property('success').to.be.true
             done()
           })
       })

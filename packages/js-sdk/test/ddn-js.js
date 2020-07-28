@@ -1,6 +1,11 @@
-import DdnJS from '../lib'
+import testUtils, { TestUtil } from '@ddn/test-utils'
+import DdnJS, { config, constants } from '../lib'
 
-// 必须初始化
-DdnJS.init('gar0fktt')
+const nodeObj = new TestUtil(config, constants)
 
-export default DdnJS
+const node = Object.assign(nodeObj, testUtils)
+
+export {
+  DdnJS,
+  node
+}

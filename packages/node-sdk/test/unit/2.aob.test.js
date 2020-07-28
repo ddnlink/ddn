@@ -1,7 +1,7 @@
 // passed
 import Debug from 'debug'
 import DdnUtils from '@ddn/utils'
-import { DdnJS, node, nodeObj } from '../ddn-js'
+import { DdnJS, node } from '../ddn-js'
 // import { ACL } from './aob/5.acl'
 
 const expect = node.expect
@@ -30,11 +30,11 @@ describe('AOB Test', () => {
 
   // 开始前，得把发行商账号 IssuerAccount 注册到链上(登录一下即可)
   beforeAll((done) => {
-    nodeObj.api.post('/accounts/open')
+    node.api.post('/accounts/open')
       .set('Accept', 'application/json')
-      .set('version', nodeObj.version)
-      .set('nethash', nodeObj.config.nethash)
-      .set('port', nodeObj.config.port)
+      .set('version', node.version)
+      .set('nethash', node.config.nethash)
+      .set('port', node.config.port)
       .send({
         secret: IssuerAccount1.password
       })
@@ -56,11 +56,11 @@ describe('AOB Test', () => {
     // 转账给它
     const transaction = await createTransfer(IssuerAccount1.address, node.randomCoin(), node.Gaccount.password)
 
-    nodeObj.peer.post('/transactions')
+    node.peer.post('/transactions')
       .set('Accept', 'application/json')
-      .set('version', nodeObj.version)
-      .set('nethash', nodeObj.config.nethash)
-      .set('port', nodeObj.config.port)
+      .set('version', node.version)
+      .set('nethash', node.config.nethash)
+      .set('port', node.config.port)
       .send({
         transaction
       })
@@ -83,16 +83,16 @@ describe('AOB Test', () => {
   // 1. 注册发行商
   describe('Register Issuer', () => {
     it('Should be ok', async (done) => {
-      await nodeObj.onNewBlockAsync()
+      await node.onNewBlockAsync()
 
       const transaction = await DdnJS.aob.createIssuer(issuerName, 'An issuer', IssuerAccount1.password)
       debug('注册发行商创建的transaction 1', transaction)
 
-      nodeObj.peer.post('/transactions')
+      node.peer.post('/transactions')
         .set('Accept', 'application/json')
-        .set('version', nodeObj.version)
-        .set('nethash', nodeObj.config.nethash)
-        .set('port', nodeObj.config.port)
+        .set('version', node.version)
+        .set('nethash', node.config.nethash)
+        .set('port', node.config.port)
         .send({
           transaction
         })
@@ -111,17 +111,17 @@ describe('AOB Test', () => {
     })
 
     it('with the same name again, Should be fail', async (done) => {
-      await nodeObj.onNewBlockAsync()
+      await node.onNewBlockAsync()
 
       const transaction = await DdnJS.aob.createIssuer(issuerName, 'An issuer', IssuerAccount2.password)
       debug('注册发行商创建的transaction 2', transaction)
       debug('注册发行商创建的transaction 2', transaction)
 
-      nodeObj.peer.post('/transactions')
+      node.peer.post('/transactions')
         .set('Accept', 'application/json')
-        .set('version', nodeObj.version)
-        .set('nethash', nodeObj.config.nethash)
-        .set('port', nodeObj.config.port)
+        .set('version', node.version)
+        .set('nethash', node.config.nethash)
+        .set('port', node.config.port)
         .send({
           transaction
         })
@@ -141,16 +141,16 @@ describe('AOB Test', () => {
     })
 
     it('with the same IssuerAccount1 again, Should be fail', async (done) => {
-      await nodeObj.onNewBlockAsync()
+      await node.onNewBlockAsync()
 
       const transaction = await DdnJS.aob.createIssuer(issuerName2, 'An issuer', IssuerAccount1.password)
       debug('注册发行商创建的transaction 3', transaction)
 
-      nodeObj.peer.post('/transactions')
+      node.peer.post('/transactions')
         .set('Accept', 'application/json')
-        .set('version', nodeObj.version)
-        .set('nethash', nodeObj.config.nethash)
-        .set('port', nodeObj.config.port)
+        .set('version', node.version)
+        .set('nethash', node.config.nethash)
+        .set('port', node.config.port)
         .send({
           transaction
         })
@@ -170,16 +170,16 @@ describe('AOB Test', () => {
     })
 
     it('with IssuerAccount2 who no money, Should be fail', async (done) => {
-      await nodeObj.onNewBlockAsync()
+      await node.onNewBlockAsync()
 
       const transaction = await DdnJS.aob.createIssuer(issuerName2, 'An issuer', IssuerAccount2.password)
       debug('注册发行商创建的transaction 3', transaction)
 
-      nodeObj.peer.post('/transactions')
+      node.peer.post('/transactions')
         .set('Accept', 'application/json')
-        .set('version', nodeObj.version)
-        .set('nethash', nodeObj.config.nethash)
-        .set('port', nodeObj.config.port)
+        .set('version', node.version)
+        .set('nethash', node.config.nethash)
+        .set('port', node.config.port)
         .send({
           transaction
         })
@@ -202,7 +202,7 @@ describe('AOB Test', () => {
   // 1.1 检索发行商
   describe('Get issuers', () => {
     it('Get issuers should be ok', async () => {
-      const [err, res] = await nodeObj.apiGetAsyncE('/aob/issuers')
+      const [err, res] = await node.apiGetAsyncE('/aob/issuers')
 
       debug('get /aob/issuers/issuers response', err, res.body)
       expect(err).to.not.ok
@@ -214,7 +214,7 @@ describe('AOB Test', () => {
     })
 
     it('Get issuer by name should be ok', async () => {
-      const [err, res] = await nodeObj.apiGetAsyncE(`/aob/issuers/name/${issuerName}`)
+      const [err, res] = await node.apiGetAsyncE(`/aob/issuers/name/${issuerName}`)
       debug('issuerName', issuerName)
       debug('get /aob/issuers/name/:name response', err, res.body)
       expect(err).to.not.ok
@@ -238,11 +238,11 @@ describe('AOB Test', () => {
 
       debug('Asset transaction:', transaction)
 
-      nodeObj.peer.post('/transactions')
+      node.peer.post('/transactions')
         .set('Accept', 'application/json')
-        .set('version', nodeObj.version)
-        .set('nethash', nodeObj.config.nethash)
-        .set('port', nodeObj.config.port)
+        .set('version', node.version)
+        .set('nethash', node.config.nethash)
+        .set('port', node.config.port)
         .send({
           transaction
         })
@@ -265,17 +265,17 @@ describe('AOB Test', () => {
   describe('Add asset issues', () => {
     it('Should be ok', async (done) => {
       // 等 1 次确认
-      await nodeObj.onNewBlockAsync()
+      await node.onNewBlockAsync()
 
       // const transaction = await createPluginAsset(DdnUtils.assetTypes.AOB_ISSUE, asset, IssuerAccount1.password)
       const transaction = await DdnJS.aob.createIssue(currency, '100000', IssuerAccount1.password)
       debug('Add issue transaction:', transaction)
 
-      nodeObj.peer.post('/transactions')
+      node.peer.post('/transactions')
         .set('Accept', 'application/json')
-        .set('version', nodeObj.version)
-        .set('nethash', nodeObj.config.nethash)
-        .set('port', nodeObj.config.port)
+        .set('version', node.version)
+        .set('nethash', node.config.nethash)
+        .set('port', node.config.port)
         .send({
           transaction
         })
@@ -298,7 +298,7 @@ describe('AOB Test', () => {
   describe('Transfer Issue', () => {
     it('Should be ok', async (done) => {
       // 等 1 次确认
-      await nodeObj.onNewBlockAsync()
+      await node.onNewBlockAsync()
 
       const obj = {
         recipientId: IssuerAccount1.address,
@@ -310,11 +310,11 @@ describe('AOB Test', () => {
       // const transaction = await createPluginAsset(65, obj, IssuerAccount1.password);
       const transaction = await createPluginAsset(DdnUtils.assetTypes.AOB_TRANSFER, obj, IssuerAccount1.password)
 
-      nodeObj.peer.post('/transactions')
+      node.peer.post('/transactions')
         .set('Accept', 'application/json')
-        .set('version', nodeObj.version)
-        .set('nethash', nodeObj.config.nethash)
-        .set('port', nodeObj.config.port)
+        .set('version', node.version)
+        .set('nethash', node.config.nethash)
+        .set('port', node.config.port)
         .send({
           transaction
         })

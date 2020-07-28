@@ -2,8 +2,7 @@
  * passed
  */
 import Debug from 'debug'
-import Tester from '@ddn/test-utils'
-import DdnJS from '../ddn-js'
+import { DdnJS, node } from '../ddn-js'
 
 const debug = Debug('debug')
 
@@ -13,14 +12,14 @@ async function createTransfer (address, amount, secret, second_secret) {
 
 async function newAccount () {
   return new Promise((resolve, reject) => {
-    Tester.api.get('/accounts/new')
+    node.api.get('/accounts/new')
       .set('Accept', 'application/json')
       .expect('Content-Type', /json/)
       .expect(200)
       .end((err, {
         body
       }) => {
-        Tester.expect(body).to.have.property('secret')
+        node.expect(body).to.have.property('secret')
 
         if (err) {
           return reject(err)
@@ -36,7 +35,7 @@ async function multiSign ({
   address
 }, trsId) {
   return new Promise((resolve, reject) => {
-    Tester.api.post('/multisignatures/sign')
+    node.api.post('/multisignatures/sign')
       .set('Accept', 'application/json')
       .send({
         secret,
@@ -53,7 +52,7 @@ async function multiSign ({
 
         debug(`${address} sign:${JSON.stringify(body)}`)
 
-        Tester.expect(body).to.have.property('success').to.be.true
+        node.expect(body).to.have.property('success').to.be.true
 
         resolve()
       })
@@ -71,13 +70,13 @@ describe('PUT /multisignatures', () => {
     debug(`Multi Account: ${JSON.stringify(multiAccount)}`)
     debug('\r\n')
 
-    const transaction = await createTransfer(multiAccount.address, '100000000000', Tester.Gaccount.password)
+    const transaction = await createTransfer(multiAccount.address, '100000000000', node.Gaccount.password)
     // await new Promise((resolve, reject) => {
-    Tester.peer.post('/transactions')
+    node.peer.post('/transactions')
       .set('Accept', 'application/json')
-      .set('version', Tester.version)
-      .set('nethash', Tester.config.nethash)
-      .set('port', Tester.config.port)
+      .set('version', node.version)
+      .set('nethash', node.config.nethash)
+      .set('port', node.config.port)
       .send({
         transaction
       })
@@ -87,8 +86,8 @@ describe('PUT /multisignatures', () => {
         body
       }) => {
         debug('multi Account2 ', JSON.stringify(body))
-        Tester.expect(err).be.not.ok
-        Tester.expect(body).to.have.property('success').to.be.true
+        node.expect(err).be.not.ok
+        node.expect(body).to.have.property('success').to.be.true
 
         done()
       })
@@ -112,7 +111,7 @@ describe('PUT /multisignatures', () => {
 
   // 创建多重签名账号
   it('PUT /multisignatures. Should be ok', (done) => {
-    Tester.onNewBlock(() => {
+    node.onNewBlock(() => {
       const kg = []
       for (let i = 0; i < accounts.length; i++) {
         const acc = accounts[i]
@@ -121,7 +120,7 @@ describe('PUT /multisignatures', () => {
       debug(`keysgroup: ${JSON.stringify(kg)}`)
       debug('\r\n')
 
-      Tester.api.put('/multisignatures')
+      node.api.put('/multisignatures')
         .set('Accept', 'application/json')
         .send({
           secret: multiAccount.secret,
@@ -135,8 +134,8 @@ describe('PUT /multisignatures', () => {
           body
         }) => {
           debug('PUT /multisignatures', JSON.stringify(body))
-          Tester.expect(err).be.not.ok
-          Tester.expect(body).to.have.property('success').to.be.true
+          node.expect(err).be.not.ok
+          node.expect(body).to.have.property('success').to.be.true
 
           multiTrsId = body.transactionId
           debug('multiTrsId', multiTrsId)
@@ -160,7 +159,7 @@ describe('PUT /multisignatures', () => {
         result = false
       }
     }
-    Tester.expect(result).be.true
+    node.expect(result).be.true
     done()
   })
 })

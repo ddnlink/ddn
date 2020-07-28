@@ -67,8 +67,8 @@ describe('GET /blocks/getFee', () => {
         node.expect(body).to.have.property('success').to.be.true
         if (body.success === true && body.fee !== null) {
           node.expect(body).to.have.property('fee')
-          // node.expect(body.fee).to.equal(node.Fees.transactionFee);
-          const result = DdnUtils.bignum.isEqualTo(body.fee, node.Fees.transactionFee)
+          // node.expect(body.fee).to.equal(node.constants.net.fees.send);
+          const result = DdnUtils.bignum.isEqualTo(body.fee, node.constants.net.fees.send)
           node.expect(result).to.be.true
         } else {
           debug('Request failed or fee is null')

@@ -78,9 +78,6 @@ export class TestUtil {
     this.blockTime = config.blockTime || 10000 // Block time in miliseconds
     this.blockTimePlus = config.blockTimePlus || 12000 // Block time + 2 seconds in miliseconds
     this.version = config.version || '0.0.1' // peer version
-
-    // 简化常量调用
-    // constants = userConstants
   }
 
   randomCapitalUsername () {
@@ -269,12 +266,13 @@ export class TestUtil {
     return t + epochTime * 1000
   }
 
-  submitTransactionAsync = PIFY(this.submitTransaction)
-  onNewBlockAsync = PIFY(this.onNewBlock)
-  apiGetAsync = PIFY(this.apiGet)
-  giveMoneyAsync = PIFY(this.giveMoney)
-  sleepAsync = PIFY(this.sleep)
-  openAccountAsync = PIFY(this.openAccount)
+  submitTransactionAsync = PIFY(this.submitTransaction, this)
+  onNewBlockAsync = PIFY(this.onNewBlock, this)
+  apiGetAsync = PIFY(this.apiGet, this)
+  apiGetAsyncE = EIFY(this.apiGet, this)
+  giveMoneyAsync = PIFY(this.giveMoney, this)
+  sleepAsync = PIFY(this.sleep, this)
+  openAccountAsync = PIFY(this.openAccount, this)
 }
 
 export * from './random-utils'
@@ -286,13 +284,6 @@ export default {
   chai,
   supertest,
   expect,
-
-  // api,
-  // peer,
-  // version,
-  // normalizer,
-  // blockTime,
-  // blockTimePlus,
 
   randomCoin,
   Gaccount,

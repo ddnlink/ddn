@@ -1,9 +1,8 @@
 import Debug from 'debug'
-import Tester from '@ddn/test-utils'
-import DdnJS from '../ddn-js'
+import { DdnJS, node } from '../ddn-js'
 
 const debug = Debug('debug')
-const expect = Tester.expect
+const expect = node.expect
 
 describe('transaction.js', () => {
   const transaction = DdnJS.transaction

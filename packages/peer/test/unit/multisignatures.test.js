@@ -680,7 +680,7 @@ describe('GET /multisignatures/pending', () => {
               .to.have.property('fee')
               .to.equal(
                 String(
-                  node.Fees.multisignatureRegistrationFee *
+                  node.constants.net.fees.multiSignature *
                                     (Keys.length + 1)
                 )
               )

@@ -1,9 +1,9 @@
 import Debug from 'debug'
-import Tester from '@ddn/test-utils'
+import { node } from '../ddn-js'
 import slots from '../../lib/time/slots'
 
 const debug = Debug('debug')
-const expect = Tester.expect
+const expect = node.expect
 
 describe('slots.js', () => {
   it('should be ok', () => {

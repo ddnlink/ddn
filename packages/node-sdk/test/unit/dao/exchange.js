@@ -1,13 +1,12 @@
 // no pass
 import Debug from 'debug'
 import DdnUtil from '@ddn/utils'
-import Tester from '@ddn/test-utils'
-import DdnJS from '../../ddn-js'
+import { DdnJS, node } from '../../ddn-js'
 
 const debug = Debug('debug')
 
-const Account1 = Tester.randomTxAccount()
-const Account2 = Tester.randomTxAccount()
+const Account1 = node.randomTxAccount()
+const Account2 = node.randomTxAccount()
 let transaction
 let exchange
 let Account1Balance
@@ -18,7 +17,7 @@ jest.setTimeout(50000)
 export const Exchange = () => {
   async function openAccount (account) {
     await new Promise((resolve, reject) => {
-      Tester.api.post('/accounts/open')
+      node.api.post('/accounts/open')
         .set('Accept', 'application/json')
         .send({
           secret: account.password,
@@ -36,7 +35,7 @@ export const Exchange = () => {
           }
 
           // eslint-disable-next-line no-unused-expressions
-          Tester.expect(body).to.have.property('success').to.be.true
+          node.expect(body).to.have.property('success').to.be.true
 
           if (body.account !== null) {
             account.address = body.account.address
@@ -54,18 +53,18 @@ export const Exchange = () => {
   async function sendDDN ({
     address
   }, coin) {
-    await Tester.onNewBlockAsync()
+    await node.onNewBlockAsync()
 
     const result = await new Promise((resolve, reject) => {
-      const randomCoin = Tester.randomCoin()
+      const randomCoin = node.randomCoin()
       if (!coin) {
         coin = randomCoin
       }
 
-      Tester.api.put('/transactions')
+      node.api.put('/transactions')
         .set('Accept', 'application/json')
         .send({
-          secret: Tester.Gaccount.password,
+          secret: node.Gaccount.password,
           amount: `${coin}`,
           recipientId: address
         })
@@ -81,13 +80,13 @@ export const Exchange = () => {
           }
 
           console.log(`Sending ${coin} DDN to ${address}`)
-          Tester.expect(body).to.have.property('success').to.be.true
+          node.expect(body).to.have.property('success').to.be.true
 
           resolve(coin)
         })
     })
 
-    await Tester.onNewBlockAsync()
+    await node.onNewBlockAsync()
 
     return result
   }
@@ -105,19 +104,19 @@ export const Exchange = () => {
       debug('Account1Balance', Account1Balance)
 
       // 获取 org_id
-      const getOrgIdUrl = `/dao/orgs?pagesize=1&address=${Tester.Gaccount.address}`
-      Tester.api.get(getOrgIdUrl)
+      const getOrgIdUrl = `/dao/orgs?pagesize=1&address=${node.Gaccount.address}`
+      node.api.get(getOrgIdUrl)
         .set('Accept', 'application/json')
-        .set('version', Tester.version)
-        .set('nethash', Tester.config.nethash)
-        .set('port', Tester.config.port)
+        .set('version', node.version)
+        .set('nethash', node.config.nethash)
+        .set('port', node.config.port)
         .expect(200)
         .end((err, {
           body
         }) => {
           debug('getOrgIdUrl', getOrgIdUrl, JSON.stringify(body))
-          Tester.expect(err).to.be.not.ok
-          Tester.expect(body).to.have.property('success').to.be.true
+          node.expect(err).to.be.not.ok
+          node.expect(body).to.have.property('success').to.be.true
           org_id = body.result.rows[0].org_id
 
           done()
@@ -132,15 +131,15 @@ export const Exchange = () => {
         state: 0,
         exchange_trs_id: '',
         received_address: Account1.address,
-        sender_address: Tester.Gaccount.address
+        sender_address: node.Gaccount.address
       }
 
-      transaction = await DdnJS.assetPlugin.createPluginAsset(DdnUtil.assetTypes.DAO_EXCHANGE, exchange, Tester.Gaccount.password) // 41
-      Tester.peer.post('/transactions')
+      transaction = await DdnJS.assetPlugin.createPluginAsset(DdnUtil.assetTypes.DAO_EXCHANGE, exchange, node.Gaccount.password) // 41
+      node.peer.post('/transactions')
         .set('Accept', 'application/json')
-        .set('version', Tester.version)
-        .set('nethash', Tester.config.nethash)
-        .set('port', Tester.config.port)
+        .set('version', node.version)
+        .set('nethash', node.config.nethash)
+        .set('port', node.config.port)
         .send({
           transaction
         })
@@ -151,10 +150,10 @@ export const Exchange = () => {
         }) => {
           debug('exchange with state = 0, ok', JSON.stringify(body))
 
-          Tester.expect(err).to.be.not.ok
+          node.expect(err).to.be.not.ok
 
-          Tester.expect(body).to.have.property('success').to.be.true
-          Tester.expect(body).to.have.property('transactionId')
+          node.expect(body).to.have.property('success').to.be.true
+          node.expect(body).to.have.property('transactionId')
 
           // 为下面的买操作准备
           exchange.exchange_trs_id = body.transactionId
@@ -165,7 +164,7 @@ export const Exchange = () => {
 
     // 1状态 - 确认买 交易
     it('Create exchange to buy with state = 1, Should be ok', async (done) => {
-      await Tester.onNewBlockAsync()
+      await node.onNewBlockAsync()
 
       const temp = exchange.received_address
       exchange.received_address = exchange.sender_address
@@ -177,11 +176,11 @@ export const Exchange = () => {
       debug('exchange to buy ', exchange)
 
       transaction = await DdnJS.assetPlugin.createPluginAsset(DdnUtil.assetTypes.DAO_EXCHANGE, exchange, Account1.password)
-      Tester.peer.post('/transactions')
+      node.peer.post('/transactions')
         .set('Accept', 'application/json')
-        .set('version', Tester.version)
-        .set('nethash', Tester.config.nethash)
-        .set('port', Tester.config.port)
+        .set('version', node.version)
+        .set('nethash', node.config.nethash)
+        .set('port', node.config.port)
         .send({
           transaction
         })
@@ -192,10 +191,10 @@ export const Exchange = () => {
         }) => {
           debug('exchange with state = 1, ok', JSON.stringify(body))
 
-          Tester.expect(err).to.be.not.ok
+          node.expect(err).to.be.not.ok
 
-          Tester.expect(body).to.have.property('success').to.be.true
-          Tester.expect(body).to.have.property('transactionId')
+          node.expect(body).to.have.property('success').to.be.true
+          node.expect(body).to.have.property('transactionId')
 
           done()
         })
@@ -203,7 +202,7 @@ export const Exchange = () => {
 
     // fixme: 2020.6.20
     it('Create exchange to buy with state = 1 again, Should be fail', async (done) => {
-      await Tester.onNewBlockAsync()
+      await node.onNewBlockAsync()
 
       exchange.amount = exchange.price
       exchange.recipientId = exchange.received_address
@@ -211,11 +210,11 @@ export const Exchange = () => {
       transaction = await DdnJS.assetPlugin.createPluginAsset(DdnUtil.assetTypes.DAO_EXCHANGE, exchange, Account1.password)
       debug('exchange to buy again, fail, transaction', transaction)
 
-      Tester.peer.post('/transactions')
+      node.peer.post('/transactions')
         .set('Accept', 'application/json')
-        .set('version', Tester.version)
-        .set('nethash', Tester.config.nethash)
-        .set('port', Tester.config.port)
+        .set('version', node.version)
+        .set('nethash', node.config.nethash)
+        .set('port', node.config.port)
         .send({
           transaction
         })
@@ -226,9 +225,9 @@ export const Exchange = () => {
         }) => {
           debug('exchange with state = 1 again, fail', JSON.stringify(body))
 
-          Tester.expect(err).to.be.not.ok
-          Tester.expect(body).to.have.property('success').to.be.false
-          Tester.expect(body).to.have.property('error').to.contain('confirm exchange already exists')
+          node.expect(err).to.be.not.ok
+          node.expect(body).to.have.property('success').to.be.false
+          node.expect(body).to.have.property('error').to.contain('confirm exchange already exists')
 
           done()
         })
@@ -239,21 +238,21 @@ export const Exchange = () => {
   //     let org_id = "";
 
   //     beforeAll(async (done) => {
-  //         const getOrgIdUrl = `/dao/orgs/all?pagesize=1&address=${Tester.Gaccount.address}`;
-  //         Tester.api.get(getOrgIdUrl)
+  //         const getOrgIdUrl = `/dao/orgs/all?pagesize=1&address=${node.Gaccount.address}`;
+  //         node.api.get(getOrgIdUrl)
   //             .set("Accept", "application/json")
-  //             .set("version", Tester.version)
-  //             .set("nethash", Tester.config.nethash)
-  //             .set("port", Tester.config.port)
+  //             .set("version", node.version)
+  //             .set("nethash", node.config.nethash)
+  //             .set("port", node.config.port)
   //             .expect(200)
   //             .end((err, {
   //                 body
   //             }) => {
   //                 debug("get /dao/orgs/all? ok", JSON.stringify(body));
 
-  //                 Tester.expect(err).to.be.not.ok;
+  //                 node.expect(err).to.be.not.ok;
 
-  //                 Tester.expect(body).to.have.property("success").to.be.true;
+  //                 node.expect(body).to.have.property("success").to.be.true;
 
   //                 org_id = body.result.rows[0].org_id;
 
@@ -262,10 +261,10 @@ export const Exchange = () => {
   //     });
 
   //     it("Using invalid parameters, no parameters, should be fail.", (done) => {
-  //         Tester.api.put("/dao/exchanges")
+  //         node.api.put("/dao/exchanges")
   //             .set('Accept', 'application/json')
   //             .send({
-  //                 secret: Tester.Gaccount.password
+  //                 secret: node.Gaccount.password
   //             })
   //             .expect('Content-Type', /json/)
   //             .expect(200)
@@ -274,20 +273,20 @@ export const Exchange = () => {
   //             }) => {
   //                 debug("put /dao/exchanges no parameters, fail", JSON.stringify(body));
 
-  //                 Tester.expect(err).to.be.not.ok;
+  //                 node.expect(err).to.be.not.ok;
 
-  //                 Tester.expect(body).to.have.property("success").to.be.false;
-  //                 Tester.expect(body).to.have.property("error").to.include("Invalid parameters");
+  //                 node.expect(body).to.have.property("success").to.be.false;
+  //                 node.expect(body).to.have.property("error").to.include("Invalid parameters");
 
   //                 done();
   //             });
   //     });
 
   //     it("State=0, Using valid parameters, should be ok.", (done) => {
-  //         Tester.api.put("/dao/exchanges")
+  //         node.api.put("/dao/exchanges")
   //             .set('Accept', 'application/json')
   //             .send({
-  //                 secret: Tester.Gaccount.password,
+  //                 secret: node.Gaccount.password,
   //                 org_id,
   //                 price: exchangePrice,
   //                 receivedAddress: Account2.address
@@ -299,10 +298,10 @@ export const Exchange = () => {
   //             }) => {
   //                 debug("put /dao/exchanges, State=0, valid parameters, ok", JSON.stringify(body));
 
-  //                 Tester.expect(err).to.be.not.ok;
+  //                 node.expect(err).to.be.not.ok;
 
-  //                 Tester.expect(body).to.have.property("success").to.be.true;
-  //                 Tester.expect(body).to.have.property("transactionId");
+  //                 node.expect(body).to.have.property("success").to.be.true;
+  //                 node.expect(body).to.have.property("transactionId");
 
   //                 exchange = exchange || {};
   //                 exchange.exchange_trs_id = body.transactionId;
@@ -312,16 +311,16 @@ export const Exchange = () => {
   //     });
 
   //     it("State=1, Account2 no exists, should be fail.", async (done) => {
-  //         await Tester.onNewBlockAsync();
+  //         await node.onNewBlockAsync();
 
-  //         Tester.api.put("/dao/exchanges")
+  //         node.api.put("/dao/exchanges")
   //             .set('Accept', 'application/json')
   //             .send({
   //                 secret: Account2.password,
   //                 org_id,
   //                 price: exchangePrice,
   //                 exchangeTrsId: exchange.exchange_trs_id,
-  //                 receivedAddress: Tester.Gaccount.address,
+  //                 receivedAddress: node.Gaccount.address,
   //                 state: 1
   //             })
   //             .expect('Content-Type', /json/)
@@ -331,10 +330,10 @@ export const Exchange = () => {
   //             }) => {
   //                 debug("State=1, Account2 no exists, fail", JSON.stringify(body));
 
-  //                 Tester.expect(err).to.be.not.ok;
+  //                 node.expect(err).to.be.not.ok;
 
-  //                 Tester.expect(body).to.have.property("success").to.be.false;
-  //                 Tester.expect(body).to.have.property("error").to.equal("Account not found");
+  //                 node.expect(body).to.have.property("success").to.be.false;
+  //                 node.expect(body).to.have.property("error").to.equal("Account not found");
 
   //                 done();
   //             });
@@ -345,16 +344,16 @@ export const Exchange = () => {
   //     });
 
   //     it("State=1, Account2 balance < 700000000, should be fail.", async (done) => {
-  //         await Tester.onNewBlockAsync();
+  //         await node.onNewBlockAsync();
 
-  //         Tester.api.put("/dao/exchanges")
+  //         node.api.put("/dao/exchanges")
   //             .set('Accept', 'application/json')
   //             .send({
   //                 secret: Account2.password,
   //                 org_id,
   //                 price: exchangePrice,
   //                 exchangeTrsId: exchange.exchange_trs_id,
-  //                 receivedAddress: Tester.Gaccount.address,
+  //                 receivedAddress: node.Gaccount.address,
   //                 state: 1
   //             })
   //             .expect('Content-Type', /json/)
@@ -364,10 +363,10 @@ export const Exchange = () => {
   //             }) => {
   //                 debug("Account2 balance < 700000000, fail", JSON.stringify(body));
 
-  //                 Tester.expect(err).to.be.not.ok;
+  //                 node.expect(err).to.be.not.ok;
 
-  //                 Tester.expect(body).to.have.property("success").to.be.false;
-  //                 Tester.expect(body).to.have.property("error").to.contain("Insufficient balance");
+  //                 node.expect(body).to.have.property("success").to.be.false;
+  //                 node.expect(body).to.have.property("error").to.contain("Insufficient balance");
 
   //                 done();
   //             });
@@ -376,16 +375,16 @@ export const Exchange = () => {
   //     it("State=1, Account2 balance > 700000000, should be ok.", async (done) => {
   //         await sendDDN(Account2);
 
-  //         // await Tester.onNewBlockAsync();
+  //         // await node.onNewBlockAsync();
 
-  //         Tester.api.put("/dao/exchanges")
+  //         node.api.put("/dao/exchanges")
   //             .set('Accept', 'application/json')
   //             .send({
   //                 secret: Account2.password,
   //                 org_id,
   //                 price: exchangePrice,
   //                 exchangeTrsId: exchange.exchange_trs_id,
-  //                 receivedAddress: Tester.Gaccount.address,
+  //                 receivedAddress: node.Gaccount.address,
   //                 state: 1
   //             })
   //             .expect('Content-Type', /json/)
@@ -395,10 +394,10 @@ export const Exchange = () => {
   //             }) => {
   //                 debug("Account2 balance > 700000000, ok", JSON.stringify(body));
 
-  //                 Tester.expect(err).to.be.not.ok;
+  //                 node.expect(err).to.be.not.ok;
 
-  //                 Tester.expect(body).to.have.property("success").to.be.true;
-  //                 Tester.expect(body).to.have.property("transactionId");
+  //                 node.expect(body).to.have.property("success").to.be.true;
+  //                 node.expect(body).to.have.property("transactionId");
 
 //                 done();
 //             });

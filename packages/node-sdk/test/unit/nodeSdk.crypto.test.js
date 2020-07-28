@@ -1,10 +1,9 @@
 import Debug from 'debug'
 import DdnUtils from '@ddn/utils'
-import Tester from '@ddn/test-utils'
-import DdnJS from '../ddn-js'
+import { DdnJS, node } from '../ddn-js'
 
 const debug = Debug('debug')
-const expect = Tester.expect
+const expect = node.expect
 const Bignum = DdnUtils.bignum
 
 describe('Node SDK', () => {

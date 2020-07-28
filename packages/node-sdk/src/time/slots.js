@@ -3,7 +3,6 @@ import { constants } from '../config'
 // const interval = constants.interval
 // const delegates = constants.delegates
 
-// console.log('options.getAll', options.getAll())
 /**
  * 周期开始时间
  */

@@ -1,12 +1,11 @@
 // import Buffer from "buffer";
 import Debug from 'debug'
 import DdnUtils from '@ddn/utils'
-import Tester from '@ddn/test-utils'
-import DdnJS from '../ddn-js'
+import { DdnJS, node } from '../ddn-js'
 
 const debug = Debug('evidence')
 
-const expect = Tester.expect
+const expect = node.expect
 
 describe('DDN evidence.js', () => {
   const evidence = DdnJS.evidence

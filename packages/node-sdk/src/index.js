@@ -1,4 +1,3 @@
-// import init from './init'
 import slots from './time/slots'
 import format from './time/format'
 import crypto from './utils/crypto'
@@ -20,9 +19,6 @@ import assetPlugin from './transactions/asset-plugin'
 export * from './config'
 
 export default {
-  // init,
-  // utils
-  // config,
   utils: {
     slots,
     format

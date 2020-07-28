@@ -1,7 +1,6 @@
 import Debug from 'debug'
 import DdnUtils from '@ddn/utils'
-import Tester from '@ddn/test-utils'
-import DdnJS from '../ddn-js'
+import { DdnJS, node } from '../ddn-js'
 
 const debug = Debug('debug')
 
@@ -18,10 +17,10 @@ describe('Test createEvidence', () => {
   let evidence2
 
   beforeAll(done => {
-    const ipid = Tester.randomIpId()
+    const ipid = node.randomIpId()
     evidence = {
       ipid: ipid,
-      title: Tester.randomUsername(),
+      title: node.randomUsername(),
       description: `${ipid} has been evidence.`,
       hash: 'f082022ee664008a1f15d62514811dfd',
       author: 'Evanlai',
@@ -31,10 +30,10 @@ describe('Test createEvidence', () => {
       tags: 'world,cup,test'
     }
 
-    const ipid2 = Tester.randomIpId()
+    const ipid2 = node.randomIpId()
     evidence2 = {
       ipid: ipid2,
-      title: Tester.randomUsername(),
+      title: node.randomUsername(),
       description: `${ipid} has been evidence.`,
       hash: 'f082022ee664008a1f15d62514811dfd',
       author: 'Evanlai',
@@ -47,18 +46,18 @@ describe('Test createEvidence', () => {
       ext2: new Date()
     }
 
-    Tester.expect(evidence).to.be.not.equal(evidence2)
+    node.expect(evidence).to.be.not.equal(evidence2)
     done()
   })
 
   it('CreateEvidence Should be ok', async (done) => {
-    transaction = await createEvidence(evidence, Tester.Gaccount.password)
+    transaction = await createEvidence(evidence, node.Gaccount.password)
 
-    Tester.peer.post('/transactions')
+    node.peer.post('/transactions')
       .set('Accept', 'application/json')
-      .set('version', Tester.version)
-      .set('nethash', Tester.config.nethash)
-      .set('port', Tester.config.port)
+      .set('version', node.version)
+      .set('nethash', node.config.nethash)
+      .set('port', node.config.port)
       .send({
         transaction
       })
@@ -68,21 +67,21 @@ describe('Test createEvidence', () => {
         body
       }) => {
         debug('CreateEvidence: ', JSON.stringify(body))
-        Tester.expect(err).to.be.not.ok
-        Tester.expect(body).to.have.property('success').to.be.true
+        node.expect(err).to.be.not.ok
+        node.expect(body).to.have.property('success').to.be.true
         done()
       })
   })
 
   it('Get /evidences/ipid/:ipid should be ok', done => {
-    Tester.onNewBlock(err => {
-      Tester.expect(err).to.be.not.ok
+    node.onNewBlock(err => {
+      node.expect(err).to.be.not.ok
 
-      Tester.api.get(`/evidences/ipid/${evidence.ipid}`)
+      node.api.get(`/evidences/ipid/${evidence.ipid}`)
         .set('Accept', 'application/json')
-        .set('version', Tester.version)
-        .set('nethash', Tester.config.nethash)
-        .set('port', Tester.config.port)
+        .set('version', node.version)
+        .set('nethash', node.config.nethash)
+        .set('port', node.config.port)
         .expect('Content-Type', /json/)
         .expect(200)
         .end((err, {
@@ -90,14 +89,14 @@ describe('Test createEvidence', () => {
         }) => {
           debug(`/evidences/ipid/${evidence.ipid}`, JSON.stringify(body))
 
-          Tester.expect(err).to.be.not.ok
-          Tester.expect(body).to.have.property('success').to.be.true
-          Tester.expect(body).to.have.property('result').not.null
+          node.expect(err).to.be.not.ok
+          node.expect(body).to.have.property('success').to.be.true
+          node.expect(body).to.have.property('result').not.null
 
-          Tester.expect(body.result).to.have.property('transaction_id')
+          node.expect(body.result).to.have.property('transaction_id')
 
-          Tester.expect(body.result.transaction_type).to.equal(transaction.type)
-          Tester.expect(body.result.ipid).to.equal(evidence.ipid)
+          node.expect(body.result.transaction_type).to.equal(transaction.type)
+          node.expect(body.result.ipid).to.equal(evidence.ipid)
 
           done()
         })
@@ -106,13 +105,13 @@ describe('Test createEvidence', () => {
 
   describe('Asset puglin Test', () => {
     it('POST peers/transactions, Should be ok', async (done) => {
-      const transaction = await createPluginAsset(DdnUtils.assetTypes.EVIDENCE, evidence2, Tester.Gaccount.password)
+      const transaction = await createPluginAsset(DdnUtils.assetTypes.EVIDENCE, evidence2, node.Gaccount.password)
 
-      Tester.peer.post('/transactions')
+      node.peer.post('/transactions')
         .set('Accept', 'application/json')
-        .set('version', Tester.version)
-        .set('nethash', Tester.config.nethash)
-        .set('port', Tester.config.port)
+        .set('version', node.version)
+        .set('nethash', node.config.nethash)
+        .set('port', node.config.port)
         .send({
           transaction
         })
@@ -122,8 +121,8 @@ describe('Test createEvidence', () => {
           body
         }) => {
           debug('Asset puglin body: ', JSON.stringify(body))
-          Tester.expect(err).to.be.not.ok
-          Tester.expect(body).have.property('success').be.true
+          node.expect(err).to.be.not.ok
+          node.expect(body).have.property('success').be.true
 
           done()
         })

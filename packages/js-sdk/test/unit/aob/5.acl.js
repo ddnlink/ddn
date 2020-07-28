@@ -1,7 +1,6 @@
 import Debug from 'debug'
 import DdnUtils from '@ddn/utils'
-import node from '@ddn/test-utils'
-import DdnJS from '../../ddn-js'
+import { DdnJS, node } from '../../ddn-js'
 
 const debug = Debug('debug')
 

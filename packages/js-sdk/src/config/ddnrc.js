@@ -1,11 +1,20 @@
 /* ---------------------------------------------------------------------------------------------
- *  Created by DDN Team on Sat Jun 16 2017 11:31:12
+ *  Copy from .ddnrc.js
  *
- *  Copyright (c) 2019 DDN Foundation. All rights reserved.
+ *  Copyright (c) 2019 DDN FOUNDATION. All rights reserved.
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *-------------------------------------------------------------------------------------------- */
 
-import constants from './constants.ddn'
-// import constants from './constants.hbl'
-
-export default constants
+export default {
+  /**
+   * About Peer
+  */
+  port: 8001,
+  address: '0.0.0.0',
+  publicIp: '',
+  logLevel: 'error',
+  net: 'testnet',
+  nethash: '0ab796cd',
+  payloadLimitSize: '8mb',
+  clientDriftSeconds: 5
+}

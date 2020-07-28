@@ -246,7 +246,7 @@ describe('PUT /votes with funds', () => {
         node.expect(body.transaction.type).to.equal(node.AssetTypes.VOTE)
         node.expect(body.transaction.amount).to.equal('0')
         node.expect(body.transaction.senderPublicKey).to.equal(Raccount.publicKey)
-        node.expect(body.transaction.fee).to.equal(node.Fees.voteFee)
+        node.expect(body.transaction.fee).to.equal(node.constants.net.fees.vote)
 
         done()
       })
@@ -294,7 +294,7 @@ describe('PUT /votes with funds', () => {
           node.expect(body.transaction.type).to.equal(node.AssetTypes.VOTE)
           node.expect(body.transaction.amount).to.equal('0')
           node.expect(body.transaction.senderPublicKey).to.equal(Raccount.publicKey)
-          node.expect(body.transaction.fee).to.equal(node.Fees.voteFee)
+          node.expect(body.transaction.fee).to.equal(node.constants.net.fees.vote)
 
           done()
         })
@@ -593,7 +593,7 @@ describe('PUT /delegates to regist with funds', () => {
           node.expect(err).be.not.ok
           node.expect(body).to.have.property('success').to.be.true
           node.expect(body).to.have.property('transaction').that.is.an('object')
-          node.expect(body.transaction.fee).to.equal(node.Fees.delegateRegistrationFee)
+          node.expect(body.transaction.fee).to.equal(node.constants.net.fees.delegate)
           node.expect(body.transaction.asset.delegate.username).to.equal(R2account.username.toLowerCase())
           node.expect(body.transaction.asset.delegate.publicKey).to.equal(R2account.publicKey)
           node.expect(body.transaction.type).to.equal(node.AssetTypes.DELEGATE)

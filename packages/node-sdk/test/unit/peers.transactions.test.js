@@ -5,8 +5,7 @@ import crypto from 'crypto'
 import path from 'path'
 import Debug from 'debug'
 import DdnUtils from '@ddn/utils'
-import Tester from '@ddn/test-utils'
-import DdnJS from '../ddn-js'
+import { DdnJS, node } from '../ddn-js'
 
 import {
   requireFile
@@ -22,13 +21,13 @@ const genesisblock = requireFile(genesisblockFile)
 
 describe('POST /peer/transactions', () => {
   it('Using valid transaction with wrong nethash in headers. Should fail', async done => {
-    const transaction = await DdnJS.transaction.createTransaction(Tester.Daccount.address, 1, message, Tester.Gaccount.password)
+    const transaction = await DdnJS.transaction.createTransaction(node.Daccount.address, 1, message, node.Gaccount.password)
 
-    Tester.peer.post('/transactions')
+    node.peer.post('/transactions')
       .set('Accept', 'application/json')
-      .set('version', Tester.version)
+      .set('version', node.version)
       .set('nethash', 'wrongnet')
-      .set('port', Tester.config.port)
+      .set('port', node.config.port)
       .send({
         transaction
       })
@@ -38,20 +37,20 @@ describe('POST /peer/transactions', () => {
         body
       }) => {
         debug(JSON.stringify(body))
-        Tester.expect(body).to.have.property('success').to.be.false
-        Tester.expect(body.expected).to.equal(Tester.config.nethash)
+        node.expect(body).to.have.property('success').to.be.false
+        node.expect(body.expected).to.equal(node.config.nethash)
         done()
       })
   })
 
   it('Using same valid transaction with correct nethash in headers. Should be ok', async done => {
-    const transaction = await DdnJS.transaction.createTransaction(Tester.Daccount.address, 1, message, Tester.Gaccount.password)
+    const transaction = await DdnJS.transaction.createTransaction(node.Daccount.address, 1, message, node.Gaccount.password)
 
-    Tester.peer.post('/transactions')
+    node.peer.post('/transactions')
       .set('Accept', 'application/json')
-      .set('version', Tester.version)
-      .set('nethash', Tester.config.nethash)
-      .set('port', Tester.config.port)
+      .set('version', node.version)
+      .set('nethash', node.config.nethash)
+      .set('port', node.config.port)
       .send({
         transaction
       })
@@ -61,18 +60,18 @@ describe('POST /peer/transactions', () => {
         body
       }) => {
         console.log('correct nethash', JSON.stringify(body))
-        Tester.expect(body).to.have.property('success').to.be.true
+        node.expect(body).to.have.property('success').to.be.true
         done()
       })
   })
 
   it('Using transaction with undefined recipientId. Should fail', async done => {
-    const transaction = await DdnJS.transaction.createTransaction(undefined, 1, message, Tester.Gaccount.password)
-    Tester.peer.post('/transactions')
+    const transaction = await DdnJS.transaction.createTransaction(undefined, 1, message, node.Gaccount.password)
+    node.peer.post('/transactions')
       .set('Accept', 'application/json')
-      .set('version', Tester.version)
-      .set('nethash', Tester.config.nethash)
-      .set('port', Tester.config.port)
+      .set('version', node.version)
+      .set('nethash', node.config.nethash)
+      .set('port', node.config.port)
       .send({
         transaction
       })
@@ -82,19 +81,19 @@ describe('POST /peer/transactions', () => {
         body
       }) => {
         debug('undefined recipientId', JSON.stringify(body))
-        Tester.expect(body).to.have.property('success').to.be.false
-        Tester.expect(body).to.have.property('error').to.contain('Invalid recipient')
+        node.expect(body).to.have.property('success').to.be.false
+        node.expect(body).to.have.property('error').to.contain('Invalid recipient')
         done()
       })
   })
 
   it('Using transaction with negative amount. Should fail', async done => {
-    const transaction = await DdnJS.transaction.createTransaction(Tester.Daccount.address, -1, message, Tester.Gaccount.password)
-    Tester.peer.post('/transactions')
+    const transaction = await DdnJS.transaction.createTransaction(node.Daccount.address, -1, message, node.Gaccount.password)
+    node.peer.post('/transactions')
       .set('Accept', 'application/json')
-      .set('version', Tester.version)
-      .set('nethash', Tester.config.nethash)
-      .set('port', Tester.config.port)
+      .set('version', node.version)
+      .set('nethash', node.config.nethash)
+      .set('port', node.config.port)
       .send({
         transaction
       })
@@ -104,21 +103,21 @@ describe('POST /peer/transactions', () => {
         body
       }) => {
         debug('negative amount', JSON.stringify(body))
-        Tester.expect(body).to.have.property('success').to.be.false
-        Tester.expect(body).to.have.property('error').to.contain('Invalid transaction amount')
+        node.expect(body).to.have.property('success').to.be.false
+        node.expect(body).to.have.property('error').to.contain('Invalid transaction amount')
         done()
       })
   })
 
   it('Using invalid passphrase. Should fail', async done => {
-    const transaction = await DdnJS.transaction.createTransaction(Tester.Daccount.address, 1, message, '')
-    transaction.recipientId = Tester.Daccount.address
+    const transaction = await DdnJS.transaction.createTransaction(node.Daccount.address, 1, message, '')
+    transaction.recipientId = node.Daccount.address
     transaction.id = await DdnJS.crypto.getId(transaction) // 这里提供是不对的
-    Tester.peer.post('/transactions')
+    node.peer.post('/transactions')
       .set('Accept', 'application/json')
-      .set('version', Tester.version)
-      .set('nethash', Tester.config.nethash)
-      .set('port', Tester.config.port)
+      .set('version', node.version)
+      .set('nethash', node.config.nethash)
+      .set('port', node.config.port)
       .send({
         transaction
       })
@@ -128,19 +127,19 @@ describe('POST /peer/transactions', () => {
         body
       }) => {
         debug('invalid passphrase', JSON.stringify(body))
-        Tester.expect(body).to.have.property('success').to.be.false
-        Tester.expect(body).to.have.property('error')
+        node.expect(body).to.have.property('success').to.be.false
+        node.expect(body).to.have.property('error')
         done()
       })
   })
 
   it('When sender has no funds. Should fail', async done => {
-    const transaction = await DdnJS.transaction.createTransaction(Tester.Daccount.address, 1, message, 'randomstring')
-    Tester.peer.post('/transactions')
+    const transaction = await DdnJS.transaction.createTransaction(node.Daccount.address, 1, message, 'randomstring')
+    node.peer.post('/transactions')
       .set('Accept', 'application/json')
-      .set('version', Tester.version)
-      .set('nethash', Tester.config.nethash)
-      .set('port', Tester.config.port)
+      .set('version', node.version)
+      .set('nethash', node.config.nethash)
+      .set('port', node.config.port)
       .send({
         transaction
       })
@@ -150,21 +149,21 @@ describe('POST /peer/transactions', () => {
         body
       }) => {
         debug(JSON.stringify(body))
-        Tester.expect(body).to.have.property('success').to.be.false
-        Tester.expect(body).to.have.property('error').to.contain('Insufficient balance')
+        node.expect(body).to.have.property('success').to.be.false
+        node.expect(body).to.have.property('error').to.contain('Insufficient balance')
         done()
       })
   })
 
   it('Usin fake signature. Should fail', async done => {
-    const transaction = await DdnJS.transaction.createTransaction(Tester.Daccount.address, 1, message, Tester.Gaccount.password)
+    const transaction = await DdnJS.transaction.createTransaction(node.Daccount.address, 1, message, node.Gaccount.password)
     transaction.signature = crypto.randomBytes(64).toString('hex')
     transaction.id = await DdnJS.crypto.getId(transaction)
-    Tester.peer.post('/transactions')
+    node.peer.post('/transactions')
       .set('Accept', 'application/json')
-      .set('version', Tester.version)
-      .set('nethash', Tester.config.nethash)
-      .set('port', Tester.config.port)
+      .set('version', node.version)
+      .set('nethash', node.config.nethash)
+      .set('port', node.config.port)
       .send({
         transaction
       })
@@ -174,20 +173,20 @@ describe('POST /peer/transactions', () => {
         body
       }) => {
         debug(JSON.stringify(body))
-        Tester.expect(body).to.have.property('success').to.be.false
-        Tester.expect(body).to.have.property('error')
+        node.expect(body).to.have.property('success').to.be.false
+        node.expect(body).to.have.property('error')
         done()
       })
   })
 
   it('Using invalid signature. Should fail', async done => {
-    const transaction = await DdnJS.transaction.createTransaction(Tester.Daccount.address, 1, message, Tester.Gaccount.password)
-    transaction.signature = Tester.randomPassword()
-    Tester.peer.post('/transactions')
+    const transaction = await DdnJS.transaction.createTransaction(node.Daccount.address, 1, message, node.Gaccount.password)
+    transaction.signature = node.randomPassword()
+    node.peer.post('/transactions')
       .set('Accept', 'application/json')
-      .set('version', Tester.version)
-      .set('nethash', Tester.config.nethash)
-      .set('port', Tester.config.port)
+      .set('version', node.version)
+      .set('nethash', node.config.nethash)
+      .set('port', node.config.port)
       .send({
         transaction
       })
@@ -197,20 +196,20 @@ describe('POST /peer/transactions', () => {
         body
       }) => {
         debug('invalid signature', JSON.stringify(body))
-        Tester.expect(body).to.have.property('success').to.be.false
-        Tester.expect(body).to.have.property('error').to.include('should match format "signature"')
+        node.expect(body).to.have.property('success').to.be.false
+        node.expect(body).to.have.property('error').to.include('should match format "signature"')
         done()
       })
   })
 
   it('Using invalid publicKey. Should fail', async done => {
-    const transaction = await DdnJS.transaction.createTransaction(Tester.Daccount.address, 1, message, Tester.Gaccount.password)
-    transaction.senderPublicKey = Tester.randomPassword()
-    Tester.peer.post('/transactions')
+    const transaction = await DdnJS.transaction.createTransaction(node.Daccount.address, 1, message, node.Gaccount.password)
+    transaction.senderPublicKey = node.randomPassword()
+    node.peer.post('/transactions')
       .set('Accept', 'application/json')
-      .set('version', Tester.version)
-      .set('nethash', Tester.config.nethash)
-      .set('port', Tester.config.port)
+      .set('version', node.version)
+      .set('nethash', node.config.nethash)
+      .set('port', node.config.port)
       .send({
         transaction
       })
@@ -220,22 +219,22 @@ describe('POST /peer/transactions', () => {
         body
       }) => {
         debug('invalid publicKey', JSON.stringify(body))
-        Tester.expect(body).to.have.property('success').to.be.false
-        Tester.expect(body).to.have.property('error').to.include('should match format "publicKey"')
+        node.expect(body).to.have.property('success').to.be.false
+        node.expect(body).to.have.property('error').to.include('should match format "publicKey"')
         done()
       })
   })
 
   it('Using very larger than totalAmount and genesis block id. Should fail', async done => {
-    const largeAmount = DdnUtils.bignum.plus(Tester.constants.totalAmount, 1)
-    const transaction = await DdnJS.transaction.createTransaction(Tester.Daccount.address, largeAmount, message, Tester.Gaccount.password)
+    const largeAmount = DdnUtils.bignum.plus(node.constants.totalAmount, 1)
+    const transaction = await DdnJS.transaction.createTransaction(node.Daccount.address, largeAmount, message, node.Gaccount.password)
     transaction.block_id = genesisblock.id
 
-    Tester.peer.post('/transactions')
+    node.peer.post('/transactions')
       .set('Accept', 'application/json')
-      .set('version', Tester.version)
-      .set('nethash', Tester.config.nethash)
-      .set('port', Tester.config.port)
+      .set('version', node.version)
+      .set('nethash', node.config.nethash)
+      .set('port', node.config.port)
       .send({
         transaction
       })
@@ -245,18 +244,18 @@ describe('POST /peer/transactions', () => {
         body
       }) => {
         debug('large amount', JSON.stringify(body))
-        Tester.expect(body).to.have.property('success').to.be.false
+        node.expect(body).to.have.property('success').to.be.false
         done()
       })
   })
 
   it('Using overflown amount. Should fail', async done => {
-    const transaction = await DdnJS.transaction.createTransaction(Tester.Daccount.address, 184819291270000000012910218291201281920128129, message, Tester.Gaccount.password)
-    Tester.peer.post('/transactions')
+    const transaction = await DdnJS.transaction.createTransaction(node.Daccount.address, 184819291270000000012910218291201281920128129, message, node.Gaccount.password)
+    node.peer.post('/transactions')
       .set('Accept', 'application/json')
-      .set('version', Tester.version)
-      .set('nethash', Tester.config.nethash)
-      .set('port', Tester.config.port)
+      .set('version', node.version)
+      .set('nethash', node.config.nethash)
+      .set('port', node.config.port)
       .send({
         transaction
       })
@@ -266,19 +265,19 @@ describe('POST /peer/transactions', () => {
         body
       }) => {
         debug(JSON.stringify(body))
-        Tester.expect(body).to.have.property('success').to.be.false
-        Tester.expect(body).to.have.property('error')
+        node.expect(body).to.have.property('success').to.be.false
+        node.expect(body).to.have.property('error')
         done()
       })
   })
 
   it('Using float amount. Should fail', async done => {
-    const transaction = await DdnJS.transaction.createTransaction(Tester.Daccount.address, 1.3, message, Tester.Gaccount.password)
-    Tester.peer.post('/transactions')
+    const transaction = await DdnJS.transaction.createTransaction(node.Daccount.address, 1.3, message, node.Gaccount.password)
+    node.peer.post('/transactions')
       .set('Accept', 'application/json')
-      .set('version', Tester.version)
-      .set('nethash', Tester.config.nethash)
-      .set('port', Tester.config.port)
+      .set('version', node.version)
+      .set('nethash', node.config.nethash)
+      .set('port', node.config.port)
       .send({
         transaction
       })
@@ -288,8 +287,8 @@ describe('POST /peer/transactions', () => {
         body
       }) => {
         debug(JSON.stringify(body))
-        Tester.expect(body).to.have.property('success').to.be.false
-        Tester.expect(body).to.have.property('error')
+        node.expect(body).to.have.property('success').to.be.false
+        node.expect(body).to.have.property('error')
         done()
       })
   })
