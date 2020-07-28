@@ -2,15 +2,19 @@
 id: ddn-context
 title: 上下文
 sidebar_label: DDN Context
+toc: menu
 ---
 
 ## 1. 上下文说明
-&emsp;&emsp;上下文是贯穿于区块链系统的对象，上下文对象中包含了所有区块链链相关的设置信息和方法对象，在区块链代码、扩展资产包等场景都可以正常获取和使用。<br/>
-&emsp;&emsp;在任何地方都可以使用this._context获取到上下文，如下面的代码可以获取到系统运行的根目录：
+
+上下文是贯穿于区块链系统的对象，上下文对象中包含了所有区块链链相关的设置信息和方法对象，在区块链代码、扩展资产包等场景都可以正常获取和使用。在任何地方都可以使用this._context获取到上下文，如下面的代码可以获取到系统运行的根目录：
+
 ```
 var a = this._context.baseDir;
 ```
-&emsp;&emsp;为了方便使用，精简代码，在所有上下文场景中，上下文对象的所有内容都被注入到了当前this指针中，因此，下面的代码也能正确得到系统运行根目录：
+
+为了方便使用，精简代码，在所有上下文场景中，上下文对象的所有内容都被注入到了当前this指针中，因此，下面的代码也能正确得到系统运行根目录：
+
 ```
 var a = this.baseDir;
 ```
@@ -48,200 +52,584 @@ delegate | 对象 | 受托人相关操作类
 dataquery | 对象 | 交易/区块数据查询类
 
 ## 4. 区块相关操作类
-##### 查询指定条件的区块数量<br/>getCount(where)
 
-##### 返回配置文件中的默认交易手续费<br/>calculateFee()
+### 查询指定条件的区块数量
 
-##### 区块状态计算类（计算节点奖励、供应量等信息）getBlockStatus()
+```
+> getCount(where)
+```
 
-##### 设置最后区块数据对象<br/>setLastBlock(block)
+### 返回配置文件中的默认交易手续费
 
-##### 返回最后一个区块数据对象<br/>getLastBlock()
+```
+> calculateFee()
+```
 
-##### 计算并返回区块数据的字节信息<br/>getBytes(block)
+### 区块状态计算类（计算节点奖励、供应量等信息）getBlockStatus()
 
-##### 获取区块数据的Hash计算结果<br/>getHash(block)
+### 设置最后区块数据对象
 
-##### 使用传入的密钥对区块数据进行签名操作，并返回签名内容供后续操作验证<br/>sign(block, keypair)
+```
+> setLastBlock(block)
+```
 
-##### 根据区块数据，通过Hash计算得到区块对应Id<br/>getId(block)
+### 返回最后一个区块数据对象
 
-##### 验证区块数据格式、类型等的正确性<br/>objectNormalize(block)
+```
+> getLastBlock()
+```
 
-##### 处理创世区块数据（系统初次运行时调用）<br/>handleGenesisBlock()
+### 计算并返回区块数据的字节信息
 
-##### 将区块数据保存到数据库（仅是区块数据本身，不包含其中的交易数据）<br/>serializeBlock2Db(block, dbTrans)
+```
+> getBytes(block)
+```
 
-##### 将数据库查询的数据序列化成JSON格式的区块对象<br/>serializeDbData2Block(raw)
+### 获取区块数据的Hash计算结果
 
-##### 将区块数据保存到数据库（包括区块数据记录和所有包含的交易易数据记录）<br/>saveBlock(block, dbTrans)
+```
+> getHash(block)
+```
 
-##### 根据传入的数据创建一个区块对象（不包含任何交易）<br/>createBlock(data)
+### 使用传入的密钥对区块数据进行签名操作，并返回签名内容供后续操作验证
 
-##### 接收其他节点广播的新区块数据，并进行处理<br/>receiveNewBlock(block, votes)
+```
+> sign(block, keypair)
+```
 
-##### 接收其他节点反馈的投票数据，并进行处理<br/>receiveVotes(votes)
+### 根据区块数据，通过Hash计算得到区块对应Id
 
-##### 接收其他节点广播的投票申请，并进行处理<br/>receiveNewPropose(propose)
+```
+> getId(block)
+```
 
-##### 应用区块数据，执行交易逻辑，并保存区块和交易数据到数据库中<br/>applyBlock(block, votes, broadcast, saveBlock)
+### 验证区块数据格式、类型等的正确性
 
-##### 验证区块签名正确性<br/>verifySignature(block)
+```
+> objectNormalize(block)
+```
 
-##### 验证区块数据的合法性（包括验证区块签名）<br/>verifyBlock(block, votes)
+### 处理创世区块数据（系统初次运行时调用）
 
-##### 验证投票数据的合法性<br/>verifyBlockVotes(block, votes)
+```
+> handleGenesisBlock()
+```
 
-##### 检查区块数据并对数据进行预处理，为后续应用区块数据做准备<br/>processBlock(block, votes, broadcast, save, verifyTrs)
+### 将区块数据保存到数据库（仅是区块数据本身，不包含其中的交易数据）
 
-##### 生成区块数据并铸造区块<br/>generateBlock(keypair, timestamp)
+```
+> serializeBlock2Db(block, dbTrans)
+```
 
-##### 删除指定Id的区块数据，用于区块数据异常数据回滚时<br/>deleteBlock(blockId, dbTrans)
+### 将数据库查询的数据序列化成JSON格式的区块对象
 
-##### 删除指定区块之前的区块数据，用于区块数据异常数据回滚时<br/>deleteBlocksBefore(block)
+```
+> serializeDbData2Block(raw)
+```
 
-##### 删除指定Id区块之后的区块数据，用于区块数据异常数据回滚时<br/>simpleDeleteAfterBlock(blockId)
+### 将区块数据保存到数据库（包括区块数据记录和所有包含的交易易数据记录）
 
-##### 从其他节点查询并同步区块数据，本地区块数据不完整时调用<br/>loadBlocksOffset(limit, offset, verify)
+```
+> saveBlock(block, dbTrans)
+```
 
-##### 分页查询区块数据（不包含交易信息）<br/>queryBlockData(where, sorts, offset, limit, returnTotal)
+### 根据传入的数据创建一个区块对象（不包含任何交易）
 
-##### 根据id、height、hash任一属性，查询对应的区块数据，不包含交易数据<br/>querySimpleBlockData(query)
+```
+> createBlock(data)
+```
+
+### 接收其他节点广播的新区块数据，并进行处理
+
+```
+> receiveNewBlock(block, votes)
+```
+
+### 接收其他节点反馈的投票数据，并进行处理
+
+```
+> receiveVotes(votes)
+```
+
+### 接收其他节点广播的投票申请，并进行处理
+
+```
+> receiveNewPropose(propose)
+```
+
+### 应用区块数据，执行交易逻辑，并保存区块和交易数据到数据库中
+
+```
+> applyBlock(block, votes, broadcast, saveBlock)
+```
+
+### 验证区块签名正确性
+
+```
+> verifySignature(block)
+```
+
+### 验证区块数据的合法性（包括验证区块签名）
+
+```
+> verifyBlock(block, votes)
+```
+
+### 验证投票数据的合法性
+
+```
+> verifyBlockVotes(block, votes)
+```
+
+### 检查区块数据并对数据进行预处理，为后续应用区块数据做准备
+
+```
+> processBlock(block, votes, broadcast, save, verifyTrs)
+```
+
+### 生成区块数据并铸造区块
+
+```
+> generateBlock(keypair, timestamp)
+```
+
+### 删除指定Id的区块数据，用于区块数据异常数据回滚时
+
+```
+> deleteBlock(blockId, dbTrans)
+```
+
+### 删除指定区块之前的区块数据，用于区块数据异常数据回滚时
+
+```
+> deleteBlocksBefore(block)
+```
+
+### 删除指定Id区块之后的区块数据，用于区块数据异常数据回滚时
+
+```
+> simpleDeleteAfterBlock(blockId)
+```
+
+### 从其他节点查询并同步区块数据，本地区块数据不完整时调用
+
+```
+> loadBlocksOffset(limit, offset, verify)
+```
+
+### 分页查询区块数据（不包含交易信息）
+
+```
+> queryBlockData(where, sorts, offset, limit, returnTotal)
+```
+
+### 根据id、height、hash任一属性，查询对应的区块数据，不包含交易数据
+
+```
+> querySimpleBlockData(query)
+```
 
 ## 5. 交易相关操作类
-##### 根据资产配置名称获取资产实例<br/>getAssetInstanceByName(assetName)
+### 根据资产配置名称获取资产实例
 
-##### 挂载扩展资产Api<br/>mountAssetApis(expressApp)
+```
+> getAssetInstanceByName(assetName)
+```
 
-##### 根据传入的数据创建一个交易对象<br/>create(data)
+### 挂载扩展资产Api
 
-##### 使用传入的密钥对交易数据进行签名操作，并返回签名内容供后续操作验证<br/>sign(keypair, trs)
+```
+> mountAssetApis(expressApp)
+```
 
-##### 计算并返回交易数据的字节信息<br/>getBytes(trs, skipSignature, skipSecondSignature)
+### 根据传入的数据创建一个交易对象
 
-##### 验证交易数据格式、类型的正确性<br/>objectNormalize(trs)
+```
+> create(data)
+```
 
-##### 将交易数据存储到数据库<br/>serializeTransaction2Db(trs, dbTrans)
+### 使用传入的密钥对交易数据进行签名操作，并返回签名内容供后续操作验证
 
-##### 将数据库读取的数据序列化为JSON格式的交易对象<br/>serializeDbData2Transaction(raw)
+```
+> sign(keypair, trs)
+```
 
-##### 根据Id查询未确认交易<br/>getUnconfirmedTransaction(trsId)
+### 计算并返回交易数据的字节信息
 
-##### 查询未确认交易列表<br/>getUnconfirmedTransactionList(reverse, limit)
+```
+> getBytes(trs, skipSignature, skipSecondSignature)
+```
 
-##### 应用未确认交易，锁定待转账金额<br/>applyUnconfirmed(trs, sender, dbTrans)
+### 验证交易数据格式、类型的正确性
 
-##### 回滚应用未确认交易<br/>undoUnconfirmed(transaction, dbTrans)
+```
+> objectNormalize(trs)
+```
 
-##### 回滚所有未确认交易的应用操作<br/>undoUnconfirmedList()
+### 将交易数据存储到数据库
 
-##### 判断交易对象是否已就绪，是否可参与区块铸造<br/>ready(trs, sender)
+```
+> serializeTransaction2Db(trs, dbTrans)
+```
 
-##### 应用交易数据，金额转账操作最终此时进行<br/>apply(trs, block, sender, dbTrans)
+### 将数据库读取的数据序列化为JSON格式的交易对象
 
-##### 回滚应用交易操作<br/>undo(trs, block, sender, dbTrans)
+```
+> serializeDbData2Transaction(raw)
+```
 
-##### 将指定Id的交易从未确认交易列表中移除<br/>removeUnconfirmedTransaction(id)
+### 根据Id查询未确认交易
 
-##### 将指定交易加入未确认交易列表<br/>addUnconfirmedTransaction(transaction, sender)
+```
+> getUnconfirmedTransaction(trsId)
+```
 
-##### 判断指定交易是否在未确认交易中是否存在<br/>hasUnconfirmedTransaction(transaction)
+### 查询未确认交易列表
 
-##### 获取交易数据的Hash计算结果<br/>getHash(trs)
+```
+> getUnconfirmedTransactionList(reverse, limit)
+```
 
-##### 根据交易数据，通过Hash计算得到交易对应Id<br/>getId(trs)
+### 应用未确认交易，锁定待转账金额
 
-##### 交易预处理<br/>process(trs, sender, requester)
+```
+> applyUnconfirmed(trs, sender, dbTrans)
+```
 
-##### 将新交易进行处理并加入未确认交易列表<br/>processUnconfirmedTransaction(transaction, broadcast)
+### 回滚应用未确认交易
 
-##### 接收交易数据并处理，等待进行区块铸造<br/>receiveTransactions(transactions)
+```
+> undoUnconfirmed(transaction, dbTrans)
+```
 
-##### 根据交易字节流和公钥验证签名是否正确<br/>verifyBytes(bytes, signature, publicKey)
+### 回滚所有未确认交易的应用操作
 
-##### 验证交易签名的正确性<br/>verifySignature(trs, signature, publicKey)
+```
+> undoUnconfirmedList()
+```
 
-##### 对交易进行多重签名<br/>multisign(trs, keypair)
+### 判断交易对象是否已就绪，是否可参与区块铸造
 
-##### 验证交易的合法性（包括签名、二级密码等）<br/>verify(trs, sender, requester)
+```
+> ready(trs, sender)
+```
 
-##### 验证交易二级密码正确性<br/>verifySecondSignature(trs, signature, publicKey)
+### 应用交易数据，金额转账操作最终此时进行
+
+```
+> apply(trs, block, sender, dbTrans)
+```
+
+### 回滚应用交易操作
+
+```
+> undo(trs, block, sender, dbTrans)
+```
+
+### 将指定Id的交易从未确认交易列表中移除
+
+```
+> removeUnconfirmedTransaction(id)
+```
+
+### 将指定交易加入未确认交易列表
+
+```
+> addUnconfirmedTransaction(transaction, sender)
+```
+
+### 判断指定交易是否在未确认交易中是否存在
+
+```
+> hasUnconfirmedTransaction(transaction)
+```
+
+### 获取交易数据的Hash计算结果
+
+```
+> getHash(trs)
+```
+
+### 根据交易数据，通过Hash计算得到交易对应Id
+
+```
+> getId(trs)
+```
+
+### 交易预处理
+
+```
+> process(trs, sender, requester)
+```
+
+### 将新交易进行处理并加入未确认交易列表
+
+```
+> processUnconfirmedTransaction(transaction, broadcast)
+```
+
+### 接收交易数据并处理，等待进行区块铸造
+
+```
+> receiveTransactions(transactions)
+```
+
+### 根据交易字节流和公钥验证签名是否正确
+
+```
+> verifyBytes(bytes, signature, publicKey)
+```
+
+### 验证交易签名的正确性
+
+```
+> verifySignature(trs, signature, publicKey)
+```
+
+### 对交易进行多重签名
+
+```
+> multisign(trs, keypair)
+```
+
+### 验证交易的合法性（包括签名、二级密码等）
+
+```
+> verify(trs, sender, requester)
+```
+
+### 验证交易二级密码正确性
+
+```
+> verifySecondSignature(trs, signature, publicKey)
+```
 
 ## 6. 账户相关操作类
-##### 初始化账户信息及账户余额数据<br/>initAccountsAndBalances()
+### 初始化账户信息及账户余额数据
 
-##### 检查账户地址是否合法<br/>isAddress(address)
+```
+> initAccountsAndBalances()
+```
 
-##### 根据公钥信息生成账户地址<br/>generateAddressByPublicKey(publicKey)
+### 检查账户地址是否合法
 
-##### 设置账户信息（有则修改，没有则新增）<br/>setAccount(data, dbTrans)
+```
+> isAddress(address)
+```
 
-##### 根据账户地址查询详细账户信息<br/>getAccountByAddress(address)
+### 根据公钥信息生成账户地址
 
-##### 根据公钥查询详细账户信息<br/>getAccountByPublicKey(publicKey)
+```
+> generateAddressByPublicKey(publicKey)
+```
 
-##### 查询账户详细信息<br/>getAccount(filter, fields)
+### 设置账户信息（有则修改，没有则新增）
 
-##### 分页查询账户列表<br/>getAccountList(filter, fields)
+```
+> setAccount(data, dbTrans)
+```
 
-##### 将所有账户余额缓存到本地缓存<br/>cacheAllAccountBalances()
+### 根据账户地址查询详细账户信息
 
-##### 重建账户和余额信息（根据已有区块信息）<br/>repairAccounts(count, verify)
+```
+> getAccountByAddress(address)
+```
 
-##### 检查钱包账户数据完整性<br/>checkAccounts(count)
+### 根据公钥查询详细账户信息
 
-##### 合并账户信息<br/>merge(address, diff, dbTrans)
+```
+> getAccountByPublicKey(publicKey)
+```
 
-##### 更新指定账户信息<br/>updateAccount(data, where, dbTrans)
+### 查询账户详细信息
+
+```
+> getAccount(filter, fields)
+```
+
+### 分页查询账户列表
+
+```
+> getAccountList(filter, fields)
+```
+
+### 将所有账户余额缓存到本地缓存
+
+```
+> cacheAllAccountBalances()
+```
+
+### 重建账户和余额信息（根据已有区块信息）
+
+```
+> repairAccounts(count, verify)
+```
+
+### 检查钱包账户数据完整性
+
+```
+> checkAccounts(count)
+```
+
+### 合并账户信息
+
+```
+> merge(address, diff, dbTrans)
+```
+
+### 更新指定账户信息
+
+```
+> updateAccount(data, where, dbTrans)
+```
 
 ## 7. 受托人相关操作类
-##### 受托人信息初始化<br/>prepare()
+### 受托人信息初始化
 
-##### 判断当前节点是否允许进行区块铸造<br/>isForgeEnabled()
+```
+> prepare()
+```
 
-##### 判断当前节点是否存在有效的受托人配置<br/>hasValidDelegates()
+### 判断当前节点是否允许进行区块铸造
 
-##### 将密钥对应的账户放入当前节点的受托人配置列表中<br/>enableForged(keypair)
+```
+> isForgeEnabled()
+```
 
-##### 将公钥对应的账户从当前节点的受托人配置中移除<br/>disableForgedByPublicKey(publicKey)：
+### 判断当前节点是否存在有效的受托人配置
 
-##### 返回当前节点配置的所有密钥信息<br/>getMyDelegateByPublicKey(publicKey)
+```
+> hasValidDelegates()
+```
 
-##### 检查账户投票情况的合法性<br/>checkDelegates(publicKey, votes)
+### 将密钥对应的账户放入当前节点的受托人配置列表中
 
-##### 分页查询受托人列表<br/>getDelegates(query)
+```
+> enableForged(keypair)
+```
 
-##### 返回排序过得前101个受托人的公钥列表<br/>getDelegatePublickKeysSortByVote()
+### 将公钥对应的账户从当前节点的受托人配置中移除
 
-##### 返回乱序处理过的受托人公钥列表<br/>getDisorderDelegatePublicKeys(height)
+```
+> disableForgedByPublicKey(publicKey)：
+```
 
-##### 返回当前所有受托人列表中在本地节点配置中存在的私钥信息<br/>getActiveDelegateKeypairs(height)
+### 返回当前节点配置的所有密钥信息
 
-##### 返回当前时间当前节点接下来可以进行铸造区块的受托人信息和时间戳<br/>getForgeDelegateWithCurrentTime(curSlot, height)
+```
+> getMyDelegateByPublicKey(publicKey)
+```
 
-##### 验证区块信息和当前时间槽是否匹配<br/>validateBlockSlot(block)
+### 检查账户投票情况的合法性
 
-##### 验证投票提议和当前时间槽是否匹配<br/>validateProposeSlot(propose)
+```
+> checkDelegates(publicKey, votes)
+```
+
+### 分页查询受托人列表
+
+```
+> getDelegates(query)
+```
+
+### 返回排序过得前101个受托人的公钥列表
+
+```
+> getDelegatePublickKeysSortByVote()
+```
+
+### 返回乱序处理过的受托人公钥列表
+
+```
+> getDisorderDelegatePublicKeys(height)
+```
+
+### 返回当前所有受托人列表中在本地节点配置中存在的私钥信息
+
+```
+> getActiveDelegateKeypairs(height)
+```
+
+### 返回当前时间当前节点接下来可以进行铸造区块的受托人信息和时间戳
+
+```
+> getForgeDelegateWithCurrentTime(curSlot, height)
+```
+
+### 验证区块信息和当前时间槽是否匹配
+
+```
+> validateBlockSlot(block)
+```
+
+### 验证投票提议和当前时间槽是否匹配
+
+```
+> validateProposeSlot(propose)
+```
 
 ## 8. 交易/区块数据查询类
-##### 分页查询区块数据列表<br/>loadSimpleBlocksData(where, limit, offset, orders)
+### 分页查询区块数据列表
 
-##### 根据区块Id数组查询其包含的所有交易信息<br/>loadTransactionsWithBlockIds(blockIds)
+```
+> loadSimpleBlocksData(where, limit, offset, orders)
+```
 
-##### 查询交易Id数组包含的所有受托人交易信息<br/>loadDelegatesWithTransactionIds(transactionIds)
+### 根据区块Id数组查询其包含的所有交易信息
 
-##### 查询交易Id数组包含的所有投票交易信息<br/>loadVotesWithTransactionIds(transactionIds)
+```
+> loadTransactionsWithBlockIds(blockIds)
+```
 
-##### 查询交易Id数组包含的所有扩展资产交易信息<br/>loadAssetsWithTransactionIds(transactionIds)
+### 查询交易Id数组包含的所有受托人交易信息
 
-##### 查询交易Id数组包含的所有扩展资产交易的扩展属性信息<br/>loadAssetExtsWithTransactionIds(transactionIds)
+```
+> loadDelegatesWithTransactionIds(transactionIds)
+```
 
-##### 查询交易Id数组包含的所有签名交易信息<br/>loadSignaturesWithTransactionIds(transactionIds)
+### 查询交易Id数组包含的所有投票交易信息
 
-##### 查询交易Id数组包含的所有多重签名交易信息<br/>loadMultiSignaturesWithTransactionIds(transactionIds)
+```
+> loadVotesWithTransactionIds(transactionIds)
+```
 
-##### 分页查询区块信息列表（完整区块信息，包含交易数据）<br/>queryFullBlockData(where, limit, offset, orders)
+### 查询交易Id数组包含的所有扩展资产交易信息
 
-##### 分页查询交易信息列表（仅包含交易数据本身，不包含附着的业务数据）<br/>loadSimpleTransactionData(where, limit, offset, orders,returnTotal)
+```
+> loadAssetsWithTransactionIds(transactionIds)
+```
 
-##### 分页查询完整的交易信息列表（除交易数据外，还包含完整的业务数据）<br/>queryFullTransactionData(where, limit, offset, orders, returnTotal)
+### 查询交易Id数组包含的所有扩展资产交易的扩展属性信息
+
+```
+> loadAssetExtsWithTransactionIds(transactionIds)
+```
+
+### 查询交易Id数组包含的所有签名交易信息
+
+```
+> loadSignaturesWithTransactionIds(transactionIds)
+```
+
+### 查询交易Id数组包含的所有多重签名交易信息
+
+```
+> loadMultiSignaturesWithTransactionIds(transactionIds)
+```
+
+### 分页查询区块信息列表（完整区块信息，包含交易数据）
+
+```
+> queryFullBlockData(where, limit, offset, orders)
+```
+
+### 分页查询交易信息列表（仅包含交易数据本身，不包含附着的业务数据）
+
+```
+> loadSimpleTransactionData(where, limit, offset, orders,returnTotal)
+```
+
+
+### 分页查询完整的交易信息列表（除交易数据外，还包含完整的业务数据）
+> ```
+queryFullTransactionData(where, limit, offset, orders, returnTotal)```

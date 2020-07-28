@@ -9,7 +9,7 @@ localeTitle: DDN资产扩展       # 本地化标题
 toc: menu
 ---
 
-# DDN资产扩展
+# DDN插件开发
 
 ## 资产类型
 

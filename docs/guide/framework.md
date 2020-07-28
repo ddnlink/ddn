@@ -2,6 +2,7 @@
 id: ddn-framework
 title: 框架介绍
 sidebar_label: Framework
+toc: menu
 ---
 
 ## 1. 源码目录说明
@@ -96,21 +97,21 @@ sidebar_label: Framework
         |-- genesisBlock.json   //创世区块数据文件
 
 ## 2. 系统架构
-![架构图](/img/ddn-framework.jpg)
+![架构图](../images/ddn-framework.jpg)
 
 ## 3. DDN核心流程
 
 ### &emsp;a. 系统启动流程
-![系统启动流程](/img/ddn-program-start.jpg)
+![系统启动流程](../images/ddn-program-start.jpg)
 
 ### &emsp;b. 新交易流程
-![新交易流程](/img/ddn-new-transaction.jpg)
+![新交易流程](../images/ddn-new-transaction.jpg)
 
 ### &emsp;c. 区块铸造流程
-![区块铸造流程](/img/ddn-block-forged.jpg)
+![区块铸造流程](../images/ddn-block-forged.jpg)
 
 ### &emsp;d. 交易打包流程
-![交易打包流程](/img/ddn-transaction-pack.jpg)
+![交易打包流程](../images/ddn-transaction-pack.jpg)
 
 ### &emsp;e. 节点同步流程
-![节点同步流程](/img/dd-peer-sync.jpg)
+![节点同步流程](../images/ddn-peer-sync.jpg)

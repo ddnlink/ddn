@@ -21,12 +21,20 @@ export default {
         children: ['guide/readme.md', 'guide/get-started', 'guide/peer-install']
       },
       {
-        title: '框架',
+        title: '应用开发',
+        children: ['guide/app/wallet', 'guide/app/explorer', 'guide/app/dapp']
+      },
+      {
+        title: '框架扩展',
+        children: ['guide/asset', 'guide/assetTypes', 'guide/crypto', 'guide/ddn-cli']
+      },
+      {
+        title: '底层开发',
         children: ['guide/framework', 'guide/config', 'guide/database', 'guide/context']
       },
 
       {
-        title: '贡献',
+        title: '我要贡献',
         children: ['guide/contributing']
       }
     ]

@@ -2,6 +2,7 @@
 id: ddn-database
 title: 数据库
 sidebar_label: Database
+toc: menu
 ---
 
 ## 1. 数据库配置
@@ -77,7 +78,7 @@ module.exports = (connection) = >{
 [点击查看Sequelize详细文档](https://sequelize.org/v4/)
 
 ### &emsp;b. 模型生成流程
-![模型生成流程](/img/ddn-database.jpg)
+![模型生成流程](../images/ddn-database.jpg)
 
 ### &emsp;c. 运行时对象
 &emsp;&emsp;数据库操作对象存在于运行时上下文context中，命名为dao，以context.dao.方法名的格式即可调用对应的数据操作方法。
@@ -244,4 +245,4 @@ static getVersionChanges() {
 }
 ```
 &emsp;&emsp;升级流程<br/>
-![升级流程](/img/ddn-database-upgrade.jpg)
+![升级流程](../images/ddn-database-upgrade.jpg)
