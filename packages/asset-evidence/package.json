@@ -1,6 +1,6 @@
 {
   "name": "@ddn/asset-evidence",
-  "version": "0.1.12",
+  "version": "0.1.13",
   "description": "DDN evidence",
   "main": "lib/index.js",
   "module": "dist/index.esm.js",

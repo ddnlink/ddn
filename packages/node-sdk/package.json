@@ -1,6 +1,6 @@
 {
   "name": "@ddn/node-sdk",
-  "version": "0.3.12",
+  "version": "0.3.13",
   "description": "DDN Node.js SDK",
   "main": "lib/index.js",
   "files": [
@@ -28,9 +28,9 @@
   "dependencies": {
     "@ddn/asset-aob": "^0.2.5",
     "@ddn/asset-base": "^0.2.11",
-    "@ddn/asset-dao": "^0.2.13",
-    "@ddn/asset-dapp": "^0.2.13",
-    "@ddn/asset-evidence": "^0.1.12",
+    "@ddn/asset-dao": "^0.2.14",
+    "@ddn/asset-dapp": "^0.2.14",
+    "@ddn/asset-evidence": "^0.1.13",
     "@ddn/core": "^0.2.5",
     "@ddn/crypto": "^0.2.12",
     "@ddn/utils": "^0.1.11",
@@ -43,8 +43,8 @@
     "tweetnacl": "^1.0.2"
   },
   "devDependencies": {
-    "rollup-plugin-replace": "^2.2.0",
-    "@ddn/test-utils": "^0.0.12"
+    "@ddn/test-utils": "^0.0.12",
+    "rollup-plugin-replace": "^2.2.0"
   },
   "gitHead": "26a701eeebd9d9f8c72a73cb18080170f6fd4fde"
 }
