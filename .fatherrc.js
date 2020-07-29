@@ -16,5 +16,8 @@ export default {
   doc: {
     themeConfig: { mode: 'light' },
     base: '/doc'
-  }
+  },
+  extraBabelPlugins: [
+    ['@babel/plugin-transform-classes'],
+  ],
 };

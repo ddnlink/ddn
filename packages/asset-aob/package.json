@@ -3,7 +3,6 @@
   "version": "0.3.8",
   "description": "DDN asset on blockchain",
   "main": "lib/index.js",
-  "module": "dist/index.esm.js",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/ddnlink/ddn.git",
@@ -15,7 +14,6 @@
   },
   "files": [
     "lib",
-    "dist",
     ".ddnrc.js"
   ],
   "author": "wangxm",
