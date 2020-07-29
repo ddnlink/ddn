@@ -5,6 +5,12 @@ import DdnUtils from '@ddn/utils'
 import DdnCrypto from '@ddn/crypto'
 
 class Transfer extends Asset.Base {
+  // eslint-disable-next-line no-useless-constructor
+  // constructor (context, transactionConfig) {
+  //   super(context, transactionConfig)
+  //   // console.log()
+  // }
+
   async propsMapping () {
     return [
       {
@@ -28,7 +34,12 @@ class Transfer extends Asset.Base {
 
     return buffer
   }
-  
+
+  async calculateFee () {
+    console.log('this.constants[this.config.net].fees.aob_transfer', this.constants[this.config.net].fees.aob_transfer)
+    return DdnUtils.bignum.multiply(this.constants[this.config.net].fees.aob_transfer, this.constants.fixedPoint)
+  }
+
   async create (data, trs) {
     trs.recipientId = data.recipientId
     trs.amount = '0'

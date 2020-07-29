@@ -44,11 +44,22 @@ module.exports = {
 
     // Fees for transacton
     fees: {
+      // base
       send: '10000000',
-      vote: '100000000',
+      vote: '10000000',
       secondSignature: '500000000',
       delegate: '10000000000',
       multiSignature: '500000000',
+
+      // aob
+      aob_issuer: '100',
+      aob_asset: '500',
+      aob_flag: '0.1',
+      aob_acl: '0.1',
+      aob_issue: '0.1',
+      aob_transfer: '0',
+
+      // dapp
       dappRegistration: '2500000000',
       dappWithdrawal: '10000000',
       dappDeposit: '10000000',

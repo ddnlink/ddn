@@ -16,9 +16,12 @@ import exchange from './transactions/exchange'
 import coupon from './transactions/coupon'
 import assetPlugin from './transactions/asset-plugin'
 
-export * from './config'
+import { config, constants } from './config'
 
 export default {
+  config,
+  constants,
+
   utils: {
     slots,
     format

@@ -206,11 +206,11 @@ curl -X GET -H "Content-Type: application/json" 'http://localhost:8001/api/aob/a
 var currency = 'IssuerName.CNY'
 // 本次发行量=真实数量（100）*10**精度（3），所有发行量之和需 <= 上限*精度
 var amount = '100000'
-var trs = DdnJS.aob.createIssue(currency, amount, secret, secondSecret)
+var trs = await DdnJS.aob.createIssue(currency, amount, secret, secondSecret)
 console.log(JSON.stringify(trs))
 {"type":13,"amount":0,"fee":10000000,"recipientId":null,"senderPublicKey":"fafcd01f6b813fdeb3c086e60bc7fa9bfc8ef70ae7be47ce0ac5d06e7b1a8575","timestamp":19475744,"asset":{"aobIssue":{"currency":"IssuerName.CNY","amount":"100000"}},"signature":"32b01a18eca2b0dc7e2ce77ba4e758eaae2532f60844760a762cc20918e7439ac6ca585b921db6ede833ed0bf1c62e30cec545a928abafe0b679183a6ad02202","signSignature":"4fc290d7d7d788e9112a56233df0fe796cba39be3efa0cebf00cbc7e5bc5fd1369fad49e5698d967845b5c02e427926049cab25845d4d385e4a395791906f909"}
 
-curl -H "Content-Type: application/json" -H "nethash:0ab796cd" -H "version:''" -k -X POST -d '{"transaction":{"type":13,"amount":0,"fee":10000000,"recipientId":null,"senderPublicKey":"fafcd01f6b813fdeb3c086e60bc7fa9bfc8ef70ae7be47ce0ac5d06e7b1a8575","timestamp":19475744,"asset":{"aobIssue":{"currency":"IssuerName.CNY","amount":"100000"}},"signature":"32b01a18eca2b0dc7e2ce77ba4e758eaae2532f60844760a762cc20918e7439ac6ca585b921db6ede833ed0bf1c62e30cec545a928abafe0b679183a6ad02202","signSignature":"4fc290d7d7d788e9112a56233df0fe796cba39be3efa0cebf00cbc7e5bc5fd1369fad49e5698d967845b5c02e427926049cab25845d4d385e4a395791906f909"}}' 'http://localhost:8001/peer/transactions' && echo
+curl -H "Content-Type: application/json" -H "nethash:gar0fktt" -H "version:''" -k -X POST -d '{"transaction":{"type":64,"nethash":"gar0fktt","amount":"0","fee":"10000000","recipientId":null,"senderPublicKey":"1e18845d5fbbdf0a6820610e042dcb9a250205964b8075a395453b4a1d1ed10c","timestamp":84812020,"message":null,"asset":{"aobIssue":{"currency":"rcpDa.TRCP","amount":"10000"}},"signature":"5d0d19f2c40714715bc0f868d907489c07527af618441c6c76314bbad5b9487ac3bc09451d11f3874256ef10a9115dabab1b2f53451619653350c94f28015e07"}}' 'http://192.160.120.200:8001/peer/transactions' && echo
 ```   
    
 JSON返回示例：   

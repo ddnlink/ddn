@@ -308,7 +308,10 @@ describe('AOB Test', () => {
       }
 
       // const transaction = await createPluginAsset(65, obj, IssuerAccount1.password);
-      const transaction = await createPluginAsset(DdnUtils.assetTypes.AOB_TRANSFER, obj, IssuerAccount1.password)
+      // const transaction = await createPluginAsset(DdnUtils.assetTypes.AOB_TRANSFER, obj, IssuerAccount1.password)
+      const transaction = await DdnJS.aob.createTransfer(currency, '1', IssuerAccount2.address, 'test', IssuerAccount1.password)
+
+      debug('transfer ok', transaction)
 
       node.peer.post('/transactions')
         .set('Accept', 'application/json')

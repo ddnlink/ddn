@@ -428,8 +428,8 @@ class Transaction {
 
     if (trs.id && trs.id !== txId) {
       // FIXME: 这里没有要求从Asset插件端传ID，不然会出错，请确认
-      this.logger.error('trs.id', trs.id)
-      this.logger.error('txId', txId)
+      this.logger.debug('trs.id', trs.id)
+      this.logger.debug('txId', txId)
       throw new Error('Incorrect transaction id 2')
     } else {
       trs.id = txId

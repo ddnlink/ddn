@@ -111,7 +111,8 @@ class AssetBase {
      * @param {*} sender
      */
   async calculateFee () {
-    return DdnUtils.bignum.multiply(0.1, 100000000) // fixme: 这里应该可以定制 2020.5.31
+    console.log('base.js...................')
+    // return DdnUtils.bignum.multiply(0.0002, 100) // fixme: 这里应该可以定制 2020.5.31
   }
 
   /**

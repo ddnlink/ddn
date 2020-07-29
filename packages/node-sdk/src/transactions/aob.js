@@ -39,7 +39,7 @@ async function createTransaction (
     transaction.sign_signature = await DdnCrypto.secondSign(transaction, secondKeys)
   }
 
-  // transaction.id = await DdnCrypto.getId(transaction)
+  transaction.id = await DdnCrypto.getId(transaction)
 
   return transaction
 }
@@ -52,7 +52,7 @@ export default {
         desc
       }
     }
-    const fee = bignum.multiply(100, constants.fixedPoint)
+    const fee = bignum.multiply(constants.net.fees.aob_issuer, constants.fixedPoint)
     const trs = await createTransaction(
       asset,
       fee,
@@ -91,7 +91,7 @@ export default {
       }
     }
     // var fee = (500 + (Math.floor(bytes.length / 200) + 1) * 0.1) * constants.fixedPoint
-    const fee = bignum.multiply(500, constants.fixedPoint)
+    const fee = bignum.multiply(constants.net.fees.aob_asset, constants.fixedPoint)
     return await createTransaction(
       asset,
       fee,
@@ -111,7 +111,7 @@ export default {
         flag
       }
     }
-    const fee = bignum.multiply(0.1, constants.fixedPoint)
+    const fee = bignum.multiply(constants.net.fees.aob_flag, constants.fixedPoint)
     return await createTransaction(
       asset,
       fee,
@@ -132,7 +132,7 @@ export default {
         list
       }
     }
-    const fee = bignum.multiply(0.1, constants.fixedPoint)
+    const fee = bignum.multiply(constants.net.fees.aob_acl, constants.fixedPoint)
     return await createTransaction(
       asset,
       fee,
@@ -151,7 +151,10 @@ export default {
         amount: `${amount}`
       }
     }
-    const fee = bignum.multiply(0.1, constants.fixedPoint)
+    const fee = bignum.multiply(constants.net.fees.aob_issue, constants.fixedPoint)
+
+    console.log('createIssue', fee, `${fee}`)
+
     const trs = await createTransaction(
       asset,
       fee,
@@ -165,21 +168,16 @@ export default {
     return trs
   },
 
-  async createTransfer (
-    currency,
-    amount,
-    recipientId,
-    message,
-    secret,
-    secondSecret
-  ) {
+  async createTransfer (currency, amount, recipientId, message, secret, secondSecret) {
     const asset = {
       aobTransfer: {
         currency,
         amount: `${amount}`
       }
     }
-    const fee = bignum.multiply(0.1, constants.fixedPoint)
+    const fee = bignum.multiply(constants.net.fees.aob_transfer, constants.fixedPoint)
+    console.log('createTransfer', fee, `${fee}`)
+
     return await createTransaction(
       asset,
       fee,
