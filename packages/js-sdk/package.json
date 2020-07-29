@@ -1,6 +1,6 @@
 {
   "name": "@ddn/js-sdk",
-  "version": "0.0.7",
+  "version": "0.0.8",
   "description": "DDN Node.js SDK",
   "main": "index.js",
   "module": "dist/index.esm.js",
@@ -32,7 +32,7 @@
     "url": "http://github.com/ddnlink/ddn/issues"
   },
   "dependencies": {
-    "@ddn/asset-aob": "^0.3.8",
+    "@ddn/asset-aob": "^0.3.9",
     "@ddn/asset-base": "^0.2.11",
     "@ddn/asset-dao": "^0.2.14",
     "@ddn/asset-dapp": "^0.2.14",
