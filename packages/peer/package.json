@@ -1,6 +1,6 @@
 {
   "name": "@ddn/peer",
-  "version": "0.5.8",
+  "version": "0.5.9",
   "description": "DDN Peer.",
   "files": [
     "lib",
@@ -44,11 +44,11 @@
     "node": ">=8.6.0"
   },
   "dependencies": {
-    "@ddn/asset-aob": "^0.3.6",
-    "@ddn/asset-base": "^0.2.10",
-    "@ddn/asset-dao": "^0.2.12",
-    "@ddn/asset-dapp": "^0.2.12",
-    "@ddn/asset-evidence": "^0.1.11",
+    "@ddn/asset-aob": "^0.3.7",
+    "@ddn/asset-base": "^0.2.11",
+    "@ddn/asset-dao": "^0.2.13",
+    "@ddn/asset-dapp": "^0.2.13",
+    "@ddn/asset-evidence": "^0.1.12",
     "@ddn/core": "^0.2.5",
     "@ddn/crypto": "^0.2.12",
     "@ddn/utils": "^0.1.11",

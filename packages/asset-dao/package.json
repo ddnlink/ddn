@@ -1,6 +1,6 @@
 {
   "name": "@ddn/asset-dao",
-  "version": "0.2.12",
+  "version": "0.2.13",
   "description": "this is asset-dao",
   "main": "lib/index.js",
   "module": "dist/index.esm.js",
@@ -21,7 +21,7 @@
     ".ddnrc.js"
   ],
   "dependencies": {
-    "@ddn/asset-base": "^0.2.10",
+    "@ddn/asset-base": "^0.2.11",
     "@ddn/crypto": "^0.2.12",
     "@ddn/utils": "^0.1.11",
     "bytebuffer": "^5.0.1",
