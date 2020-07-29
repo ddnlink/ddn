@@ -2,6 +2,11 @@ import Asset from '@ddn/asset-base'
 import DdnUtils from '@ddn/utils'
 
 class InTransfer extends Asset.Base {
+  // eslint-disable-next-line no-useless-constructor
+  constructor (context, transactionConfig) {
+    super(context, transactionConfig)
+  }
+
   async propsMapping () {
     return [
       {

@@ -17,6 +17,11 @@ import daoUtil from './daoUtil.js'
  * @fee 0.1EBT
  */
 class Contribution extends Asset.Base {
+  // eslint-disable-next-line no-useless-constructor
+  constructor (context, transactionConfig) {
+    super(context, transactionConfig)
+  }
+
   async propsMapping () {
     return [{
       field: 'str2',

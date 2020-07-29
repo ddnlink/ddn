@@ -2,6 +2,11 @@ import ByteBuffer from 'bytebuffer'
 import Asset from '@ddn/asset-base'
 
 class Evidence extends Asset.Base {
+  // eslint-disable-next-line no-useless-constructor
+  constructor (context, transactionConfig) {
+    super(context, transactionConfig)
+  }
+
   async propsMapping () {
     return [
       { field: 'str4', prop: 'ipid', required: true, maxLen: 64 },

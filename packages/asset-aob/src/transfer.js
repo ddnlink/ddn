@@ -6,10 +6,9 @@ import DdnCrypto from '@ddn/crypto'
 
 class Transfer extends Asset.Base {
   // eslint-disable-next-line no-useless-constructor
-  // constructor (context, transactionConfig) {
-  //   super(context, transactionConfig)
-  //   // console.log()
-  // }
+  constructor (context, transactionConfig) {
+    super(context, transactionConfig)
+  }
 
   async propsMapping () {
     return [

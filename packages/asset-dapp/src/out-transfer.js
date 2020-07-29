@@ -5,6 +5,11 @@ import DdnCrypto from '@ddn/crypto'
 const _dappOuttransferUnconfirmeds = {}
 
 class OutTransfer extends Asset.Base {
+  // eslint-disable-next-line no-useless-constructor
+  constructor (context, transactionConfig) {
+    super(context, transactionConfig)
+  }
+
   async propsMapping () {
     return [
       {

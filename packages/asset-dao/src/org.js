@@ -21,6 +21,11 @@ import daoUtil from './daoUtil.js'
 // });
 
 class Org extends Asset.Base {
+  // eslint-disable-next-line no-useless-constructor
+  constructor (context, transactionConfig) {
+    super(context, transactionConfig)
+  }
+
   /**
       * Org 自治组织中的组织
       * 自治组织可以包含媒体号、企业号等组织形态，为未来更多扩展留有余地。

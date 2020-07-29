@@ -2,6 +2,11 @@ import Asset from '@ddn/asset-base'
 import DdnUtils from '@ddn/utils'
 
 class Flags extends Asset.Base {
+  // eslint-disable-next-line no-useless-constructor
+  constructor (context, transactionConfig) {
+    super(context, transactionConfig)
+  }
+
   // flag_type: 1: 设置acl对应值，2：设置writeoff对应值
   async propsMapping () {
     return [

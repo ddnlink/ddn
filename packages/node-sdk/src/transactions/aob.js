@@ -153,7 +153,7 @@ export default {
     }
     const fee = bignum.multiply(constants.net.fees.aob_issue, constants.fixedPoint)
 
-    console.log('createIssue', fee, `${fee}`)
+    // console.log('createIssue', fee, `${fee}`)
 
     const trs = await createTransaction(
       asset,
@@ -176,7 +176,7 @@ export default {
       }
     }
     const fee = bignum.multiply(constants.net.fees.aob_transfer, constants.fixedPoint)
-    console.log('createTransfer', fee, `${fee}`)
+    // console.log('createTransfer', fee, `${fee}`)
 
     return await createTransaction(
       asset,

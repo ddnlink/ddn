@@ -18,6 +18,11 @@ import daoUtil from './daoUtil'
   * @fee 0EBT
   */
 class Confirmation extends Asset.Base {
+  // eslint-disable-next-line no-useless-constructor
+  constructor (context, transactionConfig) {
+    super(context, transactionConfig)
+  }
+
   // eslint-disable-next-line class-methods-use-this
   async propsMapping () {
     return [{

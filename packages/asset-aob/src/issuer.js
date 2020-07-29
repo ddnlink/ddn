@@ -8,6 +8,11 @@ import DdnUtils from '@ddn/utils'
  * 一个用户仅能注册成为一个发行商
  */
 class Issuer extends Asset.Base {
+  // eslint-disable-next-line no-useless-constructor
+  constructor (context, transactionConfig) {
+    super(context, transactionConfig)
+  }
+
   async propsMapping () {
     return [
       {

@@ -26,6 +26,11 @@ import daoUtil from './daoUtil.js'
   * @fee 交易费用
   */
 class Exchange extends Asset.Base {
+  // eslint-disable-next-line no-useless-constructor
+  constructor (context, transactionConfig) {
+    super(context, transactionConfig)
+  }
+
   // eslint-disable-next-line class-methods-use-this
   async propsMapping () {
     return [{

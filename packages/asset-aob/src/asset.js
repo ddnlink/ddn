@@ -3,6 +3,11 @@ import DdnUtils from '@ddn/utils'
 import assert from 'assert'
 
 class Aob extends Asset.Base {
+  // eslint-disable-next-line no-useless-constructor
+  constructor (context, transactionConfig) {
+    super(context, transactionConfig)
+  }
+
   async propsMapping () {
     return [
       {
