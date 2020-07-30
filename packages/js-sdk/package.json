@@ -1,6 +1,6 @@
 {
   "name": "@ddn/js-sdk",
-  "version": "0.0.10",
+  "version": "0.1.0",
   "description": "DDN Node.js SDK",
   "main": "index.js",
   "module": "dist/index.esm.js",
