@@ -390,7 +390,7 @@ class MultisignaturesRouter {
             return reject(err)
           }
 
-          const addresses1 = rows[0].account_id.split(',') // wxm block database
+          const addresses1 = rows[0].account_id && rows[0].account_id.split(',') // wxm block database
 
           try {
             const rows = await this.runtime.account.getAccountList({

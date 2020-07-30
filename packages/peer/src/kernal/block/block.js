@@ -9,16 +9,15 @@ import assert from 'assert'
 import nacl from 'tweetnacl'
 
 import ByteBuffer from 'bytebuffer'
-import DdnUtils from '@ddn/utils'
 import DdnCrypto from '@ddn/crypto'
 import BlockStatus from './block-status'
 
-const {
+import {
   assetTypes,
   runtimeState,
   system,
   bignum
-} = DdnUtils
+} from '@ddn/utils'
 
 let _singleton
 
@@ -60,7 +59,7 @@ class Block {
   }
 
   async calculateFee () {
-    return this.constants[this.config.net].fees.transfer
+    return bignum.multiply(this.constants.net.fees.transfer, this.constants.fixedPoint)
   }
 
   getBlockStatus () {

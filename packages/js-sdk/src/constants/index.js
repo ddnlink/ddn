@@ -5,7 +5,7 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *-------------------------------------------------------------------------------------------- */
 
-import constants from './constants.ddn'
-// import constants from './constants.hbl'
+// import constants from './constants.ddn'
+import constants from './constants.hbl'
 
 export default constants
