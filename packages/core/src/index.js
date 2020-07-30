@@ -7,6 +7,7 @@ export {
   mergeConfigs
 }
 
+// todo: delete it
 export default {
   getPaths,
   getUserConfig,
