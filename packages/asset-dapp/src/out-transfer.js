@@ -53,6 +53,10 @@ class OutTransfer extends Asset.Base {
     return buf
   }
 
+  async calculateFee () {
+    return DdnUtils.bignum.multiply(this.constants.net.fees.dapp_out, this.constants.fixedPoint)
+  }
+
   async create (data, trs) {
     trs.recipientId = data.recipientId
     trs.amount = '0'

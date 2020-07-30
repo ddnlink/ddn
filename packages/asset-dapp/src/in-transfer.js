@@ -26,6 +26,10 @@ class InTransfer extends Asset.Base {
     ]
   }
 
+  async calculateFee () {
+    return DdnUtils.bignum.multiply(this.constants.net.fees.dapp_in, this.constants.fixedPoint)
+  }
+
   async create (data, trs) {
     trs.recipientId = null
 

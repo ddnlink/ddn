@@ -1,4 +1,4 @@
-import DdnUtils from '@ddn/utils'
+import { bignum, assetTypes } from '@ddn/utils'
 
 import crypto from '../utils/crypto'
 
@@ -22,13 +22,13 @@ async function createEvidence (evidence, secret, secondSecret) {
     throw new Error('Invalid ipid format')
   }
 
-  const fee = constants.net.fees.evidence
+  const fee = bignum.multiply(constants.net.fees.evidence, constants.fixedPoint)
 
   const transaction = {
-    type: DdnUtils.assetTypes.EVIDENCE, // 10 -> 20
+    type: assetTypes.EVIDENCE, // 10 -> 20
     nethash: config.nethash,
     amount: '0',
-    fee,
+    fee: `${fee}`,
     recipientId: null,
     senderPublicKey: keys.publicKey,
     timestamp: slots.getTime() - config.clientDriftSeconds,

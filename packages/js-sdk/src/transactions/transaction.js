@@ -1,17 +1,16 @@
 import _ from 'lodash'
-import DdnUtils from '@ddn/utils'
+import { bignum, assetTypes } from '@ddn/utils'
 
 import crypto from '../utils/crypto' // TODO: @ddn/crypto
-import constants from '../constants'
 import slots from '../time/slots'
-import options from '../utils/options'
+import { config, constants } from '../config'
 
 function calculateFee (amount) {
-  const min = constants.net.fees.send
+  const min = constants.net.fees.transfer
 
-  const fee = DdnUtils.bignum.multiply(amount, 0.0001).toFixed(0)
+  const fee = bignum.multiply(amount, 0.0001).toFixed(0)
 
-  if (DdnUtils.bignum.isLessThan(fee, min)) {
+  if (bignum.isLessThan(fee, min)) {
     return min
   } else {
     return `${fee}`
@@ -19,14 +18,15 @@ function calculateFee (amount) {
 }
 
 async function createTransaction (recipientId, amount, message, secret, second_secret) {
+  const fee = bignum.multiply(constants.net.fees.transfer, constants.fixedPoint)
   const transaction = {
-    type: DdnUtils.assetTypes.TRANSFER,
-    nethash: options.get('nethash'),
+    type: assetTypes.TRANSFER,
+    nethash: config.nethash,
     amount: `${amount}`,
-    fee: constants.net.fees.send,
+    fee: `${fee}`,
     recipientId: recipientId,
     message,
-    timestamp: slots.getTime() - options.get('clientDriftSeconds'),
+    timestamp: slots.getTime() - config.clientDriftSeconds,
     asset: {}
   }
 
@@ -45,14 +45,15 @@ async function createTransaction (recipientId, amount, message, secret, second_s
 }
 
 async function createLock (height, secret, second_secret) {
+  const fee = bignum.multiply(constants.net.fees.lock, constants.fixedPoint)
   const transaction = {
     type: 100, // TODO: update to string lock
     amount: '0',
-    nethash: options.get('nethash'),
-    fee: '10000000',
+    nethash: config.nethash,
+    fee: `${fee}`,
     recipientId: null,
     args: [String(height)],
-    timestamp: slots.getTime() - options.get('clientDriftSeconds'),
+    timestamp: slots.getTime() - config.clientDriftSeconds,
     asset: {}
   }
 

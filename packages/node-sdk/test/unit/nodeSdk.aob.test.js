@@ -1,6 +1,5 @@
 // passed
 import Debug from 'debug'
-import DdnUtils from '@ddn/utils'
 import { DdnJS, node } from '../ddn-js'
 // import { ACL } from './aob/5.acl'
 
@@ -11,9 +10,9 @@ async function createTransfer (address, amount, secret) {
   return await DdnJS.transaction.createTransaction(address, amount, null, secret)
 }
 
-async function createPluginAsset (type, asset, secret, secondSecret) {
-  return await DdnJS.assetPlugin.createPluginAsset(type, asset, secret, secondSecret)
-}
+// async function createPluginAsset (type, asset, secret, secondSecret) {
+//   return await DdnJS.assetPlugin.createPluginAsset(type, asset, secret, secondSecret)
+// }
 
 jest.setTimeout(50000)
 
@@ -300,16 +299,8 @@ describe('AOB Test', () => {
       // 等 1 次确认
       await node.onNewBlockAsync()
 
-      const obj = {
-        recipientId: IssuerAccount1.address,
-        currency,
-        aobAmount: '10',
-        message: '测试转账'
-      }
-
-      // const transaction = await createPluginAsset(65, obj, IssuerAccount1.password);
       // const transaction = await createPluginAsset(DdnUtils.assetTypes.AOB_TRANSFER, obj, IssuerAccount1.password)
-      const transaction = await DdnJS.aob.createTransfer(currency, '1', IssuerAccount2.address, 'test', IssuerAccount1.password)
+      const transaction = await DdnJS.aob.createTransfer(currency, '1', node.Gaccount.address, 'test', IssuerAccount1.password)
 
       debug('transfer ok', transaction)
 

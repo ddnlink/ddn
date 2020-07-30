@@ -2,21 +2,21 @@ import ByteBuffer from 'bytebuffer'
 import DdnUtils from '@ddn/utils'
 
 import crypto from '../utils/crypto'
-import constants from '../constants'
 import slots from '../time/slots'
-import globalOptions from '../utils/options'
+import { config, constants } from '../config'
 
 async function createDApp (options, secret, secondSecret) {
   const keys = crypto.getKeys(secret)
 
+  const fee = DdnUtils.bignum.multiply(constants.net.fees.dapp, constants.fixedPoint)
   const transaction = {
-    nethash: globalOptions.get('nethash'),
+    nethash: config.nethash,
     type: DdnUtils.assetTypes.DAPP,
     amount: '0',
-    fee: constants.net.fees.dapp,
+    fee: `${fee}`,
     recipientId: null,
     senderPublicKey: keys.publicKey,
-    timestamp: slots.getTime() - globalOptions.get('clientDriftSeconds'),
+    timestamp: slots.getTime() - config.clientDriftSeconds,
     asset: {
       dapp: {
         category: options.category,
@@ -72,9 +72,9 @@ function createInnerTransaction (options, secret) {
   let args = options.args
   if (args instanceof Array) args = JSON.stringify(args)
   const trs = {
-    nethash: globalOptions.get('nethash'),
+    nethash: config.nethash,
     fee: options.fee,
-    timestamp: slots.getTime() - globalOptions.get('clientDriftSeconds'),
+    timestamp: slots.getTime() - config.clientDriftSeconds,
     senderPublicKey: keys.publicKey,
     type: options.type,
     args

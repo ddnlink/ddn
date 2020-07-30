@@ -1,5 +1,6 @@
 import ByteBuffer from 'bytebuffer'
 import Asset from '@ddn/asset-base'
+import DdnUtils from '@ddn/utils'
 
 class Evidence extends Asset.Base {
   // eslint-disable-next-line no-useless-constructor
@@ -67,6 +68,10 @@ class Evidence extends Asset.Base {
     return bb.toBuffer()
   }
 
+  async calculateFee () {
+    return DdnUtils.bignum.multiply(this.constants.net.fees.evidence, this.constants.fixedPoint)
+  }
+
   async verify (trs, sender) {
     const trans = await super.verify(trs, sender)
     const assetObj = await this.getAssetObject(trs)
@@ -89,12 +94,10 @@ class Evidence extends Asset.Base {
           ['senderId'],
           async (err, { senderId }) => {
             if (err) {
-              reject(err)
+              return reject(err)
             } else {
               if (senderId !== sender.address) {
-                return reject(
-                                    `The evidence ipid ${assetObj.ipid} has been registered by ${senderId}`
-                )
+                return reject(new Error(`The evidence ipid ${assetObj.ipid} has been registered by ${senderId})`))
               } else {
                 let results2
                 try {
@@ -113,17 +116,17 @@ class Evidence extends Asset.Base {
                 }
 
                 if (results2 && results2.length > 0) {
-                  return reject(
-                                        `The evidence hash already exists: ${assetObj.hash}`
-                  )
+                  return reject(new Error(`The evidence hash already exists: ${assetObj.hash}`))
                 } else {
-                  resolve(trans)
+                  return resolve(trans)
                 }
               }
             }
           }
+
         )
-      })
+      }
+      )
     } else {
       return trans
     }
@@ -133,9 +136,7 @@ class Evidence extends Asset.Base {
     const assetObj = await this.getAssetObject(trs)
     const key = `${sender.address}:${trs.type}:${assetObj.ipid}`
     if (this.oneoff.has(key)) {
-      throw new Error(
-                `The evidence ${assetObj.ipid} is in process already.`
-      )
+      throw new Error(`The evidence ${assetObj.ipid} is in process already.`)
     }
 
     await super.applyUnconfirmed(trs, sender, dbTrans)

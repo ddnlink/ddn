@@ -80,14 +80,12 @@ class Confirmation extends Asset.Base {
 
   async calculateFee (trs) {
     const confirmation = await this.getAssetObject(trs)
-    let feeBase = '1'
+    let feeBase = this.constants.net.fees.dao_confirmation
     if (confirmation.state === 0) {
       feeBase = '0' // 拒绝稿件时手续费为0
     }
 
-    const result = DdnUtils.bignum.multiply(feeBase, this.constants.fixedPoint).toString()
-
-    return result
+    return DdnUtils.bignum.multiply(feeBase, this.constants.fixedPoint).toString()
   }
 
   async verify (trs) {

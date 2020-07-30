@@ -32,7 +32,7 @@ class Multisignature {
   async calculateFee ({ asset }, sender) {
     return DdnUtils.bignum.multiply(
       DdnUtils.bignum.plus(asset.multisignature.keysgroup.length, 1),
-      5, this.constants.fixedPoint)
+      this.constants.net.fees.multiSignature, this.constants.fixedPoint)
   }
 
   async verify (trs, sender) {

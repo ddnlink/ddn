@@ -1,4 +1,4 @@
-import DdnUtils from '@ddn/utils'
+import { bignum, assetTypes } from '@ddn/utils'
 import crypto from '../utils/crypto'
 
 import { config, constants } from '../config'
@@ -7,10 +7,10 @@ import slots from '../time/slots'
 async function createIssuerAuditorBuy (received_address, amount, secret, secondSecret) {
   const keys = crypto.getKeys(secret)
 
-  const fee = constants.net.fees.send
+  const fee = bignum.multiply(constants.net.fees.transfer, constants.fixedPoint)
 
   const transaction = {
-    type: DdnUtils.assetTypes.COUPON_ISSUER_AUDITOR_BUY,
+    type: assetTypes.COUPON_ISSUER_AUDITOR_BUY,
     nethash: config.nethash,
     amount,
     fee: `${fee}`,
@@ -39,10 +39,10 @@ async function createIssuerAuditorBuy (received_address, amount, secret, secondS
 async function createIssuerApply (orgName, org_id, orgOwner, orgOwnerPhone, secret, secondSecret) {
   const keys = crypto.getKeys(secret)
 
-  const fee = constants.net.fees.send
+  const fee = bignum.multiply(constants.net.fees.transfer, constants.fixedPoint)
 
   const transaction = {
-    type: DdnUtils.assetTypes.COUPON_ISSUER_APPLY,
+    type: assetTypes.COUPON_ISSUER_APPLY,
     nethash: config.nethash,
     amount: '0',
     fee: `${fee}`,
@@ -75,10 +75,10 @@ async function createIssuerApply (orgName, org_id, orgOwner, orgOwnerPhone, secr
 async function createIssuerUpdate (orgName, org_id, orgOwner, orgOwnerPhone, secret, secondSecret) {
   const keys = crypto.getKeys(secret)
 
-  const fee = constants.net.fees.send
+  const fee = bignum.multiply(constants.net.fees.transfer, constants.fixedPoint)
 
   const transaction = {
-    type: DdnUtils.assetTypes.COUPON_ISSUER_UPDATE,
+    type: assetTypes.COUPON_ISSUER_UPDATE,
     nethash: config.nethash,
     amount: '0',
     fee: `${fee}`,
@@ -111,10 +111,10 @@ async function createIssuerUpdate (orgName, org_id, orgOwner, orgOwnerPhone, sec
 async function createIssuerCheck (address, orgName, org_id, orgOwner, orgOwnerPhone, state, secret, secondSecret) {
   const keys = crypto.getKeys(secret)
 
-  const fee = constants.net.fees.send
+  const fee = bignum.multiply(constants.net.fees.transfer, constants.fixedPoint)
 
   const transaction = {
-    type: DdnUtils.assetTypes.COUPON_ISSUER_CHECK,
+    type: assetTypes.COUPON_ISSUER_CHECK,
     nethash: config.nethash,
     amount: '0',
     fee: `${fee}`,
@@ -147,10 +147,10 @@ async function createIssuerCheck (address, orgName, org_id, orgOwner, orgOwnerPh
 async function createIssuerFreeze (address, orgName, org_id, orgOwner, orgOwnerPhone, secret, secondSecret) {
   const keys = crypto.getKeys(secret)
 
-  const fee = constants.net.fees.send
+  const fee = bignum.multiply(constants.net.fees.transfer, constants.fixedPoint)
 
   const transaction = {
-    type: DdnUtils.assetTypes.COUPON_ISSUER_FREEZE,
+    type: assetTypes.COUPON_ISSUER_FREEZE,
     nethash: config.nethash,
     amount: '0',
     fee: `${fee}`,
@@ -182,10 +182,10 @@ async function createIssuerFreeze (address, orgName, org_id, orgOwner, orgOwnerP
 async function createIssuerUnfreeze (address, orgName, org_id, orgOwner, orgOwnerPhone, state, secret, secondSecret) {
   const keys = crypto.getKeys(secret)
 
-  const fee = constants.net.fees.send
+  const fee = bignum.multiply(constants.net.fees.transfer, constants.fixedPoint)
 
   const transaction = {
-    type: DdnUtils.assetTypes.COUPON_ISSUER_UNFREEZE,
+    type: assetTypes.COUPON_ISSUER_UNFREEZE,
     nethash: config.nethash,
     amount: '0',
     fee: `${fee}`,
@@ -220,10 +220,10 @@ async function createIssueNew (goodsName, goodsSpecs, goodsUnit, goodsNum, unitP
   batchValue, issueNum, issueTime, expireTime, secret, secondSecret) {
   const keys = crypto.getKeys(secret)
 
-  const fee = constants.net.fees.send
+  const fee = bignum.multiply(constants.net.fees.transfer, constants.fixedPoint)
 
   const transaction = {
-    type: DdnUtils.assetTypes.COUPON_ISSUE_NEW,
+    type: assetTypes.COUPON_ISSUE_NEW,
     nethash: config.nethash,
     amount: '0',
     fee: `${fee}`,
@@ -261,10 +261,10 @@ async function createIssueClose (goodsName, goodsSpecs, goodsUnit, goodsNum, uni
   batchValue, issueNum, issueTime, expireTime, secret, secondSecret) {
   const keys = crypto.getKeys(secret)
 
-  const fee = constants.net.fees.send
+  const fee = bignum.multiply(constants.net.fees.transfer, constants.fixedPoint)
 
   const transaction = {
-    type: DdnUtils.assetTypes.COUPON_ISSUE_CLOSE,
+    type: assetTypes.COUPON_ISSUE_CLOSE,
     nethash: config.nethash,
     amount: '0',
     fee: `${fee}`,
@@ -302,10 +302,10 @@ async function createIssueReopen (goodsName, goodsSpecs, goodsUnit, goodsNum, un
   batchValue, issueNum, issueTime, expireTime, secret, secondSecret) {
   const keys = crypto.getKeys(secret)
 
-  const fee = constants.net.fees.send
+  const fee = bignum.multiply(constants.net.fees.transfer, constants.fixedPoint)
 
   const transaction = {
-    type: DdnUtils.assetTypes.COUPON_ISSUE_REOPEN,
+    type: assetTypes.COUPON_ISSUE_REOPEN,
     nethash: config.nethash,
     amount: '0',
     fee: `${fee}`,
@@ -343,10 +343,10 @@ async function createExchangeBuy (batchValue, code, received_address,
   price, secret, secondSecret) {
   const keys = crypto.getKeys(secret)
 
-  const fee = constants.net.fees.send
+  const fee = bignum.multiply(constants.net.fees.transfer, constants.fixedPoint)
 
   const transaction = {
-    type: DdnUtils.assetTypes.COUPON_EXCH_BUY,
+    type: assetTypes.COUPON_EXCH_BUY,
     nethash: config.nethash,
     amount: price,
     fee: `${fee}`,
@@ -379,10 +379,10 @@ async function createExchangePay (batchValue, code, received_address,
   secret, secondSecret) {
   const keys = crypto.getKeys(secret)
 
-  const fee = constants.net.fees.send
+  const fee = bignum.multiply(constants.net.fees.transfer, constants.fixedPoint)
 
   const transaction = {
-    type: DdnUtils.assetTypes.COUPON_EXCH_PAY,
+    type: assetTypes.COUPON_EXCH_PAY,
     nethash: config.nethash,
     amount: '0',
     fee: `${fee}`,
@@ -415,10 +415,10 @@ async function createExchangeTransferConfirm (batchValue, code, received_address
   price, related_trs_id, state, secret, secondSecret) {
   const keys = crypto.getKeys(secret)
 
-  const fee = constants.net.fees.send
+  const fee = bignum.multiply(constants.net.fees.transfer, constants.fixedPoint)
 
   const transaction = {
-    type: DdnUtils.assetTypes.COUPON_EXCH_TRANSFER_CONFIRM,
+    type: assetTypes.COUPON_EXCH_TRANSFER_CONFIRM,
     nethash: config.nethash,
     amount: price,
     fee: `${fee}`,
@@ -453,10 +453,10 @@ async function createExchangeTransferAsk (batchValue, code, received_address,
   price, secret, secondSecret) {
   const keys = crypto.getKeys(secret)
 
-  const fee = constants.net.fees.send
+  const fee = bignum.multiply(constants.net.fees.transfer, constants.fixedPoint)
 
   const transaction = {
-    type: DdnUtils.assetTypes.COUPON_EXCH_TRANSFER_ASK,
+    type: assetTypes.COUPON_EXCH_TRANSFER_ASK,
     nethash: config.nethash,
     amount: '0',
     fee: `${fee}`,

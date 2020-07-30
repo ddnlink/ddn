@@ -1,13 +1,12 @@
 import DdnUtils from '@ddn/utils'
 import DdnCrypto from '../utils/crypto'
-import constants from '../constants'
 import slots from '../time/slots'
-import options from '../utils/options'
+import { config, constants } from '../config'
 
 const { bignum } = DdnUtils
 
 function getClientFixedTime () {
-  return slots.getTime() - options.get('clientDriftSeconds')
+  return slots.getTime() - config.clientDriftSeconds
 }
 
 async function createTransaction (
@@ -23,7 +22,7 @@ async function createTransaction (
 
   const transaction = {
     type,
-    nethash: options.get('nethash'),
+    nethash: config.nethash,
     amount: '0',
     fee: `${fee}`,
     recipientId: recipientId,
@@ -52,7 +51,7 @@ export default {
         desc
       }
     }
-    const fee = bignum.multiply(100, constants.fixedPoint)
+    const fee = bignum.multiply(constants.net.fees.aob_issuer, constants.fixedPoint)
     const trs = await createTransaction(
       asset,
       fee,
@@ -91,7 +90,7 @@ export default {
       }
     }
     // var fee = (500 + (Math.floor(bytes.length / 200) + 1) * 0.1) * constants.fixedPoint
-    const fee = bignum.multiply(500, constants.fixedPoint)
+    const fee = bignum.multiply(constants.net.fees.aob_asset, constants.fixedPoint)
     return await createTransaction(
       asset,
       fee,
@@ -111,7 +110,7 @@ export default {
         flag
       }
     }
-    const fee = bignum.multiply(0.1, constants.fixedPoint)
+    const fee = bignum.multiply(constants.net.fees.aob_flag, constants.fixedPoint)
     return await createTransaction(
       asset,
       fee,
@@ -132,7 +131,7 @@ export default {
         list
       }
     }
-    const fee = bignum.multiply(0.1, constants.fixedPoint)
+    const fee = bignum.multiply(constants.net.fees.aob_acl, constants.fixedPoint)
     return await createTransaction(
       asset,
       fee,
@@ -151,7 +150,7 @@ export default {
         amount: `${amount}`
       }
     }
-    const fee = bignum.multiply(0.1, constants.fixedPoint)
+    const fee = bignum.multiply(constants.net.fees.aob_issue, constants.fixedPoint)
     const trs = await createTransaction(
       asset,
       fee,
@@ -179,7 +178,8 @@ export default {
         amount: `${amount}`
       }
     }
-    const fee = bignum.multiply(0.1, constants.fixedPoint)
+    const fee = bignum.multiply(constants.net.fees.aob_transfer, constants.fixedPoint)
+    console.log('constants.net.fees.aob_transfer', constants.net.fees.aob_transfer)
     return await createTransaction(
       asset,
       fee,

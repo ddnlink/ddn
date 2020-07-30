@@ -66,7 +66,7 @@ describe('Test second passphrase', () => {
               secret: node.Gaccount.password,
 
               // Testing 1 delegate registration + 1 transaction sending 1DDN
-              amount: DdnUtils.bignum.plus(node.constants.net.fees.secondSignature, 10000000000).toString(),
+              amount: DdnUtils.bignum.plus(node.constants.net.fees.signature, 10000000000).toString(),
               recipientId: account.address
             })
             .expect('Content-Type', /json/)

@@ -27,8 +27,7 @@ class Delegate {
   }
 
   async calculateFee () {
-    // Bignum update
-    return DdnUtils.bignum.multiply(100, this.constants.fixedPoint)
+    return DdnUtils.bignum.multiply(this.constants.net.fees.delegate, this.constants.fixedPoint)
   }
 
   async verify (trs, { is_delegate }) {
@@ -36,7 +35,6 @@ class Delegate {
       throw new Error('Invalid recipient')
     }
 
-    // Bignum update if (trs.amount !== 0) {
     if (!DdnUtils.bignum.isZero(trs.amount)) {
       throw new Error('Invalid transaction amount')
     }

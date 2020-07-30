@@ -35,6 +35,10 @@ class Issue extends Asset.Base {
     return buffer
   }
 
+  async calculateFee () {
+    return DdnUtils.bignum.multiply(this.constants.net.fees.aob_issue, this.constants.fixedPoint)
+  }
+
   async verify (trs, sender) {
     const assetIssue = await this.getAssetObject(trs)
 

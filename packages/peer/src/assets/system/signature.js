@@ -21,7 +21,7 @@ class Signatures {
   }
 
   async calculateFee (trs, sender) {
-    return DdnUtils.bignum.multiply(5, this.constants.fixedPoint)
+    return DdnUtils.bignum.multiply(this.constants.net.fees.signature, this.constants.fixedPoint)
   }
 
   async verify (trs, sender, cb) {

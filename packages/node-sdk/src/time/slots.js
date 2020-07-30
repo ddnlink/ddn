@@ -1,7 +1,7 @@
 import { constants } from '../config'
 
-// const interval = constants.interval
-// const delegates = constants.delegates
+const interval = constants.interval
+const delegates = constants.delegates
 
 /**
  * 周期开始时间
@@ -46,7 +46,6 @@ function getSlotNumber (epochTime) {
 }
 
 function getSlotTime (slot) {
-  const interval = constants.interval
   return slot * interval
 }
 
@@ -57,13 +56,24 @@ function getNextSlot () {
 }
 
 function getLastSlot (nextSlot) {
-  const delegates = constants.delegates
   return nextSlot + delegates
 }
 
+export {
+  interval,
+  delegates,
+  getTime,
+  getRealTime,
+  getSlotNumber,
+  getSlotTime,
+  getNextSlot,
+  getLastSlot,
+  beginEpochTime
+}
+
 export default {
-  // interval,
-  // delegates,
+  interval,
+  delegates,
   getTime,
   getRealTime,
   getSlotNumber,

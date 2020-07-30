@@ -50,6 +50,10 @@ class Acl extends Asset.Base {
     return bb.toBuffer()
   }
 
+  async calculateFee () {
+    return DdnUtils.bignum.multiply(this.constants.net.fees.aob_acl, this.constants.fixedPoint)
+  }
+
   async verify (trs, sender) {
     await super.verify(trs, sender)
 

@@ -2,7 +2,7 @@
  * 转账资产交易
  * wangxm   2018-12-28
  */
-import DdnUtil from '@ddn/utils' // DdnUtil.bignum update
+import { bignum } from '@ddn/utils' // bignum update
 
 class Transfer {
   constructor (context) {
@@ -20,8 +20,8 @@ class Transfer {
     return trs
   }
 
-  async calculateFee (trs, sender) {
-    return this.constants[this.config.net].fees.send
+  async calculateFee () {
+    return bignum.multiply(this.constants.net.fees.transfer, this.constants.fixedPoint)
   }
 
   async verify (trs, {
@@ -32,11 +32,11 @@ class Transfer {
       throw new Error('Invalid recipient')
     }
 
-    if (DdnUtil.bignum.isNaN(trs.amount)) {
+    if (bignum.isNaN(trs.amount)) {
       throw new Error('Invalid transaction amount.')
     }
 
-    if (DdnUtil.bignum.isLessThanOrEqualTo(trs.amount, 0)) {
+    if (bignum.isLessThanOrEqualTo(trs.amount, 0)) {
       throw new Error('Invalid transaction amount')
     }
 
@@ -51,8 +51,8 @@ class Transfer {
       if (
         lockHeight &&
                 lastBlock &&
-                DdnUtil.bignum.isLessThanOrEqualTo(
-                  DdnUtil.bignum.plus(lastBlock.height, 1),
+                bignum.isLessThanOrEqualTo(
+                  bignum.plus(lastBlock.height, 1),
                   lockHeight
                 )
       ) {

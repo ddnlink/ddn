@@ -115,6 +115,10 @@ class Contribution extends Asset.Base {
     return bb.toBuffer()
   }
 
+  async calculateFee () {
+    return DdnUtils.bignum.multiply(this.constants.net.fees.dao_contribution, this.constants.fixedPoint)
+  }
+
   async dbSave (trs, dbTrans) {
     const contribution = await this.getAssetObject(trs)
     contribution.url = (contribution.url + '').toLowerCase()

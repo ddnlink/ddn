@@ -1,10 +1,11 @@
 import Debug from 'debug'
-import DdnUtils from '@ddn/utils'
+import { bignum } from '@ddn/utils'
 import { DdnJS, node } from '../ddn-js'
 
 const debug = Debug('debug')
 const expect = node.expect
-const Bignum = DdnUtils.bignum
+
+const { constants } = node
 
 describe('Node SDK', () => {
   describe('crypto.js', () => {
@@ -19,7 +20,7 @@ describe('Node SDK', () => {
     })
 
     it('should has properties', () => {
-      const properties = ['getBytes', 'getHash', 'getId', 'getFee', 'sign', 'secondSign', 'getKeys', 'generateAddress', 'verify', 'verifySecondSignature', 'fixedPoint']
+      const properties = ['getBytes', 'getHash', 'getId', 'getFee', 'sign', 'secondSign', 'getKeys', 'generateAddress', 'verify', 'verifySecondSignature']
       properties.forEach(property => {
         expect(crypto).to.have.property(property)
       })
@@ -41,7 +42,7 @@ describe('Node SDK', () => {
         const transaction = {
           nethash: '0ab796cd',
           type: 0,
-          amount: '1000', // Bignum update
+          amount: '1000', // bignum update
           recipientId: '58191285901858109',
           timestamp: 141738,
           asset: {},
@@ -63,7 +64,7 @@ describe('Node SDK', () => {
         const transaction = {
           nethash: '0ab796cd',
           type: 0,
-          amount: '1000', // Bignum update
+          amount: '1000', // bignum update
           recipientId: '58191285901858109',
           timestamp: 141738,
           asset: {},
@@ -98,7 +99,7 @@ describe('Node SDK', () => {
         const transaction = {
           nethash: '0ab796cd',
           type: 0,
-          amount: '1000', // Bignum update
+          amount: '1000', // bignum update
           recipientId: '58191285901858109',
           timestamp: 141738,
           asset: {},
@@ -132,7 +133,7 @@ describe('Node SDK', () => {
         const transaction = {
           nethash: '0ab796cd',
           type: 0,
-          amount: '1000', // Bignum update
+          amount: '1000', // bignum update
           recipientId: '58191285901858109',
           timestamp: 141738,
           asset: {},
@@ -161,58 +162,29 @@ describe('Node SDK', () => {
       })
 
       it('should return BigNumber', async (done) => {
-        const fee = await getFee({ amount: '100000', type: 0 }) // Bignum update
+        const fee = await getFee({ amount: '100000', type: 0 }) // bignum update
 
         debug('fee: ', fee)
-        expect(Bignum.isBigNumber(fee)).to.be.true
+        expect(bignum.isBigNumber(fee)).to.be.true
         expect(fee).to.be.not.NaN
         done()
       })
 
-      it('should return 10000000', async (done) => {
-        const fee = await getFee({ amount: '100000', type: 0 }) // Bignum update
-        expect(Bignum.isBigNumber(fee)).to.be.true
-        expect(fee.toString()).to.equal('10000000')
+      it('should be ok if type == 0', async (done) => {
+        const fee = await getFee({ amount: '100000', type: 0 }) // bignum update
+        const fee2 = bignum.multiply(constants.net.fees.transfer, constants.fixedPoint).toString()
+        expect(bignum.isBigNumber(fee)).to.be.true
+        expect(fee.toString()).to.equal(fee2)
         done()
       })
 
-      it('should return 10000000000', async (done) => {
-        const fee = await getFee({ type: 1 })
-        expect(Bignum.isBigNumber(fee)).to.be.true
-        expect(fee.toString()).to.equal('10000000000')
-        done()
-      })
-
-      it('should be equal 1000000000000', async (done) => {
+      it('should be ok if type is delegate', async (done) => {
         const fee = await getFee({ type: 2 })
-        expect(Bignum.isBigNumber(fee)).to.be.true
-        expect(fee.toString()).to.equal('1000000000000')
+        const fee2 = bignum.multiply(constants.net.fees.delegate, constants.fixedPoint).toString()
+
+        expect(bignum.isBigNumber(fee)).to.be.true
+        expect(fee.toString()).to.equal(fee2)
         done()
-      })
-
-      it('should be equal 100000000', async (done) => {
-        const fee = await getFee({ type: 3 })
-        debug('fee: ', fee)
-        expect(Bignum.isBigNumber(fee)).to.be.true
-        expect(fee.toString()).to.equal('100000000')
-        done()
-      })
-    })
-
-    // todo: 这里是进率，数字是对的，当然因为使用大数据格式，使用字符串也可以
-    describe('fixedPoint', () => {
-      const fixedPoint = crypto.fixedPoint
-
-      it('should be ok', () => {
-        expect(fixedPoint).to.be.ok
-      })
-
-      it('should be number', () => {
-        expect(fixedPoint).to.be.a('number').and.not.NaN
-      })
-
-      it('should be equal 100000000', () => {
-        expect(fixedPoint).to.equal(100000000)
       })
     })
 
@@ -232,7 +204,7 @@ describe('Node SDK', () => {
         const transaction = {
           nethash: '0ab796cd',
           type: 0,
-          amount: '1000', // Bignum update
+          amount: '1000', // bignum update
           recipientId: 'D9EWvxNF89StC8UAS3WHrgXX8fCGyAaoU',
           timestamp: 141738,
           asset: {},

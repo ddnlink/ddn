@@ -699,21 +699,23 @@ describe('PUT /signatures', () => {
           node.expect(body).to.have.property('success').to.be.true
           node.expect(body).to.have.property('transaction').that.is.an('object')
           if (body.success === true && body.transaction !== null) {
+            const fee = DdnUtils.bignum.multiply(node.constants.net.fees.signature, node.constants.fixedPoint)
+
             // console.log(Account1)
             node.expect(body.transaction).to.have.property('type').to.equal(node.AssetTypes.SIGNATURE)
             node.expect(body.transaction).to.have.property('senderPublicKey').to.equal(Account1.publicKey)
             node.expect(body.transaction).to.have.property('senderId').to.equal(Account1.address)
-            node.expect(body.transaction).to.have.property('fee').to.equal(node.constants.net.fees.secondSignature)
+            node.expect(body.transaction).to.have.property('fee').to.equal(fee)
             Account1.transactions.push(transactionCount)
             transactionCount += 1
 
-            Account1.balance = DdnUtils.bignum.minus(Account1.balance, node.constants.net.fees.secondSignature)
+            Account1.balance = DdnUtils.bignum.minus(Account1.balance, fee)
 
             transactionList[transactionCount - 1] = {
               sender: Account1.address,
               recipient: 'SYSTEM',
               brutoSent: 0,
-              fee: node.constants.net.fees.secondSignature,
+              fee: node.constants.net.fees.signature,
               nettoSent: 0,
               txId: body.transaction.id,
               type: node.AssetTypes.SIGNATURE

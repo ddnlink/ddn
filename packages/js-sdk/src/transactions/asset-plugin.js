@@ -1,20 +1,19 @@
 import Asset from '@ddn/asset-base'
 import crypto from '../utils/crypto'
 import slots from '../time/slots'
-import options from '../utils/options'
-// import constants from '../constants';
+import { config } from '../config'
 
 async function createPluginAsset (trsType, assetInfo, secret, secondSecret) {
   const keys = crypto.getKeys(secret)
 
   const transaction = {
     type: trsType,
-    nethash: options.get('nethash'),
+    nethash: config.nethash,
     amount: assetInfo.amount ? `${assetInfo.amount}` : '0',
     fee: '',
     recipientId: assetInfo.recipientId ? assetInfo.recipientId : null,
     senderPublicKey: keys.publicKey,
-    timestamp: slots.getTime() - options.get('clientDriftSeconds'),
+    timestamp: slots.getTime() - config.clientDriftSeconds,
     message: assetInfo.message ? `${assetInfo.message}` : null,
     asset: {}
   }
@@ -35,7 +34,7 @@ async function createPluginAsset (trsType, assetInfo, secret, secondSecret) {
 
   // 计算资产费用
   // fixme: 这里的 fee 应该与对应的 trsType 对应，不然就是默认 send 交易费用
-  // const fee = assetInfo.fee || constants.net.fees.send;
+  // const fee = assetInfo.fee || constants.net.fees.transfer;
   // delete assetInfo.fee;
   if (assetInfo.fee) {
     transaction.fee = assetInfo.fee

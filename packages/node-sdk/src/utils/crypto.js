@@ -2,7 +2,7 @@ import nacl from 'tweetnacl'
 import crypto from 'crypto'
 
 import DdnCrypto from '@ddn/crypto'
-import DdnUtils from '@ddn/utils'
+import { assetTypes, bignum } from '@ddn/utils'
 import Asset from '@ddn/asset-base'
 import { constants } from '../config'
 
@@ -10,7 +10,6 @@ let Buffer
 if (typeof Buffer === 'undefined') {
   Buffer = require('buffer/').Buffer
 }
-const fixedPoint = constants.fixedPoint
 
 const {
   createHash,
@@ -38,23 +37,21 @@ function toLocalBuffer (buf) {
 
 async function getFee (transaction) {
   switch (transaction.type) {
-    case DdnUtils.assetTypes.TRANSFER: // Normal
-      return DdnUtils.bignum.multiply(0.1, fixedPoint)
-    case DdnUtils.assetTypes.SIGNATURE: // Signature
-      return DdnUtils.bignum.multiply(100, fixedPoint)
-    case DdnUtils.assetTypes.DELEGATE: // Delegate
-      return DdnUtils.bignum.multiply(10000, fixedPoint)
-    case DdnUtils.assetTypes.VOTE: // Vote
-      return DdnUtils.bignum.new(fixedPoint)
+    case assetTypes.TRANSFER: // Normal
+      return bignum.multiply(constants.net.fees.transfer, constants.fixedPoint)
+    case assetTypes.SIGNATURE: // Signature
+      return bignum.multiply(constants.net.fees.signature, constants.fixedPoint)
+    case assetTypes.DELEGATE: // Delegate
+      return bignum.multiply(constants.net.fees.delegate, constants.fixedPoint)
+    case assetTypes.VOTE: // Vote
+      return bignum.multiply(constants.net.fees.vote, constants.fixedPoint)
     default: {
-      let fee = constants.net.fees.send
+      let fee = constants.net.fees.transfer
       if (Asset.Utils.isTypeValueExists(transaction.type)) {
         const trans = Asset.Utils.getTransactionByTypeValue(transaction.type)
         const TransCls = require(trans.package).default[trans.name]
         let transInst = new TransCls({
-          constants: {
-            fixedPoint
-          }
+          constants
         })
 
         fee = await transInst.calculateFee(transaction)
@@ -105,7 +102,6 @@ export default {
   verifySecondSignature,
   verifyBytes,
 
-  fixedPoint, // 测试和前端用
   signBytes,
   toLocalBuffer, // 测试和前端用
   generateSecret, // 测试和前端用,重构： generatePhasekey() -> generateSecret()

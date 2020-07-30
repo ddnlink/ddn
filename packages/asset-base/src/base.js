@@ -106,28 +106,27 @@ class AssetBase {
   }
 
   /**
-     * 计算该类型资产交易的手续费（方法内不允许使用context对象内容）
-     * @param {*} trs
-     * @param {*} sender
-     */
+   * 计算该类型资产交易的手续费，如果子类没有定义该方法，默认是转账交易费，即：0.1 DDN
+   * @param {*} trs
+   * @param {*} sender
+   */
   async calculateFee () {
-    console.log('base.js...................')
-    // return DdnUtils.bignum.multiply(0.0002, 100) // fixme: 这里应该可以定制 2020.5.31
+    return DdnUtils.bignum.multiply(this.constants.net.fees.transfer, this.constants.fixedPoint)
   }
 
   /**
-     * 定义资产属性和字段的对应关系
-     * 最多支持定义15个属性
-     * 字符串类型10个，名称分别是str1,str2,str3...str10，长度分别是32,64,64,128,128,256,256,512,512,1024，前4个有索引
-     * 整数类型3个，名称分别是int1,int2,int3，类型为INT，前2个有索引
-     * 时间戳类型2个，分别是timestamp1,timestamp2
-     * 扩展类无上限，名称使用str_ext, int_ext, timestamp_ext，分别定义不同类型
-     *
-     * 以下属于系统属性，不可使用
-     * amount：转账金额，默认为0，字符串类型
-     * recipientId：收款地址，默认为null
-     * message：备注信息
-     */
+   * 定义资产属性和字段的对应关系
+   * 最多支持定义15个属性
+   * 字符串类型10个，名称分别是str1,str2,str3...str10，长度分别是32,64,64,128,128,256,256,512,512,1024，前4个有索引
+   * 整数类型3个，名称分别是int1,int2,int3，类型为INT，前2个有索引
+   * 时间戳类型2个，分别是timestamp1,timestamp2
+   * 扩展类无上限，名称使用str_ext, int_ext, timestamp_ext，分别定义不同类型
+   *
+   * 以下属于系统属性，不可使用
+   * amount：转账金额，默认为0，字符串类型
+   * recipientId：收款地址，默认为null
+   * message：备注信息
+   */
   async propsMapping () {
     throw new Error('AssetBase子类必须重载propsMapping方法。')
 
@@ -144,12 +143,11 @@ class AssetBase {
      * 自定义资产Api
      * @param {*} router
      */
-  async attachApi () {
-  }
+  async attachApi () { }
 
   /**
-     * 判断是否包含Json扩展属性
-     */
+   * 判断是否包含Json扩展属性
+   */
   async hasExtProps () {
     if (this.isHasExtProps !== null && typeof (this.isHasExtProps) !== 'undefined') {
       return this.isHasExtProps

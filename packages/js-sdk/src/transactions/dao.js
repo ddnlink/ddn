@@ -1,10 +1,8 @@
 import DdnUtils from '@ddn/utils'
 
 import crypto from '../utils/crypto'
-import constants from '../constants'
-
 import slots from '../time/slots'
-import options from '../utils/options'
+import { config, constants } from '../config'
 
 const { bignum } = DdnUtils
 
@@ -72,12 +70,12 @@ async function createOrg (org, secret, second_secret) {
   }
   const transaction = {
     type: DdnUtils.assetTypes.DAO_ORG,
-    nethash: options.get('nethash'),
+    nethash: config.nethash,
     amount: '0',
     fee: bignum.multiply(feeBase, 100000000).toString(), // bignum update feeBase * 100000000,
     recipientId: null,
     senderPublicKey: keys.publicKey,
-    timestamp: slots.getTime() - options.get('clientDriftSeconds'),
+    timestamp: slots.getTime() - config.clientDriftSeconds,
     asset: {
       org
     }
@@ -96,15 +94,15 @@ async function createOrg (org, secret, second_secret) {
 
 async function createTransfer (address, amount, secret, second_secret) {
   const keys = crypto.getKeys(secret)
-  const fee = constants.net.fees.org
+  const fee = DdnUtils.bignum.multiply(constants.net.fees.dao_exchange, constants.fixedPoint)
   const transaction = {
     type: DdnUtils.assetTypes.TRANSFER,
-    nethash: options.get('nethash'),
+    nethash: config.nethash,
     amount, // fixme 1000000000 ????
     fee: `${fee}`,
     recipientId: address,
     senderPublicKey: keys.publicKey,
-    timestamp: slots.getTime() - options.get('clientDriftSeconds')
+    timestamp: slots.getTime() - config.clientDriftSeconds
   }
 
   transaction.signature = await crypto.sign(transaction, keys)
@@ -146,7 +144,7 @@ async function createConfirmation (trsAmount, confirmation, secret, second_secre
     throw new Error('Invalid state format')
   }
 
-  let fee = constants.net.fees.org
+  let fee = DdnUtils.bignum.multiply(constants.net.fees.dao_confirmation, constants.fixedPoint)
   if (confirmation.state === 0) {
     fee = '0'
   }
@@ -159,12 +157,12 @@ async function createConfirmation (trsAmount, confirmation, secret, second_secre
 
   const transaction = {
     type: DdnUtils.assetTypes.DAO_CONFIRMATION,
-    nethash: options.get('nethash'),
+    nethash: config.nethash,
     amount: `${amount}`,
     fee: `${fee}`,
     recipientId,
     senderPublicKey: keys.publicKey,
-    timestamp: slots.getTime() - options.get('clientDriftSeconds'),
+    timestamp: slots.getTime() - config.clientDriftSeconds,
     asset: {
       daoConfirmation: confirmation
     }
@@ -210,18 +208,18 @@ async function createContribution (contribution, secret, second_secret) {
     throw new Error('Invalid url format')
   }
 
-  const fee = constants.net.fees.org
+  const fee = DdnUtils.bignum.multiply(constants.net.fees.dao_contribution, constants.fixedPoint)
   // contribution.sender_address = contribution.sender_address
   // contribution.received_address = contribution.received_address
   const transaction = {
     type: DdnUtils.assetTypes.DAO_CONTRIBUTION,
-    nethash: options.get('nethash'),
+    nethash: config.nethash,
     amount: '0',
     fee: `${fee}`,
     recipientId: null,
     senderPublicKey: keys.publicKey,
     // senderPublicKey: keys.publicKey,
-    timestamp: slots.getTime() - options.get('clientDriftSeconds'),
+    timestamp: slots.getTime() - config.clientDriftSeconds,
     asset: {
       daoContribution: contribution
     }

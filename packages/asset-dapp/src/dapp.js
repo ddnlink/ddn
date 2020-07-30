@@ -82,7 +82,7 @@ class Dapp extends Asset.Base {
   }
 
   async calculateFee () {
-    return DdnUtils.bignum.multiply(100, this.constants.fixedPoint)
+    return DdnUtils.bignum.multiply(this.constants.net.fees.dapp, this.constants.fixedPoint)
   }
 
   async verify (trs) {

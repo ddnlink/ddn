@@ -27,6 +27,10 @@ class Flags extends Asset.Base {
     return buffer
   }
 
+  async calculateFee () {
+    return DdnUtils.bignum.multiply(this.constants.net.fees.aob_flag, this.constants.fixedPoint)
+  }
+
   async verify (trs, sender) {
     await super.verify(trs, sender)
 

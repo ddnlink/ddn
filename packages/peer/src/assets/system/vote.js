@@ -24,7 +24,7 @@ class Vote {
   }
 
   async calculateFee (trs, sender) {
-    return DdnUtils.bignum.multiply(0.1, this.constants.fixedPoint)
+    return DdnUtils.bignum.multiply(this.constants.net.fees.vote, this.constants.fixedPoint)
   }
 
   async verify (trs, sender) {

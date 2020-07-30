@@ -60,7 +60,7 @@ class Block {
   }
 
   async calculateFee () {
-    return this.constants[this.config.net].fees.send
+    return this.constants[this.config.net].fees.transfer
   }
 
   getBlockStatus () {

@@ -72,7 +72,7 @@ async function createOrg (org, secret, second_secret) {
     type: DdnUtils.assetTypes.DAO_ORG,
     nethash: config.nethash,
     amount: '0',
-    fee: bignum.multiply(feeBase, 100000000).toString(), // bignum update feeBase * 100000000,
+    fee: bignum.multiply(feeBase, constants.fixedPoint).toString(), // bignum update feeBase * 100000000,
     recipientId: null,
     senderPublicKey: keys.publicKey,
     timestamp: slots.getTime() - config.clientDriftSeconds,
@@ -94,7 +94,7 @@ async function createOrg (org, secret, second_secret) {
 
 async function createTransfer (address, amount, secret, second_secret) {
   const keys = crypto.getKeys(secret)
-  const fee = constants.net.fees.org
+  const fee = bignum.multiply(constants.net.fees.dao_exchange, constants.fixedPoint)
   const transaction = {
     type: DdnUtils.assetTypes.TRANSFER,
     nethash: config.nethash,
@@ -144,7 +144,7 @@ async function createConfirmation (trsAmount, confirmation, secret, second_secre
     throw new Error('Invalid state format')
   }
 
-  let fee = constants.net.fees.org
+  let fee = bignum.multiply(constants.net.fees.dao_confirmation, constants.fixedPoint)
   if (confirmation.state === 0) {
     fee = '0'
   }
@@ -208,7 +208,7 @@ async function createContribution (contribution, secret, second_secret) {
     throw new Error('Invalid url format')
   }
 
-  const fee = constants.net.fees.org
+  const fee = bignum.multiply(constants.net.fees.dao_contribution, constants.fixedPoint)
   // contribution.sender_address = contribution.sender_address
   // contribution.received_address = contribution.received_address
   const transaction = {
@@ -236,9 +236,54 @@ async function createContribution (contribution, secret, second_secret) {
   return transaction
 }
 
+/**
+ * Create exchange transaction
+ * @param {Exchange} exchange object
+ * @param {*} secret
+ * @param {*} secondSecret
+ */
+async function createExchange (trsopt, exchange, secret, secondSecret) {
+  const keys = crypto.getKeys(secret)
+
+  if (typeof exchange !== 'object') {
+    throw new Error('The first argument should be a object!')
+  }
+
+  if (!exchange.org_id || exchange.org_id.length === 0) {
+    throw new Error('Invalid org_id format')
+  }
+
+  const fee = bignum.multiply(constants.net.fees.exchange, constants.fixedPoint)
+
+  const transaction = Object.assign({
+    type: DdnUtils.assetTypes.DAO_EXCHANGE,
+    nethash: config.nethash,
+    amount: '0', // Bignum update
+    fee: `${fee}`,
+    recipientId: null,
+    senderPublicKey: keys.publicKey,
+    // senderPublicKey: keys.publicKey,
+    timestamp: slots.getTime() - config.clientDriftSeconds,
+    asset: {
+      exchange
+    }
+  }, trsopt || {})
+
+  transaction.signature = await crypto.sign(transaction, keys)
+
+  if (secondSecret) {
+    const secondKeys = crypto.getKeys(secondSecret)
+    transaction.sign_signature = await crypto.secondSign(transaction, secondKeys)
+  }
+
+  transaction.id = await crypto.getId(transaction)
+  return transaction
+}
+
 export default {
   createOrg,
   createConfirmation,
   createTransfer,
-  createContribution
+  createContribution,
+  createExchange
 }

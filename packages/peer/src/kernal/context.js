@@ -31,6 +31,7 @@ class Context {
 
     // 区块链基本常量配置
     this.constants = options.constants
+    this.constants.net = options.constants[options.configObject.net]
 
     // 地址操作 常用操作和常量放在上下文
     this.address = new Address(this.constants.tokenPrefix)

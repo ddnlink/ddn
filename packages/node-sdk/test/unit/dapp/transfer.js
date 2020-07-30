@@ -1,7 +1,7 @@
 import extend from 'extend'
 import Debug from 'debug'
 import DdnUtils from '@ddn/utils'
-import { DdnJS, node } from '../ddn-js'
+import { DdnJS, node } from '../../ddn-js'
 
 const expect = node.expect
 const debug = Debug('debug')
@@ -35,7 +35,6 @@ async function createTransfer (address, amount, secret, second_secret) {
 }
 
 async function registerDAppAsync (options, { password }) {
-  // DdnJS.init();
   options.fee = '10000000000'
   const dappData = await createPluginAsset(DdnUtils.assetTypes.DAPP, options, password)
   const res = await node.submitTransactionAsync(dappData)
@@ -161,7 +160,7 @@ export const Transfer = () => {
       expect(res.body).to.have.property('success').to.be.true
 
       const balance2 = res.body.balance
-      const balance = DdnUtils.bignum.minus(balance1, inTransferAmount, node.constants.net.fees.send)
+      const balance = DdnUtils.bignum.minus(balance1, inTransferAmount, node.constants.net.fees.transfer)
       expect(balance).to.equal(balance2)
 
       const dappBalance = getDAppBalanceAsync(dappId, DAPP_CURRENCY)
@@ -339,8 +338,8 @@ export const Transfer = () => {
       await node.onNewBlockAsync()
 
       const dappBalance2 = await getDAppBalanceAsync(dappId, DAPP_CURRENCY)
-      // DdnUtils.bignum update expect(DdnUtils.bignum(dappBalance1).sub(amount).sub(node.constants.net.fees.send).toString()).to.equal(dappBalance2)
-      expect(DdnUtils.bignum.minus(dappBalance1, amount, node.constants.net.fees.send).toString()).to.equal(dappBalance2)
+      // DdnUtils.bignum update expect(DdnUtils.bignum(dappBalance1).sub(amount).sub(node.constants.net.fees.transfer).toString()).to.equal(dappBalance2)
+      expect(DdnUtils.bignum.minus(dappBalance1, amount, node.constants.net.fees.transfer).toString()).to.equal(dappBalance2)
 
       res = await node.apiGetAsync(`/accounts/getBalance?address=${recipientAccount.address}`)
       expect(res.body).to.have.property('success').to.be.true
@@ -369,9 +368,9 @@ export const Transfer = () => {
     //   let dappBalance2 = await getDAppBalanceAsync(dappId, currency)
     //   let dappDdnBalance2 = await getDAppBalanceAsync(dappId, DAPP_CURRENCY)
     //   //DdnUtils.bignum update expect(DdnUtils.bignum(dappBalance1).sub(amount).toString()).to.equal(dappBalance2)
-    //   //DdnUtils.bignum update expect(DdnUtils.bignum(dappDdnBalance1).sub(node.constants.net.fees.send).toString()).to.equal(dappDdnBalance2)
+    //   //DdnUtils.bignum update expect(DdnUtils.bignum(dappDdnBalance1).sub(node.constants.net.fees.transfer).toString()).to.equal(dappDdnBalance2)
     //   expect(DdnUtils.bignum.minus(dappBalance1, amount).toString()).to.equal(dappBalance2)
-    //   expect(DdnUtils.bignum.minus(dappDdnBalance1, node.constants.net.fees.send).toString()).to.equal(dappDdnBalance2)
+    //   expect(DdnUtils.bignum.minus(dappDdnBalance1, node.constants.net.fees.transfer).toString()).to.equal(dappDdnBalance2)
 
   //   res = await node.apiGetAsync('/accounts/getBalance?address=' + recipientAccount.address)
   //   expect(res.body).to.have.property('success').to.be.true

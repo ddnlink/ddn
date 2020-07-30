@@ -9,11 +9,12 @@ import { config, constants } from '../config'
 async function createDApp (options, secret, secondSecret) {
   const keys = crypto.getKeys(secret)
 
+  const fee = DdnUtils.bignum.multiply(constants.net.fees.dapp, constants.fixedPoint)
   const transaction = {
     nethash: config.nethash,
     type: DdnUtils.assetTypes.DAPP,
     amount: '0',
-    fee: constants.net.fees.dapp,
+    fee: `${fee}`,
     recipientId: null,
     senderPublicKey: keys.publicKey,
     timestamp: slots.getTime() - config.clientDriftSeconds,

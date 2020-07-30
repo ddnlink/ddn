@@ -18,12 +18,13 @@ async function createSignature (secret, secondSecret) {
   const keys = crypto.getKeys(secret)
 
   const signature = signSignature(secondSecret)
+  const fee = DdnUtils.bignum.multiply(constants.net.fees.signature, constants.fixedPoint)
 
   const transaction = {
     type: DdnUtils.assetTypes.SIGNATURE,
     nethash: config.nethash,
     amount: '0',
-    fee: constants.net.fees.secondSignature,
+    fee: `${fee}`,
     recipientId: null,
     senderPublicKey: keys.publicKey,
     timestamp: slots.getTime() - config.clientDriftSeconds,

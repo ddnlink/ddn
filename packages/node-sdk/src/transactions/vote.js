@@ -1,18 +1,18 @@
 import DdnUtils from '@ddn/utils'
 
 import crypto from '../utils/crypto'
-
 import slots from '../time/slots'
 import { config, constants } from '../config'
 
 async function createVote (keyList, secret, secondSecret) {
   const keys = crypto.getKeys(secret)
+  const fee = DdnUtils.bignum.multiply(constants.net.fees.vote, constants.fixedPoint)
 
   const transaction = {
     type: DdnUtils.assetTypes.VOTE,
     nethash: config.nethash,
     amount: '0',
-    fee: constants.net.fees.vote,
+    fee: `${fee}`,
     recipientId: null,
     senderPublicKey: keys.publicKey,
     timestamp: slots.getTime() - config.clientDriftSeconds,

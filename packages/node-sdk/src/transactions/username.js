@@ -1,6 +1,6 @@
+import DdnUtils from '@ddn/utils'
 import crypto from '../utils/crypto'
 
-import DdnUtils from '@ddn/utils'
 import slots from '../time/slots'
 import { config, constants } from '../config'
 
@@ -10,7 +10,7 @@ async function createUsername (name, secret, secondSecret) {
   if (!name || name.length === 0) {
     throw new Error('Invalid name format')
   }
-  const fee = constants.net.fees.username
+  const fee = DdnUtils.bignum.multiply(constants.net.fees.username, constants.fixedPoint)
 
   const transaction = {
     type: DdnUtils.assetTypes.USERINFO,

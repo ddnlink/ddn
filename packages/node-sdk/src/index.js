@@ -12,7 +12,6 @@ import dapp from './transactions/dapp'
 import aob from './transactions/aob'
 import evidence from './transactions/evidence'
 import dao from './transactions/dao'
-import exchange from './transactions/exchange'
 import coupon from './transactions/coupon'
 import assetPlugin from './transactions/asset-plugin'
 
@@ -46,7 +45,6 @@ export default {
   // dao
   evidence,
   dao,
-  exchange,
 
   // coupon
   coupon,

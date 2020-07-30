@@ -1,7 +1,8 @@
 import Asset from '@ddn/asset-base'
+import { bignum } from '@ddn/utils'
 import crypto from '../utils/crypto'
 import slots from '../time/slots'
-import { config } from '../config'
+import { config, constants } from '../config'
 
 async function createPluginAsset (trsType, assetInfo, secret, secondSecret) {
   const keys = crypto.getKeys(secret)
@@ -34,7 +35,7 @@ async function createPluginAsset (trsType, assetInfo, secret, secondSecret) {
 
   // 计算资产费用
   // fixme: 这里的 fee 应该与对应的 trsType 对应，不然就是默认 send 交易费用
-  // const fee = assetInfo.fee || constants.net.fees.send;
+  // const fee = assetInfo.fee || constants.net.fees.transfer;
   // delete assetInfo.fee;
   if (assetInfo.fee) {
     transaction.fee = assetInfo.fee

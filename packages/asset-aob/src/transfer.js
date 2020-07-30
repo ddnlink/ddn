@@ -35,8 +35,7 @@ class Transfer extends Asset.Base {
   }
 
   async calculateFee () {
-    console.log('this.constants[this.config.net].fees.aob_transfer', this.constants[this.config.net].fees.aob_transfer)
-    return DdnUtils.bignum.multiply(this.constants[this.config.net].fees.aob_transfer, this.constants.fixedPoint)
+    return DdnUtils.bignum.multiply(this.constants.net.fees.aob_transfer, this.constants.fixedPoint)
   }
 
   async create (data, trs) {

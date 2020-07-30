@@ -20,7 +20,7 @@ class Lock {
   }
 
   async calculateFee (trs, sender) {
-    return this.constants[this.config.net].fees.send
+    return DdnUtils.bignum.multiply(this.constants.net.fees.lock, this.constants.fixedPoint)
   }
 
   async verify (trs, sender) {

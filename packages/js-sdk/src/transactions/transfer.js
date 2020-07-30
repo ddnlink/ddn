@@ -1,22 +1,22 @@
 import crypto from '../utils/crypto'
-import constants from '../constants'
-import DdnUtils from '@ddn/utils'
+import { bignum, assetTypes } from '@ddn/utils'
 import slots from '../time/slots'
-import options from '../utils/options'
+import { config, constants } from '../config'
 
-const nethash = options.get('nethash')
+const nethash = config.nethash
 
 async function createInTransfer (dappId, currency, amount, secret, secondSecret) {
   const keys = crypto.getKeys(secret)
+  const fee = bignum.multiply(constants.net.fees.dapp_in, constants.fixedPoint)
 
   const transaction = {
-    type: DdnUtils.assetTypes.DAPP_IN,
+    type: assetTypes.DAPP_IN,
     nethash,
-    amount: '0', // Bignum update
-    fee: constants.net.fees.send,
+    amount: '0',
+    fee: `${fee}`,
     recipientId: null,
     senderPublicKey: keys.publicKey,
-    timestamp: slots.getTime() - options.get('clientDriftSeconds'),
+    timestamp: slots.getTime() - config.clientDriftSeconds,
     asset: {
       in: {
         dapp_id: dappId,
@@ -26,7 +26,7 @@ async function createInTransfer (dappId, currency, amount, secret, secondSecret)
   }
 
   if (currency === constants.nethash[nethash].tokenName) {
-    transaction.amount = amount // Bignum update Number(amount)
+    transaction.amount = amount
   } else {
     transaction.asset.in.amount = String(amount)
   }
@@ -44,15 +44,15 @@ async function createInTransfer (dappId, currency, amount, secret, secondSecret)
 
 async function createOutTransfer (recipientId, dappId, transactionId, currency, amount, secret, secondSecret) {
   const keys = crypto.getKeys(secret)
-
+  const fee = bignum.multiply(constants.net.fees.dapp_out, constants.fixedPoint)
   const transaction = {
     nethash,
-    type: DdnUtils.assetTypes.DAPP_OUT,
+    type: assetTypes.DAPP_OUT,
     amount: '0', // Bignum update
-    fee: constants.net.fees.send,
+    fee: `${fee}`,
     recipientId: recipientId,
     senderPublicKey: keys.publicKey,
-    timestamp: slots.getTime() - options.get('clientDriftSeconds'),
+    timestamp: slots.getTime() - config.clientDriftSeconds,
     asset: {
       outTransfer: {
         dapp_id: dappId,

@@ -210,6 +210,10 @@ class Exchange extends Asset.Base {
     return bb.toBuffer()
   }
 
+  async calculateFee () {
+    return DdnUtils.bignum.multiply(this.constants.net.fees.dao_exchange, this.constants.fixedPoint)
+  }
+
   async applyUnconfirmed (trs, sender, dbTrans) {
     const assetObj = await this.getAssetObject(trs)
     const key = `${sender.address}:${trs.type}:${assetObj.org_id}:${assetObj.state}`
