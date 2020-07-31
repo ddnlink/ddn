@@ -1,3 +1,37 @@
+# [3.6.0](https://github.com/ddnlink/ddn/compare/v3.5.0...v3.6.0) (2020-07-31)
+
+
+### Bug Fixes
+
+* 🐛 Fix a bug on get multisignatures/accounts ([98ab9c6](https://github.com/ddnlink/ddn/commit/98ab9c64c0ba466809dd09f533bdf8457bc31a0e))
+* 🐛 Fix asset extends by adding constructor in chlidren ([e4ad3fc](https://github.com/ddnlink/ddn/commit/e4ad3fcdbf74e288f4b27043539ace1c74bcc2ad))
+* 🐛 Fix block fee and a multisignature bug ([49043c5](https://github.com/ddnlink/ddn/commit/49043c5596ad190ddc8d1853a086792c52aa6c8d))
+* 🐛 Fix peerStatus and multisignatures in @ddn/node-sdk ([643e38c](https://github.com/ddnlink/ddn/commit/643e38cb4a3ec8d141232e4d6b8612d01ae95f1a))
+* 🐛 Update @ddn/node-sdk ([bf8b8a7](https://github.com/ddnlink/ddn/commit/bf8b8a74d2623c5909ea3e15fa08c0c8166bb9ce))
+* 🐛 Update @ddn/node-sdk export messages ([96762c7](https://github.com/ddnlink/ddn/commit/96762c78385c9c338f3069f2fb7ba3d942e5bbe2))
+
+
+### Features
+
+* 🎸 Add @ddn/js-sdk for browsers and fix some bugs ([2e88d66](https://github.com/ddnlink/ddn/commit/2e88d66b36356c03336f5496bdd76d9397e52fb8))
+* 🎸 Add dao, dao and evidence transations for @ddn/js-sdk ([8bdfc8b](https://github.com/ddnlink/ddn/commit/8bdfc8bf285a2adb5f25f1e38e06313e59ed8bce))
+* 🎸 Add features make @ddn/crypto campatible with browsers ([77b85db](https://github.com/ddnlink/ddn/commit/77b85db03a4f28790a14298c265d9346a56b514c))
+* 🎸 Add getBytes for @ddn/asset-aob and update some apis ([a868e66](https://github.com/ddnlink/ddn/commit/a868e66c0155dd8cb810d4802add890f51c73c31))
+* 🎸 Delete bitcore-mnemonic from @ddn/peer and Update aob ([722617a](https://github.com/ddnlink/ddn/commit/722617ae4946bfeb5f4682bfe9d293f5cfe8f686))
+* 🎸 Seperate config and constants from js-sdk and node-sdk ([1d320b8](https://github.com/ddnlink/ddn/commit/1d320b8f439bd00b6a038df3962890aebe19e6af))
+* 🎸 Update to make SDK compatible with browser ([8dd74fe](https://github.com/ddnlink/ddn/commit/8dd74feb11a92e40e219ba683e0efd63d0f47286))
+* 🎸 Update transaction fees algorithm ([61e172f](https://github.com/ddnlink/ddn/commit/61e172f9a9b3b4faf4218728570d8411a044ad32))
+
+
+### Tests
+
+* 💍 Seperate @ddn/test-utils from @ddn/utils ([a78127b](https://github.com/ddnlink/ddn/commit/a78127bdec3c9520a45e6dd3217258fa598a4209))
+
+
+### BREAKING CHANGES
+
+* 🧨 Update @ddn/node-sdk to compatible browser
+
 
 ## [3.5.2](https://github.com/ddnlink/ddn/compare/v3.3.0...v3.5.2) (2020-07-01)
 
