@@ -53,7 +53,7 @@ export function requireFile (f, opts: IOpts = {}) {
   const { onError = defaultOnError } = opts
   let ret: any = {}
   try {
-        ret = require(f) || {}; // eslint-disable-line
+    ret = require(f) || {}; // eslint-disable-line
   } catch (e) {
     onError(e, f)
   }
