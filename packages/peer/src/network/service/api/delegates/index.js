@@ -26,7 +26,7 @@ class RootRouter {
         limit: {
           type: 'integer',
           minimum: 0,
-          maximum: 101
+          maximum: this.constants.delegates
         },
         offset: {
           type: 'integer',

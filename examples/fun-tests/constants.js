@@ -8,7 +8,8 @@ module.exports = {
   tokenPrefix: 'D',
   foundAddress: 'DLjrrVwnmMXstcAYVjcrpwyYb3kY1ehABU',
   walletUrl: 'http://wallet.ddn.link',
-
+  enableMoreLockTypes: true,
+  
   interval: 10, // 10ms
   delegates: 101, // number
   maxAmount: 100000000,
@@ -25,7 +26,7 @@ module.exports = {
   maxConfirmations: 77 * 100,
   confirmationLength: 77,
   fixedPoint: 10 ** 8,
-  totalAmount: '10000000000000000', // Bignum update
+  totalAmount: '10000000000000000',
   maxTxsPerBlock: 500,
 
   testnet: {

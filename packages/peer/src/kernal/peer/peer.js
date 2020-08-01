@@ -513,7 +513,7 @@ class Peer {
           {
             dapp_id: dappId
           },
-          limit || this.config.settings.delegateNumber,
+          limit || this.constants.delegates,
           null,
           false,
           (err, result) => {
@@ -536,7 +536,7 @@ class Peer {
       this.dao.findPage(
         'peer',
         where,
-        limit || this.config.settings.delegateNumber,
+        limit || this.constants.delegates,
         null,
         false,
         null,

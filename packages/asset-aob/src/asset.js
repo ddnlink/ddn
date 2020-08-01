@@ -11,56 +11,56 @@ class Aob extends Asset.Base {
   async propsMapping () {
     return [
       {
-        field: 'str1',
         prop: 'name',
-        required: true
+        required: true,
+        field: 'str1'
       },
       {
-        field: 'str9',
         prop: 'desc',
         minLen: 1,
         maxLen: 1024,
-        required: true
+        required: true,
+        field: 'str9'
       },
       {
-        field: 'str2',
-        prop: 'maximum'
+        prop: 'maximum',
+        field: 'str2'
       },
       {
-        field: 'str3',
-        prop: 'quantity'
+        prop: 'quantity',
+        field: 'str3'
       },
       {
-        field: 'str4',
-        prop: 'issuer_name'
+        prop: 'issuer_name',
+        field: 'str4'
       },
       {
-        field: 'str10',
-        prop: 'strategy'
+        prop: 'strategy',
+        field: 'str10'
       },
       {
-        field: 'int1',
-        prop: 'precision'
+        prop: 'precision',
+        field: 'int1'
       },
       {
-        field: 'int2',
-        prop: 'acl'
+        prop: 'acl',
+        field: 'int2'
       },
       {
-        field: 'int3',
-        prop: 'writeoff'
+        prop: 'writeoff',
+        field: 'int3'
       },
       {
-        field: 'str5',
-        prop: 'allow_writeoff'
+        prop: 'allow_writeoff',
+        field: 'str5'
       },
       {
-        field: 'str6',
-        prop: 'allow_whitelist'
+        prop: 'allow_whitelist',
+        field: 'str6'
       },
       {
-        field: 'str7',
-        prop: 'allow_blacklist'
+        prop: 'allow_blacklist',
+        field: 'str7'
       }
     ]
   }

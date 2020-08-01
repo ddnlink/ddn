@@ -57,7 +57,7 @@ class BlockStatus {
   calcSupply (height) {
     let heightResult = this.parseHeight(height)
 
-    heightResult = DdnUtils.bignum.minus(heightResult, DdnUtils.bignum.modulo(heightResult, this.config.settings.delegateNumber))
+    heightResult = DdnUtils.bignum.minus(heightResult, DdnUtils.bignum.modulo(heightResult, this.constants.delegates))
 
     const milestone = this.calcMilestone(heightResult)
 

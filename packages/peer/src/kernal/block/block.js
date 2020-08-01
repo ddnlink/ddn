@@ -454,7 +454,7 @@ class Block {
           return cb()
         }
 
-        if (this._lastVoteTime && Date.now() - this._lastVoteTime < (this.config.settings.blockIntervalTime * 1000) / 2) {
+        if (this._lastVoteTime && Date.now() - this._lastVoteTime < (this.constants.interval * 1000) / 2) {
           this.logger.debug('ignore the frequently propose')
           return cb()
         }
@@ -653,7 +653,7 @@ class Block {
           if (!applyedTrsIdSet.has(item.id)) {
             if (item.type === assetTypes.MULTISIGNATURE) {
               const curTime = this.runtime.slot.getTime() // (new Date()).getTime();
-              const pasttime = Math.ceil((curTime - item.timestamp) / this.config.settings.blockIntervalTime)
+              const pasttime = Math.ceil((curTime - item.timestamp) / this.constants.interval)
 
               if (pasttime >= item.asset.multisignature.lifetime) {
                 return false

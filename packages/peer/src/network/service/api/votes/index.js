@@ -67,7 +67,7 @@ class RootRouter {
 
         let percent = 100 - (delegates[i].missedblocks / ((delegates[i].producedblocks + delegates[i].missedblocks) / 100))
         percent = percent || 0
-        const outsider = i + 1 > this.config.settings.delegateNumber // wxm   slots.delegates;
+        const outsider = i + 1 > this.constants.delegates // wxm   slots.delegates;
         delegates[i].productivity = (!outsider) ? parseFloat(Math.floor(percent * 100) / 100).toFixed(2) : 0
       }
 

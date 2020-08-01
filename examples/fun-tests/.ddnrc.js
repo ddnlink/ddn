@@ -161,9 +161,7 @@ module.exports = {
     params: {}
   },
   settings: {
-    enableMoreLockTypes: true,
-    delegateNumber: 101,
-    blockIntervalTime: 10
+    enableMoreLockTypes: true
   },
 
   /**

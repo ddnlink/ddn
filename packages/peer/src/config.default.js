@@ -159,8 +159,6 @@ export default {
   },
   settings: {
     enableMoreLockTypes: true,
-    delegateNumber: 101,
-    blockIntervalTime: 10
   },
 
   /**

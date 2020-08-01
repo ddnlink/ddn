@@ -181,7 +181,7 @@ class Dapp extends Asset.Base {
     } else {
       delegatesArr = typeof dapp.delegates === 'string' ? dapp.delegates.split(',') : dapp.delegates
       if (delegatesArr.length < 5 ||
-                delegatesArr.length > this.config.settings.delegateNumber) {
+                delegatesArr.length > this.constants.delegates) {
         throw new Error('Invalid dapp delegates amount')
       }
 

@@ -45,7 +45,7 @@ class Transfer {
       throw new Error('Invalid recipientId, cannot be your self')
     }
 
-    if (!this.config.settings.enableMoreLockTypes) {
+    if (!this.constants.enableMoreLockTypes) {
       const lastBlock = this.runtime.block.getLastBlock()
 
       if (

@@ -3,7 +3,7 @@ import shell from 'shelljs'
 import ip from 'ip'
 
 class System {
-  static getPublicIp () {
+  static get () {
     let publicIp = null
     try {
       const ifaces = os.networkInterfaces()

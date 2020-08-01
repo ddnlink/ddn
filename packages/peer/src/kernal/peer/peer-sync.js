@@ -173,15 +173,14 @@ class PeerSync {
         const backRound = await this.runtime.round.calc(lastLackBlock.height)
         let backHeight = lastLackBlock.height
 
-        if (currentRound !== backRound || DdnUtils.bignum.isEqualTo(DdnUtils.bignum.modulo(lastBlock.height, this.config.settings.delegateNumber), 0)) {
+        if (currentRound !== backRound || DdnUtils.bignum.isEqualTo(DdnUtils.bignum.modulo(lastBlock.height, this.constants.delegates), 0)) {
           if (backRound === 1) {
             backHeight = 1
           } else {
-            // DdnUtils.bignum update backHeight = backHeight - backHeight % 101;
-            backHeight = DdnUtils.bignum.minus(backHeight, DdnUtils.bignum.modulo(backHeight, this.config.settings.delegateNumber))
+            backHeight = DdnUtils.bignum.minus(backHeight, DdnUtils.bignum.modulo(backHeight, this.constants.delegates))
           }
 
-          var result = await this.runtime.block.querySimpleBlockData({ height: backHeight.toString() })
+          const result = await this.runtime.block.querySimpleBlockData({ height: backHeight.toString() })
           if (result && result.block) {
             lastLackBlock = result.block
           }
@@ -191,13 +190,11 @@ class PeerSync {
         await this.runtime.round.directionSwap('backward', lastBlock)
 
         // wxm TODO  有些资产里处理了这个逻辑，如DAPP
-        // library.bus.message('deleteBlocksBefore', commonBlock);
         await this.runtime.block.deleteBlocksBefore(lastLackBlock)
         await this.runtime.round.directionSwap('forward', lastBlock)
       } catch (err) {
         this.logger.error(`Failed to rollback blocks before ${lastLackBlock.height}`, DdnUtils.system.getErrorMsg(err))
         process.exit(1)
-        return
       }
     }
     // rollback blocks end

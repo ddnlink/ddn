@@ -32,7 +32,7 @@ class Round {
 
     await new Promise((resolve, reject) => {
       this.dao.findOne('block', {
-        [roundStr]: this.dao.db_str(`(select (cast(block.height / ${this.config.settings.delegateNumber} as integer) + (case when block.height % ${this.config.settings.delegateNumber} > 0 then 1 else 0 end))) = ${roundStr}`)
+        [roundStr]: this.dao.db_str(`(select (cast(block.height / ${this.constants.delegates} as integer) + (case when block.height % ${this.constants.delegates} > 0 then 1 else 0 end))) = ${roundStr}`)
       }, [
         [this.dao.db_fnSum(''), 'fees'], // wxm block database    library.dao.db_fn('sum', library.dao.db_col('totalFee'))
         [this.dao.db_fnGroupConcat('reward'), 'rewards'], // wxm block database   library.dao.db_fn('group_concat', library.dao.db_col('reward'))
@@ -57,10 +57,10 @@ class Round {
 
   async calc (height) {
     let value = 0
-    if (DdnUtils.bignum.isGreaterThan(DdnUtils.bignum.modulo(height, this.config.settings.delegateNumber), 0)) {
+    if (DdnUtils.bignum.isGreaterThan(DdnUtils.bignum.modulo(height, this.constants.delegates), 0)) {
       value = 1
     }
-    return DdnUtils.bignum.plus(DdnUtils.bignum.floor(DdnUtils.bignum.divide(height, this.config.settings.delegateNumber)), value)
+    return DdnUtils.bignum.plus(DdnUtils.bignum.floor(DdnUtils.bignum.divide(height, this.constants.delegates)), value)
   }
 
   async getVotes (round, dbTrans) {
@@ -129,8 +129,8 @@ class Round {
       return
     }
 
-    if (this._delegatesByRound[round].length !== this.config.settings.delegateNumber &&
-            !DdnUtils.bignum.isEqualTo(block.height, 1) && !DdnUtils.bignum.isEqualTo(block.height, this.config.settings.delegateNumber)) {
+    if (this._delegatesByRound[round].length !== this.constants.delegates &&
+            !DdnUtils.bignum.isEqualTo(block.height, 1) && !DdnUtils.bignum.isEqualTo(block.height, this.constants.delegates)) {
       this.logger.debug('Round tick completed', {
         height: block.height
       })
@@ -268,7 +268,7 @@ class Round {
     this._unDelegatesByRound[round] = this._unDelegatesByRound[round] || []
     this._unDelegatesByRound[round].pop()
 
-    if (this._unDelegatesByRound[round].length !== this.config.settings.delegateNumber && !DdnUtils.bignum.isEqualTo(previousBlock.b_height, 1)) {
+    if (this._unDelegatesByRound[round].length !== this.constants.delegates && !DdnUtils.bignum.isEqualTo(previousBlock.b_height, 1)) {
       return done()
     }
 

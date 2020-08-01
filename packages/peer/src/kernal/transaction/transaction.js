@@ -593,7 +593,7 @@ class Transaction {
       throw new Error('Invalid sender')
     }
 
-    if (this.config.settings.enableMoreLockTypes) {
+    if (this.constants.enableMoreLockTypes) {
       const lastBlock = this.runtime.block.getLastBlock()
 
       const isLockedType = await this._assets.isSupportLock(trs.type)

@@ -894,11 +894,11 @@ class AssetBase {
       let fieldType = currProp.field.replace(/[0-9]/g, '')
       fieldType = fieldType.replace(/_ext$/, '')
       if (fieldType === 'str') {
-        propsRules[currProp.prop].type = 'string'
+        propsRules[currProp.prop].type = ['string', 'null']
       } else if (fieldType === 'int') {
-        propsRules[currProp.prop].type = 'integer'
+        propsRules[currProp.prop].type = ['integer', 'null']
       } else if (fieldType === 'timestamp') {
-        propsRules[currProp.prop].type = 'string'
+        propsRules[currProp.prop].type = ['string', 'null']
         propsRules[currProp.prop].format = 'datetime'
       }
 
@@ -921,9 +921,9 @@ class AssetBase {
   }
 
   /**
-     * 读取数据库数据并反序列成交易对象体
-     * @param {*} raw
-     */
+   * 读取数据库数据并反序列成交易对象体
+   * @param {*} raw
+   */
   async dbRead (raw) {
     if (raw && raw.asset_trs_id) {
       const result = {

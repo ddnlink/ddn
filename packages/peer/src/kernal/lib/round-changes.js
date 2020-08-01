@@ -32,8 +32,8 @@ class RoundChanges {
     // const feesRemaining = totalDistributeFees - (fees * slots.delegates);
 
     const totalDistributeFees = DdnUtils.bignum.floor(DdnUtils.bignum.multiply(this._roundFees, ratio))
-    const fees = DdnUtils.bignum.floor(DdnUtils.bignum.divide(totalDistributeFees, this.config.settings.delegateNumber))
-    const feesRemaining = DdnUtils.bignum.minus(totalDistributeFees, DdnUtils.bignum.multiply(fees, this.config.settings.delegateNumber))
+    const fees = DdnUtils.bignum.floor(DdnUtils.bignum.divide(totalDistributeFees, this.constants.delegates))
+    const feesRemaining = DdnUtils.bignum.minus(totalDistributeFees, DdnUtils.bignum.multiply(fees, this.constants.delegates))
 
     // DdnUtils.bignum update const rewards = Math.floor(parseInt(roundRewards[index]) * ratio) || 0;
     const rewards = DdnUtils.bignum.floor(DdnUtils.bignum.multiply(this._roundRewards[index], ratio)) || 0

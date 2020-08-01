@@ -1,12 +1,12 @@
 /**
- * Delegate
+ * Consensus 共识
  * wangxm   2018-01-08
  */
 import ByteBuffer from 'bytebuffer'
 import nacl from 'tweetnacl'
-import DdnCrypto from '@ddn/crypto'
 import assert from 'assert'
 import ip from 'ip'
+import DdnCrypto from '@ddn/crypto'
 
 let _singleton
 
@@ -32,9 +32,7 @@ class Consensus {
   getProposeHash (propose) {
     const bytes = new ByteBuffer()
 
-    // Bignum update   bytes.writeLong(propose.height);
     bytes.writeString(propose.height)
-
     bytes.writeString(propose.id)
 
     const generatorPublicKeyBuffer = Buffer.from(propose.generator_public_key, 'hex') // wxm block database
@@ -65,7 +63,7 @@ class Consensus {
     }
     const hash = this.getProposeHash(propose)
     propose.hash = hash.toString('hex')
-    propose.signature = await DdnCrypto.sign(hash, keypair)
+    propose.signature = nacl.sign.detached(hash, Buffer.from(keypair.privateKey, 'hex'))
     return propose
   }
 
@@ -145,7 +143,7 @@ class Consensus {
         signatures: {
           type: 'array',
           minLength: 1,
-          maxLength: 101
+          maxLength: this.constants.delegates
         }
       },
       required: ['height', 'id', 'signatures']
@@ -203,7 +201,7 @@ class Consensus {
      * @param {*} votes
      */
   hasEnoughVotes (votes) {
-    return votes && votes.signatures && (votes.signatures.length > (this.config.settings.delegateNumber * 2 / 3))
+    return votes && votes.signatures && (votes.signatures.length > (this.constants.delegates * 2 / 3))
   }
 
   /**

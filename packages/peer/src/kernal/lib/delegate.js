@@ -138,9 +138,9 @@ class Delegate {
       }
 
       const total_votes = (existing_votes + additions) - removals
-      if (total_votes > this.config.settings.delegateNumber) {
-        const exceeded = total_votes - this.config.settings.delegateNumber
-        throw new Error(`Maximum number ${this.config.settings.delegateNumber} votes exceeded (${exceeded} too many).`)
+      if (total_votes > this.constants.delegates) {
+        const exceeded = total_votes - this.constants.delegates
+        throw new Error(`Maximum number ${this.constants.delegates} votes exceeded (${exceeded} too many).`)
       }
     } else {
       throw new Error('Please provide an array of votes')
@@ -157,12 +157,12 @@ class Delegate {
       sort: [['vote', 'DESC'], ['publicKey', 'ASC']] // wxm block database
     }, ['username', 'address', 'publicKey', 'vote', 'missedblocks', 'producedblocks', 'fees', 'rewards', 'balance'])
 
-    let limit = query.limit || this.config.settings.delegateNumber
+    let limit = query.limit || this.constants.delegates
     const offset = query.offset || 0
     let orderField = query.orderBy || 'rate:asc'
 
     orderField = orderField ? orderField.split(':') : null
-    limit = limit > this.config.settings.delegateNumber ? this.config.settings.delegateNumber : limit
+    limit = limit > this.constants.delegates ? this.constants.delegates : limit
 
     const orderBy = orderField ? orderField[0] : null
     const sortMode = orderField && orderField.length === 2 ? orderField[1] : 'asc'
@@ -182,7 +182,7 @@ class Delegate {
       let percent = 100 - (delegates[i].missedblocks / ((delegates[i].producedblocks + delegates[i].missedblocks) / 100))
       percent = Math.abs(percent) || 0
 
-      const outsider = i + 1 > this.config.settings.delegateNumber
+      const outsider = i + 1 > this.constants.delegates
       delegates[i].productivity = (!outsider) ? Math.round(percent * 1e2) / 1e2 : 0
 
       delegates[i].forged = DdnUtils.bignum.plus(delegates[i].fees, delegates[i].rewards).toString()
@@ -206,7 +206,7 @@ class Delegate {
       is_delegate: 1, // wxm block database
       // sort: {"vote": -1, "publicKey": 1},
       sort: [['vote', 'DESC'], ['publicKey', 'ASC']], // wxm block database
-      limit: this.config.settings.delegateNumber
+      limit: this.constants.delegates
     }, ['publicKey'])
 
     if (!delegates || !delegates.length) {
@@ -264,7 +264,7 @@ class Delegate {
     let currentSlot = curSlot
     const lastSlot = this.runtime.slot.getLastSlot(currentSlot)
     for (; currentSlot < lastSlot; currentSlot += 1) {
-      const delegatePos = currentSlot % this.config.settings.delegateNumber
+      const delegatePos = currentSlot % this.constants.delegates
       const delegatePublicKey = activeDelegates[delegatePos]
       if (delegatePublicKey && this._myDelegateKeypairs[delegatePublicKey]) {
         return {
@@ -279,17 +279,17 @@ class Delegate {
   async validateBlockSlot ({ height, timestamp, generator_public_key }) {
     const activeDelegates = await this.getDisorderDelegatePublicKeys(height)
     const currentSlot = this.runtime.slot.getSlotNumber(timestamp)
-    const delegateKey = activeDelegates[currentSlot % this.config.settings.delegateNumber]
+    const delegateKey = activeDelegates[currentSlot % this.constants.delegates]
     if (delegateKey && generator_public_key === delegateKey) {
       return
     }
-    throw new Error(`Failed to verify slot, expected delegate: ${delegateKey}`)
+    throw new Error(`Failed to verify slot, expected delegate: ${delegateKey}, gotten delegate: ${generator_public_key}`)
   }
 
   async validateProposeSlot ({ height, timestamp, generator_public_key }) {
     const activeDelegates = await this.getDisorderDelegatePublicKeys(height)
     const currentSlot = this.runtime.slot.getSlotNumber(timestamp)
-    const delegateKey = activeDelegates[currentSlot % this.config.settings.delegateNumber]
+    const delegateKey = activeDelegates[currentSlot % this.constants.delegates]
     if (delegateKey && generator_public_key === delegateKey) {
       return
     }
