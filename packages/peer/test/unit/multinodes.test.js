@@ -3,7 +3,7 @@
  */
 import Debug from 'debug'
 import async from 'async'
-import node from '@ddn/test-utils'
+import { node } from '../ddn-js'
 const debug = Debug('multinodes')
 
 // 全部启动下面的服务才能测试通过

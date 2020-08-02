@@ -57,3 +57,4 @@ blockchain.*
 # custom
 **/**/*.hbl.js
 examples/custom
+.ddnrc.js

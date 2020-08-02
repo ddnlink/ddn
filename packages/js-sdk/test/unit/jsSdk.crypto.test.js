@@ -183,18 +183,18 @@ describe('Node SDK', () => {
         done()
       })
 
-      it('should be equal 1000000000000', async (done) => {
+      it('should be equal 10000000000', async (done) => {
         const fee = await getFee({ type: 2 })
         expect(Bignum.isBigNumber(fee)).to.be.true
-        expect(fee.toString()).to.equal('1000000000000')
+        expect(fee.toString()).to.equal('10000000000')
         done()
       })
 
-      it('should be equal 100000000', async (done) => {
+      it('should be equal 10000000', async (done) => {
         const fee = await getFee({ type: 3 })
         debug('fee: ', fee)
         expect(Bignum.isBigNumber(fee)).to.be.true
-        expect(fee.toString()).to.equal('100000000')
+        expect(fee.toString()).to.equal('10000000')
         done()
       })
     })

@@ -2,7 +2,7 @@
  * passed
  */
 import Debug from 'debug'
-import node from '@ddn/test-utils'
+import { node } from '../ddn-js'
 
 const debug = Debug('peer')
 

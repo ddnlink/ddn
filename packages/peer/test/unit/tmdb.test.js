@@ -1,7 +1,7 @@
 /**
  * passed
  */
-import node from '@ddn/test-utils'
+import { node } from '../ddn-js'
 
 import Tmdb from '../../lib/helpers/tmdb'
 

@@ -2,14 +2,14 @@ import { getUserConfig, requireFile, mergeConfigs } from '@ddn/core'
 import path from 'path'
 
 import Asset from '@ddn/asset-base'
-import defaultConstants from './constants'
-import defaultConfig from './ddnrc.js'
+import defaultConstants from './constants.default'
+import defaultConfig from './ddnrc.default'
 
 const baseDir = path.resolve(process.cwd(), './')
 const userConfig = getUserConfig({ cwd: baseDir })
 
 /**
- * 请在项目根目录 新增 .ddnrc.js 配置文件，或者 config/ddnrc.js 等，参考 DDN 配置文档
+ * 请在项目根目录 新增 .ddnrc.js 配置文件，或者 config/config.js 等，参考 DDN 配置文档
  */
 export const config = mergeConfigs(defaultConfig, userConfig)
 

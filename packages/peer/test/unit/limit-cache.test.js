@@ -1,12 +1,12 @@
 /**
  * passed
  */
-import DdnUtil from '@ddn/utils'
-import node from '@ddn/test-utils'
+import { LimitCache } from '@ddn/utils'
+import { node } from '../ddn-js'
 
 describe('LimitCache', () => {
   it('normal test', done => {
-    const lc = new DdnUtil.LimitCache({
+    const lc = new LimitCache({
       limit: 10
     })
     for (let i = 0; i < 10; ++i) {

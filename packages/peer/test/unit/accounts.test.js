@@ -2,8 +2,8 @@
  * passed
  */
 import Debug from 'debug'
-import node from '@ddn/test-utils'
-import constants from '../../lib/constants'
+import { node } from '../ddn-js'
+const constants = node.constants
 
 const debug = Debug('debug')
 // Account info for password "ddntest"

@@ -24,7 +24,7 @@ async function getFee (transaction) {
 }
 
 async function getAssetFee (transaction) {
-  let fee = constants.net.fees.transfer
+  let fee = bignum.multiply(constants.net.fees.transfer, constants.fixedPoint)
   const { trsName, asset } = await getAsset(transaction)
   if (asset && (typeof assetGetFees[trsName] === 'function')) {
     fee = await assetGetFees[trsName](asset)

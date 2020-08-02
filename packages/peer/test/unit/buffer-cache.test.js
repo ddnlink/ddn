@@ -1,7 +1,7 @@
 /**
  * passed
  */
-import node from '@ddn/test-utils'
+import { node } from '../ddn-js'
 
 import BufferCache from '../../lib/helpers/buffer-cache'
 

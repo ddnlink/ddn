@@ -2,8 +2,8 @@
  * passed
  */
 import Debug from 'debug'
-import DdnUtils from '@ddn/utils'
-import node from '@ddn/test-utils'
+import { bignum } from '@ddn/utils'
+import { node } from '../ddn-js'
 
 const debug = Debug('debug')
 
@@ -132,7 +132,7 @@ describe('PUT /votes with funds', () => {
         node.expect(body).to.have.property('success').to.be.true
         node.expect(body).to.have.property('transactionId')
         node.expect(body.transactionId).to.be.a('string')
-        Raccount.amount = DdnUtils.bignum.plus(Raccount.amount, randomCoin).toString()
+        Raccount.amount = bignum.plus(Raccount.amount, randomCoin).toString()
         done()
       })
   })
@@ -246,7 +246,7 @@ describe('PUT /votes with funds', () => {
         node.expect(body.transaction.type).to.equal(node.AssetTypes.VOTE)
         node.expect(body.transaction.amount).to.equal('0')
         node.expect(body.transaction.senderPublicKey).to.equal(Raccount.publicKey)
-        node.expect(body.transaction.fee).to.equal(node.constants.net.fees.vote)
+        node.expect(body.transaction.fee).to.equal(bignum.multiply(node.constants.net.fees.vote, node.constants.fixedPoint).toString())
 
         done()
       })
@@ -294,7 +294,7 @@ describe('PUT /votes with funds', () => {
           node.expect(body.transaction.type).to.equal(node.AssetTypes.VOTE)
           node.expect(body.transaction.amount).to.equal('0')
           node.expect(body.transaction.senderPublicKey).to.equal(Raccount.publicKey)
-          node.expect(body.transaction.fee).to.equal(node.constants.net.fees.vote)
+          node.expect(body.transaction.fee).to.equal(bignum.multiply(node.constants.net.fees.vote, node.constants.fixedPoint).toString())
 
           done()
         })
@@ -457,8 +457,8 @@ describe('PUT /delegates to regist with funds', () => {
               node.expect(body).to.have.property('success').to.be.true
               node.expect(body).to.have.property('transactionId')
               node.expect(body.transactionId).to.be.a('string')
-              // DdnUtils.bignum update R2account.amount += node.randomCoin;
-              R2account.amount = DdnUtils.bignum.plus(R2account.amount, randomCoin).toString()
+              // bignum update R2account.amount += node.randomCoin;
+              R2account.amount = bignum.plus(R2account.amount, randomCoin).toString()
 
               done()
             })
@@ -593,7 +593,7 @@ describe('PUT /delegates to regist with funds', () => {
           node.expect(err).be.not.ok
           node.expect(body).to.have.property('success').to.be.true
           node.expect(body).to.have.property('transaction').that.is.an('object')
-          node.expect(body.transaction.fee).to.equal(node.constants.net.fees.delegate)
+          node.expect(body.transaction.fee).to.equal(bignum.multiply(node.constants.net.fees.delegate, node.constants.fixedPoint).toString())
           node.expect(body.transaction.asset.delegate.username).to.equal(R2account.username.toLowerCase())
           node.expect(body.transaction.asset.delegate.publicKey).to.equal(R2account.publicKey)
           node.expect(body.transaction.type).to.equal(node.AssetTypes.DELEGATE)

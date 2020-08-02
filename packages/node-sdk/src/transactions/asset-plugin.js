@@ -1,8 +1,7 @@
 import Asset from '@ddn/asset-base'
-import { bignum } from '@ddn/utils'
 import crypto from '../utils/crypto'
 import slots from '../time/slots'
-import { config, constants } from '../config'
+import { config } from '../config'
 
 async function createPluginAsset (trsType, assetInfo, secret, secondSecret) {
   const keys = crypto.getKeys(secret)

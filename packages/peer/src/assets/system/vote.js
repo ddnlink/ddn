@@ -5,7 +5,7 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *-------------------------------------------------------------------------------------------- */
 import ByteBuffer from 'bytebuffer'
-import Diff from '../../lib/diff.js'
+import Diff from '../../utils/diff.js'
 import DdnUtils from '@ddn/utils'
 
 class Vote {

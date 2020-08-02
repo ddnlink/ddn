@@ -8,14 +8,16 @@
 /**
  * passed
  */
-import DdnUtil from '@ddn/utils'
-import node from '@ddn/test-utils'
-import constants from '../../lib/constants'
+import { bignum } from '@ddn/utils'
+import { node } from '../ddn-js'
 import BlockStatus from '../../lib/kernal/block/block-status'
+
+const constants = node.constants
 
 describe('Constants params', () => {
   it('test block reward', done => {
     global.config = { net: 'testnet', settings: { delegateNumber: 101 } }
+    global.constants = constants
     let blockStatus = new BlockStatus(global)
     node.expect(blockStatus.calcMilestone(1)).to.equal('0')
     node.expect(blockStatus.calcMilestone(2999999)).to.equal('0')
@@ -34,8 +36,8 @@ describe('Constants params', () => {
 
     node.expect(blockStatus.calcSupply(1)).to.equal(constants.totalAmount)
     node.expect(blockStatus.calcSupply(2)).to.equal(constants.totalAmount)
-    node.expect(blockStatus.calcSupply(101)).to.equal(DdnUtil.bignum.plus(constants.totalAmount, DdnUtil.bignum.multiply(constants.testnet.milestones[0], 100)).toString())
-    node.expect(blockStatus.calcSupply(102)).to.equal(DdnUtil.bignum.plus(constants.totalAmount, DdnUtil.bignum.multiply(constants.testnet.milestones[0], 100)).toString())
+    node.expect(blockStatus.calcSupply(101)).to.equal(bignum.plus(constants.totalAmount, bignum.multiply(constants.testnet.milestones[0], 100)).toString())
+    node.expect(blockStatus.calcSupply(102)).to.equal(bignum.plus(constants.totalAmount, bignum.multiply(constants.testnet.milestones[0], 100)).toString())
 
     // todo 下面的还没有修改
     // node.expect(blockStatus.calcSupply(3000000)).to.equal(11499950500000000);
@@ -57,20 +59,20 @@ describe('Constants params', () => {
     node.expect(blockStatus.calcReward(15464499)).to.equal('100000000')
     node.expect(blockStatus.calcReward(15464500)).to.equal('100000000')
 
-    // node.expect(blockStatus.calcSupply(0)).to.equal(10000000000000000);
-    // node.expect(blockStatus.calcSupply(1)).to.equal(10000000000000000);
-    // node.expect(blockStatus.calcSupply(2)).to.equal(10000000000000000);
-    // node.expect(blockStatus.calcSupply(3)).to.equal(10000000000000000);
-    // node.expect(blockStatus.calcSupply(111)).to.equal(10000050000000000);
-    // node.expect(blockStatus.calcSupply(491077)).to.equal(10245530500000000);
-    // node.expect(blockStatus.calcSupply(513236)).to.equal(10256590000000000);
-    // node.expect(blockStatus.calcSupply(537943)).to.equal(10268962500000000);
-    // node.expect(blockStatus.calcSupply(587374)).to.equal(10293657000000000);
-    // node.expect(blockStatus.calcSupply(3464502)).to.equal(11685800300000000);
-    // node.expect(blockStatus.calcSupply(6464505)).to.equal(12839351000000000);
-    // node.expect(blockStatus.calcSupply(15464515)).to.equal(14546450900000000);
-    // node.expect(blockStatus.calcSupply(15464615)).to.equal(14546461000000000);
-    // node.expect(blockStatus.calcSupply(18464517)).to.equal(14846451200000000);
+    node.expect(blockStatus.calcSupply(0)).to.equal('10000000000000000');
+    node.expect(blockStatus.calcSupply(1)).to.equal('10000000000000000');
+    node.expect(blockStatus.calcSupply(2)).to.equal('10000000000000000');
+    node.expect(blockStatus.calcSupply(3)).to.equal('10000000000000000');
+    node.expect(blockStatus.calcSupply(111)).to.equal('10000050000000000');
+    node.expect(blockStatus.calcSupply(491077)).to.equal('10245530500000000');
+    node.expect(blockStatus.calcSupply(513236)).to.equal('10256590000000000');
+    node.expect(blockStatus.calcSupply(537943)).to.equal('10268962500000000');
+    node.expect(blockStatus.calcSupply(587374)).to.equal('10293657000000000');
+    node.expect(blockStatus.calcSupply(3464502)).to.equal('11685800300000000');
+    node.expect(blockStatus.calcSupply(6464505)).to.equal('12839351000000000');
+    node.expect(blockStatus.calcSupply(15464515)).to.equal('14546450900000000');
+    node.expect(blockStatus.calcSupply(15464615)).to.equal('14546461000000000');
+    node.expect(blockStatus.calcSupply(18464517)).to.equal('14846451200000000');
 
     done()
   })

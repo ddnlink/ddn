@@ -2,7 +2,8 @@
  * passed
  */
 import Debug from 'debug'
-import node from '@ddn/test-utils'
+import { bignum } from '@ddn/utils'
+import { node } from '../ddn-js'
 
 const debug = Debug('debug')
 const expect = node.expect
@@ -32,9 +33,7 @@ let accountOpenTurn = 0
 
 async function openAccount ({ password, name }, i) {
   if (i !== null) {
-    console.log(
-            `Opening Account ${i} with password: ${password}`
-    )
+    console.log(`Opening Account ${i} with password: ${password}`)
   }
 
   const res = await node.openAccountAsync({ secret: password })
@@ -132,7 +131,14 @@ async function confirmTransaction ({ password }, id) {
         if (err) {
           return reject(err)
         }
-        debug('Signing Tx ID = ' + id + ' from account with password = ' + password + ' Got reply: ' + JSON.stringify(body))
+        debug(
+          'Signing Tx ID = ' +
+            id +
+            ' from account with password = ' +
+            password +
+            ' Got reply: ' +
+            JSON.stringify(body)
+        )
         expect(body).to.have.property('success').to.be.true
 
         resolve()
@@ -646,9 +652,7 @@ describe('GET /multisignatures/pending', () => {
   it('Using valid public key. Should be ok', done => {
     // node.onNewBlock(function (err) {
     node.api
-      .get(
-                `/multisignatures/pending?publicKey=${MultisigAccount.publicKey}`
-      )
+      .get(`/multisignatures/pending?publicKey=${MultisigAccount.publicKey}`)
       .set('Accept', 'application/json')
       .expect('Content-Type', /json/)
       .expect(200)
@@ -663,8 +667,8 @@ describe('GET /multisignatures/pending', () => {
         for (let i = 0; i < body.transactions.length; i++) {
           // debug(MultisigAccount.publicKey);
           if (
-            body.transactions[i].transaction.senderPublicKey ==
-                        MultisigAccount.publicKey
+            body.transactions[i].transaction.senderPublicKey ===
+            MultisigAccount.publicKey
           ) {
             flag += 1
             expect(body.transactions[i].transaction)
@@ -679,10 +683,7 @@ describe('GET /multisignatures/pending', () => {
             expect(body.transactions[i].transaction)
               .to.have.property('fee')
               .to.equal(
-                String(
-                  node.constants.net.fees.multiSignature *
-                                    (Keys.length + 1)
-                )
+                bignum.multiply(bignum.multiply(node.constants.net.fees.multiSignature, node.constants.fixedPoint), (Keys.length + 1)).toString()
               )
             expect(body.transactions[i].transaction)
               .to.have.property('id')

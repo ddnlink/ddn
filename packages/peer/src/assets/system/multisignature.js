@@ -4,7 +4,7 @@
  */
 import DdnUtils from '@ddn/utils'
 import ByteBuffer from 'bytebuffer'
-import Diff from '../../lib/diff'
+import Diff from '../../utils/diff'
 
 class Multisignature {
   constructor (context) {

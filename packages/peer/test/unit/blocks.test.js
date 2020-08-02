@@ -3,14 +3,14 @@
  */
 import path from 'path'
 import Debug from 'debug'
-import DdnUtils from '@ddn/utils'
-import node from '@ddn/test-utils'
+import { bignum } from '@ddn/utils'
+import { node } from '../ddn-js'
 
-import { requireFile } from '@ddn/core/lib/getUserConfig'
+import { requireFile } from '@ddn/core'
 
 const debug = Debug('debug')
 
-const genesisblockFile = path.resolve(process.cwd(), './examples/fun-tests/config/genesisBlock.json')
+const genesisblockFile = path.resolve(process.cwd(), './examples/custom/config/genesisBlock.json')
 const genesisblock = requireFile(genesisblockFile)
 
 const block = {
@@ -37,12 +37,12 @@ describe('GET /blocks/getHeight', () => {
         node.expect(body).to.have.property('success').to.be.true
         if (body.success === true && body.height !== null) {
           node.expect(body).to.have.property('height')
-          const result = DdnUtils.bignum.isGreaterThan(body.height, '0')
+          const result = bignum.isGreaterThan(body.height, '0')
           node.expect(result).be.true
 
           if (body.success === true) {
             block.blockHeight = body.height
-            if (DdnUtils.bignum.isGreaterThan(body.height, 100)) {
+            if (bignum.isGreaterThan(body.height, 100)) {
               testBlocksUnder100 = true
             }
           } else {
@@ -67,8 +67,8 @@ describe('GET /blocks/getFee', () => {
         node.expect(body).to.have.property('success').to.be.true
         if (body.success === true && body.fee !== null) {
           node.expect(body).to.have.property('fee')
-          // node.expect(body.fee).to.equal(node.constants.net.fees.transfer);
-          const result = DdnUtils.bignum.isEqualTo(body.fee, node.constants.net.fees.transfer)
+
+          const result = bignum.isEqualTo(body.fee, bignum.multiply(node.constants.net.fees.transfer, node.constants.fixedPoint))
           node.expect(result).to.be.true
         } else {
           debug('Request failed or fee is null')
@@ -216,7 +216,7 @@ describe('GET /blocks', () => {
         node.expect(body).to.have.property('success').to.be.true
         node.expect(body).to.have.property('blocks').that.is.an('array')
         for (let i = 0; i < body.blocks.length; i++) {
-          const result = DdnUtils.bignum.isEqualTo(body.blocks[i].total_fee, block.totalFee)
+          const result = bignum.isEqualTo(body.blocks[i].total_fee, block.totalFee)
           node.expect(result).to.be.true
         }
         done()
@@ -239,7 +239,7 @@ describe('GET /blocks', () => {
         node.expect(body).to.have.property('success').to.be.true
         node.expect(body).to.have.property('blocks').that.is.an('array')
         for (let i = 0; i < body.blocks.length; i++) {
-          const result = DdnUtils.bignum.isEqualTo(body.blocks[i].total_amount, block.totalAmount)
+          const result = bignum.isEqualTo(body.blocks[i].total_amount, block.totalAmount)
           debug(result, body.blocks[i].total_amount, totalAmount)
           node.expect(result).to.be.true
         }
@@ -286,7 +286,7 @@ describe('GET /blocks', () => {
         node.expect(body).to.have.property('blocks').that.is.an('array')
         for (let i = 0; i < body.blocks.length; i++) {
           if (typeof body.blocks[i + 1] !== 'undefined') {
-            const bRet = DdnUtils.bignum.isGreaterThanOrEqualTo(body.blocks[i].height, body.blocks[i + 1].height)
+            const bRet = bignum.isGreaterThanOrEqualTo(body.blocks[i].height, body.blocks[i + 1].height)
             node.expect(bRet).to.be.true
           }
         }

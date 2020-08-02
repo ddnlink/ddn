@@ -3,9 +3,12 @@
  */
 import Debug from 'debug'
 import crypto from 'crypto'
+import { bignum } from '@ddn/utils'
 import { DdnJS, node } from '../ddn-js'
 
 const debug = Debug('debug')
+
+const constants = node.constants
 
 const account = node.randomAccount()
 const account2 = node.randomAccount()
@@ -37,7 +40,7 @@ describe('Registering a delegate', () => {
           .set('port', node.config.port)
           .send({
             secret: node.Gaccount.password,
-            amount: node.constants.net.fees.delegate,
+            amount: bignum.multiply(constants.net.fees.delegate, constants.fixedPoint),
             recipientId: account.address
           })
           .expect('Content-Type', /json/)
@@ -49,7 +52,7 @@ describe('Registering a delegate', () => {
             node.onNewBlock(async err => {
               node.expect(err).to.be.not.ok
               const transaction = await DdnJS.delegate.createDelegate(crypto.randomBytes(64).toString('hex'), account.password)
-              transaction.fee = node.constants.net.fees.delegate
+              transaction.fee = bignum.multiply(constants.net.fees.delegate, constants.fixedPoint)
 
               node.peer.post('/transactions')
                 .set('Accept', 'application/json')
@@ -76,7 +79,7 @@ describe('Registering a delegate', () => {
 
   it('When account has no funds. Should fail', async done => {
     const transaction = await DdnJS.delegate.createDelegate(node.randomDelegateName().toLowerCase(), node.randomPassword())
-    transaction.fee = node.constants.net.fees.delegate
+    transaction.fee = bignum.multiply(constants.net.fees.delegate, constants.fixedPoint)
 
     node.peer.post('/transactions')
       .set('Accept', 'application/json')
@@ -177,7 +180,7 @@ describe('Registering a delegate', () => {
           .set('port', node.config.port)
           .send({
             secret: node.Gaccount.password,
-            amount: node.constants.net.fees.delegate,
+            amount: bignum.multiply(constants.net.fees.delegate, constants.fixedPoint),
             recipientId: account2.address
           })
           .expect('Content-Type', /json/)

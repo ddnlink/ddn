@@ -12,18 +12,7 @@ $ yarn add @ddn/peer
 
 ## Default localnet genesis account
 
-**Note**: You can replace the [*] of the address with `D`、`E`...
-
-```
-{
-  "keypair": {
-    "publicKey": "2e6d978c5e6f1fbfc5a27abd964d9b6adc352daa81e31d9098a4f5ee3d7f885e",
-    "privateKey": "863669059023e53d46d92b6a1a7bdaa8a9ff3555d98c07517c2a3a08c89ff9d02e6d978c5e6f1fbfc5a27abd964d9b6adc352daa81e31d9098a4f5ee3d7f885e"
-  },
-  "address": "[*]CE3q83WTqk58Y3hU9GDStn7MmqWU9xHbK",
-  "secret": "enter boring shaft rent essence foil trick vibrant fabric quote indoor output"
-}
-```
+**Note**: You get test DDN from <https://ddn.link>
 
 ## Test
 

@@ -1,7 +1,7 @@
 /**
  * passed
  */
-import node from '@ddn/test-utils'
+import { node } from '../ddn-js'
 
 describe('test blocks', () => {
   describe('POST /peer/blocks', () => {

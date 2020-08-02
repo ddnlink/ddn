@@ -2,8 +2,8 @@
  * passed
  */
 import Debug from 'debug'
-import DdnUtils from '@ddn/utils'
-import node from '@ddn/test-utils'
+import { bignum } from '@ddn/utils'
+import { node } from '../ddn-js'
 
 const debug = Debug('debug')
 
@@ -17,7 +17,7 @@ const transactionList = []
 let offsetTimestamp = 0
 
 // Used for calculating amounts
-let expectedFee = '0' // DdnUtils.bignum update
+let expectedFee = '0' // bignum update
 let totalTxFee = '0'
 // const randomCoin = "0";
 
@@ -42,16 +42,16 @@ beforeAll(async () => {
 
   let randomCoin = node.randomCoin()
   res = await node.giveMoneyAsync(Account1.address, randomCoin)
-  expectedFee = node.expectedFee(randomCoin)
+  expectedFee = randomCoin
   debug('giveMoneyAsync response', res.body)
 
   node.expect(res.body).to.have.property('success').to.be.true
   Account1.transactions.push(transactionCount)
   transactionCount += 1
 
-  // DdnUtils.bignum update
+  // bignum update
   // totalTxFee += (expectedFee / node.normalizer);
-  totalTxFee = DdnUtils.bignum.plus(totalTxFee, DdnUtils.bignum.divide(expectedFee, node.normalizer))
+  totalTxFee = bignum.plus(totalTxFee, bignum.divide(expectedFee, node.normalizer))
 
   Account1.balance += randomCoin
   transactionList[transactionCount - 1] = {
@@ -59,8 +59,8 @@ beforeAll(async () => {
     recipient: Account1.address,
     brutoSent: (randomCoin + expectedFee) / node.normalizer,
 
-    // DdnUtils.bignum update fee: expectedFee / node.normalizer,
-    fee: DdnUtils.bignum.divide(expectedFee, node.normalizer).toString(),
+    // bignum update fee: expectedFee / node.normalizer,
+    fee: bignum.divide(expectedFee, node.normalizer).toString(),
 
     nettoSent: randomCoin / node.normalizer,
     txId: res.body.transactionId,
@@ -68,15 +68,15 @@ beforeAll(async () => {
   }
 
   randomCoin = node.randomCoin()
-  expectedFee = node.expectedFee(randomCoin)
+  expectedFee = randomCoin // node.expectedFee(randomCoin)
   res = await node.giveMoneyAsync(Account2.address, randomCoin)
   node.expect(res.body).to.have.property('success').to.be.true
   Account2.transactions.push(transactionCount)
   transactionCount += 1
 
-  // DdnUtils.bignum update
+  // bignum update
   // totalTxFee += (expectedFee / node.normalizer);
-  totalTxFee = DdnUtils.bignum.plus(totalTxFee, DdnUtils.bignum.divide(expectedFee, node.normalizer))
+  totalTxFee = bignum.plus(totalTxFee, bignum.divide(expectedFee, node.normalizer))
 
   Account2.balance += randomCoin
   transactionList[transactionCount - 1] = {
@@ -84,8 +84,8 @@ beforeAll(async () => {
     recipient: Account2.address,
     brutoSent: (randomCoin + expectedFee) / node.normalizer,
 
-    // DdnUtils.bignum update fee: expectedFee / node.normalizer,
-    fee: DdnUtils.bignum.divide(expectedFee, node.normalizer).toString(),
+    // bignum update fee: expectedFee / node.normalizer,
+    fee: bignum.divide(expectedFee, node.normalizer).toString(),
 
     nettoSent: randomCoin / node.normalizer,
     txId: res.body.transactionId,
@@ -116,8 +116,8 @@ describe('GET /api/transactions', () => {
         if (body.transactions.length > 0) {
           for (let i = 0; i < body.transactions.length; i++) {
             if (typeof body.transactions[i + 1] !== 'undefined') {
-              // DdnUtils.bignum update node.expect(res.body.transactions[i].amount).to.be.at.most(res.body.transactions[i + 1].amount);
-              const bRet = DdnUtils.bignum.isLessThanOrEqualTo(body.transactions[i].amount, body.transactions[i + 1].amount)
+              // bignum update node.expect(res.body.transactions[i].amount).to.be.at.most(res.body.transactions[i + 1].amount);
+              const bRet = bignum.isLessThanOrEqualTo(body.transactions[i].amount, body.transactions[i + 1].amount)
               node.expect(bRet).to.be.true
             }
           }
@@ -249,7 +249,7 @@ describe('GET /api/transactions', () => {
         if (body.transactions.length > 0) {
           for (let i = 0; i < body.transactions.length; i++) {
             if (typeof body.transactions[i + 1] !== 'undefined') {
-              const bRet = DdnUtils.bignum.isGreaterThanOrEqualTo(body.transactions[i].amount, body.transactions[i + 1].amount)
+              const bRet = bignum.isGreaterThanOrEqualTo(body.transactions[i].amount, body.transactions[i + 1].amount)
               // node.expect(res.body.transactions[i].amount).to.be.at.most(res.body.transactions[i + 1].amount);
               node.expect(bRet).to.be.true
             }
@@ -322,22 +322,20 @@ describe('PUT /api/transactions', () => {
           node.expect(body).to.have.property('success').to.be.true
           node.expect(body).to.have.property('transactionId')
           if (body.success === true && body.transactionId !== null) {
-            expectedFee = node.expectedFee(amountToSend)
+            expectedFee = amountToSend // node.expectedFee(amountToSend)
 
-            // DdnUtils.bignum update Account1.balance -= (amountToSend + expectedFee);
-            Account1.balance = DdnUtils.bignum.minus(Account1.balance, amountToSend, expectedFee)
+            Account1.balance = bignum.minus(Account1.balance, amountToSend, expectedFee)
 
             Account2.balance += amountToSend
             Account1.transactions.push(transactionCount)
             transactionList[transactionCount] = {
               sender: Account1.address,
               recipient: Account2.address,
-              brutoSent: DdnUtils.bignum.divide(DdnUtils.bignum.plus(amountToSend, expectedFee), node.normalizer),
+              brutoSent: bignum.divide(bignum.plus(amountToSend, expectedFee), node.normalizer),
 
-              // DdnUtils.bignum update 'fee': expectedFee / node.normalizer,
-              fee: DdnUtils.bignum.divide(expectedFee, node.normalizer),
+              fee: bignum.divide(expectedFee, node.normalizer),
 
-              nettoSent: DdnUtils.bignum.divide(amountToSend, node.normalizer),
+              nettoSent: bignum.divide(amountToSend, node.normalizer),
               txId: body.transactionId,
               type: node.AssetTypes.TRANSFER
             }
@@ -699,7 +697,7 @@ describe('PUT /signatures', () => {
           node.expect(body).to.have.property('success').to.be.true
           node.expect(body).to.have.property('transaction').that.is.an('object')
           if (body.success === true && body.transaction !== null) {
-            const fee = DdnUtils.bignum.multiply(node.constants.net.fees.signature, node.constants.fixedPoint)
+            const fee = bignum.multiply(node.constants.net.fees.signature, node.constants.fixedPoint).toString()
 
             // console.log(Account1)
             node.expect(body.transaction).to.have.property('type').to.equal(node.AssetTypes.SIGNATURE)
@@ -709,7 +707,7 @@ describe('PUT /signatures', () => {
             Account1.transactions.push(transactionCount)
             transactionCount += 1
 
-            Account1.balance = DdnUtils.bignum.minus(Account1.balance, fee)
+            Account1.balance = bignum.minus(Account1.balance, fee)
 
             transactionList[transactionCount - 1] = {
               sender: Account1.address,

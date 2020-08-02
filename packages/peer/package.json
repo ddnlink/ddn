@@ -51,6 +51,7 @@
     "@ddn/asset-evidence": "^0.1.15",
     "@ddn/core": "^0.2.7",
     "@ddn/crypto": "^0.2.14",
+    "@ddn/test-utils": "^0.1.0",
     "@ddn/utils": "^0.1.13",
     "ajv": "^6.3.0",
     "array.prototype.find": "^2.1.0",
