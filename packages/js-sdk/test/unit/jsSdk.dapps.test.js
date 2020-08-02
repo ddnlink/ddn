@@ -201,7 +201,7 @@ beforeAll(done => {
 
 beforeAll(done => {
   randomCoin = node.randomCoin()
-  expectedFee = node.expectedFee(randomCoin)
+  expectedFee = randomCoin // node.expectedFee(randomCoin)
   node.api.put('/transactions')
     .set('Accept', 'application/json')
     .send({

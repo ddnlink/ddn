@@ -1,6 +1,6 @@
 import _ from 'lodash'
 import Debug from 'debug'
-import { node } from '../ddn-js'
+import { node } from './ddn-js'
 
 const debug = Debug('debug')
 const expect = node.expect

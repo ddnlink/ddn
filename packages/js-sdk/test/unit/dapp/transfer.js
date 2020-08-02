@@ -1,8 +1,7 @@
 import extend from 'extend'
 import Debug from 'debug'
 import DdnUtils from '@ddn/utils'
-import { node } from '../ddn-js'
-import DdnJS from '../../ddn-js'
+import { DdnJS, node } from '../../ddn-js'
 
 const expect = node.expect
 const debug = Debug('debug')

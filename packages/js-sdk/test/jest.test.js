@@ -1,5 +1,5 @@
 // Jest mothods
-import { node } from '../ddn-js'
+import { node } from './ddn-js'
 
 const expect = node.expect
 
