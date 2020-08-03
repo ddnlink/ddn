@@ -160,9 +160,6 @@ module.exports = {
     masterpassword: "xS5XaSoHsTEL",
     params: {}
   },
-  settings: {
-    enableMoreLockTypes: true
-  },
 
   /**
    * Database options

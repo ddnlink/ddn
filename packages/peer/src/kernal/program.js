@@ -439,7 +439,7 @@ class Program {
         return
       }
 
-      if (Date.now() % (this._context.config.settings.blockIntervalTime * 1000) > (this._context.config.settings.blockIntervalTime * 1000) / 2) {
+      if (Date.now() % (this._context.constants.interval * 1000) > (this._context.constants.interval * 1000) / 2) {
         this._context.logger.trace('Loop:', 'maybe too late to collect votes')
         return
       }
