@@ -5,7 +5,7 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *-------------------------------------------------------------------------------------------- */
 
-import DdnUtils from '@ddn/utils'
+import { bignum } from '@ddn/utils'
 
 export default {
   validate (amount) {
@@ -14,26 +14,26 @@ export default {
 
     let bnAmount
     try {
-      bnAmount = DdnUtils.bignum.new(amount)
+      bnAmount = bignum.new(amount)
     } catch (e) {
       return 'Failed to convert'
     }
 
-    if (DdnUtils.bignum.isLessThan(bnAmount, 1) ||
-        DdnUtils.bignum.isGreaterThan(bnAmount, '1e48')) {
-      return 'Invalid amount range'
+    if (bignum.isLessThan(bnAmount, 1) ||
+        bignum.isGreaterThan(bnAmount, '1e48')) {
+      return 'Amount out of range'
     }
 
     return null
   },
 
   calcRealAmount (amount, precision) {
-    let ba = DdnUtils.bignum.new(amount)
+    let ba = bignum.new(amount)
     while (precision > 0) {
       if (precision > 8) {
-        ba = DdnUtils.bignum.divide(ba, 10 ** 8)
+        ba = bignum.divide(ba, 10 ** 8) // Todo: 限制最大精度，修改为常量
       } else {
-        ba = DdnUtils.bignum.divide(ba, 10 ** precision)
+        ba = bignum.divide(ba, 10 ** precision)
       }
       precision -= 8
     }

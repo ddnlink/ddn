@@ -2,8 +2,8 @@
  * Delegate
  * wangxm   2018-01-08
  */
-import DdnCrypto from '@ddn/crypto'
-import DdnUtils from '@ddn/utils'
+import DdnCrypto, { nacl, crypto } from '@ddn/crypto'
+import { bignum } from '@ddn/utils'
 
 let _singleton
 
@@ -176,7 +176,8 @@ class Delegate {
 
     for (let i = 0; i < delegates.length; i++) {
       delegates[i].rate = i + 1
-      delegates[i].approval = delegates[i].vote / totalSupply // TODO: bigNumber?? 2020.6.24
+      // delegates[i].approval = delegates[i].vote / totalSupply // TODO: bigNumber?? 2020.6.24
+      delegates[i].approval = bignum.divide(delegates[i].vote, totalSupply) // TODO: bigNumber?? 2020.6.24
       delegates[i].approval = Math.round(delegates[i].approval * 1e2) / 1e2
 
       let percent = 100 - (delegates[i].missedblocks / ((delegates[i].producedblocks + delegates[i].missedblocks) / 100))
@@ -185,7 +186,7 @@ class Delegate {
       const outsider = i + 1 > this.constants.delegates
       delegates[i].productivity = (!outsider) ? Math.round(percent * 1e2) / 1e2 : 0
 
-      delegates[i].forged = DdnUtils.bignum.plus(delegates[i].fees, delegates[i].rewards).toString()
+      delegates[i].forged = bignum.plus(delegates[i].fees, delegates[i].rewards).toString()
     }
 
     return {
@@ -221,9 +222,10 @@ class Delegate {
      */
   async getDisorderDelegatePublicKeys (height) {
     const truncDelegateList = await this.getDelegatePublickKeysSortByVote()
+
     const seedSource = await this.runtime.round.calc(height).toString()
     // wxm 对查询返回的受托人列表进行乱序处理
-    let currentSeed = DdnCrypto.createHash(Buffer.from(seedSource))
+    let currentSeed = nacl.hash(Buffer.from(seedSource))
     for (let i = 0, delCount = truncDelegateList.length; i < delCount; i++) {
       for (let x = 0; x < 4 && i < delCount; i++, x++) {
         const newIndex = currentSeed[x] % delCount
@@ -231,7 +233,7 @@ class Delegate {
         truncDelegateList[newIndex] = truncDelegateList[i]
         truncDelegateList[i] = b
       }
-      currentSeed = DdnCrypto.createHash(Buffer.from(currentSeed))
+      currentSeed = nacl.hash(Buffer.from(currentSeed))
     }
 
     return truncDelegateList
@@ -264,7 +266,7 @@ class Delegate {
     let currentSlot = curSlot
     const lastSlot = this.runtime.slot.getLastSlot(currentSlot)
     for (; currentSlot < lastSlot; currentSlot += 1) {
-      const delegatePos = currentSlot % this.constants.delegates
+      const delegatePos = currentSlot % this.constants.superPeers
       const delegatePublicKey = activeDelegates[delegatePos]
       if (delegatePublicKey && this._myDelegateKeypairs[delegatePublicKey]) {
         return {
@@ -278,18 +280,20 @@ class Delegate {
 
   async validateBlockSlot ({ height, timestamp, generator_public_key }) {
     const activeDelegates = await this.getDisorderDelegatePublicKeys(height)
+
     const currentSlot = this.runtime.slot.getSlotNumber(timestamp)
-    const delegateKey = activeDelegates[currentSlot % this.constants.delegates]
+    const delegateKey = activeDelegates[currentSlot % this.constants.superPeers]
+
     if (delegateKey && generator_public_key === delegateKey) {
       return
     }
-    throw new Error(`Failed to verify slot, expected delegate: ${delegateKey}, gotten delegate: ${generator_public_key}`)
+    throw new Error(`Failed to verify slot, gotten delegate: ${delegateKey}, expected delegate: ${generator_public_key}`)
   }
 
   async validateProposeSlot ({ height, timestamp, generator_public_key }) {
     const activeDelegates = await this.getDisorderDelegatePublicKeys(height)
     const currentSlot = this.runtime.slot.getSlotNumber(timestamp)
-    const delegateKey = activeDelegates[currentSlot % this.constants.delegates]
+    const delegateKey = activeDelegates[currentSlot % this.constants.superPeers]
     if (delegateKey && generator_public_key === delegateKey) {
       return
     }
@@ -297,7 +301,7 @@ class Delegate {
   }
 
   /**
-     * 该方法向forks_stats插入数据，但未见到其他地方有用到该表数据
+     * 该方法向forks_stats插入数据，但未在其他地方用该表数据
      * @param {*} block
      * @param {*} cause
      */

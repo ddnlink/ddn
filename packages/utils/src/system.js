@@ -21,6 +21,7 @@ class System {
     } catch (e) {
       // TODO: update to logger.info(e)
       console.log(e)
+      throw e
     }
     return publicIp
   }

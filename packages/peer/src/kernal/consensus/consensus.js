@@ -3,10 +3,9 @@
  * wangxm   2018-01-08
  */
 import ByteBuffer from 'bytebuffer'
-import nacl from 'tweetnacl'
 import assert from 'assert'
 import ip from 'ip'
-import DdnCrypto from '@ddn/crypto'
+import DdnCrypto, { nacl } from '@ddn/crypto'
 
 let _singleton
 
@@ -143,7 +142,7 @@ class Consensus {
         signatures: {
           type: 'array',
           minLength: 1,
-          maxLength: this.constants.delegates
+          maxLength: this.constants.superPeers
         }
       },
       required: ['height', 'id', 'signatures']
@@ -201,7 +200,7 @@ class Consensus {
      * @param {*} votes
      */
   hasEnoughVotes (votes) {
-    return votes && votes.signatures && (votes.signatures.length > (this.constants.delegates * 2 / 3))
+    return votes && votes.signatures && (votes.signatures.length > (this.constants.superPeers * 2 / 3))
   }
 
   /**

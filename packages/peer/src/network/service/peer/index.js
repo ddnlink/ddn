@@ -110,7 +110,6 @@ class PeerService {
 
   async getHeight (req) {
     const lastBlock = this.runtime.block.getLastBlock()
-    console.log('lastBlock.height', lastBlock.height)
 
     return {
       success: true,

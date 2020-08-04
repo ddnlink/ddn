@@ -333,7 +333,7 @@ class Peer {
       return true
     }
 
-    const compatibleVersion = this.constants[this.config.net].compatibleVersion
+    const compatibleVersion = this.constants.net.compatibleVersion
 
     const numsCompatible = compatibleVersion.split('.').map(Number)
     for (let i = 0; i < nums.length; ++i) {

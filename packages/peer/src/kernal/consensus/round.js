@@ -2,7 +2,7 @@
  * Round
  * wangxm   2018-01-07
  */
-import DdnUtils from '@ddn/utils'
+import { bignum } from '@ddn/utils'
 
 import RoundChanges from './round-changes'
 
@@ -57,10 +57,10 @@ class Round {
 
   async calc (height) {
     let value = 0
-    if (DdnUtils.bignum.isGreaterThan(DdnUtils.bignum.modulo(height, this.constants.delegates), 0)) {
+    if (bignum.isGreaterThan(bignum.modulo(height, this.constants.superPeers), 0)) {
       value = 1
     }
-    return DdnUtils.bignum.plus(DdnUtils.bignum.floor(DdnUtils.bignum.divide(height, this.constants.delegates)), value)
+    return bignum.plus(bignum.floor(bignum.divide(height, this.constants.superPeers)), value)
   }
 
   async getVotes (round, dbTrans) {
@@ -112,7 +112,7 @@ class Round {
 
     this._feesByRound[round] = (this._feesByRound[round] || 0)
 
-    this._feesByRound[round] = DdnUtils.bignum.plus(this._feesByRound[round], block.total_fee) // wxm block database
+    this._feesByRound[round] = bignum.plus(this._feesByRound[round], block.total_fee) // wxm block database
 
     this._rewardsByRound[round] = (this._rewardsByRound[round] || [])
     this._rewardsByRound[round].push(block.reward)
@@ -120,9 +120,9 @@ class Round {
     this._delegatesByRound[round] = this._delegatesByRound[round] || []
     this._delegatesByRound[round].push(block.generator_public_key)
 
-    const nextRound = await this.calc(DdnUtils.bignum.plus(block.height, 1))
+    const nextRound = await this.calc(bignum.plus(block.height, 1))
 
-    if (DdnUtils.bignum.isEqualTo(round, nextRound) && !DdnUtils.bignum.isEqualTo(block.height, 1)) {
+    if (bignum.isEqualTo(round, nextRound) && !bignum.isEqualTo(block.height, 1)) {
       this.logger.debug('Round tick completed', {
         height: block.height
       })
@@ -130,7 +130,7 @@ class Round {
     }
 
     if (this._delegatesByRound[round].length !== this.constants.delegates &&
-            !DdnUtils.bignum.isEqualTo(block.height, 1) && !DdnUtils.bignum.isEqualTo(block.height, this.constants.delegates)) {
+            !bignum.isEqualTo(block.height, 1) && !bignum.isEqualTo(block.height, this.constants.delegates)) {
       this.logger.debug('Round tick completed', {
         height: block.height
       })
@@ -139,7 +139,7 @@ class Round {
 
     const outsiders = []
 
-    if (!DdnUtils.bignum.isEqualTo(block.height, 1)) {
+    if (!bignum.isEqualTo(block.height, 1)) {
       const roundDelegates = await this.runtime.delegate.getDisorderDelegatePublicKeys(block.height)
 
       for (let i = 0; i < roundDelegates.length; i++) {
@@ -165,8 +165,8 @@ class Round {
       let changeFees = changes.fees
       const changeRewards = changes.rewards
       if (index === this._delegatesByRound[round].length - 1) {
-        changeBalance = DdnUtils.bignum.plus(changeBalance, changes.feesRemaining)
-        changeFees = DdnUtils.bignum.plus(changeFees, changes.feesRemaining)
+        changeBalance = bignum.plus(changeBalance, changes.feesRemaining)
+        changeFees = bignum.plus(changeFees, changes.feesRemaining)
       }
 
       await this.runtime.account.merge(null, {
@@ -185,13 +185,12 @@ class Round {
     const fees = bonus.fees
     const rewards = bonus.rewards
 
-    // const BONUS_CURRENCY = constants.tokenName
-    this.logger.info(`DDN witness club get new bonus: ${bonus}`)
+    this.logger.info(`DDN witness club get new bonus: ${JSON.stringify(bonus)}`)
 
     await this.runtime.account.merge(this.constants.foundAddress, {
       address: this.constants.foundAddress,
-      balance: DdnUtils.bignum.plus(fees, rewards).toString(), // DdnUtils.bignum update (fees + rewards),
-      u_balance: DdnUtils.bignum.plus(fees, rewards).toString(), // DdnUtils.bignum update (fees + rewards),
+      balance: bignum.plus(fees, rewards).toString(),
+      u_balance: bignum.plus(fees, rewards).toString(),
       fees: fees.toString(),
       rewards: rewards.toString(),
       block_id: block.id, // wxm block database
@@ -199,7 +198,7 @@ class Round {
     }, dbTrans)
 
     const votes = await this.getVotes(round, dbTrans)
-    for (var i = 0; i < votes.length; i++) {
+    for (let i = 0; i < votes.length; i++) {
       const vote = votes[i]
       const address = this.runtime.account.generateAddressByPublicKey(vote.delegate)
       await this.runtime.account.updateAccount({
@@ -252,7 +251,7 @@ class Round {
 
     this._feesByRound[round] = (this._feesByRound[round] || 0)
 
-    this._feesByRound[round] = DdnUtils.bignum.minus(this._feesByRound[round], block.totalFee)
+    this._feesByRound[round] = bignum.minus(this._feesByRound[round], block.totalFee)
 
     this._rewardsByRound[round] = (this._rewardsByRound[round] || [])
     this._rewardsByRound[round].pop()
@@ -260,7 +259,7 @@ class Round {
     this._delegatesByRound[round] = this._delegatesByRound[round] || []
     this._delegatesByRound[round].pop()
 
-    if (prevRound === round && !DdnUtils.bignum.isEqualTo(previousBlock.b_height, 1)) {
+    if (prevRound === round && !bignum.isEqualTo(previousBlock.b_height, 1)) {
       return done()
     }
 
@@ -268,7 +267,7 @@ class Round {
     this._unDelegatesByRound[round] = this._unDelegatesByRound[round] || []
     this._unDelegatesByRound[round].pop()
 
-    if (this._unDelegatesByRound[round].length !== this.constants.delegates && !DdnUtils.bignum.isEqualTo(previousBlock.b_height, 1)) {
+    if (this._unDelegatesByRound[round].length !== this.constants.delegates && !bignum.isEqualTo(previousBlock.b_height, 1)) {
       return done()
     }
 
@@ -285,8 +284,8 @@ class Round {
     // const outsiders = [];
     // async.series([
     //   cb => {
-    //     //DdnUtils.bignum update if (block.height === 1) {
-    //     if (DdnUtils.bignum.isEqualTo(block.height, 1)) {
+    //     //bignum update if (block.height === 1) {
+    //     if (bignum.isEqualTo(block.height, 1)) {
     //       return cb();
     //     }
     //     modules.delegates.generateDelegateList(block.height, (err, roundDelegates) => {
@@ -324,21 +323,21 @@ class Round {
     //       const changeRewards = changes.rewards;
 
     //       if (index === 0) {
-    //         // DdnUtils.bignum update
+    //         // bignum update
     //         // changeBalance += changes.feesRemaining;
     //         // changeFees += changes.feesRemaining;
-    //         changeBalance = DdnUtils.bignum.plus(changeBalance, changes.feesRemaining);
-    //         changeFees = DdnUtils.bignum.plus(changeFees, changes.feesRemaining);
+    //         changeBalance = bignum.plus(changeBalance, changes.feesRemaining);
+    //         changeFees = bignum.plus(changeFees, changes.feesRemaining);
     //       }
 
     //       modules.accounts.mergeAccountAndGet({
     //         publicKey: delegate,   //wxm block database
-    //         balance: DdnUtils.bignum.minus(0, changeBalance).toString(),    //DdnUtils.bignum update -changeBalance,
-    //         u_balance: DdnUtils.bignum.minus(0, changeBalance).toString(),  //DdnUtils.bignum update -changeBalance,
+    //         balance: bignum.minus(0, changeBalance).toString(),    //bignum update -changeBalance,
+    //         u_balance: bignum.minus(0, changeBalance).toString(),  //bignum update -changeBalance,
     //         block_id: block.id,  //wxm block database
     //         round: modules.round.calc(block.height).toString(),
-    //         fees: DdnUtils.bignum.minus(0, changeFees).toString(),   //DdnUtils.bignum update -changeFees,
-    //         rewards: DdnUtils.bignum.minus(0, changeRewards).toString()  //DdnUtils.bignum update -changeRewards
+    //         fees: bignum.minus(0, changeFees).toString(),   //bignum update -changeFees,
+    //         rewards: bignum.minus(0, changeRewards).toString()  //bignum update -changeRewards
     //       }, dbTrans, next);
     //     }, cb);
     //   },
@@ -353,10 +352,10 @@ class Round {
     //     library.logger.info(`DDN witness club get new bonus: ${bonus}`)
     //     modules.accounts.mergeAccountAndGet({
     //       address: this.constants.foundAddress,
-    //       balance: DdnUtils.bignum.minus(0, fees, rewards).toString(),     //DdnUtils.bignum update -(fees + rewards),
-    //       u_balance: DdnUtils.bignum.minus(0, fees, rewards).toString(),       //DdnUtils.bignum update -(fees + rewards),
-    //       fees: DdnUtils.bignum.minus(0, fees).toString(),     //DdnUtils.bignum update -fees,
-    //       rewards: DdnUtils.bignum.minus(0, rewards).toString(),       //DdnUtils.bignum update -rewards,
+    //       balance: bignum.minus(0, fees, rewards).toString(),     //bignum update -(fees + rewards),
+    //       u_balance: bignum.minus(0, fees, rewards).toString(),       //bignum update -(fees + rewards),
+    //       fees: bignum.minus(0, fees).toString(),     //bignum update -fees,
+    //       rewards: bignum.minus(0, rewards).toString(),       //bignum update -rewards,
     //       block_id: block.id,    //wxm block database
     //       round: modules.round.calc(block.height).toString(),
     //     }, dbTrans, err => {

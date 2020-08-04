@@ -3,7 +3,7 @@
  * wangxm   2018-12-28
  */
 import ByteBuffer from 'bytebuffer'
-import DdnUtils from '@ddn/utils'
+import { bignum } from '@ddn/utils'
 
 class Delegate {
   constructor (context) {
@@ -27,7 +27,7 @@ class Delegate {
   }
 
   async calculateFee () {
-    return DdnUtils.bignum.multiply(this.constants.net.fees.delegate, this.constants.fixedPoint)
+    return bignum.multiply(this.constants.net.fees.delegate, this.constants.fixedPoint)
   }
 
   async verify (trs, { is_delegate }) {
@@ -35,7 +35,7 @@ class Delegate {
       throw new Error('Invalid recipient')
     }
 
-    if (!DdnUtils.bignum.isZero(trs.amount)) {
+    if (!bignum.isZero(trs.amount)) {
       throw new Error('Invalid transaction amount')
     }
 

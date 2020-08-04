@@ -17,7 +17,7 @@ class RoundChanges {
       this._roundRewards = (this.runtime.round._unRewardsByRound[round] || [])
     }
 
-    this._CLUB_BONUS_RATIO = context.constants[context.config.net].rewardRatio
+    this._CLUB_BONUS_RATIO = context.constants.net.rewardRatio
   }
 
   at (index) {
@@ -33,7 +33,7 @@ class RoundChanges {
       fees: fees.toString(),
       feesRemaining: feesRemaining.toString(),
       rewards: rewards.toString(),
-      balance: bignum.plus(fees, rewards).toString() // bignum update fees + rewards
+      balance: bignum.plus(fees, rewards).toString()
     }
   }
 

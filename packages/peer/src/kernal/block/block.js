@@ -3,21 +3,13 @@
  * wangxm   2018-12-27
  */
 import os from 'os'
-
 import ip from 'ip'
 import assert from 'assert'
-import nacl from 'tweetnacl'
 
 import ByteBuffer from 'bytebuffer'
-import DdnCrypto from '@ddn/crypto'
+import DdnCrypto, { nacl } from '@ddn/crypto'
+import { assetTypes, runtimeState, system, bignum } from '@ddn/utils'
 import BlockStatus from './block-status'
-
-import {
-  assetTypes,
-  runtimeState,
-  system,
-  bignum
-} from '@ddn/utils'
 
 let _singleton
 
@@ -879,7 +871,7 @@ class Block {
           await this.runtime.delegate.validateBlockSlot(block)
         } catch (err) {
           await this.runtime.delegate.fork(block, 3)
-          return reject(`Can't verify slot: ${err}`)
+          return reject(new Error(`Can't verify slot: ${err}`))
         }
 
         this.logger.debug('verify block slot ok')
@@ -997,7 +989,8 @@ class Block {
       })
     } catch (e) {
       this.logger.error('create block model error', e)
-      return
+      // return
+      throw new Error(`create block model error: ${e.toString()}`)
     }
 
     this.logger.info(`Generate new block at height ${(parseInt(this._lastBlock.height) + 1)}`)
@@ -1010,6 +1003,7 @@ class Block {
     this.logger.info(`get active delegate keypairs len: ${activeKeypairs.length}`)
 
     const localVotes = this.runtime.consensus.createVotes(activeKeypairs, block)
+
     if (this.runtime.consensus.hasEnoughVotes(localVotes)) {
       await this.processBlock(block, localVotes, true, true, false)
       this.logger.log(`Forged new block id: ${block.id} height: ${block.height} round: ${await this.runtime.round.calc(block.height)} slot: ${this.runtime.slot.getSlotNumber(block.timestamp)} reward: ${block.reward}`)

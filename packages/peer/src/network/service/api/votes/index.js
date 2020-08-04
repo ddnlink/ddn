@@ -61,8 +61,6 @@ class RootRouter {
 
       for (let i = 0; i < delegates.length; i++) {
         delegates[i].rate = i + 1
-        // console.log('delegates[i].vote, totalSupply', delegates[i].vote, totalSupply)
-
         delegates[i].approval = ((delegates[i].vote / totalSupply) * 100).toFixed(2)
 
         let percent = 100 - (delegates[i].missedblocks / ((delegates[i].producedblocks + delegates[i].missedblocks) / 100))

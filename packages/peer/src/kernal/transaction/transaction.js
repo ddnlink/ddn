@@ -2,10 +2,9 @@
  * 交易核心方法和处理逻辑
  * wangxm   2018-12-28
  */
-import nacl from 'tweetnacl'
 import extend from 'util-extend'
 import DdnUtils from '@ddn/utils'
-import DdnCrypto from '@ddn/crypto'
+import DdnCrypto, { nacl } from '@ddn/crypto'
 import Assets from '../../assets'
 
 let _singleton

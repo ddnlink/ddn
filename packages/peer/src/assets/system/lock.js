@@ -4,9 +4,7 @@
  *  Copyright (c) 2019 DDN Foundation. All rights reserved.
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *-------------------------------------------------------------------------------------------- */
-import DdnUtils from '@ddn/utils'
-
-const { bignum } = DdnUtils
+import { bignum } from '@ddn/utils'
 
 class Lock {
   constructor (context) {
@@ -20,7 +18,7 @@ class Lock {
   }
 
   async calculateFee (trs, sender) {
-    return DdnUtils.bignum.multiply(this.constants.net.fees.lock, this.constants.fixedPoint)
+    return bignum.multiply(this.constants.net.fees.lock, this.constants.fixedPoint)
   }
 
   async verify (trs, sender) {

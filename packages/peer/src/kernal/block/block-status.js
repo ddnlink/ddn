@@ -21,9 +21,9 @@ class BlockStatus {
     Object.assign(this, context)
     this._context = context
 
-    this._milestones = context.constants[context.config.net].milestones
-    this._distance = context.constants[context.config.net].rewardDistance
-    this._rewardOffset = context.constants[context.config.net].rewardOffset
+    this._milestones = context.constants.net.milestones
+    this._distance = context.constants.net.rewardDistance
+    this._rewardOffset = context.constants.net.rewardOffset
   }
 
   parseHeight (height) {
@@ -58,7 +58,7 @@ class BlockStatus {
   calcSupply (height) {
     let heightResult = this.parseHeight(height)
 
-    heightResult = bignum.minus(heightResult, bignum.modulo(heightResult, this.constants.delegates))
+    heightResult = bignum.minus(heightResult, bignum.modulo(heightResult, this.constants.superPeers))
 
     const milestone = this.calcMilestone(heightResult)
 

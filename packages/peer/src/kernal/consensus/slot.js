@@ -16,14 +16,14 @@ class Slot {
     Object.assign(this, context)
     this._context = context
     this.interval = this.constants.interval
-    this.delegates = this.constants.delegates
+    this.delegates = this.constants.superPeers
   }
 
   /**
      * 返回区块链启动时间戳
      */
   beginEpochTime () {
-    return this.constants[this.config.net].beginDate
+    return this.constants.net.beginDate
   }
 
   /**
@@ -36,8 +36,6 @@ class Slot {
     }
     const d = this.beginEpochTime()
     const t = d.getTime()
-
-    // console.log("t, time", t, time);
 
     return Math.floor((time - t) / 1000)
   }
@@ -63,6 +61,7 @@ class Slot {
     if (epochTime === undefined) {
       epochTime = this.getTime()
     }
+
     return Math.floor(epochTime / this.interval)
   }
 
