@@ -1,6 +1,6 @@
 {
   "name": "@ddn/js-sdk",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "DDN Node.js SDK",
   "main": "index.js",
   "module": "dist/index.esm.js",
@@ -32,13 +32,13 @@
     "url": "http://github.com/ddnlink/ddn/issues"
   },
   "dependencies": {
-    "@ddn/asset-aob": "^0.3.12",
-    "@ddn/asset-base": "^0.2.14",
-    "@ddn/asset-dao": "^0.2.17",
-    "@ddn/asset-dapp": "^0.2.17",
-    "@ddn/asset-evidence": "^0.1.16",
-    "@ddn/crypto": "^0.2.15",
-    "@ddn/utils": "^0.1.14",
+    "@ddn/asset-aob": "^0.4.0",
+    "@ddn/asset-base": "^0.3.0",
+    "@ddn/asset-dao": "^0.3.0",
+    "@ddn/asset-dapp": "^0.2.18",
+    "@ddn/asset-evidence": "^0.1.17",
+    "@ddn/crypto": "^0.3.0",
+    "@ddn/utils": "^0.1.15",
     "JSONStream": "^1.3.1",
     "bitcore-mnemonic": "^8.20.5",
     "buffer": "^4.7.0",
