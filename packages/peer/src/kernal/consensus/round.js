@@ -55,12 +55,16 @@ class Round {
     })
   }
 
+  /**
+   * 获得某高度下的铸块周期
+   * @param {*} height 高度
+   */
   async calc (height) {
     let value = 0
     if (bignum.isGreaterThan(bignum.modulo(height, this.constants.superPeers), 0)) {
       value = 1
     }
-    return bignum.plus(bignum.floor(bignum.divide(height, this.constants.superPeers)), value)
+    return bignum.plus(bignum.floor(bignum.divide(height, this.constants.superPeers)), value).toString()
   }
 
   async getVotes (round, dbTrans) {
@@ -100,6 +104,11 @@ class Round {
     // wxm TODO
   }
 
+  /**
+   * tick 是比 round 更小的周期，做一些 round 周期内的数据整理工作
+   * @param {object} block 区块
+   * @param {array}} dbTrans 交易
+   */
   async tick (block, dbTrans) {
     await this.runtime.account.merge(null, {
       publicKey: block.generator_public_key, // wxm block database
@@ -227,6 +236,12 @@ class Round {
     })
   }
 
+  /**
+   * tick 的反向操作
+   * @param {objec} block 区块
+   * @param {object} previousBlock 前一区块
+   * @param {array} dbTrans 交易
+   */
   async backwardTick (block, previousBlock, dbTrans) {
     const done = (err) => {
       if (err) {
@@ -278,118 +293,6 @@ class Round {
       previousBlock
     })
     process.exit(1)
-
-    // wxm TODO 下面的代码本来没有注释，但上面直接exit了，不会走到这里，所以整个方法的逻辑还需要梳理
-    // FIXME process the cross round rollback
-    // const outsiders = [];
-    // async.series([
-    //   cb => {
-    //     //bignum update if (block.height === 1) {
-    //     if (bignum.isEqualTo(block.height, 1)) {
-    //       return cb();
-    //     }
-    //     modules.delegates.generateDelegateList(block.height, (err, roundDelegates) => {
-    //       if (err) {
-    //         return cb(err);
-    //       }
-    //       for (let i = 0; i < roundDelegates.length; i++) {
-    //         if (privated.unDelegatesByRound[round].indexOf(roundDelegates[i]) === -1) {
-    //           outsiders.push(modules.accounts.generateAddressByPublicKey(roundDelegates[i]));
-    //         }
-    //       }
-    //       cb();
-    //     });
-    //   },
-    //   cb => {
-    //     if (!outsiders.length) {
-    //       return cb();
-    //     }
-    //     const escaped = outsiders.map(item => `'${item}'`);
-    //     // shuai 2018-11-21
-    //     library.dao.update('mem_account', {
-    //       missedblocks: Sequelize.literal('missedblocks - 1')
-    //     }, { address: { '$in': escaped.join(',') } }, dbTrans, cb)
-    //     // library.dbLite.query(`update mem_accounts set missedblocks = missedblocks - 1 where address in (${escaped.join(',')})`, (err, data) => {
-    //     //   cb(err);
-    //     // });
-    //   },
-    //   cb => {
-    //     const roundChanges = new RoundChanges(round, true);
-
-    //     async.forEachOfSeries(privated.unDelegatesByRound[round], (delegate, index, next) => {
-    //       const changes = roundChanges.at(index);
-    //       let changeBalance = changes.balance;
-    //       let changeFees = changes.fees;
-    //       const changeRewards = changes.rewards;
-
-    //       if (index === 0) {
-    //         // bignum update
-    //         // changeBalance += changes.feesRemaining;
-    //         // changeFees += changes.feesRemaining;
-    //         changeBalance = bignum.plus(changeBalance, changes.feesRemaining);
-    //         changeFees = bignum.plus(changeFees, changes.feesRemaining);
-    //       }
-
-    //       modules.accounts.mergeAccountAndGet({
-    //         publicKey: delegate,   //wxm block database
-    //         balance: bignum.minus(0, changeBalance).toString(),    //bignum update -changeBalance,
-    //         u_balance: bignum.minus(0, changeBalance).toString(),  //bignum update -changeBalance,
-    //         block_id: block.id,  //wxm block database
-    //         round: modules.round.calc(block.height).toString(),
-    //         fees: bignum.minus(0, changeFees).toString(),   //bignum update -changeFees,
-    //         rewards: bignum.minus(0, changeRewards).toString()  //bignum update -changeRewards
-    //       }, dbTrans, next);
-    //     }, cb);
-    //   },
-    //   cb => {
-    //     // distribute club bonus
-    //     const bonus = new RoundChanges(round).getClubBonus();
-    //     const fees = bonus.fees;
-    //     const rewards = bonus.rewards;
-
-    //     const BONUS_CURRENCY = this.constants.tokenName
-
-    //     library.logger.info(`DDN witness club get new bonus: ${bonus}`)
-    //     modules.accounts.mergeAccountAndGet({
-    //       address: this.constants.foundAddress,
-    //       balance: bignum.minus(0, fees, rewards).toString(),     //bignum update -(fees + rewards),
-    //       u_balance: bignum.minus(0, fees, rewards).toString(),       //bignum update -(fees + rewards),
-    //       fees: bignum.minus(0, fees).toString(),     //bignum update -fees,
-    //       rewards: bignum.minus(0, rewards).toString(),       //bignum update -rewards,
-    //       block_id: block.id,    //wxm block database
-    //       round: modules.round.calc(block.height).toString(),
-    //     }, dbTrans, err => {
-    //       cb(err);
-    //     });
-    //   },
-    //   cb => {
-    //     self.getVotes(round, (err, votes) => {
-    //       if (err) {
-    //         return cb(err);
-    //       }
-    //       async.eachSeries(votes, (vote, cb) => {
-    //         let address = null;
-    //         address = modules.accounts.generateAddressByPublicKey(vote.delegate)
-    //         library.dao.update('mem_account', {
-    //           vote: Sequelize.literal('vote + ' + vote.amount),
-    //         }, { address }, dbTrans, cb)
-    //         // library.dbLite.query('update mem_accounts set vote = vote + $amount where address = $address', {
-    //         //   address,
-    //         //   amount: vote.amount
-    //         // }, cb);
-    //       }, err => {
-    //         self.flush(round, err2 => {
-    //           cb(err || err2);
-    //         });
-    //       })
-    //     });
-    //   }
-    // ], err => {
-    //   delete privated.unFeesByRound[round];
-    //   delete privated.unRewardsByRound[round];
-    //   delete privated.unDelegatesByRound[round];
-    //   done(err)
-    // });
   }
 }
 

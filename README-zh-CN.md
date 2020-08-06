@@ -48,7 +48,7 @@ DDN, 是一个成熟的企业级区块链系统，已经服务于版权存证、
 
 ## 架构
 
-![](./doc/images/architect.jpeg)
+![](./docs/images/architect.jpeg)
 
 ## 案例
 

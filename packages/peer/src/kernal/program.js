@@ -174,10 +174,7 @@ class Program {
     })
 
     process.on('unhandledRejection', (reason, p) => {
-      // this._context.logger.fetal('*******************************************');
-
       console.log('Unhandled Rejection at: ', p, 'reason:', reason)
-      // application specific logging, throwing an error, or other logic here
     })
 
     process.on('uncaughtException', err => {
@@ -226,8 +223,8 @@ class Program {
     // 启动准备（节点）
     await this._context.runtime.peer.prepare()
 
-    // 启动准备（受托人）
-    await this._context.runtime.delegate.prepare()
+    // 启动准备（受托人） move to the follow
+    // await this._context.runtime.delegate.prepare()
 
     // 启动准备（Round）
     await this._context.runtime.round.prepare()
@@ -253,6 +250,9 @@ class Program {
 
     // 启动签名同步任务
     await this.startSignaturesSyncTask()
+
+    // 启动准备（受托人）
+    await this._context.runtime.delegate.prepare()
 
     // 启动区块铸造任务
     await this.startForgeBlockTask()

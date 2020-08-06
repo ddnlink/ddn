@@ -127,10 +127,10 @@ class Vote {
     }
   }
 
-  // 替换dbSave方法 ---wly
   /**
+   * 替换dbSave方法 ---wly
 	 * 功能:新增一条vote数据
-	*/
+	 */
   async dbSave ({ asset, id }, dbTrans) {
     return new Promise((resolve, reject) => {
       this.dao.insert('vote', {

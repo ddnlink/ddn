@@ -2,15 +2,19 @@ import DdnCrypto from '@ddn/crypto'
 import DdnUtils from '@ddn/utils'
 
 /**
- * RootRouter接口
+ * DelegatesRouter 接口
  * wangxm   2019-03-22
  */
-class RootRouter {
+class DelegatesRouter {
   constructor (context) {
     Object.assign(this, context)
     this._context = context
   }
 
+  /**
+   * 获取全部受托人
+   * @param {*} req 参数对象，{ offset, limit, address, orderBy }
+   */
   async get (req) {
     const query = Object.assign({}, req.body, req.query)
     query.offset = Number(query.offset || 0)
@@ -342,4 +346,4 @@ class RootRouter {
   }
 }
 
-export default RootRouter
+export default DelegatesRouter

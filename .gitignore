@@ -47,6 +47,7 @@ screenshot
 /packages/**/package-lock\.json
 
 # settings
+config/deploy
 **/**/config.mainnet.js
 **/**/config.local.js
 **/**/.ddnrc.local.js

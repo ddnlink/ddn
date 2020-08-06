@@ -1,4 +1,4 @@
-import _ from 'lodash'
+import { isEmpty } from 'lodash-es'
 import Debug from 'debug'
 import { node } from './ddn-js'
 
@@ -13,19 +13,17 @@ describe('An example of DDN test, please do test follow me', () => {
   })
 })
 
-describe("Test all Utils, for example: _.isEmpty('')", () => {
-  it("Should use _.isEmpty, not '' ", () => {
+describe("Test all Utils, for example: isEmpty('')", () => {
+  it("Should use isEmpty, not '' ", () => {
     const test = ' '
 
-    debug('Blank is empty', !!test, _.isEmpty(test))
+    debug('Blank is empty', !!test, isEmpty(test))
 
     expect(!!test).be.true
-    expect(_.isEmpty(test)).be.false
-    expect(!!test).be.not.equal(_.isEmpty(test))
+    expect(isEmpty(test)).be.false
+    expect(!!test).be.not.equal(isEmpty(test))
   })
 })
-
-// D9DT21EowZTAQW3gqHTGXdMKf3HTqKJcTF
 
 async function sendDDN (password, address, coin) {
   await node.onNewBlockAsync()
@@ -87,7 +85,7 @@ describe('sendDDN is ok', () => {
 
     debug('Coins', result)
 
-    expect(result).be.not.equal(_.isEmpty(result))
+    expect(result).be.not.equal(isEmpty(result))
     done()
   }, 30000)
 
@@ -96,7 +94,7 @@ describe('sendDDN is ok', () => {
 
     debug('Coins', result)
 
-    expect(result).be.not.equal(_.isEmpty(result))
+    expect(result).be.not.equal(isEmpty(result))
     done()
   }, 30000)
 })

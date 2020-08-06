@@ -204,11 +204,11 @@ class Consensus {
   }
 
   /**
-     * 判断投票基于分布节点是否足够，需要至少6个
+     * 判断投票基于分布节点是否足够，需要至少2个
      * @param {*} votes
      */
   hasEnoughVotesRemote (votes) {
-    return votes && votes.signatures && votes.signatures.length >= 6
+    return votes && votes.signatures && votes.signatures.length >= 2
   }
 }
 

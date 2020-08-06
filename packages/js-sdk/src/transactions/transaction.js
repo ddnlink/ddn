@@ -1,4 +1,3 @@
-import _ from 'lodash'
 import { bignum, assetTypes } from '@ddn/utils'
 
 import crypto from '../utils/crypto' // TODO: @ddn/crypto

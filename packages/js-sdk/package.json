@@ -2,9 +2,7 @@
   "name": "@ddn/js-sdk",
   "version": "0.1.2",
   "description": "DDN Node.js SDK",
-  "main": "index.js",
-  "module": "dist/index.esm.js",
-  "unpkg": "build/index.browserify.js",
+  "main": "dist/index.js",
   "files": [
     "lib",
     "dist",
@@ -43,6 +41,7 @@
     "bitcore-mnemonic": "^8.20.5",
     "buffer": "^4.7.0",
     "bytebuffer": "^5.0.1",
+    "lodash-es": "^4.17.15",
     "long": "^4.0.0",
     "ripemd160": "^2.0.1",
     "through2": "^2.0.3",

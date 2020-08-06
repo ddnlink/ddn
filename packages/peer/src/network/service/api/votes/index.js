@@ -4,10 +4,10 @@ import DdnUtils from '@ddn/utils'
 const { assetTypes, bignum } = DdnUtils
 
 /**
- * RootRouter接口
+ * VotesRouter接口
  * wangxm   2019-03-22
  */
-class RootRouter {
+class VotesRouter {
   constructor (context) {
     Object.assign(this, context)
     this._context = context
@@ -65,7 +65,7 @@ class RootRouter {
 
         let percent = 100 - (delegates[i].missedblocks / ((delegates[i].producedblocks + delegates[i].missedblocks) / 100))
         percent = percent || 0
-        const outsider = i + 1 > this.constants.delegates // wxm   slots.delegates;
+        const outsider = i + 1 > this.constants.superPeers // wxm
         delegates[i].productivity = (!outsider) ? parseFloat(Math.floor(percent * 100) / 100).toFixed(2) : 0
       }
 
@@ -79,7 +79,7 @@ class RootRouter {
   async getFee (req) {
     return {
       success: true,
-      fee: bignum.multiply(1, this.constants.fixedPoint)
+      fee: bignum.multiply(this.constants.net.fees.vote, this.constants.fixedPoint)
     }
   }
 
@@ -227,4 +227,4 @@ class RootRouter {
   }
 }
 
-export default RootRouter
+export default VotesRouter

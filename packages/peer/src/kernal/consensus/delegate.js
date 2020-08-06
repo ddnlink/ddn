@@ -2,7 +2,7 @@
  * Delegate
  * wangxm   2018-01-08
  */
-import DdnCrypto, { nacl, crypto } from '@ddn/crypto'
+import DdnCrypto, { nacl } from '@ddn/crypto'
 import { bignum } from '@ddn/utils'
 
 let _singleton
@@ -176,8 +176,7 @@ class Delegate {
 
     for (let i = 0; i < delegates.length; i++) {
       delegates[i].rate = i + 1
-      // delegates[i].approval = delegates[i].vote / totalSupply // TODO: bigNumber?? 2020.6.24
-      delegates[i].approval = bignum.divide(delegates[i].vote, totalSupply) // TODO: bigNumber?? 2020.6.24
+      delegates[i].approval = bignum.divide(delegates[i].vote, totalSupply).toNumber()
       delegates[i].approval = Math.round(delegates[i].approval * 1e2) / 1e2
 
       let percent = 100 - (delegates[i].missedblocks / ((delegates[i].producedblocks + delegates[i].missedblocks) / 100))
@@ -303,7 +302,7 @@ class Delegate {
   /**
      * 该方法向forks_stats插入数据，但未在其他地方用该表数据
      * @param {*} block
-     * @param {*} cause
+     * @param {*} cause 原因，1~5
      */
   async fork (block, cause) {
     this.logger.info('Fork', {
