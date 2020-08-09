@@ -196,12 +196,10 @@ class Transaction {
       throw new Error(`Unknown transaction type 5 ${trs.type}`)
     }
 
-    // wxm TODO 这里不应该使用特定的类型，应该有通用的方式
     if (trs.type === DdnUtils.assetTypes.DAPP_OUT) { //
       return await this._assets.call(trs.type, trs, block, sender)
     }
 
-    // DdnUtils.bignum update   const amount = trs.amount + trs.fee;
     const amount = DdnUtils.bignum.plus(trs.amount, trs.fee)
 
     const sender1 = await this.runtime.account.merge(sender.address, {

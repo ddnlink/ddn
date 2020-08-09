@@ -11,8 +11,8 @@ import builtins from "rollup-plugin-node-builtins";
  */
 
 export default {
-  target: "browser",
-  cjs: { type: "rollup", lazy: false },
+  // target: "browser",
+  // cjs: { type: "rollup", lazy: false },
   esm: { type: "rollup" },
   disableTypeCheck: false,
 

@@ -90,7 +90,7 @@ async function secondSign (transaction, { privateKey }) {
   return bufToHex(signature)
 }
 
-// hex
+// hex 不包含 asset 字段
 async function getId (transaction) {
   const hash = await getHash(transaction)
   return hash.toString('hex')
