@@ -157,7 +157,7 @@ class Multisignature {
       multimin: asset.multisignature.min,
       multilifetime: asset.multisignature.lifetime,
       block_id: id, // wxm block database
-      round: await this.runtime.round.calc(height)
+      round: await this.runtime.round.getRound(height)
     }, dbTrans)
 
     const keysgroup = asset.multisignature.keysgroup
@@ -192,7 +192,7 @@ class Multisignature {
       multimin: -asset.multisignature.min,
       multilifetime: -asset.multisignature.lifetime,
       block_id: id, // wxm block database
-      round: await this.runtime.round.calc(height)
+      round: await this.runtime.round.getRound(height)
     }, dbTrans)
   }
 

@@ -33,12 +33,30 @@ class Delegate {
   }
 
   /**
+   * 授权可以铸块
+   */
+  enableForging () {
+    this._forgingEanbled = true
+  }
+
+  /**
+   * 授权不允许铸块
+   */
+  disableForging () {
+    this._forgingEanbled = false
+  }
+
+  /**
      * 判断当前节点是否配置有有效受托人信息
      */
   hasValidDelegates () {
     return this._myDelegateNum > 0
   }
 
+  /**
+   * Get my able forging delegate
+   * @param {object} keypair *
+   */
   async enableForged (keypair) {
     this._myDelegateKeypairs[keypair.publicKey.toString('hex')] = keypair
   }
@@ -207,7 +225,7 @@ class Delegate {
       // sort: {"vote": -1, "publicKey": 1},
       sort: [['vote', 'DESC'], ['publicKey', 'ASC']], // wxm block database
       limit: this.constants.delegates
-    }, ['publicKey'])
+    }, ['publicKey', 'vote'])
 
     if (!delegates || !delegates.length) {
       throw new Error('No active delegates found')
@@ -222,7 +240,7 @@ class Delegate {
   async getDisorderDelegatePublicKeys (height) {
     const truncDelegateList = await this.getDelegatePublickKeysSortByVote()
 
-    const seedSource = await this.runtime.round.calc(height).toString()
+    const seedSource = await this.runtime.round.getRound(height).toString()
     // wxm 对查询返回的受托人列表进行乱序处理
     let currentSeed = nacl.hash(Buffer.from(seedSource))
     for (let i = 0, delCount = truncDelegateList.length; i < delCount; i++) {
@@ -262,10 +280,14 @@ class Delegate {
   async getForgeDelegateWithCurrentTime (curSlot, height) {
     const activeDelegates = await this.getDisorderDelegatePublicKeys(height)
 
+    this.logger.debug('delegate.js 283L getForgeDelegateWithCurrentTime()， activeDelegates.length = ', activeDelegates.length)
+    this.logger.debug('delegate.js 283L getForgeDelegateWithCurrentTime()， delegatePos = ', curSlot % this.constants.delegates)
+    this.logger.debug('peer4 is at delegatesList of pos ', activeDelegates.indexOf('cec8c30342362f26f0bebbfcafbe58d741b2ee4ee6e81e4e486427981594f842'))
+
     let currentSlot = curSlot
     const lastSlot = this.runtime.slot.getLastSlot(currentSlot)
     for (; currentSlot < lastSlot; currentSlot += 1) {
-      const delegatePos = currentSlot % this.constants.superPeers
+      const delegatePos = currentSlot % this.constants.delegates
       const delegatePublicKey = activeDelegates[delegatePos]
       if (delegatePublicKey && this._myDelegateKeypairs[delegatePublicKey]) {
         return {
@@ -281,7 +303,7 @@ class Delegate {
     const activeDelegates = await this.getDisorderDelegatePublicKeys(height)
 
     const currentSlot = this.runtime.slot.getSlotNumber(timestamp)
-    const delegateKey = activeDelegates[currentSlot % this.constants.superPeers]
+    const delegateKey = activeDelegates[currentSlot % this.constants.delegates]
 
     if (delegateKey && generator_public_key === delegateKey) {
       return
@@ -292,7 +314,7 @@ class Delegate {
   async validateProposeSlot ({ height, timestamp, generator_public_key }) {
     const activeDelegates = await this.getDisorderDelegatePublicKeys(height)
     const currentSlot = this.runtime.slot.getSlotNumber(timestamp)
-    const delegateKey = activeDelegates[currentSlot % this.constants.superPeers]
+    const delegateKey = activeDelegates[currentSlot % this.constants.delegates]
     if (delegateKey && generator_public_key === delegateKey) {
       return
     }

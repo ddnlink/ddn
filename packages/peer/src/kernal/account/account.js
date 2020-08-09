@@ -191,6 +191,16 @@ class Account {
       throw new Error('Invalid address getAccount')
     }
 
+    // return new Promise((reslove, reject) => {
+    //   this.dao.findPage('mem_account', filter, limit || 1000, offset, false, fields || null, sort, (err, data) => {
+    //     if (err) {
+    //       return reject(err)
+    //     }
+
+    //     reslove(data)
+    //   })
+    // })
+
     // shuai 2019-11-20
     return new Promise(async (resolve, reject) => {
       try {
@@ -203,9 +213,12 @@ class Account {
             reslove(data)
           })
         })
+
+        // FIXME: 优化到其他方法中去 2020.8.8
         const mem_account_ids = mem_accounts.map(({
           address
         }) => address)
+
         let delegates = []
         let u_delegates = []
         let multisignatures = []
@@ -515,7 +528,7 @@ class Account {
                   if (!errCatched) {
                     try {
                       // wxm TODO  此处旧代码是直接cacheAllAccountBalances，但是如果block区块内容改动过，是不会发现的，感觉还是应该repaireAccounts，但是repaireAccounts每次重启会重新遍历区块数据，数据太大会导致启动消耗很多时间
-                      // await this.repairAccounts(count, true);
+                      // await this.repairAccounts(count, true)
                       await this.cacheAllAccountBalances()
                     } catch (e) {
                       return reject(e)
@@ -534,6 +547,12 @@ class Account {
     })
   }
 
+  /**
+   * 合并账户信息
+   * @param {*} address 账号公钥地址，可以为空，这时候变化的内容（diff）里提供公钥也是可以的
+   * @param {object} diff 变化内容(变更的publicKey 或 balance)
+   * @param {object} dbTrans 交易
+   */
   async merge (address, diff, dbTrans) {
     const update = {}
     const remove = {}
@@ -564,7 +583,7 @@ class Account {
               break
             case Number:
               if (DdnUtils.bignum.isNaN(trueValue)) {
-                return reject('Encountered invalid number while merging account: ' + trueValue + ', value: ' + value + ', value: ' + address)
+                return reject(new Error('Encountered invalid number while merging account: ' + trueValue + ', value: ' + value + ', value: ' + address))
               }
 
               if (DdnUtils.bignum.isEqualTo(DdnUtils.bignum.abs(trueValue), trueValue) && !DdnUtils.bignum.isZero(trueValue)) {
@@ -573,7 +592,6 @@ class Account {
                 update[value] = this.dao.db_str(`${value} ${DdnUtils.bignum.new(trueValue)}`)
               }
 
-              // DdnUtils.bignum update   if (trueValue !== 0 && value === "balance") {
               if (!DdnUtils.bignum.isZero(trueValue) && value === 'balance') {
                 const mem_accounts2delegate = await new Promise((resolve, reject) => {
                   this.dao.findOne('mem_accounts2delegate', {
@@ -655,6 +673,8 @@ class Account {
                         resolve(data)
                       })
                     })
+
+                    // this.logger.debug('FindOne account when merge, it is ', mem_account)
 
                     if (mem_account) {
                       await new Promise((resolve, reject) => {

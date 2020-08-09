@@ -207,7 +207,7 @@ class Transaction {
     const sender1 = await this.runtime.account.merge(sender.address, {
       balance: amount,
       block_id: block.id, // wxm block database
-      round: await this.runtime.round.calc(block.height)
+      round: await this.runtime.round.getRound(block.height)
     }, dbTrans)
 
     await this._assets.call(trs.type, trs, block, sender1, dbTrans)
@@ -374,10 +374,11 @@ class Transaction {
     const accountInfo = await this.runtime.account.merge(sender.address, {
       balance: DdnUtils.bignum.minus(0, amount),
       block_id: block.id, // wxm block database
-      round: await this.runtime.round.calc(block.height)
+      round: await this.runtime.round.getRound(block.height)
     }, dbTrans)
     const newSender = Object.assign({}, sender, accountInfo) // wxm block database
 
+    // this.logger.debug('transaction.js 381 apply newSender', newSender)
     await this._assets.call(trs.type, 'apply', trs, block, newSender, dbTrans)
   }
 

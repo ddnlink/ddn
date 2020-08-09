@@ -50,6 +50,36 @@ class VotesRouter {
       throw new Error('Account not found')
     }
 
+    // const mem_accounts = await new Promise((reslove, reject) => {
+    //   this.dao.findPage('mem_account', filter, limit || 1000, offset, false, fields || null, sort, (err, data) => {
+    //     if (err) {
+    //       return reject(err)
+    //     }
+
+    //     reslove(data)
+    //   })
+    // })
+    // const mem_account_ids = mem_accounts.map(({ address }) => address)
+    // const delegates = await new Promise((reslove, reject) => {
+    //   this.dao.findListByGroup('mem_accounts2delegate', {
+    //     account_id: {
+    //       $in: mem_account_ids
+    //     } // wxm block database
+    //   }, {
+    //     limit: mem_account_ids.length,
+    //     offset: 0,
+    //     group: ['account_id'],
+    //     attributes: [
+    //       [this.dao.db_fnGroupConcat('dependent_id'), 'delegates'], 'account_id'
+    //     ]
+    //   }, (err, data) => { // wxm block database library.dao.db_fn('group_concat', library.dao.db_col('dependentId'))
+    //     if (err) {
+    //       return reject(err)
+    //     }
+    //     reslove(data)
+    //   })
+    // })
+
     if (account.delegates) {
       const delegates = await this.runtime.account.getAccountList({
         is_delegate: 1, // wxm block database
@@ -65,7 +95,7 @@ class VotesRouter {
 
         let percent = 100 - (delegates[i].missedblocks / ((delegates[i].producedblocks + delegates[i].missedblocks) / 100))
         percent = percent || 0
-        const outsider = i + 1 > this.constants.superPeers // wxm
+        const outsider = i + 1 > this.constants.delegates // wxm
         delegates[i].productivity = (!outsider) ? parseFloat(Math.floor(percent * 100) / 100).toFixed(2) : 0
       }
 

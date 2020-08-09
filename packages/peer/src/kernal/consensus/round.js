@@ -23,11 +23,11 @@ class Round {
     this._feesByRound = {}
     this._rewardsByRound = {}
     this._delegatesByRound = {}
-    this._unDelegatesByRound = {}
+    // this._unDelegatesByRound = {}
   }
 
   async prepare () {
-    const round = await this.calc(this.runtime.block.getLastBlock().height)
+    const round = await this.getRound(this.runtime.block.getLastBlock().height)
     const roundStr = round.toString()
 
     await new Promise((resolve, reject) => {
@@ -59,12 +59,12 @@ class Round {
    * 获得某高度下的铸块周期
    * @param {*} height 高度
    */
-  async calc (height) {
+  async getRound (height) {
     let value = 0
-    if (bignum.isGreaterThan(bignum.modulo(height, this.constants.superPeers), 0)) {
+    if (bignum.isGreaterThan(bignum.modulo(height, this.constants.delegates), 0)) {
       value = 1
     }
-    return bignum.plus(bignum.floor(bignum.divide(height, this.constants.superPeers)), value).toString()
+    return bignum.plus(bignum.floor(bignum.divide(height, this.constants.delegates)), value).toString()
   }
 
   async getVotes (round, dbTrans) {
@@ -114,10 +114,10 @@ class Round {
       publicKey: block.generator_public_key, // wxm block database
       producedblocks: 1,
       block_id: block.id, // wxm block database
-      round: await this.calc(block.height)
+      round: await this.getRound(block.height)
     }, dbTrans)
 
-    const round = await this.calc(block.height)
+    const round = await this.getRound(block.height)
 
     this._feesByRound[round] = (this._feesByRound[round] || 0)
 
@@ -129,10 +129,11 @@ class Round {
     this._delegatesByRound[round] = this._delegatesByRound[round] || []
     this._delegatesByRound[round].push(block.generator_public_key)
 
-    const nextRound = await this.calc(bignum.plus(block.height, 1))
+    const nextRound = await this.getRound(bignum.plus(block.height, 1))
 
+    // 在一个 round 里，不需要其他操作
     if (bignum.isEqualTo(round, nextRound) && !bignum.isEqualTo(block.height, 1)) {
-      this.logger.debug('Round tick completed', {
+      this.logger.debug('Round tick completed in the same round: ', {
         height: block.height
       })
       return
@@ -140,8 +141,9 @@ class Round {
 
     if (this._delegatesByRound[round].length !== this.constants.delegates &&
             !bignum.isEqualTo(block.height, 1) && !bignum.isEqualTo(block.height, this.constants.delegates)) {
-      this.logger.debug('Round tick completed', {
-        height: block.height
+      this.logger.debug('Round tick completed 2', {
+        height: block.height,
+        delegatesByRound: this._delegatesByRound[round].length
       })
       return
     }
@@ -183,7 +185,7 @@ class Round {
         balance: changeBalance.toString(),
         u_balance: changeBalance.toString(),
         block_id: block.id, // wxm block database
-        round: await this.calc(block.height),
+        round: await this.getRound(block.height),
         fees: changeFees.toString(),
         rewards: changeRewards.toString()
       }, dbTrans)
@@ -203,10 +205,12 @@ class Round {
       fees: fees.toString(),
       rewards: rewards.toString(),
       block_id: block.id, // wxm block database
-      round: await this.calc(block.height)
+      round: await this.getRound(block.height)
     }, dbTrans)
 
     const votes = await this.getVotes(round, dbTrans)
+    // this.logger.debug('round.js 210 data.........', votes)
+
     for (let i = 0; i < votes.length; i++) {
       const vote = votes[i]
       const address = this.runtime.account.generateAddressByPublicKey(vote.delegate)
@@ -231,7 +235,7 @@ class Round {
     delete this._rewardsByRound[round]
     delete this._delegatesByRound[round]
 
-    this.logger.debug('Round tick completed', {
+    this.logger.debug('Round tick completed 3', {
       height: block.height
     })
   }
@@ -258,11 +262,11 @@ class Round {
       publicKey: block.generator_public_key, // wxm block database
       producedblocks: -1,
       block_id: block.id, // wxm block database
-      round: await this.calc(block.height)
+      round: await this.getRound(block.height)
     }, dbTrans)
 
-    const round = await this.calc(block.height)
-    const prevRound = await this.calc(previousBlock.b_height)
+    const round = await this.getRound(block.height)
+    const prevRound = await this.getRound(previousBlock.b_height)
 
     this._feesByRound[round] = (this._feesByRound[round] || 0)
 
@@ -275,14 +279,6 @@ class Round {
     this._delegatesByRound[round].pop()
 
     if (prevRound === round && !bignum.isEqualTo(previousBlock.b_height, 1)) {
-      return done()
-    }
-
-    // wxm TODO 这块还有问题，也就是_unDelegatesByRound没有任何地方有赋值操作，所以length不会存在，这里待改，暂时改成下面
-    this._unDelegatesByRound[round] = this._unDelegatesByRound[round] || []
-    this._unDelegatesByRound[round].pop()
-
-    if (this._unDelegatesByRound[round].length !== this.constants.delegates && !bignum.isEqualTo(previousBlock.b_height, 1)) {
       return done()
     }
 

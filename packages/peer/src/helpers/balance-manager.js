@@ -5,9 +5,8 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *-------------------------------------------------------------------------------------------- */
 
+import { bignum } from '@ddn/utils'
 import Tmdb from './tmdb.js'
-
-import DdnUtil from '@ddn/utils'
 
 class BalanceManager {
   constructor () {
@@ -19,23 +18,17 @@ class BalanceManager {
   }
 
   setNativeBalance (address, balance) {
-    // DdnUtil.bignum update
-    // if (typeof balance === 'number') balance = String(balance)
-    // this.tmdb.set([address, 1], DdnUtil.bignum(balance).toString())
-
-    this.tmdb.set([address, 1], DdnUtil.bignum.new(balance).toString())
+    this.tmdb.set([address, 1], bignum.new(balance).toString())
   }
 
   addNativeBalance (address, amount) {
-    // DdnUtil.bignum update
+    // bignum update
     // if (typeof amount === 'number') amount = String(amount)
 
     const keys = [address, 1]
     const balance = this.tmdb.get(keys) || '0'
 
-    // DdnUtil.bignum update
-    // this.tmdb.set(keys, DdnUtil.bignum(balance).plus(amount).toString())
-    this.tmdb.set(keys, DdnUtil.bignum.plus(balance, amount).toString())
+    this.tmdb.set(keys, bignum.plus(balance, amount).toString())
   }
 
   getAssetBalance (address, currency) {
@@ -43,23 +36,22 @@ class BalanceManager {
   }
 
   setAssetBalance (address, currency, balance) {
-    // DdnUtil.bignum update
+    // bignum update
     // if (typeof balance === 'number') amount = String(balance)
-    // this.tmdb.set([address, currency], DdnUtil.bignum(balance).toString())
+    // this.tmdb.set([address, currency], bignum(balance).toString())
 
-    this.tmdb.set([address, currency], DdnUtil.bignum.new(balance).toString())
+    this.tmdb.set([address, currency], bignum.new(balance).toString())
   }
 
   addAssetBalance (address, currency, amount) {
-    // DdnUtil.bignum update
+    // bignum update
     // if (typeof amount === 'number') amount = String(amount)
 
     const keys = [address, currency]
     const balance = this.tmdb.get(keys) || '0'
 
-    // DdnUtil.bignum update
-    // this.tmdb.set(keys, DdnUtil.bignum(balance).plus(amount).toString())
-    this.tmdb.set(keys, DdnUtil.bignum.plus(balance, amount).toString())
+    // bignum update
+    this.tmdb.set(keys, bignum.plus(balance, amount).toString())
   }
 
   rollback () {

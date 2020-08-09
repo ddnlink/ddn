@@ -76,7 +76,7 @@ JSON返回示例：
 		"type": 0,   
 		"timestamp": 4380147,   
 		"senderPublicKey": "fafcd01f6b813fdeb3c086e60bc7fa9bfc8ef70ae7be47ce0ac5d06e7b1a8575",   
-		"senderId": "16358246403719868041",   
+		"senderId": "DDr1KLYLRos6iZ55HvNrKo2X8Zpg2mT1oh",   
 		"recipientId": "D2zThPTQZDNQqXbe5tikDQ24YyCQTCpbSC",   
 		"amount": 10000000000,   
 		"fee": 10000000,   
@@ -95,7 +95,7 @@ JSON返回示例：
 		"type": 0,   
 		"timestamp": 4380024,   
 		"senderPublicKey": "fafcd01f6b813fdeb3c086e60bc7fa9bfc8ef70ae7be47ce0ac5d06e7b1a8575",   
-		"senderId": "16358246403719868041",   
+		"senderId": "DDr1KLYLRos6iZ55HvNrKo2X8Zpg2mT1oh",   
 		"recipientId": "D2zThPTQZDNQqXbe5tikDQ24YyCQTCpbSC",   
 		"amount": 10000000000,   
 		"fee": 10000000,   
@@ -144,7 +144,7 @@ JSON返回示例：
 		"type": 0,// 交易类型，0：普通DDN转账   
 		"timestamp": 4380024,// 距离阿希创世块的timestamp   
 		"senderPublicKey": "fafcd01f6b813fdeb3c086e60bc7fa9bfc8ef70ae7be47ce0ac5d06e7b1a8575", // 发送者公钥   
-		"senderId": "16358246403719868041",// 发送者地址   
+		"senderId": "DDr1KLYLRos6iZ55HvNrKo2X8Zpg2mT1oh",// 发送者地址   
 		"recipientId": "D2zThPTQZDNQqXbe5tikDQ24YyCQTCpbSC",// 接收者地址   
 		"amount": 10000000000,// 交易额，100DDN   
 		"fee": 10000000, // 手续费0.1DDN  

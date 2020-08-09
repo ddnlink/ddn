@@ -15,8 +15,8 @@ class Slot {
   constructor (context) {
     Object.assign(this, context)
     this._context = context
-    this.interval = this.constants.interval
-    this.delegates = this.constants.superPeers
+    this._interval = this.constants.interval
+    this._delegates = this.constants.delegates
   }
 
   /**
@@ -62,11 +62,11 @@ class Slot {
       epochTime = this.getTime()
     }
 
-    return Math.floor(epochTime / this.interval)
+    return Math.floor(epochTime / this._interval)
   }
 
   getSlotTime (slot) {
-    return slot * this.interval
+    return slot * this._interval
   }
 
   getNextSlot () {
@@ -75,7 +75,7 @@ class Slot {
   }
 
   getLastSlot (nextSlot) {
-    return nextSlot + this.delegates
+    return nextSlot + this._delegates
   }
 }
 

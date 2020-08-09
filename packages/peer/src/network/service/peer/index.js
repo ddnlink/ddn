@@ -15,50 +15,43 @@ class PeerService {
     this._invalidTrsCache = new DdnUtils.LimitCache()
   }
 
-  async filter ({
-    headers,
-    connection,
-    body
-  }, res, next) {
+  async filter ({ headers, connection, body }, res, next) {
     const peerIp = headers['x-forwarded-for'] || connection.remoteAddress
     if (!peerIp) {
-      return res
-        .status(500)
-        .send({
-          success: false,
-          error: 'Wrong header data'
-        })
+      return res.status(500).send({
+        success: false,
+        error: 'Wrong header data'
+      })
     }
 
     headers.port = parseInt(headers.port)
 
-    const validateErrors = await this.ddnSchema.validate({
-      type: 'object',
-      properties: {
-        os: {
-          type: 'string',
-          maxLength: 64
+    const validateErrors = await this.ddnSchema.validate(
+      {
+        type: 'object',
+        properties: {
+          os: {
+            type: 'string',
+            maxLength: 64
+          },
+          nethash: {
+            type: 'string',
+            maxLength: 8
+          },
+          version: {
+            type: 'string',
+            maxLength: 11
+          }
         },
-        nethash: {
-          type: 'string',
-          maxLength: 8
-        },
-        version: {
-          type: 'string',
-          maxLength: 11
-        }
+        required: ['nethash', 'version']
       },
-      required: ['nethash', 'version']
-    },
-    headers
+      headers
     )
     if (validateErrors) {
-      return res
-        .status(500)
-        .send({
-          success: false,
-          error: validateErrors[0].message
-        })
+      return res.status(500).send({
+        success: false,
+        error: validateErrors[0].message
+      })
     }
 
     if (headers.nethash !== this.config.nethash) {
@@ -113,7 +106,7 @@ class PeerService {
 
     return {
       success: true,
-      height: (lastBlock && lastBlock.height) ? lastBlock.height : 0
+      height: lastBlock && lastBlock.height ? lastBlock.height : 0
     }
   }
 
@@ -130,55 +123,54 @@ class PeerService {
     }
   }
 
-  async postPropose ({
-    body
-  }) {
+  async postPropose ({ body }) {
     if (typeof body.propose === 'string') {
       body.propose = this.protobuf.decodeBlockPropose(
         Buffer.from(body.propose, 'base64')
       )
     }
 
-    const validateErrors = await this.ddnSchema.validate({
-      type: 'object',
-      properties: {
-        height: {
-          type: 'string'
+    const validateErrors = await this.ddnSchema.validate(
+      {
+        type: 'object',
+        properties: {
+          height: {
+            type: 'string'
+          },
+          id: {
+            type: 'string',
+            maxLength: 64
+          },
+          timestamp: {
+            type: 'integer'
+          },
+          generator_public_key: {
+            type: 'string',
+            format: 'publicKey'
+          },
+          address: {
+            type: 'string'
+          },
+          hash: {
+            type: 'string',
+            format: 'hex'
+          },
+          signature: {
+            type: 'string',
+            format: 'signature'
+          }
         },
-        id: {
-          type: 'string',
-          maxLength: 64
-        },
-        timestamp: {
-          type: 'integer'
-        },
-        generator_public_key: {
-          type: 'string',
-          format: 'publicKey'
-        },
-        address: {
-          type: 'string'
-        },
-        hash: {
-          type: 'string',
-          format: 'hex'
-        },
-        signature: {
-          type: 'string',
-          format: 'signature'
-        }
+        required: [
+          'height',
+          'id',
+          'timestamp',
+          'generator_public_key',
+          'address',
+          'hash',
+          'signature'
+        ]
       },
-      required: [
-        'height',
-        'id',
-        'timestamp',
-        'generator_public_key',
-        'address',
-        'hash',
-        'signature'
-      ]
-    },
-    body.propose
+      body.propose
     )
 
     if (validateErrors) {
@@ -197,28 +189,27 @@ class PeerService {
     }
   }
 
-  async postVotes ({
-    body
-  }) {
-    const validateErrors = await this.ddnSchema.validate({
-      type: 'object',
-      properties: {
-        height: {
-          type: 'string'
+  async postVotes ({ body }) {
+    const validateErrors = await this.ddnSchema.validate(
+      {
+        type: 'object',
+        properties: {
+          height: {
+            type: 'string'
+          },
+          id: {
+            type: 'string',
+            maxLength: 64
+          },
+          signatures: {
+            type: 'array',
+            minLength: 1,
+            maxLength: 101
+          }
         },
-        id: {
-          type: 'string',
-          maxLength: 64
-        },
-        signatures: {
-          type: 'array',
-          minLength: 1,
-          maxLength: 101
-        }
+        required: ['height', 'id', 'signatures']
       },
-      required: ['height', 'id', 'signatures']
-    },
-    body
+      body
     )
     if (validateErrors) {
       return {
@@ -256,29 +247,28 @@ class PeerService {
     }
   }
 
-  async postSignatures ({
-    body
-  }) {
-    const validateErrors = await this.ddnSchema.validate({
-      type: 'object',
-      properties: {
-        signature: {
-          type: 'object',
-          properties: {
-            transaction: {
-              type: 'string'
+  async postSignatures ({ body }) {
+    const validateErrors = await this.ddnSchema.validate(
+      {
+        type: 'object',
+        properties: {
+          signature: {
+            type: 'object',
+            properties: {
+              transaction: {
+                type: 'string'
+              },
+              signature: {
+                type: 'string',
+                format: 'signature'
+              }
             },
-            signature: {
-              type: 'string',
-              format: 'signature'
-            }
-          },
-          required: ['transaction', 'signature']
-        }
+            required: ['transaction', 'signature']
+          }
+        },
+        required: ['signature']
       },
-      required: ['signature']
-    },
-    body
+      body
     )
     if (validateErrors) {
       return {
@@ -307,11 +297,7 @@ class PeerService {
     }
   }
 
-  async postTransactions ({
-    headers,
-    connection,
-    body
-  }) {
+  async postTransactions ({ headers, connection, body }) {
     const lastBlock = await this.runtime.block.getLastBlock()
     const lastSlot = this.runtime.slot.getSlotNumber(lastBlock.timestamp)
 
@@ -329,9 +315,7 @@ class PeerService {
 
     const peerIp = headers['x-forwarded-for'] || connection.remoteAddress
     const peerStr = peerIp
-      ? `${peerIp}:${
-            isNaN(headers.port) ? 'unknown' : headers.port
-            }`
+      ? `${peerIp}:${isNaN(headers.port) ? 'unknown' : headers.port}`
       : 'unknown'
     if (typeof body.transaction === 'string') {
       body.transaction = this.protobuf.decodeTransaction(
@@ -361,10 +345,10 @@ class PeerService {
           3600
         )
         this.logger.log(
-                    `Received transaction ${
-                    transaction ? transaction.id : 'null'
-                    } is not valid, ban 60 min`,
-                    peerStr
+          `Received transaction ${
+            transaction ? transaction.id : 'null'
+          } is not valid, ban 60 min`,
+          peerStr
         )
       }
 
@@ -395,12 +379,12 @@ class PeerService {
             )
           ) {
             return cb(
-               `The transaction ${transaction.id} is in process already..`
+              `The transaction ${transaction.id} is in process already..`
             ) // 这里是正常交易，仅是未确认,
           }
 
           this.logger.log(
-                        `Received transaction ${transaction.id} from peer ${peerStr}`
+            `Received transaction ${transaction.id} from peer ${peerStr}`
           )
 
           try {
@@ -421,13 +405,15 @@ class PeerService {
           if (err) {
             // 这里的错误就是上面 catch 的 exp，所以统一在这里处理就好
             this.logger.debug(
-                            `Receive invalid transaction, transaction is ${
-                            JSON.stringify(transaction)
-                            }, ${DdnUtils.system.getErrorMsg(err)}`
+              `Receive invalid transaction, transaction is ${JSON.stringify(
+                transaction
+              )}, ${DdnUtils.system.getErrorMsg(err)}`
             )
 
             this.logger.error(
-                            `Receive invalid transaction, transaction type: ${JSON.stringify(transaction.type)}, ${DdnUtils.system.getErrorMsg(err)}`
+              `Receive invalid transaction, transaction type: ${JSON.stringify(
+                transaction.type
+              )}, ${DdnUtils.system.getErrorMsg(err)}`
             )
 
             // 缓存非法交易

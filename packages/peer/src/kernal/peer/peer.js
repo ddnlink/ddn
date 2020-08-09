@@ -150,7 +150,7 @@ class Peer {
               }
             )
           } else {
-            reject(`Peer not found: ${config.ip}`)
+            reject(new Error(`Peer not found: ${config.ip}`))
           }
         }
       )
@@ -383,9 +383,10 @@ class Peer {
         { state: 0, clock: { $lt: Date.now() } },
         (err, result) => {
           if (err) {
-            resolve(false)
+            // resolve(false)
+            resolve(err)
           } else {
-            resolve(true)
+            resolve(result)
           }
         }
       )
@@ -434,12 +435,12 @@ class Peer {
      */
   async reset () {
     return new Promise((resolve, reject) => {
-      this.dao.update('peer', { state: 2 }, {}, null, err => {
+      this.dao.update('peer', { state: 2 }, {}, null, (err, result) => {
         if (err) {
-          this.logger.error(`Failed to reset peers: ${e}`)
+          this.logger.error(`Failed to reset peers: ${err}`)
           reject(err)
         } else {
-          resolve()
+          resolve(result)
         }
       })
     })

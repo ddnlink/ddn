@@ -73,7 +73,7 @@ JSON返回示例：
 请求示例：   
 ```js   
 var ddn = require('@ddn/node-sdk');   
-var targetAddress = "16358246403719868041";  
+var targetAddress = "DDr1KLYLRos6iZ55HvNrKo2X8Zpg2mT1oh";  
 var amount = 100*100000000;   //100 DDN
 var password = 'measure bottom stock hospital calm hurdle come banner high edge foster cram';  
 var secondPassword  = 'erjimimashezhi001';  
@@ -83,10 +83,10 @@ var message = ''; // 转账备注
 // 可以通过user.secondPublicKey来判断用户是否有二级密码，如果没有，则不必输入，以下几个交易类型类似
 var transaction = ddn.transaction.createTransaction(targetAddress, amount, message, password, secondPassword || undefined);       
 JSON.stringify(transaction)
-'{"type":0,"amount":10000000000,"fee":10000000,"recipientId":"16358246403719868041","message":"","timestamp":37002975,"asset":{},"senderPublicKey":"8065a105c785a08757727fded3a06f8f312e73ad40f1f3502e0232ea42e67efd","signature":"bd0ed22abf09a13c1778ebfb96fc8584dd209961cb603fd0d818d88df647a926795b5e3c51e23f6ed38648169f4e4c912dd854725c22cce9bbdc15ec51c23008","id":"de72b89312c7d128db28611ed36eab2ff0136912c4a67f97342417c942b055cf"}'
+'{"type":0,"amount":10000000000,"fee":10000000,"recipientId":"DDr1KLYLRos6iZ55HvNrKo2X8Zpg2mT1oh","message":"","timestamp":37002975,"asset":{},"senderPublicKey":"8065a105c785a08757727fded3a06f8f312e73ad40f1f3502e0232ea42e67efd","signature":"bd0ed22abf09a13c1778ebfb96fc8584dd209961cb603fd0d818d88df647a926795b5e3c51e23f6ed38648169f4e4c912dd854725c22cce9bbdc15ec51c23008","id":"de72b89312c7d128db28611ed36eab2ff0136912c4a67f97342417c942b055cf"}'
 
 // 将上面生成的转账操作的交易数据通过post提交给DDN server
-curl -H "Content-Type: application/json" -H "nethash:0ab796cd" -H "version:''" -k -X POST -d '{"transaction":{"type":0,"amount":10000000000,"fee":10000000,"recipientId":"16358246403719868041","message":"","timestamp":37002975,"asset":{},"senderPublicKey":"8065a105c785a08757727fded3a06f8f312e73ad40f1f3502e0232ea42e67efd","signature":"bd0ed22abf09a13c1778ebfb96fc8584dd209961cb603fd0d818d88df647a926795b5e3c51e23f6ed38648169f4e4c912dd854725c22cce9bbdc15ec51c23008","id":"de72b89312c7d128db28611ed36eab2ff0136912c4a67f97342417c942b055cf"}}' http://127.0.0.1:8001/peer/transactions
+curl -H "Content-Type: application/json" -H "nethash:0ab796cd" -H "version:''" -k -X POST -d '{"transaction":{"type":0,"amount":10000000000,"fee":10000000,"recipientId":"DDr1KLYLRos6iZ55HvNrKo2X8Zpg2mT1oh","message":"","timestamp":37002975,"asset":{},"senderPublicKey":"8065a105c785a08757727fded3a06f8f312e73ad40f1f3502e0232ea42e67efd","signature":"bd0ed22abf09a13c1778ebfb96fc8584dd209961cb603fd0d818d88df647a926795b5e3c51e23f6ed38648169f4e4c912dd854725c22cce9bbdc15ec51c23008","id":"de72b89312c7d128db28611ed36eab2ff0136912c4a67f97342417c942b055cf"}}' http://127.0.0.1:8001/peer/transactions
 ```   
    
 JSON返回示例：   

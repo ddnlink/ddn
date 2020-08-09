@@ -13,6 +13,27 @@ class DelegatesRouter {
 
   /**
    * 获取全部受托人
+   * 默认检索的是 vote 排行前 this.constants.delegates 数量的受托人，无论
+   * 
+   * for example:
+   * 
+   * 1. ?address=... 将与该账户投票的delegates对比，获得列表中 delegate 的 voted 状态是 true 或 false
+   * 
+   * http://localhost:8001/api/delegates?address=H8NqZeDoejQbDXR5Z225Y94T9QFtKZbGNv
+   * 
+   * add field: { voted: true, ...}
+   * 
+   * 2. orderBy = fieldname: sortMode
+   * 
+   * http://localhost:8001/api/delegates?orderBy=vote:desc
+   * 
+   * number fields: 'approval', 'productivity', 'rate', 'vote', 'missedblocks', 'producedblocks', 'fees', 'rewards', 'balance'
+   * string fields: 'username'
+   * 
+   * 3. offset=1， limit=30
+   * 
+   * http://localhost:8001/api/delegates?address=HByps9Q7SwijgHs2AhGtVoLBk2wcy9Dk8j&offset=1&limit=30
+   * 
    * @param {*} req 参数对象，{ offset, limit, address, orderBy }
    */
   async get (req) {

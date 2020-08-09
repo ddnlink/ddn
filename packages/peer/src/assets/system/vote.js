@@ -5,8 +5,8 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *-------------------------------------------------------------------------------------------- */
 import ByteBuffer from 'bytebuffer'
-import Diff from '../../utils/diff.js'
 import DdnUtils from '@ddn/utils'
+import Diff from '../../utils/diff.js'
 
 class Vote {
   constructor (context) {
@@ -24,19 +24,31 @@ class Vote {
   }
 
   async calculateFee (trs, sender) {
-    return DdnUtils.bignum.multiply(this.constants.net.fees.vote, this.constants.fixedPoint)
+    return DdnUtils.bignum.multiply(
+      this.constants.net.fees.vote,
+      this.constants.fixedPoint
+    )
   }
 
   async verify (trs, sender) {
-    if (!trs.asset.vote || !trs.asset.vote.votes || !trs.asset.vote.votes.length) {
+    if (
+      !trs.asset.vote ||
+      !trs.asset.vote.votes ||
+      !trs.asset.vote.votes.length
+    ) {
       throw new Error('No votes sent')
     }
 
     if (trs.asset.vote.votes && trs.asset.vote.votes.length > 33) {
-      throw new Error('Voting limit exceeded. Maximum is 33 votes per transaction')
+      throw new Error(
+        'Voting limit exceeded. Maximum is 33 votes per transaction'
+      )
     }
 
-    await this.runtime.delegate.checkDelegates(trs.senderPublicKey, trs.asset.vote.votes)
+    await this.runtime.delegate.checkDelegates(
+      trs.senderPublicKey,
+      trs.asset.vote.votes
+    )
 
     return trs
   }
@@ -64,22 +76,31 @@ class Vote {
   }
 
   async apply ({ asset }, { id, height }, { address }, dbTrans) {
-    await this.runtime.account.merge(address, {
-      delegates: asset.vote.votes,
-      block_id: id, // wxm block database
-      round: await this.runtime.round.calc(height)
-    }, dbTrans)
+    // this.logger.debug('votes.js 67 vote apply merge address', asset)
+    await this.runtime.account.merge(
+      address,
+      {
+        delegates: asset.vote.votes,
+        block_id: id, // wxm block database
+        round: await this.runtime.round.getRound(height)
+      },
+      dbTrans
+    )
   }
 
   async undo ({ asset }, { id, height }, { address }, dbTrans) {
     if (asset.vote.votes === null) return
 
     const votesInvert = Diff.reverse(asset.vote.votes)
-    await this.runtime.account.merge(address, {
-      delegates: votesInvert,
-      block_id: id, // wxm block database
-      round: await this.runtime.round.calc(height)
-    }, dbTrans)
+    await this.runtime.account.merge(
+      address,
+      {
+        delegates: votesInvert,
+        block_id: id, // wxm block database
+        round: await this.runtime.round.getRound(height)
+      },
+      dbTrans
+    )
   }
 
   async applyUnconfirmed ({ type }, { address }, dbTrans) {
@@ -96,20 +117,25 @@ class Vote {
   }
 
   async objectNormalize (trs) {
-    const validateErrors = await this.ddnSchema.validate({
-      type: 'object',
-      properties: {
-        votes: {
-          type: 'array',
-          minLength: 1,
-          maxLength: 101,
-          uniqueItems: true
-        }
+    const validateErrors = await this.ddnSchema.validate(
+      {
+        type: 'object',
+        properties: {
+          votes: {
+            type: 'array',
+            minLength: 1,
+            maxLength: 101,
+            uniqueItems: true
+          }
+        },
+        required: ['votes']
       },
-      required: ['votes']
-    }, trs.asset.vote)
+      trs.asset.vote
+    )
     if (validateErrors) {
-      throw new Error(`Incorrect votes in transactions: ${validateErrors[0].schemaPath} ${validateErrors[0].message}`)
+      throw new Error(
+        `Incorrect votes in transactions: ${validateErrors[0].schemaPath} ${validateErrors[0].message}`
+      )
     }
 
     return trs
@@ -129,20 +155,27 @@ class Vote {
 
   /**
    * 替换dbSave方法 ---wly
-	 * 功能:新增一条vote数据
-	 */
+   * 功能:新增一条vote数据
+   */
   async dbSave ({ asset, id }, dbTrans) {
     return new Promise((resolve, reject) => {
-      this.dao.insert('vote', {
-        votes: Array.isArray(asset.vote.votes) ? asset.vote.votes.join(',') : null,
-        transaction_id: id
-      }, dbTrans, (err, result) => {
-        if (err) {
-          reject(err)
-        } else {
-          resolve(result)
+      this.dao.insert(
+        'vote',
+        {
+          votes: Array.isArray(asset.vote.votes)
+            ? asset.vote.votes.join(',')
+            : null,
+          transaction_id: id
+        },
+        dbTrans,
+        (err, result) => {
+          if (err) {
+            reject(err)
+          } else {
+            resolve(result)
+          }
         }
-      })
+      )
     })
   }
 

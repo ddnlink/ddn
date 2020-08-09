@@ -685,7 +685,7 @@ JSON返回示例：
    
 请求示例：   
 ```js   
-curl -X GET -H "Content-Type: application/json"  'http://localhost:8001/api/aob/transfers/my/transactions/16358246403719868041?offset=0&limit=2' && echo
+curl -X GET -H "Content-Type: application/json"  'http://localhost:8001/api/aob/transfers/my/transactions/DDr1KLYLRos6iZ55HvNrKo2X8Zpg2mT1oh?offset=0&limit=2' && echo
 ```   
    
 JSON返回示例：   
@@ -858,7 +858,7 @@ type=14
    
 请求示例：   
 ```js   
-curl -X GET -H "Content-Type: application/json"  'http://localhost:8001/api/aob/assets/balances/16358246403719868041/IssuerName.CNY' && echo
+curl -X GET -H "Content-Type: application/json"  'http://localhost:8001/api/aob/assets/balances/DDr1KLYLRos6iZ55HvNrKo2X8Zpg2mT1oh/IssuerName.CNY' && echo
 ```   
    
 JSON返回示例：   
@@ -901,7 +901,7 @@ JSON返回示例：
    
 请求示例：   
 ```js   
-curl -X GET -H "Content-Type: application/json"  'http://localhost:8001/api/aob/transfers/my/16358246403719868041/IssuerName.CNY' && echo
+curl -X GET -H "Content-Type: application/json"  'http://localhost:8001/api/aob/transfers/my/DDr1KLYLRos6iZ55HvNrKo2X8Zpg2mT1oh/IssuerName.CNY' && echo
 ```   
    
 JSON返回示例：   
@@ -915,7 +915,7 @@ JSON返回示例：
 		"type": 14,
 		"timestamp": 19481489,
 		"senderPublicKey": "fafcd01f6b813fdeb3c086e60bc7fa9bfc8ef70ae7be47ce0ac5d06e7b1a8575",
-		"senderId": "16358246403719868041",
+		"senderId": "DDr1KLYLRos6iZ55HvNrKo2X8Zpg2mT1oh",
 		"recipientId": "AKKHPvQb2A119LNicCQWLZQDFxhGVEY57a",
 		"amount": 0,
 		"fee": 10000000,

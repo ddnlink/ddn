@@ -11,7 +11,7 @@ const LOG_SET_VALUE = 2
 class Tmdb {
   constructor (map) {
     this.map = (map instanceof Map ? map : new Map())
-    this.log = new Array()
+    this.log = []
   }
 
   set (keys, value) {
@@ -87,8 +87,11 @@ class Tmdb {
     }
   }
 
+  /**
+   * commit 清零
+   */
   commit () {
-    this.log = new Array()
+    this.log = []
   }
 }
 

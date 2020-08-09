@@ -323,12 +323,12 @@ JSON返回示例：
    
 请求示例：   
 ```bash   
-curl -k -H "Content-Type: application/json" -X POST -d '{"secret":"motion group blossom coral upper warrior pattern fragile sister misery palm detect"}' 'http://localhost:8001/api/delegates/forging/enable'   
+curl -k -H "Content-Type: application/json" -X POST -d '{"secret":"pact october wrap gain amazing spring biology allow skull aware laundry unhappy"}' 'http://localhost:8001/api/delegates/forging/enable'   
 ```   
    
 JSON返回示例：   
 ```js   
-{"success":true,"address":"16358246403719868041"}   
+{"success":true,"address":"DDr1KLYLRos6iZ55HvNrKo2X8Zpg2mT1oh"}   
 ```      
 
 ### **2.4.9 受托人关闭锻造**   
@@ -353,12 +353,12 @@ JSON返回示例：
    
 请求示例：   
 ```bash   
-curl -k -H "Content-Type: application/json" -X POST -d '{"secret":"motion group blossom coral upper warrior pattern fragile sister misery palm detect"}' 'http://localhost:8001/api/delegates/forging/disable'   
+curl -k -H "Content-Type: application/json" -X POST -d '{"secret":"pact october wrap gain amazing spring biology allow skull aware laundry unhappy"}' 'http://localhost:8001/api/delegates/forging/disable'   
 ```   
    
 JSON返回示例：   
 ```js   
-{"success":true,"address":"16358246403719868041"}     
+{"success":true,"address":"DDr1KLYLRos6iZ55HvNrKo2X8Zpg2mT1oh"}     
 ```     
 
 ### **2.4.10 受托人锻造状态查看**   
@@ -392,7 +392,7 @@ JSON返回示例：
 
 ## **2.4 投票Vote**
 
-### **2.1.6 根据地址获取其投票列表**   
+### **2.1.6 根据地址获取我的投票列表**   
 接口地址：/api/votes  
 请求方式：get   
 支持格式：urlencoded   

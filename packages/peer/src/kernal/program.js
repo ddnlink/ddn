@@ -227,7 +227,7 @@ class Program {
     // await this._context.runtime.delegate.prepare()
 
     // 启动准备（Round）
-    await this._context.runtime.round.prepare()
+    // await this._context.runtime.round.prepare()
 
     // 启动节点网络服务
     this._context.runtime.httpserver = await HttpServer.newServer(this._context).start()
@@ -251,8 +251,11 @@ class Program {
     // 启动签名同步任务
     await this.startSignaturesSyncTask()
 
-    // 启动准备（受托人）
+    // 启动准备（受托人）- 需要用到同步后的 account 信息
     await this._context.runtime.delegate.prepare()
+
+    // 启动准备（Round）- 需要用到同步后的 block 信息
+    await this._context.runtime.round.prepare()
 
     // 启动区块铸造任务
     await this.startForgeBlockTask()
@@ -295,11 +298,12 @@ class Program {
         await (async () => {
           if (this._peerSyncCounter === 0) {
             await this._context.runtime.peer.syncPeersList()
-            this._peerSyncCounter = 3
+            this._peerSyncCounter = 3 // TODO: this.constants.try_time
           }
           this._peerSyncCounter--
 
           await this._context.runtime.peer.restoreBanState()
+          this._context.logger.debug('Peers ban is restored:  this._peerSyncCounter = ' + this._peerSyncCounter)
         })()
       } catch (err) {
         this._context.logger.warn('The peer sync task error: ' + err)
@@ -367,9 +371,9 @@ class Program {
             return
           }
 
-          var lastBlock = this._context.runtime.block.getLastBlock()
-          var lastSlot = this._context.runtime.slot.getSlotNumber(lastBlock.timestamp)
-          if (this._context.runtime.slot.getNextSlot() - lastSlot >= 3) {
+          const lastBlock = this._context.runtime.block.getLastBlock()
+          const lastSlot = this._context.runtime.slot.getSlotNumber(lastBlock.timestamp)
+          if (this._context.runtime.slot.getNextSlot() - lastSlot >= 3) { // TODO: this.constants.*
             this._context.runtime.state = DdnUtils.runtimeState.Syncing
 
             this._context.logger.debug('startSyncBlocks enter')
@@ -378,7 +382,7 @@ class Program {
               this._context.sequence.add(async (cb) => {
                 this._context.logger.debug('startSyncBlocks enter sequence')
                 try {
-                  var syncCompleted = await this._context.runtime.peer.syncBlocks()
+                  const syncCompleted = await this._context.runtime.peer.syncBlocks()
                   cb(null, syncCompleted)
                 } catch (syncErr) {
                   cb(syncErr)
@@ -436,6 +440,7 @@ class Program {
       const lastBlock = this._context.runtime.block.getLastBlock()
 
       if (currentSlot === this._context.runtime.slot.getSlotNumber(lastBlock.timestamp)) {
+        this._context.logger.trace('Loop:', 'lastBlock is in the same slot')
         return
       }
 
@@ -444,7 +449,7 @@ class Program {
         return
       }
 
-      var forgeDelegateInfo = await this._context.runtime.delegate.getForgeDelegateWithCurrentTime(currentSlot, DdnUtils.bignum.plus(lastBlock.height, 1))
+      const forgeDelegateInfo = await this._context.runtime.delegate.getForgeDelegateWithCurrentTime(currentSlot, DdnUtils.bignum.plus(lastBlock.height, 1))
       if (forgeDelegateInfo === null) {
         this._context.logger.trace('Loop:', 'skipping slot')
         return

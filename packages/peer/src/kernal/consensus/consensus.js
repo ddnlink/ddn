@@ -5,7 +5,7 @@
 import ByteBuffer from 'bytebuffer'
 import assert from 'assert'
 import ip from 'ip'
-import DdnCrypto, { nacl } from '@ddn/crypto'
+import { nacl } from '@ddn/crypto'
 
 let _singleton
 
@@ -48,7 +48,9 @@ class Consensus {
 
     bytes.flip()
 
-    return DdnCrypto.createHash(bytes.toBuffer())
+    // fixme: DdnCrypto.createHash 返回的是 buffer 是不对的
+    // return DdnCrypto.createHash(bytes.toBuffer())
+    return nacl.hash(bytes.toBuffer())
   }
 
   async createPropose (keypair, { generator_public_key, height, id, timestamp }, address) {
@@ -142,7 +144,7 @@ class Consensus {
         signatures: {
           type: 'array',
           minLength: 1,
-          maxLength: this.constants.superPeers
+          maxLength: this.constants.delegates
         }
       },
       required: ['height', 'id', 'signatures']
@@ -155,6 +157,11 @@ class Consensus {
     return votes
   }
 
+  /**
+   * 对当前高度的块进行hash，方便后面受托人签名（投票）
+   * @param {string} height 高度
+   * @param {string} id 块id
+   */
   getVoteHash (height, id) {
     const bytes = new ByteBuffer()
 
@@ -163,9 +170,15 @@ class Consensus {
     bytes.writeString(id)
 
     bytes.flip()
-    return DdnCrypto.createHash(bytes.toBuffer())
+    // fixme: DdnCrypto.createHash 返回的是 buffer 是不对的
+    return nacl.hash(bytes.toBuffer())
   }
 
+  /**
+   * 受托人给当前高度的区块签名
+   * @param {array} keypairs 受托人公私钥对
+   * @param {object} param1 块高度、id
+   */
   createVotes (keypairs, { height, id }) {
     const hash = this.getVoteHash(height, id)
     const votes = {
@@ -196,19 +209,19 @@ class Consensus {
   }
 
   /**
-     * 判断投票基于本地是否足够，需要2/3
-     * @param {*} votes
-     */
+   * 判断投票基于本地是否足够，需要 this.constants.voters: 0,
+   * @param {*} votes
+   */
   hasEnoughVotes (votes) {
-    return votes && votes.signatures && (votes.signatures.length > (this.constants.superPeers * 2 / 3))
+    return votes && votes.signatures && (votes.signatures.length >= this.constants.voters) // (this.constants.delegates * 2 / 3)
   }
 
   /**
-     * 判断投票基于分布节点是否足够，需要至少2个
-     * @param {*} votes
-     */
+   * 判断投票基于分布节点是否足够，需要至少 this.constants.remoteVoters 个
+   * @param {*} votes
+   */
   hasEnoughVotesRemote (votes) {
-    return votes && votes.signatures && votes.signatures.length >= 2
+    return votes && votes.signatures && votes.signatures.length >= this.constants.remoteVoters
   }
 }
 

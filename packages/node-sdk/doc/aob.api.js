@@ -1,6 +1,6 @@
 var DdnJS = require('../lib').default
 // 一级密码
-var secret = 'motion group blossom coral upper warrior pattern fragile sister misery palm detect'
+var secret = 'pact october wrap gain amazing spring biology allow skull aware laundry unhappy'
 // 二级密码
 var secondSecret = 'erjimima001'
 // 发行商名称,唯一标识

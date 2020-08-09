@@ -235,7 +235,7 @@ class OutTransfer extends Asset.Base {
         balance: amount.toString(), // DdnUtils.bignum update
         u_balance: amount.toString(), // DdnUtils.bignum update
         block_id: block.id, // wxm block database
-        round: await this.runtime.round.calc(block.height)
+        round: await this.runtime.round.getRound(block.height)
       }, dbTrans)
 
       var minusSum = DdnUtils.bignum.minus(0, amount, trs.fee)
@@ -268,7 +268,7 @@ class OutTransfer extends Asset.Base {
         balance: minusAmount.toString(),
         u_balance: minusAmount.toString(),
         block_id: block.id, // wxm block database
-        round: await this.runtime.round.calc(block.height)
+        round: await this.runtime.round.getRound(block.height)
       }, dbTrans)
       await this._updateAssetBalance(this.constants.tokenName,
         sum, transfer.dapp_id, dbTrans)

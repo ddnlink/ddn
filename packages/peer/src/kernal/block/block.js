@@ -120,7 +120,9 @@ class Block {
   }
 
   getHash (block) {
+    // fixme: 2020.8.8 该方法返回 buffer, 还是使用原始 的nacl把
     return DdnCrypto.createHash(this.getBytes(block))
+    // return nacl.hash(this.getBytes(block))
   }
 
   // 2020.5.20 使用 NaCI 替代
@@ -351,7 +353,7 @@ class Block {
     await new Promise((resolve, reject) => {
       this.sequence.add(async cb => {
         if (block.previous_block === this._lastBlock.id && bignum.isEqualTo(bignum.plus(this._lastBlock.height, 1), block.height)) { // wxm block database
-          this.logger.info(`Received new block id: ${block.id} height: ${block.height} round: ${await this.runtime.round.calc(this.getLastBlock().height)} slot: ${this.runtime.slot.getSlotNumber(block.timestamp)} reward: ${this.getLastBlock().reward}`)
+          this.logger.info(`Received new block id: ${block.id} height: ${block.height} round: ${await this.runtime.round.getRound(this.getLastBlock().height)} slot: ${this.runtime.slot.getSlotNumber(block.timestamp)} reward: ${this.getLastBlock().reward}`)
           await this.processBlock(block, votes, true, true, true)
           cb()
         } else if (block.previous_block !== this._lastBlock.id && this._lastBlock.height + 1 === block.height) { // wxm block database
@@ -408,7 +410,7 @@ class Block {
           }
         }
 
-        this.logger.log(`Forged new block id: ${id} height: ${height} round: ${await this.runtime.round.calc(height)} slot: ${this.runtime.slot.getSlotNumber(block.timestamp)} reward: ${block.reward}`)
+        this.logger.log(`Forged new block id: ${id} height: ${height} round: ${await this.runtime.round.getRound(height)} slot: ${this.runtime.slot.getSlotNumber(block.timestamp)} reward: ${block.reward}`)
       }
 
       cb()
@@ -524,21 +526,14 @@ class Block {
      * 应用区块数据，执行交易逻辑，并保存区块和交易数据到数据库中
      * @param {*} block 区块数据
      * @param {*} votes 投票数据
-     * @param {*} broadcast 是否广播
-     * @param {*} saveBlock 是否保存到数据库
+     * @param {*} isBroadcast 是否广播
+     * @param {*} isSaveBlock 是否保存到数据库
      */
-  async applyBlock (block, votes, broadcast, saveBlock) {
+  async applyBlock (block, votes, isBroadcast, isSaveBlock) {
     const applyedTrsIdSet = new Set()
 
     const doApplyBlock = async () => {
       this.logger.debug('doApplyBlock is starting')
-
-      // const sortedTrs = block.transactions.sort((a, b) => {
-      //     if (a.type === 1) {
-      //         return 1;
-      //     }
-      //     return 0;
-      // });
 
       const sortedTrs = this._sortTransactions(block.transactions)
 
@@ -564,13 +559,9 @@ class Block {
 
             this.logger.debug('apply block ok')
 
-            if (saveBlock) {
+            if (isSaveBlock) {
               await this.saveBlock(block, dbTrans)
               this.logger.debug('save block ok')
-
-              // modules.round.tick(block, dbTrans, done);   //wxm block database
-            } else {
-              // modules.round.tick(block, dbTrans, done); //wxm block database
             }
             await this.runtime.round.tick(block, dbTrans)
 
@@ -602,7 +593,7 @@ class Block {
             this.balanceCache.commit()
             this.runtime.consensus.clearState()
 
-            if (broadcast) {
+            if (isBroadcast) {
               this.logger.info(`Block applied correctly with ${block.transactions.length} transactions`)
               votes.signatures = votes.signatures.slice(0, 6)
 
@@ -700,6 +691,11 @@ class Block {
     return res
   }
 
+  /**
+   * verify block before save
+   * @param {object} block block data
+   * @param {object}} votes votes
+   */
   async verifyBlock (block, votes) {
     try {
       block.id = this.getId(block)
@@ -815,7 +811,7 @@ class Block {
       delegatesList = await this.runtime.delegate.getDisorderDelegatePublicKeys(block.height)
     } catch (err) {
       this.logger.error('Failed to get delegate list while verifying block votes')
-      process.exit(-1)
+      process.exit(1)
     }
 
     const publicKeySet = {}
@@ -823,6 +819,7 @@ class Block {
       publicKeySet[item] = true
     })
 
+    this.logger.debug('block verifyblockVotes get delegates list ', delegatesList.length)
     for (const item of votes.signatures) {
       if (!publicKeySet[item.key]) {
         throw new Error(`Votes key is not in the top list: ${item.key}`)
@@ -989,7 +986,6 @@ class Block {
       })
     } catch (e) {
       this.logger.error('create block model error', e)
-      // return
       throw new Error(`create block model error: ${e.toString()}`)
     }
 
@@ -997,16 +993,19 @@ class Block {
 
     await this.verifyBlock(block, null)
 
+    // 本地 keypairs
     const activeKeypairs = await this.runtime.delegate.getActiveDelegateKeypairs(block.height)
     assert(activeKeypairs && activeKeypairs.length > 0, 'Active keypairs should not be empty')
 
     this.logger.info(`get active delegate keypairs len: ${activeKeypairs.length}`)
 
     const localVotes = this.runtime.consensus.createVotes(activeKeypairs, block)
+    this.logger.debug(`get local votes: ${localVotes.signatures.length}`)
+    this.logger.debug(`block.js 1007L generateBlock() this.runtime.consensus.hasEnoughVotes(localVotes) ${this.runtime.consensus.hasEnoughVotes(localVotes)}`)
 
     if (this.runtime.consensus.hasEnoughVotes(localVotes)) {
       await this.processBlock(block, localVotes, true, true, false)
-      this.logger.log(`Forged new block id: ${block.id} height: ${block.height} round: ${await this.runtime.round.calc(block.height)} slot: ${this.runtime.slot.getSlotNumber(block.timestamp)} reward: ${block.reward}`)
+      this.logger.log(`Forged new block id: ${block.id} height: ${block.height} round: ${await this.runtime.round.getRound(block.height)} slot: ${this.runtime.slot.getSlotNumber(block.timestamp)} reward: ${block.reward}`)
     } else {
       if (!this.config.publicIp) {
         throw new Error('No public ip')
@@ -1210,13 +1209,6 @@ class Block {
   }
 
   async loadBlocksOffset (limit, offset, verify) {
-    // fixme: delete it
-    // const newLimit = limit + (offset || 0);
-    // const params = {
-    //     limit: newLimit,
-    //     offset: offset || 0
-    // };
-
     this.logger.debug(`loadBlockOffset limit: ${limit}, offset: ${offset}, verify: ${verify}`)
 
     return new Promise((resolve, reject) => {
@@ -1240,13 +1232,11 @@ class Block {
             block.transactions = this._sortTransactions(block.transactions)
             if (verify) {
               const lastBlock = this.getLastBlock()
-              if (!lastBlock || !lastBlock.id) {
-                // apply genesis block
-                await this.applyBlock(block, null, false, false)
-              } else {
+              if (lastBlock && lastBlock.id) {
                 await this.verifyBlock(block, null)
-                await this.applyBlock(block, null, false, false)
               }
+              // fixme: 获取到块之后，isSaveBlock 应该是 true ？？ 2020.8.7
+              await this.applyBlock(block, null, false, false)
             } else {
               this.setLastBlock(block)
             }

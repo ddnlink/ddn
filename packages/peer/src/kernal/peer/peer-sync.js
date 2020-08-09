@@ -118,7 +118,7 @@ class PeerSync {
       const maxHeight = currProcessHeight
       currProcessHeight = data.firstHeight
 
-      var result = await this.runtime.peer.request({ peer, api: `/blocks/common?ids=${data.ids}&max=${maxHeight}&min=${currProcessHeight}` })
+      const result = await this.runtime.peer.request({ peer, api: `/blocks/common?ids=${data.ids}&max=${maxHeight}&min=${currProcessHeight}` })
       if (result && result.body && result.body.common) {
         lastLackBlock = await new Promise(
           (resolve, reject) => {
@@ -146,10 +146,8 @@ class PeerSync {
     }
 
     this.logger.info(`Found common block ${lastLackBlock.id} (at ${lastLackBlock.height}) with peer ${peerStr}, last block height is ${lastBlock.height}`)
-    // DdnUtils.bignum update const toRemove = lastBlock.height - commonBlock.height;
     const toRemove = DdnUtils.bignum.minus(lastBlock.height, lastLackBlock.height)
 
-    // DdnUtils.bignum update if (toRemove >= 5) {
     if (DdnUtils.bignum.isGreaterThanOrEqualTo(toRemove, 5)) {
       this.logger.error('long fork, ban 60 min', peerStr)
       this.runtime.peer.changeState(peer.ip, peer.port, 0, 3600)
@@ -169,8 +167,8 @@ class PeerSync {
     // rollback blocks
     if (lastLackBlock.id !== lastBlock.id) {
       try {
-        const currentRound = await this.runtime.round.calc(lastBlock.height)
-        const backRound = await this.runtime.round.calc(lastLackBlock.height)
+        const currentRound = await this.runtime.round.getRound(lastBlock.height)
+        const backRound = await this.runtime.round.getRound(lastLackBlock.height)
         let backHeight = lastLackBlock.height
 
         if (currentRound !== backRound || DdnUtils.bignum.isEqualTo(DdnUtils.bignum.modulo(lastBlock.height, this.constants.delegates), 0)) {
@@ -248,13 +246,13 @@ class PeerSync {
       // This code is for compatible with old nodes
       if (blocks[0] && blocks[0].length === 63) {
         blocks.forEach(b => {
-          for (var i = 80; i >= 25; --i) {
+          for (let i = 80; i >= 25; --i) {
             b[i] = b[i - 2]
           }
           b[23] = ''
           b[24] = ''
           if (b[14] >= 8 && b[14] <= 14) {
-            for (var i = 80; i >= 48; --i) {
+            for (let i = 80; i >= 48; --i) {
               b[i] = b[i - 6]
             }
             b[42] = ''
@@ -346,6 +344,7 @@ class PeerSync {
                 transaction: signature.transaction
               })
             } catch (e) {
+              cb(e)
             }
           }
         }
@@ -390,7 +389,7 @@ class PeerSync {
     }
 
     const transactions = data.body.transactions
-    for (var i = 0; i < transactions.length; i++) {
+    for (let i = 0; i < transactions.length; i++) {
       try {
         transactions[i] = await this.runtime.transaction.objectNormalize(transactions[i])
       } catch (e) {
@@ -402,7 +401,7 @@ class PeerSync {
     }
 
     const trs = []
-    for (var i = 0; i < transactions.length; ++i) {
+    for (let i = 0; i < transactions.length; ++i) {
       if (!await this.runtime.transaction.hasUnconfirmedTransaction(transactions[i])) {
         trs.push(transactions[i])
       }

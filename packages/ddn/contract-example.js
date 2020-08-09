@@ -58,12 +58,6 @@ class ExampleContract {
   normalize (asset, cb) {
     setImmediate(cb)
   }
-
-  onBind (_modules) {
-    modules = _modules
-    // eslint-disable-next-line no-undef
-    modules.logic.transaction.attachAssetType(__TYPE__, self)
-  }
 }
 
 export default ExampleContract

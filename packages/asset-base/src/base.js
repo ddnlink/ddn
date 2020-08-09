@@ -822,7 +822,7 @@ class AssetBase {
         balance: amount,
         u_balance: amount,
         block_id: id, // wxm block database
-        round: await this.runtime.round.calc(height)
+        round: await this.runtime.round.getRound(height)
       }, dbTrans)
     }
   }
@@ -844,7 +844,7 @@ class AssetBase {
         balance: amountStr,
         u_balance: amountStr,
         block_id: id, // wxm block database
-        round: await this.runtime.round.calc(height)
+        round: await this.runtime.round.getRound(height)
       }, dbTrans)
     }
   }

@@ -6,6 +6,11 @@
  *-------------------------------------------------------------------------------------------- */
 
 export default {
+
+  /**
+   * 充值变更操作
+   * @param {array} diff 变更内容的数组，格式为 ['+publicKey1', '-publicKey2'] 比如：['+aswbs...sfefs', '-sfsfesbfee...fegf']
+   */
   reverse (diff) {
     const copyDiff = diff.slice()
     for (let i = 0; i < copyDiff.length; i++) {
@@ -15,6 +20,11 @@ export default {
     return copyDiff
   },
 
+  /**
+   * 合并
+   * @param {array} source 源数组
+   * @param {array} diff 变更列表
+   */
   merge (source, diff) {
     let res = source ? source.slice() : []
 
