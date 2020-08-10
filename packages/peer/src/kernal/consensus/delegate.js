@@ -287,8 +287,7 @@ class Delegate {
     let currentSlot = curSlot
     const lastSlot = this.runtime.slot.getLastSlot(currentSlot)
     for (; currentSlot < lastSlot; currentSlot += 1) {
-      const delegatePos = currentSlot % this.constants.delegates
-      const delegatePublicKey = activeDelegates[delegatePos]
+      const delegatePublicKey = activeDelegates[currentSlot % this.constants.delegates]
       if (delegatePublicKey && this._myDelegateKeypairs[delegatePublicKey]) {
         return {
           time: this.runtime.slot.getSlotTime(currentSlot),
