@@ -223,11 +223,11 @@ class Program {
     // 启动准备（节点）
     await this._context.runtime.peer.prepare()
 
-    // 启动准备（受托人） move to the follow
-    // await this._context.runtime.delegate.prepare()
-
     // 启动准备（Round）
-    // await this._context.runtime.round.prepare()
+    await this._context.runtime.round.prepare()
+
+    // 启动准备（受托人） move to the follow
+    await this._context.runtime.delegate.prepare()
 
     // 启动节点网络服务
     this._context.runtime.httpserver = await HttpServer.newServer(this._context).start()
@@ -245,17 +245,17 @@ class Program {
     // 启动区块数据同步任务
     await this.startBlockDataSyncTask()
 
+    // 启动准备（受托人）- 需要用到同步后的 account 信息
+    // await this._context.runtime.delegate.prepare()
+
+    // 启动准备（Round）- 需要用到同步后的 block 信息
+    // await this._context.runtime.round.prepare()
+
     // 启动区块未确认交易的同步任务
     await this.startUnconfirmedTransactionSyncTask()
 
     // 启动签名同步任务
     await this.startSignaturesSyncTask()
-
-    // 启动准备（受托人）- 需要用到同步后的 account 信息
-    await this._context.runtime.delegate.prepare()
-
-    // 启动准备（Round）- 需要用到同步后的 block 信息
-    await this._context.runtime.round.prepare()
 
     // 启动区块铸造任务
     await this.startForgeBlockTask()

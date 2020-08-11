@@ -384,9 +384,9 @@ class Peer {
         (err, result) => {
           if (err) {
             // resolve(false)
-            resolve(err)
+            resolve(false)
           } else {
-            resolve(result)
+            resolve(true)
           }
         }
       )

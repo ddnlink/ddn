@@ -103,7 +103,7 @@ class Delegate {
         }
       })
     } else {
-      throw new Error('Delegates not found.')
+      this.logger.info('Delegates not found.')
     }
   }
 
@@ -307,7 +307,7 @@ class Delegate {
     if (delegateKey && generator_public_key === delegateKey) {
       return
     }
-    throw new Error(`Failed to verify slot, gotten delegate: ${delegateKey}, expected delegate: ${generator_public_key}`)
+    throw new Error(`Failed to verify slot, expected delegate: ${generator_public_key}, gotten delegate: ${delegateKey}`)
   }
 
   async validateProposeSlot ({ height, timestamp, generator_public_key }) {

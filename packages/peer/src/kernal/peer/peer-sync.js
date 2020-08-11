@@ -42,7 +42,7 @@ class PeerSync {
         required: ['height']
       }, remotePeerHeight.body)
       if (validateErrors) {
-        this.logger.log(`Failed to parse blockchain height: ${peerStr}\n${validateErrors[0].schemaPath} ${validateErrors[0].message}`)
+        this.logger.log(`Failed to parse blockchain height: ${peerStr} ${validateErrors[0].schemaPath} ${validateErrors[0].message}`)
       }
 
       if (DdnUtils.bignum.isLessThan(this.runtime.block.getLastBlock().height, remotePeerHeight.body.height)) {
@@ -171,12 +171,15 @@ class PeerSync {
         const backRound = await this.runtime.round.getRound(lastLackBlock.height)
         let backHeight = lastLackBlock.height
 
+        this.logger.debug('rollback blocks querySimpleBlockData, backHeight 1', backHeight.toString())
+        this.logger.debug('rollback blocks querySimpleBlockData, backRound 1 ', backRound)
         if (currentRound !== backRound || DdnUtils.bignum.isEqualTo(DdnUtils.bignum.modulo(lastBlock.height, this.constants.delegates), 0)) {
-          if (backRound === 1) {
-            backHeight = 1
+          if (DdnUtils.bignum.isEqualTo(backRound, 1)) {
+            backHeight = '1'
           } else {
             backHeight = DdnUtils.bignum.minus(backHeight, DdnUtils.bignum.modulo(backHeight, this.constants.delegates))
           }
+          this.logger.debug('rollback blocks querySimpleBlockData, backHeight 2', backHeight.toString())
 
           const result = await this.runtime.block.querySimpleBlockData({ height: backHeight.toString() })
           if (result && result.block) {
@@ -223,9 +226,11 @@ class PeerSync {
 
     let lastClonedBlock = null
     let queryBlockId = blockId
+    let loaded = false
+    let count = 0
 
-    // for (var i = 0; i < 1; i++) {
-    while (true) {
+    while (!loaded && count < 30) {
+      count++
       const data = await this.runtime.peer.request({ peer, api: `/blocks?lastBlockId=${queryBlockId}&limit=200` })
 
       let blocks = data.body.blocks
@@ -242,33 +247,11 @@ class PeerSync {
         throw new Error(`Can't parse blocks: ${validateErrors[0].schemaPath} ${validateErrors[0].message}`)
       }
 
-      // add two new field: trs.args and trs.message
-      // This code is for compatible with old nodes
-      if (blocks[0] && blocks[0].length === 63) {
-        blocks.forEach(b => {
-          for (let i = 80; i >= 25; --i) {
-            b[i] = b[i - 2]
-          }
-          b[23] = ''
-          b[24] = ''
-          if (b[14] >= 8 && b[14] <= 14) {
-            for (let i = 80; i >= 48; --i) {
-              b[i] = b[i - 6]
-            }
-            b[42] = ''
-            b[43] = ''
-            b[44] = ''
-            b[45] = ''
-            b[46] = ''
-            b[47] = ''
-          }
-        })
-      }
-
       // wxm block databsae
       // blocks = blocks.map(row2parsed, parseFields(privated.blocksDataFields));
       blocks = await this.runtime.block._parseObjectFromFullBlocksData(blocks)
       if (blocks.length === 0) {
+        loaded = true
         break
       } else {
         this.logger.log(`Loading ${blocks.length} blocks from`, peerStr)

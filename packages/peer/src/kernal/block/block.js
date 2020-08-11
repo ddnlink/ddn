@@ -356,20 +356,19 @@ class Block {
           this.logger.info(`Received new block id: ${block.id} height: ${block.height} round: ${await this.runtime.round.getRound(this.getLastBlock().height)} slot: ${this.runtime.slot.getSlotNumber(block.timestamp)} reward: ${this.getLastBlock().reward}`)
           await this.processBlock(block, votes, true, true, true)
           cb()
-        } else if (block.previous_block !== this._lastBlock.id && this._lastBlock.height + 1 === block.height) { // wxm block database
+        } else if (block.previous_block !== this._lastBlock.id && bignum.isEqualTo(bignum.plus(this._lastBlock.height, 1), block.height)) { // wxm block database
+        // } else if (block.previous_block !== this._lastBlock.id && this._lastBlock.height + 1 === block.height) { // wxm block database
           // Fork: Same height but different previous block id
           await this.runtime.delegate.fork(block, 1)
 
           cb('Fork-1')
-        } else if (block.previous_block === this._lastBlock.previous_block && block.height === this._lastBlock.height && block.id !== this._lastBlock.id) { // wxm block database
+        } else if (block.previous_block === this._lastBlock.previous_block && bignum.isEqualTo(block.height, this._lastBlock.height) && block.id !== this._lastBlock.id) { // wxm block database
+        // } else if (block.previous_block === this._lastBlock.previous_block && block.height === this._lastBlock.height && block.id !== this._lastBlock.id) { // wxm block database
           // Fork: Same height and previous block id, but different block id
           await this.runtime.delegate.fork(block, 5)
-
           cb('Fork-2')
         } else if (bignum.isGreaterThan(block.height, bignum.plus(this._lastBlock.height, 1))) {
           this.logger.info(`receive discontinuous block height ${block.height}`)
-
-          // modules.loader.startSyncBlocks();
 
           cb()
         } else {
@@ -705,9 +704,9 @@ class Block {
 
     block.height = bignum.plus(this._lastBlock.height, 1).toString()
 
-    this.logger.debug(`verifyBlock, id: ${block.id}, h: ${block.height}`)
+    this.logger.debug(`verifyBlock, id: ${block.id}, pre-h: ${this._lastBlock.height}, h: ${block.height}`)
 
-    if (!block.previous_block && block.height !== 1) { // wxm block database
+    if (!block.previous_block && !bignum.isEqualTo(block.height, 1)) { // wxm block database
       throw new Error('Previous block should not be null')
     }
 
@@ -1189,7 +1188,7 @@ class Block {
                         typeof (result.height) !== 'undefined') {
             this.dao.remove('block', {
               height: {
-                $gte: result.height
+                $gte: result.height // todo: ?????? 2020.8.11
               }
             },
             (err2, result2) => {
@@ -1225,6 +1224,8 @@ class Block {
           ])
 
           const blocks = await this._parseObjectFromFullBlocksData(blocksData)
+          this.logger.debug('loadBlocksOffset blocks[0].height', blocks[0].height) // height is bignum 2020.8
+
           for (let i = 0; i < blocks.length; i++) {
             const block = blocks[i]
             this.logger.debug('loadBlocksOffset processing:', block.id)
@@ -1320,6 +1321,7 @@ class Block {
      * @param {*} query
      */
   async querySimpleBlockData (query) {
+    this.logger.debug('start querySimpleBlockData, query is ', query)
     const validateErrors = await this.ddnSchema.validate({
       type: 'object',
       properties: {
@@ -1369,7 +1371,7 @@ class Block {
 
             let maxHeight = 2
             if (rows.length > 0) {
-              maxHeight = rows[0].maxHeight + 1
+              maxHeight = rows[0].maxHeight + 1 // height - bignum ?
             }
 
             this.dao.findPage('block', where, 1, 0, false, [
@@ -1388,7 +1390,7 @@ class Block {
               [this.dao.db_str(maxHeight + '-height'), 'b_confirmations']
             ], null, (err2, rows2) => {
               if (err2 || !rows2 || !rows2.length) {
-                return cb(err2 || 'Block not found')
+                return cb(err2 || 'querySimpleBlockData Block not found')
               }
 
               const block = this.serializeDbData2Block(rows2[0])

@@ -106,7 +106,7 @@ class PeerService {
 
     return {
       success: true,
-      height: lastBlock && lastBlock.height ? lastBlock.height : 0
+      height: lastBlock && lastBlock.height ? lastBlock.height : '0'
     }
   }
 

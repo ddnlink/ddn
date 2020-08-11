@@ -58,6 +58,7 @@ class Round {
   /**
    * 获得某高度下的铸块周期
    * @param {*} height 高度
+   * return string
    */
   async getRound (height) {
     let value = 0
@@ -119,7 +120,7 @@ class Round {
 
     const round = await this.getRound(block.height)
 
-    this._feesByRound[round] = (this._feesByRound[round] || 0)
+    this._feesByRound[round] = (this._feesByRound[round] || '0')
 
     this._feesByRound[round] = bignum.plus(this._feesByRound[round], block.total_fee) // wxm block database
 

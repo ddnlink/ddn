@@ -417,7 +417,7 @@ class Account {
 
                         await this.cacheAllAccountBalances()
 
-                        this.logger.info('Blockchain ready')
+                        this.logger.info('repairAccounts is ok, Blockchain ready')
 
                         resolve()
                       } catch (err5) {
@@ -534,7 +534,7 @@ class Account {
                       return reject(e)
                     }
 
-                    this.logger.info('Blockchain ready')
+                    this.logger.info('checkAccounts is ok, Blockchain ready')
                   }
 
                   resolve()
