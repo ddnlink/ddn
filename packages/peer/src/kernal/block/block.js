@@ -704,6 +704,9 @@ class Block {
 
     block.height = bignum.plus(this._lastBlock.height, 1).toString()
 
+    if (typeof this._lastBlock.height === 'undefined') {
+      this.logger.debug(`verifyBlock, block: ${block}, pre-block: ${this._lastBlock}`)
+    }
     this.logger.debug(`verifyBlock, id: ${block.id}, pre-h: ${this._lastBlock.height}, h: ${block.height}`)
 
     if (!block.previous_block && !bignum.isEqualTo(block.height, 1)) { // wxm block database

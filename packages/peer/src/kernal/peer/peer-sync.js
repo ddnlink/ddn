@@ -3,8 +3,7 @@
  * wangxm   2019-01-15
  */
 import ip from 'ip'
-
-import DdnUtils from '@ddn/utils'
+import { bignum, system } from '@ddn/utils'
 
 let _singleton
 
@@ -45,7 +44,7 @@ class PeerSync {
         this.logger.log(`Failed to parse blockchain height: ${peerStr} ${validateErrors[0].schemaPath} ${validateErrors[0].message}`)
       }
 
-      if (DdnUtils.bignum.isLessThan(this.runtime.block.getLastBlock().height, remotePeerHeight.body.height)) {
+      if (bignum.isLessThan(this.runtime.block.getLastBlock().height, remotePeerHeight.body.height)) {
         let syncLastBlock = null
         const lastBlock = this.runtime.block.getLastBlock()
         if (lastBlock.id !== this.genesisblock.id) {
@@ -112,7 +111,7 @@ class PeerSync {
 
     let lastLackBlock = null
     let currProcessHeight = lastBlock.height
-    while (!lastLackBlock && DdnUtils.bignum.isGreaterThan(currProcessHeight, 1)) {
+    while (!lastLackBlock && bignum.isGreaterThan(currProcessHeight, 1)) {
       const data = await this._getIdSequence(currProcessHeight)
 
       const maxHeight = currProcessHeight
@@ -146,9 +145,9 @@ class PeerSync {
     }
 
     this.logger.info(`Found common block ${lastLackBlock.id} (at ${lastLackBlock.height}) with peer ${peerStr}, last block height is ${lastBlock.height}`)
-    const toRemove = DdnUtils.bignum.minus(lastBlock.height, lastLackBlock.height)
+    const toRemove = bignum.minus(lastBlock.height, lastLackBlock.height)
 
-    if (DdnUtils.bignum.isGreaterThanOrEqualTo(toRemove, 5)) {
+    if (bignum.isGreaterThanOrEqualTo(toRemove, 5)) {
       this.logger.error('long fork, ban 60 min', peerStr)
       this.runtime.peer.changeState(peer.ip, peer.port, 0, 3600)
       return
@@ -171,15 +170,14 @@ class PeerSync {
         const backRound = await this.runtime.round.getRound(lastLackBlock.height)
         let backHeight = lastLackBlock.height
 
-        this.logger.debug('rollback blocks querySimpleBlockData, backHeight 1', backHeight.toString())
-        this.logger.debug('rollback blocks querySimpleBlockData, backRound 1 ', backRound)
-        if (currentRound !== backRound || DdnUtils.bignum.isEqualTo(DdnUtils.bignum.modulo(lastBlock.height, this.constants.delegates), 0)) {
-          if (DdnUtils.bignum.isEqualTo(backRound, 1)) {
+        this.logger.debug('rollback blocks querySimpleBlockData, backRound', backRound)
+        if (currentRound !== backRound || bignum.isEqualTo(bignum.modulo(lastBlock.height, this.constants.delegates), 0)) {
+          if (bignum.isEqualTo(backRound, 1)) {
             backHeight = '1'
           } else {
-            backHeight = DdnUtils.bignum.minus(backHeight, DdnUtils.bignum.modulo(backHeight, this.constants.delegates))
+            backHeight = bignum.minus(backHeight, bignum.modulo(backHeight, this.constants.delegates))
           }
-          this.logger.debug('rollback blocks querySimpleBlockData, backHeight 2', backHeight.toString())
+          this.logger.debug('rollback blocks querySimpleBlockData, backHeight: ', backHeight.toString())
 
           const result = await this.runtime.block.querySimpleBlockData({ height: backHeight.toString() })
           if (result && result.block) {
@@ -194,7 +192,7 @@ class PeerSync {
         await this.runtime.block.deleteBlocksBefore(lastLackBlock)
         await this.runtime.round.directionSwap('forward', lastBlock)
       } catch (err) {
-        this.logger.error(`Failed to rollback blocks before ${lastLackBlock.height}`, DdnUtils.system.getErrorMsg(err))
+        this.logger.error(`Failed to rollback blocks before ${lastLackBlock.height}`, system.getErrorMsg(err))
         process.exit(1)
       }
     }

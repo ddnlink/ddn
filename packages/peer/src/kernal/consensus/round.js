@@ -186,7 +186,7 @@ class Round {
         balance: changeBalance.toString(),
         u_balance: changeBalance.toString(),
         block_id: block.id, // wxm block database
-        round: await this.getRound(block.height),
+        round: await this.getRound(block.height), // Todo: 数据库是 int 型，赋值是 str
         fees: changeFees.toString(),
         rewards: changeRewards.toString()
       }, dbTrans)
@@ -210,7 +210,6 @@ class Round {
     }, dbTrans)
 
     const votes = await this.getVotes(round, dbTrans)
-    // this.logger.debug('round.js 210 data.........', votes)
 
     for (let i = 0; i < votes.length; i++) {
       const vote = votes[i]

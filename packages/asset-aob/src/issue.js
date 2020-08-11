@@ -1,8 +1,8 @@
 import _ from 'lodash'
-// import mathjs from 'mathjs'
+import mathjs from 'mathjs'
 
 import Asset from '@ddn/asset-base'
-import { bignum } from '@ddn/utils'
+import DdnJS, { bignum } from '@ddn/utils'
 
 class Issue extends Asset.Base {
   // eslint-disable-next-line no-useless-constructor
@@ -47,13 +47,13 @@ class Issue extends Asset.Base {
       throw new Error('Invalid AoB Issue transaction recipient')
     }
 
-    // 主交易数量应该为
+    // 主交易数量应该为 0
     if (!bignum.isZero(trs.amount)) {
       throw new Error('Invalid AoB Issue transaction amount')
     }
 
     const { amount } = assetIssue
-    const error = amount.validate(amount)
+    const error = DdnJS.amount.validate(amount)
     if (error) {
       throw new Error(`Invalid AoB Issue transaction amount: ${error}`)
     }
@@ -128,9 +128,9 @@ class Issue extends Asset.Base {
     for (let i = 0; i < result4.length; i += 1) {
       const { precision } = result4[i]
       result4[i].maximum = bignum.new(result4[i].maximum).toString(10)
-      result4[i].maximumShow = amount.calcRealAmount(result4[i].maximum, precision)
+      result4[i].maximumShow = DdnJS.amount.calcRealAmount(result4[i].maximum, precision)
       result4[i].quantity = bignum.new(result4[i].quantity).toString(10)
-      result4[i].quantityShow = amount.calcRealAmount(result4[i].quantity, precision)
+      result4[i].quantityShow = DdnJS.amount.calcRealAmount(result4[i].quantity, precision)
     }
     const count = 0
 
