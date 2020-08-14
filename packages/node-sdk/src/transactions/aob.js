@@ -168,15 +168,15 @@ export default {
     return trs
   },
 
-  async createTransfer (currency, amount, recipientId, message, secret, secondSecret) {
+  async createTransfer (currency, amount, recipientId, message, content, secret, secondSecret) {
     const asset = {
       aobTransfer: {
         currency,
-        amount: `${amount}`
+        amount: `${amount}`,
+        content
       }
     }
     const fee = bignum.multiply(constants.net.fees.aob_transfer, constants.fixedPoint)
-    // console.log('createTransfer', fee, `${fee}`)
 
     return await createTransaction(
       asset,

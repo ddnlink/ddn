@@ -1,16 +1,20 @@
+/**
+ * Please use yourself constants file
+ * Note: Once the mainnet is online, this file can no longer be changed.
+ */
 export default {
-  nethash: '0ab796cd', // 标定该链的版本
-  tokenName: 'DDN',
-  tokenPrefix: 'D',
-  foundAddress: 'DLjrrVwnmMXstcAYVjcrpwyYb3kY1ehABU', // Please protect its private key
-  walletUrl: 'http://wallet.ddn.link',
+  nethash: 'gar0fktt', // 标定该链的版本
+  tokenName: 'HBL',
+  tokenPrefix: 'H',
+  foundAddress: 'HLjrrVwnmMXstcAYVjcrpwyYb3kY1ehABU',
+  walletUrl: 'http://wallet.hbl.link',
   enableMoreLockTypes: true,
 
   interval: 10, // 10ms
   delegates: 101, // number
   superPeers: 21,
-  voters: 66,
-  remoteVoters: 3,
+  voters: 33,
+  remoteVoters: 1,
   maxAmount: 100000000,
   maxPayloadLength: 8 * 1024 * 1024,
   blockHeaderLength: 248,

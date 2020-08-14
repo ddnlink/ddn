@@ -77,7 +77,7 @@ class PeerBlockService {
           }
           if (query.lastBlockId) {
             where.height = {
-              $gt: row ? row.height : 0
+              $gt: row ? row.height : '0' // fixme 2020.8.13 height >= 1
             }
           }
 

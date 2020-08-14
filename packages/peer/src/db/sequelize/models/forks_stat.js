@@ -14,7 +14,7 @@ export default connection => connection.define('forks_stat', {
     allowNull: false
   },
   block_height: {
-    type: Sequelize.INTEGER, // 原类型:INT
+    type: Sequelize.INTEGER, // 原类型:INT 
     allowNull: false
   },
   previous_block: {

@@ -14,7 +14,7 @@ export default {
   publicIp: '',
   logLevel: 'error',
   net: 'testnet',
-  nethash: 'gar0fktt',
+  nethash: '0ab796cd',
   payloadLimitSize: '8mb',
   clientDriftSeconds: 5
 }

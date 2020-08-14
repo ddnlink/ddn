@@ -7,7 +7,6 @@
 
 const crypto = require('crypto')
 const ByteBuffer = require('bytebuffer')
-const node = require('./variables.js')
 
 function getBytes (trs) {
   try {

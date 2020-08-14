@@ -300,9 +300,10 @@ describe('AOB Test', () => {
       await node.onNewBlockAsync()
 
       // const transaction = await createPluginAsset(DdnUtils.assetTypes.AOB_TRANSFER, obj, IssuerAccount1.password)
-      const transaction = await DdnJS.aob.createTransfer(currency, '1', node.Gaccount.address, 'test', IssuerAccount1.password)
+      // const transaction = await DdnJS.aob.createTransfer(currency, '1', node.Gaccount.address, 'test', IssuerAccount1.password)
+      const transaction = await DdnJS.aob.createTransfer(currency, '10', node.Gaccount.address, '主交易备注', '资产交易备注', IssuerAccount1.password)
 
-      debug('transfer ok', transaction)
+      debug('transfer trs: ', transaction)
 
       node.peer.post('/transactions')
         .set('Accept', 'application/json')
@@ -317,7 +318,7 @@ describe('AOB Test', () => {
         .end((err, {
           body
         }) => {
-          debug(body)
+          debug('transfer ok: ', body)
 
           expect(err).to.be.not.ok
           expect(body).to.have.property('success').to.be.true

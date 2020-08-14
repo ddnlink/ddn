@@ -169,17 +169,19 @@ export default {
     amount,
     recipientId,
     message,
+    content,
     secret,
     secondSecret
   ) {
     const asset = {
       aobTransfer: {
         currency,
-        amount: `${amount}`
+        amount: `${amount}`,
+        content
       }
     }
     const fee = bignum.multiply(constants.net.fees.aob_transfer, constants.fixedPoint)
-    console.log('constants.net.fees.aob_transfer', constants.net.fees.aob_transfer)
+
     return await createTransaction(
       asset,
       fee,
