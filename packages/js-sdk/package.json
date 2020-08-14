@@ -3,6 +3,7 @@
   "version": "0.1.2",
   "description": "DDN Node.js SDK",
   "main": "dist/index.js",
+  "unpkg": "build/index.browserify.js",
   "files": [
     "lib",
     "dist",
@@ -11,6 +12,7 @@
   "scripts": {
     "test": "mocha test",
     "build": "yarn build:dev & yarn build:prod",
+    "build:custom": "DDN_ENV=custom yarn build:dev & yarn build:prod",
     "build:dev": "browserify index.js > ./build/index.browserify.js",
     "build:prod": "browserify index.js -p tinyify > ./build/index.browserify.min.js"
   },

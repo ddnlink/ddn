@@ -1,7 +1,12 @@
 import Asset from '@ddn/asset-base'
 import constants from '../constants'
-import config from './ddnrc'
+import ddnrc from './ddnrc'
 import assets from './config.asset'
+
+let config = ddnrc
+if (process.env.DDN_ENV === 'custom') {
+  config = require('./ddnrc.custom').default
+}
 
 constants.net = constants[config.net]
 
