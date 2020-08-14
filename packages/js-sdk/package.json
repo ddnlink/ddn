@@ -1,6 +1,6 @@
 {
   "name": "@ddn/js-sdk",
-  "version": "0.1.5",
+  "version": "0.1.6",
   "description": "DDN Node.js SDK",
   "main": "dist/index.js",
   "unpkg": "build/index.browserify.js",
@@ -34,7 +34,7 @@
   "dependencies": {
     "@ddn/asset-aob": "^0.4.3",
     "@ddn/asset-base": "^0.3.3",
-    "@ddn/asset-dao": "^0.3.3",
+    "@ddn/asset-dao": "^0.3.4",
     "@ddn/asset-dapp": "^0.2.21",
     "@ddn/asset-evidence": "^0.1.20",
     "@ddn/crypto": "^0.3.3",
