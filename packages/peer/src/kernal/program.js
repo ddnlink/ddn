@@ -223,11 +223,11 @@ class Program {
     // 启动准备（节点）
     await this._context.runtime.peer.prepare()
 
-    // 启动准备（受托人） move to the follow
-    // await this._context.runtime.delegate.prepare()
-
     // 启动准备（Round）
-    // await this._context.runtime.round.prepare()
+    await this._context.runtime.round.prepare()
+
+    // 启动准备（受托人）
+    await this._context.runtime.delegate.prepare()
 
     // 启动节点网络服务
     this._context.runtime.httpserver = await HttpServer.newServer(this._context).start()
@@ -250,12 +250,6 @@ class Program {
 
     // 启动签名同步任务
     await this.startSignaturesSyncTask()
-
-    // 启动准备（受托人）- 需要用到同步后的 account 信息
-    await this._context.runtime.delegate.prepare()
-
-    // 启动准备（Round）- 需要用到同步后的 block 信息
-    await this._context.runtime.round.prepare()
 
     // 启动区块铸造任务
     await this.startForgeBlockTask()
@@ -283,13 +277,13 @@ class Program {
         return result[0]
       }
     } catch (err) {
-      this._context.logger.warn('Error: ' + err)
+      this._context.logger.error('Error: ' + err)
     }
     return null
   }
 
   /**
-     * 同步节点列表 & 维护本地节点状态
+     * 同步节点列表 & 维护本地节点状态（轮询）
      */
   async startPeerSyncTask () {
     const validPeer = await this.getValidPeer()
@@ -373,14 +367,13 @@ class Program {
 
           const lastBlock = this._context.runtime.block.getLastBlock()
           const lastSlot = this._context.runtime.slot.getSlotNumber(lastBlock.timestamp)
-          if (this._context.runtime.slot.getNextSlot() - lastSlot >= 3) { // TODO: this.constants.*
+          if (this._context.runtime.slot.getNextSlot() - lastSlot >= 3) {
             this._context.runtime.state = DdnUtils.runtimeState.Syncing
 
             this._context.logger.debug('startSyncBlocks enter')
 
             await new Promise((resolve) => {
               this._context.sequence.add(async (cb) => {
-                this._context.logger.debug('startSyncBlocks enter sequence')
                 try {
                   const syncCompleted = await this._context.runtime.peer.syncBlocks()
                   cb(null, syncCompleted)

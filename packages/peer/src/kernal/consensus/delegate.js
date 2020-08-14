@@ -103,7 +103,7 @@ class Delegate {
         }
       })
     } else {
-      throw new Error('Delegates not found.')
+      this.logger.info('Delegates not found.')
     }
   }
 
@@ -280,15 +280,10 @@ class Delegate {
   async getForgeDelegateWithCurrentTime (curSlot, height) {
     const activeDelegates = await this.getDisorderDelegatePublicKeys(height)
 
-    this.logger.debug('delegate.js 283L getForgeDelegateWithCurrentTime()， activeDelegates.length = ', activeDelegates.length)
-    this.logger.debug('delegate.js 283L getForgeDelegateWithCurrentTime()， delegatePos = ', curSlot % this.constants.delegates)
-    this.logger.debug('peer4 is at delegatesList of pos ', activeDelegates.indexOf('cec8c30342362f26f0bebbfcafbe58d741b2ee4ee6e81e4e486427981594f842'))
-
     let currentSlot = curSlot
     const lastSlot = this.runtime.slot.getLastSlot(currentSlot)
     for (; currentSlot < lastSlot; currentSlot += 1) {
-      const delegatePos = currentSlot % this.constants.delegates
-      const delegatePublicKey = activeDelegates[delegatePos]
+      const delegatePublicKey = activeDelegates[currentSlot % this.constants.delegates]
       if (delegatePublicKey && this._myDelegateKeypairs[delegatePublicKey]) {
         return {
           time: this.runtime.slot.getSlotTime(currentSlot),
@@ -308,7 +303,7 @@ class Delegate {
     if (delegateKey && generator_public_key === delegateKey) {
       return
     }
-    throw new Error(`Failed to verify slot, gotten delegate: ${delegateKey}, expected delegate: ${generator_public_key}`)
+    throw new Error(`Failed to verify slot, expected delegate: ${generator_public_key}, gotten delegate: ${delegateKey}`)
   }
 
   async validateProposeSlot ({ height, timestamp, generator_public_key }) {

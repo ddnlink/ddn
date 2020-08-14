@@ -1,8 +1,9 @@
 {
   "name": "@ddn/js-sdk",
-  "version": "0.1.2",
+  "version": "0.1.4",
   "description": "DDN Node.js SDK",
   "main": "dist/index.js",
+  "unpkg": "build/ddn.browserify.min.js",
   "files": [
     "lib",
     "dist",
@@ -11,8 +12,8 @@
   "scripts": {
     "test": "mocha test",
     "build": "yarn build:dev & yarn build:prod",
-    "build:dev": "browserify index.js > ./build/index.browserify.js",
-    "build:prod": "browserify index.js -p tinyify > ./build/index.browserify.min.js"
+    "build:dev": "browserify index.js > ./build/ddn.browserify.js",
+    "build:prod": "browserify index.js -p tinyify > ./build/ddn.browserify.min.js"
   },
   "keywords": [
     "ddn",
@@ -30,13 +31,13 @@
     "url": "http://github.com/ddnlink/ddn/issues"
   },
   "dependencies": {
-    "@ddn/asset-aob": "^0.4.0",
-    "@ddn/asset-base": "^0.3.0",
-    "@ddn/asset-dao": "^0.3.0",
-    "@ddn/asset-dapp": "^0.2.18",
-    "@ddn/asset-evidence": "^0.1.17",
-    "@ddn/crypto": "^0.3.0",
-    "@ddn/utils": "^0.1.15",
+    "@ddn/asset-aob": "^0.4.2",
+    "@ddn/asset-base": "^0.3.2",
+    "@ddn/asset-dao": "^0.3.2",
+    "@ddn/asset-dapp": "^0.2.20",
+    "@ddn/asset-evidence": "^0.1.19",
+    "@ddn/crypto": "^0.3.2",
+    "@ddn/utils": "^0.1.17",
     "JSONStream": "^1.3.1",
     "bitcore-mnemonic": "^8.20.5",
     "buffer": "^4.7.0",
@@ -44,8 +45,7 @@
     "lodash-es": "^4.17.15",
     "long": "^4.0.0",
     "ripemd160": "^2.0.1",
-    "through2": "^2.0.3",
-    "tweetnacl": "^1.0.2"
+    "through2": "^2.0.3"
   },
   "npmFileMap": [
     {

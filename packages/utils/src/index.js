@@ -1,9 +1,10 @@
 import assetTypes from './asset-types'
 import runtimeState from './runtime-states'
-import amount from './amount'
 import LimitCache from './limit-cache'
-import system from './system'
+import amount from './amount'
 import bignum from './bignumber'
+import bufferCache from './buffer-cache'
+import system from './system'
 import routesMap from './routes-map'
 
 export {
@@ -11,8 +12,9 @@ export {
   assetTypes,
   runtimeState,
   amount,
-  system,
   bignum,
+  bufferCache,
+  system,
   routesMap
 }
 
@@ -22,7 +24,8 @@ export default {
   assetTypes,
   runtimeState,
   amount,
-  system,
   bignum,
+  bufferCache,
+  system,
   routesMap
 }

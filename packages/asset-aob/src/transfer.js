@@ -19,6 +19,10 @@ class Transfer extends Asset.Base {
       {
         field: 'str2',
         prop: 'amount'
+      },
+      {
+        field: 'str10',
+        prop: 'content' // 区别于主链交易的备注 message
       }
     ]
   }
@@ -28,7 +32,8 @@ class Transfer extends Asset.Base {
 
     const buffer = Buffer.concat([
       Buffer.from(asset.currency, 'utf8'),
-      Buffer.from(asset.amount, 'utf8')
+      Buffer.from(asset.amount, 'utf8'),
+      Buffer.from(asset.content || '', 'utf8')
     ])
 
     return buffer
@@ -333,6 +338,7 @@ class Transfer extends Asset.Base {
     })
   }
 
+  // TODO: test it 2020.8.8
   async putTransferAsset (req) {
     const { body } = req
     const validateErrors = await this.ddnSchema.validate({
@@ -368,9 +374,13 @@ class Transfer extends Asset.Base {
           type: 'string',
           format: 'publicKey'
         },
-        message: {
+        message: { // 主交易备注
           type: 'string',
           maxLength: 256
+        },
+        content: { // 资产交易备注
+          type: 'string',
+          maxLength: 1024
         }
       },
       required: ['secret', 'amount', 'recipientId', 'currency']
@@ -391,8 +401,9 @@ class Transfer extends Asset.Base {
       recipientId: body.recipientId,
       currency: body.currency,
       amount: body.amount + '',
-      message: body.message,
-      fee: '0'
+      // message: body.message, // fixme: 不应该在 aobTransfer 里
+      content: body.content,
+      fee: '0' // fixme: 不应该在 aobTransfer 里
     }
 
     return new Promise((resolve, reject) => {
@@ -546,6 +557,7 @@ class Transfer extends Asset.Base {
     //   ]
     // }
 
+    // TODO: asset 检索方法总结 2020.8.9
     // 这里的调用将会检索全部交易类型
     // const transfer = await this.queryAsset(where, null, true, pageindex, pagesize, null, false)
 

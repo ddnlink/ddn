@@ -72,7 +72,8 @@ const aobIssue = async (asset) => {
 const aobTransfer = async (asset) => {
   const buffer = Buffer.concat([
     Buffer.from(asset.currency, 'utf8'),
-    Buffer.from(asset.amount, 'utf8')
+    Buffer.from(asset.amount, 'utf8'),
+    Buffer.from(asset.content || '', 'utf8')
   ])
 
   return buffer

@@ -31,6 +31,7 @@ class Round {
     const roundStr = round.toString()
 
     await new Promise((resolve, reject) => {
+      // 这里没有将 bignum 计算传进去，通过 / % 等运算符，字符串形式的 bignum 会自动转为 number
       this.dao.findOne('block', {
         [roundStr]: this.dao.db_str(`(select (cast(block.height / ${this.constants.delegates} as integer) + (case when block.height % ${this.constants.delegates} > 0 then 1 else 0 end))) = ${roundStr}`)
       }, [
@@ -58,6 +59,7 @@ class Round {
   /**
    * 获得某高度下的铸块周期
    * @param {*} height 高度
+   * return string
    */
   async getRound (height) {
     let value = 0
@@ -119,7 +121,7 @@ class Round {
 
     const round = await this.getRound(block.height)
 
-    this._feesByRound[round] = (this._feesByRound[round] || 0)
+    this._feesByRound[round] = (this._feesByRound[round] || '0')
 
     this._feesByRound[round] = bignum.plus(this._feesByRound[round], block.total_fee) // wxm block database
 
@@ -185,7 +187,7 @@ class Round {
         balance: changeBalance.toString(),
         u_balance: changeBalance.toString(),
         block_id: block.id, // wxm block database
-        round: await this.getRound(block.height),
+        round: await this.getRound(block.height), // Todo: 数据库是 int 型，赋值是 str
         fees: changeFees.toString(),
         rewards: changeRewards.toString()
       }, dbTrans)
@@ -209,7 +211,6 @@ class Round {
     }, dbTrans)
 
     const votes = await this.getVotes(round, dbTrans)
-    // this.logger.debug('round.js 210 data.........', votes)
 
     for (let i = 0; i < votes.length; i++) {
       const vote = votes[i]
@@ -266,7 +267,8 @@ class Round {
     }, dbTrans)
 
     const round = await this.getRound(block.height)
-    const prevRound = await this.getRound(previousBlock.b_height)
+    // const prevRound = await this.getRound(previousBlock.b_height)
+    const prevRound = await this.getRound(previousBlock.height)
 
     this._feesByRound[round] = (this._feesByRound[round] || 0)
 
@@ -278,7 +280,8 @@ class Round {
     this._delegatesByRound[round] = this._delegatesByRound[round] || []
     this._delegatesByRound[round].pop()
 
-    if (prevRound === round && !bignum.isEqualTo(previousBlock.b_height, 1)) {
+    // if (prevRound === round && !bignum.isEqualTo(previousBlock.b_height, 1)) {
+    if (prevRound === round && !bignum.isEqualTo(previousBlock.height, 1)) {
       return done()
     }
 

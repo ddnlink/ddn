@@ -73,7 +73,7 @@ You can donate DDN to the follow address with [DDN Wallet](http://wallet.ddn.lin
 
 ## Contribute
 
-Please visit [CONTRIBUTING](./doc/guide/contributing.md) 
+Please visit [CONTRIBUTING](./docs/guide/contributing.en-US.md) 
 
 ## License
 
