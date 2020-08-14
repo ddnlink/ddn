@@ -1,6 +1,6 @@
 import ByteBuffer from 'bytebuffer'
 import Asset from '@ddn/asset-base'
-import DdnUtils from '@ddn/utils'
+import { bignum } from '@ddn/utils'
 import DdnCrypto from '@ddn/crypto'
 
 import daoUtil from './daoUtil.js'
@@ -63,7 +63,7 @@ class Contribution extends Asset.Base {
     if (trs.recipientId) {
       throw new Error('Invalid recipient')
     }
-    if (!DdnUtils.bignum.isZero(trs.amount)) {
+    if (!bignum.isZero(trs.amount)) {
       throw new Error('Invalid transaction amount')
     }
     if (!trs.asset || !contribution) {
@@ -91,7 +91,7 @@ class Contribution extends Asset.Base {
       throw new Error('url is undefined or too long, don`t more than 256 characters.')
     }
 
-    if (DdnUtils.bignum.isNaN(contribution.price)) {
+    if (bignum.isNaN(contribution.price)) {
       throw new Error("Invalid contribution's price.")
     }
 
@@ -116,7 +116,7 @@ class Contribution extends Asset.Base {
   }
 
   async calculateFee () {
-    return DdnUtils.bignum.multiply(this.constants.net.fees.dao_contribution, this.constants.fixedPoint)
+    return bignum.multiply(this.constants.net.fees.dao_contribution, this.constants.fixedPoint)
   }
 
   async dbSave (trs, dbTrans) {

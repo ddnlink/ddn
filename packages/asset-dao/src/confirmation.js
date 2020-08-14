@@ -230,7 +230,6 @@ class Confirmation extends Asset.Base {
           type: 'integer',
           minimum: 1
         },
-        // FIXME: 2020.4.8 这里出现错误 SQLITE_ERROR: no such column: trs_asset.pagesize"
         pageSize: {
           type: 'integer',
           minimum: 1,

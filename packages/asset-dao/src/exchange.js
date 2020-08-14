@@ -77,8 +77,6 @@ class Exchange extends Asset.Base {
     }
 
     if (data[assetJsonName].state === 1) {
-      console.log('data[assetJsonName]', data[assetJsonName])
-
       trans.amount = trans.asset[assetJsonName].price
       trans.recipientId = trans.asset[assetJsonName].received_address
     }
@@ -90,8 +88,6 @@ class Exchange extends Asset.Base {
     const asset = await this.getAssetObject(trs)
     // check org id
     if (!daoUtil.isOrgId(asset.org_id.toLowerCase())) {
-      console.log('exchange.js asset.org_id', asset.org_id)
-
       throw new Error('exchange org id not allow: ' + asset.org_id.toLowerCase())
     }
     if (!this.address.isAddress(sender.address)) {
