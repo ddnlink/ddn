@@ -1,6 +1,6 @@
 {
   "name": "@ddn/asset-dapp",
-  "version": "0.2.20",
+  "version": "0.2.21",
   "description": "this is asset-dapp package",
   "main": "lib/index.js",
   "module": "dist/index.esm.js",
@@ -21,10 +21,10 @@
   "author": "wly",
   "license": "MIT",
   "dependencies": {
-    "@ddn/asset-base": "^0.3.2",
-    "@ddn/crypto": "^0.3.2",
+    "@ddn/asset-base": "^0.3.3",
+    "@ddn/crypto": "^0.3.3",
     "@ddn/sandbox": "^0.1.5",
-    "@ddn/utils": "^0.1.17",
+    "@ddn/utils": "^0.1.18",
     "async": "^2.6.1",
     "bytebuffer": "^5.0.1",
     "decompress-zip": "^0.2.2",
