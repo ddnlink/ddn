@@ -6,11 +6,7 @@ const bignumber = {
      * 实例化一个大数
      */
   new (...args) {
-    if (args.length !== 1) {
-      throw new Error('必须是一个参数')
-    }
-
-    return new BigNumber(args[0])
+    return BigNumber(args[0])
   },
 
   /**
@@ -24,14 +20,9 @@ const bignumber = {
      * 加法操作
      */
   plus (...args) {
-    if (args.length < 2) {
-      throw new Error('至少需要两个参数')
-    }
-
-    let result = new BigNumber(0)
-
-    for (let i = 0; i < args.length; i++) {
-      result = result.plus(new BigNumber(args[i]))
+    let result = BigNumber(args[0])
+    for (let i = 1; i < args.length; i++) {
+      result = result.plus(args[i])
     }
 
     return result
@@ -41,13 +32,9 @@ const bignumber = {
      * 减法操作
      */
   minus (...args) {
-    if (args.length < 2) {
-      throw new Error('至少需要两个参数')
-    }
-
-    let result = new BigNumber(args[0])
+    let result = BigNumber(args[0])
     for (let i = 1; i < args.length; i++) {
-      result = result.minus(new BigNumber(args[i]))
+      result = result.minus(args[i])
     }
     return result
   },
@@ -56,13 +43,9 @@ const bignumber = {
      * 乘法操作
      */
   multiply (...args) {
-    if (args.length < 2) {
-      throw new Error('至少需要两个参数')
-    }
-
-    let result = new BigNumber(args[0])
+    let result = BigNumber(args[0])
     for (let i = 1; i < args.length; i++) {
-      result = result.multipliedBy(new BigNumber(args[i]))
+      result = result.multipliedBy(args[i])
     }
     return result
   },
@@ -71,13 +54,9 @@ const bignumber = {
      * 除法操作
      */
   divide (...args) {
-    if (args.length < 2) {
-      throw new Error('至少需要两个参数')
-    }
-
-    let result = new BigNumber(args[0])
+    let result = BigNumber(args[0])
     for (let i = 1; i < args.length; i++) {
-      result = result.dividedBy(new BigNumber(args[i]))
+      result = result.dividedBy(args[i])
     }
     return result
   },
@@ -86,121 +65,77 @@ const bignumber = {
      * 非数值判断
      */
   isNaN (...args) {
-    if (args.length !== 1) {
-      throw new Error('必须是一个参数')
-    }
-
-    return new BigNumber(args[0]).isNaN()
+    return BigNumber(args[0]).isNaN()
   },
 
   /**
      * 零判断
      */
   isZero (...args) {
-    if (args.length !== 1) {
-      throw new Error('必须是一个参数')
-    }
-
-    return new BigNumber(args[0]).isZero()
+    return BigNumber(args[0]).isZero()
   },
 
   /**
      * 相等判断
      */
   isEqualTo (...args) {
-    if (args.length !== 2) {
-      throw new Error('必须是两个参数')
-    }
-
-    return new BigNumber(args[0]).isEqualTo(new BigNumber(args[1]))
+    return BigNumber(args[0]).isEqualTo(args[1])
   },
 
   /**
      * 大于判断
      */
   isGreaterThan (...args) {
-    if (args.length !== 2) {
-      throw new Error('必须是两个参数')
-    }
-
-    return new BigNumber(args[0]).isGreaterThan(new BigNumber(args[1]))
+    return BigNumber(args[0]).isGreaterThan(args[1])
   },
 
   /**
      * 大于等于判断
      */
   isGreaterThanOrEqualTo (...args) {
-    if (args.length !== 2) {
-      throw new Error('必须是两个参数')
-    }
-
-    return new BigNumber(args[0]).isGreaterThanOrEqualTo(new BigNumber(args[1]))
+    return BigNumber(args[0]).isGreaterThanOrEqualTo(args[1])
   },
 
   /**
      * 小于判断
      */
   isLessThan (...args) {
-    if (args.length !== 2) {
-      throw new Error('必须是两个参数')
-    }
-
-    return new BigNumber(args[0]).isLessThan(new BigNumber(args[1]))
+    return BigNumber(args[0]).isLessThan(args[1])
   },
 
   /**
      * 小于等于判断
      */
   isLessThanOrEqualTo (...args) {
-    if (args.length !== 2) {
-      throw new Error('必须是两个参数')
-    }
-
-    return new BigNumber(args[0]).isLessThanOrEqualTo(new BigNumber(args[1]))
+    return BigNumber(args[0]).isLessThanOrEqualTo(args[1])
   },
 
   /**
      * 绝对值
      */
   abs (...args) {
-    if (args.length !== 1) {
-      throw new Error('必须是一个参数')
-    }
-
-    return new BigNumber(args[0]).absoluteValue()
+    return BigNumber(args[0]).absoluteValue()
   },
 
   /**
      * 取模
      */
   modulo (...args) {
-    if (args.length !== 2) {
-      throw new Error('必须是两个参数')
-    }
-
-    return new BigNumber(args[0]).modulo(new BigNumber(args[1]))
+    return BigNumber(args[0]).modulo(args[1])
   },
 
   /**
      * 最接近的较小整数
      */
   floor (...args) {
-    if (args.length !== 1) {
-      throw new Error('必须是一个参数')
-    }
-
-    return new BigNumber(args[0]).integerValue(BigNumber.ROUND_FLOOR)
+    return BigNumber(args[0]).integerValue(BigNumber.ROUND_FLOOR)
   },
 
   /**
      * 最接近的较大整数
      */
   ceil (...args) {
-    if (args.length !== 1) {
-      throw new Error('必须是一个参数')
-    }
-
-    return new BigNumber(args[0]).integerValue(BigNumber.ROUND_CEIL)
+    return BigNumber(args[0]).integerValue(BigNumber.ROUND_CEIL)
   },
 
   /**
@@ -208,11 +143,7 @@ const bignumber = {
      * 返回bigNumber对象
      */
   pow (...args) {
-    if (args.length !== 2) {
-      throw new Error('必须是两个参数')
-    }
-
-    return new BigNumber(args[0]).pow(args[1])
+    return BigNumber(args[0]).pow(args[1])
   },
 
   /**
@@ -245,11 +176,11 @@ const bignumber = {
       )
     }
 
-    return new BigNumber(hex.join(''), 16)
+    return BigNumber(hex.join(''), 16)
   },
 
   toBuffer (currBignumber, opts) {
-    currBignumber = new BigNumber(currBignumber)
+    currBignumber = BigNumber(currBignumber)
 
     if (typeof opts === 'string') {
       if (opts !== 'mpint') return 'Unsupported Buffer representation'

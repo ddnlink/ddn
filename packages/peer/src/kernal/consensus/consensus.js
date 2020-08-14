@@ -6,6 +6,7 @@ import ByteBuffer from 'bytebuffer'
 import assert from 'assert'
 import ip from 'ip'
 import { nacl } from '@ddn/crypto'
+import { bignum } from '@ddn/utils'
 
 let _singleton
 
@@ -98,7 +99,8 @@ class Consensus {
   }
 
   addPendingVotes ({ height, id, signatures }) {
-    if (!this._pendingBlock || this._pendingBlock.height !== height || this._pendingBlock.id !== id) {
+    // if (!this._pendingBlock || this._pendingBlock.height !== height || this._pendingBlock.id !== id) {
+    if (!this._pendingBlock || !bignum.isEqualTo(this._pendingBlock.height, height) || this._pendingBlock.id !== id) {
       return this._pendingVotes
     }
 
@@ -209,7 +211,7 @@ class Consensus {
   }
 
   /**
-   * 判断投票基于本地是否足够，需要 this.constants.voters: 0,
+   * 判断投票基于本地是否足够，需要 ${this.constants.voters} 个
    * @param {*} votes
    */
   hasEnoughVotes (votes) {
@@ -217,7 +219,7 @@ class Consensus {
   }
 
   /**
-   * 判断投票基于分布节点是否足够，需要至少 this.constants.remoteVoters 个
+   * 判断投票基于分布节点是否足够，需要至少 ${this.constants.remoteVoters} 个
    * @param {*} votes
    */
   hasEnoughVotesRemote (votes) {

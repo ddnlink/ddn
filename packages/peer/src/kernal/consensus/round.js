@@ -31,6 +31,7 @@ class Round {
     const roundStr = round.toString()
 
     await new Promise((resolve, reject) => {
+      // 这里没有将 bignum 计算传进去，通过 / % 等运算符，字符串形式的 bignum 会自动转为 number
       this.dao.findOne('block', {
         [roundStr]: this.dao.db_str(`(select (cast(block.height / ${this.constants.delegates} as integer) + (case when block.height % ${this.constants.delegates} > 0 then 1 else 0 end))) = ${roundStr}`)
       }, [
@@ -266,7 +267,8 @@ class Round {
     }, dbTrans)
 
     const round = await this.getRound(block.height)
-    const prevRound = await this.getRound(previousBlock.b_height)
+    // const prevRound = await this.getRound(previousBlock.b_height)
+    const prevRound = await this.getRound(previousBlock.height)
 
     this._feesByRound[round] = (this._feesByRound[round] || 0)
 
@@ -278,7 +280,8 @@ class Round {
     this._delegatesByRound[round] = this._delegatesByRound[round] || []
     this._delegatesByRound[round].pop()
 
-    if (prevRound === round && !bignum.isEqualTo(previousBlock.b_height, 1)) {
+    // if (prevRound === round && !bignum.isEqualTo(previousBlock.b_height, 1)) {
+    if (prevRound === round && !bignum.isEqualTo(previousBlock.height, 1)) {
       return done()
     }
 

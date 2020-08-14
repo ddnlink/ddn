@@ -196,18 +196,20 @@ class Multisignature {
     }, dbTrans)
   }
 
-  async applyUnconfirmed ({
-    asset
-  }, {
+  async applyUnconfirmed ({ asset }, {
     address,
     multisignatures
   }, dbTrans) {
     if (this._unconfirmedSignatures[address]) {
-      throw new Error('Signature on this account is pending confirmation')
+      // todo: 2020.8.13 throw 和 return 不是一样的流程，请确认
+      // throw new Error(`Signature on this account ${address} is pending confirmation`)
+      this.logger.info(`Signature on this account ${address} is pending confirmation`)
+      return
     }
 
     if (multisignatures.length) {
-      throw new Error('Account already has multisignatures enabled')
+      this.logger.info('Account already has multisignatures enabled')
+      return
     }
 
     this._unconfirmedSignatures[address] = true

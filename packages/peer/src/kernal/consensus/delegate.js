@@ -280,10 +280,6 @@ class Delegate {
   async getForgeDelegateWithCurrentTime (curSlot, height) {
     const activeDelegates = await this.getDisorderDelegatePublicKeys(height)
 
-    this.logger.debug('delegate.js 283L getForgeDelegateWithCurrentTime()， activeDelegates.length = ', activeDelegates.length)
-    this.logger.debug('delegate.js 283L getForgeDelegateWithCurrentTime()， delegatePos = ', curSlot % this.constants.delegates)
-    this.logger.debug('peer4 is at delegatesList of pos ', activeDelegates.indexOf('cec8c30342362f26f0bebbfcafbe58d741b2ee4ee6e81e4e486427981594f842'))
-
     let currentSlot = curSlot
     const lastSlot = this.runtime.slot.getLastSlot(currentSlot)
     for (; currentSlot < lastSlot; currentSlot += 1) {

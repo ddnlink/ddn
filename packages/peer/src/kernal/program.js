@@ -277,13 +277,13 @@ class Program {
         return result[0]
       }
     } catch (err) {
-      this._context.logger.warn('Error: ' + err)
+      this._context.logger.error('Error: ' + err)
     }
     return null
   }
 
   /**
-     * 同步节点列表 & 维护本地节点状态
+     * 同步节点列表 & 维护本地节点状态（轮询）
      */
   async startPeerSyncTask () {
     const validPeer = await this.getValidPeer()
@@ -367,14 +367,13 @@ class Program {
 
           const lastBlock = this._context.runtime.block.getLastBlock()
           const lastSlot = this._context.runtime.slot.getSlotNumber(lastBlock.timestamp)
-          if (this._context.runtime.slot.getNextSlot() - lastSlot >= 3) { // TODO: this.constants.*
+          if (this._context.runtime.slot.getNextSlot() - lastSlot >= 3) {
             this._context.runtime.state = DdnUtils.runtimeState.Syncing
 
             this._context.logger.debug('startSyncBlocks enter')
 
             await new Promise((resolve) => {
               this._context.sequence.add(async (cb) => {
-                this._context.logger.debug('startSyncBlocks enter sequence')
                 try {
                   const syncCompleted = await this._context.runtime.peer.syncBlocks()
                   cb(null, syncCompleted)

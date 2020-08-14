@@ -413,6 +413,7 @@ class Peer {
       }
 
       return new Promise((resolve, reject) => {
+        this.logger.debug('Peer is changeState: clock', clock)
         this.dao.update(
           'peer',
           { state, clock },

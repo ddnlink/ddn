@@ -249,11 +249,11 @@ class Block {
         payload_hash: raw.b_payloadHash, // wxm block database
         generator_public_key: raw.b_generatorPublicKey, // wxm block database
         generator_id: this.address.generateAddress(raw.b_generatorPublicKey), // imfly
-        // generator_id: address.generateB÷ase58CheckAddress(raw.b_generatorPublicKey), //wxm block database
         block_signature: raw.b_blockSignature, // wxm block database
         confirmations: raw.b_confirmations
       }
-      block.totalForged = bignum.plus(block.total_fee, block.reward)
+      // fixme: 2020.8.12 bignum 的性能可能会影响块同步
+      block.totalForged = bignum.plus(block.total_fee, block.reward).toString()
 
       return block
     }
@@ -265,6 +265,7 @@ class Block {
      * @param {*} dbTrans
      */
   async saveBlock (block, dbTrans) {
+    this.logger.debug('start saveBlock block.height = ', block.height)
     await this.serializeBlock2Db(block, dbTrans)
 
     if (block.transactions && block.transactions.length > 0) {
@@ -397,6 +398,7 @@ class Block {
 
       if (this.runtime.consensus.hasEnoughVotes(totalVotes)) {
         const block = this.runtime.consensus.getPendingBlock()
+        this.logger.debug('receiveVotes getPendingBlock block.height = ', block.height)
 
         const height = block.height
         const id = block.id
@@ -432,7 +434,8 @@ class Block {
 
     await new Promise((resolve, reject) => {
       this.sequence.add(async cb => {
-        if (this._lastPropose && this._lastPropose.height === propose.height &&
+        // if (this._lastPropose && this._lastPropose.height === propose.height &&
+        if (this._lastPropose && bignum.isEqualTo(this._lastPropose.height, propose.height) &&
                     this._lastPropose.generator_public_key === propose.generator_public_key &&
                     this._lastPropose.id !== propose.id) {
           this.logger.warn(`generate different block with the same height, generator: ${propose.generator_public_key}`)
@@ -543,7 +546,7 @@ class Block {
               const transaction = sortedTrs[i]
               const updatedAccountInfo = await this.runtime.account.setAccount({
                 publicKey: transaction.senderPublicKey,
-                isGenesis: block.height === 1
+                isGenesis: bignum.isEqualTo(block.height, 1)
               }, dbTrans)
 
               const accountInfo = await this.runtime.account.getAccountByAddress(updatedAccountInfo.address)
@@ -572,7 +575,7 @@ class Block {
           if (err) {
             applyedTrsIdSet.clear() // wxm TODO 清除上面未处理的交易记录
             this.balanceCache.rollback()
-            if (!result) {
+            if (!result) { // fixme 2020.8.13 这里的 result 是 ????????? 重要, 按照上面 done() 的回调, result为null
               this.logger.error(`回滚失败或者提交异常，出块失败: ${err}`)
               process.exit(1)
             } else { // 回滚成功
@@ -705,7 +708,7 @@ class Block {
     block.height = bignum.plus(this._lastBlock.height, 1).toString()
 
     if (typeof this._lastBlock.height === 'undefined') {
-      this.logger.debug(`verifyBlock, block: ${block}, pre-block: ${this._lastBlock}`)
+      this.logger.debug(`verifyBlock, block: ${JSON.stringify(block)}, pre-block: ${JSON.stringify(this._lastBlock)}`)
     }
     this.logger.debug(`verifyBlock, id: ${block.id}, pre-h: ${this._lastBlock.height}, h: ${block.height}`)
 
@@ -715,7 +718,8 @@ class Block {
 
     const expectedReward = this._blockStatus.calcReward(block.height)
 
-    if (block.height !== 1 && !bignum.isEqualTo(expectedReward, block.reward)) {
+    // if (block.height !== 1 && !bignum.isEqualTo(expectedReward, block.reward)) {
+    if (!bignum.isEqualTo(block.height, 1) && !bignum.isEqualTo(expectedReward, block.reward)) {
       throw new Error('Invalid block reward')
     }
 
@@ -730,7 +734,8 @@ class Block {
     // FIXME: 每次重启服务都会出现该错误 2020.6.2
     if (block.previous_block !== this._lastBlock.id) {
       await this.runtime.delegate.fork(block, 1)
-      this.logger.error('Incorrect previous block hash', block.previous_block, this._lastBlock.id)
+      this.logger.debug('Incorrect previous block hash, block.previous_block', block.previous_block)
+      this.logger.debug('Incorrect previous block hash, this._lastBlock.id', this._lastBlock.id)
       throw new Error('Incorrect previous block hash')
     }
 
@@ -993,7 +998,11 @@ class Block {
 
     this.logger.info(`Generate new block at height ${(parseInt(this._lastBlock.height) + 1)}`)
 
-    await this.verifyBlock(block, null)
+    try {
+      await this.verifyBlock(block, null)
+    } catch (error) {
+      this.logger.debug(`Add try/catch to handle verifyBlock not passed ${error}`)
+    }
 
     // 本地 keypairs
     const activeKeypairs = await this.runtime.delegate.getActiveDelegateKeypairs(block.height)
@@ -1105,16 +1114,24 @@ class Block {
   async _popLastBlock (oldLastBlock) {
     return new Promise((resolve, reject) => {
       this.balancesSequence.add(async cb => {
+        function done (err, previousBlock) {
+          if (err) {
+            const finalErr = 'popLastBlock err: ' + err
+            cb(finalErr)
+          } else {
+            cb(null, previousBlock)
+          }
+        }
+
         this.logger.info(`begin to pop block ${oldLastBlock.height} ${oldLastBlock.id}`)
 
-        // wxm TODO 这里查询条件用的id = previous_block，但过来的previous_block肯定有问题怎么会查出来呢，所以改成按照height-1来查上一个，但不知道会不会有问题
         let previousBlock = await this.runtime.dataquery.queryFullBlockData({
-          height: bignum.minus(oldLastBlock.height, 1).toString()
+          id: oldLastBlock.previous_block
         }, 1, 0, [
           ['height', 'asc']
-        ]) // {id: oldLastBlock.previous_block}
+        ])
         if (!previousBlock || !previousBlock.length) {
-          return cb('previousBlock is null')
+          return done('previousBlock is null')
         }
 
         previousBlock = previousBlock[0]
@@ -1122,7 +1139,7 @@ class Block {
         let transactions = this._sortTransactions(oldLastBlock.transactions)
         transactions = transactions.reverse()
 
-        this.dao.transaction(async (dbTrans, done) => {
+        this.dao.transaction(async (dbTrans, cb) => {
           try {
             for (let i = 0; i < transactions.length; i++) {
               const transaction = transactions[i]
@@ -1239,7 +1256,7 @@ class Block {
               if (lastBlock && lastBlock.id) {
                 await this.verifyBlock(block, null)
               }
-              // fixme: 获取到块之后，isSaveBlock 应该是 true ？？ 2020.8.7
+              // fixme: 获取到块之后，isSaveBlock 应该是 true
               await this.applyBlock(block, null, false, false)
             } else {
               this.setLastBlock(block)

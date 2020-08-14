@@ -43,20 +43,22 @@ class PeerSync {
       if (validateErrors) {
         this.logger.log(`Failed to parse blockchain height: ${peerStr} ${validateErrors[0].schemaPath} ${validateErrors[0].message}`)
       }
-
-      if (bignum.isLessThan(this.runtime.block.getLastBlock().height, remotePeerHeight.body.height)) {
+      const lastBlock = this.runtime.block.getLastBlock()
+      if (bignum.isLessThan(lastBlock.height, remotePeerHeight.body.height)) {
         let syncLastBlock = null
-        const lastBlock = this.runtime.block.getLastBlock()
+
+        this.logger.debug(`Got lastBlock height is ${lastBlock.height}`)
         if (lastBlock.id !== this.genesisblock.id) {
-          syncLastBlock = await this._addLackBlocks(remotePeerHeight.peer)
+          this.logger.debug('Must get syncLastBlock')
+          syncLastBlock = await this._addLackBlocks(remotePeerHeight.peer, lastBlock)
         } else {
           syncLastBlock = await this._cloneBlocksFromPeer(remotePeerHeight.peer, lastBlock.id)
         }
-
+        this.logger.debug(`Got syncLastBlock ${syncLastBlock}`)
         if (syncLastBlock) {
-          remotePeerHeight = await this.runtime.peer.request({ api: '/height' })
-          if (remotePeerHeight && remotePeerHeight.body &&
-                        syncLastBlock.height === remotePeerHeight.body.height) {
+          remotePeerHeight = await this.runtime.peer.request({ api: '/height' }) // fixme ???
+          // if (remotePeerHeight && remotePeerHeight.body && syncLastBlock.height === remotePeerHeight.body.height) {
+          if (remotePeerHeight && remotePeerHeight.body && bignum.isEqualTo(syncLastBlock.height, remotePeerHeight.body.height)) {
             return true
           } else {
             return false
@@ -103,11 +105,13 @@ class PeerSync {
     })
   }
 
-  async _addLackBlocks (peer) {
+  async _addLackBlocks (peer, lastBlock) {
     const peerStr = peer ? `${ip.fromLong(peer.ip)}:${peer.port}` : 'unknown'
     this.logger.info(`Looking for common block with ${peerStr}`)
 
-    const lastBlock = this.runtime.block.getLastBlock()
+    // modules.blocks.getCommonBlock
+    // 2020.8.13 不要重复调用，前面传过来，
+    // const lastBlock = this.runtime.block.getLastBlock()
 
     let lastLackBlock = null
     let currProcessHeight = lastBlock.height
@@ -127,8 +131,9 @@ class PeerSync {
             }, ['previous_block'], (err, row) => {
               if (err || !row) {
                 this.logger.error(err || "Can't compare blocks")
-                resolve()
-              } else if (result.body.common.previous_block === row.previous_block) {
+                // resolve()
+                reject(err || "Can't compare blocks")
+              } else if (result.body.common.previous_block === row.previous_block) { // 确定那个正常的块
                 resolve(result.body.common)
               } else {
                 resolve()
@@ -146,6 +151,7 @@ class PeerSync {
 
     this.logger.info(`Found common block ${lastLackBlock.id} (at ${lastLackBlock.height}) with peer ${peerStr}, last block height is ${lastBlock.height}`)
     const toRemove = bignum.minus(lastBlock.height, lastLackBlock.height)
+    this.logger.debug(`Got lastBlock.height = ${lastBlock.height}, lastLackBlock.height = ${lastLackBlock.height}`)
 
     if (bignum.isGreaterThanOrEqualTo(toRemove, 5)) {
       this.logger.error('long fork, ban 60 min', peerStr)
@@ -163,7 +169,7 @@ class PeerSync {
       return process.exit(0)
     }
 
-    // rollback blocks
+    // rollback blocks TODO 这是要回滚那么分叉的区块
     if (lastLackBlock.id !== lastBlock.id) {
       try {
         const currentRound = await this.runtime.round.getRound(lastBlock.height)
@@ -201,6 +207,7 @@ class PeerSync {
     this.logger.debug(`Loading blocks from peer ${peerStr}`)
 
     try {
+      // TODO 最新缺失区块与最新区块 id 一致，这里仍然检索 200条，并循环处理 2020.8.8
       lastLackBlock = await this._cloneBlocksFromPeer(peer, lastLackBlock.id)
     } catch (err) {
       this.logger.error(`Failed to load blocks, ban 60 min: ${peerStr}`, err)
@@ -252,7 +259,6 @@ class PeerSync {
         loaded = true
         break
       } else {
-        this.logger.log(`Loading ${blocks.length} blocks from`, peerStr)
         for (let j = 0; j < blocks.length; j++) {
           let block = blocks[j]
 
@@ -261,7 +267,7 @@ class PeerSync {
           } catch (e) {
             this.logger.error(`Failed to normalize block: ${e}`, block)
             this.logger.error(`Block ${block ? block.id : 'null'} is not valid, ban 60 min`, peerStr)
-            this.runtime.peer.changeState(peer.ip, peer.port, 0, 3600)
+            this.runtime.peer.changeState(peer.ip, peer.port, 0, 3600) // 3600 s
             return
           }
 
@@ -270,7 +276,7 @@ class PeerSync {
           } catch (err) {
             this.logger.error(`Failed to process block: ${err}`, block)
             this.logger.error(`Block ${block ? block.id : 'null'} is not valid, ban 60 min`, peerStr)
-            this.runtime.peer.changeState(peer.ip, peer.port, 0, 3600)
+            this.runtime.peer.changeState(peer.ip, peer.port, 0, 3600) // 3600 ms
             return
           }
 
@@ -383,9 +389,12 @@ class PeerSync {
 
     const trs = []
     for (let i = 0; i < transactions.length; ++i) {
-      if (!await this.runtime.transaction.hasUnconfirmedTransaction(transactions[i])) {
-        trs.push(transactions[i])
+      // fixme 2020.8.13
+      // if (!await this.runtime.transaction.hasUnconfirmedTransaction(transactions[i])) {
+      if (await this.runtime.transaction.hasUnconfirmedTransaction(transactions[i])) {
+        return reject('Transaction already exists.')
       }
+      trs.push(transactions[i])
     }
 
     return new Promise((resolve, reject) => {

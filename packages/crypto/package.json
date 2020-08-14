@@ -29,6 +29,7 @@
   "dependencies": {
     "bitcore-mnemonic": "^8.20.5",
     "bytebuffer": "^5.0.1",
+    "crypto": "^1.0.1",
     "fast-sha256": "^1.3.0",
     "ripemd160": "^2.0.2",
     "tweetnacl": "^1.0.2"

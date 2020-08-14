@@ -13,8 +13,8 @@ module.exports = {
   interval: 10, // 10ms
   delegates: 101, // number
   superPeers: 21,
-  voters: 0,
-  remoteVoters: 0,
+  voters: 33,
+  remoteVoters: 1,
   maxAmount: 100000000,
   maxPayloadLength: 8 * 1024 * 1024,
   blockHeaderLength: 248,

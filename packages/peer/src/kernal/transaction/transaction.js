@@ -251,7 +251,7 @@ class Transaction {
       return await this._assets.call(transaction.type, 'undoUnconfirmed', transaction, sender)
     }
 
-    const amount = DdnUtils.bignum.plus(transaction.amount, transaction.fee)
+    const amount = DdnUtils.bignum.plus(transaction.amount, transaction.fee).toString()
 
     this.balanceCache.addNativeBalance(sender.address, amount)
 
@@ -315,7 +315,7 @@ class Transaction {
 
       const amount = DdnUtils.bignum.plus(trs.amount, trs.fee)
       if (DdnUtils.bignum.isLessThan(sender.u_balance, amount) && trs.block_id !== this.genesisblock.id) { // wxm block database
-        throw new Error(`Insufficient balance: ${sender.address}`)
+        throw new Error(`applyUnconfirmed, insufficient balance: ${sender.address}`)
       }
 
       this.balanceCache.addNativeBalance(sender.address, DdnUtils.bignum.minus(0, amount))
@@ -343,6 +343,7 @@ class Transaction {
     }
 
     if (!sender) {
+      this.logger.debug('sender is not found')
       return false
     }
 
@@ -351,11 +352,16 @@ class Transaction {
 
   async apply (trs, block, sender, dbTrans) {
     if (!this._assets.hasType(trs.type)) {
-      throw new Error(`Unknown transaction type 9 ${trs.type}`)
+      // throw new Error(`Unknown transaction type 9 ${trs.type}`)
+      this.logger.info(`Unknown transaction type 9 ${trs.type}`)
+      return
     }
 
     if (!await this.ready(trs, sender)) {
-      throw new Error(`Transaction is not ready: ${trs.id}`)
+      this.logger.debug('Transaction is not ready, trs: ', trs)
+      // throw new Error(`Transaction is not ready: ${trs.id}`)
+      this.logger.info(`Transaction is not ready: ${trs.id}`)
+      return
     }
 
     // todo: 2020.6.25 特殊 asset 的处理
@@ -366,7 +372,9 @@ class Transaction {
     const amount = DdnUtils.bignum.plus(trs.amount, trs.fee)
 
     if (trs.block_id !== this.genesisblock.id && DdnUtils.bignum.isLessThan(sender.balance, amount)) { // wxm block database
-      throw new Error(`Insufficient balance: ${sender.balance}`)
+      // throw new Error(`apply, insufficient balance: ${sender.balance}`)
+      this.logger.info(`apply, insufficient balance: ${sender.balance}`)
+      return
     }
 
     const accountInfo = await this.runtime.account.merge(sender.address, {
@@ -399,13 +407,12 @@ class Transaction {
       this._unconfirmedNumber++
     } catch (err) {
       await this.removeUnconfirmedTransaction(transaction.id)
-      throw err
+      this.logger.debug('addUnconfirmedTransaction error, the trans has been removted')
+      throw new Error(`addUnconfirmedTransaction error, the trans has been removted ${err}`)
     }
   }
 
-  async hasUnconfirmedTransaction ({
-    id
-  }) {
+  async hasUnconfirmedTransaction ({ id }) {
     const index = this._unconfirmedTransactionsIdIndex[id]
     const result = index !== undefined && this._unconfirmedTransactions[index] !== false
     return result
@@ -425,7 +432,6 @@ class Transaction {
     }
 
     if (trs.id && trs.id !== txId) {
-      // FIXME: 这里没有要求从Asset插件端传ID，不然会出错，请确认
       this.logger.debug('trs.id', trs.id)
       this.logger.debug('txId', txId)
       throw new Error('Incorrect transaction id 2')
@@ -632,12 +638,12 @@ class Transaction {
     }
 
     // Verify second signature
-    if (!trs.requester_public_key && sender.second_signature && !DdnUtils.bignum.isEqualTo(sender.second_signature, 0)) {
+    if (!trs.requester_public_key && sender.second_signature) {
       valid = await this.verifySecondSignature(trs, sender.second_public_key)
       if (!valid) {
         throw new Error(`Failed to verify sender second signature: ${trs.id}`)
       }
-    } else if (trs.requester_public_key && requester.second_signature && !DdnUtils.bignum.isEqualTo(requester.second_signature, 0)) { // wxm block database
+    } else if (trs.requester_public_key && requester.second_signature) { // wxm block database
       valid = await this.verifySecondSignature(trs, requester.second_public_key) // wxm block database
       if (!valid) {
         throw new Error(`Failed to verify requester second signature: ${trs.id}`)
