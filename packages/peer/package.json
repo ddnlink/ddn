@@ -1,6 +1,6 @@
 {
   "name": "@ddn/peer",
-  "version": "0.7.4",
+  "version": "0.7.5",
   "description": "DDN Peer.",
   "files": [
     "lib",
@@ -44,15 +44,15 @@
     "node": ">=8.6.0"
   },
   "dependencies": {
-    "@ddn/asset-aob": "^0.4.3",
-    "@ddn/asset-base": "^0.3.3",
-    "@ddn/asset-dao": "^0.3.4",
-    "@ddn/asset-dapp": "^0.2.21",
-    "@ddn/asset-evidence": "^0.1.20",
+    "@ddn/asset-aob": "^0.4.4",
+    "@ddn/asset-base": "^0.3.4",
+    "@ddn/asset-dao": "^0.3.5",
+    "@ddn/asset-dapp": "^0.2.22",
+    "@ddn/asset-evidence": "^0.1.21",
     "@ddn/core": "^0.2.11",
-    "@ddn/crypto": "^0.3.3",
-    "@ddn/test-utils": "^0.1.5",
-    "@ddn/utils": "^0.1.18",
+    "@ddn/crypto": "^0.3.4",
+    "@ddn/test-utils": "^0.1.6",
+    "@ddn/utils": "^0.1.19",
     "ajv": "^6.3.0",
     "array.prototype.find": "^2.1.0",
     "array.prototype.findindex": "^2.0.2",
@@ -91,6 +91,5 @@
     "tracer": "^0.8.11",
     "util-extend": "1.0.3",
     "valid-url": "1.0.9"
-  },
-  "gitHead": "26a701eeebd9d9f8c72a73cb18080170f6fd4fde"
+  }
 }
