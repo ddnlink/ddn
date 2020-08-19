@@ -1,6 +1,5 @@
 /**
- * Please use yourself constants file
- * Note: Once the mainnet is online, this file can no longer be changed.
+ * 本文件用于测试
  */
 export default {
   nethash: 'gar0fktt', // 标定该链的版本

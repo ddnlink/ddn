@@ -8,7 +8,7 @@ import assert from 'assert'
 
 import ByteBuffer from 'bytebuffer'
 import DdnCrypto, { nacl } from '@ddn/crypto'
-import { assetTypes, runtimeState, system, bignum } from '@ddn/utils'
+import { runtimeState, system, bignum } from '@ddn/utils'
 import BlockStatus from './block-status'
 
 let _singleton
@@ -1011,11 +1011,10 @@ class Block {
     const activeKeypairs = await this.runtime.delegate.getActiveDelegateKeypairs(block.height)
     assert(activeKeypairs && activeKeypairs.length > 0, 'Active keypairs should not be empty')
 
-    this.logger.info(`get active delegate keypairs len: ${activeKeypairs.length}`)
+    this.logger.debug(`get active delegate keypairs len: ${activeKeypairs.length}`)
 
     const localVotes = this.runtime.consensus.createVotes(activeKeypairs, block)
     this.logger.debug(`get local votes: ${localVotes.signatures.length}`)
-    this.logger.debug(`block.js 1007L generateBlock() this.runtime.consensus.hasEnoughVotes(localVotes) ${this.runtime.consensus.hasEnoughVotes(localVotes)}`)
 
     if (this.runtime.consensus.hasEnoughVotes(localVotes)) {
       await this.processBlock(block, localVotes, true, true, false)
