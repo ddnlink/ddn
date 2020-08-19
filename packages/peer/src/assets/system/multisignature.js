@@ -203,12 +203,12 @@ class Multisignature {
     if (this._unconfirmedSignatures[address]) {
       // todo: 2020.8.13 throw 和 return 不是一样的流程，请确认
       // throw new Error(`Signature on this account ${address} is pending confirmation`)
-      this.logger.info(`Signature on this account ${address} is pending confirmation`)
+      this.logger.error(`Signature on this account ${address} is pending confirmation`)
       return
     }
 
     if (multisignatures.length) {
-      this.logger.info('Account already has multisignatures enabled')
+      this.logger.error('Account already has multisignatures enabled')
       return
     }
 

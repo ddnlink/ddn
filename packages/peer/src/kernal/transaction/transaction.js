@@ -315,7 +315,7 @@ class Transaction {
 
       const amount = DdnUtils.bignum.plus(trs.amount, trs.fee)
       if (DdnUtils.bignum.isLessThan(sender.u_balance, amount) && trs.block_id !== this.genesisblock.id) { // wxm block database
-        throw new Error(`applyUnconfirmed, insufficient balance: ${sender.address}`)
+        throw new Error(`Insufficient balance: ${sender.address}`)
       }
 
       this.balanceCache.addNativeBalance(sender.address, DdnUtils.bignum.minus(0, amount))
@@ -352,16 +352,16 @@ class Transaction {
 
   async apply (trs, block, sender, dbTrans) {
     if (!this._assets.hasType(trs.type)) {
-      // throw new Error(`Unknown transaction type 9 ${trs.type}`)
-      this.logger.info(`Unknown transaction type 9 ${trs.type}`)
-      return
+      throw new Error(`Unknown transaction type 9 ${trs.type}`)
+      // this.logger.info(`Unknown transaction type 9 ${trs.type}`)
+      // return
     }
 
     if (!await this.ready(trs, sender)) {
       this.logger.debug('Transaction is not ready, trs: ', trs)
-      // throw new Error(`Transaction is not ready: ${trs.id}`)
-      this.logger.info(`Transaction is not ready: ${trs.id}`)
-      return
+      throw new Error(`Transaction is not ready: ${trs.id}`)
+      // this.logger.info(`Transaction is not ready: ${trs.id}`)
+      // return
     }
 
     // todo: 2020.6.25 特殊 asset 的处理
@@ -372,9 +372,9 @@ class Transaction {
     const amount = DdnUtils.bignum.plus(trs.amount, trs.fee)
 
     if (trs.block_id !== this.genesisblock.id && DdnUtils.bignum.isLessThan(sender.balance, amount)) { // wxm block database
-      // throw new Error(`apply, insufficient balance: ${sender.balance}`)
-      this.logger.info(`apply, insufficient balance: ${sender.balance}`)
-      return
+      throw new Error(`apply, insufficient balance: ${sender.balance}`)
+      // this.logger.info(`apply, insufficient balance: ${sender.balance}`)
+      // return
     }
 
     const accountInfo = await this.runtime.account.merge(sender.address, {
@@ -384,7 +384,6 @@ class Transaction {
     }, dbTrans)
     const newSender = Object.assign({}, sender, accountInfo) // wxm block database
 
-    // this.logger.debug('transaction.js 381 apply newSender', newSender)
     await this._assets.call(trs.type, 'apply', trs, block, newSender, dbTrans)
   }
 
@@ -407,8 +406,8 @@ class Transaction {
       this._unconfirmedNumber++
     } catch (err) {
       await this.removeUnconfirmedTransaction(transaction.id)
-      this.logger.debug('addUnconfirmedTransaction error, the trans has been removted')
-      throw new Error(`addUnconfirmedTransaction error, the trans has been removted ${err}`)
+      this.logger.debug('addUnconfirmedTransaction error, the tran has been removted')
+      throw new Error(`addUnconfirmedTransaction error, ${err}`)
     }
   }
 
@@ -712,7 +711,7 @@ class Transaction {
     if (DdnUtils.bignum.isLessThan(trs.amount, 0) ||
             DdnUtils.bignum.isGreaterThan(trs.amount, DdnUtils.bignum.multiply(this.constants.maxAmount, this.constants.fixedPoint)) ||
             `${trs.amount}`.includes('.') || `${trs.amount}`.includes('e')) {
-      throw new Error(`Invalid transaction amount: ${trs.id}`)
+      throw new Error(`Invalid transaction amount: ${trs.amount}`)
     }
     // Check timestamp
     if (this.runtime.slot.getSlotNumber(trs.timestamp) > this.runtime.slot.getSlotNumber()) {

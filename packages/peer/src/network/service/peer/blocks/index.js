@@ -19,9 +19,11 @@ class PeerBlockService {
     if (typeof body.votes === 'string') {
       body.votes = this.protobuf.decodeBlockVotes(Buffer.from(body.votes, 'base64'))
     }
+    let block
+    let votes
     try {
-      var block = await this.runtime.block.objectNormalize(body.block)
-      var votes = await this.runtime.consensus.normalizeVotes(body.votes)
+      block = await this.runtime.block.objectNormalize(body.block)
+      votes = await this.runtime.consensus.normalizeVotes(body.votes)
     } catch (e) {
       this.logger.error(`normalize block or votes object error: ${e.toString()}`)
       this.logger.error(`Block ${block ? block.id : 'null'} is not valid, ban 60 min`, peerStr)
@@ -97,8 +99,8 @@ class PeerBlockService {
   async getCommon (req) {
     const query = req.query
 
-    query.max = Number(query.max)
-    query.min = Number(query.min)
+    // query.max = Number(query.max)
+    // query.min = Number(query.min)
 
     const validateErrors = await this.ddnSchema.validate({
       type: 'object',

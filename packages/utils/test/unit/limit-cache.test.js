@@ -1,7 +1,7 @@
 /**
  * passed
  */
-import { LimitCache } from '@ddn/utils'
+import { LimitCache } from '../../'
 import { node } from '../ddn-js'
 
 describe('LimitCache', () => {

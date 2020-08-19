@@ -1,17 +1,11 @@
 /**
  * passed
  */
-import path from 'path'
 import Debug from 'debug'
 import { bignum } from '@ddn/utils'
 import { node } from '../ddn-js'
 
-import { requireFile } from '@ddn/core'
-
 const debug = Debug('debug')
-
-const genesisblockFile = path.resolve(process.cwd(), './examples/custom/config/genesisBlock.json')
-const genesisblock = requireFile(genesisblockFile)
 
 const block = {
   blockHeight: '0',
@@ -297,6 +291,11 @@ describe('GET /blocks', () => {
 
 describe('GET /blocks/get?id=', () => {
   it('Using genesisblock id. Should be ok', done => {
+    let genesisblock = require('../fixtures/genesisBlock/genesisBlock.json')
+    if (process.env.DDN_ENV === 'custom') {
+      genesisblock = require('../fixtures/genesisBlock/genesisBlock.custom.json')
+    }
+
     const genesisblockId = genesisblock.id
     debug('genesisblockId', genesisblockId)
 

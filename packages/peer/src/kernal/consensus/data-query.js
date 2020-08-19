@@ -481,6 +481,7 @@ class DataQuery {
             [this.dao.db_str(`${maxHeight}-block_height`), 'confirmations']
           ], orders, (err, rows) => {
             if (err) {
+              this.logger.error('Query transactions from database error', err)
               reject(err)
             } else {
               resolve(rows)

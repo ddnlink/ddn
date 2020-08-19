@@ -47,6 +47,7 @@ class ExampleContract {
     setImmediate(cb)
   }
 
+  // todo: delete it 
   save (trs, cb) {
     setImmediate(cb)
   }
@@ -55,6 +56,7 @@ class ExampleContract {
     return null
   }
 
+  // todo: delete it 
   normalize (asset, cb) {
     setImmediate(cb)
   }

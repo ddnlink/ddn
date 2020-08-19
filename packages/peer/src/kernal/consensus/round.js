@@ -267,8 +267,8 @@ class Round {
     }, dbTrans)
 
     const round = await this.getRound(block.height)
-    // const prevRound = await this.getRound(previousBlock.b_height)
-    const prevRound = await this.getRound(previousBlock.height)
+    const prevRound = await this.getRound(previousBlock.b_height)
+    // const prevRound = await this.getRound(previousBlock.height)
 
     this._feesByRound[round] = (this._feesByRound[round] || 0)
 

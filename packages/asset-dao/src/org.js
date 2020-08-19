@@ -521,11 +521,11 @@ class Org extends Asset.Base {
      */
   async getOrgList (req) {
     const query = Object.assign({}, req.body, req.query)
-    query.pageindex = Number(query.pageindex || 1)
-    query.pagesize = Number(query.pagesize || 100)
-    if (typeof query.state !== 'undefined') {
-      query.state = Number(query.state)
-    }
+    // query.pageindex = Number(query.pageindex || 1)
+    // query.pagesize = Number(query.pagesize || 100)
+    // if (typeof query.state !== 'undefined') {
+    //   query.state = Number(query.state)
+    // }
 
     const validateErrors = await this.ddnSchema.validate({
       type: 'object',

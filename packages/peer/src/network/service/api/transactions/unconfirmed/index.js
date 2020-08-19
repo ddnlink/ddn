@@ -9,7 +9,7 @@ class RootRouter {
   }
 
   async get (req) {
-    const query = Object.assign({}, req.body, req.query);
+    const query = Object.assign({}, req.body, req.query)
     const validateErrors = await this.ddnSchema.validate({
       type: 'object',
       properties: {
@@ -21,14 +21,14 @@ class RootRouter {
           type: 'string'
         }
       }
-    }, query);
+    }, query)
     if (validateErrors) {
       throw new Error(`Invalid parameters: ${validateErrors[0].schemaPath} ${validateErrors[0].message}`)
     }
 
-    const transactions = await this.runtime.transaction.getUnconfirmedTransactionList(true);
+    const transactions = await this.runtime.transaction.getUnconfirmedTransactionList(true)
     if (query.senderPublicKey || query.address) {
-      const result = [];
+      const result = []
       for (let i = 0; i < transactions.length; i++) {
         if (transactions[i].senderPublicKey === query.senderPublicKey ||
                     transactions[i].recipientId === query.address) { // wxm block database
@@ -38,12 +38,12 @@ class RootRouter {
 
       return { success: true, transactions: result }
     } else {
-      return { success: true, transactions };
+      return { success: true, transactions }
     }
   }
 
   async getGet (req) {
-    const query = Object.assign({}, req.body, req.query);
+    const query = Object.assign({}, req.body, req.query)
     const validateErrors = await this.ddnSchema.validate({
       type: 'object',
       properties: {
@@ -54,12 +54,12 @@ class RootRouter {
         }
       },
       required: ['id']
-    }, query);
+    }, query)
     if (validateErrors) {
       throw new Error(`Invalid parameters: ${validateErrors[0].schemaPath} ${validateErrors[0].message}`)
     }
 
-    const unconfirmedTransaction = await this.runtime.transaction.getUnconfirmedTransaction(query.id);
+    const unconfirmedTransaction = await this.runtime.transaction.getUnconfirmedTransaction(query.id)
     if (!unconfirmedTransaction) {
       throw new Error('Transaction not found')
     }
@@ -68,4 +68,4 @@ class RootRouter {
   }
 }
 
-export default RootRouter;
+export default RootRouter

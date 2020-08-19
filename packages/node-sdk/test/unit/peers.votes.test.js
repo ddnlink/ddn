@@ -2,7 +2,7 @@
  * passed
  */
 import Debug from 'debug'
-import DdnUtils from '@ddn/utils'
+import { bignum } from '@ddn/utils'
 import { DdnJS, node } from '../ddn-js'
 
 const debug = new Debug('debug')
@@ -55,7 +55,7 @@ describe('POST /peer/transactions', () => {
             node.expect(body).to.have.property('transactionId')
             if (body.success === true && body.transactionId !== null) {
               node.expect(body.transactionId).to.be.a('string')
-              voterAccount.amount = DdnUtils.bignum.plus(voterAccount.amount, randomCoin).toString()
+              voterAccount.amount = bignum.plus(voterAccount.amount, randomCoin).toString()
             } else {
               debug('Sent: secret: ' + node.Gaccount.password + ', amount: ' + randomCoin + ', recipientId: ' + voterAccount.address)
               node.expect('TEST').to.equal('FAILED')
@@ -244,6 +244,8 @@ describe('POST /peer/transactions', () => {
           done()
         }
 
+        const feeBase = bignum.plus(node.constants.net.fees.delegate, node.constants.net.fees.vote)
+        const fee = bignum.multiply(feeBase, node.constants.fixedPoint).toString()
         node.api.put('/transactions')
           .set('Accept', 'application/json')
           .set('version', node.version)
@@ -251,7 +253,7 @@ describe('POST /peer/transactions', () => {
           .set('port', node.config.port)
           .send({
             secret: node.Gaccount.password,
-            amount: DdnUtils.bignum.plus(node.constants.net.fees.delegate, node.constants.net.fees.vote),
+            amount: fee,
             recipientId: account.address
           })
           .expect('Content-Type', /json/)
