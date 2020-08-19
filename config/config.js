@@ -1,57 +1,11 @@
-export default {
-  title: 'DDN',
-  mode: 'site',
-  hash: true,
-  favicon: 'http://testnet.ddn.link/static/ddnlogo.b8ab60d5.png',
-  logo: 'http://testnet.ddn.link/static/ddnlogo.b8ab60d5.png',
-  navs: [
-    null,
-    { title: '白皮书', path: 'https://github.com/ddnlink/whitepaper' },
-    { title: 'GitHub', path: 'https://github.com/ddnlink/ddn' },
-  ],
+import docs from './config.docs'
 
-  menus: {
-    '/guide': [
-      {
-        title: '版本 3.0',
-        children: []
-      },
-      {
-        title: '介绍',
-        children: ['guide/readme.md', 'guide/get-started', 'guide/peer-install']
-      },
-      {
-        title: '应用开发',
-        children: ['guide/app/wallet', 'guide/app/explorer', 'guide/app/dapp']
-      },
-      {
-        title: '框架扩展',
-        children: ['guide/asset', 'guide/assetTypes', 'guide/crypto', 'guide/ddn-cli']
-      },
-      {
-        title: '底层开发',
-        children: ['guide/framework', 'guide/config', 'guide/database', 'guide/context']
-      },
+// 默认是输出 ddn-docs
+let config = docs
 
-      {
-        title: '我要贡献',
-        children: ['guide/contributing']
-      }
-    ]
-  },
+// 暂时为了方便在根目录下测试 node_sdk
+if (process.env.DDN_ENV === 'custom') {
+  config = require('./config.custom').default
+}
 
-  extraBabelPlugins: [
-    [
-      'import',
-      {
-        libraryName: 'antd',
-        libraryDirectory: 'es',
-        style: 'css',
-      },
-    ],
-  ],
-  resolve: {
-    // 文档所在路径
-    includes: ['docs']
-  }
-};
+export default config

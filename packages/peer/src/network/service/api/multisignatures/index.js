@@ -376,31 +376,30 @@ class MultisignaturesRouter {
 
     return new Promise((resolve, reject) => {
       this.dao.findList('mem_accounts2multisignature',
-        {
-          dependent_id: query.publicKey // wxm block database
-        },
+        { dependent_id: query.publicKey },
+        [[this.dao.db_fnGroupConcat('account_id'), 'account_id']],
         null,
-        null,
-        [
-          [this.dao.db_fnGroupConcat('account_id'), 'account_id']
-        ],
         async (err, rows) => {
           if (err) {
-            this.logger.error(DdnUtils.system.getErrorMsg(err))
+            this.logger.error('Can`t find multisignatures, ', DdnUtils.system.getErrorMsg(err))
             return reject(err)
           }
+          let addresses = []
 
-          const addresses1 = rows[0].account_id && rows[0].account_id.split(',') // wxm block database
+          if (rows[0] && rows[0].account_id) {
+            addresses = rows[0].account_id.split(',') // wxm block database
+          }
 
           try {
             const rows = await this.runtime.account.getAccountList({
               address: {
-                $in: addresses1
+                $in: addresses
               },
               sort: [
                 ['balance', 'ASC']
               ] // wxm block database
             }, ['address', 'balance', 'multisignatures', 'multilifetime', 'multimin'])
+
 
             for (let i = 0; i < rows.length; i++) {
               const account = rows[i]
@@ -424,7 +423,7 @@ class MultisignaturesRouter {
               accounts: rows
             })
           } catch (e) {
-            this.logger.error(DdnUtils.system.getErrorMsg(e))
+            this.logger.error('findList: ', DdnUtils.system.getErrorMsg(e))
             return reject(e)
           }
         })

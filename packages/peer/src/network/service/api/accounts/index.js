@@ -177,8 +177,8 @@ class AccountService {
 
   async getTop (req) {
     const query = Object.assign({}, req.body, req.query)
-    const offset = Number(query.offset || 0)
-    const limit = Number(query.limit || 100)
+    // const offset = Number(query.offset || 0)
+    // const limit = Number(query.limit || 100)
 
     if (Number.isNaN(limit) || Number.isNaN(offset)) {
       throw new Error('Invalid parameters: limit or offset')

@@ -21,11 +21,13 @@ describe('AOB Test', () => {
   const IssuerAccount1 = node.randomAccount()
   const IssuerAccount2 = node.randomAccount()
   debug('IssuerAccount', IssuerAccount1)
+  debug('IssuerAccount2', IssuerAccount2)
 
   // 先给发行商想个名字
   const issuerName = node.randomIssuerName('', 5)
   const issuerName2 = node.randomIssuerName()
   debug('issuerName', issuerName)
+  debug('issuerName2', issuerName2)
 
   // 开始前，得把发行商账号 IssuerAccount 注册到链上(登录一下即可)
   beforeAll((done) => {
@@ -171,7 +173,7 @@ describe('AOB Test', () => {
       await node.onNewBlockAsync()
 
       const transaction = await DdnJS.aob.createIssuer(issuerName2, 'An issuer', IssuerAccount2.password)
-      debug('注册发行商创建的transaction 3', transaction)
+      debug('注册发行商创建的transaction 4', transaction)
 
       node.peer.post('/transactions')
         .set('Accept', 'application/json')

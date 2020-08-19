@@ -73,16 +73,16 @@ class RootRouter {
 
   async get (req) {
     const query = Object.assign({}, req.body, req.query)
-    query.limit = Number(query.limit || 10)
-    query.offset = Number(query.offset || 0)
+    // query.limit = Number(query.limit || 10)
+    // query.offset = Number(query.offset || 0)
 
-    if (typeof query.state !== 'undefined') {
-      query.state = Number(query.state)
-    }
+    // if (typeof query.state !== 'undefined') {
+    //   query.state = Number(query.state)
+    // }
 
-    if (typeof query.port !== 'undefined') {
-      query.port = Number(query.port)
-    }
+    // if (typeof query.port !== 'undefined') {
+    //   query.port = Number(query.port)
+    // }
 
     const validateErrors = await this.ddnSchema.validatePeers(query)
     if (validateErrors) {
@@ -110,7 +110,7 @@ class RootRouter {
 
   async getGet (req) {
     const query = Object.assign({}, req.body, req.query)
-    query.port = Number(query.port)
+    // query.port = Number(query.port)
 
     const validateErrors = await this.ddnSchema.validate({
       type: 'object',

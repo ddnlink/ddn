@@ -284,7 +284,9 @@ class Block {
   async createBlock (data) {
     const transactions = this._sortTransactions(data.transactions)
 
+    this.logger.debug(`Height is being created, data: ${JSON.stringify(data)}`)
     const nextHeight = (data.previous_block) ? bignum.plus(data.previous_block.height, 1).toString() : '1' // bignum update //wxm block database
+    this.logger.debug(`Height is being created, nextHeight: ${nextHeight}`)
     const reward = this._blockStatus.calcReward(nextHeight)
 
     let totalFee = bignum.new(0)
@@ -366,7 +368,7 @@ class Block {
         } else if (block.previous_block === this._lastBlock.previous_block && bignum.isEqualTo(block.height, this._lastBlock.height) && block.id !== this._lastBlock.id) { // wxm block database
         // } else if (block.previous_block === this._lastBlock.previous_block && block.height === this._lastBlock.height && block.id !== this._lastBlock.id) { // wxm block database
           // Fork: Same height and previous block id, but different block id
-          await this.runtime.delegate.fork(block, 5)
+          await this.runtime.delegate.fork(block, 2)
           cb('Fork-2')
         } else if (bignum.isGreaterThan(block.height, bignum.plus(this._lastBlock.height, 1))) {
           this.logger.info(`receive discontinuous block height ${block.height}`)
@@ -554,7 +556,6 @@ class Block {
 
               await this.runtime.transaction.applyUnconfirmed(transaction, newAccountInfo, dbTrans)
               await this.runtime.transaction.apply(transaction, block, newAccountInfo, dbTrans)
-
               await this.runtime.transaction.removeUnconfirmedTransaction(transaction.id)
               applyedTrsIdSet.add(transaction.id)
             }
@@ -573,9 +574,11 @@ class Block {
           }
         }, async (err, result) => {
           if (err) {
-            applyedTrsIdSet.clear() // wxm TODO 清除上面未处理的交易记录
+            // applyedTrsIdSet.clear() // wxm TODO 清除上面未处理的交易记录
             this.balanceCache.rollback()
-            if (!result) { // fixme 2020.8.13 这里的 result 是 ????????? 重要, 按照上面 done() 的回调, result为null
+
+            // result 是事务
+            if (!result) {
               this.logger.error(`回滚失败或者提交异常，出块失败: ${err}`)
               process.exit(1)
             } else { // 回滚成功
@@ -634,24 +637,24 @@ class Block {
           this.logger.error(`Failed to apply block: ${err}`)
         }
 
-        const redoTrs = unconfirmedTrs.filter((item) => {
-          if (!applyedTrsIdSet.has(item.id)) {
-            if (item.type === assetTypes.MULTISIGNATURE) {
-              const curTime = this.runtime.slot.getTime() // (new Date()).getTime();
-              const pasttime = Math.ceil((curTime - item.timestamp) / this.constants.interval)
+        const redoTrs = unconfirmedTrs.filter((item) => !applyedTrsIdSet.has(item.id))
+        // if (!applyedTrsIdSet.has(item.id)) {
+        //   if (item.type === assetTypes.MULTISIGNATURE) {
+        //     const curTime = this.runtime.slot.getTime() // (new Date()).getTime();
+        //     const pasttime = Math.ceil((curTime - item.timestamp) / this.constants.interval)
 
-              if (pasttime >= item.asset.multisignature.lifetime) {
-                return false
-              } else {
-                return true
-              }
-            } else {
-              return true
-            }
-          } else {
-            return false
-          }
-        })
+        //     if (pasttime >= item.asset.multisignature.lifetime) {
+        //       return false
+        //     } else {
+        //       return true
+        //     }
+        //   } else {
+        //     return true
+        //   }
+        // } else {
+        //   return false
+        // }
+        // })
         try {
           await this.runtime.transaction.receiveTransactions(redoTrs)
         } catch (err) {
@@ -1001,7 +1004,7 @@ class Block {
     try {
       await this.verifyBlock(block, null)
     } catch (error) {
-      this.logger.debug(`Add try/catch to handle verifyBlock not passed ${error}`)
+      this.logger.error(`verifyBlock not passed ${error}`)
     }
 
     // 本地 keypairs

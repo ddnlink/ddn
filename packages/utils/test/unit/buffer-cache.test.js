@@ -1,9 +1,9 @@
 /**
- * passed
+ * TODO: have no use
  */
 import { node } from '../ddn-js'
 
-import BufferCache from '../../lib/helpers/buffer-cache'
+import { BufferCache } from '../../'
 
 describe('BufferCache', () => {
   it('normal test', async () => {

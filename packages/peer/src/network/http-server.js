@@ -127,6 +127,7 @@ class HttpServer {
 
   /**
      * 转换输入参数类型（字符串 -> 整型）
+     * 下面忽略的字段，必须使用正确的字符串型，比如：fee, totalFee, amount, reward等
      */
   _addQueryParamsMiddleware () {
     const ignore = [
@@ -140,7 +141,7 @@ class HttpServer {
           return value
         }
 
-        if (isNaN(value) || parseInt(value) !== value || isNaN(parseInt(value, radix))) {
+        if (isNaN(value) || parseInt(value) === value || isNaN(parseInt(value, radix))) {
           return value
         }
 

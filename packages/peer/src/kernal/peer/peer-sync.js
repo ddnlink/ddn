@@ -392,7 +392,11 @@ class PeerSync {
       // fixme 2020.8.13
       // if (!await this.runtime.transaction.hasUnconfirmedTransaction(transactions[i])) {
       if (await this.runtime.transaction.hasUnconfirmedTransaction(transactions[i])) {
-        return reject('Transaction already exists.')
+        // fixme no promise 2020.8.17 这里应该退出整个函数还是for循环 AA
+        // return reject('Transaction already exists.')
+        throw new Error('Transaction already exists.')
+        // this.logger.error('Transaction already exists.')
+        // continue
       }
       trs.push(transactions[i])
     }

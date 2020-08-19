@@ -42,7 +42,7 @@ beforeAll(async () => {
 
   let randomCoin = node.randomCoin()
   res = await node.giveMoneyAsync(Account1.address, randomCoin)
-  expectedFee = randomCoin
+  expectedFee = node.constants.net.fees.transfer
   debug('giveMoneyAsync response', res.body)
 
   node.expect(res.body).to.have.property('success').to.be.true
@@ -51,7 +51,7 @@ beforeAll(async () => {
 
   // bignum update
   // totalTxFee += (expectedFee / node.normalizer);
-  totalTxFee = bignum.plus(totalTxFee, bignum.divide(expectedFee, node.normalizer))
+  totalTxFee = bignum.plus(totalTxFee, expectedFee)
 
   Account1.balance += randomCoin
   transactionList[transactionCount - 1] = {
@@ -60,7 +60,7 @@ beforeAll(async () => {
     brutoSent: (randomCoin + expectedFee) / node.normalizer,
 
     // bignum update fee: expectedFee / node.normalizer,
-    fee: bignum.divide(expectedFee, node.normalizer).toString(),
+    fee: expectedFee,
 
     nettoSent: randomCoin / node.normalizer,
     txId: res.body.transactionId,
@@ -68,7 +68,7 @@ beforeAll(async () => {
   }
 
   randomCoin = node.randomCoin()
-  expectedFee = randomCoin // node.expectedFee(randomCoin)
+  expectedFee = node.constants.net.fees.transfer
   res = await node.giveMoneyAsync(Account2.address, randomCoin)
   node.expect(res.body).to.have.property('success').to.be.true
   Account2.transactions.push(transactionCount)
@@ -82,10 +82,9 @@ beforeAll(async () => {
   transactionList[transactionCount - 1] = {
     sende: node.Gaccount.address,
     recipient: Account2.address,
-    brutoSent: (randomCoin + expectedFee) / node.normalizer,
+    brutoSent: randomCoin / node.normalizer + expectedFee,
 
-    // bignum update fee: expectedFee / node.normalizer,
-    fee: bignum.divide(expectedFee, node.normalizer).toString(),
+    fee: expectedFee,
 
     nettoSent: randomCoin / node.normalizer,
     txId: res.body.transactionId,
@@ -104,26 +103,25 @@ describe('GET /api/transactions', () => {
     const offset = 0
     const orderBy = 't_amount:asc'
 
-    node.api.get(`/transactions?blockId=${blockId}&senderId=${senderId}&recipientId=${recipientId}&limit=${limit}&offset=${offset}&orderBy=${orderBy}`)
+    const sqlString = `/transactions?blockId=${blockId}&senderId=${senderId}&recipientId=${recipientId}&limit=${limit}&offset=${offset}&orderBy=${orderBy}`
+    debug('sql string', sqlString)
+
+    node.api.get(sqlString)
       .set('Accept', 'application/json')
       .expect('Content-Type', /json/)
       .expect(200)
       .end((_err, { body }) => {
-        // console.log(JSON.stringify(res.body));
+        // debug('valid parameters ok', JSON.stringify(body))
         node.expect(body).to.have.property('success').to.be.true
         node.expect(body).to.have.property('transactions').that.is.an('array')
         node.expect(body.transactions).to.have.length.within(1, limit)
         if (body.transactions.length > 0) {
           for (let i = 0; i < body.transactions.length; i++) {
             if (typeof body.transactions[i + 1] !== 'undefined') {
-              // bignum update node.expect(res.body.transactions[i].amount).to.be.at.most(res.body.transactions[i + 1].amount);
               const bRet = bignum.isLessThanOrEqualTo(body.transactions[i].amount, body.transactions[i + 1].amount)
               node.expect(bRet).to.be.true
             }
           }
-        } else {
-          // console.log('Request failed. Expected success');
-          node.expect('TEST').to.equal('FAILED')
         }
         done()
       })
@@ -321,30 +319,26 @@ describe('PUT /api/transactions', () => {
           // console.log(JSON.stringify(res.body));
           node.expect(body).to.have.property('success').to.be.true
           node.expect(body).to.have.property('transactionId')
-          if (body.success === true && body.transactionId !== null) {
-            expectedFee = amountToSend // node.expectedFee(amountToSend)
+          expectedFee = '0.1' // node.constants.net.fees.transfer
 
-            Account1.balance = bignum.minus(Account1.balance, amountToSend, expectedFee)
+          Account1.balance = bignum.minus(Account1.balance, amountToSend, expectedFee)
 
-            Account2.balance += amountToSend
-            Account1.transactions.push(transactionCount)
-            transactionList[transactionCount] = {
-              sender: Account1.address,
-              recipient: Account2.address,
-              brutoSent: bignum.divide(bignum.plus(amountToSend, expectedFee), node.normalizer),
+          Account2.balance += amountToSend
+          Account1.transactions.push(transactionCount)
+          transactionList[transactionCount] = {
+            sender: Account1.address,
+            recipient: Account2.address,
+            brutoSent: bignum.divide(bignum.plus(amountToSend, bignum.multiply(expectedFee, node.constants.fixedPoint)), node.normalizer),
 
-              fee: bignum.divide(expectedFee, node.normalizer),
+            fee: '0.1',
 
-              nettoSent: bignum.divide(amountToSend, node.normalizer),
-              txId: body.transactionId,
-              type: node.AssetTypes.TRANSFER
-            }
-            transactionCount += 1
-          } else {
-            // console.log('Failed Tx or transactionId is null');
-            // console.log('Sent: secret: ' + Account1.password + ', amount: ' + amountToSend + ', recipientId: ' + Account2.address);
-            node.expect('TEST').to.equal('FAILED')
+            nettoSent: bignum.divide(amountToSend, node.normalizer),
+            txId: body.transactionId,
+            type: node.AssetTypes.TRANSFER
           }
+          debug('transactionList[0] = ', transactionList[0])
+          transactionCount += 1
+
           done()
         })
     })
@@ -371,7 +365,7 @@ describe('PUT /api/transactions', () => {
   })
 
   it('Using float amount. Should fail', done => {
-    const amountToSend = 1.2
+    const amountToSend = '1.2'
     node.api.put('/transactions')
       .set('Accept', 'application/json')
       .send({
@@ -382,9 +376,9 @@ describe('PUT /api/transactions', () => {
       .expect('Content-Type', /json/)
       .expect(200)
       .end((_err, { body }) => {
-        // console.log(JSON.stringify(res.body));
+        debug('Using float amount fail', JSON.stringify(body))
         node.expect(body).to.have.property('success').to.be.false
-        node.expect(body).to.have.property('error')
+        node.expect(body).to.have.property('error').include('Invalid transaction amount')
         done()
       })
   })
@@ -395,13 +389,13 @@ describe('PUT /api/transactions', () => {
         .set('Accept', 'application/json')
         .send({
           secret: Account1.password,
-          amount: Account1.balance,
+          amount: Account1.balance + '',
           recipientId: Account2.address
         })
         .expect('Content-Type', /json/)
         .expect(200)
         .end((_err, { body }) => {
-          // console.log(JSON.stringify(res.body));
+          debug('Using entire balance fail', JSON.stringify(body))
           node.expect(body).to.have.property('success').to.be.false
           node.expect(body).to.have.property('error')
           done()
@@ -528,24 +522,31 @@ describe('PUT /api/transactions', () => {
 describe('GET /transactions/get?id=', () => {
   it('Using valid id. Should be ok', done => {
     const transactionInCheck = transactionList[0]
-    node.api.get(`/transactions/get?id=${transactionInCheck.txId}`)
+    debug('Using valid id, transactionInCheck', transactionInCheck)
+    const sqlString = `/transactions/get?id=${transactionInCheck.txId}`
+    debug('Using valid id, sqlString', sqlString)
+
+    node.api.get(sqlString)
       .set('Accept', 'application/json')
       .expect('Content-Type', /json/)
       .expect(200)
       .end((_err, { body }) => {
+        debug('Using valid id, ok', JSON.stringify(body))
+        debug('node.normalizer', node.normalizer)
         node.expect(body).to.have.property('success').to.be.true
         node.expect(body).to.have.property('transaction').that.is.an('object')
-        if (body.success === true && body.transaction.id !== null) {
-          node.expect(body.transaction.id).to.equal(transactionInCheck.txId)
-          node.expect(body.transaction.amount / node.normalizer).to.equal(transactionInCheck.nettoSent)
-          node.expect(`${body.transaction.fee / node.normalizer}`).to.equal(transactionInCheck.fee)
-          node.expect(body.transaction.recipientId).to.equal(transactionInCheck.recipient)
-          node.expect(body.transaction.senderId).to.equal(transactionInCheck.sender)
-          node.expect(body.transaction.type).to.equal(transactionInCheck.type)
-        } else {
-          // console.log('Transaction failed or transaction list is null');
-          node.expect('TEST').to.equal('FAILED')
-        }
+        node.expect(body.transaction.id).to.equal(transactionInCheck.txId)
+        const amountResult = bignum.divide(body.transaction.amount, node.normalizer).isEqualTo(transactionInCheck.nettoSent)
+        const feeResult = bignum.isEqualTo(bignum.divide(body.transaction.fee, node.normalizer), transactionInCheck.fee)
+        debug('body.transaction.amount', body.transaction.amount)
+        debug('body.transaction.fee', body.transaction.fee)
+        debug('bignum.divide(body.transaction.fee, node.normalizer)', bignum.divide(body.transaction.fee, node.normalizer).toString())
+        debug('transactionInCheck.fee', transactionInCheck.fee)
+        node.expect(amountResult).to.be.true
+        node.expect(feeResult).to.be.true
+        node.expect(body.transaction.recipientId).to.equal(transactionInCheck.recipient)
+        node.expect(body.transaction.senderId).to.equal(transactionInCheck.sender)
+        node.expect(body.transaction.type).to.equal(transactionInCheck.type)
         done()
       })
   })
@@ -571,7 +572,7 @@ describe('GET /transactions', () => {
       .expect('Content-Type', /json/)
       .expect(200)
       .end((_err, { body }) => {
-        debug('get /transactions?type= ok', JSON.stringify(body))
+        // debug('get /transactions?type= ok', JSON.stringify(body))
 
         node.expect(body).to.have.property('success').to.be.true
         if (body.success === true && body.transactions !== null) {
