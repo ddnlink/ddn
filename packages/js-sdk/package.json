@@ -12,9 +12,11 @@
   "scripts": {
     "test": "mocha test",
     "build": "yarn build:dev & yarn build:prod",
-    "build:custom": "DDN_ENV=custom yarn build:dev & yarn build:prod",
+    "build:custom": "DDN_ENV=custom yarn build:custom:dev & yarn build:custom:prod",
     "build:dev": "browserify index.js > ./build/index.browserify.js",
-    "build:prod": "browserify index.js -p tinyify > ./build/index.browserify.min.js"
+    "build:prod": "browserify index.js -p tinyify > ./build/index.browserify.min.js",
+    "build:custom:dev": "browserify index.js > ./build/ddn-js-sdk.custom.js",
+    "build:custom:prod": "browserify index.js -p tinyify > ./build/ddn-js-sdk.custom.min.js"
   },
   "keywords": [
     "ddn",
