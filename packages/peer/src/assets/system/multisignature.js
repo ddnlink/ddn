@@ -201,15 +201,11 @@ class Multisignature {
     multisignatures
   }, dbTrans) {
     if (this._unconfirmedSignatures[address]) {
-      // todo: 2020.8.13 throw 和 return 不是一样的流程，请确认
-      // throw new Error(`Signature on this account ${address} is pending confirmation`)
-      this.logger.error(`Signature on this account ${address} is pending confirmation`)
-      return
+      throw new Error(`Signature on this account ${address} is pending confirmation`)
     }
 
     if (multisignatures.length) {
-      this.logger.error('Account already has multisignatures enabled')
-      return
+      throw new Error('Account already has multisignatures enabled')
     }
 
     this._unconfirmedSignatures[address] = true

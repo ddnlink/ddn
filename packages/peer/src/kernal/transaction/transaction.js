@@ -309,9 +309,9 @@ class Transaction {
       }
 
       // wxm 这个逻辑应该去掉，不应该这么使用序号特殊处理，如果必须，应该是用assetTypes.type枚举
-      if (trs.type === DdnUtils.assetTypes.DAPP_OUT) {
-        return await this._assets.call(trs.type, 'applyUnconfirmed', trs, sender, dbTrans)
-      }
+      // if (trs.type === DdnUtils.assetTypes.DAPP_OUT) {
+      //   return await this._assets.call(trs.type, 'applyUnconfirmed', trs, sender, dbTrans)
+      // }
 
       const amount = DdnUtils.bignum.plus(trs.amount, trs.fee)
       if (DdnUtils.bignum.isLessThan(sender.u_balance, amount) && trs.block_id !== this.genesisblock.id) { // wxm block database
@@ -358,7 +358,6 @@ class Transaction {
     }
 
     if (!await this.ready(trs, sender)) {
-      this.logger.debug('Transaction is not ready, trs: ', trs)
       throw new Error(`Transaction is not ready: ${trs.id}`)
       // this.logger.info(`Transaction is not ready: ${trs.id}`)
       // return

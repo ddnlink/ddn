@@ -588,9 +588,6 @@ class Block {
               this.logger.error(`回滚失败或者提交异常，出块失败: ${err}`)
               process.exit(1)
             } else { // 回滚成功
-              // Fixme: 2020.8.25
-              this.logger.debug(`transaction.applyUnconfirmed,  transaction.apply, transaction.removeUnconfirmedTransaction, has error: ${err}, should rollback trs.`)
-
               this._isActive = false
               reject(err)
             }
