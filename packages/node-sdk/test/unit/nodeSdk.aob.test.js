@@ -326,6 +326,40 @@ describe('AOB Test', () => {
           done()
         })
     })
+
+    // 资产交易
+    it('Insufficient AoB balance should be fail', async (done) => {
+      // 等 1 次确认
+      await node.onNewBlockAsync()
+
+      // const transaction = await createPluginAsset(DdnUtils.assetTypes.AOB_TRANSFER, obj, IssuerAccount1.password)
+      // const transaction = await DdnJS.aob.createTransfer(currency, '1', node.Gaccount.address, 'test', IssuerAccount1.password)
+      const transaction = await DdnJS.aob.createTransfer(currency, '100000000000', node.Gaccount.address, '主交易', '资产交易不合法', IssuerAccount1.password)
+
+      debug('transfer trs2: ', transaction)
+
+      node.peer.post('/transactions')
+        .set('Accept', 'application/json')
+        .set('version', node.version)
+        .set('nethash', node.config.nethash)
+        .set('port', node.config.port)
+        .send({
+          transaction
+        })
+        .expect('Content-Type', /json/)
+        .expect(200)
+        .end((err, {
+          body
+        }) => {
+          debug('transfer ok ', body)
+
+          expect(err).to.be.not.ok
+          expect(body).to.have.property('success').to.be.false
+          expect(body).to.have.property('error').to.contain('Insufficient')
+
+          done()
+        })
+    })
   })
 })
 

@@ -291,8 +291,6 @@ class Transfer extends Asset.Base {
     const surplus = DdnUtils.bignum.minus(balance, transfer.amount)
     if (DdnUtils.bignum.isLessThan(surplus, 0)) {
       throw new Error(`Insufficient AoB ${transfer.currency} balance`)
-      // this.logger.error(`Insufficient AoB ${transfer.currency} balance`)
-      // return
     }
     this.balanceCache.setAssetBalance(sender.address, transfer.currency, surplus.toString())
     return trs

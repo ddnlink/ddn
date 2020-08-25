@@ -1,4 +1,4 @@
-export default {
+module.exports = {
   title: 'DDN',
   mode: 'site',
   hash: true,
@@ -18,7 +18,7 @@ export default {
       },
       {
         title: '介绍',
-        children: ['guide/readme.md', 'guide/get-started', 'guide/peer-install']
+        children: ['guide/readme.md', 'guide/get-started', 'guide/peer-install-testnet', 'guide/peer-install-mainnet']
       },
       {
         title: '应用开发',

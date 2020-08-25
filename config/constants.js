@@ -11,7 +11,7 @@ let constants = ddn
 
 // Todo: get it when building
 if (process.env.DDN_ENV === 'custom') {
-  constants = require('./constants.custom').default
+  constants = require('./constants.custom')
 }
 
 export default constants

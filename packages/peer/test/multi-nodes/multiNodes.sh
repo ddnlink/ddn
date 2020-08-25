@@ -2,9 +2,9 @@
 # bash ./test/multi-nodes/multiNodes.sh
 
 pwd
-a3=../ddn-4097
-a4=../ddn-4098
-a5=../ddn-4099
+a3=../ddn-8001
+a4=../ddn-8002
+a5=../ddn-8003
 
 /bin/cp ./test/multi-nodes/config-multi-nodes.json ./config.json
 /bin/cp ./test/multi-nodes/index.js ./test/index.js
