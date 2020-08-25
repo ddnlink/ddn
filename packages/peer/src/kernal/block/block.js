@@ -8,7 +8,7 @@ import assert from 'assert'
 
 import ByteBuffer from 'bytebuffer'
 import DdnCrypto, { nacl } from '@ddn/crypto'
-import { assetTypes, runtimeState, system, bignum } from '@ddn/utils'
+import { runtimeState, system, bignum } from '@ddn/utils'
 import BlockStatus from './block-status'
 
 let _singleton
@@ -554,9 +554,15 @@ class Block {
               const accountInfo = await this.runtime.account.getAccountByAddress(updatedAccountInfo.address)
               const newAccountInfo = Object.assign({}, accountInfo, updatedAccountInfo)
 
-              await this.runtime.transaction.applyUnconfirmed(transaction, newAccountInfo, dbTrans)
-              await this.runtime.transaction.apply(transaction, block, newAccountInfo, dbTrans)
-              await this.runtime.transaction.removeUnconfirmedTransaction(transaction.id)
+              try {
+                await this.runtime.transaction.applyUnconfirmed(transaction, newAccountInfo, dbTrans)
+                await this.runtime.transaction.apply(transaction, block, newAccountInfo, dbTrans)
+              } catch (err) {
+                throw new Error(err)
+              } finally {
+                await this.runtime.transaction.removeUnconfirmedTransaction(transaction.id)
+              }
+
               applyedTrsIdSet.add(transaction.id)
             }
 
@@ -574,7 +580,7 @@ class Block {
           }
         }, async (err, result) => {
           if (err) {
-            // applyedTrsIdSet.clear() // wxm TODO 清除上面未处理的交易记录
+            applyedTrsIdSet.clear() // wxm TODO 清除上面未处理的交易记录
             this.balanceCache.rollback()
 
             // result 是事务
@@ -582,6 +588,9 @@ class Block {
               this.logger.error(`回滚失败或者提交异常，出块失败: ${err}`)
               process.exit(1)
             } else { // 回滚成功
+              // Fixme: 2020.8.25
+              this.logger.debug(`transaction.applyUnconfirmed,  transaction.apply, transaction.removeUnconfirmedTransaction, has error: ${err}, should rollback trs.`)
+
               this._isActive = false
               reject(err)
             }
@@ -638,23 +647,6 @@ class Block {
         }
 
         const redoTrs = unconfirmedTrs.filter((item) => !applyedTrsIdSet.has(item.id))
-        // if (!applyedTrsIdSet.has(item.id)) {
-        //   if (item.type === assetTypes.MULTISIGNATURE) {
-        //     const curTime = this.runtime.slot.getTime() // (new Date()).getTime();
-        //     const pasttime = Math.ceil((curTime - item.timestamp) / this.constants.interval)
-
-        //     if (pasttime >= item.asset.multisignature.lifetime) {
-        //       return false
-        //     } else {
-        //       return true
-        //     }
-        //   } else {
-        //     return true
-        //   }
-        // } else {
-        //   return false
-        // }
-        // })
         try {
           await this.runtime.transaction.receiveTransactions(redoTrs)
         } catch (err) {
@@ -857,7 +849,11 @@ class Block {
 
     block.transactions = this._sortTransactions(block.transactions)
 
-    await this.verifyBlock(block, votes)
+    try {
+      await this.verifyBlock(block, votes)
+    } catch (error) {
+      throw new Error(`Verify block fail, Error: ${error}`)
+    }
 
     this.logger.debug('verify block ok')
 
@@ -1004,18 +1000,18 @@ class Block {
     try {
       await this.verifyBlock(block, null)
     } catch (error) {
-      this.logger.error(`verifyBlock not passed ${error}`)
+      // this.logger.error(`verifyBlock not passed ${error}`)
+      throw new Error(`verifyBlock not passed ${error}`)
     }
 
     // 本地 keypairs
     const activeKeypairs = await this.runtime.delegate.getActiveDelegateKeypairs(block.height)
     assert(activeKeypairs && activeKeypairs.length > 0, 'Active keypairs should not be empty')
 
-    this.logger.info(`get active delegate keypairs len: ${activeKeypairs.length}`)
+    this.logger.debug(`get active delegate keypairs len: ${activeKeypairs.length}`)
 
     const localVotes = this.runtime.consensus.createVotes(activeKeypairs, block)
     this.logger.debug(`get local votes: ${localVotes.signatures.length}`)
-    this.logger.debug(`block.js 1007L generateBlock() this.runtime.consensus.hasEnoughVotes(localVotes) ${this.runtime.consensus.hasEnoughVotes(localVotes)}`)
 
     if (this.runtime.consensus.hasEnoughVotes(localVotes)) {
       await this.processBlock(block, localVotes, true, true, false)
@@ -1257,7 +1253,12 @@ class Block {
             if (verify) {
               const lastBlock = this.getLastBlock()
               if (lastBlock && lastBlock.id) {
-                await this.verifyBlock(block, null)
+                try {
+                  await this.verifyBlock(block, null)
+                } catch (error) {
+                  // this.logger.error(`verifyBlock not passed ${error}`)
+                  throw new Error(`verifyBlock not passed ${error}`)
+                }
               }
               // fixme: 获取到块之后，isSaveBlock 应该是 true
               await this.applyBlock(block, null, false, false)

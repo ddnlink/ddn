@@ -257,7 +257,7 @@ class Delegate {
   }
 
   /**
-     * 返回当前所有受托人列表中在本地节点配置中存在的私钥信息
+     * 返回当前所有受托人列表中 在本地节点配置中 存在的私钥信息
      * @param {*} height
      */
   async getActiveDelegateKeypairs (height) {
