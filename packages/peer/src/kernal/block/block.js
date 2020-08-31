@@ -579,6 +579,7 @@ class Block {
             done(err)
           }
         }, async (err, result) => {
+          this.logger.debug(`The dao.transaction is finished, err: ${err}, result: ${result} `)
           if (err) {
             applyedTrsIdSet.clear() // wxm TODO 清除上面未处理的交易记录
             this.balanceCache.rollback()
@@ -643,7 +644,7 @@ class Block {
           await doApplyBlock()
         } catch (err) {
           this.logger.error(`Failed to apply block: ${err}`)
-          cb(`Failed to apply block: ${err}`) // TODO: 2020.8.30
+          // cb(`Failed to apply block: ${err}`) // TODO: 2020.8.31
         }
 
         const redoTrs = unconfirmedTrs.filter((item) => !applyedTrsIdSet.has(item.id))
@@ -1161,7 +1162,7 @@ class Block {
             await this.runtime.round.backwardTick(oldLastBlock, previousBlock, dbTrans)
             await this.deleteBlock(oldLastBlock.id, dbTrans)
 
-            cb(null, previousBlock)
+            cb(null)
           } catch (err) {
             cb(err)
           }
@@ -1174,6 +1175,7 @@ class Block {
             throw new Error(err2)
           }
         } else {
+          this.setLastBlock(previousBlock)
           resolve(previousBlock)
         }
       })
@@ -1200,8 +1202,9 @@ class Block {
     while (bignum.isLessThan(block.height, this._lastBlock.height)) {
       blocks.unshift(this._lastBlock)
 
-      const newLastBlock = await this._popLastBlock(this._lastBlock)
-      this.setLastBlock(newLastBlock)
+      await this._popLastBlock(this._lastBlock)
+      // const newLastBlock = await this._popLastBlock(this._lastBlock)
+      // this.setLastBlock(newLastBlock)
     }
 
     return blocks

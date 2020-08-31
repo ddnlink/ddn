@@ -339,7 +339,9 @@ class Transaction {
 
   async ready (trs, sender) {
     if (!this._assets.hasType(trs.type)) {
-      throw Error(`Unknown transaction type 8 ${trs.type}`)
+      // throw Error(`Unknown transaction type 8 ${trs.type}`)
+      this.logger.warn(`Unknown transaction type 8 ${trs.type}`)
+      return false
     }
 
     if (!sender) {

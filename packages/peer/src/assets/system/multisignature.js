@@ -332,7 +332,7 @@ class Multisignature {
       this.logger.warn(
         'The multisignature is waiting for other account signatures.'
       )
-      return false
+      return true
     }
 
     if (Array.isArray(multisignatures) && !multisignatures.length) {
