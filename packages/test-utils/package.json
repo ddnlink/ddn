@@ -1,6 +1,6 @@
 {
   "name": "@ddn/test-utils",
-  "version": "0.1.7",
+  "version": "0.1.8",
   "description": "Test utils for DDN",
   "main": "lib/index.js",
   "files": [
@@ -18,7 +18,7 @@
   "license": "MIT",
   "dependencies": {
     "@ddn/core": "^0.2.12",
-    "@ddn/utils": "^0.1.20"
+    "@ddn/utils": "^0.1.21"
   },
   "devDependencies": {
     "chai": "^4.2.0",
