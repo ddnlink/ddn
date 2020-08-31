@@ -261,9 +261,7 @@ class Round {
     }
 
     const round = await this.getRound(block.height)
-    // fixme: 2020.08.20 这里应该查询出来的，没有使用别名了，所以才会在回滚的时候出错，确认一下
-    const prevRound = await this.getRound(previousBlock.b_height)
-    // const prevRound = await this.getRound(previousBlock.height)
+    const prevRound = await this.getRound(previousBlock.height)
     this.logger.debug(`Round backward tick prevRound is ${prevRound} of previousBlock.height ${previousBlock.height} or previousBlock.b_height ${previousBlock.b_height}`)
 
     await this.runtime.account.merge(null, {
@@ -283,7 +281,6 @@ class Round {
     this._delegatesByRound[round] = this._delegatesByRound[round] || []
     this._delegatesByRound[round].pop()
 
-    // if (prevRound === round && !bignum.isEqualTo(previousBlock.b_height, 1)) {
     if (prevRound === round && !bignum.isEqualTo(previousBlock.height, 1)) {
       return done()
     }

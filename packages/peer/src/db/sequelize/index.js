@@ -739,11 +739,11 @@ class DAO {
             if (err) {
               t.rollback()
                 .then(() => {
-                  cb('rollback--' + err, true)
+                  cb('rollback--, err1+true: ' + err, true)
                   return null
                 })
                 .catch(err2 => {
-                  cb('rollback--' + err2, false)
+                  cb('rollback--, err2+false: ' + err2, false)
                   return null
                 })
             } else {
@@ -761,11 +761,11 @@ class DAO {
         } catch (err3) {
           t.rollback()
             .then(() => {
-              cb('rollback--' + err3, true)
+              cb('rollback--, err3+true: ' + err3, true)
               return null
             })
             .catch(err4 => {
-              cb('rollback--' + err4, false)
+              cb('rollback--, err4+false: ' + err4, false)
               return null
             })
         }

@@ -148,9 +148,9 @@ class PeerBlockService {
       const peerIp = req.headers['x-forwarded-for'] || req.connection.remoteAddress
       const peerPort = parseInt(req.headers.port)
       const peerStr = peerIp ? `${peerIp}:${isNaN(peerPort) ? 'unkwnown' : peerPort}` : 'unknown'
-      this.logger.log('Invalid common block request, ban 60 min', peerStr)
 
       if (!validateErrors && peerIp && !isNaN(peerPort)) {
+        this.logger.log('Invalid common block request, ban 60 min', peerStr)
         await this.runtime.peer.changeState(ip.toLong(peerIp), peerPort, 0, 3600)
       }
 

@@ -228,7 +228,7 @@ class Block {
   }
 
   /**
-     * 将数据对象序列化成区块JSON对象
+     * 将数据对象序列化成区块JSON对象 dbRead
      * @param {*} data
      */
   serializeDbData2Block (raw) {
@@ -614,6 +614,8 @@ class Block {
                   await this.runtime.transaction.execAssetFunc('onNewBlock', block, votes)
                 } catch (err) {
                   this.logger.error(`Broadcast new block failed: ${system.getErrorMsg(err)}`)
+                  // TODO: 2020.8.30 检查该处是否抛出错误
+                  // throw new Error(`Broadcast new block failed: ${system.getErrorMsg(err)}`)
                 }
               })
             }
@@ -641,6 +643,7 @@ class Block {
           await doApplyBlock()
         } catch (err) {
           this.logger.error(`Failed to apply block: ${err}`)
+          cb(`Failed to apply block: ${err}`) // TODO: 2020.8.30
         }
 
         const redoTrs = unconfirmedTrs.filter((item) => !applyedTrsIdSet.has(item.id))
@@ -648,6 +651,7 @@ class Block {
           await this.runtime.transaction.receiveTransactions(redoTrs)
         } catch (err) {
           this.logger.error('Failed to redo unconfirmed transactions', err)
+          cb(`Failed to apply block: ${err}`) // TODO: 2020.8.30
         }
 
         cb()
@@ -838,6 +842,11 @@ class Block {
      * @param {*} verifyTrs
      */
   async processBlock (block, votes, broadcast, save, verifyTrs) {
+    if (!this.runtime.loaded) {
+      this.logger.debug(`It is doing here block.processBlock ..........${this.runtime.loaded}...`)
+      throw new Error('Blockchain is loading')
+    }
+
     try {
       block = await this.objectNormalize(block)
     } catch (e) {
@@ -849,7 +858,7 @@ class Block {
     try {
       await this.verifyBlock(block, votes)
     } catch (error) {
-      throw new Error(`Verify block fail, Error: ${error}`)
+      throw new Error(`Verify block fail, ${error}`)
     }
 
     this.logger.debug('verify block ok')
@@ -1109,6 +1118,7 @@ class Block {
 
   async _popLastBlock (oldLastBlock) {
     return new Promise((resolve, reject) => {
+      let previousBlock
       this.balancesSequence.add(async cb => {
         function done (err, previousBlock) {
           if (err) {
@@ -1121,7 +1131,7 @@ class Block {
 
         this.logger.info(`begin to pop block ${oldLastBlock.height} ${oldLastBlock.id}`)
 
-        let previousBlock = await this.runtime.dataquery.queryFullBlockData({
+        previousBlock = await this.runtime.dataquery.queryFullBlockData({
           id: oldLastBlock.previous_block
         }, 1, 0, [
           ['height', 'asc']
@@ -1130,7 +1140,8 @@ class Block {
           return done('previousBlock is null')
         }
 
-        previousBlock = previousBlock[0]
+        const blockNormalize = await this._parseObjectFromFullBlocksData(previousBlock)
+        previousBlock = blockNormalize[0]
 
         let transactions = this._sortTransactions(oldLastBlock.transactions)
         transactions = transactions.reverse()
@@ -1150,14 +1161,18 @@ class Block {
             await this.runtime.round.backwardTick(oldLastBlock, previousBlock, dbTrans)
             await this.deleteBlock(oldLastBlock.id, dbTrans)
 
-            done(null, previousBlock)
+            cb(null, previousBlock)
           } catch (err) {
-            done(err)
+            cb(err)
           }
-        }, cb)
-      }, (err2, previousBlock) => {
+        }, done)
+      }, (err2, result) => {
         if (err2) {
           reject(err2)
+          if (!result) {
+            this.logger.error('_popLastBlock`s dao.transaction is fail.')
+            throw new Error(err2)
+          }
         } else {
           resolve(previousBlock)
         }
