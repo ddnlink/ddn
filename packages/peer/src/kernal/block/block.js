@@ -344,7 +344,7 @@ class Block {
      * @param {*} votes
      */
   async receiveNewBlock (block, votes) {
-    if (this.runtime.state !== runtimeState.Ready) {
+    if (this.runtime.state !== runtimeState.Ready || !this.runtime.loaded) {
       return
     }
 
@@ -392,12 +392,14 @@ class Block {
   }
 
   async receiveVotes (votes) {
+    this.logger.debug('Receive votes start')
     if (this.runtime.state !== runtimeState.Ready) {
       return
     }
 
     this.sequence.add(async (cb) => {
       const totalVotes = this.runtime.consensus.addPendingVotes(votes)
+
       if (totalVotes && totalVotes.signatures) {
         this.logger.debug(`receive new votes, total votes number ${totalVotes.signatures.length}`)
       }
@@ -417,7 +419,7 @@ class Block {
           }
         }
 
-        this.logger.log(`receiveVotes: ${id} height: ${height} round: ${await this.runtime.round.getRound(height)} slot: ${this.runtime.slot.getSlotNumber(block.timestamp)} reward: ${block.reward}`)
+        this.logger.info(`receiveVotes: ${id} height: ${height} round: ${await this.runtime.round.getRound(height)} slot: ${this.runtime.slot.getSlotNumber(block.timestamp)} reward: ${block.reward}`)
       }
 
       cb()
@@ -429,6 +431,7 @@ class Block {
      * @param {*} propose
      */
   async receiveNewPropose (propose) {
+    this.logger.debug('receiveNewPropose start.')
     if (this.runtime.state !== runtimeState.Ready) {
       return
     }
@@ -440,7 +443,6 @@ class Block {
 
     await new Promise((resolve, reject) => {
       this.sequence.add(async cb => {
-        // if (this._lastPropose && this._lastPropose.height === propose.height &&
         if (this._lastPropose && bignum.isEqualTo(this._lastPropose.height, propose.height) &&
                     this._lastPropose.generator_public_key === propose.generator_public_key &&
                     this._lastPropose.id !== propose.id) {
@@ -478,7 +480,6 @@ class Block {
           const activeKeypairs = await this.runtime.delegate.getActiveDelegateKeypairs(propose.height)
           if (activeKeypairs && activeKeypairs.length > 0) {
             const votes = this.runtime.consensus.createVotes(activeKeypairs, propose)
-
             this.logger.debug(`send votes height ${votes.height} id ${votes.id} sigatures ${votes.signatures.length}`)
 
             const replyData = {
@@ -506,11 +507,17 @@ class Block {
             }
 
             // 向提议请求节点回复本机授权
+            let res
             setImmediate(async () => {
               try {
-                await this.runtime.peer.request(replyData)
+                res = await this.runtime.peer.request(replyData)
+                if (res.body.success === false) {
+                  this.logger.debug(`Replay propose request fail ${JSON.stringify(res.body.message)}.`)
+                }
               } catch (err) {
-                this.logger.error(`Replay propose request failed: ${system.getErrorMsg(err)}`)
+                if (err) {
+                  this.logger.error(`Replay propose request failed: ${system.getErrorMsg(err)}`)
+                }
               }
             })
 
@@ -518,13 +525,16 @@ class Block {
             this._lastPropose = propose
           }
         } catch (err) {
-          this.logger.error(`onReceivePropose error: ${err}`)
+          this.logger.error(`Receive propose fail, ${err}`)
+          cb(err)
         }
 
-        this.logger.debug('onReceivePropose finished')
-
         cb()
-      }, () => {
+      }, (err) => {
+        if (err) {
+          reject(err)
+        }
+        this.logger.debug('onReceivePropose finished')
         resolve()
       })
     })
@@ -648,7 +658,6 @@ class Block {
           await doApplyBlock()
         } catch (err) {
           this.logger.error(`Failed to apply block 1: ${err}`)
-          // cb(`Failed to apply block: ${err}`) // TODO: 2020.8.31
         }
 
         const redoTrs = unconfirmedTrs.filter((item) => !applyedTrsIdSet.has(item.id))
@@ -656,7 +665,6 @@ class Block {
           await this.runtime.transaction.receiveTransactions(redoTrs)
         } catch (err) {
           this.logger.error('Failed to redo unconfirmed transactions', err)
-          cb(`Failed to redo unconfirmed transactions: ${err}`) // TODO: 2020.8.30
         }
 
         cb()
@@ -851,6 +859,7 @@ class Block {
       throw new Error('DDN is preparing')
     }
 
+    if (!block.transactions) block.transactions = []
     try {
       block = await this.objectNormalize(block)
     } catch (e) {
@@ -921,7 +930,6 @@ class Block {
                 publicKey: transaction.senderPublicKey
               })
 
-              // transaction.id = await this.runtime.transaction.getId(transaction); // 2020.5.18
               transaction.id = await DdnCrypto.getId(transaction) // 2020.5.18
               transaction.block_id = block.id // wxm block database
 
@@ -948,6 +956,7 @@ class Block {
         try {
           await this.applyBlock(block, votes, broadcast, save)
         } catch (err) {
+          this.logger.error(`Failed to apply block: ${err}`)
           return reject(err)
         }
 
@@ -1045,9 +1054,7 @@ class Block {
       }
 
       this.runtime.consensus.setPendingBlock(block)
-
       this.runtime.consensus.addPendingVotes(localVotes)
-
       this._proposeCache[propose.hash] = true
 
       setImmediate(async () => {

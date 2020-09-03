@@ -401,6 +401,7 @@ class Peer {
      * @param {*} timeoutSeconds 服务暂停时间（单位：秒）
      */
   async changeState (pip, port, state, timeoutSeconds) {
+    // FIXME: 2020.9.3 白名单状态修改
     // const isStaticPeer = this.config.peers.list.find(
     //   peer => peer.ip === ip.fromLong(pip) && peer.port === port
     // )
