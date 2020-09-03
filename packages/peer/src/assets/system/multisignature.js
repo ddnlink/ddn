@@ -80,6 +80,7 @@ class Multisignature {
               ) {
                 verify = false
               } else {
+                this.logger.debug(`trs.asset.multisignature.keysgroup[s].substring(1): ${trs.asset.multisignature.keysgroup[s].substring(1)}`)
                 verify = await this.runtime.transaction.verifySignature(
                   trs,
                   trs.signatures[d],
@@ -208,11 +209,12 @@ class Multisignature {
 
   async applyUnconfirmed ({ asset }, { address, multisignatures }, dbTrans) {
     if (this._unconfirmedSignatures[address]) {
+      // Fixme: 2020.09.03
       // throw new Error(
       //   `Signature on this account ${address} is pending confirmation`
       // )
       this.logger.warn(`Signature on this account ${address} is pending confirmation`)
-			return
+      return
     }
 
     if (multisignatures.length) {
@@ -328,11 +330,12 @@ class Multisignature {
   }
 
   async ready ({ signatures, asset }, { multisignatures, multimin }) {
+    this.logger.debug(`multisignature's signatures: ${signatures}`)
     if (!signatures) {
       this.logger.warn(
         'The multisignature is waiting for other account signatures.'
       )
-      return true
+      return false
     }
 
     if (Array.isArray(multisignatures) && !multisignatures.length) {

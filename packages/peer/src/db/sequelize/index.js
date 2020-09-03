@@ -739,40 +739,40 @@ class DAO {
             if (err) {
               t.rollback()
                 .then(() => {
-                  cb('rollback--, err1+true: ' + err, true)
-                  return null
+                  return cb('rollback--, err1+true: ' + err, true)
+                  // return null
                 })
                 .catch(err2 => {
                   cb('rollback--, err2+false: ' + err2, false)
-                  return null
+                  // return null
                 })
             } else {
               t.commit()
                 .then(() => {
-                  cb(null, true)
-                  return null
+                  return cb(null, true)
+                  // return null
                 })
                 .catch(err2 => {
-                  cb('commit--' + err2, false)
-                  return null
+                  return cb('commit--' + err2, false)
+                  // return null
                 })
             }
           })
         } catch (err3) {
           t.rollback()
             .then(() => {
-              cb('rollback--, err3+true: ' + err3, true)
-              return null
+              return cb('rollback--, err3+true: ' + err3, true)
+              // return null
             })
             .catch(err4 => {
-              cb('rollback--, err4+false: ' + err4, false)
-              return null
+              return cb('rollback--, err4+false: ' + err4, false)
+              // return null
             })
         }
       })
     } else {
       cb('数据库未连接', false)
-      return null
+      // return null
     }
   }
 

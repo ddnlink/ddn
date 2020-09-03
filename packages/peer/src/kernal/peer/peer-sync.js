@@ -276,15 +276,16 @@ class PeerSync {
 
           try {
             await this.runtime.block.processBlock(block, null, false, true, true)
-            queryBlockId = block.id
-            lastClonedBlock = block
-            this.logger.log(`Block ${block.id} loaded from ${peerStr} at`, block.height)
           } catch (err) {
-            this.logger.error(`Failed to process block: ${err}`, block)
+            this.logger.error(`Failed to process block: ${err}`)
             this.logger.error(`Block is not valid, ban 60 min, block: ${block ? block.id : 'null'} `, peerStr)
             this.runtime.peer.changeState(peer.ip, peer.port, 0, 3600) // 3600 ms
             return null
           }
+
+          queryBlockId = block.id
+          lastClonedBlock = block
+          this.logger.log(`Block ${block.id} loaded from ${peerStr} at`, block.height)
         }
       }
     }

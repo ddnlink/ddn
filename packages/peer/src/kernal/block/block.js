@@ -357,7 +357,11 @@ class Block {
       this.sequence.add(async cb => {
         if (block.previous_block === this._lastBlock.id && bignum.isEqualTo(bignum.plus(this._lastBlock.height, 1), block.height)) { // wxm block database
           this.logger.info(`Received new block id: ${block.id} height: ${block.height} round: ${await this.runtime.round.getRound(this.getLastBlock().height)} slot: ${this.runtime.slot.getSlotNumber(block.timestamp)} reward: ${this.getLastBlock().reward}`)
-          await this.processBlock(block, votes, true, true, true)
+          try {
+            await this.processBlock(block, votes, true, true, true)
+          } catch (err) {
+            this.logger.error(`Received new block err: ${err}`)
+          }
           cb()
         } else if (block.previous_block !== this._lastBlock.id && bignum.isEqualTo(bignum.plus(this._lastBlock.height, 1), block.height)) { // wxm block database
         // } else if (block.previous_block !== this._lastBlock.id && this._lastBlock.height + 1 === block.height) { // wxm block database
@@ -409,11 +413,11 @@ class Block {
           await this.processBlock(block, totalVotes, true, true, false)
         } catch (err) {
           if (err) {
-            this.logger.error(`Failed to process confirmed block height: ${height} id: ${id} error: ${err}`)
+            this.logger.error(`receiveVotes error: ${err} height: ${height} id: ${id} `)
           }
         }
 
-        this.logger.log(`Forged new block id: ${id} height: ${height} round: ${await this.runtime.round.getRound(height)} slot: ${this.runtime.slot.getSlotNumber(block.timestamp)} reward: ${block.reward}`)
+        this.logger.log(`receiveVotes: ${id} height: ${height} round: ${await this.runtime.round.getRound(height)} slot: ${this.runtime.slot.getSlotNumber(block.timestamp)} reward: ${block.reward}`)
       }
 
       cb()
@@ -643,7 +647,7 @@ class Block {
         try {
           await doApplyBlock()
         } catch (err) {
-          this.logger.error(`Failed to apply block: ${err}`)
+          this.logger.error(`Failed to apply block 1: ${err}`)
           // cb(`Failed to apply block: ${err}`) // TODO: 2020.8.31
         }
 
@@ -652,7 +656,7 @@ class Block {
           await this.runtime.transaction.receiveTransactions(redoTrs)
         } catch (err) {
           this.logger.error('Failed to redo unconfirmed transactions', err)
-          cb(`Failed to apply block: ${err}`) // TODO: 2020.8.30
+          cb(`Failed to redo unconfirmed transactions: ${err}`) // TODO: 2020.8.30
         }
 
         cb()
@@ -844,8 +848,7 @@ class Block {
      */
   async processBlock (block, votes, broadcast, save, verifyTrs) {
     if (!this.runtime.loaded) {
-      this.logger.debug(`It is doing here block.processBlock ..........${this.runtime.loaded}...`)
-      throw new Error('Blockchain is loading')
+      throw new Error('DDN is preparing')
     }
 
     try {
@@ -1021,8 +1024,12 @@ class Block {
     this.logger.debug(`get local votes: ${localVotes.signatures.length}`)
 
     if (this.runtime.consensus.hasEnoughVotes(localVotes)) {
-      await this.processBlock(block, localVotes, true, true, false)
-      this.logger.log(`Forged new block id: ${block.id} height: ${block.height} round: ${await this.runtime.round.getRound(block.height)} slot: ${this.runtime.slot.getSlotNumber(block.timestamp)} reward: ${block.reward}`)
+      try {
+        await this.processBlock(block, localVotes, true, true, false)
+        this.logger.log(`Forged new block id: ${block.id} height: ${block.height} round: ${await this.runtime.round.getRound(block.height)} slot: ${this.runtime.slot.getSlotNumber(block.timestamp)} reward: ${block.reward}`)
+      } catch (err) {
+        this.logger.error(`Forged new block err: ${err}`)
+      }
     } else {
       if (!this.config.publicIp) {
         throw new Error('No public ip')
