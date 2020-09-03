@@ -1,6 +1,6 @@
 {
   "name": "@ddn/asset-aob",
-  "version": "0.4.6",
+  "version": "0.4.7",
   "description": "DDN asset on blockchain",
   "main": "lib/index.js",
   "repository": {
