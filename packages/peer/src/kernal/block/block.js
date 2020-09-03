@@ -228,7 +228,7 @@ class Block {
   }
 
   /**
-     * 将数据对象序列化成区块JSON对象
+     * 将数据对象序列化成区块JSON对象 dbRead
      * @param {*} data
      */
   serializeDbData2Block (raw) {
@@ -344,7 +344,7 @@ class Block {
      * @param {*} votes
      */
   async receiveNewBlock (block, votes) {
-    if (this.runtime.state !== runtimeState.Ready) {
+    if (this.runtime.state !== runtimeState.Ready || !this.runtime.loaded) {
       return
     }
 
@@ -357,7 +357,11 @@ class Block {
       this.sequence.add(async cb => {
         if (block.previous_block === this._lastBlock.id && bignum.isEqualTo(bignum.plus(this._lastBlock.height, 1), block.height)) { // wxm block database
           this.logger.info(`Received new block id: ${block.id} height: ${block.height} round: ${await this.runtime.round.getRound(this.getLastBlock().height)} slot: ${this.runtime.slot.getSlotNumber(block.timestamp)} reward: ${this.getLastBlock().reward}`)
-          await this.processBlock(block, votes, true, true, true)
+          try {
+            await this.processBlock(block, votes, true, true, true)
+          } catch (err) {
+            this.logger.error(`Received new block err: ${err}`)
+          }
           cb()
         } else if (block.previous_block !== this._lastBlock.id && bignum.isEqualTo(bignum.plus(this._lastBlock.height, 1), block.height)) { // wxm block database
         // } else if (block.previous_block !== this._lastBlock.id && this._lastBlock.height + 1 === block.height) { // wxm block database
@@ -388,12 +392,14 @@ class Block {
   }
 
   async receiveVotes (votes) {
+    this.logger.debug('Receive votes start')
     if (this.runtime.state !== runtimeState.Ready) {
       return
     }
 
     this.sequence.add(async (cb) => {
       const totalVotes = this.runtime.consensus.addPendingVotes(votes)
+
       if (totalVotes && totalVotes.signatures) {
         this.logger.debug(`receive new votes, total votes number ${totalVotes.signatures.length}`)
       }
@@ -409,11 +415,11 @@ class Block {
           await this.processBlock(block, totalVotes, true, true, false)
         } catch (err) {
           if (err) {
-            this.logger.error(`Failed to process confirmed block height: ${height} id: ${id} error: ${err}`)
+            this.logger.error(`receiveVotes error: ${err} height: ${height} id: ${id} `)
           }
         }
 
-        this.logger.log(`Forged new block id: ${id} height: ${height} round: ${await this.runtime.round.getRound(height)} slot: ${this.runtime.slot.getSlotNumber(block.timestamp)} reward: ${block.reward}`)
+        this.logger.info(`receiveVotes: ${id} height: ${height} round: ${await this.runtime.round.getRound(height)} slot: ${this.runtime.slot.getSlotNumber(block.timestamp)} reward: ${block.reward}`)
       }
 
       cb()
@@ -425,6 +431,7 @@ class Block {
      * @param {*} propose
      */
   async receiveNewPropose (propose) {
+    this.logger.debug('receiveNewPropose start.')
     if (this.runtime.state !== runtimeState.Ready) {
       return
     }
@@ -436,7 +443,6 @@ class Block {
 
     await new Promise((resolve, reject) => {
       this.sequence.add(async cb => {
-        // if (this._lastPropose && this._lastPropose.height === propose.height &&
         if (this._lastPropose && bignum.isEqualTo(this._lastPropose.height, propose.height) &&
                     this._lastPropose.generator_public_key === propose.generator_public_key &&
                     this._lastPropose.id !== propose.id) {
@@ -474,7 +480,6 @@ class Block {
           const activeKeypairs = await this.runtime.delegate.getActiveDelegateKeypairs(propose.height)
           if (activeKeypairs && activeKeypairs.length > 0) {
             const votes = this.runtime.consensus.createVotes(activeKeypairs, propose)
-
             this.logger.debug(`send votes height ${votes.height} id ${votes.id} sigatures ${votes.signatures.length}`)
 
             const replyData = {
@@ -502,11 +507,17 @@ class Block {
             }
 
             // 向提议请求节点回复本机授权
+            let res
             setImmediate(async () => {
               try {
-                await this.runtime.peer.request(replyData)
+                res = await this.runtime.peer.request(replyData)
+                if (res.body.success === false) {
+                  this.logger.debug(`Replay propose request fail ${JSON.stringify(res.body.message)}.`)
+                }
               } catch (err) {
-                this.logger.error(`Replay propose request failed: ${system.getErrorMsg(err)}`)
+                if (err) {
+                  this.logger.error(`Replay propose request failed: ${system.getErrorMsg(err)}`)
+                }
               }
             })
 
@@ -514,13 +525,16 @@ class Block {
             this._lastPropose = propose
           }
         } catch (err) {
-          this.logger.error(`onReceivePropose error: ${err}`)
+          this.logger.error(`Receive propose fail, ${err}`)
+          cb(err)
         }
 
-        this.logger.debug('onReceivePropose finished')
-
         cb()
-      }, () => {
+      }, (err) => {
+        if (err) {
+          reject(err)
+        }
+        this.logger.debug('onReceivePropose finished')
         resolve()
       })
     })
@@ -579,6 +593,7 @@ class Block {
             done(err)
           }
         }, async (err, result) => {
+          this.logger.debug(`The dao.transaction is finished, err: ${err}, result: ${result} `)
           if (err) {
             applyedTrsIdSet.clear() // wxm TODO 清除上面未处理的交易记录
             this.balanceCache.rollback()
@@ -588,9 +603,6 @@ class Block {
               this.logger.error(`回滚失败或者提交异常，出块失败: ${err}`)
               process.exit(1)
             } else { // 回滚成功
-              // Fixme: 2020.8.25
-              this.logger.debug(`transaction.applyUnconfirmed,  transaction.apply, transaction.removeUnconfirmedTransaction, has error: ${err}, should rollback trs.`)
-
               this._isActive = false
               reject(err)
             }
@@ -617,6 +629,8 @@ class Block {
                   await this.runtime.transaction.execAssetFunc('onNewBlock', block, votes)
                 } catch (err) {
                   this.logger.error(`Broadcast new block failed: ${system.getErrorMsg(err)}`)
+                  // TODO: 2020.8.30 检查该处是否抛出错误
+                  // throw new Error(`Broadcast new block failed: ${system.getErrorMsg(err)}`)
                 }
               })
             }
@@ -643,7 +657,7 @@ class Block {
         try {
           await doApplyBlock()
         } catch (err) {
-          this.logger.error(`Failed to apply block: ${err}`)
+          this.logger.error(`Failed to apply block 1: ${err}`)
         }
 
         const redoTrs = unconfirmedTrs.filter((item) => !applyedTrsIdSet.has(item.id))
@@ -841,6 +855,11 @@ class Block {
      * @param {*} verifyTrs
      */
   async processBlock (block, votes, broadcast, save, verifyTrs) {
+    if (!this.runtime.loaded) {
+      throw new Error('DDN is preparing')
+    }
+
+    if (!block.transactions) block.transactions = []
     try {
       block = await this.objectNormalize(block)
     } catch (e) {
@@ -852,7 +871,7 @@ class Block {
     try {
       await this.verifyBlock(block, votes)
     } catch (error) {
-      throw new Error(`Verify block fail, Error: ${error}`)
+      throw new Error(`Verify block fail, ${error}`)
     }
 
     this.logger.debug('verify block ok')
@@ -911,7 +930,6 @@ class Block {
                 publicKey: transaction.senderPublicKey
               })
 
-              // transaction.id = await this.runtime.transaction.getId(transaction); // 2020.5.18
               transaction.id = await DdnCrypto.getId(transaction) // 2020.5.18
               transaction.block_id = block.id // wxm block database
 
@@ -938,6 +956,7 @@ class Block {
         try {
           await this.applyBlock(block, votes, broadcast, save)
         } catch (err) {
+          this.logger.error(`Failed to apply block: ${err}`)
           return reject(err)
         }
 
@@ -1014,8 +1033,12 @@ class Block {
     this.logger.debug(`get local votes: ${localVotes.signatures.length}`)
 
     if (this.runtime.consensus.hasEnoughVotes(localVotes)) {
-      await this.processBlock(block, localVotes, true, true, false)
-      this.logger.log(`Forged new block id: ${block.id} height: ${block.height} round: ${await this.runtime.round.getRound(block.height)} slot: ${this.runtime.slot.getSlotNumber(block.timestamp)} reward: ${block.reward}`)
+      try {
+        await this.processBlock(block, localVotes, true, true, false)
+        this.logger.log(`Forged new block id: ${block.id} height: ${block.height} round: ${await this.runtime.round.getRound(block.height)} slot: ${this.runtime.slot.getSlotNumber(block.timestamp)} reward: ${block.reward}`)
+      } catch (err) {
+        this.logger.error(`Forged new block err: ${err}`)
+      }
     } else {
       if (!this.config.publicIp) {
         throw new Error('No public ip')
@@ -1031,9 +1054,7 @@ class Block {
       }
 
       this.runtime.consensus.setPendingBlock(block)
-
       this.runtime.consensus.addPendingVotes(localVotes)
-
       this._proposeCache[propose.hash] = true
 
       setImmediate(async () => {
@@ -1112,6 +1133,7 @@ class Block {
 
   async _popLastBlock (oldLastBlock) {
     return new Promise((resolve, reject) => {
+      let previousBlock
       this.balancesSequence.add(async cb => {
         function done (err, previousBlock) {
           if (err) {
@@ -1124,7 +1146,7 @@ class Block {
 
         this.logger.info(`begin to pop block ${oldLastBlock.height} ${oldLastBlock.id}`)
 
-        let previousBlock = await this.runtime.dataquery.queryFullBlockData({
+        previousBlock = await this.runtime.dataquery.queryFullBlockData({
           id: oldLastBlock.previous_block
         }, 1, 0, [
           ['height', 'asc']
@@ -1133,7 +1155,8 @@ class Block {
           return done('previousBlock is null')
         }
 
-        previousBlock = previousBlock[0]
+        const blockNormalize = await this._parseObjectFromFullBlocksData(previousBlock)
+        previousBlock = blockNormalize[0]
 
         let transactions = this._sortTransactions(oldLastBlock.transactions)
         transactions = transactions.reverse()
@@ -1153,15 +1176,20 @@ class Block {
             await this.runtime.round.backwardTick(oldLastBlock, previousBlock, dbTrans)
             await this.deleteBlock(oldLastBlock.id, dbTrans)
 
-            done(null, previousBlock)
+            cb(null)
           } catch (err) {
-            done(err)
+            cb(err)
           }
-        }, cb)
-      }, (err2, previousBlock) => {
+        }, done)
+      }, (err2, result) => {
         if (err2) {
           reject(err2)
+          if (!result) {
+            this.logger.error('_popLastBlock`s dao.transaction is fail.')
+            throw new Error(err2)
+          }
         } else {
+          this.setLastBlock(previousBlock)
           resolve(previousBlock)
         }
       })
@@ -1188,8 +1216,9 @@ class Block {
     while (bignum.isLessThan(block.height, this._lastBlock.height)) {
       blocks.unshift(this._lastBlock)
 
-      const newLastBlock = await this._popLastBlock(this._lastBlock)
-      this.setLastBlock(newLastBlock)
+      await this._popLastBlock(this._lastBlock)
+      // const newLastBlock = await this._popLastBlock(this._lastBlock)
+      // this.setLastBlock(newLastBlock)
     }
 
     return blocks

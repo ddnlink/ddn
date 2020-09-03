@@ -339,7 +339,9 @@ class Transaction {
 
   async ready (trs, sender) {
     if (!this._assets.hasType(trs.type)) {
-      throw Error(`Unknown transaction type 8 ${trs.type}`)
+      // throw Error(`Unknown transaction type 8 ${trs.type}`)
+      this.logger.warn(`Unknown transaction type 8 ${trs.type}`)
+      return false
     }
 
     if (!sender) {
@@ -357,11 +359,11 @@ class Transaction {
       // return
     }
 
+    // TODO: 没有 ready 的交易，不代表不合法，比如：多重签名交易
     if (!await this.ready(trs, sender)) {
-      this.logger.debug('Transaction is not ready, trs: ', trs)
-      throw new Error(`Transaction is not ready: ${trs.id}`)
-      // this.logger.info(`Transaction is not ready: ${trs.id}`)
-      // return
+      // throw new Error(`Transaction is not ready: ${trs.id}`)
+      this.logger.info(`Transaction is not ready: ${trs.id}`)
+      return
     }
 
     // todo: 2020.6.25 特殊 asset 的处理

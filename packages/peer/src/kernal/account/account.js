@@ -584,7 +584,7 @@ class Account {
               break
             case Number:
               if (DdnUtils.bignum.isNaN(trueValue)) {
-                return reject(new Error('Encountered invalid number while merging account: ' + trueValue + ', value: ' + value + ', value: ' + address))
+                return reject(new Error('Encountered invalid number while merging account: ' + trueValue + ', value: ' + value + ', address: ' + address))
               }
 
               if (DdnUtils.bignum.isEqualTo(DdnUtils.bignum.abs(trueValue), trueValue) && !DdnUtils.bignum.isZero(trueValue)) {

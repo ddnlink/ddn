@@ -139,7 +139,7 @@ class PeerService {
           },
           id: {
             type: 'string',
-            maxLength: 64
+            maxLength: 128
           },
           timestamp: {
             type: 'integer'
@@ -176,7 +176,7 @@ class PeerService {
     if (validateErrors) {
       return {
         success: false,
-        error: `Schema validation error: ${validateErrors[0].schemaPath} ${validateErrors[0].message}`
+        error: `Invalid parameters: : ${validateErrors[0].schemaPath} ${validateErrors[0].message}`
       }
     }
 
@@ -199,22 +199,24 @@ class PeerService {
           },
           id: {
             type: 'string',
-            maxLength: 64
+            maxLength: 128
           },
           signatures: {
             type: 'array',
             minLength: 1,
-            maxLength: 101
+            maxLength: this.constants.delegates // 101
           }
         },
         required: ['height', 'id', 'signatures']
       },
       body
     )
+
+    // Todo: 2020.9.3 请求本接口的方法应该对 success 做个判断，或者改成 throw
     if (validateErrors) {
       return {
         success: false,
-        error: `Schema validation error: ${validateErrors[0].schemaPath} ${validateErrors[0].message}`
+        error: `Invalid parameters: : ${validateErrors[0].schemaPath} ${validateErrors[0].message}`
       }
     }
 

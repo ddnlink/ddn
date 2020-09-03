@@ -5,7 +5,7 @@
 import ByteBuffer from 'bytebuffer'
 import assert from 'assert'
 import ip from 'ip'
-import { nacl } from '@ddn/crypto'
+import { nacl, createHash } from '@ddn/crypto'
 import { bignum } from '@ddn/utils'
 
 let _singleton
@@ -49,9 +49,7 @@ class Consensus {
 
     bytes.flip()
 
-    // fixme: DdnCrypto.createHash 返回的是 buffer 是不对的
-    // return DdnCrypto.createHash(bytes.toBuffer())
-    return nacl.hash(bytes.toBuffer())
+    return createHash(bytes.toBuffer())
   }
 
   async createPropose (keypair, { generator_public_key, height, id, timestamp }, address) {
@@ -65,7 +63,8 @@ class Consensus {
     }
     const hash = this.getProposeHash(propose)
     propose.hash = hash.toString('hex')
-    propose.signature = nacl.sign.detached(hash, Buffer.from(keypair.privateKey, 'hex'))
+    // propose.signature = nacl.sign.detached(hash, Buffer.from(keypair.privateKey, 'hex'))
+    propose.signature = Buffer.from(nacl.sign.detached(hash, Buffer.from(keypair.privateKey, 'hex'))).toString('hex')
     return propose
   }
 
@@ -99,7 +98,6 @@ class Consensus {
   }
 
   addPendingVotes ({ height, id, signatures }) {
-    // if (!this._pendingBlock || this._pendingBlock.height !== height || this._pendingBlock.id !== id) {
     if (!this._pendingBlock || !bignum.isEqualTo(this._pendingBlock.height, height) || this._pendingBlock.id !== id) {
       return this._pendingVotes
     }
@@ -167,13 +165,11 @@ class Consensus {
   getVoteHash (height, id) {
     const bytes = new ByteBuffer()
 
-    // Bignum update   bytes.writeLong(height);
     bytes.writeString(`${height}`)
     bytes.writeString(id)
 
     bytes.flip()
-    // fixme: DdnCrypto.createHash 返回的是 buffer 是不对的
-    return nacl.hash(bytes.toBuffer())
+    return createHash(bytes.toBuffer())
   }
 
   /**
@@ -192,7 +188,7 @@ class Consensus {
     keypairs.forEach(el => {
       votes.signatures.push({
         key: el.publicKey.toString('hex'),
-        sig: nacl.sign.detached(hash, Buffer.from(el.privateKey, 'hex'))
+        sig: Buffer.from(nacl.sign.detached(hash, Buffer.from(el.privateKey, 'hex'))).toString('hex')
       })
     })
 
@@ -215,7 +211,7 @@ class Consensus {
    * @param {*} votes
    */
   hasEnoughVotes (votes) {
-    return votes && votes.signatures && (votes.signatures.length >= this.constants.voters) // (this.constants.delegates * 2 / 3)
+    return votes && votes.signatures && (votes.signatures.length >= this.constants.voters)
   }
 
   /**

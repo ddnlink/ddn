@@ -43,6 +43,8 @@ class Program {
     await this._context.init(options)
 
     this._context.runtime.state = DdnUtils.runtimeState.Pending
+    this._context.runtime.loaded = false
+
     // 区块核心处理模块
     this._context.runtime.block = Block.singleton(this._context)
     // 交易核心处理模块
@@ -253,6 +255,9 @@ class Program {
 
     // 启动区块铸造任务
     await this.startForgeBlockTask()
+
+    // 块加载完成
+    this._context.runtime.loaded = true
   }
 
   async _blockchainReady () {
