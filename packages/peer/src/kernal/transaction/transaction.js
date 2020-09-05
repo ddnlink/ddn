@@ -145,7 +145,7 @@ class Transaction {
           try {
             await this._assets.call(trs.type, 'dbSave', trs, dbTrans)
           } catch (e) {
-            return reject(e)
+            return reject(new Error(`Insert tr fail ${e.toString()}`))
           }
           resolve(result)
         }
