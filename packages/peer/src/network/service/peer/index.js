@@ -406,15 +406,9 @@ class PeerService {
 
           if (err) {
             // 这里的错误就是上面 catch 的 exp，所以统一在这里处理就好
-            this.logger.debug(
+            this.logger.error(
               `Receive invalid transaction, transaction is ${JSON.stringify(
                 transaction
-              )}, ${DdnUtils.system.getErrorMsg(err)}`
-            )
-
-            this.logger.error(
-              `Receive invalid transaction, transaction type: ${JSON.stringify(
-                transaction.type
               )}, ${DdnUtils.system.getErrorMsg(err)}`
             )
 

@@ -25,8 +25,6 @@ class Block {
     Object.assign(this, context)
     this._context = context
 
-    this._isActive = false
-
     this._lastBlock = null
     this._blockCache = {}
 
@@ -612,15 +610,12 @@ class Block {
 
             // result 是事务
             if (!result) {
-              this.logger.error(`回滚失败或者提交异常，出块失败: ${err}`)
+              this.logger.error(`Rollback or commit error, apply block fail: ${err}`)
               process.exit(1)
             } else { // 回滚成功
-              this._isActive = false
               reject(err)
             }
           } else {
-            this._isActive = false
-
             this.setLastBlock(block)
 
             this._blockCache = {}
