@@ -264,13 +264,13 @@ JSON返回示例：
    
 请求示例：   
 ```bash   
-curl -k -H "Content-Type: application/json" -X PUT -d '{"secret":"unaware label emerge fancy concert long fiction report affair appear decide twenty","amount":1000000,"recipientId":"D2zThPTQZDNQqXbe5tikDQ24YyCQTCpbSC"}' 'http://127.0.0.1:8001/api/transactions'    
+curl -k -H "Content-Type: application/json" -X PUT -d '{"secret": "grunt grain siege churn chicken phrase shell arrange fox recipe scan tube","amount":"1000000","recipientId":"D2zThPTQZDNQqXbe5tikDQ24YyCQTCpbSC"}' 'http://106.15.227.133:8001/api/transactions'    
 ```   
    
 JSON返回示例：   
 ```js   
 {   
 	"success": true,   
-	"transactionId": "16670272591943275531"   
+	"transactionId": "d45283a7197f9c60613c74f42672102aa9f1218f50cc4d16cb0009c8a2b7bbb241a61e2b858888f4c4360fe17fdaaec18434d6258be3b18a81d28d7a4499f4e0"   
 }   
 ```  

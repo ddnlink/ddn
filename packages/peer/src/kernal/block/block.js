@@ -538,7 +538,7 @@ class Block {
         if (err) {
           reject(err)
         }
-        this.logger.debug('onReceivePropose finished')
+        this.logger.debug('receivePropose finished')
         resolve()
       })
     })
