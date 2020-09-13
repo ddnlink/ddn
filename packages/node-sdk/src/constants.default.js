@@ -9,8 +9,8 @@ export default {
   interval: 10, // 10ms
   delegates: 101, // number
   superPeers: 21,
-  voters: 66,
-  remoteVoters: 3,
+  voters: 67,
+  remoteVoters: 6,
   maxAmount: 100000000,
   maxPayloadLength: 8 * 1024 * 1024,
   blockHeaderLength: 248,

@@ -236,7 +236,7 @@ class Exchange extends Asset.Base {
   }
 
   async dbSave (trs, dbTrans) {
-    var result = await super.dbSave(trs, dbTrans)
+    let result = await super.dbSave(trs, dbTrans)
     const asset = await this.getAssetObject(trs)
     if (asset.state === 1) {
       result = await daoUtil.exchangeOrg(this._context,

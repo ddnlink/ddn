@@ -25,8 +25,6 @@ class Block {
     Object.assign(this, context)
     this._context = context
 
-    this._isActive = false
-
     this._lastBlock = null
     this._blockCache = {}
 
@@ -145,7 +143,7 @@ class Block {
     const validateErrors = await this.ddnSchema.validateBlock(block)
     if (validateErrors) {
       this.logger.error(validateErrors[0].message)
-      throw new Error(`Invalid parameters: ${validateErrors[0].schemaPath} ${validateErrors[0].message}`)
+      throw Error(`Invalid parameters: ${validateErrors[0].schemaPath} ${validateErrors[0].message}`)
     }
 
     try {
@@ -219,7 +217,8 @@ class Block {
     return new Promise((resolve, reject) => {
       this.dao.insert('block', newBlock, dbTrans, (err, result) => {
         if (err) {
-          reject(err)
+          this.logger.error(`insert block fail: ${err.toString()}`)
+          reject(new Error(`insert block fail: ${err.toString()}`))
         } else {
           resolve(result)
         }
@@ -265,8 +264,13 @@ class Block {
      * @param {*} dbTrans
      */
   async saveBlock (block, dbTrans) {
-    this.logger.debug('start saveBlock block.height = ', block.height)
-    await this.serializeBlock2Db(block, dbTrans)
+    this.logger.debug('saveBlock start!')
+    try {
+      await this.serializeBlock2Db(block, dbTrans)
+    } catch (err) {
+      this.logger.error(`serializeBlock2Db fail ${err}`)
+      throw new Error(`serializeBlock2Db fail ${JSON.stringify(err)}`)
+    }
 
     if (block.transactions && block.transactions.length > 0) {
       for (let i = 0; i < block.transactions.length; i++) {
@@ -284,7 +288,7 @@ class Block {
   async createBlock (data) {
     const transactions = this._sortTransactions(data.transactions)
 
-    this.logger.debug(`Height is being created, data: ${JSON.stringify(data)}`)
+    this.logger.debug('Height is being created!!')
     const nextHeight = (data.previous_block) ? bignum.plus(data.previous_block.height, 1).toString() : '1' // bignum update //wxm block database
     this.logger.debug(`Height is being created, nextHeight: ${nextHeight}`)
     const reward = this._blockStatus.calcReward(nextHeight)
@@ -332,7 +336,7 @@ class Block {
       block = await this.objectNormalize(block)
     } catch (e) {
       this.logger.error(e)
-      throw Error(e.toString())
+      throw new Error(e.toString())
     }
 
     return block
@@ -534,7 +538,7 @@ class Block {
         if (err) {
           reject(err)
         }
-        this.logger.debug('onReceivePropose finished')
+        this.logger.debug('receivePropose finished')
         resolve()
       })
     })
@@ -572,7 +576,8 @@ class Block {
                 await this.runtime.transaction.applyUnconfirmed(transaction, newAccountInfo, dbTrans)
                 await this.runtime.transaction.apply(transaction, block, newAccountInfo, dbTrans)
               } catch (err) {
-                throw new Error(err)
+                this.logger.error(`Apply unconfirmed ${err.toString()}`)
+                throw new Error(`Apply unconfirmed ${err.toString()}`)
               } finally {
                 await this.runtime.transaction.removeUnconfirmedTransaction(transaction.id)
               }
@@ -583,10 +588,15 @@ class Block {
             this.logger.debug('apply block ok')
 
             if (isSaveBlock) {
-              await this.saveBlock(block, dbTrans)
-              this.logger.debug('save block ok')
+              try {
+                await this.saveBlock(block, dbTrans)
+              } catch (err) {
+                this.logger.error(`Save block fail ${err}`)
+                throw new Error(`Save block fail ${err}`)
+              }
             }
             await this.runtime.round.tick(block, dbTrans)
+            this.logger.debug('save block ok')
 
             done()
           } catch (err) {
@@ -600,15 +610,12 @@ class Block {
 
             // result 是事务
             if (!result) {
-              this.logger.error(`回滚失败或者提交异常，出块失败: ${err}`)
+              this.logger.error(`Rollback or commit error, apply block fail: ${err}`)
               process.exit(1)
             } else { // 回滚成功
-              this._isActive = false
               reject(err)
             }
           } else {
-            this._isActive = false
-
             this.setLastBlock(block)
 
             this._blockCache = {}
@@ -1010,8 +1017,8 @@ class Block {
         transactions: ready
       })
     } catch (e) {
-      this.logger.error('create block model error', e)
-      throw new Error(`create block model error: ${e.toString()}`)
+      // this.logger.error('create block model ', e)
+      throw new Error(`Create block model failed: ${e.toString()}`)
     }
 
     this.logger.info(`Generate new block at height ${(parseInt(this._lastBlock.height) + 1)}`)
@@ -1020,24 +1027,25 @@ class Block {
       await this.verifyBlock(block, null)
     } catch (error) {
       // this.logger.error(`verifyBlock not passed ${error}`)
-      throw new Error(`verifyBlock not passed ${error}`)
+      throw new Error(`verifyBlock failed when generate new block: ${error}`)
     }
 
     // 本地 keypairs
     const activeKeypairs = await this.runtime.delegate.getActiveDelegateKeypairs(block.height)
     assert(activeKeypairs && activeKeypairs.length > 0, 'Active keypairs should not be empty')
 
-    this.logger.debug(`get active delegate keypairs len: ${activeKeypairs.length}`)
+    this.logger.debug(`Get active delegate keypairs len: ${activeKeypairs.length}`)
 
     const localVotes = this.runtime.consensus.createVotes(activeKeypairs, block)
-    this.logger.debug(`get local votes: ${localVotes.signatures.length}`)
+    this.logger.debug(`Get local votes: ${localVotes.signatures.length}`)
 
     if (this.runtime.consensus.hasEnoughVotes(localVotes)) {
       try {
         await this.processBlock(block, localVotes, true, true, false)
         this.logger.log(`Forged new block id: ${block.id} height: ${block.height} round: ${await this.runtime.round.getRound(block.height)} slot: ${this.runtime.slot.getSlotNumber(block.timestamp)} reward: ${block.reward}`)
       } catch (err) {
-        this.logger.error(`Forged new block err: ${err}`)
+        this.logger.error(`Forged new block ${err}`)
+        throw new Error(`Forged new block ${err}`)
       }
     } else {
       if (!this.config.publicIp) {
@@ -1062,6 +1070,7 @@ class Block {
           await this.runtime.peer.broadcast.broadcastNewPropose(propose)
         } catch (err) {
           this.logger.error(`Broadcast new propose failed: ${system.getErrorMsg(err)}`)
+          throw new Error(`Broadcast new propose failed: ${system.getErrorMsg(err)}`)
         }
       })
     }

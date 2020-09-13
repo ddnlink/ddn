@@ -145,7 +145,7 @@ class Transaction {
           try {
             await this._assets.call(trs.type, 'dbSave', trs, dbTrans)
           } catch (e) {
-            return reject(e)
+            return reject(new Error(`Insert tr fail ${e.toString()}`))
           }
           resolve(result)
         }
@@ -408,8 +408,8 @@ class Transaction {
       this._unconfirmedNumber++
     } catch (err) {
       await this.removeUnconfirmedTransaction(transaction.id)
-      this.logger.debug('addUnconfirmedTransaction error, the tran has been removted')
-      throw new Error(`addUnconfirmedTransaction error, ${err}`)
+      this.logger.debug('Add unconfirmed transaction fail, the tran is removted')
+      throw new Error(`Add unconfirmed transaction, ${err}`)
     }
   }
 

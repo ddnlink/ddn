@@ -460,7 +460,8 @@ class Program {
             try {
               await this._context.runtime.block.generateBlock(forgeDelegateInfo.keypair, forgeDelegateInfo.time)
             } catch (err) {
-              this._context.logger.error('铸造区块异常: ' + DdnUtils.system.getErrorMsg(err))
+              this._context.logger.error('Forged new block failed: ' + DdnUtils.system.getErrorMsg(err))
+              cb('Forged new block failed: ' + err) // Added: 2020.9.4
             }
           }
 

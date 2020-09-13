@@ -380,9 +380,14 @@ class PeerService {
               transaction
             )
           ) {
-            return cb(
-              `The transaction ${transaction.id} is in process already..`
-            ) // 这里是正常交易，仅是未确认,
+            // return cb(
+            //   `The transaction ${transaction.id} is in process already..`
+            // ) 
+            this._invalidTrsCache.set(transaction.id, true)
+            return {
+              success: false,
+              error: `The transaction ${transaction.id} is in process already..`
+            }
           }
 
           this.logger.log(
@@ -406,21 +411,15 @@ class PeerService {
 
           if (err) {
             // 这里的错误就是上面 catch 的 exp，所以统一在这里处理就好
-            this.logger.debug(
+            this.logger.warn(
               `Receive invalid transaction, transaction is ${JSON.stringify(
                 transaction
               )}, ${DdnUtils.system.getErrorMsg(err)}`
             )
 
-            this.logger.error(
-              `Receive invalid transaction, transaction type: ${JSON.stringify(
-                transaction.type
-              )}, ${DdnUtils.system.getErrorMsg(err)}`
-            )
-
             // 缓存非法交易
             this._invalidTrsCache.set(transaction.id, true)
-
+            
             result = {
               success: false,
               error: err.message ? err.message : err

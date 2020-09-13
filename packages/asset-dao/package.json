@@ -1,6 +1,6 @@
 {
   "name": "@ddn/asset-dao",
-  "version": "0.3.7",
+  "version": "0.3.8",
   "description": "this is asset-dao",
   "main": "lib/index.js",
   "module": "dist/index.esm.js",
