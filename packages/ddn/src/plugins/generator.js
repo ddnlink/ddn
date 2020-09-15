@@ -336,7 +336,7 @@ function genGenesisBlock (options) {
   const Eaccount = {}
 
   // let newBlockInfo;
-  blockHelper.new(genesisAccount, options.nethash, options.tokenName, options.tokenPrefix, null, options.file)
+  blockHelper.new(genesisAccount, options.nethash, options.tokenName, options.tokenPrefix, null, options.file, options.message)
     .then(function (newBlockInfo) {
       const delegateSecrets = newBlockInfo.delegates.map(i => {
         const rv = (Math.random() * 100 + index).toFixed(0) % 3
@@ -355,7 +355,7 @@ function genGenesisBlock (options) {
       })
 
       genesisAccount.nethash = newBlockInfo.nethash
-      const filename = options.file || './genesisBlock'
+      const filename = options.genesisBlockName || './genesisBlock'
 
       writeFileSync(filename + '.json', newBlockInfo.block)
 
@@ -368,7 +368,7 @@ function genGenesisBlock (options) {
       appendFileSync(logFile, Eaccount)
       appendFileSync(logFile, '\ndelegates secrets:\n')
       appendFileSync(logFile, delegateSecrets)
-      console.log(`New genesis block and related account has been created, please see the two files: ${filename} and ${logFile}`)
+      console.log(`New genesis block and related account has been created, please see the two files: ${filename}.json and ${logFile}`)
     }).catch(function (err) {
       console.log('err=', err)
     })
@@ -400,9 +400,11 @@ export default function (program) {
     .command('createGenesis')
     .description('create genesis block')
     .option('-f, --file <file>', 'genesis accounts balance file')
-    .option('-d, --default', 'genesisAccount`s secret, default is the testnet secret')
+    .option('-d, --default', 'genesisAccount`s secret, default is the DDN`s testnet secret')
     .option('-n, --nethash <nethash>', 'default to generate a new nethash')
     .option('-p, --tokenPrefix <prefix>', 'default is `D`')
     .option('-t, --tokenName <name>', 'default is `DDN`')
+    .option('-g, --genesisBlockName <genesisBlockName>', 'default is `genesisBlock`')
+    .option('-m, --message <message>', 'default is `null`')
     .action(genGenesisBlock)
 }

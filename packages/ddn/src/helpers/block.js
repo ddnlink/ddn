@@ -85,7 +85,7 @@ function getId (block) {
 
 export default {
   getBytes,
-  async new ({ address, keypair }, nethash, tokenName, tokenPrefix, dapp, accountsFile) {
+  async new ({ address, keypair }, nethash, tokenName, tokenPrefix, dapp, accountsFile, message) {
     let payloadLength = 0
     // let payloadBytes = new ByteBuffer(1, true);
     let payloadHash = null
@@ -120,14 +120,19 @@ export default {
         const trs = {
           type: assetTypes.TRANSFER,
           nethash,
-          amount: bignum.multiply(bignum.new(parts[1]), 100000000),
+          amount: bignum.multiply(parts[1], 100000000).toString(),
           fee: '0',
           timestamp: 0,
           recipientId: parts[0], // wxm block database
           senderId: sender.address, // wxm block database
           senderPublicKey: sender.keypair.publicKey // wxm block database
         }
-        totalAmount = bignum.plus(totalAmount, trs.amount)
+
+        if (message && i === '0') {
+          trs.message = message
+        }
+
+        totalAmount = bignum.plus(totalAmount, trs.amount).toString()
 
         trs.signature = await DdnCrypto.sign(trs, sender.keypair)
         trs.id = await DdnCrypto.getId(trs)
@@ -146,7 +151,7 @@ export default {
         senderPublicKey: sender.keypair.publicKey // wxm block database
       }
 
-      totalAmount = bignum.plus(totalAmount, balanceTransaction.amount)
+      totalAmount = bignum.plus(totalAmount, balanceTransaction.amount).toString()
 
       balanceTransaction.signature = await DdnCrypto.sign(balanceTransaction, sender.keypair)
       balanceTransaction.id = await DdnCrypto.getId(balanceTransaction)
@@ -202,7 +207,7 @@ export default {
     }
 
     voteTransaction.signature = await DdnCrypto.sign(voteTransaction, sender.keypair)
-    console.log('voteTransaction.signature 132', voteTransaction.signature)
+    // console.log('voteTransaction.signature 132', voteTransaction.signature)
     voteTransaction.id = await DdnCrypto.getId(voteTransaction)
 
     transactions.push(voteTransaction)
