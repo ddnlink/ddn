@@ -38,8 +38,6 @@ class DelegatesRouter {
    */
   async get (req) {
     const query = Object.assign({}, req.body, req.query)
-    // query.offset = Number(query.offset || 0)
-    // query.limit = Number(query.limit || 100)
 
     const validateErrors = await this.ddnSchema.validate({
       type: 'object',
@@ -205,6 +203,7 @@ class DelegatesRouter {
             const lastBlock = this.runtime.block.getLastBlock()
             const totalSupply = this.runtime.block.getBlockStatus().calcSupply(lastBlock.height)
             rows.forEach(row => {
+              // row.weight = DdnUtils.bignum.divide(row.balance, totalSupply)
               row.weight = DdnUtils.bignum.divide(row.balance, DdnUtils.bignum.multiply(totalSupply, 100))
             })
 
@@ -215,7 +214,7 @@ class DelegatesRouter {
   }
 
   async getFee () {
-    const fee = DdnUtils.bignum.multiply(100, this.constants.fixedPoint)
+    const fee = DdnUtils.bignum.multiply(this.constants.net.fees.delegate, this.constants.fixedPoint)
     return { success: true, fee }
   }
 

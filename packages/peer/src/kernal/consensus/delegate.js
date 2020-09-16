@@ -195,7 +195,7 @@ class Delegate {
     for (let i = 0; i < delegates.length; i++) {
       delegates[i].rate = i + 1
       delegates[i].approval = bignum.divide(delegates[i].vote, totalSupply).toNumber()
-      delegates[i].approval = Math.round(delegates[i].approval * 1e2) / 1e2
+      delegates[i].approval = Math.round(delegates[i].approval * 1e2)
 
       let percent = 100 - (delegates[i].missedblocks / ((delegates[i].producedblocks + delegates[i].missedblocks) / 100))
       percent = Math.abs(percent) || 0

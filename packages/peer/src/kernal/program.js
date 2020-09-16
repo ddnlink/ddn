@@ -152,7 +152,6 @@ class Program {
     if (options.isDaemonMode) {
       require('daemon')({ cwd: process.cwd() })
     }
-
     // 提供系统默认配置文件
     options.configObject = extend(true, defaultConfig.default, options.configObject)
 

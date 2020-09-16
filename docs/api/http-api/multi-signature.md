@@ -35,14 +35,14 @@ sidebar_label: Http api multi signature
    
 请求示例：   
 ```bash   
-curl -k -H "Content-Type: application/json" -X PUT -d '{"secret":"pact october wrap gain amazing spring biology allow skull aware laundry unhappy","min":2,"lifetime":1,"keysgroup":["+ab8c0af3b048dac4d32ad779f79c47948c2a0a0577b89ca7eba58ae321f04695","+daeee33def7eef0c7ba06ec66eda7204437ba88ace8f04e4a6aa4d7bfbd18bc1"]}' 'http://127.0.0.1:8001/api/multisignatures'  
+curl -k -H "Content-Type: application/json" -X PUT -d '{"secret":"pact october wrap gain amazing spring biology allow skull aware laundry unhappy","min":2,"lifetime":1,"keysgroup":["+daeee33def7eef0c7ba06ec66eda7204437ba88ace8f04e4a6aa4d7bfbd18bc1","+ab8c0af3b048dac4d32ad779f79c47948c2a0a0577b89ca7eba58ae321f04695"]}' 'http://127.0.0.1:8001/api/multisignatures'  
 ```   
    
 JSON返回示例：   
 ```js  
 {
     "success": true,
-    "transactionId": "7bfd264cecd77b4522bd905c1b89a59484cb390f6e2353b062…25ce43da5effc6cc8a374c92ee5d7196f91f84a0f58925d12" //返回结果只是生成交易id，还需要其他人签名后该账户才能成功设置成多重签名账户
+    "transactionId": "ee9f10aca5f7f610de8d52689c26194a6f807f86144b7761f4a4ee1fd9260a18f21cc06ff12983a0643413a65608177ec6005a9acc75c72b7978ec4ce66f1afe" //返回结果只是生成交易id，还需要其他人签名后该账户才能成功设置成多重签名账户
 }  
 ```   
    
@@ -54,7 +54,7 @@ JSON返回示例：
 
 |名称	|类型   |必填 |说明              |   
 |------ |-----  |---  |----              |   
-|publicKey|string  |Y|公钥      |    
+|publicKey|string  |Y|公钥（签名组里的）      |    
    
    
 返回参数说明：   
@@ -67,40 +67,44 @@ JSON返回示例：
    
 请求示例：   
 ```bash   
-curl -k -X GET http://127.0.0.1:8001/api/multisignatures/pending?publicKey=2cef5711e61bb5361c544077aa08aebc4d962a1d656571901c48d716382ad4fd   
+curl -k -X GET http://127.0.0.1:8001/api/multisignatures/pending?publicKey=ab8c0af3b048dac4d32ad779f79c47948c2a0a0577b89ca7eba58ae321f04695   
 ```   
    
 JSON返回示例：   
 ```js   
-{   
-	"success": true,   
-	"transactions": [{      //上一步中设置账户为多重签名交易的详情，transactionId: 17620378998277022323   
-		"min": 2,   
-		"lifetime": 1,   
-		"signed": true,   
-		"transaction": {   
-			"type": 4,      //4代表注册多重签名账户   
-			"amount": 0,   
-			"senderPublicKey": "2cef5711e61bb5361c544077aa08aebc4d962a1d656571901c48d716382ad4fd",   
-			"requesterPublicKey": null,   
-			"timestamp": 4879978,   
-			"asset": {   
-				"multisignature": {   
-					"min": 2,   
-					"keysgroup": ["+eb48b9ab7c9a34a9b7cdf860265d65b31af774355cabf1b3a387d14a1925dc97",   
-					"+d5d7aa157f866c47a2a1e09e2746286ed089fd90976b54fbfa930e87d11609cb"],   
-					"lifetime": 1   
-				}   
-			},   
-			"recipientId": null,   
-			"signature": "a42feaccd9f2a4940fc0be1a1580e786b360f189db3154328f307988e75484293eae391f2f9eee489913cc6d15984eb1f5f5a0aa1bf78ea745d5c725f161af08",   
-			"id": "17620378998277022323",   
-			"fee": 1500000000,   
-			"senderId": "3855903394839129841"   
-		}   
-	}]   
-}   
-   
+{
+    "success": true,
+    "transactions": [
+        {
+            "min": 2,
+            "lifetime": 1,
+            "signed": false,
+            "transaction": {
+                "type": 4,
+                "amount": "0",
+                "nethash": "0ab796cd",
+                "senderPublicKey": "d14d63c0e8055dad426ea616318825ead9993329c353f521faaf23d0d33e1fd3",
+                "requester_public_key": null,
+                "timestamp": 89084827,
+                "asset": {
+                    "multisignature": {
+                        "min": 2,
+                        "keysgroup": [
+                            "+daeee33def7eef0c7ba06ec66eda7204437ba88ace8f04e4a6aa4d7bfbd18bc1",
+                            "+ab8c0af3b048dac4d32ad779f79c47948c2a0a0577b89ca7eba58ae321f04695"
+                        ],
+                        "lifetime": 1
+                    }
+                },
+                "recipientId": null,
+                "signature": "04feef88931dbc09cfc6a8d72e3733f53fcd55063dd370bedba32a7137641de81153c72a8137489c615403deac670d7a130029311d4a9576585260a45668ae05",
+                "id": "ee9f10aca5f7f610de8d52689c26194a6f807f86144b7761f4a4ee1fd9260a18f21cc06ff12983a0643413a65608177ec6005a9acc75c72b7978ec4ce66f1afe",
+                "fee": "1500000000",
+                "senderId": "DDr1KLYLRos6iZ55HvNrKo2X8Zpg2mT1oh"
+            }
+        }
+    ]
+}
 ```   
    
 ### **2.8.3 非交易发起人对交易进行多重签名**   
@@ -127,78 +131,100 @@ JSON返回示例：
    
 请求示例：   
 ```bash   
-curl -k -H "Content-Type: application/json" -X POST -d '{"secret":"lemon carpet desk accuse clerk future oyster essay seminar force live dog","transactionId":"17620378998277022323"}' 'http://127.0.0.1:8001/api/multisignatures/sign'   //公钥为eb48b9ab7c9a34a9b7cdf860265d65b31af774355cabf1b3a387d14a1925dc97的用户进行签名   
+// 首先，公钥为 ab8c0af3b048dac4d32ad779f79c47948c2a0a0577b89ca7eba58ae321f04695 的用户进行签名
+curl -k -H "Content-Type: application/json" -X POST -d '{"secret":"grunt grain siege churn chicken phrase shell arrange fox recipe scan tube","transactionId":"ee9f10aca5f7f610de8d52689c26194a6f807f86144b7761f4a4ee1fd9260a18f21cc06ff12983a0643413a65608177ec6005a9acc75c72b7978ec4ce66f1afe"}' 'http://127.0.0.1:8001/api/multisignatures/sign'      
 ```   
    
 JSON返回示例：   
 ```js   
 {   
 	"success": true,   
-	"transactionId": "17620378998277022323"   
+	"transactionId": "ee9f10aca5f7f610de8d52689c26194a6f807f86144b7761f4a4ee1fd9260a18f21cc06ff12983a0643413a65608177ec6005a9acc75c72b7978ec4ce66f1afe"   
 }   
+
 // 此时再次获取pending   
-curl -k -X GET http://127.0.0.1:8001/api/multisignatures/pending?publicKey=2cef5711e61bb5361c544077aa08aebc4d962a1d656571901c48d716382ad4fd   
-{   
-	"success": true,   
-	"transactions": [{   
-		"min": 2,   
-		"lifetime": 1,   
-		"signed": true,   
-		"transaction": {   
-			"type": 4,   
-			"amount": 0,   
-			"senderPublicKey": "2cef5711e61bb5361c544077aa08aebc4d962a1d656571901c48d716382ad4fd",   
-			"requesterPublicKey": null,   
-			"timestamp": 4879978,   
-			"asset": {   
-				"multisignature": {   
-					"min": 2,   
-					"keysgroup": ["+eb48b9ab7c9a34a9b7cdf860265d65b31af774355cabf1b3a387d14a1925dc97",   
-					"+d5d7aa157f866c47a2a1e09e2746286ed089fd90976b54fbfa930e87d11609cb"],   
-					"lifetime": 1   
-				}   
-			},   
-			"recipientId": null,   
-			"signature": "a42feaccd9f2a4940fc0be1a1580e786b360f189db3154328f307988e75484293eae391f2f9eee489913cc6d15984eb1f5f5a0aa1bf78ea745d5c725f161af08",   
-			"id": "17620378998277022323",   
-			"fee": 1500000000,   
-			"senderId": "3855903394839129841",   
-			"signatures": ["b38a161264db2a23e353d3fbc4983562f6343d5ee693144543ca54e2bc67c0f73d1c761b7bfa38b2bb101ac2ab0797b674b1a9964ccd400aaa310746c3494d03"]      //新生成的多重签名   
-		}   
-	}]   
-}   
-   
-// 公钥为d5d7aa157f866c47a2a1e09e2746286ed089fd90976b54fbfa930e87d11609cb的账户对该注册交易进行签名   
-curl -k -H "Content-Type: application/json" -X POST -d '{"secret":"chalk among elbow piece badge try van round quality position simple teach","transactionId":"17620378998277022323"}' 'http://127.0.0.1:8001/api/multisignatures/sign'   
-{"success":true,"transactionId":"17620378998277022323"}   
-// 此时再次获取pending,结果为空   
-curl -k -X GET http://127.0.0.1:8001/api/multisignatures/pending?publicKey=2cef5711e61bb5361c544077aa08aebc4d962a1d656571901c48d716382ad4fd   
+curl -k -X GET http://127.0.0.1:8001/api/multisignatures/pending?publicKey=ab8c0af3b048dac4d32ad779f79c47948c2a0a0577b89ca7eba58ae321f04695   
+{
+    "success": true,
+    "transactions": [
+        {
+            "min": 2,
+            "lifetime": 1,
+            "signed": true, // 改变为 true
+            "transaction": {
+                "type": 4,
+                "amount": "0",
+                "nethash": "0ab796cd",
+                "senderPublicKey": "d14d63c0e8055dad426ea616318825ead9993329c353f521faaf23d0d33e1fd3",
+                "requester_public_key": null,
+                "timestamp": 89084827,
+                "asset": {
+                    "multisignature": {
+                        "min": 2,
+                        "keysgroup": [
+                            "+daeee33def7eef0c7ba06ec66eda7204437ba88ace8f04e4a6aa4d7bfbd18bc1",
+                            "+ab8c0af3b048dac4d32ad779f79c47948c2a0a0577b89ca7eba58ae321f04695"
+                        ],
+                        "lifetime": 1
+                    }
+                },
+                "recipientId": null,
+                "signature": "04feef88931dbc09cfc6a8d72e3733f53fcd55063dd370bedba32a7137641de81153c72a8137489c615403deac670d7a130029311d4a9576585260a45668ae05",
+                "id": "ee9f10aca5f7f610de8d52689c26194a6f807f86144b7761f4a4ee1fd9260a18f21cc06ff12983a0643413a65608177ec6005a9acc75c72b7978ec4ce66f1afe",
+                "fee": "1500000000",
+                "senderId": "DDr1KLYLRos6iZ55HvNrKo2X8Zpg2mT1oh",
+                "signatures": [
+                    "f7ca97fdfaf9667a3fa0ea5eade3f0c2d836b6a9e65af7bddf3dc64f1baf12e89bb56d29449b1b6132c4bd5a99e16227a6bedd532c913e25c6315aa332cd3f0e" // 新生成的签名
+                ]
+            }
+        }
+    ]
+}
+
+// 然后，公钥为 daeee33def7eef0c7ba06ec66eda7204437ba88ace8f04e4a6aa4d7bfbd18bc1 的账户对该注册交易进行签名   
+curl -k -H "Content-Type: application/json" -X POST -d '{"secret":"enter boring shaft rent essence foil trick vibrant fabric quote indoor output","transactionId":"ee9f10aca5f7f610de8d52689c26194a6f807f86144b7761f4a4ee1fd9260a18f21cc06ff12983a0643413a65608177ec6005a9acc75c72b7978ec4ce66f1afe"}' 'http://127.0.0.1:8001/api/multisignatures/sign'   
+
+// 获得结果
+{"success":true,"transactionId":"ee9f10aca5f7f610de8d52689c26194a6f807f86144b7761f4a4ee1fd9260a18f21cc06ff12983a0643413a65608177ec6005a9acc75c72b7978ec4ce66f1afe"}   
+
+// 此时再次获取pending，结果为空   
+curl -k -X GET http://127.0.0.1:8001/api/multisignatures/pending?publicKey=ab8c0af3b048dac4d32ad779f79c47948c2a0a0577b89ca7eba58ae321f04695   
 {"success":true,"transactions":[]}   
+
 // 查看该注册交易详情（该交易已广播并写入blockchain）,此时该账户已成功注册成为多重签名账户   
-curl -k -X GET http://127.0.0.1:8001/api/transactions/get?id=17620378998277022323   
-{   
-	"success": true,   
-	"transaction": {   
-		"id": "17620378998277022323",   //注册账户为多重签名用户的交易id   
-		"height": "157013",   
-		"blockId": "4680888982781013372",   
-		"type": 4,   
-		"timestamp": 4879978,   
-		"senderPublicKey": "2cef5711e61bb5361c544077aa08aebc4d962a1d656571901c48d716382ad4fd",   
-		"senderId": "3855903394839129841",   
-		"recipientId": "",   
-		"amount": 0,   
-		"fee": 1500000000,   
-		"signature": "a42feaccd9f2a4940fc0be1a1580e786b360f189db3154328f307988e75484293eae391f2f9eee489913cc6d15984eb1f5f5a0aa1bf78ea745d5c725f161af08",   
-		"signSignature": "",   
-		"signatures": null,   
-		"confirmations": "26",   
-		"asset": {   
-			   
-		}   
-	}   
-}   
-   
+curl -k -X GET http://127.0.0.1:8001/api/transactions/get?id=ee9f10aca5f7f610de8d52689c26194a6f807f86144b7761f4a4ee1fd9260a18f21cc06ff12983a0643413a65608177ec6005a9acc75c72b7978ec4ce66f1afe   
+  
+{
+    "success": true,
+    "transaction": {
+        "id": "ee9f10aca5f7f610de8d52689c26194a6f807f86144b7761f4a4ee1fd9260a18f21cc06ff12983a0643413a65608177ec6005a9acc75c72b7978ec4ce66f1afe",
+        "height": "311",
+        "block_id": "25186ac66f99e144312d305795658c5c5df16c487e3bf22578a3f4ec467bb703e9681da4a37cd9bb579c48086cc8efd751eac7c281d32a9f72c3cf28febaac87",
+        "type": 4,
+        "timestamp": 89084827,
+        "senderPublicKey": "d14d63c0e8055dad426ea616318825ead9993329c353f521faaf23d0d33e1fd3",
+        "senderId": "DDr1KLYLRos6iZ55HvNrKo2X8Zpg2mT1oh",
+        "recipientId": null,
+        "amount": "0",
+        "fee": "1500000000",
+        "signature": "04feef88931dbc09cfc6a8d72e3733f53fcd55063dd370bedba32a7137641de81153c72a8137489c615403deac670d7a130029311d4a9576585260a45668ae05",
+        "sign_signature": null,
+        "signatures": null,
+        "confirmations": 8,
+        "args": null,
+        "message": null,
+        "asset": {
+            "multisignature": {
+                "min": 2,
+                "lifetime": 1,
+                "keysgroup": [
+                    "+daeee33def7eef0c7ba06ec66eda7204437ba88ace8f04e4a6aa4d7bfbd18bc1",
+                    "+ab8c0af3b048dac4d32ad779f79c47948c2a0a0577b89ca7eba58ae321f04695"
+                ]
+            }
+        }
+    }
+}
 ```   
    
 ### **2.8.4 获取多重签名账户信息**   
@@ -222,30 +248,50 @@ curl -k -X GET http://127.0.0.1:8001/api/transactions/get?id=1762037899827702232
    
 请求示例：   
 ```bash   
-curl -k -X GET http://127.0.0.1:8001/api/multisignatures/accounts?publicKey=eb48b9ab7c9a34a9b7cdf860265d65b31af774355cabf1b3a387d14a1925dc97   
+curl -k -X GET http://127.0.0.1:8001/api/multisignatures/accounts?publicKey=ab8c0af3b048dac4d32ad779f79c47948c2a0a0577b89ca7eba58ae321f04695   
 ```   
    
 JSON返回示例：   
 ```js   
-{   
-	"success": true,   
-	"accounts": [{   
-		"address": "3855903394839129841",       //多重签名账户地址   
-		"balance": 18500000000,     //多重签名账户余额   
-		"multisignatures": ["eb48b9ab7c9a34a9b7cdf860265d65b31af774355cabf1b3a387d14a1925dc97",   
-		"d5d7aa157f866c47a2a1e09e2746286ed089fd90976b54fbfa930e87d11609cb"],    //多重签名账户公钥   
-		"multimin": 2,  //最少签名个数   
-		"multilifetime": 1,   
-		"multisigaccounts": [{          //签名者账户详情   
-			"address": "13542769708474548631",   
-			"publicKey": "eb48b9ab7c9a34a9b7cdf860265d65b31af774355cabf1b3a387d14a1925dc97",   
-			"balance": 0   
-		},   
-		{   
-			"address": "4100816257782486230",   
-			"publicKey": "d5d7aa157f866c47a2a1e09e2746286ed089fd90976b54fbfa930e87d11609cb",   
-			"balance": 0   
-		}]   
-	}]   
-}   
+{
+    "success": true,
+    "accounts": [
+        {
+            "address": "DDr1KLYLRos6iZ55HvNrKo2X8Zpg2mT1oh", //多重签名账户地址
+            "balance": 121790000000, //多重签名账户余额
+            "multisignatures": [
+                "daeee33def7eef0c7ba06ec66eda7204437ba88ace8f04e4a6aa4d7bfbd18bc1",
+                "ab8c0af3b048dac4d32ad779f79c47948c2a0a0577b89ca7eba58ae321f04695"
+            ],
+            "multilifetime": 1,
+            "multimin": 2, //最少签名个数
+            "delegates": [],
+            "u_delegates": [],
+            "u_multisignatures": [ //多重签名账户公钥
+                "daeee33def7eef0c7ba06ec66eda7204437ba88ace8f04e4a6aa4d7bfbd18bc1",
+                "ab8c0af3b048dac4d32ad779f79c47948c2a0a0577b89ca7eba58ae321f04695"
+            ],
+            "multisigaccounts": [ //签名者账户详情 
+                {
+                    "address": "DC5kJzMdNDhrnupWX2NGafzMoiwdHiySBe",
+                    "publicKey": "daeee33def7eef0c7ba06ec66eda7204437ba88ace8f04e4a6aa4d7bfbd18bc1",
+                    "balance": 999999776570000000,
+                    "delegates": [],
+                    "u_delegates": [],
+                    "multisignatures": [],
+                    "u_multisignatures": []
+                },
+                {
+                    "address": "DJWuENme5xJUJTjWiQEjfuLYRGtABfwhjz",
+                    "publicKey": "ab8c0af3b048dac4d32ad779f79c47948c2a0a0577b89ca7eba58ae321f04695",
+                    "balance": 50090000000,
+                    "delegates": [],
+                    "u_delegates": [],
+                    "multisignatures": [],
+                    "u_multisignatures": []
+                }
+            ]
+        }
+    ]
+}
 ``` 

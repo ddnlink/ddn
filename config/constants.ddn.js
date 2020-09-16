@@ -6,6 +6,9 @@ module.exports = {
   nethash: '0ab796cd', // 标定该链的版本
   tokenName: 'DDN',
   tokenPrefix: 'D',
+  maxAmount: 1 * 10 ** 8,
+  fixedPoint: 10 ** 8,
+  totalAmount: '10000000000000000',
   foundAddress: 'DLjrrVwnmMXstcAYVjcrpwyYb3kY1ehABU',
   walletUrl: 'http://wallet.ddn.link',
   enableMoreLockTypes: true,
@@ -15,7 +18,6 @@ module.exports = {
   superPeers: 21,
   voters: 33,
   remoteVoters: 1,
-  maxAmount: 100000000,
   maxPayloadLength: 8 * 1024 * 1024,
   blockHeaderLength: 248,
   addressLength: 208,
@@ -28,8 +30,6 @@ module.exports = {
   maxSignaturesLength: 196 * 256,
   maxConfirmations: 77 * 100,
   confirmationLength: 77,
-  fixedPoint: 10 ** 8,
-  totalAmount: '10000000000000000',
   maxTxsPerBlock: 500,
 
   testnet: {
