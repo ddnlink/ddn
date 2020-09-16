@@ -24,7 +24,7 @@ function genUsers ({ tokenPrefix, tokenName }) {
   // 1亿的75个，75亿
   for (let i = 1; i < 76; i++) {
     const user = accountHelper.account(cryptoLib.generateSecret(), _tokenPrefix)
-    user.username = `${tokenName}_${i}`
+    user.username = `user_${i}`
     user.amount = 10000 * wan
     users.push(user)
   }
@@ -32,7 +32,7 @@ function genUsers ({ tokenPrefix, tokenName }) {
   // 2000万的75个, 15亿
   for (let i = 76; i < 151; i++) {
     const user = accountHelper.account(cryptoLib.generateSecret(), _tokenPrefix)
-    user.username = `${tokenName}_${i}`
+    user.username = `user_${i}`
     user.amount = 2000 * wan
     users.push(user)
   }
@@ -40,7 +40,7 @@ function genUsers ({ tokenPrefix, tokenName }) {
   // 1000万的100个，10亿
   for (let i = 151; i < 251; i++) {
     const user = accountHelper.account(cryptoLib.generateSecret(), _tokenPrefix)
-    user.username = `${tokenName}_${i}`
+    user.username = `user_${i}`
     user.amount = 1000 * wan
     users.push(user)
   }
@@ -52,23 +52,18 @@ function genUsers ({ tokenPrefix, tokenName }) {
   user.amount = 0
   users.push(user)
 
+  let liststr = ''
   const teamusers = users.map(i => {
     delete i.keypair
+    liststr += `${i.address}, ${i.amount}` + '\n'
     return i
   })
 
-  let liststr = ''
-  users.map(({ address, amount }) => {
-    const str = `${address}  ${amount}\n`
-    liststr += str
-    return liststr
-  })
-
   const logFile = './teams.log'
-  writeFileSync(logFile, 'team account:\n')
+  writeFileSync(logFile, 'Accounts:\n')
   appendFileSync(logFile, teamusers)
-  writeFileSync('./teams.txt', liststr)
-  console.log('New team and related users have been created, please see the two file: ./teams.log and ./teams.txt')
+  writeFileSync('./teams.txt', liststr.replace(/(\s*$)/g, ' '))
+  console.log('New team and related users have been created, please see the two files: ./teams.log and ./teams.txt')
 }
 
 export default program => {

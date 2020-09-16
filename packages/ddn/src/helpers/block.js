@@ -111,10 +111,10 @@ export default {
     if (accountsFile && fs.existsSync(accountsFile)) {
       const lines = fs.readFileSync(accountsFile, 'utf8').split('\n')
       for (const i in lines) {
-        const parts = lines[i].split('  ')
+        const parts = lines[i].split(', ')
 
         if (parts.length !== 2) {
-          console.error('Invalid recipient balance format')
+          console.error(`Invalid recipient balance format ${lines[i]}`)
           break
         }
         const trs = {

@@ -91,8 +91,8 @@ class VotesRouter {
 
       for (let i = 0; i < delegates.length; i++) {
         delegates[i].rate = i + 1
-        delegates[i].approval = bignum.new(delegates[i].vote).dividedBy(totalSupply).multipliedBy(100).toFixed(2) // % 制
-        // delegates[i].approval = ((delegates[i].vote / totalSupply) * 100).toFixed(2)
+        const approval = bignum.new(delegates[i].vote).dividedBy(totalSupply).toNumber()
+        delegates[i].approval = Math.round(approval * 1e2)
 
         let percent = 100 - (delegates[i].missedblocks / ((delegates[i].producedblocks + delegates[i].missedblocks) / 100))
         percent = percent || 0

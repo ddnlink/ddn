@@ -6,9 +6,9 @@ module.exports = {
   nethash: '0ab796cd', // 标定该链的版本
   tokenName: 'DDN',
   tokenPrefix: 'D',
-  maxAmount: 100 * 10 ** 8,
+  maxAmount: 1 * 10 ** 8,
   fixedPoint: 10 ** 8,
-  totalAmount: '1000000000000000000',
+  totalAmount: '10000000000000000',
   foundAddress: 'DLjrrVwnmMXstcAYVjcrpwyYb3kY1ehABU',
   walletUrl: 'http://wallet.ddn.link',
   enableMoreLockTypes: true,
