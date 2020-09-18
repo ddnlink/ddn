@@ -6,7 +6,7 @@ sidebar_label: Http api delegate
 ---
 
 
-## **2.4 受托人delegates** 
+## **2.4 受托人** 
    
 ### **2.4.1 获取受托人总个数**   
 接口地址：/api/delegates/count   
@@ -53,21 +53,23 @@ JSON返回示例：
    
 请求示例：   
 ```bash   
-curl -k -X GET 'http://127.0.0.1:8001/api/delegates/voters?publicKey=0095b28997a33bb4f16b62523bcc1902179f2a7b5a3dd83980da5c1cbae854d6'   
+curl -k -X GET 'http://127.0.0.1:8001/api/delegates/voters?publicKey=d2155304db26fc893c4ba41ae230bd8bb4241bb8e3fccb4d234594e7c70496d2'   
 ```   
    
 JSON返回示例：   
 ```js   
 {
     "success": true,
-    "accounts": [{
-        "username": "",
-        "address": "DPesT3fMLkDVHvqLaXR3YzGkdw16vgKqPj",
-        "publicKey": "70d0cbd2c3dccfaaa65acfa5689dbc3656ff0807cd1611e88d854fec07845ac1",
-        "balance": 9977192780000000,
-        "weight": 98.21503291966083
-    }]
-}  
+    "accounts": [
+        {
+            "address": "DC5kJzMdNDhrnupWX2NGafzMoiwdHiySBe",
+            "balance": 999999801160000000,
+            "publicKey": "daeee33def7eef0c7ba06ec66eda7204437ba88ace8f04e4a6aa4d7bfbd18bc1",
+            "username": null,
+            "weight": "0.00999999650160052826"
+        }
+    ]
+}
 ```   
    
 ### **2.4.3 根据公钥或者用户名获取受托人详情**   
@@ -92,8 +94,8 @@ JSON返回示例：
    
 请求示例：   
 ```bash   
-curl -k -X GET http://127.0.0.1:8001/api/delegates/get?publicKey=0095b28997a33bb4f16b62523bcc1902179f2a7b5a3dd83980da5c1cbae854d6   
-curl -k -X GET http://127.0.0.1:8001/api/delegates/get?username=ddn_88   
+curl -k -X GET 'http://127.0.0.1:8001/api/delegates/get?publicKey=0d820478d627db1fd3c4d832b27e3094f25a4e93dd33e759fc2f5adf1a6f33c8'   
+curl -k -X GET 'http://127.0.0.1:8001/api/delegates/get?username=DDN_88'   
 ```   
    
 JSON返回示例：   
@@ -101,21 +103,21 @@ JSON返回示例：
 {
     "success": true,
     "delegate": {
-        "username": "ddn_88",
-        "address": "DC5kJzMdNDhrnupWX2NGafzMoiwdHiySBe",
-        "publicKey": "0095b28997a33bb4f16b62523bcc1902179f2a7b5a3dd83980da5c1cbae854d6",
-        "balance": 614801267317,
-        "vote": 9977192780000000,
-        "producedblocks": 1537,
-        "missedblocks": 1604,
-        "fees": 1267317,
-        "rewards": 614800000000,
-        "rate": 1,
-        "approval": 98.22,
-        "productivity": 48.93,
-        "forged": "614801267317"
+        "username": "DDN_88",
+        "address": "DJuXPWRQSbWTtNVXhyAUB3e8NsWyK5pTAJ",
+        "publicKey": "0d820478d627db1fd3c4d832b27e3094f25a4e93dd33e759fc2f5adf1a6f33c8",
+        "vote": 1000000000000000000,
+        "missedblocks": 0,
+        "producedblocks": 4,
+        "fees": 12752474,
+        "rewards": 800000000,
+        "balance": 812752474,
+        "rate": 6,
+        "approval": 100,
+        "productivity": 100,
+        "forged": "812752474"
     }
-} 
+}
 ```   
    
 ### **2.4.4 获取受托人列表**   
@@ -151,39 +153,40 @@ JSON返回示例：
 ```js   
 {
     "success": true,
-    "delegates": [{
-        "username": "ddn_88",
-        "address": "DC5kJzMdNDhrnupWX2NGafzMoiwdHiySBe",
-        "publicKey": "0095b28997a33bb4f16b62523bcc1902179f2a7b5a3dd83980da5c1cbae854d6",
-        "balance": 614801267317,
-        "vote": 9977192780000000,
-        "producedblocks": 1537,
-        "missedblocks": 1604,
-        "fees": 1267317,
-        "rewards": 614800000000,
-        "rate": 1,
-        "approval": 98.22,
-        "productivity": 48.93,
-        "forged": "614801267317"
-    }, 
-    
-    {
-        "username": "ddn_65",
-        "address": "D2zThPTQZDNQqXbe5tikDQ24YyCQTCpbSC",
-        "publicKey": "03afab2fff8e10592604db708c57b9d89b96cc5a14a80c805702b8ade8ae6f3b",
-        "balance": 1573761742557,
-        "vote": 9977192780000000,
-        "producedblocks": 3934,
-        "missedblocks": 1,
-        "fees": 161742557,
-        "rewards": 1573600000000,
-        "rate": 2,
-        "approval": 98.22,
-        "productivity": 99.97,
-        "forged": "1573761742557"
-    }],
+    "delegates": [
+        {
+            "username": "DDN_37",
+            "address": "DKAFh8rvU83iGWsBF96PVzGFeKctvxWgH8",
+            "publicKey": "025724b6a9d32ba8a118e6776fa8ed2f12e1b6a7189513c2297991e959733094",
+            "vote": 1000000000000000000,
+            "missedblocks": 0,
+            "producedblocks": 4,
+            "fees": 12752543,
+            "rewards": 800000000,
+            "balance": 812752543,
+            "rate": 1,
+            "approval": 100,
+            "productivity": 100,
+            "forged": "812752543"
+        },
+        {
+            "username": "DDN_93",
+            "address": "D14LesCgYXhL1ag73R3GX9xj5pSX8fuRjH",
+            "publicKey": "08ff2dd684c25e68655fd62a154120a9278baaa345e23e69bacd430219f08e60",
+            "vote": 1000000000000000000,
+            "missedblocks": 0,
+            "producedblocks": 4,
+            "fees": 12752474,
+            "rewards": 800000000,
+            "balance": 812752474,
+            "rate": 2,
+            "approval": 100,
+            "productivity": 100,
+            "forged": "812752474"
+        }
+    ],
     "totalCount": 101
-} 
+}
 ```   
    
    
@@ -207,12 +210,12 @@ JSON返回示例：
    
 请求示例：   
 ```bash   
-curl -k -X GET 'http://127.0.0.1:8001/api/delegates/fee?publicKey=0095b28997a33bb4f16b62523bcc1902179f2a7b5a3dd83980da5c1cbae854d6'   
+curl -k -X GET 'http://127.0.0.1:8001/api/delegates/fee?publicKey=0d820478d627db1fd3c4d832b27e3094f25a4e93dd33e759fc2f5adf1a6f33c8'   
 ```   
    
 JSON返回示例：   
 ```js   
-{"success":true,"fee":10000000000}  //0.1 DDN   
+{"success":true,"fee":"10000000000"}  //0.1 DDN   
 ```   
    
 ### **2.4.6 根据公钥查看其锻造情况**   
@@ -237,17 +240,17 @@ JSON返回示例：
    
 请求示例：   
 ```bash   
-curl -k -X GET 'http://127.0.0.1:8001/api/delegates/forging/getForgedByAccount?generatorPublicKey=0095b28997a33bb4f16b62523bcc1902179f2a7b5a3dd83980da5c1cbae854d6'   
+curl -k -X GET 'http://127.0.0.1:8001/api/delegates/forging/getForgedByAccount?generatorPublicKey=0d820478d627db1fd3c4d832b27e3094f25a4e93dd33e759fc2f5adf1a6f33c8'   
 ```   
    
 JSON返回示例：   
 ```js   
-{   
-	"success": true,   
-	"fees": 12589307065,   
-	"rewards": 285600000000,   
-	"forged": 298189307065   
-}   
+{
+    "success": true,
+    "fees": "12752474",
+    "rewards": "1200000000",
+    "forged": "1212752474"
+}
 ```   
    
 ### **2.4.7 注册受托人**   
@@ -273,32 +276,33 @@ JSON返回示例：
    
 请求示例：   
 ```bash   
-curl -k -H "Content-Type: application/json" -X PUT -d '{"secret":"unaware label emerge fancy concert long fiction report affair appear decide twenty","username":"delegate_0821"}' 'http://127.0.0.1:8001/api/delegates'   
+curl -k -H "Content-Type: application/json" -X PUT -d '{"secret":"attract motion canal change horror dose waste hub team horse half tiny","username":"delegate_test"}' 'http://127.0.0.1:8001/api/delegates'   
 ```   
    
 JSON返回示例：   
 ```js   
-{   
-	"success": true,   
-	"transaction": {   
-		"type": 2,  //注册受托人的交易类型为2   
-		"amount": 0,   
-		"senderPublicKey": "3b64f1833e6328043e1f2fee31e638bdaa6dfff5c7eb9c8577a5cefcf11261f2",   
-		"requesterPublicKey": null,   
-		"timestamp": 4737615,   
-		"asset": {   
-			"delegate": {   
-				"username": "delegate_0821",   
-				"publicKey": "3b64f1833e6328043e1f2fee31e638bdaa6dfff5c7eb9c8577a5cefcf11261f2"   
-			}   
-		},   
-		"recipientId": null,   
-		"signature": "7f8417e8db5f58ddff887c86c789c26b32fd3f01083ef1e3c8d4e18ed16622bf766492d78518c6c7a07aada1c98b1efc36d40c8e09394989dbde229d8e3f8103",   
-		"id": "16351320834453011577",   
-		"fee": 10000000000,   
-		"senderId": "250438937633388106"   
-	}   
-}   
+{
+    "success": true,
+    "transaction": {
+        "type": 2,
+        "amount": "0",
+        "nethash": "0ab796cd",
+        "senderPublicKey": "9a9058fba208ab7fb3d9b2c521b1c6dabf38583fc18f1779d61d2266487cf744",
+        "requester_public_key": null,
+        "timestamp": 89234984,
+        "asset": {
+            "delegate": {
+                "username": "delegate_test",
+                "publicKey": "9a9058fba208ab7fb3d9b2c521b1c6dabf38583fc18f1779d61d2266487cf744"
+            }
+        },
+        "recipientId": null,
+        "signature": "01aed2938c3cb3e6cdbf592d90ce36f8568d8dd514627dd521b15de6e4510cfb51d974838313711669a49091d288e9beba09189a2bbfc1da36f4760bf6f0ff08",
+        "id": "181ddb912bb991c954add535decadebfc039f4c1723ef7d03b80f389036308fec82d0ac830ef9a1a1bc35e5a3a0ca39ae199d5145cdc3a7b3b2f327f70e3f948",
+        "fee": "10000000000",
+        "senderId": "D61gSRn1ko2NiEYLutPxnBDXU4MBJ2b4by"
+    }
+} 
 ```   
    
 ### **2.4.8 受托人开启锻造**   
@@ -323,12 +327,12 @@ JSON返回示例：
    
 请求示例：   
 ```bash   
-curl -k -H "Content-Type: application/json" -X POST -d '{"secret":"pact october wrap gain amazing spring biology allow skull aware laundry unhappy"}' 'http://localhost:8001/api/delegates/forging/enable'   
+curl -k -H "Content-Type: application/json" -X POST -d '{"secret":"attract motion canal change horror dose waste hub team horse half tiny"}' 'http://localhost:8001/api/delegates/forging/enable'   
 ```   
    
 JSON返回示例：   
 ```js   
-{"success":true,"address":"DDr1KLYLRos6iZ55HvNrKo2X8Zpg2mT1oh"}   
+{"success":true,"address":"D61gSRn1ko2NiEYLutPxnBDXU4MBJ2b4by"}   
 ```      
 
 ### **2.4.9 受托人关闭锻造**   
@@ -353,12 +357,12 @@ JSON返回示例：
    
 请求示例：   
 ```bash   
-curl -k -H "Content-Type: application/json" -X POST -d '{"secret":"pact october wrap gain amazing spring biology allow skull aware laundry unhappy"}' 'http://localhost:8001/api/delegates/forging/disable'   
+curl -k -H "Content-Type: application/json" -X POST -d '{"secret":"attract motion canal change horror dose waste hub team horse half tiny"}' 'http://localhost:8001/api/delegates/forging/disable'   
 ```   
    
 JSON返回示例：   
 ```js   
-{"success":true,"address":"DDr1KLYLRos6iZ55HvNrKo2X8Zpg2mT1oh"}     
+{"success":true,"address":"D61gSRn1ko2NiEYLutPxnBDXU4MBJ2b4by"}     
 ```     
 
 ### **2.4.10 受托人锻造状态查看**   
@@ -382,7 +386,7 @@ JSON返回示例：
    
 请求示例：   
 ```bash   
-curl -k -X GET 'http://127.0.0.1:8001/api/delegates/forging/status?publicKey=fafcd01f6b813fdeb3c086e60bc7fa9bfc8ef70ae7be47ce0ac5d06e7b1a8575'        
+curl -k -X GET 'http://127.0.0.1:8001/api/delegates/forging/status?publicKey=9a9058fba208ab7fb3d9b2c521b1c6dabf38583fc18f1779d61d2266487cf744'        
 ```   
    
 JSON返回示例：   

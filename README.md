@@ -45,7 +45,7 @@ More infomation please visit our [official website](https://www.ddn.link) , [doc
 
 ## Architect
 
-![](./doc/images/architect.jpeg)
+![](./docs/images/architect.jpeg)
 
 ## Examples
 

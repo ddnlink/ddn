@@ -5,7 +5,10 @@ title: 二次密码
 sidebar_label: Http api second password
 ---
 
-## **2.7 二级密码signatures**   
+## **2.7 二级密码**   
+
+对应的就是签名（signature） 功能
+
 ### **2.7.1 设置二级密码**   
 接口地址：/api/signatures   
 请求方式：put   
@@ -82,6 +85,6 @@ JSON返回示例：
 ```js   
 {   
 	"success": true,   
-	"fee": 500000000         //5 DDN   
+	"fee": "500000000"         //5 DDN   
 }     
 ```   
