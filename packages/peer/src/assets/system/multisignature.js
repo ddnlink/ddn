@@ -60,10 +60,7 @@ class Multisignature {
       throw new Error('Invalid multisignature min')
     }
 
-    if (
-      trs.asset.multisignature.lifetime < 1 ||
-      trs.asset.multisignature.lifetime > 24
-    ) {
+    if (trs.asset.multisignature.lifetime < 1 || trs.asset.multisignature.lifetime > 24) {
       throw new Error(`Invalid multisignature lifetime: ${trs.id}`)
     }
 
@@ -209,11 +206,7 @@ class Multisignature {
 
   async applyUnconfirmed ({ asset }, { address, multisignatures }, dbTrans) {
     if (this._unconfirmedSignatures[address]) {
-      // Fixme: 2020.09.03
-      // throw new Error(
-      //   `Signature on this account ${address} is pending confirmation`
-      // )
-      this.logger.warn(`Signature on this account ${address} is pending confirmation`)
+      this.logger.debug(`Signature on this account ${address} is pending confirmation`)
       return
     }
 
@@ -332,9 +325,7 @@ class Multisignature {
   async ready ({ signatures, asset }, { multisignatures, multimin }) {
     this.logger.debug(`multisignature's signatures: ${signatures}`)
     if (!signatures) {
-      this.logger.warn(
-        'The multisignature is waiting for other account signatures.'
-      )
+      this.logger.debug('The multisignature is waiting for other account signatures.')
       return false
     }
 
