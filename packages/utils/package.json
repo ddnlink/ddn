@@ -1,6 +1,6 @@
 {
   "name": "@ddn/utils",
-  "version": "0.1.18",
+  "version": "0.1.21",
   "description": "DDN utils.",
   "main": "lib/index.js",
   "module": "dist/index.esm.js",
@@ -17,7 +17,7 @@
     "lib"
   ],
   "dependencies": {
-    "@ddn/core": "^0.2.11",
+    "@ddn/core": "^0.2.12",
     "bignumber.js": "^7.2.1",
     "ip": "^1.1.5"
   },
@@ -25,6 +25,5 @@
     "shelljs": "^0.8.3"
   },
   "author": "wly",
-  "license": "MIT",
-  "gitHead": "29ef555868f39340333d04ed85d8125efbb24ca3"
+  "license": "MIT"
 }

@@ -1,5 +1,5 @@
 import utils, { TestUtil } from '@ddn/test-utils'
-import DdnJS from '../lib'
+import DdnJS from '../'
 
 const { config, constants } = DdnJS
 const nodeApi = new TestUtil(config, constants)

@@ -20,7 +20,7 @@ const Gaccount = {
   balance: '10000000000000000'
 }
 
-export {
+export default {
   Daccount,
   Eaccount,
   Gaccount

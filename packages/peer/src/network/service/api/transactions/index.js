@@ -13,18 +13,8 @@ class TransactionService {
 
   async get (req) {
     const query = Object.assign({}, req.body, req.query)
-    query.offset = Number(query.offset || 0)
-    query.limit = Number(query.limit || 100)
-
-    if (typeof query.type !== 'undefined') {
-      query.type = Number(query.type)
-    }
-    if (typeof query.aob !== 'undefined') {
-      query.aob = Number(query.aob)
-    }
-    if (typeof query.and !== 'undefined') {
-      query.and = Number(query.and)
-    }
+    // query.offset = Number(query.offset || 0)
+    // query.limit = Number(query.limit || 100)
 
     const validateErrors = await this.ddnSchema.validate(
       {
@@ -176,11 +166,37 @@ class TransactionService {
     const limit = query.limit || 100
     const offset = query.offset || 0
 
+    const sortFields = ['t_id', 't_block_id', 't_amount', 't_fee', 't_type', 't_timestamp', 't_senderPublicKey', 't_senderId', 't_recipientId', 't_confirmations', 'b_height']
+
+    let sort
+    let sortBy
+    let sortMethod
+    if (query.orderBy) {
+      sort = query.orderBy.split(':')
+
+      sortBy = sort[0]
+      if (sort.length === 2) {
+        sortMethod = sort[1] === 'desc' ? 'desc' : 'asc'
+      } else {
+        sortMethod = 'desc' // default desc
+      }
+    }
+
+    if (sortBy) {
+      if (sortFields.indexOf(sortBy) < 0) {
+        throw new Error('Invalid sort field')
+      }
+    }
+
+    // sequelize, order: [[Sequelize.literal('booth.boothname'), 'ASC']]
+    // https://github.com/sequelize/sequelize/issues/7897
+    const orders = sortBy ? [[this.dao.db_str(sortBy), sortMethod]] : null
+
     const data = await this.runtime.dataquery.queryFullTransactionData(
       where,
       limit,
       offset,
-      null,
+      orders,
       true
     )
 

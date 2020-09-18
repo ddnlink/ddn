@@ -2,7 +2,7 @@
  * Delegate
  * wangxm   2018-01-08
  */
-import DdnCrypto, { nacl } from '@ddn/crypto'
+import DdnCrypto, { createHash } from '@ddn/crypto'
 import { bignum } from '@ddn/utils'
 
 let _singleton
@@ -195,7 +195,7 @@ class Delegate {
     for (let i = 0; i < delegates.length; i++) {
       delegates[i].rate = i + 1
       delegates[i].approval = bignum.divide(delegates[i].vote, totalSupply).toNumber()
-      delegates[i].approval = Math.round(delegates[i].approval * 1e2) / 1e2
+      delegates[i].approval = Math.round(delegates[i].approval * 1e2)
 
       let percent = 100 - (delegates[i].missedblocks / ((delegates[i].producedblocks + delegates[i].missedblocks) / 100))
       percent = Math.abs(percent) || 0
@@ -238,11 +238,18 @@ class Delegate {
      * 返回乱序处理的受托人public_key列表
      */
   async getDisorderDelegatePublicKeys (height) {
-    const truncDelegateList = await this.getDelegatePublickKeysSortByVote()
+    let truncDelegateList
+    try {
+      truncDelegateList = await this.getDelegatePublickKeysSortByVote()
+    } catch (err) {
+      this.logger.error('************* Cannot get delegate list ************' + err.toString())
+      throw err
+    }
 
     const seedSource = await this.runtime.round.getRound(height).toString()
     // wxm 对查询返回的受托人列表进行乱序处理
-    let currentSeed = nacl.hash(Buffer.from(seedSource))
+    // let currentSeed = nacl.hash(Buffer.from(seedSource))
+    let currentSeed = createHash(Buffer.from(seedSource))
     for (let i = 0, delCount = truncDelegateList.length; i < delCount; i++) {
       for (let x = 0; x < 4 && i < delCount; i++, x++) {
         const newIndex = currentSeed[x] % delCount
@@ -250,14 +257,14 @@ class Delegate {
         truncDelegateList[newIndex] = truncDelegateList[i]
         truncDelegateList[i] = b
       }
-      currentSeed = nacl.hash(Buffer.from(currentSeed))
+      currentSeed = createHash(Buffer.from(currentSeed))
     }
 
     return truncDelegateList
   }
 
   /**
-     * 返回当前所有受托人列表中在本地节点配置中存在的私钥信息
+     * 返回当前所有受托人列表中 在本地节点配置中 存在的私钥信息
      * @param {*} height
      */
   async getActiveDelegateKeypairs (height) {

@@ -182,13 +182,17 @@ export default {
       // port: 12345,
 
       pool: {
-        max: 10,
-        min: 1,
-        idle: 10000
+        maxactive: 1,
+        max: 5,
+        min: 0,
+        idle: 20000,
+        acquire: 20000
       },
+      logging: console.log,
 
       // SQLite only
-      storage: 'blockchain.db',
+      storage: 'db/blockchain.db',
+      transactionType: 'IMMEDIATE',
 
       // Sequelize will warn you if you're using the default aliases and not limiting them
       // https://sequelize.org/master/manual/querying.html#operators-aliases

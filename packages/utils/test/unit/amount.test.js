@@ -2,7 +2,7 @@
  * passed
  */
 import { node } from '../ddn-js'
-import amount from '../../lib/helpers/amount'
+import { amount } from '../../'
 
 describe('amount', () => {
   it('normal test', done => {
@@ -14,8 +14,8 @@ describe('amount', () => {
     node.expect(amount.validate('9999999999999999999999999999999999999999999999999')).to.equal('Invalid amount range')
     node.expect(amount.validate('10000000000000000000000000000000000000000000000000')).to.equal('Invalid amount range')
 
-    node.expect(amount.validate('2') === null).to.be.true
-    node.expect(amount.validate('1000') === null).to.be.true
+    node.expect(amount.validate('2') === false).to.be.true
+    node.expect(amount.validate('1000') === false).to.be.true
     done()
   })
 })

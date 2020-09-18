@@ -30,14 +30,16 @@ import {
   randomIpId
 } from './random-utils'
 
-import {
-  Daccount,
-  Eaccount,
-  Gaccount
-} from './accout-utils'
+import accounts from './accout-utils'
 
 // TODO 包的整理规划需要进一步明确原则，根据通用性确定是否写成npm包
 import { DappCategory, DappType } from '@ddn/asset-dapp'
+
+const {
+  Daccount,
+  Eaccount,
+  Gaccount
+} = accounts
 
 const assetTypes = DdnUtils.assetTypes
 const bignum = DdnUtils.bignum

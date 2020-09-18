@@ -1,6 +1,6 @@
 {
   "name": "@ddn/core",
-  "version": "0.2.11",
+  "version": "0.2.12",
   "description": "DDN core.",
   "main": "./lib/index.js",
   "keywords": [
@@ -35,6 +35,5 @@
   },
   "devDependencies": {
     "umi-types": "0.5.3"
-  },
-  "gitHead": "29ef555868f39340333d04ed85d8125efbb24ca3"
+  }
 }

@@ -401,34 +401,36 @@ class Peer {
      * @param {*} timeoutSeconds 服务暂停时间（单位：秒）
      */
   async changeState (pip, port, state, timeoutSeconds) {
-    const isStaticPeer = this.config.peers.list.find(
-      peer => peer.ip === ip.fromLong(pip) && peer.port === port
-    )
-    if (isStaticPeer) {
-      this.logger.info("Peer in white list, the state can't change.")
-    } else {
-      let clock = null
-      if (state === 0) {
-        clock = Date.now() + (timeoutSeconds || 1) * 1000
-      }
-
-      return new Promise((resolve, reject) => {
-        this.logger.debug('Peer is changeState: clock', clock)
-        this.dao.update(
-          'peer',
-          { state, clock },
-          { ip: pip, port },
-          (err, result) => {
-            if (err) {
-              this.logger.error('Peer#state', err)
-              reject(err)
-            } else {
-              resolve(result)
-            }
-          }
-        )
-      })
+    // FIXME: 2020.9.3 白名单状态修改
+    // const isStaticPeer = this.config.peers.list.find(
+    //   peer => peer.ip === ip.fromLong(pip) && peer.port === port
+    // )
+    // if (false) {
+    // if (isStaticPeer) {
+    // this.logger.info("Peer in white list, the state can't change.")
+    // } else {
+    let clock = null
+    if (state === 0) {
+      clock = Date.now() + (timeoutSeconds || 1) * 1000
     }
+
+    return new Promise((resolve, reject) => {
+      this.logger.debug('Peer is changeState: clock', clock)
+      this.dao.update(
+        'peer',
+        { state, clock },
+        { ip: pip, port },
+        (err, result) => {
+          if (err) {
+            this.logger.error('Peer#state', err)
+            reject(err)
+          } else {
+            resolve(result)
+          }
+        }
+      )
+    })
+    // }
   }
 
   /**

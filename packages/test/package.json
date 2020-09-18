@@ -1,6 +1,6 @@
 {
   "name": "@ddn/test",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "bin": {
     "test": "./bin/test.js"
   },
@@ -41,6 +41,5 @@
     "typescript": "^3.5.2",
     "umi-utils": "1.7.1",
     "yargs-parser": "13.1.1"
-  },
-  "gitHead": "29ef555868f39340333d04ed85d8125efbb24ca3"
+  }
 }

@@ -43,6 +43,8 @@ class Program {
     await this._context.init(options)
 
     this._context.runtime.state = DdnUtils.runtimeState.Pending
+    this._context.runtime.loaded = false
+
     // 区块核心处理模块
     this._context.runtime.block = Block.singleton(this._context)
     // 交易核心处理模块
@@ -150,7 +152,6 @@ class Program {
     if (options.isDaemonMode) {
       require('daemon')({ cwd: process.cwd() })
     }
-
     // 提供系统默认配置文件
     options.configObject = extend(true, defaultConfig.default, options.configObject)
 
@@ -253,6 +254,9 @@ class Program {
 
     // 启动区块铸造任务
     await this.startForgeBlockTask()
+
+    // 块加载完成
+    this._context.runtime.loaded = true
   }
 
   async _blockchainReady () {
@@ -455,7 +459,8 @@ class Program {
             try {
               await this._context.runtime.block.generateBlock(forgeDelegateInfo.keypair, forgeDelegateInfo.time)
             } catch (err) {
-              this._context.logger.error('铸造区块异常: ' + DdnUtils.system.getErrorMsg(err))
+              this._context.logger.error('Forged new block failed: ' + DdnUtils.system.getErrorMsg(err))
+              cb('Forged new block failed: ' + err) // Added: 2020.9.4
             }
           }
 

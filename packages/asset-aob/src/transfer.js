@@ -156,6 +156,7 @@ class Transfer extends Asset.Base {
     const balance = (assetBalancedata && assetBalancedata.balance) ? assetBalancedata.balance : '0'
     const newBalance = DdnUtils.bignum.plus(balance, `-${transfer.amount}`)
     if (DdnUtils.bignum.isLessThan(newBalance, 0)) {
+      // this.logger.error('Asset balance not enough')
       throw new Error('Asset balance not enough')
     }
     if (assetBalancedata) {
@@ -188,6 +189,7 @@ class Transfer extends Asset.Base {
     const balance2 = (assetBalancedata2 && assetBalancedata2.balance) ? assetBalancedata2.balance : '0'
     const newBalance2 = DdnUtils.bignum.plus(balance2, transfer.amount)
     if (DdnUtils.bignum.isLessThan(newBalance2, 0)) {
+      // this.logger.error('Asset balance not enough')
       throw new Error('Asset balance not enough')
     }
     if (assetBalancedata2) {
@@ -227,6 +229,8 @@ class Transfer extends Asset.Base {
     const newBalance = DdnUtils.bignum.plus(balance, transfer.amount)
     if (DdnUtils.bignum.isLessThan(newBalance, 0)) {
       throw new Error('Asset balance not enough')
+      // this.logger.error('Asset balance not enough')
+      // return
     }
     if (assetBalancedata) {
       this.dao.update('mem_asset_balance', {
@@ -259,6 +263,8 @@ class Transfer extends Asset.Base {
     const newBalance2 = DdnUtils.bignum.plus(balance2, `-${transfer.amount}`)
     if (DdnUtils.bignum.isLessThan(newBalance2, 0)) {
       throw new Error('Asset balance not enough')
+      // this.logger.error('Asset balance not enough')
+      // return
     }
     if (assetBalancedata2) {
       this.dao.update('mem_asset_balance', {
@@ -284,7 +290,7 @@ class Transfer extends Asset.Base {
 
     const surplus = DdnUtils.bignum.minus(balance, transfer.amount)
     if (DdnUtils.bignum.isLessThan(surplus, 0)) {
-      throw new Error('Insufficient asset balance')
+      throw new Error(`Insufficient AoB balance of ${transfer.currency}`)
     }
     this.balanceCache.setAssetBalance(sender.address, transfer.currency, surplus.toString())
     return trs

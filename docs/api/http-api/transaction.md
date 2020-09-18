@@ -43,72 +43,55 @@ sidebar_label: Http api transaction
    
 请求示例：   
 ```bash   
-curl -k -X GET 'http://127.0.0.1:8001/api/transactions?recipientId=D2zThPTQZDNQqXbe5tikDQ24YyCQTCpbSC&orderBy=t_timestamp:desc&limit=3'   
+curl -k -X GET 'http://127.0.0.1:8001/api/transactions?recipientId=DDr1KLYLRos6iZ55HvNrKo2X8Zpg2mT1oh&orderBy=t_timestamp:desc&limit=3'   
 ```   
    
 JSON返回示例：   
 ```js   
-{   
-	"success": true,   
-	"transactions": [{   
-		"id": "17192581936339156329",   
-		"height": "105951",   
-		"blockId": "15051364118100195665",   
-		"type": 0,   
-		"timestamp": 4385190,   
-		"senderPublicKey": "d39d6f26869067473d685da742339d1a9117257fe14b3cc7261e3f2ed5a339e3",   
-		"senderId": "15745540293890213312",   
-		"recipientId": "D2zThPTQZDNQqXbe5tikDQ24YyCQTCpbSC",   
-		"amount": 10000000000,   
-		"fee": 10000000,   
-		"signature": "98d65df3109802c707eeed706e90a907f337bddab58cb4c1fbe6ec2179aa1c85ec2903cc0cf44bf0092926829aa5a0a6ec99458f65b6ebd11f0988772e58740e",   
-		"signSignature": "",   
-		"signatures": null,   
-		"confirmations": "31802",   
-		"asset": {   
-			   
-		}   
-	},   
-	{   
-		"id": "7000452951235123088",   
-		"height": "105473",   
-		"blockId": "11877628176330539727",   
-		"type": 0,   
-		"timestamp": 4380147,   
-		"senderPublicKey": "fafcd01f6b813fdeb3c086e60bc7fa9bfc8ef70ae7be47ce0ac5d06e7b1a8575",   
-		"senderId": "DDr1KLYLRos6iZ55HvNrKo2X8Zpg2mT1oh",   
-		"recipientId": "D2zThPTQZDNQqXbe5tikDQ24YyCQTCpbSC",   
-		"amount": 10000000000,   
-		"fee": 10000000,   
-		"signature": "dc84044d4f6b4779eecc3a986b6507e458cc5964f601ebeb4d3b68a96129813f4940e14de950526dd685ca1328b6e477e6c57e95aeac45859a2ea62a587d0204",   
-		"signSignature": "",   
-		"signatures": null,   
-		"confirmations": "32280",   
-		"asset": {   
-			   
-		}   
-	},   
-	{   
-		"id": "14093929199102906687",   
-		"height": "105460",   
-		"blockId": "2237504897174225512",   
-		"type": 0,   
-		"timestamp": 4380024,   
-		"senderPublicKey": "fafcd01f6b813fdeb3c086e60bc7fa9bfc8ef70ae7be47ce0ac5d06e7b1a8575",   
-		"senderId": "DDr1KLYLRos6iZ55HvNrKo2X8Zpg2mT1oh",   
-		"recipientId": "D2zThPTQZDNQqXbe5tikDQ24YyCQTCpbSC",   
-		"amount": 10000000000,   
-		"fee": 10000000,   
-		"signature": "73ceddc3cbe5103fbdd9eee12f7e4d9a125a3bcf2e7cd04282b7329719735aeb36936762f17d842fb14813fa8f857b8144040e5117dffcfc7e2ae88e36440a0f",   
-		"signSignature": "",   
-		"signatures": null,   
-		"confirmations": "32293",   
-		"asset": {   
-			   
-		}   
-	}],   
-	"count": 3   
-}   
+{
+    "success": true,
+    "transactions": [
+        {
+            "id": "63b3019d9d35e8dd336f732c3132a08d6d8476d391262463e3b7b6ab6cef28daba3fa4ca47f0a9ab103a4bebb4c815f4b6862f884e402ee0bb9235999561f251",
+            "height": "7",
+            "block_id": "23d5ae161f2ba8fcf3fdb4ebcb76c311b4c5e379c79199cccef3964cfa3145ecb44589c7dca8042206a234c4ffd14b8aec4f575f97eace7129b825583cf2824e",
+            "type": 0,
+            "timestamp": 89142766,
+            "senderPublicKey": "daeee33def7eef0c7ba06ec66eda7204437ba88ace8f04e4a6aa4d7bfbd18bc1",
+            "senderId": "DC5kJzMdNDhrnupWX2NGafzMoiwdHiySBe",
+            "recipientId": "DDr1KLYLRos6iZ55HvNrKo2X8Zpg2mT1oh",
+            "amount": "50000000000",
+            "fee": "10000000",
+            "signature": "b4c7c5a86df20b94afb7787c2fdc6153da12d4fa569b117dd537c47c7e11fb0ab2f77c665580796bd16e0f35de22174aa2b32afeb8a6f4e9aaf4274937a28804",
+            "sign_signature": null,
+            "signatures": null,
+            "confirmations": 141,
+            "args": null,
+            "message": null,
+            "asset": {}
+        },
+        {
+            "id": "f5e06b1193295da852eca3a7d5d8ef5c7cb848aa3b5cbb3b21a06e1e9f3c457999946e9ca6064650953c47379abb06d7604367f1b611d2937810de7c612b8962",
+            "height": "7",
+            "block_id": "23d5ae161f2ba8fcf3fdb4ebcb76c311b4c5e379c79199cccef3964cfa3145ecb44589c7dca8042206a234c4ffd14b8aec4f575f97eace7129b825583cf2824e",
+            "type": 0,
+            "timestamp": 89142765,
+            "senderPublicKey": "daeee33def7eef0c7ba06ec66eda7204437ba88ace8f04e4a6aa4d7bfbd18bc1",
+            "senderId": "DC5kJzMdNDhrnupWX2NGafzMoiwdHiySBe",
+            "recipientId": "DDr1KLYLRos6iZ55HvNrKo2X8Zpg2mT1oh",
+            "amount": "50000000000",
+            "fee": "10000000",
+            "signature": "9a85b1a7043e801bd0e2d158041fb3301500f222e69d9f5242b4b6ce5d7b1b3008da111f7709fdb73c7651c44f17ce35c4b377c0f1e6dac5f859cf56394ffe04",
+            "sign_signature": null,
+            "signatures": null,
+            "confirmations": 141,
+            "args": null,
+            "message": null,
+            "asset": {}
+        }
+    ],
+    "count": 2
+} 
 ```   
 ### **2.2.2 根据交易id查看交易详情**   
 接口地址：/api/transactions/get   
@@ -130,32 +113,33 @@ JSON返回示例：
    
 请求示例：   
 ```bash   
-curl -k -X GET 'http://127.0.0.1:8001/api/transactions/get?id=14093929199102906687'   
+curl -k -X GET 'http://127.0.0.1:8001/api/transactions/get?id=f5e06b1193295da852eca3a7d5d8ef5c7cb848aa3b5cbb3b21a06e1e9f3c457999946e9ca6064650953c47379abb06d7604367f1b611d2937810de7c612b8962'   
 ```   
    
 JSON返回示例：   
-```js   
-{   
-	"success": true,   
-	"transaction": {   
-		"id": "14093929199102906687", // 交易id  
-		"height": "105460",// 该交易所在区块高度   
-		"blockId": "2237504897174225512",// 所在区块id   
-		"type": 0,// 交易类型，0：普通DDN转账   
-		"timestamp": 4380024,// 距离阿希创世块的timestamp   
-		"senderPublicKey": "fafcd01f6b813fdeb3c086e60bc7fa9bfc8ef70ae7be47ce0ac5d06e7b1a8575", // 发送者公钥   
-		"senderId": "DDr1KLYLRos6iZ55HvNrKo2X8Zpg2mT1oh",// 发送者地址   
-		"recipientId": "D2zThPTQZDNQqXbe5tikDQ24YyCQTCpbSC",// 接收者地址   
-		"amount": 10000000000,// 交易额，100DDN   
-		"fee": 10000000, // 手续费0.1DDN  
-		"signature": "73ceddc3cbe5103fbdd9eee12f7e4d9a125a3bcf2e7cd04282b7329719735aeb36936762f17d842fb14813fa8f857b8144040e5117dffcfc7e2ae88e36440a0f",   
-		"signSignature": "",   
-		"signatures": null,   
-		"confirmations": "34268",// 确认数   
-		"asset": {   
-		}   
-	}   
-}   
+```js  
+{
+    "success": true,
+    "transaction": {
+        "id": "f5e06b1193295da852eca3a7d5d8ef5c7cb848aa3b5cbb3b21a06e1e9f3c457999946e9ca6064650953c47379abb06d7604367f1b611d2937810de7c612b8962",
+        "height": "7",
+        "block_id": "23d5ae161f2ba8fcf3fdb4ebcb76c311b4c5e379c79199cccef3964cfa3145ecb44589c7dca8042206a234c4ffd14b8aec4f575f97eace7129b825583cf2824e",
+        "type": 0, // 交易类型，0：普通DDN转账
+        "timestamp": 89142765, // 距离创世块的timestamp
+        "senderPublicKey": "daeee33def7eef0c7ba06ec66eda7204437ba88ace8f04e4a6aa4d7bfbd18bc1",
+        "senderId": "DC5kJzMdNDhrnupWX2NGafzMoiwdHiySBe", // 发送者地址  
+        "recipientId": "DDr1KLYLRos6iZ55HvNrKo2X8Zpg2mT1oh", // 接收者地址
+        "amount": "50000000000",
+        "fee": "10000000", // 手续费0.1DDN 
+        "signature": "9a85b1a7043e801bd0e2d158041fb3301500f222e69d9f5242b4b6ce5d7b1b3008da111f7709fdb73c7651c44f17ce35c4b377c0f1e6dac5f859cf56394ffe04",
+        "sign_signature": null,
+        "signatures": null,
+        "confirmations": 151,
+        "args": null,
+        "message": null,
+        "asset": {}
+    }
+} 
 ```   
    
 ### **2.2.3 根据未确认交易id查看详情**   
@@ -178,7 +162,7 @@ JSON返回示例：
    
 请求示例：   
 ```bash   
-curl -k -X GET http://127.0.0.1:8001/api/transactions/unconfirmed/get?id=7557072430673853692  // 正常情况，该未确认交易存在时间极短0~10秒   
+curl -k -X GET http://127.0.0.1:8001/api/transactions/unconfirmed/get?id=bc7e2c9ad4da35f21bedd16363ac3981d1b665395b99f54c433bd2365e16632116748c08c4344758c26cc67a5e6723e2e14401f5aa2b94739d9e7619bc5703d3  // 正常情况，该未确认交易存在时间极短0~10秒   
 ```   
    
 JSON返回示例：   
@@ -188,17 +172,17 @@ JSON返回示例：
 	"transaction": {
 		"type": 0,
 		"amount": 10000,
-		"senderPublicKey": "3ec1c9ec08c0512641deba37c0e95a0fe5fc3bdf58424009f594d7d6a4e28a2a",
+		"senderPublicKey": "ab8c0af3b048dac4d32ad779f79c47948c2a0a0577b89ca7eba58ae321f04695",
 		"requesterPublicKey": null,
 		"timestamp": 5082322,
 		"asset": {
 			
 		},
-		"recipientId": "D2zThPTQZDNQqXbe5tikDQ24YyCQTCpbSC",
+		"recipientId": "DDr1KLYLRos6iZ55HvNrKo2X8Zpg2mT1oh",
 		"signature": "3a97f8d63509ef964bda3d816366b8e9e2d9b5d4604a660e7cbeefe210cb910f5de9a51bece06c32d010f55502c62f0f59b8224e1c141731ddfee27206a88d02",
-		"id": "7557072430673853692",
+		"id": "bc7e2c9ad4da35f21bedd16363ac3981d1b665395b99f54c433bd2365e16632116748c08c4344758c26cc67a5e6723e2e14401f5aa2b94739d9e7619bc5703d3",
 		"fee": 10000000,
-		"senderId": "15238461869262180695"
+		"senderId": "DJWuENme5xJUJTjWiQEjfuLYRGtABfwhjz"
 	}
 }
 ```   
@@ -264,13 +248,13 @@ JSON返回示例：
    
 请求示例：   
 ```bash   
-curl -k -H "Content-Type: application/json" -X PUT -d '{"secret":"unaware label emerge fancy concert long fiction report affair appear decide twenty","amount":1000000,"recipientId":"D2zThPTQZDNQqXbe5tikDQ24YyCQTCpbSC"}' 'http://127.0.0.1:8001/api/transactions'    
+curl -k -H "Content-Type: application/json" -X PUT -d '{"secret": "grunt grain siege churn chicken phrase shell arrange fox recipe scan tube","amount":"1000000","recipientId":"DDr1KLYLRos6iZ55HvNrKo2X8Zpg2mT1oh"}' 'http://127.0.0.1:8001/api/transactions'    
 ```   
    
 JSON返回示例：   
 ```js   
 {   
 	"success": true,   
-	"transactionId": "16670272591943275531"   
+	"transactionId": "bc7e2c9ad4da35f21bedd16363ac3981d1b665395b99f54c433bd2365e16632116748c08c4344758c26cc67a5e6723e2e14401f5aa2b94739d9e7619bc5703d3"   
 }   
 ```  

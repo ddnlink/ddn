@@ -13,7 +13,7 @@ export default (
   }
 ) => {
   return (req, res, next) => {
-    req.query = parseNums(req.query, options)
+    req.query = parseNums(req.query || req.body, options)
     next()
   }
 }

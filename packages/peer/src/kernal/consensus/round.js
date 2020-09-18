@@ -58,7 +58,7 @@ class Round {
 
   /**
    * 获得某高度下的铸块周期
-   * @param {*} height 高度
+   * @param {*} height 高度（bignum）
    * return string
    */
   async getRound (height) {
@@ -112,14 +112,14 @@ class Round {
    * @param {array}} dbTrans 交易
    */
   async tick (block, dbTrans) {
+    const round = await this.getRound(block.height)
+
     await this.runtime.account.merge(null, {
       publicKey: block.generator_public_key, // wxm block database
       producedblocks: 1,
       block_id: block.id, // wxm block database
-      round: await this.getRound(block.height)
+      round
     }, dbTrans)
-
-    const round = await this.getRound(block.height)
 
     this._feesByRound[round] = (this._feesByRound[round] || '0')
 
@@ -141,6 +141,7 @@ class Round {
       return
     }
 
+    // 受托人数量，不是创世区块，也不是第一轮
     if (this._delegatesByRound[round].length !== this.constants.delegates &&
             !bignum.isEqualTo(block.height, 1) && !bignum.isEqualTo(block.height, this.constants.delegates)) {
       this.logger.debug('Round tick completed 2', {
@@ -259,16 +260,16 @@ class Round {
       }
     }
 
+    const round = await this.getRound(block.height)
+    const prevRound = await this.getRound(previousBlock.height)
+    this.logger.debug(`Round backward tick prevRound is ${prevRound} of previousBlock.height ${previousBlock.height} or previousBlock.b_height ${previousBlock.b_height}`)
+
     await this.runtime.account.merge(null, {
       publicKey: block.generator_public_key, // wxm block database
       producedblocks: -1,
       block_id: block.id, // wxm block database
-      round: await this.getRound(block.height)
+      round
     }, dbTrans)
-
-    const round = await this.getRound(block.height)
-    // const prevRound = await this.getRound(previousBlock.b_height)
-    const prevRound = await this.getRound(previousBlock.height)
 
     this._feesByRound[round] = (this._feesByRound[round] || 0)
 
@@ -280,7 +281,6 @@ class Round {
     this._delegatesByRound[round] = this._delegatesByRound[round] || []
     this._delegatesByRound[round].pop()
 
-    // if (prevRound === round && !bignum.isEqualTo(previousBlock.b_height, 1)) {
     if (prevRound === round && !bignum.isEqualTo(previousBlock.height, 1)) {
       return done()
     }

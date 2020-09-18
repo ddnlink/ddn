@@ -1,7 +1,7 @@
 {
     "name": "@ddn/ddn",
     "preferGlobal": true,
-    "version": "0.2.21",
+    "version": "0.2.24",
     "description": "A Command line tool to manage ddn",
     "main": "./lib/index.js",
     "scripts": {
@@ -20,9 +20,9 @@
     "author": "HuoDing <hd@qq.com>",
     "license": "MIT",
     "dependencies": {
-        "@ddn/crypto": "^0.3.3",
+        "@ddn/crypto": "^0.3.6",
         "@ddn/node-sdk": "^0.2.5",
-        "@ddn/utils": "^0.1.18",
+        "@ddn/utils": "^0.1.21",
         "async": "1.5.2",
         "bytebuffer": "^4.0.0",
         "commander": "^2.8.1",
@@ -43,6 +43,5 @@
         "type": "git",
         "url": "https://github.com/ddnlink/ddn/tree/master/packages/ddn"
     },
-    "homepage": "https://github.com/ddnlink/ddn/tree/master/packages/ddn",
-    "gitHead": "29ef555868f39340333d04ed85d8125efbb24ca3"
+    "homepage": "https://github.com/ddnlink/ddn/tree/master/packages/ddn"
 }

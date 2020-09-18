@@ -81,9 +81,6 @@ class Lock {
       throw new Error('Double submit')
     }
     this.oneoff.set(key, true)
-
-    // self.library.oneoff.set(key, true);
-    // setImmediate(cb);
   }
 
   async undoUnconfirmed ({ type }, { address }, dbTrans) {

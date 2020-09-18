@@ -125,7 +125,7 @@ class DAO {
         }
       } else {
         if (typeof cb === 'function') {
-          cb('数据模型未定义：' + modelName)
+          cb('Data model not defined: ' + modelName)
           return null
         }
       }
@@ -184,7 +184,7 @@ class DAO {
         }
       } else {
         if (typeof cb === 'function') {
-          cb('数据模型未定义：' + modelName)
+          cb('Data model not defined: ' + modelName)
           return null
         }
       }
@@ -254,7 +254,7 @@ class DAO {
         }
       } else {
         if (typeof cb === 'function') {
-          cb('数据模型未定义：' + modelName)
+          cb('Data model not defined: ' + modelName)
           return null
         }
       }
@@ -315,7 +315,7 @@ class DAO {
         }
       } else {
         if (typeof cb === 'function') {
-          cb('数据模型未定义：' + modelName)
+          cb('Data model not defined: ' + modelName)
           return null
         }
       }
@@ -382,7 +382,7 @@ class DAO {
         }
       } else {
         if (typeof cb === 'function') {
-          cb('数据模型未定义：' + modelName)
+          cb('Data model not defined: ' + modelName)
           return null
         }
       }
@@ -453,7 +453,7 @@ class DAO {
           })
       } else {
         if (typeof cb === 'function') {
-          cb('数据模型未定义：' + modelName)
+          cb('Data model not defined: ' + modelName)
           return null
         }
       }
@@ -509,6 +509,7 @@ class DAO {
             if (typeof cb === 'function') {
               const jsonResults = []
               const foundRows = results.rows ? results.rows : results
+
               for (let i = 0; i < foundRows.length; i++) {
                 jsonResults.push(foundRows[i].toJSON())
               }
@@ -527,6 +528,7 @@ class DAO {
           })
           .catch(err2 => {
             if (typeof cb === 'function') {
+              // console.log(' err2 .................', err2)
               let errMsg2 = err2.toString()
               if (err2.errors && err2.errors.length > 0) {
                 for (let i = 0; i < err2.errors.length; i++) {
@@ -539,7 +541,7 @@ class DAO {
           })
       } else {
         if (typeof cb === 'function') {
-          cb('数据模型未定义：' + modelName)
+          cb('Data model not defined: ' + modelName)
           return null
         }
       }
@@ -551,6 +553,8 @@ class DAO {
             errMsg += '\r\n' + err.errors[i].message
           }
         }
+        // console.log('findPage err 3.................')
+
         cb(errMsg)
         return null
       }
@@ -609,13 +613,14 @@ class DAO {
                   errMsg2 += '\r\n' + err2.errors[i].message
                 }
               }
+              console.log('findListByGroup error 1', err2)
               cb(errMsg2)
               return null
             }
           })
       } else {
         if (typeof cb === 'function') {
-          cb('数据模型未定义：' + modelName)
+          cb('Data model not defined: ' + modelName)
           return null
         }
       }
@@ -627,6 +632,9 @@ class DAO {
             errMsg += '\r\n' + err.errors[i].message
           }
         }
+
+              console.log('findListByGroup error 2', err)
+
         cb(errMsg)
         return null
       }
@@ -650,8 +658,6 @@ class DAO {
     this._getModel(modelName)
       .findOne(options)
       .then(data => {
-        // console.log('data', data);
-
         cb(null, data ? data.toJSON() : null)
         return null
       })
@@ -733,40 +739,40 @@ class DAO {
             if (err) {
               t.rollback()
                 .then(() => {
-                  cb('rollback--' + err, true)
-                  return null
+                  return cb('rollback--, err1+true: ' + err, true)
+                  // return null
                 })
                 .catch(err2 => {
-                  cb('rollback--' + err2, false)
-                  return null
+                  cb('rollback--, err2+false: ' + err2, false)
+                  // return null
                 })
             } else {
               t.commit()
                 .then(() => {
-                  cb(null, true)
-                  return null
+                  return cb(null, true)
+                  // return null
                 })
                 .catch(err2 => {
-                  cb('commit--' + err2, false)
-                  return null
+                  return cb('commit--' + err2, false)
+                  // return null
                 })
             }
           })
         } catch (err3) {
           t.rollback()
             .then(() => {
-              cb('rollback--' + err3, true)
-              return null
+              return cb('rollback--, err3+true: ' + err3, true)
+              // return null
             })
             .catch(err4 => {
-              cb('rollback--' + err4, false)
-              return null
+              return cb('rollback--, err4+false: ' + err4, false)
+              // return null
             })
         }
       })
     } else {
       cb('数据库未连接', false)
-      return null
+      // return null
     }
   }
 
@@ -799,7 +805,7 @@ class DAO {
           })
       } else {
         if (typeof cb === 'function') {
-          cb('数据模型未定义：' + modelName)
+          cb('Data model not defined: ' + modelName)
           return null
         }
       }
@@ -837,7 +843,7 @@ class DAO {
           })
       } else {
         if (typeof cb === 'function') {
-          cb('数据模型未定义：' + modelName)
+          cb('Data model not defined: ' + modelName)
           return null
         }
       }
@@ -884,7 +890,7 @@ class DAO {
           })
       } else {
         if (typeof cb === 'function') {
-          cb('数据模型未定义：' + modelName)
+          cb('Data model not defined: ' + modelName)
           return null
         }
       }

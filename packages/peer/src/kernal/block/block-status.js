@@ -73,7 +73,7 @@ class BlockStatus {
     let amount = bignum.new(0)
     let multiplier = bignum.new(0)
 
-    heightResult = bignum.plus(bignum.minus(heightResult, this._rewardOffset), 1)
+    heightResult = bignum.minus(heightResult, this._rewardOffset).plus(1)
 
     for (var i = 0; i < this._milestones.length; i++) {
       if (milestone >= i) {

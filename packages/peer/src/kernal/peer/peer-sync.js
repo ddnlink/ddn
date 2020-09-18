@@ -42,7 +42,10 @@ class PeerSync {
       }, remotePeerHeight.body)
       if (validateErrors) {
         this.logger.log(`Failed to parse blockchain height: ${peerStr} ${validateErrors[0].schemaPath} ${validateErrors[0].message}`)
+        // 2020.8.28 添加返回结果
+        return false
       }
+
       const lastBlock = this.runtime.block.getLastBlock()
       if (bignum.isLessThan(lastBlock.height, remotePeerHeight.body.height)) {
         let syncLastBlock = null
@@ -54,11 +57,10 @@ class PeerSync {
         } else {
           syncLastBlock = await this._cloneBlocksFromPeer(remotePeerHeight.peer, lastBlock.id)
         }
-        this.logger.debug(`Got syncLastBlock ${syncLastBlock}`)
+        this.logger.debug(`Got syncLastBlock: ${syncLastBlock}`)
         if (syncLastBlock) {
           remotePeerHeight = await this.runtime.peer.request({ api: '/height' }) // fixme ???
-          // if (remotePeerHeight && remotePeerHeight.body && syncLastBlock.height === remotePeerHeight.body.height) {
-          if (remotePeerHeight && remotePeerHeight.body && bignum.isEqualTo(syncLastBlock.height, remotePeerHeight.body.height)) {
+          if (remotePeerHeight && remotePeerHeight.body && bignum.new(syncLastBlock.height).eq(remotePeerHeight.body.height)) {
             return true
           } else {
             return false
@@ -118,8 +120,8 @@ class PeerSync {
     while (!lastLackBlock && bignum.isGreaterThan(currProcessHeight, 1)) {
       const data = await this._getIdSequence(currProcessHeight)
 
-      const maxHeight = currProcessHeight
-      currProcessHeight = data.firstHeight
+      const maxHeight = currProcessHeight // 119
+      currProcessHeight = data.firstHeight // 114
 
       const result = await this.runtime.peer.request({ peer, api: `/blocks/common?ids=${data.ids}&max=${maxHeight}&min=${currProcessHeight}` })
       if (result && result.body && result.body.common) {
@@ -129,8 +131,11 @@ class PeerSync {
               id: result.body.common.id,
               height: result.body.common.height
             }, ['previous_block'], (err, row) => {
+              this.logger.debug(`peer-sync._addLackBlocks result.body.common.previous_block is ${result.body.common.previous_block}`)
+              this.logger.debug(`peer-sync._addLackBlocks row.previous_block is ${row.previous_block}`)
               if (err || !row) {
                 this.logger.error(err || "Can't compare blocks")
+                // FIXME: 2020.8.29 这里使用 reject 的流程是不一样的
                 // resolve()
                 reject(err || "Can't compare blocks")
               } else if (result.body.common.previous_block === row.previous_block) { // 确定那个正常的块
@@ -150,7 +155,7 @@ class PeerSync {
     }
 
     this.logger.info(`Found common block ${lastLackBlock.id} (at ${lastLackBlock.height}) with peer ${peerStr}, last block height is ${lastBlock.height}`)
-    const toRemove = bignum.minus(lastBlock.height, lastLackBlock.height)
+    const toRemove = bignum.new(lastBlock.height).minus(lastLackBlock.height)
     this.logger.debug(`Got lastBlock.height = ${lastBlock.height}, lastLackBlock.height = ${lastLackBlock.height}`)
 
     if (bignum.isGreaterThanOrEqualTo(toRemove, 5)) {
@@ -187,7 +192,9 @@ class PeerSync {
 
           const result = await this.runtime.block.querySimpleBlockData({ height: backHeight.toString() })
           if (result && result.block) {
-            lastLackBlock = result.block
+            // fixme: 2020.8.29 添加序列化数据
+            const block = await this.runtime.block._parseObjectFromFullBlocksData([result.block])
+            lastLackBlock = block.pop()
           }
         }
 
@@ -223,11 +230,13 @@ class PeerSync {
     return lastLackBlock
   }
 
+  /**
+   * return lastClonedBlock from remote peer or null
+   * @param {object} peer peer object
+   * @param {string} blockId block id
+   */
   async _cloneBlocksFromPeer (peer, blockId) {
     const peerStr = peer ? `${ip.fromLong(peer.ip)}:${peer.port}` : 'unknown'
-    if (blockId === this.genesisblock.id) {
-      this.logger.debug(`Loading blocks from genesis from ${peerStr}`)
-    }
 
     let lastClonedBlock = null
     let queryBlockId = blockId
@@ -240,11 +249,6 @@ class PeerSync {
 
       let blocks = data.body.blocks
 
-      // wxm TODO
-      // if (typeof blocks === "string") {
-      //     blocks = library.dbLite.parseCSV(blocks);
-      // }
-
       const validateErrors = await this.ddnSchema.validate({
         type: 'array'
       }, blocks)
@@ -253,7 +257,6 @@ class PeerSync {
       }
 
       // wxm block databsae
-      // blocks = blocks.map(row2parsed, parseFields(privated.blocksDataFields));
       blocks = await this.runtime.block._parseObjectFromFullBlocksData(blocks)
       if (blocks.length === 0) {
         loaded = true
@@ -266,23 +269,22 @@ class PeerSync {
             block = await this.runtime.block.objectNormalize(block)
           } catch (e) {
             this.logger.error(`Failed to normalize block: ${e}`, block)
-            this.logger.error(`Block ${block ? block.id : 'null'} is not valid, ban 60 min`, peerStr)
+            this.logger.error(`Block is not valid, ban 60 min, block: ${block ? block.id : 'null'} `, peerStr)
             this.runtime.peer.changeState(peer.ip, peer.port, 0, 3600) // 3600 s
-            return
+            return null
           }
 
           try {
             await this.runtime.block.processBlock(block, null, false, true, true)
           } catch (err) {
-            this.logger.error(`Failed to process block: ${err}`, block)
-            this.logger.error(`Block ${block ? block.id : 'null'} is not valid, ban 60 min`, peerStr)
+            this.logger.error(`Failed to process block: ${err}`)
+            this.logger.error(`Block is not valid, ban 60 min, block: ${block ? block.id : 'null'} `, peerStr)
             this.runtime.peer.changeState(peer.ip, peer.port, 0, 3600) // 3600 ms
-            return
+            return null
           }
 
           queryBlockId = block.id
           lastClonedBlock = block
-
           this.logger.log(`Block ${block.id} loaded from ${peerStr} at`, block.height)
         }
       }
@@ -392,7 +394,11 @@ class PeerSync {
       // fixme 2020.8.13
       // if (!await this.runtime.transaction.hasUnconfirmedTransaction(transactions[i])) {
       if (await this.runtime.transaction.hasUnconfirmedTransaction(transactions[i])) {
-        return reject('Transaction already exists.')
+        // fixme no promise 2020.8.17 这里应该退出整个函数还是for循环 AA
+        // return reject('Transaction already exists.')
+        throw new Error('Transaction already exists.')
+        // this.logger.error('Transaction already exists.')
+        // continue
       }
       trs.push(transactions[i])
     }

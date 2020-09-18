@@ -3,7 +3,7 @@ import runtimeState from './runtime-states'
 import LimitCache from './limit-cache'
 import amount from './amount'
 import bignum from './bignumber'
-import bufferCache from './buffer-cache'
+import BufferCache from './buffer-cache'
 import system from './system'
 import routesMap from './routes-map'
 
@@ -13,7 +13,7 @@ export {
   runtimeState,
   amount,
   bignum,
-  bufferCache,
+  BufferCache,
   system,
   routesMap
 }
@@ -25,7 +25,7 @@ export default {
   runtimeState,
   amount,
   bignum,
-  bufferCache,
+  BufferCache,
   system,
   routesMap
 }

@@ -254,14 +254,31 @@ class Org extends Asset.Base {
   }
 
   async dbSave (trs, dbTrans) {
-    const org = await this.getAssetObject(trs)
+    const assetObj = await this.getAssetObject(trs)
+    this.logger.debug(`assetObj: ${assetObj}`)
+
+    if (!assetObj) {
+      return
+    }
+
+    // fixme: 2020.9.5 这里为什么只能通过 Object.assign 创建新对象才能将 transaction_id 创建出来
+    const org = Object.assign({}, assetObj) // assetObj //
+
+    this.logger.debug(`dbSave org 0: ${JSON.stringify(org)}`)
+
     org.transaction_id = trs.id
     org.timestamp = trs.timestamp
     if (org.org_id) {
       org.org_id = org.org_id.toLowerCase()
     }
+    this.logger.debug(`dbSave org 1: ${JSON.stringify(org)}`)
 
-    await super.dbSave(trs, dbTrans)
+    try {
+      await super.dbSave(trs, dbTrans)
+    } catch (err) {
+      throw new Error(`super dbSave fail ${err.toString()}`)
+    }
+    // TODO：这里传给 daoUtil.updateOrg 的 org 必须是合法的
     await daoUtil.updateOrg(this._context, org, dbTrans)
   }
 
@@ -521,11 +538,6 @@ class Org extends Asset.Base {
      */
   async getOrgList (req) {
     const query = Object.assign({}, req.body, req.query)
-    query.pageindex = Number(query.pageindex || 1)
-    query.pagesize = Number(query.pagesize || 100)
-    if (typeof query.state !== 'undefined') {
-      query.state = Number(query.state)
-    }
 
     const validateErrors = await this.ddnSchema.validate({
       type: 'object',

@@ -16,5 +16,10 @@ export default {
   net: 'testnet',
   nethash: '0ab796cd',
   payloadLimitSize: '8mb',
-  clientDriftSeconds: 5
+  clientDriftSeconds: 5,
+
+  dapp: {
+    masterpassword: "xS5XaSoHsTEL",
+    params: {}
+  }
 }

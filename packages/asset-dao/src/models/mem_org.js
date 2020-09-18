@@ -18,8 +18,8 @@ export default function (connection) {
       type: Sequelize.STRING(128)
     },
     tags: {
-      type: Sequelize.STRING(40),
-      allowNull: false
+      type: Sequelize.STRING(40)
+      // allowNull: false fixme: 2020.9.5
     },
     url: {
       type: Sequelize.STRING(256)

@@ -24,9 +24,59 @@ async function updateOrg (context, org, dbTrans) {
   }
 
   return new Promise((resolve, reject) => {
+    // const validateErrors = await this.ddnSchema.validate({
+    //   type: 'object',
+    //   properties: {
+    //     transaction_id: {
+    //       type: 'string',
+    //       minLength: 1,
+    //       maxLength: 32
+    //     },
+    //     org_id: {
+    //       type: 'string',
+    //       minLength: 1,
+    //       maxLength: 20
+    //     },
+    //     name: {
+    //       type: 'string',
+    //       minLength: 1,
+    //       maxLength: 64
+    //     },
+    //     address: {
+    //       type: 'string',
+    //       minLength: 1,
+    //       maxLength: 128
+    //     },
+    //     tags: {
+    //       type: 'string',
+    //       minLength: 1,
+    //       maxLength: 40
+    //     },
+    //     url: {
+    //       type: 'string',
+    //       minLength: 1,
+    //       maxLength: 256
+    //     },
+    //     state: {
+    //       type: 'integer',
+    //       minimum: 0,
+    //       maximum: 1
+    //     },
+    //     timestamp: {
+    //       type: 'string',
+    //       minimum: 0
+    //     }
+    //   },
+    //   required: ['transaction_id', 'org_id', 'state', 'timestamp']
+    // }, org)
+
+    // if (validateErrors) {
+    //   return reject(new Error(`Invalid parameters: ${validateErrors[0].schemaPath} ${validateErrors[0].message}`))
+    // }
+
     context.dao.insertOrUpdate('mem_org', org, dbTrans, (err, result) => {
       if (err) {
-        return reject(err)
+        return reject(new Error(`insertOrUpdate mem_org ${err}`))
       }
 
       resolve(result)

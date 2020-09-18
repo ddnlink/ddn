@@ -21,11 +21,13 @@ describe('AOB Test', () => {
   const IssuerAccount1 = node.randomAccount()
   const IssuerAccount2 = node.randomAccount()
   debug('IssuerAccount', IssuerAccount1)
+  debug('IssuerAccount2', IssuerAccount2)
 
   // 先给发行商想个名字
   const issuerName = node.randomIssuerName('', 5)
   const issuerName2 = node.randomIssuerName()
   debug('issuerName', issuerName)
+  debug('issuerName2', issuerName2)
 
   // 开始前，得把发行商账号 IssuerAccount 注册到链上(登录一下即可)
   beforeAll((done) => {
@@ -171,7 +173,7 @@ describe('AOB Test', () => {
       await node.onNewBlockAsync()
 
       const transaction = await DdnJS.aob.createIssuer(issuerName2, 'An issuer', IssuerAccount2.password)
-      debug('注册发行商创建的transaction 3', transaction)
+      debug('注册发行商创建的transaction 4', transaction)
 
       node.peer.post('/transactions')
         .set('Accept', 'application/json')
@@ -299,7 +301,7 @@ describe('AOB Test', () => {
       await node.onNewBlockAsync()
 
       // const transaction = await createPluginAsset(DdnUtils.assetTypes.AOB_TRANSFER, obj, IssuerAccount1.password)
-      const transaction = await DdnJS.aob.createTransfer(currency, '10', node.Gaccount.address,'主交易备注', '资产交易备注', IssuerAccount1.password)
+      const transaction = await DdnJS.aob.createTransfer(currency, '10', node.Gaccount.address, '主交易备注', '资产交易备注', IssuerAccount1.password)
       debug('aob transfer: ', transaction)
 
       node.peer.post('/transactions')
@@ -319,6 +321,37 @@ describe('AOB Test', () => {
 
           expect(err).to.be.not.ok
           expect(body).to.have.property('success').to.be.true
+
+          done()
+        })
+    })
+
+    it('if aob amount is 0 should be fail', async (done) => {
+      // 等 1 次确认
+      await node.onNewBlockAsync()
+
+      // const transaction = await createPluginAsset(DdnUtils.assetTypes.AOB_TRANSFER, obj, IssuerAccount1.password)
+      const transaction = await DdnJS.aob.createTransfer(currency, '10', node.Gaccount.address, '主交易备注', '资产交易备注', IssuerAccount2.password)
+      debug('aob transfer: ', transaction)
+
+      node.peer.post('/transactions')
+        .set('Accept', 'application/json')
+        .set('version', node.version)
+        .set('nethash', node.config.nethash)
+        .set('port', node.config.port)
+        .send({
+          transaction
+        })
+        .expect('Content-Type', /json/)
+        .expect(200)
+        .end((err, {
+          body
+        }) => {
+          debug('Transfer issue should be ok', body)
+
+          expect(err).to.be.not.ok
+          expect(body).to.have.property('success').to.be.false
+          expect(body).to.have.property('error').to.contain('Insufficient AoB balance')
 
           done()
         })

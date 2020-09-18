@@ -207,6 +207,7 @@ class Account {
         let mem_accounts = await new Promise((reslove, reject) => {
           this.dao.findPage('mem_account', filter, limit || 1000, offset, false, fields || null, sort, (err, data) => {
             if (err) {
+              // this.logger.error('Find account error ', err)
               return reject(err)
             }
 
@@ -333,6 +334,48 @@ class Account {
       } catch (e) {
         reject(e)
       }
+    })
+  }
+
+  async getMultisignaturAccount (ids) {
+    const multisignatures = await new Promise((reslove, reject) => {
+      this.dao.findListByGroup('mem_accounts2multisignature', {
+        account_id: { // wxm block database
+          $in: ids
+        }
+      }, {
+        limit: ids.length,
+        offset: 0,
+        group: ['account_id'],
+        attributes: [
+          [this.dao.db_fnGroupConcat('dependent_id'), 'multisignatures'], 'account_id' // wxm block database library.dao.db_fn('group_concat', library.dao.db_col('dependentId'))
+        ]
+      }, (err, data) => {
+        if (err) {
+          return reject(err)
+        }
+        reslove(data)
+      })
+    })
+
+    const u_multisignatures = await new Promise((reslove, reject) => {
+      this.dao.findListByGroup('mem_accounts2u_multisignature', {
+        account_id: { // wxm block database
+          $in: ids
+        }
+      }, {
+        limit: ids.length,
+        offset: 0,
+        group: ['account_id'],
+        attributes: [
+          [this.dao.db_fnGroupConcat('dependent_id'), 'u_multisignatures'], 'account_id' // wxm block database library.dao.db_fn('group_concat', library.dao.db_col('dependentId'))
+        ]
+      }, (err, data) => {
+        if (err) {
+          return reject(err)
+        }
+        reslove(data)
+      })
     })
   }
 
@@ -583,7 +626,7 @@ class Account {
               break
             case Number:
               if (DdnUtils.bignum.isNaN(trueValue)) {
-                return reject(new Error('Encountered invalid number while merging account: ' + trueValue + ', value: ' + value + ', value: ' + address))
+                return reject(new Error('Encountered invalid number while merging account: ' + trueValue + ', value: ' + value + ', address: ' + address))
               }
 
               if (DdnUtils.bignum.isEqualTo(DdnUtils.bignum.abs(trueValue), trueValue) && !DdnUtils.bignum.isZero(trueValue)) {

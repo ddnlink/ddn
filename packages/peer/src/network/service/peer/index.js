@@ -139,7 +139,7 @@ class PeerService {
           },
           id: {
             type: 'string',
-            maxLength: 64
+            maxLength: 128
           },
           timestamp: {
             type: 'integer'
@@ -176,7 +176,7 @@ class PeerService {
     if (validateErrors) {
       return {
         success: false,
-        error: `Schema validation error: ${validateErrors[0].schemaPath} ${validateErrors[0].message}`
+        error: `Invalid parameters: : ${validateErrors[0].schemaPath} ${validateErrors[0].message}`
       }
     }
 
@@ -199,22 +199,24 @@ class PeerService {
           },
           id: {
             type: 'string',
-            maxLength: 64
+            maxLength: 128
           },
           signatures: {
             type: 'array',
             minLength: 1,
-            maxLength: 101
+            maxLength: this.constants.delegates // 101
           }
         },
         required: ['height', 'id', 'signatures']
       },
       body
     )
+
+    // Todo: 2020.9.3 请求本接口的方法应该对 success 做个判断，或者改成 throw
     if (validateErrors) {
       return {
         success: false,
-        error: `Schema validation error: ${validateErrors[0].schemaPath} ${validateErrors[0].message}`
+        error: `Invalid parameters: : ${validateErrors[0].schemaPath} ${validateErrors[0].message}`
       }
     }
 
@@ -378,9 +380,14 @@ class PeerService {
               transaction
             )
           ) {
-            return cb(
-              `The transaction ${transaction.id} is in process already..`
-            ) // 这里是正常交易，仅是未确认,
+            // return cb(
+            //   `The transaction ${transaction.id} is in process already..`
+            // ) 
+            this._invalidTrsCache.set(transaction.id, true)
+            return {
+              success: false,
+              error: `The transaction ${transaction.id} is in process already..`
+            }
           }
 
           this.logger.log(
@@ -404,21 +411,15 @@ class PeerService {
 
           if (err) {
             // 这里的错误就是上面 catch 的 exp，所以统一在这里处理就好
-            this.logger.debug(
+            this.logger.warn(
               `Receive invalid transaction, transaction is ${JSON.stringify(
                 transaction
               )}, ${DdnUtils.system.getErrorMsg(err)}`
             )
 
-            this.logger.error(
-              `Receive invalid transaction, transaction type: ${JSON.stringify(
-                transaction.type
-              )}, ${DdnUtils.system.getErrorMsg(err)}`
-            )
-
             // 缓存非法交易
             this._invalidTrsCache.set(transaction.id, true)
-
+            
             result = {
               success: false,
               error: err.message ? err.message : err
