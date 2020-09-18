@@ -177,13 +177,6 @@ class AccountService {
 
   async getTop (req) {
     const query = Object.assign({}, req.body, req.query)
-    const offset = Number(query.offset || 0)
-    const limit = Number(query.limit || 100)
-
-    if (Number.isNaN(limit) || Number.isNaN(offset)) {
-      throw new Error('Invalid parameters: limit or offset')
-    }
-
     const queryResult = await this.runtime.account.getAccountList({
       sort: [['balance', 'DESC']], // wxm block database
       offset: query.offset,
