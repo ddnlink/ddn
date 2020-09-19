@@ -382,7 +382,7 @@ class PeerService {
           ) {
             // return cb(
             //   `The transaction ${transaction.id} is in process already..`
-            // ) 
+            // )
             this._invalidTrsCache.set(transaction.id, true)
             return {
               success: false,
@@ -419,7 +419,7 @@ class PeerService {
 
             // 缓存非法交易
             this._invalidTrsCache.set(transaction.id, true)
-            
+
             result = {
               success: false,
               error: err.message ? err.message : err

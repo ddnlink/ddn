@@ -77,7 +77,7 @@ $ tar zxvf ddn-linux-2.0.2-mainnet.tar.gz
 
 ```
 # 进入安装目录
-$ cd ~/your/path/ddn-linux-3.6.1-testnet
+$ cd ~/your/path/ddn-linux-2.0.2-mainnet
 
 # 在 ubuntu 执行下面的命令
 $ chmod u+x init/*.sh && chmod 755 ddnd && ./ddnd configure # 主要是安装sqlite3/ntp2等依赖包和库
@@ -85,17 +85,17 @@ $ chmod u+x init/*.sh && chmod 755 ddnd && ./ddnd configure # 主要是安装sql
 
 ### 2.3 配置节点
 
-DDN区块链的配置文件有多个，本文档默认使用`.ddnrc.js`, 更多关于`配置`的内容，请参考[DDN区块链的配置](./config.md)
+本文档默认使用`config.json`,作为配置文件。最新版本的DDN区块链的配置文件有多个，更多关于`配置`的内容，请参考[DDN区块链的配置](./config.md)
 
-打开`.ddnrc.js`：
+打开`config.json`：
 
 ```sh
-$ vim .ddnrc.js
+$ vim config.json
 ```
 
 #### 2.3.1 配置公网IP
 
-打开`.ddnrc.js`, 找到并修改 publicIp 为自己服务器的公网 IP。系统会自动检测公网ip，为避免公网ip无法检测到，建议手动修改：
+打开`config.json`, 找到并修改 publicIp 为自己服务器的公网 IP。系统会自动检测公网ip，为避免公网ip无法检测到，建议手动修改：
 
 ```json
  publicIp: "x.x.x.x",
@@ -105,7 +105,7 @@ $ vim .ddnrc.js
 
 在此操作之前，一定要首先申请受托人，并获得投票授权，否则是不会出块的。
 
-打开`.ddnrc.js`, 找到`secret`字段，将`受托人密钥`填进去即可。**可配置多个，但不能重复**。
+打开`config.json`, 找到`secret`字段，将`受托人密钥`填进去即可。**可配置多个，但不能重复**。
 
 ```jsx | inline
 import React from 'react';
@@ -124,7 +124,7 @@ $ ./ddnd restart
 
 ```
 # 进入安装目录
-$ cd ~/your/path/ddn-linux-3.6.1-testnet
+$ cd ~/your/path/ddn-linux-2.0.2-mainnet
 
 # 启动节点
 $ ./ddnd start
@@ -183,7 +183,7 @@ $ tail -f logs/debug.log
 
 查看设置是否正确
 
-- 查看是否改了`.ddnrc.js`里的port、IP等字段
+- 查看是否改了`config.json`里的port、IP等字段
 - 测试节点的端口是`8001`
 - 检查防火墙配置，需要打开节点端口入站和出站。
 

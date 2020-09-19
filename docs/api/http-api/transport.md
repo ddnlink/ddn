@@ -5,12 +5,13 @@ title: 点对点传输
 sidebar_label: Http api transport
 ---
 
-## **2.9 点对点传输tansport[安全的api]**   
+## **2.9 点对点传输**   
 ### **2.9.1 说明**   
+
 /peer相关的api，在请求时都需要设置一个header  
 
- - key为magic，testnet value:0ab796cd, mainnet value:5f5b3cf5  
- - key为version，value为''  
+ - key为nethash，testnet value:0ab796cd, mainnet value:5f5b3cf5  
+ - key为version，value为'3.6.0'  
 
 ### **2.9.2 普通交易**   
 ddn系统的所有写操作都是通过发起一个交易来完成的。 

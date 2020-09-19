@@ -5,7 +5,7 @@ title: 节点
 sidebar_label: Http api peer
 ---
 
-## **2.5 节点peers**   
+## **2.5 节点**   
    
 ### **2.5.1 获取本机连接的所有节点信息**   
 接口地址：/api/peers   

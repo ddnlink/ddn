@@ -186,11 +186,11 @@ class PeerSync {
           if (bignum.isEqualTo(backRound, 1)) {
             backHeight = '1'
           } else {
-            backHeight = bignum.minus(backHeight, bignum.modulo(backHeight, this.constants.delegates))
+            backHeight = bignum.minus(backHeight, bignum.modulo(backHeight, this.constants.delegates)).toString()
           }
           this.logger.debug('rollback blocks querySimpleBlockData, backHeight: ', backHeight.toString())
 
-          const result = await this.runtime.block.querySimpleBlockData({ height: backHeight.toString() })
+          const result = await this.runtime.block.querySimpleBlockData({ height: backHeight })
           if (result && result.block) {
             // fixme: 2020.8.29 添加序列化数据
             const block = await this.runtime.block._parseObjectFromFullBlocksData([result.block])

@@ -1,7 +1,7 @@
 ---
 order: 5
 id: http-api-delegate
-title: 受托人/投票
+title: 受托人
 sidebar_label: Http api delegate
 ---
 

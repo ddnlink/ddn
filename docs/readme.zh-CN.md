@@ -2,7 +2,7 @@
 title: DDN - 区块链敏捷开发框架
 order: 10
 hero:
-  title: 区块链敏捷开发框架
+  title: DDN企业级区块链开发框架
   desc: 共商、共建、共享、共赢
   actions:
     - text: 快速上手

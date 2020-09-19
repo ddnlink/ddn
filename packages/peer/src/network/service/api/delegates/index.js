@@ -1,6 +1,5 @@
 import DdnCrypto from '@ddn/crypto'
-import DdnUtils from '@ddn/utils'
-
+import { assetTypes, bignum } from '@ddn/utils'
 /**
  * DelegatesRouter 接口
  * wangxm   2019-03-22
@@ -203,8 +202,8 @@ class DelegatesRouter {
             const lastBlock = this.runtime.block.getLastBlock()
             const totalSupply = this.runtime.block.getBlockStatus().calcSupply(lastBlock.height)
             rows.forEach(row => {
-              // row.weight = DdnUtils.bignum.divide(row.balance, totalSupply)
-              row.weight = DdnUtils.bignum.divide(row.balance, DdnUtils.bignum.multiply(totalSupply, 100))
+              // row.weight = bignum.divide(row.balance, totalSupply)
+              row.weight = bignum.divide(row.balance, bignum.multiply(totalSupply, 100))
             })
 
             resolve({ success: true, accounts: rows })
@@ -214,7 +213,7 @@ class DelegatesRouter {
   }
 
   async getFee () {
-    const fee = DdnUtils.bignum.multiply(this.constants.net.fees.delegate, this.constants.fixedPoint)
+    const fee = bignum.multiply(this.constants.net.fees.delegate, this.constants.fixedPoint).toString()
     return { success: true, fee }
   }
 
@@ -308,7 +307,7 @@ class DelegatesRouter {
 
           try {
             const transaction = await this.runtime.transaction.create({
-              type: DdnUtils.assetTypes.DELEGATE,
+              type: assetTypes.DELEGATE,
               username: body.username,
               sender: account,
               keypair,
@@ -343,7 +342,7 @@ class DelegatesRouter {
 
           try {
             const transaction = await this.runtime.transaction.create({
-              type: DdnUtils.assetTypes.DELEGATE,
+              type: assetTypes.DELEGATE,
               username: body.username,
               sender: account,
               keypair,

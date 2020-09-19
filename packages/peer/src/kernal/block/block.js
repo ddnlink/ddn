@@ -49,7 +49,7 @@ class Block {
   }
 
   async calculateFee () {
-    return bignum.multiply(this.constants.net.fees.transfer, this.constants.fixedPoint)
+    return bignum.multiply(this.constants.net.fees.transfer, this.constants.fixedPoint).toString()
   }
 
   getBlockStatus () {

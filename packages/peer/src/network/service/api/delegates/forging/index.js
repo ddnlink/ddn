@@ -2,10 +2,10 @@ import DdnCrypto from '@ddn/crypto'
 import DdnUtils from '@ddn/utils'
 
 /**
- * RootRouter接口
+ * ForgingRouter 接口
  * wangxm   2019-03-22
  */
-class RootRouter {
+class ForgingRouter {
   constructor (context) {
     Object.assign(this, context)
     this._context = context
@@ -172,4 +172,4 @@ class RootRouter {
   }
 }
 
-export default RootRouter
+export default ForgingRouter

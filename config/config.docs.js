@@ -18,7 +18,7 @@ module.exports = {
       },
       {
         title: '介绍',
-        children: ['guide/readme.md', 'guide/get-started', 'guide/peer-install-testnet', 'guide/peer-install-mainnet']
+        children: ['guide/readme.md', 'guide/peer-install-testnet', 'guide/peer-install-mainnet']
       },
       {
         title: '应用开发',

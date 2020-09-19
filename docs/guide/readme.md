@@ -28,15 +28,14 @@ nav:
   <a href="/README-zh-CN.md">简体中文 (Simplified Chinese)</a> •
 </p>
 
-**基于当前版本的测试链**: <http://testnet.ddn.link>
 
-DDN, 是一个成熟的企业级区块链系统，已经服务于版权存证、检验检测、电子医疗等10多个领域。
+DDN，英文“Data Delivery Network”的简称，新一代数据分发网络，是面向企业的区块链应用平台，其使命是“让杰出的企业更杰出”。DDN网络由无数条公链、联盟链和专有链组成，基于区块链公开、透明、不可篡改的特点，有效保护用户数据资产，在数据存证、流程优化、智能控制、金融结算等诸多方面有显著优势。采取模块化的开发设计，可视化的操作定制，多重P2P网络补偿架构，让开发和使用更轻松。
 
-更多信息，请查看 [官网](https://www.ddn.link) , [docs](http://docs.ddn.link).
+DDN, 已经在文创版权、数字存证、党建政务、金融期货、检验检测、电子医疗等15个领域，真正落地了红榜链、亿检链、国标链、文创链等大型应用10多个，拥有国家市场监督局、山东省、安徽省、甘肃省、中国移动、阿里、腾讯、微软、亚马逊等众多客户、合作伙伴。目前，已经构建起从技术研发 ->应用落地 -> 高校培训 -> 学生就业 -> 技术研发 的闭环生态，在未来的发展中，必将快速走进大众生活，服务于每个有价值的数据。
 
 **配套书籍和视频**: [《Nodejs区块链开发2》](https://github.com/imfly/blockchain-on-nodejs), [旧版电子书](https://github.com/imfly/bitcoin-on-nodejs), [旧版纸质书籍](https://item.jd.com/12206128.html), [旧版代码](https://github.com/ebookcoin/ebookcoin)
 
-测试网络：<http://testnet.ddn.link>
+**基于当前版本的测试链**: <http://testnet.ddn.link>
 
 > 特别注意：> 3.* 的版本并未兼容当前主网，切记不要使用主网测试你的Dapp应用。
 

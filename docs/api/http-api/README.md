@@ -1,10 +1,10 @@
 ---
 order: 1
 id: http-api
-title: Http API使用说明
+title: 简介
 sidebar_label: Http api
 group:
-  title: 2. 基础Http API
+  title: 2. Http API
   order: 2
 ---
 
@@ -24,8 +24,10 @@ group:
 1. [账户](/api/http-api/account.md)
 2. [交易](/api/http-api/transaction.md)
 3. [区块](/api/http-api/blocks.md)
-4. [受托人/投票](/api/http-api/delegates.md)
+4. [受托人](/api/http-api/delegates.md)
 5. [节点](/api/http-api/peer.md)
-6. [二次密码](/api/http-api/password.md)
-7. [多重签名](/api/http-api/multi-signature.md)
-8. [点对点传输](/api/http-api/transport.md)
+6. [投票](/api/http-api/delegates.md)
+7. [二次密码](/api/http-api/password.md)
+8. [多重签名](/api/http-api/multi-signature.md)
+9. [点对点传输](/api/http-api/transport.md)
+10. [网络状态](/api/http-api/network.md)

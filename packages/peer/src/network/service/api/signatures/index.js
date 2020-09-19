@@ -3,7 +3,7 @@
  * wangxm   2019-03-27
  */
 import DdnCrypto from '@ddn/crypto'
-import DdnUtils from '@ddn/utils'
+import { assetTypes, bignum } from '@ddn/utils'
 
 class RootRouter {
   constructor (context) {
@@ -97,7 +97,7 @@ class RootRouter {
           let transactions = []
           try {
             const transaction = await this.runtime.transaction.create({
-              type: DdnUtils.assetTypes.SIGNATURE,
+              type: assetTypes.SIGNATURE,
               sender: account,
               keypair,
               requester: keypair,
@@ -128,7 +128,7 @@ class RootRouter {
           let transactions = []
           try {
             const transaction = await this.runtime.transaction.create({
-              type: DdnUtils.assetTypes.SIGNATURE,
+              type: assetTypes.SIGNATURE,
               sender: account,
               keypair,
               second_keypair
@@ -150,9 +150,7 @@ class RootRouter {
   }
 
   async getFee (req) {
-    //   DdnUtils.bignum update
-    //   fee = 5 * constants.fixedPoint;
-    const fee = DdnUtils.bignum.multiply(5, this.constants.fixedPoint)
+    const fee = bignum.multiply(this.constants.net.fees.signature, this.constants.fixedPoint)
     return { success: true, fee }
   }
 }

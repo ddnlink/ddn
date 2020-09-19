@@ -34,9 +34,9 @@
     "test:custom": "DDN_ENV=custom ./packages/test/bin/test.js",
     "test": "./packages/test/bin/test.js",
     "lint": "eslint --fix --ext .js packages/**/src packages/**/test",
-    "doc:dev": "dumi dev",
-    "doc:build": "dumi build",
-    "doc:deploy": "bash ./scripts/deploy_doc.sh"
+    "doc:dev": "DDN_ENV=docs dumi dev",
+    "doc:build": "DDN_ENV=docs dumi build",
+    "doc:deploy": "DDN_ENV=docs deploy website"
   },
   "author": "DDN <support@ddn.link>",
   "contributors": [

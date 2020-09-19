@@ -3,7 +3,7 @@
  * wangxm   2019-03-27
  */
 import DdnCrypto from '@ddn/crypto'
-import DdnUtils from '@ddn/utils'
+import { assetTypes, bignum, system } from '@ddn/utils'
 
 class MultisignaturesRouter {
   constructor (context) {
@@ -97,7 +97,7 @@ class MultisignaturesRouter {
 
         try {
           const transaction = await this.runtime.transaction.create({
-            type: DdnUtils.assetTypes.MULTISIGNATURE,
+            type: assetTypes.MULTISIGNATURE,
             sender: account,
             keypair,
             second_keypair,
@@ -109,7 +109,7 @@ class MultisignaturesRouter {
           const transactions = await this.runtime.transaction.receiveTransactions([transaction])
           cb(null, transactions)
         } catch (e) {
-          this.logger.error('create multisignatures error', DdnUtils.system.getErrorMsg(e))
+          this.logger.error('create multisignatures error', system.getErrorMsg(e))
           return cb(e)
         }
       }, (err, transactions) => {
@@ -120,7 +120,7 @@ class MultisignaturesRouter {
             try {
               await this.runtime.socketio.emit('multisignatures/change', {})
             } catch (err2) {
-              this.logger.error('socket emit error: multisignatures/change', DdnUtils.system.getErrorMsg(err2))
+              this.logger.error('socket emit error: multisignatures/change', system.getErrorMsg(err2))
             }
           })
 
@@ -180,7 +180,7 @@ class MultisignaturesRouter {
 
     const sign = await this.runtime.transaction.multisign(transaction, keypair)
 
-    if (transaction.type === DdnUtils.assetTypes.MULTISIGNATURE) {
+    if (transaction.type === assetTypes.MULTISIGNATURE) {
       if ((!transaction.asset.multisignature.keysgroup.includes(`+${keypair.publicKey}`)) ||
                 (transaction.signatures && transaction.signatures.includes(sign.toString('hex')))) {
         // 是多重签名交易（asset），但签名者不属于签名组里的人，也不在交易的多个签名里
@@ -245,7 +245,7 @@ class MultisignaturesRouter {
               transaction: transaction.id
             })
           } catch (err) {
-            this.logger.error(`Broadcast new signature failed: ${DdnUtils.system.getErrorMsg(err)}`)
+            this.logger.error(`Broadcast new signature failed: ${system.getErrorMsg(err)}`)
           }
         })
 
@@ -287,7 +287,7 @@ class MultisignaturesRouter {
     if (query.isOutTransfer) {
       transactions = transactions.filter(({
         type
-      }) => type === DdnUtils.assetTypes.DAPP_OUT)
+      }) => type === assetTypes.DAPP_OUT)
     }
 
     const pendings = []
@@ -304,7 +304,7 @@ class MultisignaturesRouter {
           try {
             verify = await this.runtime.transaction.verifySignature(item, signature, query.publicKey)
           } catch (e) {
-            this.logger.error('/multisignatures/pending verify fail, error is ', DdnUtils.system.getErrorMsg(e))
+            this.logger.error('/multisignatures/pending verify fail, error is ', system.getErrorMsg(e))
             verify = false
           }
 
@@ -381,7 +381,7 @@ class MultisignaturesRouter {
         null,
         async (err, rows) => {
           if (err) {
-            this.logger.error('Can`t find multisignatures, ', DdnUtils.system.getErrorMsg(err))
+            this.logger.error('Can`t find multisignatures, ', system.getErrorMsg(err))
             return reject(err)
           }
           let addresses = []
@@ -423,11 +423,18 @@ class MultisignaturesRouter {
               accounts: rows
             })
           } catch (e) {
-            this.logger.error('findList: ', DdnUtils.system.getErrorMsg(e))
+            this.logger.error('findList: ', system.getErrorMsg(e))
             return reject(e)
           }
         })
     })
+  }
+
+  async getFee () {
+    return {
+      success: true,
+      fee: bignum.multiply(this.constants.net.fees.multisignature, this.constants.fixedPoint).toString()
+    }
   }
 }
 

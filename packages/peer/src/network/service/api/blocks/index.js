@@ -195,7 +195,7 @@ class BlockService {
     }
   }
 
-  async getGetFee (req) {
+  async getFee (req) {
     if (this.runtime.state !== DdnUtils.runtimeState.Ready) {
       throw new Error('Blockchain is loading')
     }
