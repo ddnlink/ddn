@@ -50,7 +50,7 @@ export default {
       delegate: '100',
       signature: '5',
       multiSignature: '5',
-      lock: 'o.1',
+      lock: '0.1',
 
       // aob
       aob_issuer: '100',
@@ -102,7 +102,7 @@ export default {
       delegate: '100',
       signature: '5',
       multiSignature: '5',
-      lock: 'o.1',
+      lock: '0.1',
 
       // aob
       aob_issuer: '100',

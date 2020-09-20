@@ -6,7 +6,7 @@ sidebar_label: Http api multi signature
 ---
 
 
-## **2.8 多重签名multisignatures**   
+## **2.8 多重签名**   
 ### **2.8.1 设置普通账户为多重签名账户**   
 接口地址：/api/multisignatures   
 请求方式：put   

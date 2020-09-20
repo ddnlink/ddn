@@ -6,7 +6,7 @@ sidebar_label: Http api transaction
 ---
 
 
-## **2.2 交易transactions**   
+## **2.2 交易**   
 ### **2.2.1 获取交易信息**   
 
 接口地址：/api/transactions   

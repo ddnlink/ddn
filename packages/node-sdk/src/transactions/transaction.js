@@ -6,7 +6,7 @@ import crypto from '../utils/crypto' // TODO: @ddn/crypto
 import slots from '../time/slots'
 
 async function createTransaction (recipientId, amount, message, secret, second_secret) {
-  const fee = bignum.multiply(constants.net.fees.transfer, constants.fixedPoint)
+  const fee = bignum.multiply(constants.net.fees.transfer, constants.fixedPoint).toString()
   const transaction = {
     type: DdnUtils.assetTypes.TRANSFER,
     nethash: config.nethash, // <- config.nethash,
@@ -33,7 +33,7 @@ async function createTransaction (recipientId, amount, message, secret, second_s
 }
 
 async function createLock (height, secret, second_secret) {
-  const fee = bignum.multiply(constants.net.fees.lock, constants.fixedPoint)
+  const fee = bignum.multiply(constants.net.fees.lock, constants.fixedPoint).toString()
   const transaction = {
     type: 100, // TODO: update to string lock
     amount: '0',

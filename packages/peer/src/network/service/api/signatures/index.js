@@ -150,7 +150,7 @@ class RootRouter {
   }
 
   async getFee (req) {
-    const fee = bignum.multiply(this.constants.net.fees.signature, this.constants.fixedPoint)
+    const fee = bignum.multiply(this.constants.net.fees.signature, this.constants.fixedPoint).toString()
     return { success: true, fee }
   }
 }
