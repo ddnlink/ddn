@@ -560,11 +560,12 @@ class Account {
     const insert = {}
     const insert_object = {}
     const remove_object = {}
-
+  
+    
     if (!address && diff.publicKey) {
       address = this.generateAddressByPublicKey(diff.publicKey) // wxm block database
     }
-
+    // 把余额添加到缓存（map)
     if (diff.balance) {
       this.balanceCache.addNativeBalance(address, diff.balance)
     }
@@ -586,13 +587,13 @@ class Account {
               if (DdnUtils.bignum.isNaN(trueValue)) {
                 return reject(new Error('Encountered invalid number while merging account: ' + trueValue + ', value: ' + value + ', address: ' + address))
               }
-
+               // trueValue 为正数并且不等0
               if (DdnUtils.bignum.isEqualTo(DdnUtils.bignum.abs(trueValue), trueValue) && !DdnUtils.bignum.isZero(trueValue)) {
                 update[value] = this.dao.db_str(`${value} + ${DdnUtils.bignum.new(trueValue)}`)
               } else if (DdnUtils.bignum.isLessThan(trueValue, 0)) {
                 update[value] = this.dao.db_str(`${value} ${DdnUtils.bignum.new(trueValue)}`)
               }
-
+              // 字段为balance并且不等于0
               if (!DdnUtils.bignum.isZero(trueValue) && value === 'balance') {
                 const mem_accounts2delegate = await new Promise((resolve, reject) => {
                   this.dao.findOne('mem_accounts2delegate', {
@@ -606,20 +607,22 @@ class Account {
                 })
 
                 if (mem_accounts2delegate) {
-                  await new Promise((resolve, reject) => {
-                    this.dao.insert('mem_round', {
-                      address: address,
-                      amount: trueValue.toString(),
-                      delegate: mem_accounts2delegate.dependent_id, // wxm block database
-                      block_id: diff.block_id, // wxm block database
-                      round: diff.round.toString()
-                    }, dbTrans, (err) => {
-                      if (err) {
-                        return reject(err)
-                      }
-                      return resolve()
+                  if (diff.block_id !== this.genesisblock.id) { // wxm async ok      genesisblock.block.id
+                    await new Promise((resolve, reject) => {
+                      this.dao.insert('mem_round', {
+                        address: address,
+                        amount: trueValue.toString(),
+                        delegate: mem_accounts2delegate.dependent_id, // wxm block database
+                        block_id: diff.block_id, // wxm block database
+                        round: diff.round.toString()
+                      }, dbTrans, (err) => {
+                        if (err) {
+                          return reject(err)
+                        }
+                        return resolve()
+                      })
                     })
-                  })
+                  }
                 }
               }
 
@@ -681,7 +684,7 @@ class Account {
                       await new Promise((resolve, reject) => {
                         this.dao.insert('mem_round', {
                           address: address,
-                          amount: math + mem_account[balanceField].toString(),
+                          amount: (math||'+') + mem_account[balanceField].toString(),
                           delegate: val,
                           block_id: diff.block_id, // wxm block database
                           round: diff.round.toString()

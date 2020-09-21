@@ -28,7 +28,7 @@ import MultiSignature from './consensus/multisignature'
 import defaultConfig from '../config.default.js'
 
 class Program {
-  async _init (options) {
+  async _init(options) {
     options.logger = Logger({
       filename: path.join(options.baseDir, 'logs', 'debug.log'),
       echo: options.isDaemonMode ? null : options.configObject.logLevel,
@@ -76,7 +76,7 @@ class Program {
   /**
      * 文件锁，保证系统只能运行一份
      */
-  _checkProcessState () {
+  _checkProcessState() {
     if (this._context.isDaemonMode) {
       try {
         var fd = fs.openSync(this._pid_file, 'wx')
@@ -97,7 +97,7 @@ class Program {
   /**
      * 释放文件锁
      */
-  _resetProcessState () {
+  _resetProcessState() {
     try {
       if (fs.existsSync(this._pid_file)) {
         fs.unlinkSync(this._pid_file)
@@ -110,7 +110,7 @@ class Program {
   /**
      * 升级数据库结构
      */
-  async _applyDatabaseUpgrade () {
+  async _applyDatabaseUpgrade() {
     return new Promise((resolve, reject) => {
       dbUpgrade.upgrade(this._context, (err, result) => {
         if (err) {
@@ -125,7 +125,7 @@ class Program {
   /**
      * 校验创世区块的数据
      */
-  async _checkGenesisBlock () {
+  async _checkGenesisBlock() {
     const block = this._context.genesisblock
 
     let payloadBytes = ''
@@ -147,7 +147,7 @@ class Program {
     return true
   }
 
-  async run (options) {
+  async run(options) {
     // 如果是后台模式，禁止输出
     if (options.isDaemonMode) {
       require('daemon')({ cwd: process.cwd() })
@@ -260,9 +260,9 @@ class Program {
     this._context.runtime.loaded = true
   }
 
-  async _blockchainReady () {
+  async _blockchainReady() {
     if (!this._blockchainReadyFired &&
-            this._context.runtime.state === DdnUtils.runtimeState.Ready) {
+      this._context.runtime.state === DdnUtils.runtimeState.Ready) {
       // 通知资产系统已就绪事件
       await this._context.runtime.transaction.execAssetFunc('onBlockchainReady')
       this._blockchainReadyFired = true
@@ -272,7 +272,7 @@ class Program {
   /**
      * 获取一个有效节点（非本机自己）
      */
-  async getValidPeer () {
+  async getValidPeer() {
     try {
       const publicIp = this._context.config.publicIp || '127.0.0.1'
       const publicIpLongValue = ip.toLong(publicIp)
@@ -290,7 +290,7 @@ class Program {
   /**
      * 同步节点列表 & 维护本地节点状态（轮询）
      */
-  async startPeerSyncTask () {
+  async startPeerSyncTask() {
     const validPeer = await this.getValidPeer()
     if (validPeer) {
       try {
@@ -317,7 +317,7 @@ class Program {
   /**
      * 签名同步任务（轮询）
      */
-  async startSignaturesSyncTask () {
+  async startSignaturesSyncTask() {
     const validPeer = await this.getValidPeer()
     if (validPeer) {
       try {
@@ -337,7 +337,7 @@ class Program {
   /**
      * 同步未确认交易（轮询）
      */
-  async startUnconfirmedTransactionSyncTask () {
+  async startUnconfirmedTransactionSyncTask() {
     const validPeer = await this.getValidPeer()
     if (validPeer) {
       try {
@@ -361,7 +361,7 @@ class Program {
   /**
      * 同步节点区块数据（轮询）
      */
-  async startBlockDataSyncTask () {
+  async startBlockDataSyncTask() {
     const validPeer = await this.getValidPeer()
     if (validPeer) {
       try {
@@ -393,6 +393,7 @@ class Program {
                   this._context.runtime.state = DdnUtils.runtimeState.Ready
                   await this._blockchainReady()
                 } else {
+                  this._context.logger.debug(`startSyncBlocks not complete change state pending`)
                   this._context.runtime.state = DdnUtils.runtimeState.Pending
                 }
 
@@ -409,6 +410,7 @@ class Program {
         await this.startBlockDataSyncTask()
       }, 1000 * 10)
     } else {
+      this._context.logger.debug(`change state is ready`)
       this._context.runtime.state = DdnUtils.runtimeState.Ready
       await this._blockchainReady()
     }
@@ -417,7 +419,15 @@ class Program {
   /**
      * 尝试铸造区块（轮询）
      */
-  async startForgeBlockTask () {
+  async startForgeBlockTask() {
+    // const lastBlock = this._context.runtime.block.getLastBlock()
+    // if (lastBlock.height > 3) {
+    //   console.log("我要回滚");
+    //   const result = await this._context.runtime.block._popLastBlock(
+    //     lastBlock
+    //   );
+    //   console.log("回滚结束", result);
+    // }
     await (async () => {
       if (this._context.runtime.state !== DdnUtils.runtimeState.Ready) {
         return
@@ -436,7 +446,6 @@ class Program {
       const currentSlot = this._context.runtime.slot.getSlotNumber()
 
       const lastBlock = this._context.runtime.block.getLastBlock()
-
       if (currentSlot === this._context.runtime.slot.getSlotNumber(lastBlock.timestamp)) {
         this._context.logger.trace('Loop:', 'lastBlock is in the same slot')
         return
@@ -456,7 +465,7 @@ class Program {
       await new Promise((resolve) => {
         this._context.sequence.add(async (cb) => {
           if (this._context.runtime.slot.getSlotNumber(forgeDelegateInfo.time) === this._context.runtime.slot.getSlotNumber() &&
-                        this._context.runtime.block.getLastBlock().timestamp < forgeDelegateInfo.time) {
+            this._context.runtime.block.getLastBlock().timestamp < forgeDelegateInfo.time) {
             try {
               await this._context.runtime.block.generateBlock(forgeDelegateInfo.keypair, forgeDelegateInfo.time)
             } catch (err) {
@@ -481,7 +490,7 @@ class Program {
     }, 100)
   }
 
-  destory () {
+  destory() {
     this._resetProcessState()
   }
 }

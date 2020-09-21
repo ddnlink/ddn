@@ -271,7 +271,6 @@ class Block {
       this.logger.error(`serializeBlock2Db fail ${err}`)
       throw new Error(`serializeBlock2Db fail ${JSON.stringify(err)}`)
     }
-
     if (block.transactions && block.transactions.length > 0) {
       for (let i = 0; i < block.transactions.length; i++) {
         const transaction = block.transactions[i]
@@ -349,10 +348,12 @@ class Block {
      */
   async receiveNewBlock (block, votes) {
     if (this.runtime.state !== runtimeState.Ready || !this.runtime.loaded) {
+      this.logger.debug(`prepare is not ready ,state: ${this.runtime.state}, Ready: ${runtimeState.Ready}, loaded: ${this.runtime.loaded}`)
       return
     }
 
     if (this._blockCache[block.id]) {
+      this.logger.debug(`blockCache include block: ${block.id}`)
       return
     }
     this._blockCache[block.id] = true
@@ -376,6 +377,7 @@ class Block {
         } else if (block.previous_block === this._lastBlock.previous_block && bignum.isEqualTo(block.height, this._lastBlock.height) && block.id !== this._lastBlock.id) { // wxm block database
         // } else if (block.previous_block === this._lastBlock.previous_block && block.height === this._lastBlock.height && block.id !== this._lastBlock.id) { // wxm block database
           // Fork: Same height and previous block id, but different block id
+          this.logger.error(`fork 2 block: ${block}, lastBlock: ${this._lastBlock}`)
           await this.runtime.delegate.fork(block, 2)
           cb('Fork-2')
         } else if (bignum.isGreaterThan(block.height, bignum.plus(this._lastBlock.height, 1))) {
@@ -410,7 +412,7 @@ class Block {
 
       if (this.runtime.consensus.hasEnoughVotes(totalVotes)) {
         const block = this.runtime.consensus.getPendingBlock()
-        this.logger.debug('receiveVotes getPendingBlock block.height = ', block.height)
+        this.logger.debug(`receiveVotes getPendingBlock block.height = ${block.heigh}`)
 
         const height = block.height
         const id = block.id
@@ -437,10 +439,12 @@ class Block {
   async receiveNewPropose (propose) {
     this.logger.debug('receiveNewPropose start.')
     if (this.runtime.state !== runtimeState.Ready) {
+      this.logger.debug(`receive new propose ,prepare is not ready ,state: ${this.runtime.state}, Ready: ${runtimeState.Ready}`)
       return
     }
 
     if (this._proposeCache[propose.hash]) {
+      this.logger.debug(`propose cache include propose hash: ${propose.hash}, propeseCache: ${this._proposeCache}`)
       return
     }
     this._proposeCache[propose.hash] = true
@@ -568,7 +572,7 @@ class Block {
                 publicKey: transaction.senderPublicKey,
                 isGenesis: bignum.isEqualTo(block.height, 1)
               }, dbTrans)
-
+               //吴连有 todo 最好加事物，报uuid的错误是存储数据时取的dbTrans不对
               const accountInfo = await this.runtime.account.getAccountByAddress(updatedAccountInfo.address)
               const newAccountInfo = Object.assign({}, accountInfo, updatedAccountInfo)
 
@@ -595,7 +599,13 @@ class Block {
                 throw new Error(`Save block fail ${err}`)
               }
             }
-            await this.runtime.round.tick(block, dbTrans)
+            try {
+              
+              await this.runtime.round.tick(block, dbTrans)
+            } catch (error) {
+              this.logger.error(`tick error dbTrans rollback error: ${JSON.stringify(error)}`)
+              throw new Error(error)
+            }
             this.logger.debug('save block ok')
 
             done()
@@ -944,8 +954,9 @@ class Block {
                 item.id === transaction.id
               })
               if (existsTrs) {
+                // wxy 这里如果库里存在一些交易就不存这个块吗？TODO
                 await this.runtime.transaction.removeUnconfirmedTransaction(transaction.id)
-                return reject(`Transaction already exists: ${transaction.id}`)
+                 reject(`Transaction already exists: ${transaction.id}`)
               }
 
               if (verifyTrs) {
@@ -953,7 +964,7 @@ class Block {
                 await this.runtime.transaction.verify(transaction, sender)
               }
             } catch (err) {
-              return reject(err)
+               reject(err)
             }
           }
         }
@@ -964,7 +975,7 @@ class Block {
           await this.applyBlock(block, votes, broadcast, save)
         } catch (err) {
           this.logger.error(`Failed to apply block: ${err}`)
-          return reject(err)
+           reject(err)
         }
 
         resolve()
@@ -1175,16 +1186,16 @@ class Block {
             for (let i = 0; i < transactions.length; i++) {
               const transaction = transactions[i]
 
-              const sender = await this.runtime.account.getAccountByPublicKey(transaction.senderPublicKey, dbTrans)
-
               this.logger.info('undo transacton: ', transaction.id)
+              const sender = await this.runtime.account.getAccountByPublicKey(transaction.senderPublicKey, dbTrans)
               await this.runtime.transaction.undo(transaction, oldLastBlock, sender, dbTrans)
               await this.runtime.transaction.undoUnconfirmed(transaction, dbTrans)
+              //wulianyou 
+              await this.runtime.transaction.deleteTransaction(transaction.id,dbTrans)
             }
 
             await this.runtime.round.backwardTick(oldLastBlock, previousBlock, dbTrans)
             await this.deleteBlock(oldLastBlock.id, dbTrans)
-
             cb(null)
           } catch (err) {
             cb(err)
@@ -1192,11 +1203,11 @@ class Block {
         }, done)
       }, (err2, result) => {
         if (err2) {
-          reject(err2)
-          if (!result) {
-            this.logger.error('_popLastBlock`s dao.transaction is fail.')
-            throw new Error(err2)
+          if (!result) { 
+            this.logger.error('_popLastBlock`s dao.transaction is fail.',err2)
+            // throw new Error(err2)
           }
+          reject(err2)
         } else {
           this.setLastBlock(previousBlock)
           resolve(previousBlock)
@@ -1224,8 +1235,13 @@ class Block {
 
     while (bignum.isLessThan(block.height, this._lastBlock.height)) {
       blocks.unshift(this._lastBlock)
-
-      await this._popLastBlock(this._lastBlock)
+      // try {
+        
+        await this._popLastBlock(this._lastBlock)
+      // } catch (error) {
+      //   this.debug.error(`pop last block fail: ${error}`)
+      //   throw new Error(`pop last block fail: ${error}`)
+      // }
       // const newLastBlock = await this._popLastBlock(this._lastBlock)
       // this.setLastBlock(newLastBlock)
     }
