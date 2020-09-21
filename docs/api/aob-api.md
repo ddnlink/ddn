@@ -17,20 +17,20 @@ sidebar_label: Assets on blockchain
    
 ## **2 接口**   
 ## **2.1 AOB相关交易** 
-DDN系统的所有写操作都是通过发起一个交易来完成的。 
+DDN系统的所有写操作都是通过发起一个交易来完成的。  
 交易数据通过一个叫做@ddn/node-sdk的库来构建，然后再通过一个POST接口发布出去。
 
-POST接口规格如下：
-payload为@ddn/node-sdk创建出来的交易数据
+POST接口规格如下：  
+payload为@ddn/node-sdk创建出来的交易数据  
 接口地址：/peer/transactions  
 请求方式：post   
 支持格式：json  
 公用变量：
-```
+```js
 var DdnJS = require('@ddn/node-sdk').default;
 // 一级密码
 var secret = 'wild corn coil lizard runway flower outside vicious diesel aim slight become'
-<!-- address: DNz4hQjV1KWo8LJwhQya9WANZsrhaziABG -->
+// address: DNz4hQjV1KWo8LJwhQya9WANZsrhaziABG
 // 二级密码
 var secondSecret = 'ddnaobtest001'
 ```
@@ -42,11 +42,12 @@ var secondSecret = 'ddnaobtest001'
 |------ |-----  |---  |----              |   
 |transaction|json|Y|DdnJS.aob.createIssuer根据发行商名字、描述、一级密码、二级密码生成的交易数据|
 
-返回参数说明：   
+返回参数说明：
 
-|名称	|类型   |说明              |   
-|------ |-----  |----              |   
-|success|boolean  |是否成功 |  
+|名称|类型|说明|
+|------|-----|----|
+|success|boolean|是否成功获得response数据。|
+|transactionId|string|交易id|
 
    
 请求示例：   
@@ -58,15 +59,56 @@ var desc = 'IssuerDesc'
 // 构造交易数据
 var trs = DdnJS.aob.createIssuer(name, desc, secret, secondSecret)
 console.log(JSON.stringify(trs))
-{"type":9,"amount":0,"fee":10000000,"recipientId":null,"senderPublicKey":"fafcd01f6b813fdeb3c086e60bc7fa9bfc8ef70ae7be47ce0ac5d06e7b1a8575","timestamp":19395607,"asset":{"aobIssuer":{"name":"IssuerName","desc":"IssuerDesc"}},"signature":"c6ed2a4bafe2b8aa31f4aaceacc2a96cb028abbabb2ed062937498c58e24ca5467a340ddd63b67f809a680ff91b83e685c64991eb695494ddb2fdc57e5761607","signSignature":"8eceacbd47c2b8ed335145ced19d7a3a51f99bdd6631d16ed214180c6f80e29bd6d572f45e7c7d685584e55cb5c303cf340406553ece28c9c0a2fa7a777aac0b"}
-
-// 将生成的交易数据通过post发送给server，注册资产发行商IssuerName
-curl -H "Content-Type: application/json" -H "nethash:gar0fktt" -H "version:''" -k -X POST -d '{"transaction":{"type":60,"nethash":"gar0fktt","amount":"0","fee":"10000000000","recipientId":null,"senderPublicKey":"1e18845d5fbbdf0a6820610e042dcb9a250205964b8075a395453b4a1d1ed10c","timestamp":84671055,"message":null,"asset":{"aobIssuer":{"name":"rcpDa","desc":"资产描述"}},"signature":"f8f8bb32e84fda67bdbf6cef27b83ae13684e5e9b4cf1ea3d22e4c1c1d013d10028422ffa199717fe55b4e73470b9f0d33f0a7123059a2fe628f8e58c824900f"}}' 'http://120.221.161.39:8001/peer/transactions' && echo
+{
+    "type": 60,
+    "nethash": "0ab796cd",
+    "amount": "0",
+    "fee": "10000000000",
+    "recipientId": null,
+    "senderPublicKey": "1e18845d5fbbdf0a6820610e042dcb9a250205964b8075a395453b4a1d1ed10c",
+    "timestamp": 84671055,
+    "message": null,
+    "asset": {
+        "aobIssuer": {
+            "name": "rcpDa",
+            "desc": "资产描述"
+        }
+    },
+    "signature": "f8f8bb32e84fda67bdbf6cef27b83ae13684e5e9b4cf1ea3d22e4c1c1d013d10028422ffa199717fe55b4e73470b9f0d33f0a7123059a2fe628f8e58c824900f"
+}
 ```   
-   
-JSON返回示例：   
-```js  
-{"success":true}		
+将生成的交易数据以transaction为key，放入json，调用上链接口提交，注册资产发行商IssuerName
+```sh
+curl --location --request POST 'http://localhost:8001/peer/transactions' \
+--header 'Content-Type: application/json' \
+--header 'nethash: 0ab796cd' \
+--header 'version: 3.0' \
+--data-raw '{
+    "transaction": {
+        "type": 60,
+        "nethash": "0ab796cd",
+        "amount": "0",
+        "fee": "10000000000",
+        "recipientId": null,
+        "senderPublicKey": "1e18845d5fbbdf0a6820610e042dcb9a250205964b8075a395453b4a1d1ed10c",
+        "timestamp": 84314217,
+        "message": null,
+        "asset": {
+            "aobIssuer": {
+                "name": "IssuerName",
+                "desc": "IssuerDesc"
+            }
+        },
+        "signature": "4043460ca15d3b24361e611b3009ad3212ae97c0872267bf855b765b38a9386580db368a7f12dcf9165a6367c08ee30d67c48ffe68e08a382e2ab0638dd1560f"
+    }
+}'
+```
+返回结果
+```json
+{
+    "success": true,
+    "transactionId": "8c70ba13ddac0a3d6d1d4abf5d7cc1af43c4cc3a1c96c6b04ccf0e604b88f64115b8a57245318da424dd6daf6dbf3b41eebe529f464e0cceea045587246d8f9c"
+}
 ```
 
 ### **2.1.2 注册资产** 
@@ -76,11 +118,12 @@ JSON返回示例：
 |------ |-----  |---  |----              |   
 |transaction|json|Y|DdnJS.aob.createAsset根据资产名字、描述、上限、精度、策略、一级密码、二级密码生成的交易数据|
 
-返回参数说明：   
+返回参数说明：
 
-|名称	|类型   |说明              |   
-|------ |-----  |----              |   
-|success|boolean  |是否成功 |  
+|名称|类型|说明|
+|------|-----|----|
+|success|boolean|是否成功获得response数据。|
+|transactionId|string|交易id|
 
    
 请求示例：   
@@ -95,17 +138,71 @@ var precision = 3
 // 策略
 var strategy = ''
 // 构造交易数据
-var trs = DdnJS.aob.createAsset(name, desc, maximum  , precision, strategy, secret, secondSecret)
+var trs = DdnJS.aob.createAsset(name, desc, maximum, precision, strategy, '0', '0', '0', secret, secondSecret)
 console.log(JSON.stringify(trs))
-{"type":10,"amount":0,"fee":10000000,"recipientId":null,"senderPublicKey":"fafcd01f6b813fdeb3c086e60bc7fa9bfc8ef70ae7be47ce0ac5d06e7b1a8575","timestamp":19397444,"asset":{"aobAsset":{"name":"IssuerName.CNY","desc":"资产描述","maximum":"1000000","precision":3,"strategy":""}},"signature":"c755587d331dd2eb62ef91dce1511d83a3e603c7cdc7548a16052519c21ea89c78364e35e5d46da0e2103fa2fb7f037eec55a5deba18826fa13e4252422d750e","signSignature":"1b7ed4c21c477b8ff3d2acfdfd7ff85617093f4c21de70938c46b61c9704b037dbcf7f9e5f5dd1a5dc8f22cf473aaa459e6e5b15ced388b8a1da1e307987a509"}
+{
+    "type": 61,
+    "nethash": "0ab796cd",
+    "amount": "0",
+    "fee": "50000000000",
+    "recipientId": null,
+    "senderPublicKey": "1e18845d5fbbdf0a6820610e042dcb9a250205964b8075a395453b4a1d1ed10c",
+    "timestamp": 84314778,
+    "message": null,
+    "asset": {
+        "aobAsset": {
+            "name": "IssuerName.CNY",
+            "desc": "资产描述",
+            "maximum": "1000000",
+            "precision": 3,
+            "strategy": "",
+            "allow_blacklist": "0",
+            "allow_whitelist": "0",
+            "allow_writeoff": "0"
+        }
+    },
+    "signature": "d06ac3ee9ecbca7e856a02a7fa9ac38283269bce02d187daa1e59ac3957a10aff756506816d1e7f528f9f9c0ce90e2dae07ccb36f8076157aa0e6c668e1ff60b"
+}
 
-// 将生成的交易数据通过post发送给server，注册资产IssuerName.CNY
-curl -H "Content-Type: application/json" -H "nethash:0ab796cd" -H "version:''" -k -X POST -d '{"transaction":{"type":10,"amount":0,"fee":10000000,"recipientId":null,"senderPublicKey":"fafcd01f6b813fdeb3c086e60bc7fa9bfc8ef70ae7be47ce0ac5d06e7b1a8575","timestamp":19397444,"asset":{"aobAsset":{"name":"IssuerName.CNY","desc":"资产描述","maximum":"1000000","precision":3,"strategy":""}},"signature":"c755587d331dd2eb62ef91dce1511d83a3e603c7cdc7548a16052519c21ea89c78364e35e5d46da0e2103fa2fb7f037eec55a5deba18826fa13e4252422d750e","signSignature":"1b7ed4c21c477b8ff3d2acfdfd7ff85617093f4c21de70938c46b61c9704b037dbcf7f9e5f5dd1a5dc8f22cf473aaa459e6e5b15ced388b8a1da1e307987a509"}}' 'http://localhost:8001/peer/transactions' && echo
-```   
-   
-JSON返回示例：   
-```js  
-{"success":true}		
+```
+将生成的交易数据以transaction为key，放入json，调用上链接口提交，注册资产IssuerName.CNY
+```sh
+curl --location --request POST 'http://localhost:8001/peer/transactions' \
+--header 'Content-Type: application/json' \
+--header 'nethash: 0ab796cd' \
+--header 'version: 3.0' \
+--data-raw '{
+    "transaction": {
+        "type": 61,
+        "nethash": "0ab796cd",
+        "amount": "0",
+        "fee": "50000000000",
+        "recipientId": null,
+        "senderPublicKey": "1e18845d5fbbdf0a6820610e042dcb9a250205964b8075a395453b4a1d1ed10c",
+        "timestamp": 84314778,
+        "message": null,
+        "asset": {
+            "aobAsset": {
+                "name": "IssuerName.CNY",
+                "desc": "资产描述",
+                "maximum": "1000000",
+                "precision": 3,
+                "strategy": "",
+                "allow_blacklist": "0",
+                "allow_whitelist": "0",
+                "allow_writeoff": "0"
+            }
+        },
+        "signature": "d06ac3ee9ecbca7e856a02a7fa9ac38283269bce02d187daa1e59ac3957a10aff756506816d1e7f528f9f9c0ce90e2dae07ccb36f8076157aa0e6c668e1ff60b"
+    }
+}'
+```
+JSON返回示例：
+```json
+{
+    "success": true,
+    "transactionId": "b763c260aea7769d71063c3dcf4aa7b07d58a3765d6561967f3a09b99e8348e70ab701d52a149348be00494fe84c62bb58cd677a0de3fdcef472899569ef407a"
+}
 ```
 
 ### **2.1.3 资产设置acl模式** 
@@ -194,11 +291,12 @@ curl -X GET -H "Content-Type: application/json" 'http://localhost:8001/api/aob/a
 |------ |-----  |---  |----              |   
 |transaction|json|Y|DdnJS.aob.createIssuer根据发行商名字、描述、一级密码、二级密码生成的交易数据|
 
-返回参数说明：   
+返回参数说明：
 
-|名称	|类型   |说明              |   
-|------ |-----  |----              |   
-|success|boolean  |是否成功 |  
+|名称|类型|说明|
+|------|-----|----|
+|success|boolean|是否成功获得response数据。|
+|transactionId|string|交易id|
 
    
 请求示例：   
@@ -208,14 +306,60 @@ var currency = 'IssuerName.CNY'
 var amount = '100000'
 var trs = await DdnJS.aob.createIssue(currency, amount, secret, secondSecret)
 console.log(JSON.stringify(trs))
-{"type":13,"amount":0,"fee":10000000,"recipientId":null,"senderPublicKey":"fafcd01f6b813fdeb3c086e60bc7fa9bfc8ef70ae7be47ce0ac5d06e7b1a8575","timestamp":19475744,"asset":{"aobIssue":{"currency":"IssuerName.CNY","amount":"100000"}},"signature":"32b01a18eca2b0dc7e2ce77ba4e758eaae2532f60844760a762cc20918e7439ac6ca585b921db6ede833ed0bf1c62e30cec545a928abafe0b679183a6ad02202","signSignature":"4fc290d7d7d788e9112a56233df0fe796cba39be3efa0cebf00cbc7e5bc5fd1369fad49e5698d967845b5c02e427926049cab25845d4d385e4a395791906f909"}
+{
+    "transaction": {
+        "type": 64,
+        "nethash": "0ab796cd",
+        "amount": "0",
+        "fee": "10000000",
+        "recipientId": null,
+        "senderPublicKey": "1e18845d5fbbdf0a6820610e042dcb9a250205964b8075a395453b4a1d1ed10c",
+        "timestamp": 84315799,
+        "message": null,
+        "asset": {
+            "aobIssue": {
+                "currency": "IssuerName.CNY",
+                "amount": "10000"
+            }
+        },
+        "signature": "852acb37e1d336a2becd5c40660a72344d25312d95d3b7dff03d64031943460c1c020ccbbdcc4f9177d19c80e5a04b2bfe4e6bfe14273ce8703513162bb1fb07"
+    }
+}
+```
 
-curl -H "Content-Type: application/json" -H "nethash:gar0fktt" -H "version:''" -k -X POST -d '{"transaction":{"type":64,"nethash":"gar0fktt","amount":"0","fee":"10000000","recipientId":null,"senderPublicKey":"1e18845d5fbbdf0a6820610e042dcb9a250205964b8075a395453b4a1d1ed10c","timestamp":84815011,"message":null,"asset":{"aobIssue":{"currency":"rcpDa.TRCP","amount":"100"}},"signature":"061367c60874cbfe993730d82b5067e67b3dc3d160c7330f0ff66ea6f42a1d8c2af5c2c0762a94617c8f5bab9b27da9e63661ede4dbe02ced1dd6021ddb7d706","id":"75a6327ae9978187ee351c0a5e563ff687a1be72813f17f92201bac09aba7736d522b3d1e123756e6a4c442d6b3e780d11c21868dbf184540086e7de0bc6b397"}}' 'http://120.221.161.39:8001/peer/transactions' && echo
-```   
-   
-JSON返回示例：   
-```js  
-{"success":true}			
+将其以transaction为key，放入json，调用上链接口提交
+```sh
+curl --location --request POST 'http://106.15.227.133:8001/peer/transactions' \
+--header 'Content-Type: application/json' \
+--header 'nethash: 0ab796cd' \
+--header 'version: 3.0' \
+--data-raw '{
+    "transaction": {
+        "type": 64,
+        "nethash": "0ab796cd",
+        "amount": "0",
+        "fee": "10000000",
+        "recipientId": null,
+        "senderPublicKey": "1e18845d5fbbdf0a6820610e042dcb9a250205964b8075a395453b4a1d1ed10c",
+        "timestamp": 84315799,
+        "message": null,
+        "asset": {
+            "aobIssue": {
+                "currency": "IssuerName.CNY",
+                "amount": "10000"
+            }
+        },
+        "signature": "852acb37e1d336a2becd5c40660a72344d25312d95d3b7dff03d64031943460c1c020ccbbdcc4f9177d19c80e5a04b2bfe4e6bfe14273ce8703513162bb1fb07"
+    }
+}'
+```
+
+JSON返回示例：
+```json
+{
+    "success": true,
+    "transactionId": "b763c260aea7769d71063c3dcf4aa7b07d58a3765d6561967f3a09b99e8348e70ab701d52a149348be00494fe84c62bb58cd677a0de3fdcef472899569ef407a"
+}
 ```
 
 ### **2.1.6 资产转账** 
@@ -225,11 +369,12 @@ JSON返回示例：
 |------ |-----  |---  |----              |   
 |transaction|json|Y|DdnJS.aob.createTransfer根据资产名字、数量、接收者地址、一级密码、二级密码生成的交易数据|
 
-返回参数说明：   
+返回参数说明：
 
-|名称	|类型   |说明              |   
-|------ |-----  |----              |   
-|success|boolean  |是否成功 |  
+|名称|类型|说明|
+|------|-----|----|
+|success|boolean|是否成功获得response数据。|
+|transactionId|string|交易id|
 
    
 请求示例：   
@@ -241,17 +386,60 @@ var amount = '10000'
 var recipientId = 'AKKHPvQb2A119LNicCQWLZQDFxhGVEY57a'
 var message = 'xxxxx(交易所ID)'
 
-var trs = DdnJS.aob.createTransfer(currency, amount, recipientId, message, secret, secondSecret)
+var trs = DdnJS.aob.createTransfer(currency, amount, recipientId, null, message, secret, secondSecret)
 console.log(JSON.stringify(trs))
-{"type":14,"amount":0,"fee":10000000,"recipientId":"AKKHPvQb2A119LNicCQWLZQDFxhGVEY57a","senderPublicKey":"fafcd01f6b813fdeb3c086e60bc7fa9bfc8ef70ae7be47ce0ac5d06e7b1a8575","timestamp":19481489,"asset":{"aobTransfer":{"currency":"IssuerName.CNY","amount":"10000"}},"signature":"77789071a2ad6d407b9d1e0d654a9deb6d85340a3d2a13d786030e26ac773b4e9b5f052589958d2b8553ae5fc9449496946b5c225e0baa723e7ddecbd89f060a","signSignature":"f0d4a000aae3dd3fa48a92f792d4318e41e3b56cdbaf98649261ae34490652b87645326a432d5deb69f771c133ee4b67d2d22789197be34249e6f7f0c30c1705"}
-
-// 给AKKHPvQb2A119LNicCQWLZQDFxhGVEY57a发送10.000 IssuerName.CNY资产
-curl -H "Content-Type: application/json" -H "nethash:0ab796cd" -H "version:''" -k -X POST -d '{"transaction":{"type":14,"amount":0,"fee":10000000,"recipientId":"AKKHPvQb2A119LNicCQWLZQDFxhGVEY57a","senderPublicKey":"fafcd01f6b813fdeb3c086e60bc7fa9bfc8ef70ae7be47ce0ac5d06e7b1a8575","timestamp":19481489,"asset":{"aobTransfer":{"currency":"IssuerName.CNY","amount":"10000"}},"signature":"77789071a2ad6d407b9d1e0d654a9deb6d85340a3d2a13d786030e26ac773b4e9b5f052589958d2b8553ae5fc9449496946b5c225e0baa723e7ddecbd89f060a","signSignature":"f0d4a000aae3dd3fa48a92f792d4318e41e3b56cdbaf98649261ae34490652b87645326a432d5deb69f771c133ee4b67d2d22789197be34249e6f7f0c30c1705"}}' 'http://localhost:8001/peer/transactions' && echo
+{
+    "type": 14,
+    "amount": 0,
+    "fee": 10000000,
+    "recipientId": "AKKHPvQb2A119LNicCQWLZQDFxhGVEY57a",
+    "senderPublicKey": "fafcd01f6b813fdeb3c086e60bc7fa9bfc8ef70ae7be47ce0ac5d06e7b1a8575",
+    "timestamp": 19481489,
+    "asset": {
+        "aobTransfer": {
+            "currency": "IssuerName.CNY",
+            "amount": "10000"
+        }
+    },
+    "signature": "77789071a2ad6d407b9d1e0d654a9deb6d85340a3d2a13d786030e26ac773b4e9b5f052589958d2b8553ae5fc9449496946b5c225e0baa723e7ddecbd89f060a",
+    "signSignature": "f0d4a000aae3dd3fa48a92f792d4318e41e3b56cdbaf98649261ae34490652b87645326a432d5deb69f771c133ee4b67d2d22789197be34249e6f7f0c30c1705"
+}
 ```   
    
-JSON返回示例：   
-```js  
-{"success":true}		
+
+将其以transaction为key，放入json，调用上链接口提交
+```sh
+# 给AKKHPvQb2A119LNicCQWLZQDFxhGVEY57a发送10.000 IssuerName.CNY资产
+curl --location --request POST 'http://106.15.227.133:8001/peer/transactions' \
+--header 'Content-Type: application/json' \
+--header 'nethash: 0ab796cd' \
+--header 'version: 3.0' \
+--data-raw '{
+    "transaction": {
+        "type": 14,
+        "amount": 0,
+        "fee": 10000000,
+        "recipientId": "AKKHPvQb2A119LNicCQWLZQDFxhGVEY57a",
+        "senderPublicKey": "fafcd01f6b813fdeb3c086e60bc7fa9bfc8ef70ae7be47ce0ac5d06e7b1a8575",
+        "timestamp": 19481489,
+        "asset": {
+            "aobTransfer": {
+                "currency": "IssuerName.CNY",
+                "amount": "10000"
+            }
+        },
+        "signature": "77789071a2ad6d407b9d1e0d654a9deb6d85340a3d2a13d786030e26ac773b4e9b5f052589958d2b8553ae5fc9449496946b5c225e0baa723e7ddecbd89f060a",
+        "signSignature": "f0d4a000aae3dd3fa48a92f792d4318e41e3b56cdbaf98649261ae34490652b87645326a432d5deb69f771c133ee4b67d2d22789197be34249e6f7f0c30c1705"
+    }
+}'
+```
+
+JSON返回示例：
+```json
+{
+    "success": true,
+    "transactionId": "b763c260aea7769d71063c3dcf4aa7b07d58a3765d6561967f3a09b99e8348e70ab701d52a149348be00494fe84c62bb58cd677a0de3fdcef472899569ef407a"
+}
 ```
  
 ### **2.1.7 资产注销** 
@@ -261,11 +449,12 @@ JSON返回示例：
 |------ |-----  |---  |----              |   
 |transaction|json|Y|DdnJS.aob.createFlags根据资产名字、注销状态、黑白名单模式、一级密码、二级密码生成的交易数据|
 
-返回参数说明：   
+返回参数说明：
 
-|名称	|类型   |说明              |   
-|------ |-----  |----              |   
-|success|boolean  |是否成功 |  
+|名称|类型|说明|
+|------|-----|----|
+|success|boolean|是否成功获得response数据。|
+|transactionId|string|交易id|
 
    
 请求示例：   
