@@ -88,8 +88,27 @@ class Signatures {
       second_public_key: null
     }
     await this.runtime.account.setAccount(data, dbTrans)
-
+    await this.deleteSignature(trs.id,dbTrans)
     return await this.runtime.account.getAccountByAddress(address)
+  }
+
+  /**
+   * @description 回滚时删除对应的签名
+   * @author created by wly
+   * @param {*} transaction_id 交易id
+   * @param {*} dbTrans 事物
+   */
+  async deleteSignature (transaction_id,dbTrans){
+    return new Promise((resolve, reject) => {
+      this.dao.remove("signature", {
+        transaction_id,
+      }, dbTrans, (err) => {
+        if (err) {
+          return reject(err)
+        }
+        resolve(true)
+      })
+    })
   }
 
   async applyUnconfirmed ({ type }, { address }, dbTrans) {

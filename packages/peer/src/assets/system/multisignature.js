@@ -186,7 +186,7 @@ class Multisignature {
     }
   }
 
-  async undo ({ asset }, { id, height }, { address }, dbTrans) {
+  async undo ({ asset ,id:trsId}, { id, height }, { address }, dbTrans) {
     const multiInvert = Diff.reverse(asset.multisignature.keysgroup)
 
     this._unconfirmedSignatures[address] = true
@@ -202,8 +202,26 @@ class Multisignature {
       },
       dbTrans
     )
+    await this.deleteMultisignature(trsId,dbTrans)
   }
-
+/**
+   * @description 回滚时删除对应的多重签名
+   * @author created by wly
+   * @param {*} transaction_id 交易id
+   * @param {*} dbTrans 事物
+   */
+  async deleteMultisignature (transaction_id,dbTrans){
+    return new Promise((resolve, reject) => {
+      this.dao.remove("multisignature", {
+        transaction_id,
+      }, dbTrans, (err) => {
+        if (err) {
+          return reject(err)
+        }
+        resolve(true)
+      })
+    })
+  }
   async applyUnconfirmed ({ asset }, { address, multisignatures }, dbTrans) {
     if (this._unconfirmedSignatures[address]) {
       this.logger.debug(`Signature on this account ${address} is pending confirmation`)

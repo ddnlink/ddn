@@ -261,11 +261,12 @@ class Dapp extends Asset.Base {
     }
   }
 
-  async undo (trs) {
+  async undo (trs,block,_,dbTrans) {
     const assetObj = await this.getAssetObject(trs)
     if (assetObj.name === WITNESS_CLUB_DAPP_NAME) {
       global.state.clubInfo = null
     }
+    super.undo(trs,block,_,dbTrans)
   }
 
   async applyUnconfirmed (trs) {
