@@ -137,9 +137,8 @@ function generateAddress (publicKey, tokenPrefix) {
   if (typeof publicKey === 'string') {
     publicKey = Buffer.from(publicKey, 'hex')
   }
-  const h1 = nacl.hash(publicKey)
-
-  const h2 = new RIPEMD160().update(Buffer.from(h1)).digest()
+  const h1 = Buffer.from(nacl.hash(publicKey))
+  const h2 = new RIPEMD160().update(h1).digest() // fixme: 2020.9.20 这里的参数只能使用 string ？
   return tokenPrefix + base58check.encode(h2)
 }
 

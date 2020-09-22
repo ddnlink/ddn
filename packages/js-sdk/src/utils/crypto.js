@@ -7,10 +7,8 @@ import { constants } from '../config'
 import { getBytes } from '../bytes'
 import { getFee } from '../fees'
 
-let Buffer
-if (typeof Buffer === 'undefined') {
-  Buffer = require('buffer/').Buffer
-}
+// const Buffer = require('safe-buffer').Buffer
+
 const fixedPoint = constants.fixedPoint
 
 const { base58check } = DdnCrypto
@@ -54,14 +52,14 @@ function isAddress (address) {
   return true
 }
 
-// fixme: 将所有 generateBase58CheckAddress -> generateAddress
 function generateAddress (publicKey) {
   const tokenPrefix = constants.tokenPrefix
   if (typeof publicKey === 'string') {
     publicKey = Buffer.from(publicKey, 'hex')
   }
-  const h1 = nacl.hash(publicKey)
-  const h2 = new RIPEMD160().update(Buffer.from(h1)).digest()
+
+  const h1 = Buffer.from(nacl.hash(publicKey))
+  const h2 = new RIPEMD160().update(h1).digest()
   return tokenPrefix + base58check.encode(h2)
 }
 

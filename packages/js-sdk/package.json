@@ -48,6 +48,7 @@
     "lodash-es": "^4.17.15",
     "long": "^4.0.0",
     "ripemd160": "^2.0.1",
+    "safe-buffer": "^5.2.1",
     "through2": "^2.0.3"
   },
   "npmFileMap": [

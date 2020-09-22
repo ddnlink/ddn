@@ -32,7 +32,7 @@ module.exports = {
     list: [],
     blackList: [],
     options: {
-      timeout: 4000
+      timeout: 5000
     }
   },
   forging: {

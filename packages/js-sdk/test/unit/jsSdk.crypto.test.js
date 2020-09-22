@@ -111,7 +111,7 @@ describe('Node SDK', () => {
         debug('#getHash, hash:', result)
 
         expect(result).to.be.ok
-        expect(Buffer.isBuffer(result)).be.true
+        // expect(Buffer.isBuffer(result)).be.true
         expect(result.length).to.equal(64)
         done()
       })
@@ -176,10 +176,10 @@ describe('Node SDK', () => {
         done()
       })
 
-      it('should return 10000000000', async (done) => {
+      it('should return 500000000', async (done) => {
         const fee = await getFee({ type: 1 })
         expect(Bignum.isBigNumber(fee)).to.be.true
-        expect(fee.toString()).to.equal('10000000000')
+        expect(fee.toString()).to.equal('500000000')
         done()
       })
 

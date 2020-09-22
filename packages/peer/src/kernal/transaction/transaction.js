@@ -197,7 +197,7 @@ class Transaction {
     }
 
     if (trs.type === DdnUtils.assetTypes.DAPP_OUT) { //
-      return await this._assets.call(trs.type, trs, block, sender)
+      return await this._assets.call(trs.type, 'undo', trs, block, sender)
     }
 
     const amount = DdnUtils.bignum.plus(trs.amount, trs.fee)
@@ -208,7 +208,7 @@ class Transaction {
       round: await this.runtime.round.getRound(block.height)
     }, dbTrans)
 
-    await this._assets.call(trs.type, trs, block, sender1, dbTrans)
+    await this._assets.call(trs.type, 'undo', trs, block, sender1, dbTrans)
   }
 
   async getUnconfirmedTransaction (trsId) {

@@ -183,7 +183,7 @@ class Peer {
         if (this._peerUpdateTimes[peerKey]) {
           if (
             new Date().getTime() - this._peerUpdateTimes[peerKey] >
-                        1000 * 29
+            1000 * 29
           ) {
             needUpdateToDB = true
           } else {
@@ -224,9 +224,7 @@ class Peer {
                           port: peer.port
                         })
                       } else {
-                        this._peerUpdateTimes[
-                          peerKey
-                        ] = new Date().getTime()
+                        this._peerUpdateTimes[peerKey] = new Date().getTime()
                       }
                     }
 
@@ -246,11 +244,11 @@ class Peer {
   }
 
   /**
-     * 请求节点指定接口（默认随机节点，也可指定args.peer来使用指定节点）
-     * @param {*} args
-     * @param {*} dappId
-     * @param {*} allowSelf
-     */
+   * 请求节点指定接口（默认随机节点，也可指定args.peer来使用指定节点）
+   * @param {*} args
+   * @param {*} dappId
+   * @param {*} allowSelf
+   */
   async request (args, dappId, allowSelf) {
     return await PeerInvoker.singleton(this._context).invoke(
       args,
@@ -260,8 +258,8 @@ class Peer {
   }
 
   /**
-     * 从其他节点同步节点列表
-     */
+   * 从其他节点同步节点列表
+   */
   async syncPeersList () {
     let data
     try {
@@ -281,7 +279,7 @@ class Peer {
         const validateErrors = await this.ddnSchema.validatePeer(peer)
         if (validateErrors) {
           this.logger.error(
-                        `Invalid peer: ${validateErrors[0].schemaPath} ${validateErrors[0].message}`
+            `Invalid peer: ${validateErrors[0].schemaPath} ${validateErrors[0].message}`
           )
           continue
         }
@@ -294,8 +292,8 @@ class Peer {
 
         if (
           ip.toLong('127.0.0.1') === peer.ip ||
-                    peer.port === 0 ||
-                    peer.port > 65535
+          peer.port === 0 ||
+          peer.port > 65535
         ) {
           continue
         }
@@ -308,8 +306,8 @@ class Peer {
   }
 
   /**
-     * 从随机节点同步区块数据
-     */
+   * 从随机节点同步区块数据
+   */
   async syncBlocks () {
     return await PeerSync.singleton(this._context).trySyncBlockData()
   }
@@ -319,8 +317,8 @@ class Peer {
   }
 
   /**
-     * 从随机节点同步未确认交易
-     */
+   * 从随机节点同步未确认交易
+   */
   async syncUnconfirmedTransactions () {
     return await PeerSync.singleton(
       this._context
@@ -373,8 +371,8 @@ class Peer {
   }
 
   /**
-     * 恢复暂停的节点服务状态为可用（已达到暂停时间的）
-     */
+   * 恢复暂停的节点服务状态为可用（已达到暂停时间的）
+   */
   async restoreBanState () {
     return await new Promise(resolve => {
       this.dao.update(
@@ -394,12 +392,12 @@ class Peer {
   }
 
   /**
-     * 修改指定节点服务的状态
-     * @param {*} pip 节点IP
-     * @param {*} port 服务端口
-     * @param {*} state 状态（0：停用，1：可用，2：健康）
-     * @param {*} timeoutSeconds 服务暂停时间（单位：秒）
-     */
+   * 修改指定节点服务的状态
+   * @param {*} pip 节点IP
+   * @param {*} port 服务端口
+   * @param {*} state 状态（0：停用，1：可用，2：健康）
+   * @param {*} timeoutSeconds 服务暂停时间（单位：秒）
+   */
   async changeState (pip, port, state, timeoutSeconds) {
     // FIXME: 2020.9.3 白名单状态修改
     // const isStaticPeer = this.config.peers.list.find(
@@ -434,8 +432,8 @@ class Peer {
   }
 
   /**
-     * 重置所有节点服务状态为健康
-     */
+   * 重置所有节点服务状态为健康
+   */
   async reset () {
     return new Promise((resolve, reject) => {
       this.dao.update('peer', { state: 2 }, {}, null, (err, result) => {
@@ -456,16 +454,14 @@ class Peer {
       const peerIp = ip.fromLong(peer.ip)
       if (
         (peerIp === '127.0.0.1' || peerIp === this.config.publicIp) &&
-                peer.port === this.config.port &&
-                !allowSelf
+        peer.port === this.config.port &&
+        !allowSelf
       ) {
         if (peers.length > 1) {
           return peers[1]
         } else {
           await this.reset()
-          this.logger.warn(
-            'single none does not need sychronization.'
-          )
+          this.logger.warn('single none does not need sychronization.')
 
           return null
         }
