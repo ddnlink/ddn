@@ -116,7 +116,7 @@ class Delegate {
     return await this.runtime.account.getAccountByAddress(address)
   }
 
-  async undo ({ asset }, { address, nameexist }, dbTrans) {
+  async undo ({ id,asset },_, { address, nameexist }, dbTrans) {
     const data = {
       address,
       u_is_delegate: 1, // wxm block database
@@ -130,8 +130,27 @@ class Delegate {
     }
 
     await this.runtime.account.setAccount(data, dbTrans)
-
+    await this.deleteDelegate(id,dbTrans)
     return await this.runtime.account.getAccountByAddress(address)
+  }
+
+  /**
+   * @description 回滚时删除对应的投票
+   * @author created by wly
+   * @param {*} transaction_id 交易id
+   * @param {*} dbTrans 事物
+   */
+  async deleteDelegate (transaction_id,dbTrans){
+    return new Promise((resolve, reject) => {
+      this.dao.remove("delegate", {
+        transaction_id,
+      }, dbTrans, (err) => {
+        if (err) {
+          return reject(err)
+        }
+        resolve(true)
+      })
+    })
   }
 
   async applyUnconfirmed ({ asset, type }, { isDelegate, address }) {

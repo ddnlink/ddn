@@ -9,12 +9,12 @@ import DdnUtils from '@ddn/utils'
 import Diff from '../../utils/diff.js'
 
 class Vote {
-  constructor (context) {
+  constructor(context) {
     Object.assign(this, context)
     this._context = context
   }
 
-  async create ({ votes }, trs) {
+  async create({ votes }, trs) {
     trs.recipientId = null // wxm block database
     trs.asset.vote = {
       votes
@@ -23,14 +23,14 @@ class Vote {
     return trs
   }
 
-  async calculateFee (trs, sender) {
+  async calculateFee(trs, sender) {
     return DdnUtils.bignum.multiply(
       this.constants.net.fees.vote,
       this.constants.fixedPoint
     )
   }
 
-  async verify (trs, sender) {
+  async verify(trs, sender) {
     if (
       !trs.asset.vote ||
       !trs.asset.vote.votes ||
@@ -53,11 +53,11 @@ class Vote {
     return trs
   }
 
-  async process (trs, sender) {
+  async process(trs, sender) {
     return trs
   }
 
-  async getBytes ({ asset }) {
+  async getBytes({ asset }) {
     if (!asset.vote.votes) {
       return null
     }
@@ -71,11 +71,11 @@ class Vote {
     return bb.toBuffer()
   }
 
-  async isSupportLock () {
+  async isSupportLock() {
     return false
   }
 
-  async apply ({ asset }, { id, height }, { address }, dbTrans) {
+  async apply({ asset }, { id, height }, { address }, dbTrans) {
     // this.logger.debug('votes.js 67 vote apply merge address', asset)
     await this.runtime.account.merge(
       address,
@@ -88,7 +88,7 @@ class Vote {
     )
   }
 
-  async undo ({ asset }, { id, height }, { address }, dbTrans) {
+  async undo({ id:trsId, asset }, { id, height }, { address }, dbTrans) {
     if (asset.vote.votes === null) return
 
     const votesInvert = Diff.reverse(asset.vote.votes)
@@ -101,9 +101,29 @@ class Vote {
       },
       dbTrans
     )
+    await this.deleteVote(trsId, dbTrans)
   }
 
-  async applyUnconfirmed ({ type }, { address }, dbTrans) {
+  /**
+   * * @description 回滚时删除对应的投票信息
+   * @author created by wly
+   * @param {*} transaction_id 交易id
+   * @param {*} dbTrans 事物
+   */
+  async deleteVote(transaction_id, dbTrans) {
+    return new Promise((resolve, reject) => {
+      this.dao.remove("vote", {
+        transaction_id,
+      }, dbTrans, (err) => {
+        if (err) {
+          return reject(err)
+        }
+        resolve(true)
+      })
+    })
+  }
+
+  async applyUnconfirmed({ type }, { address }, dbTrans) {
     const key = `${address}:${type}`
     if (this.oneoff.has(key)) {
       throw new Error('Double submit')
@@ -111,12 +131,12 @@ class Vote {
     this.oneoff.set(key, true)
   }
 
-  async undoUnconfirmed ({ type }, { address }, dbTrans) {
+  async undoUnconfirmed({ type }, { address }, dbTrans) {
     const key = `${address}:${type}`
     this.oneoff.delete(key)
   }
 
-  async objectNormalize (trs) {
+  async objectNormalize(trs) {
     const validateErrors = await this.ddnSchema.validate(
       {
         type: 'object',
@@ -141,7 +161,7 @@ class Vote {
     return trs
   }
 
-  async dbRead ({ v_votes }) {
+  async dbRead({ v_votes }) {
     if (!v_votes) {
       return null
     } else {
@@ -157,7 +177,7 @@ class Vote {
    * 替换dbSave方法 ---wly
    * 功能:新增一条vote数据
    */
-  async dbSave ({ asset, id }, dbTrans) {
+  async dbSave({ asset, id }, dbTrans) {
     return new Promise((resolve, reject) => {
       this.dao.insert(
         'vote',
@@ -179,7 +199,7 @@ class Vote {
     })
   }
 
-  async ready ({ signatures }, { multisignatures, multimin }) {
+  async ready({ signatures }, { multisignatures, multimin }) {
     if (Array.isArray(multisignatures) && multisignatures.length) {
       if (!signatures) {
         return false

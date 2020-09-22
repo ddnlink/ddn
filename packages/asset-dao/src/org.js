@@ -22,7 +22,7 @@ import daoUtil from './daoUtil.js'
 
 class Org extends Asset.Base {
   // eslint-disable-next-line no-useless-constructor
-  constructor (context, transactionConfig) {
+  constructor(context, transactionConfig) {
     super(context, transactionConfig)
   }
 
@@ -36,7 +36,7 @@ class Org extends Asset.Base {
       * 3、必须英文开头；
       */
   // eslint-disable-next-line class-methods-use-this
-  async propsMapping () {
+  async propsMapping() {
     return [{
       field: 'str1',
       prop: 'org_id',
@@ -85,7 +85,7 @@ class Org extends Asset.Base {
      * @param {object} trs 交易
      */
   // eslint-disable-next-line class-methods-use-this
-  async create (data, trs) {
+  async create(data, trs) {
     const trans = trs
     trans.recipientId = null
     trans.amount = '0'
@@ -97,7 +97,7 @@ class Org extends Asset.Base {
   }
 
   // eslint-disable-next-line class-methods-use-this
-  async calculateFee (trs) {
+  async calculateFee(trs) {
     let feeBase = 1
     const assetObj = await this.getAssetObject(trs)
 
@@ -125,7 +125,7 @@ class Org extends Asset.Base {
     return result
   }
 
-  async verify (trs, sender) {
+  async verify(trs, sender) {
     const org = await this.getAssetObject(trs)
     if (trs.recipientId) {
       throw new Error('Invalid recipient')
@@ -208,7 +208,7 @@ class Org extends Asset.Base {
     return trs
   }
 
-  async applyUnconfirmed (trs, sender, dbTrans) {
+  async applyUnconfirmed(trs, sender, dbTrans) {
     const assetObj = await this.getAssetObject(trs)
     const key = `${sender.address}:${trs.type}:${assetObj.org_id}:${assetObj.state}`
     if (assetObj.state === 0 && this.oneoff.has(key)) {
@@ -221,8 +221,30 @@ class Org extends Asset.Base {
       this.oneoff.set(key, true)
     }
   }
+  
+  /**
+   * @description 回滚组织时删除组织信息
+   * @author wly
+   * @param {*} trs 交易
+   * @param {*} block 块信息
+   * @param {*} _ 忽略sender，发送者信息
+   * @param {*} dbTrans 事物
+   */
+  async undo(trs, block, _, dbTrans) {
+    return new Promise((resolve, reject) => {
+    this.dao.remove('mem_org', {
+      transaction_id: trs.id,
+    }, dbTrans, (err) => {
+      if (err) {
+        return reject(err)
+      }
+      super.undo(trs, block,_, dbTrans)
+      resolve(true)
+    })
+  })
+  }
 
-  async undoUnconfirmed (trs, sender, dbTrans) {
+  async undoUnconfirmed(trs, sender, dbTrans) {
     const assetObj = await this.getAssetObject(trs)
     if (assetObj.state === 0) {
       const key = `${sender.address}:${trs.type}:${assetObj.org_id}:${assetObj.state}`
@@ -233,7 +255,7 @@ class Org extends Asset.Base {
     return result
   }
 
-  async getBytes (trs) {
+  async getBytes(trs) {
     const org = await this.getAssetObject(trs)
     const bb = new ByteBuffer()
     if (!org) {
@@ -253,7 +275,7 @@ class Org extends Asset.Base {
     return bb.toBuffer()
   }
 
-  async dbSave (trs, dbTrans) {
+  async dbSave(trs, dbTrans) {
     const assetObj = await this.getAssetObject(trs)
     this.logger.debug(`assetObj: ${assetObj}`)
 
@@ -285,7 +307,7 @@ class Org extends Asset.Base {
   /**
      * 自定义资产Api
      */
-  async attachApi (router) {
+  async attachApi(router) {
     router.get('/', async (req, res) => {
       try {
         const result = await this.getOrgList(req, res)
@@ -328,7 +350,7 @@ class Org extends Asset.Base {
      * @param {*} req
      * @param {*} res
      */
-  async putOrg (req) {
+  async putOrg(req) {
     const body = req.body
 
     const validateErrors = await this.ddnSchema.validate({
@@ -526,7 +548,7 @@ class Org extends Asset.Base {
      * @param {*} req
      * @param {*} res
      */
-  async getOrgByOrgId (req) {
+  async getOrgByOrgId(req) {
     const orgInfo = await daoUtil.getEffectiveOrgByOrgId(this._context, req.params.org_id)
     return { success: true, result: { org: orgInfo } }
   }
@@ -536,7 +558,7 @@ class Org extends Asset.Base {
      * @param {*} req
      * @param {*} res
      */
-  async getOrgList (req) {
+  async getOrgList(req) {
     const query = Object.assign({}, req.body, req.query)
 
     const validateErrors = await this.ddnSchema.validate({
@@ -614,13 +636,13 @@ class Org extends Asset.Base {
       this.dao.findPage('mem_org', where, limit, offset, true, [
         'transaction_id', 'org_id', 'name', 'address', 'tags',
         'url', 'state', 'timestamp'], orders, (err, result) => {
-        if (err) {
-          this.logger.error('this.dao.findPage error', err)
-          return reject(err)
-        }
+          if (err) {
+            this.logger.error('this.dao.findPage error', err)
+            return reject(err)
+          }
 
-        resolve({ success: true, result })
-      })
+          resolve({ success: true, result })
+        })
     })
   }
 }

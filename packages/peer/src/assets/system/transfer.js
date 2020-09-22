@@ -5,12 +5,12 @@
 import { bignum } from '@ddn/utils' // bignum update
 
 class Transfer {
-  constructor (context) {
+  constructor(context) {
     Object.assign(this, context)
     this._context = context
   }
 
-  async create ({
+  async create({
     recipientId,
     amount
   }, trs) {
@@ -20,11 +20,11 @@ class Transfer {
     return trs
   }
 
-  async calculateFee () {
+  async calculateFee() {
     return bignum.multiply(this.constants.net.fees.transfer, this.constants.fixedPoint)
   }
 
-  async verify (trs, {
+  async verify(trs, {
     address,
     lockHeight
   }) {
@@ -50,11 +50,11 @@ class Transfer {
 
       if (
         lockHeight &&
-                lastBlock &&
-                bignum.isLessThanOrEqualTo(
-                  bignum.plus(lastBlock.height, 1),
-                  lockHeight
-                )
+        lastBlock &&
+        bignum.isLessThanOrEqualTo(
+          bignum.plus(lastBlock.height, 1),
+          lockHeight
+        )
       ) {
         throw new Error('Account is locked')
       }
@@ -63,20 +63,20 @@ class Transfer {
     return trs
   }
 
-  async process (trs, sender) {
+  async process(trs, sender) {
     // setImmediate(cb, null, trs);
     return trs
   }
 
-  async getBytes (trs) {
+  async getBytes(trs) {
     return null
   }
 
-  async isSupportLock () {
+  async isSupportLock() {
     return true
   }
 
-  async apply ({
+  async apply({
     recipientId,
     amount
   }, {
@@ -86,23 +86,24 @@ class Transfer {
     await this.runtime.account.setAccount({
       address: recipientId
     },
-    dbTrans
+      dbTrans
     )
 
     await this.runtime.account.merge(
       recipientId, {
-        address: recipientId, // wxm block database
-        balance: amount,
-        u_balance: amount,
-        block_id: id, // wxm block database
-        round: await this.runtime.round.getRound(height)
-      },
+      address: recipientId, // wxm block database
+      balance: amount,
+      u_balance: amount,
+      block_id: id, // wxm block database
+      round: await this.runtime.round.getRound(height)
+    },
       dbTrans
     )
   }
 
-  async undo ({
+  async undo({
     recipientId,
+    id: trsId,
     amount
   }, {
     id,
@@ -111,41 +112,61 @@ class Transfer {
     await this.runtime.account.setAccount({
       address: recipientId
     },
-    dbTrans
+      dbTrans
     )
 
     await this.runtime.account.merge(
       recipientId, {
-        address: recipientId, // wxm block database
-        balance: `-${amount}`,
-        u_balance: `-${amount}`,
-        block_id: id, // wxm block database
-        round: await this.runtime.round.getRound(height)
-      },
+      address: recipientId, // wxm block database
+      balance: `-${amount}`,
+      u_balance: `-${amount}`,
+      block_id: id, // wxm block database
+      round: await this.runtime.round.getRound(height)
+    },
       dbTrans
     )
+    await this.deleteTransfer(trsId, dbTrans)
   }
 
-  async applyUnconfirmed (trs, sender, dbTrans) {
+  /**
+   * @description 回滚时删除对应的transfer
+   * @author created by wly
+   * @param {*} transaction_id 交易id
+   * @param {*} dbTrans 事物
+   */
+  async deleteTransfer(transaction_id, dbTrans) {
+    return new Promise((resolve, reject) => {
+      this.dao.remove("transfer", {
+        transaction_id,
+      }, dbTrans, (err) => {
+        if (err) {
+          return reject(err)
+        }
+        resolve(true)
+      })
+    })
+  }
+
+  async applyUnconfirmed(trs, sender, dbTrans) {
 
   }
 
-  async undoUnconfirmed (trs, sender, dbTrans) {
+  async undoUnconfirmed(trs, sender, dbTrans) {
 
   }
 
-  async objectNormalize (trs) {
+  async objectNormalize(trs) {
     delete trs.block_id // wxm block database
     return trs
   }
 
-  async dbRead (raw) {
+  async dbRead(raw) {
     return null
   }
 
-  async dbSave (trs, dbTrans) {}
+  async dbSave(trs, dbTrans) { }
 
-  async ready ({
+  async ready({
     signatures
   }, {
     multisignatures,

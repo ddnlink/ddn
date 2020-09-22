@@ -278,6 +278,12 @@ class PeerSync {
             await this.runtime.block.processBlock(block, null, false, true, true)
           } catch (err) {
             this.logger.error(`Failed to process block: ${err}`)
+            if (err.message === "DDN is preparing") {
+              // return setTimeout(() => {
+              //   _cloneBlocksFromPeer(peer, blockId)
+              // }, 10)
+              return
+            }
             this.logger.error(`Block is not valid, ban 60 min, block: ${block ? block.id : 'null'} `, peerStr)
             this.runtime.peer.changeState(peer.ip, peer.port, 0, 3600) // 3600 ms
             return null

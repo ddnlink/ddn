@@ -37,6 +37,26 @@ class Transaction {
   }
 
   /**
+   * wulianyou 09-11
+   * 删除交易
+   * @param {*} trsId 
+   */
+
+  async deleteTransaction (trsId, dbTrans) {
+    return new Promise((resolve, reject) => {
+      this.dao.remove('tr', {
+        id: trsId
+      }, dbTrans, (err, result) => {
+        if (err) {
+          reject(err)
+        } else {
+          resolve(result)
+        }
+      })
+    })
+  }
+
+  /**
      * 根据资产配置名称获取资产实例
      * @param {*} assetName
      */
@@ -145,6 +165,8 @@ class Transaction {
           try {
             await this._assets.call(trs.type, 'dbSave', trs, dbTrans)
           } catch (e) {
+            this.logger.debug(`insert tr error trsId: ${newTrans.id}`)
+            this.logger.debug(`insert tr error trsId: ${JSON.stringify(newTrans)}`)
             return reject(new Error(`Insert tr fail ${e.toString()}`))
           }
           resolve(result)
@@ -195,11 +217,9 @@ class Transaction {
     if (!this._assets.hasType(trs.type)) {
       throw new Error(`Unknown transaction type 5 ${trs.type}`)
     }
-
     if (trs.type === DdnUtils.assetTypes.DAPP_OUT) { //
-      return await this._assets.call(trs.type, 'undo', trs, block, sender)
+      return await this._assets.call(trs.type, 'undo',trs, block, sender,dbTrans)
     }
-
     const amount = DdnUtils.bignum.plus(trs.amount, trs.fee)
 
     const sender1 = await this.runtime.account.merge(sender.address, {
@@ -207,8 +227,7 @@ class Transaction {
       block_id: block.id, // wxm block database
       round: await this.runtime.round.getRound(block.height)
     }, dbTrans)
-
-    await this._assets.call(trs.type, 'undo', trs, block, sender1, dbTrans)
+    await this._assets.call(trs.type, 'undo', trs, block,sender1, dbTrans)
   }
 
   async getUnconfirmedTransaction (trsId) {
@@ -243,7 +262,6 @@ class Transaction {
     if (!this._assets.hasType(transaction.type)) {
       throw new Error(`Unknown transaction type 6 ${transaction.type}`)
     }
-
     // wxm TODO
     // 此处应该使用this._assets方法（transaction.type）来做判断
     // fixme: 2020.4.22 这里是 dapp 的交易，转移到别处？
@@ -252,7 +270,6 @@ class Transaction {
     }
 
     const amount = DdnUtils.bignum.plus(transaction.amount, transaction.fee).toString()
-
     this.balanceCache.addNativeBalance(sender.address, amount)
 
     await this.runtime.account.merge(sender.address, {
