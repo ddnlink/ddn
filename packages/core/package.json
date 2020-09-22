@@ -1,6 +1,6 @@
 {
   "name": "@ddn/core",
-  "version": "0.2.12",
+  "version": "0.2.13",
   "description": "DDN core.",
   "main": "./lib/index.js",
   "keywords": [

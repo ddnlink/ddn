@@ -1,6 +1,6 @@
 {
   "name": "@ddn/crypto",
-  "version": "0.3.6",
+  "version": "0.3.7",
   "description": "Crypto for DDN",
   "keywords": [
     "crypto",
@@ -36,6 +36,6 @@
     "tweetnacl": "^1.0.2"
   },
   "devDependencies": {
-    "@ddn/utils": "^0.1.21"
+    "@ddn/utils": "^0.1.22"
   }
 }
