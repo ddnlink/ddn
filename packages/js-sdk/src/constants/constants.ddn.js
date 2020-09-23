@@ -2,7 +2,7 @@
  * Please use yourself constants file
  * Note: Once the mainnet is online, this file can no longer be changed.
  */
-module.exports = {
+export default {
   nethash: '0ab796cd', // 标定该链的版本
   tokenName: 'DDN',
   tokenPrefix: 'D',
