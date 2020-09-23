@@ -1,8 +1,15 @@
-export default {
+/**
+ * Please use yourself constants file
+ * Note: Once the mainnet is online, this file can no longer be changed.
+ */
+module.exports = {
   nethash: '0ab796cd', // 标定该链的版本
   tokenName: 'DDN',
   tokenPrefix: 'D',
-  foundAddress: 'DLjrrVwnmMXstcAYVjcrpwyYb3kY1ehABU', // Please protect its private key
+  maxAmount: 100 * 10 ** 8,
+  fixedPoint: 10 ** 8,
+  totalAmount: '1000000000000000000',
+  foundAddress: 'DLjrrVwnmMXstcAYVjcrpwyYb3kY1ehABU',
   walletUrl: 'http://wallet.ddn.link',
   enableMoreLockTypes: true,
 
@@ -11,7 +18,6 @@ export default {
   superPeers: 21,
   voters: 67,
   remoteVoters: 6,
-  maxAmount: 100000000,
   maxPayloadLength: 8 * 1024 * 1024,
   blockHeaderLength: 248,
   addressLength: 208,
@@ -24,8 +30,6 @@ export default {
   maxSignaturesLength: 196 * 256,
   maxConfirmations: 77 * 100,
   confirmationLength: 77,
-  fixedPoint: 10 ** 8,
-  totalAmount: '10000000000000000', // = maxAmount * fixedPoint
   maxTxsPerBlock: 500,
 
   testnet: {

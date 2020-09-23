@@ -143,11 +143,9 @@ export class TestUtil {
             return cb(err || 'Got incorrect status')
           }
 
-          // bignum update if (height + 1 === body.height) {
           if (bignum.isEqualTo(bignum.plus(height, 1), body.height)) {
             height = body.height
           }
-
           setTimeout(cb, 1000)
         })
       },
@@ -155,10 +153,8 @@ export class TestUtil {
       err => {
         if (err) {
           cb(err)
-          // return setImmediate(cb, err);
         } else {
           cb(null, height)
-          // return setImmediate(cb, null, height);
         }
       }
     )

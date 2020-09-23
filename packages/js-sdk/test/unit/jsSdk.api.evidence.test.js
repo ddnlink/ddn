@@ -17,7 +17,11 @@ describe('Test createEvidence', () => {
   let evidence2
 
   beforeAll(done => {
+    debug('beforeAll starting ...')
     const ipid = node.randomIpId()
+
+    debug(`beforeAll ipid: ${ipid}`)
+
     evidence = {
       ipid: ipid,
       title: node.randomUsername(),
@@ -47,11 +51,14 @@ describe('Test createEvidence', () => {
     }
 
     node.expect(evidence).to.be.not.equal(evidence2)
+    debug(`beforeAll end: ${JSON.stringify(evidence2)}`)
+
     done()
   })
 
   it('CreateEvidence Should be ok', async (done) => {
     transaction = await createEvidence(evidence, node.Gaccount.password)
+    debug(`transaction: ${JSON.stringify(transaction)}`)
 
     node.peer.post('/transactions')
       .set('Accept', 'application/json')
@@ -73,9 +80,14 @@ describe('Test createEvidence', () => {
       })
   })
 
-  it('Get /evidences/ipid/:ipid should be ok', done => {
+  it('Get /evidences/ipid/:ipid should be ok', async done => {
+    // debug(`onNewBlock: ${ipid}`)
+    // await node.onNewBlockAsync()
     node.onNewBlock(err => {
+      debug('onNewBlock 2..')
+
       node.expect(err).to.be.not.ok
+      debug(`/evidences/ipid/${evidence.ipid}`, evidence.ipid)
 
       node.api.get(`/evidences/ipid/${evidence.ipid}`)
         .set('Accept', 'application/json')

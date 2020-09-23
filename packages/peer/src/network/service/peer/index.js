@@ -380,14 +380,13 @@ class PeerService {
               transaction
             )
           ) {
-            // return cb(
-            //   `The transaction ${transaction.id} is in process already..`
-            // )
             this._invalidTrsCache.set(transaction.id, true)
-            return {
-              success: false,
-              error: `The transaction ${transaction.id} is in process already..`
-            }
+            return cb(`The transaction ${transaction.id} is in process already..`)
+
+            // return {
+            //   success: false,
+            //   error: `The transaction ${transaction.id} is in process already..`
+            // }
           }
 
           this.logger.log(

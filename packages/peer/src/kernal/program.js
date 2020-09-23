@@ -27,6 +27,15 @@ import MultiSignature from './consensus/multisignature'
 
 import defaultConfig from '../config.default.js'
 
+/**
+ * By default, Node has 4 workers to resolve DNS queries. If your DNS query takes long-ish time, 
+ * requests will block on the DNS phase, and the symptom is exactly ESOCKETTIMEDOUT or ETIMEDOUT.
+ * 
+ * https://stackoverflow.com/questions/24320578/node-js-get-request-etimedout-esockettimedout
+ * https://segmentfault.com/q/1010000012789448
+ */
+process.env.UV_THREADPOOL_SIZE = 20 // max: 128
+
 class Program {
   async _init(options) {
     options.logger = Logger({

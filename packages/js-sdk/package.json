@@ -45,7 +45,7 @@
     "bitcore-mnemonic": "^8.20.5",
     "buffer": "^4.7.0",
     "bytebuffer": "^5.0.1",
-    "lodash-es": "^4.17.15",
+    "lodash": "^4.17.20",
     "long": "^4.0.0",
     "ripemd160": "^2.0.1",
     "safe-buffer": "^5.2.1",

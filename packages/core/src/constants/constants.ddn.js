@@ -1,17 +1,23 @@
-export default {
+/**
+ * Please use yourself constants file
+ * Note: Once the mainnet is online, this file can no longer be changed.
+ */
+module.exports = {
   nethash: '0ab796cd', // 标定该链的版本
   tokenName: 'DDN',
   tokenPrefix: 'D',
-  foundAddress: 'DLjrrVwnmMXstcAYVjcrpwyYb3kY1ehABU', // Please protect its private key
+  maxAmount: 100 * 10 ** 8,
+  fixedPoint: 10 ** 8,
+  totalAmount: '1000000000000000000',
+  foundAddress: 'DLjrrVwnmMXstcAYVjcrpwyYb3kY1ehABU',
   walletUrl: 'http://wallet.ddn.link',
   enableMoreLockTypes: true,
-  
+
   interval: 10, // 10ms
   delegates: 101, // number
   superPeers: 21,
-  voters: 0,
-  remoteVoters: 0,
-  maxAmount: 100000000,
+  voters: 67,
+  remoteVoters: 6,
   maxPayloadLength: 8 * 1024 * 1024,
   blockHeaderLength: 248,
   addressLength: 208,
@@ -24,8 +30,6 @@ export default {
   maxSignaturesLength: 196 * 256,
   maxConfirmations: 77 * 100,
   confirmationLength: 77,
-  fixedPoint: 10 ** 8,
-  totalAmount: '10000000000000000', // = maxAmount * fixedPoint
   maxTxsPerBlock: 500,
 
   testnet: {
@@ -44,25 +48,38 @@ export default {
 
     // Fees for transacton
     fees: {
-      send: '10000000',
-      vote: '10000000',
-      secondSignature: '500000000',
-      delegate: '10000000000',
-      multiSignature: '500000000',
-      dappRegistration: '2500000000',
-      dappWithdrawal: '10000000',
-      dappDeposit: '10000000',
-      data: '10000000',
+      // base
+      transfer: '0.1',
+      vote: '0.1',
+      delegate: '100',
+      signature: '5',
+      multiSignature: '5',
+      lock: '0.1',
+
+      // aob
+      aob_issuer: '100',
+      aob_asset: '500',
+      aob_flag: '0.1',
+      aob_acl: '0.1',
+      aob_issue: '0.1',
+      aob_transfer: '0',
+
+      // dapp
+      dapp: '100',
+      dapp_out: '0.1',
+      dapp_in: '0.1',
 
       // todo: 测试中提供的费用
-      username: '10000000',
-      multiTransfer: '10000000',
-      dapp: '10000000000',
+      username: '0.1',
 
       // dao
-      evidence: '10000000', // fixme
-      org: '10000000',
-      exchange: '10000000'
+      dao_confirmation: '1',
+      dao_contribution: '1',
+      dao_exchange: '0.1',
+      dao_org: '0.1',
+
+      // evidence
+      evidence: '0.1' // fixme
     }
   },
 
@@ -83,25 +100,38 @@ export default {
 
     // Fees for transacton
     fees: {
-      send: '10000000',
-      vote: '10000000',
-      secondSignature: '500000000',
-      delegate: '10000000000',
-      multisignature: '500000000',
-      dappRegistration: '2500000000',
-      dappWithdrawal: '10000000',
-      dappDeposit: '10000000',
-      data: '10000000',
+      // base
+      transfer: '0.1',
+      vote: '0.1',
+      delegate: '100',
+      signature: '5',
+      multiSignature: '5',
+      lock: '0.1',
+
+      // aob
+      aob_issuer: '100',
+      aob_asset: '500',
+      aob_flag: '0.1',
+      aob_acl: '0.1',
+      aob_issue: '0.1',
+      aob_transfer: '0',
+
+      // dapp
+      dapp: '100',
+      dapp_out: '0.1',
+      dapp_in: '0.1',
 
       // todo: 测试中提供的费用
-      username: '10000000',
-      multiTransfer: '10000000',
-      dapp: '10000000000',
+      username: '0.1',
 
       // dao
-      evidence: '10000000', // fixme
-      org: '10000000',
-      exchange: '10000000'
+      dao_confirmation: '1',
+      dao_contribution: '1',
+      dao_exchange: '0.1',
+      dao_org: '0.1',
+
+      // evidence
+      evidence: '0.1' // fixme
     }
   }
 }

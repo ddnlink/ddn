@@ -2,11 +2,11 @@
  * PeerInvoker
  * wangxm   2019-01-14
  */
-import request from 'request'
 import ip from 'ip'
-import extend from 'extend'
 import os from 'os'
 import http from 'http'
+import request from 'request'
+import extend from 'extend'
 
 let _singleton
 
@@ -26,10 +26,7 @@ class PeerInvoker {
       os: os.platform() + os.release(),
       version: this.config.version,
       port: this.config.port,
-      nethash: this.config.nethash,
-      // fixme: 2020.9.20
-      Accept: '*/*',
-      'User-Agent': 'request/2.88.2'
+      nethash: this.config.nethash
     }
   }
 
@@ -60,9 +57,9 @@ class PeerInvoker {
       method: args.method || 'GET',
       json: true,
       headers: extend({}, this._headers, args.headers),
-      timeout: 20000, // this.config.peers.options.timeout,
+      timeout: this.config.peers.options.timeout,
       forever: true,
-      agent: new http.Agent({ keepAlive: true }) // fixme: 2020.9.20
+      agent: new http.Agent({ keepAlive: true })
     }
 
     if ((args.data !== null && typeof args.data === 'object') || Array.isArray(args.data)) {
