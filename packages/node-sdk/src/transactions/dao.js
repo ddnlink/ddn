@@ -175,7 +175,7 @@ async function createConfirmation (trsAmount, confirmation, secret, second_secre
     transaction.sign_signature = await crypto.secondSign(transaction, secondKeys)
   }
 
-  transaction.id = crypto.getId(transaction)
+  transaction.id = await crypto.getId(transaction)
   return transaction
 }
 
@@ -232,7 +232,7 @@ async function createContribution (contribution, secret, second_secret) {
     transaction.sign_signature = await crypto.secondSign(transaction, secondKeys)
   }
 
-  transaction.id = crypto.getId(transaction)
+  transaction.id =await crypto.getId(transaction)
   return transaction
 }
 
@@ -260,12 +260,12 @@ async function createExchange (trsopt, exchange, secret, secondSecret) {
     nethash: config.nethash,
     amount: '0', // Bignum update
     fee: `${fee}`,
-    recipientId: null,
+    recipientId: exchange.recipientId|| null,
     senderPublicKey: keys.publicKey,
     // senderPublicKey: keys.publicKey,
     timestamp: slots.getTime() - config.clientDriftSeconds,
     asset: {
-      exchange
+      daoExchange:exchange
     }
   }, trsopt || {})
 
