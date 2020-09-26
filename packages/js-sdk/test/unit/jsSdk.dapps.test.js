@@ -1011,7 +1011,7 @@ describe('GET /dapps/installed', () => {
         const dapps = body.result.rows
         for (let i = 0; i < dapps.length; i++) {
           if (dapps[i] !== null) {
-            if (dapps[i].transactionId === DappToInstall.transactionId) {
+            if (dapps[i].transaction_id === DappToInstall.transactionId) {
               flag += 1
             }
           }

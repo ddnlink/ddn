@@ -232,10 +232,10 @@ export class TestUtil {
 
   async giveMoneyAndWaitAsync (addresses, amount) {
     await bluebird.map(addresses, async (address) => {
-      const res = await PIFY(this.giveMoney)(address, amount || randomCoin())
+      const res = await PIFY(this.giveMoney.bind(this))(address, amount || randomCoin())
       expect(res.body).to.have.property('success').to.be.true
     })
-    await PIFY(this.onNewBlock)()
+    await PIFY(this.onNewBlock.bind(this))()
   }
 
   sleep (n, cb) {
