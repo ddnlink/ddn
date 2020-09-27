@@ -200,7 +200,7 @@ export const Exchange = () => {
         })
     })
 
-    // fixme: 2020.6.20
+    // fixme: 2020.6.20 这里可能出现上一步还还没存到库里，这条同样的资产会创建成功
     it('Create exchange to buy with state = 1 again, Should be fail', async (done) => {
       await node.onNewBlockAsync()
 

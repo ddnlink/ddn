@@ -40,5 +40,15 @@ export default {
     const result = DdnUtils.bignum.multiply(feeBase, constants.fixedPoint).toString()
 
     return result
+  },
+  daoContribution: async (asset) => {
+    let feeBase = '1'
+    if (asset.state === 0) {
+      feeBase = '0' // 拒绝稿件时手续费为0
+    }
+
+    const result = DdnUtils.bignum.multiply(feeBase, constants.fixedPoint).toString()
+
+    return result
   }
 }
