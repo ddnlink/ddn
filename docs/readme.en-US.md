@@ -33,12 +33,13 @@ $ ddn g blockchain MyBlockchain
 
 // 启动
 $ cd MyBlockchain
+$ chmod u+x ddnd
 $ ./ddnd start
 ```
 
 ## 社区
 
-社区坚持“共商、共享、共建、共赢”的建设理念，基于`DATM`(分布式取款机)社区工具进行全球协作，环境加入：
+社区坚持“共商、共享、共建、共赢”的建设理念，基于`DATM`(分布式取款机)社区工具进行全球协作，欢迎加入：
 
 ```jsx | inline
 import React from 'react';
