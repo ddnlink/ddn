@@ -64,7 +64,7 @@ Commands:
   verifyBytes [options]                  verify bytes/signature/publickey
   generate|g <asset> <name>              generate new blockchain
   contract [options]                     contract operations
-  crypto [options]                       crypto operations
+  account [options]                       crypto operations
   dapps [options]                        manage your dapps
   createGenesis [options]                create genesis block
   peerStat                               analyze block height of all peers

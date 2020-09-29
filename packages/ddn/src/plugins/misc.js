@@ -1,10 +1,10 @@
 
 import async from 'async'
 import request from 'request'
-import DdnNodeSdk from '@ddn/node-sdk'
+import nodeSdk from '@ddn/node-sdk'
 import Api from '../helpers/api'
 
-const DdnUtils = DdnNodeSdk.util
+const DdnUtils = nodeSdk.util
 
 let globalOptions
 

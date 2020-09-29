@@ -106,9 +106,9 @@ async function getAssetBytes (transaction) {
   if (global.assets && global.assets.transTypeNames[transaction.type]) {
     const trans = global.assets.transTypeNames[transaction.type]
     const TransCls = require(trans.package).default[trans.name]
-
     let transInst = new TransCls()
     const buf = await transInst.getBytes(transaction)
+
     transInst = null
 
     return buf

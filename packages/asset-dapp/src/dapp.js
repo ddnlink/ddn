@@ -210,7 +210,7 @@ class Dapp extends Asset.Base {
   }
 
   async getBytes (trs) {
-    const dapp = trs.asset.dapp
+    const dapp = await this.getAssetObject(trs)
     let buf = Buffer.from([])
     const nameBuf = Buffer.from(dapp.name, 'utf8')
     buf = Buffer.concat([buf, nameBuf])
@@ -602,6 +602,8 @@ class Dapp extends Asset.Base {
 
     const dapp = await this.getDappByTransactionId(id)
 
+    console.log('dapp', dapp)
+
     const installedIds = await this.getInstalledDappIds()
     if (installedIds.indexOf(id) < 0) {
       throw new Error('Dapp not installed')
@@ -628,6 +630,7 @@ class Dapp extends Asset.Base {
         try {
           await this.stopDapp(dapp)
         } catch (err) {
+          console.log('err..............')
           throw new Error(err)
         }
       }
@@ -702,11 +705,13 @@ class Dapp extends Asset.Base {
   }
 
   async _attachDappApi (id) {
+    console.log('_attachDappApi start.....')
     try {
       const dappPath = path.join(this.config.dappsDir, id)
       const routers = await this._readDappRouters(dappPath)
+      console.log('routers', routers)
       if (routers && routers.length > 0) {
-        const router = await this.runtime.httpserver.addApiRouter('/dapp/' + id)
+        const router = await this.runtime.httpserver.addApiRouter('/dappp/' + id)
 
         for (let i = 0; i < routers.length; i++) {
           const subRouter = routers[i]
@@ -779,6 +784,7 @@ class Dapp extends Asset.Base {
   }
 
   async stopDapp (dapp) {
+    console.log('stopDapp...........')
     if (!_dappLaunched[dapp.transaction_id]) {
       throw new Error('DApp not launched')
     }

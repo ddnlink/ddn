@@ -1,6 +1,6 @@
 import fs from 'fs'
 import DdnCrypto from '@ddn/crypto'
-import ddnJS from '@ddn/node-sdk'
+import NodeSdk from '@ddn/node-sdk'
 import Api from '../helpers/api'
 import blockHelper from '../helpers/block'
 
@@ -183,9 +183,7 @@ function getTransaction (id) {
 }
 
 async function sendMoney (options) {
-  ddnJS.init.init(options.nethash)
-
-  var trs = await ddnJS.transaction.createTransaction(
+  var trs = await NodeSdk.transaction.createTransaction(
     options.to,
     // bignum update Number(options.amount),
     options.amount + '',
@@ -200,15 +198,13 @@ async function sendMoney (options) {
 }
 
 async function sendAsset (options) {
-  ddnJS.init.init(options.nethash)
-
   var obj = {
     recipientId: options.to,
     currency: options.currency,
     aobAmount: options.amount + '',
     message: options.message
   }
-  var trs = await ddnJS.assetPlugin.createPluginAsset(65, obj, options.secret, options.secondSecret)
+  var trs = await NodeSdk.assetPlugin.createPluginAsset(65, obj, options.secret, options.secondSecret)
 
   getApi().broadcastTransaction(trs, function (err, result) {
     console.log(err || result.transactionId)
@@ -216,9 +212,7 @@ async function sendAsset (options) {
 }
 
 async function registerDelegate (options) {
-  ddnJS.init.init(options.nethash)
-
-  var trs = await ddnJS.delegate.createDelegate(
+  var trs = await NodeSdk.delegate.createDelegate(
     options.username,
     options.secret,
     options.secondSecret
@@ -242,7 +236,7 @@ async function vote (secret, publicKeys, op, secondSecret) {
   var votes = publicKeys.split(',').map(function (el) {
     return op + el
   })
-  var trs = await ddnJS.vote.createVote(
+  var trs = await NodeSdk.vote.createVote(
     votes,
     secret,
     secondSecret
@@ -312,42 +306,39 @@ function downvote (options) {
 }
 
 async function setSecondSecret (options) {
-  var trs = await ddnJS.signature.createSignature(options.secret, options.newSecondSecret, options.oldSecondSecret)
+  var trs = await NodeSdk.signature.createSignature(options.secret, options.newSecondSecret, options.oldSecondSecret)
   getApi().broadcastTransaction(trs, function (err, result) {
     console.log(err || result.transactionId)
   })
 }
 
-async function registerDapp (options) {
-  if (!options.metafile || !fs.existsSync(options.metafile)) {
-    console.error('Error: invalid params, dapp meta file must exists')
-    return
-  }
-  ddnJS.init.init(options.nethash)
-  var dapp = JSON.parse(fs.readFileSync(options.metafile, 'utf8'))
-  var trs = await ddnJS.assetPlugin.createPluginAsset(11, dapp, options.secret, options.secondSecret)
-  //   var trs = ddnJS.dapp.createDApp(dapp, options.secret, options.secondSecret);
-  getApi().broadcastTransaction(trs, function (err, result) {
-    console.log(err || result.transactionId)
-  })
-}
+// async function registerDapp (options) {
+//   if (!options.metafile || !fs.existsSync(options.metafile)) {
+//     console.error('Error: invalid params, dapp meta file must exists')
+//     return
+//   }
+//   var dapp = JSON.parse(fs.readFileSync(options.metafile, 'utf8'))
+//   var trs = await NodeSdk.dapp.createDApp(dapp, options.secret, options.secondSecret)
+//   getApi().broadcastTransaction(trs, function (err, result) {
+//     console.log(err || result.transactionId)
+//   })
+// }
 
 async function deposit (options) {
-  ddnJS.init.init(options.nethash)
   const dapp = {
     dapp_id: options.dapp,
     currency: options.currency,
     amount: options.amount
   }
-  const trs = await ddnJS.assetPlugin.createPluginAsset(12, dapp, options.secret, options.secondSecret)
-  //   var trs = ddnJS.transfer.createInTransfer(options.dapp, options.currency, options.amount, options.secret, options.secondSecret)
+  const trs = await NodeSdk.assetPlugin.createPluginAsset(12, dapp, options.secret, options.secondSecret)
+  //   var trs = NodeSdk.transfer.createInTransfer(options.dapp, options.currency, options.amount, options.secret, options.secondSecret)
   getApi().broadcastTransaction(trs, function (err, result) {
     console.log(err || result.transactionId)
   })
 }
 
 function dappTransaction (options) {
-  var trs = ddnJS.dapp.createInnerTransaction({
+  var trs = NodeSdk.dapp.createInnerTransaction({
     fee: options.fee,
     type: Number(options.type),
     args: options.args
@@ -358,8 +349,7 @@ function dappTransaction (options) {
 }
 
 async function lock (options) {
-  ddnJS.init.init(options.nethash)
-  var trs = await ddnJS.transaction.createLock(options.height, options.secret, options.secondSecret)
+  var trs = await NodeSdk.transaction.createLock(options.height, options.secret, options.secondSecret)
   getApi().broadcastTransaction(trs, function (err, result) {
     console.log(err || result.transactionId)
   })
@@ -378,7 +368,6 @@ function getFullBlockByHeight (height) {
 }
 
 async function getTransactionBytes (options) {
-  ddnJS.init.init(options.nethash)
   try {
     var trs = JSON.parse(fs.readFileSync(options.file))
   } catch (e) {
@@ -386,25 +375,23 @@ async function getTransactionBytes (options) {
     return
   }
 
-  const buff = await ddnJS.crypto.getBytes(trs, true, true)
+  const buff = await NodeSdk.crypto.getBytes(trs, true, true)
   const hex = buff.toString('hex')
   console.log(hex)
 }
 
 async function getTransactionId (options) {
-  ddnJS.init.init(options.nethash)
   try {
     var trs = JSON.parse(fs.readFileSync(options.file))
   } catch (e) {
     console.log('Invalid transaction format')
     return
   }
-  const trsId = await ddnJS.crypto.getId(trs)
+  const trsId = await NodeSdk.crypto.getId(trs)
   console.log(trsId)
 }
 
 async function getBlockPayloadHash (options) {
-  ddnJS.init.init(options.nethash)
   let block
   try {
     block = JSON.parse(fs.readFileSync(options.file))
@@ -414,7 +401,7 @@ async function getBlockPayloadHash (options) {
   }
   let payloadBytes = ''
   for (let i = 0; i < block.transactions.length; ++i) {
-    payloadBytes += await ddnJS.crypto.getBytes(block.transactions[i])
+    payloadBytes += await NodeSdk.crypto.getBytes(block.transactions[i])
   }
   const payloadHash = DdnCrypto.createHash(Buffer.from(payloadBytes))
 
@@ -445,7 +432,7 @@ async function getBlockId (options) {
 }
 
 function verifyBytes (options) {
-  console.log(ddnJS.crypto.verifyBytes(options.bytes, options.signature, options.publicKey))
+  console.log(NodeSdk.crypto.verifyBytes(options.bytes, options.signature, options.publicKey))
 }
 
 export default function (program) {
@@ -638,13 +625,13 @@ export default function (program) {
     .option('--oldSecondSecret <secret>', '')
     .action(setSecondSecret)
 
-  program
-    .command('registerDapp')
-    .description('register a dapp')
-    .option('-e, --secret <secret>', '')
-    .option('-s, --secondSecret <secret>', '')
-    .option('-f, --metafile <metafile>', 'dapp meta file')
-    .action(registerDapp)
+  // program
+  //   .command('registerDapp')
+  //   .description('register a dapp')
+  //   .option('-e, --secret <secret>', '')
+  //   .option('-s, --secondSecret <secret>', '')
+  //   .option('-f, --metafile <metafile>', 'dapp meta file')
+  //   .action(registerDapp)
 
   program
     .command('deposit')

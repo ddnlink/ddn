@@ -14,6 +14,7 @@ import valid_url from 'valid-url'
 
 import accountHelper from '../helpers/account'
 import blockHelper from '../helpers/block'
+import { prompt } from '../utils/prompt'
 
 const dappCategories = [
   'Common',
@@ -26,15 +27,6 @@ const dappCategories = [
   'Utilities',
   'Games'
 ]
-
-async function prompt (question) {
-  if (Array.isArray(question)) {
-    return await inquirer.prompt(question)
-  } else {
-    const answer = await inquirer.prompt([question])
-    return answer[question.name]
-  }
-}
 
 async function createDAppMetaFile (name) {
   const answer = await prompt([
@@ -154,9 +146,9 @@ async function createDAppMetaFile (name) {
         for (var i in publicKeys) {
           try {
             var b = Buffer.from(publicKeys[i])
-            // console.log(b.length); // 66
+            // done('b.length..........' + b.length) // 66
 
-            if (b.length !== 32) {
+            if (b.length !== 64) {
               done('Invalid public key: ' + publicKeys[i])
               return
             }

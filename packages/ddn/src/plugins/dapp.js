@@ -1,23 +1,18 @@
-
 import inquirer from 'inquirer'
 import fs from 'fs'
-import path from 'path'
 import request from 'request'
-import valid_url from 'valid-url'
+
 import accountHelper from '../helpers/account.js'
 import dappHelper from '../helpers/dapp.js'
+import { prompt } from '../utils/prompt'
 
-const dappCategories = [
-  'Common',
-  'Business',
-  'Social',
-  'Education',
-  'Entertainment',
-  'News',
-  'Life',
-  'Utilities',
-  'Games'
-]
+import { generateDapp } from './dapp/generate'
+
+let globalOptions
+
+function getApi () {
+  return new Api({ host: globalOptions.host, port: globalOptions.port, mainnet: !!globalOptions.main })
+}
 
 function bip39Validator (input) {
   const done = this.async()
@@ -53,179 +48,6 @@ function precisionValidator (input) {
     return done('Precision is between 0 and 16')
   }
   done(null, true)
-}
-
-async function prompt (question) {
-  if (Array.isArray(question)) {
-    return await inquirer.prompt(question)
-  } else {
-    const answer = await inquirer.prompt([question])
-    return answer[question.name]
-  }
-}
-
-async function createDAppMetaFile () {
-  const answer = await prompt([
-    {
-      type: 'input',
-      name: 'name',
-      message: 'Enter DApp name',
-      required: true,
-      validate: function (value) {
-        var done = this.async()
-        if (value.length === 0) {
-          done('DApp name is too short, minimum is 1 character')
-          return
-        }
-        if (value.length > 32) {
-          done('DApp name is too long, maximum is 32 characters')
-          return
-        }
-        return done(null, true)
-      }
-    },
-    {
-      type: 'input',
-      name: 'description',
-      message: 'Enter DApp description',
-      validate: function (value) {
-        var done = this.async()
-
-        if (value.length > 160) {
-          done('DApp description is too long, maximum is 160 characters')
-          return
-        }
-
-        return done(null, true)
-      }
-    },
-    {
-      type: 'input',
-      name: 'tags',
-      message: 'Enter DApp tags',
-      validate: function (value) {
-        var done = this.async()
-
-        if (value.length > 160) {
-          done('DApp tags is too long, maximum is 160 characters')
-          return
-        }
-
-        return done(null, true)
-      }
-    },
-    {
-      type: 'rawlist',
-      name: 'category',
-      required: true,
-      message: 'Choose DApp category',
-      choices: dappCategories
-    },
-    {
-      type: 'input',
-      name: 'link',
-      message: 'Enter DApp link',
-      required: true,
-      validate: function (value) {
-        var done = this.async()
-
-        if (!valid_url.isUri(value)) {
-          done('Invalid DApp link, must be a valid url')
-          return
-        }
-        if (value.indexOf('.zip') !== value.length - 4) {
-          done('Invalid DApp link, does not link to zip file')
-          return
-        }
-        if (value.length > 160) {
-          return done('DApp link is too long, maximum is 160 characters')
-        }
-
-        return done(null, true)
-      }
-    },
-    {
-      type: 'input',
-      name: 'icon',
-      message: 'Enter DApp icon url',
-      validate: function (value) {
-        var done = this.async()
-
-        if (!valid_url.isUri(value)) {
-          return done('Invalid DApp icon, must be a valid url')
-        }
-        var extname = path.extname(value)
-        if (['.png', '.jpg', '.jpeg'].indexOf(extname) === -1) {
-          return done('Invalid DApp icon file type')
-        }
-        if (value.length > 160) {
-          return done('DApp icon url is too long, maximum is 160 characters')
-        }
-
-        return done(null, true)
-      }
-    },
-    {
-      type: 'input',
-      name: 'delegates',
-      message: "Enter public keys of dapp delegates - hex array, use ',' for separator",
-      validate: function (value) {
-        var done = this.async()
-
-        var publicKeys = value.split(',')
-
-        if (publicKeys.length === 0) {
-          done('DApp requires at least 1 delegate public key')
-          return
-        }
-
-        for (var i in publicKeys) {
-          try {
-            var b = Buffer.from(publicKeys[i], 'hex')
-            if (b.length !== 32) {
-              done('Invalid public key: ' + publicKeys[i])
-              return
-            }
-          } catch (e) {
-            done('Invalid hex for public key: ' + publicKeys[i])
-            return
-          }
-        }
-        done(null, true)
-      }
-    },
-    {
-      type: 'input',
-      name: 'unlockDelegates',
-      message: 'How many delegates are needed to unlock asset of a dapp?',
-      validate: function (value) {
-        var done = this.async()
-        var n = Number(value)
-        if (!Number.isInteger(n) || n < 3 || n > 101) {
-          return done('Invalid unlockDelegates')
-        }
-        done(null, true)
-      }
-    }
-  ])
-  var dappMetaInfo = {
-    name: answer.name,
-    link: answer.link,
-    category: dappCategories.indexOf(answer.category) + 1,
-    description: answer.description || '',
-    tags: answer.tags || '',
-    icon: answer.icon || '',
-    delegates: answer.delegates.split(','),
-    unlockDelegates: Number(answer.unlockDelegates),
-    type: 0
-  }
-  var dappMetaJson = JSON.stringify(dappMetaInfo, null, 2)
-  fs.writeFileSync('./dapp.json', dappMetaJson, 'utf8')
-  console.log('DApp meta information is saved to ./dapp.json ...')
-}
-
-async function addDapp () {
-  await createDAppMetaFile()
 }
 
 function depositDapp () {
@@ -504,11 +326,25 @@ async function createGenesisBlock () {
   console.log('New genesis block is created at: ./genesis.json')
 }
 
+async function registerDapp (options) {
+  if (!options.metafile || !fs.existsSync(options.metafile)) {
+    console.error('Error: invalid params, dapp meta file must exists')
+    return
+  }
+  var dapp = JSON.parse(fs.readFileSync(options.metafile, 'utf8'))
+  var trs = await NodeSdk.dapp.createDApp(dapp, options.secret, options.secondSecret)
+  getApi().broadcastTransaction(trs, function (err, result) {
+    console.log(err || result.transactionId)
+  })
+}
+
 module.exports = function (program) {
+  globalOptions = program
+
   program
-    .command('dapps')
+    .command('dapp')
     .description('manage your dapps')
-    .option('-a, --add', 'add new dapp')
+    .option('-n, --new', 'genereate new dapp')
     .option('-d, --deposit', 'deposit funds to dapp')
     .option('-w, --withdrawal', 'withdraw funds from dapp')
     .option('-i, --install', 'install dapp')
@@ -517,8 +353,8 @@ module.exports = function (program) {
     .action(function (options) {
       (async function () {
         try {
-          if (options.add) {
-            addDapp()
+          if (options.new) {
+            generateDapp()
           } else if (options.deposit) {
             depositDapp()
           } else if (options.withdrawal) {
@@ -530,11 +366,19 @@ module.exports = function (program) {
           } else if (options.genesis) {
             createGenesisBlock()
           } else {
-            console.log("'DDN dapps -h' to get help")
+            console.log("'DDN dapp -h' to get help")
           }
         } catch (e) {
           console.error(e)
         }
       })()
     })
+
+  program
+    .command('registerDapp')
+    .description('register a dapp')
+    .option('-e, --secret <secret>', '')
+    .option('-s, --secondSecret <secret>', '')
+    .option('-f, --metafile <metafile>', 'dapp meta file')
+    .action(registerDapp)
 }
