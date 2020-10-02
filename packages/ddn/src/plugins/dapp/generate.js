@@ -6,6 +6,7 @@ import child_process from 'child_process'
 import chalk from 'chalk'
 import ora from 'ora'
 import valid_url from 'valid-url'
+import handlebars from 'handlebars'
 
 import { prompt } from '../../utils/prompt'
 
@@ -191,7 +192,7 @@ async function tempaleDapp (name) {
         console.log(symbols.error, chalk.red('Template downloads fail.'))
       } else {
         spinner.succeed()
-        shell.mv('./.tmp/dapp/' + name)
+        shell.mv('./.tmp/dapp/', './' + name)
         const filename = `${name}/dapp.json`
 
         const meta = {
@@ -202,7 +203,7 @@ async function tempaleDapp (name) {
           tags: answer.tags || '',
           icon: answer.icon || '',
           delegates: answer.delegates.split(','),
-          unlockDelegates: Number(answer.unlockDelegates),
+          unlock_delegates: Number(answer.unlockDelegates),
           type: 0
         }
 
@@ -216,7 +217,7 @@ async function tempaleDapp (name) {
           dt.tags = '{{tags}}'
           dt.icon = '{{icon}}'
           dt.delegates = '{{delegates}}'
-          dt.unlockDelegates = '{{unlockDelegates}}'
+          dt.unlock_delegates = '{{unlockDelegates}}'
           dt.type = '{{type}}'
 
           const result = handlebars.compile(JSON.stringify(dt, null, 2))(meta)
@@ -232,7 +233,7 @@ async function tempaleDapp (name) {
       }
     })
   } else {
-    console.log(symbols.error, chalk.red('项目已存在'))
+    console.log(symbols.error, chalk.red('Dapp project already exists.'))
   }
 }
 

@@ -34,7 +34,8 @@
         "rmdir": "^1.1.0",
         "shelljs": "^0.8.4",
         "symbols": "^0.0.6",
-        "valid-url": "1.0.9"
+        "valid-url": "1.0.9",
+        "yargs": "^16.0.3"
     },
     "bugs": {
         "url": "https://github.com/ddnlink/ddn/issues"

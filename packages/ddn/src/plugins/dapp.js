@@ -1,12 +1,12 @@
 import inquirer from 'inquirer'
 import fs from 'fs'
 import request from 'request'
+import NodeSdk from '@ddn/node-sdk'
 
 import accountHelper from '../helpers/account.js'
 import dappHelper from '../helpers/dapp.js'
 import { prompt } from '../utils/prompt'
-
-import { generateDapp } from './dapp/generate'
+import Api from '../helpers/api'
 
 let globalOptions
 
@@ -326,59 +326,10 @@ async function createGenesisBlock () {
   console.log('New genesis block is created at: ./genesis.json')
 }
 
-async function registerDapp (options) {
-  if (!options.metafile || !fs.existsSync(options.metafile)) {
-    console.error('Error: invalid params, dapp meta file must exists')
-    return
-  }
-  var dapp = JSON.parse(fs.readFileSync(options.metafile, 'utf8'))
-  var trs = await NodeSdk.dapp.createDApp(dapp, options.secret, options.secondSecret)
-  getApi().broadcastTransaction(trs, function (err, result) {
-    console.log(err || result.transactionId)
-  })
-}
-
-module.exports = function (program) {
-  globalOptions = program
-
-  program
-    .command('dapp')
-    .description('manage your dapps')
-    .option('-n, --new', 'genereate new dapp')
-    .option('-d, --deposit', 'deposit funds to dapp')
-    .option('-w, --withdrawal', 'withdraw funds from dapp')
-    .option('-i, --install', 'install dapp')
-    .option('-u, --uninstall', 'uninstall dapp')
-    .option('-g, --genesis', 'create genesis block')
-    .action(function (options) {
-      (async function () {
-        try {
-          if (options.new) {
-            generateDapp()
-          } else if (options.deposit) {
-            depositDapp()
-          } else if (options.withdrawal) {
-            withdrawalDapp()
-          } else if (options.install) {
-            installDapp()
-          } else if (options.uninstall) {
-            uninstallDapp()
-          } else if (options.genesis) {
-            createGenesisBlock()
-          } else {
-            console.log("'DDN dapp -h' to get help")
-          }
-        } catch (e) {
-          console.error(e)
-        }
-      })()
-    })
-
-  program
-    .command('registerDapp')
-    .description('register a dapp')
-    .option('-e, --secret <secret>', '')
-    .option('-s, --secondSecret <secret>', '')
-    .option('-f, --metafile <metafile>', 'dapp meta file')
-    .action(registerDapp)
+export {
+  depositDapp,
+  withdrawalDapp,
+  installDapp,
+  uninstallDapp,
+  createGenesisBlock
 }

@@ -165,6 +165,7 @@ class Delegate {
     }
   }
 
+  // todo: 2020.10.2 待优化，包含 getAccountList 方法
   async getDelegates (query) {
     if (!query) {
       throw new Error('Missing query argument')
