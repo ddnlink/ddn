@@ -15,7 +15,8 @@ module.exports = {
     },
     state: {
       alias: 't',
-      describe: 'State'
+      describe: 'State',
+      choices: [0, 1, 2]
     },
     version: {
       alias: 'v',

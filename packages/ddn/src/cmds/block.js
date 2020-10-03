@@ -1,9 +1,9 @@
 module.exports = {
-  command: 'blockchain [command]',
-  aliases: ['block', 'chain'],
-  desc: 'Manage blockchain',
+  command: 'block [command]',
+  aliases: ['B', 'block', 'chain'],
+  desc: 'Manage block tools',
   builder: function (yargs) {
-    return yargs.commandDir('blockchain')
+    return yargs.commandDir('block')
   },
 
   handler: function (argv) {

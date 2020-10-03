@@ -1,18 +1,10 @@
 import inquirer from 'inquirer'
 import fs from 'fs'
 import request from 'request'
-import NodeSdk from '@ddn/node-sdk'
 
 import accountHelper from '../helpers/account.js'
 import dappHelper from '../helpers/dapp.js'
 import { prompt } from '../utils/prompt'
-import Api from '../helpers/api'
-
-let globalOptions
-
-function getApi () {
-  return new Api({ host: globalOptions.host, port: globalOptions.port, mainnet: !!globalOptions.main })
-}
 
 function bip39Validator (input) {
   const done = this.async()

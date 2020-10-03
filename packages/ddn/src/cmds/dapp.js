@@ -1,3 +1,6 @@
+const y18n = require('y18n')
+const __ = y18n().__
+
 module.exports = {
   command: 'dapp [command]',
   desc: 'Manage dapps',
@@ -6,6 +9,6 @@ module.exports = {
   },
 
   handler: function (argv) {
-    console.log('Hi, please select a command, e.g: new, install, --help')
+    console.log(__('Hi, please select a command, e.g: new, install, --help'))
   }
 }

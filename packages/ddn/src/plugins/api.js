@@ -187,10 +187,9 @@ function getTransaction (id) {
   })
 }
 
-async function sendMoney (options) {
+async function sendToken (options) {
   var trs = await NodeSdk.transaction.createTransaction(
     options.to,
-    // bignum update Number(options.amount),
     options.amount + '',
     options.message,
     options.secret,
@@ -265,7 +264,7 @@ function listdiffvotes (options) {
       limit: options.limit || 101,
       offset: options.offset || 0
     }
-    getApi().get('/api/accounts/delegates', params, function (err, result) {
+    getApi().get('/api/votes', params, function (err, result) {
       if (err) {
         console.log(err)
         return
@@ -311,7 +310,7 @@ function downvote (options) {
 }
 
 async function setSecondSecret (options) {
-  var trs = await NodeSdk.signature.createSignature(options.secret, options.newSecondSecret, options.oldSecondSecret)
+  var trs = await NodeSdk.signature.createSignature(options.secret, options.newSecondSecret)
   getApi().broadcastTransaction(trs, function (err, result) {
     console.log(err || result.transactionId)
   })
@@ -467,7 +466,7 @@ export {
   getUnconfirmedTransactions,
   getTransactions,
   getTransaction,
-  sendMoney,
+  sendToken,
   sendAsset,
   registerDelegate,
   listdiffvotes,
@@ -488,100 +487,6 @@ export {
   registerDapp
 }
 
-// export default function (program) {
-//   globalOptions = program
-
-//   program
-//     .command('getPeers')
-//     .description('get peers')
-//     .option('-o, --offset <n>', '')
-//     .option('-l, --limit <n>', '')
-//     .option('-t, --state <n>', ' 0 ~ 3')
-//     .option('-s, --sort <field:mode>', '')
-//     .option('-v, --version <version>', '')
-//     .option('-p, --port <n>', '')
-//     .option('--os <os>', '')
-//     .action(getPeers)
-
-//   program
-//     .command('getUnconfirmedTransactions')
-//     .description('get unconfirmed transactions')
-//     .option('-k, --key <sender public key>', '')
-//     .option('-a, --address <address>', '')
-//     .action(getUnconfirmedTransactions)
-
-//   program
-//     .command('getTransactions')
-//     .description('get transactions')
-//     .option('-b, --blockId <id>', '')
-//     .option('-o, --offset <n>', '')
-//     .option('-l, --limit <n>', '')
-//     .option('-t, --type <n>', 'transaction type')
-//     .option('-s, --sort <field:mode>', '')
-//     .option('-a, --amount <n>', '')
-//     .option('-f, --fee <n>', '')
-//     .option('-m, --message <message>', '')
-//     .option('--senderPublicKey <key>', '')
-//     .option('--senderId <id>', '')
-//     .option('--recipientId <id>', '')
-//     .action(getTransactions)
-
-//   program
-//     .command('getTransaction [id]')
-//     .description('get transactions')
-//     .action(getTransaction)
-
-//   program
-//     .command('sendToken')
-//     .description('send token to some address')
-//     .option('-e, --secret <secret>', '')
-//     .option('-s, --secondSecret <secret>', '')
-//     .option('-a, --amount <n>', '')
-//     .option('-t, --to <address>', '')
-//     .option('-m, --message <message>', '')
-//     .option('-n, --nethash <nethash>', 'fl6ybowg')
-//     .action(sendMoney)
-
-//   program
-//     .command('sendAsset')
-//     .description('send asset to some address')
-//     .option('-e, --secret <secret>', '')
-//     .option('-s, --secondSecret <secret>', '')
-//     .option('-c, --currency <currency>', '')
-//     .option('-a, --amount <amount>', '')
-//     .option('-t, --to <address>', '')
-//     .option('-m, --message <message>', '')
-//     .action(sendAsset)
-
-//   program
-//     .command('registerDelegate')
-//     .description('register delegate')
-//     .option('-e, --secret <secret>', '')
-//     .option('-s, --secondSecret <secret>', '')
-//     .option('-u, --username <username>', '')
-//     .action(registerDelegate)
-
-//   program
-//     .command('listDiffVotes')
-//     .description('list the votes each other')
-//     .option('-u, --username <username>', '', process.env.DDN_USER)
-//     .action(listdiffvotes)
-
-//   program
-//     .command('upVote')
-//     .description('vote for delegates')
-//     .option('-e, --secret <secret>', '')
-//     .option('-s, --secondSecret <secret>', '')
-//     .option('-p, --publicKeys <public key list>', '')
-//     .action(upvote)
-
-//   program
-//     .command('downVote')
-//     .description('cancel vote for delegates')
-//     .option('-e, --secret <secret>', '')
-//     .option('-s, --secondSecret <secret>', '')
-//     .option('-p, --publicKeys <public key list>', '')
-//     .action(downvote)
 
 //   program
 //     .command('setSecondsecret')
@@ -591,13 +496,6 @@ export {
 //     .option('--oldSecondSecret <secret>', '')
 //     .action(setSecondSecret)
 
-//   // program
-//   //   .command('registerDapp')
-//   //   .description('register a dapp')
-//   //   .option('-e, --secret <secret>', '')
-//   //   .option('-s, --secondSecret <secret>', '')
-//   //   .option('-f, --metafile <metafile>', 'dapp meta file')
-//   //   .action(registerDapp)
 
 //   program
 //     .command('deposit')
@@ -607,7 +505,7 @@ export {
 //     .option('-d, --dapp <dapp id>', 'dapp id that you want to deposit')
 //     .option('-c, --currency <currency>', 'deposit currency')
 //     .option('-a, --amount <amount>', 'deposit amount')
-//     .action(deposit)
+//     .action(deposit) -> depositDapp ?
 
 //   program
 //     .command('dappTransaction')
@@ -619,59 +517,3 @@ export {
 //     .option('-f, --fee <fee>', 'transaction fee')
 //     .action(dappTransaction)
 
-//   program
-//     .command('lock')
-//     .description('lock account transfer')
-//     .option('-e, --secret <secret>', '')
-//     .option('-s, --secondSecret <secret>', '')
-//     .option('-h, --height <height>', 'lock height')
-//     .action(lock)
-
-//   program
-//     .command('getFullBlockById [id]')
-//     .description('get full block by block id')
-//     .action(getFullBlockById)
-
-//   program
-//     .command('getFullBlockByHeight [height]')
-//     .description('get full block by block height')
-//     .action(getFullBlockByHeight)
-
-//   program
-//     .command('getTransactionBytes')
-//     .description('get transaction bytes')
-//     .option('-f, --file <file>', 'transaction file')
-//     .action(getTransactionBytes)
-
-//   program
-//     .command('getTransactionId')
-//     .description('get transaction id')
-//     .option('-f, --file <file>', 'transaction file')
-//     .action(getTransactionId)
-
-//   program
-//     .command('getBlockBytes')
-//     .description('get block bytes')
-//     .option('-f, --file <file>', 'block file')
-//     .action(getBlockBytes)
-
-//   program
-//     .command('getBlockPayloadHash')
-//     .description('get block bytes')
-//     .option('-f, --file <file>', 'block file')
-//     .action(getBlockPayloadHash)
-
-//   program
-//     .command('getBlockId')
-//     .description('get block id')
-//     .option('-f, --file <file>', 'block file')
-//     .action(getBlockId) // todo: async
-
-//   program
-//     .command('verifyBytes')
-//     .description('verify bytes/signature/publickey')
-//     .option('-b, --bytes <bytes>', 'transaction or block bytes')
-//     .option('-s, --signature <signature>', 'transaction or block signature')
-//     .option('-p, --publicKey <publicKey>', 'signer public key')
-//     .action(verifyBytes)
-// }

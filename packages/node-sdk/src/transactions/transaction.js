@@ -7,10 +7,11 @@ import slots from '../time/slots'
 
 async function createTransaction (recipientId, amount, message, secret, second_secret) {
   const fee = bignum.multiply(constants.net.fees.transfer, constants.fixedPoint).toString()
+  const amount2 = bignum.multiply(amount, constants.fixedPoint).toString()
   const transaction = {
     type: DdnUtils.assetTypes.TRANSFER,
     nethash: config.nethash, // <- config.nethash,
-    amount: `${amount}`,
+    amount: `${amount2}`,
     fee: `${fee}`,
     recipientId: recipientId,
     message,

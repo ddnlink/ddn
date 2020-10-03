@@ -1,8 +1,9 @@
 module.exports = {
-  command: 'maintain [command]',
-  desc: 'DDN maintain tools.',
+  command: 'account [command]',
+  aliases: ['A'],
+  desc: 'DDN account manage tools.',
   builder: function (yargs) {
-    return yargs.commandDir('maintain')
+    return yargs.commandDir('account')
   },
 
   handler: function (argv) {
