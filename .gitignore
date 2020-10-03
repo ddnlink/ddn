@@ -51,7 +51,6 @@ config/deploy
 **/**/config.mainnet.js
 **/**/config.local.js
 **/**/.ddnrc.local.js
-blockchain.*
 *.db
 *.db-journal
 

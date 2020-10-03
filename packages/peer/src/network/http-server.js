@@ -320,6 +320,9 @@ class HttpServer {
         await this._tryAddRouter(newRouter, inst, name)
       }
     }
+    const dappRouter = express.Router()
+    await this._app.use('/api/dapp', dappRouter)
+    this.dappRouter = dappRouter
 
     await this._app.use(basePath, newRouter)
   }

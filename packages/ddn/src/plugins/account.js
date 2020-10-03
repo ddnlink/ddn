@@ -1,5 +1,5 @@
 import inquirer from 'inquirer'
-import cryptoLib from '@ddn/crypto'
+import crypto from '@ddn/crypto'
 import accountHelper from '../helpers/account.js'
 
 async function genPubkey () {
@@ -27,7 +27,7 @@ async function genAccount () {
   const accounts = []
 
   for (let i = 0; i < n; i++) {
-    const a = accountHelper.account(cryptoLib.generateSecret())
+    const a = accountHelper.account(crypto.generateSecret())
     accounts.push({
       address: a.address,
       secret: a.secret,
@@ -40,7 +40,7 @@ async function genAccount () {
 
 export default function (program) {
   program
-    .command('crypto')
+    .command('account')
     .description('crypto operations')
     .option('-p, --pubkey', 'generate public key from secret')
     .option('-g, --generate', 'generate random accounts')

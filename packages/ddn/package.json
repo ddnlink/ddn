@@ -21,7 +21,7 @@
     "license": "MIT",
     "dependencies": {
         "@ddn/crypto": "^0.3.8",
-        "@ddn/node-sdk": "^0.2.5",
+        "@ddn/node-sdk": "^0.4.13",
         "@ddn/utils": "^0.1.23",
         "async": "1.5.2",
         "bytebuffer": "^4.0.0",
@@ -34,7 +34,9 @@
         "rmdir": "^1.1.0",
         "shelljs": "^0.8.4",
         "symbols": "^0.0.6",
-        "valid-url": "1.0.9"
+        "valid-url": "1.0.9",
+        "y18n": "^5.0.2",
+        "yargs": "^16.0.3"
     },
     "bugs": {
         "url": "https://github.com/ddnlink/ddn/issues"

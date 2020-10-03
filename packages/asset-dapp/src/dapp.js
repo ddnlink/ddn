@@ -261,12 +261,12 @@ class Dapp extends Asset.Base {
     }
   }
 
-  async undo (trs,block,_,dbTrans) {
+  async undo (trs, block, _, dbTrans) {
     const assetObj = await this.getAssetObject(trs)
     if (assetObj.name === WITNESS_CLUB_DAPP_NAME) {
       global.state.clubInfo = null
     }
-    super.undo(trs,block,_,dbTrans)
+    super.undo(trs, block, _, dbTrans)
   }
 
   async applyUnconfirmed (trs) {
@@ -637,8 +637,11 @@ class Dapp extends Asset.Base {
       }
     })
 
-    sandbox.run(args)
-
+    try {
+      sandbox.run(args)
+    } catch (error) {
+      console.log('errorrr', error)
+    }
     // eslint-disable-next-line require-atomic-updates
     _dappLaunched[id] = sandbox
 
@@ -702,41 +705,46 @@ class Dapp extends Asset.Base {
   }
 
   async _attachDappApi (id) {
+    console.log('hi....................')
     try {
       const dappPath = path.join(this.config.dappsDir, id)
       const routers = await this._readDappRouters(dappPath)
       if (routers && routers.length > 0) {
-        const router = await this.runtime.httpserver.addApiRouter('/dapp/' + id)
+        // const router = await this.runtime.httpserver.addApiRouter('/dapp/' + id)
 
         for (let i = 0; i < routers.length; i++) {
           const subRouter = routers[i]
           if (subRouter.method && subRouter.path) {
-            router[subRouter.method](subRouter.path, async (req, res) => {
-              try {
-                const result = await new Promise((resolve, reject) => {
-                  const sandbox = _dappLaunched[id]
-                  if (sandbox) {
-                    sandbox.request({
-                      method: subRouter.method,
-                      path: subRouter.path,
-                      query: req.query,
-                      body: req.body
-                    }, (err, data) => {
-                      if (err) {
-                        return reject(err)
-                      }
+            try {
+              this.runtime.httpserver.dappRouter[subRouter.method](subRouter.path, async (req, res) => {
+                try {
+                  const result = await new Promise((resolve, reject) => {
+                    const sandbox = _dappLaunched[id]
+                    if (sandbox) {
+                      sandbox.request({
+                        method: subRouter.method,
+                        path: subRouter.path,
+                        query: req.query,
+                        body: req.body
+                      }, (err, data) => {
+                        if (err) {
+                          return reject(err)
+                        }
 
-                      resolve(data)
-                    })
-                  } else {
-                    reject('DApp not launched')
-                  }
-                })
-                res.json({ success: true, result })
-              } catch (err) {
-                res.json({ success: false, error: err + '' })
-              }
-            })
+                        resolve(data)
+                      })
+                    } else {
+                      reject('DApp not launched')
+                    }
+                  })
+                  res.json({ success: true, result })
+                } catch (err) {
+                  res.json({ success: false, error: err + '' })
+                }
+              })
+            } catch (error) {
+              console.log('error', error)
+            }
           }
         }
       }

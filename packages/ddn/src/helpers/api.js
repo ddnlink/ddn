@@ -1,6 +1,6 @@
 /* eslint-disable standard/no-callback-literal */
 import request from 'request'
-import config from '../config'
+import NodeSdk from '@ddn/node-sdk'
 
 function resultHandler (cb) {
   return (err, res, body) => {
@@ -30,7 +30,7 @@ class Api {
     this.host = this.options.host || '127.0.0.1'
     this.port = this.options.port || (this.mainnet ? 8000 : 8001)
     this.baseUrl = `http://${this.host}:${this.port}`
-    this.nethash = config.nethash
+    this.nethash = NodeSdk.constants.nethash
   }
 
   get (path, params, cb) {

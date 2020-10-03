@@ -68,7 +68,7 @@ const _assetFiledRules = {
 }
 
 class AssetBase {
-  constructor(context, transactionConfig) {
+  constructor (context, transactionConfig) {
     Object.assign(this, context)
     this._context = context
 
@@ -78,21 +78,21 @@ class AssetBase {
   /**
      * 获取资产配置类型值
      */
-  async getTransactionType() {
+  async getTransactionType () {
     return this._transactionConfig.type
   }
 
   /**
      * 获取资产配置名称
      */
-  async getTransactionName() {
+  async getTransactionName () {
     return this._transactionConfig.name
   }
 
   /**
      * 获取资产所属包名
      */
-  async getPackageName() {
+  async getPackageName () {
     return this._transactionConfig.package
   }
 
@@ -101,7 +101,7 @@ class AssetBase {
      * @param {*} data
      * @param {*} trs
      */
-  async create(data, trs) {
+  async create (data, trs) {
     return trs
   }
 
@@ -110,7 +110,7 @@ class AssetBase {
    * @param {*} trs
    * @param {*} sender
    */
-  async calculateFee() {
+  async calculateFee () {
     return DdnUtils.bignum.multiply(this.constants.net.fees.transfer, this.constants.fixedPoint)
   }
 
@@ -127,7 +127,7 @@ class AssetBase {
    * recipientId：收款地址，默认为null
    * message：备注信息
    */
-  async propsMapping() {
+  async propsMapping () {
     throw new Error('AssetBase子类必须重载propsMapping方法。')
 
     // 例如：员工资产类型有name、age、address 3个自定义属性，对应预设字段如下：
@@ -143,12 +143,12 @@ class AssetBase {
      * 自定义资产Api
      * @param {*} router
      */
-  async attachApi() { }
+  async attachApi () { }
 
   /**
    * 判断是否包含Json扩展属性
    */
-  async hasExtProps() {
+  async hasExtProps () {
     if (this.isHasExtProps !== null && typeof (this.isHasExtProps) !== 'undefined') {
       return this.isHasExtProps
     }
@@ -167,7 +167,7 @@ class AssetBase {
     return this.isHasExtProps
   }
 
-  async getPropsMappingItemByProp(propName) {
+  async getPropsMappingItemByProp (propName) {
     if (!this.propsMappingItems ||
       !this.propsMappingItems[propName.toLowerCase()]) {
       const props = await this.propsMapping()
@@ -190,7 +190,7 @@ class AssetBase {
     }
   }
 
-  async getPropsMappingItemByField(fieldName) {
+  async getPropsMappingItemByField (fieldName) {
     if (!this.propsMappingItems ||
       !this.propsMappingItems[fieldName.toLowerCase()]) {
       const props = await this.propsMapping()
@@ -217,7 +217,7 @@ class AssetBase {
      * 获取资产在交易对象中的名称
      * @param {*} type
      */
-  async getAssetJsonName(type) {
+  async getAssetJsonName (type) {
     if (!type) {
       type = await this.getTransactionType()
     }
@@ -228,7 +228,7 @@ class AssetBase {
      * 获得交易信息中的当前资产对象
      * @param {*} trs
      */
-  async getAssetObject(trs) {
+  async getAssetObject (trs) {
     if (!trs || !trs.asset) {
       return null
     }
@@ -240,7 +240,7 @@ class AssetBase {
      * 根据资产配置名称获取资产对应实例
      * @param {*} assetName
      */
-  async getAssetInstanceByName(assetName) {
+  async getAssetInstanceByName (assetName) {
     return AssetUtils.getAssetInstanceByName(this._context, assetName)
   }
 
@@ -253,7 +253,7 @@ class AssetBase {
      * @param {*} pageSize 页码的记录条数，默认50
      * @param {*} cb
      */
-  async getAssetBase(filter, hasExtProps, pageIndex, pageSize, orders, returnTotal, attributes) {
+  async getAssetBase (filter, hasExtProps, pageIndex, pageSize, orders, returnTotal, attributes) {
     attributes = [
       ['transaction_id', 'asset_trs_id'],
       ['transaction_type', 'asset_trs_type'],
@@ -340,7 +340,7 @@ class AssetBase {
      * @param {*} pageSize 分页的大小，每页的返回的最大记录条数
      * @param {*} asset 资产交易的配置name或type（config.asset.js文件中定义）
      */
-  async queryAsset(where, orders, returnTotal, pageIndex, pageSize, asset, defaultTrsType) {
+  async queryAsset (where, orders, returnTotal, pageIndex, pageSize, asset, defaultTrsType) {
     let assetInst = this
     if (asset) {
       let assetTrans
@@ -507,7 +507,7 @@ class AssetBase {
      * @param {*} dbTrans
      * @param {*} cb
      */
-  async update(obj, where, dbTrans, asset) {
+  async update (obj, where, dbTrans, asset) {
     let assetInst = this
     if (asset) {
       let assetTrans
@@ -577,7 +577,7 @@ class AssetBase {
      * @param {*} where 查询条件，遵循sequelize规则，使用prop的名称定义
      * @param {*} asset 资产交易的配置name或type（config.asset.js文件中定义）
      */
-  async queryAssetCount(where, asset) {
+  async queryAssetCount (where, asset) {
     let assetInst = this
     if (asset) {
       let assetTrans
@@ -629,7 +629,7 @@ class AssetBase {
      * 校验输入数据格式是否符合规则（_assetFiledRules负责定义规则）
      * @param {*} trs
      */
-  async fieldsIsValid(trs) {
+  async fieldsIsValid (trs) {
     const assetJsonName = AssetUtils.getAssetJsonName(trs.type)
     if (!trs.asset || !trs.asset[assetJsonName]) {
       throw new Error('Invalid transaction asset')
@@ -736,7 +736,7 @@ class AssetBase {
      * @param {*} sender
      * @param {*} cb
      */
-  async verify(trs) {
+  async verify (trs) {
     if (DdnUtils.bignum.isZero(trs.amount)) { // 等于0
       if (trs.recipientId) { // wxm block database
         throw new Error('The recipientId attribute of the transaction must be null.')
@@ -759,7 +759,7 @@ class AssetBase {
      * @param {*} trs
      * @param {*} sender
      */
-  async process(trs, sender) {
+  async process (trs, sender) {
     return trs
   }
 
@@ -767,7 +767,7 @@ class AssetBase {
      * 获取资产的字节格式数据，用于签名计算
      * @param {*} trs
      */
-  async getBytes(trs) {
+  async getBytes (trs) {
     // await this.fieldsIsValid(trs)
 
     // const assetName = AssetUtils.getAssetJsonName(trs.type)
@@ -802,7 +802,7 @@ class AssetBase {
     // }
   }
 
-  async isSupportLock() {
+  async isSupportLock () {
     return true
   }
 
@@ -813,7 +813,7 @@ class AssetBase {
      * @param {*} sender
      * @param {*} dbTrans
      */
-  async apply({ amount, recipientId }, { id, height },_, dbTrans) {
+  async apply ({ amount, recipientId }, { id, height }, _, dbTrans) {
     if (DdnUtils.bignum.isGreaterThan(amount, 0)) {
       await this.runtime.account.setAccount({ address: recipientId }, dbTrans)
 
@@ -834,7 +834,7 @@ class AssetBase {
      * @param {*} sender
      * @param {*} dbTrans
      */
-  async undo({ id: trsId, amount, recipientId }, { id, height }, _, dbTrans) {
+  async undo ({ id: trsId, amount, recipientId }, { id, height }, _, dbTrans) {
     if (DdnUtils.bignum.isGreaterThan(amount, 0)) {
       await this.runtime.account.setAccount({ address: recipientId }, dbTrans)
       const amountStr = DdnUtils.bignum.minus(0, amount).toString()
@@ -847,7 +847,6 @@ class AssetBase {
       }, dbTrans)
     }
     await this.deleteBase(trsId, dbTrans)
-
   }
 
   /**
@@ -856,10 +855,10 @@ class AssetBase {
    * @param {*} transaction_id 交易id
    * @param {*} dbTrans 事物
    */
-  async deleteBase(transaction_id, dbTrans) {
+  async deleteBase (transaction_id, dbTrans) {
     await new Promise((resolve, reject) => {
-      this.dao.remove("trs_asset", {
-        transaction_id,
+      this.dao.remove('trs_asset', {
+        transaction_id
       }, dbTrans, (err) => {
         if (err) {
           return reject(err)
@@ -868,8 +867,8 @@ class AssetBase {
       })
     })
     return new Promise((resolve, reject) => {
-      this.dao.remove("trs_asset_ext", {
-        transaction_id,
+      this.dao.remove('trs_asset_ext', {
+        transaction_id
       }, dbTrans, (err) => {
         if (err) {
           return reject(err)
@@ -885,7 +884,7 @@ class AssetBase {
      * @param {*} sender
      * @param {*} dbTrans
      */
-  async applyUnconfirmed({ type, id }) {
+  async applyUnconfirmed ({ type, id }) {
     const key = `${type}_${id}`
 
     if (this.oneoff.has(key)) {
@@ -901,7 +900,7 @@ class AssetBase {
      * @param {*} sender
      * @param {*} dbTrans
      */
-  async undoUnconfirmed({ type, id }) {
+  async undoUnconfirmed ({ type, id }) {
     const key = `${type}_${id}`
     this.oneoff.delete(key)
   }
@@ -910,7 +909,7 @@ class AssetBase {
      * 校验交易传入数据是否符合规范，从数据格式、数据长度、是否必须角度进行
      * @param {*} trs
      */
-  async objectNormalize(trs) {
+  async objectNormalize (trs) {
     const assetName = AssetUtils.getAssetJsonName(trs.type)
 
     const propsRules = {}
@@ -954,7 +953,7 @@ class AssetBase {
    * 读取数据库数据并反序列成交易对象体
    * @param {*} raw
    */
-  async dbRead(raw) {
+  async dbRead (raw) {
     if (raw && raw.asset_trs_id) {
       const result = {
         transaction_id: raw.asset_trs_id,
@@ -1002,7 +1001,7 @@ class AssetBase {
      * @param {*} trs
      * @param {*} dbTrans
      */
-  async dbSave(trs, dbTrans) {
+  async dbSave (trs, dbTrans) {
     const assetName = AssetUtils.getAssetJsonName(trs.type)
     const asset = trs.asset[assetName]
 
@@ -1065,7 +1064,7 @@ class AssetBase {
      * @param {*} trs
      * @param {*} sender
      */
-  async ready({ signatures }, { multisignatures, multimin }) {
+  async ready ({ signatures }, { multisignatures, multimin }) {
     if (multisignatures && multisignatures.length) {
       if (!signatures) {
         return false
@@ -1079,7 +1078,7 @@ class AssetBase {
   /**
      * 区块链启动成功后执行
      */
-  async onBlockchainReady() {
+  async onBlockchainReady () {
   }
 }
 

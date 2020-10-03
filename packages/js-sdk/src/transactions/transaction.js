@@ -18,10 +18,11 @@ function calculateFee (amount) {
 
 async function createTransaction (recipientId, amount, message, secret, second_secret) {
   const fee = bignum.multiply(constants.net.fees.transfer, constants.fixedPoint)
+  const amount2 = bignum.multiply(amount, constants.fixedPoint).toString() // 传来的 amount 原本就该是含精度的值
   const transaction = {
     type: assetTypes.TRANSFER,
     nethash: config.nethash,
-    amount: `${amount}`,
+    amount: `${amount2}`,
     fee: `${fee}`,
     recipientId: recipientId,
     message,

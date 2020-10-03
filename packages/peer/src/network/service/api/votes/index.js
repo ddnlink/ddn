@@ -14,7 +14,8 @@ class VotesRouter {
   }
 
   /**
-   * 获取用户所投的节点信息
+   * todo: 2020.10.2 增加 limit, offset 等检索条件
+   * 所投：获取用户所投的受托人信息
    * @param {*} req address or publicKey
    */
   async get (req) {

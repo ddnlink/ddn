@@ -441,20 +441,13 @@ class Transaction {
       throw new Error(`Unknown transaction type 10 ${trs.type}`)
     }
 
-    let txId
-    try {
-      txId = await DdnCrypto.getId(trs)
-    } catch (e) {
-      this.logger.error('Invalid transaction id, err: ', e)
-      throw new Error('Invalid transaction id 1')
-    }
+    const txId = await DdnCrypto.getId(trs)
 
-    if (trs.id && trs.id !== txId) {
+    // 确保客户端传入id，这里仅做验证
+    if (typeof trs.id === 'undefined' || trs.id !== txId) {
       this.logger.debug('trs.id', trs.id)
       this.logger.debug('txId', txId)
-      throw new Error('Incorrect transaction id 2')
-    } else {
-      trs.id = txId
+      throw new Error('Incorrect transaction id')
     }
 
     if (!sender) {
