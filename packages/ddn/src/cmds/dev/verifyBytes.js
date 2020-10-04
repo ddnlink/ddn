@@ -2,7 +2,7 @@ import { init, verifyBytes } from '../../plugins/api'
 
 module.exports = {
   command: 'verifyBytes',
-  aliases: 'VB',
+  aliases: 'vb',
   desc: 'Verify bytes/signature/publickey',
   builder: {
     bytes: {

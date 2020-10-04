@@ -2,7 +2,7 @@ import { init, getBlockByHeight } from '../../plugins/api'
 
 module.exports = {
   command: 'getBlockByHeight [height]',
-  aliases: 'BByH',
+  aliases: 'gbbh',
   desc: 'Get block by height',
   builder: {},
 

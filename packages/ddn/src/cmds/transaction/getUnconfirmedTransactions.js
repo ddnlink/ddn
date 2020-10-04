@@ -2,7 +2,7 @@ import { init, getUnconfirmedTransactions } from '../../plugins/api'
 
 module.exports = {
   command: 'getUnconfirmedTransactions',
-  aliases: 'UT',
+  aliases: 'guts',
   desc: 'Get unconfirmed transactions list',
   builder: {
     key: {

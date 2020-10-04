@@ -2,7 +2,7 @@ import { init, sendToken } from '../../plugins/api'
 
 module.exports = {
   command: 'sendToken',
-  aliases: 'ST',
+  aliases: 'st',
   desc: 'Send token to some address',
   builder: {
     secret: {
@@ -29,7 +29,7 @@ module.exports = {
       alias: 'n',
       describe: 'nethash',
       default: '0ab796cd' // DDN testnet
-    },
+    }
   },
 
   handler: function (argv) {

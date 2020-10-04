@@ -2,7 +2,7 @@ import { init, openAccount } from '../../plugins/api'
 
 module.exports = {
   command: 'openAccount [secret]',
-  aliases: 'open',
+  aliases: ['o', 'open'],
   desc: 'Open your account and get the infomation by secret',
   builder: {},
 

@@ -2,7 +2,7 @@ import { init, upvote } from '../../plugins/api'
 
 module.exports = {
   command: 'upvote',
-  aliases: 'UV',
+  aliases: 'uv',
   desc: 'Vote for delegates',
   builder: {
     secret: {

@@ -2,7 +2,7 @@ import { init, getVotedDelegates } from '../../plugins/api'
 
 module.exports = {
   command: 'getVotedDelegates [address]',
-  aliases: 'votedD',
+  aliases: 'gvd',
   desc: 'Get delegates voted by address',
   builder: {
     offset: {

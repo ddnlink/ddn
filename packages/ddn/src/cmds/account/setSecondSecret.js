@@ -2,7 +2,7 @@ import { init, setSecondSecret } from '../../plugins/api'
 
 module.exports = {
   command: 'setSecondSecret',
-  aliases: 'SSS',
+  aliases: 'sss',
   desc: 'Set second secret',
   builder: {
     secret: {

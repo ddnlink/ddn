@@ -2,7 +2,7 @@ import { init, getBlockPayloadHash } from '../../plugins/api'
 
 module.exports = {
   command: 'getBlockPayloadHash',
-  aliases: 'GBI',
+  aliases: 'gbph',
   desc: 'Get block payload hash',
   builder: {
     file: {

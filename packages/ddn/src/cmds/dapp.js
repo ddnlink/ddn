@@ -3,7 +3,7 @@ const __ = y18n().__
 
 module.exports = {
   command: 'dapp [command]',
-  desc: 'Manage dapps',
+  desc: 'DDN dapp manage tools.',
   builder: function (yargs) {
     return yargs.commandDir('dapp')
   },

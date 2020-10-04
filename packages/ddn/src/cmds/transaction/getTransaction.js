@@ -2,7 +2,7 @@ import { init, getTransaction } from '../../plugins/api'
 
 module.exports = {
   command: 'getTransaction [id]',
-  aliases: 'TById',
+  aliases: 'gt',
   desc: 'Get transaction by id',
   builder: {},
 

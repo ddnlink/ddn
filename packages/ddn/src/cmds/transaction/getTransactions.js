@@ -2,7 +2,7 @@ import { init, getTransactions } from '../../plugins/api'
 
 module.exports = {
   command: 'getTransactions',
-  aliases: 'T',
+  aliases: 'gts',
   desc: 'Get peers list',
   builder: {
     blockId: {

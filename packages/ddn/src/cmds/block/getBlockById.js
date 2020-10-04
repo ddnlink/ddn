@@ -2,7 +2,7 @@ import { init, getBlockById } from '../../plugins/api'
 
 module.exports = {
   command: 'getBlockById [id]',
-  aliases: 'GBBI',
+  aliases: 'gbbi',
   desc: 'Get block by id',
   builder: {},
 

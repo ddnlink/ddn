@@ -2,7 +2,7 @@ import { init, getDelegates } from '../../plugins/api'
 
 module.exports = {
   command: 'getDelegates',
-  aliases: 'Ds',
+  aliases: 'gd',
   desc: 'Get delegates list',
   builder: {
     offset: {

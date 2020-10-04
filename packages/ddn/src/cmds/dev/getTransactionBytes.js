@@ -2,7 +2,7 @@ import { init, getTransactionBytes } from '../../plugins/api'
 
 module.exports = {
   command: 'getTransactionBytes',
-  aliases: 'GTB',
+  aliases: 'gtb',
   desc: 'Get transaction bytes',
   builder: {
     file: {

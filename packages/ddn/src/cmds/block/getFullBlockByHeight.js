@@ -2,7 +2,7 @@ import { init, getFullBlockByHeight } from '../../plugins/api'
 
 module.exports = {
   command: 'getFullBlockByHeight [height]',
-  aliases: 'GFBBH',
+  aliases: 'gfbbh',
   desc: 'Get full block by block height',
   builder: {},
 

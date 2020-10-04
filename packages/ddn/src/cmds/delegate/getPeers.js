@@ -2,7 +2,7 @@ import { init, getPeers } from '../../plugins/api'
 
 module.exports = {
   command: 'getPeers',
-  aliases: 'peers',
+  aliases: ['gp', 'peers'],
   desc: 'Get peers list',
   builder: {
     offset: {

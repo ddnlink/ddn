@@ -1,7 +1,7 @@
 module.exports = {
   command: 'block [command]',
-  aliases: ['B', 'block', 'chain'],
-  desc: 'Manage block tools',
+  aliases: ['b', 'block', 'chain'],
+  desc: 'DDN block manage tools.',
   builder: function (yargs) {
     return yargs.commandDir('block')
   },
