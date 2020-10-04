@@ -2,7 +2,7 @@ import { init, getDelegateByUsername } from '../../plugins/api'
 
 module.exports = {
   command: 'getDelegateByUsername [username]',
-  aliases: 'DByU',
+  aliases: 'gdbu',
   desc: 'Get delegate by username',
   builder: {},
 

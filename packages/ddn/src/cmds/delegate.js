@@ -1,6 +1,6 @@
 module.exports = {
   command: 'delegate [command]',
-  aliases: ['D'],
+  aliases: ['d', 'peer'],
   desc: 'DDN delegate manage tools.',
   builder: function (yargs) {
     return yargs.commandDir('delegate')

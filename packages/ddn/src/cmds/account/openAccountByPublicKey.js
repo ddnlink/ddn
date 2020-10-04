@@ -2,7 +2,7 @@ import { init, openAccountByPublicKey } from '../../plugins/api'
 
 module.exports = {
   command: 'openAccountByPublicKey [publickey]',
-  aliases: 'openByPk',
+  aliases: 'oabp',
   desc: 'Open your account and get the infomation by publickey',
   builder: {},
 

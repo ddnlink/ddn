@@ -2,7 +2,7 @@ import { init, delegateStat } from '../../plugins/maintain'
 
 module.exports = {
   command: 'delegateStat',
-  aliases: 'DStat',
+  aliases: 'ds',
   desc: 'Analyze delegates status',
   builder: {},
 

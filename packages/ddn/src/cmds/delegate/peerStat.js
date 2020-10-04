@@ -2,7 +2,7 @@ import { init, peerStat } from '../../plugins/maintain'
 
 module.exports = {
   command: 'peerStat',
-  aliases: 'PStat',
+  aliases: 'ps',
   desc: 'Analyze block height of all peers',
   builder: {},
 

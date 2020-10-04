@@ -1,7 +1,7 @@
 module.exports = {
   command: 'transaction [command]',
-  aliases: ['T', 'trs'],
-  desc: 'Manage transaction tools.',
+  aliases: ['t', 'trs'],
+  desc: 'DDN transaction manage tools.',
   builder: function (yargs) {
     return yargs.commandDir('transaction')
   },

@@ -2,7 +2,7 @@ import { init, getBlockBytes } from '../../plugins/api'
 
 module.exports = {
   command: 'getBlockBytes',
-  aliases: 'GBB',
+  aliases: 'gbb',
   desc: 'Get block bytes',
   builder: {
     file: {

@@ -2,8 +2,8 @@ import { init, registerDapp } from '../../plugins/api'
 
 module.exports = {
   command: 'regist',
-  aliases: 'n',
-  desc: 'Create an empty dapp from template',
+  aliases: 'r',
+  desc: 'Regist dapp to blockchain',
   builder: {
     secret: {
       alias: 'e',

@@ -2,7 +2,7 @@ import { init, lock } from '../../plugins/api'
 
 module.exports = {
   command: 'lock',
-  aliases: 'L',
+  aliases: 'l',
   desc: 'Lock account to ban transfer ...',
   builder: {
     secret: {

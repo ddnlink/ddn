@@ -2,7 +2,7 @@ import { init, getDelegateByPublicKey } from '../../plugins/api'
 
 module.exports = {
   command: 'getDelegateByPublicKey [publickey]',
-  aliases: 'DByPk',
+  aliases: 'gdbp',
   desc: 'Get delegate by public key',
   builder: {},
 

@@ -13,12 +13,12 @@ module.exports = {
   menus: {
     '/guide': [
       {
-        title: '版本 3.0',
+        title: '版本 3.6.0',
         children: []
       },
       {
         title: '介绍',
-        children: ['guide/readme.md', 'guide/peer-install-testnet', 'guide/peer-install-mainnet']
+        children: ['guide/readme.md', 'guide/peer-install-testnet', 'guide/peer-install-mainnet', 'guide/config', 'guide/ddn-cli']
       },
       {
         title: '应用开发',
@@ -26,11 +26,11 @@ module.exports = {
       },
       {
         title: '框架扩展',
-        children: ['guide/asset', 'guide/assetTypes', 'guide/crypto', 'guide/ddn-cli']
+        children: ['guide/asset', 'guide/assetTypes', 'guide/crypto']
       },
       {
         title: '底层开发',
-        children: ['guide/framework', 'guide/config', 'guide/database', 'guide/context']
+        children: ['guide/framework', 'guide/database', 'guide/context']
       },
 
       {

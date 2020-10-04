@@ -2,7 +2,7 @@ import { init, downvote } from '../../plugins/api'
 
 module.exports = {
   command: 'downvote',
-  aliases: 'DV',
+  aliases: 'dv',
   desc: 'Cancel vote for delegates',
   builder: {
     secret: {

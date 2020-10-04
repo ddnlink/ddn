@@ -2,7 +2,7 @@ import { init, registerDelegate } from '../../plugins/api'
 
 module.exports = {
   command: 'registerDelegate',
-  aliases: 'RD',
+  aliases: 'rd',
   desc: 'Register delegate',
   builder: {
     secret: {

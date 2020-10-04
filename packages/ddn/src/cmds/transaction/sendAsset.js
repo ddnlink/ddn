@@ -2,7 +2,7 @@ import { init, sendAsset } from '../../plugins/api'
 
 module.exports = {
   command: 'sendAsset',
-  aliases: 'SA',
+  aliases: 'sa',
   desc: 'Send asset to some address',
   builder: {
     secret: {
