@@ -1,7 +1,7 @@
 import nacl from 'tweetnacl'
 import DdnCrypto from '@ddn/crypto'
 import ByteBuffer from 'bytebuffer'
-import dappTransactionsLib from '../dapptransactions'
+import dappTransactionsLib from '../utils/dapptransactions'
 import accounts from './account'
 
 function getBytes (block, skipSignature) {

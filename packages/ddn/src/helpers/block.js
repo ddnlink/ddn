@@ -6,7 +6,7 @@ import DdnUtils from '@ddn/utils'
 import ByteBuffer from 'bytebuffer'
 import NodeSdk from '@ddn/node-sdk'
 
-import transactionsLib from '../transactions'
+import transactionsLib from '../utils/transactions'
 import accounts from './account.js'
 const { bignum, assetTypes } = DdnUtils
 
