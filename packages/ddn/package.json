@@ -1,7 +1,7 @@
 {
     "name": "@ddn/ddn",
     "preferGlobal": true,
-    "version": "0.2.26",
+    "version": "0.3.0",
     "description": "A Command line tool to manage ddn",
     "main": "./lib/index.js",
     "scripts": {
@@ -20,8 +20,8 @@
     "author": "HuoDing <hd@qq.com>",
     "license": "MIT",
     "dependencies": {
-        "@ddn/crypto": "^0.3.8",
-        "@ddn/node-sdk": "^0.4.13",
+        "@ddn/crypto": "^0.3.9",
+        "@ddn/node-sdk": "^0.4.14",
         "@ddn/utils": "^0.1.23",
         "async": "1.5.2",
         "bytebuffer": "^4.0.0",
