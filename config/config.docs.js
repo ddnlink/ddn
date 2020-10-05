@@ -7,7 +7,7 @@ module.exports = {
   navs: [
     null,
     { title: '白皮书', path: 'https://github.com/ddnlink/whitepaper' },
-    { title: 'GitHub', path: 'https://github.com/ddnlink/ddn' },
+    { title: 'GitHub', path: 'https://github.com/ddnlink/ddn' }
   ],
 
   menus: {
@@ -18,19 +18,19 @@ module.exports = {
       },
       {
         title: '介绍',
-        children: ['guide/readme.md', 'guide/peer-install-testnet', 'guide/peer-install-mainnet', 'guide/config', 'guide/ddn-cli']
+        children: ['guide/readme.md', 'guide/peer-install-testnet', 'guide/peer-install-mainnet', 'guide/config', 'guide/assetTypes', 'guide/ddn-cli']
       },
       {
         title: '应用开发',
-        children: ['guide/app/wallet', 'guide/app/explorer', 'guide/app/dapp']
+        children: ['guide/app/wallet', 'guide/app/explorer']
       },
       {
         title: '框架扩展',
-        children: ['guide/asset', 'guide/assetTypes', 'guide/crypto']
+        children: ['guide/crypto', 'guide/asset', 'guide/app/dapp']
       },
       {
         title: '底层开发',
-        children: ['guide/framework', 'guide/database', 'guide/context']
+        children: ['guide/flows', 'guide/database', 'guide/context']
       },
 
       {

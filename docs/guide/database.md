@@ -2,7 +2,6 @@
 id: ddn-database
 title: 数据库
 sidebar_label: Database
-toc: menu
 ---
 
 ## 1. 数据库配置

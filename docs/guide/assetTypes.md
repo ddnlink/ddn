@@ -6,7 +6,6 @@ time:  5个小时                  # 学习时长
 videoUrl: ''                   # 视频链接地址
 prjectUrl: 'https://github.com/' # 源码地址
 localeTitle: DDN交易类型       # 本地化标题
-toc: menu
 ---
 
 # 交易类型

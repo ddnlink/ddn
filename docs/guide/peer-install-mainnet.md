@@ -2,7 +2,6 @@
 id: ddn-install
 title: 主网节点安装
 sidebar_label: Peer Install Mainnet
-toc: menu
 ---
 
 # DDN 主网（mainnet）节点安装

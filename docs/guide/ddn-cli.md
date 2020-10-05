@@ -1,7 +1,6 @@
 ---
 title: 命令行工具
 order: 1
-toc: menu
 ---
 
 # 命令行工具

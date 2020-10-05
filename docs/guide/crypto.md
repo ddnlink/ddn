@@ -1,7 +1,6 @@
 ---
 title: 加密算法
 order: 1                      
-toc: menu
 ---
 
 # 加密算法

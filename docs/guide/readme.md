@@ -55,6 +55,10 @@ DDN, 已经在文创版权、数字存证、党建政务、金融期货、检验
 
 ## 架构
 
+![架构图](../images/ddn-framework.jpg)
+
+## 未来
+
 ![](../images/architect.jpeg)
 
 ## 案例

@@ -2,7 +2,6 @@
 id: ddn-install
 title: 测试网节点安装
 sidebar_label: Peer Install Testnet
-toc: menu
 ---
 # DDN 测试网（testnet）节点安装
 

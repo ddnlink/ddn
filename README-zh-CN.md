@@ -48,6 +48,10 @@ DDN, 是一个成熟的企业级区块链系统，已经服务于版权存证、
 
 ## 架构
 
+![架构图](./docs/images/ddn-framework.jpg)
+
+## 未来
+
 ![](./docs/images/architect.jpeg)
 
 ## 案例

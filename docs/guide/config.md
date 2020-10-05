@@ -3,7 +3,6 @@
 id: ddn-config
 title: 开发配置
 sidebar_label: DDN config
-toc: menu
 ---
 
 # 开发配置
