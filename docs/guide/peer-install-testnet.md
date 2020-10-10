@@ -30,9 +30,9 @@ sidebar_label: Peer Install Testnet
 
 ```sh
 # 安装依赖包
-sudo apt-get install curl wget git libssl-dev openssl make gcc g++ autoconf automake python build-essential -y
+sudo apt-get install curl wget git libssl-dev openssl make gcc g++ autoconf automake python build-essential cron -y
 # 针对 ubuntu 18.04
-sudo apt-get node-gyp node-pre-gyp libsqlite3-dev 
+sudo apt-get install node-gyp node-pre-gyp libsqlite3-dev 
 # 可以直接安装 ntp 和 sqlite3，也可以在安装节点的时候安装
 sudo apt-get install ntp sqlite3 -y
 ```
@@ -53,6 +53,8 @@ export NVM_DIR="$HOME/.nvm"
 [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
 
 # 安装 node 和 npm
+# 国内服务器可修改镜像源，提升安装速度
+# export NVM_NODEJS_ORG_MIRROR=http://npm.taobao.org/mirrors/node
 nvm install v10.21.0
 
 # 检查版本，确认是否安装成功 
@@ -67,7 +69,7 @@ node --version # v10.21.0
 
 ### 2.1 下载并解压
 
-下载测试网（testnet）程序，您可以去 [http://github.com](https://github.com/ddnlink/ddn/releases/download/v3.6.0/ddn-linux-3.6.0-testnet.tar.gz) 上直接下载相应版本，也可以通过下面的方式，通过命令行下载：
+下载测试网（testnet）程序，您可以去 [http://github.com](https://github.com/ddnlink/ddn/releases/) 上直接下载相应版本，也可以通过下面的方式，通过命令行下载：
 
 ```
 $ wget http://106.15.227.133/download/ddn-linux-3.6.1-testnet.tar.gz
@@ -81,6 +83,7 @@ $ tar zxvf ddn-linux-3.6.1-testnet.tar.gz
 $ cd ~/your/path/ddn-linux-3.6.1-testnet
 
 # 在 ubuntu 执行下面的命令
+# 若找不到sudo命令，执行apt-get install sudo
 $ chmod u+x init/*.sh && chmod 755 ddnd && ./ddnd configure # 主要是安装sqlite3/ntp2等依赖包和库
 ```
 
@@ -126,6 +129,9 @@ $ ./ddnd restart
 ```
 # 进入安装目录
 $ cd ~/your/path/ddn-linux-3.6.1-testnet
+
+# 修改node的路径，将node路径补全，例如/root/.nvm/versions/node/v10.21.0/bin/node
+$ vim bin/node
 
 # 启动节点
 $ ./ddnd start
@@ -342,4 +348,10 @@ $ sudo apt install python g++ node-gyp  node-pre-gyp libsqlite3-dev
 
 ```
 $ npm install sqlite3 --build-from-source  --registry=https://registry.npm.taobao.org
+```
+### 6.7 nvm无法安装
+
+若无法访问raw.githubusercontent.com，可在/etc/hosts增加如下内容
+```
+151.101.76.133    raw.githubusercontent.com
 ```
