@@ -149,7 +149,7 @@ $ ./ddnd restart
 $ ./ddnd version
 
 # 打开生产区块开关（必须首先注册过受托人）
-./aschd enable "your sercret"
+./ddnd enable "your sercret"
 ```
 
 ## 4 在线升级
