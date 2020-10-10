@@ -7,7 +7,7 @@ readonly PID_FILE=$PROG_DIR/ddn.pid
 readonly IPS=("https://ddn.link/static/download-International" "http://ddn.link/static/download-Chinese")
 
 function read_port() {
-  echo `cat $PROG_DIR/.ddnrc.js |grep '"port"'|head -n 1| awk -F "[:,]" '{print$2}'|tr -d ' '`
+  echo `cat $PROG_DIR/.ddnrc.js |grep 'port'|head -n 2|tail -n 1| awk -F "[:,]" '{print$2}'|tr -d ' '`
 }
 
 function is_running() {
