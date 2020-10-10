@@ -293,64 +293,57 @@ class Transaction {
   async applyUnconfirmed (trs, sender, dbTrans) {
     if (!sender && trs.block_id !== this.genesisblock.id) { // wxm block database
       throw new Error('Invalid block id')
-    } else {
-      let requester = null
-      if (trs.requester_public_key) { // wxm block database
-        requester = await this.runtime.account.getAccountByPublicKey(trs.requester_public_key)
-        if (!requester) {
-          throw new Error('Invalid requester')
-        }
+    }
+    let requester = null
+    if (trs.requester_public_key) { // wxm block database
+      requester = await this.runtime.account.getAccountByPublicKey(trs.requester_public_key)
+      if (!requester) {
+        throw new Error('Invalid requester')
       }
+    }
+    if (!this._assets.hasType(trs.type)) {
+      throw new Error(`Unknown transaction type 7 ${trs.type}`)
+    }
 
-      if (!this._assets.hasType(trs.type)) {
-        throw new Error(`Unknown transaction type 7 ${trs.type}`)
-      }
+    if (!trs.requester_public_key && sender.second_signature && !DdnUtils.bignum.isEqualTo(sender.second_signature, 0) &&
+              !trs.sign_signature && trs.block_id !== this.genesisblock.id) { // wxm block database
+      throw new Error(`Failed second signature: ${trs.id}`)
+    }
 
-      if (!trs.requester_public_key && sender.second_signature && !DdnUtils.bignum.isEqualTo(sender.second_signature, 0) &&
-                !trs.sign_signature && trs.block_id !== this.genesisblock.id) { // wxm block database
-        throw new Error(`Failed second signature: ${trs.id}`)
-      }
+    if (!trs.requester_public_key && (!sender.second_signature || DdnUtils.bignum.isEqualTo(sender.second_signature, 0)) &&
+              (trs.sign_signature && trs.sign_signature.length > 0)) { // wxm block database
+      throw new Error('Sender account does not have a second signature')
+    }
 
-      if (!trs.requester_public_key && (!sender.second_signature || DdnUtils.bignum.isEqualTo(sender.second_signature, 0)) &&
-                (trs.sign_signature && trs.sign_signature.length > 0)) { // wxm block database
-        throw new Error('Sender account does not have a second signature')
-      }
+    if (trs.requester_public_key && requester.second_signature && !DdnUtils.bignum.isEqualTo(requester.second_signature, 0) && !trs.sign_signature) { // wxm block database
+      throw new Error(`Failed second signature: ${trs.id}`)
+    }
 
-      if (trs.requester_public_key && requester.second_signature && !DdnUtils.bignum.isEqualTo(requester.second_signature, 0) && !trs.sign_signature) { // wxm block database
-        throw new Error(`Failed second signature: ${trs.id}`)
-      }
-
-      if (trs.requester_public_key && (!requester.second_signature || DdnUtils.bignum.isEqualTo(requester.second_signature, 0)) &&
-                (trs.sign_signature && trs.sign_signature.length > 0)) { // wxm block database
-        throw new Error('Requester account does not have a second signature')
-      }
-
-      // wxm 这个逻辑应该去掉，不应该这么使用序号特殊处理，如果必须，应该是用assetTypes.type枚举
-      if (trs.type === DdnUtils.assetTypes.DAPP_OUT) {
-        return await this._assets.call(trs.type, 'applyUnconfirmed', trs, sender, dbTrans)
-      }
-
-      const amount = DdnUtils.bignum.plus(trs.amount, trs.fee)
-      if (DdnUtils.bignum.isLessThan(sender.u_balance, amount) && trs.block_id !== this.genesisblock.id) { // wxm block database
-        throw new Error(`Insufficient balance: ${sender.address}`)
-      }
-
-      this.balanceCache.addNativeBalance(sender.address, DdnUtils.bignum.minus(0, amount))
-
-      const accountInfo = await this.runtime.account.merge(sender.address, {
-        u_balance: DdnUtils.bignum.minus(0, amount)
+    if (trs.requester_public_key && (!requester.second_signature || DdnUtils.bignum.isEqualTo(requester.second_signature, 0)) &&
+              (trs.sign_signature && trs.sign_signature.length > 0)) { // wxm block database
+      throw new Error('Requester account does not have a second signature')
+    }
+    // wxm 这个逻辑应该去掉，不应该这么使用序号特殊处理，如果必须，应该是用assetTypes.type枚举
+    if (trs.type === DdnUtils.assetTypes.DAPP_OUT) {
+      return await this._assets.call(trs.type, 'applyUnconfirmed', trs, sender, dbTrans)
+    }
+    const amount = DdnUtils.bignum.plus(trs.amount, trs.fee)
+    if (DdnUtils.bignum.isLessThan(sender.u_balance, amount) && trs.block_id !== this.genesisblock.id) { // wxm block database
+      throw new Error(`Insufficient balance: ${sender.address}`)
+    }
+    this.balanceCache.addNativeBalance(sender.address, DdnUtils.bignum.minus(0, amount))
+    const accountInfo = await this.runtime.account.merge(sender.address, {
+      u_balance: DdnUtils.bignum.minus(0, amount)
+    }, dbTrans)
+    const newAccountInfo = Object.assign({}, sender, accountInfo) // wxm block database
+    try {
+      await this._assets.call(trs.type, 'applyUnconfirmed', trs, newAccountInfo, dbTrans)
+    } catch (err) {
+      this.balanceCache.addNativeBalance(newAccountInfo.address, amount)
+      await this.runtime.account.merge(newAccountInfo.address, {
+        u_balance: amount
       }, dbTrans)
-      const newAccountInfo = Object.assign({}, sender, accountInfo) // wxm block database
-
-      try {
-        await this._assets.call(trs.type, 'applyUnconfirmed', trs, newAccountInfo, dbTrans)
-      } catch (err) {
-        this.balanceCache.addNativeBalance(newAccountInfo.address, amount)
-        await this.runtime.account.merge(newAccountInfo.address, {
-          u_balance: amount
-        }, dbTrans)
-        throw err
-      }
+      throw err
     }
   }
 
@@ -385,7 +378,7 @@ class Transaction {
 
     // todo: 2020.6.25 特殊 asset 的处理
     if (trs.type === DdnUtils.assetTypes.DAPP_OUT) {
-      return this._assets.call(trs.type, 'apply', trs, block, sender)
+      return this._assets.call(trs.type, 'apply', trs, block, sender, dbTrans)
     }
 
     const amount = DdnUtils.bignum.plus(trs.amount, trs.fee)
