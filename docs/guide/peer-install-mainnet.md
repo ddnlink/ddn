@@ -1,5 +1,5 @@
 ---
-id: ddn-install
+id: ddn-mainnet-install
 title: 主网节点安装
 sidebar_label: Peer Install Mainnet
 ---
@@ -100,7 +100,21 @@ $ vim config.json
  publicIp: "x.x.x.x",
 ```
 
-#### 2.3.2 配置受托人
+#### 2.3.2 配置可访问的节点
+
+找到并修改 peers => list 为可访问的节点 IP。系统会自动从节点中同步数据到当前节点：
+
+```
+  peers: {
+    list: ['peer.ddn.link'],
+    blackList: [],
+    options: {
+      timeout: 4000
+    }
+  },
+```
+
+#### 2.3.3 配置受托人
 
 在此操作之前，一定要首先申请受托人，并获得投票授权，否则是不会出块的。
 

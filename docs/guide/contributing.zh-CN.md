@@ -3,17 +3,17 @@ title: 贡献
 order: 2
 ---
 
-# Contribute
+# 贡献
 
-## Set up
+## 初始化
 
-Clone the repo.
+摘取代码
 
 ```bash
 $ git clone https://github.com/ddnlink/ddn.git
 ```
 
-Install dev deps after git clone the repo.
+安装开发包
 
 ```bash
 $ cd ddn
@@ -32,21 +32,21 @@ Build first.
 $ yarn build / -w
 ```
 
-Run it in an other terminal.
+在另一个命令框执行
 
 ```bash
 $ cd examples/fun-tests
 $ yarn start
 ```
 
-If you watch nothing，please do that
+如果没有反应，执行以下命令
 
 ```bash
 $ cd examples/fun-tests
 $ touch .ddnrc.local.js
 ```
 
-and then, copy the follow content to `.ddnrc.local.js`
+然后，把以下内容复制到`.ddnrc.local.js`
 
 ```js
 /*---------------------------------------------------------------------------------------------
@@ -65,42 +65,42 @@ module.exports = {
 }
 ```
 
-## Common Tasks
+## 常见操作
 
-Monitor file changes and transform with babel.
+监视文件更改并使用babel进行转换。
 
 ```bash
 $ yarn build --watch
 ```
 
-Run test.
+运行测试
 
 ```bash
-# Including e2e test
+# 包括 e2e 的测试
 $ yarn test
 
-# Unit test only
+# 仅单元测试
 $ yarn test .test.(t|j)s
 
-# Test specified file and watch
+# 测试指定文件并观看
 $ yarn test getMockData.test.js -w
 
-# Test specified package
+# 测试指定的包
 $ PACKAGE=core yarn test
 
-# Don't run e2e test
+# 不执行 e2e 测试
 $ E2E=none yarn test
 
 # Generate coverage
 $ yarn test --coverage
 ```
 
-Publish to npm.
+发布到npm
 
 ```bash
-# Generator the changelog first.
+# 首先生成变更日志
 $ yarn changelog
 
-# Do not use yarn for this command.
+# 这行命令不要使用yarn
 $ npm run publish
 ```
