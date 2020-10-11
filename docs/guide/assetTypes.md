@@ -6,7 +6,6 @@ time:  5个小时                  # 学习时长
 videoUrl: ''                   # 视频链接地址
 prjectUrl: 'https://github.com/' # 源码地址
 localeTitle: DDN交易类型       # 本地化标题
-toc: menu
 ---
 
 # 交易类型
@@ -24,7 +23,7 @@ toc: menu
   DAPP_IN: 6, // DAPP DEPOSIT
   DAPP_OUT: 7, // DAPP WITHDRAW
 
-  MULTITRANSFER: 8, 
+  MULTITRANSFER: 8,
   USERINFO: 9,
 
   // Evidence: 20-39,

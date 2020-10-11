@@ -4,8 +4,9 @@ import fs from 'fs'
 import DdnCrypto from '@ddn/crypto'
 import DdnUtils from '@ddn/utils'
 import ByteBuffer from 'bytebuffer'
-import config from '../config'
-import transactionsLib from '../transactions'
+import NodeSdk from '@ddn/node-sdk'
+
+import transactionsLib from '../utils/transactions'
 import accounts from './account.js'
 const { bignum, assetTypes } = DdnUtils
 
@@ -143,7 +144,7 @@ export default {
       const balanceTransaction = {
         type: assetTypes.TRANSFER,
         nethash,
-        amount: config.totalAmount,
+        amount: NodeSdk.constants.totalAmount,
         fee: '0',
         timestamp: 0,
         recipientId: address, // wxm   block database

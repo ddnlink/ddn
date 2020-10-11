@@ -1,9 +1,7 @@
-
 ---
 id: git-process
 title: git协作流程
 sidebar_label: git-process
-toc: menu
 ---
 
 

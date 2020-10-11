@@ -1,5 +1,5 @@
 ---
-title: 链上资产 # 课程标题
+title: Asset On Blockchain # 课程标题
 challengeType: 0               # 课程类型，默认为0：理论， 1： 实验
 order: 1                       # 序号，以此为当前单元的课程排序
 time:  5个小时                  # 学习时长
@@ -67,7 +67,7 @@ async calculateFee(trs, sender)
  * 整数类型3个，名称分别是int1,int2,int3，类型为INT，前2个有索引
  * 时间戳类型2个，分别是timestamp1,timestamp2
  * 扩展属性理论上无上限，名称使用str_ext, int_ext, timestamp_ext，分别定义不同类型
- * 
+ *
  * 以下属于系统属性，不可使用
  * amount：转账金额，默认为0，字符串类型
  * recipientId：收款地址，默认为null
@@ -140,7 +140,7 @@ async objectNormalize(trs)
  * @param {*} raw 数据库查询返回对象
  */
 async dbRead(raw)
-    
+
 /**
  * 将交易存储到数据库中
  * @param {*} trs 交易对象

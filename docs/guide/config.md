@@ -3,7 +3,6 @@
 id: ddn-config
 title: 开发配置
 sidebar_label: DDN config
-toc: menu
 ---
 
 # 开发配置
@@ -39,9 +38,7 @@ export default {
 
 ## NODE_ENV
 
-程序默认是生产环境，即：非开发环境，`.ddnrc.mainnet.js` 将被自动合并到最终的配置中去。如果设置 `NODE_ENV=development` ，程序将运行在
-
-开发环境下，`.ddnrc.local.js` 和 `.ddnrc.testnet.js` 将都被合并到配置中去，同时，前者覆盖后者。
+程序默认是生产环境，即：非开发环境，`.ddnrc.mainnet.js` 将被自动合并到最终的配置中去。如果设置 `NODE_ENV=development` ，程序将运行在开发环境下，`.ddnrc.local.js` 和 `.ddnrc.testnet.js` 将都被合并到配置中去，同时，前者覆盖后者。
 
 ## DDN_ENV
 

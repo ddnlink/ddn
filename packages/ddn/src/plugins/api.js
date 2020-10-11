@@ -1,10 +1,15 @@
 import fs from 'fs'
 import DdnCrypto from '@ddn/crypto'
-import ddnJS from '@ddn/node-sdk'
+import NodeSdk from '@ddn/node-sdk'
 import Api from '../helpers/api'
 import blockHelper from '../helpers/block'
 
 let globalOptions
+
+// 调用其他方法之前需要初始化全局选项
+function init (options) {
+  globalOptions = options
+}
 
 function getApi () {
   return new Api({ host: globalOptions.host, port: globalOptions.port, mainnet: !!globalOptions.main })
@@ -58,7 +63,7 @@ function getVotedDelegates (address, options) {
     limit: options.limit,
     offset: options.offset
   }
-  getApi().get('/api/accounts/delegates', params, function (err, result) {
+  getApi().get('/api/votes', params, function (err, result) {
     console.log(err || result)
   })
 }
@@ -182,12 +187,9 @@ function getTransaction (id) {
   })
 }
 
-async function sendMoney (options) {
-  ddnJS.init.init(options.nethash)
-
-  var trs = await ddnJS.transaction.createTransaction(
+async function sendToken (options) {
+  var trs = await NodeSdk.transaction.createTransaction(
     options.to,
-    // bignum update Number(options.amount),
     options.amount + '',
     options.message,
     options.secret,
@@ -200,15 +202,13 @@ async function sendMoney (options) {
 }
 
 async function sendAsset (options) {
-  ddnJS.init.init(options.nethash)
-
   var obj = {
     recipientId: options.to,
     currency: options.currency,
     aobAmount: options.amount + '',
     message: options.message
   }
-  var trs = await ddnJS.assetPlugin.createPluginAsset(65, obj, options.secret, options.secondSecret)
+  var trs = await NodeSdk.assetPlugin.createPluginAsset(65, obj, options.secret, options.secondSecret)
 
   getApi().broadcastTransaction(trs, function (err, result) {
     console.log(err || result.transactionId)
@@ -216,9 +216,7 @@ async function sendAsset (options) {
 }
 
 async function registerDelegate (options) {
-  ddnJS.init.init(options.nethash)
-
-  var trs = await ddnJS.delegate.createDelegate(
+  var trs = await NodeSdk.delegate.createDelegate(
     options.username,
     options.secret,
     options.secondSecret
@@ -242,7 +240,7 @@ async function vote (secret, publicKeys, op, secondSecret) {
   var votes = publicKeys.split(',').map(function (el) {
     return op + el
   })
-  var trs = await ddnJS.vote.createVote(
+  var trs = await NodeSdk.vote.createVote(
     votes,
     secret,
     secondSecret
@@ -266,7 +264,7 @@ function listdiffvotes (options) {
       limit: options.limit || 101,
       offset: options.offset || 0
     }
-    getApi().get('/api/accounts/delegates', params, function (err, result) {
+    getApi().get('/api/votes', params, function (err, result) {
       if (err) {
         console.log(err)
         return
@@ -312,7 +310,7 @@ function downvote (options) {
 }
 
 async function setSecondSecret (options) {
-  var trs = await ddnJS.signature.createSignature(options.secret, options.newSecondSecret, options.oldSecondSecret)
+  var trs = await NodeSdk.signature.createSignature(options.secret, options.newSecondSecret)
   getApi().broadcastTransaction(trs, function (err, result) {
     console.log(err || result.transactionId)
   })
@@ -323,31 +321,34 @@ async function registerDapp (options) {
     console.error('Error: invalid params, dapp meta file must exists')
     return
   }
-  ddnJS.init.init(options.nethash)
+
+  if (!options.secret) {
+    console.error('Error: invalid params, secret must exists')
+    return
+  }
+
   var dapp = JSON.parse(fs.readFileSync(options.metafile, 'utf8'))
-  var trs = await ddnJS.assetPlugin.createPluginAsset(11, dapp, options.secret, options.secondSecret)
-  //   var trs = ddnJS.dapp.createDApp(dapp, options.secret, options.secondSecret);
+  var trs = await NodeSdk.dapp.createDApp(dapp, options.secret, options.secondSecret)
   getApi().broadcastTransaction(trs, function (err, result) {
     console.log(err || result.transactionId)
   })
 }
 
 async function deposit (options) {
-  ddnJS.init.init(options.nethash)
   const dapp = {
     dapp_id: options.dapp,
     currency: options.currency,
     amount: options.amount
   }
-  const trs = await ddnJS.assetPlugin.createPluginAsset(12, dapp, options.secret, options.secondSecret)
-  //   var trs = ddnJS.transfer.createInTransfer(options.dapp, options.currency, options.amount, options.secret, options.secondSecret)
+  const trs = await NodeSdk.assetPlugin.createPluginAsset(12, dapp, options.secret, options.secondSecret)
+  //   var trs = NodeSdk.transfer.createInTransfer(options.dapp, options.currency, options.amount, options.secret, options.secondSecret)
   getApi().broadcastTransaction(trs, function (err, result) {
     console.log(err || result.transactionId)
   })
 }
 
 function dappTransaction (options) {
-  var trs = ddnJS.dapp.createInnerTransaction({
+  var trs = NodeSdk.dapp.createInnerTransaction({
     fee: options.fee,
     type: Number(options.type),
     args: options.args
@@ -358,8 +359,7 @@ function dappTransaction (options) {
 }
 
 async function lock (options) {
-  ddnJS.init.init(options.nethash)
-  var trs = await ddnJS.transaction.createLock(options.height, options.secret, options.secondSecret)
+  var trs = await NodeSdk.transaction.createLock(options.height, options.secret, options.secondSecret)
   getApi().broadcastTransaction(trs, function (err, result) {
     console.log(err || result.transactionId)
   })
@@ -378,7 +378,6 @@ function getFullBlockByHeight (height) {
 }
 
 async function getTransactionBytes (options) {
-  ddnJS.init.init(options.nethash)
   try {
     var trs = JSON.parse(fs.readFileSync(options.file))
   } catch (e) {
@@ -386,25 +385,23 @@ async function getTransactionBytes (options) {
     return
   }
 
-  const buff = await ddnJS.crypto.getBytes(trs, true, true)
+  const buff = await NodeSdk.crypto.getBytes(trs, true, true)
   const hex = buff.toString('hex')
   console.log(hex)
 }
 
 async function getTransactionId (options) {
-  ddnJS.init.init(options.nethash)
   try {
     var trs = JSON.parse(fs.readFileSync(options.file))
   } catch (e) {
     console.log('Invalid transaction format')
     return
   }
-  const trsId = await ddnJS.crypto.getId(trs)
+  const trsId = await NodeSdk.crypto.getId(trs)
   console.log(trsId)
 }
 
 async function getBlockPayloadHash (options) {
-  ddnJS.init.init(options.nethash)
   let block
   try {
     block = JSON.parse(fs.readFileSync(options.file))
@@ -414,7 +411,7 @@ async function getBlockPayloadHash (options) {
   }
   let payloadBytes = ''
   for (let i = 0; i < block.transactions.length; ++i) {
-    payloadBytes += await ddnJS.crypto.getBytes(block.transactions[i])
+    payloadBytes += await NodeSdk.crypto.getBytes(block.transactions[i])
   }
   const payloadHash = DdnCrypto.createHash(Buffer.from(payloadBytes))
 
@@ -445,280 +442,78 @@ async function getBlockId (options) {
 }
 
 function verifyBytes (options) {
-  console.log(ddnJS.crypto.verifyBytes(options.bytes, options.signature, options.publicKey))
+  console.log(NodeSdk.crypto.verifyBytes(options.bytes, options.signature, options.publicKey))
 }
 
-export default function (program) {
-  globalOptions = program
-
-  program
-    .command('getHeight')
-    .description('get block height')
-    .action(getHeight)
-
-  program
-    .command('getBlockstatus')
-    .description('get block status')
-    .action(getBlockStatus)
-
-  program
-    .command('openAccount [secret]')
-    .description('open your account and get the infomation by secret')
-    .action(openAccount)
-
-  program
-    .command('openAccountByPublickey [publickey]')
-    .description('open your account and get the infomation by publickey')
-    .action(openAccountByPublicKey)
-
-  program
-    .command('getBalance [address]')
-    .description('get balance by address')
-    .action(getBalance)
-
-  program
-    .command('getAccount [address]')
-    .description('get account by address')
-    .action(getAccount)
-
-  program
-    .command('getVotedDelegates [address]')
-    .description('get delegates voted by address')
-    .option('-o, --offset <n>', '')
-    .option('-l, --limit <n>', '')
-    .action(getVotedDelegates)
-
-  program
-    .command('getDelegatesCount')
-    .description('get delegates count')
-    .action(getDelegatesCount)
-
-  program
-    .command('getDelegates')
-    .description('get delegates')
-    .option('-o, --offset <n>', '')
-    .option('-l, --limit <n>', '')
-    .option('-s, --sort <field:mode>', 'rate:asc, vote:desc, ...')
-    .action(getDelegates)
-
-  program
-    .command('getVoters [publicKey]')
-    .description('get voters of a delegate by public key')
-    .action(getVoters)
-
-  program
-    .command('getDelegateByPublickey [publicKey]')
-    .description('get delegate by public key')
-    .action(getDelegateByPublicKey)
-
-  program
-    .command('getDelegateByUsername [username]')
-    .description('get delegate by username')
-    .action(getDelegateByUsername)
-
-  program
-    .command('getBlocks')
-    .description('get blocks')
-    .option('-o, --offset <n>', '')
-    .option('-l, --limit <n>', '')
-    .option('-r, --reward <n>', '')
-    .option('-f, --totalFee <n>', '')
-    .option('-a, --totalAmount <n>', '')
-    .option('-g, --generatorPublicKey <publicKey>', '')
-    .option('-s, --sort <field:mode>', 'height:asc, totalAmount:asc, totalFee:asc')
-    .action(getBlocks)
-
-  program
-    .command('getBlockById [id]')
-    .description('get block by id')
-    .action(getBlockById)
-
-  program
-    .command('getBlockByHeight [height]')
-    .description('get block by height')
-    .action(getBlockByHeight)
-
-  program
-    .command('getPeers')
-    .description('get peers')
-    .option('-o, --offset <n>', '')
-    .option('-l, --limit <n>', '')
-    .option('-t, --state <n>', ' 0 ~ 3')
-    .option('-s, --sort <field:mode>', '')
-    .option('-v, --version <version>', '')
-    .option('-p, --port <n>', '')
-    .option('--os <os>', '')
-    .action(getPeers)
-
-  program
-    .command('getUnconfirmedTransactions')
-    .description('get unconfirmed transactions')
-    .option('-k, --key <sender public key>', '')
-    .option('-a, --address <address>', '')
-    .action(getUnconfirmedTransactions)
-
-  program
-    .command('getTransactions')
-    .description('get transactions')
-    .option('-b, --blockId <id>', '')
-    .option('-o, --offset <n>', '')
-    .option('-l, --limit <n>', '')
-    .option('-t, --type <n>', 'transaction type')
-    .option('-s, --sort <field:mode>', '')
-    .option('-a, --amount <n>', '')
-    .option('-f, --fee <n>', '')
-    .option('-m, --message <message>', '')
-    .option('--senderPublicKey <key>', '')
-    .option('--senderId <id>', '')
-    .option('--recipientId <id>', '')
-    .action(getTransactions)
-
-  program
-    .command('getTransaction [id]')
-    .description('get transactions')
-    .action(getTransaction)
-
-  program
-    .command('sendToken')
-    .description('send token to some address')
-    .option('-e, --secret <secret>', '')
-    .option('-s, --secondSecret <secret>', '')
-    .option('-a, --amount <n>', '')
-    .option('-t, --to <address>', '')
-    .option('-m, --message <message>', '')
-    .option('-n, --nethash <nethash>', 'fl6ybowg')
-    .action(sendMoney)
-
-  program
-    .command('sendAsset')
-    .description('send asset to some address')
-    .option('-e, --secret <secret>', '')
-    .option('-s, --secondSecret <secret>', '')
-    .option('-c, --currency <currency>', '')
-    .option('-a, --amount <amount>', '')
-    .option('-t, --to <address>', '')
-    .option('-m, --message <message>', '')
-    .action(sendAsset)
-
-  program
-    .command('registerDelegate')
-    .description('register delegate')
-    .option('-e, --secret <secret>', '')
-    .option('-s, --secondSecret <secret>', '')
-    .option('-u, --username <username>', '')
-    .action(registerDelegate)
-
-  program
-    .command('listDiffVotes')
-    .description('list the votes each other')
-    .option('-u, --username <username>', '', process.env.DDN_USER)
-    .action(listdiffvotes)
-
-  program
-    .command('upVote')
-    .description('vote for delegates')
-    .option('-e, --secret <secret>', '')
-    .option('-s, --secondSecret <secret>', '')
-    .option('-p, --publicKeys <public key list>', '')
-    .action(upvote)
-
-  program
-    .command('downVote')
-    .description('cancel vote for delegates')
-    .option('-e, --secret <secret>', '')
-    .option('-s, --secondSecret <secret>', '')
-    .option('-p, --publicKeys <public key list>', '')
-    .action(downvote)
-
-  program
-    .command('setSecondsecret')
-    .description('set second secret')
-    .option('-e, --secret <secret>', '')
-    .option('--newSecondSecret <secret>', '')
-    .option('--oldSecondSecret <secret>', '')
-    .action(setSecondSecret)
-
-  program
-    .command('registerDapp')
-    .description('register a dapp')
-    .option('-e, --secret <secret>', '')
-    .option('-s, --secondSecret <secret>', '')
-    .option('-f, --metafile <metafile>', 'dapp meta file')
-    .action(registerDapp)
-
-  program
-    .command('deposit')
-    .description('deposit assets to an app')
-    .option('-e, --secret <secret>', '')
-    .option('-s, --secondSecret <secret>', '')
-    .option('-d, --dapp <dapp id>', 'dapp id that you want to deposit')
-    .option('-c, --currency <currency>', 'deposit currency')
-    .option('-a, --amount <amount>', 'deposit amount')
-    .action(deposit)
-
-  program
-    .command('dappTransaction')
-    .description('create a dapp transaction')
-    .option('-e, --secret <secret>', '')
-    .option('-d, --dapp <dapp id>', 'dapp id')
-    .option('-t, --type <type>', 'transaction type')
-    .option('-a, --args <args>', 'json array format')
-    .option('-f, --fee <fee>', 'transaction fee')
-    .action(dappTransaction)
-
-  program
-    .command('lock')
-    .description('lock account transfer')
-    .option('-e, --secret <secret>', '')
-    .option('-s, --secondSecret <secret>', '')
-    .option('-h, --height <height>', 'lock height')
-    .action(lock)
-
-  program
-    .command('getFullBlockById [id]')
-    .description('get full block by block id')
-    .action(getFullBlockById)
-
-  program
-    .command('getFullBlockByHeight [height]')
-    .description('get full block by block height')
-    .action(getFullBlockByHeight)
-
-  program
-    .command('getTransactionBytes')
-    .description('get transaction bytes')
-    .option('-f, --file <file>', 'transaction file')
-    .action(getTransactionBytes)
-
-  program
-    .command('getTransactionId')
-    .description('get transaction id')
-    .option('-f, --file <file>', 'transaction file')
-    .action(getTransactionId)
-
-  program
-    .command('getBlockBytes')
-    .description('get block bytes')
-    .option('-f, --file <file>', 'block file')
-    .action(getBlockBytes)
-
-  program
-    .command('getBlockPayloadHash')
-    .description('get block bytes')
-    .option('-f, --file <file>', 'block file')
-    .action(getBlockPayloadHash)
-
-  program
-    .command('getBlockId')
-    .description('get block id')
-    .option('-f, --file <file>', 'block file')
-    .action(getBlockId) // todo: async
-
-  program
-    .command('verifyBytes')
-    .description('verify bytes/signature/publickey')
-    .option('-b, --bytes <bytes>', 'transaction or block bytes')
-    .option('-s, --signature <signature>', 'transaction or block signature')
-    .option('-p, --publicKey <publicKey>', 'signer public key')
-    .action(verifyBytes)
+export {
+  init,
+  getHeight,
+  getBlockStatus,
+  openAccount,
+  openAccountByPublicKey,
+  getBalance,
+  getAccount,
+  getVotedDelegates,
+  getDelegatesCount,
+  getDelegates,
+  getVoters,
+  getDelegateByPublicKey,
+  getDelegateByUsername,
+  getBlocks,
+  getBlockById,
+  getBlockByHeight,
+  getPeers,
+  getUnconfirmedTransactions,
+  getTransactions,
+  getTransaction,
+  sendToken,
+  sendAsset,
+  registerDelegate,
+  listdiffvotes,
+  upvote,
+  downvote,
+  setSecondSecret,
+  deposit,
+  dappTransaction,
+  lock,
+  getFullBlockById,
+  getFullBlockByHeight,
+  getTransactionBytes,
+  getTransactionId,
+  getBlockBytes,
+  getBlockPayloadHash,
+  getBlockId,
+  verifyBytes,
+  registerDapp
 }
+
+
+//   program
+//     .command('setSecondsecret')
+//     .description('set second secret')
+//     .option('-e, --secret <secret>', '')
+//     .option('--newSecondSecret <secret>', '')
+//     .option('--oldSecondSecret <secret>', '')
+//     .action(setSecondSecret)
+
+
+//   program
+//     .command('deposit')
+//     .description('deposit assets to an app')
+//     .option('-e, --secret <secret>', '')
+//     .option('-s, --secondSecret <secret>', '')
+//     .option('-d, --dapp <dapp id>', 'dapp id that you want to deposit')
+//     .option('-c, --currency <currency>', 'deposit currency')
+//     .option('-a, --amount <amount>', 'deposit amount')
+//     .action(deposit) -> depositDapp ?
+
+//   program
+//     .command('dappTransaction')
+//     .description('create a dapp transaction')
+//     .option('-e, --secret <secret>', '')
+//     .option('-d, --dapp <dapp id>', 'dapp id')
+//     .option('-t, --type <type>', 'transaction type')
+//     .option('-a, --args <args>', 'json array format')
+//     .option('-f, --fee <fee>', 'transaction fee')
+//     .action(dappTransaction)
+

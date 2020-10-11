@@ -2,7 +2,7 @@
 title: DDN介绍
 order: 1
 nav:
-  title: 指南
+  title: Guide
   order: 1
 ---
 
@@ -54,6 +54,10 @@ DDN, 已经在文创版权、数字存证、党建政务、金融期货、检验
 - [ ] 更多功能，持续开发中...
 
 ## 架构
+
+![架构图](../images/ddn-framework.jpg)
+
+## 未来
 
 ![](../images/architect.jpeg)
 

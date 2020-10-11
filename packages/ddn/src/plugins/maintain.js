@@ -1,10 +1,8 @@
 
 import async from 'async'
 import request from 'request'
-import DdnNodeSdk from '@ddn/node-sdk'
+import nodeSdk from '@ddn/node-sdk'
 import Api from '../helpers/api'
-
-const DdnUtils = DdnNodeSdk.util
 
 let globalOptions
 
@@ -16,7 +14,12 @@ function getApi () {
   })
 }
 
-function peerstat () {
+// 调用其他方法之前需要初始化全局选项
+function init (options) {
+  globalOptions = options
+}
+
+function peerStat () {
   const api = getApi()
   api.get('/api/peers/', {}, (err, { peers }) => {
     if (err) {
@@ -102,7 +105,7 @@ function peerstat () {
   })
 }
 
-function delegatestat () {
+function delegateStat () {
   const api = getApi()
   api.get('/api/delegates', {}, (err, { delegates }) => {
     if (err) {
@@ -154,14 +157,21 @@ function delegatestat () {
           d.balance / 100000000,
           b ? b.height : '',
           b ? b.id : '',
-          DdnUtils.format.fullTimestamp(b ? b.timestamp : ''),
-          DdnUtils.format.timeAgo(b ? b.timestamp : ''))
+          nodeSdk.utils.format.fullTimestamp(b ? b.timestamp : ''),
+          nodeSdk.utils.format.timeAgo(b ? b.timestamp : ''))
       }
     })
   })
 }
 
-function ipstat () {
+/**
+ * 提供获取ip地址的接口网站
+ * http://ip.taobao.com/
+ * https://zhuanlan.zhihu.com/p/83765235
+ * https://ip-api.com/docs/api:json
+ * 
+ */
+function ipStat () {
   const api = getApi()
   api.get('/api/peers/', {}, (err, { peers }) => {
     if (err) {
@@ -169,41 +179,29 @@ function ipstat () {
       return
     }
     async.mapLimit(peers, 5, ({ ip }, next) => {
-      const url = `http://ip.taobao.com/service/getIpInfo.php?ip=${ip}`
+      const url = `http://ip-api.com/json/${ip}`
       request(url, (err, { statusCode }, body) => {
         if (err || statusCode !== 200) {
           console.error('Failed to get ip info:', err)
           next(null, {})
         } else {
-          next(null, JSON.parse(body).data)
+          next(null, JSON.parse(body))
         }
       })
     }, (_err, ips) => {
       for (let i = 0; i < ips.length; ++i) {
         const ip = ips[i]
-        if (ip.country_id) {
-          console.log('%s\t%s', ip.country, ip.country_id)
+        if (ip.country) {
+          console.log('%s\t%s', ip.country, ip.countryCode)
         }
       }
     })
   })
 }
 
-export default program => {
-  globalOptions = program
-
-  program
-    .command('peerStat')
-    .description('analyze block height of all peers')
-    .action(peerstat)
-
-  program
-    .command('delegateStat')
-    .description('analyze delegates status')
-    .action(delegatestat)
-
-  program
-    .command('ipStat')
-    .description('analyze peer ip info')
-    .action(ipstat)
+export {
+  init,
+  peerStat,
+  delegateStat,
+  ipStat
 }

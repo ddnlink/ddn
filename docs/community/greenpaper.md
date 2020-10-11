@@ -1,8 +1,8 @@
 ---
 title: 社区管理绿皮书
 nav:
-  title: 社区
-
+  title: Community
+  order: 3
 toc: menu
 ---
 
@@ -119,7 +119,7 @@ export default () => <img src={gif} width="500" />;
 | 编程语言 | 	Node.js/Javascript |	C/C++ 、Go、Java |
 | 共识机制 | 	改进的DPOS |	POW 、POS、DPOS |
 | 总体性能 | 	高 |	低 |
-| 扩展性   | 好，可视化定制 | 差，定制难度大 | 
+| 扩展性   | 好，可视化定制 | 差，定制难度大 |
 | 模块化   | 支持 |	多数不支持 |
 | 友好度   | 开发友好高效	| 二次开发难度大 |
 | 产品生态 | 	好 |	好 |

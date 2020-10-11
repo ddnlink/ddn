@@ -2,8 +2,8 @@
 order: 1
 title: 1. DDN API 简介
 nav:
-  order: 3
-  title: 接口
+  order: 2
+  title: API
 toc: menu
 ---
 

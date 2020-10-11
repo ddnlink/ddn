@@ -45,6 +45,10 @@ More infomation please visit our [official website](https://www.ddn.link) , [doc
 
 ## Architect
 
+![架构图](./docs/images/ddn-framework.jpg)
+
+## Future
+
 ![](./docs/images/architect.jpeg)
 
 ## Examples
