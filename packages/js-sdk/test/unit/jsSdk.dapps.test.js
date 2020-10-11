@@ -698,9 +698,9 @@ describe('GET /dapps', () => {
         node.expect(body).to.have.property('result')
         node.expect(body.result).to.have.property('rows').that.is.an('array')
         const dapps = body.result.rows
-        if (dapps[0] !== null) {
+        if (dapps.length > 0) {
           for (let i = 0; i < dapps.length; i++) {
-            if (dapps[i + 1] !== null) {
+            if (dapps[i + 1]) {
               node.expect(dapps[i].category).to.be.at.most(dapps[i + 1].category)
             }
           }
@@ -721,9 +721,9 @@ describe('GET /dapps', () => {
         node.expect(body).to.have.property('result')
         node.expect(body.result).to.have.property('rows').that.is.an('array')
         const dapps = body.result.rows
-        if (dapps[0] !== null) {
+        if (dapps.length > 0) {
           for (let i = 0; i < dapps.length; i++) {
-            if (dapps[i + 1] !== null) {
+            if (dapps[i + 1]) {
               node.expect(dapps[i].category).to.be.at.least(dapps[i + 1].category)
             }
           }
@@ -1011,7 +1011,7 @@ describe('GET /dapps/installed', () => {
         const dapps = body.result.rows
         for (let i = 0; i < dapps.length; i++) {
           if (dapps[i] !== null) {
-            if (dapps[i].transactionId === DappToInstall.transactionId) {
+            if (dapps[i].transaction_id === DappToInstall.transactionId) {
               flag += 1
             }
           }

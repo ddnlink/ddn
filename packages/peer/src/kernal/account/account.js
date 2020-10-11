@@ -131,6 +131,7 @@ class Account {
     return new Promise((resolve, reject) => {
       this.dao.insertOrUpdate('mem_account', data, dbTrans, (err, result) => {
         if (err) {
+          this.logger.error("set account error", err)
           reject(err)
         } else {
           resolve(result)

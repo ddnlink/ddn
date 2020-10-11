@@ -1,3 +1,4 @@
-import sandbox from '../lib/sandbox'
-import Sandbox from './sandbox'
-export { Sandbox }
+import Sandbox from './sandbox';
+
+
+export default Sandbox
