@@ -72,7 +72,7 @@ DDN, 是一个成熟的企业级区块链系统，已经服务于版权存证、
 
 ## 贡献
 
-请参考 [贡献文档](./doc/guide/contributing.md) 
+请参考 [贡献文档](./docs/guide/contributing.zh-CN.md)
 
 ## 捐赠
 
