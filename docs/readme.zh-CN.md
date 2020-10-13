@@ -33,6 +33,7 @@ $ ddn g blockchain MyBlockchain
 
 // 启动
 $ cd MyBlockchain
+$ yarn install
 $ chmod u+x ddnd
 $ ./ddnd start
 ```
