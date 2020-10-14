@@ -66,11 +66,15 @@ function genUsers ({ tokenPrefix, tokenName }) {
   console.log('New team and related users have been created, please see the two files: ./teams.log and ./teams.txt')
 }
 
-export default program => {
-  program
-    .command('createUsers')
-    .description('create some accounts')
-    .option('-p, --tokenPrefix <prefix>', 'default is `D`')
-    .option('-t, --tokenName <name>', 'default is `DDN`')
-    .action(genUsers)
+export {
+  genUsers
 }
+
+// export default program => {
+//   program
+//     .command('createUsers')
+//     .description('create some accounts')
+//     .option('-p, --tokenPrefix <prefix>', 'default is `D`')
+//     .option('-t, --tokenName <name>', 'default is `DDN`')
+//     .action(genUsers)
+// }

@@ -26,19 +26,7 @@ https://unpkg.com/browse/@ddn/js-sdk@0.0.5/index.browserify.min.js
 
 放在您工程文件合适的位置
 
-### **1.2 初始化**
-
-`js-sdk`在使用前，首先进行初始化。  
-
-`init(nethash)`
-
-- `nethash` 节点网络
-
-```
-DdnJS.init('0ab796cd')
-```
-
-### **1.3 说明**
+### **1.2 说明**
 很多函数都需要传入secret、secondSecret这2个参数，分表代表密码和二级密码，下面章节不再赘述。
 自定如下全局变量，用于之后章节代码演示。
 

@@ -1,5 +1,5 @@
 import nacl from 'tweetnacl'
-import DdnCrypto from '@ddn/crypto'
+import DdnCrypto from '../utils/crypto'
 import ByteBuffer from 'bytebuffer'
 import dappTransactionsLib from '../utils/dapptransactions'
 import accounts from './account'
@@ -66,6 +66,7 @@ export default {
     const sender = accounts.account(DdnCrypto.generateSecret())
     let payloadBytes = ''
 
+    // TODO: 2020.10.14 请修正完善
     const block = {
       delegate: keypair.publicKey,
       height: '1',
@@ -79,17 +80,17 @@ export default {
 
     if (assetInfo) {
       const assetTrs = {
+        type: 3,
         fee: '0',
         timestamp: 0,
         senderPublicKey: sender.keypair.publicKey,
-        type: 3,
         args: JSON.stringify([
           assetInfo.name,
           String(Number(assetInfo.amount) * (10 ** assetInfo.precision)),
           address
         ])
       }
-      const bytes = dappTransactionsLib.getTransactionBytes()
+      const bytes = dappTransactionsLib.getTransactionBytes(assetTrs, true)
       assetTrs.signature = await DdnCrypto.sign(assetTrs, sender.keypair)
       block.payloadLength += bytes.length
       payloadBytes += bytes
@@ -101,7 +102,7 @@ export default {
 
     block.payloadHash = DdnCrypto.createHash(Buffer.from(payloadBytes))
 
-    block.signature = sign(block, keypair) // fixme 应该是 block 的
+    block.signature = sign(block, keypair)
     block.id = getId(block)
 
     return block

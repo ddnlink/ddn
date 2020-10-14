@@ -179,11 +179,11 @@ async function createDAppMetaFile (name) {
   return answer
 }
 
-async function generateDapp (type, name) {
-  await tempaleDapp(type, name)
+async function generateDapp (name) {
+  await tempaleDapp(name)
 }
 
-async function tempaleDapp (type, name) {
+async function tempaleDapp (name) {
   if (!fs.existsSync(name)) {
     console.log('创建Dapp项目...')
 
@@ -198,8 +198,8 @@ async function tempaleDapp (type, name) {
         console.log(symbols.error, chalk.red('模板下载失败'))
       } else {
         spinner.succeed()
-        shell.mv('./.tmp/' + type, './' + name)
-        const filename = type === 'blockchain' ? `${name}/package.json` : `${name}/dapp.json`
+        shell.mv('./.tmp/dapp', './' + name)
+        const filename = `${name}/dapp.json`
 
         const meta = {
           name: answer.name,
@@ -243,18 +243,19 @@ async function tempaleDapp (type, name) {
   }
 }
 
-function generateBlockchain (type, name) {
-  tempaleBlockchain(type, name)
+function generateBlockchain (name) {
+  console.log(name)
+  tempaleBlockchain(name)
 }
 
 // TODO: 产生合约交易
 function generateContract (name) {
-
+  console.log('Hi, I`m coming soon...')
 }
 
-function tempaleBlockchain (type, name) {
+function tempaleBlockchain (name) {
   if (!fs.existsSync(name)) {
-    console.log('创建项目...')
+    console.log('Create blockchain project...')
 
     // TODO: 添加更多定制项
     inquirer.prompt([
@@ -277,7 +278,7 @@ function tempaleBlockchain (type, name) {
           console.log(symbols.error, chalk.red('模板下载失败'))
         } else {
           spinner.succeed()
-          shell.mv('./.tmp/' + type, './' + name)
+          shell.mv('./.tmp/blockchain', './' + name)
           const filename = `${name}/package.json`
           const meta = {
             name,
@@ -320,7 +321,7 @@ function appendFileSync (file, obj) {
 
 function genGenesisBlock (options) {
   const defaultSecret = 'enter boring shaft rent essence foil trick vibrant fabric quote indoor output'
-  const secret = (options && options.default) ? defaultSecret : DdnCrypto.generateSecret()
+  const secret = (options && options.secret) ? defaultSecret : DdnCrypto.generateSecret()
   const genesisAccount = accountHelper.account(secret, options.tokenPrefix)
 
   let index = 0
@@ -366,37 +367,23 @@ function genGenesisBlock (options) {
     })
 }
 
-export default function (program) {
-  program
-    .command('generate [type] <name>')
-    .alias('g')
-    .description('generate new blockchain, dapp, contract etc.')
-    .action(function (type, name) {
-      switch (type) {
-        case 'blockchain':
-          generateBlockchain(type, name)
-          break
-        case 'dapp':
-          generateDapp(type, name)
-          break
-
-        case 'contract':
-          generateContract(name)
-          break
-        default:
-          break
-      }
-    })
-
-  program
-    .command('createGenesis')
-    .description('create genesis block')
-    .option('-f, --file <file>', 'genesis accounts balance file')
-    .option('-d, --default', 'genesisAccount`s secret, default is the DDN`s testnet secret')
-    .option('-n, --nethash <nethash>', 'default to generate a new nethash')
-    .option('-p, --tokenPrefix <prefix>', 'default is `D`')
-    .option('-t, --tokenName <name>', 'default is `DDN`')
-    .option('-g, --genesisBlockName <genesisBlockName>', 'default is `genesisBlock`')
-    .option('-m, --message <message>', 'default is `null`')
-    .action(genGenesisBlock)
+export {
+  generateBlockchain,
+  generateDapp,
+  generateContract,
+  genGenesisBlock
 }
+
+
+//   program
+//     .command('createGenesis')
+//     .description('create genesis block')
+//     .option('-f, --file <file>', 'genesis accounts balance file')
+//     .option('-d, --default', 'genesisAccount`s secret, default is the DDN`s testnet secret')
+//     .option('-n, --nethash <nethash>', 'default to generate a new nethash')
+//     .option('-p, --tokenPrefix <prefix>', 'default is `D`')
+//     .option('-t, --tokenName <name>', 'default is `DDN`')
+//     .option('-g, --genesisBlockName <genesisBlockName>', 'default is `genesisBlock`')
+//     .option('-m, --message <message>', 'default is `null`')
+//     .action(genGenesisBlock)
+// }

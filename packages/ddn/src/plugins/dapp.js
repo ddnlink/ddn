@@ -280,7 +280,7 @@ async function createGenesisBlock () {
   var wantInbuiltAsset = await inquirer.prompt({
     type: 'confirm',
     name: 'wantInbuiltAsset',
-    message: 'Do you want publish a inbuilt asset in this dapp?',
+    message: 'Do you want to publish a inbuilt asset in this dapp?',
     default: false
   })
 

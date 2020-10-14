@@ -1,8 +1,8 @@
 import { createGenesisBlock } from '../../plugins/dapp'
 
 module.exports = {
-  command: 'newGenesis',
-  aliases: 'g',
+  command: 'genesisBlock',
+  aliases: 'gb',
   desc: 'Create dapp genesis block',
   builder: {},
 

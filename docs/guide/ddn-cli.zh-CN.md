@@ -5,17 +5,17 @@ order: 1
 
 # 命令行工具
 
-## 简介
+## 1. 简介
 
 从 DDN v3.0.0 以后，我们的命令行工具`ddn`名称正式更改为`ddn`，也就是说，通过命令行操作的命令与实际运行的程序将保持一致，都是`ddn`.
 
 同时，DDN v3.6.0 版本之后，DDN 区块链命令行工具采取分级、分类管理的方法进行了彻底重构，您可以像使用 `git` 命令那样使用`ddn`了，体验上有了很大提升。
 
-## 说明
+## 2. 说明
 
-### 分类
+### 2.1 分类
 
-整体上，命令包含了 6 个类别的子命令，它们是：`account`、`block` `dapp` `delegate` `dev` `transaction`，列表对比说明如下：
+整体上，命令包含了 7 个类别的子命令，它们是：`account`、`block`、 `dapp`、 `delegate`、 `dev`、 `transaction`、 `generate`，列表对比说明如下：
 
 |序号 | 类别或子命令 | 简称 | 备注 |
 |--------|---------|-----------|---------|
@@ -24,7 +24,8 @@ order: 1
 |  3  | transaction   | t, trs | 交易子命令，包括转账、检索交易等命令 |
 |  4  | delegate   | d | 节点相关子命令，受托人、节点、IP等 |
 |  5  | dapp   | 无 | Dapp子命令，包括资产转账等 |
-|  6  | dev   | 无 | 开发子命令，包括新建链、智能合约等命令 |
+|  6  | dev   | 无 | 辅助开发子命令，包括获取块ID等命令 |
+|  7  | generate   | g | 辅助开发子命令，包括新建链、新建智能合约等命令 |
 
 简称的逻辑是：
 
@@ -43,6 +44,7 @@ ddn <命令>
   ddn dapp [command]         DDN dapp manage tools.
   ddn delegate [command]     DDN delegate manage tools.       [aliases: d, peer]
   ddn dev [command]          DDN develop tools.
+  ddn generate [command]     DDN generate tools.                    [aliases: g]
   ddn transaction [command]  DDN transaction manage tools.     [aliases: t, trs]
 
 选项：
@@ -55,7 +57,7 @@ ddn <命令>
 copyright 2020
 ```
 
-### 分级
+### 2.2 分级
 
 每个类别下面有多个子命令，您只要使用`ddn a -h`(等同于`ddn account -h`）的方式检索查看即可
 
@@ -90,8 +92,23 @@ DDN account manage tools.
   -h, --help     显示帮助信息                                             [布尔]
 ```
 
+### 2.3 便利性
 
-## 公共选项
+命令的使用充分考虑了开发的便利性，比如，我们要开启一个新的Dapp的定制，可以这样操作：
+
+（1）使用Dapp子命令
+
+```shell
+$ ddn dapp g MyDapp // 这是最简单直观的思考逻辑
+```
+
+（2）使用generate子命令
+
+```shell
+$ ddn g dapp MyDapp // 与上述命令正好相反，但是效果一样
+```
+
+## 3. 公共选项
 
 所有命令所默认请求的`host`,`port`,以及网络类型`main`等是它们的公共选项，以大写字母的形式提供。它们就是：
 
@@ -104,6 +121,6 @@ DDN account manage tools.
   -h, --help     显示帮助信息   
 ```
 
-## 参考
+## 4. 参考
 
 更多应用案例，请参考 《DDN-UBL 高校实验教程》
