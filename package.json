@@ -33,7 +33,7 @@
     "test:custom": "DDN_ENV=custom ./packages/test/bin/test.js",
     "test": "./packages/test/bin/test.js",
 		"cm": "git-cz",
-		"format": "yarn lint:fix & yarn prettier",
+		"format": "yarn lint:fix && yarn prettier",
     "lint": "eslint --ext .js packages/**/src",
     "lint:fix": "eslint --fix --ext .js packages/**/src",
     "lint-staged": "lint-staged",
