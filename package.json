@@ -34,6 +34,9 @@
     "test:custom": "DDN_ENV=custom ./packages/test/bin/test.js",
     "test": "./packages/test/bin/test.js",
     "lint": "eslint --fix --ext .js packages/**/src packages/**/test",
+    "lint-staged": "lint-staged",
+    "lint-staged:js": "lint",
+    "prettier": "prettier --write ./packages/**/src/**/**/* ./packages/**/test/**/**/*",
     "doc:dev": "DDN_ENV=docs dumi dev",
     "doc:build": "DDN_ENV=docs dumi build",
     "doc:deploy": "DDN_ENV=docs deploy website"
@@ -74,8 +77,17 @@
     "father-build": "^1.18.1",
     "git-cz": "^4.3.1",
     "lerna": "^3.18.1",
+    "lint-staged": "^10.4.0",
+    "prettier": "^2.1.2",
     "rollup-plugin-node-builtins": "^2.1.2",
     "rollup-plugin-node-globals": "^1.4.0"
+  },
+  "lint-staged": {
+    "**/*.{js,jsx,less}": [
+      "prettier --write",
+      "git add"
+    ],
+    "**/*.{js,jsx}": "npm run lint-staged:js"
   },
   "publishConfig": {
     "access": "public"

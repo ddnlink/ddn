@@ -373,17 +373,3 @@ export {
   generateContract,
   genGenesisBlock
 }
-
-
-//   program
-//     .command('createGenesis')
-//     .description('create genesis block')
-//     .option('-f, --file <file>', 'genesis accounts balance file')
-//     .option('-d, --default', 'genesisAccount`s secret, default is the DDN`s testnet secret')
-//     .option('-n, --nethash <nethash>', 'default to generate a new nethash')
-//     .option('-p, --tokenPrefix <prefix>', 'default is `D`')
-//     .option('-t, --tokenName <name>', 'default is `DDN`')
-//     .option('-g, --genesisBlockName <genesisBlockName>', 'default is `genesisBlock`')
-//     .option('-m, --message <message>', 'default is `null`')
-//     .action(genGenesisBlock)
-// }

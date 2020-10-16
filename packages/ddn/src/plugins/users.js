@@ -69,12 +69,3 @@ function genUsers ({ tokenPrefix, tokenName }) {
 export {
   genUsers
 }
-
-// export default program => {
-//   program
-//     .command('createUsers')
-//     .description('create some accounts')
-//     .option('-p, --tokenPrefix <prefix>', 'default is `D`')
-//     .option('-t, --tokenName <name>', 'default is `DDN`')
-//     .action(genUsers)
-// }
