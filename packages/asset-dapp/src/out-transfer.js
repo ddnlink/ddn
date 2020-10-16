@@ -179,35 +179,30 @@ class OutTransfer extends Asset.Base {
       currency
     }
 
+    const row = await this.dao.findOne('mem_asset_balance', condition, ['balance'], dbTrans);
+
+    let balance = '0'
+    // FIXME: let balanceExists = false;
+    if (row) {
+      balance = row.balance
+      // balanceExists = true;
+    }
+
+    const newBalance = DdnUtils.bignum.plus(balance, amount)
+    if (DdnUtils.bignum.isLessThan(newBalance, 0)) {
+      return reject('Asset balance not enough')
+    }
+
+    condition.balance = newBalance.toString()
+
     return new Promise((resolve, reject) => {
-      this.dao.findOne('mem_asset_balance',
-        condition, ['balance'], dbTrans,
-        (err, row) => {
-          if (err) {
-            return reject(err)
+      this.dao.insertOrUpdate('mem_asset_balance',
+        condition, dbTrans, (err2, result) => {
+          if (err2) {
+            return reject(err2)
           }
 
-          let balance = '0'
-          // FIXME: let balanceExists = false;
-          if (row) {
-            balance = row.balance
-            // balanceExists = true;
-          }
-
-          const newBalance = DdnUtils.bignum.plus(balance, amount)
-          if (DdnUtils.bignum.isLessThan(newBalance, 0)) {
-            return reject('Asset balance not enough')
-          }
-
-          condition.balance = newBalance.toString()
-          this.dao.insertOrUpdate('mem_asset_balance',
-            condition, dbTrans, (err2, result) => {
-              if (err2) {
-                return reject(err2)
-              }
-
-              resolve(result)
-            })
+          resolve(result)
         })
     })
   }

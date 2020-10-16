@@ -98,8 +98,8 @@ class DBUtils {
      * @param {*} transaction 事务对象
      * @param {*} cb 回调函数
      */
-  static insert (modelName, modelObj, transaction, cb) {
-    sequelizeDB.insert(modelName, modelObj, transaction, cb)
+  static insert (modelName, modelObj, transaction) {
+    return sequelizeDB.insert(modelName, modelObj, transaction)
   }
 
   /**
@@ -201,8 +201,8 @@ class DBUtils {
      * @param {*} dbTrans 事务对象
      * @param {*} cb 回调
      */
-  static findOne (modelName, where, attributes, dbTrans, cb) {
-    sequelizeDB.findOne(modelName, where, attributes, dbTrans, cb)
+  static async findOne (modelName, where, attributes, dbTrans) {
+    return sequelizeDB.findOne(modelName, where, attributes, dbTrans)
   }
 
   /**

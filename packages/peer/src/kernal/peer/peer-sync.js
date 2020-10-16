@@ -125,27 +125,25 @@ class PeerSync {
 
       const result = await this.runtime.peer.request({ peer, api: `/blocks/common?ids=${data.ids}&max=${maxHeight}&min=${currProcessHeight}` })
       if (result && result.body && result.body.common) {
-        lastLackBlock = await new Promise(
-          (resolve, reject) => {
-            this.dao.findOne('block', {
-              id: result.body.common.id,
-              height: result.body.common.height
-            }, ['previous_block'], (err, row) => {
-              this.logger.debug(`peer-sync._addLackBlocks result.body.common.previous_block is ${result.body.common.previous_block}`)
-              this.logger.debug(`peer-sync._addLackBlocks row.previous_block is ${row.previous_block}`)
-              if (err || !row) {
-                this.logger.error(err || "Can't compare blocks")
-                // FIXME: 2020.8.29 这里使用 reject 的流程是不一样的
-                // resolve()
-                reject(err || "Can't compare blocks")
-              } else if (result.body.common.previous_block === row.previous_block) { // 确定那个正常的块
-                resolve(result.body.common)
-              } else {
-                resolve()
-              }
-            })
+        try {
+          const row = await this.dao.findOne('block', {
+            id: result.body.common.id,
+            height: result.body.common.height
+          }, ['previous_block'])
+          this.logger.debug(`peer-sync._addLackBlocks result.body.common.previous_block is ${result.body.common.previous_block}`)
+                this.logger.debug(`peer-sync._addLackBlocks row.previous_block is ${row.previous_block}`)
+                
+          if (!row) {
+            this.logger.error("Can't compare blocks")
+            throw new Error("Can't compare blocks")
           }
-        )
+          if (result.body.common.previous_block === row.previous_block) { // 确定那个正常的块
+            lastLackBlock = result.body.common
+          }
+        } catch (e) {
+          this.logger.error(err)
+          throw e;
+        }
       }
     }
 

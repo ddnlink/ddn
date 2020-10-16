@@ -84,63 +84,18 @@ class DAO {
       })
   }
 
-  static insert (modelName, modelObj, transaction, cb) {
-    try {
-      if (typeof cb === 'undefined' && typeof transaction === 'function') {
-        cb = transaction
-        transaction = null
-      }
-
-      const modelInst = this._getModel(modelName)
-      if (modelInst) {
-        if (modelObj) {
-          const options = Object.assign({}, logOptions, {
-            transaction: transaction || null
-          })
-          modelInst
-            .create(modelObj, options)
-            .then(newRecord => {
-              if (typeof cb === 'function') {
-                cb(null, newRecord)
-                return null
-              }
-            })
-            .catch(err2 => {
-              if (typeof cb === 'function') {
-                let errMsg2 = err2.toString()
-                if (err2.errors && err2.errors.length > 0) {
-                  for (let i = 0; i < err2.errors.length; i++) {
-                    errMsg2 += '\r\n' + err2.errors[i].message
-                  }
-                }
-                cb(errMsg2)
-                return null
-              }
-            })
-        } else {
-          if (typeof cb === 'function') {
-            cb('无效的数据输入：' + modelObj)
-            return null
-          }
-        }
-      } else {
-        if (typeof cb === 'function') {
-          cb('Data model not defined: ' + modelName)
-          return null
-        }
-      }
-    } catch (err) {
-      if (typeof cb === 'function') {
-        let errMsg = err.toString()
-        if (err.errors && err.errors.length > 0) {
-          for (let i = 0; i < err.errors.length; i++) {
-            errMsg += '\r\n' + err.errors[i].message
-          }
-        }
-        cb(errMsg)
-        return null
-      }
+  static insert(modelName, modelObj, transaction) {
+    const modelInst = this._getModel(modelName);
+    if (!modelInst) {
+      throw new Error('Data model not defined: ' + modelName);
     }
+    if (!modelObj) {
+      throw new Error('无效的数据输入：' + modelObj);
+    }
+    const options = Object.assign({}, logOptions, {
+      transaction: transaction || null,
+    });
+    return modelInst.create(modelObj, options);
   }
 
   static insertOrUpdate (modelName, modelObj, transaction, cb) {
@@ -641,27 +596,17 @@ class DAO {
     }
   }
 
-  static findOne (modelName, where, attributes, dbTrans, cb) {
-    if (typeof cb === 'undefined' && typeof dbTrans === 'function') {
-      cb = dbTrans
-      dbTrans = null
-    }
-
+  static async findOne(modelName, where, attributes, dbTrans) {
     const options = Object.assign({}, logOptions, {
       attributes: attributes || undefined,
-      where: where || undefined
-    })
+      where: where || undefined,
+    });
 
     if (dbTrans) {
-      options.transaction = dbTrans
+      options.transaction = dbTrans;
     }
-    this._getModel(modelName)
-      .findOne(options)
-      .then(data => {
-        cb(null, data ? data.toJSON() : null)
-        return null
-      })
-      .catch(cb)
+    const result = await this._getModel(modelName).findOne(options);
+    return result ? result.toJSON() : null
   }
 
   static count (modelName, where, dbTrans, cb) {

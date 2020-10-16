@@ -172,16 +172,7 @@ class Signatures {
       publicKey: asset.signature.publicKey
     }
 
-    return new Promise((resolve, reject) => {
-      this.dao.insert('signature', obj, dbTrans,
-        (err, result) => {
-          if (err) {
-            reject(err)
-          } else {
-            resolve(result)
-          }
-        })
-    })
+    return this.dao.insert('signature', obj, dbTrans);
   }
 
   ready ({ signatures }, { multisignatures, multimin }) {

@@ -638,33 +638,19 @@ class Account {
               }
               // 字段为balance并且不等于0
               if (!DdnUtils.bignum.isZero(trueValue) && value === 'balance') {
-                const mem_accounts2delegate = await new Promise((resolve, reject) => {
-                  this.dao.findOne('mem_accounts2delegate', {
-                    account_id: address // wxm block database
-                  }, null, dbTrans, (err, data) => {
-                    if (err) {
-                      return reject(err)
-                    }
-                    resolve(data)
-                  })
-                })
+                const mem_accounts2delegate = await this.dao.findOne('mem_accounts2delegate', {
+                  account_id: address // wxm block database
+                }, null, dbTrans)
 
                 if (mem_accounts2delegate) {
                   if (diff.block_id !== this.genesisblock.id) { // wxm async ok      genesisblock.block.id
-                    await new Promise((resolve, reject) => {
-                      this.dao.insert('mem_round', {
-                        address: address,
-                        amount: trueValue.toString(),
-                        delegate: mem_accounts2delegate.dependent_id, // wxm block database
-                        block_id: diff.block_id, // wxm block database
-                        round: diff.round.toString()
-                      }, dbTrans, (err) => {
-                        if (err) {
-                          return reject(err)
-                        }
-                        return resolve()
-                      })
-                    })
+                    await this.dao.insert('mem_round', {
+                      address: address,
+                      amount: trueValue.toString(),
+                      delegate: mem_accounts2delegate.dependent_id, // wxm block database
+                      block_id: diff.block_id, // wxm block database
+                      round: diff.round.toString()
+                    }, dbTrans)
                   }
                 }
               }
@@ -710,34 +696,20 @@ class Account {
                     // if (math === '-') {
                     //   balanceField = '-balance';
                     // }
-                    const mem_account = await new Promise((resolve, reject) => {
-                      this.dao.findOne('mem_account', {
-                        address
-                      }, null, dbTrans, (err, data) => {
-                        if (err) {
-                          return reject(err)
-                        }
-                        resolve(data)
-                      })
-                    })
-
+                    const mem_account = await this.dao.findOne('mem_account', {
+                      address
+                    }, null, dbTrans)
+                    
                     // this.logger.debug('FindOne account when merge, it is ', mem_account)
 
                     if (mem_account) {
-                      await new Promise((resolve, reject) => {
-                        this.dao.insert('mem_round', {
-                          address: address,
-                          amount: (math||'+') + mem_account[balanceField].toString(),
-                          delegate: val,
-                          block_id: diff.block_id, // wxm block database
-                          round: diff.round.toString()
-                        }, dbTrans, (err) => {
-                          if (err) {
-                            return reject(err)
-                          }
-                          return resolve()
-                        })
-                      })
+                      await this.dao.insert('mem_round', {
+                        address: address,
+                        amount: (math||'+') + mem_account[balanceField].toString(),
+                        delegate: val,
+                        block_id: diff.block_id, // wxm block database
+                        round: diff.round.toString()
+                      }, dbTrans)
                     }
                   }
                 }
@@ -745,8 +717,7 @@ class Account {
               break
           }
         })
-
-        const removeKeys = Object.keys(remove)
+      const removeKeys = Object.keys(remove)
         await bluebird.each(removeKeys, async (el) => {
           await new Promise((resolve, reject) => {
             this.dao.remove('mem_accounts2' + el.substring(0, el.length - 1), {
@@ -766,17 +737,10 @@ class Account {
         const insertKeys = Object.keys(insert)
         await bluebird.each(insertKeys, async (el) => {
           await bluebird.each(insert[el], async (_, i) => {
-            await new Promise((resolve, reject) => {
-              this.dao.insert('mem_accounts2' + el.substring(0, el.length - 1), {
-                account_id: address, // wxm block database
-                dependent_id: insert[el][i] // wxm block database
-              }, dbTrans, (err) => {
-                if (err) {
-                  return reject(err)
-                }
-                resolve()
-              })
-            })
+            await this.dao.insert('mem_accounts2' + el.substring(0, el.length - 1), {
+              account_id: address, // wxm block database
+              dependent_id: insert[el][i] // wxm block database
+            }, dbTrans)
           })
         })
 
@@ -795,14 +759,7 @@ class Account {
         const insertObjectKeys = Object.keys(insert_object)
         await bluebird.each(insertObjectKeys, async (el) => {
           await bluebird.each(insert[el], async () => {
-            await new Promise((resolve, reject) => {
-              this.dao.insert('mem_accounts2' + el.substring(0, el.length - 1), insert_object[el], dbTrans, (err) => {
-                if (err) {
-                  return reject(err)
-                }
-                resolve()
-              })
-            })
+            await this.dao.insert('mem_accounts2' + el.substring(0, el.length - 1), insert_object[el], dbTrans)
           })
         })
 

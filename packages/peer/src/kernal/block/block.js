@@ -214,16 +214,13 @@ class Block {
       previous_block: block.previous_block || null
     }
 
-    return new Promise((resolve, reject) => {
-      this.dao.insert('block', newBlock, dbTrans, (err, result) => {
-        if (err) {
-          this.logger.error(`insert block fail: ${err.toString()}`)
-          reject(new Error(`insert block fail: ${err.toString()}`))
-        } else {
-          resolve(result)
-        }
-      })
-    })
+    try {
+      const result = await this.dao.insert('block', newBlock, dbTrans)
+      return result
+    }catch (err) {
+      this.logger.error(`insert block fail: ${err.toString()}`) 
+      reject(new Error(`insert block fail: ${err.toString()}`))
+    }
   }
 
   /**
@@ -892,95 +889,90 @@ class Block {
     }
 
     this.logger.debug('verify block ok')
-
-    return new Promise((resolve, reject) => {
-      this.dao.findOne('block', {
+    let row;
+    try {
+      row = await this.dao.findOne('block', {
         id: block.id
-      }, null, async (err, row) => {
-        if (err) {
-          return reject(`Failed to query blocks from db: ${err}`)
+      }, null);
+    } catch (e) {
+      throw new Error(`Failed to query blocks from db: ${err}`)
+    }
+    const bId = row && row.id
+      if (bId && save) {
+        throw new Error(`Block already exists: ${block.id}`)
+      }
+
+      try {
+        await this.runtime.delegate.validateBlockSlot(block)
+      } catch (err) {
+        await this.runtime.delegate.fork(block, 3)
+        throw new Error(`Can't verify slot: ${err}`)
+      }
+
+      this.logger.debug('verify block slot ok')
+
+      if (block.transactions && block.transactions.length) {
+        const trsIds = []
+        for (let i = 0; i < block.transactions.length; i++) {
+          const transaction = block.transactions[i]
+          trsIds.push(transaction.id)
         }
 
-        const bId = row && row.id
-        if (bId && save) {
-          return reject(`Block already exists: ${block.id}`)
-        }
-
-        try {
-          await this.runtime.delegate.validateBlockSlot(block)
-        } catch (err) {
-          await this.runtime.delegate.fork(block, 3)
-          return reject(new Error(`Can't verify slot: ${err}`))
-        }
-
-        this.logger.debug('verify block slot ok')
-
-        if (block.transactions && block.transactions.length) {
-          const trsIds = []
-          for (let i = 0; i < block.transactions.length; i++) {
-            const transaction = block.transactions[i]
-            trsIds.push(transaction.id)
-          }
-
-          let existsTrsIds = []
-          if (trsIds.length > 0) {
-            existsTrsIds = await new Promise((resolve, reject) => {
-              this.dao.findList('tr', {
-                id: {
-                  $in: trsIds
-                }
-              }, ['id'], null, null, (err, result) => {
-                if (err) {
-                  return reject(`Failed to query transaction from db: ${err}`)
-                } else {
-                  resolve(result)
-                }
-              })
+        let existsTrsIds = []
+        if (trsIds.length > 0) {
+          existsTrsIds = await new Promise((resolve, reject) => {
+            this.dao.findList('tr', {
+              id: {
+                $in: trsIds
+              }
+            }, ['id'], null, null, (err, result) => {
+              if (err) {
+                throw new Error (`Failed to query transaction from db: ${err}`)
+              } else {
+                return result
+              }
             })
-          }
+          })
+        }
 
-          for (let i = 0; i < block.transactions.length; i++) {
-            try {
-              const transaction = block.transactions[i]
+        for (let i = 0; i < block.transactions.length; i++) {
+          try {
+            const transaction = block.transactions[i]
 
-              await this.runtime.account.setAccount({
-                publicKey: transaction.senderPublicKey
-              })
+            await this.runtime.account.setAccount({
+              publicKey: transaction.senderPublicKey
+            })
 
-              transaction.id = await DdnCrypto.getId(transaction) // 2020.5.18
-              transaction.block_id = block.id // wxm block database
+            transaction.id = await DdnCrypto.getId(transaction) // 2020.5.18
+            transaction.block_id = block.id // wxm block database
 
-              const existsTrs = existsTrsIds.find((item) => {
-                item.id === transaction.id
-              })
-              if (existsTrs) {
-                // wxy 这里如果库里存在一些交易就不存这个块吗？TODO
-                await this.runtime.transaction.removeUnconfirmedTransaction(transaction.id)
-                 reject(`Transaction already exists: ${transaction.id}`)
-              }
-
-              if (verifyTrs) {
-                const sender = await this.runtime.account.getAccountByPublicKey(transaction.senderPublicKey)
-                await this.runtime.transaction.verify(transaction, sender)
-              }
-            } catch (err) {
-               reject(err)
+            const existsTrs = existsTrsIds.find((item) => {
+              item.id === transaction.id
+            })
+            if (existsTrs) {
+              // wxy 这里如果库里存在一些交易就不存这个块吗？TODO
+              await this.runtime.transaction.removeUnconfirmedTransaction(transaction.id)
+                throw new Error(`Transaction already exists: ${transaction.id}`)
             }
+
+            if (verifyTrs) {
+              const sender = await this.runtime.account.getAccountByPublicKey(transaction.senderPublicKey)
+              await this.runtime.transaction.verify(transaction, sender)
+            }
+          } catch (err) {
+            throw err
           }
         }
+      }
 
-        this.logger.debug('verify block transactions ok')
+      this.logger.debug('verify block transactions ok')
 
-        try {
-          await this.applyBlock(block, votes, broadcast, save)
-        } catch (err) {
-          this.logger.error(`Failed to apply block: ${err}`)
-           reject(err)
-        }
-
-        resolve()
-      })
-    })
+      try {
+        await this.applyBlock(block, votes, broadcast, save)
+      } catch (err) {
+        this.logger.error(`Failed to apply block: ${err}`)
+        throw err
+      }
   }
 
   /**
@@ -1250,34 +1242,26 @@ class Block {
   }
 
   async simpleDeleteAfterBlock (blockId) {
-    return new Promise((resolve, reject) => {
-      this.dao.findOne('block', {
-        id: blockId
-      }, ['height'], (err, result) => {
-        if (err) {
-          return reject(err)
-        } else {
-          if (result && result.height !== null &&
-                        typeof (result.height) !== 'undefined') {
-            this.dao.remove('block', {
-              height: {
-                $gte: result.height // todo: ?????? 2020.8.11
-              }
-            },
-            (err2, result2) => {
-              if (err2) {
-                return reject(err2)
-              } else {
-                resolve(result2)
-              }
+    const result = await this.dao.findOne('block', {
+      id: blockId
+    }, ['height']);
+    if (result && result.height !== null &&
+                  typeof (result.height) !== 'undefined') {
+      return new Promise((resolve, reject) => {
+          this.dao.remove('block', {
+            height: {
+              $gte: result.height // todo: ?????? 2020.8.11
             }
-            )
-          } else {
-            resolve()
-          }
-        }
-      })
-    })
+          },
+          (err2, result2) => {
+            if (err2) {
+              return reject(err2)
+            } else {
+              resolve(result2)
+            }
+          })
+        })
+      }
   }
 
   async loadBlocksOffset (limit, offset, verify) {

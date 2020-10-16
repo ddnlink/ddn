@@ -281,15 +281,8 @@ class Aob extends Asset.Base {
   async getBalance (req) {
     const address = req.params.address
     const currency = req.params.currency
-    return new Promise((resolve, reject) => {
-      this.dao.findOne('mem_asset_balance', { address, currency }, null, null, (err, data) => {
-        if (err) {
-          reject(err)
-        }
-
-        resolve({ success: true, result: data })
-      })
-    })
+    const result = await this.dao.findOne('mem_asset_balance', { address, currency }, null, null)
+    return { success: true, result }
   }
 
   async getIssuerAssets (req) {

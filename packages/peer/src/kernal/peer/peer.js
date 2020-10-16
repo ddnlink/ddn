@@ -34,39 +34,33 @@ class Peer {
 
     for (let i = 0; i < peers.length; i++) {
       const peer = peers[i]
-
+      const result = await this.dao.findOne(
+        'peer',
+        {
+          ip: ip.toLong(peer.ip),
+          port: peer.port
+        },
+        null)
       await new Promise((resolve, reject) => {
-        this.dao.findOne(
-          'peer',
-          {
-            ip: ip.toLong(peer.ip),
-            port: peer.port
-          },
-          null,
-          (err, result) => {
-            if (err) {
-              reject(err)
-            } else if (!result) {
-              this.dao.insertOrUpdate(
-                'peer',
-                {
-                  ip: ip.toLong(peer.ip),
-                  port: peer.port,
-                  state: 2
-                },
-                (err2, result2) => {
-                  if (err2) {
-                    reject(err2)
-                  } else {
-                    resolve(result2)
-                  }
-                }
-              )
-            } else {
-              resolve()
+        if (!result) {
+          this.dao.insertOrUpdate(
+            'peer',
+            {
+              ip: ip.toLong(peer.ip),
+              port: peer.port,
+              state: 2
+            },
+            (err2, result2) => {
+              if (err2) {
+                reject(err2)
+              } else {
+                resolve(result2)
+              }
             }
-          }
-        )
+          )
+        } else {
+          resolve()
+        }
       })
     }
 
@@ -104,57 +98,32 @@ class Peer {
   }
 
   async addDapp (config) {
-    return new Promise((resolve, reject) => {
-      this.dao.findOne(
-        'peer',
+    const peer = await this.dao.findOne(
+      'peer',
+      {
+        ip: config.ip,
+        port: config.port
+      },
+      null)
+    if (!peer) {
+      throw new Error(`Peer not found: ${config.ip}`)
+    }
+    const peers_dapp = await this.dao.findOne(
+      'peers_dapp',
+      {
+        peer_id: data.id
+      },
+      null)
+    if (peers_dapp) {
+      const result = await this.dao.insert(
+        'peers_dapp',
         {
-          ip: config.ip,
-          port: config.port
-        },
-        null,
-        (err, data) => {
-          if (err) {
-            return reject(err)
-          }
-
-          if (data) {
-            this.dao.findOne(
-              'peers_dapp',
-              {
-                peer_id: data.id
-              },
-              null,
-              (err2, data2) => {
-                if (err2) {
-                  return reject(err2)
-                }
-
-                if (!data2) {
-                  this.dao.insert(
-                    'peers_dapp',
-                    {
-                      peer_id: data.id,
-                      dapp_id: config.dappId
-                    },
-                    (err3, data3) => {
-                      if (err3) {
-                        reject(err3)
-                      } else {
-                        resolve(data3)
-                      }
-                    }
-                  )
-                } else {
-                  resolve()
-                }
-              }
-            )
-          } else {
-            reject(new Error(`Peer not found: ${config.ip}`))
-          }
-        }
-      )
-    })
+          peer_id: data.id,
+          dapp_id: config.dappId
+        })
+        return result
+    }
+    return
   }
 
   async update (peer) {
@@ -196,49 +165,43 @@ class Peer {
 
       if (needUpdateToDB && !this._peerUpdatings[peerKey]) {
         this._peerUpdatings[peerKey] = true
-
-        return new Promise((resolve, reject) => {
-          this.dao.findOne(
+        try {
+          const data = await this.dao.findOne(
             'peer',
             {
               ip: peerData.ip,
               port: peerData.port
             },
-            null,
-            (err, data) => {
-              if (!err) {
-                if (data && data.state === 0) {
-                  delete peerData.state
-                }
-
-                this.dao.insertOrUpdate(
-                  'peer',
-                  peerData,
-                  null,
-                  async (err2, data2) => {
-                    if (!err2) {
-                      if (dappId) {
-                        await this.addDapp({
-                          dappId,
-                          ip: peer.ip,
-                          port: peer.port
-                        })
-                      } else {
-                        this._peerUpdateTimes[peerKey] = new Date().getTime()
-                      }
-                    }
-
-                    this._peerUpdatings[peerKey] = false
-                    resolve()
-                  }
-                )
-              } else {
-                this._peerUpdatings[peerKey] = false
-                resolve()
-              }
+            null);
+            if (data && data.state === 0) {
+              delete peerData.state
             }
-          )
-        })
+            return new Promise((resolve, reject) => {
+              this.dao.insertOrUpdate(
+                'peer',
+                peerData,
+                null,
+                async (err2, data2) => {
+                  if (!err2) {
+                    if (dappId) {
+                      await this.addDapp({
+                        dappId,
+                        ip: peer.ip,
+                        port: peer.port
+                      })
+                    } else {
+                      this._peerUpdateTimes[peerKey] = new Date().getTime()
+                    }
+                  }
+
+                  this._peerUpdatings[peerKey] = false
+                  resolve()
+                })
+            })
+        } catch (e) {
+          this._peerUpdatings[peerKey] = false
+          resolve()
+        }
       }
     }
   }

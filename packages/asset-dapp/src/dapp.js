@@ -488,19 +488,9 @@ class Dapp extends Asset.Base {
   async getDappBalance (req) {
     const dappId = req.params.dappid
     const currency = req.params.currency
-
-    return new Promise((resolve, reject) => {
-      this.dao.findOne('mem_asset_balance', { address: dappId, currency },
-        ['balance'], (err, row) => {
-          if (err) {
-            console.log('err', err)
-            return reject(err)
-          }
-          console.log('row', row)
-
-          resolve({ success: true, result: { currency, balance: row.balance } })
-        })
-    })
+    const result = await this.dao.findOne('mem_asset_balance', { address: dappId, currency },
+    ['balance'])
+    return { success: true, result: { currency, balance: result.balance } }
   }
 
   async getLaunchDappLastError (req) {

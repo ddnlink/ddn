@@ -4,30 +4,30 @@
  *  Copyright (c) 2019 DDN Foundation. All rights reserved.
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *-------------------------------------------------------------------------------------------- */
-import ByteBuffer from 'bytebuffer'
-import DdnUtils from '@ddn/utils'
-import Diff from '../../utils/diff.js'
+import ByteBuffer from "bytebuffer";
+import DdnUtils from "@ddn/utils";
+import Diff from "../../utils/diff.js";
 
 class Vote {
   constructor(context) {
-    Object.assign(this, context)
-    this._context = context
+    Object.assign(this, context);
+    this._context = context;
   }
 
   async create({ votes }, trs) {
-    trs.recipientId = null // wxm block database
+    trs.recipientId = null; // wxm block database
     trs.asset.vote = {
       votes
-    }
+    };
 
-    return trs
+    return trs;
   }
 
   async calculateFee(trs, sender) {
     return DdnUtils.bignum.multiply(
       this.constants.net.fees.vote,
       this.constants.fixedPoint
-    )
+    );
   }
 
   async verify(trs, sender) {
@@ -36,43 +36,43 @@ class Vote {
       !trs.asset.vote.votes ||
       !trs.asset.vote.votes.length
     ) {
-      throw new Error('No votes sent')
+      throw new Error("No votes sent");
     }
 
     if (trs.asset.vote.votes && trs.asset.vote.votes.length > 33) {
       throw new Error(
-        'Voting limit exceeded. Maximum is 33 votes per transaction'
-      )
+        "Voting limit exceeded. Maximum is 33 votes per transaction"
+      );
     }
 
     await this.runtime.delegate.checkDelegates(
       trs.senderPublicKey,
       trs.asset.vote.votes
-    )
+    );
 
-    return trs
+    return trs;
   }
 
   async process(trs, sender) {
-    return trs
+    return trs;
   }
 
   async getBytes({ asset }) {
     if (!asset.vote.votes) {
-      return null
+      return null;
     }
 
-    const bb = new ByteBuffer()
-    const votes = asset.vote.votes.join('')
-    console.log('vote.js asset.vote.votes.join', votes)
+    const bb = new ByteBuffer();
+    const votes = asset.vote.votes.join("");
+    console.log("vote.js asset.vote.votes.join", votes);
 
-    bb.writeUTF8String(votes)
-    bb.flip()
-    return bb.toBuffer()
+    bb.writeUTF8String(votes);
+    bb.flip();
+    return bb.toBuffer();
   }
 
   async isSupportLock() {
-    return false
+    return false;
   }
 
   async apply({ asset }, { id, height }, { address }, dbTrans) {
@@ -85,13 +85,13 @@ class Vote {
         round: await this.runtime.round.getRound(height)
       },
       dbTrans
-    )
+    );
   }
 
-  async undo({ id:trsId, asset }, { id, height }, { address }, dbTrans) {
-    if (asset.vote.votes === null) return
+  async undo({ id: trsId, asset }, { id, height }, { address }, dbTrans) {
+    if (asset.vote.votes === null) return;
 
-    const votesInvert = Diff.reverse(asset.vote.votes)
+    const votesInvert = Diff.reverse(asset.vote.votes);
     await this.runtime.account.merge(
       address,
       {
@@ -100,8 +100,8 @@ class Vote {
         round: await this.runtime.round.getRound(height)
       },
       dbTrans
-    )
-    await this.deleteVote(trsId, dbTrans)
+    );
+    await this.deleteVote(trsId, dbTrans);
   }
 
   /**
@@ -112,64 +112,69 @@ class Vote {
    */
   async deleteVote(transaction_id, dbTrans) {
     return new Promise((resolve, reject) => {
-      this.dao.remove("vote", {
-        transaction_id,
-      }, dbTrans, (err) => {
-        if (err) {
-          return reject(err)
+      this.dao.remove(
+        "vote",
+        {
+          transaction_id
+        },
+        dbTrans,
+        err => {
+          if (err) {
+            return reject(err);
+          }
+          resolve(true);
         }
-        resolve(true)
-      })
-    })
+      );
+    });
   }
 
   async applyUnconfirmed({ type }, { address }, dbTrans) {
-    const key = `${address}:${type}`
+    const key = `${address}:${type}`;
     if (this.oneoff.has(key)) {
-      throw new Error('Double submit')
+      throw new Error("Double submit");
     }
-    this.oneoff.set(key, true)
+    this.oneoff.set(key, true);
   }
 
   async undoUnconfirmed({ type }, { address }, dbTrans) {
-    const key = `${address}:${type}`
-    this.oneoff.delete(key)
+    const key = `${address}:${type}`;
+    this.oneoff.delete(key);
   }
 
   async objectNormalize(trs) {
     const validateErrors = await this.ddnSchema.validate(
       {
-        type: 'object',
+        type: "object",
         properties: {
           votes: {
-            type: 'array',
+            type: "array",
             minLength: 1,
             maxLength: 101,
             uniqueItems: true
           }
         },
-        required: ['votes']
+        required: ["votes"]
       },
       trs.asset.vote
-    )
+    );
     if (validateErrors) {
       throw new Error(
         `Incorrect votes in transactions: ${validateErrors[0].schemaPath} ${validateErrors[0].message}`
-      )
+      );
     }
 
-    return trs
+    return trs;
   }
 
   async dbRead({ v_votes }) {
     if (!v_votes) {
-      return null
+      return null;
     } else {
-      const votes = v_votes.split(',')
+      const votes = v_votes.split(",");
       const vote = {
         votes
-      }
-      return { vote }
+      };
+      return { vote };
     }
   }
 
@@ -178,37 +183,28 @@ class Vote {
    * 功能:新增一条vote数据
    */
   async dbSave({ asset, id }, dbTrans) {
-    return new Promise((resolve, reject) => {
-      this.dao.insert(
-        'vote',
-        {
-          votes: Array.isArray(asset.vote.votes)
-            ? asset.vote.votes.join(',')
-            : null,
-          transaction_id: id
-        },
-        dbTrans,
-        (err, result) => {
-          if (err) {
-            reject(err)
-          } else {
-            resolve(result)
-          }
-        }
-      )
-    })
+    return this.dao.insert(
+      "vote",
+      {
+        votes: Array.isArray(asset.vote.votes)
+          ? asset.vote.votes.join(",")
+          : null,
+        transaction_id: id
+      },
+      dbTrans
+    );
   }
 
   async ready({ signatures }, { multisignatures, multimin }) {
     if (Array.isArray(multisignatures) && multisignatures.length) {
       if (!signatures) {
-        return false
+        return false;
       }
-      return signatures.length >= multimin - 1
+      return signatures.length >= multimin - 1;
     } else {
-      return true
+      return true;
     }
   }
 }
 
-export default Vote
+export default Vote;

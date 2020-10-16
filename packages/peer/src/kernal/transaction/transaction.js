@@ -157,22 +157,15 @@ class Transaction {
       message: trs.message || null
     }
 
-    return new Promise((resolve, reject) => {
-      this.dao.insert('tr', newTrans, dbTrans, async (err, result) => {
-        if (err) {
-          reject(err)
-        } else {
-          try {
-            await this._assets.call(trs.type, 'dbSave', trs, dbTrans)
-          } catch (e) {
-            this.logger.debug(`insert tr error trsId: ${newTrans.id}`)
-            this.logger.debug(`insert tr error trsId: ${JSON.stringify(newTrans)}`)
-            return reject(new Error(`Insert tr fail ${e.toString()}`))
-          }
-          resolve(result)
-        }
-      })
-    })
+    const result = await this.dao.insert('tr', newTrans, dbTrans);
+    try {
+      await this._assets.call(trs.type, 'dbSave', trs, dbTrans)
+    } catch (e) {
+      this.logger.debug(`insert tr error trsId: ${newTrans.id}`)
+      this.logger.debug(`insert tr error trsId: ${JSON.stringify(newTrans)}`)
+      return reject(new Error(`Insert tr fail ${e.toString()}`))
+    }
+    return result;
   }
 
   async serializeDbData2Transaction (raw) {

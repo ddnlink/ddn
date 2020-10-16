@@ -65,14 +65,11 @@ class PeerBlockService {
     }
 
     return new Promise((resolve, reject) => {
-      this.sequence.add((cb) => {
-        this.dao.findOne('block', {
-          id: query.lastBlockId || null
-        }, ['height'], async (err, row) => {
-          if (err) {
-            return reject(err)
-          }
-
+      this.sequence.add(async (cb) => {
+        try {
+          const row = await this.dao.findOne('block', {
+            id: query.lastBlockId || null
+          }, ['height']);
           const where = {}
           if (query.id) {
             where.id = query.id
@@ -82,10 +79,11 @@ class PeerBlockService {
               $gt: row ? row.height : '0' // fixme 2020.8.13 height >= 1
             }
           }
-
           const data = await this.runtime.dataquery.queryFullBlockData(where, limit, 0, [['height', 'asc']])
           cb(null, { blocks: data })
-        })
+        } catch (e) {
+          reject(e)
+        }
       }, (err, result) => {
         if (err) {
           reject(err)

@@ -341,22 +341,15 @@ class Delegate {
       cause
     })
 
-    return new Promise((resolve, reject) => {
-      this.dao.insert('forks_stat', {
-        delegate_public_key: block.generator_public_key,
-        block_timestamp: block.timestamp,
-        block_id: block.id,
-        block_height: block.height,
-        previous_block: block.previous_block,
-        cause
-      }, (err, result) => {
-        if (err) {
-          reject(err)
-        } else {
-          resolve(result)
-        }
-      })
-    })
+    const result = await this.dao.insert('forks_stat', {
+      delegate_public_key: block.generator_public_key,
+      block_timestamp: block.timestamp,
+      block_id: block.id,
+      block_height: block.height,
+      previous_block: block.previous_block,
+      cause
+    });
+    return result;
   }
 }
 
