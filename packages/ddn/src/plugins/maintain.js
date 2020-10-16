@@ -169,7 +169,7 @@ function delegateStat () {
  * http://ip.taobao.com/
  * https://zhuanlan.zhihu.com/p/83765235
  * https://ip-api.com/docs/api:json
- * 
+ *
  */
 function ipStat () {
   const api = getApi()

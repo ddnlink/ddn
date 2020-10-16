@@ -132,23 +132,26 @@ class Consensus {
   }
 
   async normalizeVotes (votes) {
-    const validateErrors = await this.ddnSchema.validate({
-      type: 'object',
-      properties: {
-        height: {
-          type: 'string'
+    const validateErrors = await this.ddnSchema.validate(
+      {
+        type: 'object',
+        properties: {
+          height: {
+            type: 'string'
+          },
+          id: {
+            type: 'string'
+          },
+          signatures: {
+            type: 'array',
+            minLength: 1,
+            maxLength: this.constants.delegates
+          }
         },
-        id: {
-          type: 'string'
-        },
-        signatures: {
-          type: 'array',
-          minLength: 1,
-          maxLength: this.constants.delegates
-        }
+        required: ['height', 'id', 'signatures']
       },
-      required: ['height', 'id', 'signatures']
-    }, votes)
+      votes
+    )
     if (validateErrors) {
       this.logger.error(`Consensus.normalizeVotes: ${validateErrors[0].message}`)
       throw new Error(`Invalid parameters: ${validateErrors[0].schemaPath} ${validateErrors[0].message}`)
@@ -211,7 +214,7 @@ class Consensus {
    * @param {*} votes
    */
   hasEnoughVotes (votes) {
-    return votes && votes.signatures && (votes.signatures.length >= this.constants.voters)
+    return votes && votes.signatures && votes.signatures.length >= this.constants.voters
   }
 
   /**

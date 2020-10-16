@@ -158,7 +158,7 @@ export default {
     params: {}
   },
   settings: {
-    enableMoreLockTypes: true,
+    enableMoreLockTypes: true
   },
 
   /**

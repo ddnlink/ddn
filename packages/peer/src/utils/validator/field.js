@@ -1,4 +1,3 @@
-
 /**
  *
  * @param {Validator} validator Validator instance
@@ -23,13 +22,13 @@ class Field {
   }
 
   /**
-     * Create child field.
-     * @param {string} path Validation field path
-     * @param {*} value Validated value
-     * @param {object} rules Set of rules
-     * @param {*} thisArg Value used as this reference within rule callback calls.
-     * @returns {Validator.Field}
-     */
+   * Create child field.
+   * @param {string} path Validation field path
+   * @param {*} value Validated value
+   * @param {object} rules Set of rules
+   * @param {*} thisArg Value used as this reference within rule callback calls.
+   * @returns {Validator.Field}
+   */
   child (path, value, rules, thisArg) {
     const field = this.validator.createField(this.path.concat(path), value, rules, thisArg)
     field.report = this.report
@@ -37,9 +36,9 @@ class Field {
   }
 
   /**
-     * Validate field value and trigger callback on result
-     * @param callback
-     */
+   * Validate field value and trigger callback on result
+   * @param callback
+   */
   validate (callback) {
     const stack = this._stack
     // TODO copy value
@@ -121,9 +120,9 @@ class Field {
   }
 
   /**
-     * End validation. Drop validation stack.
-     * @param {Error} err Report and error if passed. Optional
-     */
+   * End validation. Drop validation stack.
+   * @param {Error} err Report and error if passed. Optional
+   */
   end (err) {
     this._stack = []
 
@@ -140,9 +139,9 @@ class Field {
   }
 
   /**
-     * Create validation async. Callback get done function to emit validation end.
-     * @param {function(done:function)} callback
-     */
+   * Create validation async. Callback get done function to emit validation end.
+   * @param {function(done:function)} callback
+   */
   async (callback) {
     this.isAsync = true
     const self = this
@@ -154,7 +153,7 @@ class Field {
       self.isAsync = false
 
       if (err) {
-        if (!err.hasOwnProperty('field')) {
+        if (!Object.prototype.hasOwnProperty.call(err, 'field')) {
           Object.defineProperty(err, 'field', {
             enumerable: false,
             value: self
@@ -169,9 +168,9 @@ class Field {
   }
 
   /**
-     * Report an invalid validation result
-     * @param {{}} report Validation report object
-     */
+   * Report an invalid validation result
+   * @param {{}} report Validation report object
+   */
   issue (report) {
     this.hasError = true
     report.path = this.path.concat(report.path)

@@ -39,7 +39,8 @@ class Delegate {
       throw new Error('Invalid transaction amount')
     }
 
-    if (is_delegate) { // wxm block database
+    if (is_delegate) {
+      // wxm block database
       throw new Error('Account is already a delegate')
     }
 
@@ -116,7 +117,7 @@ class Delegate {
     return await this.runtime.account.getAccountByAddress(address)
   }
 
-  async undo ({ id,asset },_, { address, nameexist }, dbTrans) {
+  async undo ({ id, asset }, _, { address, nameexist }, dbTrans) {
     const data = {
       address,
       u_is_delegate: 1, // wxm block database
@@ -130,7 +131,7 @@ class Delegate {
     }
 
     await this.runtime.account.setAccount(data, dbTrans)
-    await this.deleteDelegate(id,dbTrans)
+    await this.deleteDelegate(id, dbTrans)
     return await this.runtime.account.getAccountByAddress(address)
   }
 
@@ -140,16 +141,21 @@ class Delegate {
    * @param {*} transaction_id 交易id
    * @param {*} dbTrans 事物
    */
-  async deleteDelegate (transaction_id,dbTrans){
+  async deleteDelegate (transaction_id, dbTrans) {
     return new Promise((resolve, reject) => {
-      this.dao.remove("delegate", {
-        transaction_id,
-      }, dbTrans, (err) => {
-        if (err) {
-          return reject(err)
+      this.dao.remove(
+        'delegate',
+        {
+          transaction_id
+        },
+        dbTrans,
+        err => {
+          if (err) {
+            return reject(err)
+          }
+          resolve(true)
         }
-        resolve(true)
-      })
+      )
     })
   }
 
@@ -176,18 +182,23 @@ class Delegate {
   }
 
   async objectNormalize (trs) {
-    const validateErrors = await this.ddnSchema.validate({
-      type: 'object',
-      properties: {
-        publicKey: {
-          type: 'string',
-          format: 'publicKey'
-        }
+    const validateErrors = await this.ddnSchema.validate(
+      {
+        type: 'object',
+        properties: {
+          publicKey: {
+            type: 'string',
+            format: 'publicKey'
+          }
+        },
+        required: ['publicKey']
       },
-      required: ['publicKey']
-    }, trs.asset.delegate)
+      trs.asset.delegate
+    )
     if (validateErrors) {
-      throw new Error(`Can't verify delegate transaction, incorrect parameters: ${validateErrors[0].schemaPath} ${validateErrors[0].message}`)
+      throw new Error(
+        `Can't verify delegate transaction, incorrect parameters: ${validateErrors[0].schemaPath} ${validateErrors[0].message}`
+      )
     }
 
     return trs
@@ -209,20 +220,25 @@ class Delegate {
 
   // 替换dbSave方法 ---wly
   /**
-	 * 功能:新增一条delegate数据
-	*/
+   * 功能:新增一条delegate数据
+   */
   async dbSave ({ asset, id }, dbTrans) {
     return new Promise((resolve, reject) => {
-      this.dao.insert('delegate', {
-        username: asset.delegate.username,
-        transaction_id: id
-      }, dbTrans, (err, result) => {
-        if (err) {
-          reject(err)
-        } else {
-          resolve(result)
+      this.dao.insert(
+        'delegate',
+        {
+          username: asset.delegate.username,
+          transaction_id: id
+        },
+        dbTrans,
+        (err, result) => {
+          if (err) {
+            reject(err)
+          } else {
+            resolve(result)
+          }
         }
-      })
+      )
     })
   }
 

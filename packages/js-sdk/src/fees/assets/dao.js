@@ -1,9 +1,8 @@
-
 import DdnUtils from '@ddn/utils'
 import constants from '../../constants'
 
 export default {
-  daoOrg: async (asset) => {
+  daoOrg: async asset => {
     let feeBase = 1
 
     const org_id = asset.org_id
@@ -31,7 +30,7 @@ export default {
     return result
   },
 
-  daoConfirmation: async (asset) => {
+  daoConfirmation: async asset => {
     let feeBase = '1'
     if (asset.state === 0) {
       feeBase = '0' // 拒绝稿件时手续费为0
@@ -41,7 +40,7 @@ export default {
 
     return result
   },
-  daoContribution: async (asset) => {
+  daoContribution: async asset => {
     let feeBase = '1'
     if (asset.state === 0) {
       feeBase = '0' // 拒绝稿件时手续费为0

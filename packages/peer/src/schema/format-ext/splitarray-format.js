@@ -1,5 +1,4 @@
 export default {
-
   name: 'splitarray',
 
   validate (str) {
@@ -14,5 +13,4 @@ export default {
       return false
     }
   }
-
 }

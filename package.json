@@ -33,9 +33,10 @@
     "test:custom": "DDN_ENV=custom ./packages/test/bin/test.js",
     "test": "./packages/test/bin/test.js",
     "cm": "git-cz",
-    "lint": "eslint --fix --ext .js packages/**/src packages/**/test",
+    "lint": "eslint --ext .js packages/**/src",
+    "lint:fix": "eslint --fix --ext .js packages/**/src",
     "lint-staged": "lint-staged",
-    "lint-staged:js": "lint",
+    "lint-staged:js": "eslint --ext .js",
     "prettier": "prettier --write ./packages/**/src/**/**/* ./packages/**/test/**/**/*",
     "doc:dev": "DDN_ENV=docs dumi dev",
     "doc:build": "DDN_ENV=docs dumi build",
@@ -67,11 +68,13 @@
     "@typescript-eslint/parser": "^3.3.0",
     "conventional-changelog": "^3.1.21",
     "dumi": "^1.0.3",
-    "eslint": "^7.3.0",
+    "eslint": "^7.11.0",
     "eslint-config-airbnb-base": "^14.2.0",
+    "eslint-config-prettier": "^6.12.0",
     "eslint-config-standard": "^14.1.1",
     "eslint-plugin-import": "^2.21.2",
     "eslint-plugin-node": "^11.1.0",
+    "eslint-plugin-prettier": "^3.1.4",
     "eslint-plugin-promise": "^4.2.1",
     "eslint-plugin-standard": "^4.0.1",
     "father-build": "^1.18.1",
@@ -85,7 +88,7 @@
   },
   "husky": {
     "hooks": {
-      "pre-commit": "npm run lint-staged"
+      "pre-commit": ""
     }
   },
   "lint-staged": {
@@ -93,7 +96,7 @@
       "prettier --write",
       "git add"
     ],
-    "**/*.{js,jsx}": "npm run lint-staged:js"
+    "*.js": "eslint --fix --ext .js"
   },
   "publishConfig": {
     "access": "public"

@@ -19,11 +19,11 @@ class PeerBroadcast {
   }
 
   /**
-     * 向随机节点广播区块和交易数据
-     * @param {*} options 请求参数，包括url、method(get、post)等等
-     * @param {*} dappId 是否只广播某个dappId的节点
-     * @param {*} num 广播的节点个数，默认5个
-     */
+   * 向随机节点广播区块和交易数据
+   * @param {*} options 请求参数，包括url、method(get、post)等等
+   * @param {*} dappId 是否只广播某个dappId的节点
+   * @param {*} num 广播的节点个数，默认5个
+   */
   async broadcast (options, dappId, num = 5) {
     const broadcastPeers = []
 
@@ -41,8 +41,7 @@ class PeerBroadcast {
             break
           }
         }
-      } catch (err) {
-      }
+      } catch (err) {}
     }
 
     return {
@@ -52,10 +51,10 @@ class PeerBroadcast {
   }
 
   /**
-     * 将区块数据在节点间随机进行广播
-     * @param {*} block
-     * @param {*} votes
-     */
+   * 将区块数据在节点间随机进行广播
+   * @param {*} block
+   * @param {*} votes
+   */
   async broadcastNewBlock (block, votes) {
     const data = {
       block: this.protobuf.encodeBlock(block).toString('base64'),
@@ -75,9 +74,9 @@ class PeerBroadcast {
   }
 
   /**
-     * 将不足授权的新区块提议在节点间随机进行广播，进行确认
-     * @param {*} propose
-     */
+   * 将不足授权的新区块提议在节点间随机进行广播，进行确认
+   * @param {*} propose
+   */
   async broadcastNewPropose (propose) {
     const data = {
       propose: this.protobuf.encodeBlockPropose(propose).toString('base64')

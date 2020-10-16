@@ -4,9 +4,7 @@ module.exports = {
   command: 'blockchain <name>',
   aliases: 'b',
   desc: 'Generate new blockchain.',
-  builder: {
-
-  },
+  builder: {},
 
   handler: function (argv) {
     generateBlockchain(argv.name)

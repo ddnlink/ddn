@@ -11,10 +11,10 @@ class RoundChanges {
 
     if (!back) {
       this._roundFees = this.runtime.round._feesByRound[round] || 0
-      this._roundRewards = (this.runtime.round._rewardsByRound[round] || [])
+      this._roundRewards = this.runtime.round._rewardsByRound[round] || []
     } else {
       this._roundFees = this.runtime.round._unFeesByRound[round] || 0
-      this._roundRewards = (this.runtime.round._unRewardsByRound[round] || [])
+      this._roundRewards = this.runtime.round._unRewardsByRound[round] || []
     }
 
     this._CLUB_BONUS_RATIO = context.constants.net.rewardRatio
@@ -38,11 +38,20 @@ class RoundChanges {
   }
 
   getClubBonus () {
-    const fees = bignum.minus(this._roundFees, bignum.floor(bignum.multiply(this._roundFees, bignum.minus(1, this._CLUB_BONUS_RATIO))))
+    const fees = bignum.minus(
+      this._roundFees,
+      bignum.floor(bignum.multiply(this._roundFees, bignum.minus(1, this._CLUB_BONUS_RATIO)))
+    )
 
     let rewards = bignum.new(0)
     for (let i = 0; i < this._roundRewards.length; ++i) {
-      rewards = bignum.plus(rewards, bignum.minus(this._roundRewards[i], bignum.floor(bignum.multiply(this._roundRewards[i], bignum.minus(1, this._CLUB_BONUS_RATIO)))))
+      rewards = bignum.plus(
+        rewards,
+        bignum.minus(
+          this._roundRewards[i],
+          bignum.floor(bignum.multiply(this._roundRewards[i], bignum.minus(1, this._CLUB_BONUS_RATIO)))
+        )
+      )
     }
 
     return {

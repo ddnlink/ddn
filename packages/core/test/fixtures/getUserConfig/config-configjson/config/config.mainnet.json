@@ -1,5 +1,4 @@
-
 {
-    "port": 6000,
-    "net": "mainnet"
+  "port": 6000,
+  "net": "mainnet"
 }

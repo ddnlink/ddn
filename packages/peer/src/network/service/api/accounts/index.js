@@ -12,16 +12,19 @@ class AccountService {
 
   async get (req) {
     const query = Object.assign({}, req.body, req.query)
-    const validateErrors = await this.ddnSchema.validate({
-      type: 'object',
-      properties: {
-        address: {
-          type: 'string',
-          minLength: 1
-        }
+    const validateErrors = await this.ddnSchema.validate(
+      {
+        type: 'object',
+        properties: {
+          address: {
+            type: 'string',
+            minLength: 1
+          }
+        },
+        required: ['address']
       },
-      required: ['address']
-    }, query)
+      query
+    )
     if (validateErrors) {
       throw new Error(`Invalid parameters: ${validateErrors[0].schemaPath} ${validateErrors[0].message}`)
     }
@@ -69,17 +72,20 @@ class AccountService {
 
   async getGetBalance (req) {
     const query = Object.assign({}, req.body, req.query)
-    const validateErrors = await this.ddnSchema.validate({
-      type: 'object',
-      properties: {
-        address: {
-          type: 'string',
-          minLength: 1,
-          maxLength: 50
-        }
+    const validateErrors = await this.ddnSchema.validate(
+      {
+        type: 'object',
+        properties: {
+          address: {
+            type: 'string',
+            minLength: 1,
+            maxLength: 50
+          }
+        },
+        required: ['address']
       },
-      required: ['address']
-    }, query)
+      query
+    )
     if (validateErrors) {
       throw new Error(`Invalid parameters: ${validateErrors[0].schemaPath} ${validateErrors[0].message}`)
     }
@@ -96,16 +102,19 @@ class AccountService {
 
   async getGetPublicKey (req) {
     const query = Object.assign({}, req.body, req.query)
-    const validateErrors = await this.ddnSchema.validate({
-      type: 'object',
-      properties: {
-        address: {
-          type: 'string',
-          minLength: 1
-        }
+    const validateErrors = await this.ddnSchema.validate(
+      {
+        type: 'object',
+        properties: {
+          address: {
+            type: 'string',
+            minLength: 1
+          }
+        },
+        required: ['address']
       },
-      required: ['address']
-    }, query)
+      query
+    )
     if (validateErrors) {
       throw new Error(`Invalid parameters: ${validateErrors[0].schemaPath} ${validateErrors[0].message}`)
     }
@@ -119,16 +128,19 @@ class AccountService {
 
   async postGeneratePublicKey (req) {
     const body = req.body
-    const validateErrors = await this.ddnSchema.validate({
-      type: 'object',
-      properties: {
-        secret: {
-          type: 'string',
-          minLength: 1
-        }
+    const validateErrors = await this.ddnSchema.validate(
+      {
+        type: 'object',
+        properties: {
+          secret: {
+            type: 'string',
+            minLength: 1
+          }
+        },
+        required: ['secret']
       },
-      required: ['secret']
-    }, body)
+      body
+    )
     if (validateErrors) {
       throw new Error(`Invalid parameters: ${validateErrors[0].schemaPath} ${validateErrors[0].message}`)
     }
@@ -192,31 +204,33 @@ class AccountService {
 
   async getCount (req) {
     const count = await new Promise((resolve, reject) => {
-      this.dao.count('mem_account', null,
-        (err, count) => {
-          if (err) {
-            reject(err || 'Database error')
-          } else {
-            resolve(count)
-          }
-        })
+      this.dao.count('mem_account', null, (err, count) => {
+        if (err) {
+          reject(err || 'Database error')
+        } else {
+          resolve(count)
+        }
+      })
     })
     return { success: true, count }
   }
 
   async postOpen (req) {
     const body = req.body
-    const validateErrors = await this.ddnSchema.validate({
-      type: 'object',
-      properties: {
-        secret: {
-          type: 'string',
-          minLength: 1,
-          maxLength: 100
-        }
+    const validateErrors = await this.ddnSchema.validate(
+      {
+        type: 'object',
+        properties: {
+          secret: {
+            type: 'string',
+            minLength: 1,
+            maxLength: 100
+          }
+        },
+        required: ['secret']
       },
-      required: ['secret']
-    }, body)
+      body
+    )
     if (validateErrors) {
       throw new Error(`Invalid parameters: ${validateErrors[0].schemaPath} ${validateErrors[0].message}`)
     }
@@ -259,16 +273,19 @@ class AccountService {
 
   async postOpen2 (req) {
     const body = req.body
-    const validateErrors = await this.ddnSchema.validate({
-      type: 'object',
-      properties: {
-        publicKey: {
-          type: 'string',
-          format: 'publicKey'
-        }
+    const validateErrors = await this.ddnSchema.validate(
+      {
+        type: 'object',
+        properties: {
+          publicKey: {
+            type: 'string',
+            format: 'publicKey'
+          }
+        },
+        required: ['publicKey']
       },
-      required: ['publicKey']
-    }, body)
+      body
+    )
     if (validateErrors) {
       throw new Error(`Invalid parameters: ${validateErrors[0].schemaPath} ${validateErrors[0].message}`)
     }

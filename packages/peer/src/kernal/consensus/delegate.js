@@ -26,8 +26,8 @@ class Delegate {
   }
 
   /**
-     * 当前节点是否允许区块铸造
-     */
+   * 当前节点是否允许区块铸造
+   */
   isForgeEnabled () {
     return this._forgingEanbled
   }
@@ -47,8 +47,8 @@ class Delegate {
   }
 
   /**
-     * 判断当前节点是否配置有有效受托人信息
-     */
+   * 判断当前节点是否配置有有效受托人信息
+   */
   hasValidDelegates () {
     return this._myDelegateNum > 0
   }
@@ -86,7 +86,8 @@ class Delegate {
     }
 
     const accounts = await this.runtime.account.getAccountList({
-      publicKey: { // wxm block database
+      publicKey: {
+        // wxm block database
         $in: delegatePublicKeys
       },
       limit: delegatePublicKeys.length
@@ -139,7 +140,7 @@ class Delegate {
           throw new Error('Invalid public key')
         }
 
-        if (math === '+' && (account.delegates !== null && account.delegates.includes(publicKey2))) {
+        if (math === '+' && account.delegates !== null && account.delegates.includes(publicKey2)) {
           throw new Error('Failed to add vote, account has already voted for this delegate')
         }
         if (math === '-' && (account.delegates === null || !account.delegates.includes(publicKey2))) {
@@ -155,7 +156,7 @@ class Delegate {
         }
       }
 
-      const total_votes = (existing_votes + additions) - removals
+      const total_votes = existing_votes + additions - removals
       if (total_votes > this.constants.delegates) {
         const exceeded = total_votes - this.constants.delegates
         throw new Error(`Maximum number ${this.constants.delegates} votes exceeded (${exceeded} too many).`)
@@ -171,10 +172,16 @@ class Delegate {
       throw new Error('Missing query argument')
     }
 
-    const delegates = await this.runtime.account.getAccountList({
-      is_delegate: 1, // wxm block database
-      sort: [['vote', 'DESC'], ['publicKey', 'ASC']] // wxm block database
-    }, ['username', 'address', 'publicKey', 'vote', 'missedblocks', 'producedblocks', 'fees', 'rewards', 'balance'])
+    const delegates = await this.runtime.account.getAccountList(
+      {
+        is_delegate: 1, // wxm block database
+        sort: [
+          ['vote', 'DESC'],
+          ['publicKey', 'ASC']
+        ] // wxm block database
+      },
+      ['username', 'address', 'publicKey', 'vote', 'missedblocks', 'producedblocks', 'fees', 'rewards', 'balance']
+    )
 
     let limit = query.limit || this.constants.delegates
     const offset = query.offset || 0
@@ -198,11 +205,11 @@ class Delegate {
       delegates[i].approval = bignum.divide(delegates[i].vote, totalSupply).toNumber()
       delegates[i].approval = Math.round(delegates[i].approval * 1e2)
 
-      let percent = 100 - (delegates[i].missedblocks / ((delegates[i].producedblocks + delegates[i].missedblocks) / 100))
+      let percent = 100 - delegates[i].missedblocks / ((delegates[i].producedblocks + delegates[i].missedblocks) / 100)
       percent = Math.abs(percent) || 0
 
       const outsider = i + 1 > this.constants.delegates
-      delegates[i].productivity = (!outsider) ? Math.round(percent * 1e2) / 1e2 : 0
+      delegates[i].productivity = !outsider ? Math.round(percent * 1e2) / 1e2 : 0
 
       delegates[i].forged = bignum.plus(delegates[i].fees, delegates[i].rewards).toString()
     }
@@ -218,15 +225,21 @@ class Delegate {
   }
 
   /**
-     * 返回所有受托人的public_key列表
-     */
+   * 返回所有受托人的public_key列表
+   */
   async getDelegatePublickKeysSortByVote () {
-    const delegates = await this.runtime.account.getAccountList({
-      is_delegate: 1, // wxm block database
-      // sort: {"vote": -1, "publicKey": 1},
-      sort: [['vote', 'DESC'], ['publicKey', 'ASC']], // wxm block database
-      limit: this.constants.delegates
-    }, ['publicKey', 'vote'])
+    const delegates = await this.runtime.account.getAccountList(
+      {
+        is_delegate: 1, // wxm block database
+        // sort: {"vote": -1, "publicKey": 1},
+        sort: [
+          ['vote', 'DESC'],
+          ['publicKey', 'ASC']
+        ], // wxm block database
+        limit: this.constants.delegates
+      },
+      ['publicKey', 'vote']
+    )
 
     if (!delegates || !delegates.length) {
       throw new Error('No active delegates found')
@@ -236,8 +249,8 @@ class Delegate {
   }
 
   /**
-     * 返回乱序处理的受托人public_key列表
-     */
+   * 返回乱序处理的受托人public_key列表
+   */
   async getDisorderDelegatePublicKeys (height) {
     let truncDelegateList
     try {
@@ -265,9 +278,9 @@ class Delegate {
   }
 
   /**
-     * 返回当前所有受托人列表中 在本地节点配置中 存在的私钥信息
-     * @param {*} height
-     */
+   * 返回当前所有受托人列表中 在本地节点配置中 存在的私钥信息
+   * @param {*} height
+   */
   async getActiveDelegateKeypairs (height) {
     const delegates = await this.getDisorderDelegatePublicKeys(height)
 
@@ -281,10 +294,10 @@ class Delegate {
   }
 
   /**
-     * 返回当前时间当前节点接下来可以进行铸造区块的受托人信息和时间戳
-     * @param {*} curSlot
-     * @param {*} height
-     */
+   * 返回当前时间当前节点接下来可以进行铸造区块的受托人信息和时间戳
+   * @param {*} curSlot
+   * @param {*} height
+   */
   async getForgeDelegateWithCurrentTime (curSlot, height) {
     const activeDelegates = await this.getDisorderDelegatePublicKeys(height)
 
@@ -311,7 +324,9 @@ class Delegate {
     if (delegateKey && generator_public_key === delegateKey) {
       return
     }
-    throw new Error(`Failed to verify slot, expected delegate: ${generator_public_key}, gotten delegate: ${delegateKey}`)
+    throw new Error(
+      `Failed to verify slot, expected delegate: ${generator_public_key}, gotten delegate: ${delegateKey}`
+    )
   }
 
   async validateProposeSlot ({ height, timestamp, generator_public_key }) {
@@ -325,10 +340,10 @@ class Delegate {
   }
 
   /**
-     * 该方法向forks_stats插入数据，但未在其他地方用该表数据
-     * @param {*} block
-     * @param {*} cause 原因，1~5
-     */
+   * 该方法向forks_stats插入数据，但未在其他地方用该表数据
+   * @param {*} block
+   * @param {*} cause 原因，1~5
+   */
   async fork (block, cause) {
     this.logger.info('Fork', {
       delegate: block.generator_public_key,
@@ -342,20 +357,24 @@ class Delegate {
     })
 
     return new Promise((resolve, reject) => {
-      this.dao.insert('forks_stat', {
-        delegate_public_key: block.generator_public_key,
-        block_timestamp: block.timestamp,
-        block_id: block.id,
-        block_height: block.height,
-        previous_block: block.previous_block,
-        cause
-      }, (err, result) => {
-        if (err) {
-          reject(err)
-        } else {
-          resolve(result)
+      this.dao.insert(
+        'forks_stat',
+        {
+          delegate_public_key: block.generator_public_key,
+          block_timestamp: block.timestamp,
+          block_id: block.id,
+          block_height: block.height,
+          previous_block: block.previous_block,
+          cause
+        },
+        (err, result) => {
+          if (err) {
+            reject(err)
+          } else {
+            resolve(result)
+          }
         }
-      })
+      )
     })
   }
 }

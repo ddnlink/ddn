@@ -60,17 +60,23 @@ class Lock {
   }
 
   async apply ({ args }, block, { address }, dbTrans) {
-    await this.runtime.account.setAccount({
-      address,
-      lock_height: args[0] // bignum update Number(trs.args[0])
-    }, dbTrans)
+    await this.runtime.account.setAccount(
+      {
+        address,
+        lock_height: args[0] // bignum update Number(trs.args[0])
+      },
+      dbTrans
+    )
   }
 
   async undo (trs, block, { address }, dbTrans) {
-    await this.runtime.account.setAccount({
-      address,
-      lock_height: 0
-    }, dbTrans)
+    await this.runtime.account.setAccount(
+      {
+        address,
+        lock_height: 0
+      },
+      dbTrans
+    )
 
     // self.library.base.account.set(sender.address, { lock_height: 0 }, dbTrans, cb);
   }
@@ -96,8 +102,7 @@ class Lock {
     return null
   }
 
-  async dbSave (trs, dbTrans) {
-  }
+  async dbSave (trs, dbTrans) {}
 
   async ready ({ signatures }, { multisignatures, multimin }) {
     if (multisignatures.length) {

@@ -13,16 +13,19 @@ class ForgingRouter {
 
   async getGetForgedByAccount (req) {
     const query = Object.assign({}, req.body, req.query)
-    const validateErrors = await this.ddnSchema.validate({
-      type: 'object',
-      properties: {
-        generatorPublicKey: {
-          type: 'string',
-          format: 'publicKey'
-        }
+    const validateErrors = await this.ddnSchema.validate(
+      {
+        type: 'object',
+        properties: {
+          generatorPublicKey: {
+            type: 'string',
+            format: 'publicKey'
+          }
+        },
+        required: ['generatorPublicKey']
       },
-      required: ['generatorPublicKey']
-    }, query)
+      query
+    )
     if (validateErrors) {
       throw new Error(`Invalid parameters: ${validateErrors[0].schemaPath} ${validateErrors[0].message}`)
     }
@@ -42,28 +45,30 @@ class ForgingRouter {
 
   async postEnable (req) {
     const body = req.body
-    const validateErrors = await this.ddnSchema.validate({
-      type: 'object',
-      properties: {
-        secret: {
-          type: 'string',
-          minLength: 1,
-          maxLength: 100
+    const validateErrors = await this.ddnSchema.validate(
+      {
+        type: 'object',
+        properties: {
+          secret: {
+            type: 'string',
+            minLength: 1,
+            maxLength: 100
+          },
+          publicKey: {
+            type: 'string',
+            format: 'publicKey'
+          }
         },
-        publicKey: {
-          type: 'string',
-          format: 'publicKey'
-        }
+        required: ['secret']
       },
-      required: ['secret']
-    }, body)
+      body
+    )
     if (validateErrors) {
       return { success: false, error: validateErrors[0].message }
     }
 
     const ip = req.connection.remoteAddress
-    if (this.config.forging.access.whiteList.length > 0 &&
-            !this.config.forging.access.whiteList.includes(ip)) {
+    if (this.config.forging.access.whiteList.length > 0 && !this.config.forging.access.whiteList.includes(ip)) {
       return { success: false, error: 'Access denied' }
     }
 
@@ -87,7 +92,8 @@ class ForgingRouter {
       return { success: false, error: err.toString() }
     }
 
-    if (account && account.is_delegate) { // wxm block database
+    if (account && account.is_delegate) {
+      // wxm block database
       await this.runtime.delegate.enableForged(keypair)
       this.logger.info(`Forging enabled on account: ${account.address}`)
       return { success: true, address: account.address }
@@ -98,28 +104,30 @@ class ForgingRouter {
 
   async postDisable (req) {
     const body = req.body
-    const validateErrors = await this.ddnSchema.validate({
-      type: 'object',
-      properties: {
-        secret: {
-          type: 'string',
-          minLength: 1,
-          maxLength: 100
+    const validateErrors = await this.ddnSchema.validate(
+      {
+        type: 'object',
+        properties: {
+          secret: {
+            type: 'string',
+            minLength: 1,
+            maxLength: 100
+          },
+          publicKey: {
+            type: 'string',
+            format: 'publicKey'
+          }
         },
-        publicKey: {
-          type: 'string',
-          format: 'publicKey'
-        }
+        required: ['secret']
       },
-      required: ['secret']
-    }, body)
+      body
+    )
     if (validateErrors) {
       return { success: false, error: validateErrors[0].message }
     }
 
     const ip = req.connection.remoteAddress
-    if (this.config.forging.access.whiteList.length > 0 &&
-            !this.config.forging.access.whiteList.includes(ip)) {
+    if (this.config.forging.access.whiteList.length > 0 && !this.config.forging.access.whiteList.includes(ip)) {
       return { success: false, error: 'Access denied' }
     }
 
@@ -142,7 +150,8 @@ class ForgingRouter {
       return { success: false, error: err.toString() }
     }
 
-    if (account && account.is_delegate) { // wxm block database
+    if (account && account.is_delegate) {
+      // wxm block database
       await this.runtime.delegate.disableForgedByPublicKey(keypair.publicKey)
       this.logger.info(`Forging disabled on account: ${account.address}`)
       return { success: true, address: account.address }
@@ -153,16 +162,19 @@ class ForgingRouter {
 
   async getStatus (req) {
     const query = req.query
-    const validateErrors = await this.ddnSchema.validate({
-      type: 'object',
-      properties: {
-        publicKey: {
-          type: 'string',
-          format: 'publicKey'
-        }
+    const validateErrors = await this.ddnSchema.validate(
+      {
+        type: 'object',
+        properties: {
+          publicKey: {
+            type: 'string',
+            format: 'publicKey'
+          }
+        },
+        required: ['publicKey']
       },
-      required: ['publicKey']
-    }, query)
+      query
+    )
     if (validateErrors) {
       return { success: false, error: validateErrors[0].message }
     }

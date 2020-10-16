@@ -4,9 +4,7 @@ module.exports = {
   command: 'contract <name>',
   aliases: 'c',
   desc: 'Generate new contract.',
-  builder: {
-
-  },
+  builder: {},
 
   handler: function (argv) {
     generateContract(argv.name)

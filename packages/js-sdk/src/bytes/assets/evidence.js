@@ -1,7 +1,7 @@
 import ByteBuffer from 'bytebuffer'
 
 export default {
-  evidence: async (asset) => {
+  evidence: async asset => {
     const bb = new ByteBuffer(1, true)
     bb.writeString(asset.ipid)
     bb.writeString(asset.title)

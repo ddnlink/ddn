@@ -10,18 +10,21 @@ class RootRouter {
 
   async get (req) {
     const query = Object.assign({}, req.body, req.query)
-    const validateErrors = await this.ddnSchema.validate({
-      type: 'object',
-      properties: {
-        senderPublicKey: {
-          type: 'string',
-          format: 'publicKey'
-        },
-        address: {
-          type: 'string'
+    const validateErrors = await this.ddnSchema.validate(
+      {
+        type: 'object',
+        properties: {
+          senderPublicKey: {
+            type: 'string',
+            format: 'publicKey'
+          },
+          address: {
+            type: 'string'
+          }
         }
-      }
-    }, query)
+      },
+      query
+    )
     if (validateErrors) {
       throw new Error(`Invalid parameters: ${validateErrors[0].schemaPath} ${validateErrors[0].message}`)
     }
@@ -30,8 +33,11 @@ class RootRouter {
     if (query.senderPublicKey || query.address) {
       const result = []
       for (let i = 0; i < transactions.length; i++) {
-        if (transactions[i].senderPublicKey === query.senderPublicKey ||
-                    transactions[i].recipientId === query.address) { // wxm block database
+        if (
+          transactions[i].senderPublicKey === query.senderPublicKey ||
+          transactions[i].recipientId === query.address
+        ) {
+          // wxm block database
           result.push(transactions[i])
         }
       }
@@ -44,17 +50,20 @@ class RootRouter {
 
   async getGet (req) {
     const query = Object.assign({}, req.body, req.query)
-    const validateErrors = await this.ddnSchema.validate({
-      type: 'object',
-      properties: {
-        id: {
-          type: 'string',
-          minLength: 1,
-          maxLength: 128
-        }
+    const validateErrors = await this.ddnSchema.validate(
+      {
+        type: 'object',
+        properties: {
+          id: {
+            type: 'string',
+            minLength: 1,
+            maxLength: 128
+          }
+        },
+        required: ['id']
       },
-      required: ['id']
-    }, query)
+      query
+    )
     if (validateErrors) {
       throw new Error(`Invalid parameters: ${validateErrors[0].schemaPath} ${validateErrors[0].message}`)
     }

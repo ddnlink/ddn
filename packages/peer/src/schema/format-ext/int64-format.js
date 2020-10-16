@@ -1,5 +1,4 @@
 export default {
-
   name: 'int64',
 
   // FIXME: value?
@@ -7,5 +6,4 @@ export default {
     console.log('int64 haha......................')
     return false
   }
-
 }

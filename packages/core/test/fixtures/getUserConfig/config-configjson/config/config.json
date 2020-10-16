@@ -1,13 +1,13 @@
 {
-    "port": 8001,
-    "address": "127.0.0.1",
-    "publicIp": "",
-    "logLevel": "info",
-    "net": "testnet",
-    "nethash": "0ab796cd",
-    "api": {
-        "access": {
-        "whiteList": []
-        }
+  "port": 8001,
+  "address": "127.0.0.1",
+  "publicIp": "",
+  "logLevel": "info",
+  "net": "testnet",
+  "nethash": "0ab796cd",
+  "api": {
+    "access": {
+      "whiteList": []
     }
+  }
 }

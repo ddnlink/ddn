@@ -5,7 +5,7 @@ module.exports = {
   foundAddress: 'DLjrrVwnmMXstcAYVjcrpwyYb3kY1ehABU', // Please protect its private key
   walletUrl: 'http://wallet.ddn.link',
   enableMoreLockTypes: true,
-  
+
   interval: 10, // 10ms
   delegates: 101, // number
   maxAmount: 100000000,

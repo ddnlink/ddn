@@ -19,9 +19,9 @@ class Router {
   }
 
   /**
-     * 为指定的资产插件生成API路由
+   * 为指定的资产插件生成API路由
      * @param {*} assetConfig
-     * @param {*} assetInst
+   * @param {*} assetInst
      */
   async attachAssetPluginApi (assetConfig, assetInst) {
     if (assetConfig && assetInst) {
@@ -30,7 +30,7 @@ class Router {
 
       const router = express.Router()
       // Asset attachApi firstly
-      if (typeof (assetInst.attachApi) === 'function') {
+      if (typeof assetInst.attachApi === 'function') {
         await assetInst.attachApi(router)
       }
 

@@ -1,4 +1,3 @@
-
 import pluralize from 'pluralize'
 import _ from 'lodash'
 

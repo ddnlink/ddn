@@ -181,10 +181,7 @@ class Peer {
       let needUpdateToDB = true
       if (this._peerUpdateTimes.length >= 0) {
         if (this._peerUpdateTimes[peerKey]) {
-          if (
-            new Date().getTime() - this._peerUpdateTimes[peerKey] >
-            1000 * 29
-          ) {
+          if (new Date().getTime() - this._peerUpdateTimes[peerKey] > 1000 * 29) {
             needUpdateToDB = true
           } else {
             needUpdateToDB = false
@@ -211,27 +208,22 @@ class Peer {
                   delete peerData.state
                 }
 
-                this.dao.insertOrUpdate(
-                  'peer',
-                  peerData,
-                  null,
-                  async (err2, data2) => {
-                    if (!err2) {
-                      if (dappId) {
-                        await this.addDapp({
-                          dappId,
-                          ip: peer.ip,
-                          port: peer.port
-                        })
-                      } else {
-                        this._peerUpdateTimes[peerKey] = new Date().getTime()
-                      }
+                this.dao.insertOrUpdate('peer', peerData, null, async (err2, data2) => {
+                  if (!err2) {
+                    if (dappId) {
+                      await this.addDapp({
+                        dappId,
+                        ip: peer.ip,
+                        port: peer.port
+                      })
+                    } else {
+                      this._peerUpdateTimes[peerKey] = new Date().getTime()
                     }
-
-                    this._peerUpdatings[peerKey] = false
-                    resolve()
                   }
-                )
+
+                  this._peerUpdatings[peerKey] = false
+                  resolve()
+                })
               } else {
                 this._peerUpdatings[peerKey] = false
                 resolve()
@@ -250,11 +242,7 @@ class Peer {
    * @param {*} allowSelf
    */
   async request (args, dappId, allowSelf) {
-    return await PeerInvoker.singleton(this._context).invoke(
-      args,
-      dappId,
-      allowSelf
-    )
+    return await PeerInvoker.singleton(this._context).invoke(args, dappId, allowSelf)
   }
 
   /**
@@ -278,9 +266,7 @@ class Peer {
         const peer = peers[i]
         const validateErrors = await this.ddnSchema.validatePeer(peer)
         if (validateErrors) {
-          this.logger.error(
-            `Invalid peer: ${validateErrors[0].schemaPath} ${validateErrors[0].message}`
-          )
+          this.logger.error(`Invalid peer: ${validateErrors[0].schemaPath} ${validateErrors[0].message}`)
           continue
         }
 
@@ -290,11 +276,7 @@ class Peer {
           continue
         }
 
-        if (
-          ip.toLong('127.0.0.1') === peer.ip ||
-          peer.port === 0 ||
-          peer.port > 65535
-        ) {
+        if (ip.toLong('127.0.0.1') === peer.ip || peer.port === 0 || peer.port > 65535) {
           continue
         }
 
@@ -320,9 +302,7 @@ class Peer {
    * 从随机节点同步未确认交易
    */
   async syncUnconfirmedTransactions () {
-    return await PeerSync.singleton(
-      this._context
-    ).trySyncUnconfirmedTransactions()
+    return await PeerSync.singleton(this._context).trySyncUnconfirmedTransactions()
   }
 
   async isCompatible (version) {
@@ -345,9 +325,7 @@ class Peer {
   }
 
   async remove (pip, port) {
-    const isStaticPeer = this.config.peers.list.find(
-      peer => peer.ip === ip.fromLong(pip) && peer.port === port
-    )
+    const isStaticPeer = this.config.peers.list.find(peer => peer.ip === ip.fromLong(pip) && peer.port === port)
     if (isStaticPeer) {
       this.logger.info("Peer in white list, can't remove.")
     } else {
@@ -375,19 +353,14 @@ class Peer {
    */
   async restoreBanState () {
     return await new Promise(resolve => {
-      this.dao.update(
-        'peer',
-        { state: 1, clock: null },
-        { state: 0, clock: { $lt: Date.now() } },
-        (err, result) => {
-          if (err) {
-            // resolve(false)
-            resolve(false)
-          } else {
-            resolve(true)
-          }
+      this.dao.update('peer', { state: 1, clock: null }, { state: 0, clock: { $lt: Date.now() } }, (err, result) => {
+        if (err) {
+          // resolve(false)
+          resolve(false)
+        } else {
+          resolve(true)
         }
-      )
+      })
     })
   }
 
@@ -414,19 +387,14 @@ class Peer {
 
     return new Promise((resolve, reject) => {
       this.logger.debug('Peer is changeState: clock', clock)
-      this.dao.update(
-        'peer',
-        { state, clock },
-        { ip: pip, port },
-        (err, result) => {
-          if (err) {
-            this.logger.error('Peer#state', err)
-            reject(err)
-          } else {
-            resolve(result)
-          }
+      this.dao.update('peer', { state, clock }, { ip: pip, port }, (err, result) => {
+        if (err) {
+          this.logger.error('Peer#state', err)
+          reject(err)
+        } else {
+          resolve(result)
         }
-      )
+      })
     })
     // }
   }
@@ -452,11 +420,7 @@ class Peer {
     if (peers && peers.length) {
       const peer = peers[0]
       const peerIp = ip.fromLong(peer.ip)
-      if (
-        (peerIp === '127.0.0.1' || peerIp === this.config.publicIp) &&
-        peer.port === this.config.port &&
-        !allowSelf
-      ) {
+      if ((peerIp === '127.0.0.1' || peerIp === this.config.publicIp) && peer.port === this.config.port && !allowSelf) {
         if (peers.length > 1) {
           return peers[1]
         } else {

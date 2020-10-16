@@ -83,9 +83,7 @@ class TransactionService {
       query
     )
     if (validateErrors) {
-      throw new Error(
-        `Invalid parameters: ${validateErrors[0].schemaPath} ${validateErrors[0].message}`
-      )
+      throw new Error(`Invalid parameters: ${validateErrors[0].schemaPath} ${validateErrors[0].message}`)
     }
 
     const where = {}
@@ -166,7 +164,19 @@ class TransactionService {
     const limit = query.limit || 100
     const offset = query.offset || 0
 
-    const sortFields = ['t_id', 't_block_id', 't_amount', 't_fee', 't_type', 't_timestamp', 't_senderPublicKey', 't_senderId', 't_recipientId', 't_confirmations', 'b_height']
+    const sortFields = [
+      't_id',
+      't_block_id',
+      't_amount',
+      't_fee',
+      't_type',
+      't_timestamp',
+      't_senderPublicKey',
+      't_senderId',
+      't_recipientId',
+      't_confirmations',
+      'b_height'
+    ]
 
     let sort
     let sortBy
@@ -192,20 +202,12 @@ class TransactionService {
     // https://github.com/sequelize/sequelize/issues/7897
     const orders = sortBy ? [[this.dao.db_str(sortBy), sortMethod]] : null
 
-    const data = await this.runtime.dataquery.queryFullTransactionData(
-      where,
-      limit,
-      offset,
-      orders,
-      true
-    )
+    const data = await this.runtime.dataquery.queryFullTransactionData(where, limit, offset, orders, true)
 
     const transactions = []
     for (let i = 0; i < data.transactions.length; i++) {
       const row = data.transactions[i]
-      const trs = await this.runtime.transaction.serializeDbData2Transaction(
-        row
-      )
+      const trs = await this.runtime.transaction.serializeDbData2Transaction(row)
       transactions.push(trs)
     }
 
@@ -232,9 +234,7 @@ class TransactionService {
       query
     )
     if (validateErrors) {
-      throw new Error(
-        `Invalid parameters: ${validateErrors[0].schemaPath} ${validateErrors[0].message}`
-      )
+      throw new Error(`Invalid parameters: ${validateErrors[0].schemaPath} ${validateErrors[0].message}`)
     }
 
     const rows = await this.runtime.dataquery.queryFullTransactionData(
@@ -249,9 +249,7 @@ class TransactionService {
       const result = []
       for (let i = 0; i < rows.length; i++) {
         const row = rows[i]
-        const trs = await this.runtime.transaction.serializeDbData2Transaction(
-          row
-        )
+        const trs = await this.runtime.transaction.serializeDbData2Transaction(row)
         result.push(trs)
       }
 
@@ -305,9 +303,7 @@ class TransactionService {
       body
     )
     if (validateErrors) {
-      throw new Error(
-        `Invalid parameters: ${validateErrors[0].schemaPath} ${validateErrors[0].message}`
-      )
+      throw new Error(`Invalid parameters: ${validateErrors[0].schemaPath} ${validateErrors[0].message}`)
     }
 
     const keypair = DdnCrypto.getKeys(body.secret)
@@ -322,9 +318,7 @@ class TransactionService {
         async cb => {
           let recipient
           try {
-            recipient = await this.runtime.account.getAccountByAddress(
-              body.recipientId
-            )
+            recipient = await this.runtime.account.getAccountByAddress(body.recipientId)
           } catch (err) {
             return cb(err)
           }
@@ -334,15 +328,10 @@ class TransactionService {
             return cb('Recipient not found')
           }
 
-          if (
-            body.multisigAccountPublicKey &&
-            body.multisigAccountPublicKey !== keypair.publicKey.toString('hex')
-          ) {
+          if (body.multisigAccountPublicKey && body.multisigAccountPublicKey !== keypair.publicKey.toString('hex')) {
             let account
             try {
-              account = await this.runtime.account.getAccountByPublicKey(
-                body.multisigAccountPublicKey
-              )
+              account = await this.runtime.account.getAccountByPublicKey(body.multisigAccountPublicKey)
             } catch (err) {
               return cb(err)
             }
@@ -355,19 +344,13 @@ class TransactionService {
               return cb('Account does not have multisignatures enabled')
             }
 
-            if (
-              !account.multisignatures.includes(
-                keypair.publicKey.toString('hex')
-              )
-            ) {
+            if (!account.multisignatures.includes(keypair.publicKey.toString('hex'))) {
               return cb('Account does not belong to multisignature group')
             }
 
             let requester
             try {
-              requester = await this.runtime.account.getAccountByPublicKey(
-                keypair.publicKey
-              )
+              requester = await this.runtime.account.getAccountByPublicKey(keypair.publicKey)
             } catch (err) {
               return cb(err)
             }
@@ -392,10 +375,7 @@ class TransactionService {
             }
 
             let second_keypair = null
-            if (
-              requester.second_signature &&
-              !DdnUtils.bignum.isEqualTo(requester.second_signature, 0)
-            ) {
+            if (requester.second_signature && !DdnUtils.bignum.isEqualTo(requester.second_signature, 0)) {
               // wxm block database
               second_keypair = DdnCrypto.getKeys(body.secondSecret)
             }
@@ -411,24 +391,17 @@ class TransactionService {
                 second_keypair,
                 message: body.message
               })
-              const transactions = await this.runtime.transaction.receiveTransactions(
-                [transaction]
-              )
+              const transactions = await this.runtime.transaction.receiveTransactions([transaction])
               cb(null, transactions)
             } catch (err) {
               cb(err)
             }
           } else {
-            this.logger.debug(
-              'publicKey is: ',
-              keypair.publicKey.toString('hex')
-            )
+            this.logger.debug('publicKey is: ', keypair.publicKey.toString('hex'))
 
             let account
             try {
-              account = await this.runtime.account.getAccountByPublicKey(
-                keypair.publicKey.toString('hex')
-              )
+              account = await this.runtime.account.getAccountByPublicKey(keypair.publicKey.toString('hex'))
             } catch (err) {
               return cb(err)
             }
@@ -456,9 +429,7 @@ class TransactionService {
                 message: body.message
               })
 
-              const transactions = await this.runtime.transaction.receiveTransactions(
-                [transaction]
-              )
+              const transactions = await this.runtime.transaction.receiveTransactions([transaction])
               cb(null, transactions)
             } catch (err) {
               cb(err)
@@ -498,9 +469,7 @@ class TransactionService {
       return `${y}-${m}-${d}`
     }
     if (!query.startTime) {
-      query.startTime = formatDate(
-        new Date(new Date().getTime() - 1000 * 60 * 60 * 24 * 7)
-      )
+      query.startTime = formatDate(new Date(new Date().getTime() - 1000 * 60 * 60 * 24 * 7))
     }
     if (!query.endTime) {
       query.endTime = formatDate(new Date())

@@ -730,7 +730,7 @@ class Dapp extends Asset.Base {
                         resolve(data)
                       })
                     } else {
-                      reject('DApp not launched')
+                      reject(new Error('DApp not launched'))
                     }
                   })
                   res.json({ success: true, result })
@@ -1007,11 +1007,11 @@ class Dapp extends Asset.Base {
 
       downloadRequest.on('response', (res) => {
         if (res.statusCode !== 200) {
-          return reject(`Faile to download dapp ${source} with err code: ${res.statusCode}`)
+          return reject(new Error(`Faile to download dapp ${source} with err code: ${res.statusCode}`))
         }
       })
 
-      downloadRequest.on('error', (err) => reject(`Failed to download dapp ${source} with error: ${err.message}`))
+      downloadRequest.on('error', (err) => reject(new Error(`Failed to download dapp ${source} with error: ${err.message}`)))
 
       const file = fs.createWriteStream(target)
       file.on('finish', () => {
@@ -1037,7 +1037,7 @@ class Dapp extends Asset.Base {
     return new Promise((resolve, reject) => {
       const unzipper = new DecompressZip(zippath)
 
-      unzipper.on('error', (err) => reject(`Failed to decompress zip file: ${err}`))
+      unzipper.on('error', (err) => reject(new Error(`Failed to decompress zip file: ${err}`)))
 
       unzipper.on('extract', () => {
         resolve()
@@ -1055,12 +1055,10 @@ class Dapp extends Asset.Base {
     const dappPath = path.join(this.config.dappsDir, dapp.transaction_id)
 
     await new Promise((resolve, reject) => {
-      fs.exists(dappPath, (exists) => {
-        if (exists) {
-          return reject('Dapp is already installed')
-        }
-        resolve()
-      })
+      if (!fs.existsSync(dappPath)) {
+        return reject(new Error('Dapp is already installed'))
+      }
+      resolve()
     })
 
     await new Promise((resolve, reject) => {
@@ -1281,7 +1279,7 @@ class Dapp extends Asset.Base {
         }
 
         if (account.second_signature && !body.secondSecret) {
-          return cb('Invalid second passphrase')
+          return cb(new Error('Invalid second passphrase'))
         }
 
         let second_keypair = null

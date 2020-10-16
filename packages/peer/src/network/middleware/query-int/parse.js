@@ -11,14 +11,14 @@
  * @param  {Object}    options         - Options.
  * @param  {Function}  options.parser  - Parser to process string with. Should return NaN if not a valid number. Defaults to parseInt.
  * @return {Object}    Returns new object with same properties (shallow copy).
-*/
+ */
 function parseNums (obj, options) {
   const result = {}
   let key
   let value
 
   for (key in obj) {
-    if (obj.hasOwnProperty(key)) {
+    if (Object.prototype.hasOwnProperty.call(obj, key)) {
       value = obj[key]
 
       if (typeof value === 'string' && !isNaN(options.parser.call(null, value, 10, key))) {

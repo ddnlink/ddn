@@ -35,7 +35,9 @@ class BlockStatus {
   }
 
   calcMilestone (height) {
-    const location = bignum.floor(bignum.divide(this.parseHeight(bignum.minus(height, this._rewardOffset)), this._distance))
+    const location = bignum.floor(
+      bignum.divide(this.parseHeight(bignum.minus(height, this._rewardOffset)), this._distance)
+    )
     const lastMile = this._milestones[this._milestones.length - 1]
 
     if (bignum.isGreaterThan(location, bignum.minus(this._milestones.length, 1))) {

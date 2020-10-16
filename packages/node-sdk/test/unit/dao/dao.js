@@ -1,7 +1,7 @@
 // passed
 import Debug from 'debug'
 import DdnUtils from '@ddn/utils'
-import { DdnJS, node } from '../../ddn-js'
+import {DdnJS, node} from '../../ddn-js'
 
 const debug = Debug('debug')
 
@@ -19,8 +19,7 @@ export const Dao = () => {
           org_id: node.randomOrgId().toLowerCase(),
           name: node.randomUsername(),
           state: 0,
-          url:
-            'dat://f76e1e82cf4eab4bf173627ff93662973c6fab110c70fb0f86370873a9619aa6+18/public/test.html',
+          url: 'dat://f76e1e82cf4eab4bf173627ff93662973c6fab110c70fb0f86370873a9619aa6+18/public/test.html',
           tags: 'world,cup,test',
           address: Gaccount.address
         }
@@ -44,7 +43,7 @@ export const Dao = () => {
           })
           .expect('Content-Type', /json/)
           .expect(200)
-          .end((err, { body }) => {
+          .end((err, {body}) => {
             debug('valid parameters ok', JSON.stringify(body))
             node.expect(err).to.be.not.ok
             node.expect(body).to.have.property('success').to.be.true
@@ -58,16 +57,11 @@ export const Dao = () => {
           org_id: node.randomOrgId().toLowerCase(),
           name: node.randomUsername(),
           state: 0,
-          url:
-            'dat://f76e1e82cf4eab4bf173627ff93662973c6fab110c70fb0f86370873a9619aa6+18/public/test.html',
+          url: 'dat://f76e1e82cf4eab4bf173627ff93662973c6fab110c70fb0f86370873a9619aa6+18/public/test.html',
           tags: 'world,cup,test',
           address: node.Eaccount.address
         }
-        const transaction = await DdnJS.assetPlugin.createPluginAsset(
-          40,
-          orgs,
-          node.Eaccount.password
-        )
+        const transaction = await DdnJS.assetPlugin.createPluginAsset(40, orgs, node.Eaccount.password)
         node.peer
           .post('/transactions')
           .set('Accept', 'application/json')
@@ -79,7 +73,7 @@ export const Dao = () => {
           })
           .expect('Content-Type', /json/)
           .expect(200)
-          .end((err, { body }) => {
+          .end((err, {body}) => {
             debug('Fee is less', JSON.stringify(body))
 
             node.expect(err).to.be.not.ok
@@ -101,8 +95,7 @@ export const Dao = () => {
           // "org_id": node.randomOrgId(),
           name: node.randomUsername(),
           state: 0, // Default to create
-          url:
-            'dat://f76e1e82cf4eab4bf173627ff93662973c6fab110c70fb0f86370873a9619aa6+18/public/test.html',
+          url: 'dat://f76e1e82cf4eab4bf173627ff93662973c6fab110c70fb0f86370873a9619aa6+18/public/test.html',
           tags: 'world,cup,test'
         }
 
@@ -124,7 +117,7 @@ export const Dao = () => {
           })
           .expect('Content-Type', /json/)
           .expect(200)
-          .end((err, { body }) => {
+          .end((err, {body}) => {
             debug('put /api/dao/orgs', JSON.stringify(body))
             node.expect(err).to.be.not.ok
             node.expect(body).to.have.property('success').to.be.true
@@ -147,17 +140,12 @@ export const Dao = () => {
           })
           .expect('Content-Type', /json/)
           .expect(200)
-          .end((err, { body }) => {
-            debug(
-              'Update the Org`s name in the save 10s',
-              JSON.stringify(body)
-            )
+          .end((err, {body}) => {
+            debug('Update the Org`s name in the save 10s', JSON.stringify(body))
             node.expect(err).to.be.not.ok
 
             node.expect(body).to.have.property('success').to.be.false
-            node.expect(body)
-              .to.have.property('error')
-              .include(`Org ${org.org_id.toLowerCase()} not exists`)
+            node.expect(body).to.have.property('error').include(`Org ${org.org_id.toLowerCase()} not exists`)
             done()
           })
       })
@@ -173,24 +161,18 @@ export const Dao = () => {
             .set('port', node.config.port)
             .expect('Content-Type', /json/)
             .expect(200)
-            .end((err, { body }) => {
+            .end((err, {body}) => {
               debug('Org`s name is not modified ok', JSON.stringify(body))
               node.expect(err).to.be.not.ok
 
               node.expect(body).to.have.property('success').to.be.true
-              node.expect(body)
-                .to.have.property('result')
-                .that.is.an('object')
-              node.expect(body.result)
-                .to.have.property('org')
-                .that.is.an('object')
+              node.expect(body).to.have.property('result').that.is.an('object')
+              node.expect(body.result).to.have.property('org').that.is.an('object')
 
               node.expect(body.result.org).to.have.property('transaction_id')
               node.expect(body.result.org).to.have.property('org_id')
 
-              node.expect(body.result.org.org_id).to.equal(
-                org.org_id.toLowerCase()
-              )
+              node.expect(body.result.org.org_id).to.equal(org.org_id.toLowerCase())
               node.expect(body.result.org.name).to.equal(org.name)
               node.expect(body.result.org.state).to.equal(org.state)
 
@@ -218,7 +200,7 @@ export const Dao = () => {
             })
             .expect('Content-Type', /json/)
             .expect(200)
-            .end(async (err, { body }) => {
+            .end(async (err, {body}) => {
               debug('Update the Org`s name ok', JSON.stringify(body))
               node.expect(err).to.be.not.ok
 
@@ -242,24 +224,18 @@ export const Dao = () => {
             .set('port', node.config.port)
             .expect('Content-Type', /json/)
             .expect(200)
-            .end((err, { body }) => {
+            .end((err, {body}) => {
               debug('Org`s name is modified ok', JSON.stringify(body))
               node.expect(err).to.be.not.ok
 
               node.expect(body).to.have.property('success').to.be.true
-              node.expect(body)
-                .to.have.property('result')
-                .that.is.an('object')
-              node.expect(body.result)
-                .to.have.property('org')
-                .that.is.an('object')
+              node.expect(body).to.have.property('result').that.is.an('object')
+              node.expect(body.result).to.have.property('org').that.is.an('object')
 
               node.expect(body.result.org).to.have.property('transaction_id')
               node.expect(body.result.org).to.have.property('org_id')
 
-              node.expect(body.result.org.org_id).to.equal(
-                org.org_id.toLowerCase()
-              )
+              node.expect(body.result.org.org_id).to.equal(org.org_id.toLowerCase())
               node.expect(body.result.org.name).to.not.equal(org.name) // name 已经更改
               node.expect(body.result.org.state).to.equal(1)
               node.expect(body.result.org.state).to.not.equal(org.state)
@@ -286,7 +262,7 @@ export const Dao = () => {
             })
             .expect('Content-Type', /json/)
             .expect(200)
-            .end((err, { body }) => {
+            .end((err, {body}) => {
               // console.log(JSON.stringify(res.body));
               node.expect(err).to.be.not.ok
 
@@ -313,15 +289,14 @@ export const Dao = () => {
           })
           .expect('Content-Type', /json/)
           .expect(200)
-          .end((err, { body }) => {
+          .end((err, {body}) => {
             // console.log(JSON.stringify(res.body));
             node.expect(err).to.be.not.ok
 
             node.expect(body).to.have.property('success').to.be.false
-            node.expect(body.error)
-              .to.equal(
-                'Invalid parameters: #/properties/org_id/maxLength should NOT be longer than 20 characters'
-              )
+            node
+              .expect(body.error)
+              .to.equal('Invalid parameters: #/properties/org_id/maxLength should NOT be longer than 20 characters')
             done()
           })
       })
@@ -340,7 +315,7 @@ export const Dao = () => {
           })
           .expect('Content-Type', /json/)
           .expect(200)
-          .end((err, { body }) => {
+          .end((err, {body}) => {
             // console.log(JSON.stringify(res.body));
             node.expect(err).to.be.not.ok
 
@@ -404,19 +379,15 @@ export const Dao = () => {
           .set('port', node.config.port)
           .expect('Content-Type', /json/)
           .expect(200)
-          .end((err, { body }) => {
+          .end((err, {body}) => {
             debug(JSON.stringify(body))
             node.expect(err).to.be.not.ok
 
             node.expect(body).to.have.property('success').to.be.true
 
-            node.expect(body)
-              .to.have.property('result')
-              .that.is.an('object')
+            node.expect(body).to.have.property('result').that.is.an('object')
 
-            node.expect(body.result)
-              .to.have.property('rows')
-              .that.is.an('array')
+            node.expect(body.result).to.have.property('rows').that.is.an('array')
             node.expect(body.result).to.have.property('total')
 
             done()
@@ -432,19 +403,15 @@ export const Dao = () => {
           .set('port', node.config.port)
           .expect('Content-Type', /json/)
           .expect(200)
-          .end((err, { body }) => {
+          .end((err, {body}) => {
             debug('Given filter ok', JSON.stringify(body))
             node.expect(err).to.be.not.ok
 
             node.expect(body).to.have.property('success').to.be.true
-            node.expect(body)
-              .to.have.property('result')
-              .that.is.an('object')
+            node.expect(body).to.have.property('result').that.is.an('object')
 
             if (body.result) {
-              node.expect(body.result)
-                .to.have.property('rows')
-                .that.is.an('array')
+              node.expect(body.result).to.have.property('rows').that.is.an('array')
               node.expect(body.result).to.have.property('total')
             }
 

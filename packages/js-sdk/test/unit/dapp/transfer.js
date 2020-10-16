@@ -1,7 +1,7 @@
 import extend from 'extend'
 import Debug from 'debug'
 import DdnUtils from '@ddn/utils'
-import { DdnJS, node } from '../../ddn-js'
+import {DdnJS, node} from '../../ddn-js'
 
 const expect = node.expect
 const debug = Debug('debug')
@@ -18,11 +18,11 @@ const DAPP_TEMPLATE = {
   type: 0
 }
 
-async function createPluginAsset (type, asset, secret, secondSecret) {
+async function createPluginAsset(type, asset, secret, secondSecret) {
   return await DdnJS.assetPlugin.createPluginAsset(type, asset, secret, secondSecret)
 }
 
-function genNormalAccounts (n) {
+function genNormalAccounts(n) {
   const accounts = []
   for (let i = 0; i < n; ++i) {
     accounts.push(node.genNormalAccount())
@@ -30,11 +30,11 @@ function genNormalAccounts (n) {
   return accounts
 }
 
-async function createTransfer (address, amount, secret, second_secret) {
+async function createTransfer(address, amount, secret, second_secret) {
   return await DdnJS.transaction.createTransaction(address, amount, null, secret, second_secret)
 }
 
-async function registerDAppAsync (options, { password }) {
+async function registerDAppAsync(options, {password}) {
   // DdnJS.init();
   options.fee = '10000000000'
   const dappData = await createPluginAsset(DdnUtils.assetTypes.DAPP, options, password)
@@ -43,7 +43,7 @@ async function registerDAppAsync (options, { password }) {
   return res
 }
 
-async function inTransferAsync (options, { password }) {
+async function inTransferAsync(options, {password}) {
   // DdnJS.init();
   const inTransferData = await createPluginAsset(DdnUtils.assetTypes.DAPP_IN, options, password)
   const res = await node.submitTransactionAsync(inTransferData)
@@ -59,14 +59,14 @@ async function inTransferAsync (options, { password }) {
 //     return res
 // }
 
-async function getAssetBalanceAsync (address, currency) {
+async function getAssetBalanceAsync(address, currency) {
   const res = await node.apiGetAsync(`/aob/assets/balances/${address}/${currency}`)
   debug('get asset balance response', res.body)
   expect(res.body.result.currency).to.equal(currency)
   return res.body.result.balance
 }
 
-async function getDAppBalanceAsync (dappId, currency) {
+async function getDAppBalanceAsync(dappId, currency) {
   const res = await node.apiGetAsync(`/dapps/balances/${dappId}/${currency}`)
   debug('/dapps/balances', res.body)
   expect(res.body).to.have.property('success').to.be.true
@@ -77,7 +77,7 @@ export const Transfer = () => {
   describe('dapp transfer', () => {
     const delegateAccounts = genNormalAccounts(5)
     const publicKeys = delegateAccounts.map(a => a.publicKey)
-    const dapp = extend(true, { delegates: publicKeys, unlock_delegates: 3 }, DAPP_TEMPLATE)
+    const dapp = extend(true, {delegates: publicKeys, unlock_delegates: 3}, DAPP_TEMPLATE)
     dapp.name = node.randomUsername()
     dapp.link = dapp.link.replace('ddn', node.randomUsername())
     debug('dapp', dapp)
@@ -123,7 +123,7 @@ export const Transfer = () => {
     //   expect(res.body).to.have.property('error').to.match(/^Invalid transaction body/)
     // })
 
-    it('should be ok to register dapp with valid params', async (done) => {
+    it('should be ok to register dapp with valid params', async done => {
       dapp.delegates = dapp.delegates.join(',')
 
       const res = await registerDAppAsync(dapp, node.Gaccount)
@@ -134,7 +134,7 @@ export const Transfer = () => {
       done()
     })
 
-    it(`should be ok to transfer ${DAPP_CURRENCY} to an app`, async (done) => {
+    it(`should be ok to transfer ${DAPP_CURRENCY} to an app`, async done => {
       const account = node.genNormalAccount()
       await node.giveMoneyAndWaitAsync([account.address])
 
@@ -161,8 +161,12 @@ export const Transfer = () => {
       expect(res.body).to.have.property('success').to.be.true
 
       const balance2 = res.body.balance
-      const balance = DdnUtils.bignum.minus(balance1, inTransferAmount, node.constants.net.fees.transfer * node.constants.fixedPoint)
-      
+      const balance = DdnUtils.bignum.minus(
+        balance1,
+        inTransferAmount,
+        node.constants.net.fees.transfer * node.constants.fixedPoint
+      )
+
       expect(balance.toString()).to.equal(balance2.toString())
 
       const dappBalance = await getDAppBalanceAsync(dappId, DAPP_CURRENCY)
@@ -171,7 +175,7 @@ export const Transfer = () => {
       done()
     })
 
-    it('should be ok to transfer assets to an app', async (done) => {
+    it('should be ok to transfer assets to an app', async done => {
       const account = node.genNormalAccount()
       await node.giveMoneyAndWaitAsync([account.address])
       const currency = `${issuerName}.${assetName}`
@@ -284,9 +288,10 @@ export const Transfer = () => {
     //   expect(res.body).to.have.property('error').to.match(/^Valid signatures not enough/)
     // })
 
-    it(`should be ok to transfer ${DAPP_CURRENCY} from app to account`, async (done) => {
+    it(`should be ok to transfer ${DAPP_CURRENCY} from app to account`, async done => {
       const transaction = await createTransfer(delegateAccounts[0].address, '50000000', node.Gaccount.password)
-      node.peer.post('/transactions')
+      node.peer
+        .post('/transactions')
         .set('Accept', 'application/json')
         .set('version', node.version)
         .set('nethash', node.config.nethash)
@@ -296,8 +301,8 @@ export const Transfer = () => {
         })
         .expect('Content-Type', /json/)
         .expect(200)
-        .end((_err, { body }) => {
-        // console.log(res.body);
+        .end((_err, {body}) => {
+          // console.log(res.body);
           node.expect(body).to.have.property('success').to.be.true
         })
       await node.onNewBlockAsync()
@@ -306,7 +311,7 @@ export const Transfer = () => {
       const dappBalance1 = await getDAppBalanceAsync(dappId, DAPP_CURRENCY)
       // let trs = DdnJS.transfer.createOutTransfer(recipientAccount.address, dappId, node.randomTid(), DAPP_CURRENCY, amount, delegateAccounts[0].password)
       const outTransferData = {
-      // receive_address: recipientAccount.address,
+        // receive_address: recipientAccount.address,
         recipientId: recipientAccount.address,
         dapp_id: dappId,
         transaction_id: node.randomTid(),
@@ -326,7 +331,11 @@ export const Transfer = () => {
       await node.onNewBlockAsync()
       const dappBalance2 = await getDAppBalanceAsync(dappId, DAPP_CURRENCY)
       // DdnUtils.bignum update expect(DdnUtils.bignum(dappBalance1).sub(amount).sub(node.constants.net.fees.transfer).toString()).to.equal(dappBalance2)
-      expect(DdnUtils.bignum.minus(dappBalance1, amount, node.constants.net.fees.transfer * node.constants.fixedPoint).toString()).to.equal(dappBalance2)
+      expect(
+        DdnUtils.bignum
+          .minus(dappBalance1, amount, node.constants.net.fees.transfer * node.constants.fixedPoint)
+          .toString()
+      ).to.equal(dappBalance2)
       res = await node.apiGetAsync(`/accounts/getBalance?address=${recipientAccount.address}`)
       expect(res.body).to.have.property('success').to.be.true
       const recipientBalance = res.body.balance
@@ -358,10 +367,10 @@ export const Transfer = () => {
     //   expect(DdnUtils.bignum.minus(dappBalance1, amount).toString()).to.equal(dappBalance2)
     //   expect(DdnUtils.bignum.minus(dappDdnBalance1, node.constants.net.fees.transfer).toString()).to.equal(dappDdnBalance2)
 
-  //   res = await node.apiGetAsync('/accounts/getBalance?address=' + recipientAccount.address)
-  //   expect(res.body).to.have.property('success').to.be.true
-  //   let recipientBalance = await getAssetBalanceAsync(recipientAccount.address, currency)
-  //   expect(String(recipientBalance)).to.equal(amount)
-  // })
+    //   res = await node.apiGetAsync('/accounts/getBalance?address=' + recipientAccount.address)
+    //   expect(res.body).to.have.property('success').to.be.true
+    //   let recipientBalance = await getAssetBalanceAsync(recipientAccount.address, currency)
+    //   expect(String(recipientBalance)).to.equal(amount)
+    // })
   })
 }

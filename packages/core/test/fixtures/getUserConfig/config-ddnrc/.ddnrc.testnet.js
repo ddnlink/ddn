@@ -1,6 +1,4 @@
-
 export default {
-    history: 'testnet',
-    story: 'yes',
+  history: 'testnet',
+  story: 'yes'
 }
-  

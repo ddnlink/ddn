@@ -39,27 +39,32 @@ class Transaction {
   /**
    * wulianyou 09-11
    * 删除交易
-   * @param {*} trsId 
+   * @param {*} trsId
    */
 
   async deleteTransaction (trsId, dbTrans) {
     return new Promise((resolve, reject) => {
-      this.dao.remove('tr', {
-        id: trsId
-      }, dbTrans, (err, result) => {
-        if (err) {
-          reject(err)
-        } else {
-          resolve(result)
+      this.dao.remove(
+        'tr',
+        {
+          id: trsId
+        },
+        dbTrans,
+        (err, result) => {
+          if (err) {
+            reject(err)
+          } else {
+            resolve(result)
+          }
         }
-      })
+      )
     })
   }
 
   /**
-     * 根据资产配置名称获取资产实例
-     * @param {*} assetName
-     */
+   * 根据资产配置名称获取资产实例
+   * @param {*} assetName
+   */
   getAssetInstanceByName (assetName) {
     return this._assets.findInstanceByName(assetName)
   }
@@ -122,7 +127,9 @@ class Transaction {
 
     const validateErrors = await this.ddnSchema.validateTransaction(trs)
     if (validateErrors) {
-      this.logger.error(`Failed to normalize transaction: ${trs.type} ${validateErrors[0].schemaPath} ${validateErrors[0].message}`)
+      this.logger.error(
+        `Failed to normalize transaction: ${trs.type} ${validateErrors[0].schemaPath} ${validateErrors[0].message}`
+      )
       this.logger.debug(`Failed to normalize transaction: ${trs}`)
       throw new Error(`Failed to normalize transaction: ${validateErrors[0].schemaPath} ${validateErrors[0].message}`)
     }
@@ -131,8 +138,8 @@ class Transaction {
   }
 
   /**
-     * 序列化单条交易数据到数据库
-     */
+   * 序列化单条交易数据到数据库
+   */
   async serializeTransaction2Db (trs, dbTrans) {
     if (!this._assets.hasType(trs.type)) {
       throw Error(`Unknown transaction type 3 : ${trs.type}`)
@@ -217,17 +224,22 @@ class Transaction {
     if (!this._assets.hasType(trs.type)) {
       throw new Error(`Unknown transaction type 5 ${trs.type}`)
     }
-    if (trs.type === DdnUtils.assetTypes.DAPP_OUT) { //
-      return await this._assets.call(trs.type, 'undo',trs, block, sender,dbTrans)
+    if (trs.type === DdnUtils.assetTypes.DAPP_OUT) {
+      //
+      return await this._assets.call(trs.type, 'undo', trs, block, sender, dbTrans)
     }
     const amount = DdnUtils.bignum.plus(trs.amount, trs.fee)
 
-    const sender1 = await this.runtime.account.merge(sender.address, {
-      balance: amount,
-      block_id: block.id, // wxm block database
-      round: await this.runtime.round.getRound(block.height)
-    }, dbTrans)
-    await this._assets.call(trs.type, 'undo', trs, block,sender1, dbTrans)
+    const sender1 = await this.runtime.account.merge(
+      sender.address,
+      {
+        balance: amount,
+        block_id: block.id, // wxm block database
+        round: await this.runtime.round.getRound(block.height)
+      },
+      dbTrans
+    )
+    await this._assets.call(trs.type, 'undo', trs, block, sender1, dbTrans)
   }
 
   async getUnconfirmedTransaction (trsId) {
@@ -272,9 +284,13 @@ class Transaction {
     const amount = DdnUtils.bignum.plus(transaction.amount, transaction.fee).toString()
     this.balanceCache.addNativeBalance(sender.address, amount)
 
-    await this.runtime.account.merge(sender.address, {
-      u_balance: amount
-    }, dbTrans)
+    await this.runtime.account.merge(
+      sender.address,
+      {
+        u_balance: amount
+      },
+      dbTrans
+    )
     await this._assets.call(transaction.type, 'undoUnconfirmed', transaction, sender, dbTrans)
   }
 
@@ -291,11 +307,13 @@ class Transaction {
   }
 
   async applyUnconfirmed (trs, sender, dbTrans) {
-    if (!sender && trs.block_id !== this.genesisblock.id) { // wxm block database
+    if (!sender && trs.block_id !== this.genesisblock.id) {
+      // wxm block database
       throw new Error('Invalid block id')
     }
     let requester = null
-    if (trs.requester_public_key) { // wxm block database
+    if (trs.requester_public_key) {
+      // wxm block database
       requester = await this.runtime.account.getAccountByPublicKey(trs.requester_public_key)
       if (!requester) {
         throw new Error('Invalid requester')
@@ -305,22 +323,44 @@ class Transaction {
       throw new Error(`Unknown transaction type 7 ${trs.type}`)
     }
 
-    if (!trs.requester_public_key && sender.second_signature && !DdnUtils.bignum.isEqualTo(sender.second_signature, 0) &&
-              !trs.sign_signature && trs.block_id !== this.genesisblock.id) { // wxm block database
+    if (
+      !trs.requester_public_key &&
+      sender.second_signature &&
+      !DdnUtils.bignum.isEqualTo(sender.second_signature, 0) &&
+      !trs.sign_signature &&
+      trs.block_id !== this.genesisblock.id
+    ) {
+      // wxm block database
       throw new Error(`Failed second signature: ${trs.id}`)
     }
 
-    if (!trs.requester_public_key && (!sender.second_signature || DdnUtils.bignum.isEqualTo(sender.second_signature, 0)) &&
-              (trs.sign_signature && trs.sign_signature.length > 0)) { // wxm block database
+    if (
+      !trs.requester_public_key &&
+      (!sender.second_signature || DdnUtils.bignum.isEqualTo(sender.second_signature, 0)) &&
+      trs.sign_signature &&
+      trs.sign_signature.length > 0
+    ) {
+      // wxm block database
       throw new Error('Sender account does not have a second signature')
     }
 
-    if (trs.requester_public_key && requester.second_signature && !DdnUtils.bignum.isEqualTo(requester.second_signature, 0) && !trs.sign_signature) { // wxm block database
+    if (
+      trs.requester_public_key &&
+      requester.second_signature &&
+      !DdnUtils.bignum.isEqualTo(requester.second_signature, 0) &&
+      !trs.sign_signature
+    ) {
+      // wxm block database
       throw new Error(`Failed second signature: ${trs.id}`)
     }
 
-    if (trs.requester_public_key && (!requester.second_signature || DdnUtils.bignum.isEqualTo(requester.second_signature, 0)) &&
-              (trs.sign_signature && trs.sign_signature.length > 0)) { // wxm block database
+    if (
+      trs.requester_public_key &&
+      (!requester.second_signature || DdnUtils.bignum.isEqualTo(requester.second_signature, 0)) &&
+      trs.sign_signature &&
+      trs.sign_signature.length > 0
+    ) {
+      // wxm block database
       throw new Error('Requester account does not have a second signature')
     }
     // wxm 这个逻辑应该去掉，不应该这么使用序号特殊处理，如果必须，应该是用assetTypes.type枚举
@@ -328,21 +368,30 @@ class Transaction {
       return await this._assets.call(trs.type, 'applyUnconfirmed', trs, sender, dbTrans)
     }
     const amount = DdnUtils.bignum.plus(trs.amount, trs.fee)
-    if (DdnUtils.bignum.isLessThan(sender.u_balance, amount) && trs.block_id !== this.genesisblock.id) { // wxm block database
+    if (DdnUtils.bignum.isLessThan(sender.u_balance, amount) && trs.block_id !== this.genesisblock.id) {
+      // wxm block database
       throw new Error(`Insufficient balance: ${sender.address}`)
     }
     this.balanceCache.addNativeBalance(sender.address, DdnUtils.bignum.minus(0, amount))
-    const accountInfo = await this.runtime.account.merge(sender.address, {
-      u_balance: DdnUtils.bignum.minus(0, amount)
-    }, dbTrans)
+    const accountInfo = await this.runtime.account.merge(
+      sender.address,
+      {
+        u_balance: DdnUtils.bignum.minus(0, amount)
+      },
+      dbTrans
+    )
     const newAccountInfo = Object.assign({}, sender, accountInfo) // wxm block database
     try {
       await this._assets.call(trs.type, 'applyUnconfirmed', trs, newAccountInfo, dbTrans)
     } catch (err) {
       this.balanceCache.addNativeBalance(newAccountInfo.address, amount)
-      await this.runtime.account.merge(newAccountInfo.address, {
-        u_balance: amount
-      }, dbTrans)
+      await this.runtime.account.merge(
+        newAccountInfo.address,
+        {
+          u_balance: amount
+        },
+        dbTrans
+      )
       throw err
     }
   }
@@ -370,7 +419,7 @@ class Transaction {
     }
 
     // TODO: 没有 ready 的交易，不代表不合法，比如：多重签名交易
-    if (!await this.ready(trs, sender)) {
+    if (!(await this.ready(trs, sender))) {
       // throw new Error(`Transaction is not ready: ${trs.id}`)
       this.logger.info(`Transaction is not ready: ${trs.id}`)
       return
@@ -383,17 +432,22 @@ class Transaction {
 
     const amount = DdnUtils.bignum.plus(trs.amount, trs.fee)
 
-    if (trs.block_id !== this.genesisblock.id && DdnUtils.bignum.isLessThan(sender.balance, amount)) { // wxm block database
+    if (trs.block_id !== this.genesisblock.id && DdnUtils.bignum.isLessThan(sender.balance, amount)) {
+      // wxm block database
       throw new Error(`apply, insufficient balance: ${sender.balance}`)
       // this.logger.info(`apply, insufficient balance: ${sender.balance}`)
       // return
     }
 
-    const accountInfo = await this.runtime.account.merge(sender.address, {
-      balance: DdnUtils.bignum.minus(0, amount),
-      block_id: block.id, // wxm block database
-      round: await this.runtime.round.getRound(block.height)
-    }, dbTrans)
+    const accountInfo = await this.runtime.account.merge(
+      sender.address,
+      {
+        balance: DdnUtils.bignum.minus(0, amount),
+        block_id: block.id, // wxm block database
+        round: await this.runtime.round.getRound(block.height)
+      },
+      dbTrans
+    )
     const newSender = Object.assign({}, sender, accountInfo) // wxm block database
 
     await this._assets.call(trs.type, 'apply', trs, block, newSender, dbTrans)
@@ -450,16 +504,20 @@ class Transaction {
     trs.senderId = sender.address // wxm block database
 
     // Verify that requester in multisignature
-    if (trs.requester_public_key) { // wxm block database
-      if (!sender.multisignatures.includes(trs.requester_public_key)) { // wxm block database
+    if (trs.requester_public_key) {
+      // wxm block database
+      if (!sender.multisignatures.includes(trs.requester_public_key)) {
+        // wxm block database
         throw new Error('Failed to verify requester`s signature in multisignatures')
       }
 
-      if (!await this.verifySignature(trs, trs.signature, trs.requester_public_key)) { // wxm block database
+      if (!(await this.verifySignature(trs, trs.signature, trs.requester_public_key))) {
+        // wxm block database
         throw new Error('Failed to verify requester`s signature')
       }
     } else {
-      if (!await this.verifySignature(trs, trs.signature, trs.senderPublicKey)) { // wxm block database
+      if (!(await this.verifySignature(trs, trs.signature, trs.senderPublicKey))) {
+        // wxm block database
         throw new Error('Failed to verify senderPublicKey signature here.')
       }
     }
@@ -468,20 +526,24 @@ class Transaction {
 
     return new Promise((resolve, reject) => {
       // shuai 2018-11-13
-      this.dao.count('tr', {
-        id: trs.id
-      }, (err, count) => {
-        if (err) {
-          this.logger.error('Database error')
-          return reject(new Error('Database error'))
-        }
+      this.dao.count(
+        'tr',
+        {
+          id: trs.id
+        },
+        (err, count) => {
+          if (err) {
+            this.logger.error('Database error')
+            return reject(new Error('Database error'))
+          }
 
-        if (count) {
-          return reject(new Error('Ignoring already confirmed transaction'))
-        }
+          if (count) {
+            return reject(new Error('Ignoring already confirmed transaction'))
+          }
 
-        resolve(trs)
-      })
+          resolve(trs)
+        }
+      )
     })
   }
 
@@ -505,7 +567,8 @@ class Transaction {
     const sender = await this.runtime.account.getAccountByPublicKey(transaction.senderPublicKey)
 
     let requester
-    if (transaction.requester_public_key && sender && sender.multisignatures && sender.multisignatures.length) { // wxm block database
+    if (transaction.requester_public_key && sender && sender.multisignatures && sender.multisignatures.length) {
+      // wxm block database
       requester = await this.runtime.account.getAccountByPublicKey(transaction.requester_public_key)
       if (!requester) {
         throw new Error('Invalid requester')
@@ -544,20 +607,14 @@ class Transaction {
   /// ///// TODO: delete it /////////////////////////////////
   async sign (trs, { privateKey }) {
     const hash = await this.getHash(trs, true, true)
-    const signature = nacl.sign.detached(
-      hash,
-      Buffer.from(privateKey, 'hex')
-    )
+    const signature = nacl.sign.detached(hash, Buffer.from(privateKey, 'hex'))
     return Buffer.from(signature).toString('hex')
     // return await DdnCrypto.sign(trs, { privateKey })
   }
 
   async multisign (trs, { privateKey }) {
     const hash = await this.getHash(trs, true, true)
-    const signature = nacl.sign.detached(
-      hash,
-      Buffer.from(privateKey, 'hex')
-    )
+    const signature = nacl.sign.detached(hash, Buffer.from(privateKey, 'hex'))
     return Buffer.from(signature).toString('hex')
   }
 
@@ -572,11 +629,11 @@ class Transaction {
   }
 
   /**
-     * 验证签名方法
-     * @param {object} trs 交易
-     * @param {string} signature 签名
-     * @param {string} publicKey 公钥
-     */
+   * 验证签名方法
+   * @param {object} trs 交易
+   * @param {string} signature 签名
+   * @param {string} publicKey 公钥
+   */
   async verifySignature (trs, signature, publicKey) {
     if (!this._assets.hasType(trs.type)) {
       throw new Error(`Unknown transaction type 12 ${trs.type}`)
@@ -605,7 +662,12 @@ class Transaction {
       const lastBlock = this.runtime.block.getLastBlock()
 
       const isLockedType = await this._assets.isSupportLock(trs.type)
-      if (isLockedType && sender.lock_height && lastBlock && DdnUtils.bignum.isLessThanOrEqualTo(DdnUtils.bignum.plus(lastBlock.height, 1), sender.lock_height)) {
+      if (
+        isLockedType &&
+        sender.lock_height &&
+        lastBlock &&
+        DdnUtils.bignum.isLessThanOrEqualTo(DdnUtils.bignum.plus(lastBlock.height, 1), sender.lock_height)
+      ) {
         throw new Error('Account is locked')
       }
     }
@@ -627,7 +689,8 @@ class Transaction {
 
     // Verify signature
     let valid = false
-    if (trs.requester_public_key) { // wxm block database
+    if (trs.requester_public_key) {
+      // wxm block database
       valid = await this.verifySignature(trs, trs.signature, trs.requester_public_key) // wxm block database
     } else {
       valid = await this.verifySignature(trs, trs.signature, trs.senderPublicKey)
@@ -647,7 +710,8 @@ class Transaction {
       if (!valid) {
         throw new Error(`Failed to verify sender second signature: ${trs.id}`)
       }
-    } else if (trs.requester_public_key && requester.second_signature) { // wxm block database
+    } else if (trs.requester_public_key && requester.second_signature) {
+      // wxm block database
       valid = await this.verifySecondSignature(trs, requester.second_public_key) // wxm block database
       if (!valid) {
         throw new Error(`Failed to verify requester second signature: ${trs.id}`)
@@ -679,7 +743,8 @@ class Transaction {
 
     // wxm TODO
     // 此处应该用this._assets.方法（trs.type） 来判断是否能够进入下面处理
-    if (trs.signatures && trs.type !== DdnUtils.assetTypes.DAPP_OUT) { // 13 ?
+    if (trs.signatures && trs.type !== DdnUtils.assetTypes.DAPP_OUT) {
+      // 13 ?
       for (let d = 0; d < trs.signatures.length; d++) {
         let verify = false
 
@@ -700,7 +765,8 @@ class Transaction {
     }
 
     // Check sender
-    if (trs.senderId !== sender.address) { // wxm block database
+    if (trs.senderId !== sender.address) {
+      // wxm block database
       throw new Error(`Invalid sender id: ${trs.id}`)
     }
 
@@ -713,9 +779,15 @@ class Transaction {
     }
 
     // amount 需要整理成 正整数 形式，不包含科学计数法和点号，范围在 0 ~ totalAmount 之间
-    if (DdnUtils.bignum.isLessThan(trs.amount, 0) ||
-            DdnUtils.bignum.isGreaterThan(trs.amount, DdnUtils.bignum.multiply(this.constants.maxAmount, this.constants.fixedPoint)) ||
-            `${trs.amount}`.includes('.') || `${trs.amount}`.includes('e')) {
+    if (
+      DdnUtils.bignum.isLessThan(trs.amount, 0) ||
+      DdnUtils.bignum.isGreaterThan(
+        trs.amount,
+        DdnUtils.bignum.multiply(this.constants.maxAmount, this.constants.fixedPoint)
+      ) ||
+      `${trs.amount}`.includes('.') ||
+      `${trs.amount}`.includes('e')
+    ) {
       throw new Error(`Invalid transaction amount: ${trs.amount}`)
     }
     // Check timestamp

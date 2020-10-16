@@ -19,7 +19,7 @@ export default {
   clientDriftSeconds: 5,
 
   dapp: {
-    masterpassword: "xS5XaSoHsTEL",
+    masterpassword: 'xS5XaSoHsTEL',
     params: {}
   }
 }

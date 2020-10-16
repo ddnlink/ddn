@@ -14,17 +14,17 @@ const { bignum, assetTypes } = DdnUtils
 function getBytes (block, skipSignature) {
   // const size = 4 + 4 + 8 + 4 + 8 + 8 + 8 + 4 + 32 + 32 + 64;
   const size =
-		4 + // version (int)
-		4 + // timestamp (int)
-		64 + // previousBlock 64
-		4 + // numberOfTransactions (int)
-		64 + // totalAmount (long)
-		64 + // totalFee (long)
-		64 + // reward (long)
-		4 + // payloadLength (int)
-		32 + // payloadHash
-		32 + // generatorPublicKey
-		64 // blockSignature or unused
+    4 + // version (int)
+    4 + // timestamp (int)
+    64 + // previousBlock 64
+    4 + // numberOfTransactions (int)
+    64 + // totalAmount (long)
+    64 + // totalFee (long)
+    64 + // reward (long)
+    4 + // payloadLength (int)
+    32 + // payloadHash
+    32 + // generatorPublicKey
+    64 // blockSignature or unused
 
   const bb = new ByteBuffer(size, true)
 
