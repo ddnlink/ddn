@@ -33,7 +33,6 @@
     "test:custom": "DDN_ENV=custom ./packages/test/bin/test.js",
     "test": "./packages/test/bin/test.js",
     "cm": "git-cz",
-    "precommit": "npm run lint-staged",
     "lint": "eslint --fix --ext .js packages/**/src packages/**/test",
     "lint-staged": "lint-staged",
     "lint-staged:js": "lint",
@@ -83,6 +82,11 @@
     "prettier": "^2.1.2",
     "rollup-plugin-node-builtins": "^2.1.2",
     "rollup-plugin-node-globals": "^1.4.0"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "npm run lint-staged"
+    }
   },
   "lint-staged": {
     "**/*.{js,jsx,less}": [
