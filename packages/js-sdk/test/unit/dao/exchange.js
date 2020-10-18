@@ -1,7 +1,7 @@
 // no pass
 import Debug from 'debug'
 import DdnUtil from '@ddn/utils'
-import { DdnJS, node } from '../../ddn-js'
+import {DdnJS, node} from '../../ddn-js'
 
 const debug = Debug('debug')
 
@@ -15,9 +15,10 @@ const exchangePrice = '700000000'
 jest.setTimeout(50000)
 
 export const Exchange = () => {
-  async function openAccount (account) {
+  async function openAccount(account) {
     await new Promise((resolve, reject) => {
-      node.api.post('/accounts/open')
+      node.api
+        .post('/accounts/open')
         .set('Accept', 'application/json')
         .send({
           secret: account.password,
@@ -25,9 +26,7 @@ export const Exchange = () => {
         })
         .expect('Content-Type', /json/)
         .expect(200)
-        .end((err, {
-          body
-        }) => {
+        .end((err, {body}) => {
           debug(JSON.stringify(body))
 
           if (err) {
@@ -50,9 +49,7 @@ export const Exchange = () => {
     })
   }
 
-  async function sendDDN ({
-    address
-  }, coin) {
+  async function sendDDN({address}, coin) {
     await node.onNewBlockAsync()
 
     const result = await new Promise((resolve, reject) => {
@@ -61,7 +58,8 @@ export const Exchange = () => {
         coin = randomCoin
       }
 
-      node.api.put('/transactions')
+      node.api
+        .put('/transactions')
         .set('Accept', 'application/json')
         .send({
           secret: node.Gaccount.password,
@@ -70,9 +68,7 @@ export const Exchange = () => {
         })
         .expect('Content-Type', /json/)
         .expect(200)
-        .end((err, {
-          body
-        }) => {
+        .end((err, {body}) => {
           debug(JSON.stringify(body))
 
           if (err) {
@@ -94,7 +90,7 @@ export const Exchange = () => {
   describe('Put /transactions', () => {
     let org_id = ''
 
-    beforeAll(async (done) => {
+    beforeAll(async done => {
       await openAccount(Account1)
       await openAccount(Account2)
 
@@ -105,15 +101,14 @@ export const Exchange = () => {
 
       // 获取 org_id
       const getOrgIdUrl = `/dao/orgs?pagesize=1&address=${node.Gaccount.address}`
-      node.api.get(getOrgIdUrl)
+      node.api
+        .get(getOrgIdUrl)
         .set('Accept', 'application/json')
         .set('version', node.version)
         .set('nethash', node.config.nethash)
         .set('port', node.config.port)
         .expect(200)
-        .end((err, {
-          body
-        }) => {
+        .end((err, {body}) => {
           debug('getOrgIdUrl', getOrgIdUrl, JSON.stringify(body))
           node.expect(err).to.be.not.ok
           node.expect(body).to.have.property('success').to.be.true
@@ -124,7 +119,7 @@ export const Exchange = () => {
     })
 
     // 0 状态 - 发起出售交易
-    it('Create exchange to sell with state = 0, Should be ok', async (done) => {
+    it('Create exchange to sell with state = 0, Should be ok', async done => {
       exchange = {
         org_id: org_id,
         price: exchangePrice,
@@ -134,8 +129,13 @@ export const Exchange = () => {
         sender_address: node.Gaccount.address
       }
 
-      transaction = await DdnJS.assetPlugin.createPluginAsset(DdnUtil.assetTypes.DAO_EXCHANGE, exchange, node.Gaccount.password) // 41
-      node.peer.post('/transactions')
+      transaction = await DdnJS.assetPlugin.createPluginAsset(
+        DdnUtil.assetTypes.DAO_EXCHANGE,
+        exchange,
+        node.Gaccount.password
+      ) // 41
+      node.peer
+        .post('/transactions')
         .set('Accept', 'application/json')
         .set('version', node.version)
         .set('nethash', node.config.nethash)
@@ -145,9 +145,7 @@ export const Exchange = () => {
         })
         .expect('Content-Type', /json/)
         .expect(200)
-        .end((err, {
-          body
-        }) => {
+        .end((err, {body}) => {
           debug('exchange with state = 0, ok', JSON.stringify(body))
 
           node.expect(err).to.be.not.ok
@@ -163,7 +161,7 @@ export const Exchange = () => {
     })
 
     // 1状态 - 确认买 交易
-    it('Create exchange to buy with state = 1, Should be ok', async (done) => {
+    it('Create exchange to buy with state = 1, Should be ok', async done => {
       await node.onNewBlockAsync()
 
       const temp = exchange.received_address
@@ -175,8 +173,13 @@ export const Exchange = () => {
 
       debug('exchange to buy ', exchange)
 
-      transaction = await DdnJS.assetPlugin.createPluginAsset(DdnUtil.assetTypes.DAO_EXCHANGE, exchange, Account1.password)
-      node.peer.post('/transactions')
+      transaction = await DdnJS.assetPlugin.createPluginAsset(
+        DdnUtil.assetTypes.DAO_EXCHANGE,
+        exchange,
+        Account1.password
+      )
+      node.peer
+        .post('/transactions')
         .set('Accept', 'application/json')
         .set('version', node.version)
         .set('nethash', node.config.nethash)
@@ -186,9 +189,7 @@ export const Exchange = () => {
         })
         .expect('Content-Type', /json/)
         .expect(200)
-        .end((err, {
-          body
-        }) => {
+        .end((err, {body}) => {
           debug('exchange with state = 1, ok', JSON.stringify(body))
 
           node.expect(err).to.be.not.ok
@@ -201,16 +202,21 @@ export const Exchange = () => {
     })
 
     // fixme: 2020.6.20 这里可能出现上一步还还没存到库里，这条同样的资产会创建成功
-    it('Create exchange to buy with state = 1 again, Should be fail', async (done) => {
+    it('Create exchange to buy with state = 1 again, Should be fail', async done => {
       await node.onNewBlockAsync()
 
       exchange.amount = exchange.price
       exchange.recipientId = exchange.received_address
 
-      transaction = await DdnJS.assetPlugin.createPluginAsset(DdnUtil.assetTypes.DAO_EXCHANGE, exchange, Account1.password)
+      transaction = await DdnJS.assetPlugin.createPluginAsset(
+        DdnUtil.assetTypes.DAO_EXCHANGE,
+        exchange,
+        Account1.password
+      )
       debug('exchange to buy again, fail, transaction', transaction)
 
-      node.peer.post('/transactions')
+      node.peer
+        .post('/transactions')
         .set('Accept', 'application/json')
         .set('version', node.version)
         .set('nethash', node.config.nethash)
@@ -220,9 +226,7 @@ export const Exchange = () => {
         })
         .expect('Content-Type', /json/)
         .expect(200)
-        .end((err, {
-          body
-        }) => {
+        .end((err, {body}) => {
           debug('exchange with state = 1 again, fail', JSON.stringify(body))
 
           node.expect(err).to.be.not.ok
@@ -399,8 +403,8 @@ export const Exchange = () => {
   //                 node.expect(body).to.have.property("success").to.be.true;
   //                 node.expect(body).to.have.property("transactionId");
 
-//                 done();
-//             });
-//     }, 30000)
-// });
+  //                 done();
+  //             });
+  //     }, 30000)
+  // });
 }

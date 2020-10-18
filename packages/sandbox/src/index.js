@@ -1,4 +1,3 @@
-import Sandbox from './sandbox';
-
+import Sandbox from './sandbox'
 
 export default Sandbox

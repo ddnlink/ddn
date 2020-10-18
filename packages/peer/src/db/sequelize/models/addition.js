@@ -8,18 +8,22 @@
 import Sequelize from 'sequelize'
 
 export default connection => {
-  return connection.define('addition', {
-    json: {
-      type: Sequelize.TEXT,
-      allowNull: false
+  return connection.define(
+    'addition',
+    {
+      json: {
+        type: Sequelize.TEXT,
+        allowNull: false
+      },
+      transaction_id: {
+        type: Sequelize.STRING(64),
+        allowNull: false
+      }
     },
-    transaction_id: {
-      type: Sequelize.STRING(64),
-      allowNull: false
+    {
+      freezeTableName: true,
+      tableName: 'addition',
+      timestamps: false
     }
-  }, {
-    freezeTableName: true,
-    tableName: 'addition',
-    timestamps: false
-  })
+  )
 }

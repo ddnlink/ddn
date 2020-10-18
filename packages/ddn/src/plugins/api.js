@@ -487,7 +487,6 @@ export {
   registerDapp
 }
 
-
 //   program
 //     .command('setSecondsecret')
 //     .description('set second secret')
@@ -495,7 +494,6 @@ export {
 //     .option('--newSecondSecret <secret>', '')
 //     .option('--oldSecondSecret <secret>', '')
 //     .action(setSecondSecret)
-
 
 //   program
 //     .command('deposit')
@@ -516,4 +514,3 @@ export {
 //     .option('-a, --args <args>', 'json array format')
 //     .option('-f, --fee <fee>', 'transaction fee')
 //     .action(dappTransaction)
-

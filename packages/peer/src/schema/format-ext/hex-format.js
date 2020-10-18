@@ -1,5 +1,4 @@
 export default {
-
   name: 'hex',
 
   validate (str) {
@@ -12,5 +11,4 @@ export default {
 
     return b && b.length > 0
   }
-
 }

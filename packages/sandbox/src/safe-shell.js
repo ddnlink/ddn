@@ -22,7 +22,7 @@ function main () {
       external: true,
       builtin: ['path', 'os', 'crypto', 'util', 'url', 'zlib', 'asset', 'buffer'], // 如果Dapp需要文件读写功能，需要重新定义fs对象
       root: './'
-    },
+    }
     // wrapper: 'none'
   })
 
@@ -33,7 +33,7 @@ function main () {
     _code = (fs.readFileSync(_entry)).toString()
     var script = new VMScript(fs.readFileSync(_entry))
     try {
-      let res = vm.run(script)
+      const res = vm.run(script)
       res()
     } catch (err) {
       console.log('error=======', err)

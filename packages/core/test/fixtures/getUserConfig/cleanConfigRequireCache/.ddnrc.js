@@ -1,1 +1,1 @@
-export default { bar: 'foo' };
+export default {bar: 'foo'}

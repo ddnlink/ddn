@@ -50,12 +50,7 @@ class DAO {
   }
 
   static connect (dbSetting, logger, cb) {
-    sequelizeInst = new Sequelize(
-      dbSetting.database,
-      dbSetting.username,
-      dbSetting.password,
-      dbSetting.options
-    )
+    sequelizeInst = new Sequelize(dbSetting.database, dbSetting.username, dbSetting.password, dbSetting.options)
 
     sequelizeInst
       .authenticate()
@@ -426,17 +421,7 @@ class DAO {
     }
   }
 
-  static findPage (
-    modelName,
-    where,
-    limit,
-    offset,
-    returnTotal,
-    attributes,
-    orders,
-    dbTrans,
-    cb
-  ) {
+  static findPage (modelName, where, limit, offset, returnTotal, attributes, orders, dbTrans, cb) {
     try {
       if (typeof cb === 'undefined' && typeof dbTrans === 'function') {
         cb = dbTrans
@@ -588,7 +573,7 @@ class DAO {
           }
         }
 
-              console.log('findListByGroup error 2', err)
+        console.log('findListByGroup error 2', err)
 
         cb(errMsg)
         return null

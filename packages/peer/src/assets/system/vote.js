@@ -9,13 +9,13 @@ import DdnUtils from "@ddn/utils";
 import Diff from "../../utils/diff.js";
 
 class Vote {
-  constructor(context) {
-    Object.assign(this, context);
-    this._context = context;
+  constructor (context) {
+    Object.assign(this, context)
+    this._context = context
   }
 
-  async create({ votes }, trs) {
-    trs.recipientId = null; // wxm block database
+  async create ({ votes }, trs) {
+    trs.recipientId = null // wxm block database
     trs.asset.vote = {
       votes
     };
@@ -23,41 +23,29 @@ class Vote {
     return trs;
   }
 
-  async calculateFee(trs, sender) {
-    return DdnUtils.bignum.multiply(
-      this.constants.net.fees.vote,
-      this.constants.fixedPoint
-    );
+  async calculateFee (trs, sender) {
+    return DdnUtils.bignum.multiply(this.constants.net.fees.vote, this.constants.fixedPoint)
   }
 
-  async verify(trs, sender) {
-    if (
-      !trs.asset.vote ||
-      !trs.asset.vote.votes ||
-      !trs.asset.vote.votes.length
-    ) {
-      throw new Error("No votes sent");
+  async verify (trs, sender) {
+    if (!trs.asset.vote || !trs.asset.vote.votes || !trs.asset.vote.votes.length) {
+      throw new Error('No votes sent')
     }
 
     if (trs.asset.vote.votes && trs.asset.vote.votes.length > 33) {
-      throw new Error(
-        "Voting limit exceeded. Maximum is 33 votes per transaction"
-      );
+      throw new Error('Voting limit exceeded. Maximum is 33 votes per transaction')
     }
 
-    await this.runtime.delegate.checkDelegates(
-      trs.senderPublicKey,
-      trs.asset.vote.votes
-    );
+    await this.runtime.delegate.checkDelegates(trs.senderPublicKey, trs.asset.vote.votes)
 
     return trs;
   }
 
-  async process(trs, sender) {
-    return trs;
+  async process (trs, sender) {
+    return trs
   }
 
-  async getBytes({ asset }) {
+  async getBytes ({ asset }) {
     if (!asset.vote.votes) {
       return null;
     }
@@ -71,11 +59,11 @@ class Vote {
     return bb.toBuffer();
   }
 
-  async isSupportLock() {
-    return false;
+  async isSupportLock () {
+    return false
   }
 
-  async apply({ asset }, { id, height }, { address }, dbTrans) {
+  async apply ({ asset }, { id, height }, { address }, dbTrans) {
     // this.logger.debug('votes.js 67 vote apply merge address', asset)
     await this.runtime.account.merge(
       address,
@@ -88,8 +76,8 @@ class Vote {
     );
   }
 
-  async undo({ id: trsId, asset }, { id, height }, { address }, dbTrans) {
-    if (asset.vote.votes === null) return;
+  async undo ({ id: trsId, asset }, { id, height }, { address }, dbTrans) {
+    if (asset.vote.votes === null) return
 
     const votesInvert = Diff.reverse(asset.vote.votes);
     await this.runtime.account.merge(
@@ -110,38 +98,38 @@ class Vote {
    * @param {*} transaction_id 交易id
    * @param {*} dbTrans 事物
    */
-  async deleteVote(transaction_id, dbTrans) {
+  async deleteVote (transaction_id, dbTrans) {
     return new Promise((resolve, reject) => {
       this.dao.remove(
-        "vote",
+        'vote',
         {
           transaction_id
         },
         dbTrans,
         err => {
           if (err) {
-            return reject(err);
+            return reject(err)
           }
-          resolve(true);
+          resolve(true)
         }
-      );
-    });
+      )
+    })
   }
 
-  async applyUnconfirmed({ type }, { address }, dbTrans) {
-    const key = `${address}:${type}`;
+  async applyUnconfirmed ({ type }, { address }, dbTrans) {
+    const key = `${address}:${type}`
     if (this.oneoff.has(key)) {
       throw new Error("Double submit");
     }
     this.oneoff.set(key, true);
   }
 
-  async undoUnconfirmed({ type }, { address }, dbTrans) {
-    const key = `${address}:${type}`;
-    this.oneoff.delete(key);
+  async undoUnconfirmed ({ type }, { address }, dbTrans) {
+    const key = `${address}:${type}`
+    this.oneoff.delete(key)
   }
 
-  async objectNormalize(trs) {
+  async objectNormalize (trs) {
     const validateErrors = await this.ddnSchema.validate(
       {
         type: "object",
@@ -158,15 +146,13 @@ class Vote {
       trs.asset.vote
     );
     if (validateErrors) {
-      throw new Error(
-        `Incorrect votes in transactions: ${validateErrors[0].schemaPath} ${validateErrors[0].message}`
-      );
+      throw new Error(`Incorrect votes in transactions: ${validateErrors[0].schemaPath} ${validateErrors[0].message}`)
     }
 
     return trs;
   }
 
-  async dbRead({ v_votes }) {
+  async dbRead ({ v_votes }) {
     if (!v_votes) {
       return null;
     } else {
@@ -195,7 +181,7 @@ class Vote {
     );
   }
 
-  async ready({ signatures }, { multisignatures, multimin }) {
+  async ready ({ signatures }, { multisignatures, multimin }) {
     if (Array.isArray(multisignatures) && multisignatures.length) {
       if (!signatures) {
         return false;

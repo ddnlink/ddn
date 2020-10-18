@@ -12,7 +12,9 @@ class PeerBlockService {
 
   async post ({ headers, connection, body }) {
     const peerIp = headers['x-forwarded-for'] || connection.remoteAddress
-    const peerStr = peerIp ? `${peerIp}:${isNaN(parseInt(headers.port)) ? 'unkwnown' : parseInt(headers.port)}` : 'unknown'
+    const peerStr = peerIp
+      ? `${peerIp}:${isNaN(parseInt(headers.port)) ? 'unkwnown' : parseInt(headers.port)}`
+      : 'unknown'
     if (typeof body.block === 'string') {
       body.block = this.protobuf.decodeBlock(Buffer.from(body.block, 'base64'))
     }
@@ -45,18 +47,23 @@ class PeerBlockService {
 
     return { success: true }
   }
-
   async get ({ query }) {
-    const validateErrors = await this.ddnSchema.validate({
-      type: 'object',
-      properties: {
-        lastBlockId: {
-          type: 'string'
+    const validateErrors = await this.ddnSchema.validate(
+      {
+        type: 'object',
+        properties: {
+          lastBlockId: {
+            type: 'string'
+          }
         }
-      }
-    }, query)
+      },
+      query
+    )
     if (validateErrors) {
-      return { success: false, error: `Invalid parameters: ${validateErrors[0].schemaPath} ${validateErrors[0].message}` }
+      return {
+        success: false,
+        error: `Invalid parameters: ${validateErrors[0].schemaPath} ${validateErrors[0].message}`
+      }
     }
 
     let limit = 200
@@ -78,10 +85,8 @@ class PeerBlockService {
             where.height = {
               $gt: row ? row.height : '0' // fixme 2020.8.13 height >= 1
             }
-          }
-          const data = await this.runtime.dataquery.queryFullBlockData(where, limit, 0, [['height', 'asc']])
-          cb(null, { blocks: data })
-        } catch (e) {
+					}
+				} catch (e) {
           reject(e)
         }
       }, (err, result) => {
@@ -90,7 +95,7 @@ class PeerBlockService {
         } else {
           resolve(result)
         }
-      })
+			})
     })
   }
 
@@ -100,24 +105,30 @@ class PeerBlockService {
     // query.max = Number(query.max)
     // query.min = Number(query.min)
 
-    const validateErrors = await this.ddnSchema.validate({
-      type: 'object',
-      properties: {
-        max: {
-          type: 'integer'
+    const validateErrors = await this.ddnSchema.validate(
+      {
+        type: 'object',
+        properties: {
+          max: {
+            type: 'integer'
+          },
+          min: {
+            type: 'integer'
+          },
+          ids: {
+            type: 'string',
+            format: 'splitarray'
+          }
         },
-        min: {
-          type: 'integer'
-        },
-        ids: {
-          type: 'string',
-          format: 'splitarray'
-        }
+        required: ['max', 'min', 'ids']
       },
-      required: ['max', 'min', 'ids']
-    }, query)
+      query
+    )
     if (validateErrors) {
-      return { success: false, error: `Invalid parameters: ${validateErrors[0].schemaPath} ${validateErrors[0].message}` }
+      return {
+        success: false,
+        error: `Invalid parameters: ${validateErrors[0].schemaPath} ${validateErrors[0].message}`
+      }
     }
 
     const max = query.max
@@ -127,21 +138,24 @@ class PeerBlockService {
 
     if (!escapedIds.length) {
       req.headers.port = Number(req.headers.port)
-      const validateErrors = await this.ddnSchema.validate({
-        type: 'object',
-        properties: {
-          port: {
-            type: 'integer',
-            minimum: 1,
-            maximum: 65535
+      const validateErrors = await this.ddnSchema.validate(
+        {
+          type: 'object',
+          properties: {
+            port: {
+              type: 'integer',
+              minimum: 1,
+              maximum: 65535
+            },
+            nethash: {
+              type: 'string',
+              maxLength: 8
+            }
           },
-          nethash: {
-            type: 'string',
-            maxLength: 8
-          }
+          required: ['port', 'nethash']
         },
-        required: ['port', 'nethash']
-      }, req.headers)
+        req.headers
+      )
 
       const peerIp = req.headers['x-forwarded-for'] || req.connection.remoteAddress
       const peerPort = parseInt(req.headers.port)
@@ -157,18 +171,23 @@ class PeerBlockService {
 
     return new Promise((resolve, reject) => {
       // shuai 2018-12-01
-      this.dao.findList('block', {
-        id: { $in: ids },
-        height: { $gte: min, $lte: max }
-      }, ['id', 'timestamp', 'previous_block', 'height'],
-      [['height', 'DESC']], (err, rows) => {
-        if (err) {
-          resolve({ success: false, error: 'Database error' })
-        }
+      this.dao.findList(
+        'block',
+        {
+          id: { $in: ids },
+          height: { $gte: min, $lte: max }
+        },
+        ['id', 'timestamp', 'previous_block', 'height'],
+        [['height', 'DESC']],
+        (err, rows) => {
+          if (err) {
+            resolve({ success: false, error: 'Database error' })
+          }
 
-        const commonBlock = rows.length ? rows[0] : null
-        resolve({ success: true, common: commonBlock })
-      })
+          const commonBlock = rows.length ? rows[0] : null
+          resolve({ success: true, common: commonBlock })
+        }
+      )
     })
   }
 }

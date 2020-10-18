@@ -27,13 +27,18 @@
     "start": "NODE_ENV=development node ./scripts/startPeer.js",
     "bootstrap": "lerna bootstrap",
     "build": "father-build",
-    "cm": "git-cz",
     "changelog": "conventional-changelog -p angular -i CHANGELOG.md -w",
     "chore:update-deps": "sh ./scripts/reinstall_deps.sh",
     "clean": "lerna clean -y",
     "test:custom": "DDN_ENV=custom ./packages/test/bin/test.js",
     "test": "./packages/test/bin/test.js",
-    "lint": "eslint --fix --ext .js packages/**/src packages/**/test",
+		"cm": "git-cz",
+		"format": "yarn lint:fix && yarn prettier",
+    "lint": "eslint --ext .js packages/**/src",
+    "lint:fix": "eslint --fix --ext .js packages/**/src",
+    "lint-staged": "lint-staged",
+    "lint-staged:js": "eslint --ext .js",
+    "prettier": "prettier --write ./packages/**/src/**/**/* ./packages/**/test/**/**/*",
     "doc:dev": "DDN_ENV=docs dumi dev",
     "doc:build": "DDN_ENV=docs dumi build",
     "doc:deploy": "DDN_ENV=docs deploy website"
@@ -64,18 +69,35 @@
     "@typescript-eslint/parser": "^3.3.0",
     "conventional-changelog": "^3.1.21",
     "dumi": "^1.0.3",
-    "eslint": "^7.3.0",
+    "eslint": "^7.11.0",
     "eslint-config-airbnb-base": "^14.2.0",
+    "eslint-config-prettier": "^6.12.0",
     "eslint-config-standard": "^14.1.1",
     "eslint-plugin-import": "^2.21.2",
     "eslint-plugin-node": "^11.1.0",
+    "eslint-plugin-prettier": "^3.1.4",
     "eslint-plugin-promise": "^4.2.1",
     "eslint-plugin-standard": "^4.0.1",
     "father-build": "^1.18.1",
     "git-cz": "^4.3.1",
+    "husky": "^4.3.0",
     "lerna": "^3.18.1",
+    "lint-staged": "^10.4.0",
+    "prettier": "^2.1.2",
     "rollup-plugin-node-builtins": "^2.1.2",
     "rollup-plugin-node-globals": "^1.4.0"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": ""
+    }
+  },
+  "lint-staged": {
+    "**/*.{js,jsx,less}": [
+      "prettier --write",
+      "git add"
+    ],
+    "*.js": "eslint --fix --ext .js"
   },
   "publishConfig": {
     "access": "public"

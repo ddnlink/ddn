@@ -1,7 +1,7 @@
 import ByteBuffer from 'bytebuffer'
 
 export default {
-  daoOrg: async (org) => {
+  daoOrg: async org => {
     const bb = new ByteBuffer()
     if (!org) {
       return null
@@ -20,7 +20,7 @@ export default {
     return bb.toBuffer()
   },
 
-  daoExchange: async (asset) => {
+  daoExchange: async asset => {
     const bb = new ByteBuffer()
     bb.writeString(asset.org_id.toLowerCase())
     bb.writeString(asset.exchange_trs_id)
@@ -32,7 +32,7 @@ export default {
     return bb.toBuffer()
   },
 
-  daoContribution: async (asset) => {
+  daoContribution: async asset => {
     const bb = new ByteBuffer()
     bb.writeUTF8String(asset.title)
     bb.writeUTF8String(asset.received_address)
@@ -43,7 +43,7 @@ export default {
     return bb.toBuffer()
   },
 
-  daoConfirmation: async (asset) => {
+  daoConfirmation: async asset => {
     const bb = new ByteBuffer()
     bb.writeUTF8String(asset.received_address)
     bb.writeUTF8String(asset.sender_address)

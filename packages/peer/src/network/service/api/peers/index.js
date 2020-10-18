@@ -57,17 +57,22 @@ class RootRouter {
     }
 
     return new Promise((resolve, reject) => {
-      this.dao.findPage('peer', where, limit, offset, true,
-        ['ip', 'port', 'state', 'os', 'version'], sortBy ? [
-          [sortBy, sortMethod]
-        ] : null,
+      this.dao.findPage(
+        'peer',
+        where,
+        limit,
+        offset,
+        true,
+        ['ip', 'port', 'state', 'os', 'version'],
+        sortBy ? [[sortBy, sortMethod]] : null,
         (err, rows) => {
           if (err) {
             reject(err)
           } else {
             resolve(rows)
           }
-        })
+        }
+      )
     })
   }
 
@@ -112,21 +117,24 @@ class RootRouter {
     const query = Object.assign({}, req.body, req.query)
     // query.port = Number(query.port)
 
-    const validateErrors = await this.ddnSchema.validate({
-      type: 'object',
-      properties: {
-        ip: {
-          type: 'string',
-          minLength: 1
+    const validateErrors = await this.ddnSchema.validate(
+      {
+        type: 'object',
+        properties: {
+          ip: {
+            type: 'string',
+            minLength: 1
+          },
+          port: {
+            type: 'integer',
+            minimum: 0,
+            maximum: 65535
+          }
         },
-        port: {
-          type: 'integer',
-          minimum: 0,
-          maximum: 65535
-        }
+        required: ['ip', 'port']
       },
-      required: ['ip', 'port']
-    }, query)
+      query
+    )
     if (validateErrors) {
       throw new Error(`Invalid parameters: ${validateErrors[0].schemaPath} ${validateErrors[0].message}`)
     }
@@ -154,16 +162,16 @@ class RootRouter {
   }
 
   /**
-     * GET /peers/version
-     *
-     * 该接口已经修改，原来返回值：
-     * {
-     *     version: this.config.version,
-     *     build: this.config.buildVersion,
-     *     net: this.config.net
-     * }
-     * @param {*} req 需要提供 nethash 参数
-     */
+   * GET /peers/version
+   *
+   * 该接口已经修改，原来返回值：
+   * {
+   *     version: this.config.version,
+   *     build: this.config.buildVersion,
+   *     net: this.config.net
+   * }
+   * @param {*} req 需要提供 nethash 参数
+   */
   async getVersion (req) {
     return {
       success: true,

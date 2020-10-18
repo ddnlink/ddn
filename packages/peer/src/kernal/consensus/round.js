@@ -70,16 +70,22 @@ class Round {
     // shuai 2018-11-24
     return new Promise((resolve, reject) => {
       try {
-        this.dao.findListByGroup('mem_round', { round: round.toString() }, {
-          group: ['delegate', 'round'],
-          attributes: ['delegate', 'round', [this.dao.db_fnSum('amount'), 'amount']] // wxm block database library.dao.db_fn('sum', library.dao.db_col('amount'))
-        }, dbTrans, (err, data) => {
-          if (err) {
-            reject(err)
-          } else {
-            resolve(data)
+        this.dao.findListByGroup(
+          'mem_round',
+          { round: round.toString() },
+          {
+            group: ['delegate', 'round'],
+            attributes: ['delegate', 'round', [this.dao.db_fnSum('amount'), 'amount']] // wxm block database library.dao.db_fn('sum', library.dao.db_col('amount'))
+          },
+          dbTrans,
+          (err, data) => {
+            if (err) {
+              reject(err)
+            } else {
+              resolve(data)
+            }
           }
-        })
+        )
       } catch (e) {
         reject(e)
       }
@@ -111,18 +117,22 @@ class Round {
   async tick (block, dbTrans) {
     const round = await this.getRound(block.height)
 
-    await this.runtime.account.merge(null, {
-      publicKey: block.generator_public_key, // wxm block database
-      producedblocks: 1,
-      block_id: block.id, // wxm block database
-      round
-    }, dbTrans)
+    await this.runtime.account.merge(
+      null,
+      {
+        publicKey: block.generator_public_key, // wxm block database
+        producedblocks: 1,
+        block_id: block.id, // wxm block database
+        round
+      },
+      dbTrans
+    )
 
-    this._feesByRound[round] = (this._feesByRound[round] || '0')
+    this._feesByRound[round] = this._feesByRound[round] || '0'
 
     this._feesByRound[round] = bignum.plus(this._feesByRound[round], block.total_fee) // wxm block database
 
-    this._rewardsByRound[round] = (this._rewardsByRound[round] || [])
+    this._rewardsByRound[round] = this._rewardsByRound[round] || []
     this._rewardsByRound[round].push(block.reward)
 
     this._delegatesByRound[round] = this._delegatesByRound[round] || []
@@ -139,8 +149,11 @@ class Round {
     }
 
     // 受托人数量，不是创世区块，也不是第一轮
-    if (this._delegatesByRound[round].length !== this.constants.delegates &&
-            !bignum.isEqualTo(block.height, 1) && !bignum.isEqualTo(block.height, this.constants.delegates)) {
+    if (
+      this._delegatesByRound[round].length !== this.constants.delegates &&
+      !bignum.isEqualTo(block.height, 1) &&
+      !bignum.isEqualTo(block.height, this.constants.delegates)
+    ) {
       this.logger.debug('Round tick completed 2', {
         height: block.height,
         delegatesByRound: this._delegatesByRound[round].length
@@ -162,9 +175,13 @@ class Round {
 
     if (outsiders.length) {
       const escaped = outsiders.map(item => `'${item}'`)
-      await this.runtime.account.updateAccount({
-        missedblocks: this.dao.db_str('missedblocks + 1')
-      }, { address: escaped.join(',') }, dbTrans)
+      await this.runtime.account.updateAccount(
+        {
+          missedblocks: this.dao.db_str('missedblocks + 1')
+        },
+        { address: escaped.join(',') },
+        dbTrans
+      )
     }
 
     const roundChanges = new RoundChanges(this._context, round)
@@ -180,15 +197,19 @@ class Round {
         changeFees = bignum.plus(changeFees, changes.feesRemaining)
       }
 
-      await this.runtime.account.merge(null, {
-        publicKey: delegate, // wxm block database
-        balance: changeBalance.toString(),
-        u_balance: changeBalance.toString(),
-        block_id: block.id, // wxm block database
-        round: await this.getRound(block.height), // Todo: 数据库是 int 型，赋值是 str
-        fees: changeFees.toString(),
-        rewards: changeRewards.toString()
-      }, dbTrans)
+      await this.runtime.account.merge(
+        null,
+        {
+          publicKey: delegate, // wxm block database
+          balance: changeBalance.toString(),
+          u_balance: changeBalance.toString(),
+          block_id: block.id, // wxm block database
+          round: await this.getRound(block.height), // Todo: 数据库是 int 型，赋值是 str
+          fees: changeFees.toString(),
+          rewards: changeRewards.toString()
+        },
+        dbTrans
+      )
     }
 
     // distribute club bonus
@@ -198,24 +219,32 @@ class Round {
 
     this.logger.info(`DDN witness club get new bonus: ${JSON.stringify(bonus)}`)
 
-    await this.runtime.account.merge(this.constants.foundAddress, {
-      address: this.constants.foundAddress,
-      balance: bignum.plus(fees, rewards).toString(),
-      u_balance: bignum.plus(fees, rewards).toString(),
-      fees: fees.toString(),
-      rewards: rewards.toString(),
-      block_id: block.id, // wxm block database
-      round: await this.getRound(block.height)
-    }, dbTrans)
+    await this.runtime.account.merge(
+      this.constants.foundAddress,
+      {
+        address: this.constants.foundAddress,
+        balance: bignum.plus(fees, rewards).toString(),
+        u_balance: bignum.plus(fees, rewards).toString(),
+        fees: fees.toString(),
+        rewards: rewards.toString(),
+        block_id: block.id, // wxm block database
+        round: await this.getRound(block.height)
+      },
+      dbTrans
+    )
 
     const votes = await this.getVotes(round, dbTrans)
 
     for (let i = 0; i < votes.length; i++) {
       const vote = votes[i]
       const address = this.runtime.account.generateAddressByPublicKey(vote.delegate)
-      await this.runtime.account.updateAccount({
-        vote: this.dao.db_str(`vote + ${vote.amount}`)
-      }, { address }, dbTrans)
+      await this.runtime.account.updateAccount(
+        {
+          vote: this.dao.db_str(`vote + ${vote.amount}`)
+        },
+        { address },
+        dbTrans
+      )
     }
 
     if (this.runtime.socketio) {
@@ -246,7 +275,7 @@ class Round {
    * @param {array} dbTrans 交易
    */
   async backwardTick (block, previousBlock, dbTrans) {
-    const done = (err) => {
+    const done = err => {
       if (err) {
         this.logger.error(`Round backward tick failed: ${err}`)
       } else {
@@ -259,20 +288,26 @@ class Round {
 
     const round = await this.getRound(block.height)
     const prevRound = await this.getRound(previousBlock.height)
-    this.logger.debug(`Round backward tick prevRound is ${prevRound} of previousBlock.height ${previousBlock.height} or previousBlock.b_height ${previousBlock.b_height}`)
+    this.logger.debug(
+      `Round backward tick prevRound is ${prevRound} of previousBlock.height ${previousBlock.height} or previousBlock.b_height ${previousBlock.b_height}`
+    )
 
-    await this.runtime.account.merge(null, {
-      publicKey: block.generator_public_key, // wxm block database
-      producedblocks: -1,
-      block_id: block.id, // wxm block database
-      round
-    }, dbTrans)
+    await this.runtime.account.merge(
+      null,
+      {
+        publicKey: block.generator_public_key, // wxm block database
+        producedblocks: -1,
+        block_id: block.id, // wxm block database
+        round
+      },
+      dbTrans
+    )
 
-    this._feesByRound[round] = (this._feesByRound[round] || 0)
+    this._feesByRound[round] = this._feesByRound[round] || 0
 
     this._feesByRound[round] = bignum.minus(this._feesByRound[round], block.totalFee)
 
-    this._rewardsByRound[round] = (this._rewardsByRound[round] || [])
+    this._rewardsByRound[round] = this._rewardsByRound[round] || []
     this._rewardsByRound[round].pop()
 
     this._delegatesByRound[round] = this._delegatesByRound[round] || []

@@ -1,4 +1,3 @@
-
 import path from 'path'
 import fs from 'fs'
 import request from 'request'
@@ -116,7 +115,7 @@ class Dapp extends Asset.Base {
         throw new Error('Invalid icon link')
       }
 
-      const length = dapp.icon.length
+      const { length } = dapp.icon
 
       if (
         dapp.icon.indexOf('.png') !== length - 4 &&
@@ -166,7 +165,7 @@ class Dapp extends Asset.Base {
     if (dapp.tags) {
       let tags = dapp.tags.split(',')
 
-      tags = tags.map(tag => tag.trim()).sort()
+      tags = tags.map((tag) => tag.trim()).sort()
 
       for (let i = 0; i < tags.length - 1; i++) {
         if (tags[i + 1] === tags[i]) {
@@ -210,7 +209,7 @@ class Dapp extends Asset.Base {
   }
 
   async getBytes (trs) {
-    const dapp = trs.asset.dapp
+    const { dapp } = trs.asset
     let buf = Buffer.from([])
     const nameBuf = Buffer.from(dapp.name, 'utf8')
     buf = Buffer.concat([buf, nameBuf])
@@ -494,7 +493,7 @@ class Dapp extends Asset.Base {
   }
 
   async getLaunchDappLastError (req) {
-    const query = req.query
+    const { query } = req
 
     const validateErrors = await this.ddnSchema.validate({
       type: 'object',
@@ -521,13 +520,12 @@ class Dapp extends Asset.Base {
 
     if (_dappLaunchedLastError[query.id]) {
       return { success: true, error: _dappLaunchedLastError[query.id] }
-    } else {
-      return { success: true }
     }
+    return { success: true }
   }
 
   async postLaunchDapp (req) {
-    const body = req.body
+    const { body } = req
 
     const validateErrors = await this.ddnSchema.validate({
       type: 'object',
@@ -569,13 +567,12 @@ class Dapp extends Asset.Base {
       fs.readFile(configFile, 'utf8', (err, data) => {
         if (err) {
           return reject(err)
-        } else {
-          try {
-            const configObj = JSON.parse(data)
-            return resolve(configObj)
-          } catch (err2) {
-            return reject(err2)
-          }
+        }
+        try {
+          const configObj = JSON.parse(data)
+          return resolve(configObj)
+        } catch (err2) {
+          return reject(err2)
         }
       })
     })
@@ -682,13 +679,12 @@ class Dapp extends Asset.Base {
       fs.readFile(routerFile, 'utf8', (err, data) => {
         if (err) {
           return reject(err)
-        } else {
-          try {
-            const routersObj = JSON.parse(data)
-            return resolve(routersObj)
-          } catch (err2) {
-            return reject(err2)
-          }
+        }
+        try {
+          const routersObj = JSON.parse(data)
+          return resolve(routersObj)
+        } catch (err2) {
+          return reject(err2)
         }
       })
     })
@@ -724,12 +720,12 @@ class Dapp extends Asset.Base {
                         resolve(data)
                       })
                     } else {
-                      reject('DApp not launched')
+                      reject(new Error('DApp not launched'))
                     }
                   })
                   res.json({ success: true, result })
                 } catch (err) {
-                  res.json({ success: false, error: err + '' })
+                  res.json({ success: false, error: `${err}` })
                 }
               })
             } catch (error) {
@@ -744,7 +740,7 @@ class Dapp extends Asset.Base {
   }
 
   async postStopDapp (req) {
-    const body = req.body
+    const { body } = req
 
     const validateErrors = await this.ddnSchema.validate({
       type: 'object',
@@ -794,7 +790,7 @@ class Dapp extends Asset.Base {
   }
 
   async _detachDappApi (id) {
-    await this.runtime.httpserver.removeApiRouter('/dapp/' + id)
+    await this.runtime.httpserver.removeApiRouter(`/dapp/${id}`)
   }
 
   async getDappByTransactionId (trsId) {
@@ -802,11 +798,11 @@ class Dapp extends Asset.Base {
     if (result && result.length) {
       return result[0]
     }
-    throw new Error('DApp not found: ' + trsId)
+    throw new Error(`DApp not found: ${trsId}`)
   }
 
   async getDappList (req) {
-    const query = req.query
+    const { query } = req
 
     const validateErrors = await this.ddnSchema.validate({
       type: 'object',
@@ -966,8 +962,8 @@ class Dapp extends Asset.Base {
 
     if (fs.existsSync(path)) {
       files = fs.readdirSync(path)
-      files.forEach(function (file) {
-        const curPath = path + '/' + file
+      files.forEach((file) => {
+        const curPath = `${path}/${file}`
         if (fs.statSync(curPath).isDirectory()) { // recurse
           self.delDir(curPath)
         } else { // delete file
@@ -1001,13 +997,11 @@ class Dapp extends Asset.Base {
 
       downloadRequest.on('response', (res) => {
         if (res.statusCode !== 200) {
-          return reject(`Faile to download dapp ${source} with err code: ${res.statusCode}`)
+          return reject(new Error(`Faile to download dapp ${source} with err code: ${res.statusCode}`))
         }
       })
 
-      downloadRequest.on('error', (err) => {
-        return reject(`Failed to download dapp ${source} with error: ${err.message}`)
-      })
+      downloadRequest.on('error', (err) => reject(new Error(`Failed to download dapp ${source} with error: ${err.message}`)))
 
       const file = fs.createWriteStream(target)
       file.on('finish', () => {
@@ -1033,9 +1027,7 @@ class Dapp extends Asset.Base {
     return new Promise((resolve, reject) => {
       const unzipper = new DecompressZip(zippath)
 
-      unzipper.on('error', err => {
-        return reject(`Failed to decompress zip file: ${err}`)
-      })
+      unzipper.on('error', (err) => reject(new Error(`Failed to decompress zip file: ${err}`)))
 
       unzipper.on('extract', () => {
         resolve()
@@ -1053,12 +1045,10 @@ class Dapp extends Asset.Base {
     const dappPath = path.join(this.config.dappsDir, dapp.transaction_id)
 
     await new Promise((resolve, reject) => {
-      fs.exists(dappPath, (exists) => {
-        if (exists) {
-          return reject('Dapp is already installed')
-        }
-        resolve()
-      })
+      if (!fs.existsSync(dappPath)) {
+        return reject(new Error('Dapp is already installed'))
+      }
+      resolve()
     })
 
     await new Promise((resolve, reject) => {
@@ -1070,7 +1060,7 @@ class Dapp extends Asset.Base {
       })
     })
 
-    const dappPackage = path.join(dappPath, dapp.transaction_id + '.zip')
+    const dappPackage = path.join(dappPath, `${dapp.transaction_id}.zip`)
 
     try {
       await this.downloadDapp(dapp.link, dappPackage)
@@ -1093,14 +1083,14 @@ class Dapp extends Asset.Base {
     const dappPath = path.join(this.config.dappsDir, dapp.transaction_id)
 
     if (!fs.existsSync(dappPath)) {
-      throw new Error('Dapp not installed: ' + dapp.transaction_id)
+      throw new Error(`Dapp not installed: ${dapp.transaction_id}`)
     }
 
     this.delDir(dappPath)
   }
 
   async postUninstallDapp (req, res) {
-    const body = req.body
+    const { body } = req
 
     const validateErrors = await this.ddnSchema.validate({
       type: 'object',
@@ -1150,7 +1140,7 @@ class Dapp extends Asset.Base {
   }
 
   async postInstallDapp (req, res) {
-    const body = req.body
+    const { body } = req
 
     const validateErrors = await this.ddnSchema.validate({
       type: 'object',
@@ -1200,7 +1190,7 @@ class Dapp extends Asset.Base {
   }
 
   async putDapp (req) {
-    const body = req.body
+    const { body } = req
 
     const validateErrors = await this.ddnSchema.validate({
       type: 'object',
@@ -1279,7 +1269,7 @@ class Dapp extends Asset.Base {
         }
 
         if (account.second_signature && !body.secondSecret) {
-          return cb('Invalid second passphrase')
+          return cb(new Error('Invalid second passphrase'))
         }
 
         let second_keypair = null

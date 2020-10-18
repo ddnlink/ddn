@@ -26,22 +26,30 @@ class PeerSync {
       return false
     }
 
-    const peerStr = remotePeerHeight && remotePeerHeight.peer ? `${ip.fromLong(remotePeerHeight.peer.ip)}:${remotePeerHeight.peer.port}` : 'unknown'
+    const peerStr =
+      remotePeerHeight && remotePeerHeight.peer
+        ? `${ip.fromLong(remotePeerHeight.peer.ip)}:${remotePeerHeight.peer.port}`
+        : 'unknown'
 
     if (remotePeerHeight && remotePeerHeight.body) {
       this.logger.info(`Check blockchain on ${peerStr}`)
 
-      const validateErrors = await this.ddnSchema.validate({
-        type: 'object',
-        properties: {
-          height: {
-            type: 'string'
-          }
+      const validateErrors = await this.ddnSchema.validate(
+        {
+          type: 'object',
+          properties: {
+            height: {
+              type: 'string'
+            }
+          },
+          required: ['height']
         },
-        required: ['height']
-      }, remotePeerHeight.body)
+        remotePeerHeight.body
+      )
       if (validateErrors) {
-        this.logger.log(`Failed to parse blockchain height: ${peerStr} ${validateErrors[0].schemaPath} ${validateErrors[0].message}`)
+        this.logger.log(
+          `Failed to parse blockchain height: ${peerStr} ${validateErrors[0].schemaPath} ${validateErrors[0].message}`
+        )
         // 2020.8.28 添加返回结果
         return false
       }
@@ -60,7 +68,11 @@ class PeerSync {
         this.logger.debug(`Got syncLastBlock: ${syncLastBlock}`)
         if (syncLastBlock) {
           remotePeerHeight = await this.runtime.peer.request({ api: '/height' }) // fixme ???
-          if (remotePeerHeight && remotePeerHeight.body && bignum.new(syncLastBlock.height).eq(remotePeerHeight.body.height)) {
+          if (
+            remotePeerHeight &&
+            remotePeerHeight.body &&
+            bignum.new(syncLastBlock.height).eq(remotePeerHeight.body.height)
+          ) {
             return true
           } else {
             return false
@@ -79,31 +91,39 @@ class PeerSync {
 
   async _getIdSequence (height) {
     return new Promise((resolve, reject) => {
-      this.dao.findPage('block', {
-        height: {
-          $lte: height
-        }
-      }, 5, 0, false, ['id', 'height'],
-      [['height', 'DESC']], (err, rows) => {
-        if (err || !rows || !rows.length) {
-          reject(err ? err.toString() : `Can't get sequence before: ${height}`)
-        }
-
-        let firstHeight = ''
-        let ids = ''
-        for (let i = 0; i < rows.length; i++) {
-          firstHeight = rows[i].height
-          if (ids.length > 0) {
-            ids += ','
+      this.dao.findPage(
+        'block',
+        {
+          height: {
+            $lte: height
           }
-          ids += rows[i].id
-        }
+        },
+        5,
+        0,
+        false,
+        ['id', 'height'],
+        [['height', 'DESC']],
+        (err, rows) => {
+          if (err || !rows || !rows.length) {
+            reject(err ? err.toString() : `Can't get sequence before: ${height}`)
+          }
 
-        resolve({
-          firstHeight,
-          ids
-        })
-      })
+          let firstHeight = ''
+          let ids = ''
+          for (let i = 0; i < rows.length; i++) {
+            firstHeight = rows[i].height
+            if (ids.length > 0) {
+              ids += ','
+            }
+            ids += rows[i].id
+          }
+
+          resolve({
+            firstHeight,
+            ids
+          })
+        }
+      )
     })
   }
 
@@ -123,7 +143,10 @@ class PeerSync {
       const maxHeight = currProcessHeight // 119
       currProcessHeight = data.firstHeight // 114
 
-      const result = await this.runtime.peer.request({ peer, api: `/blocks/common?ids=${data.ids}&max=${maxHeight}&min=${currProcessHeight}` })
+      const result = await this.runtime.peer.request({
+        peer,
+        api: `/blocks/common?ids=${data.ids}&max=${maxHeight}&min=${currProcessHeight}`
+      })
       if (result && result.body && result.body.common) {
         try {
           const row = await this.dao.findOne('block', {
@@ -132,7 +155,7 @@ class PeerSync {
           }, ['previous_block'])
           this.logger.debug(`peer-sync._addLackBlocks result.body.common.previous_block is ${result.body.common.previous_block}`)
                 this.logger.debug(`peer-sync._addLackBlocks row.previous_block is ${row.previous_block}`)
-                
+
           if (!row) {
             this.logger.error("Can't compare blocks")
             throw new Error("Can't compare blocks")
@@ -152,7 +175,9 @@ class PeerSync {
       return
     }
 
-    this.logger.info(`Found common block ${lastLackBlock.id} (at ${lastLackBlock.height}) with peer ${peerStr}, last block height is ${lastBlock.height}`)
+    this.logger.info(
+      `Found common block ${lastLackBlock.id} (at ${lastLackBlock.height}) with peer ${peerStr}, last block height is ${lastBlock.height}`
+    )
     const toRemove = bignum.new(lastBlock.height).minus(lastLackBlock.height)
     this.logger.debug(`Got lastBlock.height = ${lastBlock.height}, lastLackBlock.height = ${lastLackBlock.height}`)
 
@@ -180,7 +205,10 @@ class PeerSync {
         let backHeight = lastLackBlock.height
 
         this.logger.debug('rollback blocks querySimpleBlockData, backRound', backRound)
-        if (currentRound !== backRound || bignum.isEqualTo(bignum.modulo(lastBlock.height, this.constants.delegates), 0)) {
+        if (
+          currentRound !== backRound ||
+          bignum.isEqualTo(bignum.modulo(lastBlock.height, this.constants.delegates), 0)
+        ) {
           if (bignum.isEqualTo(backRound, 1)) {
             backHeight = '1'
           } else {
@@ -247,9 +275,12 @@ class PeerSync {
 
       let blocks = data.body.blocks
 
-      const validateErrors = await this.ddnSchema.validate({
-        type: 'array'
-      }, blocks)
+      const validateErrors = await this.ddnSchema.validate(
+        {
+          type: 'array'
+        },
+        blocks
+      )
       if (validateErrors) {
         throw new Error(`Can't parse blocks: ${validateErrors[0].schemaPath} ${validateErrors[0].message}`)
       }
@@ -276,7 +307,7 @@ class PeerSync {
             await this.runtime.block.processBlock(block, null, false, true, true)
           } catch (err) {
             this.logger.error(`Failed to process block: ${err}`)
-            if (err.message === "DDN is preparing") {
+            if (err.message === 'DDN is preparing') {
               // return setTimeout(() => {
               //   _cloneBlocksFromPeer(peer, blockId)
               // }, 10)
@@ -310,46 +341,52 @@ class PeerSync {
       return
     }
 
-    const validateErrors = await this.ddnSchema.validate({
-      type: 'object',
-      properties: {
-        signatures: {
-          type: 'array',
-          uniqueItems: true
-        }
+    const validateErrors = await this.ddnSchema.validate(
+      {
+        type: 'object',
+        properties: {
+          signatures: {
+            type: 'array',
+            uniqueItems: true
+          }
+        },
+        required: ['signatures']
       },
-      required: ['signatures']
-    }, data.body)
+      data.body
+    )
     if (validateErrors) {
       this.logger.error(`${validateErrors[0].schemaPath} ${validateErrors[0].message}`)
       return
     }
 
     return new Promise((resolve, reject) => {
-      this.sequence.add(async (cb) => {
-        for (let i = 0; i < data.body.signatures.length; i++) {
-          const signature = data.body.signatures[i]
-          for (let j = 0; j < signature.signatures; j++) {
-            const s = signature.signatures[j]
-            try {
-              await this.runtime.multisignature.processSignature({
-                signature: s,
-                transaction: signature.transaction
-              })
-            } catch (e) {
-              cb(e)
+      this.sequence.add(
+        async cb => {
+          for (let i = 0; i < data.body.signatures.length; i++) {
+            const signature = data.body.signatures[i]
+            for (let j = 0; j < signature.signatures; j++) {
+              const s = signature.signatures[j]
+              try {
+                await this.runtime.multisignature.processSignature({
+                  signature: s,
+                  transaction: signature.transaction
+                })
+              } catch (e) {
+                cb(e)
+              }
             }
           }
-        }
 
-        cb()
-      }, err => {
-        if (err) {
-          reject(err)
-        } else {
-          resolve()
+          cb()
+        },
+        err => {
+          if (err) {
+            reject(err)
+          } else {
+            resolve()
+          }
         }
-      })
+      )
     })
   }
 
@@ -366,16 +403,19 @@ class PeerSync {
       return
     }
 
-    const validateErrors = await this.ddnSchema.validate({
-      type: 'object',
-      properties: {
-        transactions: {
-          type: 'array',
-          uniqueItems: true
-        }
+    const validateErrors = await this.ddnSchema.validate(
+      {
+        type: 'object',
+        properties: {
+          transactions: {
+            type: 'array',
+            uniqueItems: true
+          }
+        },
+        required: ['transactions']
       },
-      required: ['transactions']
-    }, data.body)
+      data.body
+    )
     if (validateErrors) {
       this.logger.error(validateErrors[0].message)
       return
@@ -387,7 +427,10 @@ class PeerSync {
         transactions[i] = await this.runtime.transaction.objectNormalize(transactions[i])
       } catch (e) {
         const peerStr = data.peer ? `${ip.fromLong(data.peer.ip)}:${data.peer.port}` : 'unknown'
-        this.logger.log(`Transaction ${transactions[i] ? transactions[i].id : 'null'} is not valid, ban 60 min`, peerStr)
+        this.logger.log(
+          `Transaction ${transactions[i] ? transactions[i].id : 'null'} is not valid, ban 60 min`,
+          peerStr
+        )
         await this.runtime.peer.changeState(data.peer.ip, data.peer.port, 0, 3600)
         return
       }
@@ -408,20 +451,23 @@ class PeerSync {
     }
 
     return new Promise((resolve, reject) => {
-      this.balancesSequence.add(async (cb) => {
-        try {
-          await this.runtime.transaction.receiveTransactions(trs)
-          cb()
-        } catch (e) {
-          cb(e)
+      this.balancesSequence.add(
+        async cb => {
+          try {
+            await this.runtime.transaction.receiveTransactions(trs)
+            cb()
+          } catch (e) {
+            cb(e)
+          }
+        },
+        err => {
+          if (err) {
+            reject(err)
+          } else {
+            resolve()
+          }
         }
-      }, err => {
-        if (err) {
-          reject(err)
-        } else {
-          resolve()
-        }
-      })
+      )
     })
   }
 }

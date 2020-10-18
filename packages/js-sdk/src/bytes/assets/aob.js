@@ -3,7 +3,7 @@
  */
 import ByteBuffer from 'bytebuffer'
 
-const aobIssuer = async (asset) => {
+const aobIssuer = async asset => {
   // const bb = new ByteBuffer()
   // bb.writeString(asset.name)
   // bb.writeString(asset.desc)
@@ -11,14 +11,11 @@ const aobIssuer = async (asset) => {
   // bb.flip()
   // return bb.toBuffer()
 
-  const buffer = Buffer.concat([
-    Buffer.from(asset.name, 'utf8'),
-    Buffer.from(asset.desc || '', 'utf8')
-  ])
+  const buffer = Buffer.concat([Buffer.from(asset.name, 'utf8'), Buffer.from(asset.desc || '', 'utf8')])
   return buffer
 }
 
-const aobAsset = async (asset) => {
+const aobAsset = async asset => {
   let buffer = Buffer.concat([
     Buffer.from(asset.name, 'utf8'),
     Buffer.from(asset.desc || '', 'utf8'),
@@ -35,7 +32,7 @@ const aobAsset = async (asset) => {
   return buffer
 }
 
-const aobFlags = async (asset) => {
+const aobFlags = async asset => {
   const buffer = Buffer.concat([
     Buffer.from(asset.currency, 'utf8'),
     Buffer.from([asset.flag || 0]),
@@ -45,7 +42,7 @@ const aobFlags = async (asset) => {
   return buffer
 }
 
-const aobAcl = async (asset) => {
+const aobAcl = async asset => {
   const bb = new ByteBuffer()
   bb.writeString(asset.currency)
   bb.writeString(asset.operator)
@@ -60,16 +57,13 @@ const aobAcl = async (asset) => {
   return bb.toBuffer()
 }
 
-const aobIssue = async (asset) => {
-  const buffer = Buffer.concat([
-    Buffer.from(asset.currency, 'utf8'),
-    Buffer.from(asset.amount, 'utf8')
-  ])
+const aobIssue = async asset => {
+  const buffer = Buffer.concat([Buffer.from(asset.currency, 'utf8'), Buffer.from(asset.amount, 'utf8')])
 
   return buffer
 }
 
-const aobTransfer = async (asset) => {
+const aobTransfer = async asset => {
   const buffer = Buffer.concat([
     Buffer.from(asset.currency, 'utf8'),
     Buffer.from(asset.amount, 'utf8'),

@@ -20,20 +20,23 @@ class VotesRouter {
    */
   async get (req) {
     const query = Object.assign({}, req.body, req.query)
-    const validateErrors = await this.ddnSchema.validate({
-      type: 'object',
-      properties: {
-        address: {
-          type: 'string',
-          minLength: 1
-        },
+    const validateErrors = await this.ddnSchema.validate(
+      {
+        type: 'object',
+        properties: {
+          address: {
+            type: 'string',
+            minLength: 1
+          },
 
-        publicKey: {
-          type: 'string',
-          minLength: 1
+          publicKey: {
+            type: 'string',
+            minLength: 1
+          }
         }
-      }
-    }, query)
+      },
+      query
+    )
     if (validateErrors) {
       throw new Error(`Invalid parameters: ${validateErrors[0].schemaPath} ${validateErrors[0].message}`)
     }
@@ -82,10 +85,16 @@ class VotesRouter {
     // })
 
     if (account.delegates) {
-      const delegates = await this.runtime.account.getAccountList({
-        is_delegate: 1, // wxm block database
-        sort: [['vote', 'DESC'], ['publicKey', 'ASC']] // wxm block database
-      }, ['username', 'address', 'publicKey', 'vote', 'missedblocks', 'producedblocks'])
+      const delegates = await this.runtime.account.getAccountList(
+        {
+          is_delegate: 1, // wxm block database
+          sort: [
+            ['vote', 'DESC'],
+            ['publicKey', 'ASC']
+          ] // wxm block database
+        },
+        ['username', 'address', 'publicKey', 'vote', 'missedblocks', 'producedblocks']
+      )
 
       const lastBlock = this.runtime.block.getLastBlock()
       const totalSupply = this.runtime.block.getBlockStatus().calcSupply(lastBlock.height)
@@ -95,10 +104,11 @@ class VotesRouter {
         const approval = bignum.new(delegates[i].vote).dividedBy(totalSupply).toNumber()
         delegates[i].approval = Math.round(approval * 1e2)
 
-        let percent = 100 - (delegates[i].missedblocks / ((delegates[i].producedblocks + delegates[i].missedblocks) / 100))
+        let percent =
+          100 - delegates[i].missedblocks / ((delegates[i].producedblocks + delegates[i].missedblocks) / 100)
         percent = percent || 0
         const outsider = i + 1 > this.constants.delegates // wxm
-        delegates[i].productivity = (!outsider) ? parseFloat(Math.floor(percent * 100) / 100).toFixed(2) : 0
+        delegates[i].productivity = !outsider ? parseFloat(Math.floor(percent * 100) / 100).toFixed(2) : 0
       }
 
       const result = delegates.filter(({ publicKey }) => account.delegates.includes(publicKey))
@@ -122,23 +132,26 @@ class VotesRouter {
   async put (req) {
     const body = req.body
 
-    const validateErrors = await this.ddnSchema.validate({
-      type: 'object',
-      properties: {
-        secret: {
-          type: 'string',
-          minLength: 1
-        },
-        publicKey: {
-          type: 'string',
-          format: 'publicKey'
-        },
-        secondSecret: {
-          type: 'string',
-          minLength: 1
+    const validateErrors = await this.ddnSchema.validate(
+      {
+        type: 'object',
+        properties: {
+          secret: {
+            type: 'string',
+            minLength: 1
+          },
+          publicKey: {
+            type: 'string',
+            format: 'publicKey'
+          },
+          secondSecret: {
+            type: 'string',
+            minLength: 1
+          }
         }
-      }
-    }, body)
+      },
+      body
+    )
     if (validateErrors) {
       throw new Error(`Invalid parameters: ${validateErrors[0].schemaPath} ${validateErrors[0].message}`)
     }
@@ -153,108 +166,110 @@ class VotesRouter {
     }
 
     return new Promise((resolve, reject) => {
-      this.balancesSequence.add(async (cb) => {
-        if (body.multisigAccountPublicKey &&
-                    body.multisigAccountPublicKey !== keypair.publicKey) {
-          let account
-          try {
-            account = await this.runtime.account.getAccountByPublicKey(body.multisigAccountPublicKey)
-          } catch (err) {
-            return cb(err)
-          }
+      this.balancesSequence.add(
+        async cb => {
+          if (body.multisigAccountPublicKey && body.multisigAccountPublicKey !== keypair.publicKey) {
+            let account
+            try {
+              account = await this.runtime.account.getAccountByPublicKey(body.multisigAccountPublicKey)
+            } catch (err) {
+              return cb(err)
+            }
 
-          if (!account) {
-            return cb('Multisignature account not found')
-          }
+            if (!account) {
+              return cb('Multisignature account not found')
+            }
 
-          if (!account.multisignatures || !account.multisignatures) {
-            return cb('Account does not have multisignatures enabled')
-          }
+            if (!account.multisignatures || !account.multisignatures) {
+              return cb('Account does not have multisignatures enabled')
+            }
 
-          if (!account.multisignatures.includes(keypair.publicKey)) {
-            return cb('Account does not belong to multisignature group')
-          }
+            if (!account.multisignatures.includes(keypair.publicKey)) {
+              return cb('Account does not belong to multisignature group')
+            }
 
-          let requester
-          try {
-            requester = await this.runtime.account.getAccountByPublicKey(keypair.publicKey)
-          } catch (err) {
-            return cb(err)
-          }
+            let requester
+            try {
+              requester = await this.runtime.account.getAccountByPublicKey(keypair.publicKey)
+            } catch (err) {
+              return cb(err)
+            }
 
-          if (!requester || !requester.publicKey) {
-            return cb('Invalid requester')
-          }
+            if (!requester || !requester.publicKey) {
+              return cb('Invalid requester')
+            }
 
-          if (requester.second_signature && !body.secondSecret) {
-            return cb('Invalid second passphrase')
-          }
+            if (requester.second_signature && !body.secondSecret) {
+              return cb('Invalid second passphrase')
+            }
 
-          if (requester.publicKey === account.publicKey) {
-            return cb('Invalid requester')
-          }
+            if (requester.publicKey === account.publicKey) {
+              return cb('Invalid requester')
+            }
 
-          let second_keypair = null
-          if (requester.second_signature) {
-            second_keypair = DdnCrypto.getKeys(body.secondSecret)
-          }
+            let second_keypair = null
+            if (requester.second_signature) {
+              second_keypair = DdnCrypto.getKeys(body.secondSecret)
+            }
 
-          try {
-            const transaction = await this.runtime.transaction.create({
-              type: assetTypes.VOTE,
-              votes: body.delegates,
-              sender: account,
-              keypair,
-              second_keypair,
-              requester: keypair
-            })
-            const transactions = await this.runtime.transaction.receiveTransactions([transaction])
-            cb(null, transactions)
-          } catch (err) {
-            cb(err)
-          }
-        } else {
-          let account
-          try {
-            account = await this.runtime.account.getAccountByPublicKey(keypair.publicKey)
-          } catch (err) {
-            return cb(err)
-          }
+            try {
+              const transaction = await this.runtime.transaction.create({
+                type: assetTypes.VOTE,
+                votes: body.delegates,
+                sender: account,
+                keypair,
+                second_keypair,
+                requester: keypair
+              })
+              const transactions = await this.runtime.transaction.receiveTransactions([transaction])
+              cb(null, transactions)
+            } catch (err) {
+              cb(err)
+            }
+          } else {
+            let account
+            try {
+              account = await this.runtime.account.getAccountByPublicKey(keypair.publicKey)
+            } catch (err) {
+              return cb(err)
+            }
 
-          if (!account) {
-            return cb('Account not found')
-          }
+            if (!account) {
+              return cb('Account not found')
+            }
 
-          if (account.second_signature && !body.secondSecret) {
-            return cb('Invalid second passphrase')
-          }
+            if (account.second_signature && !body.secondSecret) {
+              return cb('Invalid second passphrase')
+            }
 
-          let second_keypair = null
-          if (account.second_signature) {
-            second_keypair = DdnCrypto.getKeys(body.secondSecret)
-          }
+            let second_keypair = null
+            if (account.second_signature) {
+              second_keypair = DdnCrypto.getKeys(body.secondSecret)
+            }
 
-          try {
-            const transaction = await this.runtime.transaction.create({
-              type: assetTypes.VOTE,
-              votes: body.delegates,
-              sender: account,
-              keypair,
-              second_keypair
-            })
-            const transactions = await this.runtime.transaction.receiveTransactions([transaction])
-            cb(null, transactions)
-          } catch (e) {
-            cb(e)
+            try {
+              const transaction = await this.runtime.transaction.create({
+                type: assetTypes.VOTE,
+                votes: body.delegates,
+                sender: account,
+                keypair,
+                second_keypair
+              })
+              const transactions = await this.runtime.transaction.receiveTransactions([transaction])
+              cb(null, transactions)
+            } catch (e) {
+              cb(e)
+            }
+          }
+        },
+        (err, transactions) => {
+          if (err) {
+            reject(err)
+          } else {
+            resolve({ success: true, transaction: transactions[0] })
           }
         }
-      }, (err, transactions) => {
-        if (err) {
-          reject(err)
-        } else {
-          resolve({ success: true, transaction: transactions[0] })
-        }
-      })
+      )
     })
   }
 }

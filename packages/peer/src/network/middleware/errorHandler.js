@@ -5,7 +5,7 @@ const last = (arr = []) => arr[arr.length - 1]
 const noop = Function.prototype
 
 function copyFnProps (oldFn, newFn) {
-  Object.keys(oldFn).forEach((key) => {
+  Object.keys(oldFn).forEach(key => {
     newFn[key] = oldFn[key]
   })
   return newFn

@@ -1,5 +1,4 @@
 export default {
-
   name: 'signature',
 
   validate (str) {
@@ -15,5 +14,4 @@ export default {
       return false
     }
   }
-
 }

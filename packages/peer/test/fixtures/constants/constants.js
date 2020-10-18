@@ -8,7 +8,7 @@ export default {
   foundAddress: 'DLjrrVwnmMXstcAYVjcrpwyYb3kY1ehABU', // Please protect its private key
   walletUrl: 'http://wallet.ddn.link',
   enableMoreLockTypes: true,
-  
+
   interval: 10, // 10ms
   delegates: 101, // number
   maxPayloadLength: 8 * 1024 * 1024,

@@ -46,18 +46,12 @@ class Multisignature {
       throw new Error("Multisignature group must contain at least one member");
     }
 
-    if (
-      trs.asset.multisignature.min <= 1 ||
-      trs.asset.multisignature.min > 16
-    ) {
-      throw new Error(`Invalid transaction asset: ${trs.id}`);
+    if (trs.asset.multisignature.min <= 1 || trs.asset.multisignature.min > 16) {
+      throw new Error(`Invalid transaction asset: ${trs.id}`)
     }
 
-    if (
-      trs.asset.multisignature.min >
-      trs.asset.multisignature.keysgroup.length + 1
-    ) {
-      throw new Error("Invalid multisignature min");
+    if (trs.asset.multisignature.min > trs.asset.multisignature.keysgroup.length + 1) {
+      throw new Error('Invalid multisignature min')
     }
 
     if (
@@ -84,7 +78,7 @@ class Multisignature {
                   `trs.asset.multisignature.keysgroup[s].substring(1): ${trs.asset.multisignature.keysgroup[
                     s
                   ].substring(1)}`
-                );
+                )
                 verify = await this.runtime.transaction.verifySignature(
                   trs,
                   trs.signatures[d],
@@ -145,14 +139,11 @@ class Multisignature {
     return trs;
   }
 
-  async getBytes({ asset }) {
-    const keysgroupBuffer = Buffer.from(
-      asset.multisignature.keysgroup.join(""),
-      "utf8"
-    );
-    const bb = new ByteBuffer(1 + 1 + keysgroupBuffer.length, true);
-    bb.writeByte(asset.multisignature.min);
-    bb.writeByte(asset.multisignature.lifetime);
+  async getBytes ({ asset }) {
+    const keysgroupBuffer = Buffer.from(asset.multisignature.keysgroup.join(''), 'utf8')
+    const bb = new ByteBuffer(1 + 1 + keysgroupBuffer.length, true)
+    bb.writeByte(asset.multisignature.min)
+    bb.writeByte(asset.multisignature.lifetime)
     for (let i = 0; i < keysgroupBuffer.length; i++) {
       bb.writeByte(keysgroupBuffer[i]);
     }
@@ -193,8 +184,8 @@ class Multisignature {
     }
   }
 
-  async undo({ asset, id: trsId }, { id, height }, { address }, dbTrans) {
-    const multiInvert = Diff.reverse(asset.multisignature.keysgroup);
+  async undo ({ asset, id: trsId }, { id, height }, { address }, dbTrans) {
+    const multiInvert = Diff.reverse(asset.multisignature.keysgroup)
 
     this._unconfirmedSignatures[address] = true;
 
@@ -208,33 +199,35 @@ class Multisignature {
         round: await this.runtime.round.getRound(height)
       },
       dbTrans
-    );
-    await this.deleteMultisignature(trsId, dbTrans);
+    )
+    await this.deleteMultisignature(trsId, dbTrans)
   }
+
   /**
    * @description 回滚时删除对应的多重签名
    * @author created by wly
    * @param {*} transaction_id 交易id
    * @param {*} dbTrans 事物
    */
-  async deleteMultisignature(transaction_id, dbTrans) {
+  async deleteMultisignature (transaction_id, dbTrans) {
     return new Promise((resolve, reject) => {
       this.dao.remove(
-        "multisignature",
+        'multisignature',
         {
           transaction_id
         },
         dbTrans,
         err => {
           if (err) {
-            return reject(err);
+            return reject(err)
           }
-          resolve(true);
+          resolve(true)
         }
-      );
-    });
+      )
+    })
   }
-  async applyUnconfirmed({ asset }, { address, multisignatures }, dbTrans) {
+
+  async applyUnconfirmed ({ asset }, { address, multisignatures }, dbTrans) {
     if (this._unconfirmedSignatures[address]) {
       this.logger.debug(
         `Signature on this account ${address} is pending confirmation`
@@ -301,9 +294,7 @@ class Multisignature {
       trs.asset.multisignature
     );
     if (validateErros) {
-      throw new Error(
-        `Invalid multisignature parameters: ${validateErros[0].message}`
-      );
+      throw new Error(`Invalid multisignature parameters: ${validateErros[0].message}`)
     }
     return trs;
   }

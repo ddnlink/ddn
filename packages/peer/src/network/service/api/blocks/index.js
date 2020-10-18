@@ -19,42 +19,45 @@ class BlockService {
     // query.offset = Number(query.offset || 0)
     // query.limit = Number(query.limit || 100)
 
-    const validateErrors = await this.ddnSchema.validate({
-      type: 'object',
-      properties: {
-        limit: {
-          type: 'integer',
-          minimum: 0,
-          maximum: 100
-        },
-        orderBy: {
-          type: 'string'
-        },
-        offset: {
-          type: 'integer',
-          minimum: 0
-        },
-        generatorPublicKey: {
-          type: 'string',
-          format: 'publicKey'
-        },
-        totalAmount: {
-          type: 'string'
-        },
-        totalFee: {
-          type: 'string'
-        },
-        reward: {
-          type: 'string'
-        },
-        previousBlock: {
-          type: 'string'
-        },
-        height: {
-          type: 'string'
+    const validateErrors = await this.ddnSchema.validate(
+      {
+        type: 'object',
+        properties: {
+          limit: {
+            type: 'integer',
+            minimum: 0,
+            maximum: 100
+          },
+          orderBy: {
+            type: 'string'
+          },
+          offset: {
+            type: 'integer',
+            minimum: 0
+          },
+          generatorPublicKey: {
+            type: 'string',
+            format: 'publicKey'
+          },
+          totalAmount: {
+            type: 'string'
+          },
+          totalFee: {
+            type: 'string'
+          },
+          reward: {
+            type: 'string'
+          },
+          previousBlock: {
+            type: 'string'
+          },
+          height: {
+            type: 'string'
+          }
         }
-      }
-    }, query)
+      },
+      query
+    )
     if (validateErrors) {
       throw new Error(`Invalid parameters: ${validateErrors[0].schemaPath} ${validateErrors[0].message}`)
     }
@@ -98,7 +101,17 @@ class BlockService {
       sorts[0].push(sortMethod)
 
       sortField = `b.${sortField}`
-      const sortFields = ['b.id', 'b.timestamp', 'b.height', 'b.previousBlock', 'b.totalAmount', 'b.totalFee', 'b.reward', 'b.numberOfTransactions', 'b.generatorPublicKey']
+      const sortFields = [
+        'b.id',
+        'b.timestamp',
+        'b.height',
+        'b.previousBlock',
+        'b.totalAmount',
+        'b.totalFee',
+        'b.reward',
+        'b.numberOfTransactions',
+        'b.generatorPublicKey'
+      ]
       if (!sortFields.includes(sortField)) {
         throw new Error('Invalid sort field')
       }
@@ -108,20 +121,23 @@ class BlockService {
     const limit = query.limit
 
     return new Promise((resolve, reject) => {
-      this.dbSequence.add(async (cb) => {
-        try {
-          const result = await this.runtime.block.queryBlockData(where, sorts, offset, limit, true)
-          cb(null, result)
-        } catch (e) {
-          cb(e)
+      this.dbSequence.add(
+        async cb => {
+          try {
+            const result = await this.runtime.block.queryBlockData(where, sorts, offset, limit, true)
+            cb(null, result)
+          } catch (e) {
+            cb(e)
+          }
+        },
+        (err, result) => {
+          if (err) {
+            reject(err)
+          } else {
+            resolve(Object.assign({ success: true }, result))
+          }
         }
-      }, (err, result) => {
-        if (err) {
-          reject(err)
-        } else {
-          resolve(Object.assign({ success: true }, result))
-        }
-      })
+      )
     })
   }
 
@@ -131,23 +147,26 @@ class BlockService {
     }
 
     const query = Object.assign({}, req.body, req.query)
-    const validateErrors = await this.ddnSchema.validate({
-      type: 'object',
-      properties: {
-        id: {
-          type: 'string',
-          minLength: 1
-        },
-        height: {
-          type: 'string',
-          minLength: 1
-        },
-        hash: {
-          type: 'string',
-          minLength: 1
+    const validateErrors = await this.ddnSchema.validate(
+      {
+        type: 'object',
+        properties: {
+          id: {
+            type: 'string',
+            minLength: 1
+          },
+          height: {
+            type: 'string',
+            minLength: 1
+          },
+          hash: {
+            type: 'string',
+            minLength: 1
+          }
         }
-      }
-    }, query)
+      },
+      query
+    )
     if (validateErrors) {
       throw new Error(`Invalid parameters: ${validateErrors[0].schemaPath} ${validateErrors[0].message}`)
     }
@@ -166,19 +185,22 @@ class BlockService {
     }
 
     const query = Object.assign({}, req.body, req.query)
-    const validateErrors = await this.ddnSchema.validate({
-      type: 'object',
-      properties: {
-        id: {
-          type: 'string',
-          minLength: 1
-        },
-        height: {
-          type: 'string',
-          minimum: 1
+    const validateErrors = await this.ddnSchema.validate(
+      {
+        type: 'object',
+        properties: {
+          id: {
+            type: 'string',
+            minLength: 1
+          },
+          height: {
+            type: 'string',
+            minimum: 1
+          }
         }
-      }
-    }, query)
+      },
+      query
+    )
     if (validateErrors) {
       throw new Error(`Invalid parameters: ${validateErrors[0].schemaPath} ${validateErrors[0].message}`)
     }

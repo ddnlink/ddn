@@ -69,30 +69,30 @@ class PeerInvoker {
     }
 
     return new Promise((resolve, reject) => {
-      request(req,
-        async (err, res, body) => {
-          if (err || res.statusCode !== 200) {
-            this.logger.debug('Request', {
-              url: req.url,
-              statusCode: res ? res.statusCode : 'unknown',
-              err: err || res.body.error
-            })
+      request(req, async (err, res, body) => {
+        if (err || res.statusCode !== 200) {
+          this.logger.debug('Request', {
+            url: req.url,
+            statusCode: res ? res.statusCode : 'unknown',
+            err: err || res.body.error
+          })
 
-            if (err && (err.code === 'ETIMEDOUT' || err.code === 'ESOCKETTIMEDOUT' || err.code === 'ECONNREFUSED')) {
-              await this.runtime.peer.remove(peer.ip, peer.port)
-              this.logger.info(`Removing peer ${req.method} ${req.url}`)
-            } else {
-              if (!args.not_ban) {
-                await this.runtime.peer.changeState(peer.ip, peer.port, 0, 600)
-                this.logger.info(`Ban 10 min ${req.method} ${req.url}`)
-              }
-            }
-
-            reject(err || `Request peer api failed: ${url}`)
+          if (err && (err.code === 'ETIMEDOUT' || err.code === 'ESOCKETTIMEDOUT' || err.code === 'ECONNREFUSED')) {
+            await this.runtime.peer.remove(peer.ip, peer.port)
+            this.logger.info(`Removing peer ${req.method} ${req.url}`)
           } else {
-            res.headers.port = parseInt(res.headers.port)
+            if (!args.not_ban) {
+              await this.runtime.peer.changeState(peer.ip, peer.port, 0, 600)
+              this.logger.info(`Ban 10 min ${req.method} ${req.url}`)
+            }
+          }
 
-            const validateErrors = await this.ddnSchema.validate({
+          reject(err || `Request peer api failed: ${url}`)
+        } else {
+          res.headers.port = parseInt(res.headers.port)
+
+          const validateErrors = await this.ddnSchema.validate(
+            {
               type: 'object',
               properties: {
                 os: {
@@ -114,30 +114,34 @@ class PeerInvoker {
                 }
               },
               required: ['port', 'nethash', 'version']
-            }, res.headers)
-            if (validateErrors) {
-              reject(err || `Invalid parameters: ${validateErrors[0].schemaPath} ${validateErrors[0].message} url: ${url}`)
-            }
-
-            const port = res.headers.port
-            const version = res.headers.version
-
-            if (port > 0 && port <= 65535 && version === this.config.version) {
-              await this.runtime.peer.update({
-                ip: peer.ip,
-                port,
-                state: 2,
-                os: res.headers.os,
-                version
-              })
-            } else if (!this.runtime.peer.isCompatible(version)) {
-              this.logger.debug(`Remove uncompatible peer ${peer.ip}`, version)
-              await this.runtime.peer.remove(peer.ip, port)
-            }
-
-            resolve({ body, peer })
+            },
+            res.headers
+          )
+          if (validateErrors) {
+            reject(
+              err || `Invalid parameters: ${validateErrors[0].schemaPath} ${validateErrors[0].message} url: ${url}`
+            )
           }
-        })
+
+          const port = res.headers.port
+          const version = res.headers.version
+
+          if (port > 0 && port <= 65535 && version === this.config.version) {
+            await this.runtime.peer.update({
+              ip: peer.ip,
+              port,
+              state: 2,
+              os: res.headers.os,
+              version
+            })
+          } else if (!this.runtime.peer.isCompatible(version)) {
+            this.logger.debug(`Remove uncompatible peer ${peer.ip}`, version)
+            await this.runtime.peer.remove(peer.ip, port)
+          }
+
+          resolve({ body, peer })
+        }
+      })
     })
   }
 }

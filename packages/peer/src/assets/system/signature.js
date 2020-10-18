@@ -88,7 +88,7 @@ class Signatures {
       second_public_key: null
     }
     await this.runtime.account.setAccount(data, dbTrans)
-    await this.deleteSignature(trs.id,dbTrans)
+    await this.deleteSignature(trs.id, dbTrans)
     return await this.runtime.account.getAccountByAddress(address)
   }
 
@@ -98,16 +98,21 @@ class Signatures {
    * @param {*} transaction_id 交易id
    * @param {*} dbTrans 事物
    */
-  async deleteSignature (transaction_id,dbTrans){
+  async deleteSignature (transaction_id, dbTrans) {
     return new Promise((resolve, reject) => {
-      this.dao.remove("signature", {
-        transaction_id,
-      }, dbTrans, (err) => {
-        if (err) {
-          return reject(err)
+      this.dao.remove(
+        'signature',
+        {
+          transaction_id
+        },
+        dbTrans,
+        err => {
+          if (err) {
+            return reject(err)
+          }
+          resolve(true)
         }
-        resolve(true)
-      })
+      )
     })
   }
 
@@ -135,16 +140,19 @@ class Signatures {
   }
 
   async objectNormalize (trs) {
-    const validateErros = await this.ddnSchema.validate({
-      type: 'object',
-      properties: {
-        publicKey: {
-          type: 'string',
-          format: 'publicKey'
-        }
+    const validateErros = await this.ddnSchema.validate(
+      {
+        type: 'object',
+        properties: {
+          publicKey: {
+            type: 'string',
+            format: 'publicKey'
+          }
+        },
+        required: ['publicKey']
       },
-      required: ['publicKey']
-    }, trs.asset.signature)
+      trs.asset.signature
+    )
     if (validateErros) {
       throw new Error(validateErros[0].message)
     }

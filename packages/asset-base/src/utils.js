@@ -53,7 +53,7 @@ class AssetUtils {
    * 通过一个文件，将全部插件及其交易类型的配置一次性提供
    * 本方法目的是方便前端打包，主要用于 @ddn/node-sdk 使用
    * USING：
-   * 
+   *
    * export default [
    *    "@ddn/asset-aob": {
    *      transactions: [

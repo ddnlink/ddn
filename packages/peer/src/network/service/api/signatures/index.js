@@ -13,28 +13,31 @@ class RootRouter {
 
   async put (req) {
     const body = req.body
-    const validateErrors = await this.ddnSchema.validate({
-      type: 'object',
-      properties: {
-        secret: {
-          type: 'string',
-          minLength: 1
+    const validateErrors = await this.ddnSchema.validate(
+      {
+        type: 'object',
+        properties: {
+          secret: {
+            type: 'string',
+            minLength: 1
+          },
+          secondSecret: {
+            type: 'string',
+            minLength: 1
+          },
+          publicKey: {
+            type: 'string',
+            format: 'publicKey'
+          },
+          multisigAccountPublicKey: {
+            type: 'string',
+            format: 'publicKey'
+          }
         },
-        secondSecret: {
-          type: 'string',
-          minLength: 1
-        },
-        publicKey: {
-          type: 'string',
-          format: 'publicKey'
-        },
-        multisigAccountPublicKey: {
-          type: 'string',
-          format: 'publicKey'
-        }
+        required: ['secret', 'secondSecret']
       },
-      required: ['secret', 'secondSecret']
-    }, body)
+      body
+    )
     if (validateErrors) {
       throw new Error(`Invalid parameters: ${validateErrors[0].schemaPath} ${validateErrors[0].message}`)
     }
@@ -48,104 +51,106 @@ class RootRouter {
     }
 
     return new Promise((resolve, reject) => {
-      this.balancesSequence.add(async (cb) => {
-        if (body.multisigAccountPublicKey &&
-                    body.multisigAccountPublicKey !== keypair.publicKey) {
-          let account
-          try {
-            account = await this.runtime.account.getAccountByPublicKey(body.multisigAccountPublicKey)
-          } catch (err) {
-            return cb(err)
+      this.balancesSequence.add(
+        async cb => {
+          if (body.multisigAccountPublicKey && body.multisigAccountPublicKey !== keypair.publicKey) {
+            let account
+            try {
+              account = await this.runtime.account.getAccountByPublicKey(body.multisigAccountPublicKey)
+            } catch (err) {
+              return cb(err)
+            }
+
+            if (!account) {
+              return cb('Multisignature account not found')
+            }
+
+            if (!account.multisignatures || !account.multisignatures) {
+              return cb('Account does not have multisignatures enabled')
+            }
+
+            if (!account.multisignatures.includes(keypair.publicKey)) {
+              return cb('Account does not belong to multisignature group')
+            }
+
+            if (account.second_signature || account.u_second_signature) {
+              return cb('Invalid second passphrase')
+            }
+
+            let requester
+            try {
+              requester = await this.runtime.account.getAccountByPublicKey(keypair.publicKey)
+            } catch (err) {
+              return cb(err)
+            }
+
+            if (!requester || !requester.publicKey) {
+              return cb('Invalid requester')
+            }
+
+            if (requester.second_signature && !body.secondSecret) {
+              return cb('Invalid second passphrase')
+            }
+
+            if (requester.publicKey === account.publicKey) {
+              return cb('Invalid requester')
+            }
+
+            const second_keypair = DdnCrypto.getKeys(body.secondSecret)
+            let transactions = []
+            try {
+              const transaction = await this.runtime.transaction.create({
+                type: assetTypes.SIGNATURE,
+                sender: account,
+                keypair,
+                requester: keypair,
+                second_keypair
+              })
+              transactions = await this.runtime.transaction.receiveTransactions([transaction])
+            } catch (e) {
+              return cb(e)
+            }
+            cb(null, transactions)
+          } else {
+            let account
+            try {
+              account = await this.runtime.account.getAccountByPublicKey(keypair.publicKey)
+            } catch (err) {
+              return cb(err)
+            }
+
+            if (!account) {
+              return cb('Account not found')
+            }
+
+            if (account.second_signature && !body.secondSecret) {
+              return cb('Invalid second passphrase')
+            }
+
+            const second_keypair = DdnCrypto.getKeys(body.secondSecret)
+            let transactions = []
+            try {
+              const transaction = await this.runtime.transaction.create({
+                type: assetTypes.SIGNATURE,
+                sender: account,
+                keypair,
+                second_keypair
+              })
+              transactions = await this.runtime.transaction.receiveTransactions([transaction])
+            } catch (e) {
+              return cb(e)
+            }
+            cb(null, transactions)
+          }
+        },
+        (err, transactions) => {
+          if (err || !transactions || !transactions.length) {
+            return reject(err || 'Create signature transactoin failed.')
           }
 
-          if (!account) {
-            return cb('Multisignature account not found')
-          }
-
-          if (!account.multisignatures || !account.multisignatures) {
-            return cb('Account does not have multisignatures enabled')
-          }
-
-          if (!account.multisignatures.includes(keypair.publicKey)) {
-            return cb('Account does not belong to multisignature group')
-          }
-
-          if (account.second_signature || account.u_second_signature) {
-            return cb('Invalid second passphrase')
-          }
-
-          let requester
-          try {
-            requester = await this.runtime.account.getAccountByPublicKey(keypair.publicKey)
-          } catch (err) {
-            return cb(err)
-          }
-
-          if (!requester || !requester.publicKey) {
-            return cb('Invalid requester')
-          }
-
-          if (requester.second_signature && !body.secondSecret) {
-            return cb('Invalid second passphrase')
-          }
-
-          if (requester.publicKey === account.publicKey) {
-            return cb('Invalid requester')
-          }
-
-          const second_keypair = DdnCrypto.getKeys(body.secondSecret)
-          let transactions = []
-          try {
-            const transaction = await this.runtime.transaction.create({
-              type: assetTypes.SIGNATURE,
-              sender: account,
-              keypair,
-              requester: keypair,
-              second_keypair
-            })
-            transactions = await this.runtime.transaction.receiveTransactions([transaction])
-          } catch (e) {
-            return cb(e)
-          }
-          cb(null, transactions)
-        } else {
-          let account
-          try {
-            account = await this.runtime.account.getAccountByPublicKey(keypair.publicKey)
-          } catch (err) {
-            return cb(err)
-          }
-
-          if (!account) {
-            return cb('Account not found')
-          }
-
-          if (account.second_signature && !body.secondSecret) {
-            return cb('Invalid second passphrase')
-          }
-
-          const second_keypair = DdnCrypto.getKeys(body.secondSecret)
-          let transactions = []
-          try {
-            const transaction = await this.runtime.transaction.create({
-              type: assetTypes.SIGNATURE,
-              sender: account,
-              keypair,
-              second_keypair
-            })
-            transactions = await this.runtime.transaction.receiveTransactions([transaction])
-          } catch (e) {
-            return cb(e)
-          }
-          cb(null, transactions)
+          resolve({ success: true, transaction: transactions[0] })
         }
-      }, (err, transactions) => {
-        if (err || !transactions || !transactions.length) {
-          return reject(err || 'Create signature transactoin failed.')
-        }
-
-        resolve({ success: true, transaction: transactions[0] })
-      })
+      )
     })
   }
 

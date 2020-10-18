@@ -125,9 +125,7 @@ class PeerService {
 
   async postPropose ({ body }) {
     if (typeof body.propose === 'string') {
-      body.propose = this.protobuf.decodeBlockPropose(
-        Buffer.from(body.propose, 'base64')
-      )
+      body.propose = this.protobuf.decodeBlockPropose(Buffer.from(body.propose, 'base64'))
     }
 
     const validateErrors = await this.ddnSchema.validate(
@@ -160,15 +158,7 @@ class PeerService {
             format: 'signature'
           }
         },
-        required: [
-          'height',
-          'id',
-          'timestamp',
-          'generator_public_key',
-          'address',
-          'hash',
-          'signature'
-        ]
+        required: ['height', 'id', 'timestamp', 'generator_public_key', 'address', 'hash', 'signature']
       },
       body.propose
     )
@@ -316,20 +306,14 @@ class PeerService {
     }
 
     const peerIp = headers['x-forwarded-for'] || connection.remoteAddress
-    const peerStr = peerIp
-      ? `${peerIp}:${isNaN(headers.port) ? 'unknown' : headers.port}`
-      : 'unknown'
+    const peerStr = peerIp ? `${peerIp}:${isNaN(headers.port) ? 'unknown' : headers.port}` : 'unknown'
     if (typeof body.transaction === 'string') {
-      body.transaction = this.protobuf.decodeTransaction(
-        Buffer.from(body.transaction, 'base64')
-      )
+      body.transaction = this.protobuf.decodeTransaction(Buffer.from(body.transaction, 'base64'))
     }
 
     let transaction
     try {
-      transaction = await this.runtime.transaction.objectNormalize(
-        body.transaction
-      )
+      transaction = await this.runtime.transaction.objectNormalize(body.transaction)
 
       transaction.asset = transaction.asset || {}
     } catch (e) {
@@ -340,16 +324,9 @@ class PeerService {
       })
 
       if (peerIp && headers.port > 0 && headers['port' < 65536]) {
-        await this.runtime.peer.changeState(
-          ip.toLong(peerIp),
-          headers.port,
-          0,
-          3600
-        )
+        await this.runtime.peer.changeState(ip.toLong(peerIp), headers.port, 0, 3600)
         this.logger.log(
-          `Received transaction ${
-            transaction ? transaction.id : 'null'
-          } is not valid, ban 60 min`,
+          `Received transaction ${transaction ? transaction.id : 'null'} is not valid, ban 60 min`,
           peerStr
         )
       }
@@ -375,11 +352,7 @@ class PeerService {
     return new Promise((resolve, reject) => {
       this.balancesSequence.add(
         async cb => {
-          if (
-            await this.runtime.transaction.hasUnconfirmedTransaction(
-              transaction
-            )
-          ) {
+          if (await this.runtime.transaction.hasUnconfirmedTransaction(transaction)) {
             this._invalidTrsCache.set(transaction.id, true)
             return cb(`The transaction ${transaction.id} is in process already..`)
 
@@ -389,14 +362,10 @@ class PeerService {
             // }
           }
 
-          this.logger.log(
-            `Received transaction ${transaction.id} from peer ${peerStr}`
-          )
+          this.logger.log(`Received transaction ${transaction.id} from peer ${peerStr}`)
 
           try {
-            const transactions = await this.runtime.transaction.receiveTransactions(
-              [transaction]
-            )
+            const transactions = await this.runtime.transaction.receiveTransactions([transaction])
             cb(null, transactions)
           } catch (exp) {
             cb(exp)

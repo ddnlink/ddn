@@ -12,46 +12,49 @@ class MultisignaturesRouter {
   }
 
   /**
-     * 在现有账户基础上，创建多重签名账号
-     * @param {*} req 'min', 'lifetime', 'keysgroup', 'secret' 是必须的
-     */
+   * 在现有账户基础上，创建多重签名账号
+   * @param {*} req 'min', 'lifetime', 'keysgroup', 'secret' 是必须的
+   */
   async put (req) {
     const body = Object.assign({}, req.body, req.query)
-    const validateErrors = await this.ddnSchema.validate({
-      type: 'object',
-      properties: {
-        secret: {
-          type: 'string',
-          minLength: 1,
-          maxLength: 100
+    const validateErrors = await this.ddnSchema.validate(
+      {
+        type: 'object',
+        properties: {
+          secret: {
+            type: 'string',
+            minLength: 1,
+            maxLength: 100
+          },
+          publicKey: {
+            type: 'string',
+            format: 'publicKey'
+          },
+          secondSecret: {
+            type: 'string',
+            minLength: 1,
+            maxLength: 100
+          },
+          min: {
+            type: 'integer',
+            minimum: 2,
+            maximum: 16
+          },
+          lifetime: {
+            type: 'integer',
+            minimum: 1,
+            maximum: 24
+          },
+          keysgroup: {
+            type: 'array',
+            minLength: 1,
+            maxLength: 10
+          }
         },
-        publicKey: {
-          type: 'string',
-          format: 'publicKey'
-        },
-        secondSecret: {
-          type: 'string',
-          minLength: 1,
-          maxLength: 100
-        },
-        min: {
-          type: 'integer',
-          minimum: 2,
-          maximum: 16
-        },
-        lifetime: {
-          type: 'integer',
-          minimum: 1,
-          maximum: 24
-        },
-        keysgroup: {
-          type: 'array',
-          minLength: 1,
-          maxLength: 10
-        }
+        required: ['min', 'lifetime', 'keysgroup', 'secret']
       },
-      required: ['min', 'lifetime', 'keysgroup', 'secret']
-    }, body)
+      body
+    )
     if (validateErrors) {
       return {
         success: false,
@@ -68,96 +71,102 @@ class MultisignaturesRouter {
     }
 
     return new Promise((resolve, reject) => {
-      this.balancesSequence.add(async (cb) => {
-        const publicKey = keypair.publicKey
+      this.balancesSequence.add(
+        async cb => {
+          const publicKey = keypair.publicKey
 
-        let account
+          let account
 
-        try {
-          account = await this.runtime.account.getAccountByPublicKey(publicKey) //
-        } catch (err) {
-          return cb(err)
+          try {
+            account = await this.runtime.account.getAccountByPublicKey(publicKey) //
+          } catch (err) {
+            return cb(err)
+          }
+
+          if (!account) {
+            return cb('Account ' + publicKey + ' not found')
+          }
+
+          // fixme: getAccountByPublicKey 方法已经处理
+          account.publicKey = publicKey
+
+          if (account.second_signature && !body.secondSecret) {
+            return cb('Invalid second passphrase')
+          }
+
+          let second_keypair = null
+          if (account.second_signature) {
+            second_keypair = DdnCrypto.getKeys(body.secondSecret)
+          }
+
+          try {
+            const transaction = await this.runtime.transaction.create({
+              type: assetTypes.MULTISIGNATURE,
+              sender: account,
+              keypair,
+              second_keypair,
+              min: body.min,
+              keysgroup: body.keysgroup,
+              lifetime: body.lifetime
+            })
+
+            const transactions = await this.runtime.transaction.receiveTransactions([transaction])
+            cb(null, transactions)
+          } catch (e) {
+            this.logger.error('create multisignatures error', system.getErrorMsg(e))
+            return cb(e)
+          }
+        },
+        (err, transactions) => {
+          if (err) {
+            return reject(err)
+          } else {
+            setImmediate(async () => {
+              try {
+                await this.runtime.socketio.emit('multisignatures/change', {})
+              } catch (err2) {
+                this.logger.error('socket emit error: multisignatures/change', system.getErrorMsg(err2))
+              }
+            })
+
+            resolve({
+              success: true,
+              transactionId: transactions[0].id
+            })
+          }
         }
-
-        if (!account) {
-          return cb('Account ' + publicKey + ' not found')
-        }
-
-        // fixme: getAccountByPublicKey 方法已经处理
-        account.publicKey = publicKey
-
-        if (account.second_signature && !body.secondSecret) {
-          return cb('Invalid second passphrase')
-        }
-
-        let second_keypair = null
-        if (account.second_signature) {
-          second_keypair = DdnCrypto.getKeys(body.secondSecret)
-        }
-
-        try {
-          const transaction = await this.runtime.transaction.create({
-            type: assetTypes.MULTISIGNATURE,
-            sender: account,
-            keypair,
-            second_keypair,
-            min: body.min,
-            keysgroup: body.keysgroup,
-            lifetime: body.lifetime
-          })
-
-          const transactions = await this.runtime.transaction.receiveTransactions([transaction])
-          cb(null, transactions)
-        } catch (e) {
-          this.logger.error('create multisignatures error', system.getErrorMsg(e))
-          return cb(e)
-        }
-      }, (err, transactions) => {
-        if (err) {
-          return reject(err)
-        } else {
-          setImmediate(async () => {
-            try {
-              await this.runtime.socketio.emit('multisignatures/change', {})
-            } catch (err2) {
-              this.logger.error('socket emit error: multisignatures/change', system.getErrorMsg(err2))
-            }
-          })
-
-          resolve({
-            success: true,
-            transactionId: transactions[0].id
-          })
-        }
-      })
+      )
     })
   }
 
   async postSign (req) {
     const body = Object.assign({}, req.body, req.query)
-    const validateErrors = await this.ddnSchema.validate({
-      type: 'object',
-      properties: {
-        secret: {
-          type: 'string',
-          minLength: 1,
-          maxLength: 100
+    const validateErrors = await this.ddnSchema.validate(
+      {
+        type: 'object',
+        properties: {
+          secret: {
+            type: 'string',
+            minLength: 1,
+            maxLength: 100
+          },
+          secondSecret: {
+            type: 'string',
+            minLength: 1,
+            maxLength: 100
+          },
+          publicKey: {
+            type: 'string',
+            format: 'publicKey'
+          },
+          transactionId: {
+            type: 'string'
+          }
         },
-        secondSecret: {
-          type: 'string',
-          minLength: 1,
-          maxLength: 100
-        },
-        publicKey: {
-          type: 'string',
-          format: 'publicKey'
-        },
-        transactionId: {
-          type: 'string'
-        }
+        required: ['transactionId', 'secret']
       },
-      required: ['transactionId', 'secret']
-    }, body)
+      body
+    )
     if (validateErrors) {
       return {
         success: false,
@@ -181,8 +190,10 @@ class MultisignaturesRouter {
     const sign = await this.runtime.transaction.multisign(transaction, keypair)
 
     if (transaction.type === assetTypes.MULTISIGNATURE) {
-      if ((!transaction.asset.multisignature.keysgroup.includes(`+${keypair.publicKey}`)) ||
-                (transaction.signatures && transaction.signatures.includes(sign.toString('hex')))) {
+      if (
+        !transaction.asset.multisignature.keysgroup.includes(`+${keypair.publicKey}`) ||
+        (transaction.signatures && transaction.signatures.includes(sign.toString('hex')))
+      ) {
         // 是多重签名交易（asset），但签名者不属于签名组里的人，也不在交易的多个签名里
         throw new Error('1. Permission to sign transaction denied')
       }
@@ -200,15 +211,15 @@ class MultisignaturesRouter {
         throw new Error('Account ' + transaction.senderId + ' not found')
       }
 
-      if (!transaction.requester_public_key) { // wxm block database
+      if (!transaction.requester_public_key) {
+        // wxm block database
         if (!account.multisignatures.includes(keypair.publicKey)) {
           // 不是多重签名交易，交易也没有接收方，交易发起者的多重签名里，也不包含该交易发起者的公钥（transaction.senderId ！== keypair.publicKey）
           this.logger.error('multisignatures trs', transaction)
           throw new Error('2. Permission to sign transaction denied')
         }
       } else {
-        if (account.publicKey !== keypair.publicKey ||
-                    transaction.senderPublicKey !== keypair.publicKey) {
+        if (account.publicKey !== keypair.publicKey || transaction.senderPublicKey !== keypair.publicKey) {
           // 交易有接收方，但交易发起者与当前操作的用户不一致
           throw new Error('3. Permission to sign transaction denied')
         }
@@ -229,52 +240,58 @@ class MultisignaturesRouter {
     }
 
     return new Promise((resolve, reject) => {
-      this.balancesSequence.add(async (cb) => {
-        const transaction = await this.runtime.transaction.getUnconfirmedTransaction(body.transactionId)
-        if (!transaction) {
-          return cb('Transaction not found')
-        }
-
-        transaction.signatures = transaction.signatures || []
-        transaction.signatures.push(sign)
-
-        setImmediate(async () => {
-          try {
-            await this.runtime.peer.broadcast.broadcastNewSignature({
-              signature: sign,
-              transaction: transaction.id
-            })
-          } catch (err) {
-            this.logger.error(`Broadcast new signature failed: ${system.getErrorMsg(err)}`)
+      this.balancesSequence.add(
+        async cb => {
+          const transaction = await this.runtime.transaction.getUnconfirmedTransaction(body.transactionId)
+          if (!transaction) {
+            return cb('Transaction not found')
           }
-        })
 
-        cb()
-      }, (err) => {
-        if (err) {
-          reject(err)
-        } else {
-          resolve({
-            success: true,
-            transactionId: transaction.id
+          transaction.signatures = transaction.signatures || []
+          transaction.signatures.push(sign)
+
+          setImmediate(async () => {
+            try {
+              await this.runtime.peer.broadcast.broadcastNewSignature({
+                signature: sign,
+                transaction: transaction.id
+              })
+            } catch (err) {
+              this.logger.error(`Broadcast new signature failed: ${system.getErrorMsg(err)}`)
+            }
           })
+
+          cb()
+        },
+        err => {
+          if (err) {
+            reject(err)
+          } else {
+            resolve({
+              success: true,
+              transactionId: transaction.id
+            })
+          }
         }
-      })
+      )
     })
   }
 
   async getPending (req) {
     const query = Object.assign({}, req.body, req.query)
-    const validateErrors = await this.ddnSchema.validate({
-      type: 'object',
-      properties: {
-        publicKey: {
-          type: 'string',
-          format: 'publicKey'
-        }
+    const validateErrors = await this.ddnSchema.validate(
+      {
+        type: 'object',
+        properties: {
+          publicKey: {
+            type: 'string',
+            format: 'publicKey'
+          }
+        },
+        required: ['publicKey']
       },
-      required: ['publicKey']
-    }, query)
+      query
+    )
     if (validateErrors) {
       return {
         success: false,
@@ -285,9 +302,7 @@ class MultisignaturesRouter {
     let transactions = await this.runtime.transaction.getUnconfirmedTransactionList()
 
     if (query.isOutTransfer) {
-      transactions = transactions.filter(({
-        type
-      }) => type === assetTypes.DAPP_OUT)
+      transactions = transactions.filter(({ type }) => type === assetTypes.DAPP_OUT)
     }
 
     const pendings = []
@@ -318,7 +333,8 @@ class MultisignaturesRouter {
         }
       }
 
-      if (!signed && item.senderPublicKey === query.publicKey) { // wxm block database
+      if (!signed && item.senderPublicKey === query.publicKey) {
+        // wxm block database
         signed = true
       }
 
@@ -328,9 +344,11 @@ class MultisignaturesRouter {
           break
         }
 
-        if ((sender.publicKey === query.publicKey && sender.u_multisignatures.length > 0) ||
-                    sender.u_multisignatures.includes(query.publicKey) ||
-                    sender.multisignatures.includes(query.publicKey)) {
+        if (
+          (sender.publicKey === query.publicKey && sender.u_multisignatures.length > 0) ||
+          sender.u_multisignatures.includes(query.publicKey) ||
+          sender.multisignatures.includes(query.publicKey)
+        ) {
           const min = sender.u_multimin || sender.multimin
           const lifetime = sender.u_multilifetime || sender.multilifetime
           const signatures = sender.u_multisignatures.length
@@ -357,16 +375,19 @@ class MultisignaturesRouter {
   async getAccounts (req) {
     const query = Object.assign({}, req.body, req.query)
 
-    const validateErrors = await this.ddnSchema.validate({
-      type: 'object',
-      properties: {
-        publicKey: {
-          type: 'string',
-          format: 'publicKey'
-        }
+    const validateErrors = await this.ddnSchema.validate(
+      {
+        type: 'object',
+        properties: {
+          publicKey: {
+            type: 'string',
+            format: 'publicKey'
+          }
+        },
+        required: ['publicKey']
       },
-      required: ['publicKey']
-    }, query)
+      query
+    )
     if (validateErrors) {
       return {
         success: false,
@@ -375,7 +396,8 @@ class MultisignaturesRouter {
     }
 
     return new Promise((resolve, reject) => {
-      this.dao.findList('mem_accounts2multisignature',
+      this.dao.findList(
+        'mem_accounts2multisignature',
         { dependent_id: query.publicKey },
         [[this.dao.db_fnGroupConcat('account_id'), 'account_id']],
         null,
@@ -391,15 +413,15 @@ class MultisignaturesRouter {
           }
 
           try {
-            const rows = await this.runtime.account.getAccountList({
-              address: {
-                $in: addresses
+            const rows = await this.runtime.account.getAccountList(
+              {
+                address: {
+                  $in: addresses
+                },
+                sort: [['balance', 'ASC']] // wxm block database
               },
-              sort: [
-                ['balance', 'ASC']
-              ] // wxm block database
-            }, ['address', 'balance', 'multisignatures', 'multilifetime', 'multimin'])
-
+              ['address', 'balance', 'multisignatures', 'multilifetime', 'multimin']
+            )
 
             for (let i = 0; i < rows.length; i++) {
               const account = rows[i]
@@ -409,11 +431,14 @@ class MultisignaturesRouter {
                 addresses.push(this.runtime.account.generateAddressByPublicKey(account.multisignatures[j]))
               }
 
-              const multisigaccounts = await this.runtime.account.getAccountList({
-                address: {
-                  $in: addresses
-                }
-              }, ['address', 'publicKey', 'balance'])
+              const multisigaccounts = await this.runtime.account.getAccountList(
+                {
+                  address: {
+                    $in: addresses
+                  }
+                },
+                ['address', 'publicKey', 'balance']
+              )
 
               account.multisigaccounts = multisigaccounts
             }
@@ -426,7 +451,8 @@ class MultisignaturesRouter {
             this.logger.error('findList: ', system.getErrorMsg(e))
             return reject(e)
           }
-        })
+        }
+      )
     })
   }
 

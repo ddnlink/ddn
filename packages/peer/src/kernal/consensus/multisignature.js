@@ -16,36 +16,40 @@ class MultiSignature {
   }
 
   async processSignature (tx) {
-    const done = async () => new Promise((resolve, reject) => {
-      this.balancesSequence.add(async (cb) => {
-        const transaction = await this.runtime.transaction.getUnconfirmedTransaction(tx.transaction)
-        if (!transaction) {
-          return reject('Transaction not found')
-        }
+    const done = async () =>
+      new Promise((resolve, reject) => {
+        this.balancesSequence.add(
+          async cb => {
+            const transaction = await this.runtime.transaction.getUnconfirmedTransaction(tx.transaction)
+            if (!transaction) {
+              return reject('Transaction not found')
+            }
 
-        transaction.signatures = transaction.signatures || []
-        transaction.signatures.push(tx.signature)
+            transaction.signatures = transaction.signatures || []
+            transaction.signatures.push(tx.signature)
 
-        setImmediate(async () => {
-          try {
-            await this.runtime.peer.broadcast.broadcastNewSignature({
-              signature: tx.signature,
-              transaction: transaction.id
+            setImmediate(async () => {
+              try {
+                await this.runtime.peer.broadcast.broadcastNewSignature({
+                  signature: tx.signature,
+                  transaction: transaction.id
+                })
+              } catch (err) {
+                this.logger.error(`Broadcast new signature failed: ${DdnUtils.system.getErrorMsg(err)}`)
+              }
             })
-          } catch (err) {
-            this.logger.error(`Broadcast new signature failed: ${DdnUtils.system.getErrorMsg(err)}`)
-          }
-        })
 
-        cb(null, transaction)
-      }, (err, transaction) => {
-        if (err) {
-          reject(err)
-        } else {
-          resolve(transaction)
-        }
+            cb(null, transaction)
+          },
+          (err, transaction) => {
+            if (err) {
+              reject(err)
+            } else {
+              resolve(transaction)
+            }
+          }
+        )
       })
-    })
 
     const transaction = await this.runtime.transaction.getUnconfirmedTransaction(tx.transaction)
 

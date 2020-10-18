@@ -34,30 +34,30 @@ class Validator {
   }
 
   /**
-     * Check whether rule exists.
-     * @param {string} name
-     * @returns {boolean}
-     */
+   * Check whether rule exists.
+   * @param {string} name
+   * @returns {boolean}
+   */
   hasRule (name) {
     return name in this.rules
   }
 
   /**
-     * Get rule descriptor.
-     * @param {string} name
-     * @returns {*}
-     */
+   * Get rule descriptor.
+   * @param {string} name
+   * @returns {*}
+   */
   getRule (name) {
     if (name in this.rules === false) throw new Error(`Rule "${name}" doesn't defined`)
     return this.rules[name]
   }
 
   /**
-     * Validate values with specified rules set
-     * @param {*} value
-     * @param {object} rules Set of rules
-     * @param {function(err:Error,report:Array,output:*)=} callback Result callback
-     */
+   * Validate values with specified rules set
+   * @param {*} value
+   * @param {object} rules Set of rules
+   * @param {function(err:Error,report:Array,output:*)=} callback Result callback
+   */
   validate (value, rules, callback) {
     const self = this
 
@@ -114,13 +114,13 @@ class Validator {
   }
 
   /**
-     * Create field instance
-     * @param {string|string[]} path Field path
-     * @param {*} value Validated value
-     * @param {object} rules Rule set
-     * @param {*=} thisArg This reference for Validation methods. Optional
-     * @returns {Validator.Field}
-     */
+   * Create field instance
+   * @param {string|string[]} path Field path
+   * @param {*} value Validated value
+   * @param {object} rules Rule set
+   * @param {*=} thisArg This reference for Validation methods. Optional
+   * @returns {Validator.Field}
+   */
   createField (path, value, rules, thisArg) {
     return new this.Field(this, path, value, rules, thisArg)
   }
@@ -136,10 +136,10 @@ class Validator {
   // Constructor methods
 
   /**
-     * Add validation rule descriptor to validator rule set.
-     * @param {string} name Validator name
-     * @param {{validate:function,filter:function}} descriptor Validator descriptor object
-     */
+   * Add validation rule descriptor to validator rule set.
+   * @param {string} name Validator name
+   * @param {{validate:function,filter:function}} descriptor Validator descriptor object
+   */
   static addRule (name, descriptor) {
     if (typeof descriptor !== 'object') {
       throw new Error('Rule descriptor should be an object')
@@ -157,10 +157,10 @@ class Validator {
   }
 
   /**
-     * Add rule alias
-     * @param {string} name
-     * @param {string} origin
-     */
+   * Add rule alias
+   * @param {string} name
+   * @param {string} origin
+   */
   static addAlias (name, origin) {
     Object.defineProperty(this.prototype.rules, name, {
       get () {
@@ -170,30 +170,32 @@ class Validator {
   }
 
   /**
-     * Add extra property to Field. It could be
-     * @param name
-     * @param value
-     */
+   * Add extra property to Field. It could be
+   * @param name
+   * @param value
+   */
   static fieldProperty (name, value) {
     this.prototype.Field.prototype[name] = value
   }
 
   /**
-     * Validate with fast initialization. Use `options` property for constructor instance;
-     * @param {*} value Validated value
-     * @param {object} rules Set of rules
-     * @param {object} customRules Customized rule set. Optional
-     * @param {function(err:Error, report:object[], result:*)} callback Result callback
-     */
+   * Validate with fast initialization. Use `options` property for constructor instance;
+   * @param {*} value Validated value
+   * @param {object} rules Set of rules
+   * @param {object} customRules Customized rule set. Optional
+   * @param {function(err:Error, report:object[], result:*)} callback Result callback
+   */
   static validate (value, rules, customRules, callback) {
     if (typeof customRules === 'function') {
       callback = customRules
       customRules = {}
     }
 
-    const instance = new this(extend({}, this.options, {
-      rules: customRules
-    }))
+    const instance = new this(
+      extend({}, this.options, {
+        rules: customRules
+      })
+    )
 
     return instance.validate(value, rules, callback)
   }

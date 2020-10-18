@@ -46,7 +46,7 @@ class Delegate {
 
     if (is_delegate) {
       // wxm block database
-      throw new Error("Account is already a delegate");
+      throw new Error('Account is already a delegate')
     }
 
     if (!trs.asset || !trs.asset.delegate) {
@@ -126,7 +126,7 @@ class Delegate {
     return await this.runtime.account.getAccountByAddress(address);
   }
 
-  async undo({ id, asset }, _, { address, nameexist }, dbTrans) {
+  async undo ({ id, asset }, _, { address, nameexist }, dbTrans) {
     const data = {
       address,
       u_is_delegate: 1, // wxm block database
@@ -139,9 +139,9 @@ class Delegate {
       data.u_username = asset.delegate.username;
     }
 
-    await this.runtime.account.setAccount(data, dbTrans);
-    await this.deleteDelegate(id, dbTrans);
-    return await this.runtime.account.getAccountByAddress(address);
+    await this.runtime.account.setAccount(data, dbTrans)
+    await this.deleteDelegate(id, dbTrans)
+    return await this.runtime.account.getAccountByAddress(address)
   }
 
   /**
@@ -150,22 +150,22 @@ class Delegate {
    * @param {*} transaction_id 交易id
    * @param {*} dbTrans 事物
    */
-  async deleteDelegate(transaction_id, dbTrans) {
+  async deleteDelegate (transaction_id, dbTrans) {
     return new Promise((resolve, reject) => {
       this.dao.remove(
-        "delegate",
+        'delegate',
         {
           transaction_id
         },
         dbTrans,
         err => {
           if (err) {
-            return reject(err);
+            return reject(err)
           }
-          resolve(true);
+          resolve(true)
         }
-      );
-    });
+      )
+    })
   }
 
   async applyUnconfirmed({ asset, type }, { isDelegate, address }) {
@@ -190,24 +190,24 @@ class Delegate {
     this.oneoff.delete(idKey);
   }
 
-  async objectNormalize(trs) {
+  async objectNormalize (trs) {
     const validateErrors = await this.ddnSchema.validate(
       {
-        type: "object",
+        type: 'object',
         properties: {
           publicKey: {
-            type: "string",
-            format: "publicKey"
+            type: 'string',
+            format: 'publicKey'
           }
         },
-        required: ["publicKey"]
+        required: ['publicKey']
       },
       trs.asset.delegate
-    );
+    )
     if (validateErrors) {
       throw new Error(
         `Can't verify delegate transaction, incorrect parameters: ${validateErrors[0].schemaPath} ${validateErrors[0].message}`
-      );
+      )
     }
 
     return trs;

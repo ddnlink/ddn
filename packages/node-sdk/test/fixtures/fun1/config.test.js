@@ -4,7 +4,7 @@
 var config = require('../../../lib/config')
 // const fixtures = `${__dirname}/fixtures`
 
-console.log(config.assets);
+console.log(config.assets)
 // describe('Test config.js', () => {
 //   it('should ok', () => {
 //     // const config = getUserConfig({

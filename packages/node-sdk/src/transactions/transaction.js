@@ -1,4 +1,3 @@
-import _ from 'lodash'
 import DdnUtils, { bignum } from '@ddn/utils'
 import { config, constants } from '../config'
 
