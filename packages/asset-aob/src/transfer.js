@@ -175,17 +175,22 @@ class Transfer extends Asset.Base {
       throw new Error("Asset balance not enough");
     }
     if (assetBalancedata) {
-      this.dao.update(
-        "mem_asset_balance",
-        {
-          balance: newBalance.toString()
-        },
-        {
-          address: sender.address,
-          currency: transfer.currency
-        },
-        dbTrans
-      );
+      try {
+        await this.dao.update(
+					"mem_asset_balance",
+					{
+						balance: newBalance.toString()
+					},
+					{
+						address: sender.address,
+						currency: transfer.currency
+					},
+					dbTrans
+				);
+      } catch (e) {
+        // TODO 2020-10-16 not throw error
+        this.logger.error("apply transfer error", e);
+      }
     } else {
       try {
         await this.dao.insert(
@@ -198,7 +203,7 @@ class Transfer extends Asset.Base {
           dbTrans
         );
       } catch (e) {
-        // FIXME 2020-10-16 not throw error
+        // TODO 2020-10-16 not throw error
         this.logger.error("apply transfer error", e);
       }
     }
@@ -220,17 +225,22 @@ class Transfer extends Asset.Base {
       throw new Error("Asset balance not enough");
     }
     if (assetBalancedata2) {
-      this.dao.update(
-        "mem_asset_balance",
-        {
-          balance: newBalance2.toString()
-        },
-        {
-          address: trs.recipientId,
-          currency: transfer.currency
-        },
-        dbTrans
-      );
+      try {
+        await this.dao.update(
+					"mem_asset_balance",
+					{
+						balance: newBalance2.toString()
+					},
+					{
+						address: trs.recipientId,
+						currency: transfer.currency
+					},
+					dbTrans
+				);
+      } catch (e) {
+        // TODO 2020-10-16 to throw error
+        this.logger.error("apply transfer error", e);
+      }
     } else {
       try {
         await this.dao.insert(
@@ -276,17 +286,22 @@ class Transfer extends Asset.Base {
       // return
     }
     if (assetBalancedata) {
-      this.dao.update(
-        "mem_asset_balance",
-        {
-          balance: newBalance.toString()
-        },
-        {
-          address: sender.address,
-          currency: transfer.currency
-        },
-        dbTrans
-      );
+      try {
+        await this.dao.update(
+					"mem_asset_balance",
+					{
+						balance: newBalance.toString()
+					},
+					{
+						address: sender.address,
+						currency: transfer.currency
+					},
+					dbTrans
+				);
+      } catch (e) {
+        // TODO 2020-10-16 to throw error
+        this.logger.error("undo transfer error", e);
+      }
     } else {
       try {
         await this.dao.insert(
@@ -322,17 +337,22 @@ class Transfer extends Asset.Base {
       // return
     }
     if (assetBalancedata2) {
-      this.dao.update(
-        "mem_asset_balance",
-        {
-          balance: newBalance2.toString()
-        },
-        {
-          address: trs.recipientId,
-          currency: transfer.currency
-        },
-        dbTrans
-      );
+      try {
+        await this.dao.update(
+					"mem_asset_balance",
+					{
+						balance: newBalance2.toString()
+					},
+					{
+						address: trs.recipientId,
+						currency: transfer.currency
+					},
+					dbTrans
+				);
+      } catch (e) {
+        // TODO to throw error
+        this.logger.error("apply transfer error", e);
+      }
     } else {
       try {
         await this.dao.insert(

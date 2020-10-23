@@ -168,27 +168,20 @@ class PeerBlockService {
 
       return { success: false, error: 'Invalid block id sequence' }
     }
-
-    return new Promise((resolve, reject) => {
-      // shuai 2018-12-01
-      this.dao.findList(
+		try {
+			let rows = await this.dao.findList(
         'block',
         {
           id: { $in: ids },
           height: { $gte: min, $lte: max }
         },
         ['id', 'timestamp', 'previous_block', 'height'],
-        [['height', 'DESC']],
-        (err, rows) => {
-          if (err) {
-            resolve({ success: false, error: 'Database error' })
-          }
-
-          const commonBlock = rows.length ? rows[0] : null
-          resolve({ success: true, common: commonBlock })
-        }
-      )
-    })
+        [['height', 'DESC']]);
+			const commonBlock = rows.length ? rows[0] : null
+      return { success: true, common: commonBlock };
+		} catch (e) {
+			return { success: false, error: 'Database error' }
+		}
   }
 }
 

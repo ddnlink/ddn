@@ -506,25 +506,16 @@ class TransactionService {
       const day = new Date(d1Ms)
       // 获取其年月日形式的字符串
       time = getYMD(day)
-      // 查询当日交易量
-      const count = await new Promise((resolve, reject) => {
-        this.dao.count(
-          'tr',
-          {
-            timestamp: {
-              $gte: Number(this.runtime.slot.getTime(d1Ms)),
-              $lt: Number(this.runtime.slot.getTime(d1Ms + dayMilliSeconds - 1))
-            }
-          },
-          null,
-          (err, data) => {
-            if (err) {
-              reject(err)
-            }
-            resolve(data)
-          }
-        )
-      })
+			// 查询当日交易量
+			const count = await this.dao.count(
+				'tr',
+				{
+					timestamp: {
+						$gte: Number(this.runtime.slot.getTime(d1Ms)),
+						$lt: Number(this.runtime.slot.getTime(d1Ms + dayMilliSeconds - 1))
+					}
+				},
+				null);
       const obj = {
         time,
         count

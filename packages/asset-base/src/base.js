@@ -310,68 +310,52 @@ class AssetBase {
     const limit = pageSize;
     const offset = (pageIndex - 1) * pageSize;
 
-    let result;
-    return new Promise((resolve, reject) => {
-      this.dao.findPage(
-        "trs_asset",
-        filter,
-        limit,
-        offset,
-        returnTotal,
-        attributes,
-        orders,
-        (err, rows) => {
-          if (err) {
-            reject(err);
-          } else {
-            result = rows;
+		let result;
+		const rows = await this.dao.findPage(
+			"trs_asset",
+			filter,
+			limit,
+			offset,
+			returnTotal,
+			attributes,
+			orders);
+			result = rows;
 
-            let trsIds = [];
-            if (returnTotal) {
-              trsIds = _.map(rows.rows, "asset_trs_id");
-            } else {
-              trsIds = _.map(rows, "asset_trs_id");
-            }
+		let trsIds = [];
+		if (returnTotal) {
+			trsIds = _.map(rows.rows, "asset_trs_id");
+		} else {
+			trsIds = _.map(rows, "asset_trs_id");
+		}
 
-            if (hasExtProps) {
-              this.dao.findPage(
-                "trs_asset_ext",
-                { transaction_id: { $in: trsIds } },
-                limit,
-                null,
-                null,
-                [["json_ext", "asset_ext_json"], "transaction_id"],
-                null,
-                (err2, rows2) => {
-                  if (err2) {
-                    reject(err2);
-                  } else {
-                    if (rows2 && rows2.length > 0) {
-                      const obj = _.keyBy(rows2, "transaction_id");
-                      if (returnTotal) {
-                        result.rows = _.map(result.rows, num => {
-                          num = _.extend(num, obj[num.asset_trs_id]);
-                          return num;
-                        });
-                      } else {
-                        result = _.map(result, num => {
-                          num = _.extend(num, obj[num.asset_trs_id]);
-                          return num;
-                        });
-                      }
-                    }
+		if (hasExtProps) {
+			const rows2 = await this.dao.findPage(
+				"trs_asset_ext",
+				{ transaction_id: { $in: trsIds } },
+				limit,
+				null,
+				null,
+				[["json_ext", "asset_ext_json"], "transaction_id"],
+				null);
 
-                    resolve(result);
-                  }
-                }
-              );
-            } else {
-              resolve(result);
-            }
-          }
-        }
-      );
-    });
+			if (rows2 && rows2.length > 0) {
+				const obj = _.keyBy(rows2, "transaction_id");
+				if (returnTotal) {
+					result.rows = _.map(result.rows, num => {
+						num = _.extend(num, obj[num.asset_trs_id]);
+						return num;
+					});
+				} else {
+					result = _.map(result, num => {
+						num = _.extend(num, obj[num.asset_trs_id]);
+						return num;
+					});
+				}
+			}
+			return result
+		} else {
+			return result;
+		}
   }
 
   /**
@@ -636,16 +620,7 @@ class AssetBase {
         }
       }
     }
-
-    return new Promise((resolve, reject) => {
-      this.dao.update("trs_asset", newObj, newWhere, dbTrans, (err, result) => {
-        if (err) {
-          reject(err);
-        } else {
-          resolve(result);
-        }
-      });
-    });
+		return this.dao.update("trs_asset", newObj, newWhere, dbTrans);
   }
 
   /**
@@ -688,17 +663,8 @@ class AssetBase {
           newWhere.timestamp = where[p];
         }
       }
-    }
-
-    return new Promise((resolve, reject) => {
-      this.dao.count("trs_asset", newWhere, (err, count) => {
-        if (err) {
-          reject(err);
-        } else {
-          resolve(count);
-        }
-      });
-    });
+		}
+		return this.dao.count("trs_asset", newWhere);
   }
 
   /**
@@ -958,36 +924,9 @@ class AssetBase {
    * @param {*} dbTrans 事物
    */
   async deleteBase(transaction_id, dbTrans) {
-    await new Promise((resolve, reject) => {
-      this.dao.remove(
-        "trs_asset",
-        {
-          transaction_id
-        },
-        dbTrans,
-        err => {
-          if (err) {
-            return reject(err);
-          }
-          resolve(true);
-        }
-      );
-    });
-    return new Promise((resolve, reject) => {
-      this.dao.remove(
-        "trs_asset_ext",
-        {
-          transaction_id
-        },
-        dbTrans,
-        err => {
-          if (err) {
-            return reject(err);
-          }
-          resolve(true);
-        }
-      );
-    });
+		await this.dao.remove("trs_asset", { transaction_id }, dbTrans);
+		await this.dao.remove("trs_asset_ext", { transaction_id }, dbTrans);
+		return true;
   }
 
   /**

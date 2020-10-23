@@ -21,9 +21,16 @@ function isOrgId (daoId) {
 async function updateOrg (context, org, dbTrans) {
   if (org.org_id) {
     org.org_id = org.org_id.toLowerCase()
-  }
+	}
 
-  return new Promise((resolve, reject) => {
+	try {
+		const result = await context.dao.insertOrUpdate('mem_org', org, dbTrans);
+		return result
+	} catch (e) {
+		throw new Error(`insertOrUpdate mem_org ${err}`)
+	}
+
+  // return new Promise((resolve, reject) => {
     // const validateErrors = await this.ddnSchema.validate({
     //   type: 'object',
     //   properties: {
@@ -73,30 +80,14 @@ async function updateOrg (context, org, dbTrans) {
     // if (validateErrors) {
     //   return reject(new Error(`Invalid parameters: ${validateErrors[0].schemaPath} ${validateErrors[0].message}`))
     // }
-
-    context.dao.insertOrUpdate('mem_org', org, dbTrans, (err, result) => {
-      if (err) {
-        return reject(new Error(`insertOrUpdate mem_org ${err}`))
-      }
-
-      resolve(result)
-    })
-  })
+  // })
 }
 
 async function getEffectiveOrg (context, where) {
-  return new Promise((resolve, reject) => {
-    context.dao.findList('mem_org', where,
-      ['transaction_id', 'org_id', 'name', 'address', 'tags', 'url', 'state', 'timestamp'],
-      ['timestamp'],
-      (err, result) => {
-        if (err) {
-          return reject(err)
-        }
-
-        resolve(result[0])
-      })
-  })
+	const result = await context.dao.findList('mem_org', where,
+	['transaction_id', 'org_id', 'name', 'address', 'tags', 'url', 'state', 'timestamp'],
+	['timestamp']);
+  return result[0];
 }
 
 async function getEffectiveOrgByAddress (context, address) {
@@ -117,18 +108,10 @@ async function exchangeOrg (context, org_id, address, dbTrans) {
     state: 1
   }
 
-  return new Promise((resolve, reject) => {
-    context.dao.update('mem_org', org, {
-      org_id: org_id.toLowerCase()
-    },
-    dbTrans, (err, result) => {
-      if (err) {
-        return reject(err)
-      }
-
-      resolve(result)
-    })
-  })
+  return context.dao.update('mem_org', org, {
+		org_id: org_id.toLowerCase()
+	},
+	dbTrans);
 }
 
 export default {

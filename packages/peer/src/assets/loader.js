@@ -13,6 +13,7 @@ import Delegate from './system/delegate'
 import Vote from './system/vote'
 import Multisignatures from './system/multisignature'
 import Lock from './system/lock'
+import bluebird from 'bluebird'
 
 import Router from './router'
 
@@ -101,7 +102,7 @@ class Loader {
       }
     }
 
-    assetsPackageList.map((packageName) => {
+		await bluebird.each(assetsPackageList, async (packageName) => {
       let assetModels
       try {
         assetModels = global._require_runtime_(`${packageName}/lib/define-models`) || []
@@ -111,16 +112,16 @@ class Loader {
       }
 
       if (assetModels) {
-        assetModels.map(({ name, data }) => {
+				await bluebird.each(assetModels, async ({ name, data }) => {
           // 挂载方法
           dao.buildModel(name, data)
-          // 创建表
-          dao.createTable(name, false, (err) => {
-            if (err) {
-              this.logger.err(`${packageName} 资产包自定义数据模型生成失败。`, err)
-              process.emit('cleanup')
-            }
-          })
+					// 创建表
+					try {
+          	await dao.createTable(name, false);
+					} catch (err) {
+						this.logger.err(`${packageName} 资产包自定义数据模型生成失败。`, err)
+						process.emit('cleanup')
+					}
         })
       }
     })

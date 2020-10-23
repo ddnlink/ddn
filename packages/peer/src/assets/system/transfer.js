@@ -113,21 +113,8 @@ class Transfer {
    * @param {*} dbTrans 事物
    */
   async deleteTransfer (transaction_id, dbTrans) {
-    return new Promise((resolve, reject) => {
-      this.dao.remove(
-        'transfer',
-        {
-          transaction_id
-        },
-        dbTrans,
-        err => {
-          if (err) {
-            return reject(err)
-          }
-          resolve(true)
-        }
-      )
-    })
+		await this.dao.remove('transfer', { transaction_id }, dbTrans);
+		return true;
   }
 
   async applyUnconfirmed (trs, sender, dbTrans) {}

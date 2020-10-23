@@ -146,16 +146,9 @@ class InTransfer extends Asset.Base {
       return reject('Asset balance not enough')
     }
 
-    condition.balance = newBalance.toString()
-    return new Promise((resolve, reject) => {
-      this.dao.insertOrUpdate('mem_asset_balance',
-        condition, dbTrans, (err2, result) => {
-          if (err2) {
-            return reject(err2)
-          }
-        resolve(result)
-      })
-    })
+		condition.balance = newBalance.toString()
+		const result = await this.dao.insertOrUpdate('mem_asset_balance',condition, dbTrans);
+		return result;
   }
 
   // 新增事务dbTrans ---wly

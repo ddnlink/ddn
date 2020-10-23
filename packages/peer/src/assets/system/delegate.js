@@ -151,21 +151,8 @@ class Delegate {
    * @param {*} dbTrans 事物
    */
   async deleteDelegate (transaction_id, dbTrans) {
-    return new Promise((resolve, reject) => {
-      this.dao.remove(
-        'delegate',
-        {
-          transaction_id
-        },
-        dbTrans,
-        err => {
-          if (err) {
-            return reject(err)
-          }
-          resolve(true)
-        }
-      )
-    })
+		await this.dao.remove('delegate', { transaction_id }, dbTrans);
+		return true;
   }
 
   async applyUnconfirmed({ asset, type }, { isDelegate, address }) {

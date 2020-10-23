@@ -37,15 +37,7 @@ class Block {
   }
 
   async getCount (where) {
-    return new Promise((resolve, reject) => {
-      this.dao.count('block', where, (err, count) => {
-        if (err) {
-          reject(err)
-        } else {
-          resolve(count)
-        }
-      })
-    })
+		return this.dao.count('block', where);
   }
 
   async calculateFee () {
@@ -163,38 +155,20 @@ class Block {
    */
   async handleGenesisBlock () {
     const genesisblock = this.genesisblock
-
-    return new Promise((resolve, reject) => {
-      this.dao.findOneByPrimaryKey('block', genesisblock.id, null, (err, row) => {
-        if (err) {
-          reject(err)
-        } else {
-          const blockId = row && row.id
-          if (!blockId) {
-            this.dao.transaction(
-              async (dbTrans, done) => {
-                try {
-                  await this.saveBlock(genesisblock, dbTrans)
-                  done()
-                } catch (err) {
-                  done(err)
-                }
-              },
-              err2 => {
-                if (err2) {
-                  this.logger.error(err2)
-                  process.exit(1)
-                } else {
-                  resolve(true)
-                }
-              }
-            )
-          } else {
-            resolve(true)
-          }
-        }
-      })
-    })
+		const row = await this.dao.findOneByPrimaryKey('block', genesisblock.id, null);
+		const blockId = row && row.id
+		if (blockId) {
+			return true;
+		}
+		try {
+			await this.dao.transaction(async (dbTrans) => {
+				await this.saveBlock(genesisblock, dbTrans)
+			});
+		} catch (e) {
+			this.logger.error(e)
+			process.exit(1)
+		}
+		return true;
   }
 
   /**
@@ -599,105 +573,86 @@ class Block {
 
       const sortedTrs = this._sortTransactions(block.transactions)
 
-      return new Promise((resolve, reject) => {
-        this.dao.transaction(
-          async (dbTrans, done) => {
-            try {
-              for (let i = 0; i < sortedTrs.length; i++) {
-                const transaction = sortedTrs[i]
-                const updatedAccountInfo = await this.runtime.account.setAccount(
-                  {
-                    publicKey: transaction.senderPublicKey,
-                    isGenesis: bignum.isEqualTo(block.height, 1)
-                  },
-                  dbTrans
-                )
-                // 吴连有 todo 最好加事物，报uuid的错误是存储数据时取的dbTrans不对
-                const accountInfo = await this.runtime.account.getAccountByAddress(updatedAccountInfo.address)
-                const newAccountInfo = Object.assign({}, accountInfo, updatedAccountInfo)
+      try {
+        const result = await this.dao.transaction(
+          async (dbTrans) => {
+						for (let i = 0; i < sortedTrs.length; i++) {
+							const transaction = sortedTrs[i]
+							const updatedAccountInfo = await this.runtime.account.setAccount(
+								{
+									publicKey: transaction.senderPublicKey,
+									isGenesis: bignum.isEqualTo(block.height, 1)
+								},
+								dbTrans
+							)
+							// 吴连有 todo 最好加事物，报uuid的错误是存储数据时取的dbTrans不对
+							const accountInfo = await this.runtime.account.getAccountByAddress(updatedAccountInfo.address)
+							const newAccountInfo = Object.assign({}, accountInfo, updatedAccountInfo)
 
-                try {
-                  await this.runtime.transaction.applyUnconfirmed(transaction, newAccountInfo, dbTrans)
-                  await this.runtime.transaction.apply(transaction, block, newAccountInfo, dbTrans)
-                } catch (err) {
-                  this.logger.error(`Apply unconfirmed ${err.toString()}`)
-                  throw new Error(`Apply unconfirmed ${err.toString()}`)
-                } finally {
-                  await this.runtime.transaction.removeUnconfirmedTransaction(transaction.id)
-                }
+							try {
+								await this.runtime.transaction.applyUnconfirmed(transaction, newAccountInfo, dbTrans)
+								await this.runtime.transaction.apply(transaction, block, newAccountInfo, dbTrans)
+							} catch (err) {
+								this.logger.error(`Apply unconfirmed ${err.toString()}`)
+								throw new Error(`Apply unconfirmed ${err.toString()}`)
+							} finally {
+								await this.runtime.transaction.removeUnconfirmedTransaction(transaction.id)
+							}
 
-                applyedTrsIdSet.add(transaction.id)
-              }
+							applyedTrsIdSet.add(transaction.id)
+						}
 
-              this.logger.debug('apply block ok')
+						this.logger.debug('apply block ok')
 
-              if (isSaveBlock) {
-                try {
-                  await this.saveBlock(block, dbTrans)
-                } catch (err) {
-                  this.logger.error(`Save block fail ${err}`)
-                  throw new Error(`Save block fail ${err}`)
-                }
-              }
-              try {
-                await this.runtime.round.tick(block, dbTrans)
-              } catch (error) {
-                this.logger.error(`tick error dbTrans rollback error: ${JSON.stringify(error)}`)
-                throw new Error(error)
-              }
-              this.logger.debug('save block ok')
+						if (isSaveBlock) {
+							try {
+								await this.saveBlock(block, dbTrans)
+							} catch (err) {
+								this.logger.error(`Save block fail ${err}`)
+								throw new Error(`Save block fail ${err}`)
+							}
+						}
+						try {
+							await this.runtime.round.tick(block, dbTrans)
+						} catch (error) {
+							this.logger.error(`tick error dbTrans rollback error: ${JSON.stringify(error)}`)
+							throw new Error(error)
+						}
+						this.logger.debug('save block ok')
+				});
+				this.logger.debug(`The dao.transaction is finished, result: ${result} `)
+				this.setLastBlock(block)
 
-              done()
-            } catch (err) {
-              done(err)
-            }
-          },
-          async (err, result) => {
-            this.logger.debug(`The dao.transaction is finished, err: ${err}, result: ${result} `)
-            if (err) {
-              applyedTrsIdSet.clear() // wxm TODO 清除上面未处理的交易记录
-              this.balanceCache.rollback()
+				this._blockCache = {}
+				this._proposeCache = {}
+				this._lastVoteTime = null
 
-              // result 是事务
-              if (!result) {
-                this.logger.error(`Rollback or commit error, apply block fail: ${err}`)
-                process.exit(1)
-              } else {
-                // 回滚成功
-                reject(err)
-              }
-            } else {
-              this.setLastBlock(block)
+				this.oneoff.clear()
+				this.balanceCache.commit()
+				this.runtime.consensus.clearState()
 
-              this._blockCache = {}
-              this._proposeCache = {}
-              this._lastVoteTime = null
+				if (isBroadcast) {
+					this.logger.info(`Block applied correctly with ${block.transactions.length} transactions`)
+					votes.signatures = votes.signatures.slice(0, 6)
 
-              this.oneoff.clear()
-              this.balanceCache.commit()
-              this.runtime.consensus.clearState()
-
-              if (isBroadcast) {
-                this.logger.info(`Block applied correctly with ${block.transactions.length} transactions`)
-                votes.signatures = votes.signatures.slice(0, 6)
-
-                setImmediate(async () => {
-                  try {
-                    await this.runtime.peer.broadcast.broadcastNewBlock(block, votes)
-                    await this.runtime.transaction.execAssetFunc('onNewBlock', block, votes)
-                  } catch (err) {
-                    this.logger.error(`Broadcast new block failed: ${system.getErrorMsg(err)}`)
-                    // TODO: 2020.8.30 检查该处是否抛出错误
-                    // throw new Error(`Broadcast new block failed: ${system.getErrorMsg(err)}`)
-                  }
-                })
-              }
-
-              resolve()
-            }
-          }
-        )
-      })
+					setImmediate(async () => {
+						try {
+							await this.runtime.peer.broadcast.broadcastNewBlock(block, votes)
+							await this.runtime.transaction.execAssetFunc('onNewBlock', block, votes)
+						} catch (err) {
+							this.logger.error(`Broadcast new block failed: ${system.getErrorMsg(err)}`)
+							// TODO: 2020.8.30 检查该处是否抛出错误
+							// throw new Error(`Broadcast new block failed: ${system.getErrorMsg(err)}`)
+						}
+					})
+				}
+			} catch (err) {
+				applyedTrsIdSet.clear() // wxm TODO 清除上面未处理的交易记录
+				this.balanceCache.rollback()
+				// result 是事务
+				this.logger.error(`Rollback or commit error, apply block fail: ${err}`)
+				process.exit(1)
+			}
     }
 
     return new Promise((resolve, reject) => {
@@ -972,19 +927,15 @@ class Block {
 
         let existsTrsIds = []
         if (trsIds.length > 0) {
-          existsTrsIds = await new Promise((resolve, reject) => {
-            this.dao.findList('tr', {
-              id: {
-                $in: trsIds
-              }
-            }, ['id'], null, null, (err, result) => {
-              if (err) {
-                throw new Error (`Failed to query transaction from db: ${err}`)
-              } else {
-                return result
-              }
-            })
-          })
+					try {
+						existsTrsIds = await this.dao.findList('tr', {
+							id: {
+								$in: trsIds
+							}
+						}, ['id'], null, null);
+					} catch (err) {
+						throw new Error (`Failed to query transaction from db: ${err}`)
+					}
         }
 
         for (let i = 0; i < block.transactions.length; i++) {
@@ -1236,27 +1187,24 @@ class Block {
 
           let transactions = this._sortTransactions(oldLastBlock.transactions)
           transactions = transactions.reverse()
+					try {
+						await this.dao.transaction(async (dbTrans) => {
+							for (let i = 0; i < transactions.length; i++) {
+								const transaction = transactions[i]
 
-          this.dao.transaction(async (dbTrans, cb) => {
-            try {
-              for (let i = 0; i < transactions.length; i++) {
-                const transaction = transactions[i]
+								this.logger.info('undo transacton: ', transaction.id)
+								const sender = await this.runtime.account.getAccountByPublicKey(transaction.senderPublicKey, dbTrans)
+								await this.runtime.transaction.undo(transaction, oldLastBlock, sender, dbTrans)
+								await this.runtime.transaction.undoUnconfirmed(transaction, dbTrans)
+								// wulianyou
+								await this.runtime.transaction.deleteTransaction(transaction.id, dbTrans)
+							}
 
-                this.logger.info('undo transacton: ', transaction.id)
-                const sender = await this.runtime.account.getAccountByPublicKey(transaction.senderPublicKey, dbTrans)
-                await this.runtime.transaction.undo(transaction, oldLastBlock, sender, dbTrans)
-                await this.runtime.transaction.undoUnconfirmed(transaction, dbTrans)
-                // wulianyou
-                await this.runtime.transaction.deleteTransaction(transaction.id, dbTrans)
-              }
-
-              await this.runtime.round.backwardTick(oldLastBlock, previousBlock, dbTrans)
-              await this.deleteBlock(oldLastBlock.id, dbTrans)
-              cb(null)
-            } catch (err) {
-              cb(err)
-            }
-          }, done)
+							await this.runtime.round.backwardTick(oldLastBlock, previousBlock, dbTrans)
+						})
+					} catch (e) {
+						done(e, previousBlock)
+					}
         },
         (err2, result) => {
           if (err2) {
@@ -1275,22 +1223,8 @@ class Block {
   }
 
   async deleteBlock (blockId, dbTrans) {
-    return new Promise((resolve, reject) => {
-      this.dao.remove(
-        'block',
-        {
-          id: blockId
-        },
-        dbTrans,
-        (err, result) => {
-          if (err) {
-            reject(err)
-          } else {
-            resolve(result)
-          }
-        }
-      )
-    })
+		const result = await this.dao.remove('block', { id: blockId }, dbTrans);
+		return result;
   }
 
   async deleteBlocksBefore (block) {
@@ -1316,23 +1250,14 @@ class Block {
     const result = await this.dao.findOne('block', {
       id: blockId
     }, ['height']);
-    if (result && result.height !== null &&
-                  typeof (result.height) !== 'undefined') {
-      return new Promise((resolve, reject) => {
-          this.dao.remove('block', {
-            height: {
-              $gte: result.height // todo: ?????? 2020.8.11
-            }
-          },
-          (err2, result2) => {
-            if (err2) {
-              return reject(err2)
-            } else {
-              resolve(result2)
-            }
-          })
-        })
-      }
+    if (result && result.height !== null && typeof (result.height) !== 'undefined') {
+			const delete_result = await this.dao.remove('block', {
+				height: {
+					$gte: result.height // todo: ?????? 2020.8.11
+				}
+			});
+			return delete_result;
+		}
   }
 
   async loadBlocksOffset (limit, offset, verify) {
@@ -1401,68 +1326,57 @@ class Block {
     const l = limit || 100
     if (l > 100) {
       throw new Error('Invalid limit. Maximum is 100')
-    }
+		}
 
-    return new Promise((resolve, reject) => {
-      this.dao.findPage(
-        'block',
-        null,
-        1,
-        0,
-        false,
-        [[this.dao.db_fnMax('height'), 'maxHeight']], // wxm block database  library.dao.db_fn('MAX', library.dao.db_col('height'))
-        null,
-        (err, rows) => {
-          if (err || !rows) {
-            return reject(err || 'Get Block Error.')
-          }
+		const rows = await this.dao.findPage(
+			'block',
+			null,
+			1,
+			0,
+			false,
+			[[this.dao.db_fnMax('height'), 'maxHeight']], // wxm block database  library.dao.db_fn('MAX', library.dao.db_col('height'))
+			null);
+		if (!rows) {
+			throw new Error('Get Block Error.');
+		}
 
-          let maxHeight = 2
-          if (rows.length > 0) {
-            maxHeight = rows[0].maxHeight + 1
-          }
 
-          this.dao.findPage(
-            'block',
-            w,
-            l,
-            o,
-            returnTotal,
-            [
-              ['id', 'b_id'],
-              ['height', 'b_height'],
-              ['number_of_transactions', 'b_numberOfTransactions'],
-              ['total_amount', 'b_totalAmount'],
-              ['total_fee', 'b_totalFee'],
-              ['reward', 'b_reward'],
-              ['payload_length', 'b_payloadLength'],
-              ['generator_public_key', 'b_generatorPublicKey'],
-              ['block_signature', 'b_blockSignature'],
-              ['version', 'b_version'],
-              ['timestamp', 'b_timestamp'],
-              ['previous_block', 'b_previousBlock'],
-              [this.dao.db_str(maxHeight + '-height'), 'b_confirmations']
-            ],
-            s,
-            (err2, rows2) => {
-              if (err2) {
-                return reject(err2)
-              }
+		let maxHeight = 2
+		if (rows.length > 0) {
+			maxHeight = rows[0].maxHeight + 1
+		}
 
-              const blocks = []
-              for (let i = 0; i < rows2.rows.length; i++) {
-                blocks.push(this.serializeDbData2Block(rows2.rows[i]))
-              }
+		const rows2 = await this.dao.findPage(
+			'block',
+			w,
+			l,
+			o,
+			returnTotal,
+			[
+				['id', 'b_id'],
+				['height', 'b_height'],
+				['number_of_transactions', 'b_numberOfTransactions'],
+				['total_amount', 'b_totalAmount'],
+				['total_fee', 'b_totalFee'],
+				['reward', 'b_reward'],
+				['payload_length', 'b_payloadLength'],
+				['generator_public_key', 'b_generatorPublicKey'],
+				['block_signature', 'b_blockSignature'],
+				['version', 'b_version'],
+				['timestamp', 'b_timestamp'],
+				['previous_block', 'b_previousBlock'],
+				[this.dao.db_str(maxHeight + '-height'), 'b_confirmations']
+			],
+			s);
+		const blocks = []
+		for (let i = 0; i < rows2.rows.length; i++) {
+			blocks.push(this.serializeDbData2Block(rows2.rows[i]))
+		}
 
-              resolve({
-                blocks,
-                count: rows2.total
-              })
-            }
-          )
-        }
-      )
-    })
+		return {
+			blocks,
+			count: rows2.total
+		}
   }
 
   /**
@@ -1512,58 +1426,53 @@ class Block {
 
     return new Promise((resolve, reject) => {
       this.dbSequence.add(
-        cb => {
-          this.dao.findPage(
+        async cb => {
+					try {
+          const rows = await this.dao.findPage(
             'block',
             null,
             1,
             0,
             false,
             [[this.dao.db_fnMax('height'), 'maxHeight']], // wxm block database  library.dao.db_fn('MAX', library.dao.db_col('height'))
-            null,
-            (err, rows) => {
-              if (err || !rows) {
-                return cb(err || 'Get Block Error.')
-              }
-
-              let maxHeight = 2
-              if (rows.length > 0) {
-                maxHeight = rows[0].maxHeight + 1 // height - bignum ?
-              }
-
-              this.dao.findPage(
-                'block',
-                where,
-                1,
-                0,
-                false,
-                [
-                  ['id', 'b_id'],
-                  ['height', 'b_height'],
-                  ['number_of_transactions', 'b_numberOfTransactions'],
-                  ['total_amount', 'b_totalAmount'],
-                  ['total_fee', 'b_totalFee'],
-                  ['reward', 'b_reward'],
-                  ['payload_length', 'b_payloadLength'],
-                  ['generator_public_key', 'b_generatorPublicKey'],
-                  ['block_signature', 'b_blockSignature'],
-                  ['version', 'b_version'],
-                  ['timestamp', 'b_timestamp'],
-                  ['previous_block', 'b_previousBlock'],
-                  [this.dao.db_str(maxHeight + '-height'), 'b_confirmations']
-                ],
-                null,
-                (err2, rows2) => {
-                  if (err2 || !rows2 || !rows2.length) {
-                    return cb(err2 || 'querySimpleBlockData Block not found')
-                  }
-
-                  const block = this.serializeDbData2Block(rows2[0])
-                  cb(null, block)
-                }
-              )
-            }
-          )
+						null);
+						if (!rows) {
+							throw new Error('Get Block Error.')
+						}
+						let maxHeight = 2
+						if (rows.length > 0) {
+							maxHeight = rows[0].maxHeight + 1 // height - bignum ?
+						}
+						const rows2 = await this.dao.findPage(
+							'block',
+							where,
+							1,
+							0,
+							false,
+							[
+								['id', 'b_id'],
+								['height', 'b_height'],
+								['number_of_transactions', 'b_numberOfTransactions'],
+								['total_amount', 'b_totalAmount'],
+								['total_fee', 'b_totalFee'],
+								['reward', 'b_reward'],
+								['payload_length', 'b_payloadLength'],
+								['generator_public_key', 'b_generatorPublicKey'],
+								['block_signature', 'b_blockSignature'],
+								['version', 'b_version'],
+								['timestamp', 'b_timestamp'],
+								['previous_block', 'b_previousBlock'],
+								[this.dao.db_str(maxHeight + '-height'), 'b_confirmations']
+							],
+							null);
+							if (!rows2 || !rows2.length) {
+								return cb('querySimpleBlockData Block not found')
+							}
+							const block = this.serializeDbData2Block(rows2[0])
+							cb(null, block)
+					} catch (e) {
+						cb(e)
+					}
         },
         (err, result) => {
           if (err) {

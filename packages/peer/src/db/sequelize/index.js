@@ -49,37 +49,17 @@ class DAO {
     this._addModel(name, func(sequelizeInst))
   }
 
-  static connect (dbSetting, logger, cb) {
+  static async connect (dbSetting, logger) {
     sequelizeInst = new Sequelize(dbSetting.database, dbSetting.username, dbSetting.password, dbSetting.options)
 
-    sequelizeInst
-      .authenticate()
-      .then(err => {
-        if (err) {
-          cb(err)
-          return null
-        } else {
-          this._registerModel(sequelizeInst)
+    await sequelizeInst.authenticate();
+		this._registerModel(sequelizeInst);
 
-          return sequelizeInst
-            .sync(logOptions)
-            .then(() => {
-              cb(null, sequelizeInst)
-              return null
-            })
-            .catch(err3 => {
-              cb(err3)
-              return null
-            })
-        }
-      })
-      .catch(err2 => {
-        cb(err2)
-        return null
-      })
+		await sequelizeInst.sync(logOptions);
+		return sequelizeInst;
   }
 
-  static insert(modelName, modelObj, transaction) {
+  static async insert(modelName, modelObj, transaction) {
     const modelInst = this._getModel(modelName);
     if (!modelInst) {
       throw new Error('Data model not defined: ' + modelName);
@@ -93,63 +73,17 @@ class DAO {
     return modelInst.create(modelObj, options);
   }
 
-  static insertOrUpdate (modelName, modelObj, transaction, cb) {
-    try {
-      if (typeof cb === 'undefined' && typeof transaction === 'function') {
-        cb = transaction
-        transaction = null
-      }
-
-      const modelInst = this._getModel(modelName)
-      if (modelInst) {
-        if (modelObj) {
-          const options = Object.assign({}, logOptions, {
-            transaction: transaction || null
-          })
-          modelInst
-            .upsert(modelObj, options)
-            .then(() => {
-              if (typeof cb === 'function') {
-                cb(null, modelObj)
-                return null
-              }
-            })
-            .catch(err2 => {
-              if (typeof cb === 'function') {
-                let errMsg2 = err2.toString()
-                if (err2.errors && err2.errors.length > 0) {
-                  for (let i = 0; i < err2.errors.length; i++) {
-                    errMsg2 += '\r\n' + err2.errors[i].message
-                  }
-                }
-                cb(errMsg2)
-                return null
-              }
-            })
-        } else {
-          if (typeof cb === 'function') {
-            cb('无效的数据输入：' + modelObj)
-            return null
-          }
-        }
-      } else {
-        if (typeof cb === 'function') {
-          cb('Data model not defined: ' + modelName)
-          return null
-        }
-      }
-    } catch (err) {
-      if (typeof cb === 'function') {
-        let errMsg = err.toString()
-        if (err.errors && err.errors.length > 0) {
-          for (let i = 0; i < err.errors.length; i++) {
-            errMsg += '\r\n' + err.errors[i].message
-          }
-        }
-        cb(errMsg)
-        return null
-      }
-    }
+  static async insertOrUpdate (modelName, modelObj, transaction) {
+		const modelInst = this._getModel(modelName)
+		if (!modelInst) {
+			throw new Error('Data model not defined: ' + modelName);
+		}
+		const options = Object.assign({}, logOptions, {
+			transaction: transaction || null
+		})
+		// FIX 这里旧的代码返回了传入的 Obj，正常应该返回数据库的 Obj
+		await modelInst.upsert(modelObj, options)
+		return modelObj;
   }
 
   /**
@@ -162,423 +96,164 @@ class DAO {
    * @param {*} transaction
    * @param {*} cb
    */
-  static update (modelName, modelObj, where, transaction, cb) {
-    try {
-      if (typeof cb === 'undefined' && typeof transaction === 'function') {
-        cb = transaction
-        transaction = null
-      }
-
-      const modelInst = this._getModel(modelName)
-      if (modelInst) {
-        if (modelObj) {
-          const options = Object.assign({}, logOptions, {
-            where: where,
-            transaction: transaction || null
-          })
-          modelInst
-            .update(modelObj, options)
-            .then(result => {
-              if (typeof cb === 'function') {
-                cb(null, result && result.length > 0 ? result[0] : 0)
-                return null
-              }
-            })
-            .catch(err2 => {
-              if (typeof cb === 'function') {
-                let errMsg2 = err2.toString()
-                if (err2.errors && err2.errors.length > 0) {
-                  for (let i = 0; i < err2.errors.length; i++) {
-                    errMsg2 += '\r\n' + err2.errors[i].message
-                  }
-                }
-                cb(errMsg2)
-                return null
-              }
-            })
-        } else {
-          if (typeof cb === 'function') {
-            cb('无效的数据输入：' + modelObj)
-            return null
-          }
-        }
-      } else {
-        if (typeof cb === 'function') {
-          cb('Data model not defined: ' + modelName)
-          return null
-        }
-      }
-    } catch (err) {
-      if (typeof cb === 'function') {
-        let errMsg = err.toString()
-        if (err.errors && err.errors.length > 0) {
-          for (let i = 0; i < err.errors.length; i++) {
-            errMsg += '\r\n' + err.errors[i].message
-          }
-        }
-        cb(errMsg)
-        return null
-      }
+  static async update (modelName, modelObj, where, transaction) {
+		const modelInst = this._getModel(modelName)
+		if (!modelInst) {
+			throw new Error('Data model not defined: ' + modelName);
+		}
+    if (!modelObj) {
+      throw new Error('无效的数据输入：' + modelObj);
     }
+		const options = Object.assign({}, logOptions, {
+			where: where,
+			transaction: transaction || null
+		})
+		const result = await modelInst.update(modelObj, options);
+		return result && result.length > 0 ? result[0] : 0;
   }
 
-  static remove (modelName, where, transaction, cb) {
-    try {
-      if (typeof cb === 'undefined' && typeof transaction === 'function') {
-        cb = transaction
-        transaction = null
-      }
-
-      const modelInst = this._getModel(modelName)
-      if (modelInst) {
-        if (where) {
-          const options = Object.assign({}, logOptions, {
-            where: where,
-            transaction: transaction || null,
-            cascade: true
-          })
-          modelInst
-            .destroy(options)
-            .then(result => {
-              if (typeof cb === 'function') {
-                cb(null, result)
-                return null
-              }
-            })
-            .catch(err2 => {
-              if (typeof cb === 'function') {
-                let errMsg2 = err2.toString()
-                if (err2.errors && err2.errors.length > 0) {
-                  for (let i = 0; i < err2.errors.length; i++) {
-                    errMsg2 += '\r\n' + err2.errors[i].message
-                  }
-                }
-                cb(errMsg2)
-                return null
-              }
-            })
-        } else {
-          if (typeof cb === 'function') {
-            cb('where参数是必须的：' + where)
-            return null
-          }
-        }
-      } else {
-        if (typeof cb === 'function') {
-          cb('Data model not defined: ' + modelName)
-          return null
-        }
-      }
-    } catch (err) {
-      if (typeof cb === 'function') {
-        let errMsg = err.toString()
-        if (err.errors && err.errors.length > 0) {
-          for (let i = 0; i < err.errors.length; i++) {
-            errMsg += '\r\n' + err.errors[i].message
-          }
-        }
-        cb(errMsg)
-        return null
-      }
-    }
+  static async remove (modelName, where, transaction) {
+		const modelInst = this._getModel(modelName)
+		if (!modelInst) {
+			throw new Error('Data model not defined: ' + modelName)
+		}
+		if (!where) {
+			throw new Error('where参数是必须的：' + where)
+		}
+		const options = Object.assign({}, logOptions, {
+			where: where,
+			transaction: transaction || null,
+			cascade: true
+		})
+		const result = await modelInst.destroy(options);
+		return result;
   }
 
-  static findOneByPrimaryKey (modelName, value, attributes, dbTrans, cb) {
-    try {
-      if (typeof cb === 'undefined' && typeof dbTrans === 'function') {
-        cb = dbTrans
-        dbTrans = null
-      }
-
-      const modelInst = this._getModel(modelName)
-      if (modelInst) {
-        if (value) {
-          modelInst
-            .findByPk(
-              value,
-              Object.assign({}, logOptions, {
-                attributes: attributes || undefined,
-                transaction: dbTrans || undefined
-              })
-            )
-            .then(result => {
-              if (typeof cb === 'function') {
-                if (result && result.toJSON) {
-                  cb(null, result.toJSON())
-                  return null
-                } else {
-                  cb(null, result)
-                  return null
-                }
-              }
-            })
-            .catch(err2 => {
-              if (typeof cb === 'function') {
-                let errMsg2 = err2.toString()
-                if (err2.errors && err2.errors.length > 0) {
-                  for (let i = 0; i < err2.errors.length; i++) {
-                    errMsg2 += '\r\n' + err2.errors[i].message
-                  }
-                }
-                cb(errMsg2)
-                return null
-              }
-            })
-        } else {
-          if (typeof cb === 'function') {
-            cb('无效的数据输入：' + value)
-            return null
-          }
-        }
-      } else {
-        if (typeof cb === 'function') {
-          cb('Data model not defined: ' + modelName)
-          return null
-        }
-      }
-    } catch (err) {
-      if (typeof cb === 'function') {
-        let errMsg = err.toString()
-        if (err.errors && err.errors.length > 0) {
-          for (let i = 0; i < err.errors.length; i++) {
-            errMsg += '\r\n' + err.errors[i].message
-          }
-        }
-        cb(errMsg)
-        return null
-      }
-    }
+  static async findOneByPrimaryKey (modelName, value, attributes, dbTrans) {
+		const modelInst = this._getModel(modelName)
+		if (!modelInst) {
+			throw new Error('Data model not defined: ' + modelName)
+		}
+		if (!value) {
+			throw new Error('无效的数据输入：' + value)
+		}
+		const result = await modelInst
+		.findByPk(
+			value,
+			Object.assign({}, logOptions, {
+				attributes: attributes || undefined,
+				transaction: dbTrans || undefined
+			})
+		);
+		// FIX 不知道这里为什么这么写 应该直接 toJSON 返回即可 不存在直接返回 result
+		if (result && result.toJSON) {
+			return result.toJSON()
+		}
+		return result;
   }
 
-  static findList (modelName, where, attributes, orders, dbTrans, cb) {
-    try {
-      if (typeof cb === 'undefined' && typeof dbTrans === 'function') {
-        cb = dbTrans
-        dbTrans = null
-      }
+  static async findList (modelName, where, attributes, orders, dbTrans) {
+		const modelInst = this._getModel(modelName)
+		if (!modelInst) {
+			throw new Error('Data model not defined: ' + modelName)
+		}
 
-      const modelInst = this._getModel(modelName)
-      if (modelInst) {
-        const invokeMethod = modelInst.findAll
+		const invokeMethod = modelInst.findAll
 
-        const options = Object.assign({}, logOptions, {
-          attributes: attributes || undefined,
-          where: where || undefined,
-          order: orders || undefined
-        })
+		const options = Object.assign({}, logOptions, {
+			attributes: attributes || undefined,
+			where: where || undefined,
+			order: orders || undefined
+		})
 
-        invokeMethod
-          .call(modelInst, options)
-          .then(results => {
-            if (typeof cb === 'function') {
-              const jsonResults = []
-              const foundRows = results.rows ? results.rows : results
-              for (let i = 0; i < foundRows.length; i++) {
-                jsonResults.push(foundRows[i].toJSON())
-              }
+		const results = await invokeMethod.call(modelInst, options);
+		const jsonResults = []
+		const foundRows = results.rows ? results.rows : results
+		for (let i = 0; i < foundRows.length; i++) {
+			jsonResults.push(foundRows[i].toJSON())
+		}
 
-              if (results.rows) {
-                cb(null, {
-                  rows: jsonResults,
-                  total: results.count
-                })
-                return null
-              } else {
-                cb(null, jsonResults)
-                return null
-              }
-            }
-          })
-          .catch(err2 => {
-            if (typeof cb === 'function') {
-              let errMsg2 = err2.toString()
-              if (err2.errors && err2.errors.length > 0) {
-                for (let i = 0; i < err2.errors.length; i++) {
-                  errMsg2 += '\r\n' + err2.errors[i].message
-                }
-              }
-              cb(errMsg2)
-              return null
-            }
-          })
-      } else {
-        if (typeof cb === 'function') {
-          cb('Data model not defined: ' + modelName)
-          return null
-        }
-      }
-    } catch (err) {
-      if (typeof cb === 'function') {
-        let errMsg = err.toString()
-        if (err.errors && err.errors.length > 0) {
-          for (let i = 0; i < err.errors.length; i++) {
-            errMsg += '\r\n' + err.errors[i].message
-          }
-        }
-        cb(errMsg)
-        return null
-      }
-    }
+		if (results.rows) {
+			return {
+				rows: jsonResults,
+				total: results.count
+			}
+		} else {
+			return jsonResults
+		}
   }
 
-  static findPage (modelName, where, limit, offset, returnTotal, attributes, orders, dbTrans, cb) {
-    try {
-      if (typeof cb === 'undefined' && typeof dbTrans === 'function') {
-        cb = dbTrans
-        dbTrans = null
-      }
+  static async findPage (modelName, where, limit, offset, returnTotal, attributes, orders, dbTrans) {
+		const modelInst = this._getModel(modelName)
+		if (!modelInst) {
+			throw new Error('Data model not defined: ' + modelName)
+		}
 
-      const modelInst = this._getModel(modelName)
-      if (modelInst) {
-        let invokeMethod = modelInst.findAll
-        if (returnTotal) {
-          invokeMethod = modelInst.findAndCountAll
-        }
+		let invokeMethod = modelInst.findAll
+		if (returnTotal) {
+			invokeMethod = modelInst.findAndCountAll
+		}
 
-        const options = Object.assign({}, logOptions, {
-          attributes: attributes || undefined,
-          where: where || undefined,
-          order: orders || undefined,
-          limit: limit || 100,
-          offset: offset || 0
-        })
+		const options = Object.assign({}, logOptions, {
+			attributes: attributes || undefined,
+			where: where || undefined,
+			order: orders || undefined,
+			limit: limit || 100,
+			offset: offset || 0
+		})
 
-        invokeMethod
-          .call(modelInst, options)
-          .then(results => {
-            if (typeof cb === 'function') {
-              const jsonResults = []
-              const foundRows = results.rows ? results.rows : results
+		const results = await invokeMethod.call(modelInst, options);
+		const jsonResults = []
+		const foundRows = results.rows ? results.rows : results
 
-              for (let i = 0; i < foundRows.length; i++) {
-                jsonResults.push(foundRows[i].toJSON())
-              }
+		for (let i = 0; i < foundRows.length; i++) {
+			jsonResults.push(foundRows[i].toJSON())
+		}
 
-              if (results.rows) {
-                cb(null, {
-                  rows: jsonResults,
-                  total: results.count
-                })
-                return null
-              } else {
-                cb(null, jsonResults)
-                return null
-              }
-            }
-          })
-          .catch(err2 => {
-            if (typeof cb === 'function') {
-              // console.log(' err2 .................', err2)
-              let errMsg2 = err2.toString()
-              if (err2.errors && err2.errors.length > 0) {
-                for (let i = 0; i < err2.errors.length; i++) {
-                  errMsg2 += '\r\n' + err2.errors[i].message
-                }
-              }
-              cb(errMsg2)
-              return null
-            }
-          })
-      } else {
-        if (typeof cb === 'function') {
-          cb('Data model not defined: ' + modelName)
-          return null
-        }
-      }
-    } catch (err) {
-      if (typeof cb === 'function') {
-        let errMsg = err.toString()
-        if (err.errors && err.errors.length > 0) {
-          for (let i = 0; i < err.errors.length; i++) {
-            errMsg += '\r\n' + err.errors[i].message
-          }
-        }
-        // console.log('findPage err 3.................')
-
-        cb(errMsg)
-        return null
-      }
-    }
+		if (results.rows) {
+			return {
+				rows: jsonResults,
+				total: results.count
+			}
+		} else {
+			return jsonResults
+		}
   }
 
-  static findListByGroup (modelName, where, options, dbTrans, cb) {
-    try {
-      if (typeof cb === 'undefined' && typeof dbTrans === 'function') {
-        cb = dbTrans
-        dbTrans = null
-      }
-      const { limit, offset, attributes, orders, group } = options
+  static async findListByGroup (modelName, where, options, dbTrans) {
+		const modelInst = this._getModel(modelName)
+		if (!modelInst) {
+			throw new Error('Data model not defined: ' + modelName)
+		}
+		const { limit, offset, attributes, orders, group } = options
 
-      const modelInst = this._getModel(modelName)
-      if (modelInst) {
-        const invokeMethod = modelInst.findAll
+		const invokeMethod = modelInst.findAll
 
-        const opts = Object.assign({}, logOptions, {
-          attributes: attributes || undefined,
-          where: where || undefined,
-          order: orders,
-          group,
-          limit: limit || undefined,
-          offset: offset || undefined,
-          transaction: dbTrans || undefined
-        })
+		const opts = Object.assign({}, logOptions, {
+			attributes: attributes || undefined,
+			where: where || undefined,
+			order: orders,
+			group,
+			limit: limit || undefined,
+			offset: offset || undefined,
+			transaction: dbTrans || undefined
+		})
 
-        invokeMethod
-          .call(modelInst, opts)
-          .then(results => {
-            if (typeof cb === 'function') {
-              const jsonResults = []
-              const foundRows = results.rows ? results.rows : results
-              for (let i = 0; i < foundRows.length; i++) {
-                jsonResults.push(foundRows[i].toJSON())
-              }
+		const results = await invokeMethod.call(modelInst, opts)
+		const jsonResults = []
+		const foundRows = results.rows ? results.rows : results
+		for (let i = 0; i < foundRows.length; i++) {
+			jsonResults.push(foundRows[i].toJSON())
+		}
 
-              if (results.rows) {
-                cb(null, {
-                  rows: jsonResults,
-                  total: results.count
-                })
-                return null
-              } else {
-                cb(null, jsonResults)
-                return null
-              }
-            }
-          })
-          .catch(err2 => {
-            if (typeof cb === 'function') {
-              let errMsg2 = err2.toString()
-              if (err2.errors && err2.errors.length > 0) {
-                for (let i = 0; i < err2.errors.length; i++) {
-                  errMsg2 += '\r\n' + err2.errors[i].message
-                }
-              }
-              console.log('findListByGroup error 1', err2)
-              cb(errMsg2)
-              return null
-            }
-          })
-      } else {
-        if (typeof cb === 'function') {
-          cb('Data model not defined: ' + modelName)
-          return null
-        }
-      }
-    } catch (err) {
-      if (typeof cb === 'function') {
-        let errMsg = err.toString()
-        if (err.errors && err.errors.length > 0) {
-          for (let i = 0; i < err.errors.length; i++) {
-            errMsg += '\r\n' + err.errors[i].message
-          }
-        }
-
-        console.log('findListByGroup error 2', err)
-
-        cb(errMsg)
-        return null
-      }
-    }
+		if (results.rows) {
+			return {
+				rows: jsonResults,
+				total: results.count
+			}
+		} else {
+			return jsonResults
+		}
   }
 
   static async findOne(modelName, where, attributes, dbTrans) {
@@ -594,12 +269,7 @@ class DAO {
     return result ? result.toJSON() : null
   }
 
-  static count (modelName, where, dbTrans, cb) {
-    if (typeof cb === 'undefined' && typeof dbTrans === 'function') {
-      cb = dbTrans
-      dbTrans = null
-    }
-
+  static async count (modelName, where, dbTrans) {
     var options = Object.assign({}, logOptions, {
       where: where || undefined
     })
@@ -607,235 +277,77 @@ class DAO {
     if (dbTrans) {
       options.transaction = dbTrans
     }
-    this._getModel(modelName)
-      .count(options)
-      .then(data => {
-        cb(null, data)
-        return null
-      })
-      .catch(cb)
+    return this._getModel(modelName).count(options)
   }
 
-  static execSql (sql, transaction, cb) {
-    try {
-      if (typeof cb === 'undefined' && typeof transaction === 'function') {
-        cb = transaction
-        transaction = null
-      }
-
-      sequelizeInst
-        .query(
-          sql,
-          Object.assign({}, logOptions, {
-            transaction: transaction || null
-          })
-        )
-        .spread((results, metadata) => {
-          cb(null, results)
-          return null
-          // cb(null, true);
-        })
-        .catch(err => {
-          if (typeof cb === 'function') {
-            let errMsg = err.toString()
-            if (err.errors && err.errors.length > 0) {
-              for (let i = 0; i < err.errors.length; i++) {
-                errMsg += '\r\n' + err.errors[i].message
-              }
-            }
-            cb(errMsg)
-            return null
-          }
-        })
-    } catch (err) {
-      if (typeof cb === 'function') {
-        let errMsg = err.toString()
-        if (err.errors && err.errors.length > 0) {
-          for (let i = 0; i < err.errors.length; i++) {
-            errMsg += '\r\n' + err.errors[i].message
-          }
-        }
-        cb(errMsg)
-        return null
-      }
-    }
+  static async execSql (sql, transaction) {
+		const result = await new Promise((resolve) => {
+			sequelizeInst
+				.query(
+					sql,
+					Object.assign({}, logOptions, {
+						transaction: transaction || null
+					})
+				)
+				.spread((results, metadata) => {
+					resolve(results)
+				})
+		})
+		return result;
   }
 
-  static transaction (func, cb) {
-    if (sequelizeInst) {
-      sequelizeInst.transaction(logOptions).then(t => {
-        try {
-          func(t, err => {
-            if (err) {
-              t.rollback()
-                .then(() => {
-                  return cb('rollback--, err1+true: ' + err, true)
-                  // return null
-                })
-                .catch(err2 => {
-                  cb('rollback--, err2+false: ' + err2, false)
-                  // return null
-                })
-            } else {
-              t.commit()
-                .then(() => {
-                  return cb(null, true)
-                  // return null
-                })
-                .catch(err2 => {
-                  return cb('commit--' + err2, false)
-                  // return null
-                })
-            }
-          })
-        } catch (err3) {
-          t.rollback()
-            .then(() => {
-              return cb('rollback--, err3+true: ' + err3, true)
-              // return null
-            })
-            .catch(err4 => {
-              return cb('rollback--, err4+false: ' + err4, false)
-              // return null
-            })
-        }
-      })
-    } else {
-      cb('数据库未连接', false)
-      // return null
-    }
+  static async transaction (func) {
+		if (!sequelizeInst) {
+			throw new Error("数据库未连接")
+		}
+		const t = await sequelizeInst.transaction(logOptions);
+		try {
+			await func(t);
+			try {
+				await t.commit();
+			} catch (e) {
+				throw new Error('commit--' + e);
+			}
+		} catch (e) {
+			try {
+				await t.rollback()
+				throw new Error('rollback--, err1+true: ' + e);
+			} catch (err) {
+				throw new Error('rollback--, err2+false: ' + err);
+			}
+		}
   }
 
-  static createTable (modelName, force, cb) {
-    try {
-      if (typeof cb === 'undefined' && typeof force === 'function') {
-        cb = force
-        force = null
-      }
-
-      const modelInst = this._getModel(modelName)
-      if (modelInst) {
-        modelInst
-          .sync(
-            Object.assign({}, logOptions, {
-              force: force || undefined
-            })
-          )
-          .then(() => {
-            if (typeof cb === 'function') {
-              cb(null, true)
-              return null
-            }
-          })
-          .catch(err2 => {
-            if (typeof cb === 'function') {
-              cb(err2)
-              return null
-            }
-          })
-      } else {
-        if (typeof cb === 'function') {
-          cb('Data model not defined: ' + modelName)
-          return null
-        }
-      }
-    } catch (err) {
-      if (typeof cb === 'function') {
-        let errMsg = err.toString()
-        if (err.errors && err.errors.length > 0) {
-          for (let i = 0; i < err.errors.length; i++) {
-            errMsg += '\r\n' + err.errors[i].message
-          }
-        }
-        cb(errMsg)
-        return null
-      }
-    }
+  static async createTable (modelName, force) {
+		const modelInst = this._getModel(modelName)
+		if (!modelInst) {
+			throw new Error('Data model not defined: ' + modelName);
+		}
+		await modelInst.sync(
+			Object.assign({}, logOptions, {
+				force: force || undefined
+			})
+		)
   }
 
-  static removeTable (modelName, cb) {
-    try {
-      const modelInst = this._getModel(modelName)
-      if (modelInst) {
-        modelInst
-          .drop(logOptions)
-          .then(() => {
-            if (typeof cb === 'function') {
-              cb(null, true)
-              return null
-            }
-          })
-          .catch(err2 => {
-            if (typeof cb === 'function') {
-              cb(err2)
-              return null
-            }
-          })
-      } else {
-        if (typeof cb === 'function') {
-          cb('Data model not defined: ' + modelName)
-          return null
-        }
-      }
-    } catch (err) {
-      if (typeof cb === 'function') {
-        let errMsg = err.toString()
-        if (err.errors && err.errors.length > 0) {
-          for (let i = 0; i < err.errors.length; i++) {
-            errMsg += '\r\n' + err.errors[i].message
-          }
-        }
-        cb(errMsg)
-        return null
-      }
-    }
+  static async removeTable (modelName) {
+		const modelInst = this._getModel(modelName)
+		if (!modelInst) {
+			throw new Error('Data model not defined: ' + modelName);
+		}
+		await modelInst.drop(logOptions)
   }
 
-  static clear (modelName, truncate, cb) {
-    try {
-      if (typeof cb === 'undefined' && typeof truncate === 'function') {
-        cb = truncate
-        truncate = null
-      }
-
-      const modelInst = this._getModel(modelName)
-      if (modelInst) {
-        modelInst
-          .destroy(
-            Object.assign({}, logOptions, {
-              truncate: truncate || undefined
-            })
-          )
-          .then(() => {
-            if (typeof cb === 'function') {
-              cb(null, true)
-              return null
-            }
-          })
-          .catch(err2 => {
-            if (typeof cb === 'function') {
-              cb(err2)
-              return null
-            }
-          })
-      } else {
-        if (typeof cb === 'function') {
-          cb('Data model not defined: ' + modelName)
-          return null
-        }
-      }
-    } catch (err) {
-      if (typeof cb === 'function') {
-        let errMsg = err.toString()
-        if (err.errors && err.errors.length > 0) {
-          for (let i = 0; i < err.errors.length; i++) {
-            errMsg += '\r\n' + err.errors[i].message
-          }
-        }
-        cb(errMsg)
-        return null
-      }
-    }
+  static async clear (modelName, truncate) {
+		const modelInst = this._getModel(modelName)
+		if (!modelInst) {
+			throw new Error('Data model not defined: ' + modelName);
+		}
+		await  modelInst.destroy(
+			Object.assign({}, logOptions, {
+				truncate: truncate || undefined
+			})
+		);
   }
 }
 

@@ -393,67 +393,63 @@ class MultisignaturesRouter {
         success: false,
         error: `Validation error: ${validateErrors[0].schemaPath} ${validateErrors[0].message}`
       }
-    }
+		}
+		try {
+			let rows = await this.dao.findList(
+				'mem_accounts2multisignature',
+				{ dependent_id: query.publicKey },
+				[[this.dao.db_fnGroupConcat('account_id'), 'account_id']],
+				null);
 
-    return new Promise((resolve, reject) => {
-      this.dao.findList(
-        'mem_accounts2multisignature',
-        { dependent_id: query.publicKey },
-        [[this.dao.db_fnGroupConcat('account_id'), 'account_id']],
-        null,
-        async (err, rows) => {
-          if (err) {
-            this.logger.error('Can`t find multisignatures, ', system.getErrorMsg(err))
-            return reject(err)
-          }
-          let addresses = []
+			let addresses = []
 
-          if (rows[0] && rows[0].account_id) {
-            addresses = rows[0].account_id.split(',') // wxm block database
-          }
+			if (rows[0] && rows[0].account_id) {
+				addresses = rows[0].account_id.split(',') // wxm block database
+			}
 
-          try {
-            const rows = await this.runtime.account.getAccountList(
-              {
-                address: {
-                  $in: addresses
-                },
-                sort: [['balance', 'ASC']] // wxm block database
-              },
-              ['address', 'balance', 'multisignatures', 'multilifetime', 'multimin']
-            )
+			try {
+				let rows = await this.runtime.account.getAccountList(
+					{
+						address: {
+							$in: addresses
+						},
+						sort: [['balance', 'ASC']] // wxm block database
+					},
+					['address', 'balance', 'multisignatures', 'multilifetime', 'multimin']
+				)
 
-            for (let i = 0; i < rows.length; i++) {
-              const account = rows[i]
+				for (let i = 0; i < rows.length; i++) {
+					const account = rows[i]
 
-              const addresses = []
-              for (let j = 0; j < account.multisignatures.length; j++) {
-                addresses.push(this.runtime.account.generateAddressByPublicKey(account.multisignatures[j]))
-              }
+					const addresses = []
+					for (let j = 0; j < account.multisignatures.length; j++) {
+						addresses.push(this.runtime.account.generateAddressByPublicKey(account.multisignatures[j]))
+					}
 
-              const multisigaccounts = await this.runtime.account.getAccountList(
-                {
-                  address: {
-                    $in: addresses
-                  }
-                },
-                ['address', 'publicKey', 'balance']
-              )
+					const multisigaccounts = await this.runtime.account.getAccountList(
+						{
+							address: {
+								$in: addresses
+							}
+						},
+						['address', 'publicKey', 'balance']
+					)
 
-              account.multisigaccounts = multisigaccounts
-            }
+					account.multisigaccounts = multisigaccounts
+				}
 
-            resolve({
-              success: true,
-              accounts: rows
-            })
-          } catch (e) {
-            this.logger.error('findList: ', system.getErrorMsg(e))
-            return reject(e)
-          }
-        }
-      )
-    })
+				return {
+					success: true,
+					accounts: rows
+				}
+			} catch (e) {
+				this.logger.error('findList: ', system.getErrorMsg(e))
+				throw e;
+			}
+		} catch (e) {
+			this.logger.error('Can`t find multisignatures, ', system.getErrorMsg(err))
+			throw e;
+		}
   }
 
   async getFee () {

@@ -90,41 +90,36 @@ class PeerSync {
   }
 
   async _getIdSequence (height) {
-    return new Promise((resolve, reject) => {
-      this.dao.findPage(
-        'block',
-        {
-          height: {
-            $lte: height
-          }
-        },
-        5,
-        0,
-        false,
-        ['id', 'height'],
-        [['height', 'DESC']],
-        (err, rows) => {
-          if (err || !rows || !rows.length) {
-            reject(err ? err.toString() : `Can't get sequence before: ${height}`)
-          }
+		const rows = await this.dao.findPage(
+			'block',
+			{
+				height: {
+					$lte: height
+				}
+			},
+			5,
+			0,
+			false,
+			['id', 'height'],
+			[['height', 'DESC']]);
 
-          let firstHeight = ''
-          let ids = ''
-          for (let i = 0; i < rows.length; i++) {
-            firstHeight = rows[i].height
-            if (ids.length > 0) {
-              ids += ','
-            }
-            ids += rows[i].id
-          }
+		if (!rows || !rows.length) {
+			throw new Error(`Can't get sequence before: ${height}`);
+		}
+    let firstHeight = ''
+		let ids = ''
+		for (let i = 0; i < rows.length; i++) {
+			firstHeight = rows[i].height
+			if (ids.length > 0) {
+				ids += ','
+			}
+			ids += rows[i].id
+		}
 
-          resolve({
-            firstHeight,
-            ids
-          })
-        }
-      )
-    })
+		return {
+			firstHeight,
+			ids
+		}
   }
 
   async _addLackBlocks (peer, lastBlock) {

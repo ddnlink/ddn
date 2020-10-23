@@ -89,26 +89,16 @@ class Issue extends Asset.Base {
       return num2;
     });
 
-    // (3)查询到交易的相关数据
-    let trData = await new Promise(resolve => {
-      this.dao.findList(
-        "tr",
-        {
-          id: {
-            $in: _.map(result, "transaction_id")
-          }
-        },
-        null,
-        null,
-        (err, rows) => {
-          if (err) {
-            resolve(err);
-          } else {
-            resolve(rows);
-          }
-        }
-      );
-    });
+		// (3)查询到交易的相关数据
+		let trData = await this.dao.findList(
+			"tr",
+			{
+				id: {
+					$in: _.map(result, "transaction_id")
+				}
+			},
+			null,
+			null);
     trData = _.keyBy(trData, "id");
 
     const result3 = _.map(result2, num => {
@@ -118,25 +108,15 @@ class Issue extends Asset.Base {
     });
 
     // (4)查询到块的相关数据
-    let blockData = await new Promise(resolve => {
-      this.dao.findList(
-        "block",
-        {
-          id: {
-            $in: _.map(result3, "block_id") // result - result3
-          }
-        },
-        null,
-        null,
-        (err, rows) => {
-          if (err) {
-            resolve(err);
-          } else {
-            resolve(rows);
-          }
-        }
-      );
-    });
+		let blockData = await this.dao.findList(
+			"block",
+			{
+				id: {
+					$in: _.map(result3, "block_id") // result - result3
+				}
+			},
+			null,
+			null);
     blockData = _.keyBy(blockData, "id");
 
     const result4 = _.map(result3, num => {
@@ -236,12 +216,17 @@ class Issue extends Asset.Base {
       throw new Error("Asset balance not enough");
     }
     if (assetBalancedata) {
-      this.dao.update(
-        "mem_asset_balance",
-        { balance: newBalance.toString() },
-        { address: sender.address, currency },
-        dbTrans
-      );
+      try {
+        await this.dao.update(
+					"mem_asset_balance",
+					{ balance: newBalance.toString() },
+					{ address: sender.address, currency },
+					dbTrans
+				);
+      } catch (e) {
+        // TODO 2020-10-15 to throw error
+        this.logger.error("apply asset-aob error", e);
+      }
     } else {
       try {
         await this.dao.insert(
@@ -295,12 +280,17 @@ class Issue extends Asset.Base {
       throw new Error("Asset balance not enough");
     }
     if (assetBalancedata) {
-      this.dao.update(
-        "mem_asset_balance",
-        { balance: newBalance.toString() },
-        { address: sender.address, currency },
-        dbTrans
-      );
+      try {
+        await this.dao.update(
+					"mem_asset_balance",
+					{ balance: newBalance.toString() },
+					{ address: sender.address, currency },
+					dbTrans
+				);
+      } catch (e) {
+        // TODO 2020-10-16 to throw error
+        this.logger.error("undo asset-aob error", e);
+      }
     } else {
       try {
         await this.dao.insert(

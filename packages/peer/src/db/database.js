@@ -7,17 +7,11 @@ class DBUtils {
      * @param {*} logger 日志对象
      * @param {*} cb 回调函数
      */
-  static init (dbSettings, logger, cb) {
-    sequelizeDB.connect(dbSettings, logger, (err, sequelize) => {
-      if (err) {
-        cb(err)
-      } else {
-        this.initConstants(sequelize)
-        this.initFuncs(sequelize)
-
-        cb(null, this)
-      }
-    })
+  static async init (dbSettings, logger) {
+		const sequelize = await sequelizeDB.connect(dbSettings, logger);
+		this.initConstants(sequelize)
+		this.initFuncs(sequelize)
+		return this;
   }
 
   /**
@@ -96,9 +90,8 @@ class DBUtils {
      * @param {*} modelName 模型名称
      * @param {*} modelObj 模型数据
      * @param {*} transaction 事务对象
-     * @param {*} cb 回调函数
      */
-  static insert (modelName, modelObj, transaction) {
+  static async insert (modelName, modelObj, transaction) {
     return sequelizeDB.insert(modelName, modelObj, transaction)
   }
 
@@ -107,10 +100,9 @@ class DBUtils {
      * @param {*} modelName 模型名称
      * @param {*} modelObj 模型数据
      * @param {*} transaction 事务对象
-     * @param {*} cb 回调函数
      */
-  static insertOrUpdate (modelName, modelObj, transaction, cb) {
-    sequelizeDB.insertOrUpdate(modelName, modelObj, transaction, cb)
+  static async insertOrUpdate (modelName, modelObj, transaction) {
+    return sequelizeDB.insertOrUpdate(modelName, modelObj, transaction)
   }
 
   /**
@@ -119,10 +111,9 @@ class DBUtils {
      * @param {*} modelObj 模型数据
      * @param {*} where 更新条件，指定更新范围，参考Sequelize的Query查询定义https://sequelize.readthedocs.io/en/latest/docs/querying/?q=Sequelize.fn&check_keywords=yes&area=default#where
      * @param {*} transaction 事务对象
-     * @param {*} cb 回调函数
      */
-  static update (modelName, modelObj, where, transaction, cb) {
-    sequelizeDB.update(modelName, modelObj, where, transaction, cb)
+  static async update (modelName, modelObj, where, transaction) {
+    return sequelizeDB.update(modelName, modelObj, where, transaction)
   }
 
   /**
@@ -130,10 +121,9 @@ class DBUtils {
      * @param {*} modelName
      * @param {*} where 查询条件，参考Sequelize的Query查询定义https://sequelize.readthedocs.io/en/latest/docs/querying/?q=Sequelize.fn&check_keywords=yes&area=default#where
      * @param {*} transaction 事务对象
-     * @param {*} cb 回调函数
      */
-  static remove (modelName, where, transaction, cb) {
-    sequelizeDB.remove(modelName, where, transaction, cb)
+  static async remove (modelName, where, transaction) {
+    return sequelizeDB.remove(modelName, where, transaction)
   }
 
   /**
@@ -142,10 +132,9 @@ class DBUtils {
      * @param {*} value 主键值
      * @param {*} attributes 定义查询返回的字段，默认为全部，具体定义规则参考Sequelize的Query查询参数https://sequelize.readthedocs.io/en/latest/docs/querying/#attributes
      * @param {*} dbTrans 事务对象
-     * @param {*} cb 回调函数
      */
-  static findOneByPrimaryKey (modelName, value, attributes, dbTrans, cb) {
-    sequelizeDB.findOneByPrimaryKey(modelName, value, attributes, dbTrans, cb)
+  static async findOneByPrimaryKey (modelName, value, attributes, dbTrans) {
+    return sequelizeDB.findOneByPrimaryKey(modelName, value, attributes, dbTrans)
   }
 
   /**
@@ -155,10 +144,9 @@ class DBUtils {
      * @param {*} attributes 定义查询返回的字段，默认为全部，参考Sequelize的Query查询参数https://sequelize.readthedocs.io/en/latest/docs/querying/#attributes
      * @param {*} sorts 定义查询的排序方式，参考Sequelize的Query查询参数https://sequelize.readthedocs.io/en/latest/docs/querying/?q=Sequelize.fn&check_keywords=yes&area=default#ordering
      * @param {*} dbTrans 事务对象
-     * @param {*} cb 回调函数
      */
-  static findList (modelName, where, attributes, sorts, dbTrans, cb) {
-    sequelizeDB.findList(modelName, where, attributes, sorts, dbTrans, cb)
+  static findList (modelName, where, attributes, sorts, dbTrans) {
+    return sequelizeDB.findList(modelName, where, attributes, sorts, dbTrans)
   }
 
   /**
@@ -171,10 +159,9 @@ class DBUtils {
      * @param {*} attributes 定义查询返回的字段，默认为全部，参考Sequelize的Query查询参数https://sequelize.readthedocs.io/en/latest/docs/querying/#attributes
      * @param {*} sorts 定义查询的排序方式，参考Sequelize的Query查询参数https://sequelize.readthedocs.io/en/latest/docs/querying/?q=Sequelize.fn&check_keywords=yes&area=default#ordering
      * @param {*} dbTrans 事务对象
-     * @param {*} cb 回调函数
      */
-  static findPage (modelName, where, limit, offset, returnTotal, attributes, sorts, dbTrans, cb) {
-    sequelizeDB.findPage(modelName, where, limit, offset, returnTotal, attributes, sorts, dbTrans, cb)
+  static async findPage (modelName, where, limit, offset, returnTotal, attributes, sorts, dbTrans) {
+    return sequelizeDB.findPage(modelName, where, limit, offset, returnTotal, attributes, sorts, dbTrans)
   }
 
   /**
@@ -187,10 +174,9 @@ class DBUtils {
      * @param {*} attributes 定义查询返回的字段，默认为全部，参考Sequelize的Query查询参数https://sequelize.readthedocs.io/en/latest/docs/querying/#attributes
      * @param {*} orders 定义查询的排序方式，参考Sequelize的Query查询参数https://sequelize.readthedocs.io/en/latest/docs/querying/?q=Sequelize.fn&check_keywords=yes&area=default#ordering
      * @param {*} dbTrans 事务对象
-     * @param {*} cb 回调函数
      */
-  static findListByGroup (modelName, where, options, dbTrans, cb) {
-    sequelizeDB.findListByGroup(modelName, where, options, dbTrans, cb)
+  static async findListByGroup (modelName, where, options, dbTrans) {
+    return sequelizeDB.findListByGroup(modelName, where, options, dbTrans)
   }
 
   /**
@@ -199,7 +185,6 @@ class DBUtils {
      * @param {*} where 查询条件
      * @param {*} attributes 返回字段
      * @param {*} dbTrans 事务对象
-     * @param {*} cb 回调
      */
   static async findOne (modelName, where, attributes, dbTrans) {
     return sequelizeDB.findOne(modelName, where, attributes, dbTrans)
@@ -210,42 +195,38 @@ class DBUtils {
      * @param {*} modelName 模型名称
      * @param {*} where 查询条件
      * @param {*} dbTrans 事务对象
-     * @param {*} cb 回调
      */
-  static count (modelName, where, dbTrans, cb) {
-    sequelizeDB.count(modelName, where, dbTrans, cb)
+  static async count (modelName, where, dbTrans) {
+    return sequelizeDB.count(modelName, where, dbTrans)
   }
 
-  static execSql (sql, transaction, cb) {
-    sequelizeDB.execSql(sql, transaction, cb)
+  static async execSql (sql, transaction) {
+    return sequelizeDB.execSql(sql, transaction)
   }
 
   /**
      *
      * @param {*} func 业务函数，由用户编写，系统会自动调用，并传入两个参数 trans-事务对象实例，done-回调方法
-     * @param {*} cb 回调函数
      */
-  static transaction (func, cb) {
-    sequelizeDB.transaction(func, cb)
+  static async transaction (func) {
+    return sequelizeDB.transaction(func)
   }
 
   /**
      * 创建指定对象的物理表格
      * @param {*} modelName
      * @param {*} force true - 如果存在的话，先删除再创建
-     * @param {*} cb
      */
-  static createTable (modelName, force, cb) {
-    sequelizeDB.createTable(modelName, force, cb)
+  static async createTable (modelName, force) {
+    return sequelizeDB.createTable(modelName, force)
   }
 
   /**
      * 删除指定对象的物理表格
      * @param {*} modelName
-     * @param {*} cb
      */
-  static removeTable (modelName, cb) {
-    sequelizeDB.removeTable(modelName, cb)
+  static async removeTable (modelName) {
+    return sequelizeDB.removeTable(modelName)
   }
 
   /**
@@ -254,8 +235,8 @@ class DBUtils {
      * @param {*} truncate 使用数据库TRUNCATE方法，释放空间和索引
      * @param {*} cb
      */
-  static clear (modelName, truncate, cb) {
-    sequelizeDB.clear(modelName, truncate, cb)
+  static async clear (modelName, truncate) {
+    return sequelizeDB.clear(modelName, truncate)
   }
 }
 

@@ -120,15 +120,8 @@ class Program {
      * 升级数据库结构
      */
   async _applyDatabaseUpgrade () {
-    return new Promise((resolve, reject) => {
-      dbUpgrade.upgrade(this._context, (err, result) => {
-        if (err) {
-          reject(err)
-        } else {
-          resolve(result)
-        }
-      })
-    })
+		const result = await dbUpgrade.upgrade(this._context);
+		return result;
   }
 
   /**
@@ -218,10 +211,8 @@ class Program {
     if (!this._context.config.publicIp) {
       this._context.logger.warn('Failed to get public ip, block forging may not work!')
     }
-
     // 初始化创世区块
     await this._context.runtime.block.handleGenesisBlock()
-
     // 初始化账户以及余额
     try {
       await this._context.runtime.account.initAccountsAndBalances()
@@ -229,13 +220,10 @@ class Program {
       this._context.logger.error('Failed to load blockchain', DdnUtils.system.getErrorMsg(err))
       return process.exit(1)
     }
-
     // 启动准备（节点）
     await this._context.runtime.peer.prepare()
-
     // 启动准备（Round）
     await this._context.runtime.round.prepare()
-
     // 启动准备（受托人）
     await this._context.runtime.delegate.prepare()
 

@@ -90,7 +90,7 @@ class Context {
     this.dao = await this._buildDataAccessObject(this.config.database, options.logger)
 
     // 数据库参数对象，Key/Value类型
-    this.dbParams = await this._buildDataParams(this.dao)
+		this.dbParams = dbParams.init(this.dao);
 
     // 运行时核心逻辑处理模块组
     this.runtime = {}
@@ -109,27 +109,8 @@ class Context {
   }
 
   async _buildDataAccessObject (dbSetting, logger) {
-    return new Promise((resolve, reject) => {
-      database.init(dbSetting, logger, (err, result) => {
-        if (err) {
-          reject(err)
-        } else {
-          resolve(result)
-        }
-      })
-    })
-  }
-
-  async _buildDataParams (dao) {
-    return new Promise((resolve, reject) => {
-      dbParams.init(dao, (err, result) => {
-        if (err) {
-          reject(err)
-        } else {
-          resolve(result)
-        }
-      })
-    })
+		const result = await database.init(dbSetting, logger);
+		return result;
   }
 }
 

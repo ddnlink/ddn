@@ -1,4 +1,4 @@
-import async from 'async'
+import bluebird from 'bluebird'
 
 let _context
 
@@ -15,7 +15,7 @@ class DBUpgrade {
     }
   }
 
-  static upgrade (context, cb) {
+  static async upgrade (context) {
     const self = this
 
     _context = context
@@ -25,48 +25,30 @@ class DBUpgrade {
          *
          * 逻辑很简单，代码很崩溃，下一版本要改成async/await
          */
-    _context.dbParams.get('version', (_err, currVersion) => {
+			let currVersion;
+			try {
+				currVersion = await _context.dbParams.get('version');
+			} catch (e) {
+				// TODO 2020-10-18
+			}
       const migrations = self.getVersionChanges()
-      const versionList = Object.keys(migrations).sort().filter(ver => ver > currVersion)
-      return async.eachSeries(versionList, (ver, cb2) => {
-        const changeList = migrations[ver]
-        _context.dao.transaction((dbTrans, done) => {
-          async.eachSeries(changeList, (command, cb3) => {
-            if (!/^\s*$/.test(command)) {
-              _context.dao.execSql(command, dbTrans, (err3, result2) => {
-                if (err3) {
-                  return cb3(err3)
-                } else {
-                  return cb3(null, result2)
-                }
-              })
-            } else {
-              return cb3(null, true)
-            }
-          }, (err2) => {
-            if (err2) {
-              return done(err2)
-            } else {
-              _context.dbParams.set('version', ver, dbTrans, (err5) => {
-                return done(err5)
-              })
-            }
-          })
-        }, (err4) => {
-          if (err4) {
-            return cb2(err4)
-          } else {
-            return cb2(null, ver)
-          }
+			const versionList = Object.keys(migrations).sort().filter(ver => ver > currVersion)
+			await bluebird.each(versionList, async (ver) => {
+				const changeList = migrations[ver]
+        await _context.dao.transaction(async (dbTrans) => {
+					await bluebird.each(changeList, async (command) => {
+						if (!/^\s*$/.test(command)) {
+							const result2 = _context.dao.execSql(command, dbTrans)
+							return result2;
+						} else {
+							return resolve(true)
+						}
+					})
+					await _context.dbParams.set('version', ver, dbTrans)
+					return ver;
         })
-      }, (err) => {
-        if (err) {
-          return cb(err)
-        } else {
-          return cb(null, self)
-        }
-      })
-    })
+			})
+			return self;
   }
 }
 

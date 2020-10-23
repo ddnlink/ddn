@@ -136,17 +136,11 @@ class Acl extends Asset.Base {
   }
 
   async _insertItem (modelName, currency, item, trans) {
-    return new Promise((resolve, reject) => {
-      this.dao.insertOrUpdate(modelName, {
-        currency,
-        address: item
-      }, trans, (err) => {
-        if (err) {
-          return reject(err)
-        }
-        resolve(true) // resolve(result)
-      })
-    })
+		await this.dao.insertOrUpdate(modelName, {
+			currency,
+			address: item
+		}, trans);
+		return true;
   }
 
   // FIXME: 2020.5.24
@@ -172,41 +166,24 @@ class Acl extends Asset.Base {
 
   async _addList (modelName, currency, list, dbTrans) {
     if (!dbTrans) {
-      const self = this
-      await new Promise((resolve, reject) => {
-        this.dao.transaction(async (trans, done) => {
-          try {
-            await self._insertList(modelName, currency, list, trans)
-            done()
-          } catch (err2) {
-            done(err2)
-          }
-        }, err => {
-          if (err) {
-            return reject(err)
-          }
-          resolve(true)
-        })
-      })
+			const self = this;
+			await this.dao.transaction(async (trans) => {
+				await self._insertList(modelName, currency, list, trans)
+			})
+			return true;
     } else {
       await this._insertList(modelName, currency, list, dbTrans)
     }
   }
 
   async _removeList (modelName, currency, list, dbTrans) {
-    return new Promise((resolve, reject) => {
-      this.dao.remove(modelName, {
-        currency,
-        address: {
-          $in: list
-        }
-      }, dbTrans, (err) => {
-        if (err) {
-          return reject(err)
-        }
-        resolve(true)
-      })
-    })
+		await this.dao.remove(modelName, {
+			currency,
+			address: {
+				$in: list
+			}
+		}, dbTrans)
+		return true;
   }
 
   async apply (trs, block, sender, dbTrans) {

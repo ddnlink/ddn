@@ -43,22 +43,8 @@ class Transaction {
    */
 
   async deleteTransaction (trsId, dbTrans) {
-    return new Promise((resolve, reject) => {
-      this.dao.remove(
-        'tr',
-        {
-          id: trsId
-        },
-        dbTrans,
-        (err, result) => {
-          if (err) {
-            reject(err)
-          } else {
-            resolve(result)
-          }
-        }
-      )
-    })
+		const result = await this.dao.remove('tr', { id: trsId },	dbTrans);
+		return result;
   }
 
   /**
@@ -170,7 +156,7 @@ class Transaction {
     } catch (e) {
       this.logger.debug(`insert tr error trsId: ${newTrans.id}`)
       this.logger.debug(`insert tr error trsId: ${JSON.stringify(newTrans)}`)
-      return reject(new Error(`Insert tr fail ${e.toString()}`))
+      throw new Error(`Insert tr fail ${e.toString()}`)
     }
     return result;
   }
@@ -517,27 +503,16 @@ class Transaction {
 
     trs = await this._assets.call(trs.type, 'process', trs, sender)
 
-    return new Promise((resolve, reject) => {
-      // shuai 2018-11-13
-      this.dao.count(
-        'tr',
-        {
-          id: trs.id
-        },
-        (err, count) => {
-          if (err) {
-            this.logger.error('Database error')
-            return reject(new Error('Database error'))
-          }
-
-          if (count) {
-            return reject(new Error('Ignoring already confirmed transaction'))
-          }
-
-          resolve(trs)
-        }
-      )
-    })
+		try {
+			const count = await this.dao.count('tr', { id: trs.id });
+			if (count) {
+				throw new Error('Ignoring already confirmed transaction')
+			}
+			return trs;
+		} catch (e) {
+			this.logger.error('Database error')
+      throw new Error('Database error')
+		}
   }
 
   async processUnconfirmedTransaction (transaction, broadcast) {

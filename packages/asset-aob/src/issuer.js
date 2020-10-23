@@ -135,27 +135,17 @@ class Issuer extends Asset.Base {
   }
 
   async onBlockchainReady () {
-    await new Promise((resolve, reject) => {
-      this.dao.findList('mem_asset_balance', null, null, null,
-        (err, rows) => {
-          if (err) {
-            return reject(err)
-          }
-
-          if (rows && rows.length) {
-            for (var i = 0; i < rows.length; i++) {
-              const row = rows[i]
-              try {
-                this.balanceCache.setAssetBalance(row.address, row.currency, row.balance)
-              } catch (err2) {
-                return reject(err2)
-              }
-            }
-          }
-
-          resolve()
-        })
-    })
+		const rows = await this.dao.findList('mem_asset_balance', null, null, null);
+    if (rows && rows.length) {
+			for (var i = 0; i < rows.length; i++) {
+				const row = rows[i]
+				try {
+					this.balanceCache.setAssetBalance(row.address, row.currency, row.balance)
+				} catch (err2) {
+					return reject(err2)
+				}
+			}
+		}
   }
 }
 

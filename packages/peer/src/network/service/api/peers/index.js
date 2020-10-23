@@ -56,24 +56,14 @@ class RootRouter {
       }
     }
 
-    return new Promise((resolve, reject) => {
-      this.dao.findPage(
-        'peer',
-        where,
-        limit,
-        offset,
-        true,
-        ['ip', 'port', 'state', 'os', 'version'],
-        sortBy ? [[sortBy, sortMethod]] : null,
-        (err, rows) => {
-          if (err) {
-            reject(err)
-          } else {
-            resolve(rows)
-          }
-        }
-      )
-    })
+    return this.dao.findPage(
+			'peer',
+			where,
+			limit,
+			offset,
+			true,
+			['ip', 'port', 'state', 'os', 'version'],
+			sortBy ? [[sortBy, sortMethod]] : null)
   }
 
   async get (req) {
