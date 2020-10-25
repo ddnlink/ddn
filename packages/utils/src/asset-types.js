@@ -51,5 +51,7 @@ export default {
   AOB_ISSUE: 64, // AOB ISSUE
   AOB_TRANSFER: 65, // AOB TRANSFER
 
+  SUPERVISE: 90,
+
   LOCK: 100 // ACCOUNT LOCK
 }

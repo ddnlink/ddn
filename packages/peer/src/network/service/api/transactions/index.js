@@ -204,13 +204,14 @@ class TransactionService {
 
     const data = await this.runtime.dataquery.queryFullTransactionData(where, limit, offset, orders, true)
 
-    const transactions = []
+    let transactions = []
     for (let i = 0; i < data.transactions.length; i++) {
       const row = data.transactions[i]
       const trs = await this.runtime.transaction.serializeDbData2Transaction(row)
       transactions.push(trs)
     }
-
+    // 屏蔽违规交易
+    transactions = await superviseTrs({ trs: transactions, context: this._context })
     return {
       success: true,
       transactions,
@@ -255,7 +256,7 @@ class TransactionService {
 
       return {
         success: true,
-        transaction: result[0]
+        transaction: await superviseTrs({ context: this._context, trs: result[0] })
       }
     } else {
       throw new Error('Transaction not found')
@@ -537,5 +538,44 @@ class TransactionService {
     }
   }
 }
-
+/**
+ * @author wly 2010-10-22
+ * @description 查询被屏蔽的交易，返回屏蔽后的交易信息
+ */
+async function superviseTrs ({ context, trs }) {
+  let trsTypeIsArray = true
+  if (!Array.isArray(trs)) {
+    trsTypeIsArray = false
+    trs = [trs]
+  }
+  const trsIds = trs.map(item => item.id)
+  const data = await new Promise((resolve) => {
+    context.dao.findList('supervise', {
+      txHash: {
+        $in: trsIds
+      }
+    }, null, null, (err, rows) => {
+      if (err) {
+        resolve(err)
+      } else {
+        resolve(rows)
+      }
+    })
+  })
+  trs.map(item => {
+    data.map(supervise => {
+      if (item.id === supervise.txHash && supervise.op === 'destroy') {
+        item.message = '内容违反相关法规，不予显示'
+        return item
+      } else {
+        return item
+      }
+    })
+  })
+  if (trsTypeIsArray) {
+    return trs
+  } else {
+    return trs[0]
+  }
+}
 export default TransactionService

@@ -229,5 +229,6 @@ module.exports = {
     '@ddn/asset-aob',
     '@ddn/asset-dapp',
     '@ddn/asset-dao'
+    // 'asset-supervise'
   ]
 }

@@ -1,3 +1,4 @@
+/* eslint-disable no-useless-call */
 /**
  * Http服务
  *
@@ -343,7 +344,14 @@ class HttpServer {
       let subPath
       if (lowerName.startsWith('get')) {
         method = 'get'
-        subPath = lowerName.substring(3)
+        const leftSubStr = lowerName.substring(3)
+        // 挂载类似 /：id的路由规则
+        if (leftSubStr.includes('$')) {
+          const subPathArr = leftSubStr.split('$')
+          subPath = subPathArr[0] + `/:${subPathArr[1]}`
+        } else {
+          subPath = lowerName.substring(3)
+        }
       } else if (lowerName.startsWith('post')) {
         method = 'post'
         subPath = lowerName.substring(4)
@@ -352,12 +360,21 @@ class HttpServer {
         subPath = lowerName.substring(3)
       } else if (lowerName.startsWith('delete')) {
         method = 'delete'
-        subPath = lowerName.substring(6)
+        // subPath = lowerName.substring(6)
+        const leftSubStr = lowerName.substring(6)
+        // 挂载类似 /：id的路由规则
+        if (leftSubStr.includes('$')) {
+          const subPathArr = leftSubStr.split('$')
+          subPath = subPathArr[0] + `/:${subPathArr[1]}`
+        } else {
+          subPath = lowerName.substring(6)
+        }
       }
 
       if (method) {
         router[method].call(router, `/${subPath}`, async (req, res) => {
           try {
+            // eslint-disable-next-line no-useless-call
             const result = await inst[name].call(inst, req)
             res.json(result)
           } catch (err) {

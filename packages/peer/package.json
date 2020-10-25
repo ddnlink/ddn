@@ -83,6 +83,7 @@
     "protobufjs": "^6.8.6",
     "randomstring": "1.1.5",
     "request": "^2.88.2",
+    "request-promise": "^4.2.6",
     "rimraf": "2.5.4",
     "sequelize": "^5.21.3",
     "socket.io": "^2.2.0",

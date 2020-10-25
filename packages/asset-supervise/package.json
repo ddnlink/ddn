@@ -1,0 +1,20 @@
+{
+  "name": "asset-supervise",
+  "version": "1.0.0",
+  "description": "DDN monitoring plug-in",
+  "main": "lib/index.js",
+  "module": "dist/index.esm.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "ddnMonitoring"
+  ],
+  "author": "creazy",
+  "license": "ISC",
+  "dependencies": {
+    "@ddn/asset-base": "^0.3.9",
+    "@ddn/utils": "^0.1.23",
+    "bytebuffer": "^5.0.1"
+  }
+}
