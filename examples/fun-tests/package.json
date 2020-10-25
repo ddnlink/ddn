@@ -1,6 +1,6 @@
 {
   "name": "ddn-starter",
-  "version": "3.8.12",
+  "version": "3.8.13",
   "main": "./app.js",
   "private": true,
   "repository": {
@@ -47,9 +47,9 @@
     "build-localnet": "./node_modules/.bin/gulp linux-build-local"
   },
   "dependencies": {
-    "@ddn/core": "^0.2.14",
-    "@ddn/peer": "^0.7.12",
-    "@ddn/utils": "^0.1.23",
+    "@ddn/core": "^0.2.15",
+    "@ddn/peer": "^0.7.13",
+    "@ddn/utils": "^0.1.24",
     "commander": "2.6.0",
     "lodash": "^4.17.11"
   },
