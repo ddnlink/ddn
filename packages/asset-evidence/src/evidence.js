@@ -92,28 +92,22 @@ class Evidence extends Asset.Base {
 				oldEvidence.transaction_id,
 				['senderId']);
 			if (senderId !== sender.address) {
-				return reject(new Error(`The evidence ipid ${assetObj.ipid} has been registered by ${senderId})`))
+				throw new Error(`The evidence ipid ${assetObj.ipid} has been registered by ${senderId})`)
 			} else {
-				let results2
-				try {
-					results2 = await super.queryAsset(
-						{
-							ipid: assetObj.ipid,
-							hash: assetObj.hash
-						},
-						['ipid', 'hash'],
-						false,
-						1,
-						1
-					)
-				} catch (err2) {
-					return reject(err2)
-				}
-
+				let results2 = await super.queryAsset(
+					{
+						ipid: assetObj.ipid,
+						hash: assetObj.hash
+					},
+					['ipid', 'hash'],
+					false,
+					1,
+					1
+				)
 				if (results2 && results2.length > 0) {
-					return reject(new Error(`The evidence hash already exists: ${assetObj.hash}`))
+					throw new Error(`The evidence hash already exists: ${assetObj.hash}`)
 				} else {
-					return resolve(trans)
+					return trans
 				}
 			}
     } else {

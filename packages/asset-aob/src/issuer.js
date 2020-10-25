@@ -141,8 +141,8 @@ class Issuer extends Asset.Base {
 				const row = rows[i]
 				try {
 					this.balanceCache.setAssetBalance(row.address, row.currency, row.balance)
-				} catch (err2) {
-					return reject(err2)
+				} catch (err) {
+					throw err
 				}
 			}
 		}

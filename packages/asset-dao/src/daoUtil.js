@@ -26,7 +26,7 @@ async function updateOrg (context, org, dbTrans) {
 	try {
 		const result = await context.dao.insertOrUpdate('mem_org', org, dbTrans);
 		return result
-	} catch (e) {
+	} catch (err) {
 		throw new Error(`insertOrUpdate mem_org ${err}`)
 	}
 

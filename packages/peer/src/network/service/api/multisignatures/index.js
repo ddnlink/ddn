@@ -446,9 +446,9 @@ class MultisignaturesRouter {
 				this.logger.error('findList: ', system.getErrorMsg(e))
 				throw e;
 			}
-		} catch (e) {
+		} catch (err) {
 			this.logger.error('Can`t find multisignatures, ', system.getErrorMsg(err))
-			throw e;
+			throw err;
 		}
   }
 

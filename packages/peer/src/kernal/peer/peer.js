@@ -168,7 +168,6 @@ class Peer {
 						}
         } catch (e) {
           this._peerUpdatings[peerKey] = false
-          resolve()
         }
       }
     }
@@ -271,9 +270,9 @@ class Peer {
 			try {
 				const result = await this.dao.remove('peer', { ip: pip, port });
 				return result;
-			} catch (e) {
+			} catch (err) {
 				this.logger.error(`remove peer: ${err}`)
-				throw e;
+				throw err;
 			}
     }
   }
@@ -314,9 +313,9 @@ class Peer {
 		try {
 			const result = await this.dao.update('peer', { state, clock }, { ip: pip, port });
 			return result;
-		} catch (e) {
+		} catch (err) {
 			his.logger.error('Peer#state', err)
-			throw e;
+			throw err;
 		}
     // }
   }
@@ -328,7 +327,7 @@ class Peer {
 		try {
 			const result = await this.dao.update('peer', { state: 2 }, {}, null);
 			return result;
-		} catch (e) {
+		} catch (err) {
 			this.logger.error(`Failed to reset peers: ${err}`)
 			throw err;
 		}

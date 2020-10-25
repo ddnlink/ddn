@@ -143,7 +143,7 @@ class InTransfer extends Asset.Base {
 
     const newBalance = DdnUtils.bignum.plus(balance, amount)
     if (DdnUtils.bignum.isLessThan(newBalance, 0)) {
-      return reject('Asset balance not enough')
+      throw new Error('Asset balance not enough')
     }
 
 		condition.balance = newBalance.toString()

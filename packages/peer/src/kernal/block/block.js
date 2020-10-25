@@ -196,7 +196,7 @@ class Block {
       return result
     }catch (err) {
       this.logger.error(`insert block fail: ${err.toString()}`)
-      reject(new Error(`insert block fail: ${err.toString()}`))
+      throw new Error(`insert block fail: ${err.toString()}`)
     }
   }
 
@@ -901,7 +901,7 @@ class Block {
       row = await this.dao.findOne('block', {
         id: block.id
       }, null);
-    } catch (e) {
+    } catch (err) {
       throw new Error(`Failed to query blocks from db: ${err}`)
     }
     const bId = row && row.id

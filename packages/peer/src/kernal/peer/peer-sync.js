@@ -158,9 +158,9 @@ class PeerSync {
           if (result.body.common.previous_block === row.previous_block) { // 确定那个正常的块
             lastLackBlock = result.body.common
           }
-        } catch (e) {
+        } catch (err) {
           this.logger.error(err)
-          throw e;
+          throw err;
         }
       }
     }

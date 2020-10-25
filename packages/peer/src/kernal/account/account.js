@@ -83,7 +83,7 @@ class Account {
   }
 
   async initAccountsAndBalances () {
-    const verify = this.config.loading.verifyOnLoading
+		const verify = this.config.loading.verifyOnLoading
 		const count = await this.runtime.block.getCount()
     if (verify || count === 1) {
       await this.repairAccounts(count, true)
@@ -466,7 +466,7 @@ class Account {
 			} finally {
 				if (err2 || count2 > 0) {
 					this.logger.error(
-						err || 'Encountered missing block, looks like node went down during block processing'
+						err2 || 'Encountered missing block, looks like node went down during block processing'
 					)
 					this.logger.info('Failed to verify db integrity 2')
 					try {
@@ -484,17 +484,17 @@ class Account {
 								is_delegate: 1 // wxm block database
 							});
 					} catch (e) {
-						err3 = 3;
+						err3 = e;
 					} finally {
 						if (err3 || count3 === 0) {
-							this.logger.error(err || 'No delegates, reload database')
+							this.logger.error(err3 || 'No delegates, reload database')
 							this.logger.info('Failed to verify db integrity 3')
 
 							try {
 								await this.repairAccounts(count, true)
-								resolve()
+								return
 							} catch (e) {
-								return reject(e)
+								throw e;
 							}
 						} else {
 							let errCatched = false
@@ -505,13 +505,13 @@ class Account {
 							} catch (err4) {
 								errCatched = true
 
-								this.logger.error(err || 'Unable to load last block')
+								this.logger.error(err4 || 'Unable to load last block')
 								this.logger.info('Failed to verify db integrity 4')
 
 								try {
 									await this.repairAccounts(count, true)
 								} catch (e) {
-									return reject(e)
+									throw e;
 								}
 							}
 
@@ -521,7 +521,7 @@ class Account {
 									// await this.repairAccounts(count, true)
 									await this.cacheAllAccountBalances()
 								} catch (e) {
-									return reject(e)
+									throw e;
 								}
 
 								this.logger.info('checkAccounts is ok, Blockchain ready')
@@ -531,7 +531,7 @@ class Account {
 				}
 			}
 		} catch (e) {
-			this.logger.error(err)
+			this.logger.error(e)
 			this.logger.info('Failed to verify db integrity 1')
 			try {
 				await this.repairAccounts(count, true)

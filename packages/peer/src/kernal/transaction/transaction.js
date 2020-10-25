@@ -510,7 +510,7 @@ class Transaction {
 			}
 			return trs;
 		} catch (e) {
-			this.logger.error('Database error')
+			this.logger.error('Database error', e)
       throw new Error('Database error')
 		}
   }

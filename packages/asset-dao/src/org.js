@@ -628,9 +628,9 @@ class Org extends Asset.Base {
 				'transaction_id', 'org_id', 'name', 'address', 'tags',
 				'url', 'state', 'timestamp'], orders);
 				return { success: true, result }
-		} catch (e) {
+		} catch (err) {
 			this.logger.error('this.dao.findPage error', err)
-			throw e;
+			throw err;
 		}
   }
 }
