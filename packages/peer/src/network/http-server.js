@@ -39,9 +39,11 @@ class HttpServer {
     this._context = context
 
     this._app = express()
-    this._app.use(compression({
-      level: 6
-    }))
+    this._app.use(
+      compression({
+        level: 6
+      })
+    )
     this._app.use(cors())
     this._app.options('*', cors())
 
@@ -52,13 +54,17 @@ class HttpServer {
       const privateKey = fs.readFileSync(this.config.ssl.options.key)
       const certificate = fs.readFileSync(this.config.ssl.options.cert)
 
-      this._https_server = https.createServer({
-        key: privateKey,
-        cert: certificate,
-        ciphers: 'ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-AES256-GCM-SHA384:DHE-RSA-AES128-GCM-SHA256:' +
-                    'ECDHE-RSA-AES128-SHA256:DHE-RSA-AES128-SHA256:ECDHE-RSA-AES256-SHA384:DHE-RSA-AES256-SHA384:ECDHE-RSA-AES256-SHA256:DHE-RSA-AES256-SHA256:HIGH:' +
-                    '!aNULL:!eNULL:!EXPORT:!DES:!RC4:!MD5:!PSK:!SRP:!CAMELLIA'
-      }, this._app) // FIXME: app -> this._app ?
+      this._https_server = https.createServer(
+        {
+          key: privateKey,
+          cert: certificate,
+          ciphers:
+            'ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-AES256-GCM-SHA384:DHE-RSA-AES128-GCM-SHA256:' +
+            'ECDHE-RSA-AES128-SHA256:DHE-RSA-AES128-SHA256:ECDHE-RSA-AES256-SHA384:DHE-RSA-AES256-SHA384:ECDHE-RSA-AES256-SHA256:DHE-RSA-AES256-SHA256:HIGH:' +
+            '!aNULL:!eNULL:!EXPORT:!DES:!RC4:!MD5:!PSK:!SRP:!CAMELLIA'
+        },
+        this._app
+      ) // FIXME: app -> this._app ?
 
       this._https_io = require('socket.io')(this._https_server)
     }
@@ -66,7 +72,7 @@ class HttpServer {
     context.runtime.socketio = new SocketioEmiter(context, this._http_io, this._https_io)
 
     this._apiRouters = {}
-
+    this.dappRouter = null
     this._init()
   }
 
@@ -76,17 +82,23 @@ class HttpServer {
     this._app.set('view engine', 'ejs')
     this._app.set('views', this.config.publicDir)
     this._app.use(express.static(this.config.publicDir))
-    this._app.use(bodyParser.raw({
-      limit: this.config.payloadLimitSize
-    }))
-    this._app.use(bodyParser.urlencoded({
-      extended: true,
-      limit: this.config.payloadLimitSize,
-      parameterLimit: 5000
-    }))
-    this._app.use(bodyParser.json({
-      limit: this.config.payloadLimitSize
-    }))
+    this._app.use(
+      bodyParser.raw({
+        limit: this.config.payloadLimitSize
+      })
+    )
+    this._app.use(
+      bodyParser.urlencoded({
+        extended: true,
+        limit: this.config.payloadLimitSize,
+        parameterLimit: 5000
+      })
+    )
+    this._app.use(
+      bodyParser.json({
+        limit: this.config.payloadLimitSize
+      })
+    )
     this._app.use(methodOverride())
 
     this._addQueryParamsMiddleware()
@@ -97,9 +109,9 @@ class HttpServer {
   }
 
   /**
-     * 404 错误处理
-     * 拦截全部使用 next(err) 的错误信息。
-     */
+   * 404 错误处理
+   * 拦截全部使用 next(err) 的错误信息。
+   */
   _add404ErrorHandleMiddleware () {
     this._app.all('*', (req, res) => {
       res.json({
@@ -111,9 +123,9 @@ class HttpServer {
   }
 
   /**
-     * 错误处理
-     * 拦截全部使用 next(err) 的错误信息。
-     */
+   * 错误处理
+   * 拦截全部使用 next(err) 的错误信息。
+   */
   _addErrorHandleMiddleware () {
     this._app.use((err, req, res, next) => {
       res.status(200)
@@ -126,33 +138,48 @@ class HttpServer {
   }
 
   /**
-     * 转换输入参数类型（字符串 -> 整型）
-     * 下面忽略的字段，必须使用正确的字符串型，比如：fee, totalFee, amount, reward等
-     */
+   * 转换输入参数类型（字符串 -> 整型）
+   * 下面忽略的字段，必须使用正确的字符串型，比如：fee, totalFee, amount, reward等
+   */
   _addQueryParamsMiddleware () {
     const ignore = [
-      'id', 'name', 'lastBlockId', 'blockId', 'transactionId',
-      'address', 'recipientId', 'senderId', 'previousBlock', 'ip',
-      'fee', 'totalFee', 'amount', 'totalAmount', 'height', 'reward'
+      'id',
+      'name',
+      'lastBlockId',
+      'blockId',
+      'transactionId',
+      'address',
+      'recipientId',
+      'senderId',
+      'previousBlock',
+      'ip',
+      'fee',
+      'totalFee',
+      'amount',
+      'totalAmount',
+      'height',
+      'reward'
     ]
-    this._app.use(queryParser({
-      parser (value, radix, name) {
-        if (ignore.includes(name)) {
-          return value
-        }
+    this._app.use(
+      queryParser({
+        parser (value, radix, name) {
+          if (ignore.includes(name)) {
+            return value
+          }
 
-        if (isNaN(value) || parseInt(value) === value || isNaN(parseInt(value, radix))) {
-          return value
-        }
+          if (isNaN(value) || parseInt(value) === value || isNaN(parseInt(value, radix))) {
+            return value
+          }
 
-        return parseInt(value)
-      }
-    }))
+          return parseInt(value)
+        }
+      })
+    )
   }
 
   /**
-     * 公共头信息
-     */
+   * 公共头信息
+   */
   _addCommonHeadersMiddleware () {
     const commonHeaders = {
       os: os.platform() + os.release(),
@@ -161,9 +188,7 @@ class HttpServer {
       nethash: this.config.nethash
     }
 
-    this._app.use(({
-      url
-    }, res, next) => {
+    this._app.use(({ url }, res, next) => {
       const parts = url.split('/')
       if (parts.length > 1) {
         if (parts[1] === 'peer') {
@@ -176,15 +201,10 @@ class HttpServer {
   }
 
   /**
-     * 安全约束中间件（api白名单、peer黑名单）
-     */
+   * 安全约束中间件（api白名单、peer黑名单）
+   */
   _addSecurityMiddleware () {
-    this._app.use(({
-      url,
-      headers,
-      connection,
-      method
-    }, res, next) => {
+    this._app.use(({ url, headers, connection, method }, res, next) => {
       const parts = url.split('/')
       const ip = headers['x-forwarded-for'] || connection.remoteAddress
       let port = headers.port
@@ -204,30 +224,28 @@ class HttpServer {
       this.logger.debug(`${method} ${url} from ${ip}:${port}`)
 
       /* Instruct browser to deny display of <frame>, <iframe> regardless of origin.
-             *
-             * RFC -> https://tools.ietf.org/html/rfc7034
-             */
+       *
+       * RFC -> https://tools.ietf.org/html/rfc7034
+       */
       res.setHeader('X-Frame-Options', 'DENY')
 
       /* Set Content-Security-Policy headers.
-             *
-             * frame-ancestors - Defines valid sources for <frame>, <iframe>, <object>, <embed> or <applet>.
-             *
-             * W3C Candidate Recommendation -> https://www.w3.org/TR/CSP/
-             */
+       *
+       * frame-ancestors - Defines valid sources for <frame>, <iframe>, <object>, <embed> or <applet>.
+       *
+       * W3C Candidate Recommendation -> https://www.w3.org/TR/CSP/
+       */
       res.setHeader('Content-Security-Policy', "frame-ancestors 'none'")
 
       if (parts.length > 1) {
         if (parts[1] === 'api') {
-          if (this.config.api.access.whiteList.length > 0 &&
-                        !this.config.api.access.whiteList.includes(ip)) {
+          if (this.config.api.access.whiteList.length > 0 && !this.config.api.access.whiteList.includes(ip)) {
             res.sendStatus(403)
           } else {
             next()
           }
         } else if (parts[1] === 'peer') {
-          if (this.config.peers.blackList.length > 0 &&
-                        this.config.peers.blackList.includes(ip)) {
+          if (this.config.peers.blackList.length > 0 && this.config.peers.blackList.includes(ip)) {
             res.sendStatus(403)
           } else {
             next()
@@ -242,9 +260,9 @@ class HttpServer {
   }
 
   /**
-     * 遍历指定目录的子目录和文件
-     * @param {*} currDir
-     */
+   * 遍历指定目录的子目录和文件
+   * @param {*} currDir
+   */
   async _enumerateDir (currDir) {
     const items = fs.readdirSync(currDir)
     for (let i = 0; i < items.length; i++) {
@@ -260,9 +278,9 @@ class HttpServer {
   }
 
   /**
-     * 遍历指定目录下的文件
-     * @param {*} currDir
-     */
+   * 遍历指定目录下的文件
+   * @param {*} currDir
+   */
   async _enumerateFiles (currDir) {
     const items = fs.readdirSync(currDir)
     for (let i = 0; i < items.length; i++) {
@@ -285,14 +303,12 @@ class HttpServer {
   }
 
   /**
-     * 将指定目录下的指定类挂载到指定路由
-     * @param {*} currDir
-     * @param {*} cls
-     * @param {*} inst
-     */
-  async _mountRouter (currDir, {
-    prototype
-  }, inst) {
+   * 将指定目录下的指定类挂载到指定路由
+   * @param {*} currDir
+   * @param {*} cls
+   * @param {*} inst
+   */
+  async _mountRouter (currDir, { prototype }, inst) {
     const rootPath = await this._getBasePath()
     let basePath = currDir.toLowerCase().replace(rootPath.toLowerCase(), '')
     basePath = basePath.replace('.js', '') // .ts??
@@ -309,30 +325,38 @@ class HttpServer {
 
     const newRouter = express.Router()
 
-    if (typeof (inst.filter) === 'function') {
+    if (typeof inst.filter === 'function') {
       await newRouter.use(async (req, res, next) => await inst.filter.call(this, req, res, next))
     }
 
     const names = Object.getOwnPropertyNames(prototype)
     for (let i = 0; i < names.length; i++) {
       const name = names[i]
-      if (typeof (inst[name]) === 'function') {
+      if (typeof inst[name] === 'function') {
         await this._tryAddRouter(newRouter, inst, name)
       }
     }
-    const dappRouter = express.Router()
-    await this._app.use('/api/dapp', dappRouter)
-    this.dappRouter = dappRouter
 
     await this._app.use(basePath, newRouter)
+
+    // dapp fixme: 2020.10.20
+    const dappRouter = express.Router()
+    await this._app.use('/dapps', dappRouter)
+    this.dappRouter = dappRouter
+
+    // const newRouter2 = express.Router()
+    // newRouter2.get('/dapps/:id', function (req, res) {
+    //   res.render('/dapps/' + req.params.id + '/index.html')
+    // })
+    // await this._app.use('/', newRouter2)
   }
 
   /**
-     * 将指定类实例中的指定方法挂载到指定路由中
-     * @param {*} router
-     * @param {*} inst
-     * @param {*} name
-     */
+   * 将指定类实例中的指定方法挂载到指定路由中
+   * @param {*} router
+   * @param {*} inst
+   * @param {*} name
+   */
   async _tryAddRouter (router, inst, name) {
     if (name) {
       let method = null
@@ -356,9 +380,9 @@ class HttpServer {
       }
 
       if (method) {
-        router[method].call(router, `/${subPath}`, async (req, res) => {
+        router[method](`/${subPath}`, async (req, res) => {
           try {
-            const result = await inst[name].call(inst, req)
+            const result = await inst[name](req)
             res.json(result)
           } catch (err) {
             res.json({
@@ -376,8 +400,8 @@ class HttpServer {
   }
 
   /**
-     * 启动http监听服务
-     */
+   * 启动http监听服务
+   */
   async start () {
     const basePath = await this._getBasePath()
     await this._enumerateDir(basePath)
@@ -399,16 +423,16 @@ class HttpServer {
 
         if (!err) {
           if (this.config.ssl.enabled) {
-            this._https_server.listen(this.config.ssl.options.port,
-              this.config.ssl.options.address, err2 => {
-                if (err2) {
-                  return reject(err2)
-                }
-
-                this._logger.info(`DDN https server listened on ${this.config.ssl.options.address}:${this.config.ssl.options.port}`)
-                resolve(self)
+            this._https_server.listen(this.config.ssl.options.port, this.config.ssl.options.address, err2 => {
+              if (err2) {
+                return reject(err2)
               }
-            )
+
+              this._logger.info(
+                `DDN https server listened on ${this.config.ssl.options.address}:${this.config.ssl.options.port}`
+              )
+              resolve(self)
+            })
           } else {
             resolve(self)
           }
@@ -420,7 +444,7 @@ class HttpServer {
   }
 
   async addApiRouter (path) {
-    const key = (`/api${path}`).toLowerCase()
+    const key = `/api${path}`.toLowerCase()
     this._apiRouters[key] = this._app._router.stack.length
 
     const newRouter = express.Router()
@@ -429,7 +453,7 @@ class HttpServer {
   }
 
   async removeApiRouter (path) {
-    const key = (`/api${path}`).toLowerCase()
+    const key = `/api${path}`.toLowerCase()
     if (this._apiRouters[key]) {
       const index = this._apiRouters[key]
       if (index >= 0 && index < this._app._router.stack.length) {
