@@ -1,13 +1,13 @@
 ---
 order: 6
 id: http-api-peer
-title: 节点
+title: 5.节点
 sidebar_label: Http api peer
 ---
 
-## **2.5 节点**   
+# **节点**
    
-### **2.5.1 获取本机连接的所有节点信息**   
+## **1 获取本机连接的所有节点信息**
 接口地址：/api/peers   
 请求方式：get   
 支持格式：urlencoded   
@@ -37,7 +37,7 @@ sidebar_label: Http api peer
 请求示例：   
 ```bash   
 curl -k -X GET 'http://127.0.0.1:8001/api/peers?limit=1'   
-```   
+```
    
 JSON返回示例：   
 ```js   
@@ -54,9 +54,9 @@ JSON返回示例：
     ],
     "totalCount": 1
 }  
-```   
+```
    
-### **2.5.2 获取本节点版本号等信息**   
+## **2 获取本节点版本号等信息**
 接口地址：/api/peers/version   
 请求方式：get   
 支持格式：无   
@@ -75,7 +75,7 @@ JSON返回示例：
 请求示例：   
 ```bash   
 curl -k -X GET http://127.0.0.1:8001/api/peers/version   
-```   
+```
    
 JSON返回示例：   
 ```js   
@@ -85,9 +85,9 @@ JSON返回示例：
 	"build": "07:11:01 07/07/2020",   
 	"net": "testnet"   
 }   
-```   
+```
    
-### **2.5.3 获取指定ip节点信息**   
+## **3 获取指定ip节点信息**
 接口地址：/api/peers/get   
 请求方式：get   
 支持格式：urlencoded   
@@ -110,7 +110,7 @@ JSON返回示例：
 请求示例：   
 ```bash   
 curl -k -X GET 'http://127.0.0.1:8001/api/peers/get?ip=127.0.0.1&port=8001'   
-```   
+```
    
 JSON返回示例：   
 ```js   
@@ -119,11 +119,11 @@ JSON返回示例：
 	"peer": {   
 	}   
 }   
-```   
+```
 
 
-## **2.6 同步和加载**   
-### **2.6.1 查看本地区块链加载状态**   
+<!-- ## **2.6 同步和加载**-->
+## **4 查看本地区块链加载状态**
 接口地址：/api/loader/status   
 请求方式：get   
 支持格式：无   
@@ -140,7 +140,7 @@ JSON返回示例：
 请求示例：   
 ```bash   
 curl -k http://127.0.0.1:8001/api/loader/status -X GET   
-```   
+```
    
 JSON返回示例：   
 ```js   
@@ -150,9 +150,9 @@ JSON返回示例：
 	"now": 4727, 
 	"blocksCount": 4727   
 }   
-```   
+```
    
-### **2.6.2 查看区块同步信息**   
+## **5 查看区块同步信息**
 接口地址：/api/loader/status/sync   
 请求方式：get   
 支持格式：无   
@@ -168,7 +168,7 @@ JSON返回示例：
 请求示例：   
 ```bash   
 curl -k http://127.0.0.1:8001/api/loader/status/sync -X GET   
-```   
+```
    
 JSON返回示例：   
 ```js   
@@ -178,4 +178,4 @@ JSON返回示例：
 	"blocks": 0,   
 	"height": 5257   
 }   
-```   
+```
