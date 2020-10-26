@@ -1,15 +1,15 @@
 ---
-order: 7
+order: 8
 id: http-api-second-password
-title: 二次密码
+title: 7.二次密码
 sidebar_label: Http api second password
 ---
 
-## **2.7 二级密码**   
+# **二级密码**
 
 对应的就是签名（signature） 功能
 
-### **2.7.1 设置二级密码**   
+## **1 设置二级密码**
 接口地址：/api/signatures   
 请求方式：put   
 支持格式：json   
@@ -34,7 +34,7 @@ sidebar_label: Http api second password
 请求示例：   
 ```bash   
 curl -k -H "Content-Type: application/json" -X PUT -d '{"secret":"grunt grain siege churn chicken phrase shell arrange fox recipe scan tube","secondSecret":"excuse purpose cousin weasel false attitude dutch lunar enemy soul tongue promote"}' 'http://127.0.0.1:8001/api/signatures'    
-```   
+```
    
 JSON返回示例：   
 ```js  
@@ -59,9 +59,9 @@ JSON返回示例：
         "senderId": "DJWuENme5xJUJTjWiQEjfuLYRGtABfwhjz"
     }
 } 
-```   
+```
    
-### **2.7.2 获取二级密码设置手续费**   
+## **2 获取二级密码设置手续费**
 接口地址：/api/signatures/fee   
 请求方式：get   
 支持格式：无   
@@ -79,7 +79,7 @@ JSON返回示例：
 请求示例：   
 ```bash   
 curl -k http://127.0.0.1:8001/api/signatures/fee -X GET   
-```   
+```
    
 JSON返回示例：   
 ```js   
@@ -87,4 +87,4 @@ JSON返回示例：
 	"success": true,   
 	"fee": "500000000"         //5 DDN   
 }     
-```   
+```
