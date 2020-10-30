@@ -50,6 +50,7 @@
     "@ddn/core": "^0.2.14",
     "@ddn/peer": "^0.7.12",
     "@ddn/utils": "^0.1.23",
+    "bignumber": "git+ssh://git@git.ebookchain.net:ddn/bignumber.git",
     "commander": "2.6.0",
     "lodash": "^4.17.11"
   },

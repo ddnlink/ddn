@@ -338,17 +338,6 @@ class HttpServer {
     }
 
     await this._app.use(basePath, newRouter)
-
-    // dapp fixme: 2020.10.20
-    const dappRouter = express.Router()
-    await this._app.use('/dapps', dappRouter)
-    this.dappRouter = dappRouter
-
-    // const newRouter2 = express.Router()
-    // newRouter2.get('/dapps/:id', function (req, res) {
-    //   res.render('/dapps/' + req.params.id + '/index.html')
-    // })
-    // await this._app.use('/', newRouter2)
   }
 
   /**
@@ -405,6 +394,7 @@ class HttpServer {
   async start () {
     const basePath = await this._getBasePath()
     await this._enumerateDir(basePath)
+    await this.addDappRouter()
 
     this.runtime.transaction.mountAssetApis(this._app)
 
@@ -441,6 +431,16 @@ class HttpServer {
         }
       })
     })
+  }
+
+  // 为Dapps添加动态路由
+  async addDappRouter () {
+    const key = 'dapps'
+    this._apiRouters[key] = this._app._router.stack.length
+
+    const newRouter = express.Router()
+    await this._app.use('/dapps', newRouter)
+    this.dappRouter = newRouter
   }
 
   async addApiRouter (path) {

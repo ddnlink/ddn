@@ -9,7 +9,6 @@ import DdnUtils from '@ddn/utils'
 import valid_url from 'valid-url'
 import ByteBuffer from 'bytebuffer'
 import dappCategory from './dapp/dapp-category.js'
-import DappRouter from './utils/router'
 
 const WITNESS_CLUB_DAPP_NAME = 'DDN-FOUNDATION'
 
@@ -24,8 +23,8 @@ class Dapp extends Asset.Base {
     super(context, transactionConfig)
 
     this._context = context
-    this.appPath = context.baseDir
-    this.dappPath = context.config.dappsDir
+    this.appPath = context.baseDir || path.resolve(__dirname, './')
+    this.dappsPath = context.config.dappsDir || path.join(this.appPath, 'dapps')
   }
 
   async propsMapping () {
@@ -466,7 +465,6 @@ class Dapp extends Asset.Base {
         res.json(result)
       } catch (err) {
         self.logger.error('getDappBalance err', err)
-        console.log('getDappBalance err', err)
         res.json({ success: false, error: err.message || err.toString() })
       }
     })
@@ -504,11 +502,9 @@ class Dapp extends Asset.Base {
     return new Promise((resolve, reject) => {
       this.dao.findOne('mem_asset_balance', { address: dappId, currency }, ['balance'], (err, row) => {
         if (err) {
-          console.log('err', err)
+          this.logger.error('err', err)
           return reject(err)
         }
-        console.log('row', row)
-
         resolve({ success: true, result: { currency, balance: row.balance } })
       })
     })
@@ -582,6 +578,7 @@ class Dapp extends Asset.Base {
 
     await this.symlink(body.id)
     await this.runDapp(body.id, body.params)
+
     await this.runtime.socketio.emit('dapps/change', {})
 
     return { success: true }
@@ -637,32 +634,10 @@ class Dapp extends Asset.Base {
       }
     }
 
-    // const sandbox = new Sandbox(this._context, id, async (type, data) => {
-    //   if (type === 'close' || type === 'error') {
-    //     try {
-    //       await this.stopDapp(dapp)
-    //     } catch (err) {
-    //       throw new Error(err)
-    //     }
-    //   }
-
-    //   if (type === 'error' || type === 'stderr_data') {
-    //     _dappLaunchedLastError[id] = data && data.message ? data.message : data.toString()
-    //   }
-    // })
     const sandbox = new Sandbox(dappPath, id, args, this.apiHandler, true, this.logger)
 
-    try {
-      sandbox.run(args)
-    } catch (error) {
-      console.log('errorrr', error)
-    }
     // eslint-disable-next-line require-atomic-updates
     _dappLaunched[id] = sandbox
-
-    await this._attachDappApi(id)
-
-    await this._addLaunchedMarkFile(dappPath)
 
     sandbox.on('exit', function (code) {
       this.logger.info('Dapp ' + id + ' exited with code ' + code)
@@ -681,6 +656,15 @@ class Dapp extends Asset.Base {
         this.logger.error('Encountered error while stopping dapp: ' + error)
       }
     })
+
+    try {
+      sandbox.run(args)
+    } catch (error) {
+      this.logger.error('Sandbox run fail ', error)
+    }
+
+    await this._attachDappApi(id)
+    await this._addLaunchedMarkFile(dappPath)
   }
 
   async _getLaunchedMarkFile (dappPath) {
@@ -737,8 +721,8 @@ class Dapp extends Asset.Base {
   }
 
   async _attachDappApi (id) {
-    console.log('hi....................')
-    const dappRouter = new DappRouter()
+    this.logger.debug('Hi, Dapp apis have been attached.')
+    const dappRouter = this.runtime.httpserver.dappRouter
 
     try {
       const dappPath = path.join(this.config.dappsDir, id)
@@ -749,32 +733,23 @@ class Dapp extends Asset.Base {
           const subRouter = routers[i]
           if (subRouter.method && subRouter.path) {
             try {
-              // console.log('this.runtime.httpserver.dappRouter, ', this.runtime.httpserver.dappRouter)
-
-              // this.runtime.httpserver.dappRouter[subRouter.method](subRouter.path, async (req, res) => {
-              dappRouter[subRouter.method](subRouter.path, async (req, res) => {
+              dappRouter[subRouter.method](`/${id}${subRouter.path}`, async (req, res) => {
                 try {
                   const result = await new Promise((resolve, reject) => {
-                    const sandbox = _dappLaunched[id]
-                    if (sandbox) {
-                      sandbox.request(
-                        {
-                          method: subRouter.method,
-                          path: subRouter.path,
-                          query: req.query,
-                          body: req.body
-                        },
-                        (err, data) => {
-                          if (err) {
-                            return reject(err)
-                          }
-
-                          resolve(data)
-                        }
-                      )
-                    } else {
-                      reject(new Error('DApp not launched'))
+                    const reqParams = {
+                      query: subRouter.method === 'get' ? req.query : req.body,
+                      params: req.params
                     }
+                    this.request(id, subRouter.method, subRouter.path, reqParams, function (err, body) {
+                      if (!err && body.error) {
+                        err = body.error
+                      }
+                      if (err) {
+                        body = { error: err.toString() }
+                      }
+                      body.success = !err
+                      res.json(body)
+                    })
                   })
                   res.json({ success: true, result })
                 } catch (err) {
@@ -782,25 +757,31 @@ class Dapp extends Asset.Base {
                 }
               })
             } catch (error) {
-              console.log('error', error)
+              this.logger.error(`${subRouter.method} /dapps/${id}${subRouter.path} fail `, error)
             }
           }
         }
       }
     } catch (err) {
-      this.logger.error(err)
+      this.logger.error('attach dapp apis fail ', err)
+    }
+  }
+
+  request (dappId, method, path, query, cb) {
+    const sandbox = _dappLaunched[dappId]
+
+    if (!sandbox) {
+      return cb('Dapp not found')
     }
 
-    // if (!private.defaultRouteId) {
-    //   private.defaultRouteId = dapp.transactionId
-    //   library.network.app.use('/api/dapps/default/', private.routes[dapp.transactionId])
-    // }
-    this.runtime.httpserver._app.use('/d/' + id + '/', dappRouter)
-    // library.network.app.use(function (err, req, res, next) {
-    //   if (!err) return next()
-    //   library.logger.error(req.url, err.toString())
-    //   res.status(500).send({ success: false, error: err.toString() })
-    // })
+    sandbox.sendMessage(
+      {
+        method: method,
+        path: path,
+        query: query
+      },
+      cb
+    )
   }
 
   async postStopDapp (req) {
@@ -1409,57 +1390,38 @@ class Dapp extends Asset.Base {
       const dappPath = path.join(this.config.dappsDir, dappId)
       const file = await this._getLaunchedMarkFile(dappPath)
       if (fs.existsSync(file)) {
+        await this.symlink(dappId)
         await this.runDapp(dappId) // wxm params
       }
     }
   }
 
-  async onNewBlock (block) {
-    for (const dappId of Object.keys(_dappLaunched)) {
-      const sandbox = _dappLaunched[dappId]
-      // console.log('sandbox == ', sandbox)
-
-      if (sandbox) {
-        try {
-          await new Promise((resolve, reject) => {
-            sandbox.request(
-              {
-                method: 'post',
-                path: '/message',
-                query: null,
-                body: {
-                  message: 'newblock',
-                  data: {
-                    block_id: block.id,
-                    block_height: block.height,
-                    number_of_transactions: block.number_of_transactions
-                  }
-                }
-              },
-              (err, data) => {
-                if (err) {
-                  return reject(err)
-                }
-                resolve(data)
-              }
-            )
-          })
-        } catch (err2) {
-          this.logger.error(err2)
-        }
+  async onNewBlock (block, votes, broadcast) {
+    const req = {
+      query: {
+        topic: 'point',
+        message: { id: block.id, height: block.height }
       }
     }
+    Object.keys(_dappLaunched).forEach(function (dappId) {
+      broadcast &&
+        self.request(dappId, 'post', '/message', req, function (err) {
+          if (err) {
+            this.logger.error('onNewBlock message', err)
+          }
+        })
+    })
   }
 
   async symlink (dappId) {
     const dappPath = path.join(this.dappsPath, dappId)
     const dappPublicPath = path.resolve(dappPath, 'public')
     const dappPublicLink = path.resolve(this.appPath, 'public', 'dist', 'dapps', dappId)
+    const dappPublicLink0 = path.resolve(this.appPath, 'public', 'dist', 'dapps')
 
     if (fs.existsSync(dappPublicPath)) {
-      this.logger.debug(`dappPublicPath is ${dappPublicPath}`)
       if (!fs.existsSync(dappPublicLink)) {
-        this.logger.debug(`dappPublicLink is ${dappPublicLink}`)
+        fs.mkdirSync(dappPublicLink0, { recursive: true })
         fs.symlinkSync(dappPublicPath, dappPublicLink)
       }
     }
