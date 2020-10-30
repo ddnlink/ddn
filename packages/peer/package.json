@@ -87,7 +87,6 @@
     "sequelize": "^5.21.3",
     "socket.io": "^2.2.0",
     "sqlite3": "^5.0.0",
-    "strftime": "^0.10.0",
     "tracer": "^0.8.11",
     "util-extend": "1.0.3",
     "valid-url": "1.0.9"
