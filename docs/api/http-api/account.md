@@ -1,14 +1,14 @@
 ---
 order: 2
 id: http-api-account
-title: 账户
+title: 1.账户
 sidebar_label: Http api account
 ---
 
-## **2.1 账户accounts**   
+# **账户accounts**
    
-### **2.1.1 登录**   
-#### **2.1.1.1 本地加密后再登陆（推荐使用）**   
+## **1 登录**
+### **1.1 本地加密后再登陆（推荐使用）**
 接口地址：/api/accounts/open2/   
 请求方式：post   
 支持格式：json   
@@ -35,7 +35,7 @@ var publicKey = DdnJS.crypto.getKeys(secret).publicKey;  //根据密码生成公
 
 // 将上面生成的数据通过post提交到DDN server   
 curl -X POST -H "Content-Type: application/json" -k -d '{"publicKey":"bd1e78c5a10fbf1eca36b28bbb8ea85f320967659cbf1f7ff1603d0a368867b9"}' http://127.0.0.1:8001/api/accounts/open2/   
-```   
+```
    
 JSON返回示例：   
 ```js   
@@ -59,9 +59,9 @@ JSON返回示例：
     },
     "version": "3.7.5" //当前节点版本号
 } 
-```   
+```
    
-##### **2.1.1.2 本地不加密直接登陆**   
+### **1.2 本地不加密直接登陆**
 接口地址：/api/accounts/open/   
 请求方式：post   
 支持格式：json   
@@ -82,7 +82,7 @@ JSON返回示例：
 请求示例：   
 ```bash   
 curl -X POST -H "Content-Type: application/json" -k -d '{"secret":"excuse purpose cousin weasel false attitude dutch lunar enemy soul tongue promote"}' http://127.0.0.1:8001/api/accounts/open/   
-```   
+```
    
 JSON返回示例：   
 ```js   
@@ -101,8 +101,8 @@ JSON返回示例：
         "lock_height": 0
     }
 }  
-```   
-### **2.1.2 根据地址获取账户信息**   
+```
+## **2 根据地址获取账户信息**
 接口地址：/api/accounts   
 请求方式：get   
 支持格式：urlencoded   
@@ -124,7 +124,7 @@ JSON返回示例：
 请求示例：   
 ```bash   
 curl -k -X GET 'http://127.0.0.1:8001/api/accounts?address=DQJXarv8yZgyy6NMfTQSKDyE9W7BBThuCq'   
-```   
+```
    
 JSON返回示例：   
 ```js   
@@ -149,8 +149,8 @@ JSON返回示例：
     },
     "version": "3.7.5"
 }  
-```   
-### **2.1.3 获取账户余额**   
+```
+## **3 获取账户余额**
 接口地址：/api/accounts/getBalance   
 请求方式：get   
 支持格式：urlencoded   
@@ -172,7 +172,7 @@ JSON返回示例：
 请求示例：   
 ```bash   
 curl -k -X GET 'http://127.0.0.1:8001/api/accounts/getBalance?address=DQ9vRnmaZACJ43vnhZyZmCX6dfksvMaqFR'   
-```   
+```
    
 JSON返回示例：   
 ```js   
@@ -181,9 +181,9 @@ JSON返回示例：
 	"balance": 0,
 	"unconfirmedBalance": 0
 }  
-```   
+```
    
-### **2.1.4 根据地址获取账户公钥**   
+## **4 根据地址获取账户公钥**
 接口地址：/api/accounts/getPublickey   
 请求方式：get   
 支持格式：urlencoded   
@@ -203,7 +203,7 @@ JSON返回示例：
 请求示例：   
 ```bash   
 curl -k -X GET 'http://127.0.0.1:8001/api/accounts/getPublickey?address=DC5kJzMdNDhrnupWX2NGafzMoiwdHiySBe'   
-```   
+```
    
 JSON返回示例：   
 ```js   
@@ -211,10 +211,10 @@ JSON返回示例：
 	"success": true,   
 	"publicKey": "daeee33def7eef0c7ba06ec66eda7204437ba88ace8f04e4a6aa4d7bfbd18bc1"   
 }   
-```   
+```
    
 
-### **2.1.5 生成公钥**   
+## **5 生成公钥**
 接口地址：/api/accounts/generatePublickey   
 请求方式：post   
 支持格式：json   
@@ -234,7 +234,7 @@ JSON返回示例：
 请求示例：   
 ```bash   
 curl -k -H "Content-Type: application/json" -X POST -d '{"secret":"this is a key expand music basket purse later educate follow ride"}' 'http://127.0.0.1:8001/api/accounts/generatePublickey'   
-```   
+```
    
 JSON返回示例：   
 ```js   
@@ -242,9 +242,9 @@ JSON返回示例：
 	"success": true,   
 	"publicKey": "85868d2e6afd76034cd5faa6bc53def2facd6e47afac51d6429df78ce41c3b57"   
 }   
-```   
+```
 
-### **2.1.6 生成新账户**   
+## **6 生成新账户**
 接口地址：/api/accounts/new   
 请求方式：get   
 支持格式：无   
@@ -264,7 +264,7 @@ JSON返回示例：
 请求示例：   
 ```bash   
 curl -k -X GET 'http://127.0.0.1:8001/api/accounts/new'   
-```   
+```
    
 JSON返回示例：   
 ```js  
@@ -275,9 +275,9 @@ JSON返回示例：
     "privateKey": "4d60989a5243752478f2cca33935c4f9cfa12b230dff785504eebc1589a49f21ab8c0af3b048dac4d32ad779f79c47948c2a0a0577b89ca7eba58ae321f04695",
     "address": "DJWuENme5xJUJTjWiQEjfuLYRGtABfwhjz" // 地址
 }
-```    
+```
 
-### **2.1.7 获取账户排行榜前100名**   
+## **7 获取账户排行榜前100名**
 接口地址：/api/accounts/top   
 请求方式：get   
 支持格式：无   
@@ -299,7 +299,7 @@ JSON返回示例：
 请求示例：   
 ```bash   
 curl -k -X GET 'http://127.0.0.1:8001/api/accounts/top?limit=5&offset=0'  //返回前5名账户信息
-```   
+```
    
 JSON返回示例：   
 ```js   
@@ -333,9 +333,9 @@ JSON返回示例：
         }
     ]
 } 
-```   
+```
 
-### **2.1.8 获取当前链上账户总个数**   
+## **8 获取当前链上账户总个数**
 接口地址：/api/accounts/count   
 请求方式：get   
 支持格式：无   
@@ -352,7 +352,7 @@ JSON返回示例：
 请求示例：   
 ```bash   
 curl -k -X GET 'http://127.0.0.1:8001/api/accounts/count'    
-```   
+```
    
 JSON返回示例：   
 ```js   
@@ -360,4 +360,4 @@ JSON返回示例：
 	success: true,
 	count: 110
 }
-```    
+```

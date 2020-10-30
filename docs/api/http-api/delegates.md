@@ -1,14 +1,14 @@
 ---
 order: 5
 id: http-api-delegate
-title: 受托人
+title: 4.受托人
 sidebar_label: Http api delegate
 ---
 
 
-## **2.4 受托人** 
+# **受托人**
    
-### **2.4.1 获取受托人总个数**   
+## **1 获取受托人总个数**
 接口地址：/api/delegates/count   
 请求方式：get   
 支持格式：无   
@@ -24,7 +24,7 @@ sidebar_label: Http api delegate
 请求示例：   
 ```bash   
 curl -k -X GET 'http://127.0.0.1:8001/api/delegates/count'   
-```   
+```
    
 JSON返回示例：   
 ```js   
@@ -32,9 +32,9 @@ JSON返回示例：
 	"success": true,    
 	"count": 101    
 }     
-```   
+```
    
-### **2.4.2 根据受托人公钥查看哪些人为其投了票**   
+## **2 根据受托人公钥查看哪些人为其投了票**
 接口地址：/api/delegates/voters   
 请求方式：get   
 支持格式：urlencoded   
@@ -54,7 +54,7 @@ JSON返回示例：
 请求示例：   
 ```bash   
 curl -k -X GET 'http://127.0.0.1:8001/api/delegates/voters?publicKey=d2155304db26fc893c4ba41ae230bd8bb4241bb8e3fccb4d234594e7c70496d2'   
-```   
+```
    
 JSON返回示例：   
 ```js   
@@ -70,9 +70,9 @@ JSON返回示例：
         }
     ]
 }
-```   
+```
    
-### **2.4.3 根据公钥或者用户名获取受托人详情**   
+## **3 根据公钥或者用户名获取受托人详情**
 接口地址： /api/delegates/get   
 请求方式：get   
 支持格式：urlencoded   
@@ -96,7 +96,7 @@ JSON返回示例：
 ```bash   
 curl -k -X GET 'http://127.0.0.1:8001/api/delegates/get?publicKey=0d820478d627db1fd3c4d832b27e3094f25a4e93dd33e759fc2f5adf1a6f33c8'   
 curl -k -X GET 'http://127.0.0.1:8001/api/delegates/get?username=DDN_88'   
-```   
+```
    
 JSON返回示例：   
 ```js   
@@ -118,9 +118,9 @@ JSON返回示例：
         "forged": "812752474"
     }
 }
-```   
+```
    
-### **2.4.4 获取受托人列表**   
+## **4 获取受托人列表**
 接口地址：/api/delegates   
 请求方式：get   
 支持格式：urlencoded   
@@ -147,7 +147,7 @@ JSON返回示例：
 请求示例：   
 ```bash   
 curl -k -X GET 'http://127.0.0.1:8001/api/delegates?orderby=approval:desc&limit=2' //按照得票率降序排序，取出前2名   
-```   
+```
    
 JSON返回示例：   
 ```js   
@@ -187,10 +187,10 @@ JSON返回示例：
     ],
     "totalCount": 101
 }
-```   
+```
    
    
-### **2.4.5 获取受托人设置的转账费**   
+## **5 获取受托人设置的转账费**
 接口地址：/api/delegates/fee   
 请求方式：get   
 支持格式：urlencoded   
@@ -211,14 +211,14 @@ JSON返回示例：
 请求示例：   
 ```bash   
 curl -k -X GET 'http://127.0.0.1:8001/api/delegates/fee?publicKey=0d820478d627db1fd3c4d832b27e3094f25a4e93dd33e759fc2f5adf1a6f33c8'   
-```   
+```
    
 JSON返回示例：   
 ```js   
 {"success":true,"fee":"10000000000"}  //0.1 DDN   
-```   
+```
    
-### **2.4.6 根据公钥查看其锻造情况**   
+## **6 根据公钥查看其锻造情况**
 接口地址：/api/delegates/forging/getForgedByAccount   
 请求方式：get   
 支持格式：urlencoded   
@@ -241,7 +241,7 @@ JSON返回示例：
 请求示例：   
 ```bash   
 curl -k -X GET 'http://127.0.0.1:8001/api/delegates/forging/getForgedByAccount?generatorPublicKey=0d820478d627db1fd3c4d832b27e3094f25a4e93dd33e759fc2f5adf1a6f33c8'   
-```   
+```
    
 JSON返回示例：   
 ```js   
@@ -251,9 +251,9 @@ JSON返回示例：
     "rewards": "1200000000",
     "forged": "1212752474"
 }
-```   
+```
    
-### **2.4.7 注册受托人**   
+## **7 注册受托人**
 接口地址：/api/delegates   
 请求方式：put   
 支持格式：urlencoded   
@@ -277,7 +277,7 @@ JSON返回示例：
 请求示例：   
 ```bash   
 curl -k -H "Content-Type: application/json" -X PUT -d '{"secret":"attract motion canal change horror dose waste hub team horse half tiny","username":"delegate_test"}' 'http://127.0.0.1:8001/api/delegates'   
-```   
+```
    
 JSON返回示例：   
 ```js   
@@ -303,9 +303,9 @@ JSON返回示例：
         "senderId": "D61gSRn1ko2NiEYLutPxnBDXU4MBJ2b4by"
     }
 } 
-```   
+```
    
-### **2.4.8 受托人开启锻造**   
+## **8 受托人开启锻造**
 接口地址：/api/delegates/forging/enable   
 请求方式：post   
 支持格式：urlencoded   // url必须是受托人所在服务器  
@@ -328,14 +328,14 @@ JSON返回示例：
 请求示例：   
 ```bash   
 curl -k -H "Content-Type: application/json" -X POST -d '{"secret":"attract motion canal change horror dose waste hub team horse half tiny"}' 'http://localhost:8001/api/delegates/forging/enable'   
-```   
+```
    
 JSON返回示例：   
 ```js   
 {"success":true,"address":"D61gSRn1ko2NiEYLutPxnBDXU4MBJ2b4by"}   
-```      
+```
 
-### **2.4.9 受托人关闭锻造**   
+## **9 受托人关闭锻造**
 接口地址：/api/delegates/forging/disable   
 请求方式：post   
 支持格式：urlencoded   // url必须是受托人所在服务器  
@@ -358,14 +358,14 @@ JSON返回示例：
 请求示例：   
 ```bash   
 curl -k -H "Content-Type: application/json" -X POST -d '{"secret":"attract motion canal change horror dose waste hub team horse half tiny"}' 'http://localhost:8001/api/delegates/forging/disable'   
-```   
+```
    
 JSON返回示例：   
 ```js   
 {"success":true,"address":"D61gSRn1ko2NiEYLutPxnBDXU4MBJ2b4by"}     
-```     
+```
 
-### **2.4.10 受托人锻造状态查看**   
+## **10 受托人锻造状态查看**
 接口地址：/api/delegates/forging/status      
 请求方式：get     
 支持格式：urlencoded    
@@ -387,9 +387,9 @@ JSON返回示例：
 请求示例：   
 ```bash   
 curl -k -X GET 'http://127.0.0.1:8001/api/delegates/forging/status?publicKey=9a9058fba208ab7fb3d9b2c521b1c6dabf38583fc18f1779d61d2266487cf744'        
-```   
+```
    
 JSON返回示例：   
 ```js   
 {"success":true,"enabled":false}    
-```     
+```

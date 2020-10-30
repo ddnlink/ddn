@@ -1,13 +1,13 @@
 ---
-order: 8
+order: 9
 id: http-api-multi-signature
-title: 多重签名
+title: 8.多重签名
 sidebar_label: Http api multi signature
 ---
 
 
-## **2.8 多重签名**   
-### **2.8.1 设置普通账户为多重签名账户**   
+# **多重签名**
+## **1 设置普通账户为多重签名账户**
 接口地址：/api/multisignatures   
 请求方式：put   
 支持格式：json   
@@ -36,7 +36,7 @@ sidebar_label: Http api multi signature
 请求示例：   
 ```bash   
 curl -k -H "Content-Type: application/json" -X PUT -d '{"secret":"pact october wrap gain amazing spring biology allow skull aware laundry unhappy","min":2,"lifetime":1,"keysgroup":["+daeee33def7eef0c7ba06ec66eda7204437ba88ace8f04e4a6aa4d7bfbd18bc1","+ab8c0af3b048dac4d32ad779f79c47948c2a0a0577b89ca7eba58ae321f04695"]}' 'http://127.0.0.1:8001/api/multisignatures'  
-```   
+```
    
 JSON返回示例：   
 ```js  
@@ -44,9 +44,9 @@ JSON返回示例：
     "success": true,
     "transactionId": "ee9f10aca5f7f610de8d52689c26194a6f807f86144b7761f4a4ee1fd9260a18f21cc06ff12983a0643413a65608177ec6005a9acc75c72b7978ec4ce66f1afe" //返回结果只是生成交易id，还需要其他人签名后该账户才能成功设置成多重签名账户
 }  
-```   
+```
    
-### **2.8.2 根据公钥获取挂起的多重签名交易详情**   
+## **2 根据公钥获取挂起的多重签名交易详情**
 接口地址：/api/multisignatures/pending   
 请求方式：get   
 支持格式：urlencoded   
@@ -68,7 +68,7 @@ JSON返回示例：
 请求示例：   
 ```bash   
 curl -k -X GET http://127.0.0.1:8001/api/multisignatures/pending?publicKey=ab8c0af3b048dac4d32ad779f79c47948c2a0a0577b89ca7eba58ae321f04695   
-```   
+```
    
 JSON返回示例：   
 ```js   
@@ -105,9 +105,9 @@ JSON返回示例：
         }
     ]
 }
-```   
+```
    
-### **2.8.3 非交易发起人对交易进行多重签名**   
+## **3 非交易发起人对交易进行多重签名**
 接口地址：/api/multisignatures/sign   
 请求方式：post   
 支持格式：json   
@@ -133,7 +133,7 @@ JSON返回示例：
 ```bash   
 // 首先，公钥为 ab8c0af3b048dac4d32ad779f79c47948c2a0a0577b89ca7eba58ae321f04695 的用户进行签名
 curl -k -H "Content-Type: application/json" -X POST -d '{"secret":"grunt grain siege churn chicken phrase shell arrange fox recipe scan tube","transactionId":"ee9f10aca5f7f610de8d52689c26194a6f807f86144b7761f4a4ee1fd9260a18f21cc06ff12983a0643413a65608177ec6005a9acc75c72b7978ec4ce66f1afe"}' 'http://127.0.0.1:8001/api/multisignatures/sign'      
-```   
+```
    
 JSON返回示例：   
 ```js   
@@ -225,9 +225,9 @@ curl -k -X GET http://127.0.0.1:8001/api/transactions/get?id=ee9f10aca5f7f610de8
         }
     }
 }
-```   
+```
    
-### **2.8.4 获取多重签名账户信息**   
+## **4 获取多重签名账户信息**
 接口地址：/api/multisignatures/accounts   
 请求方式：get   
 支持格式：urlencoded   
@@ -249,7 +249,7 @@ curl -k -X GET http://127.0.0.1:8001/api/transactions/get?id=ee9f10aca5f7f610de8
 请求示例：   
 ```bash   
 curl -k -X GET http://127.0.0.1:8001/api/multisignatures/accounts?publicKey=ab8c0af3b048dac4d32ad779f79c47948c2a0a0577b89ca7eba58ae321f04695   
-```   
+```
    
 JSON返回示例：   
 ```js   
@@ -294,4 +294,4 @@ JSON返回示例：
         }
     ]
 }
-``` 
+```

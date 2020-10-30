@@ -1,7 +1,7 @@
 ---
 order: 3
 id: dao-api
-title: 自治组织DAO Api
+title: 2.自治组织DAO Api
 sidebar_label: Decenter Auto Organization
 ---
 

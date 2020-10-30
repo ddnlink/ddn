@@ -1,7 +1,7 @@
 ---
 order: 7
 id: js-sdk-api
-title: 7. Js SDK API
+title: Js SDK API
 sidebar_label: DDN Js-SDK API
 ---
 
