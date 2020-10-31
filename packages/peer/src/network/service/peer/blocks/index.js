@@ -70,7 +70,6 @@ class PeerBlockService {
     if (query.limit) {
       limit = Math.min(limit, Number(query.limit))
     }
-
     return new Promise((resolve, reject) => {
       this.sequence.add(async (cb) => {
         try {
@@ -86,6 +85,8 @@ class PeerBlockService {
               $gt: row ? row.height : '0' // fixme 2020.8.13 height >= 1
             }
 					}
+					const data = await this.runtime.dataquery.queryFullBlockData(where, limit, 0, [['height', 'asc']])
+					cb(null, { blocks: data })
 				} catch (e) {
           reject(e)
         }
