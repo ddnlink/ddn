@@ -305,8 +305,7 @@ class PeerSync {
           try {
             block = await this.runtime.block.objectNormalize(block)
           } catch (e) {
-            this.logger.error(`Failed to normalize block: ${e}`, block)
-            this.logger.error(`Block is not valid, ban 60 min, block: ${block ? block.id : 'null'} `, peerStr)
+            this.logger.error(`Failed to normalize block, ban 60 min, block: ${block ? block.id : 'null'} `, peerStr)
             this.runtime.peer.changeState(peer.ip, peer.port, 0, 3600) // 3600 s
             return null
           }

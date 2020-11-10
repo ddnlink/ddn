@@ -41,9 +41,9 @@ class Program {
     options.logger = tracer.colorConsole({
       level: options.configObject.logLevel,
       format: [
-        '{{title}} {{timestamp}} {{message}} (in {{file}}:{{line}})', // default format
+        '{{title}} {{timestamp}} {{file}}:{{line}} {{method}} {{message}}', // default format
         {
-          error: '{{title}} {{timestamp}} {{message}} (in {{file}}:{{line}})\nCall Stack:\n{{stack}}' // error format
+          error: '{{title}} {{timestamp}} {{file}}:{{line}} {{method}} {{message}} \nCall Stack:\n{{stack}}' // error format
         }
       ],
       dateformat: 'HH:MM:ss.L',
@@ -54,6 +54,12 @@ class Program {
         })
       }
     })
+
+    // options.logger.dailyfile({
+    //   root: 'logs',
+    //   maxLogFiles: 30,
+    //   logPathFormat: '{{root}}/{{date}}.log'
+    // })
 
     if (!options.configObject.publicIp) {
       options.configObject.publicIp = DdnUtils.system.getPublicIp()
@@ -445,14 +451,6 @@ class Program {
    * 尝试铸造区块（轮询）
    */
   async startForgeBlockTask () {
-    // const lastBlock = this._context.runtime.block.getLastBlock()
-    // if (lastBlock.height > 3) {
-    //   console.log("我要回滚");
-    //   const result = await this._context.runtime.block._popLastBlock(
-    //     lastBlock
-    //   );
-    //   console.log("回滚结束", result);
-    // }
     await (async () => {
       if (this._context.runtime.state !== DdnUtils.runtimeState.Ready) {
         return
