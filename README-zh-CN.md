@@ -66,7 +66,7 @@ DDN, 是一个成熟的企业级区块链系统，已经服务于版权存证、
 
 | Github Issue | DATM |
 | ------------------------------------------------------- | ------------------------------------------------------------------------------------------- |
-| [ddnlink/ddn/issues](https://github.com/ddnlink/ddn/issues) | <img src="./doc/images/datm.jpg" width="200px">| 
+| [ddnlink/ddn/issues](https://github.com/ddnlink/ddn/issues) | <img src="./docs/images/datm.jpg" width="200px">| 
 
 > PS：DATM 是基于DDN区块链的 分布式任务管理工具，大家可以在上面领取任务、讨论问题，任务完成，系统通过`智能合约`支付给你DDN
 
@@ -80,7 +80,7 @@ DDN, 是一个成熟的企业级区块链系统，已经服务于版权存证、
 
 | DDN基金会钱包转账地址 | DDN手机钱包扫码转账 |
 | ------------------------------------------------------- | ------------------------------------------------------------------------------------------- |
-| DLjrrVwnmMXstcAYVjcrpwyYb3kY1ehABU | ![](./doc/images/foundation.png)| 
+| DLjrrVwnmMXstcAYVjcrpwyYb3kY1ehABU | ![](./docs/images/foundation.png)| 
 
 ## 协议
 
