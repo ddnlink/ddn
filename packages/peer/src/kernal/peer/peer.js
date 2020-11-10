@@ -515,6 +515,17 @@ class Peer {
       )
     })
   }
+
+  // Sidechains
+  sandboxApi (call, args, cb) {
+    // sandboxHelper.callMethod(shared, call, args, cb)
+    if (typeof this[call] !== 'function') {
+      return cb(`Function not found in module: ${call}`)
+    }
+
+    const callArgs = [args, cb]
+    return this[call].apply(this, callArgs)
+  }
 }
 
 export default Peer

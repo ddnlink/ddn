@@ -1,13 +1,13 @@
 ---
 order: 4
 id: http-api-block
-title: 区块
+title: 3.区块
 sidebar_label: Http api block
 ---
 
 
-## **2.3 区块**   
-### **2.3.1 获取指定区块的详情**   
+# **区块**
+## **1 获取指定区块的详情**
 接口地址：/api/blocks/get   
 请求方式：get   
 支持格式：urlencoded   
@@ -30,7 +30,7 @@ sidebar_label: Http api block
 请求示例：   
 ```bash   
 curl -k -X GET 'http://127.0.0.1:8001/api/blocks/get?id=ad6cb4628195dc1fd4051a41f8564bdfb11b28fe30b11232fd8061d564ef6b6494cb36fb9beb317919eebe710c910f9f69e3f2f65f0045ac160c14c1a69e466e'   
-```   
+```
    
 JSON返回示例：   
 ```js   
@@ -54,9 +54,9 @@ JSON返回示例：
         "totalForged": "500000000"
     }
 }
-```   
+```
    
-### **2.3.2 获取区块数据**   
+## **2 获取区块数据**
 接口地址：/api/blocks   
 请求方式：get   
 支持格式：urlencoded   
@@ -87,7 +87,7 @@ JSON返回示例：
 请求示例：   
 ```bash   
 curl -k -X GET 'http://127.0.0.1:8001/api/blocks?limit=2&offset=0&orderBy=height:desc'   
-```   
+```
    
 JSON返回示例：   
 ```js   
@@ -131,9 +131,9 @@ JSON返回示例：
     ],
     "count": 270
 }
-```   
+```
    
-### **2.3.3 获取区块链高度**   
+## **3 获取区块链高度**
 接口地址：/api/blocks/getHeight   
 请求方式：get   
 支持格式：无   
@@ -149,14 +149,14 @@ JSON返回示例：
 请求示例：   
 ```bash   
 curl -k -X GET 'http://127.0.0.1:8001/api/blocks/getheight'    
-```   
+```
    
 JSON返回示例：   
 ```js   
 {"success":true,"height": "285"}   
-```   
+```
    
-### **2.3.4 获取普通转账手续费**   
+## **4 获取普通转账手续费**
 接口地址：/api/blocks/getFee   
 请求方式：get   
 支持格式：无   
@@ -173,14 +173,14 @@ JSON返回示例：
 请求示例：   
 ```bash   
 curl -k -X GET 'http://127.0.0.1:8001/api/blocks/getfee'   
-```   
+```
    
 JSON返回示例：   
 ```js   
 {"success":true,"fee":"10000000"}     // 手续费为0.1 DDN   
-```   
+```
    
-### **2.5 获取里程碑**   
+## **5 获取里程碑**
 接口地址：/api/blocks/getMilestone   
 请求方式：get   
 支持格式：无   
@@ -196,14 +196,14 @@ JSON返回示例：
 请求示例：   
 ```bash   
 curl -k -X GET 'http://127.0.0.1:8001/api/blocks/getMilestone'    
-```   
+```
    
 JSON返回示例：   
 ```js   
 {"success":true,"milestone":"0"}   
-```   
+```
    
-### **2.3.6 查看单个区块奖励**   
+## **6 查看单个区块奖励**
 接口地址：/api/blocks/getReward   
 请求方式：get   
 支持格式：无   
@@ -220,14 +220,14 @@ JSON返回示例：
 请求示例：   
 ```bash   
 curl -k -X GET 'http://127.0.0.1:8001/api/blocks/getReward'   
-```   
+```
    
 JSON返回示例：   
 ```js   
 {"success":true,"reward":"500000000"} //每个生成一个block奖励 5 DDN   
-```   
+```
    
-### **2.3.7 获取Token当前供应值**   
+## **7 获取Token当前供应值**
 接口地址：/api/blocks/getSupply   
 请求方式：get   
 支持格式：无   
@@ -244,14 +244,14 @@ JSON返回示例：
 请求示例：   
 ```bash   
 curl -k -X GET 'http://127.0.0.1:8001/api/blocks/getSupply'   
-```   
+```
    
 JSON返回示例：   
 ```js   
 {"success":true,"supply":"1000000100500000000"} // 当前testnet共有 10000001005 DDN   
-```   
+```
    
-### **2.3.8 区块链状态**   
+## **8 区块链状态**
 接口地址：/api/blocks/getStatus   
 请求方式：get   
 支持格式：无   
@@ -272,7 +272,7 @@ JSON返回示例：
 请求示例：   
 ```bash   
 curl -k -X GET 'http://127.0.0.1:8001/api/blocks/getStatus'   
-```   
+```
    
 JSON返回示例：   
 ```js   
@@ -284,10 +284,10 @@ JSON返回示例：
     "reward": "500000000",
     "supply": "1000000151000000000"
 } 
-```   
+```
    
 
-### **2.3.9 获取指定区块的交易信息**   
+## **9 获取指定区块的交易信息**
 接口地址：/api/blocks/full   
 请求方式：get   
 支持格式：无   
@@ -311,7 +311,7 @@ JSON返回示例：
 请求示例：   
 ```bash   
 curl -k -X GET 'http://127.0.0.1:8001/api/blocks/full?height=222'   
-```   
+```
    
 JSON返回示例：   
 ```js   
@@ -336,4 +336,4 @@ JSON返回示例：
         "transactions": []
     }
 }
-``` 
+```

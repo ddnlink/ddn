@@ -1,6 +1,6 @@
 ---
 order: 1
-title: 1. DDN API 简介
+title: DDN API 简介
 nav:
   order: 2
   title: 接口

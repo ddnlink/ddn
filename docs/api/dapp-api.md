@@ -1,7 +1,7 @@
 ---
 order: 4
 id: ddn-dapp-api
-title: 4. 智能合约（Dapp） API
+title: 智能合约（Dapp） API
 sidebar_label: DDN Dapp API
 ---
 
@@ -496,6 +496,12 @@ curl --location --request POST 'http://localhost:8001/api/dapps/launch' \
 --header 'Content-Type: application/json' \
 --data-raw '{
     "id": "6efbd41f9afce5132e87a0ff6c2e6a42adb72dc5bc1028a37f5e159251350688ca996e796dbb8d90ac20d1039020ea33020f542cf2623805a71acc529270c69e",
+    "master": "xS5XaSoHsTEL"
+}'
+curl --location --request POST 'http://localhost:8001/api/dapps/launch' \
+--header 'Content-Type: application/json' \
+--data-raw '{
+    "id": "8d508af080311dc7663319d1ca708366e08d494262b40c2f5a7f07685d529041bffc52380e51d7f0e18042a72090ba3bdd4e9663073ee58e3d3383d374c26294",
     "master": "xS5XaSoHsTEL"
 }'
 ```

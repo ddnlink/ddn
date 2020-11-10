@@ -1,17 +1,17 @@
 ---
 order: 1
 id: http-api
-title: 简介
+title: 0.简介
 sidebar_label: Http api
 group:
-  title: 2. Http API
+  title: Http API
   order: 2
 ---
 
 # DDN HTTP API文档
 
-## **1 API使用说明**   
-### **1.1 请求过程说明**   
+# **API使用说明**
+## **1 请求过程说明**
 1.1 构造请求数据，用户数据按照DDN提供的接口规则，通过程序生成签名，生成请求数据集合；       
 1.2 发送请求数据，把构造完成的数据集合通过POST/GET等提交的方式传递给DDN；       
 1.3 DDN对请求数据进行处理，服务器在接收到请求后，会首先进行安全校验，验证通过后便会处理该次发送过来的请求；       
@@ -20,7 +20,7 @@ group:
 
 ---   
 
-## ** API 目录 **
+## **API 目录**
 1. [账户](/api/http-api/account.md)
 2. [交易](/api/http-api/transaction.md)
 3. [区块](/api/http-api/blocks.md)

@@ -16,6 +16,8 @@ const _dappInstalling = {}
 const _dappRemoving = {}
 const _dappLaunched = {}
 const _dappLaunchedLastError = {}
+const _dappready = {}
+const modules = {}
 
 class Dapp extends Asset.Base {
   // eslint-disable-next-line no-useless-constructor
@@ -634,15 +636,17 @@ class Dapp extends Asset.Base {
       }
     }
 
+    // this.logger.debug('modules: ', this.runtime)
     const sandbox = new Sandbox(dappPath, id, args, this.apiHandler, true, this.logger)
 
     // eslint-disable-next-line require-atomic-updates
     _dappLaunched[id] = sandbox
 
+    const self = this
     sandbox.on('exit', function (code) {
       this.logger.info('Dapp ' + id + ' exited with code ' + code)
       try {
-        this.stop(dapp)
+        // self.stopDapp(dapp)
       } catch (error) {
         this.logger.error('Encountered error while stopping dapp: ' + error)
       }
@@ -651,17 +655,13 @@ class Dapp extends Asset.Base {
     sandbox.on('error', function (err) {
       this.logger.info('Encountered error in dapp ' + id + ' ' + err.toString())
       try {
-        this.stop(dapp)
+        self.stopDapp(dapp)
       } catch (error) {
         this.logger.error('Encountered error while stopping dapp: ' + error)
       }
     })
 
-    try {
-      sandbox.run(args)
-    } catch (error) {
-      this.logger.error('Sandbox run fail ', error)
-    }
+    sandbox.run()
 
     await this._attachDappApi(id)
     await this._addLaunchedMarkFile(dappPath)
@@ -721,12 +721,13 @@ class Dapp extends Asset.Base {
   }
 
   async _attachDappApi (id) {
-    this.logger.debug('Hi, Dapp apis have been attached.')
-    const dappRouter = this.runtime.httpserver.dappRouter
+    const self = this
+    self.logger.debug('Hi, Dapp apis have been attached.')
+    const dappRouter = self.runtime.httpserver.dappRouter
 
     try {
-      const dappPath = path.join(this.config.dappsDir, id)
-      const routers = await this._readDappRouters(dappPath)
+      const dappPath = path.join(self.config.dappsDir, id)
+      const routers = await self._readDappRouters(dappPath)
 
       if (routers && routers.length > 0) {
         for (let i = 0; i < routers.length; i++) {
@@ -740,7 +741,10 @@ class Dapp extends Asset.Base {
                       query: subRouter.method === 'get' ? req.query : req.body,
                       params: req.params
                     }
-                    this.request(id, subRouter.method, subRouter.path, reqParams, function (err, body) {
+
+                    self.request(id, subRouter.method, subRouter.path, reqParams, function (err, body) {
+                      self.logger.debug('Request is end. err, body', err, body)
+
                       if (!err && body.error) {
                         err = body.error
                       }
@@ -757,13 +761,13 @@ class Dapp extends Asset.Base {
                 }
               })
             } catch (error) {
-              this.logger.error(`${subRouter.method} /dapps/${id}${subRouter.path} fail `, error)
+              self.logger.error(`${subRouter.method} /dapps/${id}${subRouter.path} fail `, error)
             }
           }
         }
       }
     } catch (err) {
-      this.logger.error('attach dapp apis fail ', err)
+      self.logger.error('attach dapp apis fail ', err)
     }
   }
 
@@ -824,7 +828,8 @@ class Dapp extends Asset.Base {
       throw new Error('DApp not launched')
     }
 
-    _dappLaunched[dapp.transaction_id].stop()
+    // _dappLaunched[dapp.transaction_id].stop()
+    _dappLaunched[dapp.transaction_id].exit()
     this.runtime.socketio.emit('dapps/change', {})
 
     _dappLaunched[dapp.transaction_id] = null
@@ -1383,6 +1388,12 @@ class Dapp extends Asset.Base {
     })
   }
 
+  async onBind () {
+    modules.dapp = this
+    modules.blocks = this.runtime.block
+    modules.transport = this.runtime.peer
+  }
+
   async onBlockchainReady () {
     const installIds = await this.getInstalledDappIds()
     for (let i = 0; i < installIds.length; i++) {
@@ -1428,9 +1439,6 @@ class Dapp extends Asset.Base {
   }
 
   apiHandler (message, callback) {
-    const modules = this.runtime
-    this.logger.debug(`modules are ${modules}`)
-
     try {
       const strs = message.call.split('#')
       const module = strs[0]
@@ -1441,12 +1449,62 @@ class Dapp extends Asset.Base {
         return setImmediate(callback, 'Invalid module in call: ' + message.call)
       }
       if (!modules[module].sandboxApi) {
-        return setImmediate(callback, "This module doesn't have sandbox api")
+        return setImmediate(callback, 'This module have no sandbox api')
       }
       modules[module].sandboxApi(call, { body: message.args, dappId: message.dappId }, callback)
     } catch (e) {
       return setImmediate(callback, 'Invalid call ' + e.toString())
     }
+  }
+
+  sandboxApi (call, args, cb) {
+    // sandboxHelper.callMethod(shared, call, args, cb)
+    if (typeof this[call] !== 'function') {
+      return cb(`Function not found in module: ${call}`)
+    }
+
+    const callArgs = [args, cb]
+    return this[call].apply(this, callArgs)
+  }
+
+  getDapp (req, cb) {
+    ;(async () => {
+      const dapp = await this.getDappByTransactionId(req.dappId)
+      return cb(null, dapp)
+    })()
+  }
+
+  setReady (req, cb) {
+    _dappready[req.dappId] = true
+    // library.bus.message('dappReady', req.dappId, true)
+    cb(null, {})
+  }
+
+  registerInterface (req, cb) {
+    cb()
+    //   const dappId = req.dappId
+    //   const method = req.body.method
+    //   const path = req.body.path
+    //   private.routes[dappId][method](path, function (req, res) {
+    //     var reqParams = {
+    //       query: (method == 'get') ? req.query : req.body,
+    //       params: req.params
+    //     }
+    //     self.request(dappId, method, path, reqParams, function (err, body) {
+    //       if (!body) {
+    //         body = {}
+    //       }
+    //       if (!err && body.error) {
+    //         err = body.error
+    //       }
+    //       if (err) {
+    //         body = { error: err.toString() }
+    //       }
+    //       body.success = !err
+    //       res.json(body)
+    //     })
+    //   })
+    //   cb(null)
   }
 }
 

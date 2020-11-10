@@ -1,7 +1,7 @@
 ---
 order: 3
 id: dao-api
-title: 自治组织DAO Api
+title: 2.自治组织DAO Api
 sidebar_label: Decenter Auto Organization
 ---
 
@@ -15,7 +15,7 @@ sidebar_label: Decenter Auto Organization
 
 名称 | 类型 | 说明 |required
 -|-|-|-
-org_id |string|组织唯一id|true
+org_id |string|组织唯一id(长度大于等4小于等于20)|true
 name |string |组织名称|true
 state|number|组织号状态|true
 url |string |地址|true

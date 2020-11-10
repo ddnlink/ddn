@@ -1,4 +1,3 @@
-
 import yargs from 'yargs'
 
 yargs
@@ -18,11 +17,12 @@ yargs
 
     main: {
       alias: 'M',
-      describe: 'Specify the mainnet, default: false'
-      // default: false
+      describe: 'Specify the mainnet'
     }
   })
   .help()
   .alias('h', 'help')
   .epilog('copyright 2020')
-  .argv
+  .fail((msg, err, yargs) => {
+    console.error('', yargs.help())
+  }).argv

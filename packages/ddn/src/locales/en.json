@@ -1,4 +1,6 @@
 {
   "Hi, please select a command, e.g: new, install, --help": "Hi, please select a command, e.g: new, install, --help",
-  "Hello:": "Hi"
+	"Hello:": "Hi",
+	"Specify the port of the node": "Specify the port of the node",
+	"Specify the mainnet": "Specify the mainnet, default: false"
 }

@@ -954,12 +954,12 @@ class Block {
         null,
         async (err, row) => {
           if (err) {
-            return reject(`Failed to query blocks from db: ${err}`)
+            return reject(new Error(`Failed to query blocks from db: ${err}`))
           }
 
           const bId = row && row.id
           if (bId && save) {
-            return reject(`Block already exists: ${block.id}`)
+            return reject(new Error(`Block already exists: ${block.id}`))
           }
 
           try {
@@ -993,7 +993,7 @@ class Block {
                   null,
                   (err, result) => {
                     if (err) {
-                      return reject(`Failed to query transaction from db: ${err}`)
+                      return reject(new Error(`Failed to query transaction from db: ${err}`))
                     } else {
                       resolve(result)
                     }
@@ -1019,7 +1019,7 @@ class Block {
                 if (existsTrs) {
                   // wxy 这里如果库里存在一些交易就不存这个块吗？TODO
                   await this.runtime.transaction.removeUnconfirmedTransaction(transaction.id)
-                  reject(`Transaction already exists: ${transaction.id}`)
+                  reject(new Error(`Transaction already exists: ${transaction.id}`))
                 }
 
                 if (verifyTrs) {
@@ -1608,6 +1608,21 @@ class Block {
         }
       )
     })
+  }
+
+  sandboxApi (call, args, cb) {
+    // sandboxHelper.callMethod(shared, call, args, cb)
+    if (typeof this[call] !== 'function') {
+      return cb(`Function not found in module: ${call}`)
+    }
+
+    const callArgs = [args, cb]
+    return this[call].apply(this, callArgs)
+  }
+
+  getHeight (req, cb) {
+    const lastBlock = this.runtime.block.getLastBlock()
+    return cb(null, lastBlock && lastBlock.height ? lastBlock.height : '0')
   }
 }
 

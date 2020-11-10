@@ -9,8 +9,8 @@ import ip from 'ip'
 import extend from 'extend2'
 import DdnCrypto from '@ddn/crypto'
 import DdnUtils from '@ddn/utils'
+import tracer from 'tracer'
 
-import { Logger } from '../logger'
 import Context from './context'
 import Block from './block/block'
 import Transaction from './transaction/transaction'
@@ -38,10 +38,21 @@ process.env.UV_THREADPOOL_SIZE = 20 // max: 128
 
 class Program {
   async _init (options) {
-    options.logger = Logger({
-      filename: path.join(options.baseDir, 'logs', 'debug.log'),
-      echo: options.isDaemonMode ? null : options.configObject.logLevel,
-      errorLevel: options.configObject.logLevel
+    options.logger = tracer.colorConsole({
+      level: options.configObject.logLevel,
+      format: [
+        '{{title}} {{timestamp}} {{file}}:{{line}} ({{method}}) {{message}}', // default format
+        {
+          error: '{{title}} {{timestamp}} {{file}}:{{line}} ({{method}}) {{message}} \nCall Stack:\n{{stack}}' // error format
+        }
+      ],
+      dateformat: 'HH:MM:ss.L',
+      transport: function (data) {
+        console.log(data.output)
+        fs.appendFile(path.join(options.baseDir, 'logs', 'debug.log'), data.rawoutput + '\n', err => {
+          if (err) throw err
+        })
+      }
     })
 
     if (!options.configObject.publicIp) {
@@ -83,8 +94,8 @@ class Program {
   }
 
   /**
-     * 文件锁，保证系统只能运行一份
-     */
+   * 文件锁，保证系统只能运行一份
+   */
   _checkProcessState () {
     if (this._context.isDaemonMode) {
       try {
@@ -104,8 +115,8 @@ class Program {
   }
 
   /**
-     * 释放文件锁
-     */
+   * 释放文件锁
+   */
   _resetProcessState () {
     try {
       if (fs.existsSync(this._pid_file)) {
@@ -117,8 +128,8 @@ class Program {
   }
 
   /**
-     * 升级数据库结构
-     */
+   * 升级数据库结构
+   */
   async _applyDatabaseUpgrade () {
     return new Promise((resolve, reject) => {
       dbUpgrade.upgrade(this._context, (err, result) => {
@@ -132,8 +143,8 @@ class Program {
   }
 
   /**
-     * 校验创世区块的数据
-     */
+   * 校验创世区块的数据
+   */
   async _checkGenesisBlock () {
     const block = this._context.genesisblock
 
@@ -192,7 +203,7 @@ class Program {
       process.emit('cleanup')
     })
 
-    if (typeof (gc) === 'function') {
+    if (typeof gc === 'function') {
       setInterval(() => {
         // eslint-disable-next-line no-undef
         gc()
@@ -211,7 +222,7 @@ class Program {
     await this._applyDatabaseUpgrade()
 
     // 验证创世区块数据是否合法
-    if (!await this._checkGenesisBlock()) {
+    if (!(await this._checkGenesisBlock())) {
       process.exit(1)
     }
 
@@ -249,6 +260,8 @@ class Program {
       this._context.logger.info('DDN Start Successfully!')
     }
 
+    await this._bindReady()
+
     // 启动节点管理任务
     await this.startPeerSyncTask()
 
@@ -263,29 +276,39 @@ class Program {
 
     // 启动区块铸造任务
     await this.startForgeBlockTask()
+  }
 
-    // 块加载完成
-    this._context.runtime.loaded = true
+  async _bindReady () {
+    // if (this._context.runtime.loaded) {
+    // 通知资产系统已就绪事件
+    await this._context.runtime.transaction.execAssetFunc('onBind')
+    // }
   }
 
   async _blockchainReady () {
-    if (!this._blockchainReadyFired &&
-      this._context.runtime.state === DdnUtils.runtimeState.Ready) {
+    if (!this._blockchainReadyFired && this._context.runtime.state === DdnUtils.runtimeState.Ready) {
       // 通知资产系统已就绪事件
       await this._context.runtime.transaction.execAssetFunc('onBlockchainReady')
+      // 块加载完成
+      this._context.runtime.loaded = true
+
       this._blockchainReadyFired = true
     }
   }
 
   /**
-     * 获取一个有效节点（非本机自己）
-     */
+   * 获取一个有效节点（非本机自己）
+   */
   async getValidPeer () {
     try {
       const publicIp = this._context.config.publicIp || '127.0.0.1'
       const publicIpLongValue = ip.toLong(publicIp)
       const port = this._context.config.port
-      const result = await this._context.runtime.peer.queryList(null, { state: { $gt: 0 }, $not: { ip: publicIpLongValue, port: port } }, 1)
+      const result = await this._context.runtime.peer.queryList(
+        null,
+        { state: { $gt: 0 }, $not: { ip: publicIpLongValue, port: port } },
+        1
+      )
       if (result && result.length) {
         return result[0]
       }
@@ -296,8 +319,8 @@ class Program {
   }
 
   /**
-     * 同步节点列表 & 维护本地节点状态（轮询）
-     */
+   * 同步节点列表 & 维护本地节点状态（轮询）
+   */
   async startPeerSyncTask () {
     const validPeer = await this.getValidPeer()
     if (validPeer) {
@@ -323,8 +346,8 @@ class Program {
   }
 
   /**
-     * 签名同步任务（轮询）
-     */
+   * 签名同步任务（轮询）
+   */
   async startSignaturesSyncTask () {
     const validPeer = await this.getValidPeer()
     if (validPeer) {
@@ -343,8 +366,8 @@ class Program {
   }
 
   /**
-     * 同步未确认交易（轮询）
-     */
+   * 同步未确认交易（轮询）
+   */
   async startUnconfirmedTransactionSyncTask () {
     const validPeer = await this.getValidPeer()
     if (validPeer) {
@@ -367,8 +390,8 @@ class Program {
   }
 
   /**
-     * 同步节点区块数据（轮询）
-     */
+   * 同步节点区块数据（轮询）
+   */
   async startBlockDataSyncTask () {
     const validPeer = await this.getValidPeer()
     if (validPeer) {
@@ -385,28 +408,31 @@ class Program {
 
             this._context.logger.debug('startSyncBlocks enter')
 
-            await new Promise((resolve) => {
-              this._context.sequence.add(async (cb) => {
-                try {
-                  const syncCompleted = await this._context.runtime.peer.syncBlocks()
-                  cb(null, syncCompleted)
-                } catch (syncErr) {
-                  cb(syncErr)
-                }
-              }, async (err, syncCompleted) => {
-                err && this._context.logger.error('loadBlocks timer:', err)
-                this._context.logger.debug('startSyncBlocks end')
+            await new Promise(resolve => {
+              this._context.sequence.add(
+                async cb => {
+                  try {
+                    const syncCompleted = await this._context.runtime.peer.syncBlocks()
+                    cb(null, syncCompleted)
+                  } catch (syncErr) {
+                    cb(syncErr)
+                  }
+                },
+                async (err, syncCompleted) => {
+                  err && this._context.logger.error('loadBlocks timer:', err)
+                  this._context.logger.debug('startSyncBlocks end')
 
-                if (syncCompleted) {
-                  this._context.runtime.state = DdnUtils.runtimeState.Ready
-                  await this._blockchainReady()
-                } else {
-                  this._context.logger.debug('startSyncBlocks not complete change state pending')
-                  this._context.runtime.state = DdnUtils.runtimeState.Pending
-                }
+                  if (syncCompleted) {
+                    this._context.runtime.state = DdnUtils.runtimeState.Ready
+                    await this._blockchainReady()
+                  } else {
+                    this._context.logger.debug('startSyncBlocks not complete change state pending')
+                    this._context.runtime.state = DdnUtils.runtimeState.Pending
+                  }
 
-                resolve()
-              })
+                  resolve()
+                }
+              )
             })
           }
         })()
@@ -425,8 +451,8 @@ class Program {
   }
 
   /**
-     * 尝试铸造区块（轮询）
-     */
+   * 尝试铸造区块（轮询）
+   */
   async startForgeBlockTask () {
     // const lastBlock = this._context.runtime.block.getLastBlock()
     // if (lastBlock.height > 3) {
@@ -464,32 +490,41 @@ class Program {
         return
       }
 
-      const forgeDelegateInfo = await this._context.runtime.delegate.getForgeDelegateWithCurrentTime(currentSlot, DdnUtils.bignum.plus(lastBlock.height, 1))
+      const forgeDelegateInfo = await this._context.runtime.delegate.getForgeDelegateWithCurrentTime(
+        currentSlot,
+        DdnUtils.bignum.plus(lastBlock.height, 1)
+      )
       if (forgeDelegateInfo === null) {
         this._context.logger.trace('Loop:', 'skipping slot')
         return
       }
 
-      await new Promise((resolve) => {
-        this._context.sequence.add(async (cb) => {
-          if (this._context.runtime.slot.getSlotNumber(forgeDelegateInfo.time) === this._context.runtime.slot.getSlotNumber() &&
-            this._context.runtime.block.getLastBlock().timestamp < forgeDelegateInfo.time) {
-            try {
-              await this._context.runtime.block.generateBlock(forgeDelegateInfo.keypair, forgeDelegateInfo.time)
-            } catch (err) {
-              this._context.logger.error('Forged new block failed: ' + DdnUtils.system.getErrorMsg(err))
-              cb('Forged new block failed: ' + err) // Added: 2020.9.4
+      await new Promise(resolve => {
+        this._context.sequence.add(
+          async cb => {
+            if (
+              this._context.runtime.slot.getSlotNumber(forgeDelegateInfo.time) ===
+                this._context.runtime.slot.getSlotNumber() &&
+              this._context.runtime.block.getLastBlock().timestamp < forgeDelegateInfo.time
+            ) {
+              try {
+                await this._context.runtime.block.generateBlock(forgeDelegateInfo.keypair, forgeDelegateInfo.time)
+              } catch (err) {
+                this._context.logger.error('Forged new block failed: ' + DdnUtils.system.getErrorMsg(err))
+                cb('Forged new block failed: ' + err) // Added: 2020.9.4
+              }
             }
-          }
 
-          cb()
-        }, (err) => {
-          if (err) {
-            this._context.logger.error('Failed generate block within slot:', err)
-          }
+            cb()
+          },
+          err => {
+            if (err) {
+              this._context.logger.error('Failed generate block within slot:', err)
+            }
 
-          resolve()
-        })
+            resolve()
+          }
+        )
       })
     })()
 

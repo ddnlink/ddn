@@ -1,13 +1,13 @@
 ---
 order: 3
 id: http-api-transaction
-title: 交易
+title: 2.交易
 sidebar_label: Http api transaction
 ---
 
 
-## **2.2 交易**   
-### **2.2.1 获取交易信息**   
+# **交易**
+## **1 获取交易信息**
 
 接口地址：/api/transactions   
 请求方式：get   
@@ -44,7 +44,7 @@ sidebar_label: Http api transaction
 请求示例：   
 ```bash   
 curl -k -X GET 'http://127.0.0.1:8001/api/transactions?recipientId=DDr1KLYLRos6iZ55HvNrKo2X8Zpg2mT1oh&orderBy=t_timestamp:desc&limit=3'   
-```   
+```
    
 JSON返回示例：   
 ```js   
@@ -92,8 +92,8 @@ JSON返回示例：
     ],
     "count": 2
 } 
-```   
-### **2.2.2 根据交易id查看交易详情**   
+```
+## **2 根据交易id查看交易详情**
 接口地址：/api/transactions/get   
 请求方式：get   
 支持格式：urlencoded   
@@ -114,7 +114,7 @@ JSON返回示例：
 请求示例：   
 ```bash   
 curl -k -X GET 'http://127.0.0.1:8001/api/transactions/get?id=f5e06b1193295da852eca3a7d5d8ef5c7cb848aa3b5cbb3b21a06e1e9f3c457999946e9ca6064650953c47379abb06d7604367f1b611d2937810de7c612b8962'   
-```   
+```
    
 JSON返回示例：   
 ```js  
@@ -140,9 +140,9 @@ JSON返回示例：
         "asset": {}
     }
 } 
-```   
+```
    
-### **2.2.3 根据未确认交易id查看详情**   
+## **3 根据未确认交易id查看详情**
 接口地址：/api/transactions/unconfirmed/get   
 请求方式：get   
 支持格式：urlencoded   
@@ -163,7 +163,7 @@ JSON返回示例：
 请求示例：   
 ```bash   
 curl -k -X GET http://127.0.0.1:8001/api/transactions/unconfirmed/get?id=bc7e2c9ad4da35f21bedd16363ac3981d1b665395b99f54c433bd2365e16632116748c08c4344758c26cc67a5e6723e2e14401f5aa2b94739d9e7619bc5703d3  // 正常情况，该未确认交易存在时间极短0~10秒   
-```   
+```
    
 JSON返回示例：   
 ```js   
@@ -185,10 +185,10 @@ JSON返回示例：
 		"senderId": "DJWuENme5xJUJTjWiQEjfuLYRGtABfwhjz"
 	}
 }
-```   
+```
    
    
-### **2.2.4 获取[全网所有]未确认的交易详情**   
+## **4 获取[全网所有]未确认的交易详情**
 接口地址：/api/transactions/unconfirmed   
 请求方式：get   
 支持格式：urlencoded   
@@ -212,7 +212,7 @@ JSON返回示例：
 请求示例：   
 ```bash   
 curl -k -X GET 'http://127.0.0.1:8001/api/transactions/unconfirmed'   
-```   
+```
    
 JSON返回示例：   
 ```js   
@@ -220,9 +220,9 @@ JSON返回示例：
 	"success": true,   
 	"transactions": []      //全网目前不存在未确认的交易   
 }   
-```   
+```
    
-### **2.2.5 创建交易并广播**   
+## **5 创建交易并广播**
 接口地址：/api/transactions   
 请求方式：PUT   
 支持格式：json   
@@ -249,7 +249,7 @@ JSON返回示例：
 请求示例：   
 ```bash   
 curl -k -H "Content-Type: application/json" -X PUT -d '{"secret": "grunt grain siege churn chicken phrase shell arrange fox recipe scan tube","amount":"1000000","recipientId":"DDr1KLYLRos6iZ55HvNrKo2X8Zpg2mT1oh"}' 'http://127.0.0.1:8001/api/transactions'    
-```   
+```
    
 JSON返回示例：   
 ```js   
@@ -257,4 +257,4 @@ JSON返回示例：
 	"success": true,   
 	"transactionId": "bc7e2c9ad4da35f21bedd16363ac3981d1b665395b99f54c433bd2365e16632116748c08c4344758c26cc67a5e6723e2e14401f5aa2b94739d9e7619bc5703d3"   
 }   
-```  
+```

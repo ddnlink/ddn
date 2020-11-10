@@ -1,10 +1,10 @@
 ---
 order: 1
 id: plugin-api
-title: 链插件API
+title: 0.链插件API
 sidebar_label: Plugin API
 group:
-  title: 5. 链插件（Plugin）API
+  title: 链插件（Plugin）API
   order: 5
 ---
 

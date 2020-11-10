@@ -1,13 +1,13 @@
 ---
-order: 6
+order: 7
 id: http-api-vote
-title: 投票
+title: 6.投票
 sidebar_label: Http api vote
 ---
 
-## **2.6 投票**
+# **投票**
 
-### **2.6.1 根据地址获取我的投票列表**   
+## **1 根据地址获取我的投票列表**
 接口地址：/api/votes  
 请求方式：get   
 支持格式：urlencoded   
@@ -28,7 +28,7 @@ sidebar_label: Http api vote
 请求示例：   
 ```bash   
 curl -k -X GET 'http://127.0.0.1:8001/api/votes?address=DC5kJzMdNDhrnupWX2NGafzMoiwdHiySBe'   
-```   
+```
    
 JSON返回示例：   
 ```js   
@@ -83,9 +83,9 @@ JSON返回示例：
        ...
     ]
 }
-```   
+```
    
-### **2.6.2 获取受托人手续费设置**   
+## **2 获取受托人手续费设置**
 接口地址：/api/votes/fee   
 请求方式：get   
 支持格式：无   
@@ -102,7 +102,7 @@ JSON返回示例：
 请求示例：   
 ```bash   
 curl -k -X GET 'http://127.0.0.1:8001/api/votes/fee  
-```   
+```
    
 JSON返回示例：   
 ```js   
@@ -110,11 +110,11 @@ JSON返回示例：
 	"success": true,   
 	"fee": 100000000  // 0.1 DDN   
 }   
-```   
+```
    
 <!-- The follow is doing -->
 
-### **2.6.3 给受托人投票**   
+## **3 给受托人投票**
 接口地址：/api/votes  
 请求方式：put   
 支持格式：json   
@@ -138,7 +138,7 @@ JSON返回示例：
 请求示例：   
 ```bash   
 curl -k -H "Content-Type: application/json" -X PUT -d '{"secret":"call scissors pupil water friend timber spend brand vote obey corn size","publicKey":"3ec1c9ec08c0512641deba37c0e95a0fe5fc3bdf58424009f594d7d6a4e28a2a","delegates":["+fafcd01f6b813fdeb3c086e60bc7fa9bfc8ef70ae7be47ce0ac5d06e7b1a8575"]}' 'http://127.0.0.1:8001/api/votes'     
-```   
+```
    
 JSON返回示例：   
 ```js   
@@ -162,4 +162,4 @@ JSON返回示例：
 		"senderId": "15238461869262180695"
 	}
 }  
-```   
+```
