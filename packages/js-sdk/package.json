@@ -2,7 +2,7 @@
   "name": "@ddn/js-sdk",
   "version": "0.1.16",
   "description": "DDN Node.js SDK",
-  "main": "dist/index.js",
+  "main": "lib/index.js",
   "unpkg": "build/index.browserify.js",
   "files": [
     "lib",
