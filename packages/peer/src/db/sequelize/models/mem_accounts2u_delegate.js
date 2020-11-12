@@ -9,7 +9,7 @@ export default connection =>
         allowNull: false
       },
       dependent_id: {
-        type: Sequelize.STRING(64), // 原类型:varchar,size:64
+        type: Sequelize.STRING(128), // 原类型:varchar,size:64
         allowNull: false
       }
     },

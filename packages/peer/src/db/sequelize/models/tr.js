@@ -11,12 +11,12 @@ export default connection => {
     'tr',
     {
       id: {
-        type: Sequelize.STRING(64),
+        type: Sequelize.STRING(128),
         primaryKey: true,
         allowNull: false
       },
       block_id: {
-        type: Sequelize.STRING(64),
+        type: Sequelize.STRING(128),
         allowNull: false
       },
       block_height: {
@@ -78,10 +78,11 @@ export default connection => {
         },
         {
           fields: ['senderId']
-        },
-        {
-          fields: ['recipientId']
-        },
+				},
+				// FIXME 字段太长 在 mysql 中创建索引失败
+        // {
+        //   fields: ['recipientId']
+        // },
         {
           fields: ['senderPublicKey']
         },

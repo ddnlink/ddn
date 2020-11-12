@@ -82,7 +82,7 @@ export default connection =>
         defaultValue: 0
       },
       block_id: {
-        type: Sequelize.STRING(64) // 原类型:varchar,size:64
+        type: Sequelize.STRING(128) // 原类型:varchar,size:64
       },
       nameexist: {
         type: Sequelize.INTEGER, // 原类型:tinyint,size:1

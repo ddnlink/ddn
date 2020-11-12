@@ -28,7 +28,7 @@ export default connection =>
         type: Sequelize.STRING(11) // 原类型:VARCHAR,size:11
       },
       clock: {
-        type: Sequelize.INTEGER // 原类型:INT
+        type: Sequelize.BIGINT(13) // 原类型:INT
       }
     },
     {

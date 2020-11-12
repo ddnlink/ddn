@@ -16,7 +16,7 @@ export default connection => {
         allowNull: false
       },
       transaction_id: {
-        type: Sequelize.STRING(64),
+        type: Sequelize.STRING(128),
         allowNull: false
       }
     },

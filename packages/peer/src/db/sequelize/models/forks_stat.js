@@ -13,7 +13,7 @@ export default connection =>
         allowNull: false
       },
       block_id: {
-        type: Sequelize.STRING(64), // 原类型:VARCHAR,size:64
+        type: Sequelize.STRING(128), // 原类型:VARCHAR,size:64
         allowNull: false
       },
       block_height: {
@@ -21,7 +21,7 @@ export default connection =>
         allowNull: false
       },
       previous_block: {
-        type: Sequelize.STRING(64), // 原类型:VARCHAR,size:64
+        type: Sequelize.STRING(128), // 原类型:VARCHAR,size:64
         allowNull: false
       },
       cause: {

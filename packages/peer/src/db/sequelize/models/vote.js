@@ -11,7 +11,7 @@ export default connection =>
         type: Sequelize.TEXT // 原类型:TEXT
       },
       transaction_id: {
-        type: Sequelize.STRING(64), // 原类型:VARCHAR,size:64
+        type: Sequelize.STRING(128), // 原类型:VARCHAR,size:64
         primaryKey: true,
         allowNull: false
       }

@@ -5,7 +5,7 @@ export default connection => {
     'multisignature',
     {
       transaction_id: {
-        type: Sequelize.STRING(64),
+        type: Sequelize.STRING(128),
         primaryKey: true,
         allowNull: false
       },

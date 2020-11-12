@@ -5,7 +5,7 @@ export default connection =>
     'block',
     {
       id: {
-        type: Sequelize.STRING(64),
+        type: Sequelize.STRING(128),
         primaryKey: true,
         allowNull: false
       },
@@ -14,7 +14,7 @@ export default connection =>
         allowNull: false
       },
       previous_block: {
-        type: Sequelize.STRING(64)
+        type: Sequelize.STRING(128)
       },
       number_of_transactions: {
         type: Sequelize.INTEGER,
@@ -33,7 +33,7 @@ export default connection =>
         allowNull: false
       },
       payload_hash: {
-        type: Sequelize.STRING(64),
+        type: Sequelize.STRING(128),
         allowNull: false
       },
       payload_length: {

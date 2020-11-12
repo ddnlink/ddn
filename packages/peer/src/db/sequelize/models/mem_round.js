@@ -8,7 +8,7 @@ export default connection => {
         type: Sequelize.INTEGER
       },
       block_id: {
-        type: Sequelize.STRING(64)
+        type: Sequelize.STRING(128)
       },
       delegate: {
         type: Sequelize.STRING(64)
