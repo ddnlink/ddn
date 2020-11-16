@@ -208,33 +208,31 @@ const DdnJS = require('@ddn/node-sdk').default // 注意 有个 default 属性
 
 ### **4.1 资产发行商注册，type=60**
 
-异步方法：`assetPlugin.createPluginAsset(type, assetInfo, secret, secondSecret)`
+异步方法：`DdnJS.aob.createIssuer(name, desc, secret, secondSecret)`
 ```
-const issuer = {
-    name: "DDD",    // 发行商名称,唯一标识
-    desc: "J G V",  // 发行商描述
-    issuer_id: "DLbsdFXJNVa68SCAJxtGMaGdfBWkPALZzJ",
-    fee: '10000000000',
-}
-
-await DdnJS.assetPlugin.createPluginAsset(60, issuer, secret, secondSecret)
+// 发行商名称,唯一标识
+const name = 'IssuerName'
+// 发行商描述
+const desc = 'IssuerDesc'
+// 构造交易数据
+const trs = DdnJS.aob.createIssuer(name, desc, secret, secondSecret)
+console.log(JSON.stringify(trs))
 {
-    type: 60,
-    nethash: "0ab796cd",
-    amount: "0",
-    recipient_id: null,
-    sender_public_key: "0b5cfb77f401c818f7ebf02a0e88d52a28d3e4e24643e8a080c0c20ac45d0b9c",
-    timestamp: 55102937,
-    message: null,
-    asset: {
-        aobIssuer: {
-            name: "DDD",
-            desc: "J G V",
-            issuer_id: "DLbsdFXJNVa68SCAJxtGMaGdfBWkPALZzJ"
+    "type": 60,
+    "nethash": "0ab796cd",
+    "amount": "0",
+    "fee": "10000000000",
+    "recipientId": null,
+    "senderPublicKey": "1e18845d5fbbdf0a6820610e042dcb9a250205964b8075a395453b4a1d1ed10c",
+    "timestamp": 84671055,
+    "message": null,
+    "asset": {
+        "aobIssuer": {
+            "name": "rcpDa",
+            "desc": "资产描述"
         }
     },
-    fee: "10000000000",
-    signature: "f8503ee19d2fb1798847cbb66346daf01bf34e0278caa5a9aa51dcd6a7a7081ef45f01ed76518d01169133571f610de1e074a1012d6fd23703a4b35393b0ae0a"
+    "signature": "f8f8bb32e84fda67bdbf6cef27b83ae13684e5e9b4cf1ea3d22e4c1c1d013d10028422ffa199717fe55b4e73470b9f0d33f0a7123059a2fe628f8e58c824900f"
 }
 ```
 
@@ -242,202 +240,202 @@ await DdnJS.assetPlugin.createPluginAsset(60, issuer, secret, secondSecret)
 
 ### **4.2 资产注册，type=61**
 
-异步方法：`assetPlugin.createPluginAsset(type, assetInfo, secret, secondSecret)`
+异步方法：`DdnJS.aob.createAsset(name, desc, maximum, precision, strategy, '0', '0', '0', secret, secondSecret`
 ```
-const obj = {
-    name: "DDD.NCR",    // 资产名称，发行商名.资产名，唯一标识
-    desc: "DDD新币种",
-    maximum: "100000000",   // 上限
-    precision: 2,   // 精度，小数点的位数，这里上限是1000000，精度为3，代表资产IssuerName.CNY的最大发行量为1000.000
-    strategy: '',   // 策略
-    allow_blacklist: '1',
-    allow_whitelist: '1',
-    allow_writeoff: '1',
-    fee: '50000000000'
-}
-
-await DdnJS.assetPlugin.createPluginAsset(61, obj, secret, secondSecret)
+// 资产名称，发行商名.资产名，唯一标识
+const name = 'IssuerName.CNY'
+const desc = '资产描述'
+// 上限
+const maximum = '1000000'
+// 精度，小数点的位数，这里上限是1000000，精度为3，代表资产IssuerName.CNY的最大发行量为1000.000
+const precision = 3
+// 策略
+const strategy = ''
+// 构造交易数据
+const trs = DdnJS.aob.createAsset(name, desc, maximum, precision, strategy, '0', '0', '0', secret, secondSecret)
+console.log(JSON.stringify(trs))
 {
-    type: 61,
-    nethash: "0ab796cd",
-    amount: "0",
-    recipient_id: null,
-    sender_public_key: "0b5cfb77f401c818f7ebf02a0e88d52a28d3e4e24643e8a080c0c20ac45d0b9c",
-    timestamp: 55103637,
-    message: null,
-    asset: {
-        aobAsset: {
-            name: "DDD.NCR",
-            desc: "DDD新币种",
-            maximum: "100000000",
-            precision: 2,
-            strategy: "",
-            allow_blacklist: "1",
-            allow_whitelist: "1",
-            allow_writeoff: "1"
+    "type": 61,
+    "nethash": "0ab796cd",
+    "amount": "0",
+    "fee": "50000000000",
+    "recipientId": null,
+    "senderPublicKey": "1e18845d5fbbdf0a6820610e042dcb9a250205964b8075a395453b4a1d1ed10c",
+    "timestamp": 84314778,
+    "message": null,
+    "asset": {
+        "aobAsset": {
+            "name": "IssuerName.CNY",
+            "desc": "资产描述",
+            "maximum": "1000000",
+            "precision": 3,
+            "strategy": "",
+            "allow_blacklist": "0",
+            "allow_whitelist": "0",
+            "allow_writeoff": "0"
         }
     },
-    fee: "50000000000",
-    signature: "6a197b7533d6d74bd15d0ffd873db6c841bcd729aec531b5987c02ba94e4c507dd5f085821f10a4dc152c20180b9989303083df1355ac506c0a50f2d0b45da05"
+    "signature": "d06ac3ee9ecbca7e856a02a7fa9ac38283269bce02d187daa1e59ac3957a10aff756506816d1e7f528f9f9c0ce90e2dae07ccb36f8076157aa0e6c668e1ff60b"
 }
 ```
 
 
 
-### **4.3 资产设置访问控制列表(acl)模式，type=62**
+### **4.3 资产设置访问控制列表(acl)模式，type=11**
 
-异步方法：`assetPlugin.createPluginAsset(type, assetInfo, secret, secondSecret)`
+异步方法：`DdnJS.aob.createFlags(currency, flagType, flag, secret, secondSecret)`
 ```
-const obj = {
-    currency: "DDD.NCR",
-    flag: 1,    //flag_type=1（0：使用黑名单，1：使用白名单，2：全开放），flag_type=2（0：流通，1：注销）
-    flag_type: 1    //1：黑白名单设置，2：注销设置
-}
-
-await DdnJS.assetPlugin.createPluginAsset(62, obj, secret, secondSecret)
+const currency = 'IssuerName.CNY'
+// 资产是否注销，1：流通，2：注销
+const flagType = 1
+// 访问控制列表的类型，0：黑名单， 1：白名单，资产创建后默认为黑名单模式
+const flag = 1
+const trs = DdnJS.aob.createFlags(currency, flagType, flag, secret, secondSecret)
+console.log(JSON.stringify(trs))
 {
-    type: 62,
-    nethash: "0ab796cd",
-    amount: "0",
-    recipient_id: null,
-    sender_public_key: "0b5cfb77f401c818f7ebf02a0e88d52a28d3e4e24643e8a080c0c20ac45d0b9c",
-    timestamp: 55104595,
-    message: null,
-    asset: {
-        aobFlags: {
-            currency: "DDD.NCR",
-            flag: 1,
-            flag_type: 1
+    "type":11,
+    "amount":0,
+    "fee":10000000,
+    "recipientId":null,
+    "senderPublicKey":"fafcd01f6b813fdeb3c086e60bc7fa9bfc8ef70ae7be47ce0ac5d06e7b1a8575",
+    "timestamp":19400996,
+    "asset":{
+        "aobFlags":{
+            "currency":"IssuerName.CNY",
+            "flagType":1,
+            "flag":1
         }
     },
-    fee: "10000000",
-    signature: "79dd60164b3acf300dca9f81b0f032114d5c54448d1fee3a0bd43157ae54b54d3307a3c8eeca4f464c49a6a02265b1e3f2d553c48799f94d8f0437d417c0e305"
-}
-```
-
-### **4.4 更新访问控制列表(acl)，type=63**
-
-异步方法：`assetPlugin.createPluginAsset(type, assetInfo, secret, secondSecret)`
-
-```
-const obj = {
-    currency: "DDD.NCR",
-    flag: 1,    // 访问控制列表的类型，0：黑名单， 1：白名单
-    operator: "+",  // '+'表示增加列表， ‘-’表示删除列表
-    list: "DJS57PDiq2srYdL5eqzUt7oAZ4WvEkVT9q"    //黑白名单内容，多个用逗号分隔
+    "signature":"b96fb3d1456e1f26357109cc24d82834eb9a4687f29e69c374bbb1d534568336e148cac52f213aa4d2a69185092f8e1143b49ec4b8048cd9b3af4e20f6ba0b08",
+    "signSignature":"b37c77ebebe90341346be2aefe1e12bd7403e5d8f4d6e8f04630190b3e09494a28820da0ffd5f9ff011033aa6d70fc9bb4c159a4493be3b18fd7ff470103570d"
 }
 
-await DdnJS.assetPlugin.createPluginAsset(63, obj, secret, secondSecret)
+```
+
+### **4.4 更新访问控制列表(acl)，type=12**
+
+异步方法：`DdnJS.aob.createAcl(currency, operator, flag, list, secret, secondSecret)`
+
+```
+const currency = 'IssuerName.CNY'
+// '+'表示增加列表， ‘-’表示删除列表
+const operator = '+'
+const list = ['15745540293890213312']
+// 访问控制列表的类型，0：黑名单， 1：白名单
+const flag =1
+const trs = DdnJS.aob.createAcl(currency, operator, flag, list, secret, secondSecret)
+console.log(JSON.stringify(trs))
 {
-    type: 63,
-    nethash: "0ab796cd",
-    amount: "0",
-    recipient_id: null,
-    sender_public_key: "0b5cfb77f401c818f7ebf02a0e88d52a28d3e4e24643e8a080c0c20ac45d0b9c",
-    timestamp: 55105961,
-    message: null,
-    asset: {
-        aobAcl: {
-            currency: "DDD.NCR",
-            flag: 1,
-            operator: "+",
-            list: "DJS57PDiq2srYdL5eqzUt7oAZ4WvEkVT9q"
+    "type":12,
+    "amount":0,
+    "fee":20000000,
+    "recipientId":null,
+    "senderPublicKey":"fafcd01f6b813fdeb3c086e60bc7fa9bfc8ef70ae7be47ce0ac5d06e7b1a8575",
+    "timestamp":19403125,
+    "asset":{
+        "aobAcl":{
+            "currency":"IssuerName.CNY",
+            "operator":"+",
+            "flag":1,
+            "list":[
+                "15745540293890213312"
+            ]
         }
     },
-    fee: "10000000",
-    signature: "5d81ebd68af2c2e314b9ca2bae99cbd538933325cf4965b510b88319a67c82f901c2a2e234fe220d6d5424c8deddd0f34e6eb5c326e1360e31118a4db64b5e07"
+    "signature":"ad4060e04c1a12256de114e34499f8add24326753f1f8362991ee14aefc4c0fe90ff394d2db97e83770855a5688d463de00656fdd2d04604605cf3c04fdaca0e",
+    "signSignature":"63129c58b1b9fcce88cbe829f3104a10ab06037253e9b65feb50ce0d2bb988533b93e8edcad016a85675f9027758fc318cf899ca7ef161a95a8d8a055ae83a02"
 }
 ```
 
 ### **4.5 资产发行，type=64**
 
-异步方法：`assetPlugin.createPluginAsset(type, assetInfo, secret, secondSecret)`
+异步方法：`DdnJS.aob.createIssue(currency, amount, secret, secondSecret)`
 
 ```
-const obj = {
-    currency: "DDD.NCR",
-    aobAmount: "50000000",  // 本次发行量=真实数量（100）*10**精度（3），所有发行量之和需 <= 上限*精度
-    fee: '10000000',
-}
-
-await DdnJS.assetPlugin.createPluginAsset(64, obj, secret, secondSecret)
+const currency = 'IssuerName.CNY'
+// 本次发行量=真实数量（100）*10**精度（3），所有发行量之和需 <= 上限*精度
+const amount = '100000'
+const trs = await DdnJS.aob.createIssue(currency, amount, secret, secondSecret)
+console.log(JSON.stringify(trs))
 {
-    type: 64,
-    nethash: "0ab796cd",
-    amount: "0",
-    recipient_id: null,
-    sender_public_key: "0b5cfb77f401c818f7ebf02a0e88d52a28d3e4e24643e8a080c0c20ac45d0b9c",
-    timestamp: 55108465,
-    message: null,
-    asset: {
-        aobIssue: {
-            currency: "DDD.NCR",
-            amount: "50000000"
+    "transaction": {
+        "type": 64,
+        "nethash": "0ab796cd",
+        "amount": "0",
+        "fee": "10000000",
+        "recipientId": null,
+        "senderPublicKey": "1e18845d5fbbdf0a6820610e042dcb9a250205964b8075a395453b4a1d1ed10c",
+        "timestamp": 84315799,
+        "message": null,
+        "asset": {
+            "aobIssue": {
+                "currency": "IssuerName.CNY",
+                "amount": "10000"
+            }
+        },
+        "signature": "852acb37e1d336a2becd5c40660a72344d25312d95d3b7dff03d64031943460c1c020ccbbdcc4f9177d19c80e5a04b2bfe4e6bfe14273ce8703513162bb1fb07"
+    }
+}
+```
+
+### **4.6 资产转账，type=14**
+
+异步方法：`DdnJS.aob.createTransfer(currency, amount, recipientId, null, message, secret, secondSecret)`
+```
+const currency = 'IssuerName.CNY'
+// 本次转账数（10000）=真实数量（10）*10**精度（3），需 <= 当前资产发行总量
+const amount = '10000'
+// 接收地址，需满足前文定义好的acl规则
+const recipientId = 'AKKHPvQb2A119LNicCQWLZQDFxhGVEY57a'
+const message = 'xxxxx(交易所ID)'
+
+const trs = DdnJS.aob.createTransfer(currency, amount, recipientId, null, message, secret, secondSecret)
+console.log(JSON.stringify(trs))
+{
+    "type": 14,
+    "amount": 0,
+    "fee": 10000000,
+    "recipientId": "AKKHPvQb2A119LNicCQWLZQDFxhGVEY57a",
+    "senderPublicKey": "fafcd01f6b813fdeb3c086e60bc7fa9bfc8ef70ae7be47ce0ac5d06e7b1a8575",
+    "timestamp": 19481489,
+    "asset": {
+        "aobTransfer": {
+            "currency": "IssuerName.CNY",
+            "amount": "10000"
         }
     },
-    fee: "10000000",
-    signature: "968df5d4853b0f6f78447dbd4e08f53f27a5825121e0c6f62adda81ee6cca8e602b5c6018a175b06dbe7125e099f200da24e972411246b462ba4b96a54b1b00d"
+    "signature": "77789071a2ad6d407b9d1e0d654a9deb6d85340a3d2a13d786030e26ac773b4e9b5f052589958d2b8553ae5fc9449496946b5c225e0baa723e7ddecbd89f060a",
+    "signSignature": "f0d4a000aae3dd3fa48a92f792d4318e41e3b56cdbaf98649261ae34490652b87645326a432d5deb69f771c133ee4b67d2d22789197be34249e6f7f0c30c1705"
 }
 ```
 
-### **4.6 资产转账，type=65**
+### **4.7 资产注销，type=11**
 
-异步方法：`assetPlugin.createPluginAsset(type, assetInfo, secret, secondSecret)`
+异步方法：`DdnJS.aob.createFlags(currency, flagType, flag, secret, secondSecret)`
 ```
-const obj = {
-    recipient_id: "DJS57PDiq2srYdL5eqzUt7oAZ4WvEkVT9q",    // 接收地址，需满足前文定义好的acl规则
-    currency: "DDD.NCR",
-    aobAmount: "10",    // 本次转账数（10000）=真实数量（10）*10**精度（3），需 <= 当前资产发行总量
-    message: '测试转账',
-    fee: '0',
-}
-await DdnJS.assetPlugin.createPluginAsset(65, obj, secret, secondSecret)
+const currency = 'IssuerName.CNY'
+// flagType为资产是否注销，1：流通，2：注销
+const flagType = 2
+// flag为黑、白名单模式
+const flag =1
+const trs = DdnJS.aob.createFlags(currency, flagType, flag, secret, secondSecret)
+console.log(JSON.stringify(trs))
 {
-    type: 65,
-    nethash: "0ab796cd",
-    amount: "0",
-    recipient_id: "DJS57PDiq2srYdL5eqzUt7oAZ4WvEkVT9q",
-    sender_public_key: "0b5cfb77f401c818f7ebf02a0e88d52a28d3e4e24643e8a080c0c20ac45d0b9c",
-    timestamp: 55108730,
-    message: "测试转账",
-    asset: {
-        aobTransfer: {
-            currency: "DDD.NCR",
-            amount: "10"
+    "type":11,
+    "amount":0,
+    "fee":10000000,
+    "recipientId":null,
+    "senderPublicKey":"fafcd01f6b813fdeb3c086e60bc7fa9bfc8ef70ae7be47ce0ac5d06e7b1a8575",
+    "timestamp":19488690,
+    "asset":{
+        "aobFlags":{
+            "currency":"IssuerName.CNY",
+            "flagType":2,
+            "flag":1
         }
     },
-    fee: "10000000",
-    signature: "f0e5cb2b832ff662c3da84b5fbb18860da4f6501679e6b2f1009f5dc24c6a75677a0fdc8812c4e9c28fbbe3f1f24b84089f366899811f365791474b5d49b2605"
-}
-```
-
-### **4.7 资产注销，type=62**
-
-异步方法：`assetPlugin.createPluginAsset(type, assetInfo, secret, secondSecret)`
-```
-const obj = {
-    currency: "DDD.NCR",
-    flag: 1,    //flag_type=1（0：使用黑名单，1：使用白名单，2：全开放），flag_type=2（0：流通，1：注销）
-    flag_type: 2    //1：黑白名单设置，2：注销设置
-}
-await DdnJS.assetPlugin.createPluginAsset(62, obj, secret, secondSecret)
-{
-    type: 62,
-    nethash: "0ab796cd",
-    amount: "0",
-    recipient_id: null,
-    sender_public_key: "0b5cfb77f401c818f7ebf02a0e88d52a28d3e4e24643e8a080c0c20ac45d0b9c",
-    timestamp: 55109270,
-    message: null,
-    asset: {
-        aobFlags: {
-            currency: "DDD.NCR",
-            flag: 1,
-            flag_type: 2
-        }
-    },
-    fee: "10000000",
-    signature: "5121c6994af989454d00b87773f8df9b974438c1ebc923646a703e2acd8d8f5b856e6ad641aef3edd47f4df818a284984cbbf19c30f61bbfbce07db828dee501"
+    "signature":"cbd656552417604704703e1236ec2bbed8eba6a2ccfcb54cc0b2d629c0a9d1335a264fc9f6dee1705f4a86c36a5ce2ba8e039d913a189b7c273c8ac0d9e3780c",
+    "signSignature":"3c7b91d03efeed2dc86e1f2301da60789751c1be8850460d8c66c0ae8f55ea27d26f0bc79541d74b4777d9b85c518c1c73c0284dbf3e826db0a686560e57a80b"
 }
 ```
 
@@ -503,51 +501,59 @@ await DdnJS.assetPlugin.createPluginAsset(62, obj, secret, secondSecret)
 ```
 
 
-## **6 dapp相关**
+<!-- ## **6 dapp相关**
 
-### **6.1 dapp注册，type=11**
+### **6.1 dapp注册，type=5**
 
-异步方法：`assetPlugin.createPluginAsset(type, assetInfo, secret, secondSecret)`
+异步方法：`await DdnJS.dapp.createDApp(options, secret, secondSecret)`
 ```
-const dapp = {
-    name: "dapp_demo",
-    description: "This is the first dapp demo.",
-    tags: "dapp demo",
-    type: 0,
-    category: 1,
-    icon: "http://ebookchain.org/static/media/logo.5e78d8c2.png",
-    link: "http://www.ebookchain.org/dapp-demo.zip",
-    delegates: "9fd69aac90c0f37ab307d7b8e98590c50b9f2a7a1ed26363a01fac89a59bdd76,2868146929409e121a092051b4577d51a92e485492acacc16c54f607cc3c097a,16de48938a493de85920505621850e6c3187fccbabe4d67abfca9fae44cb5a9c,396ddd886fb33e00c997ce2cfc090aeaa61afcd6a6628172ab349310bc6897b7,ea0ffd10ac6ef657ea2b4b20df1d9ad2cd46c8bd5cff80ed8cac6fb05b460c60",
-    unlock_delegates: 3
-};
-await DdnJS.assetPlugin.createPluginAsset(11, dapp, secret, secondSecret)
+const options = {
+      name: 'ddn-dapp-demo',
+      link: 'https://github.com/ddnlink/ddn-dapp-demo/archive/master.zip',
+      category: 1,
+      description: 'Decentralized news channel',
+      tags: 'ddn,dapp,demo',
+      icon: 'http://o7dyh3w0x.bkt.clouddn.com/hello.png',
+      type: 0,
+      delegates: [
+        '8b1c24a0b9ba9b9ccf5e35d0c848d582a2a22cca54d42de8ac7b2412e7dc63d4',
+        'aa7dcc3afd151a549e826753b0547c90e61b022adb26938177904a73fc4fee36',
+        'e29c75979ac834b871ce58dc52a6f604f8f565dea2b8925705883b8c001fe8ce',
+        '55ad778a8ff0ce4c25cb7a45735c9e55cf1daca110cfddee30e789cb07c8c9f3',
+        '982076258caab20f06feddc94b95ace89a2862f36fea73fa007916ab97e5946a'
+      ],
+      unlock_delegates: 3
+    }
+await DdnJS.dapp.createDApp(options, secret, secondSecret)
+
 {
-    type: 11,
-    nethash: "0ab796cd",
-    amount: "0",
-    recipient_id: null,
-    sender_public_key: "2e6d978c5e6f1fbfc5a27abd964d9b6adc352daa81e31d9098a4f5ee3d7f885e",
-    timestamp: 55265109,
-    message: null,
-    asset: {
-        dapp: {
-            name: "dapp_demo",
-            description: "This is the first dapp demo.",
-            tags: "dapp demo",
-            type: 0,
-            category: 1,
-            icon: "http://ebookchain.org/static/media/logo.5e78d8c2.png",
-            link: "http://www.ebookchain.org/dapp-demo.zip",
-            delegates: "07ada08c4585cfda5e095ec3796f4fa88c93484113d18b6219aea5511231309c,f408729dae7e14d5d124f3edb0d2f5d6be3d2342bc2b511f41ed39d54efa416c,668f086f26340882ebbc7d33339b898eb17ea5e6a3c4bbc6d4303ac09127cde3,2623fb0ff610e2a496c6a16e022d5de9264d8b53ca1e79884203daa64a671c58,2f28d4cadf4a2b9fe55265795852e8e20af91598ec2af1be5a4fe148bef596b9",
-            unlock_delegates: 3
-        }
-    },
-    fee: "10000000000",
-    signature: "61272bdda488f0c5cdfb4f8d2c4b23ee6eacd495a87b31b90be95ce1460b8da5982eb13c05b38b947c1617e39773d1a8d2de7b2e1236b058e941241aa09d6605"
+  nethash: '0ab796cd',
+  type: 5,
+  amount: '0',
+  fee: '10000000000',
+  recipientId: null,
+  senderPublicKey: '374dd603bd609187745bc71b75f3621652291bf21de8f74995a33053ca98f2cd',
+  timestamp: 84978305,
+  asset: {
+    dapp: {
+      category: 1,
+      name: 'ddn-dapp-demo',
+      description: 'Decentralized news channel',
+      tags: 'ddn,dapp,demo',
+      type: 0,
+      link: 'https://github.com/ddnlink/ddn-dapp-demo/archive/master.zip',
+      icon: 'http://o7dyh3w0x.bkt.clouddn.com/hello.png',
+      delegates: [Array],
+      unlock_delegates: 3
+    }
+  },
+  signature: '4dc58e131bf8ed4e08106c5db4bb9a0ec63ea53e2629ba0f8b2cb62f02777a86127eaee0ecdee45fadc4f458021ef4a6a1aed262f5c817d849e54ad51b7a8d02',
+  sign_signature: '0bf8cc293c1b08c8838a74ad1f11d14eb5e1760ba73b3db090924508d85d500a31a2714d2e54ae201c8262c3be0330759446154b4b0343aefb7b43280739440f',
+  id: 'cf99231046f2ae8a978ce3475f7f324a10296cfd3c7f10d47acefa79833429f54ed873a8fbcdd9642be6d309ad24c6483a7722b2a68c42330b9d4d2ed82ac126'
 }
 ```
 
-### **6.2 dapp充值，type=12**
+### **6.2 dapp充值，type=12 toconfirm**
 
 异步方法：`assetPlugin.createPluginAsset(type, assetInfo, secret, secondSecret)`
 ```
@@ -576,8 +582,8 @@ await DdnJS.assetPlugin.createPluginAsset(12, obj, secret, secondSecret)
 }
 ```
 
-### **6.3 dapp提现**
-#### **6.3.1 创建提现交易，type=13**
+### **6.3 dapp提现** -->
+<!-- #### **6.3.1 创建提现交易，type=13**
 
 异步方法：`assetPlugin.createPluginAsset(type, assetInfo, secret, secondSecret)`
 ```
@@ -638,54 +644,64 @@ for (let i = 0; i < dapp.unlock_delegates; i++) {
     signature: "5cd65d4d0a3a79c00864ddb3d3d0add8c9c9244a0115ad642301d8c5e7ee72459a354bc647486535cf0018609ed6f6ef061bde0984f9f40cc3dee5aa38861e00",
     signatures: ["5cd65d4d0a3a79c00864ddb3d3d0add8c9c9244a0115ad642301d8c5e7ee72459a354bc647486535cf0018609ed6f6ef061bde0984f9f40cc3dee5aa38861e00", "a973969668745228b7908521d1acb3dabe3a9aaa448ceeeede145b71e7e5377a61797552b145f8643b76cb809296b2c267a8bd8599705de19b2edb1a3589e300", "8973bd23807763fc3e1973b269665e256c0c61a181b090705afea7038d0ba0adcfafbfc371f334be84b33630de0528e05c5ffe9e5c8c296e92c190582dadc30d"]
 }
+``` -->
+
+
+## **6 存证Evidence** 
+
+### **6.1 创建存证交易，type=20**
+
+异步方法：`DdnJS.evidence.createEvidence(evidencee, secret, secondSecret);`
 ```
+const evidencee = {
+    ipid: 'ipid3', // 资产id
+    title: 'node.randomUsername()', // 标题
+    description: ' has been evidence.', // 描述
+    hash: 'f082022ee664008a1f15d62514811dfd', // 数据哈希
+    author: 'Evanlai', //作者
+    size: '2448kb',  //大小
+    type: 'html', //类型
+    url: 'dat://f76e1e82cf4eab4bf173627ff93662973c6fab110c70fb0f86370873a9619aa6+18/public/test.html', // 链接地址
+    tags: 'world,cup,test', // 标签
+  };
 
+  // 其中password是在用户登录的时候记录下来的，secondPassword需要每次让用户输入
+  // 可以通过user.secondPublicKey来判断用户是否有二级密码，如果没有，则不必输入，以下几个交易类型类似
+  const transaction = await DdnJS.evidence.createEvidence(evidencee, secret, null);
+  console.log(JSON.stringify({ transaction }));
 
-## **7 存证Evidence** 
-
-### **7.1 创建存证交易，type=10**
-
-异步方法：`assetPlugin.createPluginAsset(type, assetInfo, secret, secondSecret)`
-```
-const assetEvidence = {
-    ipid: "ipid1234567890",
-    title: "如何使用DDN进行存证操作",
-    hash: "5cfda5e095ec3796f4fa88c93484113d18b6219aea5511231309c",
-    description: "介绍存证操作的步骤和使用指南",
-    tags: "evidence example",
-    author: "wangxm",
-    url: "http://www.ebookchain.org",
-    type: ".doc",
-    size: "215355"
+  {
+    "transaction":{
+        "type":20,
+        "nethash":"0ab796cd",
+        "amount":"0",
+        "fee":"10000000",
+        "recipientId":null,
+        "senderPublicKey":"daeee33def7eef0c7ba06ec66eda7204437ba88ace8f04e4a6aa4d7bfbd18bc1",
+        "timestamp":93994165,
+        "asset":{
+            "evidence":{
+                "ipid":"ipid3",
+                "title":"node.randomUsername()",
+                "description":" has been evidence.",
+                "hash":"f082022ee664008a1f15d62514811dfd",
+                "author":"Evanlai",
+                "size":"2448kb",
+                "type":"html",
+                "url":"dat://f76e1e82cf4eab4bf173627ff93662973c6fab110c70fb0f86370873a9619aa6+18/public/test.html",
+                "tags":"world,cup,test",
+                "ext":"china",
+                "ext1":12345,
+                "ext2":"2020-11-12T09:49:50.503Z"
+            }
+        },
+        "signature":"26bd82046495f3dc4b2ed9d4452aa0f25be2a5a542fc52c5561a34c06dc8e1ebec03f6fcdbca115517d898c319c56cb448b35596e61bdd677adf9dfd4a87350f",
+        "id":"0ff3ba6dc2ceab676107f9a6a66c60d9ec17745a8cd53e3f25ff0da6829727da7d2fc6d470d43d85bd13923b7bdfe54bca6d4da97b0ac60ccd5b55b6a11b51b6"
+    }
 }
-await DdnJS.assetPlugin.createPluginAsset(10, assetEvidence, secret, secondSecret)
-{
-    type: 10,
-    nethash: "0ab796cd",
-    amount: "0",
-    recipient_id: null,
-    sender_public_key: "2e6d978c5e6f1fbfc5a27abd964d9b6adc352daa81e31d9098a4f5ee3d7f885e",
-    timestamp: 55274351,
-    message: null,
-    asset: {
-        evidence: {
-            ipid: "ipid1234567890",
-            title: "如何使用DDN进行存证操作",
-            hash: "5cfda5e095ec3796f4fa88c93484113d18b6219aea5511231309c",
-            description: "介绍存证操作的步骤和使用指南",
-            tags: "evidence example",
-            author: "wangxm",
-            url: "http://www.ebookchain.org",
-            type: ".doc",
-            size: "215355"
-        }
-    },
-    fee: "10000000",
-    signature: "34c13aabe67082e107942c9b88622616041d3cb8e987c8ae56beebe93157fa143469d38036ea11aefcdd250a5149e8e145c16e91ff8301f14c571270a709750f"
-}
 ```
 
-## **8 签名验证相关crypto**
+## **7 签名验证相关crypto**
 
 自定义如下已签名的转账交易内容(在主链给D4FN28d1mfjdUG7rtUzEAstFVzPsmWUm2L转账100DDN)，用于下面章节演示。
 ```
@@ -709,7 +725,7 @@ const transaction = await DdnJS.transaction.createTransaction(targetAddress, amo
 }
 ```
 
-### **8.1 根据交易内容获取字节Buffer对象**
+### **7.1 根据交易内容获取字节Buffer对象**
 
 异步方法：`crypto.getBytes(transaction, skipSignature, skipSecondSignature)`
 
@@ -723,7 +739,7 @@ await DdnJS.crypto.getBytes(transaction)
 > <Buffer 00 41 6f 4b 03 30 61 62 37 39 36 63 64 2e 6d 97 8c 5e 6f 1f bf c5 a2 7a bd 96 4d 9b 6a dc 35 2d aa 81 e3 1d 90 98 a4 f5 ee 3d 7f 88 5e 44 34 46 4e 32 ... >   // 返回的字节buffer对象
 ```
 
-### **8.2 根据交易内容获取Hash Buffer对象**
+### **7.2 根据交易内容获取Hash Buffer对象**
 
 异步方法：`crypto.getHash(transaction, skipSignature, skipSecondSignature)`
 
@@ -737,7 +753,7 @@ await DdnJS.crypto.getHash(transaction)
 > <Buffer d5 31 9c 14 43 4c 7d c4 49 80 b5 8e 81 70 cb 45 fe 53 4c 58 6b c0 bc 1d 42 49 1c 22 47 28 42 a1> // 返回的Hash Buffer
 ```
 
-### **8.3 对交易Bytes Buffer进行签名**
+### **7.3 对交易Bytes Buffer进行签名**
 
 异步方法：`crypto.signBytes(bytes, keys)`
 
@@ -777,7 +793,7 @@ const signature = DdnJS.crypto.signBytes(buf, keys);
 transaction.signature = signature;
 ```
 
-### **8.4 验证交易签名是否和已存在的签名一致**
+### **7.4 验证交易签名是否和已存在的签名一致**
 
 同步方法：`crypto.verifyBytes(bytes, signature, publicKey)` 返回true/false
 
@@ -791,11 +807,11 @@ DdnJS.crypto.verifyBytes(buf,transaction.signature,transaction.senderPublicKey)
 > true
 ```
 
-## **9 其它**
+## **8 其它**
 
-### **9.1 时间相关slot.time**
+### **8.1 时间相关slot.time**
 
-#### **9.1.1 DDN主网创世块生成时间**
+#### **8.1.1 DDN主网创世块生成时间**
 
 同步方法：`utils.slots.beginEpochTime()`
 `备注` 结果为UTC时间,即DDN纪元的开始时间。
@@ -806,7 +822,7 @@ DdnJS.utils.slots.beginEpochTime()
 ```
 
 
-#### **9.1.2 根据unix时间戳获获DDN时间戳**
+#### **8.1.2 根据unix时间戳获获DDN时间戳**
 
 同步方法：`utils.slots.getTime(time)` 
 `备注` 获得结果叫做EpochTim（DDN时间戳），传入的time相对于DDN纪元经历的秒数
@@ -822,7 +838,7 @@ const epochTime = DdnJS.utils.slots.getTime(unix_timestamp * 1000)
 > 40655896    // DDN时间戳
 ```
 
-#### **9.1.3 根据DDN时间戳获取unix时间戳**
+#### **8.1.3 根据DDN时间戳获取unix时间戳**
 
 同步方法：`utils.slots.getRealTime(epochTime)`
 `备注` 返回结果是真实的 unix时间戳* 1000
@@ -841,7 +857,7 @@ const unix_timestamp === real_time / 1000
 > true // 换算结果一致
 ```
 
-#### **9.1.4 时间格式化**
+#### **8.1.4 时间格式化**
 
 同步方法：`DdnJS.utils.format.timeAgo()`
 计算时间戳发生的时间
