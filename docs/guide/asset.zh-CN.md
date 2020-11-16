@@ -6,7 +6,6 @@ time:  5个小时                  # 学习时长
 videoUrl: ''                   # 视频链接地址
 prjectUrl: 'https://github.com/' # 源码地址
 localeTitle: DDN资产扩展       # 本地化标题
-toc: menu
 ---
 
 # DDN插件开发
