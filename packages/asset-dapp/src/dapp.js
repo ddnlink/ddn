@@ -25,8 +25,8 @@ class Dapp extends Asset.Base {
     super(context, transactionConfig)
 
     this._context = context
-    this.appPath = context.baseDir || path.resolve(__dirname, './')
-    this.dappsPath = context.config.dappsDir || path.join(this.appPath, 'dapps')
+    this.appPath = (context && context.baseDir) || path.resolve(__dirname, './')
+    this.dappsPath = (context && context.config && context.config.dappsDir) || path.join(this.appPath, 'dapps')
   }
 
   async propsMapping () {
@@ -663,7 +663,7 @@ class Dapp extends Asset.Base {
 
     sandbox.run()
 
-    await this._attachDappApi(id)
+    await this._attachDappFrameworkApi(id)
     await this._addLaunchedMarkFile(dappPath)
   }
 
@@ -720,29 +720,31 @@ class Dapp extends Asset.Base {
     })
   }
 
-  async _attachDappApi (id) {
+  /**
+   * 将侧链的默认接口加载上来
+   * @param {string} id DappId
+   */
+  async _attachDappFrameworkApi (id) {
     const self = this
     self.logger.debug('Hi, Dapp apis have been attached.')
     const dappRouter = self.runtime.httpserver.dappRouter
 
     try {
-      const dappPath = path.join(self.config.dappsDir, id)
-      const routers = await self._readDappRouters(dappPath)
-
+      const routers = Sandbox.routes
       if (routers && routers.length > 0) {
-        for (let i = 0; i < routers.length; i++) {
-          const subRouter = routers[i]
-          if (subRouter.method && subRouter.path) {
+        for (const router of routers) {
+          // const router = routers[i]
+          if (router.method && router.path) {
             try {
-              dappRouter[subRouter.method](`/${id}${subRouter.path}`, async (req, res) => {
+              const handler = async function (req, res) {
                 try {
                   const result = await new Promise((resolve, reject) => {
                     const reqParams = {
-                      query: subRouter.method === 'get' ? req.query : req.body,
+                      query: router.method === 'get' ? req.query : req.body,
                       params: req.params
                     }
 
-                    self.request(id, subRouter.method, subRouter.path, reqParams, function (err, body) {
+                    self.request(id, router.method, router.path, reqParams, function (err, body) {
                       self.logger.debug('Request is end. err, body', err, body)
 
                       if (!err && body.error) {
@@ -759,9 +761,11 @@ class Dapp extends Asset.Base {
                 } catch (err) {
                   res.json({ success: false, error: `${err}` })
                 }
-              })
+              }
+
+              dappRouter[router.method](`/${id}${router.path}`, handler)
             } catch (error) {
-              self.logger.error(`${subRouter.method} /dapps/${id}${subRouter.path} fail `, error)
+              self.logger.error(`${router.method} /dapps/${id}${router.path} fail `, error)
             }
           }
         }
@@ -937,36 +941,6 @@ class Dapp extends Asset.Base {
         }
       }
     }
-
-    // if (sort) {
-    //     const sortItems = sort.split(",");
-    //     if (sortItems.length > 0) {
-    //         for (let i = 0; i < sortItems.length; i++) {
-    //             const sortItem = sortItems[i];
-    //             const sortItemExprs = sortItem.split(" ");
-    //             if (sortItemExprs.length === 1) {
-    //                 if (sortItemExprs[0].trim() === "") {
-    //                     throw new Error("Invalid sort params: " + sortItem);
-    //                 }
-    //                 else {
-    //                     orders.push(sortItemExprs[0].trim());
-    //                 }
-    //             }
-    //             else if (sortItemExprs.length === 2) {
-    //                 if (sortItemExprs[0].trim() === "" ||
-    //                     sortItemExprs[1].trim() === "") {
-    //                     throw new Error("Invalid sort params: " + sortItem);
-    //                 }
-    //                 else {
-    //                     orders.push([sortItemExprs[0].trim(), sortItemExprs[1].trim()]);
-    //                 }
-    //             }
-    //             else {
-    //                 throw new Error("Invalid sort params: " + sortItem);
-    //             }
-    //         }
-    //     }
-    // }
 
     const pageIndex = query.pageindex || 1
     const pageSize = query.pagesize || 100
@@ -1388,10 +1362,12 @@ class Dapp extends Asset.Base {
     })
   }
 
+  // 提供给 ddn-sandbox 的 modules 变量
   async onBind () {
     modules.dapp = this
     modules.blocks = this.runtime.block
     modules.transport = this.runtime.peer
+    modules.transactions = this.runtime.transaction
   }
 
   async onBlockchainReady () {
@@ -1476,35 +1452,36 @@ class Dapp extends Asset.Base {
 
   setReady (req, cb) {
     _dappready[req.dappId] = true
-    // library.bus.message('dappReady', req.dappId, true)
     cb(null, {})
   }
 
-  registerInterface (req, cb) {
-    cb()
-    //   const dappId = req.dappId
-    //   const method = req.body.method
-    //   const path = req.body.path
-    //   private.routes[dappId][method](path, function (req, res) {
-    //     var reqParams = {
-    //       query: (method == 'get') ? req.query : req.body,
-    //       params: req.params
-    //     }
-    //     self.request(dappId, method, path, reqParams, function (err, body) {
-    //       if (!body) {
-    //         body = {}
-    //       }
-    //       if (!err && body.error) {
-    //         err = body.error
-    //       }
-    //       if (err) {
-    //         body = { error: err.toString() }
-    //       }
-    //       body.success = !err
-    //       res.json(body)
-    //     })
-    //   })
-    //   cb(null)
+  registerInterface (options, cb) {
+    const self = this
+    const dappId = options.dappId
+    const method = options.body.method
+    const path = options.body.path
+    const handler = function (req, res) {
+      const reqParams = {
+        query: method === 'get' ? req.query : req.body,
+        params: req.params
+      }
+      self.request(dappId, method, path, reqParams, function (err, body) {
+        if (!body) {
+          body = {}
+        }
+        if (!err && body.error) {
+          err = body.error
+        }
+        if (err) {
+          body = { error: err.toString() }
+        }
+        body.success = !err
+        res.json(body)
+      })
+    }
+    const dappRouter = self.runtime.httpserver.dappRouter
+    dappRouter[method](`/${dappId}${path}`, handler)
+    cb(null)
   }
 }
 

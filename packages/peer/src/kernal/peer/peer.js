@@ -149,6 +149,8 @@ class Peer {
                 }
               }
             )
+          } else if (config.ip === '127.0.0.1') {
+            resolve()
           } else {
             reject(new Error(`Peer not found: ${config.ip}`))
           }
