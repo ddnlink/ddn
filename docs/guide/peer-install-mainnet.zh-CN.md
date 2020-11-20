@@ -38,7 +38,7 @@ $ sudo apt-get install curl wget git ntp sqlite3 libssl-dev openssl make gcc g++
 
 ### 1.3 Node.js 安装
 
-DDN区块链基于`Node.js v10.21.0`开发，推荐使用 v10.21 的系列版本，其他版本可能存在兼容性问题（已知 v12 以上版本有个别问题，其他版本欢迎尝试并反馈）。建议使用 nvm 管理版本：
+DDN区块链基于`Node.js v8+`开发，推荐使用 v8.17 的系列版本，其他版本可能存在兼容性问题。建议使用 nvm 管理版本：
 
 ```sh
 # 安装 nvm
@@ -50,10 +50,10 @@ export NVM_DIR="$HOME/.nvm"
 [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
 
 # 安装 node 和 npm
-$ nvm install v10.21.0
+$ nvm install v8.17.0
 
 # 检查版本确认安装是否成功 
-$ node --version # 输出： v10.21.0
+$ node --version # 输出： v8.17
 ```
 
 ## 2 安装节点程序
@@ -120,11 +120,11 @@ $ vim config.json
 
 打开`config.json`, 找到`secret`字段，将`受托人密钥`填进去即可。**可配置多个，但不能重复**。
 
-```jsx | inline
-import React from 'react';
-import gif from '../images/delegate-secret.png';
-
-export default () => <img src={gif} width="500" />;
+```jsx 
+  forging: {
+    secret: [
+      "attract viable organ future copy nerve twelve flag smart course unique version",
+      "wash property between put split eternal future catch muffin alley clip afraid",
 ```
 
 如果配置并同步之后，再配置受托人，需要重启程序：
@@ -158,12 +158,46 @@ $ ./ddnd version
 ./ddnd enable "your sercret"
 ```
 
-## 4 Upgrade 升级
+## 4 升级
+
+### 4.1 目前命令行正在更新维护，暂时只支持手动升级
+
+### 4.2 下载并解压
 
 ```
-$ ./ddnd upgrade
-$ ./ddnd restart
+# 主网（mainnet）程序下载：
+$ wget http://releases.ddn.link/2.0.4/ddn-linux-2.0.4-mainnet.tar.gz
+
+# 解压
+$ tar zxvf ddn-linux-2.0.4-mainnet.tar.gz
 ```
+
+### 4.2 停止先前运行的程序
+
+```
+ cd ~/your/path/ddn-linux-2.0.2-mainnet
+
+ ./ddnd stop
+```
+
+### 4.3 复制config.json和blockchain.db到新下载的2.0.4的目录下
+
+```
+cp ~/your/path/ddn-linux-2.0.2-mainnet/config.json ~/your/path/ddn-linux-2.0.4-mainnet/
+cp ~/your/path/ddn-linux-2.0.2-mainnet/blockchain.db ~/your/path/ddn-linux-2.0.4-mainnet/
+```
+
+### 4.4 启动程序
+
+```
+./ddnd start
+
+# 因为目前数据较多，程序初始化时间较长，请耐心等待
+```
+
+### 4.5 查看日志
+
+请参考章节5和6
 
 ## 5 查看节点
 
