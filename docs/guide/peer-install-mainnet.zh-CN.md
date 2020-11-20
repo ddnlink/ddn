@@ -120,11 +120,13 @@ $ vim config.json
 
 打开`config.json`, 找到`secret`字段，将`受托人密钥`填进去即可。**可配置多个，但不能重复**。
 
-```jsx 
+```
   forging: {
     secret: [
       "attract viable organ future copy nerve twelve flag smart course unique version",
-      "wash property between put split eternal future catch muffin alley clip afraid",
+      "wash property between put split eternal future catch muffin alley clip afraid"
+      ]
+    }
 ```
 
 如果配置并同步之后，再配置受托人，需要重启程序：
