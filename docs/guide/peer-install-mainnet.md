@@ -66,17 +66,17 @@ $ node --version # 输出： v8.17
 
 ```
 # 主网（mainnet）程序下载：
-$ wget http://releases.ddn.link/2.0.2/ddn-linux-2.0.2-mainnet.tar.gz
+$ wget http://releases.ddn.link/2.0.4/ddn-linux-2.0.4-mainnet.tar.gz
 
 # 解压
-$ tar zxvf ddn-linux-2.0.2-mainnet.tar.gz
+$ tar zxvf ddn-linux-2.0.4-mainnet.tar.gz
 ```
 
 ### 2.2 准备工作
 
 ```
 # 进入安装目录
-$ cd ~/your/path/ddn-linux-2.0.2-mainnet
+$ cd ~/your/path/ddn-linux-2.0.4-mainnet
 
 # 在 ubuntu 执行下面的命令
 $ chmod u+x init/*.sh && chmod 755 ddnd && ./ddnd configure # 主要是安装sqlite3/ntp2等依赖包和库
@@ -123,9 +123,8 @@ $ vim config.json
 ```
   forging: {
     secret: [
-      "attract viable organ future copy nerve twelve flag smart course unique version",
-      "wash property between put split eternal future catch muffin alley clip afraid"]
-    }
+      "attract viable organ future copy nerve twelve flag smart course unique test",
+      "wash property between put split eternal future catch muffin alley clip add",
 ```
 
 如果配置并同步之后，再配置受托人，需要重启程序：
@@ -138,7 +137,7 @@ $ ./ddnd restart
 
 ```
 # 进入安装目录
-$ cd ~/your/path/ddn-linux-2.0.2-mainnet
+$ cd ~/your/path/ddn-linux-2.0.4-mainnet
 
 # 启动节点
 $ ./ddnd start
@@ -163,6 +162,8 @@ $ ./ddnd version
 
 ### 4.1 目前命令行正在更新维护，暂时只支持手动升级
 
+如果您当前运行的版本低于2.0.4,您可以按照以下步骤升级
+
 ### 4.2 下载并解压
 
 ```
@@ -173,32 +174,69 @@ $ wget http://releases.ddn.link/2.0.4/ddn-linux-2.0.4-mainnet.tar.gz
 $ tar zxvf ddn-linux-2.0.4-mainnet.tar.gz
 ```
 
-### 4.2 停止先前运行的程序
+### 4.3 停止旧版的程序
 
 ```
- cd ~/your/path/ddn-linux-2.0.2-mainnet
+# 进入项目根目录
+$ cd ~/your/path/ddn-linux-oldVersion-mainnet
 
- ./ddnd stop
+# 停止服务
+$ ./ddnd stop
 ```
 
-### 4.3 复制config.json和blockchain.db到新下载的2.0.4的目录下
+### 4.4 复制旧版程序的config.json和blockchain.db到解压后的ddn-linux-2.0.4-mainnet的目录下
 
 ```
-cp ~/your/path/ddn-linux-2.0.2-mainnet/config.json ~/your/path/ddn-linux-2.0.4-mainnet/
-cp ~/your/path/ddn-linux-2.0.2-mainnet/blockchain.db ~/your/path/ddn-linux-2.0.4-mainnet/
+$ cp ~/your/path/ddn-linux-oldVersion-mainnet/config.json ~/your/path/ddn-linux-2.0.4-mainnet/
+
+$ cp ~/your/path/ddn-linux-oldVersion-mainnet/blockchain.db ~/your/path/ddn-linux-2.0.4-mainnet/
 ```
 
-### 4.4 启动程序
+### 4.5 启动程序
 
 ```
-./ddnd start
-
 # 因为目前数据较多，程序初始化时间较长，请耐心等待
+$ ./ddnd start
 ```
 
-### 4.5 查看日志
+### 4.6 查看节点日志和运行状态
 
 请参考章节5和6
+
+### 4.7 如果启动后访问`http://yourip:8000/api/blocks/getHeight`出现如下情况
+
+```js
+{"success":false,"error":"Error: Invalid block height"}
+```
+有可能是数据库损坏，导致不能同步，按照如下步骤下载blockchain.db
+* 首先停止服务
+
+```bash
+$ ./ddnd stop
+```
+* 然后删除项目根目录下的blockchain.db
+
+```bash
+$ rm ~/your/path/ddn-linux-2.0.4-mainnet/blockchain.db
+```
+* 最后下载我们提供的基础数据库
+
+```bash
+$ wget http://releases.ddn.link/db.tar.gz
+
+# 解压
+$ tar zxvf db.tar.gz
+```
+把db文件夹下的blockchain.db移动到项目根目录下
+
+```
+$ mv db/blcokchain.db ~/your/path/ddn-linux-2.0.4-mainnet/
+```
+* 最后启动服务
+
+```bash
+$ ./ddnd start
+```
 
 ## 5 查看节点
 
