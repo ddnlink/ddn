@@ -43,230 +43,260 @@ function precisionValidator (input) {
 }
 
 function depositDapp () {
-  inquirer.prompt([
-    {
-      type: 'password',
-      name: 'secret',
-      message: 'Enter secret',
-      validate: function (value) {
-        return value.length > 0 && value.length < 100
+  inquirer.prompt(
+    [
+      {
+        type: 'password',
+        name: 'secret',
+        message: 'Enter secret',
+        validate: function (value) {
+          return value.length > 0 && value.length < 100
+        },
+        required: true
       },
-      required: true
-    },
-    {
-      type: 'input',
-      name: 'amount',
-      message: 'Enter amount',
-      validate: function (value) {
-        return !isNaN(parseInt(value))
+      {
+        type: 'input',
+        name: 'amount',
+        message: 'Enter amount',
+        validate: function (value) {
+          return !isNaN(parseInt(value))
+        },
+        required: true
       },
-      required: true
-    },
-    {
-      type: 'input',
-      name: 'dappId',
-      message: 'DApp Id',
-      required: true
-    },
-    {
-      type: 'input',
-      name: 'secondSecret',
-      message: 'Enter secondary secret (if defined)',
-      validate: function (value) {
-        return value.length < 100
+      {
+        type: 'input',
+        name: 'dappId',
+        message: 'DApp Id',
+        required: true
       },
-      required: false
-    }
-  ], function (result) {
-    var realAmount = parseFloat((parseInt(result.amount) * 100000000).toFixed(0))
-    var body = {
-      secret: result.secret,
-      dappId: result.dappId,
-      amount: realAmount
-    }
+      {
+        type: 'input',
+        name: 'secondSecret',
+        message: 'Enter secondary secret (if defined)',
+        validate: function (value) {
+          return value.length < 100
+        },
+        required: false
+      }
+    ],
+    function (result) {
+      var realAmount = parseFloat((parseInt(result.amount) * 100000000).toFixed(0))
+      var body = {
+        secret: result.secret,
+        dappId: result.dappId,
+        amount: realAmount
+      }
 
-    if (result.secondSecret && result.secondSecret.length > 0) {
-      body.secondSecret = result.secondSecret
-    }
+      if (result.secondSecret && result.secondSecret.length > 0) {
+        body.secondSecret = result.secondSecret
+      }
 
-    inquirer.prompt([
+      inquirer.prompt(
+        [
+          {
+            type: 'input',
+            name: 'host',
+            message: 'Host and port',
+            default: 'localhost:8001',
+            required: true
+          }
+        ],
+        function (result) {
+          request(
+            {
+              url: 'http://' + result.host + '/api/dapps/transaction',
+              method: 'put',
+              json: true,
+              body: body
+            },
+            function (err, resp, body) {
+              console.log(err, body)
+              if (err) {
+                return console.log(err.toString())
+              }
+
+              if (body.success) {
+                console.log(body.transactionId)
+              } else {
+                return console.log(body.error)
+              }
+            }
+          )
+        }
+      )
+    }
+  )
+}
+
+function withdrawalDapp () {
+  inquirer.prompt(
+    [
+      {
+        type: 'password',
+        name: 'secret',
+        message: 'Enter secret',
+        validate: function (value) {
+          return value.length > 0 && value.length < 100
+        },
+        required: true
+      },
+      {
+        type: 'input',
+        name: 'amount',
+        message: 'Amount',
+        validate: function (value) {
+          return !isNaN(parseInt(value))
+        },
+        required: true
+      },
+      {
+        type: 'input',
+        name: 'dappId',
+        message: 'Enter DApp id',
+        validate: function (value) {
+          var isAddress = /^[0-9]+$/g
+          return isAddress.test(value)
+        },
+        required: true
+      }
+    ],
+    function (result) {
+      var body = {
+        secret: result.secret,
+        amount: Number(result.amount)
+      }
+
+      request(
+        {
+          url: 'http://localhost:8001/api/dapps/' + result.dappId + '/api/withdrawal',
+          method: 'post',
+          json: true,
+          body: body
+        },
+        function (err, resp, body) {
+          if (err) {
+            return console.log(err.toString())
+          }
+
+          if (body.success) {
+            console.log(body.transactionId)
+          } else {
+            return console.log(body.error)
+          }
+        }
+      )
+    }
+  )
+}
+
+function uninstallDapp () {
+  inquirer.prompt(
+    [
+      {
+        type: 'input',
+        name: 'dappId',
+        message: 'Enter dapp id',
+        validate: function (value) {
+          return value.length > 0 && value.length < 100
+        },
+        required: true
+      },
       {
         type: 'input',
         name: 'host',
         message: 'Host and port',
         default: 'localhost:8001',
         required: true
+      },
+      {
+        type: 'password',
+        name: 'masterpassword',
+        message: 'Enter dapp master password',
+        required: true
       }
-    ], function (result) {
-      request({
-        url: 'http://' + result.host + '/api/dapps/transaction',
-        method: 'put',
-        json: true,
-        body: body
-      }, function (err, resp, body) {
-        console.log(err, body)
-        if (err) {
-          return console.log(err.toString())
+    ],
+    function (result) {
+      var body = {
+        id: String(result.dappId),
+        master: String(result.masterpassword)
+      }
+
+      request(
+        {
+          url: 'http://' + result.host + '/api/dapps/uninstall',
+          method: 'post',
+          json: true,
+          body: body
+        },
+        function (err, resp, body) {
+          if (err) {
+            return console.log(err.toString())
+          }
+
+          if (body.success) {
+            console.log('Done!')
+          } else {
+            return console.log(body.error)
+          }
         }
-
-        if (body.success) {
-          console.log(body.transactionId)
-        } else {
-          return console.log(body.error)
-        }
-      })
-    })
-  })
-}
-
-function withdrawalDapp () {
-  inquirer.prompt([
-    {
-      type: 'password',
-      name: 'secret',
-      message: 'Enter secret',
-      validate: function (value) {
-        return value.length > 0 && value.length < 100
-      },
-      required: true
-    },
-    {
-      type: 'input',
-      name: 'amount',
-      message: 'Amount',
-      validate: function (value) {
-        return !isNaN(parseInt(value))
-      },
-      required: true
-    },
-    {
-      type: 'input',
-      name: 'dappId',
-      message: 'Enter DApp id',
-      validate: function (value) {
-        var isAddress = /^[0-9]+$/g
-        return isAddress.test(value)
-      },
-      required: true
-    }], function (result) {
-    var body = {
-      secret: result.secret,
-      amount: Number(result.amount)
+      )
     }
-
-    request({
-      url: 'http://localhost:8001/api/dapps/' + result.dappId + '/api/withdrawal',
-      method: 'post',
-      json: true,
-      body: body
-    }, function (err, resp, body) {
-      if (err) {
-        return console.log(err.toString())
-      }
-
-      if (body.success) {
-        console.log(body.transactionId)
-      } else {
-        return console.log(body.error)
-      }
-    })
-  })
-}
-
-function uninstallDapp () {
-  inquirer.prompt([
-    {
-      type: 'input',
-      name: 'dappId',
-      message: 'Enter dapp id',
-      validate: function (value) {
-        return value.length > 0 && value.length < 100
-      },
-      required: true
-    },
-    {
-      type: 'input',
-      name: 'host',
-      message: 'Host and port',
-      default: 'localhost:8001',
-      required: true
-    },
-    {
-      type: 'password',
-      name: 'masterpassword',
-      message: 'Enter dapp master password',
-      required: true
-    }], function (result) {
-    var body = {
-      id: String(result.dappId),
-      master: String(result.masterpassword)
-    }
-
-    request({
-      url: 'http://' + result.host + '/api/dapps/uninstall',
-      method: 'post',
-      json: true,
-      body: body
-    }, function (err, resp, body) {
-      if (err) {
-        return console.log(err.toString())
-      }
-
-      if (body.success) {
-        console.log('Done!')
-      } else {
-        return console.log(body.error)
-      }
-    })
-  })
+  )
 }
 
 function installDapp () {
-  inquirer.prompt([
-    {
-      type: 'input',
-      name: 'dappId',
-      message: 'Enter dapp id',
-      validate: function (value) {
-        return value.length > 0 && value.length < 100
+  inquirer.prompt(
+    [
+      {
+        type: 'input',
+        name: 'dappId',
+        message: 'Enter dapp id',
+        validate: function (value) {
+          return value.length > 0 && value.length < 100
+        },
+        required: true
       },
-      required: true
-    },
-    {
-      type: 'input',
-      name: 'host',
-      message: 'Host and port',
-      default: 'localhost:8001',
-      required: true
-    },
-    {
-      type: 'password',
-      name: 'masterpassword',
-      message: 'Enter dapp master password',
-      required: true
-    }], function (result) {
-    var body = {
-      id: String(result.dappId),
-      master: String(result.masterpassword)
+      {
+        type: 'input',
+        name: 'host',
+        message: 'Host and port',
+        default: 'localhost:8001',
+        required: true
+      },
+      {
+        type: 'password',
+        name: 'masterpassword',
+        message: 'Enter dapp master password',
+        required: true
+      }
+    ],
+    function (result) {
+      var body = {
+        id: String(result.dappId),
+        master: String(result.masterpassword)
+      }
+
+      request(
+        {
+          url: 'http://' + result.host + '/api/dapps/install',
+          method: 'post',
+          json: true,
+          body: body
+        },
+        function (err, resp, body) {
+          if (err) {
+            return console.log(err.toString())
+          }
+
+          if (body.success) {
+            console.log('Done!', body.path)
+          } else {
+            return console.log(body.error)
+          }
+        }
+      )
     }
-
-    request({
-      url: 'http://' + result.host + '/api/dapps/install',
-      method: 'post',
-      json: true,
-      body: body
-    }, function (err, resp, body) {
-      if (err) {
-        return console.log(err.toString())
-      }
-
-      if (body.success) {
-        console.log('Done!', body.path)
-      } else {
-        return console.log(body.error)
-      }
-    })
-  })
+  )
 }
 
 async function createGenesisBlock () {
@@ -277,7 +307,7 @@ async function createGenesisBlock () {
     validate: bip39Validator
   })
 
-  var wantInbuiltAsset = await inquirer.prompt({
+  var wantInbuiltAsset = await prompt({
     type: 'confirm',
     name: 'wantInbuiltAsset',
     message: 'Do you want to publish a inbuilt asset in this dapp?',
@@ -289,7 +319,7 @@ async function createGenesisBlock () {
     var name = await prompt({
       type: 'input',
       name: 'assetName',
-      message: 'Enter asset name, for example: BTC, CNY, USD, MYASSET',
+      message: 'Enter asset name, for example: BTC, CNY, USD, etc.',
       validate: assetNameValidator
     })
     var amount = await prompt({
@@ -311,6 +341,8 @@ async function createGenesisBlock () {
     }
   }
 
+  // console.log('assetInfo', assetInfo)
+
   var account = accountHelper.account(genesisSecret)
   var dappBlock = dappHelper.new(account, null, assetInfo)
   var dappGenesisBlockJson = JSON.stringify(dappBlock, null, 2)
@@ -318,10 +350,4 @@ async function createGenesisBlock () {
   console.log('New genesis block is created at: ./genesis.json')
 }
 
-export {
-  depositDapp,
-  withdrawalDapp,
-  installDapp,
-  uninstallDapp,
-  createGenesisBlock
-}
+export { depositDapp, withdrawalDapp, installDapp, uninstallDapp, createGenesisBlock }

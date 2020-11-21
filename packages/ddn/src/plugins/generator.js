@@ -1,4 +1,3 @@
-
 import fs from 'fs'
 import DdnCrypto from '@ddn/crypto'
 import path from 'path'
@@ -15,6 +14,8 @@ import valid_url from 'valid-url'
 import accountHelper from '../helpers/account'
 import blockHelper from '../helpers/block'
 import { prompt } from '../utils/prompt'
+import handlebarHelpers from 'handlebars-helpers'
+const helpers = handlebarHelpers(['math', 'string', 'number'])
 
 const dappCategories = [
   'Common',
@@ -30,24 +31,6 @@ const dappCategories = [
 
 async function createDAppMetaFile (name) {
   const answer = await prompt([
-    {
-      type: 'input',
-      name: 'name',
-      message: 'Enter DApp name',
-      required: true,
-      validate: function (value) {
-        var done = this.async()
-        if (value.length === 0) {
-          done('DApp name is too short, minimum is 1 character')
-          return
-        }
-        if (value.length > 32) {
-          done('DApp name is too long, maximum is 32 characters')
-          return
-        }
-        return done(null, true)
-      }
-    },
     {
       type: 'input',
       name: 'description',
@@ -162,20 +145,19 @@ async function createDAppMetaFile (name) {
     },
     {
       type: 'input',
-      name: 'unlockDelegates',
+      name: 'unlock_delegates',
       message: 'How many delegates are needed to unlock asset of a dapp?',
       validate: function (value) {
         var done = this.async()
         var n = Number(value)
         if (!Number.isInteger(n) || n < 3 || n > 101) {
-          return done('Invalid unlockDelegates')
+          return done('Invalid unlock_delegates')
         }
         done(null, true)
       }
     }
   ])
 
-  console.log('DApp meta information is saved to ./dapp.json ...')
   return answer
 }
 
@@ -185,56 +167,48 @@ async function generateDapp (name) {
 
 async function tempaleDapp (name) {
   if (!fs.existsSync(name)) {
-    console.log('创建Dapp项目...')
+    console.log('Generate DApp project ...')
 
     const answer = await createDAppMetaFile()
-    console.log(answer)
-    const spinner = ora('正在下载模板...\n')
+    const spinner = ora('DApp template is downloading ...\n')
     spinner.start()
 
     child_process.exec('git clone https://github.com/ddnlink/ddn-templates.git .tmp', function (err, stdout, stderr) {
       if (err) {
         spinner.fail()
-        console.log(symbols.error, chalk.red('模板下载失败'))
+        console.log(symbols.error, chalk.red('Template download failed'))
       } else {
         spinner.succeed()
         shell.mv('./.tmp/dapp', './' + name)
         const filename = `${name}/dapp.json`
 
         const meta = {
-          name: answer.name,
+          name: name,
           link: answer.link,
           category: dappCategories.indexOf(answer.category) + 1,
           description: answer.description || '',
           tags: answer.tags || '',
           icon: answer.icon || '',
-          delegates: answer.delegates.split(','),
-          unlockDelegates: Number(answer.unlockDelegates),
+          delegates: answer.delegates,
+          unlock_delegates: Number(answer.unlock_delegates),
           type: 0
         }
 
         if (fs.existsSync(filename)) {
           const content = fs.readFileSync(filename).toString()
-          const dt = JSON.parse(content)
-          dt.name = '{{name}}'
-          dt.link = '{{link}}'
-          dt.category = '{{category}}'
-          dt.description = '{{description}}'
-          dt.tags = '{{tags}}'
-          dt.icon = '{{icon}}'
-          dt.delegates = '{{delegates}}'
-          dt.unlockDelegates = '{{unlockDelegates}}'
-          dt.type = '{{type}}'
-
-          const result = handlebars.compile(JSON.stringify(dt, null, 2))(meta)
+          const template = handlebars.compile(content)
+          const result = template(meta, helpers)
           fs.writeFileSync(filename, result)
 
           // 清理代码
           shell.rm('-rf', '.tmp')
 
-          console.log(symbols.success, chalk.green('项目初始化完成'))
+          console.log(symbols.success, chalk.green('DApp Project initialization successful.'))
         } else {
-          console.log(symbols.error, chalk.red('Dapp.json 不存在，请检查模板是否正确！'))
+          console.log(
+            symbols.error,
+            chalk.red('Dapp.json does not exist, please check whether the template is correct!')
+          )
         }
       }
     })
@@ -258,70 +232,77 @@ function tempaleBlockchain (name) {
     console.log('Create blockchain project...')
 
     // TODO: 添加更多定制项
-    inquirer.prompt([
-      {
-        name: 'description',
-        message: '请输入项目描述'
-      },
-      {
-        name: 'author',
-        message: '请输入作者名称'
-      }
-    ]).then(answers => {
-      console.log(answers)
-      const spinner = ora('正在下载模板...\n')
-      spinner.start()
-
-      child_process.exec('git clone https://github.com/ddnlink/ddn-templates.git .tmp', function (err, stdout, stderr) {
-        if (err) {
-          spinner.fail()
-          console.log(symbols.error, chalk.red('模板下载失败'))
-        } else {
-          spinner.succeed()
-          shell.mv('./.tmp/blockchain', './' + name)
-          const filename = `${name}/package.json`
-          const meta = {
-            name,
-            description: answers.description,
-            author: answers.author
-          }
-
-          if (fs.existsSync(filename)) {
-            const content = fs.readFileSync(filename).toString()
-            const dt = JSON.parse(content)
-            dt.name = '{{name}}'
-            dt.description = '{{description}}'
-            const result = handlebars.compile(JSON.stringify(dt, null, 2))(meta)
-            fs.writeFileSync(filename, result)
-
-            // 清理代码
-            shell.rm('-rf', '.tmp')
-
-            console.log(symbols.success, chalk.green('项目初始化完成'))
-          } else {
-            console.log(symbols.error, chalk.red('package.json 不存在，请检查模板是否正确！'))
-          }
+    inquirer
+      .prompt([
+        {
+          name: 'description',
+          message: '请输入项目描述'
+        },
+        {
+          name: 'author',
+          message: '请输入作者名称'
         }
+      ])
+      .then(answers => {
+        console.log(answers)
+        const spinner = ora('正在下载模板...\n')
+        spinner.start()
+
+        child_process.exec('git clone https://github.com/ddnlink/ddn-templates.git .tmp', function (
+          err,
+          stdout,
+          stderr
+        ) {
+          if (err) {
+            spinner.fail()
+            console.log(symbols.error, chalk.red('模板下载失败'))
+          } else {
+            spinner.succeed()
+            shell.mv('./.tmp/blockchain', './' + name)
+            const filename = `${name}/package.json`
+            const meta = {
+              name,
+              description: answers.description,
+              author: answers.author
+            }
+
+            if (fs.existsSync(filename)) {
+              const content = fs.readFileSync(filename).toString()
+              // const dt = JSON.parse(content)
+              // dt.name = '{{name}}'
+              // dt.description = '{{description}}'
+              const result = handlebars.compile(content)(meta, helpers)
+              // const result = handlebars.compile(JSON.stringify(dt, null, 2))(meta)
+              fs.writeFileSync(filename, result)
+
+              // 清理代码
+              shell.rm('-rf', '.tmp')
+
+              console.log(symbols.success, chalk.green('项目初始化完成'))
+            } else {
+              console.log(symbols.error, chalk.red('package.json 不存在，请检查模板是否正确！'))
+            }
+          }
+        })
       })
-    })
   } else {
     console.log(symbols.error, chalk.red('项目已存在'))
   }
 }
 
 function writeFileSync (file, obj) {
-  const content = (typeof obj === 'string' ? obj : JSON.stringify(obj, null, 2))
+  const content = typeof obj === 'string' ? obj : JSON.stringify(obj, null, 2)
   fs.writeFileSync(file, content, 'utf8')
 }
 
 function appendFileSync (file, obj) {
-  const content = (typeof obj === 'string' ? obj : JSON.stringify(obj, null, 2))
+  const content = typeof obj === 'string' ? obj : JSON.stringify(obj, null, 2)
   fs.appendFileSync(file, content, 'utf8')
 }
 
 function genGenesisBlock (options) {
   const defaultSecret = 'enter boring shaft rent essence foil trick vibrant fabric quote indoor output'
-  const secret = (options && options.secret) ? defaultSecret : DdnCrypto.generateSecret()
+  const secret = options && options.secret ? defaultSecret : DdnCrypto.generateSecret()
   const genesisAccount = accountHelper.account(secret, options.tokenPrefix)
 
   let index = 0
@@ -329,7 +310,8 @@ function genGenesisBlock (options) {
   const Eaccount = {}
 
   // let newBlockInfo;
-  blockHelper.new(genesisAccount, options.nethash, options.tokenName, options.tokenPrefix, null, options.file, options.message)
+  blockHelper
+    .new(genesisAccount, options.nethash, options.tokenName, options.tokenPrefix, null, options.file, options.message)
     .then(function (newBlockInfo) {
       const delegateSecrets = newBlockInfo.delegates.map(i => {
         const rv = (Math.random() * 100 + index).toFixed(0) % 3
@@ -361,15 +343,13 @@ function genGenesisBlock (options) {
       appendFileSync(logFile, Eaccount)
       appendFileSync(logFile, '\ndelegates secrets:\n')
       appendFileSync(logFile, delegateSecrets)
-      console.log(`New genesis block and related account has been created, please see the two files: ${filename}.json and ${logFile}`)
-    }).catch(function (err) {
+      console.log(
+        `New genesis block and related account has been created, please see the two files: ${filename}.json and ${logFile}`
+      )
+    })
+    .catch(function (err) {
       console.log('err=', err)
     })
 }
 
-export {
-  generateBlockchain,
-  generateDapp,
-  generateContract,
-  genGenesisBlock
-}
+export { generateBlockchain, generateDapp, generateContract, genGenesisBlock }

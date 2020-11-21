@@ -1,5 +1,6 @@
 import nacl from 'tweetnacl'
-import DdnCrypto from '../utils/crypto'
+import DdnCrypto from '@ddn/crypto'
+// import DdnCrypto from '../utils/crypto'
 import ByteBuffer from 'bytebuffer'
 import dappTransactionsLib from '../utils/dapptransactions'
 import accounts from './account'
@@ -29,7 +30,7 @@ function getBytes (block, skipSignature) {
   bb.writeString(block.pointId || '0')
 
   // bignum update bb.writeLong(block.pointHeight || 0);
-  bb.writeString((`${block.pointHeight}`) || '0')
+  bb.writeString(`${block.pointHeight}` || '0')
 
   bb.writeInt(block.count)
 
@@ -84,11 +85,7 @@ export default {
         fee: '0',
         timestamp: 0,
         senderPublicKey: sender.keypair.publicKey,
-        args: JSON.stringify([
-          assetInfo.name,
-          String(Number(assetInfo.amount) * (10 ** assetInfo.precision)),
-          address
-        ])
+        args: JSON.stringify([assetInfo.name, String(Number(assetInfo.amount) * 10 ** assetInfo.precision), address])
       }
       const bytes = dappTransactionsLib.getTransactionBytes(assetTrs, true)
       assetTrs.signature = await DdnCrypto.sign(assetTrs, sender.keypair)
@@ -100,8 +97,8 @@ export default {
     }
     block.count = block.transactions.length
 
-    block.payloadHash = DdnCrypto.createHash(Buffer.from(payloadBytes))
-
+    block.payloadHash = getHash(Buffer.from(payloadBytes))
+    // block.payloadHash = DdnCrypto.createHash(Buffer.from(payloadBytes))
     block.signature = sign(block, keypair)
     block.id = getId(block)
 
