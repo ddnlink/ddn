@@ -222,7 +222,11 @@ $ rm ~/your/path/ddn-linux-2.0.4-mainnet/blockchain.db
 * 最后下载我们提供的基础数据库
 
 ```bash
+# 海外下载
 $ wget http://releases.ddn.link/snapshots/db-20201120.tar.gz
+
+# 国内下载，国内用户建议使用下面的下载地址
+$ wget http://36.133.121.235/snapshots/db-20201120.tar.gz
 
 # 解压
 $ tar zxvf db-20201120.tar.gz
@@ -230,7 +234,7 @@ $ tar zxvf db-20201120.tar.gz
 把db-20201120文件夹下的blockchain.db移动到项目根目录下
 
 ```
-$ mv db-20201120/blcokchain.db ~/your/path/ddn-linux-2.0.4-mainnet/
+$ mv db/blcokchain.db ~/your/path/ddn-linux-2.0.4-mainnet/
 ```
 * 最后启动服务
 
