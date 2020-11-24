@@ -82,7 +82,25 @@ $ cd ~/your/path/ddn-linux-2.0.4-mainnet
 $ chmod u+x init/*.sh && chmod 755 ddnd && ./ddnd configure # 主要是安装sqlite3/ntp2等依赖包和库
 ```
 
-### 2.3 配置节点
+### 2.3 下载数据库快照并解压
+
+主网数据库较大，不建议从头开始同步。可以下载数据库快照，直接解压后移动db-20201120目录下的blockchain.db到~/your/path/ddn-linux-2.0.4-mainnet根目录下
+
+```bash
+# 海外下载
+$ wget http://releases.ddn.link/snapshots/db-20201120.tar.gz
+
+# 国内下载，国内用户建议使用下面的下载地址
+$ wget http://36.133.121.235/snapshots/db-20201120.tar.gz
+
+# 解压
+$ tar zxvf db-20201120.tar.gz
+
+# 移动数据库到项目根目录下
+$ mv db-20201120/blcokchain.db ~/your/path/ddn-linux-2.0.4-mainnet/
+```
+
+### 2.4 配置节点
 
 本文档默认使用`config.json`,作为配置文件。最新版本的DDN区块链的配置文件有多个，更多关于`配置`的内容，请参考[DDN区块链的配置](./config.md)
 
@@ -92,7 +110,7 @@ $ chmod u+x init/*.sh && chmod 755 ddnd && ./ddnd configure # 主要是安装sql
 $ vim config.json
 ```
 
-#### 2.3.1 配置公网IP
+#### 2.4.1 配置公网IP
 
 打开`config.json`, 找到并修改 publicIp 为自己服务器的公网 IP。系统会自动检测公网ip，为避免公网ip无法检测到，建议手动修改：
 
@@ -100,7 +118,7 @@ $ vim config.json
  publicIp: "x.x.x.x",
 ```
 
-#### 2.3.2 配置可访问的节点
+#### 2.4.2 配置可访问的节点
 
 找到并修改 peers => list 为可访问的节点 IP。系统会自动从节点中同步数据到当前节点：
 
@@ -114,7 +132,7 @@ $ vim config.json
   },
 ```
 
-#### 2.3.3 配置受托人
+#### 2.4.3 配置受托人
 
 在此操作之前，一定要首先申请受托人，并获得投票授权，否则是不会出块的。
 
@@ -203,44 +221,33 @@ $ ./ddnd start
 
 请参考章节5和6
 
-### 4.7 如果启动后访问`http://yourip:8000/api/blocks/getHeight`出现如下情况
+### 4.7 如果启动后访问`http://yourip:8000/api/blocks/getStatus`出现如下情况
 
 ```js
 {"success":false,"error":"Error: Invalid block height"}
 ```
-有可能是数据库损坏，导致不能同步，按照如下步骤下载blockchain.db
-* 首先停止服务
+表明程序还在初始化过程中，请耐心等待，无需任何操作
+
+<!-- ### 4.8 如果您是使用node app.js启动程序控制台打印如下
 
 ```bash
-$ ./ddnd stop
-```
-* 然后删除项目根目录下的blockchain.db
+$ app.js:156 Error: Error: near line 1: database is locked
 
-```bash
-$ rm ~/your/path/ddn-linux-2.0.4-mainnet/blockchain.db
+    at onerror (/worker/ddn3/src/data/dblite/index.js:288:24)
+    at Socket.program.stderr.on.data (/worker/ddn3/src/data/dblite/index.js:302:3)
+    at emitOne (events.js:116:13)
+    at Socket.emit (events.js:211:7)
+    at addChunk (_stream_readable.js:263:12)
+    at readableAddChunk (_stream_readable.js:250:11)
+    at Socket.Readable.push (_stream_readable.js:208:10)
+    at Pipe.onread (net.js:601:20) 
 ```
-* 最后下载我们提供的基础数据库
+表明数据库进程没有结束，请耐心等待一段时间，然后重新启动 -->
 
-```bash
-# 海外下载
-$ wget http://releases.ddn.link/snapshots/db-20201120.tar.gz
+***`注意，程序升级完成后，尽量删除旧版的代码，释放服务器磁盘空间`***
 
-# 国内下载，国内用户建议使用下面的下载地址
-$ wget http://36.133.121.235/snapshots/db-20201120.tar.gz
 
-# 解压
-$ tar zxvf db-20201120.tar.gz
-```
-把db-20201120文件夹下的blockchain.db移动到项目根目录下
 
-```
-$ mv db/blcokchain.db ~/your/path/ddn-linux-2.0.4-mainnet/
-```
-* 最后启动服务
-
-```bash
-$ ./ddnd start
-```
 
 ## 5 查看节点
 
