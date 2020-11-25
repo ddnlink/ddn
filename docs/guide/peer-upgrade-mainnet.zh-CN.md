@@ -46,6 +46,7 @@ $ cp ~/your/path/ddn-linux-oldVersion-mainnet/config.json ~/your/path/ddn-linux-
 
 $ cp ~/your/path/ddn-linux-oldVersion-mainnet/blockchain.db ~/your/path/ddn-linux-2.0.4-mainnet/
 ```
+**注意**：`对于早期的节点用户，强烈建议更新config.json里面的同步节点列表具体请参考`[主网节点安装2.4.2配置可访问的节点](./peer-install-mainnet#configure)
 
 ### 1.5 启动程序
 

@@ -121,19 +121,31 @@ $ vim config.json
  publicIp: "x.x.x.x",
 ```
 
-#### 2.4.2 配置可访问的节点
+#### 2.4.2 配置可访问的节点 <span id="configure" />
 
 找到并修改 peers => list 为可访问的节点 IP。系统会自动从节点中同步数据到当前节点：
 
-```
+```js
   peers: {
-    list: ['peer.ddn.link'],
+    list: [{"ip": "peer.ddn.link", "port": 8000}],
     blackList: [],
     options: {
       timeout: 4000
     }
   },
 ```
+
+这里的 `list` 建议配置稳定的、长期的节点，并且不建议配置太多，下面的列表足够使用：
+
+```json
+list: [
+ {"ip": "peer.ddn.link", "port": 8000},
+ {"ip": "101.132.34.62", "port": 8000},
+ {"ip": "119.23.67.225", "port": 8000}
+ ]
+```
+
+**注意**：对于早期的节点用户，强烈建议同步更新上面的节点列表。`
 
 #### 2.4.3 配置受托人
 
