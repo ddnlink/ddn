@@ -36,7 +36,7 @@ $ sudo apt-get install curl wget git ntp sqlite3 libssl-dev openssl make gcc g++
 
 如果出现 sqlite3 安装失败等问题，请参考下面的`常见问题`。
 
-### 1.3 Node.js 安装
+### 1.3 Node.js 安装<span id='nodeinstall' />
 
 DDN区块链基于`Node.js v8+`开发，推荐使用 v8.17 的系列版本，其他版本可能存在兼容性问题。建议使用 nvm 管理版本：
 
@@ -50,7 +50,10 @@ export NVM_DIR="$HOME/.nvm"
 [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
 
 # 安装 node 和 npm
-$ nvm install v8.17.0
+$ nvm install v8.17.0 
+
+# 如果安装缓慢，可以切换成淘宝源
+# $ export NVM_NODEJS_ORG_MIRROR=http://npm.taobao.org/mirrors/node
 
 # 检查版本确认安装是否成功 
 $ node --version # 输出： v8.17
@@ -176,80 +179,7 @@ $ ./ddnd version
 ./ddnd enable "your sercret"
 ```
 
-## 4 升级
-
-### 4.1 目前命令行正在更新维护，暂时只支持手动升级
-
-如果您当前运行的版本低于2.0.4,您可以按照以下步骤升级
-
-### 4.2 下载并解压
-
-```
-# 主网（mainnet）程序下载：
-$ wget http://releases.ddn.link/2.0.4/ddn-linux-2.0.4-mainnet.tar.gz
-
-# 解压
-$ tar zxvf ddn-linux-2.0.4-mainnet.tar.gz
-```
-
-### 4.3 停止旧版的程序
-
-```
-# 进入项目根目录
-$ cd ~/your/path/ddn-linux-oldVersion-mainnet
-
-# 停止服务
-$ ./ddnd stop
-```
-
-### 4.4 复制旧版程序的config.json和blockchain.db到解压后的ddn-linux-2.0.4-mainnet的目录下
-
-```
-$ cp ~/your/path/ddn-linux-oldVersion-mainnet/config.json ~/your/path/ddn-linux-2.0.4-mainnet/
-
-$ cp ~/your/path/ddn-linux-oldVersion-mainnet/blockchain.db ~/your/path/ddn-linux-2.0.4-mainnet/
-```
-
-### 4.5 启动程序
-
-```
-# 因为目前数据较多，程序初始化时间较长，请耐心等待
-$ ./ddnd start
-```
-
-### 4.6 查看节点日志和运行状态
-
-请参考章节5和6
-
-### 4.7 如果启动后访问`http://yourip:8000/api/blocks/getStatus`出现如下情况
-
-```js
-{"success":false,"error":"Error: Invalid block height"}
-```
-表明程序还在初始化过程中，请耐心等待，无需任何操作
-
-<!-- ### 4.8 如果您是使用node app.js启动程序控制台打印如下
-
-```bash
-$ app.js:156 Error: Error: near line 1: database is locked
-
-    at onerror (/worker/ddn3/src/data/dblite/index.js:288:24)
-    at Socket.program.stderr.on.data (/worker/ddn3/src/data/dblite/index.js:302:3)
-    at emitOne (events.js:116:13)
-    at Socket.emit (events.js:211:7)
-    at addChunk (_stream_readable.js:263:12)
-    at readableAddChunk (_stream_readable.js:250:11)
-    at Socket.Readable.push (_stream_readable.js:208:10)
-    at Pipe.onread (net.js:601:20) 
-```
-表明数据库进程没有结束，请耐心等待一段时间，然后重新启动 -->
-
-***`注意，程序升级完成后，尽量删除旧版的代码，释放服务器磁盘空间`***
-
-
-
-
-## 5 查看节点
+## 4 查看节点 <span id='look' />
 
 用浏览器查看节点运行情况，在浏览器里输入网址 `http://yourip:8000/api/blocks/getHeight`，应该返回如下信息：
 
@@ -263,18 +193,18 @@ $ app.js:156 Error: Error: near line 1: database is locked
 {"success":fail,"error":"Blockchain is loading"} 
 ```
 
-也可以使用上面的命令，监听日志信息：
+也可以使用下面的命令，监听日志信息：
 
 ```
 # 查看并监听 log
 $ tail -f logs/debug.log
 ```
 
-## 6 常见问题
+## 5 常见问题
 
-### 6.1 浏览器无法访问
+### 5.1 浏览器无法访问
 
-如果出现无法浏览的情况，需要检查如下：
+如果出现无法访问浏览的情况，需要检查如下：
 
 #### 情形1
 
@@ -310,7 +240,7 @@ $ ./ddnd configure
 $ ./ddnd start
 ```
 
-### 6.2 无法生产块 
+### 5.2 无法生产块 
 
 #### 情形1
 
@@ -362,7 +292,7 @@ $ cat logs/debug.log | grep Forging
 Forging enabled on account: xxxxxxxxxxxxxx
 ```
 
-### 6.3 无法同步
+### 5.3 无法同步
 
 如果网络始终出现上面提到的 `Blockchain is loading` 信息，并查看 log 日志有错误，请尝试使用下面的方式修复
 
@@ -378,11 +308,11 @@ $ ./ddnd restart
 $ ./ddnd rebuild
 ```
 
-### 6.4 系统更新慢，甚至无法下载相关软件包
+### 5.4 系统更新慢，甚至无法下载相关软件包
 
 请，更新系统源。现在的系统，特别是 linux 类的操作系统，早就实现网络化更新和维护了，没有网络，基本上很难满足我们的要求。而多数操作系统，其我们在准备系统环境的时候，可能会出现下载速度慢，软件找不到等问题，这个时候，就要考虑使用国内的软件源。这里主要针对 Ubuntu 操作系统。
 
-#### 6.4.1 备份源列表
+#### 5.4.1 备份源列表
 
 Ubuntu配置的默认源并不是国内的服务器，下载更新软件都比较慢。首先备份源列表文件sources.list：
 
@@ -391,7 +321,7 @@ Ubuntu配置的默认源并不是国内的服务器，下载更新软件都比�
 $ sudo cp /etc/apt/sources.list /etc/apt/sources.list_backup
 ```
 
-#### 6.4.2 打开sources.list文件修改
+#### 5.4.2 打开sources.list文件修改
 选择合适的源，替换原文件的内容，保存编辑好的文件, 以阿里云更新服务器为例（可以分别测试阿里云、清华、中科大、163源的速度，选择最快的）：
 
 ```
@@ -415,7 +345,7 @@ deb-src http://mirrors.aliyun.com/ubuntu/ bionic-proposed main restricted univer
 deb-src http://mirrors.aliyun.com/ubuntu/ bionic-backports main restricted universe multiverse
 ```
 
-#### 6.4.3 刷新列表
+#### 5.4.3 刷新列表
 
 ```
 $ sudo apt-get update
@@ -424,7 +354,7 @@ $ sudo apt-get upgrade
 
 下载速度瞬间就起飞了。
 
-### 6.5 node-pre-gyp WARN Using request for node-pre-gyp https download 
+### 5.5 node-pre-gyp WARN Using request for node-pre-gyp https download 
 
 首先安装下面的软件包，然后再尝试操作
 
@@ -432,14 +362,14 @@ $ sudo apt-get upgrade
 $ sudo apt install python g++ node-gyp  node-pre-gyp libsqlite3-dev 
 ```
 
-### 6.6 sqlite3 安装不成功
+### 5.6 sqlite3 安装不成功
 
 首先，按照问题2，安装对应的软件包；然后，采取从源码构建安装的方式：
 
 ```
 $ npm install sqlite3 --build-from-source  --registry=https://registry.npm.taobao.org
 ```
-### 6.7 nvm无法安装
+### 5.7 nvm无法安装
 
 若无法访问raw.githubusercontent.com，可在/etc/hosts增加如下内容
 ```

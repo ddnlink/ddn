@@ -25,7 +25,16 @@ module.exports = {
       },
       {
         title: 'Introduction',
-        children: ['guide/readme', 'guide/peer-install-testnet', 'guide/peer-install-mainnet', 'guide/config', 'guide/assetTypes', 'guide/ddn-cli']
+        children: [
+          'guide/readme',
+          'guide/peer-install-testnet',
+          'guide/peer-install-mainnet',
+          'guide/peer-upgrade-mainnet',
+          'guide/config',
+          'guide/assetTypes',
+          'guide/ddn-cli',
+          'guide/integration-exc'
+        ]
       },
       {
         title: 'Frame extension',
@@ -48,7 +57,16 @@ module.exports = {
       },
       {
         title: '介绍',
-        children: ['guide/readme', 'guide/peer-install-testnet', 'guide/peer-install-mainnet', 'guide/config', 'guide/assetTypes', 'guide/ddn-cli']
+        children: [
+          'guide/readme',
+          'guide/peer-install-testnet',
+          'guide/peer-install-mainnet',
+          'guide/peer-upgrade-mainnet',
+          'guide/config',
+          'guide/assetTypes',
+          'guide/ddn-cli',
+          'guide/integration-exc'
+        ]
       },
       {
         title: '框架扩展',
@@ -74,10 +92,10 @@ module.exports = {
         libraryDirectory: 'es',
         style: 'css'
       }
-    ],
+    ]
   ],
   resolve: {
     // 文档所在路径
     includes: ['docs']
   }
-};
+}

@@ -1,6 +1,6 @@
 ---
 id: ddn-integration-exchange
-title: 主网节点安装
+title: 交易平台对接文档
 sidebar_label: integration exchange
 ---
 
@@ -30,8 +30,8 @@ DDN http接口文档-英文版：http://docs.ddn.link/api<br>
 
 节点安装文档：
 
-中文：http://docs.ddn.link/zh-CN/guide<br>
-英文：http://docs.ddn.link/guide
+中文：http://docs.ddn.link/zh-CN/guide/peer-install-mainnet<br>
+英文：http://docs.ddn.link/guide/peer-install-mainnet
 
 ## 3 用户充值DDN
 
