@@ -30,10 +30,10 @@ module.exports = {
           'guide/peer-install-testnet',
           'guide/peer-install-mainnet',
           'guide/peer-upgrade-mainnet',
+          'guide/integration-exc',
           'guide/config',
           'guide/assetTypes',
-          'guide/ddn-cli',
-          'guide/integration-exc'
+          'guide/ddn-cli'
         ]
       },
       {
@@ -62,10 +62,10 @@ module.exports = {
           'guide/peer-install-testnet',
           'guide/peer-install-mainnet',
           'guide/peer-upgrade-mainnet',
+          'guide/integration-exc',
           'guide/config',
           'guide/assetTypes',
-          'guide/ddn-cli',
-          'guide/integration-exc'
+          'guide/ddn-cli'
         ]
       },
       {
