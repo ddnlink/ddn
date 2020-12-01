@@ -153,6 +153,7 @@ class Dapp extends Asset.Base {
       throw new Error('Dapp link is too long. Maximum is 160 characters')
     }
 
+    // todo: 2020.12 添加 name 唯一性的验证
     if (!dapp.name || dapp.name.trim().length === 0 || dapp.name.trim() !== dapp.name) {
       throw new Error('Missing dapp name')
     }
@@ -614,7 +615,6 @@ class Dapp extends Asset.Base {
     args = args || []
 
     const dapp = await this.getDappByTransactionId(id)
-
     const installedIds = await this.getInstalledDappIds()
     if (installedIds.indexOf(id) < 0) {
       throw new Error('Dapp not installed')
@@ -636,8 +636,7 @@ class Dapp extends Asset.Base {
       }
     }
 
-    // this.logger.debug('modules: ', this.runtime)
-    const sandbox = new Sandbox(dappPath, id, args, this.apiHandler, true, this.logger)
+    const sandbox = new Sandbox(dappPath, dapp, args, this.apiHandler, true, this.logger)
 
     // eslint-disable-next-line require-atomic-updates
     _dappLaunched[id] = sandbox
@@ -663,7 +662,7 @@ class Dapp extends Asset.Base {
 
     sandbox.run()
 
-    await this._attachDappFrameworkApi(id)
+    await this._attachDappFrameworkApi(dapp)
     await this._addLaunchedMarkFile(dappPath)
   }
 
@@ -722,56 +721,53 @@ class Dapp extends Asset.Base {
 
   /**
    * 将侧链的默认接口加载上来
-   * @param {string} id DappId
+   * @param {string} dapp Dapp trs object
    */
-  async _attachDappFrameworkApi (id) {
+  async _attachDappFrameworkApi (dapp) {
     const self = this
-    self.logger.debug('Hi, Dapp apis have been attached.')
+    const id = dapp.transaction_id
+    const name = dapp.name
     const dappRouter = self.runtime.httpserver.dappRouter
 
-    try {
-      const routers = Sandbox.routes
-      if (routers && routers.length > 0) {
-        for (const router of routers) {
-          // const router = routers[i]
-          if (router.method && router.path) {
-            try {
-              const handler = async function (req, res) {
-                try {
-                  const result = await new Promise((resolve, reject) => {
-                    const reqParams = {
-                      query: router.method === 'get' ? req.query : req.body,
-                      params: req.params
+    const routers = Sandbox.routes
+    if (routers && routers.length > 0) {
+      for (const router of routers) {
+        // const router = routers[i]
+        if (router.method && router.path) {
+          try {
+            const handler = async function (req, res) {
+              try {
+                const result = await new Promise((resolve, reject) => {
+                  const reqParams = {
+                    query: router.method === 'get' ? req.query : req.body,
+                    params: req.params
+                  }
+
+                  self.request(id, router.method, router.path, reqParams, function (err, body) {
+                    if (!err && body.error) {
+                      err = body.error
                     }
-
-                    self.request(id, router.method, router.path, reqParams, function (err, body) {
-                      self.logger.debug('Request is end. err, body', err, body)
-
-                      if (!err && body.error) {
-                        err = body.error
-                      }
-                      if (err) {
-                        body = { error: err.toString() }
-                      }
-                      body.success = !err
-                      res.json(body)
-                    })
+                    if (err) {
+                      body = { error: err.toString() }
+                    }
+                    body.success = !err
+                    res.json(body)
                   })
-                  res.json({ success: true, result })
-                } catch (err) {
-                  res.json({ success: false, error: `${err}` })
-                }
+                })
+                res.json({ success: true, result })
+              } catch (err) {
+                res.json({ success: false, error: `${err}` })
               }
-
-              dappRouter[router.method](`/${id}${router.path}`, handler)
-            } catch (error) {
-              self.logger.error(`${router.method} /dapps/${id}${router.path} fail `, error)
             }
+
+            dappRouter[router.method](`/${id}${router.path}`, handler)
+            dappRouter[router.method](`/${name}${router.path}`, handler)
+          } catch (error) {
+            self.logger.error(`${router.method} /dapps/${id}${router.path} fail `, error)
           }
         }
       }
-    } catch (err) {
-      self.logger.error('attach dapp apis fail ', err)
+      self.logger.debug('Dapp`s APIs have been attached. ')
     }
   }
 
@@ -1427,7 +1423,11 @@ class Dapp extends Asset.Base {
       if (!modules[module].sandboxApi) {
         return setImmediate(callback, 'This module have no sandbox api')
       }
-      modules[module].sandboxApi(call, { body: message.args, dappId: message.dappId }, callback)
+      modules[module].sandboxApi(
+        call,
+        { body: message.args, dappId: message.dappId, dappName: message.dappName },
+        callback
+      )
     } catch (e) {
       return setImmediate(callback, 'Invalid call ' + e.toString())
     }
@@ -1455,11 +1455,12 @@ class Dapp extends Asset.Base {
     cb(null, {})
   }
 
-  registerInterface (options, cb) {
+  registerInterface (req, cb) {
     const self = this
-    const dappId = options.dappId
-    const method = options.body.method
-    const path = options.body.path
+    const dappId = req.dappId
+    const dappName = req.dappName
+    const method = req.body.method
+    const path = req.body.path
     const handler = function (req, res) {
       const reqParams = {
         query: method === 'get' ? req.query : req.body,
@@ -1481,6 +1482,7 @@ class Dapp extends Asset.Base {
     }
     const dappRouter = self.runtime.httpserver.dappRouter
     dappRouter[method](`/${dappId}${path}`, handler)
+    dappRouter[method](`/${dappName}${path}`, handler)
     cb(null)
   }
 }
