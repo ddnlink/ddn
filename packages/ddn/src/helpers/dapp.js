@@ -1,5 +1,5 @@
 import nacl from 'tweetnacl'
-import DdnCrypto from '@ddn/crypto'
+import * as DdnCrypto from '@ddn/crypto'
 // import DdnCrypto from '../utils/crypto'
 import ByteBuffer from 'bytebuffer'
 import dappTransactionsLib from '../utils/dapptransactions'

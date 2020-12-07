@@ -7,16 +7,9 @@ import BufferCache from './buffer-cache'
 import system from './system'
 import routesMap from './routes-map'
 
-export {
-  LimitCache,
-  assetTypes,
-  runtimeState,
-  amount,
-  bignum,
-  BufferCache,
-  system,
-  routesMap
-}
+export * from './random'
+
+export { LimitCache, assetTypes, runtimeState, amount, bignum, BufferCache, system, routesMap }
 
 // TODO: delete it
 export default {

@@ -2,7 +2,7 @@
  * RootRouter接口
  * wangxm   2019-03-27
  */
-import DdnCrypto from '@ddn/crypto'
+import * as DdnCrypto from '@ddn/crypto'
 import { assetTypes, bignum } from '@ddn/utils'
 
 class RootRouter {

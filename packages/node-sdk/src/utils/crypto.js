@@ -1,7 +1,7 @@
 import nacl from 'tweetnacl'
 import crypto from 'crypto'
 
-import DdnCrypto from '@ddn/crypto'
+import * as DdnCrypto from '@ddn/crypto'
 import { assetTypes, bignum } from '@ddn/utils'
 import Asset from '@ddn/asset-base'
 import { constants } from '../config'

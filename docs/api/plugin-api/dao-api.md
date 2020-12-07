@@ -21,15 +21,15 @@ state|number|组织号状态|true
 url |string |地址|true
 tags |string|标签|true
 
-返回参数说明：   
+返回参数说明：
 
-|名称	|类型   |说明              |   
-|------ |-----  |----              |   
-|success|boolean  |请求是否成功 |    
-|transactionId|string |交易id      |  
+|名称	|类型   |说明              |
+|------ |-----  |----              |
+|success|boolean  |请求是否成功 |
+|transactionId|string |交易id      |
 
-请求示例：   
-```bash   
+请求示例：
+```bash
 curl --location --request PUT 'http://localhost:8001/api/dao/orgs' \
 --header 'Content-Type: application/json' \
 --data-raw '{
@@ -39,8 +39,8 @@ curl --location --request PUT 'http://localhost:8001/api/dao/orgs' \
     "tags":"world,cup,test",
     "state":0,
     "secret":"enter boring shaft rent essence foil trick vibrant fabric quote indoor output"
-}'  
-```  
+}'
+```
 
 JSON返回示例：
 
@@ -64,16 +64,16 @@ state|number|组织号状态，为1允许修改|true
 url |string |地址|true
 tags |string|标签|true
 
-返回参数说明：   
+返回参数说明：
 
-|名称	|类型   |说明              |   
-|------ |-----  |----              |   
-|success|boolean  |请求是否成功 |    
-|result|object |返回结果      | 
+|名称	|类型   |说明              |
+|------ |-----  |----              |
+|success|boolean  |请求是否成功 |
+|result|object |返回结果      |
 |org|object|返回数据|
 
-请求示例：   
-```bash   
+请求示例：
+```bash
 curl --location --request GET 'http://localhost:8001/api/dao/orgs/qwertsyuasaa' \
 --header 'Content-Type: application/json' \
 --data-raw '{
@@ -84,7 +84,7 @@ curl --location --request GET 'http://localhost:8001/api/dao/orgs/qwertsyuasaa' 
     "state":0,
     "secret":"enter boring shaft rent essence foil trick vibrant fabric quote indoor output"
 }'
-``` 
+```
 
 JSON返回示例：
 
@@ -116,19 +116,19 @@ JSON返回示例：
 -|-|-|-
 org_id |string|组织唯一id|true
 
-返回参数说明：   
+返回参数说明：
 
-|名称	|类型   |说明              |   
-|------ |-----  |----              |   
-|success|boolean  |请求是否成功 |    
-|result|object |返回结果      | 
+|名称	|类型   |说明              |
+|------ |-----  |----              |
+|success|boolean  |请求是否成功 |
+|result|object |返回结果      |
 |org|object|返回数据|
 
-请求示例：  
+请求示例：
 
-```bash   
+```bash
 curl --location --request GET 'http://localhost:8001/api/dao/orgs/qwertsyuasaa'
-``` 
+```
 
 JSON返回示例：
 
@@ -160,12 +160,12 @@ JSON返回示例：
 address |string|用户的钱包地址
 
 
-返回参数说明：   
+返回参数说明：
 
-|名称	|类型   |说明              |   
-|------ |-----  |----              |   
-|success|boolean  |请求是否成功 |    
-|result|object |返回结果  
+|名称	|类型   |说明              |
+|------ |-----  |----              |
+|success|boolean  |请求是否成功 |
+|result|object |返回结果
 |org|object|返回数据|
 
 请求示例：
@@ -205,10 +205,10 @@ tags |string|标签|true
 
 返回参数说明：
 
-|名称	|类型   |说明              |   
-|------ |-----  |----              |   
-|success|boolean  |请求是否成功 |    
-|result|object |返回结果  
+|名称	|类型   |说明              |
+|------ |-----  |----              |
+|success|boolean  |请求是否成功 |
+|result|object |返回结果
 |org|object|返回数据｜
 
 请求示例：
@@ -247,10 +247,10 @@ JSON返回示例：
 tags |string|标签
 返回参数说明：
 
-|名称	|类型   |说明              |   
-|------ |-----  |----              |   
-|success|boolean  |请求是否成功 |    
-|result|object |返回结果  
+|名称	|类型   |说明              |
+|------ |-----  |----              |
+|success|boolean  |请求是否成功 |
+|result|object |返回结果
 |org|object|返回数据列表|
 |total|number|数据条数
 
@@ -267,7 +267,7 @@ JSON返回示例：
     "success": true,
     "result": {
         "rows": [
-           
+
             {
                 "transaction_id": "5b7e759183dd28ca133afd14ab8671258d2556fb86fa8eebf515aeb434b323a58a17f2a576ae0270779beb5ec4618b0b7822a919a807697cf826364f94c404dd",
                 "transaction_type": 40,
@@ -290,7 +290,7 @@ JSON返回示例：
                 "url": "dat://f76e1e82cf4eab4bf173627ff93662973c6fab110c70fb0f86370873a9619aa6+18/public/test.html",
                 "state": 1
             },
-            
+
         ],
         "total": 2
     }
@@ -307,10 +307,10 @@ state|number|状态
 
 返回参数说明：
 
-|名称	|类型   |说明              |   
-|------ |-----  |----              |   
-|success|boolean  |请求是否成功 |    
-|result|object |返回结果  
+|名称	|类型   |说明              |
+|------ |-----  |----              |
+|success|boolean  |请求是否成功 |
+|result|object |返回结果
 
 请求示例：
 ```bash
@@ -323,7 +323,7 @@ JSON返回示例：
 {
     "success": true,
     "result": {
-        
+
                 "transaction_id": "5b7e759183dd28ca133afd14ab8671258d2556fb86fa8eebf515aeb434b323a58a17f2a576ae0270779beb5ec4618b0b7822a919a807697cf826364f94c404dd",
                 "transaction_type": 40,
                 "timestamp": 89734853,
@@ -333,7 +333,7 @@ JSON返回示例：
                 "tags": "world,cup,test",
                 "url": "dat://f76e1e82cf4eab4bf173627ff93662973c6fab110c70fb0f86370873a9619aa6+18/public/test.html",
                 "state": 0
-          
+
     }
 }
 ```
@@ -347,10 +347,10 @@ JSON返回示例：
 state |number|状态
 
 返回参数说明：
-|名称	|类型   |说明              |   
-|------ |-----  |----              |   
-|success|boolean  |请求是否成功 |    
-|result|object |返回结果  
+|名称	|类型   |说明              |
+|------ |-----  |----              |
+|success|boolean  |请求是否成功 |
+|result|object |返回结果
 |org|object|返回数据列表|
 |total|number|数据条数
 
@@ -367,7 +367,7 @@ JSON返回示例：
     "success": true,
     "result": {
         "rows": [
-           
+
             {
                 "transaction_id": "5b7e759183dd28ca133afd14ab8671258d2556fb86fa8eebf515aeb434b323a58a17f2a576ae0270779beb5ec4618b0b7822a919a807697cf826364f94c404dd",
                 "transaction_type": 40,
@@ -390,7 +390,7 @@ JSON返回示例：
                 "url": "dat://f76e1e82cf4eab4bf173627ff93662973c6fab110c70fb0f86370873a9619aa6+18/public/test.html",
                 "state": 1
             },
-            
+
         ],
         "total": 2
     }
@@ -407,10 +407,10 @@ JSON返回示例：
 trs_id |string|交易id
 
 返回参数说明：
-|名称	|类型   |说明              |   
-|------ |-----  |----              |   
-|success|boolean  |请求是否成功 |    
-|result|object |返回结果 
+|名称	|类型   |说明              |
+|------ |-----  |----              |
+|success|boolean  |请求是否成功 |
+|result|object |返回结果
 
 请求示例：
 ```bash
@@ -446,10 +446,10 @@ pagesize|string|每页条数
 pageindex|string|页码
 
 返回参数说明：
-|名称	|类型   |说明              |   
-|------ |-----  |----              |   
-|success|boolean  |请求是否成功 |    
-|result|object |返回结果  
+|名称	|类型   |说明              |
+|------ |-----  |----              |
+|success|boolean  |请求是否成功 |
+|result|object |返回结果
 |org|object|返回数据列表|
 |total|number|数据条数
 
@@ -466,7 +466,7 @@ JSON返回示例：
     "success": true,
     "result": {
         "rows": [
-           
+
             {
                 "transaction_id": "5b7e759183dd28ca133afd14ab8671258d2556fb86fa8eebf515aeb434b323a58a17f2a576ae0270779beb5ec4618b0b7822a919a807697cf826364f94c404dd",
                 "transaction_type": 40,
@@ -489,7 +489,7 @@ JSON返回示例：
                 "url": "dat://f76e1e82cf4eab4bf173627ff93662973c6fab110c70fb0f86370873a9619aa6+18/public/test.html",
                 "state": 1
             },
-            
+
         ],
         "total": 2
     }
@@ -508,12 +508,12 @@ JSON返回示例：
 -|-|-|-
 |transaction|json|true
 
-返回参数说明：   
+返回参数说明：
 
-|名称	|类型   |说明   |   
-|------ |-----  |---- |   
+|名称	|类型   |说明   |
+|------ |-----  |---- |
 |success|boolean  |是否成功 |
-|transactionId|string |交易id | 
+|transactionId|string |交易id |
 
 请求示例：
 
@@ -531,8 +531,8 @@ JSON返回示例：
         received_address: reciveAddress,
         sender_address: senderAddress
       }
-       var transaction = await ddn.dao.createExchange(null,exchange,secret)       
-       console.log(JSON.stringify({transaction}))   
+       var transaction = await ddn.dao.createExchange(null,exchange,secret)
+       console.log(JSON.stringify({transaction}))
 })();
 
  打印结果：
@@ -565,12 +565,12 @@ JSON返回示例：
 -|-|-|-
 transaction|json|交易数据|true
 
-返回参数说明：   
+返回参数说明：
 
-|名称	|类型   |说明   |   
-|------ |-----  |---- |   
+|名称	|类型   |说明   |
+|------ |-----  |---- |
 |success|boolean  |是否成功 |
-|transactionId|string |交易id | 
+|transactionId|string |交易id |
 
 请求示例：
 ```js
@@ -589,8 +589,8 @@ transaction|json|交易数据|true
         recipientId:senderAddress,
         exchange_trs_id:'c56b4c85d61c41a08be58476efa202e883408bfa378fd7ad0b8576e6607225de45f45c1fa480f19a5beb266930d84651eb92b26a1837bc7e024f77df16702377'
       }
-    var transaction = await ddn.dao.createExchange(null,exchange,reciveAddressSecret)       
-    console.log(JSON.stringify({transaction}))  
+    var transaction = await ddn.dao.createExchange(null,exchange,reciveAddressSecret)
+    console.log(JSON.stringify({transaction}))
 })()
 
     输出结果：
@@ -613,7 +613,7 @@ JSON返回示例：
     "transactionId": "dc2e8551fbe586f05e36dbbf026c0f70d23abb35493a50da1c9a5f7724d561c5e666b9ecd893ab30d2ba0349adb0ff69ed94c592b44be6bd302893319281d074"
 }
 ```
-## 1.2 接口发起交易  未测试 
+## 1.2 接口发起交易  未测试
 
 接口地址：/api/dao/exchanges<br/>
 请求方式：PUT<br/>
@@ -642,12 +642,12 @@ JSON返回示例：
 -|-|-
 org_id |string|组织号id
 
-返回参数说明：   
+返回参数说明：
 
-|名称	|类型   |说明   |   
-|------ |-----  |---- |   
+|名称	|类型   |说明   |
+|------ |-----  |---- |
 |success|boolean  |是否成功 |
-|result|objecet |返回结果 | 
+|result|objecet |返回结果 |
 
 请求示例:
 ```bash
@@ -681,12 +681,12 @@ JSON返回示例：
 -|-|-
 org_id |string|组织号id
 
-返回参数说明：   
+返回参数说明：
 
-|名称	|类型   |说明   |   
-|------ |-----  |---- |   
+|名称	|类型   |说明   |
+|------ |-----  |---- |
 |success|boolean  |是否成功 |
-|result|objecet |返回结果 | 
+|result|objecet |返回结果 |
 |rows|array|结果数组|
 |total|number|总条数|
 
@@ -739,12 +739,12 @@ JSON返回示例：
 -|-|-
 sender_address |string|钱包地址
 
-返回参数说明：   
+返回参数说明：
 
-|名称	|类型   |说明   |   
-|------ |-----  |---- |   
+|名称	|类型   |说明   |
+|------ |-----  |---- |
 |success|boolean  |是否成功 |
-|result|objecet |返回结果 | 
+|result|objecet |返回结果 |
 
 请求示例：
 ```bash
@@ -778,12 +778,12 @@ JSON返回示例：
 -|-|-
 sender_address |string|钱包地址
 
-返回参数说明：   
+返回参数说明：
 
-|名称	|类型   |说明   |   
-|------ |-----  |---- |   
+|名称	|类型   |说明   |
+|------ |-----  |---- |
 |success|boolean  |是否成功 |
-|result|objecet |返回结果 | 
+|result|objecet |返回结果 |
 |rows|array|结果数组|
 |total|number|总条数|
 
@@ -825,12 +825,12 @@ JSON返回示例：
 -|-|-
 received_address |string|钱包地址
 
-返回参数说明：   
+返回参数说明：
 
-|名称	|类型   |说明   |   
-|------ |-----  |---- |   
+|名称	|类型   |说明   |
+|------ |-----  |---- |
 |success|boolean  |是否成功 |
-|result|objecet |返回结果 | 
+|result|objecet |返回结果 |
 
 请求示例：
 ```bash
@@ -864,12 +864,12 @@ JSON返回示例：
 -|-|-
 received_address |string|钱包地址
 
-返回参数说明：   
+返回参数说明：
 
-|名称	|类型   |说明   |   
-|------ |-----  |---- |   
+|名称	|类型   |说明   |
+|------ |-----  |---- |
 |success|boolean  |是否成功 |
-|result|objecet |返回结果 | 
+|result|objecet |返回结果 |
 |rows|array|结果数组|
 |total|number|总条数|
 
@@ -911,12 +911,12 @@ JSON返回示例：
 -|-|-
 price |string|交易金额
 
-返回参数说明：   
+返回参数说明：
 
-|名称	|类型   |说明   |   
-|------ |-----  |---- |   
+|名称	|类型   |说明   |
+|------ |-----  |---- |
 |success|boolean  |是否成功 |
-|result|objecet |返回结果 | 
+|result|objecet |返回结果 |
 
 请求示例：
 ```bash
@@ -929,7 +929,7 @@ JSON返回示例：
 {
     "success": true,
     "result": {
-        
+
                 "transaction_id": "06ecc4516edf6e5edb7054db3bc6bd1e699f86d804df3954351e0843650ffe5fa6b47d76deb2551cfde0edeae1cecaa5da6afd2f65f732cdbfe5578c05a1f4e8",
                 "transaction_type": 41,
                 "timestamp": 89758037,
@@ -939,7 +939,7 @@ JSON返回示例：
                 "exchange_trs_id": "",
                 "price": "700000000",
                 "state": 0
-          
+
 }
 ```
 ## 8 根据交易金额查询所有组织号的交易记录列表
@@ -951,12 +951,12 @@ JSON返回示例：
 -|-|-
 price |string|交易金额
 
-返回参数说明：   
+返回参数说明：
 
-|名称	|类型   |说明   |   
-|------ |-----  |---- |   
+|名称	|类型   |说明   |
+|------ |-----  |---- |
 |success|boolean  |是否成功 |
-|result|objecet |返回结果 | 
+|result|objecet |返回结果 |
 |rows|array|结果数组|
 |total|number|总条数|
 
@@ -1009,12 +1009,12 @@ JSON返回示例：
 -|-|-
 state |string|状态 0/1
 
-返回参数说明：   
+返回参数说明：
 
-|名称	|类型   |说明   |   
-|------ |-----  |---- |   
+|名称	|类型   |说明   |
+|------ |-----  |---- |
 |success|boolean  |是否成功 |
-|result|objecet |返回结果 | 
+|result|objecet |返回结果 |
 
 请求示例：
 ```bash
@@ -1048,12 +1048,12 @@ JSON返回示例：
 -|-|-
 state |string|状态
 
-返回参数说明：   
+返回参数说明：
 
-|名称	|类型   |说明   |   
-|------ |-----  |---- |   
+|名称	|类型   |说明   |
+|------ |-----  |---- |
 |success|boolean  |是否成功 |
-|result|objecet |返回结果 | 
+|result|objecet |返回结果 |
 |rows|array|结果数组|
 |total|number|总条数|
 
@@ -1095,12 +1095,12 @@ JSON返回示例：
 -|-|-
 trs_id |string|交易id
 
-返回参数说明：   
+返回参数说明：
 
-|名称	|类型   |说明   |   
-|------ |-----  |---- |   
+|名称	|类型   |说明   |
+|------ |-----  |---- |
 |success|boolean  |是否成功 |
-|result|objecet |返回结果 | 
+|result|objecet |返回结果 |
 
 请求示例：
 ```bash
@@ -1112,7 +1112,7 @@ JSON返回示例：
 {
     "success": true,
     "result": {
-        
+
                 "transaction_id": "06ecc4516edf6e5edb7054db3bc6bd1e699f86d804df3954351e0843650ffe5fa6b47d76deb2551cfde0edeae1cecaa5da6afd2f65f732cdbfe5578c05a1f4e8",
                 "transaction_type": 41,
                 "timestamp": 89758037,
@@ -1122,7 +1122,7 @@ JSON返回示例：
                 "exchange_trs_id": "",
                 "price": "700000000",
                 "state": 0
-          
+
 }
 ```
 
@@ -1136,12 +1136,12 @@ JSON返回示例：
 pagesize|string｜每页条数
 pageindex|string|页码
 
-返回参数说明：   
+返回参数说明：
 
-|名称	|类型   |说明   |   
-|------ |-----  |---- |   
+|名称	|类型   |说明   |
+|------ |-----  |---- |
 |success|boolean  |是否成功 |
-|result|objecet |返回结果 | 
+|result|objecet |返回结果 |
 |rows|array|结果数组|
 |total|number|总条数|
 
@@ -1199,17 +1199,17 @@ JSON返回示例：
 -|-|-|-
 transaction|json|交易体|true
 
-返回参数说明：   
+返回参数说明：
 
-|名称	|类型   |说明   |   
-|------ |-----  |---- |   
+|名称	|类型   |说明   |
+|------ |-----  |---- |
 |success|boolean  |是否成功 |
-|transactionId|string |交易id | 
+|transactionId|string |交易id |
 
 请求是示例：
 ```js
 (async () => {
-   const ddn = require('@ddn/node-sdk').default;  
+   const ddn = require('@ddn/node-sdk').default;
     let senderAddress='DC5kJzMdNDhrnupWX2NGafzMoiwdHiySBe',reciveAddress='D61gSRn1ko2NiEYLutPxnBDXU4MBJ2b4by';
     let secret='enter boring shaft rent essence foil trick vibrant fabric quote indoor output'
     let reciveAddressSecret='attract motion canal change horror dose waste hub team horse half tiny'
@@ -1221,8 +1221,8 @@ transaction|json|交易体|true
           'dat://f76e1e82cf4eab4bf173627ff93662973c6fab110c70fb0f86370873a9619aa6+18/public/test.html',
         price: '0'
       }
-    var transaction = await ddn.dao.createContribution(contribution,secret)       
-    console.log(JSON.stringify({transaction}))  
+    var transaction = await ddn.dao.createContribution(contribution,secret)
+    console.log(JSON.stringify({transaction}))
 })()
 
 //输出结果
@@ -1257,12 +1257,12 @@ url|string|链接|true
 price|string|奖励|true
 secret|string|密匙|true
 
-返回参数说明：   
+返回参数说明：
 
-|名称	|类型   |说明   |   
-|------ |-----  |---- |   
+|名称	|类型   |说明   |
+|------ |-----  |---- |
 |success|boolean  |是否成功 |
-|transactionId|string |交易id | 
+|transactionId|string |交易id |
 
 请求示例：
 ```bash
@@ -1297,12 +1297,12 @@ JSON返回示例：
 -|-|-|-
 org_id｜string｜组织号id｜true
 
-返回参数说明：   
+返回参数说明：
 
-|名称	|类型   |说明   |   
-|------ |-----  |---- |   
+|名称	|类型   |说明   |
+|------ |-----  |---- |
 |success|boolean  |是否成功 |
-|result|objecet |返回结果 | 
+|result|objecet |返回结果 |
 |rows|array|结果数组|
 |total|number|总条数|
 
@@ -1357,12 +1357,12 @@ JSON返回示例：
 -|-|-|-
 trs_id|string|贡献的交易id|true
 
-返回参数说明：   
+返回参数说明：
 
-|名称	|类型   |说明   |   
-|------ |-----  |---- |   
+|名称	|类型   |说明   |
+|------ |-----  |---- |
 |success|boolean  |是否成功 |
-|result|objecet |返回结果 | 
+|result|objecet |返回结果 |
 
 请求示例：
 ```bash
@@ -1395,12 +1395,12 @@ JSON返回示例：
 名称 | 类型 | 说明 |required
 -|-|-|-
 
-返回参数说明：   
+返回参数说明：
 
-|名称	|类型   |说明   |   
-|------ |-----  |---- |   
+|名称	|类型   |说明   |
+|------ |-----  |---- |
 |success|boolean  |是否成功 |
-|result|objecet |返回结果 | 
+|result|objecet |返回结果 |
 |rows|array|结果数组|
 |total|number|总条数|
 
@@ -1457,19 +1457,19 @@ JSON返回示例：
 -|-|-|-
 transaction|json|交易体|true
 
-返回参数说明：   
+返回参数说明：
 
-|名称	|类型   |说明   |   
-|------ |-----  |---- |   
+|名称	|类型   |说明   |
+|------ |-----  |---- |
 |success|boolean  |是否成功 |
-|transactionId|string |交易id | 
+|transactionId|string |交易id |
 
 请求示例：
 
 ```js
 (async () => {
     const ddn = require('@ddn/node-sdk').default;
-    // var ddn = require('./packages/node-sdk/lib/index').default;   
+    // var ddn = require('./packages/node-sdk/lib/index').default;
     let senderAddress='DC5kJzMdNDhrnupWX2NGafzMoiwdHiySBe',reciveAddress='D61gSRn1ko2NiEYLutPxnBDXU4MBJ2b4by';
     let secret='enter boring shaft rent essence foil trick vibrant fabric quote indoor output'
     let reciveAddressSecret='attract motion canal change horror dose waste hub team horse half tiny'
@@ -1478,17 +1478,17 @@ transaction|json|交易体|true
         received_address: senderAddress,
         url:
           'dat://f76e1e82cf4eab4bf173627ff93662973c6fab110c70fb0f86370873a9619aa6+18/public/test.html',
-        contribution_trs_id:'23681a024f3e3c650850ce3bb5b86c89cd3c2f6926fdfc6a40dadcda56c54cc1f123d676aa2c12abb2ae2ff77a1554380830b511422759b8a8ebe792dccc3eaf', 
+        contribution_trs_id:'23681a024f3e3c650850ce3bb5b86c89cd3c2f6926fdfc6a40dadcda56c54cc1f123d676aa2c12abb2ae2ff77a1554380830b511422759b8a8ebe792dccc3eaf',
         state:0,
         amount:  '0',
         recipientId: reciveAddress
       }
-    
+
     // 其中password是在用户登录的时候记录下来的，secondPassword需要每次让用户输入
     // 可以通过user.secondPublicKey来判断用户是否有二级密码，如果没有，则不必输入，以下几个交易类型类似
-    var transaction = await ddn.dao.createConfirmation('10',confirmation,secret)       
-    // var transaction = await ddn.dao.createTransfer('D61gSRn1ko2NiEYLutPxnBDXU4MBJ2b4by','10000000000',secret)       
-    console.log(JSON.stringify({transaction}))  
+    var transaction = await ddn.dao.createConfirmation('10',confirmation,secret)
+    // var transaction = await ddn.dao.createTransfer('D61gSRn1ko2NiEYLutPxnBDXU4MBJ2b4by','10000000000',secret)
+    console.log(JSON.stringify({transaction}))
 })()
 
 //输出结果
@@ -1522,12 +1522,12 @@ url|string|链接|true
 state|number|状态|true
 secret|string|密匙|true
 
-返回参数说明：   
+返回参数说明：
 
-|名称	|类型   |说明   |   
-|------ |-----  |---- |   
+|名称	|类型   |说明   |
+|------ |-----  |---- |
 |success|boolean  |是否成功 |
-|transactionId|string |交易id | 
+|transactionId|string |交易id |
 
 请求示例：
 ```bash
@@ -1560,12 +1560,12 @@ JSON返回示例：
 -|-|-|-
 org_id|string|组织id|true
 
-返回参数说明：   
+返回参数说明：
 
-|名称	|类型   |说明   |   
-|------ |-----  |---- |   
+|名称	|类型   |说明   |
+|------ |-----  |---- |
 |success|boolean  |是否成功 |
-|result|object |返回结果 | 
+|result|object |返回结果 |
 |rows|array|结果列表|
 |count|number|确认交易总数量|
 
@@ -1614,12 +1614,12 @@ JSON返回示例：
 -|-|-|-
 trs_id|string|交易id|true
 
-返回参数说明：   
+返回参数说明：
 
-|名称	|类型   |说明   |   
-|------ |-----  |---- |   
+|名称	|类型   |说明   |
+|------ |-----  |---- |
 |success|boolean  |是否成功 |
-|result|object |返回结果 | 
+|result|object |返回结果 |
 
 请求示例：
 ```bash
@@ -1655,12 +1655,12 @@ JSON返回示例：
 pagesize|string｜每页条数|false
 pageindex|string|页码|false
 
-返回参数说明：   
+返回参数说明：
 
-|名称	|类型   |说明   |   
-|------ |-----  |---- |   
+|名称	|类型   |说明   |
+|------ |-----  |---- |
 |success|boolean  |是否成功 |
-|result|object |返回结果 | 
+|result|object |返回结果 |
 |rows|array|结果列表|
 |count|number|确认交易总数量|
 

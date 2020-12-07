@@ -1,7 +1,7 @@
 import nacl from 'tweetnacl'
 import crypto from 'crypto'
 import Tester from '@ddn/test-utils'
-import DdnCrypto from '../'
+import * as DdnCrypto from '../'
 
 import Debug from 'debug'
 import { Buffer } from 'buffer'
@@ -15,7 +15,8 @@ describe('NaCI', () => {
 
     // const secretKey = 'IOzP5GrKUs8xWJvikHo8BFhwPfV6kgZh4triBDr18SbwqNE27gFckpl042OkzsfN/V/zkuO/qR06tugnt92lzA==';
     // 加密
-    const arr = '1asdfasdf21asdfasdf21asdfasdf21asdfasdf21asdfasdf21asdfasdf2qwer1asdfasdf21asdfasdf21asdfasdf21asdfasdf21asdfasdf21asdfasdf2qwer'
+    const arr =
+      '1asdfasdf21asdfasdf21asdfasdf21asdfasdf21asdfasdf21asdfasdf2qwer1asdfasdf21asdfasdf21asdfasdf21asdfasdf21asdfasdf21asdfasdf2qwer'
 
     const secretKey = Buffer.from(arr).toString('base64')
     // 解密
@@ -41,9 +42,9 @@ describe('NaCI', () => {
     let hashStrs = 'test'
 
     const hashes = crypto.createHash('sha256')
-    hashes.update(strBuffer);
+    hashes.update(strBuffer)
 
-    [1, 2, 3].forEach(e => {
+    ;[1, 2, 3].forEach(e => {
       strBuffer = Buffer.from('tt' + e)
       hashStrs += 'tt' + e
       hashes.update(strBuffer)
@@ -56,7 +57,7 @@ describe('NaCI', () => {
     expect(hashUpdate.toString()).to.be.equal(hashStrsUpdate.toString())
   })
 
-  it('#createHash should be ok, and return a Buffer, Uint8Array too.', (done) => {
+  it('#createHash should be ok, and return a Buffer, Uint8Array too.', done => {
     const buf = Buffer.from('test') // 转化一下
     const hash1 = DdnCrypto.createHash(buf)
 

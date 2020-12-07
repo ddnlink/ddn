@@ -1,4 +1,4 @@
-import DdnCrypto from '@ddn/crypto'
+import * as DdnCrypto from '@ddn/crypto'
 
 /**
  * AccountService 接口

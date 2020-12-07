@@ -4,7 +4,8 @@
  */
 import extend from 'util-extend'
 import DdnUtils from '@ddn/utils'
-import DdnCrypto, { nacl } from '@ddn/crypto'
+import * as DdnCrypto from '@ddn/crypto'
+import { getId, nacl } from '@ddn/crypto'
 import Assets from '../../assets'
 
 let _singleton
@@ -107,7 +108,7 @@ class Transaction {
       // trs.sign_signature = await DdnCrypto.sign(trs, data.second_keypair);
     }
 
-    trs.id = await DdnCrypto.getId(trs)
+    trs.id = await getId(trs)
 
     trs.fee = `${await this._assets.call(trs.type, 'calculateFee', trs, data.sender)}`
 
@@ -488,7 +489,7 @@ class Transaction {
       throw new Error(`Unknown transaction type 10 ${trs.type}`)
     }
 
-    const txId = await DdnCrypto.getId(trs)
+    const txId = await getId(trs)
 
     // 确保客户端传入id，这里仅做验证
     if (typeof trs.id === 'undefined' || trs.id !== txId) {
@@ -553,7 +554,7 @@ class Transaction {
     }
 
     if (!transaction.id) {
-      transaction.id = await DdnCrypto.getId(transaction)
+      transaction.id = await getId(transaction)
     }
 
     // Check transaction indexes

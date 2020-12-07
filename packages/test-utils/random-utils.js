@@ -1,28 +1,5 @@
 import _ from 'lodash'
-// import DdnUtils from '@ddn/utils';
-
-/**
- * 产生随机字符串
- * @param  {...any} args 常用参数为 randomName('D', 'abc...', 5)
- */
-function randomName (...args) {
-  // Convert arguments to Array
-  const array = Array.prototype.slice.apply(args)
-
-  let size = 16
-  if (array.length > 2) {
-    size = array.pop()
-  }
-
-  let name = array[0]
-  const random = array[1]
-
-  for (let i = 0; i < size; i++) {
-    name += random.charAt(Math.floor(Math.random() * random.length))
-  }
-
-  return name
-}
+import { randomName } from '@ddn/utils'
 
 // Used to create random delegates names
 function randomDelegateName () {
@@ -34,17 +11,15 @@ function randomProperty (obj, needKey) {
   const keys = Object.keys(obj)
 
   if (!needKey) {
-    return obj[keys[keys.length * Math.random() << 0]]
+    return obj[keys[(keys.length * Math.random()) << 0]]
   } else {
-    return keys[keys.length * Math.random() << 0]
+    return keys[(keys.length * Math.random()) << 0]
   }
 }
 
 // Randomizes DDN amount
 function randomCoin () {
-  // const { bignum } = DdnUtils;
-  return `${Math.floor(Math.random() * (10000 * 100000000)) + (1000 * 100000000)}`
-  // return bignum.plus(bignum.floor(bignum.multiply(Math.random(), 100000, 100000000)), 1).toString();
+  return `${Math.floor(Math.random() * (10000 * 100000000)) + 1000 * 100000000}`
 }
 
 // Dao

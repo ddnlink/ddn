@@ -1,5 +1,5 @@
 import fs from 'fs'
-import DdnCrypto from '@ddn/crypto'
+import * as DdnCrypto from '@ddn/crypto'
 import path from 'path'
 
 import inquirer from 'inquirer'

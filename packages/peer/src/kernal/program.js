@@ -7,7 +7,7 @@ import path from 'path'
 import fs from 'fs'
 import ip from 'ip'
 import extend from 'extend2'
-import DdnCrypto from '@ddn/crypto'
+import * as DdnCrypto from '@ddn/crypto'
 import DdnUtils from '@ddn/utils'
 import tracer from 'tracer'
 
