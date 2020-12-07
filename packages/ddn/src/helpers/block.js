@@ -1,8 +1,8 @@
 import nacl from 'tweetnacl'
 
 import fs from 'fs'
-import DdnCrypto from '@ddn/crypto'
-import DdnUtils from '@ddn/utils'
+import * as DdnCrypto from '@ddn/crypto'
+import DdnUtils, { randomNethash } from '@ddn/utils'
 import ByteBuffer from 'bytebuffer'
 import NodeSdk from '@ddn/node-sdk'
 
@@ -31,7 +31,8 @@ function getBytes (block, skipSignature) {
   bb.writeInt(block.version)
   bb.writeInt(block.timestamp)
 
-  if (block.previous_block) { // wxm block database
+  if (block.previous_block) {
+    // wxm block database
     bb.writeString(block.previous_block) // wxm block database
   } else {
     bb.writeString('0')
@@ -56,7 +57,8 @@ function getBytes (block, skipSignature) {
     bb.writeByte(generatorPublicKeyBuffer[i])
   }
 
-  if (!skipSignature && block.block_signature) { // wxm block database
+  if (!skipSignature && block.block_signature) {
+    // wxm block database
     const blockSignatureBuffer = Buffer.from(block.block_signature, 'hex')
     for (let i = 0; i < blockSignatureBuffer.length; i++) {
       bb.writeByte(blockSignatureBuffer[i])
@@ -95,7 +97,7 @@ export default {
     const delegates = []
 
     if (!nethash) {
-      nethash = DdnCrypto.randomNethash()
+      nethash = randomNethash()
     }
 
     if (!tokenName) {

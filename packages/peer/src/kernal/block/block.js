@@ -7,7 +7,8 @@ import ip from 'ip'
 import assert from 'assert'
 
 import ByteBuffer from 'bytebuffer'
-import DdnCrypto, { nacl } from '@ddn/crypto'
+import * as DdnCrypto from '@ddn/crypto'
+import { nacl } from '@ddn/crypto'
 import { runtimeState, system, bignum } from '@ddn/utils'
 import BlockStatus from './block-status'
 
@@ -954,12 +955,12 @@ class Block {
         null,
         async (err, row) => {
           if (err) {
-            return reject(`Failed to query blocks from db: ${err}`)
+            return reject(new Error(`Failed to query blocks from db: ${err}`))
           }
 
           const bId = row && row.id
           if (bId && save) {
-            return reject(`Block already exists: ${block.id}`)
+            return reject(new Error(`Block already exists: ${block.id}`))
           }
 
           try {
@@ -993,7 +994,7 @@ class Block {
                   null,
                   (err, result) => {
                     if (err) {
-                      return reject(`Failed to query transaction from db: ${err}`)
+                      return reject(new Error(`Failed to query transaction from db: ${err}`))
                     } else {
                       resolve(result)
                     }
@@ -1019,7 +1020,7 @@ class Block {
                 if (existsTrs) {
                   // wxy 这里如果库里存在一些交易就不存这个块吗？TODO
                   await this.runtime.transaction.removeUnconfirmedTransaction(transaction.id)
-                  reject(`Transaction already exists: ${transaction.id}`)
+                  reject(new Error(`Transaction already exists: ${transaction.id}`))
                 }
 
                 if (verifyTrs) {

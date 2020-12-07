@@ -2,7 +2,8 @@
  * Delegate
  * wangxm   2018-01-08
  */
-import DdnCrypto, { createHash } from '@ddn/crypto'
+import * as DdnCrypto from '@ddn/crypto'
+import { createHash } from '@ddn/crypto'
 import { bignum } from '@ddn/utils'
 
 let _singleton

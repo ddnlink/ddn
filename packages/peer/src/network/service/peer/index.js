@@ -5,7 +5,7 @@
 import ip from 'ip'
 
 import DdnUtils from '@ddn/utils'
-import DdnCrypto from '@ddn/crypto'
+import * as DdnCrypto from '@ddn/crypto'
 
 class PeerService {
   constructor (context) {

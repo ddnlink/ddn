@@ -1,4 +1,4 @@
-import DdnCrypto from '@ddn/crypto'
+import * as DdnCrypto from '@ddn/crypto'
 import { assetTypes, bignum } from '@ddn/utils'
 /**
  * DelegatesRouter 接口

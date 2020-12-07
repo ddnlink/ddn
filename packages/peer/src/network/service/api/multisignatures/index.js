@@ -2,7 +2,7 @@
  * MultisignaturesRouter接口
  * wangxm   2019-03-27
  */
-import DdnCrypto from '@ddn/crypto'
+import * as DdnCrypto from '@ddn/crypto'
 import { assetTypes, bignum, system } from '@ddn/utils'
 
 class MultisignaturesRouter {

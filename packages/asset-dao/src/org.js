@@ -9,7 +9,7 @@ import Asset from '@ddn/asset-base'
 import DdnUtils from '@ddn/utils'
 import ByteBuffer from 'bytebuffer'
 import { isUri } from 'valid-url'
-import DdnCrypto from '@ddn/crypto'
+import * as DdnCrypto from '@ddn/crypto'
 import daoUtil from './daoUtil.js'
 
 // 10 秒内不允许重复处理
@@ -27,63 +27,64 @@ class Org extends Asset.Base {
   }
 
   /**
-      * Org 自治组织中的组织
-      * 自治组织可以包含媒体号、企业号等组织形态，为未来更多扩展留有余地。
-      *
-      * 规则：
-      * 1、[a-zA-Z0-9_]，不分大小写，英文字符+数字+_ 加上‘M’等类别后缀；
-      * 2、前期申请 >= 5个字符，5位以下逐年开放；
-      * 3、必须英文开头；
-      */
+   * Org 自治组织中的组织
+   * 自治组织可以包含媒体号、企业号等组织形态，为未来更多扩展留有余地。
+   *
+   * 规则：
+   * 1、[a-zA-Z0-9_]，不分大小写，英文字符+数字+_ 加上‘M’等类别后缀；
+   * 2、前期申请 >= 5个字符，5位以下逐年开放；
+   * 3、必须英文开头；
+   */
   // eslint-disable-next-line class-methods-use-this
   async propsMapping () {
-    return [{
-      field: 'str1',
-      prop: 'org_id',
-      required: true
-    },
-    {
-      field: 'str2',
-      prop: 'name'
-    },
-    {
-      field: 'str4',
-      prop: 'address'
-    },
-    {
-      field: 'str3',
-      prop: 'tags',
-      required: true
-    },
-    {
-      field: 'str6',
-      prop: 'url'
-    },
-    {
-      field: 'int1',
-      prop: 'state',
-      required: true
-    }
+    return [
+      {
+        field: 'str1',
+        prop: 'org_id',
+        required: true
+      },
+      {
+        field: 'str2',
+        prop: 'name'
+      },
+      {
+        field: 'str4',
+        prop: 'address'
+      },
+      {
+        field: 'str3',
+        prop: 'tags',
+        required: true
+      },
+      {
+        field: 'str6',
+        prop: 'url'
+      },
+      {
+        field: 'int1',
+        prop: 'state',
+        required: true
+      }
     ]
   }
 
   /**
-     * 创建组织号
-     * data.asset.org 字段 6 个：
-     * @org_id 自治组织号（比如：媒体号） 5-20，5位以下逐年开放注册；媒体号 midiumId 是自治组织的一种，可以以M为后缀，其他的以此类推，必须；
-     * @name 组织名称，支持汉字，可修改（需要花费fee, **修改的字段信息同步存储在trs交易表的冗余字段args里**)，允许空；
-     * @address 绑定的钱包地址（用于接收投稿、转账等），允许空；
-     * @url 自治组织主页、媒体号主页地址等，允许空；
-     * @tags 类别标签，逗号或者空格分隔，必须；
-     * @state 0-首次申请，1-转移，必须；
-     *
-     * @transaction_id 交易id
-     * @fee 交易费用
-     * - updated_count 修改次数，虚拟字段，是通过修改次数计算出来的信息
-     *
-     * @param {object} data 传回来的数据
-     * @param {object} trs 交易
-     */
+   * 创建组织号
+   * data.asset.org 字段 6 个：
+   * @org_id 自治组织号（比如：媒体号） 5-20，5位以下逐年开放注册；媒体号 midiumId 是自治组织的一种，可以以M为后缀，其他的以此类推，必须；
+   * @name 组织名称，支持汉字，可修改（需要花费fee, **修改的字段信息同步存储在trs交易表的冗余字段args里**)，允许空；
+   * @address 绑定的钱包地址（用于接收投稿、转账等），允许空；
+   * @url 自治组织主页、媒体号主页地址等，允许空；
+   * @tags 类别标签，逗号或者空格分隔，必须；
+   * @state 0-首次申请，1-转移，必须；
+   *
+   * @transaction_id 交易id
+   * @fee 交易费用
+   * - updated_count 修改次数，虚拟字段，是通过修改次数计算出来的信息
+   *
+   * @param {object} data 传回来的数据
+   * @param {object} trs 交易
+   */
   // eslint-disable-next-line class-methods-use-this
   async create (data, trs) {
     const trans = trs
@@ -186,7 +187,8 @@ class Org extends Asset.Base {
     const yyyyNum = parseInt(new Date().getFullYear(), 10)
     if (olen <= 4) {
       throw new Error('Org id with 4 length not open in this year')
-    } if (olen === 5) {
+    }
+    if (olen === 5) {
       if (yyyyNum < 2019) {
         throw new Error('Org id with 5 length will open in year 2019')
       }
@@ -232,15 +234,20 @@ class Org extends Asset.Base {
    */
   async undo (trs, block, _, dbTrans) {
     return new Promise((resolve, reject) => {
-      this.dao.remove('mem_org', {
-        transaction_id: trs.id
-      }, dbTrans, (err) => {
-        if (err) {
-          return reject(err)
+      this.dao.remove(
+        'mem_org',
+        {
+          transaction_id: trs.id
+        },
+        dbTrans,
+        err => {
+          if (err) {
+            return reject(err)
+          }
+          super.undo(trs, block, _, dbTrans)
+          resolve(true)
         }
-        super.undo(trs, block, _, dbTrans)
-        resolve(true)
-      })
+      )
     })
   }
 
@@ -305,8 +312,8 @@ class Org extends Asset.Base {
   }
 
   /**
-     * 自定义资产Api
-     */
+   * 自定义资产Api
+   */
   async attachApi (router) {
     router.get('/', async (req, res) => {
       try {
@@ -346,58 +353,61 @@ class Org extends Asset.Base {
   }
 
   /**
-     * 注册组织号
-     * @param {*} req
-     * @param {*} res
-     */
+   * 注册组织号
+   * @param {*} req
+   * @param {*} res
+   */
   async putOrg (req) {
     const body = req.body
 
-    const validateErrors = await this.ddnSchema.validate({
-      type: 'object',
-      properties: {
-        secret: {
-          type: 'string',
-          minLength: 1,
-          maxLength: 100
+    const validateErrors = await this.ddnSchema.validate(
+      {
+        type: 'object',
+        properties: {
+          secret: {
+            type: 'string',
+            minLength: 1,
+            maxLength: 100
+          },
+          publicKey: {
+            type: 'string',
+            format: 'publicKey'
+          },
+          org_id: {
+            type: 'string',
+            minLength: 1,
+            maxLength: 20
+          },
+          name: {
+            type: 'string',
+            minLength: 1,
+            maxLength: 64
+          },
+          address: {
+            type: 'string',
+            minLength: 1,
+            maxLength: 128
+          },
+          tags: {
+            type: 'string',
+            minLength: 1,
+            maxLength: 40
+          },
+          url: {
+            type: 'string',
+            minLength: 1,
+            maxLength: 256
+          },
+          state: {
+            type: 'integer',
+            minimum: 0,
+            maximum: 1
+          }
         },
-        publicKey: {
-          type: 'string',
-          format: 'publicKey'
-        },
-        org_id: {
-          type: 'string',
-          minLength: 1,
-          maxLength: 20
-        },
-        name: {
-          type: 'string',
-          minLength: 1,
-          maxLength: 64
-        },
-        address: {
-          type: 'string',
-          minLength: 1,
-          maxLength: 128
-        },
-        tags: {
-          type: 'string',
-          minLength: 1,
-          maxLength: 40
-        },
-        url: {
-          type: 'string',
-          minLength: 1,
-          maxLength: 256
-        },
-        state: {
-          type: 'integer',
-          minimum: 0,
-          maximum: 1
-        }
+        required: ['secret', 'org_id', 'state']
       },
-      required: ['secret', 'org_id', 'state']
-    }, body)
+      body
+    )
     if (validateErrors) {
       throw new Error(`Invalid parameters: ${validateErrors[0].schemaPath} ${validateErrors[0].message}`)
     }
@@ -431,181 +441,187 @@ class Org extends Asset.Base {
     }
 
     return new Promise((resolve, reject) => {
-      this.balancesSequence.add(async (cb) => {
-        if (body.multisigAccountPublicKey && body.multisigAccountPublicKey !== keypair.publicKey) {
-          let account
-          try {
-            account = await this.runtime.account.getAccountByPublicKey(body.multisigAccountPublicKey)
-          } catch (e) {
-            return cb(e)
-          }
-
-          if (!account) {
-            return cb('Multisignature account not found')
-          }
-
-          if (!account.multisignatures) {
-            return cb('Account does not have multisignatures enabled')
-          }
-
-          if (account.multisignatures.indexOf(keypair.publicKey.toString('hex')) < 0) {
-            return cb('Account does not belong to multisignature group')
-          }
-
-          let requester
-          try {
-            requester = await this.runtime.account.getAccountByPublicKey(keypair.publicKey)
-          } catch (e) {
-            return cb(e)
-          }
-
-          if (!requester || !requester.publicKey) {
-            return cb('Invalid requester')
-          }
-
-          if (requester.second_signature && !body.secondSecret) {
-            return cb('Invalid second passphrase')
-          }
-
-          if (requester.publicKey === account.publicKey) {
-            return cb('Invalid requester')
-          }
-
-          let second_keypair = null
-          if (requester.second_signature) {
-            second_keypair = DdnCrypto.getKeys(body.secondSecret)
-          }
-
-          try {
-            const data = {
-              type: await this.getTransactionType(),
-              sender: account,
-              keypair,
-              requester: keypair,
-              second_keypair
+      this.balancesSequence.add(
+        async cb => {
+          if (body.multisigAccountPublicKey && body.multisigAccountPublicKey !== keypair.publicKey) {
+            let account
+            try {
+              account = await this.runtime.account.getAccountByPublicKey(body.multisigAccountPublicKey)
+            } catch (e) {
+              return cb(e)
             }
-            const assetJsonName = await this.getAssetJsonName()
-            data[assetJsonName] = org
 
-            const transaction = await this.runtime.transaction.create(data)
-
-            const transactions = await this.runtime.transaction.receiveTransactions([transaction])
-            cb(null, transactions)
-          } catch (e) {
-            cb(e)
-          }
-        } else {
-          let account
-          try {
-            account = await this.runtime.account.getAccountByPublicKey(keypair.publicKey)
-          } catch (e) {
-            return cb(e)
-          }
-
-          if (!account) {
-            return cb('Account not found')
-          }
-
-          if (account.second_signature && !body.secondSecret) {
-            return cb('Invalid second passphrase')
-          }
-
-          let second_keypair = null
-          if (account.secondSignature) {
-            second_keypair = DdnCrypto.getKeys(body.secondSecret)
-          }
-
-          try {
-            const data = {
-              type: await this.getTransactionType(),
-              sender: account,
-              keypair,
-              second_keypair
+            if (!account) {
+              return cb('Multisignature account not found')
             }
-            const assetJsonName = await this.getAssetJsonName()
-            data[assetJsonName] = org
 
-            const transaction = await this.runtime.transaction.create(data)
+            if (!account.multisignatures) {
+              return cb('Account does not have multisignatures enabled')
+            }
 
-            const transactions = await this.runtime.transaction.receiveTransactions([transaction])
-            cb(null, transactions)
-          } catch (e) {
-            cb(e)
+            if (account.multisignatures.indexOf(keypair.publicKey.toString('hex')) < 0) {
+              return cb('Account does not belong to multisignature group')
+            }
+
+            let requester
+            try {
+              requester = await this.runtime.account.getAccountByPublicKey(keypair.publicKey)
+            } catch (e) {
+              return cb(e)
+            }
+
+            if (!requester || !requester.publicKey) {
+              return cb('Invalid requester')
+            }
+
+            if (requester.second_signature && !body.secondSecret) {
+              return cb('Invalid second passphrase')
+            }
+
+            if (requester.publicKey === account.publicKey) {
+              return cb('Invalid requester')
+            }
+
+            let second_keypair = null
+            if (requester.second_signature) {
+              second_keypair = DdnCrypto.getKeys(body.secondSecret)
+            }
+
+            try {
+              const data = {
+                type: await this.getTransactionType(),
+                sender: account,
+                keypair,
+                requester: keypair,
+                second_keypair
+              }
+              const assetJsonName = await this.getAssetJsonName()
+              data[assetJsonName] = org
+
+              const transaction = await this.runtime.transaction.create(data)
+
+              const transactions = await this.runtime.transaction.receiveTransactions([transaction])
+              cb(null, transactions)
+            } catch (e) {
+              cb(e)
+            }
+          } else {
+            let account
+            try {
+              account = await this.runtime.account.getAccountByPublicKey(keypair.publicKey)
+            } catch (e) {
+              return cb(e)
+            }
+
+            if (!account) {
+              return cb('Account not found')
+            }
+
+            if (account.second_signature && !body.secondSecret) {
+              return cb('Invalid second passphrase')
+            }
+
+            let second_keypair = null
+            if (account.secondSignature) {
+              second_keypair = DdnCrypto.getKeys(body.secondSecret)
+            }
+
+            try {
+              const data = {
+                type: await this.getTransactionType(),
+                sender: account,
+                keypair,
+                second_keypair
+              }
+              const assetJsonName = await this.getAssetJsonName()
+              data[assetJsonName] = org
+
+              const transaction = await this.runtime.transaction.create(data)
+
+              const transactions = await this.runtime.transaction.receiveTransactions([transaction])
+              cb(null, transactions)
+            } catch (e) {
+              cb(e)
+            }
           }
-        }
-      }, (err, transactions) => {
-        if (err) {
-          return reject(err)
-        }
+        },
+        (err, transactions) => {
+          if (err) {
+            return reject(err)
+          }
 
-        resolve({ success: true, transactionId: transactions[0].id })
-      })
+          resolve({ success: true, transactionId: transactions[0].id })
+        }
+      )
     })
   }
 
   /**
-     * 根据OrgId获取Org信息
-     * @param {*} req
-     * @param {*} res
-     */
+   * 根据OrgId获取Org信息
+   * @param {*} req
+   * @param {*} res
+   */
   async getOrgByOrgId (req) {
     const orgInfo = await daoUtil.getEffectiveOrgByOrgId(this._context, req.params.org_id)
     return { success: true, result: { org: orgInfo } }
   }
 
   /**
-     * 查询Org列表
-     * @param {*} req
-     * @param {*} res
-     */
+   * 查询Org列表
+   * @param {*} req
+   * @param {*} res
+   */
   async getOrgList (req) {
     const query = Object.assign({}, req.body, req.query)
 
-    const validateErrors = await this.ddnSchema.validate({
-      type: 'object',
-      properties: {
-        pageindex: {
-          type: 'integer',
-          minimum: 1
+    const validateErrors = await this.ddnSchema.validate(
+      {
+        type: 'object',
+        properties: {
+          pageindex: {
+            type: 'integer',
+            minimum: 1
+          },
+          pagesize: {
+            type: 'integer',
+            minimum: 1,
+            maximum: 100
+          },
+          org_id: {
+            type: 'string',
+            minLength: 1,
+            maxLength: 20
+          },
+          name: {
+            type: 'string',
+            minLength: 1,
+            maxLength: 64
+          },
+          address: {
+            type: 'string',
+            minLength: 1,
+            maxLength: 128
+          },
+          tags: {
+            type: 'string',
+            minLength: 1,
+            maxLength: 40
+          },
+          url: {
+            type: 'string',
+            minLength: 1,
+            maxLength: 256
+          },
+          state: {
+            type: 'integer',
+            minimum: 0,
+            maximum: 1
+          }
         },
-        pagesize: {
-          type: 'integer',
-          minimum: 1,
-          maximum: 100
-        },
-        org_id: {
-          type: 'string',
-          minLength: 1,
-          maxLength: 20
-        },
-        name: {
-          type: 'string',
-          minLength: 1,
-          maxLength: 64
-        },
-        address: {
-          type: 'string',
-          minLength: 1,
-          maxLength: 128
-        },
-        tags: {
-          type: 'string',
-          minLength: 1,
-          maxLength: 40
-        },
-        url: {
-          type: 'string',
-          minLength: 1,
-          maxLength: 256
-        },
-        state: {
-          type: 'integer',
-          minimum: 0,
-          maximum: 1
-        }
+        required: []
       },
-      required: []
-    }, query)
+      query
+    )
     if (validateErrors) {
       throw new Error(`Invalid parameters: ${validateErrors[0].schemaPath} ${validateErrors[0].message}`)
     }
@@ -633,16 +649,23 @@ class Org extends Asset.Base {
     const offset = (pageIndex - 1) * pageSize
 
     return new Promise((resolve, reject) => {
-      this.dao.findPage('mem_org', where, limit, offset, true, [
-        'transaction_id', 'org_id', 'name', 'address', 'tags',
-        'url', 'state', 'timestamp'], orders, (err, result) => {
-        if (err) {
-          this.logger.error('this.dao.findPage error', err)
-          return reject(err)
-        }
+      this.dao.findPage(
+        'mem_org',
+        where,
+        limit,
+        offset,
+        true,
+        ['transaction_id', 'org_id', 'name', 'address', 'tags', 'url', 'state', 'timestamp'],
+        orders,
+        (err, result) => {
+          if (err) {
+            this.logger.error('this.dao.findPage error', err)
+            return reject(err)
+          }
 
-        resolve({ success: true, result })
-      })
+          resolve({ success: true, result })
+        }
+      )
     })
   }
 }

@@ -1,7 +1,7 @@
 import ByteBuffer from 'bytebuffer'
 import Asset from '@ddn/asset-base'
 import { bignum } from '@ddn/utils'
-import DdnCrypto from '@ddn/crypto'
+import * as DdnCrypto from '@ddn/crypto'
 
 import daoUtil from './daoUtil.js'
 
@@ -23,26 +23,27 @@ class Contribution extends Asset.Base {
   }
 
   async propsMapping () {
-    return [{
-      field: 'str2',
-      prop: 'title'
-    },
-    {
-      field: 'str4',
-      prop: 'received_address'
-    },
-    {
-      field: 'str5',
-      prop: 'sender_address'
-    },
-    {
-      field: 'str6',
-      prop: 'url'
-    },
-    {
-      field: 'str1',
-      prop: 'price'
-    }
+    return [
+      {
+        field: 'str2',
+        prop: 'title'
+      },
+      {
+        field: 'str4',
+        prop: 'received_address'
+      },
+      {
+        field: 'str5',
+        prop: 'sender_address'
+      },
+      {
+        field: 'str6',
+        prop: 'url'
+      },
+      {
+        field: 'str1',
+        prop: 'price'
+      }
     ]
   }
 
@@ -72,22 +73,19 @@ class Contribution extends Asset.Base {
     if (!contribution.title || contribution.title.length > 128) {
       throw new Error('title is undefined or too long, don`t more than 128 characters.')
     }
-    if (!contribution.received_address ||
-            contribution.received_address.length > 128) {
+    if (!contribution.received_address || contribution.received_address.length > 128) {
       throw new Error('received_address is undefined or too long, don`t more than 128 characters.')
     }
     if (!this.address.isAddress(contribution.received_address)) {
       throw new Error("Invalid contribution's received_address")
     }
-    if (!contribution.sender_address ||
-            contribution.sender_address.length > 128) {
+    if (!contribution.sender_address || contribution.sender_address.length > 128) {
       throw new Error('sender_address is undefined or too long, don`t more than 128 characters.')
     }
     if (!this.address.isAddress(contribution.sender_address)) {
       throw new Error("Invalid contribution's sender_address")
     }
-    if (!contribution.url ||
-            contribution.url.length > 256) {
+    if (!contribution.url || contribution.url.length > 256) {
       throw new Error('url is undefined or too long, don`t more than 256 characters.')
     }
 
@@ -155,34 +153,37 @@ class Contribution extends Asset.Base {
   }
 
   async getContributions (req) {
-    const validateErrors = await this.ddnSchema.validate({
-      type: 'object',
-      properties: {
-        senderPublicKey: {
-          type: 'string'
+    const validateErrors = await this.ddnSchema.validate(
+      {
+        type: 'object',
+        properties: {
+          senderPublicKey: {
+            type: 'string'
+          },
+          multisigAccountPublicKey: {
+            type: 'string',
+            format: 'publicKey'
+          },
+          url: {
+            type: 'string'
+          },
+          timestamp: {
+            type: 'integer'
+          },
+          pageIndex: {
+            type: 'integer',
+            minimum: 1
+          },
+          pageSize: {
+            type: 'integer',
+            minimum: 1,
+            maximum: 500
+          }
         },
-        multisigAccountPublicKey: {
-          type: 'string',
-          format: 'publicKey'
-        },
-        url: {
-          type: 'string'
-        },
-        timestamp: {
-          type: 'integer'
-        },
-        pageIndex: {
-          type: 'integer',
-          minimum: 1
-        },
-        pageSize: {
-          type: 'integer',
-          minimum: 1,
-          maximum: 500
-        }
+        required: []
       },
-      required: []
-    }, req.query)
+      req.query
+    )
     if (validateErrors) {
       throw new Error(`Invalid parameters: ${validateErrors[0].schemaPath} ${validateErrors[0].message}`)
     }
@@ -245,7 +246,8 @@ class Contribution extends Asset.Base {
       this.queryAsset(where, orders, true, pageIndex, pageSize)
         .then(rows => {
           resolve({ success: true, state: 0, result: rows })
-        }).catch(err => {
+        })
+        .catch(err => {
           reject(err)
         })
     })
@@ -258,34 +260,37 @@ class Contribution extends Asset.Base {
       throw new Error('Org not found: ' + org_id)
     }
 
-    const validateErrors = await this.ddnSchema.validate({
-      type: 'object',
-      properties: {
-        senderPublicKey: {
-          type: 'string'
+    const validateErrors = await this.ddnSchema.validate(
+      {
+        type: 'object',
+        properties: {
+          senderPublicKey: {
+            type: 'string'
+          },
+          multisigAccountPublicKey: {
+            type: 'string',
+            format: 'publicKey'
+          },
+          url: {
+            type: 'string'
+          },
+          timestamp: {
+            type: 'integer'
+          },
+          pageIndex: {
+            type: 'integer',
+            minimum: 1
+          },
+          pageSize: {
+            type: 'integer',
+            minimum: 1,
+            maximum: 500
+          }
         },
-        multisigAccountPublicKey: {
-          type: 'string',
-          format: 'publicKey'
-        },
-        url: {
-          type: 'string'
-        },
-        timestamp: {
-          type: 'integer'
-        },
-        pageIndex: {
-          type: 'integer',
-          minimum: 1
-        },
-        pageSize: {
-          type: 'integer',
-          minimum: 1,
-          maximum: 500
-        }
+        required: []
       },
-      required: []
-    }, req.query)
+      req.query
+    )
     if (validateErrors) {
       throw new Error(`Invalid parameters: ${validateErrors[0].schemaPath} ${validateErrors[0].message}`)
     }
@@ -343,7 +348,8 @@ class Contribution extends Asset.Base {
       this.queryAsset(where, orders, true, pageIndex, pageSize)
         .then(rows => {
           resolve({ success: true, state: 0, result: rows })
-        }).catch(err => {
+        })
+        .catch(err => {
           reject(err)
         })
     })
@@ -358,37 +364,40 @@ class Contribution extends Asset.Base {
 
     const body = req.body
 
-    const validateErrors = await this.ddnSchema.validate({
-      type: 'object',
-      properties: {
-        secret: {
-          type: 'string',
-          minLength: 1,
-          maxLength: 100
+    const validateErrors = await this.ddnSchema.validate(
+      {
+        type: 'object',
+        properties: {
+          secret: {
+            type: 'string',
+            minLength: 1,
+            maxLength: 100
+          },
+          secondSecret: {
+            type: 'string',
+            minLength: 1,
+            maxLength: 100
+          },
+          multisigAccountPublicKey: {
+            type: 'string',
+            format: 'publicKey'
+          },
+          title: {
+            type: 'string'
+          },
+          price: {
+            type: 'string'
+          },
+          url: {
+            type: 'string',
+            minLength: 1,
+            maxLength: 256
+          }
         },
-        secondSecret: {
-          type: 'string',
-          minLength: 1,
-          maxLength: 100
-        },
-        multisigAccountPublicKey: {
-          type: 'string',
-          format: 'publicKey'
-        },
-        title: {
-          type: 'string'
-        },
-        price: {
-          type: 'string'
-        },
-        url: {
-          type: 'string',
-          minLength: 1,
-          maxLength: 256
-        }
+        required: ['secret', 'title', 'url']
       },
-      required: ['secret', 'title', 'url']
-    }, body)
+      body
+    )
     if (validateErrors) {
       throw new Error(`Invalid parameters: ${validateErrors[0].schemaPath} ${validateErrors[0].message}`)
     }
@@ -405,122 +414,125 @@ class Contribution extends Asset.Base {
     }
 
     return new Promise((resolve, reject) => {
-      this.balancesSequence.add(async (cb) => {
-        if (body.multisigAccountPublicKey && body.multisigAccountPublicKey !== keypair.publicKey.toString('hex')) {
-          let account
-          try {
-            account = await this.runtime.account.getAccountByPublicKey(body.multisigAccountPublicKey)
-          } catch (e) {
-            return cb(e)
-          }
-
-          if (!account) {
-            return cb('Multisignature account not found')
-          }
-
-          if (!account.multisignatures) {
-            return cb('Account does not have multisignatures enabled')
-          }
-
-          if (account.multisignatures.indexOf(keypair.publicKey.toString('hex')) < 0) {
-            return cb('Account does not belong to multisignature group')
-          }
-
-          let requester
-          try {
-            requester = await this.runtime.account.getAccountByPublicKey(keypair.publicKey)
-          } catch (e) {
-            return cb(e)
-          }
-
-          if (!requester || !requester.publicKey) {
-            return cb('Invalid requester')
-          }
-
-          if (requester.second_signature && !body.secondSecret) {
-            return cb('Invalid second passphrase')
-          }
-
-          if (requester.publicKey === account.publicKey) {
-            return cb('Invalid requester')
-          }
-
-          let second_keypair = null
-          if (requester.second_signature) {
-            second_keypair = DdnCrypto.getKeys(body.secondSecret)
-          }
-
-          contribution.sender_address = account.address
-
-          try {
-            const data = {
-              type: await this.getTransactionType(),
-              sender: account,
-              keypair,
-              requester: keypair,
-              second_keypair
+      this.balancesSequence.add(
+        async cb => {
+          if (body.multisigAccountPublicKey && body.multisigAccountPublicKey !== keypair.publicKey.toString('hex')) {
+            let account
+            try {
+              account = await this.runtime.account.getAccountByPublicKey(body.multisigAccountPublicKey)
+            } catch (e) {
+              return cb(e)
             }
-            const assetJsonName = await this.getAssetJsonName()
-            data[assetJsonName] = contribution
 
-            const transaction = await this.runtime.transaction.create(data)
-
-            const transactions = await this.runtime.transaction.receiveTransactions([transaction])
-            cb(null, transactions)
-          } catch (e) {
-            cb(e)
-          }
-        } else {
-          let account
-          try {
-            account = await this.runtime.account.getAccountByPublicKey(keypair.publicKey.toString('hex'))
-          } catch (e) {
-            return cb(e)
-          }
-
-          if (!account) {
-            return cb('Account not found')
-          }
-
-          if (account.second_signature && !body.secondSecret) {
-            return cb('Invalid second passphrase')
-          }
-
-          let second_keypair = null
-          if (account.secondSignature) {
-            second_keypair = DdnCrypto.getKeys(body.secondSecret)
-          }
-
-          contribution.sender_address = account.address
-
-          try {
-            const data = {
-              type: await this.getTransactionType(),
-              sender: account,
-              keypair,
-              second_keypair
+            if (!account) {
+              return cb('Multisignature account not found')
             }
-            const assetJsonName = await this.getAssetJsonName()
-            data[assetJsonName] = contribution
 
-            const transaction = await this.runtime.transaction.create(data)
+            if (!account.multisignatures) {
+              return cb('Account does not have multisignatures enabled')
+            }
 
-            const transactions = await this.runtime.transaction.receiveTransactions([transaction])
-            cb(null, transactions)
-          } catch (e) {
-            cb(e)
+            if (account.multisignatures.indexOf(keypair.publicKey.toString('hex')) < 0) {
+              return cb('Account does not belong to multisignature group')
+            }
+
+            let requester
+            try {
+              requester = await this.runtime.account.getAccountByPublicKey(keypair.publicKey)
+            } catch (e) {
+              return cb(e)
+            }
+
+            if (!requester || !requester.publicKey) {
+              return cb('Invalid requester')
+            }
+
+            if (requester.second_signature && !body.secondSecret) {
+              return cb('Invalid second passphrase')
+            }
+
+            if (requester.publicKey === account.publicKey) {
+              return cb('Invalid requester')
+            }
+
+            let second_keypair = null
+            if (requester.second_signature) {
+              second_keypair = DdnCrypto.getKeys(body.secondSecret)
+            }
+
+            contribution.sender_address = account.address
+
+            try {
+              const data = {
+                type: await this.getTransactionType(),
+                sender: account,
+                keypair,
+                requester: keypair,
+                second_keypair
+              }
+              const assetJsonName = await this.getAssetJsonName()
+              data[assetJsonName] = contribution
+
+              const transaction = await this.runtime.transaction.create(data)
+
+              const transactions = await this.runtime.transaction.receiveTransactions([transaction])
+              cb(null, transactions)
+            } catch (e) {
+              cb(e)
+            }
+          } else {
+            let account
+            try {
+              account = await this.runtime.account.getAccountByPublicKey(keypair.publicKey.toString('hex'))
+            } catch (e) {
+              return cb(e)
+            }
+
+            if (!account) {
+              return cb('Account not found')
+            }
+
+            if (account.second_signature && !body.secondSecret) {
+              return cb('Invalid second passphrase')
+            }
+
+            let second_keypair = null
+            if (account.secondSignature) {
+              second_keypair = DdnCrypto.getKeys(body.secondSecret)
+            }
+
+            contribution.sender_address = account.address
+
+            try {
+              const data = {
+                type: await this.getTransactionType(),
+                sender: account,
+                keypair,
+                second_keypair
+              }
+              const assetJsonName = await this.getAssetJsonName()
+              data[assetJsonName] = contribution
+
+              const transaction = await this.runtime.transaction.create(data)
+
+              const transactions = await this.runtime.transaction.receiveTransactions([transaction])
+              cb(null, transactions)
+            } catch (e) {
+              cb(e)
+            }
           }
-        }
-      }, (err, transactions) => {
-        if (err) {
-          return reject(err)
-        }
+        },
+        (err, transactions) => {
+          if (err) {
+            return reject(err)
+          }
 
-        resolve({
-          success: true,
-          transactionId: transactions[0].id
-        })
-      })
+          resolve({
+            success: true,
+            transactionId: transactions[0].id
+          })
+        }
+      )
     })
   }
 }

@@ -2,7 +2,7 @@ import path from 'path'
 import fs from 'fs'
 import request from 'request'
 import DecompressZip from 'decompress-zip'
-import DdnCrypto from '@ddn/crypto'
+import * as DdnCrypto from '@ddn/crypto'
 import Asset from '@ddn/asset-base'
 import Sandbox from '@ddn/sandbox'
 import DdnUtils from '@ddn/utils'
@@ -24,48 +24,49 @@ class Dapp extends Asset.Base {
   }
 
   async propsMapping () {
-    return [{
-      field: 'str1',
-      prop: 'name',
-      required: true
-    },
-    {
-      field: 'str6',
-      prop: 'description'
-    },
-    {
-      field: 'str7',
-      prop: 'tags'
-    },
-    {
-      field: 'str8',
-      prop: 'link',
-      required: true
-    },
-    {
-      field: 'int1',
-      prop: 'type',
-      required: true
-    },
-    {
-      field: 'int2',
-      prop: 'category',
-      required: true
-    },
-    {
-      field: 'str9',
-      prop: 'icon'
-    },
-    {
-      field: 'str_ext',
-      prop: 'delegates',
-      required: true
-    },
-    {
-      field: 'int3',
-      prop: 'unlock_delegates',
-      required: true
-    }
+    return [
+      {
+        field: 'str1',
+        prop: 'name',
+        required: true
+      },
+      {
+        field: 'str6',
+        prop: 'description'
+      },
+      {
+        field: 'str7',
+        prop: 'tags'
+      },
+      {
+        field: 'str8',
+        prop: 'link',
+        required: true
+      },
+      {
+        field: 'int1',
+        prop: 'type',
+        required: true
+      },
+      {
+        field: 'int2',
+        prop: 'category',
+        required: true
+      },
+      {
+        field: 'str9',
+        prop: 'icon'
+      },
+      {
+        field: 'str_ext',
+        prop: 'delegates',
+        required: true
+      },
+      {
+        field: 'int3',
+        prop: 'unlock_delegates',
+        required: true
+      }
     ]
   }
 
@@ -119,8 +120,8 @@ class Dapp extends Asset.Base {
 
       if (
         dapp.icon.indexOf('.png') !== length - 4 &&
-                dapp.icon.indexOf('.jpg') !== length - 4 &&
-                dapp.icon.indexOf('.jpeg') !== length - 5
+        dapp.icon.indexOf('.jpg') !== length - 4 &&
+        dapp.icon.indexOf('.jpeg') !== length - 5
       ) {
         throw new Error('Invalid icon file type')
       }
@@ -165,7 +166,7 @@ class Dapp extends Asset.Base {
     if (dapp.tags) {
       let tags = dapp.tags.split(',')
 
-      tags = tags.map((tag) => tag.trim()).sort()
+      tags = tags.map(tag => tag.trim()).sort()
 
       for (let i = 0; i < tags.length - 1; i++) {
         if (tags[i + 1] === tags[i]) {
@@ -179,8 +180,7 @@ class Dapp extends Asset.Base {
       throw new Error('Have no dapp delegates')
     } else {
       delegatesArr = typeof dapp.delegates === 'string' ? dapp.delegates.split(',') : dapp.delegates
-      if (delegatesArr.length < 5 ||
-                delegatesArr.length > this.constants.delegates) {
+      if (delegatesArr.length < 5 || delegatesArr.length > this.constants.delegates) {
         throw new Error('Invalid dapp delegates amount')
       }
 
@@ -473,14 +473,22 @@ class Dapp extends Asset.Base {
     const offset = req.query.offset || 0
 
     return new Promise((resolve, reject) => {
-      this.dao.findPage('mem_asset_balance', { address: dappId }, limit, offset, true,
-        ['currency', 'balance'], null, (err, rows) => {
+      this.dao.findPage(
+        'mem_asset_balance',
+        { address: dappId },
+        limit,
+        offset,
+        true,
+        ['currency', 'balance'],
+        null,
+        (err, rows) => {
           if (err) {
             return reject(err)
           }
 
           resolve({ success: true, result: rows })
-        })
+        }
+      )
     })
   }
 
@@ -489,42 +497,43 @@ class Dapp extends Asset.Base {
     const { currency } = req.params
 
     return new Promise((resolve, reject) => {
-      this.dao.findOne('mem_asset_balance', { address: dappId, currency },
-        ['balance'], (err, row) => {
-          if (err) {
-            console.log('err', err)
-            return reject(err)
-          }
-          console.log('row', row)
+      this.dao.findOne('mem_asset_balance', { address: dappId, currency }, ['balance'], (err, row) => {
+        if (err) {
+          console.log('err', err)
+          return reject(err)
+        }
+        console.log('row', row)
 
-          resolve({ success: true, result: { currency, balance: row.balance } })
-        })
+        resolve({ success: true, result: { currency, balance: row.balance } })
+      })
     })
   }
 
   async getLaunchDappLastError (req) {
     const { query } = req
 
-    const validateErrors = await this.ddnSchema.validate({
-      type: 'object',
-      properties: {
-        id: {
-          type: 'string',
-          minLength: 1
+    const validateErrors = await this.ddnSchema.validate(
+      {
+        type: 'object',
+        properties: {
+          id: {
+            type: 'string',
+            minLength: 1
+          },
+          master: {
+            type: 'string',
+            minLength: 0
+          }
         },
-        master: {
-          type: 'string',
-          minLength: 0
-        }
+        required: ['id']
       },
-      required: ['id']
-    }, query)
+      query
+    )
     if (validateErrors) {
       throw new Error(`Invalid parameters: ${validateErrors[0].schemaPath} ${validateErrors[0].message}`)
     }
 
-    if (this.config.dapp.masterpassword &&
-            query.master !== this.config.dapp.masterpassword) {
+    if (this.config.dapp.masterpassword && query.master !== this.config.dapp.masterpassword) {
       throw new Error('Invalid master password')
     }
 
@@ -537,30 +546,32 @@ class Dapp extends Asset.Base {
   async postLaunchDapp (req) {
     const { body } = req
 
-    const validateErrors = await this.ddnSchema.validate({
-      type: 'object',
-      properties: {
-        id: {
-          type: 'string',
-          minLength: 1
+    const validateErrors = await this.ddnSchema.validate(
+      {
+        type: 'object',
+        properties: {
+          id: {
+            type: 'string',
+            minLength: 1
+          },
+          params: {
+            type: 'array',
+            minLength: 1
+          },
+          master: {
+            type: 'string',
+            minLength: 0
+          }
         },
-        params: {
-          type: 'array',
-          minLength: 1
-        },
-        master: {
-          type: 'string',
-          minLength: 0
-        }
+        required: ['id']
       },
-      required: ['id']
-    }, body)
+      body
+    )
     if (validateErrors) {
       throw new Error(`Invalid parameters: ${validateErrors[0].schemaPath} ${validateErrors[0].message}`)
     }
 
-    if (this.config.dapp.masterpassword &&
-            body.master !== this.config.dapp.masterpassword) {
+    if (this.config.dapp.masterpassword && body.master !== this.config.dapp.masterpassword) {
       throw new Error('Invalid master password')
     }
 
@@ -653,8 +664,8 @@ class Dapp extends Asset.Base {
   }
 
   /**
-     * 增加运行标记文件
-     */
+   * 增加运行标记文件
+   */
   async _addLaunchedMarkFile (dappPath) {
     const file = await this._getLaunchedMarkFile(dappPath)
     if (!fs.existsSync(file)) {
@@ -669,8 +680,8 @@ class Dapp extends Asset.Base {
   }
 
   /**
-     * 移除运行标记文件
-     */
+   * 移除运行标记文件
+   */
   async _removeLaunchedMarkFile (dappPath) {
     const file = await this._getLaunchedMarkFile(dappPath)
     if (fs.existsSync(file)) {
@@ -717,18 +728,21 @@ class Dapp extends Asset.Base {
                   const result = await new Promise((resolve, reject) => {
                     const sandbox = _dappLaunched[id]
                     if (sandbox) {
-                      sandbox.request({
-                        method: subRouter.method,
-                        path: subRouter.path,
-                        query: req.query,
-                        body: req.body
-                      }, (err, data) => {
-                        if (err) {
-                          return reject(err)
-                        }
+                      sandbox.request(
+                        {
+                          method: subRouter.method,
+                          path: subRouter.path,
+                          query: req.query,
+                          body: req.body
+                        },
+                        (err, data) => {
+                          if (err) {
+                            return reject(err)
+                          }
 
-                        resolve(data)
-                      })
+                          resolve(data)
+                        }
+                      )
                     } else {
                       reject(new Error('DApp not launched'))
                     }
@@ -752,27 +766,29 @@ class Dapp extends Asset.Base {
   async postStopDapp (req) {
     const { body } = req
 
-    const validateErrors = await this.ddnSchema.validate({
-      type: 'object',
-      properties: {
-        id: {
-          type: 'string',
-          minLength: 1
+    const validateErrors = await this.ddnSchema.validate(
+      {
+        type: 'object',
+        properties: {
+          id: {
+            type: 'string',
+            minLength: 1
+          },
+          master: {
+            type: 'string',
+            minLength: 0
+          }
         },
-        master: {
-          type: 'string',
-          minLength: 0
-        }
+        required: ['id']
       },
-      required: ['id']
-    }, body)
+      body
+    )
 
     if (validateErrors) {
       throw new Error(`Invalid parameters: ${validateErrors[0].schemaPath} ${validateErrors[0].message}`)
     }
 
-    if (this.config.dapp.masterpassword &&
-            body.master !== this.config.dapp.masterpassword) {
+    if (this.config.dapp.masterpassword && body.master !== this.config.dapp.masterpassword) {
       throw new Error('Invalid master password')
     }
 
@@ -814,46 +830,49 @@ class Dapp extends Asset.Base {
   async getDappList (req) {
     const { query } = req
 
-    const validateErrors = await this.ddnSchema.validate({
-      type: 'object',
-      properties: {
-        category: {
-          type: 'string',
-          minLength: 1
-        },
-        name: {
-          type: 'string',
-          minLength: 1,
-          maxLength: 32
-        },
-        type: {
-          type: 'integer',
-          minimum: 0
-        },
-        link: {
-          type: 'string',
-          maxLength: 2000,
-          minLength: 1
-        },
-        icon: {
-          type: 'string',
-          minLength: 1
-        },
-        sort: {
-          type: 'string',
-          minLength: 1
-        },
-        pagesize: {
-          type: 'integer',
-          minimum: 0,
-          maximum: 100
-        },
-        pageindex: {
-          type: 'integer',
-          minimum: 1
+    const validateErrors = await this.ddnSchema.validate(
+      {
+        type: 'object',
+        properties: {
+          category: {
+            type: 'string',
+            minLength: 1
+          },
+          name: {
+            type: 'string',
+            minLength: 1,
+            maxLength: 32
+          },
+          type: {
+            type: 'integer',
+            minimum: 0
+          },
+          link: {
+            type: 'string',
+            maxLength: 2000,
+            minLength: 1
+          },
+          icon: {
+            type: 'string',
+            minLength: 1
+          },
+          sort: {
+            type: 'string',
+            minLength: 1
+          },
+          pagesize: {
+            type: 'integer',
+            minimum: 0,
+            maximum: 100
+          },
+          pageindex: {
+            type: 'integer',
+            minimum: 1
+          }
         }
-      }
-    }, query)
+      },
+      query
+    )
     if (validateErrors) {
       throw new Error(`Invalid parameters: ${validateErrors[0].schemaPath} ${validateErrors[0].message}`)
     }
@@ -941,16 +960,19 @@ class Dapp extends Asset.Base {
   async getDappById (req) {
     const query = req.params
 
-    const validateErrors = await this.ddnSchema.validate({
-      type: 'object',
-      properties: {
-        id: {
-          type: 'string',
-          minLength: 1
-        }
+    const validateErrors = await this.ddnSchema.validate(
+      {
+        type: 'object',
+        properties: {
+          id: {
+            type: 'string',
+            minLength: 1
+          }
+        },
+        required: ['id']
       },
-      required: ['id']
-    }, query)
+      query
+    )
     if (validateErrors) {
       throw new Error(`Invalid parameters: ${validateErrors[0].schemaPath} ${validateErrors[0].message}`)
     }
@@ -972,11 +994,13 @@ class Dapp extends Asset.Base {
 
     if (fs.existsSync(path)) {
       files = fs.readdirSync(path)
-      files.forEach((file) => {
+      files.forEach(file => {
         const curPath = `${path}/${file}`
-        if (fs.statSync(curPath).isDirectory()) { // recurse
+        if (fs.statSync(curPath).isDirectory()) {
+          // recurse
           self.delDir(curPath)
-        } else { // delete file
+        } else {
+          // delete file
           fs.unlinkSync(curPath)
         }
       })
@@ -1005,13 +1029,15 @@ class Dapp extends Asset.Base {
     const downloadErr = await new Promise((resolve, reject) => {
       const downloadRequest = request.get(source)
 
-      downloadRequest.on('response', (res) => {
+      downloadRequest.on('response', res => {
         if (res.statusCode !== 200) {
           return reject(new Error(`Faile to download dapp ${source} with err code: ${res.statusCode}`))
         }
       })
 
-      downloadRequest.on('error', (err) => reject(new Error(`Failed to download dapp ${source} with error: ${err.message}`)))
+      downloadRequest.on('error', err =>
+        reject(new Error(`Failed to download dapp ${source} with error: ${err.message}`))
+      )
 
       const file = fs.createWriteStream(target)
       file.on('finish', () => {
@@ -1037,7 +1063,7 @@ class Dapp extends Asset.Base {
     return new Promise((resolve, reject) => {
       const unzipper = new DecompressZip(zippath)
 
-      unzipper.on('error', (err) => reject(new Error(`Failed to decompress zip file: ${err}`)))
+      unzipper.on('error', err => reject(new Error(`Failed to decompress zip file: ${err}`)))
 
       unzipper.on('extract', () => {
         resolve()
@@ -1046,7 +1072,7 @@ class Dapp extends Asset.Base {
       unzipper.extract({
         path: extractpath,
         strip: 1,
-        filter: (file) => file.type !== 'Directory'
+        filter: file => file.type !== 'Directory'
       })
     })
   }
@@ -1062,7 +1088,7 @@ class Dapp extends Asset.Base {
     })
 
     await new Promise((resolve, reject) => {
-      fs.mkdir(dappPath, (err) => {
+      fs.mkdir(dappPath, err => {
         if (err) {
           return reject(err)
         }
@@ -1102,20 +1128,23 @@ class Dapp extends Asset.Base {
   async postUninstallDapp (req, res) {
     const { body } = req
 
-    const validateErrors = await this.ddnSchema.validate({
-      type: 'object',
-      properties: {
-        id: {
-          type: 'string',
-          minLength: 1
+    const validateErrors = await this.ddnSchema.validate(
+      {
+        type: 'object',
+        properties: {
+          id: {
+            type: 'string',
+            minLength: 1
+          },
+          master: {
+            type: 'string',
+            minLength: 1
+          }
         },
-        master: {
-          type: 'string',
-          minLength: 1
-        }
+        required: ['id']
       },
-      required: ['id']
-    }, body)
+      body
+    )
     if (validateErrors) {
       throw new Error(`Invalid parameters: ${validateErrors[0].schemaPath} ${validateErrors[0].message}`)
     }
@@ -1152,20 +1181,23 @@ class Dapp extends Asset.Base {
   async postInstallDapp (req, res) {
     const { body } = req
 
-    const validateErrors = await this.ddnSchema.validate({
-      type: 'object',
-      properties: {
-        id: {
-          type: 'string',
-          minLength: 1
+    const validateErrors = await this.ddnSchema.validate(
+      {
+        type: 'object',
+        properties: {
+          id: {
+            type: 'string',
+            minLength: 1
+          },
+          master: {
+            type: 'string',
+            minLength: 1
+          }
         },
-        master: {
-          type: 'string',
-          minLength: 1
-        }
+        required: ['id']
       },
-      required: ['id']
-    }, body)
+      body
+    )
     if (validateErrors) {
       throw new Error(`Invalid parameters: ${validateErrors[0].schemaPath} ${validateErrors[0].message}`)
     }
@@ -1202,57 +1234,60 @@ class Dapp extends Asset.Base {
   async putDapp (req) {
     const { body } = req
 
-    const validateErrors = await this.ddnSchema.validate({
-      type: 'object',
-      properties: {
-        secret: {
-          type: 'string',
-          minLength: 1
+    const validateErrors = await this.ddnSchema.validate(
+      {
+        type: 'object',
+        properties: {
+          secret: {
+            type: 'string',
+            minLength: 1
+          },
+          secondSecret: {
+            type: 'string',
+            minLength: 1
+          },
+          publicKey: {
+            type: 'string',
+            format: 'publicKey'
+          },
+          category: {
+            type: 'integer',
+            minimum: 0
+          },
+          name: {
+            type: 'string',
+            minLength: 1,
+            maxLength: 32
+          },
+          description: {
+            type: 'string',
+            minLength: 0,
+            maxLength: 160
+          },
+          tags: {
+            type: 'string',
+            minLength: 0,
+            maxLength: 160
+          },
+          type: {
+            type: 'integer',
+            minimum: 0
+          },
+          link: {
+            type: 'string',
+            maxLength: 2000,
+            minLength: 1
+          },
+          icon: {
+            type: 'string',
+            minLength: 1,
+            maxLength: 2000
+          }
         },
-        secondSecret: {
-          type: 'string',
-          minLength: 1
-        },
-        publicKey: {
-          type: 'string',
-          format: 'publicKey'
-        },
-        category: {
-          type: 'integer',
-          minimum: 0
-        },
-        name: {
-          type: 'string',
-          minLength: 1,
-          maxLength: 32
-        },
-        description: {
-          type: 'string',
-          minLength: 0,
-          maxLength: 160
-        },
-        tags: {
-          type: 'string',
-          minLength: 0,
-          maxLength: 160
-        },
-        type: {
-          type: 'integer',
-          minimum: 0
-        },
-        link: {
-          type: 'string',
-          maxLength: 2000,
-          minLength: 1
-        },
-        icon: {
-          type: 'string',
-          minLength: 1,
-          maxLength: 2000
-        }
+        required: ['secret', 'type', 'name', 'category']
       },
-      required: ['secret', 'type', 'name', 'category']
-    }, body)
+      body
+    )
     if (validateErrors) {
       throw new Error(`Invalid parameters: ${validateErrors[0].schemaPath} ${validateErrors[0].message}`)
     }
@@ -1266,61 +1301,64 @@ class Dapp extends Asset.Base {
     }
 
     return new Promise((resolve, reject) => {
-      this.balancesSequence.add(async (cb) => {
-        let account
-        try {
-          account = await this.runtime.account.getAccountByPublicKey(keypair.publicKey.toString('hex'))
-        } catch (e) {
-          return cb(e)
-        }
-
-        if (!account) {
-          return cb('Account not found')
-        }
-
-        if (account.second_signature && !body.secondSecret) {
-          return cb(new Error('Invalid second passphrase'))
-        }
-
-        let second_keypair = null
-        if (account.secondSignature) {
-          second_keypair = DdnCrypto.getKeys(body.secondSecret)
-        }
-
-        try {
-          const data = {
-            type: await this.getTransactionType(),
-            sender: account,
-            keypair,
-            second_keypair
-          }
-          const assetJsonName = await this.getAssetJsonName()
-          data[assetJsonName] = {
-            category: body.category,
-            name: body.name,
-            description: body.description,
-            tags: body.tags,
-            type: body.type,
-            link: body.link,
-            icon: body.icon,
-            delegates: body.delegates,
-            unlock_delegates: body.unlock_delegates
+      this.balancesSequence.add(
+        async cb => {
+          let account
+          try {
+            account = await this.runtime.account.getAccountByPublicKey(keypair.publicKey.toString('hex'))
+          } catch (e) {
+            return cb(e)
           }
 
-          const transaction = await this.runtime.transaction.create(data)
-          const transactions = await this.runtime.transaction.receiveTransactions([transaction])
+          if (!account) {
+            return cb('Account not found')
+          }
 
-          cb(null, transactions)
-        } catch (e) {
-          cb(e)
-        }
-      }, (err, transactions) => {
-        if (err) {
-          return reject(err)
-        }
+          if (account.second_signature && !body.secondSecret) {
+            return cb(new Error('Invalid second passphrase'))
+          }
 
-        resolve({ success: true, transactionId: transactions[0].id })
-      })
+          let second_keypair = null
+          if (account.secondSignature) {
+            second_keypair = DdnCrypto.getKeys(body.secondSecret)
+          }
+
+          try {
+            const data = {
+              type: await this.getTransactionType(),
+              sender: account,
+              keypair,
+              second_keypair
+            }
+            const assetJsonName = await this.getAssetJsonName()
+            data[assetJsonName] = {
+              category: body.category,
+              name: body.name,
+              description: body.description,
+              tags: body.tags,
+              type: body.type,
+              link: body.link,
+              icon: body.icon,
+              delegates: body.delegates,
+              unlock_delegates: body.unlock_delegates
+            }
+
+            const transaction = await this.runtime.transaction.create(data)
+            const transactions = await this.runtime.transaction.receiveTransactions([transaction])
+
+            cb(null, transactions)
+          } catch (e) {
+            cb(e)
+          }
+        },
+        (err, transactions) => {
+          if (err) {
+            return reject(err)
+          }
+
+          resolve({ success: true, transactionId: transactions[0].id })
+        }
+      )
     })
   }
 
@@ -1342,24 +1380,27 @@ class Dapp extends Asset.Base {
       if (sandbox) {
         try {
           await new Promise((resolve, reject) => {
-            sandbox.request({
-              method: 'post',
-              path: '/message',
-              query: null,
-              body: {
-                message: 'newblock',
-                data: {
-                  block_id: block.id,
-                  block_height: block.height,
-                  number_of_transactions: block.number_of_transactions
+            sandbox.request(
+              {
+                method: 'post',
+                path: '/message',
+                query: null,
+                body: {
+                  message: 'newblock',
+                  data: {
+                    block_id: block.id,
+                    block_height: block.height,
+                    number_of_transactions: block.number_of_transactions
+                  }
                 }
+              },
+              (err, data) => {
+                if (err) {
+                  return reject(err)
+                }
+                resolve(data)
               }
-            }, (err, data) => {
-              if (err) {
-                return reject(err)
-              }
-              resolve(data)
-            })
+            )
           })
         } catch (err2) {
           this.logger.error(err2)

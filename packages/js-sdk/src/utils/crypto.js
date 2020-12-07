@@ -1,7 +1,8 @@
 import crypto from 'crypto'
 import RIPEMD160 from 'ripemd160'
 import Mnemonic from 'bitcore-mnemonic'
-import DdnCrypto, { nacl } from '@ddn/crypto'
+import * as DdnCrypto from '@ddn/crypto'
+import { nacl } from '@ddn/crypto'
 
 import { constants } from '../config'
 import { getBytes } from '../bytes'
