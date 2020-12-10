@@ -1092,21 +1092,20 @@ class AssetBase {
         }
       }
     }
-
+		const result = await this.dao.insert("trs_asset", assetInst, dbTrans);
     if (hasJsonExt) {
       const assetExtInst = {
         transaction_id: trs.id,
         json_ext: JSON.stringify(jsonExtObj)
       };
 
-      const result = await this.dao.insert(
+      const result2 = await this.dao.insert(
         "trs_asset_ext",
         assetExtInst,
         dbTrans
       );
-      return result;
+      return result2;
     } else {
-      const result = await this.dao.insert("trs_asset", assetInst, dbTrans);
       return result;
     }
   }
