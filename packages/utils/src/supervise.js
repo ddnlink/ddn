@@ -1,7 +1,7 @@
-const baseUrl = ' http://114.55.142.90' // 监管的host
+// const baseUrl = ' http://114.55.142.90' // 监管的host
 const request = require('request-promise')
 // 敏感词检测
-export async function checkWord (that, worlds) {
+export async function checkWord (that, worlds, baseUrl) {
   const url = '/v1/reg/kw'
   var options = {
     method: 'POST',
@@ -69,7 +69,7 @@ export async function checkWord (that, worlds) {
   return result
 }
 // 上报交易
-export async function reportWord ({ trs, message, taskId, status, success, that }) {
+export async function reportWord ({ trs, message, taskId, status, success, that, baseUrl }) {
   // if (trs.length === 0 && success) {
   //   return
   // }
@@ -111,7 +111,7 @@ export async function reportWord ({ trs, message, taskId, status, success, that 
   }
   return data
 }
-export async function beforeSaveReportWord ({ txHash, fromAcct = 0x0, toAcct = 0x0, content, type = 'normal', op = 'accept', createdAt = parseInt(new Date().getTime() / 1000), that }) {
+export async function beforeSaveReportWord ({ txHash, fromAcct = 0x0, toAcct = 0x0, content, type = 'normal', op = 'accept', createdAt = parseInt(new Date().getTime() / 1000), that, baseUrl }) {
   // if (trs.length === 0 && success) {
   //   return
   // }
@@ -157,19 +157,19 @@ export async function beforeSaveReportWord ({ txHash, fromAcct = 0x0, toAcct = 0
   return data
 }
 // 交易上链前敏感词检测
-export async function checkAndReport (transaction, that, cb) {
+export async function checkAndReport (transaction, that, cb, baseUrl) {
   if (transaction.message) {
-    const res = await checkWord(that, [{ content: transaction.message, txHash: transaction.id }])
+    const res = await checkWord(that, [{ content: transaction.message, txHash: transaction.id }], baseUrl)
     let sensitive = false
     if (res.code === 0) {
       const hits = res.originalData.data.hits
       for (let index = 0; index < hits.length; index++) {
         const element = hits[index]
         if (element.level === 10 || element.level === 0) {
-          beforeSaveReportWord({ txHash: element.txHash, fromAcct: transaction.sender, toAcct: transaction.recipientId, content: transaction.message, type: 'normal', op: 'reject', that })
+          beforeSaveReportWord({ txHash: element.txHash, fromAcct: transaction.sender, toAcct: transaction.recipientId, content: transaction.message, type: 'normal', op: 'reject', that, baseUrl })
           sensitive = true
         } else if (element.level === 1 || element.level === 2) {
-          beforeSaveReportWord({ txHash: element.txHash, fromAcct: transaction.sender, toAcct: transaction.recipientId, content: transaction.message, type: 'normal', op: 'accept', that })
+          beforeSaveReportWord({ txHash: element.txHash, fromAcct: transaction.sender, toAcct: transaction.recipientId, content: transaction.message, type: 'normal', op: 'accept', that, baseUrl })
         }
       }
       if (sensitive) {

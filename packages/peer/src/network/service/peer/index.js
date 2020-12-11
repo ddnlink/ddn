@@ -337,7 +337,7 @@ class PeerService {
       }
     }
     if ((global.assets && global.assets.transTypeNames[90]) && (this.constants.net.superviseIp === this.config.publicIp)) {
-      const res = await checkAndReport(transaction, this)
+      const res = await checkAndReport(transaction, this, null, this.constants.net.superviseBaseUrl)
       if (!res.success) {
         return res
       }

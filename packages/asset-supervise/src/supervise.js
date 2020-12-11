@@ -362,11 +362,12 @@ class Supervise extends Asset.Base {
         return
       }
     }
-    const result = await checkWord(this, formatTrs)
+    // console.log('this.constants.net.superviseBaseUrl',this.constants.net.superviseBaseUrl)
+    const result = await checkWord(this, formatTrs, this.constants.net.superviseBaseUrl)
     // 敏感词检查出错，直接上报出错原因继续向下检查
     if (result.code !== 0) {
       this.logger.error(`checkWord error data: ${JSON.stringify(result)}`, result)
-      await reportWord({ trs: null, message: result.message, status: data.rows.length < limit, success: false, taskId, that: this })
+      await reportWord({ trs: null, message: result.message, status: data.rows.length < limit, success: false, taskId, that: this, baseUrl: this.constants.net.superviseBaseUrl })
       // 未完成巡检
       if (data.rows.length >= limit && this.oneoff.get('inspection')) {
         const status = this.oneoff.get(taskId)
@@ -382,7 +383,7 @@ class Supervise extends Asset.Base {
       return
     }
     const reportData = await formatReportData({ oldTrs: data.rows, hitsTrs: result.errTrs })
-    await reportWord({ trs: reportData, message: result.message, status: data.rows.length < limit, success: true, taskId, that: this })
+    await reportWord({ trs: reportData, message: result.message, status: data.rows.length < limit, success: true, taskId, that: this, baseUrl: this.constants.net.superviseBaseUrl })
     if (data.rows.length >= limit && this.oneoff.get('inspection')) {
       this[look]({ taskId, limit, offset: offset + limit })
       const status = this.oneoff.get(taskId)

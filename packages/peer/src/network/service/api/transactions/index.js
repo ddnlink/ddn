@@ -393,7 +393,7 @@ class TransactionService {
                 message: body.message
               })
               if ((global.assets && global.assets.transTypeNames[90]) && (this.constants.net.superviseIp === this.config.publicIp)) {
-                await checkAndReport(transaction, this, cb)
+                await checkAndReport(transaction, this, cb, this.constants.net.superviseBaseUrl)
               }
               const transactions = await this.runtime.transaction.receiveTransactions([transaction])
               cb(null, transactions)
@@ -434,7 +434,7 @@ class TransactionService {
               })
               // 判断配置@ddn/asset-supervise插件的并且publicip等于监管ip的才检测敏感词
               if ((global.assets && global.assets.transTypeNames[90]) && (this.constants.net.superviseIp === this.config.publicIp)) {
-                await checkAndReport(transaction, this, cb)
+                await checkAndReport(transaction, this, cb, this.constants.net.superviseBaseUrl)
               }
               const transactions = await this.runtime.transaction.receiveTransactions([transaction])
               cb(null, transactions)
