@@ -13,7 +13,7 @@ module.exports = {
   */
   port: 8001,
   address: "0.0.0.0",
-  publicIp: "",
+  publicIp: "127.0.0.1",
   logLevel: "debug",
   net: "testnet",
   nethash: "0ab796cd",
@@ -225,6 +225,7 @@ module.exports = {
     "@ddn/asset-evidence",
     "@ddn/asset-aob",
     "@ddn/asset-dapp",
-    "@ddn/asset-dao"
+    "@ddn/asset-dao",
+    "@ddn/asset-supervise",
   ],
 };

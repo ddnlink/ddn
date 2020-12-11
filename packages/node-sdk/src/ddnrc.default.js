@@ -228,6 +228,7 @@ module.exports = {
     '@ddn/asset-evidence',
     '@ddn/asset-aob',
     '@ddn/asset-dapp',
-    '@ddn/asset-dao'
+    '@ddn/asset-dao',
+    '@ddn/asset-supervise'
   ]
 }

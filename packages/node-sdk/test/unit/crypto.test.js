@@ -3,7 +3,7 @@ import sha256 from 'fast-sha256'
 import crypto from 'crypto'
 import { Buffer } from 'buffer'
 import Debug from 'debug'
-import * as DdnCrypto from '@ddn/crypto'
+import ddnCrypto from '@ddn/crypto'
 import { DdnJS, node } from '../ddn-js'
 
 const debug = Debug('debug')
@@ -16,7 +16,10 @@ describe('crypto', () => {
   describe('#sha256.hash', function () {
     it("sha256.hash is crypto.createHash('sha256') ", () => {
       const str = 'data'
-      const h1 = crypto.createHash('sha256').update(str).digest()
+      const h1 = crypto
+        .createHash('sha256')
+        .update(str)
+        .digest()
 
       const h2 = Buffer.from(sha256.hash(Buffer.from(str)))
       const h3 = sha256.hash(Buffer.from(str))
@@ -51,7 +54,7 @@ describe('crypto', () => {
   })
 
   describe('#getHash', () => {
-    const getHash = DdnCrypto.getHash
+    const getHash = ddnCrypto.getHash
 
     it('should be a function', () => {
       expect(typeof getHash).toBe('function')
@@ -66,14 +69,14 @@ describe('crypto', () => {
   })
 
   describe('#sign', () => {
-    const sign = DdnCrypto.sign
+    const sign = ddnCrypto.sign
 
     it('should be a function', () => {
       expect(typeof sign).toBe('function')
     })
 
     it('length should be 64', async function () {
-      const keypair = await DdnCrypto.getKeys('secret')
+      const keypair = await ddnCrypto.getKeys('secret')
       const trs = await createTransfer(node.Eaccount.address, '10000000000000', node.Gaccount.password)
       const signature = await sign(trs, keypair)
       const str = Buffer.from(signature, 'hex') // 必须解密
@@ -81,8 +84,7 @@ describe('crypto', () => {
     })
 
     it('signature should be 64', () => {
-      const sign =
-        'a803070ed9ce06792363f7601c1e45ead7f7d5293455c64da95ad0fc635c82aaeb5dd21cae6afc1fe50a36049f890c047efb3b2480bc32d4904440ebc371f205'
+      const sign = 'a803070ed9ce06792363f7601c1e45ead7f7d5293455c64da95ad0fc635c82aaeb5dd21cae6afc1fe50a36049f890c047efb3b2480bc32d4904440ebc371f205'
       const str = Buffer.from(sign, 'hex')
       debug('str', str)
       expect(str.length).toEqual(64)
@@ -92,8 +94,8 @@ describe('crypto', () => {
   describe('#getKeys', function () {
     it('The same secret should get a same keyPairs', () => {
       const secret = 'you cousin patch lemon luxury picture impact lens slogan exotic purse hole'
-      const kp = DdnCrypto.getKeys(secret)
-      const kp1 = DdnCrypto.getKeys(secret)
+      const kp = ddnCrypto.getKeys(secret)
+      const kp1 = ddnCrypto.getKeys(secret)
 
       debug(kp.publicKey, kp1.publicKey)
 
@@ -102,8 +104,8 @@ describe('crypto', () => {
     })
 
     it('Multi toString("hex") should be equal', done => {
-      const Phasekey = DdnCrypto.generateSecret()
-      const publicKey = DdnCrypto.getKeys(Phasekey).publicKey
+      const Phasekey = ddnCrypto.generateSecret()
+      const publicKey = ddnCrypto.getKeys(Phasekey).publicKey
 
       node.expect(publicKey).to.be.a('string')
 
