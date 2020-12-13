@@ -59,4 +59,4 @@ config/deploy
 **/**/*.hbl.js
 **/**/*.custom.js
 examples/peer*
-.ddnrc.js
+# .ddnrc.js
