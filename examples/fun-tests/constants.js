@@ -47,6 +47,7 @@ module.exports = {
     compatibleVersion: '0.0.0', // Peer isCompatible?
     superviseIp: '106.15.227.133', // Supervise ip
     superviseBaseUrl: 'http://114.55.142.90', // Supervise address
+    superviseKey: 'lWfSp3x4QfMZLIvtt1LP5CrzArnxKCMNjCdjwFw9upInWxTKlXvE1PIfpObTpSZllyVz7ZmxSkFKOadYoqKYJw', // Supervise appky
     // Fees for transacton
     fees: {
       // base
@@ -100,6 +101,7 @@ module.exports = {
     compatibleVersion: '0.0.0', // Peer isCompatible?
     superviseIp: '120.79.169.235',
     superviseBaseUrl: 'http://114.55.142.90', // Supervise address
+    superviseKey: 'QkDpXbX7cUyLU1F2526x52+WBMTygrWiVKpHYDyWHKja8UKgx8WassEAv1itlkeLJBwwFPfODQbIR25UH88KsA==', // Supervise appky
     // Fees for transacton
     fees: {
       // base

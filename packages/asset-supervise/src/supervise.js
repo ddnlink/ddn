@@ -4,7 +4,7 @@ import DdnUtils, { checkWord, reportWord } from '@ddn/utils'
 const DdnJS = require('@ddn/node-sdk').default
 const crypto = require('crypto')
 const request = require('request-promise')
-const key = 'lWfSp3x4QfMZLIvtt1LP5CrzArnxKCMNjCdjwFw9upInWxTKlXvE1PIfpObTpSZllyVz7ZmxSkFKOadYoqKYJw=='
+let key = 'lWfSp3x4QfMZLIvtt1LP5CrzArnxKCMNjCdjwFw9upInWxTKlXvE1PIfpObTpSZllyVz7ZmxSkFKOadYoqKYJw=='
 const secret = DdnJS.crypto.generateSecret()
 const look = Symbol('look')
 const lookTts = Symbol('lookTts')
@@ -14,6 +14,10 @@ class Supervise extends Asset.Base {
     super(context, transactionConfig)
     this.customApi = '/v1/sys' // 自定义路由前缀，默认为api/${assetName}
     this.oneoff = new Map() // 覆盖全局的oneff
+    Object.assign(this, context)
+    this._context=context
+    key=this._context?this.constants.net.superviseKey:null
+    // console.log('supervisekey=======',this.constants)
   }
 
   async calculateFee () {
