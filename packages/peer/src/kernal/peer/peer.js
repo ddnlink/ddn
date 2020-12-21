@@ -108,7 +108,7 @@ class Peer {
       this.dao.findOne(
         'peer',
         {
-          ip: config.ip,
+          ip: ip.toLong(config.ip),
           port: config.port
         },
         null,
@@ -116,7 +116,6 @@ class Peer {
           if (err) {
             return reject(err)
           }
-
           if (data) {
             this.dao.findOne(
               'peers_dapp',
@@ -128,7 +127,6 @@ class Peer {
                 if (err2) {
                   return reject(err2)
                 }
-
                 if (!data2) {
                   this.dao.insert(
                     'peers_dapp',
@@ -243,7 +241,11 @@ class Peer {
    * @param {*} dappId
    * @param {*} allowSelf
    */
-  async request (args, dappId, allowSelf) {
+  async request (args, dappId, allowSelf, cb) {
+    if (typeof cb === 'function') {
+      const data = await PeerInvoker.singleton(this._context).invoke(args, dappId, allowSelf)
+      return cb(null, data)
+    }
     return await PeerInvoker.singleton(this._context).invoke(args, dappId, allowSelf)
   }
 
@@ -524,8 +526,8 @@ class Peer {
     if (typeof this[call] !== 'function') {
       return cb(`Function not found in module: ${call}`)
     }
-
-    const callArgs = [args, cb]
+    console.log(args)
+    const callArgs = [args.body, args.dappId, true, cb]
     return this[call].apply(this, callArgs)
   }
 }

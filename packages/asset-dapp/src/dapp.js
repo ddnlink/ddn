@@ -632,7 +632,7 @@ class Dapp extends Asset.Base {
     if (dappConfig.peers && dappConfig.peers.length) {
       for (let i = 0; i < dappConfig.peers.length; i++) {
         const peerItem = dappConfig.peers[i]
-        await this.runtime.peer.addDapp(peerItem)
+        await this.runtime.peer.addDapp({ ...peerItem, dappId: id })
       }
     }
 
@@ -1368,6 +1368,7 @@ class Dapp extends Asset.Base {
 
   async onBlockchainReady () {
     const installIds = await this.getInstalledDappIds()
+    console.log(installIds)
     for (let i = 0; i < installIds.length; i++) {
       const dappId = installIds[i]
       const dappPath = path.join(this.config.dappsDir, dappId)
@@ -1444,7 +1445,7 @@ class Dapp extends Asset.Base {
   }
 
   getDapp (req, cb) {
-    ;(async () => {
+    ; (async () => {
       const dapp = await this.getDappByTransactionId(req.dappId)
       return cb(null, dapp)
     })()

@@ -43,11 +43,15 @@ class PeerInvoker {
     let url
     if (args.api) {
       url = `/peer${args.api}`
+    } else if (args.path) {
+      url = `${args.path}`
     } else {
       url = args.url
     }
     if (peer.address) {
       url = `http://${peer.address}${url}`
+    } else if (peer.host) {
+      url = `http://${peer.host}:${peer.port}${url}`
     } else {
       url = `http://${ip.fromLong(peer.ip)}:${peer.port}${url}`
     }
@@ -61,7 +65,6 @@ class PeerInvoker {
       forever: true,
       agent: new http.Agent({ keepAlive: true })
     }
-
     if ((args.data !== null && typeof args.data === 'object') || Array.isArray(args.data)) {
       req.json = args.data
     } else {
@@ -90,7 +93,6 @@ class PeerInvoker {
           reject(err || `Request peer api failed: ${url}`)
         } else {
           res.headers.port = parseInt(res.headers.port)
-
           const validateErrors = await this.ddnSchema.validate(
             {
               type: 'object',
