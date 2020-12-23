@@ -103,13 +103,13 @@ class Peer {
     return this.config.version
   }
 
-  async addDapp (config) {
+  async addDapp ({ ip: configIp, port, dappId }) {
     return new Promise((resolve, reject) => {
       this.dao.findOne(
         'peer',
         {
-          ip: config.ip,
-          port: config.port
+          ip: configIp,
+          port: port
         },
         null,
         (err, data) => {
@@ -134,7 +134,7 @@ class Peer {
                     'peers_dapp',
                     {
                       peer_id: data.id,
-                      dapp_id: config.dappId
+                      dapp_id: dappId
                     },
                     (err3, data3) => {
                       if (err3) {
@@ -150,33 +150,33 @@ class Peer {
               }
             )
           } else {
-            reject(new Error(`Peer not found: ${config.ip}`))
+            reject(new Error(`Peer not found: ${configIp}`))
           }
         }
       )
     })
   }
 
-  async update (peer) {
-    if (peer && peer.ip && peer.port) {
-      const dappId = peer.dappId
+  async update ({ ip: peerIp, port, dappId, os = null, version = null, state = 1 }) {
+    if (peerIp && port) {
+      // dappId = dappId
 
       if (this.config.publicIp) {
         const localIp = ip.toLong(this.config.publicIp)
-        if (localIp === peer.ip && this.config.port === peer.port) {
+        if (localIp === peerIp && this.config.port === port) {
           return
         }
       }
 
       const peerData = {
-        ip: peer.ip,
-        port: peer.port,
-        os: peer.os || null,
-        version: peer.version || null,
-        state: peer.state || 1
+        ip: peerIp,
+        port: port,
+        os: os || null,
+        version: version || null,
+        state: state || 1
       }
 
-      const peerKey = `${peer.ip}_${peer.port}`
+      const peerKey = `${peerIp}_${port}`
 
       let needUpdateToDB = true
       if (this._peerUpdateTimes.length >= 0) {
@@ -213,8 +213,8 @@ class Peer {
                     if (dappId) {
                       await this.addDapp({
                         dappId,
-                        ip: peer.ip,
-                        port: peer.port
+                        ip: peerIp,
+                        port: port
                       })
                     } else {
                       this._peerUpdateTimes[peerKey] = new Date().getTime()
@@ -374,7 +374,7 @@ class Peer {
   async changeState (pip, port, state, timeoutSeconds) {
     // FIXME: 2020.9.3 白名单状态修改
     // const isStaticPeer = this.config.peers.list.find(
-    //   peer => peer.ip === ip.fromLong(pip) && peer.port === port
+    //   peer => peerIp === ip.fromLong(pip) && peer.port === port
     // )
     // if (false) {
     // if (isStaticPeer) {

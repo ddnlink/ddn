@@ -15,7 +15,7 @@
   "license": "ISC",
   "dependencies": {
     "@ddn/asset-base": "^0.4.0",
-    "@ddn/node-sdk":"^0.5.0",
+    "@ddn/node-sdk": "^0.5.0",
     "@ddn/utils": "^0.2.0",
     "bytebuffer": "^5.0.1",
     "request-promise": "^4.2.6"

@@ -43,7 +43,7 @@ class Transaction {
    * @param {*} trsId
    */
 
-  async deleteTransaction (trsId, dbTrans) {
+  async deleteTransaction ({ trsId, dbTrans }) {
     return new Promise((resolve, reject) => {
       this.dao.remove(
         'tr',
@@ -75,42 +75,43 @@ class Transaction {
   }
 
   async create (data) {
-    if (!this._assets.hasType(data.type)) {
-      throw new Error(`Unknown transaction type 1 ${data.type}`)
+    const { type, sender, keypair, requester, message, args, second_keypair } = data
+    if (!this._assets.hasType(type)) {
+      throw new Error(`Unknown transaction type 1 ${type}`)
     }
 
-    if (!data.sender) {
+    if (!sender) {
       throw Error("Can't find sender")
     }
 
-    if (!data.keypair) {
+    if (!keypair) {
       throw Error("Can't find keypair")
     }
 
     let trs = {
-      type: data.type,
+      type: type,
       amount: '0',
       nethash: this.config.nethash,
-      senderPublicKey: data.sender.publicKey,
-      requester_public_key: data.requester ? data.requester.publicKey.toString('hex') : null, // 仅适用于多重签名
+      senderPublicKey: sender.publicKey,
+      requester_public_key: requester ? requester.publicKey.toString('hex') : null, // 仅适用于多重签名
       timestamp: this.runtime.slot.getTime(),
       asset: {},
-      message: data.message,
-      args: data.args
+      message: message,
+      args: args
     }
 
     trs = await this._assets.call(trs.type, 'create', data, trs) // 对应各个 asset 交易类型的 async create(data, trs) 方法
 
     // trs.signature = await DdnCrypto.sign(trs, data.keypair);
-    trs.signature = await this.sign(trs, data.keypair)
-    if (data.sender.second_signature && data.second_keypair) {
-      trs.sign_signature = await this.sign(trs, data.second_keypair)
+    trs.signature = await this.sign(trs, keypair)
+    if (sender.second_signature && second_keypair) {
+      trs.sign_signature = await this.sign(trs, second_keypair)
       // trs.sign_signature = await DdnCrypto.sign(trs, data.second_keypair);
     }
 
     trs.id = await getId(trs)
 
-    trs.fee = `${await this._assets.call(trs.type, 'calculateFee', trs, data.sender)}`
+    trs.fee = `${await this._assets.call(trs.type, 'calculateFee', trs, sender)}`
 
     return trs
   }
@@ -806,17 +807,18 @@ class Transaction {
 
   // TODO: 与 @ddn/crypto 同名方法不同
   async verifySecondSignature (trs, publicKey) {
-    if (!this._assets.hasType(trs.type)) {
-      throw Error(`Unknown transaction type 14 ${trs.type}`)
+    const { type, sign_signature } = trs
+    if (!this._assets.hasType(type)) {
+      throw Error(`Unknown transaction type 14 ${type}`)
     }
 
-    if (!trs.sign_signature) {
+    if (!sign_signature) {
       return false
     }
 
     const bytes = await DdnCrypto.getBytes(trs, false, true)
     // const bytes = await this.getBytes(trs, false, true);
-    return await this.verifyBytes(bytes, trs.sign_signature, publicKey)
+    return await this.verifyBytes(bytes, sign_signature, publicKey)
   }
 }
 
