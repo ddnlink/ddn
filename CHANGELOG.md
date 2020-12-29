@@ -1,3 +1,46 @@
+## [3.6.3](https://github.com/ddnlink/ddn/compare/v3.6.0...v3.6.3) (2020-12-11)
+
+
+### Bug Fixes
+
+* 🐛 Add locales to @ddn/ddn ([83a4ad6](https://github.com/ddnlink/ddn/commit/83a4ad650b3c4b0dc2b4bade44f67e2c930d1dae)), closes [#91](https://github.com/ddnlink/ddn/issues/91)
+* 🐛 dapp test bugs ([3c64b87](https://github.com/ddnlink/ddn/commit/3c64b87fa5054bfa242fa5fca566b6c03beeb3e0))
+* 🐛 Delete config.settings from .ddnrc.js ([2a3b656](https://github.com/ddnlink/ddn/commit/2a3b656398607038460c46339b627381899bc679))
+* 🐛 Fix a bug about generator of users ([d856a97](https://github.com/ddnlink/ddn/commit/d856a972e409f2f27a478dc87b1a222459620e1f))
+* 🐛 Fix ajv verify for null type and sync sign error ([e5d33d3](https://github.com/ddnlink/ddn/commit/e5d33d3979e57e56388eecc59ed39f94bc92233e))
+* 🐛 Fix api of get accounts 'limit undefined' ([85eb85a](https://github.com/ddnlink/ddn/commit/85eb85aeaf4ea45a7e10ce77826620e79c4e6294))
+* 🐛 Fix crash due to incorrect assignment of Org object ([ea0d168](https://github.com/ddnlink/ddn/commit/ea0d16803b31c421deb858cbe41ab7d14a636899))
+* 🐛 Fix ESOCKETTIMEDOUT ([7c478db](https://github.com/ddnlink/ddn/commit/7c478dbb3754bb37a7dc93ad17d996021ba5b591))
+* 🐛 Fix export default from constants.ddn.js of js-sdk ([e0bc650](https://github.com/ddnlink/ddn/commit/e0bc6503a9c2dee8a7d1588cb555fb6128a262e4))
+* 🐛 Fix height NaN error because the db transaction error ([cba90d2](https://github.com/ddnlink/ddn/commit/cba90d24f47b7f26c5bcd0f413a3dcc0b2406b05))
+* 🐛 Fix illegal AOB transaction not cleared error ([3523814](https://github.com/ddnlink/ddn/commit/3523814f8d9cc0470f9e4c74117291ab2359b253))
+* 🐛 Fix images path error in README.md ([3ec15e4](https://github.com/ddnlink/ddn/commit/3ec15e4a3a7c82f6e8359822516488724d73a36f))
+* 🐛 Fix multisignature ready error when sync blockchain ([44ff7e6](https://github.com/ddnlink/ddn/commit/44ff7e6c1205cbe6d8898e1d4b5775dbd6db7d7c))
+* 🐛 Fix propose error because of id maxlength 64 to 128 ([3152636](https://github.com/ddnlink/ddn/commit/3152636378d12f82f44ec22f0a654f5f9828b459))
+* 🐛 Fix publish error ([af349d8](https://github.com/ddnlink/ddn/commit/af349d85963dddb16546076332b809bf9721a258))
+* 🐛 Fix publish error about @ddn/asset-dao v0.3.3 ([40984d6](https://github.com/ddnlink/ddn/commit/40984d6240edcd90c7e604d115bd091b3dbf921e))
+* 🐛 Fix the "delegates not found" error during sync ([f2c5e31](https://github.com/ddnlink/ddn/commit/f2c5e317dceeefbeeaa5fa51b7caf1beb390726c))
+* 🐛 Fix the multisignatures errors ([320edf8](https://github.com/ddnlink/ddn/commit/320edf80d7d3a7edf4442eaf5cb3a60dd87280e1))
+* 🐛 Update bignumber for height and round ([68a2285](https://github.com/ddnlink/ddn/commit/68a228503f28b2e7d1ebad0bbba0d9a967b7d318))
+* add node-sdk denpendency and add .ddnrc.js ([b5e2f4b](https://github.com/ddnlink/ddn/commit/b5e2f4b495041fdb13ec04be0d5d5f36ec19ac6d))
+* chang baseUrl to global config ([c457962](https://github.com/ddnlink/ddn/commit/c457962971625ec6cbe9b01f33703cca61dced9f))
+* fix ddn cli errors on generating dapp project from template ([de1d93f](https://github.com/ddnlink/ddn/commit/de1d93fa10e5c88b7b129b187d28ab2b090533a5))
+* integrating supervise API into plug-ins ([9d88be7](https://github.com/ddnlink/ddn/commit/9d88be72a50187f72a62bb514bc0ef26cd42ee08))
+* **ddnd:** read_port function can't get port correctly ([750456a](https://github.com/ddnlink/ddn/commit/750456a1a09ecb9afd3a41033dccd0068bfea92b))
+* **js-sdk:** fix js-sdk package main file not found question ([2ec57b6](https://github.com/ddnlink/ddn/commit/2ec57b6e42713f813e2abc0d3de7eaf01156d74e))
+
+
+### Features
+
+* 🎸 Add content field to @ddn/asset-aob, sdks and tests ([ef08045](https://github.com/ddnlink/ddn/commit/ef08045d0c3273d76485245e68b7fe95867c433f))
+* 🎸 Add several generators to ddn command line tools ([0bde9e8](https://github.com/ddnlink/ddn/commit/0bde9e83025fe1877fcf174ee602e87fe9aea90a))
+* 🎸 Add super peer and you can get it ([d1d24ae](https://github.com/ddnlink/ddn/commit/d1d24aec2c4f7db3d5ac78bfa88469630930a8c4))
+* 🎸 Categorizing to organize command line tools ([3d079d8](https://github.com/ddnlink/ddn/commit/3d079d8215f946caa2927e87b235cf0daf2406ce))
+* 🎸 Optimize consensus algorithm and improve the BigNumber ([e408e2f](https://github.com/ddnlink/ddn/commit/e408e2f94e8fcb64bb4bf0c35ff47d52025daa2d))
+* 🎸 Optimize logger to make DDN debug more friendly ([83be9c8](https://github.com/ddnlink/ddn/commit/83be9c8e020181e25265e048390e85b7fa749422))
+* 🎸 Optimize start process and fix multisignates bugs ([1b87366](https://github.com/ddnlink/ddn/commit/1b87366822d074288d89a96af97d65550b411ad2))
+* 🎸 Update ddn-cli to multi level subCommands like Git ([fae996f](https://github.com/ddnlink/ddn/commit/fae996fd9e3fe9967a36d5ff7f746b4cc45cfe4b))
+
 # [3.6.0](https://github.com/ddnlink/ddn/compare/v3.5.0...v3.6.0) (2020-07-31)
 
 

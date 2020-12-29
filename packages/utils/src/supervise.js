@@ -1,4 +1,3 @@
-// const baseUrl = ' http://114.55.142.90' // 监管的host
 const request = require('request-promise')
 // 敏感词检测
 export async function checkWord (that, worlds, baseUrl) {
@@ -111,7 +110,17 @@ export async function reportWord ({ trs, message, taskId, status, success, that,
   }
   return data
 }
-export async function beforeSaveReportWord ({ txHash, fromAcct = 0x0, toAcct = 0x0, content, type = 'normal', op = 'accept', createdAt = parseInt(new Date().getTime() / 1000), that, baseUrl }) {
+export async function beforeSaveReportWord ({
+  txHash,
+  fromAcct = 0x0,
+  toAcct = 0x0,
+  content,
+  type = 'normal',
+  op = 'accept',
+  createdAt = parseInt(new Date().getTime() / 1000),
+  that,
+  baseUrl
+}) {
   // if (trs.length === 0 && success) {
   //   return
   // }
@@ -166,10 +175,28 @@ export async function checkAndReport (transaction, that, cb, baseUrl) {
       for (let index = 0; index < hits.length; index++) {
         const element = hits[index]
         if (element.level === 10 || element.level === 0) {
-          beforeSaveReportWord({ txHash: element.txHash, fromAcct: transaction.sender, toAcct: transaction.recipientId, content: transaction.message, type: 'normal', op: 'reject', that, baseUrl })
+          beforeSaveReportWord({
+            txHash: element.txHash,
+            fromAcct: transaction.sender,
+            toAcct: transaction.recipientId,
+            content: transaction.message,
+            type: 'normal',
+            op: 'reject',
+            that,
+            baseUrl
+          })
           sensitive = true
         } else if (element.level === 1 || element.level === 2) {
-          beforeSaveReportWord({ txHash: element.txHash, fromAcct: transaction.sender, toAcct: transaction.recipientId, content: transaction.message, type: 'normal', op: 'accept', that, baseUrl })
+          beforeSaveReportWord({
+            txHash: element.txHash,
+            fromAcct: transaction.sender,
+            toAcct: transaction.recipientId,
+            content: transaction.message,
+            type: 'normal',
+            op: 'accept',
+            that,
+            baseUrl
+          })
         }
       }
       if (sensitive) {
@@ -201,18 +228,24 @@ export async function superviseTrs ({ context, trs }) {
     trs = [trs]
   }
   const trsIds = trs.map(item => item.id)
-  const data = await new Promise((resolve) => {
-    context.dao.findList('supervise', {
-      txHash: {
-        $in: trsIds
+  const data = await new Promise(resolve => {
+    context.dao.findList(
+      'supervise',
+      {
+        txHash: {
+          $in: trsIds
+        }
+      },
+      null,
+      null,
+      (err, rows) => {
+        if (err) {
+          resolve(err)
+        } else {
+          resolve(rows)
+        }
       }
-    }, null, null, (err, rows) => {
-      if (err) {
-        resolve(err)
-      } else {
-        resolve(rows)
-      }
-    })
+    )
   })
   if (data && data.length === 0) {
     if (trsTypeIsArray) {

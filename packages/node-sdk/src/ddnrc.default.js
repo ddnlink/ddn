@@ -10,7 +10,7 @@ const Op = Sequelize.Op
 module.exports = {
   /**
    * About Peer
-  */
+   */
   port: 8001,
   address: '0.0.0.0',
   publicIp: '',
@@ -224,11 +224,5 @@ module.exports = {
    *  "@ddn/asset-aob"
    * ]
    */
-  assets: [
-    '@ddn/asset-evidence',
-    '@ddn/asset-aob',
-    '@ddn/asset-dapp',
-    '@ddn/asset-dao',
-    '@ddn/asset-supervise'
-  ]
+  assets: ['@ddn/asset-evidence', '@ddn/asset-aob', '@ddn/asset-dapp', '@ddn/asset-dao']
 }

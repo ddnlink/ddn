@@ -49,7 +49,6 @@
     "@ddn/asset-dao": "^0.4.0",
     "@ddn/asset-dapp": "^0.3.0",
     "@ddn/asset-evidence": "^0.2.0",
-    "@ddn/asset-supervise": "^0.2.0",
     "@ddn/core": "^0.2.15",
     "@ddn/crypto": "^0.4.0",
     "@ddn/test-utils": "^0.2.0",
