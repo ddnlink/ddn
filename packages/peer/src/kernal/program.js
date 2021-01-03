@@ -179,7 +179,7 @@ class Program {
       require('daemon')({ cwd: process.cwd() })
     }
     // 提供系统默认配置文件
-    options.configObject = extend(true, defaultConfig.default, options.configObject)
+    options.configObject = extend(true, defaultConfig, options.configObject)
 
     process.once('cleanup', () => {
       this._context.logger.info('Cleaning up...')

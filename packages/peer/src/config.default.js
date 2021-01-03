@@ -5,13 +5,12 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *-------------------------------------------------------------------------------------------- */
 import Sequelize from 'sequelize'
-
 const Op = Sequelize.Op
 
 export default {
   /**
    * About Peer
-  */
+   */
   port: 8001,
   address: '127.0.0.1',
   publicIp: '',
@@ -238,10 +237,5 @@ export default {
    *  "@ddn/asset-aob"
    * ]
    */
-  assets: [
-    '@ddn/asset-evidence',
-    '@ddn/asset-aob',
-    '@ddn/asset-dapp',
-    '@ddn/asset-dao'
-  ]
+  assets: ['@ddn/asset-evidence', '@ddn/asset-aob', '@ddn/asset-dapp', '@ddn/asset-dao']
 }
