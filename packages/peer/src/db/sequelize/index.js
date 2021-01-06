@@ -79,6 +79,10 @@ class DAO {
       })
   }
 
+  static async close () {
+    await sequelizeInst.close()
+  }
+
   static insert (modelName, modelObj, transaction, cb) {
     try {
       if (typeof cb === 'undefined' && typeof transaction === 'function') {

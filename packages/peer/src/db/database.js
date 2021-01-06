@@ -257,6 +257,10 @@ class DBUtils {
   static clear (modelName, truncate, cb) {
     sequelizeDB.clear(modelName, truncate, cb)
   }
+
+  static async close () {
+    await sequelizeDB.close()
+  }
 }
 
 export default DBUtils

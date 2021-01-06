@@ -94,6 +94,16 @@ class Account {
     return true
   }
 
+  /**
+   * @description 暂时未使用
+   * @todo 下一步要优化成使用观察者模式使用该方法，和asset onInitAccountsAndBalances调用方式一样
+   * @author wly
+   * @copyright 2021-01-05
+   */
+  async onInitAccountsAndBalances () {
+    await this.initAccountsAndBalances()
+  }
+
   isAddress (address) {
     return this.address.isAddress(address)
   }
@@ -686,11 +696,11 @@ class Account {
                 return reject(
                   new Error(
                     'Encountered invalid number while merging account: ' +
-                      trueValue +
-                      ', value: ' +
-                      value +
-                      ', address: ' +
-                      address
+                    trueValue +
+                    ', value: ' +
+                    value +
+                    ', address: ' +
+                    address
                   )
                 )
               }

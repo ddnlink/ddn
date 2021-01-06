@@ -134,7 +134,12 @@ class Issuer extends Asset.Base {
     return { success: true, result: data[0] }
   }
 
-  async onBlockchainReady () {
+  /**
+   * @description chage from onblockChainIsReady
+   * @author wly
+   * @copyright 2021-01-05
+   */
+  async onInitAccountsAndBalances () {
     await new Promise((resolve, reject) => {
       this.dao.findList('mem_asset_balance', null, null, null,
         (err, rows) => {
@@ -156,6 +161,10 @@ class Issuer extends Asset.Base {
           resolve()
         })
     })
+  }
+
+  async onBlockchainReady () {
+
   }
 }
 

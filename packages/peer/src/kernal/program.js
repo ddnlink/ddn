@@ -181,9 +181,9 @@ class Program {
     // 提供系统默认配置文件
     options.configObject = extend(true, defaultConfig.default, options.configObject)
 
-    process.once('cleanup', () => {
+    process.once('cleanup', async () => {
       this._context.logger.info('Cleaning up...')
-
+      await this._context.close()
       this._resetProcessState()
       process.exit(1)
     })
@@ -241,7 +241,10 @@ class Program {
 
     // 初始化账户以及余额
     try {
+      // TODO next optimize initAccountsAndBalances like onInitAccountsAndBalances use
       await this._context.runtime.account.initAccountsAndBalances()
+      // init asset banlance when start program
+      await this._context.runtime.transaction.execAssetFunc('onInitAccountsAndBalances')
     } catch (err) {
       this._context.logger.error('Failed to load blockchain', DdnUtils.system.getErrorMsg(err))
       return process.exit(1)
@@ -338,7 +341,7 @@ class Program {
 
       setTimeout(() => {
         this.startPeerSyncTask()
-      }, 1000 * 49)
+      }, 1000 * 19)
     }
   }
 
