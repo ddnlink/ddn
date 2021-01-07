@@ -8,26 +8,26 @@ sidebar_label: Evidence api
 # DDN 区块链数字存证插件
 
 
-## **1 API使用说明**   
-## **1.1 请求过程说明**   
-1.1 构造请求数据，用户数据按照DDN提供的接口规则，通过程序生成签名，生成请求数据集合；       
-1.2 发送请求数据，把构造完成的数据集合通过POST/GET等提交的方式传递给DDN；       
-1.3 DDN对请求数据进行处理，服务器在接收到请求后，会首先进行安全校验，验证通过后便会处理该次发送过来的请求；       
-1.4 返回响应结果数据，DDN把响应结果以JSON的格式反馈给用户，每个响应都包含success字段，表示请求是否成功，成功为true, 失败为false。 如果失败，则还会包含一个error字段，表示错误原因；       
-1.5 对获取的返回结果数据进行处理；       
-   
----   
-   
-## **2 接口**   
-## **2.1 资产数据相关交易** 
-DDN系统的所有写操作都是通过发起一个交易来完成的。  
+## **1 API使用说明**
+## **1.1 请求过程说明**
+1.1 构造请求数据，用户数据按照DDN提供的接口规则，通过程序生成签名，生成请求数据集合；
+1.2 发送请求数据，把构造完成的数据集合通过POST/GET等提交的方式传递给DDN；
+1.3 DDN对请求数据进行处理，服务器在接收到请求后，会首先进行安全校验，验证通过后便会处理该次发送过来的请求；
+1.4 返回响应结果数据，DDN把响应结果以JSON的格式反馈给用户，每个响应都包含success字段，表示请求是否成功，成功为true, 失败为false。 如果失败，则还会包含一个error字段，表示错误原因；
+1.5 对获取的返回结果数据进行处理；
+
+---
+
+## **2 接口**
+## **2.1 资产数据相关交易**
+DDN系统的所有写操作都是通过发起一个交易来完成的。
 交易数据通过一个叫做@ddn/node-sdk的库来构建，然后再通过一个POST接口发布出去。
 
-POST接口规格如下：  
-payload为@ddn/node-sdk创建出来的交易数据  
-接口地址：/peer/transactions  
-请求方式：post   
-支持格式：json  
+POST接口规格如下：
+payload为@ddn/node-sdk创建出来的交易数据
+接口地址：/peer/transactions
+请求方式：post
+支持格式：json
 公用变量：
 ```js
 var DdnJS = require('@ddn/node-sdk').default;
@@ -41,8 +41,8 @@ var secondSecret = 'ddnaobtest001'
 ### **2.1.1 上传资产数据**
 请求参数说明：
 
-|名称 |类型   |说明        |必填       |   
-|------ |-----  |---  |----              |   
+|名称 |类型   |说明        |必填       |
+|------ |-----  |---  |----              |
 |transaction|json|DdnJS.evidence.createEvidence根据资产信息、一级密码、二级密码生成的交易数据|true
 
 返回参数说明：
@@ -52,9 +52,9 @@ var secondSecret = 'ddnaobtest001'
 |success|boolean|是否成功获得response数据。|
 |transactionId|string|交易id|
 
-   
-请求示例：   
-```js   
+
+请求示例：
+```js
 (async () => {
   const evidencee = {
     ipid: 'ipid3', // 资产id
@@ -74,10 +74,10 @@ var secondSecret = 'ddnaobtest001'
   // var transaction = await ddn.dao.createTransfer('D61gSRn1ko2NiEYLutPxnBDXU4MBJ2b4by','10000000000',secret)
   console.log(JSON.stringify({ transaction }));
 })();
-```   
+```
 将生成的交易数据以transaction为key，放入json，调用上链接口提交
 ```sh
-curl --location --request POST 'http://localhost:8001/peer/transactions' \
+curl --location --request POST 'http://127.0.0.1:8001/peer/transactions' \
 --header 'nethash: 0ab796cd' \
 --header 'version: 0' \
 --header 'Content-Type: application/json' \
@@ -101,17 +101,17 @@ curl --location --request POST 'http://localhost:8001/peer/transactions' \
 -|-|-|-
 ipid |string|资产id|true
 
-返回参数说明：   
+返回参数说明：
 
-|名称 |类型   |说明              |   
-|------ |-----  |----              |   
-|success|boolean  |请求是否成功 |    
-|result|object |资产详情     |  
+|名称 |类型   |说明              |
+|------ |-----  |----              |
+|success|boolean  |请求是否成功 |
+|result|object |资产详情     |
 
-请求示例：   
-```bash   
-curl --location --request GET 'http://localhost:8001/api/evidences/ipid/ipid3'
-```  
+请求示例：
+```bash
+curl --location --request GET 'http://127.0.0.1:8001/api/evidences/ipid/ipid3'
+```
 
 JSON返回示例：
 
@@ -144,17 +144,17 @@ JSON返回示例：
 -|-|-|-
 title |string|资产标题|true
 
-返回参数说明：   
+返回参数说明：
 
-|名称 |类型   |说明              |   
-|------ |-----  |----              |   
-|success|boolean  |请求是否成功 |    
-|result|object |资产详情     |  
+|名称 |类型   |说明              |
+|------ |-----  |----              |
+|success|boolean  |请求是否成功 |
+|result|object |资产详情     |
 
-请求示例：   
-```bash   
-curl --location --request GET 'http://localhost:8001/api/evidences/title/node.randomUsername()'
-```  
+请求示例：
+```bash
+curl --location --request GET 'http://127.0.0.1:8001/api/evidences/title/node.randomUsername()'
+```
 
 JSON返回示例：
 
@@ -189,17 +189,17 @@ title |string|资产标题|true
 pagesize|string|每页条数|false
 pageindex|string|页码|false
 
-返回参数说明：   
+返回参数说明：
 
-|名称 |类型   |说明              |   
-|------ |-----  |----              |   
-|success|boolean  |请求是否成功 |    
-|result|object |资产详情     |  
+|名称 |类型   |说明              |
+|------ |-----  |----              |
+|success|boolean  |请求是否成功 |
+|result|object |资产详情     |
 
-请求示例：   
-```bash   
-curl --location --request GET 'http://localhost:8001/api/evidences/title/node.randomUsername()/all'
-```  
+请求示例：
+```bash
+curl --location --request GET 'http://127.0.0.1:8001/api/evidences/title/node.randomUsername()/all'
+```
 
 JSON返回示例：
 
@@ -237,17 +237,17 @@ JSON返回示例：
 -|-|-|-
 hash |string|数据哈希|true
 
-返回参数说明：   
+返回参数说明：
 
-|名称 |类型   |说明              |   
-|------ |-----  |----              |   
-|success|boolean  |请求是否成功 |    
-|result|object |资产详情     |  
+|名称 |类型   |说明              |
+|------ |-----  |----              |
+|success|boolean  |请求是否成功 |
+|result|object |资产详情     |
 
-请求示例：   
-```bash   
-curl --location --request GET 'http://localhost:8001/api/evidences/hash/f082022ee664008a1f15d62514811dfd'
-```  
+请求示例：
+```bash
+curl --location --request GET 'http://127.0.0.1:8001/api/evidences/hash/f082022ee664008a1f15d62514811dfd'
+```
 
 JSON返回示例：
 
@@ -283,17 +283,17 @@ author |author|作者|true
 pagesize|string|每页条数|false
 pageindex|string|页码|false
 
-返回参数说明：   
+返回参数说明：
 
-|名称 |类型   |说明              |   
-|------ |-----  |----              |   
-|success|boolean  |请求是否成功 |    
-|result|object |资产详情     |  
+|名称 |类型   |说明              |
+|------ |-----  |----              |
+|success|boolean  |请求是否成功 |
+|result|object |资产详情     |
 
-请求示例：   
-```bash   
-curl --location --request GET 'http://localhost:8001/api/evidences/author/Evanlai/all'
-```  
+请求示例：
+```bash
+curl --location --request GET 'http://127.0.0.1:8001/api/evidences/author/Evanlai/all'
+```
 
 JSON返回示例：
 
@@ -331,17 +331,17 @@ JSON返回示例：
 -|-|-|-
 trs_id |string|交易id|true
 
-返回参数说明：   
+返回参数说明：
 
-|名称 |类型   |说明              |   
-|------ |-----  |----              |   
-|success|boolean  |请求是否成功 |    
-|result|object |资产详情     |  
+|名称 |类型   |说明              |
+|------ |-----  |----              |
+|success|boolean  |请求是否成功 |
+|result|object |资产详情     |
 
-请求示例：   
-```bash   
-curl --location --request GET 'http://localhost:8001/api/evidences/transaction/0ff3ba6dc2ceab676107f9a6a66c60d9ec17745a8cd53e3f25ff0da6829727da7d2fc6d470d43d85bd13923b7bdfe54bca6d4da97b0ac60ccd5b55b6a11b51b6'
-```  
+请求示例：
+```bash
+curl --location --request GET 'http://127.0.0.1:8001/api/evidences/transaction/0ff3ba6dc2ceab676107f9a6a66c60d9ec17745a8cd53e3f25ff0da6829727da7d2fc6d470d43d85bd13923b7bdfe54bca6d4da97b0ac60ccd5b55b6a11b51b6'
+```
 
 JSON返回示例：
 
@@ -375,17 +375,17 @@ JSON返回示例：
 pagesize|string|每页条数|false
 pageindex|string|页码|false
 
-返回参数说明：   
+返回参数说明：
 
-|名称 |类型   |说明              |   
-|------ |-----  |----              |   
-|success|boolean  |请求是否成功 |    
-|result|object |资产详情     |  
+|名称 |类型   |说明              |
+|------ |-----  |----              |
+|success|boolean  |请求是否成功 |
+|result|object |资产详情     |
 
-请求示例：   
-```bash   
-curl --location --request GET 'http://localhost:8001/api/evidences/all'
-```  
+请求示例：
+```bash
+curl --location --request GET 'http://127.0.0.1:8001/api/evidences/all'
+```
 
 JSON返回示例：
 
@@ -424,17 +424,17 @@ JSON返回示例：
 type |string|数据类型|true
 
 返回参数说明：
-|名称 |类型   |说明              |   
-|------ |-----  |----              |   
-|success|boolean  |请求是否成功 |    
-|result|object |返回结果 
+|名称 |类型   |说明              |
+|------ |-----  |----              |
+|success|boolean  |请求是否成功 |
+|result|object |返回结果
 |rows|array |返回结果列表
-|total|number |总条数 
+|total|number |总条数
 
 
 请求示例：
 ```bash
-curl --location --request GET 'http://localhost:8001/api/evidences/type/html/all'
+curl --location --request GET 'http://127.0.0.1:8001/api/evidences/type/html/all'
 ```
 
 JSON返回示例：

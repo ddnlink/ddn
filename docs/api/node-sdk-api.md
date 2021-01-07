@@ -19,7 +19,7 @@ sidebar_label: DDN Node-SDK Api
 ### **1.1 安装**
 
 ```
-npm install @ddn/node-sdk --save 
+npm install @ddn/node-sdk --save
 ```
 
 如果使用 `yarn`，命令如下：
@@ -55,8 +55,8 @@ const DdnJS = require('@ddn/node-sdk').default // 注意 有个 default 属性
 很多函数都需要传入`secret`、`secondSecret`这2个参数，分表代表密码和二级密码，下面章节不再赘述。
 自定义如下全局变量，用于之后章节代码演示。
 
-- `secret` 密码    
-- `publicKey` 公钥    
+- `secret` 密码
+- `publicKey` 公钥
 - `secondSecret` 二级密码
 
 ```
@@ -66,7 +66,7 @@ const DdnJS = require('@ddn/node-sdk').default // 注意 有个 default 属性
 ```
 
 
-## **2 账户**  
+## **2 账户**
 
 ### **2.1 根据密码获取密钥对**
 
@@ -95,7 +95,7 @@ const DdnJS = require('@ddn/node-sdk').default // 注意 有个 default 属性
 异步方法：`DdnJS.signature.createSignature(secret, secondSecret)`
 `备注` 在主链的交易类型为1
 
-- `secret` 密码    
+- `secret` 密码
 - `secondSecret` 二级密码
 
 ```
@@ -145,7 +145,7 @@ const DdnJS = require('@ddn/node-sdk').default // 注意 有个 default 属性
 ```
 
 
-## **3 普通交易transactions**  
+## **3 普通交易transactions**
 
 ### **3.1 在主链转账DDN，type=0**
 
@@ -198,13 +198,13 @@ const DdnJS = require('@ddn/node-sdk').default // 注意 有个 default 属性
     id: "d657434ddc9683f96a90ae0f2ef82ec5194f368ab70fef13466350a1d86d8fb6"
 }
 
-> await DdnJS.crypto.getId(transaction)  
+> await DdnJS.crypto.getId(transaction)
 'd657434ddc9683f96a90ae0f2ef82ec5194f368ab70fef13466350a1d86d8fb6'  // 返回结果，交易id
 
 ```
 
 
-## **4 资产相关AOB**  
+## **4 资产相关AOB**
 
 ### **4.1 资产发行商注册，type=60**
 
@@ -386,7 +386,7 @@ const currency = 'IssuerName.CNY'
 // 本次转账数（10000）=真实数量（10）*10**精度（3），需 <= 当前资产发行总量
 const amount = '10000'
 // 接收地址，需满足前文定义好的acl规则
-const recipientId = 'AKKHPvQb2A119LNicCQWLZQDFxhGVEY57a'
+const recipientId = 'DKKHPvQb2A119LNicCQWLZQDFxhGVEY57a'
 const message = 'xxxxx(交易所ID)'
 
 const trs = DdnJS.aob.createTransfer(currency, amount, recipientId, null, message, secret, secondSecret)
@@ -395,7 +395,7 @@ console.log(JSON.stringify(trs))
     "type": 14,
     "amount": 0,
     "fee": 10000000,
-    "recipientId": "AKKHPvQb2A119LNicCQWLZQDFxhGVEY57a",
+    "recipientId": "DKKHPvQb2A119LNicCQWLZQDFxhGVEY57a",
     "senderPublicKey": "fafcd01f6b813fdeb3c086e60bc7fa9bfc8ef70ae7be47ce0ac5d06e7b1a8575",
     "timestamp": 19481489,
     "asset": {
@@ -616,7 +616,7 @@ const transaction = await DdnJS.assetPlugin.createPluginAsset(12, obj, secret, s
 
 #### **6.3.2 受托人对提现交易进行签名**
 
-异步方法：`transfer.signOutTransfer(transaction, secret, secondSecret)`   
+异步方法：`transfer.signOutTransfer(transaction, secret, secondSecret)`
 `备注` dapp提现交易，需要多个受托人签名后才能生效。受托人签名的最小数量取决于dapp的注册参数：unlock_delegates。
 
 ```
@@ -647,7 +647,7 @@ for (let i = 0; i < dapp.unlock_delegates; i++) {
 ``` -->
 
 
-## **6 存证Evidence** 
+## **6 存证Evidence**
 
 ### **6.1 创建存证交易，type=20**
 
@@ -705,7 +705,7 @@ const evidencee = {
 
 自定义如下已签名的转账交易内容(在主链给D4FN28d1mfjdUG7rtUzEAstFVzPsmWUm2L转账100DDN)，用于下面章节演示。
 ```
-const targetAddress = "D4FN28d1mfjdUG7rtUzEAstFVzPsmWUm2L";  
+const targetAddress = "D4FN28d1mfjdUG7rtUzEAstFVzPsmWUm2L";
 const amount = 100*100000000;   //100 DDN
 const message = 'notethis';
 const transaction = await DdnJS.transaction.createTransaction(targetAddress, amount, message, secret, secondSecret)
@@ -735,7 +735,7 @@ const transaction = await DdnJS.transaction.createTransaction(targetAddress, amo
 
 ```
 // 此时transaction.signature和transaction.signSignature都会计算在内
-await DdnJS.crypto.getBytes(transaction) 
+await DdnJS.crypto.getBytes(transaction)
 > <Buffer 00 41 6f 4b 03 30 61 62 37 39 36 63 64 2e 6d 97 8c 5e 6f 1f bf c5 a2 7a bd 96 4d 9b 6a dc 35 2d aa 81 e3 1d 90 98 a4 f5 ee 3d 7f 88 5e 44 34 46 4e 32 ... >   // 返回的字节buffer对象
 ```
 
@@ -824,7 +824,7 @@ DdnJS.utils.slots.beginEpochTime()
 
 #### **8.1.2 根据unix时间戳获获DDN时间戳**
 
-同步方法：`utils.slots.getTime(time)` 
+同步方法：`utils.slots.getTime(time)`
 `备注` 获得结果叫做EpochTim（DDN时间戳），传入的time相对于DDN纪元经历的秒数
 
 - `time` 如果不传值则取当前时刻的 Unix时间戳*1000 (即单位是毫秒）
@@ -864,7 +864,7 @@ const unix_timestamp === real_time / 1000
 
 ```
 DdnJS.utils.format.timeAgo(84681568)
-> 24 mins ago 
+> 24 mins ago
 ```
 
 

@@ -30,7 +30,7 @@ tags |string|标签|true
 
 请求示例：
 ```bash
-curl --location --request PUT 'http://localhost:8001/api/dao/orgs' \
+curl --location --request PUT 'http://127.0.0.1:8001/api/dao/orgs' \
 --header 'Content-Type: application/json' \
 --data-raw '{
     "org_id":"qwertsyuasaa",
@@ -74,7 +74,7 @@ tags |string|标签|true
 
 请求示例：
 ```bash
-curl --location --request GET 'http://localhost:8001/api/dao/orgs/qwertsyuasaa' \
+curl --location --request GET 'http://127.0.0.1:8001/api/dao/orgs/qwertsyuasaa' \
 --header 'Content-Type: application/json' \
 --data-raw '{
     "org_id":"qwertsyuasaa",
@@ -127,7 +127,7 @@ org_id |string|组织唯一id|true
 请求示例：
 
 ```bash
-curl --location --request GET 'http://localhost:8001/api/dao/orgs/qwertsyuasaa'
+curl --location --request GET 'http://127.0.0.1:8001/api/dao/orgs/qwertsyuasaa'
 ```
 
 JSON返回示例：
@@ -171,7 +171,7 @@ address |string|用户的钱包地址
 请求示例：
 
 ```bash
-curl --location --request GET 'http://localhost:8001 /api/dao/orgs/address/DC5kJzMdNDhrnupWX2NGafzMoiwdHiySBe'
+curl --location --request GET 'http://127.0.0.1:8001 /api/dao/orgs/address/DC5kJzMdNDhrnupWX2NGafzMoiwdHiySBe'
 ```
 
 JSON返回示例：
@@ -213,7 +213,7 @@ tags |string|标签|true
 
 请求示例：
 ```bash
-curl --location --request GET 'http://localhost:8001/api/dao/orgs/tags/world,cup,test'
+curl --location --request GET 'http://127.0.0.1:8001/api/dao/orgs/tags/world,cup,test'
 ```
 
 JSON返回示例：
@@ -257,7 +257,7 @@ tags |string|标签
 请求示例：
 
 ```bash
-curl --location --request GET 'http://localhost:8001/api/dao/orgs/tags/world,cup,test/all'
+curl --location --request GET 'http://127.0.0.1:8001/api/dao/orgs/tags/world,cup,test/all'
 ```
 
 JSON返回示例：
@@ -314,7 +314,7 @@ state|number|状态
 
 请求示例：
 ```bash
-curl --location --request GET 'http://localhost:8001/api/dao/orgs/state/0'
+curl --location --request GET 'http://127.0.0.1:8001/api/dao/orgs/state/0'
 ```
 
 JSON返回示例：
@@ -357,7 +357,7 @@ state |number|状态
 请求示例：
 
 ```bash
-curl --location --request GET 'http://localhost:8001/api/dao/orgs/state/0/all'
+curl --location --request GET 'http://127.0.0.1:8001/api/dao/orgs/state/0/all'
 ```
 
 JSON返回示例：
@@ -414,7 +414,7 @@ trs_id |string|交易id
 
 请求示例：
 ```bash
-curl --location --request GET 'http://localhost:8001/api/dao/orgs/transaction/c0af0db4ddaddf9f1b558b3a22dd5907a6d7008c5053cf217808b6486a883c5886160351630e42be186ec46e9edd352775e0c7480a30ffc4c4768073e0345cba'
+curl --location --request GET 'http://127.0.0.1:8001/api/dao/orgs/transaction/c0af0db4ddaddf9f1b558b3a22dd5907a6d7008c5053cf217808b6486a883c5886160351630e42be186ec46e9edd352775e0c7480a30ffc4c4768073e0345cba'
 ```
 
 JSON返回示例：
@@ -456,7 +456,7 @@ pageindex|string|页码
 请求示例：
 
 ```bash
-curl --location --request GET 'http://localhost:8001/api/dao/orgs'
+curl --location --request GET 'http://127.0.0.1:8001/api/dao/orgs'
 ```
 
 JSON返回示例：
@@ -540,7 +540,7 @@ JSON返回示例：
 
  //将上面的交易信息通过post请求"peer/transactions"接口传到链上
 
- curl --location --request POST 'http://localhost:8001/peer/transactions' \
+ curl --location --request POST 'http://127.0.0.1:8001/peer/transactions' \
  --header 'nethash: 0ab796cd' \
  --header 'version: 0' \
  --header 'Content-Type: application/json' \
@@ -598,7 +598,7 @@ transaction|json|交易数据|true
 
    // 将上面的交易信息通过post请求"peer/transactions"接口传到链上
 
-   curl --location --request POST 'http://localhost:8001/peer/transactions' \
+   curl --location --request POST 'http://127.0.0.1:8001/peer/transactions' \
    --header 'nethash: 0ab796cd' \
    --header 'version: 0' \
    --header 'Content-Type: application/json' \
@@ -651,7 +651,7 @@ org_id |string|组织号id
 
 请求示例:
 ```bash
-curl --location --request GET 'http://localhost:8001/api/dao/exchanges/org_id/qwertsyuasaa'
+curl --location --request GET 'http://127.0.0.1:8001/api/dao/exchanges/org_id/qwertsyuasaa'
 ```
 
 JSON返回示例：
@@ -693,7 +693,7 @@ org_id |string|组织号id
 
 请求示例：
 ```bash
-curl --location --request GET 'http://localhost:8001/api/dao/exchanges/org_id/qwertsyuasaa/all'
+curl --location --request GET 'http://127.0.0.1:8001/api/dao/exchanges/org_id/qwertsyuasaa/all'
 ```
 
 JSON返回示例：
@@ -748,7 +748,7 @@ sender_address |string|钱包地址
 
 请求示例：
 ```bash
-curl --location --request GET 'http://localhost:8001/api/dao/exchanges/sender_address/D61gSRn1ko2NiEYLutPxnBDXU4MBJ2b4by'
+curl --location --request GET 'http://127.0.0.1:8001/api/dao/exchanges/sender_address/D61gSRn1ko2NiEYLutPxnBDXU4MBJ2b4by'
 ```
 
 JSON返回示例：
@@ -790,7 +790,7 @@ sender_address |string|钱包地址
 
 请求示例：
 ```bash
-curl --location --request GET 'http://localhost:8001/api/dao/exchanges/sender_address/D61gSRn1ko2NiEYLutPxnBDXU4MBJ2b4by/all'
+curl --location --request GET 'http://127.0.0.1:8001/api/dao/exchanges/sender_address/D61gSRn1ko2NiEYLutPxnBDXU4MBJ2b4by/all'
 ```
 
 JSON返回示例：
@@ -834,7 +834,7 @@ received_address |string|钱包地址
 
 请求示例：
 ```bash
-curl --location --request GET 'http://localhost:8001/api/dao/exchanges/received_address/DC5kJzMdNDhrnupWX2NGafzMoiwdHiySBe'
+curl --location --request GET 'http://127.0.0.1:8001/api/dao/exchanges/received_address/DC5kJzMdNDhrnupWX2NGafzMoiwdHiySBe'
 ```
 
 JSON返回示例：
@@ -876,7 +876,7 @@ received_address |string|钱包地址
 
 请求示例：
 ```bash
-curl --location --request GET 'http://localhost:8001/api/dao/exchanges/received_address/DC5kJzMdNDhrnupWX2NGafzMoiwdHiySBe/all'
+curl --location --request GET 'http://127.0.0.1:8001/api/dao/exchanges/received_address/DC5kJzMdNDhrnupWX2NGafzMoiwdHiySBe/all'
 ```
 
 JSON返回示例：
@@ -920,7 +920,7 @@ price |string|交易金额
 
 请求示例：
 ```bash
-curl --location --request GET 'http://localhost:8001/api/dao/exchanges/price/700000000'
+curl --location --request GET 'http://127.0.0.1:8001/api/dao/exchanges/price/700000000'
 ```
 
 JSON返回示例：
@@ -963,7 +963,7 @@ price |string|交易金额
 
 请求示例：
 ```bash
-curl --location --request GET 'http://localhost:8001/api/dao/exchanges/price/700000000/all'
+curl --location --request GET 'http://127.0.0.1:8001/api/dao/exchanges/price/700000000/all'
 ```
 
 JSON返回示例：
@@ -1018,7 +1018,7 @@ state |string|状态 0/1
 
 请求示例：
 ```bash
-curl --location --request GET 'http://localhost:8001/api/dao/exchanges/state/1'
+curl --location --request GET 'http://127.0.0.1:8001/api/dao/exchanges/state/1'
 ```
 
 JSON返回示例：
@@ -1060,7 +1060,7 @@ state |string|状态
 
 请求示例：
 ```bash
-curl --location --request GET 'http://localhost:8001/api/dao/exchanges/state/1/all'
+curl --location --request GET 'http://127.0.0.1:8001/api/dao/exchanges/state/1/all'
 ```
 
 JSON返回示例：
@@ -1104,7 +1104,7 @@ trs_id |string|交易id
 
 请求示例：
 ```bash
-curl --location --request GET 'http://localhost:8001/api/dao/exchanges/transaction/2caecea55d30bc18dd25bd1906760e4ff4f391b21fdf6af0160162adf2176a3082efe5dce36fd0b4cf5f272f53e2cf156fd487c20758fc10f6cf43474c832101'
+curl --location --request GET 'http://127.0.0.1:8001/api/dao/exchanges/transaction/2caecea55d30bc18dd25bd1906760e4ff4f391b21fdf6af0160162adf2176a3082efe5dce36fd0b4cf5f272f53e2cf156fd487c20758fc10f6cf43474c832101'
 ```
 
 JSON返回示例：
@@ -1149,7 +1149,7 @@ pageindex|string|页码
 请求示例：
 
 ```bash
-curl --location --request GET 'http://localhost:8001/api/dao/exchanges/all'
+curl --location --request GET 'http://127.0.0.1:8001/api/dao/exchanges/all'
 ```
 
 JSON返回示例：
@@ -1229,7 +1229,7 @@ transaction|json|交易体|true
 {"transaction":{"type":42,"nethash":"0ab796cd","amount":"0","fee":"100000000","recipientId":null,"senderPublicKey":"daeee33def7eef0c7ba06ec66eda7204437ba88ace8f04e4a6aa4d7bfbd18bc1","timestamp":89946294,"asset":{"daoContribution":{"title":"sssss","sender_address":"DC5kJzMdNDhrnupWX2NGafzMoiwdHiySBe","received_address":"D61gSRn1ko2NiEYLutPxnBDXU4MBJ2b4by","url":"dat://f76e1e82cf4eab4bf173627ff93662973c6fab110c70fb0f86370873a9619aa6+18/public/test.html","price":"0"}},"signature":"633451aa7e360dcce555419626cdd4739d523a619b9fae8d72fde13bf46a85c9bee997acb3cf22d91ca9cfe9cac312a82a20ba532340fd691b090e23df1ace07","id":"722946019ca08fb3e5cc08ee5cfc8d71e1f23e16db8829873a707de6d29ed09baf9f9627ba815b2ce59ddd48a1282ba6dc3c4f2d5adbed335d3c433bba2d6176"}}
 
  // 将上面的交易信息通过post请求"peer/transactions"接口传到链上
-curl --location --request POST 'http://localhost:8001/peer/transactions' \
+curl --location --request POST 'http://127.0.0.1:8001/peer/transactions' \
 --header 'nethash: 0ab796cd' \
 --header 'version: 0' \
 --header 'Content-Type: application/json' \
@@ -1266,7 +1266,7 @@ secret|string|密匙|true
 
 请求示例：
 ```bash
-curl --location --request PUT 'http://localhost:8001/api/dao/contributions/qwertsyuasaa' \
+curl --location --request PUT 'http://127.0.0.1:8001/api/dao/contributions/qwertsyuasaa' \
 --header 'Content-Type: application/json' \
 --data-raw '{
         "title": "sssss",
@@ -1310,7 +1310,7 @@ org_id｜string｜组织号id｜true
 请求示例：
 
 ```bash
-curl --location --request GET 'http://localhost:8001/api/dao/contributions/qwertsyuasaa/all'
+curl --location --request GET 'http://127.0.0.1:8001/api/dao/contributions/qwertsyuasaa/all'
 ```
 
 
@@ -1366,7 +1366,7 @@ trs_id|string|贡献的交易id|true
 
 请求示例：
 ```bash
-curl --location --request GET 'http://localhost:8001/api/dao/contributions/transaction/722946019ca08fb3e5cc08ee5cfc8d71e1f23e16db8829873a707de6d29ed09baf9f9627ba815b2ce59ddd48a1282ba6dc3c4f2d5adbed335d3c433bba2d6176'
+curl --location --request GET 'http://127.0.0.1:8001/api/dao/contributions/transaction/722946019ca08fb3e5cc08ee5cfc8d71e1f23e16db8829873a707de6d29ed09baf9f9627ba815b2ce59ddd48a1282ba6dc3c4f2d5adbed335d3c433bba2d6176'
 ```
 
 JSON返回示例：
@@ -1408,7 +1408,7 @@ JSON返回示例：
 请求示例：
 
 ```bash
-curl --location --request GET 'http://localhost:8001/api/dao/contributions/all'
+curl --location --request GET 'http://127.0.0.1:8001/api/dao/contributions/all'
 ```
 
 JSON返回示例：
@@ -1495,7 +1495,7 @@ transaction|json|交易体|true
 {"transaction":{"type":43,"nethash":"0ab796cd","amount":"0","fee":"0","recipientId":"","senderPublicKey":"daeee33def7eef0c7ba06ec66eda7204437ba88ace8f04e4a6aa4d7bfbd18bc1","timestamp":89947432,"asset":{"daoConfirmation":{"sender_address":"D61gSRn1ko2NiEYLutPxnBDXU4MBJ2b4by","received_address":"DC5kJzMdNDhrnupWX2NGafzMoiwdHiySBe","url":"dat://f76e1e82cf4eab4bf173627ff93662973c6fab110c70fb0f86370873a9619aa6+18/public/test.html","contribution_trs_id":"23681a024f3e3c650850ce3bb5b86c89cd3c2f6926fdfc6a40dadcda56c54cc1f123d676aa2c12abb2ae2ff77a1554380830b511422759b8a8ebe792dccc3eaf","state":0,"amount":"0","recipientId":"D61gSRn1ko2NiEYLutPxnBDXU4MBJ2b4by"}},"signature":"73a6f96f4a50b4eaddf3966bbedc9192f4fb36153ed21e77c456dba5e38f441d2b18b470bad333a787f5d9644de47a936a60947a0668de9c33fb8abf2b063f0c","id":"b45954aef79459ef43908e478ad930497da27b0ed771dcd022965afba9b1611bca49f9035461447b3e6347ad6e91a8774c55e6f176185bbb2b4bd556ea9a2cc1"}}
  // 将上面的交易信息通过post请求"peer/transactions"接口传到链上
 
- curl --location --request POST 'http://localhost:8001/peer/transactions' \
+ curl --location --request POST 'http://127.0.0.1:8001/peer/transactions' \
 --header 'nethash: 0ab796cd' \
 --header 'version: 0' \
 --header 'Content-Type: application/json' \
@@ -1531,7 +1531,7 @@ secret|string|密匙|true
 
 请求示例：
 ```bash
-curl --location --request GET 'http://localhost:8001 /api/dao/confirmations' \
+curl --location --request GET 'http://127.0.0.1:8001 /api/dao/confirmations' \
 --header 'Content-Type: application/json' \
 --data-raw '{
     "contribution_trs_id":"722946019ca08fb3e5cc08ee5cfc8d71e1f23e16db8829873a707de6d29ed09baf9f9627ba815b2ce59ddd48a1282ba6dc3c4f2d5adbed335d3c433bba2d6176",
@@ -1571,7 +1571,7 @@ org_id|string|组织id|true
 
 请求示例
 ```bash
-curl --location --request GET 'http://localhost:8001/api/dao/confirmations/qwertsyuasaa/all'
+curl --location --request GET 'http://127.0.0.1:8001/api/dao/confirmations/qwertsyuasaa/all'
 ```
 
 JSON返回示例：
@@ -1666,7 +1666,7 @@ pageindex|string|页码|false
 
 请求示例：
 ```bash
-curl --location --request GET 'http://localhost:8001/api/dao/confirmations/all'
+curl --location --request GET 'http://127.0.0.1:8001/api/dao/confirmations/all'
 ```
 
 JSON返回示例：

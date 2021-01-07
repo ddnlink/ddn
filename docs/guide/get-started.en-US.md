@@ -12,7 +12,7 @@ More infomation please visit our [official website](https://www.ddn.link) or [dd
 
 - nodejs v8+
 - npm 5.3+
-- node-gyp v3.6.2+ 
+- node-gyp v3.6.2+
 - sqlite v3.8.2+
 - mysql 5.0+
 - g++
@@ -37,7 +37,7 @@ sudo apt-get install curl sqlite3 ntp wget git libssl-dev openssl make gcc g++ a
 curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.35.3/install.sh | bash
 # This loads nvm
 export NVM_DIR="$HOME/.nvm"
-[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh" 
+[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
 [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
 
 # Install node and npm for current user.
@@ -50,10 +50,10 @@ node --version
 
 ```
 # git clone sourece code
-git clone https://github.com/ddnlink/ddn-starter.git && cd ddn-starter 
+git clone https://github.com/ddnlink/ddn-starter.git && cd ddn-starter
 
 # Install node packages
-npm install --production 
+npm install --production
 
 # config
 $ chmod u+x ddnd && ./ddnd configure
@@ -72,7 +72,7 @@ brew install curl sqlite3 ntp wget git libssl-dev openssl make gcc g++ autoconf 
 curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.35.3/install.sh | bash
 # This loads nvm
 export NVM_DIR="$HOME/.nvm"
-[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh" 
+[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
 [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
 
 # Install node and npm for current user.
@@ -108,7 +108,7 @@ root@e149b6732a48:/ddn# ./ddnd start
 DDN server is running ...
 ```
 
-## Run 
+## Run
 
 ```
 cd DDN && yarn start // or npm start
@@ -118,7 +118,7 @@ cd DDN && ./ddnd start
 
 ## Access in browser
 
-Then open `http://localhost:8001/api/blocks/getStatus` in your browser
+Then open `http://127.0.0.1:8001/api/blocks/getStatus` in your browser
 
 ## Usage
 
