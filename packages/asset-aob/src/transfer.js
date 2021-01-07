@@ -349,6 +349,16 @@ class Transfer extends Asset.Base {
         dbTrans
       )
     }
+    // 删除回滚的资产交易
+    if (transfer) {
+      this.dao.remove(
+        'trs_asset',
+        {
+          transaction_id: trs.id
+        },
+        dbTrans
+      )
+    }
   }
 
   async applyUnconfirmed (trs, sender) {
