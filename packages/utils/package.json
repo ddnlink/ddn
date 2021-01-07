@@ -1,6 +1,6 @@
 {
   "name": "@ddn/utils",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "DDN utils.",
   "main": "lib/index.js",
   "module": "dist/index.esm.js",
