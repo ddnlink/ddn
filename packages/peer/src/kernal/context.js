@@ -120,6 +120,10 @@ class Context {
     })
   }
 
+  async close () {
+    await database.close()
+  }
+
   async _buildDataParams (dao) {
     return new Promise((resolve, reject) => {
       dbParams.init(dao, (err, result) => {
