@@ -12,7 +12,7 @@ sidebar_label: explorer development
 所谓区块链浏览器，就是指提供用户浏览与查询区块链所有信息的工具，因为区块链公开透明的特质，它需要有一个媒介能够让区块链用户（包括矿工、监管者、开发者、交易者）看到或查询链上的数据及链的运行情况，比如区块链上的某个交易、某块区块、某个账户，当前区块高度等等。
 
 ## 2. 常见区块链浏览器分析
- 
+
 ### BTC区块链浏览器
 btc.com是比特币浏览器之一，该浏览器包含了比特币的区块信息，矿池信息，算力排行，区块统计及比特币生态相关的一些工具及应用。
 
@@ -185,10 +185,10 @@ Starting the development server...
   Compiled successfully in 17.84s
  DONE  Compiled successfully in 17842ms                                       8:06:31 PM
   App running at:
-  - Local:   http://localhost:8000 (copied to clipboard)
+  - Local:   http://127.0.0.1:8000 (copied to clipboard)
   - Network: http://192.168.12.34:8000
 ```
-在浏览器里打开 http://localhost:8000/，能看到界面
+在浏览器里打开 http://127.0.0.1:8000/，能看到界面
 
 
 #### 编译项目
@@ -201,7 +201,7 @@ $ yarn build
 
 在服务器或者后台测试时我们可以用curl命令来获取数据，如
 ```js
-curl -k -X GET 'http://127.0.0.1:8001/api/blocks/getStatus'   
+curl -k -X GET 'http://127.0.0.1:8001/api/blocks/getStatus'
 ```
 但在前端项目中，我们一般通过ajax的方式来获取远程的数据，然后展示在浏览器页面上，在获取数据之前，需要提前引入获取数据的npm包，在浏览器环境中可以直接使用fetch, request来获取数据, 而在js测试环境中, 可以用axios来获取服务端数据
 
@@ -287,7 +287,7 @@ blocksData { success: true,
        totalForged: 300000000 },
      { ...  } ],
   count: 8106526 }
-``` 
+```
 
 #### 获取当前区块详情
 接口地址：/api/blocks/get

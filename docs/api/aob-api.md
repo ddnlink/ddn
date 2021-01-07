@@ -5,26 +5,26 @@ title: 链上资产(AOB) API
 sidebar_label: Assets on blockchain
 ---
 
-## **1 API使用说明**   
-## **1.1 请求过程说明**   
-1.1 构造请求数据，用户数据按照DDN提供的接口规则，通过程序生成签名，生成请求数据集合；       
-1.2 发送请求数据，把构造完成的数据集合通过POST/GET等提交的方式传递给DDN；       
-1.3 DDN对请求数据进行处理，服务器在接收到请求后，会首先进行安全校验，验证通过后便会处理该次发送过来的请求；       
-1.4 返回响应结果数据，DDN把响应结果以JSON的格式反馈给用户，每个响应都包含success字段，表示请求是否成功，成功为true, 失败为false。 如果失败，则还会包含一个error字段，表示错误原因；       
-1.5 对获取的返回结果数据进行处理；       
-   
----   
-   
-## **2 接口**   
-## **2.1 AOB相关交易** 
-DDN系统的所有写操作都是通过发起一个交易来完成的。  
+## **1 API使用说明**
+## **1.1 请求过程说明**
+1.1 构造请求数据，用户数据按照DDN提供的接口规则，通过程序生成签名，生成请求数据集合；
+1.2 发送请求数据，把构造完成的数据集合通过POST/GET等提交的方式传递给DDN；
+1.3 DDN对请求数据进行处理，服务器在接收到请求后，会首先进行安全校验，验证通过后便会处理该次发送过来的请求；
+1.4 返回响应结果数据，DDN把响应结果以JSON的格式反馈给用户，每个响应都包含success字段，表示请求是否成功，成功为true, 失败为false。 如果失败，则还会包含一个error字段，表示错误原因；
+1.5 对获取的返回结果数据进行处理；
+
+---
+
+## **2 接口**
+## **2.1 AOB相关交易**
+DDN系统的所有写操作都是通过发起一个交易来完成的。
 交易数据通过一个叫做@ddn/node-sdk的库来构建，然后再通过一个POST接口发布出去。
 
-POST接口规格如下：  
-payload为@ddn/node-sdk创建出来的交易数据  
-接口地址：/peer/transactions  
-请求方式：post   
-支持格式：json  
+POST接口规格如下：
+payload为@ddn/node-sdk创建出来的交易数据
+接口地址：/peer/transactions
+请求方式：post
+支持格式：json
 公用变量：
 ```js
 var DdnJS = require('@ddn/node-sdk').default;
@@ -38,8 +38,8 @@ var secondSecret = 'ddnaobtest001'
 ### **2.1.1 注册资产发行商**
 请求参数说明：
 
-|名称	|类型   |必填 |说明              |   
-|------ |-----  |---  |----              |   
+|名称	|类型   |必填 |说明              |
+|------ |-----  |---  |----              |
 |transaction|json|Y|DdnJS.aob.createIssuer根据发行商名字、描述、一级密码、二级密码生成的交易数据|
 
 返回参数说明：
@@ -49,9 +49,9 @@ var secondSecret = 'ddnaobtest001'
 |success|boolean|是否成功获得response数据。|
 |transactionId|string|交易id|
 
-   
-请求示例：   
-```js   
+
+请求示例：
+```js
 // 发行商名称,唯一标识
 var name = 'IssuerName'
 // 发行商描述
@@ -76,10 +76,10 @@ console.log(JSON.stringify(trs))
     },
     "signature": "f8f8bb32e84fda67bdbf6cef27b83ae13684e5e9b4cf1ea3d22e4c1c1d013d10028422ffa199717fe55b4e73470b9f0d33f0a7123059a2fe628f8e58c824900f"
 }
-```   
+```
 将生成的交易数据以transaction为key，放入json，调用上链接口提交，注册资产发行商IssuerName
 ```sh
-curl --location --request POST 'http://localhost:8001/peer/transactions' \
+curl --location --request POST 'http://127.0.0.1:8001/peer/transactions' \
 --header 'Content-Type: application/json' \
 --header 'nethash: 0ab796cd' \
 --header 'version: 3.0' \
@@ -111,11 +111,11 @@ curl --location --request POST 'http://localhost:8001/peer/transactions' \
 }
 ```
 
-### **2.1.2 注册资产** 
+### **2.1.2 注册资产**
 请求参数说明：
 
-|名称	|类型   |必填 |说明              |   
-|------ |-----  |---  |----              |   
+|名称	|类型   |必填 |说明              |
+|------ |-----  |---  |----              |
 |transaction|json|Y|DdnJS.aob.createAsset根据资产名字、描述、上限、精度、策略、一级密码、二级密码生成的交易数据|
 
 返回参数说明：
@@ -125,9 +125,9 @@ curl --location --request POST 'http://localhost:8001/peer/transactions' \
 |success|boolean|是否成功获得response数据。|
 |transactionId|string|交易id|
 
-   
-请求示例：   
-```js   
+
+请求示例：
+```js
 // 资产名称，发行商名.资产名，唯一标识
 var name = 'IssuerName.CNY'
 var desc = '资产描述'
@@ -167,7 +167,7 @@ console.log(JSON.stringify(trs))
 ```
 将生成的交易数据以transaction为key，放入json，调用上链接口提交，注册资产IssuerName.CNY
 ```sh
-curl --location --request POST 'http://localhost:8001/peer/transactions' \
+curl --location --request POST 'http://127.0.0.1:8001/peer/transactions' \
 --header 'Content-Type: application/json' \
 --header 'nethash: 0ab796cd' \
 --header 'version: 3.0' \
@@ -205,22 +205,22 @@ JSON返回示例：
 }
 ```
 
-### **2.1.3 资产设置acl模式** 
+### **2.1.3 资产设置acl模式**
 请求参数说明：
 
-|名称	|类型   |必填 |说明              |   
-|------ |-----  |---  |----              |   
+|名称	|类型   |必填 |说明              |
+|------ |-----  |---  |----              |
 |transaction|json|Y|DdnJS.aob.createFlags根据资产名、流通状态、黑白名单模式、一级密码、二级密码生成的交易数据|
 
-返回参数说明：   
+返回参数说明：
 
-|名称	|类型   |说明              |   
-|------ |-----  |----              |   
-|success|boolean  |是否成功 |  
+|名称	|类型   |说明              |
+|------ |-----  |----              |
+|success|boolean  |是否成功 |
 
-   
-请求示例：   
-```js   
+
+请求示例：
+```js
 var currency = 'IssuerName.CNY'
 // 资产是否注销，1：流通，2：注销
 var flagType = 1
@@ -231,30 +231,30 @@ console.log(JSON.stringify(trs))
 {"type":11,"amount":0,"fee":10000000,"recipientId":null,"senderPublicKey":"fafcd01f6b813fdeb3c086e60bc7fa9bfc8ef70ae7be47ce0ac5d06e7b1a8575","timestamp":19400996,"asset":{"aobFlags":{"currency":"IssuerName.CNY","flagType":1,"flag":1}},"signature":"b96fb3d1456e1f26357109cc24d82834eb9a4687f29e69c374bbb1d534568336e148cac52f213aa4d2a69185092f8e1143b49ec4b8048cd9b3af4e20f6ba0b08","signSignature":"b37c77ebebe90341346be2aefe1e12bd7403e5d8f4d6e8f04630190b3e09494a28820da0ffd5f9ff011033aa6d70fc9bb4c159a4493be3b18fd7ff470103570d"}
 
 // 将生成的交易数据通过post发送给server，将acl改为白名单模式
-curl -H "Content-Type: application/json" -H "nethash:0ab796cd" -H "version:''" -k -X POST -d '{"transaction":{"type":11,"amount":0,"fee":10000000,"recipientId":null,"senderPublicKey":"fafcd01f6b813fdeb3c086e60bc7fa9bfc8ef70ae7be47ce0ac5d06e7b1a8575","timestamp":19400996,"asset":{"aobFlags":{"currency":"IssuerName.CNY","flagType":1,"flag":1}},"signature":"b96fb3d1456e1f26357109cc24d82834eb9a4687f29e69c374bbb1d534568336e148cac52f213aa4d2a69185092f8e1143b49ec4b8048cd9b3af4e20f6ba0b08","signSignature":"b37c77ebebe90341346be2aefe1e12bd7403e5d8f4d6e8f04630190b3e09494a28820da0ffd5f9ff011033aa6d70fc9bb4c159a4493be3b18fd7ff470103570d"}}' 'http://localhost:8001/peer/transactions' && echo
-```   
-   
-JSON返回示例：   
-```js  
-{"success":true}		
+curl -H "Content-Type: application/json" -H "nethash:0ab796cd" -H "version:''" -k -X POST -d '{"transaction":{"type":11,"amount":0,"fee":10000000,"recipientId":null,"senderPublicKey":"fafcd01f6b813fdeb3c086e60bc7fa9bfc8ef70ae7be47ce0ac5d06e7b1a8575","timestamp":19400996,"asset":{"aobFlags":{"currency":"IssuerName.CNY","flagType":1,"flag":1}},"signature":"b96fb3d1456e1f26357109cc24d82834eb9a4687f29e69c374bbb1d534568336e148cac52f213aa4d2a69185092f8e1143b49ec4b8048cd9b3af4e20f6ba0b08","signSignature":"b37c77ebebe90341346be2aefe1e12bd7403e5d8f4d6e8f04630190b3e09494a28820da0ffd5f9ff011033aa6d70fc9bb4c159a4493be3b18fd7ff470103570d"}}' 'http://127.0.0.1:8001/peer/transactions' && echo
 ```
 
-### **2.1.4 更新访问控制列表（acl）** 
+JSON返回示例：
+```js
+{"success":true}
+```
+
+### **2.1.4 更新访问控制列表（acl）**
 请求参数说明：
 
-|名称	|类型   |必填 |说明              |   
-|------ |-----  |---  |----              |   
+|名称	|类型   |必填 |说明              |
+|------ |-----  |---  |----              |
 |transaction|json|Y|DdnJS.aob.createAcl根据资产名字、列表操作方法、黑名单还是白名单、地址列表、一级密码、二级密码生成的交易数据|
 
-返回参数说明：   
+返回参数说明：
 
-|名称	|类型   |说明              |   
-|------ |-----  |----              |   
-|success|boolean  |是否成功 |  
+|名称	|类型   |说明              |
+|------ |-----  |----              |
+|success|boolean  |是否成功 |
 
-   
-请求示例：   
-```js   
+
+请求示例：
+```js
 var currency = 'IssuerName.CNY'
 // '+'表示增加列表， ‘-’表示删除列表
 var operator = '+'
@@ -266,14 +266,14 @@ console.log(JSON.stringify(trs))
 {"type":12,"amount":0,"fee":20000000,"recipientId":null,"senderPublicKey":"fafcd01f6b813fdeb3c086e60bc7fa9bfc8ef70ae7be47ce0ac5d06e7b1a8575","timestamp":19403125,"asset":{"aobAcl":{"currency":"IssuerName.CNY","operator":"+","flag":1,"list":["15745540293890213312"]}},"signature":"ad4060e04c1a12256de114e34499f8add24326753f1f8362991ee14aefc4c0fe90ff394d2db97e83770855a5688d463de00656fdd2d04604605cf3c04fdaca0e","signSignature":"63129c58b1b9fcce88cbe829f3104a10ab06037253e9b65feb50ce0d2bb988533b93e8edcad016a85675f9027758fc318cf899ca7ef161a95a8d8a055ae83a02"}
 
 // 将生成的交易数据通过post发送给server，把地址列表['15745540293890213312']增加到该白名单中，只修改名单列表，不修改acl模式，手续费0.2DDN
-curl -H "Content-Type: application/json" -H "nethash:0ab796cd" -H "version:''" -k -X POST -d '{"transaction":{"type":12,"amount":0,"fee":20000000,"recipientId":null,"senderPublicKey":"fafcd01f6b813fdeb3c086e60bc7fa9bfc8ef70ae7be47ce0ac5d06e7b1a8575","timestamp":19403125,"asset":{"aobAcl":{"currency":"IssuerName.CNY","operator":"+","flag":1,"list":["15745540293890213312"]}},"signature":"ad4060e04c1a12256de114e34499f8add24326753f1f8362991ee14aefc4c0fe90ff394d2db97e83770855a5688d463de00656fdd2d04604605cf3c04fdaca0e","signSignature":"63129c58b1b9fcce88cbe829f3104a10ab06037253e9b65feb50ce0d2bb988533b93e8edcad016a85675f9027758fc318cf899ca7ef161a95a8d8a055ae83a02"}}' 'http://localhost:8001/peer/transactions' && echo
-```   
-   
-JSON返回示例：   
-```js  
+curl -H "Content-Type: application/json" -H "nethash:0ab796cd" -H "version:''" -k -X POST -d '{"transaction":{"type":12,"amount":0,"fee":20000000,"recipientId":null,"senderPublicKey":"fafcd01f6b813fdeb3c086e60bc7fa9bfc8ef70ae7be47ce0ac5d06e7b1a8575","timestamp":19403125,"asset":{"aobAcl":{"currency":"IssuerName.CNY","operator":"+","flag":1,"list":["15745540293890213312"]}},"signature":"ad4060e04c1a12256de114e34499f8add24326753f1f8362991ee14aefc4c0fe90ff394d2db97e83770855a5688d463de00656fdd2d04604605cf3c04fdaca0e","signSignature":"63129c58b1b9fcce88cbe829f3104a10ab06037253e9b65feb50ce0d2bb988533b93e8edcad016a85675f9027758fc318cf899ca7ef161a95a8d8a055ae83a02"}}' 'http://127.0.0.1:8001/peer/transactions' && echo
+```
+
+JSON返回示例：
+```js
 {"success":true}
 // 查询更新后的列表（acl/1代表白名单）
-curl -X GET -H "Content-Type: application/json" 'http://localhost:8001/api/aob/assets/IssuerName.CNY/acl/1?limit=10&offset=0' && echo
+curl -X GET -H "Content-Type: application/json" 'http://127.0.0.1:8001/api/aob/assets/IssuerName.CNY/acl/1?limit=10&offset=0' && echo
 {
 	"success": true,
 	"list": [{
@@ -284,11 +284,11 @@ curl -X GET -H "Content-Type: application/json" 'http://localhost:8001/api/aob/a
 ```
 
 
-### **2.1.5 资产发行** 
+### **2.1.5 资产发行**
 请求参数说明：
 
-|名称	|类型   |必填 |说明              |   
-|------ |-----  |---  |----              |   
+|名称	|类型   |必填 |说明              |
+|------ |-----  |---  |----              |
 |transaction|json|Y|DdnJS.aob.createIssuer根据发行商名字、描述、一级密码、二级密码生成的交易数据|
 
 返回参数说明：
@@ -298,9 +298,9 @@ curl -X GET -H "Content-Type: application/json" 'http://localhost:8001/api/aob/a
 |success|boolean|是否成功获得response数据。|
 |transactionId|string|交易id|
 
-   
-请求示例：   
-```js   
+
+请求示例：
+```js
 var currency = 'IssuerName.CNY'
 // 本次发行量=真实数量（100）*10**精度（3），所有发行量之和需 <= 上限*精度
 var amount = '100000'
@@ -329,7 +329,7 @@ console.log(JSON.stringify(trs))
 
 将其以transaction为key，放入json，调用上链接口提交
 ```sh
-curl --location --request POST 'http://106.15.227.133:8001/peer/transactions' \
+curl --location --request POST 'http://127.0.0.1:8001/peer/transactions' \
 --header 'Content-Type: application/json' \
 --header 'nethash: 0ab796cd' \
 --header 'version: 3.0' \
@@ -362,11 +362,11 @@ JSON返回示例：
 }
 ```
 
-### **2.1.6 资产转账** 
+### **2.1.6 资产转账**
 请求参数说明：
 
-|名称	|类型   |必填 |说明              |   
-|------ |-----  |---  |----              |   
+|名称	|类型   |必填 |说明              |
+|------ |-----  |---  |----              |
 |transaction|json|Y|DdnJS.aob.createTransfer根据资产名字、数量、接收者地址、一级密码、二级密码生成的交易数据|
 
 返回参数说明：
@@ -376,14 +376,14 @@ JSON返回示例：
 |success|boolean|是否成功获得response数据。|
 |transactionId|string|交易id|
 
-   
-请求示例：   
-```js   
+
+请求示例：
+```js
 var currency = 'IssuerName.CNY'
 // 本次转账数（10000）=真实数量（10）*10**精度（3），需 <= 当前资产发行总量
 var amount = '10000'
 // 接收地址，需满足前文定义好的acl规则
-var recipientId = 'AKKHPvQb2A119LNicCQWLZQDFxhGVEY57a'
+var recipientId = 'DKKHPvQb2A119LNicCQWLZQDFxhGVEY57a'
 var message = 'xxxxx(交易所ID)'
 
 var trs = DdnJS.aob.createTransfer(currency, amount, recipientId, null, message, secret, secondSecret)
@@ -392,7 +392,7 @@ console.log(JSON.stringify(trs))
     "type": 14,
     "amount": 0,
     "fee": 10000000,
-    "recipientId": "AKKHPvQb2A119LNicCQWLZQDFxhGVEY57a",
+    "recipientId": "DKKHPvQb2A119LNicCQWLZQDFxhGVEY57a",
     "senderPublicKey": "fafcd01f6b813fdeb3c086e60bc7fa9bfc8ef70ae7be47ce0ac5d06e7b1a8575",
     "timestamp": 19481489,
     "asset": {
@@ -404,13 +404,13 @@ console.log(JSON.stringify(trs))
     "signature": "77789071a2ad6d407b9d1e0d654a9deb6d85340a3d2a13d786030e26ac773b4e9b5f052589958d2b8553ae5fc9449496946b5c225e0baa723e7ddecbd89f060a",
     "signSignature": "f0d4a000aae3dd3fa48a92f792d4318e41e3b56cdbaf98649261ae34490652b87645326a432d5deb69f771c133ee4b67d2d22789197be34249e6f7f0c30c1705"
 }
-```   
-   
+```
+
 
 将其以transaction为key，放入json，调用上链接口提交
 ```sh
-# 给AKKHPvQb2A119LNicCQWLZQDFxhGVEY57a发送10.000 IssuerName.CNY资产
-curl --location --request POST 'http://106.15.227.133:8001/peer/transactions' \
+# 给DKKHPvQb2A119LNicCQWLZQDFxhGVEY57a发送10.000 IssuerName.CNY资产
+curl --location --request POST 'http://127.0.0.1:8001/peer/transactions' \
 --header 'Content-Type: application/json' \
 --header 'nethash: 0ab796cd' \
 --header 'version: 3.0' \
@@ -419,7 +419,7 @@ curl --location --request POST 'http://106.15.227.133:8001/peer/transactions' \
         "type": 14,
         "amount": 0,
         "fee": 10000000,
-        "recipientId": "AKKHPvQb2A119LNicCQWLZQDFxhGVEY57a",
+        "recipientId": "DKKHPvQb2A119LNicCQWLZQDFxhGVEY57a",
         "senderPublicKey": "fafcd01f6b813fdeb3c086e60bc7fa9bfc8ef70ae7be47ce0ac5d06e7b1a8575",
         "timestamp": 19481489,
         "asset": {
@@ -441,12 +441,12 @@ JSON返回示例：
     "transactionId": "b763c260aea7769d71063c3dcf4aa7b07d58a3765d6561967f3a09b99e8348e70ab701d52a149348be00494fe84c62bb58cd677a0de3fdcef472899569ef407a"
 }
 ```
- 
-### **2.1.7 资产注销** 
+
+### **2.1.7 资产注销**
 请求参数说明：
 
-|名称	|类型   |必填 |说明              |   
-|------ |-----  |---  |----              |   
+|名称	|类型   |必填 |说明              |
+|------ |-----  |---  |----              |
 |transaction|json|Y|DdnJS.aob.createFlags根据资产名字、注销状态、黑白名单模式、一级密码、二级密码生成的交易数据|
 
 返回参数说明：
@@ -456,9 +456,9 @@ JSON返回示例：
 |success|boolean|是否成功获得response数据。|
 |transactionId|string|交易id|
 
-   
-请求示例：   
-```js   
+
+请求示例：
+```js
 var currency = 'IssuerName.CNY'
 // flagType为资产是否注销，1：流通，2：注销
 var flagType = 2
@@ -468,98 +468,98 @@ var trs = DdnJS.aob.createFlags(currency, flagType, flag, secret, secondSecret)
 console.log(JSON.stringify(trs))
 {"type":11,"amount":0,"fee":10000000,"recipientId":null,"senderPublicKey":"fafcd01f6b813fdeb3c086e60bc7fa9bfc8ef70ae7be47ce0ac5d06e7b1a8575","timestamp":19488690,"asset":{"aobFlags":{"currency":"IssuerName.CNY","flagType":2,"flag":1}},"signature":"cbd656552417604704703e1236ec2bbed8eba6a2ccfcb54cc0b2d629c0a9d1335a264fc9f6dee1705f4a86c36a5ce2ba8e039d913a189b7c273c8ac0d9e3780c","signSignature":"3c7b91d03efeed2dc86e1f2301da60789751c1be8850460d8c66c0ae8f55ea27d26f0bc79541d74b4777d9b85c518c1c73c0284dbf3e826db0a686560e57a80b"}
 
-curl -H "Content-Type: application/json" -H "nethash:0ab796cd" -H "version:''" -k -X POST -d '{"transaction":{"type":11,"amount":0,"fee":10000000,"recipientId":null,"senderPublicKey":"fafcd01f6b813fdeb3c086e60bc7fa9bfc8ef70ae7be47ce0ac5d06e7b1a8575","timestamp":19488690,"asset":{"aobFlags":{"currency":"IssuerName.CNY","flagType":2,"flag":1}},"signature":"cbd656552417604704703e1236ec2bbed8eba6a2ccfcb54cc0b2d629c0a9d1335a264fc9f6dee1705f4a86c36a5ce2ba8e039d913a189b7c273c8ac0d9e3780c","signSignature":"3c7b91d03efeed2dc86e1f2301da60789751c1be8850460d8c66c0ae8f55ea27d26f0bc79541d74b4777d9b85c518c1c73c0284dbf3e826db0a686560e57a80b"}}' 'http://localhost:8001/peer/transactions' && echo
-```   
-   
-JSON返回示例：   
-```js  
-{"success":true}		
-```  
+curl -H "Content-Type: application/json" -H "nethash:0ab796cd" -H "version:''" -k -X POST -d '{"transaction":{"type":11,"amount":0,"fee":10000000,"recipientId":null,"senderPublicKey":"fafcd01f6b813fdeb3c086e60bc7fa9bfc8ef70ae7be47ce0ac5d06e7b1a8575","timestamp":19488690,"asset":{"aobFlags":{"currency":"IssuerName.CNY","flagType":2,"flag":1}},"signature":"cbd656552417604704703e1236ec2bbed8eba6a2ccfcb54cc0b2d629c0a9d1335a264fc9f6dee1705f4a86c36a5ce2ba8e039d913a189b7c273c8ac0d9e3780c","signSignature":"3c7b91d03efeed2dc86e1f2301da60789751c1be8850460d8c66c0ae8f55ea27d26f0bc79541d74b4777d9b85c518c1c73c0284dbf3e826db0a686560e57a80b"}}' 'http://127.0.0.1:8001/peer/transactions' && echo
+```
+
+JSON返回示例：
+```js
+{"success":true}
+```
 
 
-### **2.1.8 其它接口**  
-get /peer/all  //查找dapp peer   
-get /peer/blocks/common //查找common block   
-...    
+### **2.1.8 其它接口**
+get /peer/all  //查找dapp peer
+get /peer/blocks/common //查找common block
+...
 
 
 
-## **2.2 用户自定义资产aob**  
+## **2.2 用户自定义资产aob**
 
-### **2.2.1 创建资产**   
-接口地址：/api/aob/transfers   
-请求方式：PUT   
-支持格式：json   
-接口备注：   
-请求参数说明：   
+### **2.2.1 创建资产**
+接口地址：/api/aob/transfers
+请求方式：PUT
+支持格式：json
+接口备注：
+请求参数说明：
 
-|名称	|类型   |必填 |说明              |   
-|------ |-----  |---  |----              |   
-|secret |string |Y    |发送者密码,最大长度100       |   
-|currency |string |Y    |资产名，最大长度22       |   
-|amount |string |Y    |转账金额，最大长度50       |   
-|recipientId |string |Y    |接收地址，最小长度1       |  
-|publicKey|string|N|发送者公钥，格式必须符合公钥格式|  
-|secondSecret|string|N|发送者二级密码，最小长度1，最大长度：100|   
-|multisigAccountPublicKey|string|N|多签账户公钥，格式必须符合公钥格式|   
-|message|string|N|转账备注，最大长度256| 
+|名称	|类型   |必填 |说明              |
+|------ |-----  |---  |----              |
+|secret |string |Y    |发送者密码,最大长度100       |
+|currency |string |Y    |资产名，最大长度22       |
+|amount |string |Y    |转账金额，最大长度50       |
+|recipientId |string |Y    |接收地址，最小长度1       |
+|publicKey|string|N|发送者公钥，格式必须符合公钥格式|
+|secondSecret|string|N|发送者二级密码，最小长度1，最大长度：100|
+|multisigAccountPublicKey|string|N|多签账户公钥，格式必须符合公钥格式|
+|message|string|N|转账备注，最大长度256|
 
-   
-返回参数说明：   
 
-|名称	|类型   |说明              |   
-|------ |-----  |----              |   
-|success|boolean  |是否成功获得response数据。|    
-|transactionId|string  |交易id      |    
-   
-   
-请求示例：   
-```bash   
+返回参数说明：
+
+|名称	|类型   |说明              |
+|------ |-----  |----              |
+|success|boolean  |是否成功获得response数据。|
+|transactionId|string  |交易id      |
+
+
+请求示例：
+```bash
 // 转0.01 absorb.YLB给D2zThPTQZDNQqXbe5tikDQ24YyCQTCpbSC
-curl -k -H "Content-Type: application/json" -X PUT -d '{"secret":"found knife gather faith wrestle private various fame cover response security predict","amount":"1000000","recipientId":"D2zThPTQZDNQqXbe5tikDQ24YyCQTCpbSC","currency":"absorb.YLB"}' 'http://localhost:8001/api/aob/transfers' && echo   
-```   
-   
-JSON返回示例：   
-```js   
-{   
-	"success": true,   
-	"transactionId": "3cb6d97534a3b90cf7fc883927f0a9a7c7f4878a9df526c2906ca97e250fcaba"   
-}   
-```  
+curl -k -H "Content-Type: application/json" -X PUT -d '{"secret":"found knife gather faith wrestle private various fame cover response security predict","amount":"1000000","recipientId":"D2zThPTQZDNQqXbe5tikDQ24YyCQTCpbSC","currency":"absorb.YLB"}' 'http://127.0.0.1:8001/api/aob/transfers' && echo
+```
 
-### **2.2.2 获取全网所有发行商**  
-接口地址：/api/aob/issuers  
-请求方式：get   
-支持格式：urlencoded 
+JSON返回示例：
+```js
+{
+	"success": true,
+	"transactionId": "3cb6d97534a3b90cf7fc883927f0a9a7c7f4878a9df526c2906ca97e250fcaba"
+}
+```
+
+### **2.2.2 获取全网所有发行商**
+接口地址：/api/aob/issuers
+请求方式：get
+支持格式：urlencoded
 
 请求参数说明：
 
-|名称	|类型   |必填 |说明              |   
-|------ |-----  |---  |----              |   
+|名称	|类型   |必填 |说明              |
+|------ |-----  |---  |----              |
 |limit|integer|N|限制结果集个数，最小值：0,最大值：100|
 |offset|integer|N|偏移量，最小值0|
 
-返回参数说明：   
+返回参数说明：
 
-|名称	|类型   |说明              |   
-|------ |-----  |----              |   
-|success|boolean  |是否成功 |  
+|名称	|类型   |说明              |
+|------ |-----  |----              |
+|success|boolean  |是否成功 |
 |issuers|list|元素为字典，每个字典代表一个发行商，包含发行商名字、描述、id（Ddn地址）|
 |count|integer|发行商总个数|
 
-请求示例：   
-```js   
+请求示例：
+```js
 curl -X GET -H "Content-Type: application/json"  'http://loc:8001/api/aob/issuers?offset=0&limit=1' && echo
-```   
-   
-JSON返回示例：   
-```js  
+```
+
+JSON返回示例：
+```js
 {
 	"success": true,
 	"issuers": [{
 		"name": "huoding",
 		"desc": "注册资产发行商-测试",
-		"issuerId": "AKKHPvQb2A119LNicCQWLZQDFxhGVEY57a"
+		"issuerId": "DKKHPvQb2A119LNicCQWLZQDFxhGVEY57a"
 	},
 	{
 		"name": "speedtest",
@@ -567,34 +567,34 @@ JSON返回示例：
 		"issuerId": "AEVWQWAq3TEJkCPSDxXMP2uCRrL2xbQnsy"
 	}],
 	"count": 6
-}		
-``` 
+}
+```
 
-### **2.2.3 查询指定发行商的信息** 
-接口地址：/api/aob/issuers/:name  
-请求方式：get   
-支持格式：urlencoded 
+### **2.2.3 查询指定发行商的信息**
+接口地址：/api/aob/issuers/:name
+请求方式：get
+支持格式：urlencoded
 
 请求参数说明：
 
-|名称	|类型   |必填 |说明              |   
-|------ |-----  |---  |----              |   
+|名称	|类型   |必填 |说明              |
+|------ |-----  |---  |----              |
 |name|string|Y|可以为发行商名称或Ddn账户地址|
 
-返回参数说明：   
+返回参数说明：
 
-|名称	|类型   |说明              |   
-|------ |-----  |----              |   
-|success|boolean  |是否成功 |  
+|名称	|类型   |说明              |
+|------ |-----  |----              |
+|success|boolean  |是否成功 |
 |issuers|dict|包含发行商名字、描述、id（Ddn地址）|
-   
-请求示例：   
-```js   
-curl -X GET -H "Content-Type: application/json"  'http://localhost:8001/api/aob/issuers/D9qa6bvWASFZrGDXm4DxDsVMr2jx8LwATx' && echo
-```   
-   
-JSON返回示例：   
-```js  
+
+请求示例：
+```js
+curl -X GET -H "Content-Type: application/json"  'http://127.0.0.1:8001/api/aob/issuers/D9qa6bvWASFZrGDXm4DxDsVMr2jx8LwATx' && echo
+```
+
+JSON返回示例：
+```js
 {
     "success": true,
     "result": {
@@ -605,39 +605,39 @@ JSON返回示例：
         "issuer_id": "D9qa6bvWASFZrGDXm4DxDsVMr2jx8LwATx",
         "desc": "valid desc"
     }
-}		
-``` 
+}
+```
 
-### **2.2.4 查看指定发行商的资产** 
-接口地址：/api/aob/assets/issuers/:name/assets  
-请求方式：get   
-支持格式：urlencoded 
+### **2.2.4 查看指定发行商的资产**
+接口地址：/api/aob/assets/issuers/:name/assets
+请求方式：get
+支持格式：urlencoded
 
 请求参数说明：
 
-|名称	|类型   |必填 |说明              |   
-|------ |-----  |---  |----              |   
+|名称	|类型   |必填 |说明              |
+|------ |-----  |---  |----              |
 |name|string|Y|可以为发行商名称或Ddn账户地址|
 |limit|integer|N|限制结果集个数，最小值：0,最大值：100|
 |offset|integer|N|偏移量，最小值0|
 
-返回参数说明：   
+返回参数说明：
 
-|名称	|类型   |说明              |   
-|------ |-----  |----              |   
-|success|boolean  |是否成功 |  
+|名称	|类型   |说明              |
+|------ |-----  |----              |
+|success|boolean  |是否成功 |
 |assets|list|每个元素是一个字典，每个字典是一个资产详情，包含资产名字、描述、上限（最大发行量=真实发行量*10**精度）、精度、策略、当前发行量、发行高度、发行商id，acl模式（0：黑名单，1：白名单）、是否注销|
 |count|interger|该发行商注册的资产总个数（包含已注销的）|
 
-   
-   
-请求示例：   
-```js   
-curl -X GET -H "Content-Type: application/json"  'http://localhost:8001/api/aob/assets/issuers/huoding/assets?offset=0&limit=2' && echo
-```   
-   
-JSON返回示例：   
-```js  
+
+
+请求示例：
+```js
+curl -X GET -H "Content-Type: application/json"  'http://127.0.0.1:8001/api/aob/assets/issuers/huoding/assets?offset=0&limit=2' && echo
+```
+
+JSON返回示例：
+```js
 {
 	"success": true,
 	"assets": [{
@@ -648,43 +648,43 @@ JSON返回示例：
 		"strategy": "",
 		"quantity": "1000000",
 		"height": 301,
-		"issuerId": "AKKHPvQb2A119LNicCQWLZQDFxhGVEY57a",
+		"issuerId": "DKKHPvQb2A119LNicCQWLZQDFxhGVEY57a",
 		"acl": 0,
 		"writeoff": 1
 	}],
 	"count": 1
-}		
-``` 
+}
+```
 
-### **2.2.5 获取全网所有资产信息** 
-接口地址：/api/aob/assets/  
-请求方式：get   
-支持格式：urlencoded 
+### **2.2.5 获取全网所有资产信息**
+接口地址：/api/aob/assets/
+请求方式：get
+支持格式：urlencoded
 
 请求参数说明：
 
-|名称	|类型   |必填 |说明              |   
-|------ |-----  |---  |----              |   
+|名称	|类型   |必填 |说明              |
+|------ |-----  |---  |----              |
 |limit|integer|N|限制结果集个数，最小值：0,最大值：100|
 |offset|integer|N|偏移量，最小值0|
 
-返回参数说明：   
+返回参数说明：
 
-|名称	|类型   |说明              |   
-|------ |-----  |----              |   
-|success|boolean  |是否成功 |  
+|名称	|类型   |说明              |
+|------ |-----  |----              |
+|success|boolean  |是否成功 |
 |assets|list|每个元素是一个字典，每个字典是一个资产详情，包含资产名字、描述、上限、精度、策略、当前发行量、发行高度、发行商id，acl、是否注销|
 |count|integer|所有资产的个数|
 
-   
-   
-请求示例：   
-```js   
-curl -X GET -H "Content-Type: application/json"  'http://localhost:8001/api/aob/assets?offset=0&limit=2' && echo
-```   
-   
-JSON返回示例：   
-```js  
+
+
+请求示例：
+```js
+curl -X GET -H "Content-Type: application/json"  'http://127.0.0.1:8001/api/aob/assets?offset=0&limit=2' && echo
+```
+
+JSON返回示例：
+```js
 {
 	"success": true,
 	"assets": [{
@@ -695,7 +695,7 @@ JSON返回示例：
 		"strategy": "",
 		"quantity": "1000000",
 		"height": 301,
-		"issuerId": "AKKHPvQb2A119LNicCQWLZQDFxhGVEY57a",
+		"issuerId": "DKKHPvQb2A119LNicCQWLZQDFxhGVEY57a",
 		"acl": 0,
 		"writeoff": 1
 	},
@@ -712,34 +712,34 @@ JSON返回示例：
 		"writeoff": 0
 	}],
 	"count": 13
-}		
-``` 
+}
+```
 
-### **2.2.6 获取指定资产信息** 
-接口地址：/api/aob/assets/:name  
-请求方式：get   
-支持格式：urlencoded 
+### **2.2.6 获取指定资产信息**
+接口地址：/api/aob/assets/:name
+请求方式：get
+支持格式：urlencoded
 
 请求参数说明：
 
-|名称	|类型   |必填 |说明              |   
-|------ |-----  |---  |----              |   
+|名称	|类型   |必填 |说明              |
+|------ |-----  |---  |----              |
 |name|string|Y|资产名|
 
-返回参数说明：   
+返回参数说明：
 
-|名称	|类型   |说明              |   
-|------ |-----  |----              |   
-|success|boolean  |是否成功 |  
+|名称	|类型   |说明              |
+|------ |-----  |----              |
+|success|boolean  |是否成功 |
 |assets|dict|包含资产名字、描述、上限、精度、策略、当前发行量、发行高度、发行商id，acl、是否注销|
-   
-请求示例：   
-```js   
-curl -X GET -H "Content-Type: application/json"  'http://localhost:8001/api/aob/assets/huoding.AOB' && echo
-```   
-   
-JSON返回示例：   
-```js  
+
+请求示例：
+```js
+curl -X GET -H "Content-Type: application/json"  'http://127.0.0.1:8001/api/aob/assets/huoding.AOB' && echo
+```
+
+JSON返回示例：
+```js
 {
 	"success": true,
 	"asset": {
@@ -750,84 +750,84 @@ JSON返回示例：
 		"strategy": "",
 		"quantity": "1000000",
 		"height": 301,
-		"issuerId": "AKKHPvQb2A119LNicCQWLZQDFxhGVEY57a",
+		"issuerId": "DKKHPvQb2A119LNicCQWLZQDFxhGVEY57a",
 		"acl": 0,
 		"writeoff": 1
 	}
-}		
-``` 
+}
+```
 
-### **2.2.7 获取指定资产的访问控制列表（acl）** 
-接口地址：/api/aob/assets/:name/acl/flag  
-请求方式：get   
-支持格式：urlencoded 
+### **2.2.7 获取指定资产的访问控制列表（acl）**
+接口地址：/api/aob/assets/:name/acl/flag
+请求方式：get
+支持格式：urlencoded
 
 请求参数说明：
 
-|名称	|类型   |必填 |说明              |   
-|------ |-----  |---  |----              |   
+|名称	|类型   |必填 |说明              |
+|------ |-----  |---  |----              |
 |name|string|Y|资产名|
 |flag|boolean|Y|取值0和1，0表示黑名单，1表示白名单|
 |limit|integer|N|限制结果集个数，最小值：0,最大值：100|
 |offset|integer|N|偏移量，最小值0|
 
-返回参数说明：   
+返回参数说明：
 
-|名称	|类型   |说明              |   
-|------ |-----  |----              |   
-|success|boolean  |是否成功 |  
+|名称	|类型   |说明              |
+|------ |-----  |----              |
+|success|boolean  |是否成功 |
 |list|list|符合规则的账户列表|
 |count|integer|符合规则账户总数|
 
-   
-请求示例：   
-```js   
+
+请求示例：
+```js
 // 获取资产huoding.AOB白名单中的地址列表
-curl -X GET -H "Content-Type: application/json"  'http://localhost:8001/api/aob/assets/huoding.AOB/acl/1' && echo
-```   
-   
-JSON返回示例：   
-```js  
+curl -X GET -H "Content-Type: application/json"  'http://127.0.0.1:8001/api/aob/assets/huoding.AOB/acl/1' && echo
+```
+
+JSON返回示例：
+```js
 {
 	"success": true,
 	"list": [{
 		"address": "15745540293890213312"
 	},
 	{
-		"address": "AKKHPvQb2A119LNicCQWLZQDFxhGVEY57a"
+		"address": "DKKHPvQb2A119LNicCQWLZQDFxhGVEY57a"
 	}],
 	"count": 2
-}		
-``` 
+}
+```
 
-### **2.2.8 获取指定账户所有aob的余额** 
-接口地址：/api/aob/balances/:address  
-请求方式：get   
-支持格式：urlencoded 
+### **2.2.8 获取指定账户所有aob的余额**
+接口地址：/api/aob/balances/:address
+请求方式：get
+支持格式：urlencoded
 
 请求参数说明：
 
-|名称	|类型   |必填 |说明              |   
-|------ |-----  |---  |----              |   
+|名称	|类型   |必填 |说明              |
+|------ |-----  |---  |----              |
 |address|string|Y|账户地址|
 |limit|integer|N|限制结果集个数，最小值：0,最大值：100|
 |offset|integer|N|偏移量，最小值0|
 
-返回参数说明：   
+返回参数说明：
 
-|名称	|类型   |说明              |   
-|------ |-----  |----              |   
-|success|boolean  |是否成功 |  
+|名称	|类型   |说明              |
+|------ |-----  |----              |
+|success|boolean  |是否成功 |
 |balances|list|拥有的资产详情列表，每个元素是一个资产，包含资产名、余额、上限、精度、当前发行量、是否注销（0：未注销，1：已注销）|
 |count|integer|当前该地址拥有的资产个数|
-   
-请求示例：   
-```js   
-curl -X GET -H "Content-Type: application/json" 'http://localhost:8001/api/aob/balances/AKKHPvQb2A119LNicCQWLZQDFxhGVEY57a' && echo
-```   
-   
-JSON返回示例：   
-```js  
+
+请求示例：
+```js
+curl -X GET -H "Content-Type: application/json" 'http://127.0.0.1:8001/api/aob/balances/DKKHPvQb2A119LNicCQWLZQDFxhGVEY57a' && echo
+```
+
+JSON返回示例：
+```js
 {
 	"success": true,
 	"balances": [{
@@ -847,38 +847,38 @@ JSON返回示例：
 		"writeoff": 0
 	}],
 	"count": 2
-}		
+}
 ```
 
-### **2.2.9 获取指定账户所有资产相关操作记录** 
-接口地址：/api/aob/transfers/my/:address  
-请求方式：get   
-支持格式：urlencoded  
-备注：包含发行商创建以及资产创建、发行、转账等  
+### **2.2.9 获取指定账户所有资产相关操作记录**
+接口地址：/api/aob/transfers/my/:address
+请求方式：get
+支持格式：urlencoded
+备注：包含发行商创建以及资产创建、发行、转账等
 
 请求参数说明：
 
-|名称	|类型   |必填 |说明              |   
-|------ |-----  |---  |----              |   
+|名称	|类型   |必填 |说明              |
+|------ |-----  |---  |----              |
 |address|string|Y|账户地址|
 |limit|integer|N|限制结果集个数，最小值：0,最大值：100|
 |offset|integer|N|偏移量，最小值0|
 
-返回参数说明：   
+返回参数说明：
 
-|名称	|类型   |说明              |   
-|------ |-----  |----              |   
-|success|boolean  |是否成功 |  
+|名称	|类型   |说明              |
+|------ |-----  |----              |
+|success|boolean  |是否成功 |
 |transactions|list|交易列表，每个元素是一个字典代表一次交易，包含交易id、区块高度、区块id、交易类型、时间戳、发送者公钥、发送者id、接收者id（系统为空，如资产注册）、交易数量（资产交易都为0）、手续费0.1DDN、签名、多重签名、确认数、资产信息（包含发行商id、发行商名字、描述）、交易id。|
 |count|integer|资产交易总个数|
-   
-请求示例：   
-```js   
-curl -X GET -H "Content-Type: application/json"  'http://localhost:8001/api/aob/transfers/my/transactions/DDr1KLYLRos6iZ55HvNrKo2X8Zpg2mT1oh?offset=0&limit=2' && echo
-```   
-   
-JSON返回示例：   
-```js  
+
+请求示例：
+```js
+curl -X GET -H "Content-Type: application/json"  'http://127.0.0.1:8001/api/aob/transfers/my/transactions/DDr1KLYLRos6iZ55HvNrKo2X8Zpg2mT1oh?offset=0&limit=2' && echo
+```
+
+JSON返回示例：
+```js
 {
 	"success": true,
 	"transactions": [{
@@ -888,7 +888,7 @@ JSON返回示例：
 		"type": 9,  // 交易类型，9代表注册发行商
 		"timestamp": 17597873,  // 交易时间，距离创世块的offset
 		"senderPublicKey": "d39d6f26869067473d685da742339d1a9117257fe14b3cc7261e3f2ed5a339e3",  // 交易发起者公钥
-		"senderId": "AKKHPvQb2A119LNicCQWLZQDFxhGVEY57a",   // 交易发起者id
+		"senderId": "DKKHPvQb2A119LNicCQWLZQDFxhGVEY57a",   // 交易发起者id
 		"recipientId": "",  //  接收者id，如果是系统则为空
 		"amount": 0,    //  交易数量，如果是资产或者DDN则为非0，否则为0
 		"fee": 10000000,    // 交易费
@@ -930,7 +930,7 @@ JSON返回示例：
 		"t_id": "17308768226103450697"
 	}],
 	"count": 58
-}		
+}
 ```
 
 
@@ -974,7 +974,7 @@ type=11
                     "flag": "1"
                 }
             },
-展示: 
+展示:
 如果$flagType==1 ： 资产issuername.BTC访问控制设置为(flag==0?黑名单：白名单)
 如果$flagType==2 ： 资产issuername.BTC被注销
 ```
@@ -1021,37 +1021,37 @@ type=14
 ```
 
 
-   
 
 
-### **2.2.10 获取指定账户指定资产的余额** 
-接口地址：/api/aob/assets/balances/:address/:currency  
-请求方式：get   
-支持格式：urlencoded 
+
+### **2.2.10 获取指定账户指定资产的余额**
+接口地址：/api/aob/assets/balances/:address/:currency
+请求方式：get
+支持格式：urlencoded
 
 请求参数说明：
 
-|名称	|类型   |必填 |说明              |   
-|------ |-----  |---  |----              |   
+|名称	|类型   |必填 |说明              |
+|------ |-----  |---  |----              |
 |address|string|Y|Ddn地址|
 |currency|string|Y|资产名字|
 |limit|integer|N|限制结果集个数，最小值：0,最大值：100|
 |offset|integer|N|偏移量，最小值0|
 
-返回参数说明：   
+返回参数说明：
 
-|名称	|类型   |说明              |   
-|------ |-----  |----              |   
-|success|boolean  |是否成功 |  
+|名称	|类型   |说明              |
+|------ |-----  |----              |
+|success|boolean  |是否成功 |
 |balances|dict|包含资产名、余额、最大发行量、精度、当前发行量、是否注销|
-   
-请求示例：   
-```js   
-curl -X GET -H "Content-Type: application/json"  'http://localhost:8001/api/aob/assets/balances/DDr1KLYLRos6iZ55HvNrKo2X8Zpg2mT1oh/IssuerName.CNY' && echo
-```   
-   
-JSON返回示例：   
-```js  
+
+请求示例：
+```js
+curl -X GET -H "Content-Type: application/json"  'http://127.0.0.1:8001/api/aob/assets/balances/DDr1KLYLRos6iZ55HvNrKo2X8Zpg2mT1oh/IssuerName.CNY' && echo
+```
+
+JSON返回示例：
+```js
 {
 	"success": true,
 	"balance": {
@@ -1062,39 +1062,39 @@ JSON返回示例：
 		"quantity": "100000",
 		"writeoff": 1
 	}
-}	
+}
 ```
 
-### **2.2.11 获取指定账户指定资产转账记录** 
-接口地址：/api/aob/transfers/my/:address/:currency  
-请求方式：get   
-支持格式：urlencoded  
-备注：只返回资产转账记录  
+### **2.2.11 获取指定账户指定资产转账记录**
+接口地址：/api/aob/transfers/my/:address/:currency
+请求方式：get
+支持格式：urlencoded
+备注：只返回资产转账记录
 
 请求参数说明：
 
-|名称	|类型   |必填 |说明              |   
-|------ |-----  |---  |----              |   
+|名称	|类型   |必填 |说明              |
+|------ |-----  |---  |----              |
 |address|string|Y|Ddn地址|
 |currency|string|Y|资产名字|
 |limit|integer|N|限制结果集个数，最小值：0,最大值：100|
 |offset|integer|N|偏移量，最小值0|
 
-返回参数说明：   
+返回参数说明：
 
-|名称	|类型   |说明              |   
-|------ |-----  |----              |   
-|success|boolean  |是否成功 |  
-|transactions|list|交易列表，每个元素是一个字典代表一次交易，包含交易id、区块高度、区块id、交易类型、时间戳、发送者公钥、发送者id、接收者id（系统为空，如资产注册）、交易数量（资产交易都为0）、手续费0.1DDN、签名、多重签名、确认数、资产信息（包含发行商id、发行商名字、描述）、交易id。|  
-|count|integer|资产交易总个数|  
-   
-请求示例：   
-```js   
-curl -X GET -H "Content-Type: application/json"  'http://localhost:8001/api/aob/transfers/my/DDr1KLYLRos6iZ55HvNrKo2X8Zpg2mT1oh/IssuerName.CNY' && echo
-```   
-   
-JSON返回示例：   
-```js  
+|名称	|类型   |说明              |
+|------ |-----  |----              |
+|success|boolean  |是否成功 |
+|transactions|list|交易列表，每个元素是一个字典代表一次交易，包含交易id、区块高度、区块id、交易类型、时间戳、发送者公钥、发送者id、接收者id（系统为空，如资产注册）、交易数量（资产交易都为0）、手续费0.1DDN、签名、多重签名、确认数、资产信息（包含发行商id、发行商名字、描述）、交易id。|
+|count|integer|资产交易总个数|
+
+请求示例：
+```js
+curl -X GET -H "Content-Type: application/json"  'http://127.0.0.1:8001/api/aob/transfers/my/DDr1KLYLRos6iZ55HvNrKo2X8Zpg2mT1oh/IssuerName.CNY' && echo
+```
+
+JSON返回示例：
+```js
 {
 	"success": true,
 	"transactions": [{
@@ -1105,7 +1105,7 @@ JSON返回示例：
 		"timestamp": 19481489,
 		"senderPublicKey": "fafcd01f6b813fdeb3c086e60bc7fa9bfc8ef70ae7be47ce0ac5d06e7b1a8575",
 		"senderId": "DDr1KLYLRos6iZ55HvNrKo2X8Zpg2mT1oh",
-		"recipientId": "AKKHPvQb2A119LNicCQWLZQDFxhGVEY57a",
+		"recipientId": "DKKHPvQb2A119LNicCQWLZQDFxhGVEY57a",
 		"amount": 0,
 		"fee": 10000000,
 		"signature": "77789071a2ad6d407b9d1e0d654a9deb6d85340a3d2a13d786030e26ac773b4e9b5f052589958d2b8553ae5fc9449496946b5c225e0baa723e7ddecbd89f060a",
@@ -1123,39 +1123,39 @@ JSON返回示例：
 		"t_id": "d6102fc30931e4dc449811cbbab705fd64bc79b09de703e8172f7bdd90835abc"
 	}],
 	"count": 15
-}	
+}
 ```
 
-### **2.2.12 获取指定资产转账记录** 
-接口地址：/api/aob/transfers/:currency  
-请求方式：get   
-支持格式：urlencoded  
-备注：只返回指定资产转账记录 
+### **2.2.12 获取指定资产转账记录**
+接口地址：/api/aob/transfers/:currency
+请求方式：get
+支持格式：urlencoded
+备注：只返回指定资产转账记录
 
 请求参数说明：
 
-|名称	|类型   |必填 |说明              |   
-|------ |-----  |---  |----              |   
+|名称	|类型   |必填 |说明              |
+|------ |-----  |---  |----              |
 |currency|string|Y|资产名字|
 |limit|integer|N|限制结果集个数，最小值：0,最大值：100|
 |offset|integer|N|偏移量，最小值0|
 
-返回参数说明：   
+返回参数说明：
 
-|名称	|类型   |说明              |   
-|------ |-----  |----              |   
-|success|boolean  |是否成功 |  
-|transactions|list|交易列表，每个元素是一个字典代表一次交易，包含交易id、区块高度、区块id、交易类型、时间戳、发送者公钥、发送者id、接收者id（系统为空，如资产注册）、交易数量（资产交易都为0）、手续费0.1DDN、签名、多重签名、确认数、资产信息（包含发行商id、发行商名字、描述）、交易id。|  
-|count|integer|该资产交易总数|  
-   
-请求示例：   
-```js   
-// 查询引力波资产absorb.YLB的所有转账记录 
+|名称	|类型   |说明              |
+|------ |-----  |----              |
+|success|boolean  |是否成功 |
+|transactions|list|交易列表，每个元素是一个字典代表一次交易，包含交易id、区块高度、区块id、交易类型、时间戳、发送者公钥、发送者id、接收者id（系统为空，如资产注册）、交易数量（资产交易都为0）、手续费0.1DDN、签名、多重签名、确认数、资产信息（包含发行商id、发行商名字、描述）、交易id。|
+|count|integer|该资产交易总数|
+
+请求示例：
+```js
+// 查询引力波资产absorb.YLB的所有转账记录
 curl -X GET -H "Content-Type: application/json" 'http://127.0.0.1:8001/api/aob/transfers/absorb.YLB' && echo
-```   
-   
-JSON返回示例：   
-```js  
+```
+
+JSON返回示例：
+```js
 {
 	success: true,
 	transactions: [{
@@ -1214,4 +1214,4 @@ JSON返回示例：
 	}],
 	count: 2
 }
-```   
+```

@@ -32,7 +32,7 @@ sidebar_label: Peer Install Testnet
 # 安装依赖包
 sudo apt-get install curl wget git libssl-dev openssl make gcc g++ autoconf automake python build-essential cron -y
 # 针对 ubuntu 18.04
-sudo apt-get install node-gyp node-pre-gyp libsqlite3-dev 
+sudo apt-get install node-gyp node-pre-gyp libsqlite3-dev
 # 可以直接安装 ntp 和 sqlite3，也可以在安装节点的时候安装
 sudo apt-get install ntp sqlite3 -y
 ```
@@ -57,7 +57,7 @@ export NVM_DIR="$HOME/.nvm"
 # export NVM_NODEJS_ORG_MIRROR=http://npm.taobao.org/mirrors/node
 nvm install v10.21.0
 
-# 检查版本，确认是否安装成功 
+# 检查版本，确认是否安装成功
 node --version # v10.21.0
 ```
 
@@ -111,7 +111,7 @@ $ vim .ddnrc.js
 
 ```
   peers: {
-    list: ['106.15.227.133'],
+    list: ['106.15.227.133'], // 记得换成你自己的IP
     blackList: [],
     options: {
       timeout: 4000
@@ -184,7 +184,7 @@ $ ./ddnd restart
 如果出现下面的信息，说明节点在同步中：
 
 ```
-{"success":fail,"error":"Blockchain is loading"} 
+{"success":fail,"error":"Blockchain is loading"}
 ```
 
 也可以使用上面的命令，监听日志信息：
@@ -234,7 +234,7 @@ $ ./ddnd configure
 $ ./ddnd start
 ```
 
-### 6.2 无法生产块 
+### 6.2 无法生产块
 
 #### 情形1
 
@@ -348,12 +348,12 @@ $ sudo apt-get upgrade
 
 下载速度瞬间就起飞了。
 
-### 6.5 node-pre-gyp WARN Using request for node-pre-gyp https download 
+### 6.5 node-pre-gyp WARN Using request for node-pre-gyp https download
 
 首先安装下面的软件包，然后再尝试操作
 
 ```
-$ sudo apt install python g++ node-gyp  node-pre-gyp libsqlite3-dev 
+$ sudo apt install python g++ node-gyp  node-pre-gyp libsqlite3-dev
 ```
 
 ### 6.6 sqlite3 安装不成功
