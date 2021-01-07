@@ -1,6 +1,6 @@
 {
   "name": "@ddn/node-sdk",
-  "version": "0.5.1",
+  "version": "0.5.2",
   "description": "DDN Node.js SDK",
   "main": "lib/index.js",
   "files": [
@@ -26,7 +26,7 @@
     "url": "http://github.com/ddnlink/ddn/issues"
   },
   "dependencies": {
-    "@ddn/asset-aob": "^0.5.1",
+    "@ddn/asset-aob": "^0.5.2",
     "@ddn/asset-base": "^0.4.1",
     "@ddn/asset-dao": "^0.4.1",
     "@ddn/asset-dapp": "^0.3.1",
