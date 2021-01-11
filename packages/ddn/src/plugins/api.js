@@ -145,7 +145,6 @@ function getPeers (options) {
     port: options.port,
     version: options.version
   }
-  // var liskOptions = {host:'login.lisk.io', port:80};
   getApi().get('/api/peers/', params, function (err, result) {
     console.log(err || pretty(result.peers))
   })

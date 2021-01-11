@@ -134,9 +134,6 @@ to generate new genesisBlock.json
 * **ddn:** Update to ES6 and Module rules are standardized
 
 
-
-
-
 ## [3.2.0](https://github.com/ddnlink/ddn/compare/v3.1.0...v3.2.0) (2020-02-10)
 
 ### Features
