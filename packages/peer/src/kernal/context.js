@@ -87,14 +87,10 @@ class Context {
     })
 
     // 数据库操作对象
-    await database.init(this.config.database, options.logger)
-    this.dao = database
+    this.dao = await database.init(this.config.database, options.logger)
 
     // 数据库参数对象，Key/Value类型
-    // this.dbParams = await this._buildDataParams(this.dao)
-
-    await dbParams.init(database)
-    this.dbParams = dbParams
+    this.dbParams = await dbParams.init(database)
 
     // 运行时核心逻辑处理模块组
     this.runtime = {}
