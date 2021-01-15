@@ -39,6 +39,7 @@ class Round {
             `(select (cast(block.height / ${this.constants.delegates} as integer) + (case when block.height % ${this.constants.delegates} > 0 then 1 else 0 end))) = ${roundStr}`
           )
         },
+        // TODO 原来的代码是this.dao.db_fnSum(''), 'fees']， 疑是有误, 这个sql报错
         [
           [this.dao.db_fnSum(''), 'fees'], // wxm block database    library.dao.db_fn('sum', library.dao.db_col('totalFee'))
           [this.dao.db_fnGroupConcat('reward'), 'rewards'], // wxm block database   library.dao.db_fn('group_concat', library.dao.db_col('reward'))

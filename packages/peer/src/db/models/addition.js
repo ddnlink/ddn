@@ -7,6 +7,25 @@
 
 import Sequelize from 'sequelize'
 
+// class Addition extends Model {}
+// Addition.init({
+//   json: {
+//     type: Sequelize.TEXT,
+//     allowNull: false
+//   },
+//   transaction_id: {
+//     type: Sequelize.STRING(64),
+//     allowNull: false
+//   }
+// },
+// {
+//   sequelize: connection,
+//   modelName: 'block',
+//   tableName: 'addition',
+//   freezeTableName: true,
+//   timestamps: false
+// })
+
 export default connection => {
   return connection.define(
     'addition',

@@ -87,10 +87,14 @@ class Context {
     })
 
     // 数据库操作对象
-    this.dao = await this._buildDataAccessObject(this.config.database, options.logger)
+    await database.init(this.config.database, options.logger)
+    this.dao = database
 
     // 数据库参数对象，Key/Value类型
-    this.dbParams = await this._buildDataParams(this.dao)
+    // this.dbParams = await this._buildDataParams(this.dao)
+
+    await dbParams.init(database)
+    this.dbParams = dbParams
 
     // 运行时核心逻辑处理模块组
     this.runtime = {}
@@ -99,18 +103,6 @@ class Context {
   async _buildProtobuf (protoFile) {
     return new Promise((resolve, reject) => {
       protobuf(protoFile, (err, result) => {
-        if (err) {
-          reject(err)
-        } else {
-          resolve(result)
-        }
-      })
-    })
-  }
-
-  async _buildDataAccessObject (dbSetting, logger) {
-    return new Promise((resolve, reject) => {
-      database.init(dbSetting, logger, (err, result) => {
         if (err) {
           reject(err)
         } else {

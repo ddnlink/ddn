@@ -1,64 +1,50 @@
 let _dao
 
+function callback (cb, err, result) {
+  // console.log(cb, err, result)
+  if (cb) cb(err, result)
+  else if (err) throw new Error(err)
+  else return result
+}
+
 class DBParams {
-  static init (dao, cb) {
+  static async init (dao, cb) {
     _dao = dao
-    cb(null, this)
+    return callback(cb, null, this)
   }
 
-  static set (name, value, dbTrans, cb) {
-    if (_dao) {
-      _dao.insertOrUpdate('param', {
+  static async set (name, value, dbTrans, cb) {
+    if (!_dao) {
+      return callback(cb, '数据库未初始化')
+    }
+    const result = await _dao.insertOrUpdate(
+      'param',
+      {
         name,
         value
-      }, dbTrans, cb)
-    } else {
-      if (typeof (cb) === 'function') {
-        return cb('数据库未初始化')
-      }
-    }
+      },
+      dbTrans
+    )
+
+    return callback(cb, null, result)
   }
 
-  static get (name, cb) {
-    if (_dao) {
-      _dao.findOneByPrimaryKey('param', name, null,
-        (err, result) => {
-          if (err) {
-            return cb(err)
-          }
-
-          if (result && result.value) {
-            return cb(null, result.value)
-          } else {
-            // console.log('db-params.js cb= ', cb);
-
-            return cb(null, null)
-          }
-        }
-      )
-    } else {
-      if (typeof (cb) === 'function') {
-        return cb('数据库未初始化')
-      }
+  static async get (name, cb) {
+    if (!_dao) {
+      return callback(cb, '数据库未初始化')
     }
+    const result = _dao.findOneByPrimaryKey('param', name, null)
+    return callback(cb, null, result && result.value)
   }
 
-  static remove (name, cb) {
-    if (_dao) {
-      _dao.remove('param', {
-        name
-      }, (err, result) => {
-        if (err) {
-          return cb(err)
-        }
-
-        cb(null, result)
-      })
-    } else {
-      if (typeof (cb) === 'function') {
-        return cb('数据库未初始化')
-      }
+  static async remove (name, cb) {
+    if (!_dao) {
+      return callback(cb, '数据库未初始化')
     }
+    const result = await _dao.remove('param', {
+      name
+    })
+    return callback(cb, null, result)
   }
 }
 

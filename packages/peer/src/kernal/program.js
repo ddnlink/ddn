@@ -137,15 +137,7 @@ class Program {
    * 升级数据库结构
    */
   async _applyDatabaseUpgrade () {
-    return new Promise((resolve, reject) => {
-      dbUpgrade.upgrade(this._context, (err, result) => {
-        if (err) {
-          reject(err)
-        } else {
-          resolve(result)
-        }
-      })
-    })
+    return await dbUpgrade.upgrade(this._context)
   }
 
   /**
