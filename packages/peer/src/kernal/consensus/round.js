@@ -30,38 +30,31 @@ class Round {
     const round = await this.getRound(this.runtime.block.getLastBlock().height)
     const roundStr = round.toString()
 
-    await new Promise((resolve, reject) => {
-      // 这里没有将 bignum 计算传进去，通过 / % 等运算符，字符串形式的 bignum 会自动转为 number
-      this.dao.findOne(
-        'block',
-        {
-          [roundStr]: this.dao.db_str(
-            `(select (cast(block.height / ${this.constants.delegates} as integer) + (case when block.height % ${this.constants.delegates} > 0 then 1 else 0 end))) = ${roundStr}`
-          )
-        },
-        // TODO 原来的代码是this.dao.db_fnSum(''), 'fees']， 疑是有误, 这个sql报错
-        [
-          [this.dao.db_fnSum(''), 'fees'], // wxm block database    library.dao.db_fn('sum', library.dao.db_col('totalFee'))
-          [this.dao.db_fnGroupConcat('reward'), 'rewards'], // wxm block database   library.dao.db_fn('group_concat', library.dao.db_col('reward'))
-          [this.dao.db_fnGroupConcat('generator_public_key'), 'delegates'] // wxm block database   library.dao.db_fn('group_concat', library.dao.db_col('generatorPublicKey'))
-        ],
-        (_err, row) => {
-          if (!row) {
-            row = {
-              fees: '',
-              rewards: [],
-              delegates: []
-            }
-          }
+    // 这里没有将 bignum 计算传进去，通过 / % 等运算符，字符串形式的 bignum 会自动转为 number
+    let row = await this.dao.findOne(
+      'block',
+      {
+        [roundStr]: this.dao.db_str(
+          `(select (cast(block.height / ${this.constants.delegates} as integer) + (case when block.height % ${this.constants.delegates} > 0 then 1 else 0 end))) = ${roundStr}`
+        )
+      },
+      [
+        [this.dao.db_fnSum('total_fee'), 'fees'],
+        [this.dao.db_fnGroupConcat('reward'), 'rewards'],
+        [this.dao.db_fnGroupConcat('generator_public_key'), 'delegates']
+      ]
+    )
+    if (!row) {
+      row = {
+        fees: '',
+        rewards: [],
+        delegates: []
+      }
+    }
 
-          this._feesByRound[round] = row.fees
-          this._rewardsByRound[round] = row.rewards.length > 0 ? row.rewards.split(',') : []
-          this._delegatesByRound[round] = row.delegates.length ? row.delegates.split(',') : []
-
-          resolve()
-        }
-      )
-    })
+    this._feesByRound[round] = row.fees
+    this._rewardsByRound[round] = row.rewards.length > 0 ? row.rewards.split(',') : []
+    this._delegatesByRound[round] = row.delegates.length ? row.delegates.split(',') : []
   }
 
   /**
