@@ -30,7 +30,7 @@ import {
   randomIpId
 } from './random-utils'
 
-import accounts from './accout-utils'
+import { accounts } from './account-utils'
 
 // TODO 包的整理规划需要进一步明确原则，根据通用性确定是否写成npm包
 import { DappCategory, DappType } from '@ddn/asset-dapp'
