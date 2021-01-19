@@ -126,27 +126,11 @@ class Transfer extends Asset.Base {
   }
 
   async isInWhiteList (currency, address) {
-    return new Promise((resolve, reject) => {
-      this.dao.findOne('acl_white', { currency, address }, null, null, (err, result) => {
-        if (err) {
-          return reject(err)
-        }
-
-        resolve(result)
-      })
-    })
+    return await this.dao.findOne('acl_white', { currency, address })
   }
 
   async isInBlackList (currency, address) {
-    return new Promise((resolve, reject) => {
-      this.dao.findOne('acl_black', { currency, address }, null, null, (err, result) => {
-        if (err) {
-          return reject(err)
-        }
-
-        resolve(result)
-      })
-    })
+    return await this.dao.findOne('acl_black', { currency, address })
   }
 
   // 新增事务dbTrans ---wly
@@ -154,23 +138,14 @@ class Transfer extends Asset.Base {
     const transfer = await this.getAssetObject(trs)
     this.balanceCache.addAssetBalance(trs.recipientId, transfer.currency, transfer.amount)
     // (1)
-    const assetBalancedata = await new Promise(resolve => {
-      this.dao.findOne(
-        'mem_asset_balance',
-        {
-          address: sender.address,
-          currency: transfer.currency
-        },
-        ['balance'],
-        (err, rows) => {
-          if (err) {
-            resolve(err)
-          } else {
-            resolve(rows)
-          }
-        }
-      )
-    })
+    const assetBalancedata = await this.dao.findOne(
+      'mem_asset_balance',
+      {
+        address: sender.address,
+        currency: transfer.currency
+      },
+      ['balance']
+    )
     const balance = assetBalancedata && assetBalancedata.balance ? assetBalancedata.balance : '0'
     const newBalance = DdnUtils.bignum.plus(balance, `-${transfer.amount}`)
     if (DdnUtils.bignum.isLessThan(newBalance, 0)) {
@@ -178,7 +153,7 @@ class Transfer extends Asset.Base {
       throw new Error('Asset balance not enough')
     }
     if (assetBalancedata) {
-      this.dao.update(
+      await this.dao.update(
         'mem_asset_balance',
         {
           balance: newBalance.toString()
@@ -190,7 +165,7 @@ class Transfer extends Asset.Base {
         dbTrans
       )
     } else {
-      this.dao.insert(
+      await this.dao.insert(
         'mem_asset_balance',
         {
           address: sender.address,
@@ -201,23 +176,14 @@ class Transfer extends Asset.Base {
       )
     }
     // (2)
-    const assetBalancedata2 = await new Promise(resolve => {
-      this.dao.findOne(
-        'mem_asset_balance',
-        {
-          address: trs.recipientId,
-          currency: transfer.currency
-        },
-        ['balance'],
-        (err, rows) => {
-          if (err) {
-            resolve(err)
-          } else {
-            resolve(rows)
-          }
-        }
-      )
-    })
+    const assetBalancedata2 = await this.dao.findOne(
+      'mem_asset_balance',
+      {
+        address: trs.recipientId,
+        currency: transfer.currency
+      },
+      ['balance']
+    )
     const balance2 = assetBalancedata2 && assetBalancedata2.balance ? assetBalancedata2.balance : '0'
     const newBalance2 = DdnUtils.bignum.plus(balance2, transfer.amount)
     if (DdnUtils.bignum.isLessThan(newBalance2, 0)) {
@@ -225,7 +191,7 @@ class Transfer extends Asset.Base {
       throw new Error('Asset balance not enough')
     }
     if (assetBalancedata2) {
-      this.dao.update(
+      await this.dao.update(
         'mem_asset_balance',
         {
           balance: newBalance2.toString()
@@ -237,7 +203,7 @@ class Transfer extends Asset.Base {
         dbTrans
       )
     } else {
-      this.dao.insert(
+      await this.dao.insert(
         'mem_asset_balance',
         {
           address: trs.recipientId,
@@ -254,23 +220,14 @@ class Transfer extends Asset.Base {
     this.balanceCache.addAssetBalance(trs.recipientId, transfer.currency, `-${transfer.amount}`)
 
     // (1)
-    const assetBalancedata = await new Promise(resolve => {
-      this.dao.findOne(
-        'mem_asset_balance',
-        {
-          address: sender.address,
-          currency: transfer.currency
-        },
-        ['balance'],
-        (err, rows) => {
-          if (err) {
-            resolve(err)
-          } else {
-            resolve(rows)
-          }
-        }
-      )
-    })
+    const assetBalancedata = await this.dao.findOne(
+      'mem_asset_balance',
+      {
+        address: sender.address,
+        currency: transfer.currency
+      },
+      ['balance']
+    )
     const balance = assetBalancedata && assetBalancedata.balance ? assetBalancedata.balance : '0'
     const newBalance = DdnUtils.bignum.plus(balance, transfer.amount)
     if (DdnUtils.bignum.isLessThan(newBalance, 0)) {
@@ -279,7 +236,7 @@ class Transfer extends Asset.Base {
       // return
     }
     if (assetBalancedata) {
-      this.dao.update(
+      await this.dao.update(
         'mem_asset_balance',
         {
           balance: newBalance.toString()
@@ -291,7 +248,7 @@ class Transfer extends Asset.Base {
         dbTrans
       )
     } else {
-      this.dao.insert(
+      await this.dao.insert(
         'mem_asset_balance',
         {
           address: sender.address,
@@ -302,23 +259,14 @@ class Transfer extends Asset.Base {
       )
     }
     // (2)
-    const assetBalancedata2 = await new Promise(resolve => {
-      this.dao.findOne(
-        'mem_asset_balance',
-        {
-          address: trs.recipientId,
-          currency: transfer.currency
-        },
-        ['balance'],
-        (err, rows) => {
-          if (err) {
-            resolve(err)
-          } else {
-            resolve(rows)
-          }
-        }
-      )
-    })
+    const assetBalancedata2 = await this.dao.findOne(
+      'mem_asset_balance',
+      {
+        address: trs.recipientId,
+        currency: transfer.currency
+      },
+      ['balance']
+    )
     const balance2 = assetBalancedata2 && assetBalancedata2.balance ? assetBalancedata2.balance : '0'
     const newBalance2 = DdnUtils.bignum.plus(balance2, `-${transfer.amount}`)
     if (DdnUtils.bignum.isLessThan(newBalance2, 0)) {
@@ -327,7 +275,7 @@ class Transfer extends Asset.Base {
       // return
     }
     if (assetBalancedata2) {
-      this.dao.update(
+      await this.dao.update(
         'mem_asset_balance',
         {
           balance: newBalance2.toString()
@@ -339,7 +287,7 @@ class Transfer extends Asset.Base {
         dbTrans
       )
     } else {
-      this.dao.insert(
+      await this.dao.insert(
         'mem_asset_balance',
         {
           address: trs.recipientId,
@@ -351,7 +299,7 @@ class Transfer extends Asset.Base {
     }
     // 删除回滚的资产交易
     if (transfer) {
-      this.dao.remove(
+      await this.dao.remove(
         'trs_asset',
         {
           transaction_id: trs.id

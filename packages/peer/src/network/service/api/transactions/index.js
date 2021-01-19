@@ -256,7 +256,10 @@ class TransactionService {
 
       return {
         success: true,
-        transaction: global.assets && global.assets.transTypeNames[90] ? await superviseTrs({ context: this._context, trs: result[0] }) : result[0]
+        transaction:
+          global.assets && global.assets.transTypeNames[90]
+            ? await superviseTrs({ context: this._context, trs: result[0] })
+            : result[0]
       }
     } else {
       throw new Error('Transaction not found')
@@ -392,7 +395,11 @@ class TransactionService {
                 second_keypair,
                 message: body.message
               })
-              if ((global.assets && global.assets.transTypeNames[90]) && (this.constants.net.superviseIp === this.config.publicIp)) {
+              if (
+                global.assets &&
+                global.assets.transTypeNames[90] &&
+                this.constants.net.superviseIp === this.config.publicIp
+              ) {
                 await checkAndReport(transaction, this, cb, this.constants.net.superviseBaseUrl)
               }
               const transactions = await this.runtime.transaction.receiveTransactions([transaction])
@@ -433,7 +440,11 @@ class TransactionService {
                 message: body.message
               })
               // 判断配置@ddn/asset-supervise插件的并且publicip等于监管ip的才检测敏感词
-              if ((global.assets && global.assets.transTypeNames[90]) && (this.constants.net.superviseIp === this.config.publicIp)) {
+              if (
+                global.assets &&
+                global.assets.transTypeNames[90] &&
+                this.constants.net.superviseIp === this.config.publicIp
+              ) {
                 await checkAndReport(transaction, this, cb, this.constants.net.superviseBaseUrl)
               }
               const transactions = await this.runtime.transaction.receiveTransactions([transaction])
@@ -514,23 +525,11 @@ class TransactionService {
       // 获取其年月日形式的字符串
       time = getYMD(day)
       // 查询当日交易量
-      const count = await new Promise((resolve, reject) => {
-        this.dao.count(
-          'tr',
-          {
-            timestamp: {
-              $gte: Number(this.runtime.slot.getTime(d1Ms)),
-              $lt: Number(this.runtime.slot.getTime(d1Ms + dayMilliSeconds - 1))
-            }
-          },
-          null,
-          (err, data) => {
-            if (err) {
-              reject(err)
-            }
-            resolve(data)
-          }
-        )
+      const count = await this.dao.count('tr', {
+        timestamp: {
+          $gte: Number(this.runtime.slot.getTime(d1Ms)),
+          $lt: Number(this.runtime.slot.getTime(d1Ms + dayMilliSeconds - 1))
+        }
       })
       const obj = {
         time,

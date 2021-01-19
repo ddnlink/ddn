@@ -27,10 +27,7 @@ class Issue extends Asset.Base {
   async getBytes (trs) {
     const asset = await this.getAssetObject(trs)
 
-    const buffer = Buffer.concat([
-      Buffer.from(asset.currency, 'utf8'),
-      Buffer.from(asset.amount, 'utf8')
-    ])
+    const buffer = Buffer.concat([Buffer.from(asset.currency, 'utf8'), Buffer.from(asset.amount, 'utf8')])
 
     return buffer
   }
@@ -68,57 +65,47 @@ class Issue extends Asset.Base {
 
     // (2)查询到issuer的数据列表
     const issuerInst = await this.getAssetInstanceByName('AobIssuer')
-    let issuerData = await issuerInst.queryAsset({
-      name: { $in: _.map(result, 'issuer_name') }
-    }, null, false, 1, 1000)
+    let issuerData = await issuerInst.queryAsset(
+      {
+        name: { $in: _.map(result, 'issuer_name') }
+      },
+      null,
+      false,
+      1,
+      1000
+    )
 
     issuerData = _.keyBy(issuerData, 'name')
 
-    const result2 = _.map(result, (num) => {
+    const result2 = _.map(result, num => {
       const num2 = num
       num2.issuer_id = issuerData[num.issuer_name].issuer_id
       return num2
     })
 
     // (3)查询到交易的相关数据
-    let trData = await new Promise((resolve) => {
-      this.dao.findList('tr', {
-        id: {
-          $in: _.map(result, 'transaction_id')
-        }
-      }, null, null, (err, rows) => {
-        if (err) {
-          resolve(err)
-        } else {
-          resolve(rows)
-        }
-      })
+    let trData = await this.dao.findList('tr', {
+      id: {
+        $in: _.map(result, 'transaction_id')
+      }
     })
     trData = _.keyBy(trData, 'id')
 
-    const result3 = _.map(result2, (num) => {
+    const result3 = _.map(result2, num => {
       const num2 = num
       num2.block_id = trData[num.transaction_id].block_id
       return num2
     })
 
     // (4)查询到块的相关数据
-    let blockData = await new Promise((resolve) => {
-      this.dao.findList('block', {
-        id: {
-          $in: _.map(result3, 'block_id') // result - result3
-        }
-      }, null, null, (err, rows) => {
-        if (err) {
-          resolve(err)
-        } else {
-          resolve(rows)
-        }
-      })
+    let blockData = await this.dao.findList('block', {
+      id: {
+        $in: _.map(result3, 'block_id') // result - result3
+      }
     })
     blockData = _.keyBy(blockData, 'id')
 
-    const result4 = _.map(result3, (num) => {
+    const result4 = _.map(result3, num => {
       const num2 = num
       num2.height = blockData[num.block_id].height
       return num2
@@ -175,29 +162,37 @@ class Issue extends Asset.Base {
     const { currency, amount } = assetIssue
     this.balanceCache.addAssetBalance(sender.address, currency, amount)
     const assetInst = await this.getAssetInstanceByName('AobAsset')
-    const data = await assetInst.queryAsset({
-      name: currency
-    }, null, null, 1, 1)
+    const data = await assetInst.queryAsset(
+      {
+        name: currency
+      },
+      null,
+      null,
+      1,
+      1
+    )
     const { quantity } = data[0]
     await assetInst.update({ quantity: bignum.plus(quantity, amount).toString() }, { name: currency }, dbTrans)
-    const assetBalancedata = await new Promise((resolve, reject) => {
-      this.dao.findOne('mem_asset_balance', { address: sender.address, currency }, ['balance'], (err, rows) => {
-        if (err) {
-          reject(err)
-        } else {
-          resolve(rows)
-        }
-      })
-    })
-    const balance = (assetBalancedata && assetBalancedata.balance) ? assetBalancedata.balance : '0'
+    const assetBalancedata = await this.dao.findOne('mem_asset_balance', { address: sender.address, currency })
+
+    const balance = assetBalancedata && assetBalancedata.balance ? assetBalancedata.balance : '0'
     const newBalance = bignum.plus(balance, amount)
     if (bignum.isLessThan(newBalance, 0)) {
       throw new Error('Asset balance not enough')
     }
     if (assetBalancedata) {
-      this.dao.update('mem_asset_balance', { balance: newBalance.toString() }, { address: sender.address, currency }, dbTrans)
+      await this.dao.update(
+        'mem_asset_balance',
+        { balance: newBalance.toString() },
+        { address: sender.address, currency },
+        dbTrans
+      )
     } else {
-      this.dao.insert('mem_asset_balance', { address: sender.address, currency, balance: newBalance.toString() }, dbTrans)
+      await this.dao.insert(
+        'mem_asset_balance',
+        { address: sender.address, currency, balance: newBalance.toString() },
+        dbTrans
+      )
     }
     return trs
   }
@@ -211,29 +206,39 @@ class Issue extends Asset.Base {
     }
     this.balanceCache.addAssetBalance(sender.address, currency, `-${amount}`)
     const assetInst = await this.getAssetInstanceByName('AobAsset')
-    const data = await assetInst.queryAsset({
-      name: currency
-    }, null, null, 1, 1)
+    const data = await assetInst.queryAsset(
+      {
+        name: currency
+      },
+      null,
+      null,
+      1,
+      1
+    )
     const { quantity } = data[0]
     await assetInst.update({ quantity: bignum.plus(quantity, amount).toString() }, { name: currency }, dbTrans)
-    const assetBalancedata = await new Promise((resolve, reject) => {
-      this.dao.findOne('mem_asset_balance', { address: sender.address, currency }, ['balance'], (err, rows) => {
-        if (err) {
-          reject(err)
-        } else {
-          resolve(rows)
-        }
-      })
-    })
-    const balance2 = (assetBalancedata && assetBalancedata.balance) ? assetBalancedata.balance : '0'
+    const assetBalancedata = await this.dao.findOne('mem_asset_balance', { address: sender.address, currency }, [
+      'balance'
+    ])
+
+    const balance2 = assetBalancedata && assetBalancedata.balance ? assetBalancedata.balance : '0'
     const newBalance = bignum.plus(balance2, amount)
     if (bignum.isLessThan(newBalance, 0)) {
       throw new Error('Asset balance not enough')
     }
     if (assetBalancedata) {
-      this.dao.update('mem_asset_balance', { balance: newBalance.toString() }, { address: sender.address, currency }, dbTrans)
+      await this.dao.update(
+        'mem_asset_balance',
+        { balance: newBalance.toString() },
+        { address: sender.address, currency },
+        dbTrans
+      )
     } else {
-      this.dao.insert('mem_asset_balance', { address: sender.address, currency, balance: newBalance.toString() }, dbTrans)
+      await this.dao.insert(
+        'mem_asset_balance',
+        { address: sender.address, currency, balance: newBalance.toString() },
+        dbTrans
+      )
     }
   }
 }

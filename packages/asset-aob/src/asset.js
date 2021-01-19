@@ -250,55 +250,42 @@ class Aob extends Asset.Base {
   async getAssetAcl (req) {
     const name = req.params.name
     const flag = req.params.flag
-    const table = (flag === '0') ? 'acl_black' : 'acl_white'
-    return new Promise((resolve, reject) => {
-      var where = { currency: name }
-      var limit = req.query.limit || 100
-      var offset = req.query.offset || '0'
-      this.dao.findPage(table, where, limit, offset, true, null, null, null, (err, data) => {
-        if (err) {
-          reject(err)
-        }
+    const table = flag === '0' ? 'acl_black' : 'acl_white'
+    const where = { currency: name }
+    const limit = req.query.limit || 100
+    const offset = req.query.offset || '0'
+    const data = await this.dao.findPage(table, where, limit, offset, true)
 
-        resolve({ success: true, result: data })
-      })
-    })
+    return { success: true, result: data }
   }
 
   async getBalances (req) {
     const address = req.params.address
-    return new Promise((resolve, reject) => {
-      this.dao.findList('mem_asset_balance', { address }, null, null, null, (err, data) => {
-        if (err) {
-          reject(err)
-        }
-
-        resolve({ success: true, result: data })
-      })
-    })
+    const data = await this.dao.findList('mem_asset_balance', { address })
+    return { success: true, result: data }
   }
 
   async getBalance (req) {
     const address = req.params.address
     const currency = req.params.currency
-    return new Promise((resolve, reject) => {
-      this.dao.findOne('mem_asset_balance', { address, currency }, null, null, (err, data) => {
-        if (err) {
-          reject(err)
-        }
+    const data = await this.dao.findOne('mem_asset_balance', { address, currency })
 
-        resolve({ success: true, result: data })
-      })
-    })
+    return { success: true, result: data }
   }
 
   async getIssuerAssets (req) {
     const name = req.params.name
     const pageIndex = req.query.pageindex || 1
     const pageSize = req.query.pagesize || 50
-    const data = await this.queryAsset({
-      issuer_name: name
-    }, null, true, pageIndex, pageSize)
+    const data = await this.queryAsset(
+      {
+        issuer_name: name
+      },
+      null,
+      true,
+      pageIndex,
+      pageSize
+    )
 
     return { success: true, result: data }
   }

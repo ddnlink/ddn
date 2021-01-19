@@ -657,29 +657,15 @@ class DAO {
     }
     const t = await sequelizeInst.transaction(logOptions)
     try {
-      await func(t, async err => {
-        if (err) {
-          try {
-            await t.rollback()
-            return callback(cb, 'rollback--, err1+true: ' + err, true)
-          } catch (err2) {
-            return callback(cb, 'rollback--, err2+false: ' + err2, false)
-          }
-        } else {
-          try {
-            await t.commit()
-            return callback(cb, null, true)
-          } catch (err2) {
-            return callback(cb, 'commit--' + err2, false)
-          }
-        }
-      })
-    } catch (err3) {
+      await func(t)
+      await t.commit()
+      return callback(cb)
+    } catch (err) {
       try {
         await t.rollback()
-        return callback(cb, 'rollback--, err3+true: ' + err3, true)
-      } catch (err4) {
-        return callback(cb, 'rollback--, err4+false:' + err4, false)
+        return callback(cb, null, 'rollback--, err+true: ' + err)
+      } catch (error) {
+        return callback(cb, 'rollback--, err+false:' + error)
       }
     }
   }

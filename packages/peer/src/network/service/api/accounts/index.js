@@ -203,15 +203,7 @@ class AccountService {
   }
 
   async getCount (req) {
-    const count = await new Promise((resolve, reject) => {
-      this.dao.count('mem_account', null, (err, count) => {
-        if (err) {
-          reject(err || 'Database error')
-        } else {
-          resolve(count)
-        }
-      })
-    })
+    const count = await this.dao.count('mem_account')
     return { success: true, count }
   }
 

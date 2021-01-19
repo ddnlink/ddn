@@ -461,7 +461,6 @@ class Dapp extends Asset.Base {
         res.json(result)
       } catch (err) {
         self.logger.error('getDappBalance err', err)
-        console.log('getDappBalance err', err)
         res.json({ success: false, error: err.message || err.toString() })
       }
     })
@@ -472,41 +471,19 @@ class Dapp extends Asset.Base {
     const limit = req.query.limit || 100
     const offset = req.query.offset || 0
 
-    return new Promise((resolve, reject) => {
-      this.dao.findPage(
-        'mem_asset_balance',
-        { address: dappId },
-        limit,
-        offset,
-        true,
-        ['currency', 'balance'],
-        null,
-        (err, rows) => {
-          if (err) {
-            return reject(err)
-          }
-
-          resolve({ success: true, result: rows })
-        }
-      )
-    })
+    const rows = await this.dao.findPage('mem_asset_balance', { address: dappId }, limit, offset, true, [
+      'currency',
+      'balance'
+    ])
+    return { success: true, result: rows }
   }
 
   async getDappBalance (req) {
     const dappId = req.params.dappid
     const { currency } = req.params
 
-    return new Promise((resolve, reject) => {
-      this.dao.findOne('mem_asset_balance', { address: dappId, currency }, ['balance'], (err, row) => {
-        if (err) {
-          console.log('err', err)
-          return reject(err)
-        }
-        console.log('row', row)
-
-        resolve({ success: true, result: { currency, balance: row.balance } })
-      })
-    })
+    const row = await this.dao.findOne('mem_asset_balance', { address: dappId, currency }, ['balance'])
+    return { success: true, result: { currency, balance: row.balance } }
   }
 
   async getLaunchDappLastError (req) {

@@ -65,13 +65,25 @@ class Issuer extends Asset.Base {
     const issuerObj = await this.getAssetObject(trs)
 
     // 验证是否存在重复数据
-    const data1 = await this.queryAsset({
-      name: issuerObj.name
-    }, null, null, 1, 1)
+    const data1 = await this.queryAsset(
+      {
+        name: issuerObj.name
+      },
+      null,
+      null,
+      1,
+      1
+    )
 
-    const data2 = await this.queryAsset({
-      issuer_id: trs.senderId
-    }, null, null, 1, 1)
+    const data2 = await this.queryAsset(
+      {
+        issuer_id: trs.senderId
+      },
+      null,
+      null,
+      1,
+      1
+    )
 
     const results = data1.concat(data2)
 
@@ -140,32 +152,16 @@ class Issuer extends Asset.Base {
    * @copyright 2021-01-05
    */
   async onInitAccountsAndBalances () {
-    await new Promise((resolve, reject) => {
-      this.dao.findList('mem_asset_balance', null, null, null,
-        (err, rows) => {
-          if (err) {
-            return reject(err)
-          }
+    const rows = await this.dao.findList('mem_asset_balance')
 
-          if (rows && rows.length) {
-            for (var i = 0; i < rows.length; i++) {
-              const row = rows[i]
-              try {
-                this.balanceCache.setAssetBalance(row.address, row.currency, row.balance)
-              } catch (err2) {
-                return reject(err2)
-              }
-            }
-          }
-
-          resolve()
-        })
-    })
+    if (rows && rows.length) {
+      for (const row of rows) {
+        this.balanceCache.setAssetBalance(row.address, row.currency, row.balance)
+      }
+    }
   }
 
-  async onBlockchainReady () {
-
-  }
+  async onBlockchainReady () {}
 }
 
 export default Issuer
