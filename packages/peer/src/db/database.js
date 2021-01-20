@@ -16,13 +16,6 @@ const logOptions = {
 
 let sequelizeInst
 
-function callback (cb, err, result) {
-  // console.log(cb, err, result)
-  if (cb) cb(err, result)
-  else if (err) throw new Error(err)
-  else return result
-}
-
 class DAO {
   static _registerModel (connection) {
     const modelDir = path.resolve(__dirname, 'models')
@@ -63,30 +56,26 @@ class DAO {
   /**
    * 数据库初始化
    * @param {*} logger 日志对象
-   * @param {*} cb 回调函数
    */
-  static async init (dbSetting, logger, cb) {
-    if (typeof cb === 'undefined' && typeof logger === 'function') {
-      cb = logger
-      logger = null
+  static async init (dbSetting, logger) {
+    // console.log(dbSetting)
+    sequelizeInst = new Sequelize(dbSetting.database, dbSetting.username, dbSetting.password, dbSetting.options)
+
+    if (logger) {
+      logOptions.logging = (sql, time) => {
+        logger.debug(`${sql}: excuting time: ${time} `)
+      }
     }
 
-    try {
-      // console.log(dbSetting)
-      sequelizeInst = new Sequelize(dbSetting.database, dbSetting.username, dbSetting.password, dbSetting.options)
+    await sequelizeInst.authenticate()
+    this._registerModel(sequelizeInst)
+    await sequelizeInst.sync(logOptions)
 
-      await sequelizeInst.authenticate()
-      this._registerModel(sequelizeInst)
-      await sequelizeInst.sync(logOptions)
+    this.initConstants(sequelizeInst)
+    this.initFuncs(sequelizeInst)
 
-      this.initConstants(sequelizeInst)
-      this.initFuncs(sequelizeInst)
-
-      // FIXME: 这里返回this与返回DAO类都不报错，但返还DAO似乎更合理一些
-      return callback(cb, null, this)
-    } catch (err) {
-      return callback(cb, err)
-    }
+    // FIXME: 这里返回this与返回DAO类都不报错，但返还DAO似乎更合理一些
+    return this
   }
 
   /**
@@ -160,39 +149,21 @@ class DAO {
    * @param {*} modelName 模型名称
    * @param {*} modelObj 模型数据
    * @param {*} transaction 事务对象
-   * @param {*} cb 回调函数
    */
-  static async insert (modelName, modelObj, transaction, cb) {
-    if (typeof cb === 'undefined' && typeof transaction === 'function') {
-      cb = transaction
-      transaction = null
-    }
-
+  static async insert (modelName, modelObj, transaction) {
     const modelInst = this._getModel(modelName)
     if (!modelInst) {
-      return callback(cb, `Data model not defined: ${modelName}`)
+      throw new Error(`Data model not defined: ${modelName}`)
     }
     if (!modelObj) {
-      return callback(cb, '无效的数据输入：' + modelObj)
+      throw new Error('无效的数据输入：' + modelObj)
     }
-    try {
-      const options = {
-        ...logOptions,
-        transaction
-      }
-      // console.log(modelName)
-      const result = await modelInst.create(modelObj, options)
-      // console.log(result && result.dataValues)
-      return callback(cb, null, result)
-    } catch (err) {
-      let errMsg = err.toString()
-      if (err.errors && err.errors.length > 0) {
-        for (let i = 0; i < err.errors.length; i++) {
-          errMsg += '\r\n' + err.errors[i].message
-        }
-      }
-      return callback(cb, errMsg)
+    const options = {
+      ...logOptions,
+      transaction
     }
+    // console.log(modelName)
+    return await modelInst.create(modelObj, options)
   }
 
   /**
@@ -200,37 +171,21 @@ class DAO {
    * @param {*} modelName 模型名称
    * @param {*} modelObj 模型数据
    * @param {*} transaction 事务对象
-   * @param {*} cb 回调函数
    */
-  static async insertOrUpdate (modelName, modelObj, transaction, cb) {
-    if (typeof cb === 'undefined' && typeof transaction === 'function') {
-      cb = transaction
-      transaction = null
-    }
-
+  static async insertOrUpdate (modelName, modelObj, transaction) {
     const modelInst = this._getModel(modelName)
     if (!modelInst) {
-      return callback(cb, `Data model not defined: ${modelName}`)
+      throw new Error(`Data model not defined: ${modelName}`)
     }
     if (!modelObj) {
-      return callback(cb, '无效的数据输入：' + modelObj)
+      throw new Error('无效的数据输入：' + modelObj)
     }
-    try {
-      const options = {
-        ...logOptions,
-        transaction
-      }
-      await modelInst.upsert(modelObj, options)
-      return callback(cb, null, modelObj)
-    } catch (err) {
-      let errMsg = err.toString()
-      if (err.errors && err.errors.length > 0) {
-        for (let i = 0; i < err.errors.length; i++) {
-          errMsg += '\r\n' + err.errors[i].message
-        }
-      }
-      return callback(cb, errMsg)
+    const options = {
+      ...logOptions,
+      transaction
     }
+    await modelInst.upsert(modelObj, options)
+    return modelObj
   }
 
   /**
@@ -240,40 +195,24 @@ class DAO {
    * @param {*} modelObj 模型数据
    * @param {*} where 更新条件，指定更新范围，参考Sequelize的Query查询定义https://sequelize.readthedocs.io/en/latest/docs/querying/?q=Sequelize.fn&check_keywords=yes&area=default#where
    * @param {*} transaction 事务对象
-   * @param {*} cb 回调函数
    */
-  static async update (modelName, modelObj, where, transaction, cb) {
-    if (typeof cb === 'undefined' && typeof transaction === 'function') {
-      cb = transaction
-      transaction = null
-    }
-
+  static async update (modelName, modelObj, where, transaction) {
     const modelInst = this._getModel(modelName)
     if (!modelInst) {
-      return callback(cb, `Data model not defined: ${modelName}`)
+      throw new Error(`Data model not defined: ${modelName}`)
     }
 
     if (!modelObj) {
-      return callback(cb, '无效的数据输入：' + modelObj)
+      throw new Error('无效的数据输入：' + modelObj)
     }
 
-    try {
-      const options = {
-        ...logOptions,
-        where,
-        transaction
-      }
-      const result = await modelInst.update(modelObj, options)
-      return callback(cb, null, result && result.length > 0 ? result[0] : 0)
-    } catch (err) {
-      let errMsg = err.toString()
-      if (err.errors && err.errors.length > 0) {
-        for (let i = 0; i < err.errors.length; i++) {
-          errMsg += '\r\n' + err.errors[i].message
-        }
-      }
-      return callback(cb, errMsg)
+    const options = {
+      ...logOptions,
+      where,
+      transaction
     }
+    const result = await modelInst.update(modelObj, options)
+    return result && result.length > 0 ? result[0] : 0
   }
 
   /**
@@ -281,41 +220,24 @@ class DAO {
    * @param {*} modelName
    * @param {*} where 查询条件，参考Sequelize的Query查询定义https://sequelize.readthedocs.io/en/latest/docs/querying/?q=Sequelize.fn&check_keywords=yes&area=default#where
    * @param {*} transaction 事务对象
-   * @param {*} cb 回调函数
    */
-  static async remove (modelName, where, transaction, cb) {
-    if (typeof cb === 'undefined' && typeof transaction === 'function') {
-      cb = transaction
-      transaction = null
-    }
-
+  static async remove (modelName, where, transaction) {
     const modelInst = this._getModel(modelName)
     if (!modelInst) {
-      return callback(cb, `Data model not defined: ${modelName}`)
+      throw new Error(`Data model not defined: ${modelName}`)
     }
 
     if (!where) {
-      return callback(cb, 'where参数是必须的：' + where)
+      throw new Error('where参数是必须的：' + where)
     }
 
-    try {
-      const options = {
-        ...logOptions,
-        where,
-        transaction,
-        cascade: true
-      }
-      const result = await modelInst.destroy(options)
-      return callback(cb, null, result)
-    } catch (err) {
-      let errMsg = err.toString()
-      if (err.errors && err.errors.length > 0) {
-        for (let i = 0; i < err.errors.length; i++) {
-          errMsg += '\r\n' + err.errors[i].message
-        }
-      }
-      return callback(cb, errMsg)
+    const options = {
+      ...logOptions,
+      where,
+      transaction,
+      cascade: true
     }
+    return await modelInst.destroy(options)
   }
 
   /**
@@ -324,40 +246,24 @@ class DAO {
    * @param {*} where 查询条件
    * @param {*} attributes 返回字段
    * @param {*} dbTrans 事务对象
-   * @param {*} cb 回调
    */
-  static async findOne (modelName, where, attributes, dbTrans, cb) {
-    if (typeof cb === 'undefined' && typeof dbTrans === 'function') {
-      cb = dbTrans
-      dbTrans = null
-    }
-
+  static async findOne (modelName, where, attributes, dbTrans) {
     const modelInst = this._getModel(modelName)
     if (!modelInst) {
-      return callback(cb, `Data model not defined: ${modelName}`)
+      throw new Error(`Data model not defined: ${modelName}`)
     }
 
-    try {
-      const options = {
-        ...logOptions,
-        attributes,
-        where
-      }
-
-      if (dbTrans) {
-        options.transaction = dbTrans
-      }
-      const result = await modelInst.findOne(options)
-      return callback(cb, null, result ? result.toJSON() : null)
-    } catch (err) {
-      let errMsg = err.toString()
-      if (err.errors && err.errors.length > 0) {
-        for (let i = 0; i < err.errors.length; i++) {
-          errMsg += '\r\n' + err.errors[i].message
-        }
-      }
-      return callback(cb, errMsg)
+    const options = {
+      ...logOptions,
+      attributes,
+      where
     }
+
+    if (dbTrans) {
+      options.transaction = dbTrans
+    }
+    const result = await modelInst.findOne(options)
+    return result ? result.toJSON() : null
   }
 
   /**
@@ -366,38 +272,22 @@ class DAO {
    * @param {*} value 主键值
    * @param {*} attributes 定义查询返回的字段，默认为全部，具体定义规则参考Sequelize的Query查询参数https://sequelize.readthedocs.io/en/latest/docs/querying/#attributes
    * @param {*} dbTrans 事务对象
-   * @param {*} cb 回调函数
    */
-  static async findOneByPrimaryKey (modelName, value, attributes, dbTrans, cb) {
-    if (typeof cb === 'undefined' && typeof dbTrans === 'function') {
-      cb = dbTrans
-      dbTrans = null
-    }
-
+  static async findOneByPrimaryKey (modelName, value, attributes, dbTrans) {
     const modelInst = this._getModel(modelName)
     if (!modelInst) {
-      return callback(cb, `Data model not defined: ${modelName}`)
+      throw new Error(`Data model not defined: ${modelName}`)
     }
     if (!value) {
-      return callback(cb, `无效的数据输入：${value}`)
+      throw new Error(`无效的数据输入：${value}`)
     }
 
-    try {
-      const result = await modelInst.findByPk(value, {
-        ...logOptions,
-        attributes,
-        transaction: dbTrans || undefined
-      })
-      return callback(cb, null, result && result.toJSON ? result.toJSON() : result)
-    } catch (err) {
-      let errMsg = err.toString()
-      if (err.errors && err.errors.length > 0) {
-        for (let i = 0; i < err.errors.length; i++) {
-          errMsg += '\r\n' + err.errors[i].message
-        }
-      }
-      return callback(cb, errMsg)
-    }
+    const result = await modelInst.findByPk(value, {
+      ...logOptions,
+      attributes,
+      transaction: dbTrans || undefined
+    })
+    return result && result.toJSON ? result.toJSON() : result
   }
 
   /**
@@ -407,51 +297,33 @@ class DAO {
    * @param {*} attributes 定义查询返回的字段，默认为全部，参考Sequelize的Query查询参数https://sequelize.readthedocs.io/en/latest/docs/querying/#attributes
    * @param {*} sorts 定义查询的排序方式，参考Sequelize的Query查询参数https://sequelize.readthedocs.io/en/latest/docs/querying/?q=Sequelize.fn&check_keywords=yes&area=default#ordering
    * @param {*} dbTrans 事务对象
-   * @param {*} cb 回调函数
    */
-  static async findList (modelName, where, attributes, orders, dbTrans, cb) {
-    if (typeof cb === 'undefined' && typeof dbTrans === 'function') {
-      cb = dbTrans
-      dbTrans = null
-    }
-
+  static async findList (modelName, where, attributes, orders, dbTrans) {
     const modelInst = this._getModel(modelName)
     if (!modelInst) {
-      return callback(cb, `Data model not defined: ${modelName}`)
+      throw new Error(`Data model not defined: ${modelName}`)
     }
 
-    try {
-      const options = {
-        ...logOptions,
-        attributes,
-        where,
-        order: orders || undefined
-      }
-
-      const results = await modelInst.findAll(options)
-      const jsonResults = []
-      const foundRows = results.rows ? results.rows : results
-      for (let i = 0; i < foundRows.length; i++) {
-        jsonResults.push(foundRows[i].toJSON())
-      }
-      const result =
-        results && results.rows
-          ? {
-            rows: jsonResults,
-            total: results.count
-          }
-          : jsonResults
-
-      return callback(cb, null, result)
-    } catch (err) {
-      let errMsg = err.toString()
-      if (err.errors && err.errors.length > 0) {
-        for (let i = 0; i < err.errors.length; i++) {
-          errMsg += '\r\n' + err.errors[i].message
-        }
-      }
-      return callback(cb, errMsg)
+    const options = {
+      ...logOptions,
+      attributes,
+      where,
+      order: orders || undefined
     }
+
+    const results = await modelInst.findAll(options)
+    const jsonResults = []
+    const foundRows = results.rows ? results.rows : results
+    for (let i = 0; i < foundRows.length; i++) {
+      jsonResults.push(foundRows[i].toJSON())
+    }
+
+    return results && results.rows
+      ? {
+        rows: jsonResults,
+        total: results.count
+      }
+      : jsonResults
   }
 
   /**
@@ -464,61 +336,41 @@ class DAO {
    * @param {*} attributes 定义查询返回的字段，默认为全部，参考Sequelize的Query查询参数https://sequelize.readthedocs.io/en/latest/docs/querying/#attributes
    * @param {*} sorts 定义查询的排序方式，参考Sequelize的Query查询参数https://sequelize.readthedocs.io/en/latest/docs/querying/?q=Sequelize.fn&check_keywords=yes&area=default#ordering
    * @param {*} dbTrans 事务对象
-   * @param {*} cb 回调函数
    */
-  static async findPage (modelName, where, limit, offset, returnTotal, attributes, orders, dbTrans, cb) {
-    if (typeof cb === 'undefined' && typeof dbTrans === 'function') {
-      cb = dbTrans
-      dbTrans = null
-    }
-
+  static async findPage (modelName, where, limit, offset, returnTotal, attributes, orders, dbTrans) {
     const modelInst = this._getModel(modelName)
     if (!modelInst) {
-      return callback(cb, `Data model not defined: ${modelName}`)
+      throw new Error(`Data model not defined: ${modelName}`)
     }
 
-    try {
-      let invokeMethod = modelInst.findAll
-      if (returnTotal) {
-        invokeMethod = modelInst.findAndCountAll
-      }
-
-      const options = {
-        ...logOptions,
-        where,
-        attributes,
-        order: orders,
-        limit: limit || 100,
-        offset: offset || 0
-      }
-
-      const results = await invokeMethod.call(modelInst, options)
-      const jsonResults = []
-      const foundRows = results.rows ? results.rows : results
-
-      for (let i = 0; i < foundRows.length; i++) {
-        jsonResults.push(foundRows[i].toJSON())
-      }
-
-      const result =
-        results && results.rows
-          ? {
-            rows: jsonResults,
-            total: results.count
-          }
-          : jsonResults
-      return callback(cb, null, result)
-    } catch (err) {
-      let errMsg = err.toString()
-      if (err.errors && err.errors.length > 0) {
-        for (let i = 0; i < err.errors.length; i++) {
-          errMsg += '\r\n' + err.errors[i].message
-        }
-      }
-      console.log('findPage err 3.................')
-
-      return callback(cb, errMsg)
+    let invokeMethod = modelInst.findAll
+    if (returnTotal) {
+      invokeMethod = modelInst.findAndCountAll
     }
+
+    const options = {
+      ...logOptions,
+      where,
+      attributes,
+      order: orders,
+      limit: limit || 100,
+      offset: offset || 0
+    }
+
+    const results = await invokeMethod.call(modelInst, options)
+    const jsonResults = []
+    const foundRows = results.rows ? results.rows : results
+
+    for (let i = 0; i < foundRows.length; i++) {
+      jsonResults.push(foundRows[i].toJSON())
+    }
+
+    return results && results.rows
+      ? {
+        rows: jsonResults,
+        total: results.count
+      }
+      : jsonResults
   }
 
   /**
@@ -531,61 +383,40 @@ class DAO {
    * @param {*} attributes 定义查询返回的字段，默认为全部，参考Sequelize的Query查询参数https://sequelize.readthedocs.io/en/latest/docs/querying/#attributes
    * @param {*} orders 定义查询的排序方式，参考Sequelize的Query查询参数https://sequelize.readthedocs.io/en/latest/docs/querying/?q=Sequelize.fn&check_keywords=yes&area=default#ordering
    * @param {*} dbTrans 事务对象
-   * @param {*} cb 回调函数
    */
-  static async findListByGroup (modelName, where, options, dbTrans, cb) {
-    if (typeof cb === 'undefined' && typeof dbTrans === 'function') {
-      cb = dbTrans
-      dbTrans = null
-    }
-
+  static async findListByGroup (modelName, where, options, dbTrans) {
     const modelInst = this._getModel(modelName)
     if (!modelInst) {
-      return callback(cb, `Data model not defined: ${modelName}`)
+      throw new Error(`Data model not defined: ${modelName}`)
     }
 
-    try {
-      const { limit, offset, attributes, orders, group } = options
+    const { limit, offset, attributes, orders, group } = options
 
-      const invokeMethod = modelInst.findAll
+    const invokeMethod = modelInst.findAll
 
-      const opts = {
-        ...logOptions,
-        where,
-        attributes,
-        group,
-        limit,
-        offset,
-        order: orders,
-        transaction: dbTrans
-      }
-
-      const results = await invokeMethod.call(modelInst, opts)
-      const jsonResults = []
-      const foundRows = results.rows ? results.rows : results
-      for (let i = 0; i < foundRows.length; i++) {
-        jsonResults.push(foundRows[i].toJSON())
-      }
-      const result =
-        results && results.rows
-          ? {
-            rows: jsonResults,
-            total: results.count
-          }
-          : jsonResults
-      return callback(cb, null, result)
-    } catch (err) {
-      let errMsg = err.toString()
-      if (err.errors && err.errors.length > 0) {
-        for (let i = 0; i < err.errors.length; i++) {
-          errMsg += '\r\n' + err.errors[i].message
-        }
-      }
-
-      console.log('findListByGroup error 2', err)
-
-      return callback(cb, errMsg)
+    const opts = {
+      ...logOptions,
+      where,
+      attributes,
+      group,
+      limit,
+      offset,
+      order: orders,
+      transaction: dbTrans
     }
+
+    const results = await invokeMethod.call(modelInst, opts)
+    const jsonResults = []
+    const foundRows = results.rows ? results.rows : results
+    for (let i = 0; i < foundRows.length; i++) {
+      jsonResults.push(foundRows[i].toJSON())
+    }
+    return results && results.rows
+      ? {
+        rows: jsonResults,
+        total: results.count
+      }
+      : jsonResults
   }
 
   /**
@@ -593,80 +424,42 @@ class DAO {
    * @param {*} modelName 模型名称
    * @param {*} where 查询条件
    * @param {*} dbTrans 事务对象
-   * @param {*} cb 回调
    */
-  static async count (modelName, where, dbTrans, cb) {
-    if (typeof cb === 'undefined' && typeof dbTrans === 'function') {
-      cb = dbTrans
-      dbTrans = null
-    }
-
+  static async count (modelName, where, dbTrans) {
     const modelInst = this._getModel(modelName)
     if (!modelInst) {
-      return callback(cb, `Data model not defined: ${modelName}`)
+      throw new Error(`Data model not defined: ${modelName}`)
     }
 
-    try {
-      const options = { ...logOptions, where: where || undefined }
-      if (dbTrans) {
-        options.transaction = dbTrans
-      }
-
-      const result = await modelInst.count(options)
-      return callback(cb, null, result)
-    } catch (err) {
-      let errMsg = err.toString()
-      if (err.errors && err.errors.length > 0) {
-        for (let i = 0; i < err.errors.length; i++) {
-          errMsg += '\r\n' + err.errors[i].message
-        }
-      }
-      return callback(cb, errMsg)
+    const options = { ...logOptions, where: where || undefined }
+    if (dbTrans) {
+      options.transaction = dbTrans
     }
+
+    return await modelInst.count(options)
   }
 
-  static async execSql (sql, transaction, cb) {
-    try {
-      if (typeof cb === 'undefined' && typeof transaction === 'function') {
-        cb = transaction
-        transaction = null
-      }
+  static async execSql (sql, transaction) {
+    const [results] = await sequelizeInst.query(sql, { ...logOptions, transaction })
 
-      const [results] = await sequelizeInst.query(sql, { ...logOptions, transaction })
-
-      return callback(cb, null, results)
-    } catch (err) {
-      let errMsg = err.toString()
-      if (err.errors && err.errors.length > 0) {
-        for (let i = 0; i < err.errors.length; i++) {
-          errMsg += '\r\n' + err.errors[i].message
-        }
-      }
-      return callback(cb, errMsg)
-    }
+    return results
   }
 
   /**
-   *
    * @param {*} func 业务函数，由用户编写，系统会自动调用，并传入两个参数 trans-事务对象实例，done-回调方法
-   * @param {*} cb 回调函数
    */
-  static async transaction (func, cb) {
+  static async transaction (func) {
     if (!sequelizeInst) {
-      return callback(cb, '数据库未连接', false)
+      throw new Error('数据库未连接')
     }
     const t = await sequelizeInst.transaction(logOptions)
     try {
       await func(t)
       await t.commit()
-      return callback(cb)
+      return
     } catch (err) {
-      try {
-        await t.rollback()
-        return callback(cb, null, 'rollback--, err+true: ' + err)
-      } catch (error) {
-        return callback(cb, 'rollback--, err+false:' + error)
-      }
+      await t.rollback()
+      return 'rollback success err: ' + err
     }
   }
 
@@ -674,87 +467,44 @@ class DAO {
    * 创建指定对象的物理表格
    * @param {*} modelName
    * @param {*} force true - 如果存在的话，先删除再创建
-   * @param {*} cb
    */
-  static async createTable (modelName, force, cb) {
-    if (typeof cb === 'undefined' && typeof force === 'function') {
-      cb = force
-      force = undefined
-    }
-
+  static async createTable (modelName, force) {
     const modelInst = this._getModel(modelName)
     if (!modelInst) {
-      return callback(cb, `Data model not defined: ${modelName}`)
+      throw new Error(`Data model not defined: ${modelName}`)
     }
 
-    try {
-      await modelInst.sync({ ...logOptions, force })
-      return callback(cb, null, true)
-    } catch (err) {
-      let errMsg = err.toString()
-      if (err.errors && err.errors.length > 0) {
-        for (let i = 0; i < err.errors.length; i++) {
-          errMsg += '\r\n' + err.errors[i].message
-        }
-      }
-      return callback(cb, errMsg)
-    }
+    await modelInst.sync({ ...logOptions, force })
+    return true
   }
 
   /**
    * 删除指定对象的物理表格
    * @param {*} modelName
-   * @param {*} cb
    */
-  static async removeTable (modelName, cb) {
+  static async removeTable (modelName) {
     const modelInst = this._getModel(modelName)
     if (!modelInst) {
-      return callback(cb, `Data model not defined: ${modelName}`)
+      throw new Error(`Data model not defined: ${modelName}`)
     }
 
-    try {
-      await modelInst.drop(logOptions)
-      return callback(cb, null, true)
-    } catch (err) {
-      let errMsg = err.toString()
-      if (err.errors && err.errors.length > 0) {
-        for (let i = 0; i < err.errors.length; i++) {
-          errMsg += '\r\n' + err.errors[i].message
-        }
-      }
-      return callback(cb, errMsg)
-    }
+    await modelInst.drop(logOptions)
+    return true
   }
 
   /**
    * 清除指定对象的所有数据
    * @param {*} modelName
    * @param {*} truncate 使用数据库TRUNCATE方法，释放空间和索引
-   * @param {*} cb
    */
-  static async clear (modelName, truncate, cb) {
-    if (typeof cb === 'undefined' && typeof truncate === 'function') {
-      cb = truncate
-      truncate = undefined
-    }
-
+  static async clear (modelName, truncate) {
     const modelInst = this._getModel(modelName)
     if (!modelInst) {
-      return callback(cb, `Data model not defined: ${modelName}`)
+      throw new Error(`Data model not defined: ${modelName}`)
     }
 
-    try {
-      await modelInst.destroy({ ...logOptions, truncate })
-      return callback(cb, null, true)
-    } catch (err) {
-      let errMsg = err.toString()
-      if (err.errors && err.errors.length > 0) {
-        for (let i = 0; i < err.errors.length; i++) {
-          errMsg += '\r\n' + err.errors[i].message
-        }
-      }
-      return callback(cb, errMsg)
-    }
+    await modelInst.destroy({ ...logOptions, truncate })
+    return true
   }
 }
 
