@@ -56,15 +56,14 @@ class RootRouter {
       }
     }
 
-    return await this.dao.findPage(
-      'peer',
+    return await this.dao.findPage('peer', {
       where,
       limit,
       offset,
-      true,
-      ['ip', 'port', 'state', 'os', 'version'],
-      sortBy ? [[sortBy, sortMethod]] : null
-    )
+      returnTotal: true,
+      attributes: ['ip', 'port', 'state', 'os', 'version'],
+      order: sortBy ? [[sortBy, sortMethod]] : null
+    })
   }
 
   async get (req) {

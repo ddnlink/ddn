@@ -87,7 +87,7 @@ class Context {
     })
 
     // 数据库操作对象
-    this.dao = await database.init(this.config.database, options.logger)
+    this.dao = await database.init(this.config.database)
 
     // 数据库参数对象，Key/Value类型
     this.dbParams = await dbParams.init(database)

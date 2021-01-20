@@ -293,25 +293,27 @@ class DAO {
   /**
    * 列表查询
    * @param {*} modelName 模型名称
-   * @param {*} where 查询条件，参考Sequelize的Query查询定义https://sequelize.readthedocs.io/en/latest/docs/querying/?q=Sequelize.fn&check_keywords=yes&area=default#where
-   * @param {*} attributes 定义查询返回的字段，默认为全部，参考Sequelize的Query查询参数https://sequelize.readthedocs.io/en/latest/docs/querying/#attributes
-   * @param {*} sorts 定义查询的排序方式，参考Sequelize的Query查询参数https://sequelize.readthedocs.io/en/latest/docs/querying/?q=Sequelize.fn&check_keywords=yes&area=default#ordering
+   * @param {*} options where 查询条件，参考Sequelize的Query查询定义https://sequelize.readthedocs.io/en/latest/docs/querying/?q=Sequelize.fn&check_keywords=yes&area=default#where
+   * @param {*} options attributes 定义查询返回的字段，默认为全部，参考Sequelize的Query查询参数https://sequelize.readthedocs.io/en/latest/docs/querying/#attributes
+   * @param {*} options sorts 定义查询的排序方式，参考Sequelize的Query查询参数https://sequelize.readthedocs.io/en/latest/docs/querying/?q=Sequelize.fn&check_keywords=yes&area=default#ordering
    * @param {*} dbTrans 事务对象
    */
-  static async findList (modelName, where, attributes, orders, dbTrans) {
+  static async findList (modelName, options, dbTrans) {
     const modelInst = this._getModel(modelName)
     if (!modelInst) {
       throw new Error(`Data model not defined: ${modelName}`)
     }
 
-    const options = {
+    const opts = {
       ...logOptions,
-      attributes,
-      where,
-      order: orders || undefined
+      ...(options || {})
     }
 
-    const results = await modelInst.findAll(options)
+    if (dbTrans) {
+      opts.transaction = dbTrans
+    }
+
+    const results = await modelInst.findAll(opts)
     const jsonResults = []
     const foundRows = results.rows ? results.rows : results
     for (let i = 0; i < foundRows.length; i++) {
@@ -329,35 +331,37 @@ class DAO {
   /**
    * 分页查询
    * @param {*} modelName 模型名称
-   * @param {*} where 查询条件，参考Sequelize的Query查询定义https://sequelize.readthedocs.io/en/latest/docs/querying/?q=Sequelize.fn&check_keywords=yes&area=default#where
-   * @param {*} limit 分页大小
-   * @param {*} offset 分页位置
-   * @param {*} returnTotal 是否返回记录总数
-   * @param {*} attributes 定义查询返回的字段，默认为全部，参考Sequelize的Query查询参数https://sequelize.readthedocs.io/en/latest/docs/querying/#attributes
-   * @param {*} sorts 定义查询的排序方式，参考Sequelize的Query查询参数https://sequelize.readthedocs.io/en/latest/docs/querying/?q=Sequelize.fn&check_keywords=yes&area=default#ordering
+   * @param {*} options where 查询条件，参考Sequelize的Query查询定义https://sequelize.readthedocs.io/en/latest/docs/querying/?q=Sequelize.fn&check_keywords=yes&area=default#where
+   * @param {*} options limit 分页大小
+   * @param {*} options offset 分页位置
+   * @param {*} options returnTotal 是否返回记录总数
+   * @param {*} options attributes 定义查询返回的字段，默认为全部，参考Sequelize的Query查询参数https://sequelize.readthedocs.io/en/latest/docs/querying/#attributes
+   * @param {*} options order 定义查询的排序方式，参考Sequelize的Query查询参数https://sequelize.readthedocs.io/en/latest/docs/querying/?q=Sequelize.fn&check_keywords=yes&area=default#ordering
    * @param {*} dbTrans 事务对象
    */
-  static async findPage (modelName, where, limit, offset, returnTotal, attributes, orders, dbTrans) {
+  static async findPage (modelName, options, dbTrans) {
     const modelInst = this._getModel(modelName)
     if (!modelInst) {
       throw new Error(`Data model not defined: ${modelName}`)
     }
 
     let invokeMethod = modelInst.findAll
-    if (returnTotal) {
+    if (options && options.returnTotal) {
       invokeMethod = modelInst.findAndCountAll
     }
 
-    const options = {
+    const opts = {
       ...logOptions,
-      where,
-      attributes,
-      order: orders,
-      limit: limit || 100,
-      offset: offset || 0
+      ...(options || {}),
+      limit: options.limit || 100,
+      offset: options.offset || 0
     }
 
-    const results = await invokeMethod.call(modelInst, options)
+    if (dbTrans) {
+      opts.transaction = dbTrans
+    }
+
+    const results = await invokeMethod.call(modelInst, opts)
     const jsonResults = []
     const foundRows = results.rows ? results.rows : results
 
@@ -384,25 +388,21 @@ class DAO {
    * @param {*} orders 定义查询的排序方式，参考Sequelize的Query查询参数https://sequelize.readthedocs.io/en/latest/docs/querying/?q=Sequelize.fn&check_keywords=yes&area=default#ordering
    * @param {*} dbTrans 事务对象
    */
-  static async findListByGroup (modelName, where, options, dbTrans) {
+  static async findListByGroup (modelName, options = {}, dbTrans) {
     const modelInst = this._getModel(modelName)
     if (!modelInst) {
       throw new Error(`Data model not defined: ${modelName}`)
     }
 
-    const { limit, offset, attributes, orders, group } = options
-
     const invokeMethod = modelInst.findAll
 
     const opts = {
       ...logOptions,
-      where,
-      attributes,
-      group,
-      limit,
-      offset,
-      order: orders,
-      transaction: dbTrans
+      ...(options || {})
+    }
+
+    if (dbTrans) {
+      opts.transaction = dbTrans
     }
 
     const results = await invokeMethod.call(modelInst, opts)

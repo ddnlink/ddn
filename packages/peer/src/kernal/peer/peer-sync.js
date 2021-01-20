@@ -90,19 +90,17 @@ class PeerSync {
   }
 
   async _getIdSequence (height) {
-    const rows = await this.dao.findPage(
-      'block',
-      {
+    const rows = await this.dao.findPage('block', {
+      where: {
         height: {
           $lte: height
         }
       },
-      5,
-      0,
-      false,
-      ['id', 'height'],
-      [['height', 'DESC']]
-    )
+      limit: 5,
+      offset: 0,
+      attributes: ['id', 'height'],
+      order: [['height', 'DESC']]
+    })
     if (!rows || !rows.length) {
       throw new Error(`Can't get sequence before: ${height}`)
     }

@@ -85,8 +85,10 @@ class Issue extends Asset.Base {
 
     // (3)查询到交易的相关数据
     let trData = await this.dao.findList('tr', {
-      id: {
-        $in: _.map(result, 'transaction_id')
+      where: {
+        id: {
+          $in: _.map(result, 'transaction_id')
+        }
       }
     })
     trData = _.keyBy(trData, 'id')
@@ -99,8 +101,10 @@ class Issue extends Asset.Base {
 
     // (4)查询到块的相关数据
     let blockData = await this.dao.findList('block', {
-      id: {
-        $in: _.map(result3, 'block_id') // result - result3
+      where: {
+        id: {
+          $in: _.map(result3, 'block_id') // result - result3
+        }
       }
     })
     blockData = _.keyBy(blockData, 'id')

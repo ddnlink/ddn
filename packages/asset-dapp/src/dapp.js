@@ -471,10 +471,13 @@ class Dapp extends Asset.Base {
     const limit = req.query.limit || 100
     const offset = req.query.offset || 0
 
-    const rows = await this.dao.findPage('mem_asset_balance', { address: dappId }, limit, offset, true, [
-      'currency',
-      'balance'
-    ])
+    const rows = await this.dao.findPage('mem_asset_balance', {
+      where: { address: dappId },
+      limit,
+      offset,
+      returnTotal: true,
+      attributes: ['currency', 'balance']
+    })
     return { success: true, result: rows }
   }
 

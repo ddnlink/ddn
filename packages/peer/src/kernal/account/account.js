@@ -195,15 +195,13 @@ class Account {
 
     // return await this.dao.findPage('mem_account', filter, limit || 1000, offset, false, fields || null, sort)
 
-    let mem_accounts = await this.dao.findPage(
-      'mem_account',
-      filter,
-      limit || 1000,
+    let mem_accounts = await this.dao.findPage('mem_account', {
+      where: filter,
+      limit: limit || 1000,
       offset,
-      false,
-      fields || null,
-      sort
-    )
+      attributes: fields,
+      order: sort
+    })
 
     // FIXME: 优化到其他方法中去 2020.8.8
     const mem_account_ids = mem_accounts.map(({ address }) => address)
@@ -213,71 +211,59 @@ class Account {
     let multisignatures = []
     let u_multisignatures = []
     if (mem_account_ids.length > 0) {
-      delegates = await this.dao.findListByGroup(
-        'mem_accounts2delegate',
-        {
+      delegates = await this.dao.findListByGroup('mem_accounts2delegate', {
+        where: {
           account_id: {
             $in: mem_account_ids
           } // wxm block database
         },
-        {
-          limit: mem_account_ids.length,
-          offset: 0,
-          group: ['account_id'],
-          attributes: [[this.dao.db_fnGroupConcat('dependent_id'), 'delegates'], 'account_id']
-        }
-      )
-      u_delegates = await this.dao.findListByGroup(
-        'mem_accounts2u_delegate',
-        {
+        limit: mem_account_ids.length,
+        offset: 0,
+        group: ['account_id'],
+        attributes: [[this.dao.db_fnGroupConcat('dependent_id'), 'delegates'], 'account_id']
+      })
+      u_delegates = await this.dao.findListByGroup('mem_accounts2u_delegate', {
+        where: {
           account_id: {
             // wxm block database
             $in: mem_account_ids
           }
         },
-        {
-          limit: mem_account_ids.length,
-          offset: 0,
-          group: ['account_id'],
-          attributes: [[this.dao.db_fnGroupConcat('dependent_id'), 'u_delegates'], 'account_id'] // wxm block database library.dao.db_fn('group_concat', library.dao.db_col('dependentId'))
-        }
-      )
-      multisignatures = await this.dao.findListByGroup(
-        'mem_accounts2multisignature',
-        {
+        limit: mem_account_ids.length,
+        offset: 0,
+        group: ['account_id'],
+        attributes: [[this.dao.db_fnGroupConcat('dependent_id'), 'u_delegates'], 'account_id'] // wxm block database library.dao.db_fn('group_concat', library.dao.db_col('dependentId'))
+      })
+      multisignatures = await this.dao.findListByGroup('mem_accounts2multisignature', {
+        where: {
           account_id: {
             // wxm block database
             $in: mem_account_ids
           }
         },
-        {
-          limit: mem_account_ids.length,
-          offset: 0,
-          group: ['account_id'],
-          attributes: [
-            [this.dao.db_fnGroupConcat('dependent_id'), 'multisignatures'],
-            'account_id' // wxm block database library.dao.db_fn('group_concat', library.dao.db_col('dependentId'))
-          ]
-        }
-      )
-      u_multisignatures = await this.dao.findListByGroup(
-        'mem_accounts2u_multisignature',
-        {
+        limit: mem_account_ids.length,
+        offset: 0,
+        group: ['account_id'],
+        attributes: [
+          [this.dao.db_fnGroupConcat('dependent_id'), 'multisignatures'],
+          'account_id' // wxm block database library.dao.db_fn('group_concat', library.dao.db_col('dependentId'))
+        ]
+      })
+      u_multisignatures = await this.dao.findListByGroup('mem_accounts2u_multisignature', {
+        where: {
           account_id: {
             // wxm block database
             $in: mem_account_ids
           }
         },
-        {
-          limit: mem_account_ids.length,
-          offset: 0,
-          group: ['account_id'],
-          attributes: [
-            [this.dao.db_fnGroupConcat('dependent_id'), 'u_multisignatures'],
-            'account_id' // wxm block database library.dao.db_fn('group_concat', library.dao.db_col('dependentId'))
-          ]
-        }
-      )
+        limit: mem_account_ids.length,
+        offset: 0,
+        group: ['account_id'],
+        attributes: [
+          [this.dao.db_fnGroupConcat('dependent_id'), 'u_multisignatures'],
+          'account_id' // wxm block database library.dao.db_fn('group_concat', library.dao.db_col('dependentId'))
+        ]
+      })
     }
 
     mem_accounts = mem_accounts.map(mem_account => {
@@ -319,41 +305,35 @@ class Account {
   }
 
   async getMultisignaturAccount (ids) {
-    await this.dao.findListByGroup(
-      'mem_accounts2multisignature',
-      {
+    await this.dao.findListByGroup('mem_accounts2multisignature', {
+      where: {
         account_id: {
           $in: ids
         }
       },
-      {
-        limit: ids.length,
-        offset: 0,
-        group: ['account_id'],
-        attributes: [
-          [this.dao.db_fnGroupConcat('dependent_id'), 'multisignatures'],
-          'account_id' // wxm block database library.dao.db_fn('group_concat', library.dao.db_col('dependentId'))
-        ]
-      }
-    )
+      limit: ids.length,
+      offset: 0,
+      group: ['account_id'],
+      attributes: [
+        [this.dao.db_fnGroupConcat('dependent_id'), 'multisignatures'],
+        'account_id' // wxm block database library.dao.db_fn('group_concat', library.dao.db_col('dependentId'))
+      ]
+    })
 
-    await this.dao.findListByGroup(
-      'mem_accounts2u_multisignature',
-      {
+    await this.dao.findListByGroup('mem_accounts2u_multisignature', {
+      where: {
         account_id: {
           $in: ids
         }
       },
-      {
-        limit: ids.length,
-        offset: 0,
-        group: ['account_id'],
-        attributes: [
-          [this.dao.db_fnGroupConcat('dependent_id'), 'u_multisignatures'],
-          'account_id' // wxm block database library.dao.db_fn('group_concat', library.dao.db_col('dependentId'))
-        ]
-      }
-    )
+      limit: ids.length,
+      offset: 0,
+      group: ['account_id'],
+      attributes: [
+        [this.dao.db_fnGroupConcat('dependent_id'), 'u_multisignatures'],
+        'account_id' // wxm block database library.dao.db_fn('group_concat', library.dao.db_col('dependentId'))
+      ]
+    })
   }
 
   async cacheAllAccountBalances () {
@@ -362,10 +342,11 @@ class Account {
 
     // fixme
     while (true) {
-      const list = await this.dao.findPage('mem_account', null, pageSize, pageIndex * pageSize, false, [
-        'address',
-        'balance'
-      ])
+      const list = await this.dao.findPage('mem_account', {
+        limit: pageSize,
+        offset: pageIndex * pageSize,
+        attributes: ['address', 'balance']
+      })
 
       if (list && list.length > 0) {
         for (let i = 0; i < list.length; i++) {

@@ -81,12 +81,11 @@ async function updateOrg (context, org, dbTrans) {
 }
 
 async function getEffectiveOrg (context, where) {
-  const result = await context.dao.findList(
-    'mem_org',
+  const result = await context.dao.findList('mem_org', {
     where,
-    ['transaction_id', 'org_id', 'name', 'address', 'tags', 'url', 'state', 'timestamp'],
-    ['timestamp']
-  )
+    attributes: ['transaction_id', 'org_id', 'name', 'address', 'tags', 'url', 'state', 'timestamp'],
+    order: ['timestamp']
+  })
   return result && result[0]
 }
 

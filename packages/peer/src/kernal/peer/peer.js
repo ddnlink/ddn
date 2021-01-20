@@ -322,29 +322,26 @@ class Peer {
   }
 
   async queryDappPeers () {
-    const data = await this.dao.findList('peers_dapp', {})
+    const data = await this.dao.findList('peers_dapp')
 
     const where = {
       id: {
         $in: _.map(data, 'peer_id')
       }
     }
-    return await this.dao.findList('peer', where)
+    return await this.dao.findList('peer', { where })
   }
 
   async queryList (dappId, where, limit) {
     let data = null
 
     if (dappId) {
-      data = await this.dao.findPage(
-        'peers_dapp',
-        {
+      data = await this.dao.findPage('peers_dapp', {
+        where: {
           dapp_id: dappId
         },
-        limit || this.constants.delegates,
-        null,
-        false
-      )
+        limit: limit || this.constants.delegates
+      })
     }
 
     where = where || {}
@@ -352,9 +349,11 @@ class Peer {
       where.id = { $in: _.map(data, 'peer_id') }
     }
 
-    return await this.dao.findPage('peer', where, limit || this.constants.delegates, null, false, null, [
-      [this.dao.db_fnRandom()]
-    ])
+    return await this.dao.findPage('peer', {
+      where,
+      limit: limit || this.constants.delegates,
+      order: [[this.dao.db_fnRandom()]]
+    })
   }
 }
 

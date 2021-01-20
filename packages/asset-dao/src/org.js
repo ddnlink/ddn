@@ -641,15 +641,14 @@ class Org extends Asset.Base {
     const limit = pageSize || 10
     const offset = (pageIndex - 1) * pageSize
 
-    const result = await this.dao.findPage(
-      'mem_org',
+    const result = await this.dao.findPage('mem_org', {
       where,
       limit,
       offset,
-      true,
-      ['transaction_id', 'org_id', 'name', 'address', 'tags', 'url', 'state', 'timestamp'],
-      orders
-    )
+      returnTotal: true,
+      attributes: ['transaction_id', 'org_id', 'name', 'address', 'tags', 'url', 'state', 'timestamp'],
+      order: orders
+    })
     return { success: true, result }
   }
 }

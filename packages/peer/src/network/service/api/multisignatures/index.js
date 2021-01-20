@@ -396,9 +396,10 @@ class MultisignaturesRouter {
     }
 
     try {
-      const rows = await this.dao.findList('mem_accounts2multisignature', { dependent_id: query.publicKey }, [
-        [this.dao.db_fnGroupConcat('account_id'), 'account_id']
-      ])
+      const rows = await this.dao.findList('mem_accounts2multisignature', {
+        where: { dependent_id: query.publicKey },
+        attributes: [[this.dao.db_fnGroupConcat('account_id'), 'account_id']]
+      })
       let addresses = []
 
       if (rows[0] && rows[0].account_id) {

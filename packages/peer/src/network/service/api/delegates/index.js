@@ -191,9 +191,10 @@ class DelegatesRouter {
       throw new Error(`Invalid parameters: ${validateErrors[0].schemaPath} ${validateErrors[0].message}`)
     }
 
-    let rows = await this.dao.findList('mem_accounts2delegate', { dependent_id: query.publicKey }, [
-      [this.dao.db_fnGroupConcat('account_id'), 'account_id']
-    ])
+    let rows = await this.dao.findList('mem_accounts2delegate', {
+      where: { dependent_id: query.publicKey },
+      attributes: [[this.dao.db_fnGroupConcat('account_id'), 'account_id']]
+    })
     let addresses = []
     if (rows[0] && rows[0].account_id) {
       addresses = rows[0].account_id.split(',') // wxm block database

@@ -177,15 +177,14 @@ class PeerBlockService {
 
     try {
       // shuai 2018-12-01
-      const rows = await this.dao.findList(
-        'block',
-        {
+      const rows = await this.dao.findList('block', {
+        where: {
           id: { $in: ids },
           height: { $gte: min, $lte: max }
         },
-        ['id', 'timestamp', 'previous_block', 'height'],
-        [['height', 'DESC']]
-      )
+        attributes: ['id', 'timestamp', 'previous_block', 'height'],
+        order: [['height', 'DESC']]
+      })
       const commonBlock = rows.length ? rows[0] : null
       return { success: true, common: commonBlock }
     } catch (err) {

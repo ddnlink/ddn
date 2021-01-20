@@ -280,7 +280,14 @@ class AssetBase {
     const limit = pageSize
     const offset = (pageIndex - 1) * pageSize
 
-    const rows = await this.dao.findPage('trs_asset', filter, limit, offset, returnTotal, attributes, orders)
+    const rows = await this.dao.findPage('trs_asset', {
+      where: filter,
+      limit,
+      offset,
+      returnTotal,
+      attributes,
+      order: orders
+    })
     let result = rows
 
     let trsIds = []
@@ -293,10 +300,11 @@ class AssetBase {
     if (!hasExtProps) {
       return result
     }
-    const rows2 = await this.dao.findPage('trs_asset_ext', { transaction_id: { $in: trsIds } }, limit, null, null, [
-      ['json_ext', 'asset_ext_json'],
-      'transaction_id'
-    ])
+    const rows2 = await this.dao.findPage('trs_asset_ext', {
+      where: { transaction_id: { $in: trsIds } },
+      limit,
+      attributes: [['json_ext', 'asset_ext_json'], 'transaction_id']
+    })
     if (!rows2 || !rows2.length) {
       return result
     }

@@ -229,8 +229,10 @@ export async function superviseTrs ({ context, trs }) {
   }
   const trsIds = trs.map(item => item.id)
   const data = await context.dao.findList('supervise', {
-    txHash: {
-      $in: trsIds
+    where: {
+      txHash: {
+        $in: trsIds
+      }
     }
   })
   if (data && data.length === 0) {

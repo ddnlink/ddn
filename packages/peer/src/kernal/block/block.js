@@ -1359,7 +1359,11 @@ class Block {
       throw new Error('Invalid limit. Maximum is 100')
     }
 
-    const rows = await this.dao.findPage('block', null, 1, 0, false, [[this.dao.db_fnMax('height'), 'maxHeight']])
+    const rows = await this.dao.findPage('block', {
+      limit: 1,
+      offset: 0,
+      attributes: [[this.dao.db_fnMax('height'), 'maxHeight']]
+    })
     if (!rows) {
       throw new Error('Get Block Error.')
     }
@@ -1369,13 +1373,12 @@ class Block {
       maxHeight = rows[0].maxHeight + 1
     }
 
-    const rows2 = await this.dao.findPage(
-      'block',
-      w,
-      l,
-      o,
+    const rows2 = await this.dao.findPage('block', {
+      where: w,
+      limit: l,
+      offset: o,
       returnTotal,
-      [
+      attributes: [
         ['id', 'b_id'],
         ['height', 'b_height'],
         ['number_of_transactions', 'b_numberOfTransactions'],
@@ -1390,8 +1393,8 @@ class Block {
         ['previous_block', 'b_previousBlock'],
         [this.dao.db_str(maxHeight + '-height'), 'b_confirmations']
       ],
-      s
-    )
+      order: s
+    })
 
     const blocks = []
     for (let i = 0; i < rows2.rows.length; i++) {
@@ -1453,7 +1456,11 @@ class Block {
       this.dbSequence.add(
         async cb => {
           try {
-            const rows = await this.dao.findPage('block', null, 1, 0, false, [[this.dao.db_fnMax('height'), 'maxHeight']]) // wxm block database  library.dao.db_fn('MAX', library.dao.db_col('height'))
+            const rows = await this.dao.findPage('block', {
+              limit: 1,
+              offset: 0,
+              attributes: [[this.dao.db_fnMax('height'), 'maxHeight']]
+            }) // wxm block database  library.dao.db_fn('MAX', library.dao.db_col('height'))
             if (!rows) {
               return cb('Get Block Error.')
             }
@@ -1462,21 +1469,26 @@ class Block {
               maxHeight = rows[0].maxHeight + 1 // height - bignum ?
             }
 
-            const rows2 = await this.dao.findPage('block', where, 1, 0, false, [
-              ['id', 'b_id'],
-              ['height', 'b_height'],
-              ['number_of_transactions', 'b_numberOfTransactions'],
-              ['total_amount', 'b_totalAmount'],
-              ['total_fee', 'b_totalFee'],
-              ['reward', 'b_reward'],
-              ['payload_length', 'b_payloadLength'],
-              ['generator_public_key', 'b_generatorPublicKey'],
-              ['block_signature', 'b_blockSignature'],
-              ['version', 'b_version'],
-              ['timestamp', 'b_timestamp'],
-              ['previous_block', 'b_previousBlock'],
-              [this.dao.db_str(maxHeight + '-height'), 'b_confirmations']
-            ])
+            const rows2 = await this.dao.findPage('block', {
+              where,
+              limit: 1,
+              offset: 0,
+              attributes: [
+                ['id', 'b_id'],
+                ['height', 'b_height'],
+                ['number_of_transactions', 'b_numberOfTransactions'],
+                ['total_amount', 'b_totalAmount'],
+                ['total_fee', 'b_totalFee'],
+                ['reward', 'b_reward'],
+                ['payload_length', 'b_payloadLength'],
+                ['generator_public_key', 'b_generatorPublicKey'],
+                ['block_signature', 'b_blockSignature'],
+                ['version', 'b_version'],
+                ['timestamp', 'b_timestamp'],
+                ['previous_block', 'b_previousBlock'],
+                [this.dao.db_str(maxHeight + '-height'), 'b_confirmations']
+              ]
+            })
             if (!rows2 || !rows2.length) {
               return cb('querySimpleBlockData Block not found')
             }

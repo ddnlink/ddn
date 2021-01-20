@@ -74,8 +74,8 @@ class Round {
     // shuai 2018-11-24
     return await this.dao.findListByGroup(
       'mem_round',
-      { round: round.toString() },
       {
+        where: { round: round.toString() },
         group: ['delegate', 'round'],
         attributes: ['delegate', 'round', [this.dao.db_fnSum('amount'), 'amount']] // wxm block database library.dao.db_fn('sum', library.dao.db_col('amount'))
       },

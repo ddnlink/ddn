@@ -20,13 +20,11 @@ class DataQuery {
   }
 
   async loadSimpleBlocksData (where, limit, offset, orders) {
-    return await this.dao.findPage(
-      'block',
+    return await this.dao.findPage('block', {
       where,
       limit,
       offset,
-      false,
-      [
+      attributes: [
         ['id', 'b_id'],
         ['height', 'b_height'],
         ['number_of_transactions', 'b_numberOfTransactions'],
@@ -41,22 +39,21 @@ class DataQuery {
         ['timestamp', 'b_timestamp'],
         ['version', 'b_version']
       ],
-      orders
-    )
+      order: orders
+    })
   }
 
   async loadTransactionsWithBlockIds (blockIds) {
     if (!blockIds || !blockIds.length) {
       throw new Error('Invalid params: blockIds')
     }
-    return await this.dao.findList(
-      'tr',
-      {
+    return await this.dao.findList('tr', {
+      where: {
         block_id: {
           $in: blockIds
         }
       },
-      [
+      attributes: [
         ['id', 't_id'],
         ['type', 't_type'],
         ['senderPublicKey', 't_senderPublicKey'],
@@ -71,58 +68,55 @@ class DataQuery {
         ['timestamp', 't_timestamp'],
         ['block_id', 'b_id']
       ],
-      [['timestamp', 'asc']]
-    )
+      order: [['timestamp', 'asc']]
+    })
   }
 
   async loadDelegatesWithTransactionIds (transactionIds) {
     if (!transactionIds || !transactionIds.length) {
       throw new Error('Invalid params: transactionIds')
     }
-    return await this.dao.findList(
-      'delegate',
-      {
+    return await this.dao.findList('delegate', {
+      where: {
         transaction_id: {
           $in: transactionIds
         }
       },
-      [
+      attributes: [
         ['username', 'd_username'],
         ['transaction_id', 't_id']
       ]
-    )
+    })
   }
 
   async loadVotesWithTransactionIds (transactionIds) {
     if (!transactionIds || !transactionIds.length) {
       throw new Error('Invalid params: transactionIds')
     }
-    return await this.dao.findList(
-      'vote',
-      {
+    return await this.dao.findList('vote', {
+      where: {
         transaction_id: {
           $in: transactionIds
         }
       },
-      [
+      attributes: [
         ['votes', 'v_votes'],
         ['transaction_id', 't_id']
       ]
-    )
+    })
   }
 
   async loadAssetsWithTransactionIds (transactionIds) {
     if (!transactionIds || !transactionIds.length) {
       throw new Error('Invalid params: transactionIds')
     }
-    return await this.dao.findList(
-      'trs_asset',
-      {
+    return await this.dao.findList('trs_asset', {
+      where: {
         transaction_id: {
           $in: transactionIds
         }
       },
-      [
+      attributes: [
         ['transaction_id', 't_id'],
         ['transaction_id', 'asset_trs_id'],
         ['transaction_type', 'asset_trs_type'],
@@ -143,77 +137,73 @@ class DataQuery {
         ['timestamp2', 'asset_timestamp2'],
         ['timestamp', 'asset_timestamp']
       ]
-    )
+    })
   }
 
   async loadAssetExtsWithTransactionIds (transactionIds) {
     if (!transactionIds || !transactionIds.length) {
       throw new Error('Invalid params: transactionIds')
     }
-    return await this.dao.findList(
-      'trs_asset_ext',
-      {
+    return await this.dao.findList('trs_asset_ext', {
+      where: {
         transaction_id: {
           $in: transactionIds
         }
       },
-      [
+      attributes: [
         ['transaction_id', 't_id'],
         ['json_ext', 'asset_ext_json']
       ]
-    )
+    })
   }
 
   async loadSignaturesWithTransactionIds (transactionIds) {
     if (!transactionIds || !transactionIds.length) {
       throw new Error('Invalid params: transactionIds')
     }
-    return await this.dao.findList(
-      'signature',
-      {
+    return await this.dao.findList('signature', {
+      where: {
         transaction_id: {
           $in: transactionIds
         }
       },
-      [
+      attributes: [
         ['publicKey', 's_publicKey'],
         ['transaction_id', 't_id']
       ]
-    )
+    })
   }
 
   async loadMultiSignaturesWithTransactionIds (transactionIds) {
     if (!transactionIds || !transactionIds.length) {
       throw new Error('Invalid params: transactionIds')
     }
-    return await this.dao.findList(
-      'multisignature',
-      {
+    return await this.dao.findList('multisignature', {
+      where: {
         transaction_id: {
           $in: transactionIds
         }
       },
-      [
+      attributes: [
         ['min', 'm_min'],
         ['lifetime', 'm_lifetime'],
         ['keysgroup', 'm_keysgroup'],
         ['transaction_id', 't_id']
       ]
-    )
+    })
   }
 
   async loadDappsWithTransactionIds (transactionIds) {
     if (!transactionIds || !transactionIds.length) {
       throw new Error('Invalid params: transactionIds')
     }
-    return await this.dao.findList(
-      'dapp',
-      {
+    return await this.dao.findList('dapp', {
+      where: {
         transaction_id: {
           $in: transactionIds
         }
       },
-      [
+      attributes: [
         ['name', 'dapp_name'],
         ['description', 'dapp_description'],
         ['tags', 'dapp_tags'],
@@ -225,48 +215,46 @@ class DataQuery {
         ['unlockDelegates', 'dapp_unlockDelegates'],
         ['transaction_id', 't_id']
       ]
-    )
+    })
   }
 
   async loadDappIntransfersWithTransactionIds (transactionIds) {
     if (!transactionIds || !transactionIds.length) {
       throw new Error('Invalid params: transactionIds')
     }
-    return await this.dao.findList(
-      'intransfer',
-      {
+    return await this.dao.findList('intransfer', {
+      where: {
         transaction_id: {
           $in: transactionIds
         }
       },
-      [
+      attributes: [
         ['dapp_id', 'it_dappId'],
         ['currency', 'it_currency'],
         ['amount', 'it_amount'],
         ['transaction_id', 't_id']
       ]
-    )
+    })
   }
 
   async loadDappOuttransfersWithTransactionIds (transactionIds) {
     if (!transactionIds || !transactionIds.length) {
       throw new Error('Invalid params: transactionIds')
     }
-    return await this.dao.findList(
-      'outtransfer',
-      {
+    return await this.dao.findList('outtransfer', {
+      where: {
         transaction_id: {
           $in: transactionIds
         }
       },
-      [
+      attributes: [
         ['dapp_id', 'ot_dappId'],
         ['outtransaction_id', 'ot_outTransactionId'],
         ['currency', 'ot_currency'],
         ['amount', 'ot_amount'],
         ['transaction_id', 't_id']
       ]
-    )
+    })
   }
 
   async queryFullBlockData (where, limit, offset, orders) {
@@ -411,7 +399,11 @@ class DataQuery {
   }
 
   async loadSimpleTransactionData (where, limit, offset, orders, returnTotal) {
-    const rows = await this.dao.findPage('block', null, 1, 0, false, [[this.dao.db_fnMax('height'), 'maxHeight']]) // wxm block database  library.dao.db_fn('MAX', library.dao.db_col('height'))
+    const rows = await this.dao.findPage('block', {
+      limit: 1,
+      offset: 0,
+      attributes: [[this.dao.db_fnMax('height'), 'maxHeight']]
+    }) // wxm block database  library.dao.db_fn('MAX', library.dao.db_col('height'))
     if (!rows) {
       throw new Error('Get Block Error.')
     }
@@ -421,13 +413,12 @@ class DataQuery {
     }
 
     try {
-      return await this.dao.findPage(
-        'tr',
+      return await this.dao.findPage('tr', {
         where,
         limit,
         offset,
-        returnTotal || false,
-        [
+        returnTotal,
+        attributes: [
           ['id', 't_id'],
           ['type', 't_type'],
           ['senderPublicKey', 't_senderPublicKey'],
@@ -444,8 +435,8 @@ class DataQuery {
           ['block_height', 'b_height'],
           [this.dao.db_str(`${maxHeight}-block_height`), 'confirmations']
         ],
-        orders
-      )
+        order: orders
+      })
     } catch (err) {
       this.logger.error('Query transactions from database error', err)
     }
