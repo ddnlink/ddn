@@ -72,41 +72,19 @@ class Round {
 
   async getVotes (round, dbTrans) {
     // shuai 2018-11-24
-    return new Promise((resolve, reject) => {
-      try {
-        this.dao.findListByGroup(
-          'mem_round',
-          { round: round.toString() },
-          {
-            group: ['delegate', 'round'],
-            attributes: ['delegate', 'round', [this.dao.db_fnSum('amount'), 'amount']] // wxm block database library.dao.db_fn('sum', library.dao.db_col('amount'))
-          },
-          dbTrans,
-          (err, data) => {
-            if (err) {
-              reject(err)
-            } else {
-              resolve(data)
-            }
-          }
-        )
-      } catch (e) {
-        reject(e)
-      }
-    })
+    return await this.dao.findListByGroup(
+      'mem_round',
+      {
+        where: { round: round.toString() },
+        group: ['delegate', 'round'],
+        attributes: ['delegate', 'round', [this.dao.db_fnSum('amount'), 'amount']] // wxm block database library.dao.db_fn('sum', library.dao.db_col('amount'))
+      },
+      dbTrans
+    )
   }
 
   async flush (round, dbTrans) {
-    return new Promise((resolve, reject) => {
-      // shuai 2018-11-21
-      this.dao.remove('mem_round', { round: round.toString() }, dbTrans, (err, result) => {
-        if (err) {
-          reject(err)
-        } else {
-          resolve(result)
-        }
-      })
-    })
+    return await this.dao.remove('mem_round', { round: round.toString() }, dbTrans)
   }
 
   async directionSwap (direction, lastBlock) {

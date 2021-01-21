@@ -136,17 +136,15 @@ class Acl extends Asset.Base {
   }
 
   async _insertItem (modelName, currency, item, trans) {
-    return new Promise((resolve, reject) => {
-      this.dao.insertOrUpdate(modelName, {
+    await this.dao.insertOrUpdate(
+      modelName,
+      {
         currency,
         address: item
-      }, trans, (err) => {
-        if (err) {
-          return reject(err)
-        }
-        resolve(true) // resolve(result)
-      })
-    })
+      },
+      trans
+    )
+    return true
   }
 
   // FIXME: 2020.5.24
@@ -156,57 +154,38 @@ class Acl extends Asset.Base {
       const item = list[i]
       Promise.resolve(await this._insertItem(modelName, currency, item, trans))
     }
-    // return new Promise(
-    //     async(resolve, reject) => {
-    //     for (var i = 0; i < list.length; i++) {
-    //         let item = list[i];
-    //         try {
-    //             await this._insertItem(modelName, currency, item, trans);
-    //         } catch (err) {
-    //             return reject(err);
-    //         }
-    //     }
-    //     resolve(true);
-    // });
   }
 
   async _addList (modelName, currency, list, dbTrans) {
     if (!dbTrans) {
       const self = this
-      await new Promise((resolve, reject) => {
-        this.dao.transaction(async (trans, done) => {
-          try {
-            await self._insertList(modelName, currency, list, trans)
-            done()
-          } catch (err2) {
-            done(err2)
-          }
-        }, err => {
-          if (err) {
-            return reject(err)
-          }
-          resolve(true)
-        })
+      const result = await this.dao.transaction(async trans => {
+        await self._insertList(modelName, currency, list, trans)
       })
+      if (result) {
+        // transaction fail but rollback success
+        throw new Error(result)
+      } else {
+        // transaction success
+        return true
+      }
     } else {
       await this._insertList(modelName, currency, list, dbTrans)
     }
   }
 
   async _removeList (modelName, currency, list, dbTrans) {
-    return new Promise((resolve, reject) => {
-      this.dao.remove(modelName, {
+    await this.dao.remove(
+      modelName,
+      {
         currency,
         address: {
           $in: list
         }
-      }, dbTrans, (err) => {
-        if (err) {
-          return reject(err)
-        }
-        resolve(true)
-      })
-    })
+      },
+      dbTrans
+    )
+    return true
   }
 
   async apply (trs, block, sender, dbTrans) {

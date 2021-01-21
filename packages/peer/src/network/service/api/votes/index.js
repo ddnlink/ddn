@@ -55,7 +55,7 @@ class VotesRouter {
     }
 
     // const mem_accounts = await new Promise((reslove, reject) => {
-    //   this.dao.findPage('mem_account', filter, limit || 1000, offset, false, fields || null, sort, (err, data) => {
+    //   this.dao.findPage('mem_account', {where: filter, limit: limit || 1000, offset, attributes: fields, order: sort}, (err, data) => {
     //     if (err) {
     //       return reject(err)
     //     }

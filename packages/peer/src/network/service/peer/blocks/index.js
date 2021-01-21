@@ -74,32 +74,25 @@ class PeerBlockService {
 
     return new Promise((resolve, reject) => {
       this.sequence.add(
-        cb => {
-          this.dao.findOne(
-            'block',
-            {
-              id: query.lastBlockId || null
-            },
-            ['height'],
-            async (err, row) => {
-              if (err) {
-                return reject(err)
-              }
+        async cb => {
+          try {
+            const row = await this.dao.findOne('block', { id: query.lastBlockId || null }, ['height'])
 
-              const where = {}
-              if (query.id) {
-                where.id = query.id
-              }
-              if (query.lastBlockId) {
-                where.height = {
-                  $gt: row ? row.height : '0' // fixme 2020.8.13 height >= 1
-                }
-              }
-
-              const data = await this.runtime.dataquery.queryFullBlockData(where, limit, 0, [['height', 'asc']])
-              cb(null, { blocks: data })
+            const where = {}
+            if (query.id) {
+              where.id = query.id
             }
-          )
+            if (query.lastBlockId) {
+              where.height = {
+                $gt: row ? row.height : '0' // fixme 2020.8.13 height >= 1
+              }
+            }
+
+            const data = await this.runtime.dataquery.queryFullBlockData(where, limit, 0, [['height', 'asc']])
+            cb(null, { blocks: data })
+          } catch (err) {
+            cb(err)
+          }
         },
         (err, result) => {
           if (err) {
@@ -182,26 +175,21 @@ class PeerBlockService {
       return { success: false, error: 'Invalid block id sequence' }
     }
 
-    return new Promise((resolve, reject) => {
+    try {
       // shuai 2018-12-01
-      this.dao.findList(
-        'block',
-        {
+      const rows = await this.dao.findList('block', {
+        where: {
           id: { $in: ids },
           height: { $gte: min, $lte: max }
         },
-        ['id', 'timestamp', 'previous_block', 'height'],
-        [['height', 'DESC']],
-        (err, rows) => {
-          if (err) {
-            resolve({ success: false, error: 'Database error' })
-          }
-
-          const commonBlock = rows.length ? rows[0] : null
-          resolve({ success: true, common: commonBlock })
-        }
-      )
-    })
+        attributes: ['id', 'timestamp', 'previous_block', 'height'],
+        order: [['height', 'DESC']]
+      })
+      const commonBlock = rows.length ? rows[0] : null
+      return { success: true, common: commonBlock }
+    } catch (err) {
+      return { success: false, error: 'Database error' }
+    }
   }
 }
 

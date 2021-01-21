@@ -44,22 +44,7 @@ class Transaction {
    */
 
   async deleteTransaction ({ trsId, dbTrans }) {
-    return new Promise((resolve, reject) => {
-      this.dao.remove(
-        'tr',
-        {
-          id: trsId
-        },
-        dbTrans,
-        (err, result) => {
-          if (err) {
-            reject(err)
-          } else {
-            resolve(result)
-          }
-        }
-      )
-    })
+    return await this.dao.remove('tr', { id: trsId }, dbTrans)
   }
 
   /**
@@ -166,22 +151,15 @@ class Transaction {
       message: trs.message || null
     }
 
-    return new Promise((resolve, reject) => {
-      this.dao.insert('tr', newTrans, dbTrans, async (err, result) => {
-        if (err) {
-          reject(err)
-        } else {
-          try {
-            await this._assets.call(trs.type, 'dbSave', trs, dbTrans)
-          } catch (e) {
-            this.logger.debug(`insert tr error trsId: ${newTrans.id}`)
-            this.logger.debug(`insert tr error trsId: ${JSON.stringify(newTrans)}`)
-            return reject(new Error(`Insert tr fail ${e.toString()}`))
-          }
-          resolve(result)
-        }
-      })
-    })
+    const result = await this.dao.insert('tr', newTrans, dbTrans)
+    try {
+      await this._assets.call(trs.type, 'dbSave', trs, dbTrans)
+    } catch (e) {
+      this.logger.debug(`insert tr error trsId: ${newTrans.id}`)
+      this.logger.debug(`insert tr error trsId: ${JSON.stringify(newTrans)}`)
+      throw new Error(`Insert tr fail ${e.toString()}`)
+    }
+    return result
   }
 
   async serializeDbData2Transaction (raw) {
@@ -526,27 +504,17 @@ class Transaction {
 
     trs = await this._assets.call(trs.type, 'process', trs, sender)
 
-    return new Promise((resolve, reject) => {
-      // shuai 2018-11-13
-      this.dao.count(
-        'tr',
-        {
-          id: trs.id
-        },
-        (err, count) => {
-          if (err) {
-            this.logger.error('Database error')
-            return reject(new Error('Database error'))
-          }
+    try {
+      const count = await this.dao.count('tr', { id: trs.id })
+      if (count) {
+        throw new Error('Ignoring already confirmed transaction')
+      }
+    } catch (err) {
+      this.logger.error('Database error')
+      throw new Error('Database error')
+    }
 
-          if (count) {
-            return reject(new Error('Ignoring already confirmed transaction'))
-          }
-
-          resolve(trs)
-        }
-      )
-    })
+    return trs
   }
 
   async processUnconfirmedTransaction (transaction, broadcast) {

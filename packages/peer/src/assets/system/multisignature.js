@@ -207,21 +207,8 @@ class Multisignature {
    * @param {*} dbTrans 事物
    */
   async deleteMultisignature (transaction_id, dbTrans) {
-    return new Promise((resolve, reject) => {
-      this.dao.remove(
-        'multisignature',
-        {
-          transaction_id
-        },
-        dbTrans,
-        err => {
-          if (err) {
-            return reject(err)
-          }
-          resolve(true)
-        }
-      )
-    })
+    await this.dao.remove('multisignature', { transaction_id }, dbTrans)
+    return true
   }
 
   async applyUnconfirmed ({ asset }, { address, multisignatures }, dbTrans) {
@@ -311,33 +298,24 @@ class Multisignature {
   }
 
   async dbSave ({ asset, id }, dbTrans) {
-    return new Promise((resolve, reject) => {
-      this.dao.insert(
-        'multisignature',
-        {
-          min: asset.multisignature.min,
-          lifetime: asset.multisignature.lifetime,
-          keysgroup: asset.multisignature.keysgroup.join(','),
-          transaction_id: id
-        },
-        dbTrans,
-        (err, result) => {
-          if (err) {
-            reject(err)
-          } else {
-            setImmediate(async () => {
-              try {
-                await this.runtime.socketio.emit('multisignatures/change', {})
-              } catch (err2) {
-                this.logger.warn('socket emit error: multisignatures/change')
-              }
-            })
-
-            resolve(result)
-          }
-        }
-      )
+    const result = await this.dao.insert(
+      'multisignature',
+      {
+        min: asset.multisignature.min,
+        lifetime: asset.multisignature.lifetime,
+        keysgroup: asset.multisignature.keysgroup.join(','),
+        transaction_id: id
+      },
+      dbTrans
+    )
+    setImmediate(async () => {
+      try {
+        await this.runtime.socketio.emit('multisignatures/change', {})
+      } catch (err2) {
+        this.logger.warn('socket emit error: multisignatures/change')
+      }
     })
+    return result
   }
 
   async ready ({ signatures, asset }, { multisignatures, multimin }) {

@@ -57,8 +57,11 @@ class InTransfer extends Asset.Base {
 
     const inTransfer = await this.getAssetObject(trs)
     if (inTransfer.currency !== this.constants.tokenName) {
-      if ((typeof (trs.amount) !== 'undefined' && !DdnUtils.bignum.isZero(trs.amount)) ||
-                (typeof (inTransfer.amount) === 'undefined' || DdnUtils.bignum.isZero(inTransfer.amount))) {
+      if (
+        (typeof trs.amount !== 'undefined' && !DdnUtils.bignum.isZero(trs.amount)) ||
+        typeof inTransfer.amount === 'undefined' ||
+        DdnUtils.bignum.isZero(inTransfer.amount)
+      ) {
         throw new Error('Invalid transfer amount')
       }
 
@@ -67,8 +70,11 @@ class InTransfer extends Asset.Base {
         throw error
       }
     } else {
-      if ((typeof (trs.amount) === 'undefined' || DdnUtils.bignum.isZero(trs.amount)) ||
-                (typeof (inTransfer.amount) !== 'undefined' && !DdnUtils.bignum.isZero(inTransfer.amount))) {
+      if (
+        typeof trs.amount === 'undefined' ||
+        DdnUtils.bignum.isZero(trs.amount) ||
+        (typeof inTransfer.amount !== 'undefined' && !DdnUtils.bignum.isZero(inTransfer.amount))
+      ) {
         throw new Error('Invalid transfer amount')
       }
     }
@@ -134,35 +140,20 @@ class InTransfer extends Asset.Base {
       currency
     }
 
-    return new Promise((resolve, reject) => {
-      this.dao.findOne('mem_asset_balance',
-        condition, ['balance'], dbTrans,
-        (err, row) => {
-          if (err) {
-            return reject(err)
-          }
+    const row = await this.dao.findOne('mem_asset_balance', condition, ['balance'], dbTrans)
 
-          let balance = '0'
-          if (row) {
-            balance = row.balance
-          }
+    let balance = '0'
+    if (row) {
+      balance = row.balance
+    }
 
-          const newBalance = DdnUtils.bignum.plus(balance, amount)
-          if (DdnUtils.bignum.isLessThan(newBalance, 0)) {
-            return reject('Asset balance not enough')
-          }
+    const newBalance = DdnUtils.bignum.plus(balance, amount)
+    if (DdnUtils.bignum.isLessThan(newBalance, 0)) {
+      throw new Error('Asset balance not enough')
+    }
 
-          condition.balance = newBalance.toString()
-          this.dao.insertOrUpdate('mem_asset_balance',
-            condition, dbTrans, (err2, result) => {
-              if (err2) {
-                return reject(err2)
-              }
-
-              resolve(result)
-            })
-        })
-    })
+    condition.balance = newBalance.toString()
+    return await this.dao.insertOrUpdate('mem_asset_balance')
   }
 
   // 新增事务dbTrans ---wly

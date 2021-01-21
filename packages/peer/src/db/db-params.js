@@ -33,7 +33,7 @@ class DBParams {
     if (!_dao) {
       return callback(cb, '数据库未初始化')
     }
-    const result = _dao.findOneByPrimaryKey('param', name, null)
+    const result = await _dao.findOneByPrimaryKey('param', name, null)
     return callback(cb, null, result && result.value)
   }
 

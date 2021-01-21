@@ -233,22 +233,15 @@ class Org extends Asset.Base {
    * @param {*} dbTrans 事物
    */
   async undo (trs, block, _, dbTrans) {
-    return new Promise((resolve, reject) => {
-      this.dao.remove(
-        'mem_org',
-        {
-          transaction_id: trs.id
-        },
-        dbTrans,
-        err => {
-          if (err) {
-            return reject(err)
-          }
-          super.undo(trs, block, _, dbTrans)
-          resolve(true)
-        }
-      )
-    })
+    await this.dao.remove(
+      'mem_org',
+      {
+        transaction_id: trs.id
+      },
+      dbTrans
+    )
+    super.undo(trs, block, _, dbTrans)
+    return true
   }
 
   async undoUnconfirmed (trs, sender, dbTrans) {
@@ -648,25 +641,15 @@ class Org extends Asset.Base {
     const limit = pageSize || 10
     const offset = (pageIndex - 1) * pageSize
 
-    return new Promise((resolve, reject) => {
-      this.dao.findPage(
-        'mem_org',
-        where,
-        limit,
-        offset,
-        true,
-        ['transaction_id', 'org_id', 'name', 'address', 'tags', 'url', 'state', 'timestamp'],
-        orders,
-        (err, result) => {
-          if (err) {
-            this.logger.error('this.dao.findPage error', err)
-            return reject(err)
-          }
-
-          resolve({ success: true, result })
-        }
-      )
+    const result = await this.dao.findPage('mem_org', {
+      where,
+      limit,
+      offset,
+      returnTotal: true,
+      attributes: ['transaction_id', 'org_id', 'name', 'address', 'tags', 'url', 'state', 'timestamp'],
+      order: orders
     })
+    return { success: true, result }
   }
 }
 

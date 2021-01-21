@@ -104,7 +104,7 @@ class Loader {
       }
     }
 
-    assetsPackageList.map(packageName => {
+    assetsPackageList.map(async packageName => {
       let assetModels
       try {
         assetModels = global._require_runtime_(`${packageName}/lib/define-models`) || []
@@ -114,17 +114,18 @@ class Loader {
       }
 
       if (assetModels) {
-        assetModels.map(({ name, data }) => {
-          // 挂载方法
-          dao.buildModel(name, data)
-          // 创建表
-          dao.createTable(name, false, err => {
-            if (err) {
-              this.logger.error(`${packageName} 资产包自定义数据模型生成失败。`, err)
-              process.emit('cleanup')
-            }
-          })
-        })
+        try {
+          for (const model of assetModels) {
+            const { name, data } = model
+            // 挂载方法
+            dao.buildModel(name, data)
+            // 创建表
+            await dao.createTable(name, false)
+          }
+        } catch (err) {
+          this.logger.error(`${packageName} 资产包自定义数据模型生成失败。`, err)
+          process.emit('cleanup')
+        }
       }
     })
   }

@@ -18,11 +18,6 @@ class DBUpgrade {
 
     _context = context
 
-    /**
-     * 此处代码逻辑就是根据VersionChanges的版本改变历史，依次执行当前版本之后所有版本的改变的Sql语句
-     *
-     * 逻辑很简单，代码很崩溃，下一版本要改成async/await
-     */
     try {
       const currVersion = await _context.dbParams.get('version')
 
@@ -32,18 +27,13 @@ class DBUpgrade {
         .filter(ver => ver > (currVersion || 0))
       for (const ver of versionList) {
         const changeList = migrations[ver]
-        await _context.dao.transaction(async (dbTrans, done) => {
-          try {
-            for (const command of changeList) {
-              if (!/^\s*$/.test(command)) {
-                await _context.dao.execSql(command, dbTrans)
-              }
+        await _context.dao.transaction(async dbTrans => {
+          for (const command of changeList) {
+            if (!/^\s*$/.test(command)) {
+              await _context.dao.execSql(command, dbTrans)
             }
-            await _context.dbParams.set('version', ver, dbTrans)
-            done()
-          } catch (err) {
-            done(err)
           }
+          await _context.dbParams.set('version', ver, dbTrans)
         })
       }
       return true
