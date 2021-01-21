@@ -99,7 +99,7 @@ class Vote {
    * @param {*} dbTrans 事物
    */
   async deleteVote (transaction_id, dbTrans) {
-    await this.dao.remove('vote', { transaction_id }, dbTrans)
+    await this.dao.remove('vote', { where: { transaction_id }, transaction: dbTrans })
     return true
   }
 
@@ -162,7 +162,9 @@ class Vote {
         votes: Array.isArray(asset.vote.votes) ? asset.vote.votes.join(',') : null,
         transaction_id: id
       },
-      dbTrans
+      {
+        transaction: dbTrans
+      }
     )
   }
 

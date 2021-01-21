@@ -76,7 +76,7 @@ class PeerBlockService {
       this.sequence.add(
         async cb => {
           try {
-            const row = await this.dao.findOne('block', { id: query.lastBlockId || null }, ['height'])
+            const row = await this.dao.findOne('block', { where: { id: query.lastBlockId }, attributes: ['height'] })
 
             const where = {}
             if (query.id) {

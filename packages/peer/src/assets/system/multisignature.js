@@ -207,7 +207,7 @@ class Multisignature {
    * @param {*} dbTrans 事物
    */
   async deleteMultisignature (transaction_id, dbTrans) {
-    await this.dao.remove('multisignature', { transaction_id }, dbTrans)
+    await this.dao.remove('multisignature', { where: { transaction_id }, transaction: dbTrans })
     return true
   }
 
@@ -306,7 +306,9 @@ class Multisignature {
         keysgroup: asset.multisignature.keysgroup.join(','),
         transaction_id: id
       },
-      dbTrans
+      {
+        transaction: dbTrans
+      }
     )
     setImmediate(async () => {
       try {

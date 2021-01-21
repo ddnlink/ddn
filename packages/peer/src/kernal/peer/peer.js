@@ -35,13 +35,13 @@ class Peer {
     for (let i = 0; i < peers.length; i++) {
       const peer = peers[i]
 
-      const result = await this.dao.findOne('peer', { ip: ip.toLong(peer.ip), port: peer.port })
+      const result = await this.dao.findOne('peer', { where: { ip: ip.toLong(peer.ip), port: peer.port } })
       if (!result) {
         await this.dao.insertOrUpdate('peer', { ip: ip.toLong(peer.ip), port: peer.port, state: 2 })
       }
     }
 
-    const count = await this.dao.count('peer', {})
+    const count = await this.dao.count('peer')
     if (count) {
       await this.syncPeersList()
       this.logger.info(`Peers ready, stored ${count}`)
@@ -65,11 +65,11 @@ class Peer {
   }
 
   async addDapp ({ ip: configIp, port, dappId }) {
-    const data = await this.dao.findOne('peer', { ip: configIp, port: port })
+    const data = await this.dao.findOne('peer', { where: { ip: configIp, port: port } })
     if (!data) {
       throw new Error(`Peer not found: ${configIp}`)
     }
-    const data2 = await this.dao.findOne('peers_dapp', { peer_id: data.id })
+    const data2 = await this.dao.findOne('peers_dapp', { where: { peer_id: data.id } })
 
     if (!data2) {
       return await this.dao.insert('peers_dapp', { peer_id: data.id, dapp_id: dappId })
@@ -114,7 +114,7 @@ class Peer {
       if (needUpdateToDB && !this._peerUpdatings[peerKey]) {
         this._peerUpdatings[peerKey] = true
         try {
-          const data = await this.dao.findOne('peer', { ip: peerData.ip, port: peerData.port })
+          const data = await this.dao.findOne('peer', { where: { ip: peerData.ip, port: peerData.port } })
           if (data && data.state === 0) {
             delete peerData.state
           }
@@ -233,7 +233,7 @@ class Peer {
       this.logger.info("Peer in white list, can't remove.")
     } else {
       try {
-        return await this.dao.remove('peer', { ip: pip, port })
+        return await this.dao.remove('peer', { where: { ip: pip, port } })
       } catch (err) {
         this.logger.error(`remove peer: ${err}`)
         throw err
@@ -246,7 +246,7 @@ class Peer {
    */
   async restoreBanState () {
     try {
-      await this.dao.update('peer', { state: 1, clock: null }, { state: 0, clock: { $lt: Date.now() } })
+      await this.dao.update('peer', { state: 1, clock: null }, { where: { state: 0, clock: { $lt: Date.now() } } })
       return true
     } catch (err) {
       return false
@@ -276,7 +276,7 @@ class Peer {
 
     this.logger.debug('Peer is changeState: clock', clock)
     try {
-      return await this.dao.update('peer', { state, clock }, { ip: pip, port })
+      return await this.dao.update('peer', { state, clock }, { where: { ip: pip, port } })
     } catch (err) {
       this.logger.error('Peer#state', err)
       throw err
@@ -289,7 +289,7 @@ class Peer {
    */
   async reset () {
     try {
-      return await this.dao.update('peer', { state: 2 }, {})
+      return await this.dao.update('peer', { state: 2 })
     } catch (err) {
       this.logger.error(`Failed to reset peers: ${err}`)
       throw err
@@ -336,7 +336,7 @@ class Peer {
     let data = null
 
     if (dappId) {
-      data = await this.dao.findPage('peers_dapp', {
+      data = await this.dao.findList('peers_dapp', {
         where: {
           dapp_id: dappId
         },
@@ -349,7 +349,7 @@ class Peer {
       where.id = { $in: _.map(data, 'peer_id') }
     }
 
-    return await this.dao.findPage('peer', {
+    return await this.dao.findList('peer', {
       where,
       limit: limit || this.constants.delegates,
       order: [[this.dao.db_fnRandom()]]

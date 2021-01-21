@@ -99,7 +99,7 @@ class Signatures {
    * @param {*} dbTrans 事物
    */
   async deleteSignature (transaction_id, dbTrans) {
-    await this.dao.remove('signature', { transaction_id }, dbTrans)
+    await this.dao.remove('signature', { where: { transaction_id }, transaction: dbTrans })
     return true
   }
 
@@ -167,7 +167,7 @@ class Signatures {
       publicKey: asset.signature.publicKey
     }
 
-    return await this.dao.insert('signature', obj, dbTrans)
+    return await this.dao.insert('signature', obj, { transaction: dbTrans })
   }
 
   ready ({ signatures }, { multisignatures, multimin }) {

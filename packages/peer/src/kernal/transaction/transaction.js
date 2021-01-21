@@ -44,7 +44,7 @@ class Transaction {
    */
 
   async deleteTransaction ({ trsId, dbTrans }) {
-    return await this.dao.remove('tr', { id: trsId }, dbTrans)
+    return await this.dao.remove('tr', { where: { id: trsId }, transaction: dbTrans })
   }
 
   /**
@@ -151,7 +151,7 @@ class Transaction {
       message: trs.message || null
     }
 
-    const result = await this.dao.insert('tr', newTrans, dbTrans)
+    const result = await this.dao.insert('tr', newTrans, { transaction: dbTrans })
     try {
       await this._assets.call(trs.type, 'dbSave', trs, dbTrans)
     } catch (e) {
@@ -248,7 +248,7 @@ class Transaction {
   }
 
   async undoUnconfirmed (transaction, dbTrans) {
-    const sender = await this.runtime.account.getAccountByPublicKey(transaction.senderPublicKey)
+    const sender = await this.runtime.account.getAccountByPublicKey(transaction.senderPublicKey, dbTrans)
     await this.removeUnconfirmedTransaction(transaction.id)
 
     if (!this._assets.hasType(transaction.type)) {
@@ -258,7 +258,7 @@ class Transaction {
     // 此处应该使用this._assets方法（transaction.type）来做判断
     // fixme: 2020.4.22 这里是 dapp 的交易，转移到别处？
     if (transaction.type === DdnUtils.assetTypes.DAPP_OUT) {
-      return await this._assets.call(transaction.type, 'undoUnconfirmed', transaction, sender)
+      return await this._assets.call(transaction.type, 'undoUnconfirmed', transaction, sender, dbTrans)
     }
 
     const amount = DdnUtils.bignum.plus(transaction.amount, transaction.fee).toString()
@@ -294,7 +294,7 @@ class Transaction {
     let requester = null
     if (trs.requester_public_key) {
       // wxm block database
-      requester = await this.runtime.account.getAccountByPublicKey(trs.requester_public_key)
+      requester = await this.runtime.account.getAccountByPublicKey(trs.requester_public_key, dbTrans)
       if (!requester) {
         throw new Error('Invalid requester')
       }
@@ -443,9 +443,9 @@ class Transaction {
     this._unconfirmedNumber--
   }
 
-  async addUnconfirmedTransaction (transaction, sender) {
+  async addUnconfirmedTransaction (transaction, sender, dbTrans) {
     try {
-      await this.applyUnconfirmed(transaction, sender)
+      await this.applyUnconfirmed(transaction, sender, dbTrans)
       this._unconfirmedTransactions.push(transaction)
       const index = this._unconfirmedTransactions.length - 1
       this._unconfirmedTransactionsIdIndex[transaction.id] = index
@@ -505,7 +505,7 @@ class Transaction {
     trs = await this._assets.call(trs.type, 'process', trs, sender)
 
     try {
-      const count = await this.dao.count('tr', { id: trs.id })
+      const count = await this.dao.count('tr', { where: { id: trs.id } })
       if (count) {
         throw new Error('Ignoring already confirmed transaction')
       }
@@ -517,7 +517,7 @@ class Transaction {
     return trs
   }
 
-  async processUnconfirmedTransaction (transaction, broadcast) {
+  async processUnconfirmedTransaction (transaction, broadcast, dbTrans) {
     if (!transaction) {
       throw new Error('No transaction to process!')
     }
@@ -534,12 +534,12 @@ class Transaction {
     await this.runtime.account.setAccount({
       publicKey: transaction.senderPublicKey
     })
-    const sender = await this.runtime.account.getAccountByPublicKey(transaction.senderPublicKey)
+    const sender = await this.runtime.account.getAccountByPublicKey(transaction.senderPublicKey, dbTrans)
 
     let requester
     if (transaction.requester_public_key && sender && sender.multisignatures && sender.multisignatures.length) {
       // wxm block database
-      requester = await this.runtime.account.getAccountByPublicKey(transaction.requester_public_key)
+      requester = await this.runtime.account.getAccountByPublicKey(transaction.requester_public_key, dbTrans)
       if (!requester) {
         throw new Error('Invalid requester')
       }

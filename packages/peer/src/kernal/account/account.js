@@ -138,22 +138,30 @@ class Account {
     }
     data.address = address
 
-    return await this.dao.insertOrUpdate('mem_account', data, dbTrans)
+    return await this.dao.insertOrUpdate('mem_account', data, { transaction: dbTrans })
   }
 
-  async getAccountByAddress (address) {
-    return await this.getAccount({
-      address
-    })
+  async getAccountByAddress (address, dbTrans) {
+    return await this.getAccount(
+      {
+        address
+      },
+      null,
+      dbTrans
+    )
   }
 
-  async getAccountByPublicKey (publicKey) {
+  async getAccountByPublicKey (publicKey, dbTrans) {
     publicKey = publicKey.toString('hex')
     const address = this.generateAddressByPublicKey(publicKey)
     this.logger.debug('getAccountByPublicKey, publicKey -> address; ' + publicKey + ' -> ' + address)
-    const account = await this.getAccount({
-      address
-    })
+    const account = await this.getAccount(
+      {
+        address
+      },
+      null,
+      dbTrans
+    )
 
     if (account && !account.publicKey) {
       account.publicKey = publicKey
@@ -162,17 +170,59 @@ class Account {
     return account
   }
 
-  async getAccount (filter, fields) {
-    const list = await this.getAccountList(filter, fields)
-
-    if (list && list.length > 0) {
-      return list[0]
+  async getAccount (where, attributes, dbTrans) {
+    const address = (where || {}).address
+    if (typeof address === 'string' && !this.isAddress(address)) {
+      this.logger.error('account address', address)
+      throw new Error('Invalid address getAccount')
     }
-    return null
+
+    // return await this.dao.findPage('mem_account', filter, limit || 1000, offset, false, fields || null, sort)
+
+    const mem_account = await this.dao.findOne('mem_account', { where, attributes, transaction: dbTrans })
+    if (!mem_account) return
+
+    const delegates = await this.dao.findList('mem_accounts2delegate', {
+      where: {
+        account_id: mem_account.address
+      },
+      attributes: [['dependent_id', 'delegates'], 'account_id'],
+      transaction: dbTrans
+    })
+
+    const u_delegates = await this.dao.findList('mem_accounts2u_delegate', {
+      where: {
+        account_id: mem_account.address
+      },
+      attributes: [['dependent_id', 'u_delegates'], 'account_id'],
+      transaction: dbTrans
+    })
+    const multisignatures = await this.dao.findList('mem_accounts2multisignature', {
+      where: {
+        account_id: mem_account.address
+      },
+      attributes: [['dependent_id', 'multisignatures'], 'account_id'],
+      transaction: dbTrans
+    })
+    const u_multisignatures = await this.dao.findList('mem_accounts2u_multisignature', {
+      where: {
+        account_id: mem_account.address
+      },
+      attributes: [['dependent_id', 'u_multisignatures'], 'account_id'],
+      transaction: dbTrans
+    })
+
+    return {
+      ...mem_account,
+      delegates: delegates.map(({ delegates }) => delegates),
+      u_delegates: u_delegates.map(({ u_delegates }) => u_delegates),
+      multisignatures: multisignatures.map(({ multisignatures }) => multisignatures),
+      u_multisignatures: u_multisignatures.map(({ u_multisignatures }) => u_multisignatures)
+    }
   }
 
   // todo: 优化该方法，减少检索处理
-  async getAccountList (filter, fields) {
+  async getAccountList (filter, fields, dbTrans) {
     let limit, offset, sort
 
     if (filter.limit > 0) {
@@ -195,12 +245,13 @@ class Account {
 
     // return await this.dao.findPage('mem_account', filter, limit || 1000, offset, false, fields || null, sort)
 
-    let mem_accounts = await this.dao.findPage('mem_account', {
+    let mem_accounts = await this.dao.findList('mem_account', {
       where: filter,
       limit: limit || 1000,
       offset,
       attributes: fields,
-      order: sort
+      order: sort,
+      transaction: dbTrans
     })
 
     // FIXME: 优化到其他方法中去 2020.8.8
@@ -220,7 +271,8 @@ class Account {
         limit: mem_account_ids.length,
         offset: 0,
         group: ['account_id'],
-        attributes: [[this.dao.db_fnGroupConcat('dependent_id'), 'delegates'], 'account_id']
+        attributes: [[this.dao.db_fnGroupConcat('dependent_id'), 'delegates'], 'account_id'],
+        transaction: dbTrans
       })
       u_delegates = await this.dao.findListByGroup('mem_accounts2u_delegate', {
         where: {
@@ -232,7 +284,8 @@ class Account {
         limit: mem_account_ids.length,
         offset: 0,
         group: ['account_id'],
-        attributes: [[this.dao.db_fnGroupConcat('dependent_id'), 'u_delegates'], 'account_id'] // wxm block database library.dao.db_fn('group_concat', library.dao.db_col('dependentId'))
+        attributes: [[this.dao.db_fnGroupConcat('dependent_id'), 'u_delegates'], 'account_id'],
+        transaction: dbTrans
       })
       multisignatures = await this.dao.findListByGroup('mem_accounts2multisignature', {
         where: {
@@ -244,10 +297,8 @@ class Account {
         limit: mem_account_ids.length,
         offset: 0,
         group: ['account_id'],
-        attributes: [
-          [this.dao.db_fnGroupConcat('dependent_id'), 'multisignatures'],
-          'account_id' // wxm block database library.dao.db_fn('group_concat', library.dao.db_col('dependentId'))
-        ]
+        attributes: [[this.dao.db_fnGroupConcat('dependent_id'), 'multisignatures'], 'account_id'],
+        transaction: dbTrans
       })
       u_multisignatures = await this.dao.findListByGroup('mem_accounts2u_multisignature', {
         where: {
@@ -259,10 +310,8 @@ class Account {
         limit: mem_account_ids.length,
         offset: 0,
         group: ['account_id'],
-        attributes: [
-          [this.dao.db_fnGroupConcat('dependent_id'), 'u_multisignatures'],
-          'account_id' // wxm block database library.dao.db_fn('group_concat', library.dao.db_col('dependentId'))
-        ]
+        attributes: [[this.dao.db_fnGroupConcat('dependent_id'), 'u_multisignatures'], 'account_id'],
+        transaction: dbTrans
       })
     }
 
@@ -314,10 +363,7 @@ class Account {
       limit: ids.length,
       offset: 0,
       group: ['account_id'],
-      attributes: [
-        [this.dao.db_fnGroupConcat('dependent_id'), 'multisignatures'],
-        'account_id' // wxm block database library.dao.db_fn('group_concat', library.dao.db_col('dependentId'))
-      ]
+      attributes: [[this.dao.db_fnGroupConcat('dependent_id'), 'multisignatures'], 'account_id']
     })
 
     await this.dao.findListByGroup('mem_accounts2u_multisignature', {
@@ -329,10 +375,7 @@ class Account {
       limit: ids.length,
       offset: 0,
       group: ['account_id'],
-      attributes: [
-        [this.dao.db_fnGroupConcat('dependent_id'), 'u_multisignatures'],
-        'account_id' // wxm block database library.dao.db_fn('group_concat', library.dao.db_col('dependentId'))
-      ]
+      attributes: [[this.dao.db_fnGroupConcat('dependent_id'), 'u_multisignatures'], 'account_id']
     })
   }
 
@@ -342,7 +385,7 @@ class Account {
 
     // fixme
     while (true) {
-      const list = await this.dao.findPage('mem_account', {
+      const list = await this.dao.findList('mem_account', {
         limit: pageSize,
         offset: pageIndex * pageSize,
         attributes: ['address', 'balance']
@@ -417,18 +460,14 @@ class Account {
   // 检查钱包账户数据完整性
   async checkAccounts (count) {
     try {
-      const result = await this.dao.update(
-        'mem_account',
-        {
-          u_is_delegate: this.dao.db_str('is_delegate'), // wxm block database
-          u_second_signature: this.dao.db_str('second_signature'), // wxm block database
-          u_username: this.dao.db_str('username'),
-          u_balance: this.dao.db_str('balance'),
-          u_delegates: this.dao.db_str('delegates'),
-          u_multisignatures: this.dao.db_str('multisignatures')
-        },
-        {}
-      )
+      const result = await this.dao.update('mem_account', {
+        u_is_delegate: this.dao.db_str('is_delegate'), // wxm block database
+        u_second_signature: this.dao.db_str('second_signature'), // wxm block database
+        u_username: this.dao.db_str('username'),
+        u_balance: this.dao.db_str('balance'),
+        u_delegates: this.dao.db_str('delegates'),
+        u_multisignatures: this.dao.db_str('multisignatures')
+      })
       this.logger.debug('checkAccounts result', result)
     } catch (err) {
       this.logger.error(err)
@@ -440,9 +479,11 @@ class Account {
     let count2, err2
     try {
       count2 = await this.dao.count('mem_account', {
-        block_id: {
-          // wxm block database
-          $eq: null
+        where: {
+          block_id: {
+            // wxm block database
+            $eq: null
+          }
         }
       })
     } catch (err) {
@@ -460,7 +501,9 @@ class Account {
     let count3, err3
     try {
       count3 = await this.dao.count('mem_account', {
-        is_delegate: 1 // wxm block database
+        where: {
+          is_delegate: 1 // wxm block database
+        }
       })
     } catch (err) {
       err3 = err
@@ -545,14 +588,12 @@ class Account {
             }
             // 字段为balance并且不等于0
             if (!DdnUtils.bignum.isZero(trueValue) && value === 'balance') {
-              const mem_accounts2delegate = await this.dao.findOne(
-                'mem_accounts2delegate',
-                {
+              const mem_accounts2delegate = await this.dao.findOne('mem_accounts2delegate', {
+                where: {
                   account_id: address // wxm block database
                 },
-                null,
-                dbTrans
-              )
+                transaction: dbTrans
+              })
 
               if (mem_accounts2delegate && diff.block_id !== this.genesisblock.id) {
                 // wxm async ok      genesisblock.block.id
@@ -565,7 +606,9 @@ class Account {
                     block_id: diff.block_id, // wxm block database
                     round: diff.round.toString()
                   },
-                  dbTrans
+                  {
+                    transaction: dbTrans
+                  }
                 )
               }
             }
@@ -611,14 +654,12 @@ class Account {
                   // if (math === '-') {
                   //   balanceField = '-balance';
                   // }
-                  const mem_account = await this.dao.findOne(
-                    'mem_account',
-                    {
+                  const mem_account = await this.dao.findOne('mem_account', {
+                    where: {
                       address
                     },
-                    null,
-                    dbTrans
-                  )
+                    transaction: dbTrans
+                  })
 
                   // this.logger.debug('FindOne account when merge, it is ', mem_account)
 
@@ -632,7 +673,9 @@ class Account {
                         block_id: diff.block_id, // wxm block database
                         round: diff.round.toString()
                       },
-                      dbTrans
+                      {
+                        transaction: dbTrans
+                      }
                     )
                   }
                 }
@@ -644,17 +687,16 @@ class Account {
 
       const removeKeys = Object.keys(remove)
       for (const el of removeKeys) {
-        await this.dao.remove(
-          'mem_accounts2' + el.substring(0, el.length - 1),
-          {
+        await this.dao.remove('mem_accounts2' + el.substring(0, el.length - 1), {
+          where: {
             dependent_id: {
               // wxm block database
               $in: remove[el]
             },
             account_id: address // wxm block database
           },
-          dbTrans
-        )
+          transaction: dbTrans
+        })
       }
 
       const insertKeys = Object.keys(insert)
@@ -666,33 +708,38 @@ class Account {
               account_id: address, // wxm block database
               dependent_id: insert[el][i] // wxm block database
             },
-            dbTrans
+            {
+              transaction: dbTrans
+            }
           )
         }
       }
 
       const removeObjectKeys = Object.keys(remove_object)
       for (const el of removeObjectKeys) {
-        await this.dao.remove('mem_accounts2' + el.substring(0, el.length - 1), remove_object[el], dbTrans)
+        await this.dao.remove('mem_accounts2' + el.substring(0, el.length - 1), {
+          where: remove_object[el],
+          transaction: dbTrans
+        })
       }
 
       const insertObjectKeys = Object.keys(insert_object)
       for (const el of insertObjectKeys) {
         for (let i = 0; i < insert[el].length; i++) {
-          await this.dao.insert('mem_accounts2' + el.substring(0, el.length - 1), insert_object[el], dbTrans)
+          await this.dao.insert('mem_accounts2' + el.substring(0, el.length - 1), insert_object[el], {
+            transaction: dbTrans
+          })
         }
       }
 
       const updateKeys = Object.keys(update)
       if (updateKeys.length) {
-        await this.dao.update(
-          'mem_account',
-          update,
-          {
+        await this.dao.update('mem_account', update, {
+          where: {
             address
           },
-          dbTrans
-        )
+          transaction: dbTrans
+        })
       }
 
       return await this.getAccountByAddress(address)
@@ -703,7 +750,7 @@ class Account {
   }
 
   async updateAccount (data, where, dbTrans) {
-    return await this.dao.update('mem_account', data, where, dbTrans)
+    return await this.dao.update('mem_account', data, { where, transaction: dbTrans })
   }
 }
 

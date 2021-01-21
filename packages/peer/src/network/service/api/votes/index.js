@@ -76,7 +76,7 @@ class VotesRouter {
     //     attributes: [
     //       [this.dao.db_fnGroupConcat('dependent_id'), 'delegates'], 'account_id'
     //     ]
-    //   }, (err, data) => { // wxm block database library.dao.db_fn('group_concat', library.dao.db_col('dependentId'))
+    //   }, (err, data) => {
     //     if (err) {
     //       return reject(err)
     //     }

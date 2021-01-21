@@ -140,7 +140,11 @@ class InTransfer extends Asset.Base {
       currency
     }
 
-    const row = await this.dao.findOne('mem_asset_balance', condition, ['balance'], dbTrans)
+    const row = await this.dao.findOne('mem_asset_balance', {
+      where: condition,
+      attributes: ['balance'],
+      transaction: dbTrans
+    })
 
     let balance = '0'
     if (row) {
@@ -153,7 +157,7 @@ class InTransfer extends Asset.Base {
     }
 
     condition.balance = newBalance.toString()
-    return await this.dao.insertOrUpdate('mem_asset_balance')
+    return await this.dao.insertOrUpdate('mem_asset_balance', condition, { transaction: dbTrans })
   }
 
   // 新增事务dbTrans ---wly

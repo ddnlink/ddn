@@ -126,11 +126,11 @@ class Transfer extends Asset.Base {
   }
 
   async isInWhiteList (currency, address) {
-    return await this.dao.findOne('acl_white', { currency, address })
+    return await this.dao.findOne('acl_white', { where: { currency, address } })
   }
 
   async isInBlackList (currency, address) {
-    return await this.dao.findOne('acl_black', { currency, address })
+    return await this.dao.findOne('acl_black', { where: { currency, address } })
   }
 
   // 新增事务dbTrans ---wly
@@ -138,14 +138,13 @@ class Transfer extends Asset.Base {
     const transfer = await this.getAssetObject(trs)
     this.balanceCache.addAssetBalance(trs.recipientId, transfer.currency, transfer.amount)
     // (1)
-    const assetBalancedata = await this.dao.findOne(
-      'mem_asset_balance',
-      {
+    const assetBalancedata = await this.dao.findOne('mem_asset_balance', {
+      where: {
         address: sender.address,
         currency: transfer.currency
       },
-      ['balance']
-    )
+      attributes: ['balance']
+    })
     const balance = assetBalancedata && assetBalancedata.balance ? assetBalancedata.balance : '0'
     const newBalance = DdnUtils.bignum.plus(balance, `-${transfer.amount}`)
     if (DdnUtils.bignum.isLessThan(newBalance, 0)) {
@@ -159,10 +158,12 @@ class Transfer extends Asset.Base {
           balance: newBalance.toString()
         },
         {
-          address: sender.address,
-          currency: transfer.currency
-        },
-        dbTrans
+          where: {
+            address: sender.address,
+            currency: transfer.currency
+          },
+          transaction: dbTrans
+        }
       )
     } else {
       await this.dao.insert(
@@ -172,18 +173,19 @@ class Transfer extends Asset.Base {
           currency: transfer.currency,
           balance: newBalance.toString()
         },
-        dbTrans
+        {
+          transaction: dbTrans
+        }
       )
     }
     // (2)
-    const assetBalancedata2 = await this.dao.findOne(
-      'mem_asset_balance',
-      {
+    const assetBalancedata2 = await this.dao.findOne('mem_asset_balance', {
+      where: {
         address: trs.recipientId,
         currency: transfer.currency
       },
-      ['balance']
-    )
+      attributes: ['balance']
+    })
     const balance2 = assetBalancedata2 && assetBalancedata2.balance ? assetBalancedata2.balance : '0'
     const newBalance2 = DdnUtils.bignum.plus(balance2, transfer.amount)
     if (DdnUtils.bignum.isLessThan(newBalance2, 0)) {
@@ -197,10 +199,12 @@ class Transfer extends Asset.Base {
           balance: newBalance2.toString()
         },
         {
-          address: trs.recipientId,
-          currency: transfer.currency
-        },
-        dbTrans
+          where: {
+            address: trs.recipientId,
+            currency: transfer.currency
+          },
+          transaction: dbTrans
+        }
       )
     } else {
       await this.dao.insert(
@@ -210,7 +214,9 @@ class Transfer extends Asset.Base {
           currency: transfer.currency,
           balance: newBalance2.toString()
         },
-        dbTrans
+        {
+          transaction: dbTrans
+        }
       )
     }
   }
@@ -220,14 +226,13 @@ class Transfer extends Asset.Base {
     this.balanceCache.addAssetBalance(trs.recipientId, transfer.currency, `-${transfer.amount}`)
 
     // (1)
-    const assetBalancedata = await this.dao.findOne(
-      'mem_asset_balance',
-      {
+    const assetBalancedata = await this.dao.findOne('mem_asset_balance', {
+      where: {
         address: sender.address,
         currency: transfer.currency
       },
-      ['balance']
-    )
+      attributes: ['balance']
+    })
     const balance = assetBalancedata && assetBalancedata.balance ? assetBalancedata.balance : '0'
     const newBalance = DdnUtils.bignum.plus(balance, transfer.amount)
     if (DdnUtils.bignum.isLessThan(newBalance, 0)) {
@@ -242,10 +247,12 @@ class Transfer extends Asset.Base {
           balance: newBalance.toString()
         },
         {
-          address: sender.address,
-          currency: transfer.currency
-        },
-        dbTrans
+          where: {
+            address: sender.address,
+            currency: transfer.currency
+          },
+          transaction: dbTrans
+        }
       )
     } else {
       await this.dao.insert(
@@ -255,18 +262,19 @@ class Transfer extends Asset.Base {
           currency: transfer.currency,
           balance: newBalance.toString()
         },
-        dbTrans
+        {
+          transaction: dbTrans
+        }
       )
     }
     // (2)
-    const assetBalancedata2 = await this.dao.findOne(
-      'mem_asset_balance',
-      {
+    const assetBalancedata2 = await this.dao.findOne('mem_asset_balance', {
+      where: {
         address: trs.recipientId,
         currency: transfer.currency
       },
-      ['balance']
-    )
+      attributes: ['balance']
+    })
     const balance2 = assetBalancedata2 && assetBalancedata2.balance ? assetBalancedata2.balance : '0'
     const newBalance2 = DdnUtils.bignum.plus(balance2, `-${transfer.amount}`)
     if (DdnUtils.bignum.isLessThan(newBalance2, 0)) {
@@ -281,10 +289,12 @@ class Transfer extends Asset.Base {
           balance: newBalance2.toString()
         },
         {
-          address: trs.recipientId,
-          currency: transfer.currency
-        },
-        dbTrans
+          where: {
+            address: trs.recipientId,
+            currency: transfer.currency
+          },
+          transaction: dbTrans
+        }
       )
     } else {
       await this.dao.insert(
@@ -294,18 +304,19 @@ class Transfer extends Asset.Base {
           currency: transfer.currency,
           balance: newBalance2.toString()
         },
-        dbTrans
+        {
+          transaction: dbTrans
+        }
       )
     }
     // 删除回滚的资产交易
     if (transfer) {
-      await this.dao.remove(
-        'trs_asset',
-        {
+      await this.dao.remove('trs_asset', {
+        where: {
           transaction_id: trs.id
         },
-        dbTrans
-      )
+        transaction: dbTrans
+      })
     }
   }
 

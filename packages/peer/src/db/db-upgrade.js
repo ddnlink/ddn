@@ -30,7 +30,7 @@ class DBUpgrade {
         await _context.dao.transaction(async dbTrans => {
           for (const command of changeList) {
             if (!/^\s*$/.test(command)) {
-              await _context.dao.execSql(command, dbTrans)
+              await _context.dao.execSql(command, { transaction: dbTrans })
             }
           }
           await _context.dbParams.set('version', ver, dbTrans)

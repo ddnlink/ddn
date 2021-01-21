@@ -233,13 +233,12 @@ class Org extends Asset.Base {
    * @param {*} dbTrans 事物
    */
   async undo (trs, block, _, dbTrans) {
-    await this.dao.remove(
-      'mem_org',
-      {
+    await this.dao.remove('mem_org', {
+      where: {
         transaction_id: trs.id
       },
-      dbTrans
-    )
+      transaction: dbTrans
+    })
     super.undo(trs, block, _, dbTrans)
     return true
   }
@@ -645,7 +644,6 @@ class Org extends Asset.Base {
       where,
       limit,
       offset,
-      returnTotal: true,
       attributes: ['transaction_id', 'org_id', 'name', 'address', 'tags', 'url', 'state', 'timestamp'],
       order: orders
     })

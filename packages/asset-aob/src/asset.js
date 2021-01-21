@@ -254,7 +254,7 @@ class Aob extends Asset.Base {
     const where = { currency: name }
     const limit = req.query.limit || 100
     const offset = req.query.offset || '0'
-    const data = await this.dao.findPage(table, { where, limit, offset, returnTotal: true })
+    const data = await this.dao.findList(table, { where, limit, offset })
 
     return { success: true, result: data }
   }
@@ -268,7 +268,7 @@ class Aob extends Asset.Base {
   async getBalance (req) {
     const address = req.params.address
     const currency = req.params.currency
-    const data = await this.dao.findOne('mem_asset_balance', { address, currency })
+    const data = await this.dao.findOne('mem_asset_balance', { where: { address, currency } })
 
     return { success: true, result: data }
   }

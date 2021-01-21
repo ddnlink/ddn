@@ -280,27 +280,34 @@ class AssetBase {
     const limit = pageSize
     const offset = (pageIndex - 1) * pageSize
 
-    const rows = await this.dao.findPage('trs_asset', {
+    const opts = {
       where: filter,
       limit,
       offset,
       returnTotal,
       attributes,
       order: orders
-    })
-    let result = rows
+    }
 
+    let rows
+    if (returnTotal) {
+      rows = await this.dao.findPage('trs_asset', opts)
+    } else {
+      rows = await this.dao.findList('trs_asset', opts)
+    }
+    if (!hasExtProps) {
+      return rows
+    }
+
+    let result = rows
     let trsIds = []
     if (returnTotal) {
-      trsIds = _.map(rows.rows, 'asset_trs_id')
+      trsIds = _.map(result.rows, 'asset_trs_id')
     } else {
-      trsIds = _.map(rows, 'asset_trs_id')
+      trsIds = _.map(result, 'asset_trs_id')
     }
 
-    if (!hasExtProps) {
-      return result
-    }
-    const rows2 = await this.dao.findPage('trs_asset_ext', {
+    const rows2 = await this.dao.findList('trs_asset_ext', {
       where: { transaction_id: { $in: trsIds } },
       limit,
       attributes: [['json_ext', 'asset_ext_json'], 'transaction_id']
@@ -567,7 +574,7 @@ class AssetBase {
       }
     }
 
-    return await this.dao.update('trs_asset', newObj, newWhere, dbTrans)
+    return await this.dao.update('trs_asset', newObj, { where: newWhere, transaction: dbTrans })
   }
 
   /**
@@ -612,7 +619,7 @@ class AssetBase {
       }
     }
 
-    return await this.dao.count('trs_asset', newWhere)
+    return await this.dao.count('trs_asset', { where: newWhere })
   }
 
   /**
@@ -856,8 +863,8 @@ class AssetBase {
    * @param {*} dbTrans 事物
    */
   async deleteBase (transaction_id, dbTrans) {
-    await this.dao.remove('trs_asset', { transaction_id }, dbTrans)
-    await this.dao.remove('trs_asset_ext', { transaction_id }, dbTrans)
+    await this.dao.remove('trs_asset', { where: { transaction_id }, transaction: dbTrans })
+    await this.dao.remove('trs_asset_ext', { where: { transaction_id }, transaction: dbTrans })
     return true
   }
 
@@ -1017,14 +1024,14 @@ class AssetBase {
       }
     }
 
-    let result = await this.dao.insert('trs_asset', assetInst, dbTrans)
+    let result = await this.dao.insert('trs_asset', assetInst, { transaction: dbTrans })
     if (hasJsonExt) {
       const assetExtInst = {
         transaction_id: trs.id,
         json_ext: JSON.stringify(jsonExtObj)
       }
 
-      result = await this.dao.insert('trs_asset_ext', assetExtInst, dbTrans)
+      result = await this.dao.insert('trs_asset_ext', assetExtInst, { transaction: dbTrans })
     }
     return result
   }
