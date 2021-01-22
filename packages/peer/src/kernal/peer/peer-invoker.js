@@ -51,6 +51,7 @@ class PeerInvoker {
     if (peer.address) {
       url = `http://${peer.address}${url}`
     } else if (peer.host) {
+      peer.ip=ip.toLong(peer.host)
       url = `http://${peer.host}:${peer.port}${url}`
     } else {
       url = `http://${ip.fromLong(peer.ip)}:${peer.port}${url}`
@@ -89,9 +90,10 @@ class PeerInvoker {
               this.logger.info(`Ban 10 min ${req.method} ${req.url}`)
             }
           }
-
-          reject(err || `Request peer api failed: ${url}`)
+          this.logger.error('request error: ',err)
+          reject( `Request peer api failed: ${url}`)
         } else {
+          console.log('res,r',res.headers.port)
           res.headers.port = parseInt(res.headers.port)
           const validateErrors = await this.ddnSchema.validate(
             {

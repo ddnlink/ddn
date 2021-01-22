@@ -773,7 +773,6 @@ class Dapp extends Asset.Base {
 
   request (dappId, method, path, query, cb) {
     const sandbox = _dappLaunched[dappId]
-
     if (!sandbox) {
       return cb('Dapp not found')
     }
@@ -1364,6 +1363,10 @@ class Dapp extends Asset.Base {
     modules.blocks = this.runtime.block
     modules.transport = this.runtime.peer
     modules.transactions = this.runtime.transaction
+    modules.accounts = this.runtime.account
+    modules.delegates = this.runtime.delegate
+    modules.multisignatures = this.runtime.multisignature
+    modules.transactions = this.runtime.transaction
   }
 
   async onBlockchainReady () {
@@ -1381,6 +1384,8 @@ class Dapp extends Asset.Base {
   }
 
   async onNewBlock (block, votes, broadcast) {
+    const self=this
+    console.log('onNewBlock',block)
     const req = {
       query: {
         topic: 'point',
@@ -1388,7 +1393,8 @@ class Dapp extends Asset.Base {
       }
     }
     Object.keys(_dappLaunched).forEach(function (dappId) {
-      broadcast &&
+      console.log('request',dappId,broadcast)
+      // broadcast &&
         self.request(dappId, 'post', '/message', req, function (err) {
           if (err) {
             this.logger.error('onNewBlock message', err)
@@ -1486,6 +1492,346 @@ class Dapp extends Asset.Base {
     dappRouter[method](`/${dappName}${path}`, handler)
     cb(null)
   }
+  
+ onDeleteBlocksBefore = function (block) {
+   const self=this
+    Object.keys(_dappLaunched).forEach(function (dappId) {
+      let req = {
+        query: {
+          topic: "rollback",
+          message: { pointId: block.id, pointHeight: block.height }
+        }
+      }
+      self.request(dappId, "post", "/message", req, function (err) {
+        if (err) {
+          library.logger.error("onDeleteBlocksBefore message", err)
+        }
+      });
+    });
+  }
+  
+  // Shared
+ getGenesis = function (req, cb) {
+    library.dbLite.query("SELECT b.height, b.id, GROUP_CONCAT(m.dependentId), t.senderId FROM trs t " +
+      "inner join blocks b on t.blockId = b.id and t.id = $id " +
+      "left outer join mem_accounts2multisignatures m on m.accountId = t.senderId and t.id = $id", { id: req.dappId }, {
+        height: Number,
+        id: String,
+        multisignature: String,
+        authorId: String
+      }, function (err, rows) {
+        if (err || rows.length == 0) {
+          return cb("Database error");
+        }
+  
+        cb(null, {
+          pointId: rows[0].id,
+          pointHeight: rows[0].height,
+          authorId: rows[0].authorId,
+          dappId: req.dappId,
+          associate: rows[0].multisignature ? rows[0].multisignature.split(",") : []
+        });
+      });
+  }
+  
+getDApp = function (req, cb) {
+    library.model.getDAppById(req.dappId, cb)
+  }
+
+  
+getCommonBlock = function (req, cb) {
+    library.dbLite.query("SELECT b.height, t.id, t.senderId, t.amount FROM trs t " +
+      "inner join blocks b on t.blockId = b.id and t.id = $id and t.type = $type" +
+      "inner join intransfer dt on dt.transactionId = t.id and dt.dappId = $dappId", {
+        dappId: req.dappId,
+        type: TransactionTypes.IN_TRANSFER
+      }, {
+        height: Number,
+        id: String,
+        senderId: String,
+        amount: String
+      }, function (err, rows) {
+        if (err) {
+          return cb("Database error");
+        }
+        cb(null, rows);
+      });
+  }
+  
+  sendWithdrawal = function (req, cb) {
+    var body = req.body;
+    library.scheme.validate(body, {
+      type: "object",
+      properties: {
+        secret: {
+          type: "string",
+          minLength: 1,
+          maxLength: 100
+        },
+        amount: {
+          type: "integer",
+          minimum: 1,
+          maximum: constants.totalAmount
+        },
+        recipientId: {
+          type: "string",
+          minLength: 1,
+          maxLength: 50
+        },
+        secondSecret: {
+          type: "string",
+          minLength: 1,
+          maxLength: 100
+        },
+        transactionId: {
+          type: "string",
+          minLength: 1,
+          maxLength: 64
+        },
+        multisigAccountPublicKey: {
+          type: "string",
+          format: "publicKey"
+        }
+      },
+      required: ["secret", 'recipientId', "amount", "transactionId"]
+    }, function (err) {
+      if (err) {
+        return cb(err[0].message);
+      }
+  
+      var hash = crypto.createHash('sha256').update(body.secret, 'utf8').digest();
+      var keypair = ed.MakeKeypair(hash);
+      var query = {};
+  
+      if (!addressHelper.isAddress(body.recipientId)) {
+        return cb("Invalid address");
+      }
+  
+      library.balancesSequence.add(function (cb) {
+        if (body.multisigAccountPublicKey && body.multisigAccountPublicKey != keypair.publicKey.toString('hex')) {
+          modules.accounts.getAccount({ publicKey: body.multisigAccountPublicKey }, function (err, account) {
+            if (err) {
+              return cb(err.toString());
+            }
+  
+            if (!account) {
+              return cb("Multisignature account not found");
+            }
+  
+            if (!account.multisignatures || !account.multisignatures) {
+              return cb("Account does not have multisignatures enabled");
+            }
+  
+            if (account.multisignatures.indexOf(keypair.publicKey.toString('hex')) < 0) {
+              return cb("Account does not belong to multisignature group");
+            }
+  
+            modules.accounts.getAccount({ publicKey: keypair.publicKey }, function (err, requester) {
+              if (err) {
+                return cb(err.toString());
+              }
+  
+              if (!requester || !requester.publicKey) {
+                return cb("Invalid requester");
+              }
+  
+              if (requester.secondSignature && !body.secondSecret) {
+                return cb("Invalid second passphrase");
+              }
+  
+              if (requester.publicKey == account.publicKey) {
+                return cb("Invalid requester");
+              }
+  
+              var secondKeypair = null;
+  
+              if (requester.secondSignature) {
+                var secondHash = crypto.createHash('sha256').update(body.secondSecret, 'utf8').digest();
+                secondKeypair = ed.MakeKeypair(secondHash);
+              }
+  
+              try {
+                var transaction = library.base.transaction.create({
+                  type: TransactionTypes.OUT_TRANSFER,
+                  amount: body.amount,
+                  sender: account,
+                  recipientId: body.recipientId,
+                  keypair: keypair,
+                  secondKeypair: secondKeypair,
+                  requester: keypair,
+                  dappId: req.dappId,
+                  transactionId: body.transactionId
+                });
+              } catch (e) {
+                return cb(e.toString());
+              }
+              modules.transactions.receiveTransactions([transaction], cb);
+            });
+          });
+        } else {
+          modules.accounts.getAccount({ publicKey: keypair.publicKey.toString('hex') }, function (err, account) {
+            if (err) {
+              return cb(err.toString());
+            }
+            if (!account) {
+              return cb("Account not found");
+            }
+  
+            if (account.secondSignature && !body.secondSecret) {
+              return cb("Invalid second passphrase");
+            }
+  
+            var secondKeypair = null;
+  
+            if (account.secondSignature) {
+              var secondHash = crypto.createHash('sha256').update(body.secondSecret, 'utf8').digest();
+              secondKeypair = ed.MakeKeypair(secondHash);
+            }
+  
+            try {
+              var transaction = library.base.transaction.create({
+                type: TransactionTypes.OUT_TRANSFER,
+                amount: body.amount,
+                sender: account,
+                recipientId: body.recipientId,
+                keypair: keypair,
+                secondKeypair: secondKeypair,
+                dappId: req.dappId,
+                transactionId: body.transactionId
+              });
+            } catch (e) {
+              return cb(e.toString());
+            }
+  
+            modules.transactions.receiveTransactions([transaction], cb);
+          });
+        }
+      }, function (err, transaction) {
+        if (err) {
+          return cb(err.toString());
+        }
+  
+        cb(null, { transactionId: transaction[0].id });
+      });
+    });
+  }
+  
+getWithdrawalLastTransaction = function (req, cb) {
+    library.dbLite.query("SELECT ot.outTransactionId FROM trs t " +
+      "inner join blocks b on t.blockId = b.id and t.type = $type " +
+      "inner join outtransfer ot on ot.transactionId = t.id and ot.dappId = $dappId " +
+      "order by b.height desc limit 1", {
+        dappId: req.dappId,
+        type: TransactionTypes.OUT_TRANSFER
+      }, {
+        id: String
+      }, function (err, rows) {
+        if (err) {
+          return cb("Database error");
+        }
+        cb(null, rows[0]);
+      });
+  }
+  
+getBalanceTransactions = function (req, cb) {
+    library.dbLite.query("SELECT t.id, lower(hex(t.senderPublicKey)), t.amount, dt.currency, dt.amount as amount2 FROM trs t " +
+      "inner join blocks b on t.blockId = b.id and t.type = $type " +
+      "inner join intransfer dt on dt.transactionId = t.id and dt.dappId = $dappId " +
+      (req.body.lastTransactionId ? "where b.height > (select height from blocks ib inner join trs it on ib.id = it.blockId and it.id = $lastId) " : "") +
+      "order by b.height", {
+        dappId: req.dappId,
+        type: TransactionTypes.IN_TRANSFER,
+        lastId: req.body.lastTransactionId
+      }, {
+        id: String,
+        senderPublicKey: String,
+        amount: String,
+        currency: String,
+        amount2: String
+      }, function (err, rows) {
+        if (err) {
+          return cb("Database error");
+        }
+        cb(null, rows);
+      });
+  }
+  
+  submitOutTransfer = function (req, cb) {
+    let trs = req.body
+    library.balancesSequence.add(function (cb) {
+      if (modules.transactions.hasUnconfirmedTransaction(trs)) {
+        return cb('Already exists');
+      }
+      library.logger.log('Submit outtransfer transaction ' + trs.id + ' from dapp ' + req.dappId);
+      modules.transactions.receiveTransactions([trs], cb);
+    }, cb);
+  }
+  // TODO will delete or complete (要么完善这个方法，要么在侧链里去掉该方法的调用,这里是同步充值侧链token的方法需要完善)
+  getDeposits= async function(req,cb){
+    const that=this
+    //TODO 这里查询的是dapp充值交易，能不能直接查询dapp资产表
+    const data = await this.runtime.dataquery.queryFullTransactionData({
+      block_height: {
+        $gt: req.body.seq
+      },
+      type:6
+    }, 10, 0, null, true)
+
+    const transactions = []
+    for (let i = 0; i < data.transactions.length; i++) {
+      const row = data.transactions[i]
+      const trs = await this.runtime.transaction.serializeDbData2Transaction(row)
+      transactions.push(trs)
+    }
+    // const data=  await new Promise(function (resolve) {
+      
+    //   that.dao.findList('tr', {
+    //     block_height: {
+    //       $gte: req.body.seq
+    //     },
+    //     type:6
+    //   }, null, null, function (err, rows) {
+    //     if (err) {
+    //       resolve(err);
+    //     } else {
+    //       resolve(rows);
+    //     }
+    //   });
+    //   });
+      console.log(transactions)
+    cb(null,transactions)
+  }
+  getLastWithdrawal=async function(req,cb){
+    const that=this
+    //TODO 这里查询的是dapp充值交易，能不能直接查询dapp资产表
+    const data = await this.runtime.dataquery.queryFullTransactionData({
+      type:7
+    }, 1, 0, [['block_height','DESC']], true)
+
+    const transactions = []
+    for (let i = 0; i < data.transactions.length; i++) {
+      const row = data.transactions[i]
+      const trs = await this.runtime.transaction.serializeDbData2Transaction(row)
+      transactions.push(trs)
+    }
+    // const data=  await new Promise(function (resolve) {
+      
+    //   that.dao.findList('tr', {
+    //     block_height: {
+    //       $gte: req.body.seq
+    //     },
+    //     type:6
+    //   }, null, null, function (err, rows) {
+    //     if (err) {
+    //       resolve(err);
+    //     } else {
+    //       resolve(rows);
+    //     }
+    //   });
+    //   });
+    cb(null,transactions)
+  }
+  
 }
 
 export default Dapp

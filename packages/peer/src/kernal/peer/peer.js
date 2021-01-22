@@ -12,14 +12,14 @@ import PeerBroadcast from './peer-broadcast'
 let _singleton
 
 class Peer {
-  static singleton (context) {
+  static singleton(context) {
     if (!_singleton) {
       _singleton = new Peer(context)
     }
     return _singleton
   }
 
-  constructor (context) {
+  constructor(context) {
     Object.assign(this, context)
     this._context = context
 
@@ -29,7 +29,7 @@ class Peer {
     this.broadcast = PeerBroadcast.singleton(this._context)
   }
 
-  async prepare () {
+  async prepare() {
     const peers = this.config.peers.list
 
     for (let i = 0; i < peers.length; i++) {
@@ -90,7 +90,7 @@ class Peer {
   }
 
   // FIXME: delete this function, use the follow version()
-  async getVersion () {
+  async getVersion() {
     return {
       version: this.config.version,
       build: this.config.buildVersion,
@@ -99,11 +99,11 @@ class Peer {
   }
 
   // TODO: this.running.peer.getVersion() -> this.running.peer.version()
-  async version () {
+  async version() {
     return this.config.version
   }
 
-  async addDapp (config) {
+  async addDapp(config) {
     return new Promise((resolve, reject) => {
       this.dao.findOne(
         'peer',
@@ -157,7 +157,7 @@ class Peer {
     })
   }
 
-  async update (peer) {
+  async update(peer) {
     if (peer && peer.ip && peer.port) {
       const dappId = peer.dappId
 
@@ -241,10 +241,15 @@ class Peer {
    * @param {*} dappId
    * @param {*} allowSelf
    */
-  async request (args, dappId, allowSelf, cb) {
+  async request(args, dappId, allowSelf, cb) {
     if (typeof cb === 'function') {
-      const data = await PeerInvoker.singleton(this._context).invoke(args, dappId, allowSelf)
-      return cb(null, data)
+      try {
+        const data = await PeerInvoker.singleton(this._context).invoke(args, dappId, allowSelf)
+        return cb(null, data)
+      } catch (error) {
+        cb(error)
+      }
+
     }
     return await PeerInvoker.singleton(this._context).invoke(args, dappId, allowSelf)
   }
@@ -252,7 +257,7 @@ class Peer {
   /**
    * 从其他节点同步节点列表
    */
-  async syncPeersList () {
+  async syncPeersList() {
     let data
     try {
       data = await this.request({
@@ -294,22 +299,22 @@ class Peer {
   /**
    * 从随机节点同步区块数据
    */
-  async syncBlocks () {
+  async syncBlocks() {
     return await PeerSync.singleton(this._context).trySyncBlockData()
   }
 
-  async syncSignatures () {
+  async syncSignatures() {
     return await PeerSync.singleton(this._context).trySyncSignatures()
   }
 
   /**
    * 从随机节点同步未确认交易
    */
-  async syncUnconfirmedTransactions () {
+  async syncUnconfirmedTransactions() {
     return await PeerSync.singleton(this._context).trySyncUnconfirmedTransactions()
   }
 
-  async isCompatible (version) {
+  async isCompatible(version) {
     const nums = `${version}`.split('.').map(Number)
     if (nums.length !== 3) {
       return true
@@ -328,7 +333,7 @@ class Peer {
     return true
   }
 
-  async remove (pip, port) {
+  async remove(pip, port) {
     const isStaticPeer = this.config.peers.list.find(peer => peer.ip === ip.fromLong(pip) && peer.port === port)
     if (isStaticPeer) {
       this.logger.info("Peer in white list, can't remove.")
@@ -355,7 +360,7 @@ class Peer {
   /**
    * 恢复暂停的节点服务状态为可用（已达到暂停时间的）
    */
-  async restoreBanState () {
+  async restoreBanState() {
     return await new Promise(resolve => {
       this.dao.update('peer', { state: 1, clock: null }, { state: 0, clock: { $lt: Date.now() } }, (err, result) => {
         if (err) {
@@ -375,7 +380,7 @@ class Peer {
    * @param {*} state 状态（0：停用，1：可用，2：健康）
    * @param {*} timeoutSeconds 服务暂停时间（单位：秒）
    */
-  async changeState (pip, port, state, timeoutSeconds) {
+  async changeState(pip, port, state, timeoutSeconds) {
     // FIXME: 2020.9.3 白名单状态修改
     // const isStaticPeer = this.config.peers.list.find(
     //   peer => peer.ip === ip.fromLong(pip) && peer.port === port
@@ -406,7 +411,7 @@ class Peer {
   /**
    * 重置所有节点服务状态为健康
    */
-  async reset () {
+  async reset() {
     return new Promise((resolve, reject) => {
       this.dao.update('peer', { state: 2 }, {}, null, (err, result) => {
         if (err) {
@@ -419,7 +424,7 @@ class Peer {
     })
   }
 
-  async getRandomPeer (dappId, allowSelf) {
+  async getRandomPeer(dappId, allowSelf) {
     const peers = await this.queryList(dappId, { state: { $gt: 0 } }, 2)
     if (peers && peers.length) {
       const peer = peers[0]
@@ -444,7 +449,7 @@ class Peer {
     }
   }
 
-  async queryDappPeers () {
+  async queryDappPeers() {
     const data = await new Promise((resolve, reject) => {
       this.dao.findList('peers_dapp', {}, null, null, (err, result) => {
         if (err) {
@@ -471,7 +476,7 @@ class Peer {
     })
   }
 
-  async queryList (dappId, where, limit) {
+  async queryList(dappId, where, limit) {
     let data = null
 
     if (dappId) {
@@ -521,12 +526,11 @@ class Peer {
   }
 
   // Sidechains
-  sandboxApi (call, args, cb) {
+  sandboxApi(call, args, cb) {
     // sandboxHelper.callMethod(shared, call, args, cb)
     if (typeof this[call] !== 'function') {
       return cb(`Function not found in module: ${call}`)
     }
-    console.log(args)
     const callArgs = [args.body, args.dappId, true, cb]
     return this[call].apply(this, callArgs)
   }

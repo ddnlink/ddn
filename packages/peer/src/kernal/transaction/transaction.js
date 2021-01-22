@@ -487,9 +487,7 @@ class Transaction {
     if (!this._assets.hasType(trs.type)) {
       throw new Error(`Unknown transaction type 10 ${trs.type}`)
     }
-
     const txId = await DdnCrypto.getId(trs)
-
     // 确保客户端传入id，这里仅做验证
     if (typeof trs.id === 'undefined' || trs.id !== txId) {
       this.logger.debug('trs.id', trs.id)
@@ -551,11 +549,9 @@ class Transaction {
     if (!transaction) {
       throw new Error('No transaction to process!')
     }
-
     if (!transaction.id) {
       transaction.id = await DdnCrypto.getId(transaction)
     }
-
     // Check transaction indexes
     if (this._unconfirmedTransactionsIdIndex[transaction.id] !== undefined) {
       throw new Error(`Transaction ${transaction.id} already exists, ignoring...`)
@@ -574,12 +570,9 @@ class Transaction {
         throw new Error('Invalid requester')
       }
     }
-
     transaction = await this.process(transaction, sender, requester)
-
     await this.verify(transaction, sender, requester)
     await this.addUnconfirmedTransaction(transaction, sender)
-
     if (broadcast) {
       setImmediate(async () => {
         try {
@@ -686,7 +679,6 @@ class Transaction {
     if (!trs.nethash) {
       throw new Error("Transaction's nethash property is required.")
     }
-
     // Verify signature
     let valid = false
     if (trs.requester_public_key) {
@@ -695,7 +687,6 @@ class Transaction {
     } else {
       valid = await this.verifySignature(trs, trs.signature, trs.senderPublicKey)
     }
-
     if (!valid) {
       throw new Error('Failed to verify requester or sender signature, 5')
     }
@@ -703,7 +694,6 @@ class Transaction {
     if (trs.nethash && trs.nethash !== this.config.nethash) {
       throw new Error('Failed to verify nethash')
     }
-
     // Verify second signature
     if (!trs.requester_public_key && sender.second_signature) {
       valid = await this.verifySecondSignature(trs, sender.second_public_key)
@@ -717,7 +707,6 @@ class Transaction {
         throw new Error(`Failed to verify requester second signature: ${trs.id}`)
       }
     }
-
     // Check that signatures unique
     if (trs.signatures && trs.signatures.length) {
       const signatures = trs.signatures.reduce((p, c) => {
@@ -799,7 +788,6 @@ class Transaction {
       })
       throw new Error('Invalid transaction timestamp')
     }
-
     return await this._assets.call(trs.type, 'verify', trs, sender)
   }
 

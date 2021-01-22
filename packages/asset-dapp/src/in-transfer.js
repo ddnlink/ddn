@@ -5,6 +5,7 @@ class InTransfer extends Asset.Base {
   // eslint-disable-next-line no-useless-constructor
   constructor (context, transactionConfig) {
     super(context, transactionConfig)
+    this._context = context
   }
 
   async propsMapping () {
@@ -36,7 +37,6 @@ class InTransfer extends Asset.Base {
     const assetJsonName = await this.getAssetJsonName(trs.type)
     // eslint-disable-next-line require-atomic-updates
     trs.asset[assetJsonName] = data[assetJsonName]
-
     if (data[assetJsonName].currency === this.constants.tokenName) {
       // eslint-disable-next-line require-atomic-updates
       trs.amount = data.amount + ''
@@ -56,6 +56,7 @@ class InTransfer extends Asset.Base {
     }
 
     const inTransfer = await this.getAssetObject(trs)
+
     if (inTransfer.currency !== this.constants.tokenName) {
       if ((typeof (trs.amount) !== 'undefined' && !DdnUtils.bignum.isZero(trs.amount)) ||
                 (typeof (inTransfer.amount) === 'undefined' || DdnUtils.bignum.isZero(inTransfer.amount))) {
@@ -114,9 +115,10 @@ class InTransfer extends Asset.Base {
 
     let buf = Buffer.from([])
     const dappId = Buffer.from(transfer.dapp_id, 'utf8')
-    // again !!!
+    console.log('getbytes',this.constants)
+    // TODO 通过nodesdk调到这里实例化时没有传content变量所以拿不到tokenName，暂时写死 again !!!
     // if (trs.asset.inTransfer.currency !== this.library.constants.tokenName) {
-    if (transfer.currency !== this.constants.tokenName) {
+    if (transfer.currency !== 'DDN') {
       const currency = Buffer.from(transfer.currency, 'utf8')
       const amount = Buffer.from(transfer.amount, 'utf8')
       buf = Buffer.concat([buf, dappId, currency, amount])

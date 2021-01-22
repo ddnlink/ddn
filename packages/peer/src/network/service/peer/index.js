@@ -378,6 +378,7 @@ class PeerService {
           }
 
           if (err) {
+            console.log(err)
             // 这里的错误就是上面 catch 的 exp，所以统一在这里处理就好
             this.logger.warn(
               `Receive invalid transaction, transaction is ${JSON.stringify(
