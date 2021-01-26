@@ -380,16 +380,17 @@ class Account {
   }
 
   async cacheAllAccountBalances () {
-    var pageSize = 5000
-    var pageIndex = 0
+    const pageSize = 5000
+    let pageIndex = 0
 
-    // fixme
     while (true) {
       const list = await this.dao.findList('mem_account', {
         limit: pageSize,
         offset: pageIndex * pageSize,
         attributes: ['address', 'balance']
       })
+
+      pageIndex++
 
       if (list && list.length > 0) {
         for (let i = 0; i < list.length; i++) {
@@ -460,14 +461,20 @@ class Account {
   // 检查钱包账户数据完整性
   async checkAccounts (count) {
     try {
-      const result = await this.dao.update('mem_account', {
-        u_is_delegate: this.dao.db_str('is_delegate'), // wxm block database
-        u_second_signature: this.dao.db_str('second_signature'), // wxm block database
-        u_username: this.dao.db_str('username'),
-        u_balance: this.dao.db_str('balance'),
-        u_delegates: this.dao.db_str('delegates'),
-        u_multisignatures: this.dao.db_str('multisignatures')
-      })
+      const result = await this.dao.update(
+        'mem_account',
+        {
+          u_is_delegate: this.dao.db_str('is_delegate'), // wxm block database
+          u_second_signature: this.dao.db_str('second_signature'), // wxm block database
+          u_username: this.dao.db_str('username'),
+          u_balance: this.dao.db_str('balance'),
+          u_delegates: this.dao.db_str('delegates'),
+          u_multisignatures: this.dao.db_str('multisignatures')
+        },
+        {
+          where: {}
+        }
+      )
       this.logger.debug('checkAccounts result', result)
     } catch (err) {
       this.logger.error(err)
@@ -559,7 +566,7 @@ class Account {
       for (const value of this._editable) {
         const trueValue = diff[value]
         if (!trueValue) {
-          return
+          continue
         }
 
         switch (this._fieldTypes[value]) {
