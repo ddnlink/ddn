@@ -122,19 +122,14 @@ class Account {
    * @param {*} dbTrans
    */
   async setAccount (data, dbTrans) {
-    let address = data.address || null
-    if (address === null) {
-      if (data.publicKey) {
-        // wxm block database
-        address = this.generateAddressByPublicKey(data.publicKey) // wxm block database
-        delete data.isGenesis
-      } else {
-        this.logger.error('setAccount error and data is:', data)
-        throw new Error('Missing address or public key in setAccount')
-      }
+    let address = data.address
+    if (!address && data.publicKey) {
+      address = this.generateAddressByPublicKey(data.publicKey) // wxm block database
+      delete data.isGenesis
     }
     if (!address) {
-      throw new Error('Invalid public key')
+      this.logger.error('setAccount error and data is:', data)
+      throw new Error('Missing address or public key in setAccount')
     }
     data.address = address
 
@@ -142,26 +137,14 @@ class Account {
   }
 
   async getAccountByAddress (address, dbTrans) {
-    return await this.getAccount(
-      {
-        address
-      },
-      null,
-      dbTrans
-    )
+    return await this.getAccount({ address }, null, dbTrans)
   }
 
   async getAccountByPublicKey (publicKey, dbTrans) {
     publicKey = publicKey.toString('hex')
     const address = this.generateAddressByPublicKey(publicKey)
     this.logger.debug('getAccountByPublicKey, publicKey -> address; ' + publicKey + ' -> ' + address)
-    const account = await this.getAccount(
-      {
-        address
-      },
-      null,
-      dbTrans
-    )
+    const account = await this.getAccount({ address }, null, dbTrans)
 
     if (account && !account.publicKey) {
       account.publicKey = publicKey
@@ -460,28 +443,28 @@ class Account {
 
   // 检查钱包账户数据完整性
   async checkAccounts (count) {
-    try {
-      const result = await this.dao.update(
-        'mem_account',
-        {
-          u_is_delegate: this.dao.db_str('is_delegate'), // wxm block database
-          u_second_signature: this.dao.db_str('second_signature'), // wxm block database
-          u_username: this.dao.db_str('username'),
-          u_balance: this.dao.db_str('balance'),
-          u_delegates: this.dao.db_str('delegates'),
-          u_multisignatures: this.dao.db_str('multisignatures')
-        },
-        {
-          where: {}
-        }
-      )
-      this.logger.debug('checkAccounts result', result)
-    } catch (err) {
-      this.logger.error(err)
-      this.logger.info('Failed to verify db integrity 1')
-      await this.repairAccounts(count, true)
-      return
-    }
+    // try {
+    //   const result = await this.dao.update(
+    //     'mem_account',
+    //     {
+    //       u_is_delegate: this.dao.db_str('is_delegate'), // wxm block database
+    //       u_second_signature: this.dao.db_str('second_signature'), // wxm block database
+    //       u_username: this.dao.db_str('username'),
+    //       u_balance: this.dao.db_str('balance'),
+    //       u_delegates: this.dao.db_str('delegates'),
+    //       u_multisignatures: this.dao.db_str('multisignatures')
+    //     },
+    //     {
+    //       where: {}
+    //     }
+    //   )
+    //   this.logger.debug('checkAccounts result', result)
+    // } catch (err) {
+    //   this.logger.error(err)
+    //   this.logger.info('Failed to verify db integrity 1')
+    //   await this.repairAccounts(count, true)
+    //   return
+    // }
 
     let count2, err2
     try {
