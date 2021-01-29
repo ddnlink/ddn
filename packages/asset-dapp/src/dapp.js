@@ -5,7 +5,7 @@ import DecompressZip from 'decompress-zip'
 import * as DdnCrypto from '@ddn/crypto'
 import Asset from '@ddn/asset-base'
 import Sandbox from '@ddn/sandbox'
-import DdnUtils from '@ddn/utils'
+import DdnUtils, { assetTypes } from '@ddn/utils'
 import valid_url from 'valid-url'
 import ByteBuffer from 'bytebuffer'
 import dappCategory from './dapp/dapp-category.js'
@@ -16,11 +16,17 @@ const _dappInstalling = {}
 const _dappRemoving = {}
 const _dappLaunched = {}
 const _dappLaunchedLastError = {}
+const _dappready = {}
+const modules = {}
 
 class Dapp extends Asset.Base {
   // eslint-disable-next-line no-useless-constructor
   constructor (context, transactionConfig) {
     super(context, transactionConfig)
+
+    this._context = context
+    this.appPath = (context && context.baseDir) || path.resolve(__dirname, './')
+    this.dappsPath = (context && context.config && context.config.dappsDir) || path.join(this.appPath, 'dapps')
   }
 
   async propsMapping () {
@@ -147,6 +153,7 @@ class Dapp extends Asset.Base {
       throw new Error('Dapp link is too long. Maximum is 160 characters')
     }
 
+    // todo: 2020.12 添加 name 唯一性的验证
     if (!dapp.name || dapp.name.trim().length === 0 || dapp.name.trim() !== dapp.name) {
       throw new Error('Missing dapp name')
     }
@@ -557,7 +564,9 @@ class Dapp extends Asset.Base {
       throw new Error('Invalid master password')
     }
 
+    await this.symlink(body.id)
     await this.runDapp(body.id, body.params)
+
     await this.runtime.socketio.emit('dapps/change', {})
 
     return { success: true }
@@ -591,7 +600,7 @@ class Dapp extends Asset.Base {
     args = args || []
 
     const dapp = await this.getDappByTransactionId(id)
-
+    console.log(dapp)
     const installedIds = await this.getInstalledDappIds()
     if (installedIds.indexOf(id) < 0) {
       throw new Error('Dapp not installed')
@@ -609,34 +618,37 @@ class Dapp extends Asset.Base {
     if (dappConfig.peers && dappConfig.peers.length) {
       for (let i = 0; i < dappConfig.peers.length; i++) {
         const peerItem = dappConfig.peers[i]
-        await this.runtime.peer.addDapp(peerItem)
+        await this.runtime.peer.addDapp({ ...peerItem, dappId: id })
       }
     }
 
-    const sandbox = new Sandbox(this._context, id, async (type, data) => {
-      if (type === 'close' || type === 'error') {
-        try {
-          await this.stopDapp(dapp)
-        } catch (err) {
-          throw new Error(err)
-        }
-      }
+    const sandbox = new Sandbox(dappPath, dapp, args, this.apiHandler, true, this.logger)
 
-      if (type === 'error' || type === 'stderr_data') {
-        _dappLaunchedLastError[id] = data && data.message ? data.message : data.toString()
-      }
-    })
-
-    try {
-      sandbox.run(args)
-    } catch (error) {
-      console.log('errorrr', error)
-    }
     // eslint-disable-next-line require-atomic-updates
     _dappLaunched[id] = sandbox
 
-    await this._attachDappApi(id)
+    const self = this
+    sandbox.on('exit', function (code) {
+      this.logger.info('Dapp ' + id + ' exited with code ' + code)
+      try {
+        // self.stopDapp(dapp)
+      } catch (error) {
+        this.logger.error('Encountered error while stopping dapp: ' + error)
+      }
+    })
 
+    sandbox.on('error', function (err) {
+      this.logger.info('Encountered error in dapp ' + id + ' ' + err.toString())
+      try {
+        self.stopDapp(dapp)
+      } catch (error) {
+        this.logger.error('Encountered error while stopping dapp: ' + error)
+      }
+    })
+
+    sandbox.run()
+
+    await this._attachDappFrameworkApi(dapp)
     await this._addLaunchedMarkFile(dappPath)
   }
 
@@ -693,56 +705,72 @@ class Dapp extends Asset.Base {
     })
   }
 
-  async _attachDappApi (id) {
-    console.log('hi....................')
-    try {
-      const dappPath = path.join(this.config.dappsDir, id)
-      const routers = await this._readDappRouters(dappPath)
-      if (routers && routers.length > 0) {
-        // const router = await this.runtime.httpserver.addApiRouter('/dapp/' + id)
+  /**
+   * 将侧链的默认接口加载上来
+   * @param {string} dapp Dapp trs object
+   */
+  async _attachDappFrameworkApi (dapp) {
+    const self = this
+    const id = dapp.transaction_id
+    const name = dapp.name
+    const dappRouter = self.runtime.httpserver.dappRouter
 
-        for (let i = 0; i < routers.length; i++) {
-          const subRouter = routers[i]
-          if (subRouter.method && subRouter.path) {
-            try {
-              this.runtime.httpserver.dappRouter[subRouter.method](subRouter.path, async (req, res) => {
-                try {
-                  const result = await new Promise((resolve, reject) => {
-                    const sandbox = _dappLaunched[id]
-                    if (sandbox) {
-                      sandbox.request(
-                        {
-                          method: subRouter.method,
-                          path: subRouter.path,
-                          query: req.query,
-                          body: req.body
-                        },
-                        (err, data) => {
-                          if (err) {
-                            return reject(err)
-                          }
+    const routers = Sandbox.routes
+    if (routers && routers.length > 0) {
+      for (const router of routers) {
+        // const router = routers[i]
+        if (router.method && router.path) {
+          try {
+            const handler = async function (req, res) {
+              try {
+                const result = await new Promise((resolve, reject) => {
+                  const reqParams = {
+                    query: router.method === 'get' ? req.query : req.body,
+                    params: req.params
+                  }
 
-                          resolve(data)
-                        }
-                      )
-                    } else {
-                      reject(new Error('DApp not launched'))
+                  self.request(id, router.method, router.path, reqParams, function (err, body) {
+                    if (!err && body.error) {
+                      err = body.error
                     }
+                    if (err) {
+                      body = { error: err.toString() }
+                    }
+                    body.success = !err
+                    res.json(body)
                   })
-                  res.json({ success: true, result })
-                } catch (err) {
-                  res.json({ success: false, error: `${err}` })
-                }
-              })
-            } catch (error) {
-              console.log('error', error)
+                })
+                res.json({ success: true, result })
+              } catch (err) {
+                res.json({ success: false, error: `${err}` })
+              }
             }
+
+            dappRouter[router.method](`/${id}${router.path}`, handler)
+            dappRouter[router.method](`/${name}${router.path}`, handler)
+          } catch (error) {
+            self.logger.error(`${router.method} /dapps/${id}${router.path} fail `, error)
           }
         }
       }
-    } catch (err) {
-      this.logger.error(err)
+      self.logger.debug('Dapp`s APIs have been attached. ')
     }
+  }
+
+  request (dappId, method, path, query, cb) {
+    const sandbox = _dappLaunched[dappId]
+    if (!sandbox) {
+      return cb('Dapp not found')
+    }
+
+    sandbox.sendMessage(
+      {
+        method: method,
+        path: path,
+        query: query
+      },
+      cb
+    )
   }
 
   async postStopDapp (req) {
@@ -785,7 +813,8 @@ class Dapp extends Asset.Base {
       throw new Error('DApp not launched')
     }
 
-    _dappLaunched[dapp.transaction_id].stop()
+    // _dappLaunched[dapp.transaction_id].stop()
+    _dappLaunched[dapp.transaction_id].exit()
     this.runtime.socketio.emit('dapps/change', {})
 
     _dappLaunched[dapp.transaction_id] = null
@@ -894,36 +923,6 @@ class Dapp extends Asset.Base {
       }
     }
 
-    // if (sort) {
-    //     const sortItems = sort.split(",");
-    //     if (sortItems.length > 0) {
-    //         for (let i = 0; i < sortItems.length; i++) {
-    //             const sortItem = sortItems[i];
-    //             const sortItemExprs = sortItem.split(" ");
-    //             if (sortItemExprs.length === 1) {
-    //                 if (sortItemExprs[0].trim() === "") {
-    //                     throw new Error("Invalid sort params: " + sortItem);
-    //                 }
-    //                 else {
-    //                     orders.push(sortItemExprs[0].trim());
-    //                 }
-    //             }
-    //             else if (sortItemExprs.length === 2) {
-    //                 if (sortItemExprs[0].trim() === "" ||
-    //                     sortItemExprs[1].trim() === "") {
-    //                     throw new Error("Invalid sort params: " + sortItem);
-    //                 }
-    //                 else {
-    //                     orders.push([sortItemExprs[0].trim(), sortItemExprs[1].trim()]);
-    //                 }
-    //             }
-    //             else {
-    //                 throw new Error("Invalid sort params: " + sortItem);
-    //             }
-    //         }
-    //     }
-    // }
-
     const pageIndex = query.pageindex || 1
     const pageSize = query.pagesize || 100
 
@@ -1008,7 +1007,7 @@ class Dapp extends Asset.Base {
   }
 
   async downloadDapp (source, target) {
-    const downloadErr = await new Promise((resolve, reject) => {
+    return new Promise((resolve, reject) => {
       const downloadRequest = request.get(source)
 
       downloadRequest.on('response', res => {
@@ -1017,9 +1016,12 @@ class Dapp extends Asset.Base {
         }
       })
 
-      downloadRequest.on('error', err =>
+      downloadRequest.on('error', err => {
+        if (fs.existsSync(target)) {
+          fs.unlinkSync(target)
+        }
         reject(new Error(`Failed to download dapp ${source} with error: ${err.message}`))
-      )
+      })
 
       const file = fs.createWriteStream(target)
       file.on('finish', () => {
@@ -1028,16 +1030,6 @@ class Dapp extends Asset.Base {
       })
 
       downloadRequest.pipe(file)
-    })
-
-    return new Promise((resolve, reject) => {
-      if (downloadErr) {
-        if (fs.existsSync(target)) {
-          fs.unlinkSync(target)
-        }
-        return reject(downloadErr)
-      }
-      resolve()
     })
   }
 
@@ -1062,21 +1054,11 @@ class Dapp extends Asset.Base {
   async installDApp (dapp) {
     const dappPath = path.join(this.config.dappsDir, dapp.transaction_id)
 
-    await new Promise((resolve, reject) => {
-      if (!fs.existsSync(dappPath)) {
-        return reject(new Error('Dapp is already installed'))
-      }
-      resolve()
-    })
+    if (!fs.existsSync(dappPath)) {
+      throw new Error('Dapp is already installed')
+    }
 
-    await new Promise((resolve, reject) => {
-      fs.mkdir(dappPath, err => {
-        if (err) {
-          return reject(err)
-        }
-        resolve()
-      })
-    })
+    fs.mkdirSync(dappPath)
 
     const dappPackage = path.join(dappPath, `${dapp.transaction_id}.zip`)
 
@@ -1277,7 +1259,7 @@ class Dapp extends Asset.Base {
     const keypair = DdnCrypto.getKeys(body.secret)
 
     if (body.publicKey) {
-      if (keypair.publicKey.toString('hex') !== body.publicKey) {
+      if (keypair.publicKey !== body.publicKey) {
         throw new Error('Invalid passphrase')
       }
     }
@@ -1287,7 +1269,7 @@ class Dapp extends Asset.Base {
         async cb => {
           let account
           try {
-            account = await this.runtime.account.getAccountByPublicKey(keypair.publicKey.toString('hex'))
+            account = await this.runtime.account.getAccountByPublicKey(keypair.publicKey)
           } catch (e) {
             return cb(e)
           }
@@ -1344,51 +1326,472 @@ class Dapp extends Asset.Base {
     })
   }
 
+  // 提供给 ddn-sandbox 的 modules 变量
+  async onBind () {
+    modules.dapp = this
+    modules.blocks = this.runtime.block
+    modules.transport = this.runtime.peer
+    modules.transactions = this.runtime.transaction
+    modules.accounts = this.runtime.account
+    modules.delegates = this.runtime.delegate
+    modules.multisignatures = this.runtime.multisignature
+    modules.transactions = this.runtime.transaction
+  }
+
   async onBlockchainReady () {
     const installIds = await this.getInstalledDappIds()
+    console.log(installIds)
     for (let i = 0; i < installIds.length; i++) {
       const dappId = installIds[i]
       const dappPath = path.join(this.config.dappsDir, dappId)
       const file = await this._getLaunchedMarkFile(dappPath)
       if (fs.existsSync(file)) {
+        await this.symlink(dappId)
         await this.runDapp(dappId) // wxm params
       }
     }
   }
 
-  async onNewBlock (block) {
-    for (const dappId of Object.keys(_dappLaunched)) {
-      const sandbox = _dappLaunched[dappId]
-      if (sandbox) {
-        try {
-          await new Promise((resolve, reject) => {
-            sandbox.request(
-              {
-                method: 'post',
-                path: '/message',
-                query: null,
-                body: {
-                  message: 'newblock',
-                  data: {
-                    block_id: block.id,
-                    block_height: block.height,
-                    number_of_transactions: block.number_of_transactions
-                  }
-                }
-              },
-              (err, data) => {
-                if (err) {
-                  return reject(err)
-                }
-                resolve(data)
-              }
-            )
-          })
-        } catch (err2) {
-          this.logger.error(err2)
-        }
+  async onNewBlock (block, votes, broadcast) {
+    const self = this
+    // console.log('onNewBlock',block)
+    const req = {
+      query: {
+        topic: 'point',
+        message: { id: block.id, height: block.height }
       }
     }
+    Object.keys(_dappLaunched).forEach(function (dappId) {
+      console.log('request', dappId, broadcast)
+      // broadcast &&
+      self.request(dappId, 'post', '/message', req, function (err) {
+        if (err) {
+          this.logger.error('onNewBlock message', err)
+        }
+      })
+    })
+  }
+
+  async symlink (dappId) {
+    const dappPath = path.join(this.dappsPath, dappId)
+    const dappPublicPath = path.resolve(dappPath, 'public')
+    const dappPublicLink = path.resolve(this.appPath, 'public', 'dist', 'dapps', dappId)
+    const dappPublicLink0 = path.resolve(this.appPath, 'public', 'dist', 'dapps')
+
+    if (fs.existsSync(dappPublicPath)) {
+      if (!fs.existsSync(dappPublicLink)) {
+        fs.mkdirSync(dappPublicLink0, { recursive: true })
+        fs.symlinkSync(dappPublicPath, dappPublicLink)
+      }
+    }
+  }
+
+  apiHandler (message, callback) {
+    try {
+      const strs = message.call.split('#')
+      const module = strs[0]
+      const call = strs[1]
+      this.logger.debug('module is ', module)
+
+      if (!modules[module]) {
+        return setImmediate(callback, 'Invalid module in call: ' + message.call)
+      }
+      if (!modules[module].sandboxApi) {
+        return setImmediate(callback, 'This module have no sandbox api')
+      }
+      modules[module].sandboxApi(
+        call,
+        { body: message.args, dappId: message.dappId, dappName: message.dappName },
+        callback
+      )
+    } catch (e) {
+      return setImmediate(callback, 'Invalid call ' + e.toString())
+    }
+  }
+
+  sandboxApi (call, args, cb) {
+    // sandboxHelper.callMethod(shared, call, args, cb)
+    if (typeof this[call] !== 'function') {
+      return cb(`Function not found in module: ${call}`)
+    }
+
+    const callArgs = [args, cb]
+    return this[call].apply(this, callArgs)
+  }
+
+  async getDapp (req, cb) {
+    ;(async () => {
+      const dapp = await this.getDappByTransactionId(req.dappId)
+      return cb(null, dapp)
+    })()
+  }
+
+  setReady (req, cb) {
+    _dappready[req.dappId] = true
+    cb(null, {})
+  }
+
+  registerInterface (req, cb) {
+    const self = this
+    const dappId = req.dappId
+    const dappName = req.dappName
+    const method = req.body.method
+    const path = req.body.path
+    const handler = function (req, res) {
+      const reqParams = {
+        query: method === 'get' ? req.query : req.body,
+        params: req.params
+      }
+      self.request(dappId, method, path, reqParams, function (err, body) {
+        if (!body) {
+          body = {}
+        }
+        if (!err && body.error) {
+          err = body.error
+        }
+        if (err) {
+          body = { error: err.toString() }
+        }
+        body.success = !err
+        res.json(body)
+      })
+    }
+    const dappRouter = self.runtime.httpserver.dappRouter
+    dappRouter[method](`/${dappId}${path}`, handler)
+    dappRouter[method](`/${dappName}${path}`, handler)
+    cb(null)
+  }
+
+  onDeleteBlocksBefore (block) {
+    const self = this
+    Object.keys(_dappLaunched).forEach(function (dappId) {
+      const req = {
+        query: {
+          topic: 'rollback',
+          message: { pointId: block.id, pointHeight: block.height }
+        }
+      }
+      self.request(dappId, 'post', '/message', req, function (err) {
+        if (err) {
+          self.logger.error('onDeleteBlocksBefore message', err)
+        }
+      })
+    })
+  }
+
+  // Shared
+  async getGenesis (req) {
+    const rows = await this.dao.execSql(
+      `SELECT b.height as height, b.id as id, GROUP_CONCAT(m.dependentId) as multisignature, t.senderId as authorId FROM trs t 
+    inner join blocks b on t.blockId = b.id and t.id = ? 
+    left outer join mem_accounts2multisignatures m on m.accountId = t.senderId and t.id = ?`,
+      {
+        replacements: [req.dappId, req.dappId]
+        // type: sequelize.QueryTypes.SELECT
+      }
+    )
+    if (!rows.length) {
+      throw new Error('Database error')
+    }
+
+    return {
+      pointId: rows[0].id,
+      pointHeight: rows[0].height,
+      authorId: rows[0].authorId,
+      dappId: req.dappId,
+      associate: rows[0].multisignature ? rows[0].multisignature.split(',') : []
+    }
+  }
+
+  // getDApp = function (req, cb) {
+  //   library.model.getDAppById(req.dappId, cb)
+  // }
+
+  async getCommonBlock (req) {
+    return await this.dao.execSql(
+      'SELECT b.height as height, t.id as id, t.senderId as senderId, t.amount as amount FROM trs t inner join blocks b on t.blockId = b.id and t.id = ? and t.type = ? inner join intransfer dt on dt.transactionId = t.id and dt.dappId = ?',
+      {
+        replacements: [req.dappId, assetTypes.DAPP_IN, req.dappId]
+        // type: sequelize.QueryTypes.SELECT
+      }
+    )
+  }
+
+  async sendWithdrawal (req, cb) {
+    const self = this
+    const body = req.body
+    const validateErrors = await this.ddnSchema.validate(
+      {
+        type: 'object',
+        properties: {
+          secret: {
+            type: 'string',
+            minLength: 1,
+            maxLength: 100
+          },
+          amount: {
+            type: 'integer',
+            minimum: 1,
+            maximum: this.constants.totalAmount
+          },
+          recipientId: {
+            type: 'string',
+            minLength: 1,
+            maxLength: 50
+          },
+          secondSecret: {
+            type: 'string',
+            minLength: 1,
+            maxLength: 100
+          },
+          transactionId: {
+            type: 'string',
+            minLength: 1,
+            maxLength: 64
+          },
+          multisigAccountPublicKey: {
+            type: 'string',
+            format: 'publicKey'
+          }
+        },
+        required: ['secret', 'recipientId', 'amount', 'transactionId']
+      },
+      body
+    )
+
+    if (validateErrors) {
+      return cb(validateErrors)
+    }
+
+    // var hash = crypto.createHash('sha256').update(body.secret, 'utf8').digest();
+    // var keypair = ed.MakeKeypair(hash);
+    const keypair = DdnCrypto.getKeys(body.secondSecret)
+    // let query = {};
+
+    if (!this.address.isAddress(body.recipientId)) {
+      return cb('Invalid address')
+    }
+
+    self.balancesSequence.add(
+      function (cb) {
+        if (body.multisigAccountPublicKey && body.multisigAccountPublicKey !== keypair.publicKey) {
+          try {
+            const account = modules.accounts.getAccount({ publicKey: body.multisigAccountPublicKey })
+            if (!account) {
+              return cb('Multisignature account not found')
+            }
+
+            if (!account.multisignatures || !account.multisignatures) {
+              return cb('Account does not have multisignatures enabled')
+            }
+
+            if (account.multisignatures.indexOf(keypair.publicKey) < 0) {
+              return cb('Account does not belong to multisignature group')
+            }
+
+            const requester = modules.accounts.getAccount({ publicKey: keypair.publicKey })
+
+            if (!requester || !requester.publicKey) {
+              return cb('Invalid requester')
+            }
+
+            if (requester.secondSignature && !body.secondSecret) {
+              return cb('Invalid second passphrase')
+            }
+
+            if (requester.publicKey === account.publicKey) {
+              return cb('Invalid requester')
+            }
+
+            let secondKeypair = null
+
+            if (requester.secondSignature) {
+              // let secondHash = crypto.createHash('sha256').update(body.secondSecret, 'utf8').digest();
+              // secondKeypair = ed.MakeKeypair(secondHash);
+              secondKeypair = DdnCrypto.getKeys(body.secondSecret)
+            }
+
+            const transaction = this.runtime.transaction.create({
+              type: assetTypes.DAPP_OUT,
+              amount: body.amount,
+              sender: account,
+              recipientId: body.recipientId,
+              keypair: keypair,
+              secondKeypair: secondKeypair,
+              requester: keypair,
+              dappId: req.dappId,
+              transactionId: body.transactionId
+            })
+            modules.transactions.receiveTransactions([transaction], cb)
+          } catch (err) {
+            return cb(err.toString())
+          }
+        } else {
+          try {
+            const account = modules.accounts.getAccount({ publicKey: keypair.publicKey })
+            if (!account) {
+              return cb('Account not found')
+            }
+
+            if (account.secondSignature && !body.secondSecret) {
+              return cb('Invalid second passphrase')
+            }
+
+            let secondKeypair = null
+
+            if (account.secondSignature) {
+              // var secondHash = crypto.createHash('sha256').update(body.secondSecret, 'utf8').digest();
+              // secondKeypair = ed.MakeKeypair(secondHash);
+              secondKeypair = DdnCrypto.getKeys(body.secondSecret)
+            }
+
+            const transaction = modules.transactions.create({
+              type: assetTypes.DAPP_OUT,
+              amount: body.amount,
+              sender: account,
+              recipientId: body.recipientId,
+              keypair: keypair,
+              secondKeypair: secondKeypair,
+              dappId: req.dappId,
+              transactionId: body.transactionId
+            })
+
+            modules.transactions.receiveTransactions([transaction], cb)
+          } catch (err) {
+            if (err) {
+              return cb(err.toString())
+            }
+          }
+        }
+      },
+      function (err, transaction) {
+        if (err) {
+          return cb(err.toString())
+        }
+
+        cb(null, { transactionId: transaction[0].id })
+      }
+    )
+  }
+
+  async getWithdrawalLastTransaction (req, cb) {
+    const rows = await this.dao.execSql(
+      'SELECT ot.outTransactionId as id FROM trs t inner join blocks b on t.blockId = b.id and t.type = ? inner join outtransfer ot on ot.transactionId = t.id and ot.dappId = ? order by b.height desc limit 1',
+      {
+        replacements: [assetTypes.DAPP_OUT, req.dappId]
+      }
+    )
+    return rows && rows[0]
+  }
+
+  async getBalanceTransactions (req) {
+    const replacements = [assetTypes.DAPP_IN, req.dappId]
+    if (req.body.lastTransactionId) replacements.push(req.body.lastTransactionId)
+    return await this.dao.execSql(
+      `SELECT t.id as id, lower(hex(t.senderPublicKey)) as senderPublicKey, t.amount as amount, dt.currency as currency, dt.amount as amount2 FROM trs t 
+    inner join blocks b on t.blockId = b.id and t.type = ? 
+    inner join intransfer dt on dt.transactionId = t.id and dt.dappId = ?
+    ${
+      req.body.lastTransactionId
+        ? 'where b.height > (select height from blocks ib inner join trs it on ib.id = it.blockId and it.id = ?) '
+        : ''
+    }
+    order by b.height`,
+      {
+        replacements
+      }
+    )
+  }
+
+  submitOutTransfer (req, cb) {
+    const self = this
+    const trs = req.body
+    self.balancesSequence.add(function (cb) {
+      if (modules.transactions.hasUnconfirmedTransaction(trs)) {
+        return cb('Already exists')
+      }
+      this.logger.log('Submit outtransfer transaction ' + trs.id + ' from dapp ' + req.dappId)
+      modules.transactions.receiveTransactions([trs], cb)
+    }, cb)
+  }
+
+  // TODO will delete or complete (要么完善这个方法，要么在侧链里去掉该方法的调用,这里是同步充值侧链token的方法需要完善)
+  async getDeposits (req, cb) {
+    // const that=this
+    // TODO 这里查询的是dapp充值交易，能不能直接查询dapp资产表
+    const data = await this.runtime.dataquery.queryFullTransactionData(
+      {
+        block_height: {
+          $gt: req.body.seq
+        },
+        type: 6
+      },
+      10,
+      0,
+      null,
+      true
+    )
+
+    const transactions = []
+    for (let i = 0; i < data.transactions.length; i++) {
+      const row = data.transactions[i]
+      const trs = await this.runtime.transaction.serializeDbData2Transaction(row)
+      transactions.push(trs)
+    }
+    // const data=  await new Promise(function (resolve) {
+
+    //   that.dao.findList('tr', {
+    //     block_height: {
+    //       $gte: req.body.seq
+    //     },
+    //     type:6
+    //   }, null, null, function (err, rows) {
+    //     if (err) {
+    //       resolve(err);
+    //     } else {
+    //       resolve(rows);
+    //     }
+    //   });
+    //   });
+    console.log(transactions)
+    cb(null, transactions)
+  }
+
+  async getLastWithdrawal (req, cb) {
+    // const that=this
+    // TODO 这里查询的是dapp充值交易，能不能直接查询dapp资产表
+    const data = await this.runtime.dataquery.queryFullTransactionData(
+      {
+        type: 7
+      },
+      1,
+      0,
+      [['block_height', 'DESC']],
+      true
+    )
+
+    const transactions = []
+    for (let i = 0; i < data.transactions.length; i++) {
+      const row = data.transactions[i]
+      const trs = await this.runtime.transaction.serializeDbData2Transaction(row)
+      transactions.push(trs)
+    }
+    // const data=  await new Promise(function (resolve) {
+
+    //   that.dao.findList('tr', {
+    //     block_height: {
+    //       $gte: req.body.seq
+    //     },
+    //     type:6
+    //   }, null, null, function (err, rows) {
+    //     if (err) {
+    //       resolve(err);
+    //     } else {
+    //       resolve(rows);
+    //     }
+    //   });
+    //   });
+    cb(null, transactions)
   }
 }
 

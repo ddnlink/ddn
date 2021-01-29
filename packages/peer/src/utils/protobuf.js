@@ -19,7 +19,8 @@ class Protobuf {
     const obj = extend(true, {}, block)
     obj.payload_hash = Buffer.from(obj.payload_hash, 'hex') // wxm block database
     obj.generator_public_key = Buffer.from(obj.generator_public_key, 'hex') // wxm block database
-    if (obj.block_signature) { // wxm block database
+    if (obj.block_signature) {
+      // wxm block database
       obj.block_signature = Buffer.from(obj.block_signature, 'hex') // wxm block database
     }
     for (let i = 0; i < obj.transactions.length; ++i) {
@@ -37,7 +38,8 @@ class Protobuf {
 
     obj.payload_hash = obj.payload_hash.toString('hex') // wxm block database
     obj.generator_public_key = obj.generator_public_key.toString('hex') // wxm block database
-    if (obj.block_signature) { // wxm block database
+    if (obj.block_signature) {
+      // wxm block database
       obj.block_signature = obj.block_signature.toString('hex') // wxm block database
     }
     for (let i = 0; i < obj.transactions.length; ++i) {
@@ -112,10 +114,12 @@ class Protobuf {
   transactionStringToBytes (obj) {
     obj.senderPublicKey = Buffer.from(obj.senderPublicKey, 'hex') // wxm block database
     obj.signature = Buffer.from(obj.signature, 'hex')
-    if (obj.requester_public_key) { // wxm block database
+    if (obj.requester_public_key) {
+      // wxm block database
       obj.requester_public_key = Buffer.from(obj.requester_public_key, 'hex') // wxm block database
     }
-    if (obj.sign_signature) { // wxm block database
+    if (obj.sign_signature) {
+      // wxm block database
       obj.sign_signature = Buffer.from(obj.sign_signature, 'hex') // wxm block database
     }
 
@@ -136,10 +140,12 @@ class Protobuf {
   transactionBytesToString (obj) {
     obj.senderPublicKey = Buffer.from(obj.senderPublicKey, 'base64').toString('hex') // obj.senderPublicKey.toString('hex');  //wxm block database
     obj.signature = Buffer.from(obj.signature, 'base64').toString('hex') // obj.signature.toString('hex');
-    if (obj.requester_public_key) { // wxm block database
+    if (obj.requester_public_key) {
+      // wxm block database
       obj.requester_public_key = Buffer.from(obj.requester_public_key, 'base64').toString('hex') // obj.requester_public_key.toString('hex');  //wxm block database
     }
-    if (obj.sign_signature) { // wxm block database
+    if (obj.sign_signature) {
+      // wxm block database
       obj.sign_signature = Buffer.from(obj.sign_signature, 'base64').toString('hex') // obj.sign_signature.toString('hex');    //wxm block database
     }
 
@@ -158,7 +164,7 @@ class Protobuf {
   }
 }
 
-export default (schemaFile, cb) => {
+export default (schemaFile, context, cb) => {
   const insertAssetMessage = async root => {
     const rootTemp = JSON.parse(JSON.stringify(root))
 
@@ -175,7 +181,7 @@ export default (schemaFile, cb) => {
       if (assetTrans) {
         const assetJsonName = Asset.Utils.getAssetJsonName(assetTrans.type)
         const TransCls = global._require_runtime_(assetTrans.package)[assetTrans.name]
-        const transInst = new TransCls() // wxm 此处传的都是null，必须保证propsMapping里不要用到这传入的context参数
+        const transInst = new TransCls(context) // wxm 此处传的都是null，必须保证propsMapping里不要用到这传入的context参数
         const props = await transInst.propsMapping()
         const fields = {}
 

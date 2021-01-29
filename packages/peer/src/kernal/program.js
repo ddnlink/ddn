@@ -261,6 +261,8 @@ class Program {
       this._context.logger.info('DDN Start Successfully!')
     }
 
+    await this._bindReady()
+
     // 启动节点管理任务
     await this.startPeerSyncTask()
 
@@ -275,15 +277,22 @@ class Program {
 
     // 启动区块铸造任务
     await this.startForgeBlockTask()
+  }
 
-    // 块加载完成
-    this._context.runtime.loaded = true
+  async _bindReady () {
+    // if (this._context.runtime.loaded) {
+    // 通知资产系统已就绪事件
+    await this._context.runtime.transaction.execAssetFunc('onBind')
+    // }
   }
 
   async _blockchainReady () {
     if (!this._blockchainReadyFired && this._context.runtime.state === DdnUtils.runtimeState.Ready) {
       // 通知资产系统已就绪事件
       await this._context.runtime.transaction.execAssetFunc('onBlockchainReady')
+      // 块加载完成
+      this._context.runtime.loaded = true
+
       this._blockchainReadyFired = true
     }
   }

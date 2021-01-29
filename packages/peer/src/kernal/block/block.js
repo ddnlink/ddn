@@ -1497,6 +1497,21 @@ class Block {
       )
     })
   }
+
+  sandboxApi (call, args, cb) {
+    // sandboxHelper.callMethod(shared, call, args, cb)
+    if (typeof this[call] !== 'function') {
+      return cb(`Function not found in module: ${call}`)
+    }
+
+    const callArgs = [args, cb]
+    return this[call].apply(this, callArgs)
+  }
+
+  getHeight (req, cb) {
+    const lastBlock = this.runtime.block.getLastBlock()
+    return cb(null, lastBlock && lastBlock.height ? lastBlock.height : '0')
+  }
 }
 
 export default Block

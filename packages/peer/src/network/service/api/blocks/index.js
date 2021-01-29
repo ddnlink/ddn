@@ -256,7 +256,29 @@ class BlockService {
     return { success: true, supply }
   }
 
+  /**
+   * @
+   * @description TODO  The next version is planned to be scrapped
+   * @param {*} req
+   */
   async getGetHeight (req) {
+    if (this.runtime.state !== DdnUtils.runtimeState.Ready) {
+      throw new Error('Blockchain is loading')
+    }
+
+    const lastBlock = this.runtime.block.getLastBlock()
+    return {
+      success: true,
+      height: lastBlock && lastBlock.height ? lastBlock.height : 0
+    }
+  }
+
+  /**
+   * @author wly
+   * @description chage router /api/bolcks/getheight to /api/bolcks/height copy from getGetHeight
+   * @param {*} req
+   */
+  async getHeight (req) {
     if (this.runtime.state !== DdnUtils.runtimeState.Ready) {
       throw new Error('Blockchain is loading')
     }

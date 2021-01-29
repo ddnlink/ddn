@@ -10,15 +10,16 @@ async function getBytes (transaction, skipSignature, skipSecondSignature) {
   }
   if (assetBytes) assetSize = assetBytes.byteLength
 
-  const size = 1 + // type (int)
-        4 + // timestamp (int)
-        8 + // nethash 8
-        32 + // senderPublicKey (int)
-        32 + // requesterPublicKey (long)
-        8 + // recipientId (long)
-        8 + // amount (long)
-        64 + // message
-        64 // args or unused
+  const size =
+    1 + // type (int)
+    4 + // timestamp (int)
+    8 + // nethash 8
+    32 + // senderPublicKey (int)
+    32 + // requesterPublicKey (long)
+    8 + // recipientId (long)
+    8 + // amount (long)
+    64 + // message
+    64 // args or unused
 
   const bb = new ByteBuffer(size + assetSize, true)
   // const bb = new ByteBuffer(1, true);
@@ -34,7 +35,8 @@ async function getBytes (transaction, skipSignature, skipSecondSignature) {
   }
 
   // +32
-  if (transaction.requester_public_key) { // wxm block database
+  if (transaction.requester_public_key) {
+    // wxm block database
     const requesterPublicKey = Buffer.from(transaction.requester_public_key, 'hex') // wxm block database
 
     for (let i = 0; i < requesterPublicKey.length; i++) {
@@ -80,7 +82,8 @@ async function getBytes (transaction, skipSignature, skipSecondSignature) {
   }
 
   // +64 验证的时候要再次减去
-  if (!skipSecondSignature && transaction.sign_signature) { // wxm block database
+  if (!skipSecondSignature && transaction.sign_signature) {
+    // wxm block database
     const signSignatureBuffer = Buffer.from(transaction.sign_signature, 'hex') // wxm block database
     for (let i = 0; i < signSignatureBuffer.length; i++) {
       bb.writeByte(signSignatureBuffer[i])
@@ -106,7 +109,7 @@ async function getAssetBytes (transaction) {
   if (global.assets && global.assets.transTypeNames[transaction.type]) {
     const trans = global.assets.transTypeNames[transaction.type]
     const TransCls = require(trans.package).default[trans.name]
-    let transInst = new TransCls()
+    let transInst = new TransCls({})
     const buf = await transInst.getBytes(transaction)
 
     transInst = null
@@ -116,6 +119,4 @@ async function getAssetBytes (transaction) {
   return null
 }
 
-export {
-  getBytes
-}
+export { getBytes }

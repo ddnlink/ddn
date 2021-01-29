@@ -98,7 +98,7 @@ class Context {
 
   async _buildProtobuf (protoFile) {
     return new Promise((resolve, reject) => {
-      protobuf(protoFile, (err, result) => {
+      protobuf(protoFile, this, (err, result) => {
         if (err) {
           reject(err)
         } else {

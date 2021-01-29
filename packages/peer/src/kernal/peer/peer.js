@@ -144,7 +144,15 @@ class Peer {
    * @param {*} dappId
    * @param {*} allowSelf
    */
-  async request (args, dappId, allowSelf) {
+  async request (args, dappId, allowSelf, cb) {
+    if (typeof cb === 'function') {
+      try {
+        const data = await PeerInvoker.singleton(this._context).invoke(args, dappId, allowSelf)
+        return cb(null, data)
+      } catch (error) {
+        cb(error)
+      }
+    }
     return await PeerInvoker.singleton(this._context).invoke(args, dappId, allowSelf)
   }
 
@@ -354,6 +362,16 @@ class Peer {
       limit: limit || this.constants.delegates,
       order: [[this.dao.db_fnRandom()]]
     })
+  }
+
+  // Sidechains
+  sandboxApi (call, args, cb) {
+    // sandboxHelper.callMethod(shared, call, args, cb)
+    if (typeof this[call] !== 'function') {
+      return cb(`Function not found in module: ${call}`)
+    }
+    const callArgs = [args.body, args.dappId, true, cb]
+    return this[call].apply(this, callArgs)
   }
 }
 
