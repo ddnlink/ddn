@@ -101,6 +101,7 @@ export default {
     block.count = block.transactions.length
 
     block.payloadHash = DdnCrypto.createHash(Buffer.from(payloadBytes))
+    block.payloadHash = Buffer.from(block.payloadHash).toString('hex')
 
     block.signature = sign(block, keypair)
     block.id = getId(block)

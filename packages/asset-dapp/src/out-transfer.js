@@ -6,11 +6,11 @@ const _dappOuttransferUnconfirmeds = {}
 
 class OutTransfer extends Asset.Base {
   // eslint-disable-next-line no-useless-constructor
-  constructor (context, transactionConfig) {
+  constructor(context, transactionConfig) {
     super(context, transactionConfig)
   }
 
-  async propsMapping () {
+  async propsMapping() {
     return [
       {
         field: 'str2',
@@ -30,18 +30,23 @@ class OutTransfer extends Asset.Base {
         field: 'str3',
         prop: 'amount',
         required: true
+      },
+      {
+        field: 'str5',
+        prop: 'withdrawal_sequence',
+        required: true
       }
     ]
   }
 
-  async getBytes (trs) {
+  async getBytes(trs) {
     const transfer = await this.getAssetObject(trs)
 
     let buf = Buffer.from([])
     const dappId = Buffer.from(transfer.dapp_id, 'utf8')
 
     // todo: 2020.7.16
-    if (transfer.currency !== this.constants.tokenName) {
+    if (transfer.currency !== 'DDN') {
       const currency = Buffer.from(transfer.currency, 'utf8')
       const amount = Buffer.from(transfer.amount, 'utf8')
       buf = Buffer.concat([buf, dappId, currency, amount])
@@ -53,11 +58,11 @@ class OutTransfer extends Asset.Base {
     return buf
   }
 
-  async calculateFee () {
+  async calculateFee() {
     return DdnUtils.bignum.multiply(this.constants.net.fees.dapp_out, this.constants.fixedPoint)
   }
 
-  async create (data, trs) {
+  async create(data, trs) {
     trs.recipientId = data.recipientId
     trs.amount = '0'
 
@@ -68,7 +73,7 @@ class OutTransfer extends Asset.Base {
     return trs
   }
 
-  async verify (trs, sender) {
+  async verify(trs, sender) {
     // await super.verify(trs, sender);
 
     if (!trs.recipientId) {
@@ -116,8 +121,22 @@ class OutTransfer extends Asset.Base {
 
     return trs
   }
+  async verifySignature(trs) {
+    const transfer = await this.getAssetObject(trs)
+    // TODO 这里做签名认证，但是为什么取不到dapp呢？？？？？
+    let dapp = await this.getDappByTransactionId(transfer.dapp_id)
+    return true
+  }
+  async getDappByTransactionId(trsId) {
+    const result = await this.queryAsset({ trs_id: trsId }, null, false, 1, 1)
+    if (result && result.length) {
+      return result[0]
+    }
+    return result
+    throw new Error(`DApp not found: ${trsId}`)
+  }
 
-  async process (trs) {
+  async process(trs) {
     var dapp = null
 
     const transfer = await this.getAssetObject(trs)
@@ -173,7 +192,7 @@ class OutTransfer extends Asset.Base {
     return trs
   }
 
-  async _updateAssetBalance (currency, amount, address, dbTrans) {
+  async _updateAssetBalance(currency, amount, address, dbTrans) {
     const condition = {
       address,
       currency
@@ -212,7 +231,7 @@ class OutTransfer extends Asset.Base {
     })
   }
 
-  async apply (trs, block, _sender, dbTrans) {
+  async apply(trs, block, _sender, dbTrans) {
     const transfer = await this.getAssetObject(trs)
 
     _dappOuttransferUnconfirmeds[trs.id] = false
@@ -221,9 +240,9 @@ class OutTransfer extends Asset.Base {
       this.balanceCache.addAssetBalance(trs.recipientId, transfer.currency, transfer.amount)
 
       await this._updateAssetBalance(transfer.currency,
-                `-${transfer.amount}`, transfer.dapp_id, dbTrans)
+        `-${transfer.amount}`, transfer.dapp_id, dbTrans)
       await this._updateAssetBalance(this.constants.tokenName,
-                `-${trs.fee}`, transfer.dapp_id, dbTrans)
+        `-${trs.fee}`, transfer.dapp_id, dbTrans)
       await this._updateAssetBalance(transfer.currency,
         transfer.amount, trs.recipientId, dbTrans) // wxm block database
     } else {
@@ -244,7 +263,7 @@ class OutTransfer extends Asset.Base {
     }
   }
 
-  async undo (trs, block, _sender, dbTrans) {
+  async undo(trs, block, _sender, dbTrans) {
     const transfer = await this.getAssetObject(trs)
 
     _dappOuttransferUnconfirmeds[trs.id] = true
@@ -257,7 +276,7 @@ class OutTransfer extends Asset.Base {
       await this._updateAssetBalance(this.constants.tokenName,
         trs.fee, transfer.dapp_id, dbTrans)
       await this._updateAssetBalance(transfer.currency,
-                `-${transfer.amount}`, trs.recipientId, dbTrans) // wxm block database
+        `-${transfer.amount}`, trs.recipientId, dbTrans) // wxm block database
     } else {
       await this.runtime.account.setAccount({ address: trs.recipientId }, dbTrans)
 
@@ -275,7 +294,7 @@ class OutTransfer extends Asset.Base {
     }
   }
 
-  async applyUnconfirmed (trs) {
+  async applyUnconfirmed(trs) {
     const transfer = await this.getAssetObject(trs)
 
     _dappOuttransferUnconfirmeds[trs.id] = true
@@ -303,7 +322,7 @@ class OutTransfer extends Asset.Base {
     }
   }
 
-  async undoUnconfirmed (trs) {
+  async undoUnconfirmed(trs) {
     _dappOuttransferUnconfirmeds[trs.id] = false
 
     const transfer = await this.getAssetObject(trs)
@@ -317,7 +336,7 @@ class OutTransfer extends Asset.Base {
     }
   }
 
-  async dbSave (trs, dbTrans) {
+  async dbSave(trs, dbTrans) {
     await super.dbSave(trs, dbTrans)
   }
 }

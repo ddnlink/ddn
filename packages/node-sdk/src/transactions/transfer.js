@@ -6,7 +6,7 @@ import { config, constants } from '../config'
 
 const nethash = config.nethash
 
-async function createInTransfer (dappId, currency, amount, secret, secondSecret) {
+async function createInTransfer(dappId, currency, amount, secret, secondSecret) {
   const keys = crypto.getKeys(secret)
 
   const fee = bignum.multiply(constants.net.fees.dapp_in, constants.fixedPoint)
@@ -43,9 +43,8 @@ async function createInTransfer (dappId, currency, amount, secret, secondSecret)
   return transaction
 }
 
-async function createOutTransfer (recipientId, dappId, transactionId, currency, amount, secret, secondSecret) {
+async function createOutTransfer(secret, recipientId, dappId, transactionId, currency, amount, withdrawal_sequence) {
   const keys = crypto.getKeys(secret)
-
   const fee = bignum.multiply(constants.net.fees.dapp_out, constants.fixedPoint)
 
   const transaction = {
@@ -57,30 +56,63 @@ async function createOutTransfer (recipientId, dappId, transactionId, currency, 
     senderPublicKey: keys.publicKey,
     timestamp: slots.getTime() - config.clientDriftSeconds,
     asset: {
-      outTransfer: {
+      dappOut: {
         dapp_id: dappId,
         transaction_id: transactionId,
         currency,
-        amount
+        amount,
+        withdrawal_sequence:String(withdrawal_sequence)
       }
     }
   }
 
   transaction.signature = await crypto.sign(transaction, keys)
 
-  if (secondSecret) {
-    const secondKeys = crypto.getKeys(secondSecret)
-    transaction.sign_signature = await crypto.secondSign(transaction, secondKeys)
-  }
+  // if (secondSecret) {
+  //   const secondKeys = crypto.getKeys(secondSecret)
+  //   transaction.sign_signature = await crypto.secondSign(transaction, secondKeys)
+  // }
 
   transaction.id = await crypto.getId(transaction)
   return transaction
 }
+// async function createOutTransfer (recipientId, dappId, transactionId, currency, amount, secret, secondSecret) {
+//   const keys = crypto.getKeys(secret)
 
-async function signOutTransfer (transaction, secret) {
+//   const fee = bignum.multiply(constants.net.fees.dapp_out, constants.fixedPoint)
+
+//   const transaction = {
+//     nethash,
+//     type: assetTypes.DAPP_OUT,
+//     amount: '0', // Bignum update
+//     fee: `${fee}`,
+//     recipientId: recipientId,
+//     senderPublicKey: keys.publicKey,
+//     timestamp: slots.getTime() - config.clientDriftSeconds,
+//     asset: {
+//       outTransfer: {
+//         dapp_id: dappId,
+//         transaction_id: transactionId,
+//         currency,
+//         amount
+//       }
+//     }
+//   }
+
+//   transaction.signature = await crypto.sign(transaction, keys)
+
+//   if (secondSecret) {
+//     const secondKeys = crypto.getKeys(secondSecret)
+//     transaction.sign_signature = await crypto.secondSign(transaction, secondKeys)
+//   }
+
+//   transaction.id = await crypto.getId(transaction)
+//   return transaction
+// }
+
+async function signOutTransfer(transaction, secret) {
   const keys = crypto.getKeys(secret)
   const signature = await crypto.sign(transaction, keys)
-
   return signature
 }
 

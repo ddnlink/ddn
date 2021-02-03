@@ -3,12 +3,12 @@ import DdnUtils from '@ddn/utils'
 
 class InTransfer extends Asset.Base {
   // eslint-disable-next-line no-useless-constructor
-  constructor (context, transactionConfig) {
+  constructor(context, transactionConfig) {
     super(context, transactionConfig)
     this._context = context
   }
 
-  async propsMapping () {
+  async propsMapping() {
     return [
       {
         field: 'str2',
@@ -23,15 +23,19 @@ class InTransfer extends Asset.Base {
       {
         field: 'str3',
         prop: 'amount'
+      },
+      {
+        field: 'str5',
+        prop: 'deposit_sequence'
       }
     ]
   }
 
-  async calculateFee () {
+  async calculateFee() {
     return DdnUtils.bignum.multiply(this.constants.net.fees.dapp_in, this.constants.fixedPoint)
   }
 
-  async create (data, trs) {
+  async create(data, trs) {
     trs.recipientId = null
 
     const assetJsonName = await this.getAssetJsonName(trs.type)
@@ -42,11 +46,11 @@ class InTransfer extends Asset.Base {
       trs.amount = data.amount + ''
       delete data[assetJsonName].amount
     }
-
+    trs.asset[assetJsonName]['withdrawal_sequence'] = trs.height
     return trs
   }
 
-  async verify (trs, sender) {
+  async verify(trs, sender) {
     if (trs.recipientId) {
       throw new Error('Invalid recipient')
     }
@@ -59,7 +63,7 @@ class InTransfer extends Asset.Base {
 
     if (inTransfer.currency !== this.constants.tokenName) {
       if ((typeof (trs.amount) !== 'undefined' && !DdnUtils.bignum.isZero(trs.amount)) ||
-                (typeof (inTransfer.amount) === 'undefined' || DdnUtils.bignum.isZero(inTransfer.amount))) {
+        (typeof (inTransfer.amount) === 'undefined' || DdnUtils.bignum.isZero(inTransfer.amount))) {
         throw new Error('Invalid transfer amount')
       }
 
@@ -69,7 +73,7 @@ class InTransfer extends Asset.Base {
       }
     } else {
       if ((typeof (trs.amount) === 'undefined' || DdnUtils.bignum.isZero(trs.amount)) ||
-                (typeof (inTransfer.amount) !== 'undefined' && !DdnUtils.bignum.isZero(inTransfer.amount))) {
+        (typeof (inTransfer.amount) !== 'undefined' && !DdnUtils.bignum.isZero(inTransfer.amount))) {
         throw new Error('Invalid transfer amount')
       }
     }
@@ -110,12 +114,11 @@ class InTransfer extends Asset.Base {
     }
   }
 
-  async getBytes (trs) {
+  async getBytes(trs) {
     const transfer = await this.getAssetObject(trs)
 
     let buf = Buffer.from([])
     const dappId = Buffer.from(transfer.dapp_id, 'utf8')
-    console.log('getbytes',this.constants)
     // TODO 通过nodesdk调到这里实例化时没有传content变量所以拿不到tokenName，暂时写死 again !!!
     // if (trs.asset.inTransfer.currency !== this.library.constants.tokenName) {
     if (transfer.currency !== 'DDN') {
@@ -130,7 +133,7 @@ class InTransfer extends Asset.Base {
     return buf
   }
 
-  async _updateAssetBalance (currency, amount, address, dbTrans) {
+  async _updateAssetBalance(currency, amount, address, dbTrans) {
     const condition = {
       address,
       currency
@@ -168,10 +171,12 @@ class InTransfer extends Asset.Base {
   }
 
   // 新增事务dbTrans ---wly
-  async apply (trs, _block, sender, dbTrans) {
+  async apply(trs, _block, sender, dbTrans) {
     const asset = await this.getAssetObject(trs)
     const dappId = asset.dapp_id
-
+    if (!asset['deposit_sequence']) {
+      asset['deposit_sequence'] = _block.height
+    }
     if (asset.currency === this.constants.tokenName) {
       this.balanceCache.addAssetBalance(dappId, asset.currency, trs.amount)
       await this._updateAssetBalance(asset.currency, trs.amount, dappId, dbTrans)
@@ -182,7 +187,7 @@ class InTransfer extends Asset.Base {
     }
   }
 
-  async undo (trs, _block, sender, dbTrans) {
+  async undo(trs, _block, sender, dbTrans) {
     const asset = await this.getAssetObject(trs)
     const transfer = await this.getAssetObject(trs)
     const dappId = asset.dapp_id
@@ -197,7 +202,7 @@ class InTransfer extends Asset.Base {
     }
   }
 
-  async applyUnconfirmed (trs, sender) {
+  async applyUnconfirmed(trs, sender) {
     const transfer = await this.getAssetObject(trs)
     if (transfer.currency !== this.constants.tokenName) {
       const balance = this.balanceCache.getAssetBalance(sender.address, transfer.currency) || 0
@@ -209,7 +214,7 @@ class InTransfer extends Asset.Base {
     }
   }
 
-  async undoUnconfirmed (trs, sender) {
+  async undoUnconfirmed(trs, sender) {
     const transfer = await this.getAssetObject(trs)
     if (transfer.currency !== this.constants.tokenName) {
       this.balanceCache.addAssetBalance(sender.address, transfer.currency, transfer.amount)
