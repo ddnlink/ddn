@@ -31,19 +31,18 @@ class Round {
     const roundStr = round.toString()
 
     // 这里没有将 bignum 计算传进去，通过 / % 等运算符，字符串形式的 bignum 会自动转为 number
-    let row = await this.dao.findOne(
-      'block',
-      {
+    let row = await this.dao.findOne('block', {
+      where: {
         [roundStr]: this.dao.db_str(
           `(select (cast(block.height / ${this.constants.delegates} as integer) + (case when block.height % ${this.constants.delegates} > 0 then 1 else 0 end))) = ${roundStr}`
         )
       },
-      [
+      attributes: [
         [this.dao.db_fnSum('total_fee'), 'fees'],
         [this.dao.db_fnGroupConcat('reward'), 'rewards'],
         [this.dao.db_fnGroupConcat('generator_public_key'), 'delegates']
       ]
-    )
+    })
     if (!row) {
       row = {
         fees: '',
@@ -72,19 +71,16 @@ class Round {
 
   async getVotes (round, dbTrans) {
     // shuai 2018-11-24
-    return await this.dao.findListByGroup(
-      'mem_round',
-      {
-        where: { round: round.toString() },
-        group: ['delegate', 'round'],
-        attributes: ['delegate', 'round', [this.dao.db_fnSum('amount'), 'amount']] // wxm block database library.dao.db_fn('sum', library.dao.db_col('amount'))
-      },
-      dbTrans
-    )
+    return await this.dao.findListByGroup('mem_round', {
+      where: { round: round.toString() },
+      group: ['delegate', 'round'],
+      attributes: ['delegate', 'round', [this.dao.db_fnSum('amount'), 'amount']],
+      transaction: dbTrans
+    })
   }
 
   async flush (round, dbTrans) {
-    return await this.dao.remove('mem_round', { round: round.toString() }, dbTrans)
+    return await this.dao.remove('mem_round', { where: { round: round.toString() }, transaction: dbTrans })
   }
 
   async directionSwap (direction, lastBlock) {

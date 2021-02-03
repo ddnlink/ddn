@@ -38,7 +38,7 @@ class Block {
   }
 
   async getCount (where) {
-    return await this.dao.count('block', where)
+    return await this.dao.count('block', { where })
   }
 
   async calculateFee () {
@@ -211,7 +211,7 @@ class Block {
     }
 
     try {
-      return await this.dao.insert('block', newBlock, dbTrans)
+      return await this.dao.insert('block', newBlock, { transaction: dbTrans })
     } catch (err) {
       this.logger.error(`insert block fail: ${err.toString()}`)
       throw new Error(`insert block fail: ${err.toString()}`)
@@ -603,7 +603,7 @@ class Block {
               dbTrans
             )
             // 吴连有 todo 最好加事物，报uuid的错误是存储数据时取的dbTrans不对
-            const accountInfo = await this.runtime.account.getAccountByAddress(updatedAccountInfo.address)
+            const accountInfo = await this.runtime.account.getAccountByAddress(updatedAccountInfo.address, dbTrans)
             const newAccountInfo = Object.assign({}, accountInfo, updatedAccountInfo)
 
             try {
@@ -921,7 +921,9 @@ class Block {
 
     try {
       const row = await this.dao.findOne('block', {
-        id: block.id
+        where: {
+          id: block.id
+        }
       })
 
       const bId = row && row.id
@@ -948,15 +950,14 @@ class Block {
         let existsTrsIds = []
         if (trsIds.length > 0) {
           try {
-            existsTrsIds = await this.dao.findList(
-              'tr',
-              {
+            existsTrsIds = await this.dao.findList('tr', {
+              where: {
                 id: {
                   $in: trsIds
                 }
               },
-              ['id']
-            )
+              attributes: ['id']
+            })
           } catch (err) {
             throw new Error(`Failed to query transaction from db: ${err}`)
           }
@@ -1240,13 +1241,7 @@ class Block {
   }
 
   async deleteBlock ({ blockId, dbTrans }) {
-    return await this.dao.remove(
-      'block',
-      {
-        id: blockId
-      },
-      dbTrans
-    )
+    return await this.dao.remove('block', { where: { id: blockId }, transaction: dbTrans })
   }
 
   async deleteBlocksBefore ({ height }) {
@@ -1269,19 +1264,20 @@ class Block {
   }
 
   async simpleDeleteAfterBlock (blockId) {
-    const result = await this.dao.findOne(
-      'block',
-      {
+    const result = await this.dao.findOne('block', {
+      where: {
         id: blockId
       },
-      ['height']
-    )
+      attributes: ['height']
+    })
     if (!result || !result.height) {
       return
     }
     return await this.dao.remove('block', {
-      height: {
-        $gte: result.height // todo: ?????? 2020.8.11
+      where: {
+        height: {
+          $gte: result.height // todo: ?????? 2020.8.11
+        }
       }
     })
   }
@@ -1359,7 +1355,7 @@ class Block {
       throw new Error('Invalid limit. Maximum is 100')
     }
 
-    const rows = await this.dao.findPage('block', {
+    const rows = await this.dao.findList('block', {
       limit: 1,
       offset: 0,
       attributes: [[this.dao.db_fnMax('height'), 'maxHeight']]
@@ -1377,7 +1373,6 @@ class Block {
       where: w,
       limit: l,
       offset: o,
-      returnTotal,
       attributes: [
         ['id', 'b_id'],
         ['height', 'b_height'],
@@ -1456,23 +1451,17 @@ class Block {
       this.dbSequence.add(
         async cb => {
           try {
-            const rows = await this.dao.findPage('block', {
-              limit: 1,
-              offset: 0,
+            const row = await this.dao.findOne('block', {
               attributes: [[this.dao.db_fnMax('height'), 'maxHeight']]
-            }) // wxm block database  library.dao.db_fn('MAX', library.dao.db_col('height'))
-            if (!rows) {
+            })
+            if (!row) {
               return cb('Get Block Error.')
             }
             let maxHeight = 2
-            if (rows.length > 0) {
-              maxHeight = rows[0].maxHeight + 1 // height - bignum ?
-            }
+            maxHeight = row.maxHeight + 1 // height - bignum ?
 
-            const rows2 = await this.dao.findPage('block', {
+            const row2 = await this.dao.findOne('block', {
               where,
-              limit: 1,
-              offset: 0,
               attributes: [
                 ['id', 'b_id'],
                 ['height', 'b_height'],
@@ -1489,10 +1478,10 @@ class Block {
                 [this.dao.db_str(maxHeight + '-height'), 'b_confirmations']
               ]
             })
-            if (!rows2 || !rows2.length) {
+            if (!row2) {
               return cb('querySimpleBlockData Block not found')
             }
-            const block = this.serializeDbData2Block(rows2[0])
+            const block = this.serializeDbData2Block(row2)
             cb(null, block)
           } catch (err) {
             return cb(err)

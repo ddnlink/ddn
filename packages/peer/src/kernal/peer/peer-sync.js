@@ -90,7 +90,7 @@ class PeerSync {
   }
 
   async _getIdSequence (height) {
-    const rows = await this.dao.findPage('block', {
+    const rows = await this.dao.findList('block', {
       where: {
         height: {
           $lte: height
@@ -142,14 +142,13 @@ class PeerSync {
         api: `/blocks/common?ids=${data.ids}&max=${maxHeight}&min=${currProcessHeight}`
       })
       if (result && result.body && result.body.common) {
-        const row = await this.dao.findOne(
-          'block',
-          {
+        const row = await this.dao.findOne('block', {
+          where: {
             id: result.body.common.id,
             height: result.body.common.height
           },
-          ['previous_block']
-        )
+          attributes: ['previous_block']
+        })
         this.logger.debug(
           `peer-sync._addLackBlocks result.body.common.previous_block is ${result.body.common.previous_block}`
         )

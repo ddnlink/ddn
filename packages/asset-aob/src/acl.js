@@ -142,7 +142,9 @@ class Acl extends Asset.Base {
         currency,
         address: item
       },
-      trans
+      {
+        transaction: trans
+      }
     )
     return true
   }
@@ -152,7 +154,7 @@ class Acl extends Asset.Base {
   async _insertList (modelName, currency, list, trans) {
     for (let i = 0; i < list.length; i++) {
       const item = list[i]
-      Promise.resolve(await this._insertItem(modelName, currency, item, trans))
+      await this._insertItem(modelName, currency, item, trans)
     }
   }
 
@@ -175,16 +177,15 @@ class Acl extends Asset.Base {
   }
 
   async _removeList (modelName, currency, list, dbTrans) {
-    await this.dao.remove(
-      modelName,
-      {
+    await this.dao.remove(modelName, {
+      where: {
         currency,
         address: {
           $in: list
         }
       },
-      dbTrans
-    )
+      transaction: dbTrans
+    })
     return true
   }
 

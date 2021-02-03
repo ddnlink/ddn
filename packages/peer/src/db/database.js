@@ -148,9 +148,9 @@ class DAO {
    * 插入数据
    * @param {*} modelName 模型名称
    * @param {*} modelObj 模型数据
-   * @param {*} transaction 事务对象
+   * @param {*} options {transaction} 事务对象
    */
-  static async insert (modelName, modelObj, transaction) {
+  static async insert (modelName, modelObj, options) {
     const modelInst = this._getModel(modelName)
     if (!modelInst) {
       throw new Error(`Data model not defined: ${modelName}`)
@@ -158,21 +158,21 @@ class DAO {
     if (!modelObj) {
       throw new Error('无效的数据输入：' + modelObj)
     }
-    const options = {
+    const opts = {
       ...logOptions,
-      transaction
+      ...(options || {})
     }
     // console.log(modelName)
-    return await modelInst.create(modelObj, options)
+    return await modelInst.create(modelObj, opts)
   }
 
   /**
    * 插入或修改数据
    * @param {*} modelName 模型名称
    * @param {*} modelObj 模型数据
-   * @param {*} transaction 事务对象
+   * @param {*} options {transaction} 事务对象
    */
-  static async insertOrUpdate (modelName, modelObj, transaction) {
+  static async insertOrUpdate (modelName, modelObj, options) {
     const modelInst = this._getModel(modelName)
     if (!modelInst) {
       throw new Error(`Data model not defined: ${modelName}`)
@@ -180,11 +180,11 @@ class DAO {
     if (!modelObj) {
       throw new Error('无效的数据输入：' + modelObj)
     }
-    const options = {
+    const opts = {
       ...logOptions,
-      transaction
+      ...(options || {})
     }
-    await modelInst.upsert(modelObj, options)
+    await modelInst.upsert(modelObj, opts)
     return modelObj
   }
 
@@ -193,10 +193,10 @@ class DAO {
    * $and, $or, $ne, $in, $not, $notIn, $gte, $gt, $lte, $lt, $like, $ilike/$iLike, $notLike, $notILike, '..'/$between, '!..'/$notBetween, '&&'/$overlap, '@>'/$contains, '<@'/$contained
    * @param {*} modelName 模型名称
    * @param {*} modelObj 模型数据
-   * @param {*} where 更新条件，指定更新范围，参考Sequelize的Query查询定义https://sequelize.readthedocs.io/en/latest/docs/querying/?q=Sequelize.fn&check_keywords=yes&area=default#where
-   * @param {*} transaction 事务对象
+   * @param {*} options {where} 更新条件，指定更新范围，参考Sequelize的Query查询定义https://sequelize.readthedocs.io/en/latest/docs/querying/?q=Sequelize.fn&check_keywords=yes&area=default#where
+   * @param {*} options {transaction} 事务对象
    */
-  static async update (modelName, modelObj, where, transaction) {
+  static async update (modelName, modelObj, options) {
     const modelInst = this._getModel(modelName)
     if (!modelInst) {
       throw new Error(`Data model not defined: ${modelName}`)
@@ -206,99 +206,46 @@ class DAO {
       throw new Error('无效的数据输入：' + modelObj)
     }
 
-    const options = {
+    const opts = {
       ...logOptions,
-      where,
-      transaction
+      ...(options || {})
     }
-    const result = await modelInst.update(modelObj, options)
+    const result = await modelInst.update(modelObj, opts)
     return result && result.length > 0 ? result[0] : 0
   }
 
   /**
    * 系统配置表专用，其他数据禁用，区块链数据不允许删除
    * @param {*} modelName
-   * @param {*} where 查询条件，参考Sequelize的Query查询定义https://sequelize.readthedocs.io/en/latest/docs/querying/?q=Sequelize.fn&check_keywords=yes&area=default#where
-   * @param {*} transaction 事务对象
+   * @param {*} options {where} 查询条件，参考Sequelize的Query查询定义https://sequelize.readthedocs.io/en/latest/docs/querying/?q=Sequelize.fn&check_keywords=yes&area=default#where
+   * @param {*} options {transaction} 事务对象
    */
-  static async remove (modelName, where, transaction) {
+  static async remove (modelName, options) {
     const modelInst = this._getModel(modelName)
     if (!modelInst) {
       throw new Error(`Data model not defined: ${modelName}`)
     }
 
-    if (!where) {
-      throw new Error('where参数是必须的：' + where)
+    if (!options || !options.where) {
+      throw new Error('where参数是必须的：' + options.where)
     }
 
-    const options = {
+    const opts = {
       ...logOptions,
-      where,
-      transaction,
+      ...(options || {}),
       cascade: true
     }
-    return await modelInst.destroy(options)
+    return await modelInst.destroy(opts)
   }
 
   /**
    * 根据条件查询到一个对象
    * @param {*} modelName 模型名称
-   * @param {*} where 查询条件
-   * @param {*} attributes 返回字段
-   * @param {*} dbTrans 事务对象
+   * @param {*} options {where} 查询条件
+   * @param {*} options {attributes} 返回字段
+   * @param {*} options {transaction} 事务对象
    */
-  static async findOne (modelName, where, attributes, dbTrans) {
-    const modelInst = this._getModel(modelName)
-    if (!modelInst) {
-      throw new Error(`Data model not defined: ${modelName}`)
-    }
-
-    const options = {
-      ...logOptions,
-      attributes,
-      where
-    }
-
-    if (dbTrans) {
-      options.transaction = dbTrans
-    }
-    const result = await modelInst.findOne(options)
-    return result ? result.toJSON() : null
-  }
-
-  /**
-   * 根据主键查询数据
-   * @param {*} modelName 模型名称
-   * @param {*} value 主键值
-   * @param {*} attributes 定义查询返回的字段，默认为全部，具体定义规则参考Sequelize的Query查询参数https://sequelize.readthedocs.io/en/latest/docs/querying/#attributes
-   * @param {*} dbTrans 事务对象
-   */
-  static async findOneByPrimaryKey (modelName, value, attributes, dbTrans) {
-    const modelInst = this._getModel(modelName)
-    if (!modelInst) {
-      throw new Error(`Data model not defined: ${modelName}`)
-    }
-    if (!value) {
-      throw new Error(`无效的数据输入：${value}`)
-    }
-
-    const result = await modelInst.findByPk(value, {
-      ...logOptions,
-      attributes,
-      transaction: dbTrans || undefined
-    })
-    return result && result.toJSON ? result.toJSON() : result
-  }
-
-  /**
-   * 列表查询
-   * @param {*} modelName 模型名称
-   * @param {*} options where 查询条件，参考Sequelize的Query查询定义https://sequelize.readthedocs.io/en/latest/docs/querying/?q=Sequelize.fn&check_keywords=yes&area=default#where
-   * @param {*} options attributes 定义查询返回的字段，默认为全部，参考Sequelize的Query查询参数https://sequelize.readthedocs.io/en/latest/docs/querying/#attributes
-   * @param {*} options sorts 定义查询的排序方式，参考Sequelize的Query查询参数https://sequelize.readthedocs.io/en/latest/docs/querying/?q=Sequelize.fn&check_keywords=yes&area=default#ordering
-   * @param {*} dbTrans 事务对象
-   */
-  static async findList (modelName, options, dbTrans) {
+  static async findOne (modelName, options) {
     const modelInst = this._getModel(modelName)
     if (!modelInst) {
       throw new Error(`Data model not defined: ${modelName}`)
@@ -309,45 +256,48 @@ class DAO {
       ...(options || {})
     }
 
-    if (dbTrans) {
-      opts.transaction = dbTrans
-    }
-
-    const results = await modelInst.findAll(opts)
-    const jsonResults = []
-    const foundRows = results.rows ? results.rows : results
-    for (let i = 0; i < foundRows.length; i++) {
-      jsonResults.push(foundRows[i].toJSON())
-    }
-
-    return results && results.rows
-      ? {
-        rows: jsonResults,
-        total: results.count
-      }
-      : jsonResults
+    const result = await modelInst.findOne(opts)
+    return result ? result.toJSON() : null
   }
 
   /**
-   * 分页查询
+   * 根据主键查询数据
    * @param {*} modelName 模型名称
+   * @param {*} value 主键值
+   * @param {*} {attributes} 定义查询返回的字段，默认为全部，具体定义规则参考Sequelize的Query查询参数https://sequelize.readthedocs.io/en/latest/docs/querying/#attributes
+   * @param {*} {transaction} 事务对象
+   */
+  static async findOneByPrimaryKey (modelName, value, options) {
+    const modelInst = this._getModel(modelName)
+    if (!modelInst) {
+      throw new Error(`Data model not defined: ${modelName}`)
+    }
+    if (!value) {
+      throw new Error(`invalid primary key：${value}`)
+    }
+
+    const result = await modelInst.findByPk(value, {
+      ...logOptions,
+      ...(options || {})
+    })
+    return result && result.toJSON ? result.toJSON() : result
+  }
+
+  /**
+   * pagination query
+   * @param {*} modelName model name
    * @param {*} options where 查询条件，参考Sequelize的Query查询定义https://sequelize.readthedocs.io/en/latest/docs/querying/?q=Sequelize.fn&check_keywords=yes&area=default#where
    * @param {*} options limit 分页大小
    * @param {*} options offset 分页位置
    * @param {*} options returnTotal 是否返回记录总数
    * @param {*} options attributes 定义查询返回的字段，默认为全部，参考Sequelize的Query查询参数https://sequelize.readthedocs.io/en/latest/docs/querying/#attributes
    * @param {*} options order 定义查询的排序方式，参考Sequelize的Query查询参数https://sequelize.readthedocs.io/en/latest/docs/querying/?q=Sequelize.fn&check_keywords=yes&area=default#ordering
-   * @param {*} dbTrans 事务对象
+   * @param {*} options transaction 事务对象
    */
-  static async findPage (modelName, options, dbTrans) {
+  static async findPage (modelName, options) {
     const modelInst = this._getModel(modelName)
     if (!modelInst) {
       throw new Error(`Data model not defined: ${modelName}`)
-    }
-
-    let invokeMethod = modelInst.findAll
-    if (options && options.returnTotal) {
-      invokeMethod = modelInst.findAndCountAll
     }
 
     const opts = {
@@ -357,55 +307,71 @@ class DAO {
       offset: options.offset || 0
     }
 
-    if (dbTrans) {
-      opts.transaction = dbTrans
-    }
-
-    const results = await invokeMethod.call(modelInst, opts)
+    const results = await modelInst.findAndCountAll(opts)
     const jsonResults = []
-    const foundRows = results.rows ? results.rows : results
+    const foundRows = results.rows
 
     for (let i = 0; i < foundRows.length; i++) {
       jsonResults.push(foundRows[i].toJSON())
     }
 
-    return results && results.rows
-      ? {
-        rows: jsonResults,
-        total: results.count
-      }
-      : jsonResults
+    return {
+      rows: jsonResults,
+      total: results.count
+    }
   }
 
   /**
-   * 分组
+   * 列表查询
    * @param {*} modelName 模型名称
-   * @param {*} where 查询条件，参考Sequelize的Query查询定义https://sequelize.readthedocs.io/en/latest/docs/querying/?q=Sequelize.fn&check_keywords=yes&area=default#where
-   * @param {*} limit 分页大小
-   * @param {*} offset 分页位置
-   * @param {*} group 是否返回记录总数
-   * @param {*} attributes 定义查询返回的字段，默认为全部，参考Sequelize的Query查询参数https://sequelize.readthedocs.io/en/latest/docs/querying/#attributes
-   * @param {*} orders 定义查询的排序方式，参考Sequelize的Query查询参数https://sequelize.readthedocs.io/en/latest/docs/querying/?q=Sequelize.fn&check_keywords=yes&area=default#ordering
-   * @param {*} dbTrans 事务对象
+   * @param {*} options where 查询条件，参考Sequelize的Query查询定义https://sequelize.readthedocs.io/en/latest/docs/querying/?q=Sequelize.fn&check_keywords=yes&area=default#where
+   * @param {*} options attributes 定义查询返回的字段，默认为全部，参考Sequelize的Query查询参数https://sequelize.readthedocs.io/en/latest/docs/querying/#attributes
+   * @param {*} options sorts 定义查询的排序方式，参考Sequelize的Query查询参数https://sequelize.readthedocs.io/en/latest/docs/querying/?q=Sequelize.fn&check_keywords=yes&area=default#ordering
+   * @param {*} options transaction 事务对象
    */
-  static async findListByGroup (modelName, options = {}, dbTrans) {
+  static async findList (modelName, options) {
     const modelInst = this._getModel(modelName)
     if (!modelInst) {
       throw new Error(`Data model not defined: ${modelName}`)
     }
-
-    const invokeMethod = modelInst.findAll
 
     const opts = {
       ...logOptions,
       ...(options || {})
     }
 
-    if (dbTrans) {
-      opts.transaction = dbTrans
+    const results = await modelInst.findAll(opts)
+    const jsonResults = []
+    for (let i = 0; i < results.length; i++) {
+      jsonResults.push(results[i].toJSON())
     }
 
-    const results = await invokeMethod.call(modelInst, opts)
+    return jsonResults
+  }
+
+  /**
+   * 分组
+   * @param {*} modelName 模型名称
+   * @param {*} options where 查询条件，参考Sequelize的Query查询定义https://sequelize.readthedocs.io/en/latest/docs/querying/?q=Sequelize.fn&check_keywords=yes&area=default#where
+   * @param {*} options limit 分页大小
+   * @param {*} options offset 分页位置
+   * @param {*} options group 是否返回记录总数
+   * @param {*} options attributes 定义查询返回的字段，默认为全部，参考Sequelize的Query查询参数https://sequelize.readthedocs.io/en/latest/docs/querying/#attributes
+   * @param {*} options orders 定义查询的排序方式，参考Sequelize的Query查询参数https://sequelize.readthedocs.io/en/latest/docs/querying/?q=Sequelize.fn&check_keywords=yes&area=default#ordering
+   * @param {*} options transaction 事务对象
+   */
+  static async findListByGroup (modelName, options) {
+    const modelInst = this._getModel(modelName)
+    if (!modelInst) {
+      throw new Error(`Data model not defined: ${modelName}`)
+    }
+
+    const opts = {
+      ...logOptions,
+      ...(options || {})
+    }
+
+    const results = await modelInst.findAll(opts)
     const jsonResults = []
     const foundRows = results.rows ? results.rows : results
     for (let i = 0; i < foundRows.length; i++) {
@@ -423,30 +389,27 @@ class DAO {
    * 根据条件查询到个数
    * @param {*} modelName 模型名称
    * @param {*} where 查询条件
-   * @param {*} dbTrans 事务对象
+   * @param {*} transaction 事务对象
    */
-  static async count (modelName, where, dbTrans) {
+  static async count (modelName, options) {
     const modelInst = this._getModel(modelName)
     if (!modelInst) {
       throw new Error(`Data model not defined: ${modelName}`)
     }
 
-    const options = { ...logOptions, where: where || undefined }
-    if (dbTrans) {
-      options.transaction = dbTrans
-    }
+    const opts = { ...logOptions, ...(options || {}) }
 
-    return await modelInst.count(options)
+    return await modelInst.count(opts)
   }
 
-  static async execSql (sql, transaction) {
-    const [results] = await sequelizeInst.query(sql, { ...logOptions, transaction })
+  static async execSql (sql, options) {
+    const [results] = await sequelizeInst.query(sql, { ...logOptions, ...(options || {}) })
 
     return results
   }
 
   /**
-   * @param {*} func 业务函数，由用户编写，系统会自动调用，并传入两个参数 trans-事务对象实例，done-回调方法
+   * @param {*} func 业务函数，由用户编写，系统会自动调用，并传入参数 trans-事务对象实例
    */
   static async transaction (func) {
     if (!sequelizeInst) {

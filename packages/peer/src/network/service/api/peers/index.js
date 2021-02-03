@@ -60,7 +60,6 @@ class RootRouter {
       where,
       limit,
       offset,
-      returnTotal: true,
       attributes: ['ip', 'port', 'state', 'os', 'version'],
       order: sortBy ? [[sortBy, sortMethod]] : null
     })

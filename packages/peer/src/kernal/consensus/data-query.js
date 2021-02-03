@@ -20,7 +20,7 @@ class DataQuery {
   }
 
   async loadSimpleBlocksData (where, limit, offset, orders) {
-    return await this.dao.findPage('block', {
+    return await this.dao.findList('block', {
       where,
       limit,
       offset,
@@ -399,21 +399,17 @@ class DataQuery {
   }
 
   async loadSimpleTransactionData (where, limit, offset, orders, returnTotal) {
-    const rows = await this.dao.findPage('block', {
-      limit: 1,
-      offset: 0,
+    const row = await this.dao.findOne('block', {
       attributes: [[this.dao.db_fnMax('height'), 'maxHeight']]
-    }) // wxm block database  library.dao.db_fn('MAX', library.dao.db_col('height'))
-    if (!rows) {
+    })
+    if (!row) {
       throw new Error('Get Block Error.')
     }
     let maxHeight = 2
-    if (rows.length > 0) {
-      maxHeight = rows[0].maxHeight + 1
-    }
+    maxHeight = row.maxHeight + 1
 
     try {
-      return await this.dao.findPage('tr', {
+      const opts = {
         where,
         limit,
         offset,
@@ -436,7 +432,12 @@ class DataQuery {
           [this.dao.db_str(`${maxHeight}-block_height`), 'confirmations']
         ],
         order: orders
-      })
+      }
+      if (returnTotal) {
+        return await this.dao.findPage('tr', opts)
+      } else {
+        return await this.dao.findList('tr', opts)
+      }
     } catch (err) {
       this.logger.error('Query transactions from database error', err)
     }

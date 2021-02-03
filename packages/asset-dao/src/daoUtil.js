@@ -74,7 +74,7 @@ async function updateOrg (context, org, dbTrans) {
   // }
 
   try {
-    return await context.dao.insertOrUpdate('mem_org', org, dbTrans)
+    return await context.dao.insertOrUpdate('mem_org', org, { transaction: dbTrans })
   } catch (err) {
     throw new Error(`insertOrUpdate mem_org ${err}`)
   }
@@ -107,14 +107,12 @@ async function exchangeOrg (context, org_id, address, dbTrans) {
     state: 1
   }
 
-  return await context.dao.update(
-    'mem_org',
-    org,
-    {
+  return await context.dao.update('mem_org', org, {
+    where: {
       org_id: org_id.toLowerCase()
     },
-    dbTrans
-  )
+    transaction: dbTrans
+  })
 }
 
 export default {

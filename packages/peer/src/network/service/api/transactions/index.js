@@ -526,9 +526,11 @@ class TransactionService {
       time = getYMD(day)
       // 查询当日交易量
       const count = await this.dao.count('tr', {
-        timestamp: {
-          $gte: Number(this.runtime.slot.getTime(d1Ms)),
-          $lt: Number(this.runtime.slot.getTime(d1Ms + dayMilliSeconds - 1))
+        where: {
+          timestamp: {
+            $gte: Number(this.runtime.slot.getTime(d1Ms)),
+            $lt: Number(this.runtime.slot.getTime(d1Ms + dayMilliSeconds - 1))
+          }
         }
       })
       const obj = {

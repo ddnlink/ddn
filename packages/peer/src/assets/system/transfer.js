@@ -113,7 +113,7 @@ class Transfer {
    * @param {*} dbTrans 事物
    */
   async deleteTransfer (transaction_id, dbTrans) {
-    await this.dao.remove('transfer', { transaction_id }, dbTrans)
+    await this.dao.remove('transfer', { where: { transaction_id }, transaction: dbTrans })
     return true
   }
 

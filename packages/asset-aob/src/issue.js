@@ -177,7 +177,7 @@ class Issue extends Asset.Base {
     )
     const { quantity } = data[0]
     await assetInst.update({ quantity: bignum.plus(quantity, amount).toString() }, { name: currency }, dbTrans)
-    const assetBalancedata = await this.dao.findOne('mem_asset_balance', { address: sender.address, currency })
+    const assetBalancedata = await this.dao.findOne('mem_asset_balance', { where: { address: sender.address, currency } })
 
     const balance = assetBalancedata && assetBalancedata.balance ? assetBalancedata.balance : '0'
     const newBalance = bignum.plus(balance, amount)
@@ -188,14 +188,16 @@ class Issue extends Asset.Base {
       await this.dao.update(
         'mem_asset_balance',
         { balance: newBalance.toString() },
-        { address: sender.address, currency },
-        dbTrans
+        {
+          where: { address: sender.address, currency },
+          transaction: dbTrans
+        }
       )
     } else {
       await this.dao.insert(
         'mem_asset_balance',
         { address: sender.address, currency, balance: newBalance.toString() },
-        dbTrans
+        { transaction: dbTrans }
       )
     }
     return trs
@@ -221,9 +223,10 @@ class Issue extends Asset.Base {
     )
     const { quantity } = data[0]
     await assetInst.update({ quantity: bignum.plus(quantity, amount).toString() }, { name: currency }, dbTrans)
-    const assetBalancedata = await this.dao.findOne('mem_asset_balance', { address: sender.address, currency }, [
-      'balance'
-    ])
+    const assetBalancedata = await this.dao.findOne('mem_asset_balance', {
+      where: { address: sender.address, currency },
+      attributes: ['balance']
+    })
 
     const balance2 = assetBalancedata && assetBalancedata.balance ? assetBalancedata.balance : '0'
     const newBalance = bignum.plus(balance2, amount)
@@ -233,15 +236,19 @@ class Issue extends Asset.Base {
     if (assetBalancedata) {
       await this.dao.update(
         'mem_asset_balance',
-        { balance: newBalance.toString() },
-        { address: sender.address, currency },
-        dbTrans
+        {
+          balance: newBalance.toString()
+        },
+        {
+          where: { address: sender.address, currency },
+          transaction: dbTrans
+        }
       )
     } else {
       await this.dao.insert(
         'mem_asset_balance',
         { address: sender.address, currency, balance: newBalance.toString() },
-        dbTrans
+        { transaction: dbTrans }
       )
     }
   }

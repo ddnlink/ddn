@@ -475,7 +475,6 @@ class Dapp extends Asset.Base {
       where: { address: dappId },
       limit,
       offset,
-      returnTotal: true,
       attributes: ['currency', 'balance']
     })
     return { success: true, result: rows }
@@ -485,7 +484,10 @@ class Dapp extends Asset.Base {
     const dappId = req.params.dappid
     const { currency } = req.params
 
-    const row = await this.dao.findOne('mem_asset_balance', { address: dappId, currency }, ['balance'])
+    const row = await this.dao.findOne('mem_asset_balance', {
+      where: { address: dappId, currency },
+      attributes: ['balance']
+    })
     return { success: true, result: { currency, balance: row.balance } }
   }
 

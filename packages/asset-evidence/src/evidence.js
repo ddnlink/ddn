@@ -89,7 +89,7 @@ class Evidence extends Asset.Base {
       return trans
     }
     const oldEvidence = results[0]
-    const { senderId } = await this.dao.findOneByPrimaryKey('tr', oldEvidence.transaction_id, ['senderId'])
+    const { senderId } = await this.dao.findOneByPrimaryKey('tr', oldEvidence.transaction_id, { attributes: ['senderId'] })
 
     if (senderId !== sender.address) {
       throw new Error(`The evidence ipid ${assetObj.ipid} has been registered by ${senderId})`)

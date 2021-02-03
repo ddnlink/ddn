@@ -179,7 +179,11 @@ class OutTransfer extends Asset.Base {
       currency
     }
 
-    const row = await this.dao.findOne('mem_asset_balance', condition, ['balance'], dbTrans)
+    const row = await this.dao.findOne('mem_asset_balance', {
+      where: condition,
+      attributes: ['balance'],
+      transaction: dbTrans
+    })
     let balance = '0'
     // FIXME: let balanceExists = false;
     if (row) {
@@ -193,7 +197,7 @@ class OutTransfer extends Asset.Base {
     }
 
     condition.balance = newBalance.toString()
-    return await this.dao.insertOrUpdate('mem_asset_balance', condition, dbTrans)
+    return await this.dao.insertOrUpdate('mem_asset_balance', condition, { transaction: dbTrans })
   }
 
   async apply (trs, block, _sender, dbTrans) {

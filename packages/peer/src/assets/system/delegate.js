@@ -142,7 +142,7 @@ class Delegate {
    * @param {*} dbTrans 事物
    */
   async deleteDelegate (transaction_id, dbTrans) {
-    await this.dao.remove('delegate', { transaction_id }, dbTrans)
+    await this.dao.remove('delegate', { where: { transaction_id }, transaction: dbTrans })
     return true
   }
 
@@ -216,7 +216,9 @@ class Delegate {
         username: asset.delegate.username,
         transaction_id: id
       },
-      dbTrans
+      {
+        transaction: dbTrans
+      }
     )
   }
 
