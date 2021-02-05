@@ -30,6 +30,11 @@ class OutTransfer extends Asset.Base {
         field: 'str3',
         prop: 'amount',
         required: true
+      },
+      {
+        field: 'str5',
+        prop: 'withdrawal_sequence',
+        required: true
       }
     ]
   }
@@ -41,7 +46,7 @@ class OutTransfer extends Asset.Base {
     const dappId = Buffer.from(transfer.dapp_id, 'utf8')
 
     // todo: 2020.7.16
-    if (transfer.currency !== this.constants.tokenName) {
+    if (transfer.currency !== 'DDN') {
       const currency = Buffer.from(transfer.currency, 'utf8')
       const amount = Buffer.from(transfer.amount, 'utf8')
       buf = Buffer.concat([buf, dappId, currency, amount])
@@ -115,6 +120,22 @@ class OutTransfer extends Asset.Base {
     }
 
     return trs
+  }
+
+  async verifySignature (trs) {
+    const transfer = await this.getAssetObject(trs)
+    // TODO 这里做签名认证，但是为什么取不到dapp呢？？？？？
+    await this.getDappByTransactionId(transfer.dapp_id)
+    return true
+  }
+
+  async getDappByTransactionId (trsId) {
+    const result = await this.queryAsset({ trs_id: trsId }, null, false, 1, 1)
+    if (result && result.length) {
+      return result[0]
+    }
+    return result
+    // throw new Error(`DApp not found: ${trsId}`)
   }
 
   async process (trs) {

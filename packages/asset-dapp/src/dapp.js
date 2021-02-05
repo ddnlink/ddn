@@ -2,7 +2,7 @@ import path from 'path'
 import fs from 'fs'
 import request from 'request'
 import DecompressZip from 'decompress-zip'
-import * as DdnCrypto from '@ddn/crypto'
+import DdnCrypto from '@ddn/crypto'
 import Asset from '@ddn/asset-base'
 import Sandbox from '@ddn/sandbox'
 import DdnUtils, { assetTypes } from '@ddn/utils'
@@ -600,7 +600,6 @@ class Dapp extends Asset.Base {
     args = args || []
 
     const dapp = await this.getDappByTransactionId(id)
-    console.log(dapp)
     const installedIds = await this.getInstalledDappIds()
     if (installedIds.indexOf(id) < 0) {
       throw new Error('Dapp not installed')
@@ -835,6 +834,7 @@ class Dapp extends Asset.Base {
     if (result && result.length) {
       return result[0]
     }
+
     throw new Error(`DApp not found: ${trsId}`)
   }
 
@@ -957,7 +957,6 @@ class Dapp extends Asset.Base {
     if (validateErrors) {
       throw new Error(`Invalid parameters: ${validateErrors[0].schemaPath} ${validateErrors[0].message}`)
     }
-
     const dapp = await this.getDappByTransactionId(query.id)
 
     return { success: true, dapp }
@@ -1259,7 +1258,7 @@ class Dapp extends Asset.Base {
     const keypair = DdnCrypto.getKeys(body.secret)
 
     if (body.publicKey) {
-      if (keypair.publicKey !== body.publicKey) {
+      if (keypair.publicKey.toString('hex') !== body.publicKey) {
         throw new Error('Invalid passphrase')
       }
     }
@@ -1269,7 +1268,7 @@ class Dapp extends Asset.Base {
         async cb => {
           let account
           try {
-            account = await this.runtime.account.getAccountByPublicKey(keypair.publicKey)
+            account = await this.runtime.account.getAccountByPublicKey(keypair.publicKey.toString('hex'))
           } catch (e) {
             return cb(e)
           }
@@ -1420,10 +1419,8 @@ class Dapp extends Asset.Base {
   }
 
   async getDapp (req, cb) {
-    ;(async () => {
-      const dapp = await this.getDappByTransactionId(req.dappId)
-      return cb(null, dapp)
-    })()
+    const dapp = await this.getDappByTransactionId(req.dappId)
+    return cb(null, dapp)
   }
 
   setReady (req, cb) {
@@ -1573,10 +1570,10 @@ class Dapp extends Asset.Base {
     }
 
     self.balancesSequence.add(
-      function (cb) {
+      async function (cb) {
         if (body.multisigAccountPublicKey && body.multisigAccountPublicKey !== keypair.publicKey) {
           try {
-            const account = modules.accounts.getAccount({ publicKey: body.multisigAccountPublicKey })
+            const account = await modules.accounts.getAccount({ publicKey: body.multisigAccountPublicKey })
             if (!account) {
               return cb('Multisignature account not found')
             }
@@ -1589,7 +1586,7 @@ class Dapp extends Asset.Base {
               return cb('Account does not belong to multisignature group')
             }
 
-            const requester = modules.accounts.getAccount({ publicKey: keypair.publicKey })
+            const requester = await modules.accounts.getAccount({ publicKey: keypair.publicKey })
 
             if (!requester || !requester.publicKey) {
               return cb('Invalid requester')
@@ -1628,7 +1625,7 @@ class Dapp extends Asset.Base {
           }
         } else {
           try {
-            const account = modules.accounts.getAccount({ publicKey: keypair.publicKey })
+            const account = await modules.accounts.getAccount({ publicKey: keypair.publicKey })
             if (!account) {
               return cb('Account not found')
             }

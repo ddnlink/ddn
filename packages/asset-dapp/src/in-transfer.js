@@ -23,6 +23,10 @@ class InTransfer extends Asset.Base {
       {
         field: 'str3',
         prop: 'amount'
+      },
+      {
+        field: 'str5',
+        prop: 'deposit_sequence'
       }
     ]
   }
@@ -42,7 +46,7 @@ class InTransfer extends Asset.Base {
       trs.amount = data.amount + ''
       delete data[assetJsonName].amount
     }
-
+    trs.asset[assetJsonName].withdrawal_sequence = trs.height
     return trs
   }
 
@@ -121,7 +125,6 @@ class InTransfer extends Asset.Base {
 
     let buf = Buffer.from([])
     const dappId = Buffer.from(transfer.dapp_id, 'utf8')
-    console.log('getbytes', this.constants)
     // TODO 通过nodesdk调到这里实例化时没有传content变量所以拿不到tokenName，暂时写死 again !!!
     // if (trs.asset.inTransfer.currency !== this.library.constants.tokenName) {
     if (transfer.currency !== 'DDN') {
@@ -166,7 +169,9 @@ class InTransfer extends Asset.Base {
   async apply (trs, _block, sender, dbTrans) {
     const asset = await this.getAssetObject(trs)
     const dappId = asset.dapp_id
-
+    if (!asset.deposit_sequence) {
+      asset.deposit_sequence = _block.height
+    }
     if (asset.currency === this.constants.tokenName) {
       this.balanceCache.addAssetBalance(dappId, asset.currency, trs.amount)
       await this._updateAssetBalance(asset.currency, trs.amount, dappId, dbTrans)
