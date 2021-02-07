@@ -52,7 +52,14 @@ class PeerInvoker {
       url = `http://${peer.address}${url}`
     } else if (peer.host) {
       peer.ip=ip.toLong(peer.host)
-      url = `http://${peer.host}:${peer.port}${url}`
+      if(dappId){
+        // TODO 这个判断是为了dapp节点测试同步，通过后需要删除
+        peer.host==='0.0.0.0'?peer.host='192.168.1.5':''
+        url = `http://${peer.host}:${peer.port}/dapps/${dappId}${url}`
+      }else{
+        url = `http://${peer.host}:${peer.port}${url}`
+
+      }
     } else {
       url = `http://${ip.fromLong(peer.ip)}:${peer.port}${url}`
     }
@@ -93,7 +100,11 @@ class PeerInvoker {
           this.logger.error('request error: ',err)
           reject( `Request peer api failed: ${url}`)
         } else {
-          console.log('res,r',res.headers.port)
+          // TODO dapp侧链返回的规则和主链的规则不一致，这里先返回后期优化一下
+          if(dappId){
+            resolve({ body, peer })
+          }
+          // console.log('res,r',res)
           res.headers.port = parseInt(res.headers.port)
           const validateErrors = await this.ddnSchema.validate(
             {

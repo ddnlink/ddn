@@ -1418,6 +1418,7 @@ class Dapp extends Asset.Base {
   }
 
   apiHandler(message, callback) {
+    console.log('apiHandler----------',message)
     try {
       const strs = message.call.split('#')
       const module = strs[0]
@@ -1445,7 +1446,7 @@ class Dapp extends Asset.Base {
     if (typeof this[call] !== 'function') {
       return cb(`Function not found in module: ${call}`)
     }
-
+    console.log('sandboxApi',call, args)
     const callArgs = [args, cb]
     return this[call].apply(this, callArgs)
   }
@@ -1814,7 +1815,7 @@ class Dapp extends Asset.Base {
     const that = this
     const dapp_id = req.dappId;
     //TODO 这里查询的是dapp充值交易，能不能直接查询dapp资产表
-    const data = await this.runtime.dataquery.loadAssetsWithDappChainCondition({ dapp_id, type: DdnUtils.assetTypes.DAPP_OUT})
+    const data = await this.runtime.dataquery.loadAssetsWithDappChainCondition({ dapp_id, type: DdnUtils.assetTypes.DAPP_OUT })
     const transactions = []
     for (let i = 0; i < data.length; i++) {
       const row = data[i]
@@ -1837,7 +1838,7 @@ class Dapp extends Asset.Base {
     //   });
     //   });
     // console.log('withDraw', transactions[0].asset.dappOut, req)
-    cb(null, transactions)
+    transactions.length > 0 ? cb(null, transactions[0]) : cb(null, null)
   }
 
 }
