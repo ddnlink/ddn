@@ -1,6 +1,6 @@
 {
   "name": "@ddn/utils",
-  "version": "0.1.24",
+  "version": "0.2.1",
   "description": "DDN utils.",
   "main": "lib/index.js",
   "module": "dist/index.esm.js",
@@ -19,7 +19,8 @@
   "dependencies": {
     "@ddn/core": "^0.2.15",
     "bignumber.js": "^7.2.1",
-    "ip": "^1.1.5"
+    "ip": "^1.1.5",
+    "request-promise": "^4.2.6"
   },
   "peerDependencies": {
     "shelljs": "^0.8.3"

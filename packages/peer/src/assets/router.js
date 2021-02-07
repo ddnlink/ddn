@@ -36,10 +36,9 @@ class Router {
 
       // Common api secendly
       const apis = await this._attachAssetPluginApiRouter(router, assetConfig, assetInst)
-
       // rustful api, for example: new api: /api/aob/assets -> old api: /api/aobasset/all
       this._assetsApi.push({
-        path: `/api/${apiSubPath}`,
+        path: assetInst.customApi ? assetInst.customApi : `/api/${apiSubPath}`, // assetInst.customApi自定义资产路由前缀
         router,
         apis
       })

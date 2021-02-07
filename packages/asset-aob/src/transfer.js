@@ -2,7 +2,7 @@ import _ from 'lodash'
 
 import Asset from '@ddn/asset-base'
 import DdnUtils from '@ddn/utils'
-import DdnCrypto from '@ddn/crypto'
+import * as DdnCrypto from '@ddn/crypto'
 
 class Transfer extends Asset.Base {
   // eslint-disable-next-line no-useless-constructor
@@ -67,9 +67,15 @@ class Transfer extends Asset.Base {
     }
 
     const assetInst = await this.getAssetInstanceByName('AobAsset')
-    const data = await assetInst.queryAsset({
-      name: assetData.currency
-    }, null, null, 1, 1)
+    const data = await assetInst.queryAsset(
+      {
+        name: assetData.currency
+      },
+      null,
+      null,
+      1,
+      1
+    )
     if (data.length <= 0) {
       throw new Error(`Asset ${assetData.currency} not exists`)
     }
@@ -79,30 +85,39 @@ class Transfer extends Asset.Base {
       throw new Error('Asset already writeoff')
     }
 
-    if (assetDetail.allow_whitelist === '0' &&
-            assetDetail.allow_blacklist === '0') {
+    if (assetDetail.allow_whitelist === '0' && assetDetail.allow_blacklist === '0') {
       return trs
     }
 
-    if (assetDetail.acl === 0) { // 检查黑白名单
-      if (await this.isInBlackList(assetData.currency, sender.address) ||
-                await this.isInBlackList(assetData.currency, trs.recipientId)) {
+    if (assetDetail.acl === 0) {
+      // 检查黑白名单
+      if (
+        (await this.isInBlackList(assetData.currency, sender.address)) ||
+        (await this.isInBlackList(assetData.currency, trs.recipientId))
+      ) {
         throw new Error('Permission not allowed')
       }
-    } else if (assetDetail.acl === 1) { // 检查白名单
+    } else if (assetDetail.acl === 1) {
+      // 检查白名单
       const issuerInst = await this.getAssetInstanceByName('AobIssuer')
-      const data2 = await issuerInst.queryAsset({
-        name: assetDetail.issuer_name
-      }, null, null, 1, 1)
+      const data2 = await issuerInst.queryAsset(
+        {
+          name: assetDetail.issuer_name
+        },
+        null,
+        null,
+        1,
+        1
+      )
       if (data2.length <= 0) {
         throw new Error('Issuer not exists')
       }
       const issuerInfo = data2[0]
 
-      if (((sender.address !== issuerInfo.issuer_id) &&
-                !(await this.isInWhiteList(assetData.currency, sender.address))) ||
-                ((trs.recipientId !== issuerInfo.issuer_id) &&
-                    !(await this.isInWhiteList(assetData.currency, trs.recipientId)))) {
+      if (
+        (sender.address !== issuerInfo.issuer_id && !(await this.isInWhiteList(assetData.currency, sender.address))) ||
+        (trs.recipientId !== issuerInfo.issuer_id && !(await this.isInWhiteList(assetData.currency, trs.recipientId)))
+      ) {
         throw new Error('Permission not allowed.')
       }
     }
@@ -111,29 +126,11 @@ class Transfer extends Asset.Base {
   }
 
   async isInWhiteList (currency, address) {
-    return new Promise((resolve, reject) => {
-      this.dao.findOne('acl_white', { currency, address },
-        null, null, (err, result) => {
-          if (err) {
-            return reject(err)
-          }
-
-          resolve(result)
-        })
-    })
+    return await this.dao.findOne('acl_white', { where: { currency, address } })
   }
 
   async isInBlackList (currency, address) {
-    return new Promise((resolve, reject) => {
-      this.dao.findOne('acl_black', { currency, address },
-        null, null, (err, result) => {
-          if (err) {
-            return reject(err)
-          }
-
-          resolve(result)
-        })
-    })
+    return await this.dao.findOne('acl_black', { where: { currency, address } })
   }
 
   // 新增事务dbTrans ---wly
@@ -141,70 +138,86 @@ class Transfer extends Asset.Base {
     const transfer = await this.getAssetObject(trs)
     this.balanceCache.addAssetBalance(trs.recipientId, transfer.currency, transfer.amount)
     // (1)
-    const assetBalancedata = await new Promise((resolve) => {
-      this.dao.findOne('mem_asset_balance', {
+    const assetBalancedata = await this.dao.findOne('mem_asset_balance', {
+      where: {
         address: sender.address,
         currency: transfer.currency
-      }, ['balance'], (err, rows) => {
-        if (err) {
-          resolve(err)
-        } else {
-          resolve(rows)
-        }
-      })
+      },
+      attributes: ['balance']
     })
-    const balance = (assetBalancedata && assetBalancedata.balance) ? assetBalancedata.balance : '0'
+    const balance = assetBalancedata && assetBalancedata.balance ? assetBalancedata.balance : '0'
     const newBalance = DdnUtils.bignum.plus(balance, `-${transfer.amount}`)
     if (DdnUtils.bignum.isLessThan(newBalance, 0)) {
       // this.logger.error('Asset balance not enough')
       throw new Error('Asset balance not enough')
     }
     if (assetBalancedata) {
-      this.dao.update('mem_asset_balance', {
-        balance: newBalance.toString()
-      }, {
-        address: sender.address,
-        currency: transfer.currency
-      }, dbTrans)
+      await this.dao.update(
+        'mem_asset_balance',
+        {
+          balance: newBalance.toString()
+        },
+        {
+          where: {
+            address: sender.address,
+            currency: transfer.currency
+          },
+          transaction: dbTrans
+        }
+      )
     } else {
-      this.dao.insert('mem_asset_balance', {
-        address: sender.address,
-        currency: transfer.currency,
-        balance: newBalance.toString()
-      }, dbTrans)
+      await this.dao.insert(
+        'mem_asset_balance',
+        {
+          address: sender.address,
+          currency: transfer.currency,
+          balance: newBalance.toString()
+        },
+        {
+          transaction: dbTrans
+        }
+      )
     }
     // (2)
-    const assetBalancedata2 = await new Promise((resolve) => {
-      this.dao.findOne('mem_asset_balance', {
+    const assetBalancedata2 = await this.dao.findOne('mem_asset_balance', {
+      where: {
         address: trs.recipientId,
         currency: transfer.currency
-      }, ['balance'], (err, rows) => {
-        if (err) {
-          resolve(err)
-        } else {
-          resolve(rows)
-        }
-      })
+      },
+      attributes: ['balance']
     })
-    const balance2 = (assetBalancedata2 && assetBalancedata2.balance) ? assetBalancedata2.balance : '0'
+    const balance2 = assetBalancedata2 && assetBalancedata2.balance ? assetBalancedata2.balance : '0'
     const newBalance2 = DdnUtils.bignum.plus(balance2, transfer.amount)
     if (DdnUtils.bignum.isLessThan(newBalance2, 0)) {
       // this.logger.error('Asset balance not enough')
       throw new Error('Asset balance not enough')
     }
     if (assetBalancedata2) {
-      this.dao.update('mem_asset_balance', {
-        balance: newBalance2.toString()
-      }, {
-        address: trs.recipientId,
-        currency: transfer.currency
-      }, dbTrans)
+      await this.dao.update(
+        'mem_asset_balance',
+        {
+          balance: newBalance2.toString()
+        },
+        {
+          where: {
+            address: trs.recipientId,
+            currency: transfer.currency
+          },
+          transaction: dbTrans
+        }
+      )
     } else {
-      this.dao.insert('mem_asset_balance', {
-        address: trs.recipientId,
-        currency: transfer.currency,
-        balance: newBalance2.toString()
-      }, dbTrans)
+      await this.dao.insert(
+        'mem_asset_balance',
+        {
+          address: trs.recipientId,
+          currency: transfer.currency,
+          balance: newBalance2.toString()
+        },
+        {
+          transaction: dbTrans
+        }
+      )
     }
   }
 
@@ -213,19 +226,14 @@ class Transfer extends Asset.Base {
     this.balanceCache.addAssetBalance(trs.recipientId, transfer.currency, `-${transfer.amount}`)
 
     // (1)
-    const assetBalancedata = await new Promise((resolve) => {
-      this.dao.findOne('mem_asset_balance', {
+    const assetBalancedata = await this.dao.findOne('mem_asset_balance', {
+      where: {
         address: sender.address,
         currency: transfer.currency
-      }, ['balance'], (err, rows) => {
-        if (err) {
-          resolve(err)
-        } else {
-          resolve(rows)
-        }
-      })
+      },
+      attributes: ['balance']
     })
-    const balance = (assetBalancedata && assetBalancedata.balance) ? assetBalancedata.balance : '0'
+    const balance = assetBalancedata && assetBalancedata.balance ? assetBalancedata.balance : '0'
     const newBalance = DdnUtils.bignum.plus(balance, transfer.amount)
     if (DdnUtils.bignum.isLessThan(newBalance, 0)) {
       throw new Error('Asset balance not enough')
@@ -233,33 +241,41 @@ class Transfer extends Asset.Base {
       // return
     }
     if (assetBalancedata) {
-      this.dao.update('mem_asset_balance', {
-        balance: newBalance.toString()
-      }, {
-        address: sender.address,
-        currency: transfer.currency
-      }, dbTrans)
+      await this.dao.update(
+        'mem_asset_balance',
+        {
+          balance: newBalance.toString()
+        },
+        {
+          where: {
+            address: sender.address,
+            currency: transfer.currency
+          },
+          transaction: dbTrans
+        }
+      )
     } else {
-      this.dao.insert('mem_asset_balance', {
-        address: sender.address,
-        currency: transfer.currency,
-        balance: newBalance.toString()
-      }, dbTrans)
+      await this.dao.insert(
+        'mem_asset_balance',
+        {
+          address: sender.address,
+          currency: transfer.currency,
+          balance: newBalance.toString()
+        },
+        {
+          transaction: dbTrans
+        }
+      )
     }
     // (2)
-    const assetBalancedata2 = await new Promise((resolve) => {
-      this.dao.findOne('mem_asset_balance', {
+    const assetBalancedata2 = await this.dao.findOne('mem_asset_balance', {
+      where: {
         address: trs.recipientId,
         currency: transfer.currency
-      }, ['balance'], (err, rows) => {
-        if (err) {
-          resolve(err)
-        } else {
-          resolve(rows)
-        }
-      })
+      },
+      attributes: ['balance']
     })
-    const balance2 = (assetBalancedata2 && assetBalancedata2.balance) ? assetBalancedata2.balance : '0'
+    const balance2 = assetBalancedata2 && assetBalancedata2.balance ? assetBalancedata2.balance : '0'
     const newBalance2 = DdnUtils.bignum.plus(balance2, `-${transfer.amount}`)
     if (DdnUtils.bignum.isLessThan(newBalance2, 0)) {
       throw new Error('Asset balance not enough')
@@ -267,26 +283,46 @@ class Transfer extends Asset.Base {
       // return
     }
     if (assetBalancedata2) {
-      this.dao.update('mem_asset_balance', {
-        balance: newBalance2.toString()
-      }, {
-        address: trs.recipientId,
-        currency: transfer.currency
-      }, dbTrans)
+      await this.dao.update(
+        'mem_asset_balance',
+        {
+          balance: newBalance2.toString()
+        },
+        {
+          where: {
+            address: trs.recipientId,
+            currency: transfer.currency
+          },
+          transaction: dbTrans
+        }
+      )
     } else {
-      this.dao.insert('mem_asset_balance', {
-        address: trs.recipientId,
-        currency: transfer.currency,
-        balance: newBalance2.toString()
-      }, dbTrans)
+      await this.dao.insert(
+        'mem_asset_balance',
+        {
+          address: trs.recipientId,
+          currency: transfer.currency,
+          balance: newBalance2.toString()
+        },
+        {
+          transaction: dbTrans
+        }
+      )
+    }
+    // 删除回滚的资产交易
+    if (transfer) {
+      await this.dao.remove('trs_asset', {
+        where: {
+          transaction_id: trs.id
+        },
+        transaction: dbTrans
+      })
     }
   }
 
   async applyUnconfirmed (trs, sender) {
     const transfer = await this.getAssetObject(trs)
-    const balance = this.balanceCache.getAssetBalance(
-      sender.address, transfer.currency
-    ) || 0
+    const balance = this.balanceCache.getAssetBalance(sender.address, transfer.currency) || 0
 
     const surplus = DdnUtils.bignum.minus(balance, transfer.amount)
     if (DdnUtils.bignum.isLessThan(surplus, 0)) {
@@ -303,8 +339,8 @@ class Transfer extends Asset.Base {
   }
 
   /**
-     * 自定义资产Api
-     */
+   * 自定义资产Api
+   */
   async attachApi (router) {
     // TODO: imfly, /transfers
     router.put('/', async (req, res) => {
@@ -316,7 +352,8 @@ class Transfer extends Asset.Base {
       }
     })
     // 获得我的全部资产交易，包括创建发行商、资产、发行、转账等全部交易类型
-    router.get('/my/:address/', async (req, res) => { // 127.0.0.1:8001/api/aob/transfers/:address/:currency
+    router.get('/my/:address/', async (req, res) => {
+      // 127.0.0.1:8001/api/aob/transfers/:address/:currency
       try {
         const result = await this.getMyTransactions(req, res)
         res.json(result)
@@ -324,7 +361,8 @@ class Transfer extends Asset.Base {
         res.json({ success: false, error: err.message || err.toString() })
       }
     })
-    router.get('/my/:address/:currency', async (req, res) => { // 127.0.0.1:8001/api/aob/transfers/:address/:currency
+    router.get('/my/:address/:currency', async (req, res) => {
+      // 127.0.0.1:8001/api/aob/transfers/:address/:currency
       try {
         const result = await this.getMyTransactions(req, res)
         res.json(result)
@@ -334,7 +372,8 @@ class Transfer extends Asset.Base {
     })
 
     // 获得 currency 的全部转账交易
-    router.get('/:currency', async (req, res) => { // 127.0.0.1:8001/api/aob/transfers/:currency
+    router.get('/:currency', async (req, res) => {
+      // 127.0.0.1:8001/api/aob/transfers/:currency
       try {
         const result = await this.getTransactions(req, res)
         res.json(result)
@@ -347,50 +386,55 @@ class Transfer extends Asset.Base {
   // TODO: test it 2020.8.8
   async putTransferAsset (req) {
     const { body } = req
-    const validateErrors = await this.ddnSchema.validate({
-      type: 'object',
-      properties: {
-        secret: {
-          type: 'string',
-          minLength: 1,
-          maxLength: 100
+    const validateErrors = await this.ddnSchema.validate(
+      {
+        type: 'object',
+        properties: {
+          secret: {
+            type: 'string',
+            minLength: 1,
+            maxLength: 100
+          },
+          currency: {
+            type: 'string',
+            maxLength: 22
+          },
+          amount: {
+            type: 'string',
+            maxLength: 50
+          },
+          recipientId: {
+            type: 'string',
+            minLength: 1
+          },
+          publicKey: {
+            type: 'string',
+            format: 'publicKey'
+          },
+          secondSecret: {
+            type: 'string',
+            minLength: 1,
+            maxLength: 100
+          },
+          multisigAccountPublicKey: {
+            type: 'string',
+            format: 'publicKey'
+          },
+          message: {
+            // 主交易备注
+            type: 'string',
+            maxLength: 256
+          },
+          content: {
+            // 资产交易备注
+            type: 'string',
+            maxLength: 1024
+          }
         },
-        currency: {
-          type: 'string',
-          maxLength: 22
-        },
-        amount: {
-          type: 'string',
-          maxLength: 50
-        },
-        recipientId: {
-          type: 'string',
-          minLength: 1
-        },
-        publicKey: {
-          type: 'string',
-          format: 'publicKey'
-        },
-        secondSecret: {
-          type: 'string',
-          minLength: 1,
-          maxLength: 100
-        },
-        multisigAccountPublicKey: {
-          type: 'string',
-          format: 'publicKey'
-        },
-        message: { // 主交易备注
-          type: 'string',
-          maxLength: 256
-        },
-        content: { // 资产交易备注
-          type: 'string',
-          maxLength: 1024
-        }
+        required: ['secret', 'amount', 'recipientId', 'currency']
       },
-      required: ['secret', 'amount', 'recipientId', 'currency']
-    }, body)
+      body
+    )
     if (validateErrors) {
       throw new Error(`Invalid parameters: ${validateErrors[0].schemaPath} ${validateErrors[0].message}`)
     }
@@ -414,115 +458,116 @@ class Transfer extends Asset.Base {
 
     return new Promise((resolve, reject) => {
       // eslint-disable-next-line consistent-return
-      this.balancesSequence.add(async (cb) => {
-        if (body.multisigAccountPublicKey && body.multisigAccountPublicKey !== keypair.publicKey.toString('hex')) {
-          let account
-          try {
-            account = await this.runtime.account.getAccountByPublicKey(
-              body.multisigAccountPublicKey
-            )
-          } catch (e) {
-            return cb(e)
-          }
-
-          if (!account) {
-            return cb('Multisignature account not found')
-          }
-          if (!account.multisignatures) {
-            return cb('Account does not have multisignatures enabled')
-          }
-          if (account.multisignatures.indexOf(keypair.publicKey.toString('hex')) < 0) {
-            return cb('Account does not belong to multisignature group')
-          }
-
-          let requester
-          try {
-            requester = await this.runtime.account.getAccountByPublicKey(keypair.publicKey)
-          } catch (e) {
-            return cb(e)
-          }
-          if (!requester || !requester.publicKey) {
-            return cb('Invalid requester')
-          }
-          if (requester.second_signature && !body.secondSecret) {
-            return cb('Invalid second passphrase')
-          }
-
-          // 请求者不是多重签名账号才对
-          if (requester.publicKey === account.publicKey) {
-            return cb('Invalid requester')
-          }
-
-          let second_keypair = null
-          if (requester.second_signature) {
-            second_keypair = DdnCrypto.getKeys(body.secondSecret)
-          }
-
-          try {
-            const data = {
-              type: await this.getTransactionType(),
-              sender: account, // 多重签名账号
-              keypair,
-              requester: keypair, // 真正的请求者
-              second_keypair, // requester的
-              recipientId: body.recipientId,
-              message: body.message
+      this.balancesSequence.add(
+        async cb => {
+          if (body.multisigAccountPublicKey && body.multisigAccountPublicKey !== keypair.publicKey.toString('hex')) {
+            let account
+            try {
+              account = await this.runtime.account.getAccountByPublicKey(body.multisigAccountPublicKey)
+            } catch (e) {
+              return cb(e)
             }
-            const assetJsonName = await this.getAssetJsonName()
-            data[assetJsonName] = transfer
 
-            const transaction = await this.runtime.transaction.create(data)
-            const transactions = await this.runtime.transaction.receiveTransactions([transaction])
-            cb(null, transactions)
-          } catch (e) {
-            cb(e)
-          }
-          // 2020.4.22 await this.runtime.transaction.receiveTransactions([transaction], cb);
-        } else {
-          let account
-          try {
-            account = await this.runtime.account.getAccountByPublicKey(keypair.publicKey.toString('hex'))
-          } catch (e) {
-            return cb(e)
-          }
-          if (!account) {
-            return cb('Account not found')
-          }
-          if (account.second_signature && !body.secondSecret) {
-            return cb('Invalid second passphrase')
-          }
-
-          let second_keypair = null
-          if (account.second_signature) {
-            second_keypair = DdnCrypto.getKeys(body.secondSecret)
-          }
-
-          try {
-            const data = {
-              type: await this.getTransactionType(),
-              sender: account,
-              keypair,
-              second_keypair,
-              recipientId: body.recipientId,
-              message: body.message
+            if (!account) {
+              return cb('Multisignature account not found')
             }
-            const assetJsonName = await this.getAssetJsonName()
-            data[assetJsonName] = transfer
+            if (!account.multisignatures) {
+              return cb('Account does not have multisignatures enabled')
+            }
+            if (account.multisignatures.indexOf(keypair.publicKey.toString('hex')) < 0) {
+              return cb('Account does not belong to multisignature group')
+            }
 
-            const transaction = await this.runtime.transaction.create(data)
+            let requester
+            try {
+              requester = await this.runtime.account.getAccountByPublicKey(keypair.publicKey)
+            } catch (e) {
+              return cb(e)
+            }
+            if (!requester || !requester.publicKey) {
+              return cb('Invalid requester')
+            }
+            if (requester.second_signature && !body.secondSecret) {
+              return cb('Invalid second passphrase')
+            }
 
-            const transactions = await this.runtime.transaction.receiveTransactions([transaction])
-            cb(null, transactions)
-          } catch (e) {
-            cb(e)
+            // 请求者不是多重签名账号才对
+            if (requester.publicKey === account.publicKey) {
+              return cb('Invalid requester')
+            }
+
+            let second_keypair = null
+            if (requester.second_signature) {
+              second_keypair = DdnCrypto.getKeys(body.secondSecret)
+            }
+
+            try {
+              const data = {
+                type: await this.getTransactionType(),
+                sender: account, // 多重签名账号
+                keypair,
+                requester: keypair, // 真正的请求者
+                second_keypair, // requester的
+                recipientId: body.recipientId,
+                message: body.message
+              }
+              const assetJsonName = await this.getAssetJsonName()
+              data[assetJsonName] = transfer
+
+              const transaction = await this.runtime.transaction.create(data)
+              const transactions = await this.runtime.transaction.receiveTransactions([transaction])
+              cb(null, transactions)
+            } catch (e) {
+              cb(e)
+            }
+            // 2020.4.22 await this.runtime.transaction.receiveTransactions([transaction], cb);
+          } else {
+            let account
+            try {
+              account = await this.runtime.account.getAccountByPublicKey(keypair.publicKey.toString('hex'))
+            } catch (e) {
+              return cb(e)
+            }
+            if (!account) {
+              return cb('Account not found')
+            }
+            if (account.second_signature && !body.secondSecret) {
+              return cb('Invalid second passphrase')
+            }
+
+            let second_keypair = null
+            if (account.second_signature) {
+              second_keypair = DdnCrypto.getKeys(body.secondSecret)
+            }
+
+            try {
+              const data = {
+                type: await this.getTransactionType(),
+                sender: account,
+                keypair,
+                second_keypair,
+                recipientId: body.recipientId,
+                message: body.message
+              }
+              const assetJsonName = await this.getAssetJsonName()
+              data[assetJsonName] = transfer
+
+              const transaction = await this.runtime.transaction.create(data)
+
+              const transactions = await this.runtime.transaction.receiveTransactions([transaction])
+              cb(null, transactions)
+            } catch (e) {
+              cb(e)
+            }
           }
+        },
+        (err, transactions) => {
+          if (err) {
+            return reject(err)
+          }
+          resolve({ success: true, transactionId: transactions[0].id })
         }
-      }, (err, transactions) => {
-        if (err) {
-          return reject(err)
-        }
-        resolve({ success: true, transactionId: transactions[0].id })
-      })
+      )
     })
   }
 
@@ -572,9 +617,7 @@ class Transfer extends Asset.Base {
     const tids = _.map(transfer.rows, 'transaction_id')
     // const where2 = { id: { $in: tids } } // only senderId?
     const where2 = { id: { $in: tids }, senderId: address } // only senderId?
-    const result = await this.runtime.dataquery.queryFullTransactionData(
-      where2, null, null, null, null
-    )
+    const result = await this.runtime.dataquery.queryFullTransactionData(where2, null, null, null, null)
     const trslist = []
     for (let i = 0; i < result.length; i++) {
       const newTrs = await this.runtime.transaction.serializeDbData2Transaction(result[i])
@@ -600,9 +643,7 @@ class Transfer extends Asset.Base {
     const transfer = await this.queryAsset(where1, null, true, pageindex, pagesize)
     const tids = _.map(transfer.rows, 'transaction_id')
     const where2 = { id: { $in: tids } }
-    const result = await this.runtime.dataquery.queryFullTransactionData(
-      where2, null, null, null, null
-    )
+    const result = await this.runtime.dataquery.queryFullTransactionData(where2, null, null, null, null)
     const trslist = []
     for (let i = 0; i < result.length; i++) {
       const newTrs = await this.runtime.transaction.serializeDbData2Transaction(result[i])

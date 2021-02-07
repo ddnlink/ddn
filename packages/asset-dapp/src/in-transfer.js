@@ -3,12 +3,12 @@ import DdnUtils from '@ddn/utils'
 
 class InTransfer extends Asset.Base {
   // eslint-disable-next-line no-useless-constructor
-  constructor(context, transactionConfig) {
+  constructor (context, transactionConfig) {
     super(context, transactionConfig)
     this._context = context
   }
 
-  async propsMapping() {
+  async propsMapping () {
     return [
       {
         field: 'str2',
@@ -31,11 +31,11 @@ class InTransfer extends Asset.Base {
     ]
   }
 
-  async calculateFee() {
+  async calculateFee () {
     return DdnUtils.bignum.multiply(this.constants.net.fees.dapp_in, this.constants.fixedPoint)
   }
 
-  async create(data, trs) {
+  async create (data, trs) {
     trs.recipientId = null
 
     const assetJsonName = await this.getAssetJsonName(trs.type)
@@ -46,11 +46,11 @@ class InTransfer extends Asset.Base {
       trs.amount = data.amount + ''
       delete data[assetJsonName].amount
     }
-    trs.asset[assetJsonName]['withdrawal_sequence'] = trs.height
+    trs.asset[assetJsonName].withdrawal_sequence = trs.height
     return trs
   }
 
-  async verify(trs, sender) {
+  async verify (trs, sender) {
     if (trs.recipientId) {
       throw new Error('Invalid recipient')
     }
@@ -62,8 +62,11 @@ class InTransfer extends Asset.Base {
     const inTransfer = await this.getAssetObject(trs)
 
     if (inTransfer.currency !== this.constants.tokenName) {
-      if ((typeof (trs.amount) !== 'undefined' && !DdnUtils.bignum.isZero(trs.amount)) ||
-        (typeof (inTransfer.amount) === 'undefined' || DdnUtils.bignum.isZero(inTransfer.amount))) {
+      if (
+        (typeof trs.amount !== 'undefined' && !DdnUtils.bignum.isZero(trs.amount)) ||
+        typeof inTransfer.amount === 'undefined' ||
+        DdnUtils.bignum.isZero(inTransfer.amount)
+      ) {
         throw new Error('Invalid transfer amount')
       }
 
@@ -72,8 +75,11 @@ class InTransfer extends Asset.Base {
         throw error
       }
     } else {
-      if ((typeof (trs.amount) === 'undefined' || DdnUtils.bignum.isZero(trs.amount)) ||
-        (typeof (inTransfer.amount) !== 'undefined' && !DdnUtils.bignum.isZero(inTransfer.amount))) {
+      if (
+        typeof trs.amount === 'undefined' ||
+        DdnUtils.bignum.isZero(trs.amount) ||
+        (typeof inTransfer.amount !== 'undefined' && !DdnUtils.bignum.isZero(inTransfer.amount))
+      ) {
         throw new Error('Invalid transfer amount')
       }
     }
@@ -114,7 +120,7 @@ class InTransfer extends Asset.Base {
     }
   }
 
-  async getBytes(trs) {
+  async getBytes (trs) {
     const transfer = await this.getAssetObject(trs)
 
     let buf = Buffer.from([])
@@ -133,49 +139,38 @@ class InTransfer extends Asset.Base {
     return buf
   }
 
-  async _updateAssetBalance(currency, amount, address, dbTrans) {
+  async _updateAssetBalance (currency, amount, address, dbTrans) {
     const condition = {
       address,
       currency
     }
 
-    return new Promise((resolve, reject) => {
-      this.dao.findOne('mem_asset_balance',
-        condition, ['balance'], dbTrans,
-        (err, row) => {
-          if (err) {
-            return reject(err)
-          }
-
-          let balance = '0'
-          if (row) {
-            balance = row.balance
-          }
-
-          const newBalance = DdnUtils.bignum.plus(balance, amount)
-          if (DdnUtils.bignum.isLessThan(newBalance, 0)) {
-            return reject('Asset balance not enough')
-          }
-
-          condition.balance = newBalance.toString()
-          this.dao.insertOrUpdate('mem_asset_balance',
-            condition, dbTrans, (err2, result) => {
-              if (err2) {
-                return reject(err2)
-              }
-
-              resolve(result)
-            })
-        })
+    const row = await this.dao.findOne('mem_asset_balance', {
+      where: condition,
+      attributes: ['balance'],
+      transaction: dbTrans
     })
+
+    let balance = '0'
+    if (row) {
+      balance = row.balance
+    }
+
+    const newBalance = DdnUtils.bignum.plus(balance, amount)
+    if (DdnUtils.bignum.isLessThan(newBalance, 0)) {
+      throw new Error('Asset balance not enough')
+    }
+
+    condition.balance = newBalance.toString()
+    return await this.dao.insertOrUpdate('mem_asset_balance', condition, { transaction: dbTrans })
   }
 
   // 新增事务dbTrans ---wly
-  async apply(trs, _block, sender, dbTrans) {
+  async apply (trs, _block, sender, dbTrans) {
     const asset = await this.getAssetObject(trs)
     const dappId = asset.dapp_id
-    if (!asset['deposit_sequence']) {
-      asset['deposit_sequence'] = _block.height
+    if (!asset.deposit_sequence) {
+      asset.deposit_sequence = _block.height
     }
     if (asset.currency === this.constants.tokenName) {
       this.balanceCache.addAssetBalance(dappId, asset.currency, trs.amount)
@@ -187,7 +182,7 @@ class InTransfer extends Asset.Base {
     }
   }
 
-  async undo(trs, _block, sender, dbTrans) {
+  async undo (trs, _block, sender, dbTrans) {
     const asset = await this.getAssetObject(trs)
     const transfer = await this.getAssetObject(trs)
     const dappId = asset.dapp_id
@@ -202,7 +197,7 @@ class InTransfer extends Asset.Base {
     }
   }
 
-  async applyUnconfirmed(trs, sender) {
+  async applyUnconfirmed (trs, sender) {
     const transfer = await this.getAssetObject(trs)
     if (transfer.currency !== this.constants.tokenName) {
       const balance = this.balanceCache.getAssetBalance(sender.address, transfer.currency) || 0
@@ -214,7 +209,7 @@ class InTransfer extends Asset.Base {
     }
   }
 
-  async undoUnconfirmed(trs, sender) {
+  async undoUnconfirmed (trs, sender) {
     const transfer = await this.getAssetObject(trs)
     if (transfer.currency !== this.constants.tokenName) {
       this.balanceCache.addAssetBalance(sender.address, transfer.currency, transfer.amount)

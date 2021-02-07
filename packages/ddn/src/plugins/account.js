@@ -38,25 +38,4 @@ async function genAccount () {
   console.log('Done')
 }
 
-export default function (program) {
-  program
-    .command('account')
-    .description('crypto operations')
-    .option('-p, --pubkey', 'generate public key from secret')
-    .option('-g, --generate', 'generate random accounts')
-    .action(function (options) {
-      (async function () {
-        try {
-          if (options.pubkey) {
-            genPubkey()
-          } else if (options.generate) {
-            genAccount()
-          } else {
-            console.log("'ddn crypto -h' to get help")
-          }
-        } catch (e) {
-          console.log(e)
-        }
-      })()
-    })
-}
+export { genPubkey, genAccount }

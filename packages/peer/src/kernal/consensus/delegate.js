@@ -2,7 +2,8 @@
  * Delegate
  * wangxm   2018-01-08
  */
-import DdnCrypto, { createHash } from '@ddn/crypto'
+import * as DdnCrypto from '@ddn/crypto'
+import { createHash } from '@ddn/crypto'
 import { bignum } from '@ddn/utils'
 
 let _singleton
@@ -356,25 +357,13 @@ class Delegate {
       cause
     })
 
-    return new Promise((resolve, reject) => {
-      this.dao.insert(
-        'forks_stat',
-        {
-          delegate_public_key: block.generator_public_key,
-          block_timestamp: block.timestamp,
-          block_id: block.id,
-          block_height: block.height,
-          previous_block: block.previous_block,
-          cause
-        },
-        (err, result) => {
-          if (err) {
-            reject(err)
-          } else {
-            resolve(result)
-          }
-        }
-      )
+    return await this.dao.insert('forks_stat', {
+      delegate_public_key: block.generator_public_key,
+      block_timestamp: block.timestamp,
+      block_id: block.id,
+      block_height: block.height,
+      previous_block: block.previous_block,
+      cause
     })
   }
 }

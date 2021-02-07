@@ -1,5 +1,5 @@
-import DdnCrypto from '@ddn/crypto'
-import DdnUtils from '@ddn/utils'
+import * as DdnCrypto from '@ddn/crypto'
+import DdnUtils, { checkAndReport, superviseTrs } from '@ddn/utils'
 
 /**
  * TransactionService 接口
@@ -15,7 +15,6 @@ class TransactionService {
     const query = Object.assign({}, req.body, req.query)
     // query.offset = Number(query.offset || 0)
     // query.limit = Number(query.limit || 100)
-
     const validateErrors = await this.ddnSchema.validate(
       {
         type: 'object',
@@ -201,16 +200,18 @@ class TransactionService {
     // sequelize, order: [[Sequelize.literal('booth.boothname'), 'ASC']]
     // https://github.com/sequelize/sequelize/issues/7897
     const orders = sortBy ? [[this.dao.db_str(sortBy), sortMethod]] : null
-
     const data = await this.runtime.dataquery.queryFullTransactionData(where, limit, offset, orders, true)
 
-    const transactions = []
+    let transactions = []
     for (let i = 0; i < data.transactions.length; i++) {
       const row = data.transactions[i]
       const trs = await this.runtime.transaction.serializeDbData2Transaction(row)
       transactions.push(trs)
     }
-
+    // 屏蔽违规交易
+    if (global.assets && global.assets.transTypeNames[90]) {
+      transactions = await superviseTrs({ trs: transactions, context: this._context })
+    }
     return {
       success: true,
       transactions,
@@ -255,7 +256,10 @@ class TransactionService {
 
       return {
         success: true,
-        transaction: result[0]
+        transaction:
+          global.assets && global.assets.transTypeNames[90]
+            ? await superviseTrs({ context: this._context, trs: result[0] })
+            : result[0]
       }
     } else {
       throw new Error('Transaction not found')
@@ -391,6 +395,13 @@ class TransactionService {
                 second_keypair,
                 message: body.message
               })
+              if (
+                global.assets &&
+                global.assets.transTypeNames[90] &&
+                this.constants.net.superviseIp === this.config.publicIp
+              ) {
+                await checkAndReport(transaction, this, cb, this.constants.net.superviseBaseUrl)
+              }
               const transactions = await this.runtime.transaction.receiveTransactions([transaction])
               cb(null, transactions)
             } catch (err) {
@@ -428,7 +439,14 @@ class TransactionService {
                 second_keypair,
                 message: body.message
               })
-
+              // 判断配置@ddn/asset-supervise插件的并且publicip等于监管ip的才检测敏感词
+              if (
+                global.assets &&
+                global.assets.transTypeNames[90] &&
+                this.constants.net.superviseIp === this.config.publicIp
+              ) {
+                await checkAndReport(transaction, this, cb, this.constants.net.superviseBaseUrl)
+              }
               const transactions = await this.runtime.transaction.receiveTransactions([transaction])
               cb(null, transactions)
             } catch (err) {
@@ -507,23 +525,13 @@ class TransactionService {
       // 获取其年月日形式的字符串
       time = getYMD(day)
       // 查询当日交易量
-      const count = await new Promise((resolve, reject) => {
-        this.dao.count(
-          'tr',
-          {
-            timestamp: {
-              $gte: Number(this.runtime.slot.getTime(d1Ms)),
-              $lt: Number(this.runtime.slot.getTime(d1Ms + dayMilliSeconds - 1))
-            }
-          },
-          null,
-          (err, data) => {
-            if (err) {
-              reject(err)
-            }
-            resolve(data)
+      const count = await this.dao.count('tr', {
+        where: {
+          timestamp: {
+            $gte: Number(this.runtime.slot.getTime(d1Ms)),
+            $lt: Number(this.runtime.slot.getTime(d1Ms + dayMilliSeconds - 1))
           }
-        )
+        }
       })
       const obj = {
         time,

@@ -67,7 +67,7 @@ var address = 'DPrkKtui3u57MPrbz6uRKj7RQdqi2rXo37' }
 
 请求事例
 ```sh
-curl --location --request POST 'http://localhost:8001/api/accounts/open' \
+curl --location --request POST 'http://127.0.0.1:8001/api/accounts/open' \
 --header 'Content-Type: application/json' \
 --data-raw '{
     "secret": "affair master wheat flock copy velvet gain heavy rabbit master pet refuse"
@@ -141,7 +141,7 @@ var transaction = await DdnJS.transaction.createTransaction(address, amount, des
 
 将其以transaction为key，放入json，调用上链接口提交
 ```sh
-curl --location --request POST 'http://localhost:8001/peer/transactions' \
+curl --location --request POST 'http://127.0.0.1:8001/peer/transactions' \
 --header 'Content-Type: application/json' \
 --header 'nethash: 0ab796cd' \
 --header 'version: ' \
@@ -211,7 +211,7 @@ curl --location --request POST 'http://localhost:8001/peer/transactions' \
 
 将其放入json，调用创建DAPP接口
 ```sh
-curl --location --request PUT 'http://localhost:8001/api/dapps' \
+curl --location --request PUT 'http://127.0.0.1:8001/api/dapps' \
 --header 'Content-Type: application/json' \
 --data-raw '{
     "secret": "affair master wheat flock copy velvet gain heavy rabbit master pet refuse",
@@ -238,7 +238,7 @@ curl --location --request PUT 'http://localhost:8001/api/dapps' \
 #### **2.1.2 查看所有DAPP**
 
 ```sh
-curl --location --request GET 'http://localhost:8001/api/dapps/all'
+curl --location --request GET 'http://127.0.0.1:8001/api/dapps/all'
 ```
 
 返回结果
@@ -272,7 +272,7 @@ curl --location --request GET 'http://localhost:8001/api/dapps/all'
 limit: 查询数量
 
 ```sh
-curl --location --request GET 'http://localhost:8001/api/dapps?limit=10'
+curl --location --request GET 'http://127.0.0.1:8001/api/dapps?limit=10'
 ```
 
 返回结果
@@ -303,7 +303,7 @@ curl --location --request GET 'http://localhost:8001/api/dapps?limit=10'
 
 #### **2.1.4 按名称检索DAPP**
 ```sh
-curl --location --request GET 'http://localhost:8001/api/dapps/name/:app_name/all'
+curl --location --request GET 'http://127.0.0.1:8001/api/dapps/name/:app_name/all'
 ```
 
 返回结果:
@@ -334,7 +334,7 @@ curl --location --request GET 'http://localhost:8001/api/dapps/name/:app_name/al
 
 #### **2.1.5 按type检索DAPP**
 ```sh
-curl --location --request GET 'http://localhost:8001/api/dapps/name/:type/all'
+curl --location --request GET 'http://127.0.0.1:8001/api/dapps/name/:type/all'
 ```
 
 返回结果:
@@ -365,7 +365,7 @@ curl --location --request GET 'http://localhost:8001/api/dapps/name/:type/all'
 
 #### **2.1.6 按id(交易id)检索DAPP**
 ```sh
-curl --location --request GET 'http://localhost:8001/api/dapps/dappId/6efbd41f9afce5132e87a0ff6c2e6a42adb72dc5bc1028a37f5e159251350688ca996e796dbb8d90ac20d1039020ea33020f542cf2623805a71acc529270c69e'
+curl --location --request GET 'http://127.0.0.1:8001/api/dapps/dappId/6efbd41f9afce5132e87a0ff6c2e6a42adb72dc5bc1028a37f5e159251350688ca996e796dbb8d90ac20d1039020ea33020f542cf2623805a71acc529270c69e'
 ```
 
 返回结果:
@@ -404,7 +404,7 @@ curl --location --request GET 'http://localhost:8001/api/dapps/dappId/6efbd41f9a
 |success|boolean|是否成功|
 
 ```sh
-curl --location --request POST 'http://localhost:8001/api/dapps/install' \
+curl --location --request POST 'http://127.0.0.1:8001/api/dapps/install' \
 --header 'Content-Type: application/json' \
 --data-raw '{
     "id": "6efbd41f9afce5132e87a0ff6c2e6a42adb72dc5bc1028a37f5e159251350688ca996e796dbb8d90ac20d1039020ea33020f542cf2623805a71acc529270c69e",
@@ -430,7 +430,7 @@ curl --location --request POST 'http://localhost:8001/api/dapps/install' \
 |result|Object|日安装的DAPP|
 
 ```sh
-curl --location --request GET 'http://localhost:8001/api/dapps/installed' \
+curl --location --request GET 'http://127.0.0.1:8001/api/dapps/installed' \
 --data-raw ''
 ```
 
@@ -469,7 +469,7 @@ curl --location --request GET 'http://localhost:8001/api/dapps/installed' \
 |ids|Array|已安装的DAPP的id|
 
 ```sh
-curl --location --request GET 'http://localhost:8001/api/dapps/installedIds' \
+curl --location --request GET 'http://127.0.0.1:8001/api/dapps/installedIds' \
 --data-raw ''
 ```
 
@@ -492,7 +492,7 @@ curl --location --request GET 'http://localhost:8001/api/dapps/installedIds' \
 |success|boolean|是否成功|
 
 ```sh
-curl --location --request POST 'http://localhost:8001/api/dapps/launch' \
+curl --location --request POST 'http://127.0.0.1:8001/api/dapps/launch' \
 --header 'Content-Type: application/json' \
 --data-raw '{
     "id": "6efbd41f9afce5132e87a0ff6c2e6a42adb72dc5bc1028a37f5e159251350688ca996e796dbb8d90ac20d1039020ea33020f542cf2623805a71acc529270c69e",
@@ -522,7 +522,7 @@ curl --location --request POST 'http://localhost:8001/api/dapps/launch' \
 |success|boolean|是否成功|
 
 ```sh
-curl --location --request POST 'http://localhost:8001/api/dapps/stop' \
+curl --location --request POST 'http://127.0.0.1:8001/api/dapps/stop' \
 --header 'Content-Type: application/json' \
 --data-raw '{
     "id": "6efbd41f9afce5132e87a0ff6c2e6a42adb72dc5bc1028a37f5e159251350688ca996e796dbb8d90ac20d1039020ea33020f542cf2623805a71acc529270c69e",
@@ -548,7 +548,7 @@ curl --location --request POST 'http://localhost:8001/api/dapps/stop' \
 |success|boolean|是否成功|
 
 ```sh
-curl --location --request GET 'http://localhost:8001/api/dapps/categories'
+curl --location --request GET 'http://127.0.0.1:8001/api/dapps/categories'
 ```
 
 返回结果:
@@ -578,7 +578,7 @@ curl --location --request GET 'http://localhost:8001/api/dapps/categories'
 |success|boolean|是否成功|
 
 ```sh
-curl --location --request POST 'http://localhost:8001/api/dapps/uninstall' \
+curl --location --request POST 'http://127.0.0.1:8001/api/dapps/uninstall' \
 --header 'Content-Type: application/json' \
 --data-raw '{
     "id": "6efbd41f9afce5132e87a0ff6c2e6a42adb72dc5bc1028a37f5e159251350688ca996e796dbb8d90ac20d1039020ea33020f542cf2623805a71acc529270c69e",

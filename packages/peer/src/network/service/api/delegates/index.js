@@ -1,4 +1,4 @@
-import DdnCrypto from '@ddn/crypto'
+import * as DdnCrypto from '@ddn/crypto'
 import { assetTypes, bignum } from '@ddn/utils'
 /**
  * DelegatesRouter 接口
@@ -168,15 +168,8 @@ class DelegatesRouter {
   }
 
   async getCount (req) {
-    return new Promise((resolve, reject) => {
-      this.dao.count('delegate', null, (err, count) => {
-        if (err) {
-          reject(err)
-        } else {
-          resolve({ success: true, count })
-        }
-      })
-    })
+    const count = await this.dao.count('delegate')
+    return { success: true, count }
   }
 
   async getVoters (req) {
@@ -198,47 +191,31 @@ class DelegatesRouter {
       throw new Error(`Invalid parameters: ${validateErrors[0].schemaPath} ${validateErrors[0].message}`)
     }
 
-    return new Promise((resolve, reject) => {
-      this.dao.findList(
-        'mem_accounts2delegate',
-        { dependent_id: query.publicKey },
-        [[this.dao.db_fnGroupConcat('account_id'), 'account_id']],
-        null,
-        null,
-        async (err, rows) => {
-          if (err) {
-            reject(err)
-          } else {
-            let addresses = []
-            if (rows[0] && rows[0].account_id) {
-              addresses = rows[0].account_id.split(',') // wxm block database
-            }
-            try {
-              rows = await this.runtime.account.getAccountList(
-                {
-                  address: {
-                    $in: addresses
-                  },
-                  sort: [['balance', 'ASC']]
-                },
-                ['address', 'balance', 'publicKey', 'username']
-              )
-            } catch (e) {
-              return reject(e)
-            }
-
-            const lastBlock = this.runtime.block.getLastBlock()
-            const totalSupply = this.runtime.block.getBlockStatus().calcSupply(lastBlock.height)
-            rows.forEach(row => {
-              // row.weight = bignum.divide(row.balance, totalSupply)
-              row.weight = bignum.divide(row.balance, bignum.multiply(totalSupply, 100))
-            })
-
-            resolve({ success: true, accounts: rows })
-          }
-        }
-      )
+    let rows = await this.dao.findList('mem_accounts2delegate', {
+      where: { dependent_id: query.publicKey },
+      attributes: [[this.dao.db_fnGroupConcat('account_id'), 'account_id']]
     })
+    let addresses = []
+    if (rows[0] && rows[0].account_id) {
+      addresses = rows[0].account_id.split(',') // wxm block database
+    }
+    rows = await this.runtime.account.getAccountList(
+      {
+        address: {
+          $in: addresses
+        },
+        sort: [['balance', 'ASC']]
+      },
+      ['address', 'balance', 'publicKey', 'username']
+    )
+    const lastBlock = this.runtime.block.getLastBlock()
+    const totalSupply = this.runtime.block.getBlockStatus().calcSupply(lastBlock.height)
+    rows.forEach(row => {
+      // row.weight = bignum.divide(row.balance, totalSupply)
+      row.weight = bignum.divide(row.balance, bignum.multiply(totalSupply, 100))
+    })
+
+    return { success: true, accounts: rows }
   }
 
   async getFee () {

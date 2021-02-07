@@ -12,14 +12,14 @@ import PeerBroadcast from './peer-broadcast'
 let _singleton
 
 class Peer {
-  static singleton(context) {
+  static singleton (context) {
     if (!_singleton) {
       _singleton = new Peer(context)
     }
     return _singleton
   }
 
-  constructor(context) {
+  constructor (context) {
     Object.assign(this, context)
     this._context = context
 
@@ -29,68 +29,29 @@ class Peer {
     this.broadcast = PeerBroadcast.singleton(this._context)
   }
 
-  async prepare() {
+  async prepare () {
     const peers = this.config.peers.list
 
     for (let i = 0; i < peers.length; i++) {
       const peer = peers[i]
 
-      await new Promise((resolve, reject) => {
-        this.dao.findOne(
-          'peer',
-          {
-            ip: ip.toLong(peer.ip),
-            port: peer.port
-          },
-          null,
-          (err, result) => {
-            if (err) {
-              reject(err)
-            } else if (!result) {
-              this.dao.insertOrUpdate(
-                'peer',
-                {
-                  ip: ip.toLong(peer.ip),
-                  port: peer.port,
-                  state: 2
-                },
-                (err2, result2) => {
-                  if (err2) {
-                    reject(err2)
-                  } else {
-                    resolve(result2)
-                  }
-                }
-              )
-            } else {
-              resolve()
-            }
-          }
-        )
-      })
+      const result = await this.dao.findOne('peer', { where: { ip: ip.toLong(peer.ip), port: peer.port } })
+      if (!result) {
+        await this.dao.insertOrUpdate('peer', { ip: ip.toLong(peer.ip), port: peer.port, state: 2 })
+      }
     }
 
-    return new Promise((resolve, reject) => {
-      this.dao.count('peer', {}, async (err, count) => {
-        if (err) {
-          reject(err)
-        } else {
-          if (count) {
-            await this.syncPeersList()
-            this.logger.info(`Peers ready, stored ${count}`)
-
-            resolve()
-          } else {
-            this.logger.warn('Peers list is empty')
-            resolve()
-          }
-        }
-      })
-    })
+    const count = await this.dao.count('peer')
+    if (count) {
+      await this.syncPeersList()
+      this.logger.info(`Peers ready, stored ${count}`)
+    } else {
+      this.logger.warn('Peers list is empty')
+    }
   }
 
   // FIXME: delete this function, use the follow version()
-  async getVersion() {
+  async getVersion () {
     return {
       version: this.config.version,
       build: this.config.buildVersion,
@@ -99,84 +60,43 @@ class Peer {
   }
 
   // TODO: this.running.peer.getVersion() -> this.running.peer.version()
-  async version() {
+  async version () {
     return this.config.version
   }
 
-  async addDapp(config) {
-    return new Promise((resolve, reject) => {
-      this.dao.findOne(
-        'peer',
-        {
-          ip: ip.toLong(config.ip),
-          port: config.port
-        },
-        null,
-        (err, data) => {
-          if (err) {
-            return reject(err)
-          }
-          if (data) {
-            this.dao.findOne(
-              'peers_dapp',
-              {
-                peer_id: data.id
-              },
-              null,
-              (err2, data2) => {
-                if (err2) {
-                  return reject(err2)
-                }
-                if (!data2) {
-                  this.dao.insert(
-                    'peers_dapp',
-                    {
-                      peer_id: data.id,
-                      dapp_id: config.dappId
-                    },
-                    (err3, data3) => {
-                      if (err3) {
-                        reject(err3)
-                      } else {
-                        resolve(data3)
-                      }
-                    }
-                  )
-                } else {
-                  resolve()
-                }
-              }
-            )
-          } else if (config.ip === '127.0.0.1') {
-            resolve()
-          } else {
-            reject(new Error(`Peer not found: ${config.ip}`))
-          }
-        }
-      )
-    })
+  async addDapp ({ ip: configIp, port, dappId }) {
+    const data = await this.dao.findOne('peer', { where: { ip: configIp, port: port } })
+    if (!data) {
+      throw new Error(`Peer not found: ${configIp}`)
+    }
+    const data2 = await this.dao.findOne('peers_dapp', { where: { peer_id: data.id } })
+
+    if (!data2) {
+      return await this.dao.insert('peers_dapp', { peer_id: data.id, dapp_id: dappId })
+    }
+    return data2
   }
 
-  async update(peer) {
-    if (peer && peer.ip && peer.port) {
-      const dappId = peer.dappId
+  async update ({ ip: peerIp, port, dappId, os = null, version = null, state = 1 }) {
+    if (peerIp && port) {
+      // dappId = dappId
 
       if (this.config.publicIp) {
         const localIp = ip.toLong(this.config.publicIp)
-        if (localIp === peer.ip && this.config.port === peer.port) {
+        if (localIp === peerIp && this.config.port === port) {
           return
         }
       }
 
       const peerData = {
-        ip: peer.ip,
-        port: peer.port,
-        os: peer.os || null,
-        version: peer.version || null,
-        state: peer.state || 1
+        ip: peerIp,
+        port: port,
+        os: os || null,
+        version: version || null,
+        state: state || 1
       }
 
-      const peerKey = `${peer.ip}_${peer.port}`
+      const peerKey = `${peerIp}_${port}`
 
       let needUpdateToDB = true
       if (this._peerUpdateTimes.length >= 0) {
@@ -193,44 +113,27 @@ class Peer {
 
       if (needUpdateToDB && !this._peerUpdatings[peerKey]) {
         this._peerUpdatings[peerKey] = true
+        try {
+          const data = await this.dao.findOne('peer', { where: { ip: peerData.ip, port: peerData.port } })
+          if (data && data.state === 0) {
+            delete peerData.state
+          }
 
-        return new Promise((resolve, reject) => {
-          this.dao.findOne(
-            'peer',
-            {
-              ip: peerData.ip,
-              port: peerData.port
-            },
-            null,
-            (err, data) => {
-              if (!err) {
-                if (data && data.state === 0) {
-                  delete peerData.state
-                }
+          await this.dao.insertOrUpdate('peer', peerData)
+          if (dappId) {
+            await this.addDapp({
+              dappId,
+              ip: peerIp,
+              port: port
+            })
+          } else {
+            this._peerUpdateTimes[peerKey] = new Date().getTime()
+          }
 
-                this.dao.insertOrUpdate('peer', peerData, null, async (err2, data2) => {
-                  if (!err2) {
-                    if (dappId) {
-                      await this.addDapp({
-                        dappId,
-                        ip: peer.ip,
-                        port: peer.port
-                      })
-                    } else {
-                      this._peerUpdateTimes[peerKey] = new Date().getTime()
-                    }
-                  }
-
-                  this._peerUpdatings[peerKey] = false
-                  resolve()
-                })
-              } else {
-                this._peerUpdatings[peerKey] = false
-                resolve()
-              }
-            }
-          )
-        })
+          this._peerUpdatings[peerKey] = false
+        } catch (err) {
+          this._peerUpdatings[peerKey] = false
+        }
       }
     }
   }
@@ -241,7 +144,7 @@ class Peer {
    * @param {*} dappId
    * @param {*} allowSelf
    */
-  async request(args, dappId, allowSelf, cb) {
+  async request (args, dappId, allowSelf, cb) {
     if (typeof cb === 'function') {
       try {
         const data = await PeerInvoker.singleton(this._context).invoke(args, dappId, allowSelf)
@@ -249,7 +152,6 @@ class Peer {
       } catch (error) {
         cb(error)
       }
-
     }
     return await PeerInvoker.singleton(this._context).invoke(args, dappId, allowSelf)
   }
@@ -257,7 +159,7 @@ class Peer {
   /**
    * 从其他节点同步节点列表
    */
-  async syncPeersList() {
+  async syncPeersList () {
     let data
     try {
       data = await this.request({
@@ -299,22 +201,22 @@ class Peer {
   /**
    * 从随机节点同步区块数据
    */
-  async syncBlocks() {
+  async syncBlocks () {
     return await PeerSync.singleton(this._context).trySyncBlockData()
   }
 
-  async syncSignatures() {
+  async syncSignatures () {
     return await PeerSync.singleton(this._context).trySyncSignatures()
   }
 
   /**
    * 从随机节点同步未确认交易
    */
-  async syncUnconfirmedTransactions() {
+  async syncUnconfirmedTransactions () {
     return await PeerSync.singleton(this._context).trySyncUnconfirmedTransactions()
   }
 
-  async isCompatible(version) {
+  async isCompatible (version) {
     const nums = `${version}`.split('.').map(Number)
     if (nums.length !== 3) {
       return true
@@ -333,44 +235,30 @@ class Peer {
     return true
   }
 
-  async remove(pip, port) {
+  async remove (pip, port) {
     const isStaticPeer = this.config.peers.list.find(peer => peer.ip === ip.fromLong(pip) && peer.port === port)
     if (isStaticPeer) {
       this.logger.info("Peer in white list, can't remove.")
     } else {
-      return new Promise((resolve, reject) => {
-        this.dao.remove(
-          'peer',
-          {
-            ip: pip,
-            port
-          },
-          (err, result) => {
-            if (err) {
-              this.logger.error(`remove peer: ${err}`)
-              reject(err)
-            }
-            resolve(result)
-          }
-        )
-      })
+      try {
+        return await this.dao.remove('peer', { where: { ip: pip, port } })
+      } catch (err) {
+        this.logger.error(`remove peer: ${err}`)
+        throw err
+      }
     }
   }
 
   /**
    * 恢复暂停的节点服务状态为可用（已达到暂停时间的）
    */
-  async restoreBanState() {
-    return await new Promise(resolve => {
-      this.dao.update('peer', { state: 1, clock: null }, { state: 0, clock: { $lt: Date.now() } }, (err, result) => {
-        if (err) {
-          // resolve(false)
-          resolve(false)
-        } else {
-          resolve(true)
-        }
-      })
-    })
+  async restoreBanState () {
+    try {
+      await this.dao.update('peer', { state: 1, clock: null }, { where: { state: 0, clock: { $lt: Date.now() } } })
+      return true
+    } catch (err) {
+      return false
+    }
   }
 
   /**
@@ -380,10 +268,10 @@ class Peer {
    * @param {*} state 状态（0：停用，1：可用，2：健康）
    * @param {*} timeoutSeconds 服务暂停时间（单位：秒）
    */
-  async changeState(pip, port, state, timeoutSeconds) {
+  async changeState (pip, port, state, timeoutSeconds) {
     // FIXME: 2020.9.3 白名单状态修改
     // const isStaticPeer = this.config.peers.list.find(
-    //   peer => peer.ip === ip.fromLong(pip) && peer.port === port
+    //   peer => peerIp === ip.fromLong(pip) && peer.port === port
     // )
     // if (false) {
     // if (isStaticPeer) {
@@ -394,37 +282,29 @@ class Peer {
       clock = Date.now() + (timeoutSeconds || 1) * 1000
     }
 
-    return new Promise((resolve, reject) => {
-      this.logger.debug('Peer is changeState: clock', clock)
-      this.dao.update('peer', { state, clock }, { ip: pip, port }, (err, result) => {
-        if (err) {
-          this.logger.error('Peer#state', err)
-          reject(err)
-        } else {
-          resolve(result)
-        }
-      })
-    })
+    this.logger.debug('Peer is changeState: clock', clock)
+    try {
+      return await this.dao.update('peer', { state, clock }, { where: { ip: pip, port } })
+    } catch (err) {
+      this.logger.error('Peer#state', err)
+      throw err
+    }
     // }
   }
 
   /**
    * 重置所有节点服务状态为健康
    */
-  async reset() {
-    return new Promise((resolve, reject) => {
-      this.dao.update('peer', { state: 2 }, {}, null, (err, result) => {
-        if (err) {
-          this.logger.error(`Failed to reset peers: ${err}`)
-          reject(err)
-        } else {
-          resolve(result)
-        }
-      })
-    })
+  async reset () {
+    try {
+      return await this.dao.update('peer', { state: 2 })
+    } catch (err) {
+      this.logger.error(`Failed to reset peers: ${err}`)
+      throw err
+    }
   }
 
-  async getRandomPeer(dappId, allowSelf) {
+  async getRandomPeer (dappId, allowSelf) {
     const peers = await this.queryList(dappId, { state: { $gt: 0 } }, 2)
     if (peers && peers.length) {
       const peer = peers[0]
@@ -449,54 +329,26 @@ class Peer {
     }
   }
 
-  async queryDappPeers() {
-    const data = await new Promise((resolve, reject) => {
-      this.dao.findList('peers_dapp', {}, null, null, (err, result) => {
-        if (err) {
-          reject(err)
-        } else {
-          resolve(result)
-        }
-      })
-    })
+  async queryDappPeers () {
+    const data = await this.dao.findList('peers_dapp')
 
     const where = {
       id: {
         $in: _.map(data, 'peer_id')
       }
     }
-    return new Promise((resolve, reject) => {
-      this.dao.findList('peer', where, null, null, (err, result) => {
-        if (err) {
-          reject(err)
-        } else {
-          resolve(result)
-        }
-      })
-    })
+    return await this.dao.findList('peer', { where })
   }
 
-  async queryList(dappId, where, limit) {
+  async queryList (dappId, where, limit) {
     let data = null
 
     if (dappId) {
-      data = await new Promise((resolve, reject) => {
-        this.dao.findPage(
-          'peers_dapp',
-          {
-            dapp_id: dappId
-          },
-          limit || this.constants.delegates,
-          null,
-          false,
-          (err, result) => {
-            if (err) {
-              reject(err)
-            } else {
-              resolve(result)
-            }
-          }
-        )
+      data = await this.dao.findList('peers_dapp', {
+        where: {
+          dapp_id: dappId
+        },
+        limit: limit || this.constants.delegates
       })
     }
 
@@ -505,28 +357,15 @@ class Peer {
       where.id = { $in: _.map(data, 'peer_id') }
     }
 
-    return new Promise((resolve, reject) => {
-      this.dao.findPage(
-        'peer',
-        where,
-        limit || this.constants.delegates,
-        null,
-        false,
-        null,
-        [[this.dao.db_fnRandom()]],
-        (err, result) => {
-          if (err) {
-            reject(err)
-          } else {
-            resolve(result)
-          }
-        }
-      )
+    return await this.dao.findList('peer', {
+      where,
+      limit: limit || this.constants.delegates,
+      order: [[this.dao.db_fnRandom()]]
     })
   }
 
   // Sidechains
-  sandboxApi(call, args, cb) {
+  sandboxApi (call, args, cb) {
     // sandboxHelper.callMethod(shared, call, args, cb)
     if (typeof this[call] !== 'function') {
       return cb(`Function not found in module: ${call}`)

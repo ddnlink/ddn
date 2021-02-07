@@ -1,4 +1,4 @@
-import ddnCrypto from '@ddn/crypto'
+import * as DdnCrypto from '@ddn/crypto'
 
 class Address {
   constructor (tokenPrefix) {
@@ -6,12 +6,12 @@ class Address {
   }
 
   isAddress (address) {
-    return ddnCrypto.isAddress(address, this.tokenPrefix)
+    return DdnCrypto.isAddress(address, this.tokenPrefix)
   }
 
   // fixme: 将所有 generateBase58CheckAddress -> generateAddress
   generateAddress (publicKey) {
-    return ddnCrypto.generateAddress(publicKey, this.tokenPrefix)
+    return DdnCrypto.generateAddress(publicKey, this.tokenPrefix)
   }
 
   generateBase58CheckAddress (publicKey) {

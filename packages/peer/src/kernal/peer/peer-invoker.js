@@ -97,8 +97,8 @@ class PeerInvoker {
               this.logger.info(`Ban 10 min ${req.method} ${req.url}`)
             }
           }
-          this.logger.error('request error: ',err)
-          reject( `Request peer api failed: ${url}`)
+          this.logger.error('request error: ', err)
+          reject(new Error(`Request peer api failed: ${url}`))
         } else {
           // TODO dapp侧链返回的规则和主链的规则不一致，这里先返回后期优化一下
           if(dappId){

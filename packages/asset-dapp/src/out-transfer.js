@@ -1,16 +1,16 @@
 import Asset from '@ddn/asset-base'
 import DdnUtils from '@ddn/utils'
-import DdnCrypto from '@ddn/crypto'
+import * as DdnCrypto from '@ddn/crypto'
 
 const _dappOuttransferUnconfirmeds = {}
 
 class OutTransfer extends Asset.Base {
   // eslint-disable-next-line no-useless-constructor
-  constructor(context, transactionConfig) {
+  constructor (context, transactionConfig) {
     super(context, transactionConfig)
   }
 
-  async propsMapping() {
+  async propsMapping () {
     return [
       {
         field: 'str2',
@@ -39,7 +39,7 @@ class OutTransfer extends Asset.Base {
     ]
   }
 
-  async getBytes(trs) {
+  async getBytes (trs) {
     const transfer = await this.getAssetObject(trs)
 
     let buf = Buffer.from([])
@@ -58,11 +58,11 @@ class OutTransfer extends Asset.Base {
     return buf
   }
 
-  async calculateFee() {
+  async calculateFee () {
     return DdnUtils.bignum.multiply(this.constants.net.fees.dapp_out, this.constants.fixedPoint)
   }
 
-  async create(data, trs) {
+  async create (data, trs) {
     trs.recipientId = data.recipientId
     trs.amount = '0'
 
@@ -73,7 +73,7 @@ class OutTransfer extends Asset.Base {
     return trs
   }
 
-  async verify(trs, sender) {
+  async verify (trs, sender) {
     // await super.verify(trs, sender);
 
     if (!trs.recipientId) {
@@ -121,22 +121,24 @@ class OutTransfer extends Asset.Base {
 
     return trs
   }
-  async verifySignature(trs) {
+
+  async verifySignature (trs) {
     const transfer = await this.getAssetObject(trs)
     // TODO 这里做签名认证，但是为什么取不到dapp呢？？？？？
-    let dapp = await this.getDappByTransactionId(transfer.dapp_id)
+    await this.getDappByTransactionId(transfer.dapp_id)
     return true
   }
-  async getDappByTransactionId(trsId) {
+
+  async getDappByTransactionId (trsId) {
     const result = await this.queryAsset({ trs_id: trsId }, null, false, 1, 1)
     if (result && result.length) {
       return result[0]
     }
     return result
-    throw new Error(`DApp not found: ${trsId}`)
+    // throw new Error(`DApp not found: ${trsId}`)
   }
 
-  async process(trs) {
+  async process (trs) {
     var dapp = null
 
     const transfer = await this.getAssetObject(trs)
@@ -192,46 +194,34 @@ class OutTransfer extends Asset.Base {
     return trs
   }
 
-  async _updateAssetBalance(currency, amount, address, dbTrans) {
+  async _updateAssetBalance (currency, amount, address, dbTrans) {
     const condition = {
       address,
       currency
     }
 
-    return new Promise((resolve, reject) => {
-      this.dao.findOne('mem_asset_balance',
-        condition, ['balance'], dbTrans,
-        (err, row) => {
-          if (err) {
-            return reject(err)
-          }
-
-          let balance = '0'
-          // FIXME: let balanceExists = false;
-          if (row) {
-            balance = row.balance
-            // balanceExists = true;
-          }
-
-          const newBalance = DdnUtils.bignum.plus(balance, amount)
-          if (DdnUtils.bignum.isLessThan(newBalance, 0)) {
-            return reject('Asset balance not enough')
-          }
-
-          condition.balance = newBalance.toString()
-          this.dao.insertOrUpdate('mem_asset_balance',
-            condition, dbTrans, (err2, result) => {
-              if (err2) {
-                return reject(err2)
-              }
-
-              resolve(result)
-            })
-        })
+    const row = await this.dao.findOne('mem_asset_balance', {
+      where: condition,
+      attributes: ['balance'],
+      transaction: dbTrans
     })
+    let balance = '0'
+    // FIXME: let balanceExists = false;
+    if (row) {
+      balance = row.balance
+      // balanceExists = true;
+    }
+
+    const newBalance = DdnUtils.bignum.plus(balance, amount)
+    if (DdnUtils.bignum.isLessThan(newBalance, 0)) {
+      throw new Error('Asset balance not enough')
+    }
+
+    condition.balance = newBalance.toString()
+    return await this.dao.insertOrUpdate('mem_asset_balance', condition, { transaction: dbTrans })
   }
 
-  async apply(trs, block, _sender, dbTrans) {
+  async apply (trs, block, _sender, dbTrans) {
     const transfer = await this.getAssetObject(trs)
 
     _dappOuttransferUnconfirmeds[trs.id] = false
@@ -239,31 +229,31 @@ class OutTransfer extends Asset.Base {
     if (transfer.currency !== this.constants.tokenName) {
       this.balanceCache.addAssetBalance(trs.recipientId, transfer.currency, transfer.amount)
 
-      await this._updateAssetBalance(transfer.currency,
-        `-${transfer.amount}`, transfer.dapp_id, dbTrans)
-      await this._updateAssetBalance(this.constants.tokenName,
-        `-${trs.fee}`, transfer.dapp_id, dbTrans)
-      await this._updateAssetBalance(transfer.currency,
-        transfer.amount, trs.recipientId, dbTrans) // wxm block database
+      await this._updateAssetBalance(transfer.currency, `-${transfer.amount}`, transfer.dapp_id, dbTrans)
+      await this._updateAssetBalance(this.constants.tokenName, `-${trs.fee}`, transfer.dapp_id, dbTrans)
+      await this._updateAssetBalance(transfer.currency, transfer.amount, trs.recipientId, dbTrans) // wxm block database
     } else {
       await this.runtime.account.setAccount({ address: trs.recipientId }, dbTrans)
 
       const amount = DdnUtils.bignum.new(transfer.amount) // DdnUtils.bignum update Number(transfer.amount);
-      await this.runtime.account.merge(trs.recipientId, {
-        address: trs.recipientId, // wxm block database
-        balance: amount.toString(), // DdnUtils.bignum update
-        u_balance: amount.toString(), // DdnUtils.bignum update
-        block_id: block.id, // wxm block database
-        round: await this.runtime.round.getRound(block.height)
-      }, dbTrans)
+      await this.runtime.account.merge(
+        trs.recipientId,
+        {
+          address: trs.recipientId, // wxm block database
+          balance: amount.toString(), // DdnUtils.bignum update
+          u_balance: amount.toString(), // DdnUtils.bignum update
+          block_id: block.id, // wxm block database
+          round: await this.runtime.round.getRound(block.height)
+        },
+        dbTrans
+      )
 
       var minusSum = DdnUtils.bignum.minus(0, amount, trs.fee)
-      await this._updateAssetBalance(this.constants.tokenName,
-        minusSum.toString(), transfer.dapp_id, dbTrans)
+      await this._updateAssetBalance(this.constants.tokenName, minusSum.toString(), transfer.dapp_id, dbTrans)
     }
   }
 
-  async undo(trs, block, _sender, dbTrans) {
+  async undo (trs, block, _sender, dbTrans) {
     const transfer = await this.getAssetObject(trs)
 
     _dappOuttransferUnconfirmeds[trs.id] = true
@@ -271,30 +261,30 @@ class OutTransfer extends Asset.Base {
     if (transfer.currency !== this.constants.tokenName) {
       this.balanceCache.addAssetBalance(trs.recipientId, transfer.currency, transfer.amount) // wxm block database
 
-      await this._updateAssetBalance(transfer.currency,
-        transfer.amount, transfer.dapp_id, dbTrans)
-      await this._updateAssetBalance(this.constants.tokenName,
-        trs.fee, transfer.dapp_id, dbTrans)
-      await this._updateAssetBalance(transfer.currency,
-        `-${transfer.amount}`, trs.recipientId, dbTrans) // wxm block database
+      await this._updateAssetBalance(transfer.currency, transfer.amount, transfer.dapp_id, dbTrans)
+      await this._updateAssetBalance(this.constants.tokenName, trs.fee, transfer.dapp_id, dbTrans)
+      await this._updateAssetBalance(transfer.currency, `-${transfer.amount}`, trs.recipientId, dbTrans) // wxm block database
     } else {
       await this.runtime.account.setAccount({ address: trs.recipientId }, dbTrans)
 
       const minusAmount = DdnUtils.bignum.minus(0, transfer.amount)
       const sum = DdnUtils.bignum.plus(transfer.amount, trs.fee)
-      await this.runtime.account.merge(trs.recipientId, {
-        address: trs.recipientId, // wxm block database
-        balance: minusAmount.toString(),
-        u_balance: minusAmount.toString(),
-        block_id: block.id, // wxm block database
-        round: await this.runtime.round.getRound(block.height)
-      }, dbTrans)
-      await this._updateAssetBalance(this.constants.tokenName,
-        sum, transfer.dapp_id, dbTrans)
+      await this.runtime.account.merge(
+        trs.recipientId,
+        {
+          address: trs.recipientId, // wxm block database
+          balance: minusAmount.toString(),
+          u_balance: minusAmount.toString(),
+          block_id: block.id, // wxm block database
+          round: await this.runtime.round.getRound(block.height)
+        },
+        dbTrans
+      )
+      await this._updateAssetBalance(this.constants.tokenName, sum, transfer.dapp_id, dbTrans)
     }
   }
 
-  async applyUnconfirmed(trs) {
+  async applyUnconfirmed (trs) {
     const transfer = await this.getAssetObject(trs)
 
     _dappOuttransferUnconfirmeds[trs.id] = true
@@ -307,8 +297,11 @@ class OutTransfer extends Asset.Base {
         throw new Error('Insufficient balance')
       }
 
-      this.balanceCache.addAssetBalance(transfer.dapp_id,
-        transfer.currency, DdnUtils.bignum.minus(0, amount).toString())// DdnUtils.bignum update -amount
+      this.balanceCache.addAssetBalance(
+        transfer.dapp_id,
+        transfer.currency,
+        DdnUtils.bignum.minus(0, amount).toString()
+      ) // DdnUtils.bignum update -amount
     } else {
       const ddnBalance = this.balanceCache.getAssetBalance(transfer.dapp_id, this.constants.tokenName) || 0
       if (DdnUtils.bignum.isLessThan(ddnBalance, fee)) {
@@ -322,7 +315,7 @@ class OutTransfer extends Asset.Base {
     }
   }
 
-  async undoUnconfirmed(trs) {
+  async undoUnconfirmed (trs) {
     _dappOuttransferUnconfirmeds[trs.id] = false
 
     const transfer = await this.getAssetObject(trs)
@@ -336,7 +329,7 @@ class OutTransfer extends Asset.Base {
     }
   }
 
-  async dbSave(trs, dbTrans) {
+  async dbSave (trs, dbTrans) {
     await super.dbSave(trs, dbTrans)
   }
 }

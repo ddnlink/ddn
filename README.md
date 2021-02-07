@@ -21,7 +21,7 @@
 </p>
 
 
-**Testnet Powered by Current version**: <http://testnet.ddn.link>
+<!-- **Testnet Powered by Current version**: <http://testnet.ddn.link> -->
 
 More infomation please visit our [official website](https://www.ddn.link) , [docs](http://docs.ddn.link).
 
@@ -63,7 +63,7 @@ More infomation please visit our [official website](https://www.ddn.link) , [doc
 
 | Github Issue | DATM |
 | ------------------------------------------------------- | ------------------------------------------------------------------------------------------- |
-| [ddnlink/ddn/issues](https://github.com/ddnlink/ddn/issues) | <img src="./doc/images/datm.jpg" width="200px">| 
+| [ddnlink/ddn/issues](https://github.com/ddnlink/ddn/issues) | <img src="./docs/images/datm.jpg" width="200px">|
 
 > PS：DATM is a distributed task management tool based on DDN blockchain. You can get tasks and discuss problems. When you complete tasks, The system will pay you DDN through the smart contract.
 
@@ -73,7 +73,7 @@ You can donate DDN to the follow address with [DDN Wallet](http://wallet.ddn.lin
 
 | DDN FOUNDATION Wallet Address | DDN Mobile Wallet QRCode |
 | ------------------------------------------------------- | ------------------------------------------------------------------------------------------- |
-| DLjrrVwnmMXstcAYVjcrpwyYb3kY1ehABU | ![](./doc/images/foundation.png) | 
+| DLjrrVwnmMXstcAYVjcrpwyYb3kY1ehABU | ![](./docs/images/foundation.png) |
 
 ## Contribute
 

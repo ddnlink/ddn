@@ -7,387 +7,257 @@ import DdnUtils from '@ddn/utils'
 let _singleton
 
 class DataQuery {
-  static singleton(context) {
+  static singleton (context) {
     if (!_singleton) {
       _singleton = new DataQuery(context)
     }
     return _singleton
   }
 
-  constructor(context) {
+  constructor (context) {
     Object.assign(this, context)
     this._context = context
   }
 
-  async loadSimpleBlocksData(where, limit, offset, orders) {
-    return new Promise((resolve, reject) => {
-      this.dao.findPage(
-        'block',
-        where,
-        limit,
-        offset,
-        false,
-        [
-          ['id', 'b_id'],
-          ['height', 'b_height'],
-          ['number_of_transactions', 'b_numberOfTransactions'],
-          ['total_amount', 'b_totalAmount'],
-          ['total_fee', 'b_totalFee'],
-          ['reward', 'b_reward'],
-          ['payload_length', 'b_payloadLength'],
-          ['payload_hash', 'b_payloadHash'],
-          ['generator_public_key', 'b_generatorPublicKey'],
-          ['block_signature', 'b_blockSignature'],
-          ['previous_block', 'b_previousBlock'],
-          ['timestamp', 'b_timestamp'],
-          ['version', 'b_version']
-        ],
-        orders,
-        (err, rows) => {
-          if (err) {
-            reject(err)
-          } else {
-            resolve(rows)
-          }
-        }
-      )
+  async loadSimpleBlocksData (where, limit, offset, orders) {
+    return await this.dao.findList('block', {
+      where,
+      limit,
+      offset,
+      attributes: [
+        ['id', 'b_id'],
+        ['height', 'b_height'],
+        ['number_of_transactions', 'b_numberOfTransactions'],
+        ['total_amount', 'b_totalAmount'],
+        ['total_fee', 'b_totalFee'],
+        ['reward', 'b_reward'],
+        ['payload_length', 'b_payloadLength'],
+        ['payload_hash', 'b_payloadHash'],
+        ['generator_public_key', 'b_generatorPublicKey'],
+        ['block_signature', 'b_blockSignature'],
+        ['previous_block', 'b_previousBlock'],
+        ['timestamp', 'b_timestamp'],
+        ['version', 'b_version']
+      ],
+      order: orders
     })
   }
 
-  async loadTransactionsWithBlockIds(blockIds) {
-    if (blockIds && blockIds.length > 0) {
-      return new Promise((resolve, reject) => {
-        this.dao.findList(
-          'tr',
-          {
-            block_id: {
-              $in: blockIds
-            }
-          },
-          [
-            ['id', 't_id'],
-            ['type', 't_type'],
-            ['senderPublicKey', 't_senderPublicKey'],
-            ['senderId', 't_senderId'],
-            ['recipientId', 't_recipientId'],
-            ['amount', 't_amount'],
-            ['fee', 't_fee'],
-            ['signature', 't_signature'],
-            ['sign_signature', 't_signSignature'],
-            ['args', 't_args'],
-            ['message', 't_message'],
-            ['timestamp', 't_timestamp'],
-            ['block_id', 'b_id']
-          ],
-          [['timestamp', 'asc']],
-          (err, rows) => {
-            if (err) {
-              reject(err)
-            } else {
-              resolve(rows)
-            }
-          }
-        )
-      })
-    } else {
+  async loadTransactionsWithBlockIds (blockIds) {
+    if (!blockIds || !blockIds.length) {
       throw new Error('Invalid params: blockIds')
     }
+    return await this.dao.findList('tr', {
+      where: {
+        block_id: {
+          $in: blockIds
+        }
+      },
+      attributes: [
+        ['id', 't_id'],
+        ['type', 't_type'],
+        ['senderPublicKey', 't_senderPublicKey'],
+        ['senderId', 't_senderId'],
+        ['recipientId', 't_recipientId'],
+        ['amount', 't_amount'],
+        ['fee', 't_fee'],
+        ['signature', 't_signature'],
+        ['sign_signature', 't_signSignature'],
+        ['args', 't_args'],
+        ['message', 't_message'],
+        ['timestamp', 't_timestamp'],
+        ['block_id', 'b_id']
+      ],
+      order: [['timestamp', 'asc']]
+    })
   }
 
-  async loadDelegatesWithTransactionIds(transactionIds) {
-    if (transactionIds && transactionIds.length > 0) {
-      return new Promise((resolve, reject) => {
-        this.dao.findList(
-          'delegate',
-          {
-            transaction_id: {
-              $in: transactionIds
-            }
-          },
-          [
-            ['username', 'd_username'],
-            ['transaction_id', 't_id']
-          ],
-          null,
-          (err, rows) => {
-            if (err) {
-              reject(err)
-            } else {
-              resolve(rows)
-            }
-          }
-        )
-      })
-    } else {
+  async loadDelegatesWithTransactionIds (transactionIds) {
+    if (!transactionIds || !transactionIds.length) {
       throw new Error('Invalid params: transactionIds')
     }
+    return await this.dao.findList('delegate', {
+      where: {
+        transaction_id: {
+          $in: transactionIds
+        }
+      },
+      attributes: [
+        ['username', 'd_username'],
+        ['transaction_id', 't_id']
+      ]
+    })
   }
 
-  async loadVotesWithTransactionIds(transactionIds) {
-    if (transactionIds && transactionIds.length > 0) {
-      return new Promise((resolve, reject) => {
-        this.dao.findList(
-          'vote',
-          {
-            transaction_id: {
-              $in: transactionIds
-            }
-          },
-          [
-            ['votes', 'v_votes'],
-            ['transaction_id', 't_id']
-          ],
-          null,
-          (err, rows) => {
-            if (err) {
-              reject(err)
-            } else {
-              resolve(rows)
-            }
-          }
-        )
-      })
-    } else {
+  async loadVotesWithTransactionIds (transactionIds) {
+    if (!transactionIds || !transactionIds.length) {
       throw new Error('Invalid params: transactionIds')
     }
+    return await this.dao.findList('vote', {
+      where: {
+        transaction_id: {
+          $in: transactionIds
+        }
+      },
+      attributes: [
+        ['votes', 'v_votes'],
+        ['transaction_id', 't_id']
+      ]
+    })
   }
 
-  async loadAssetsWithTransactionIds(transactionIds) {
-    if (transactionIds && transactionIds.length > 0) {
-      return new Promise((resolve, reject) => {
-        this.dao.findList(
-          'trs_asset',
-          {
-            transaction_id: {
-              $in: transactionIds
-            }
-          },
-          [
-            ['transaction_id', 't_id'],
-            ['transaction_id', 'asset_trs_id'],
-            ['transaction_type', 'asset_trs_type'],
-            ['str1', 'asset_str1'],
-            ['str2', 'asset_str2'],
-            ['str3', 'asset_str3'],
-            ['str4', 'asset_str4'],
-            ['str5', 'asset_str5'],
-            ['str6', 'asset_str6'],
-            ['str7', 'asset_str7'],
-            ['str8', 'asset_str8'],
-            ['str9', 'asset_str9'],
-            ['str10', 'asset_str10'],
-            ['int1', 'asset_int1'],
-            ['int2', 'asset_int2'],
-            ['int3', 'asset_int3'],
-            ['timestamp1', 'asset_timestamp1'],
-            ['timestamp2', 'asset_timestamp2'],
-            ['timestamp', 'asset_timestamp']
-          ],
-          null,
-          (err, rows) => {
-            if (err) {
-              reject(err)
-            } else {
-              resolve(rows)
-            }
-          }
-        )
-      })
-    } else {
+  async loadAssetsWithTransactionIds (transactionIds) {
+    if (!transactionIds || !transactionIds.length) {
       throw new Error('Invalid params: transactionIds')
     }
+    return await this.dao.findList('trs_asset', {
+      where: {
+        transaction_id: {
+          $in: transactionIds
+        }
+      },
+      attributes: [
+        ['transaction_id', 't_id'],
+        ['transaction_id', 'asset_trs_id'],
+        ['transaction_type', 'asset_trs_type'],
+        ['str1', 'asset_str1'],
+        ['str2', 'asset_str2'],
+        ['str3', 'asset_str3'],
+        ['str4', 'asset_str4'],
+        ['str5', 'asset_str5'],
+        ['str6', 'asset_str6'],
+        ['str7', 'asset_str7'],
+        ['str8', 'asset_str8'],
+        ['str9', 'asset_str9'],
+        ['str10', 'asset_str10'],
+        ['int1', 'asset_int1'],
+        ['int2', 'asset_int2'],
+        ['int3', 'asset_int3'],
+        ['timestamp1', 'asset_timestamp1'],
+        ['timestamp2', 'asset_timestamp2'],
+        ['timestamp', 'asset_timestamp']
+      ]
+    })
   }
 
-  async loadAssetExtsWithTransactionIds(transactionIds) {
-    if (transactionIds && transactionIds.length > 0) {
-      return new Promise((resolve, reject) => {
-        this.dao.findList(
-          'trs_asset_ext',
-          {
-            transaction_id: {
-              $in: transactionIds
-            }
-          },
-          [
-            ['transaction_id', 't_id'],
-            ['json_ext', 'asset_ext_json']
-          ],
-          null,
-          (err, rows) => {
-            if (err) {
-              reject(err)
-            } else {
-              resolve(rows)
-            }
-          }
-        )
-      })
-    } else {
+  async loadAssetExtsWithTransactionIds (transactionIds) {
+    if (!transactionIds || !transactionIds.length) {
       throw new Error('Invalid params: transactionIds')
     }
+    return await this.dao.findList('trs_asset_ext', {
+      where: {
+        transaction_id: {
+          $in: transactionIds
+        }
+      },
+      attributes: [
+        ['transaction_id', 't_id'],
+        ['json_ext', 'asset_ext_json']
+      ]
+    })
   }
 
-  async loadSignaturesWithTransactionIds(transactionIds) {
-    if (transactionIds && transactionIds.length > 0) {
-      return new Promise((resolve, reject) => {
-        this.dao.findList(
-          'signature',
-          {
-            transaction_id: {
-              $in: transactionIds
-            }
-          },
-          [
-            ['publicKey', 's_publicKey'],
-            ['transaction_id', 't_id']
-          ],
-          null,
-          (err, rows) => {
-            if (err) {
-              reject(err)
-            } else {
-              resolve(rows)
-            }
-          }
-        )
-      })
-    } else {
+  async loadSignaturesWithTransactionIds (transactionIds) {
+    if (!transactionIds || !transactionIds.length) {
       throw new Error('Invalid params: transactionIds')
     }
+    return await this.dao.findList('signature', {
+      where: {
+        transaction_id: {
+          $in: transactionIds
+        }
+      },
+      attributes: [
+        ['publicKey', 's_publicKey'],
+        ['transaction_id', 't_id']
+      ]
+    })
   }
 
-  async loadMultiSignaturesWithTransactionIds(transactionIds) {
-    if (transactionIds && transactionIds.length > 0) {
-      return new Promise((resolve, reject) => {
-        this.dao.findList(
-          'multisignature',
-          {
-            transaction_id: {
-              $in: transactionIds
-            }
-          },
-          [
-            ['min', 'm_min'],
-            ['lifetime', 'm_lifetime'],
-            ['keysgroup', 'm_keysgroup'],
-            ['transaction_id', 't_id']
-          ],
-          null,
-          (err, rows) => {
-            if (err) {
-              reject(err)
-            } else {
-              resolve(rows)
-            }
-          }
-        )
-      })
-    } else {
+  async loadMultiSignaturesWithTransactionIds (transactionIds) {
+    if (!transactionIds || !transactionIds.length) {
       throw new Error('Invalid params: transactionIds')
     }
+    return await this.dao.findList('multisignature', {
+      where: {
+        transaction_id: {
+          $in: transactionIds
+        }
+      },
+      attributes: [
+        ['min', 'm_min'],
+        ['lifetime', 'm_lifetime'],
+        ['keysgroup', 'm_keysgroup'],
+        ['transaction_id', 't_id']
+      ]
+    })
   }
 
-  async loadDappsWithTransactionIds(transactionIds) {
-    if (transactionIds && transactionIds.length > 0) {
-      return new Promise((resolve, reject) => {
-        this.dao.findList(
-          'dapp',
-          {
-            transaction_id: {
-              $in: transactionIds
-            }
-          },
-          [
-            ['name', 'dapp_name'],
-            ['description', 'dapp_description'],
-            ['tags', 'dapp_tags'],
-            ['type', 'dapp_type'],
-            ['link', 'dapp_link'],
-            ['category', 'dapp_category'],
-            ['icon', 'dapp_icon'],
-            ['delegates', 'dapp_delegates'],
-            ['unlockDelegates', 'dapp_unlockDelegates'],
-            ['transaction_id', 't_id']
-          ],
-          null,
-          (err, rows) => {
-            if (err) {
-              reject(err)
-            } else {
-              resolve(rows)
-            }
-          }
-        )
-      })
-    } else {
+  async loadDappsWithTransactionIds (transactionIds) {
+    if (!transactionIds || !transactionIds.length) {
       throw new Error('Invalid params: transactionIds')
     }
+    return await this.dao.findList('dapp', {
+      where: {
+        transaction_id: {
+          $in: transactionIds
+        }
+      },
+      attributes: [
+        ['name', 'dapp_name'],
+        ['description', 'dapp_description'],
+        ['tags', 'dapp_tags'],
+        ['type', 'dapp_type'],
+        ['link', 'dapp_link'],
+        ['category', 'dapp_category'],
+        ['icon', 'dapp_icon'],
+        ['delegates', 'dapp_delegates'],
+        ['unlockDelegates', 'dapp_unlockDelegates'],
+        ['transaction_id', 't_id']
+      ]
+    })
   }
 
-  async loadDappIntransfersWithTransactionIds(transactionIds) {
-    if (transactionIds && transactionIds.length > 0) {
-      return new Promise((resolve, reject) => {
-        this.dao.findList(
-          'intransfer',
-          {
-            transaction_id: {
-              $in: transactionIds
-            }
-          },
-          [
-            ['dapp_id', 'it_dappId'],
-            ['currency', 'it_currency'],
-            ['amount', 'it_amount'],
-            ['transaction_id', 't_id']
-          ],
-          null,
-          (err, rows) => {
-            if (err) {
-              reject(err)
-            } else {
-              resolve(rows)
-            }
-          }
-        )
-      })
-    } else {
+  async loadDappIntransfersWithTransactionIds (transactionIds) {
+    if (!transactionIds || !transactionIds.length) {
       throw new Error('Invalid params: transactionIds')
     }
+    return await this.dao.findList('intransfer', {
+      where: {
+        transaction_id: {
+          $in: transactionIds
+        }
+      },
+      attributes: [
+        ['dapp_id', 'it_dappId'],
+        ['currency', 'it_currency'],
+        ['amount', 'it_amount'],
+        ['transaction_id', 't_id']
+      ]
+    })
   }
 
-  async loadDappOuttransfersWithTransactionIds(transactionIds) {
-    if (transactionIds && transactionIds.length > 0) {
-      return new Promise((resolve, reject) => {
-        this.dao.findList(
-          'outtransfer',
-          {
-            transaction_id: {
-              $in: transactionIds
-            }
-          },
-          [
-            ['dapp_id', 'ot_dappId'],
-            ['outtransaction_id', 'ot_outTransactionId'],
-            ['currency', 'ot_currency'],
-            ['amount', 'ot_amount'],
-            ['transaction_id', 't_id']
-          ],
-          null,
-          (err, rows) => {
-            if (err) {
-              reject(err)
-            } else {
-              resolve(rows)
-            }
-          }
-        )
-      })
-    } else {
+  async loadDappOuttransfersWithTransactionIds (transactionIds) {
+    if (!transactionIds || !transactionIds.length) {
       throw new Error('Invalid params: transactionIds')
     }
+    return await this.dao.findList('outtransfer', {
+      where: {
+        transaction_id: {
+          $in: transactionIds
+        }
+      },
+      attributes: [
+        ['dapp_id', 'ot_dappId'],
+        ['outtransaction_id', 'ot_outTransactionId'],
+        ['currency', 'ot_currency'],
+        ['amount', 'ot_amount'],
+        ['transaction_id', 't_id']
+      ]
+    })
   }
 
-  async queryFullBlockData(where, limit, offset, orders) {
+  async queryFullBlockData (where, limit, offset, orders) {
     const blockRows = await this.loadSimpleBlocksData(where, limit, offset, orders)
 
     const blockIds = []
@@ -528,65 +398,52 @@ class DataQuery {
     }
   }
 
-  async loadSimpleTransactionData(where, limit, offset, orders, returnTotal) {
-    return new Promise((resolve, reject) => {
-      this.dao.findPage(
-        'block',
-        null,
-        1,
-        0,
-        false,
-        [[this.dao.db_fnMax('height'), 'maxHeight']], // wxm block database  library.dao.db_fn('MAX', library.dao.db_col('height'))
-        null,
-        (err, rows) => {
-          if (err || !rows) {
-            return reject(err || 'Get Block Error.')
-          }
-
-          let maxHeight = 2
-          if (rows.length > 0) {
-            maxHeight = rows[0].maxHeight + 1
-          }
-
-          this.dao.findPage(
-            'tr',
-            where,
-            limit,
-            offset,
-            returnTotal || false,
-            [
-              ['id', 't_id'],
-              ['type', 't_type'],
-              ['senderPublicKey', 't_senderPublicKey'],
-              ['senderId', 't_senderId'],
-              ['recipientId', 't_recipientId'],
-              ['amount', 't_amount'],
-              ['fee', 't_fee'],
-              ['signature', 't_signature'],
-              ['sign_signature', 't_signSignature'],
-              ['args', 't_args'],
-              ['message', 't_message'],
-              ['timestamp', 't_timestamp'],
-              ['block_id', 'b_id'],
-              ['block_height', 'b_height'],
-              [this.dao.db_str(`${maxHeight}-block_height`), 'confirmations']
-            ],
-            orders,
-            (err, rows) => {
-              if (err) {
-                this.logger.error('Query transactions from database error', err)
-                reject(err)
-              } else {
-                resolve(rows)
-              }
-            }
-          )
-        }
-      )
+  async loadSimpleTransactionData (where, limit, offset, orders, returnTotal) {
+    const row = await this.dao.findOne('block', {
+      attributes: [[this.dao.db_fnMax('height'), 'maxHeight']]
     })
+    if (!row) {
+      throw new Error('Get Block Error.')
+    }
+    let maxHeight = 2
+    maxHeight = row.maxHeight + 1
+
+    try {
+      const opts = {
+        where,
+        limit,
+        offset,
+        returnTotal,
+        attributes: [
+          ['id', 't_id'],
+          ['type', 't_type'],
+          ['senderPublicKey', 't_senderPublicKey'],
+          ['senderId', 't_senderId'],
+          ['recipientId', 't_recipientId'],
+          ['amount', 't_amount'],
+          ['fee', 't_fee'],
+          ['signature', 't_signature'],
+          ['sign_signature', 't_signSignature'],
+          ['args', 't_args'],
+          ['message', 't_message'],
+          ['timestamp', 't_timestamp'],
+          ['block_id', 'b_id'],
+          ['block_height', 'b_height'],
+          [this.dao.db_str(`${maxHeight}-block_height`), 'confirmations']
+        ],
+        order: orders
+      }
+      if (returnTotal) {
+        return await this.dao.findPage('tr', opts)
+      } else {
+        return await this.dao.findList('tr', opts)
+      }
+    } catch (err) {
+      this.logger.error('Query transactions from database error', err)
+    }
   }
 
-  async queryFullTransactionData(where, limit, offset, orders, returnTotal) {
+  async queryFullTransactionData (where, limit, offset, orders, returnTotal) {
     const queryData = await this.loadSimpleTransactionData(where, limit, offset, orders, returnTotal)
 
     let transactionRows = queryData
@@ -718,58 +575,50 @@ class DataQuery {
       }
     }
   }
-  async loadAssetsWithDappChainCondition({ dapp_id, seq, type }) {
-    const where = { str2: dapp_id, transaction_type: type };
-    let limit = 1000, offset = 0, orders = null
 
-    if (type == DdnUtils.assetTypes.DAPP_IN) {
+  async loadAssetsWithDappChainCondition ({ dapp_id, seq, type }) {
+    const where = { str2: dapp_id, transaction_type: type }
+    let limit = 1000
+    let offset = 0
+    let orders = null
+
+    if (type === DdnUtils.assetTypes.DAPP_IN) {
       where.str5 = { $gt: seq }
-    } else if (type == DdnUtils.assetTypes.DAPP_OUT) {
+    } else if (type === DdnUtils.assetTypes.DAPP_OUT) {
       limit = 1
       offset = 0
       orders = [['str5', 'DESC']]
     }
-    const assetData = await new Promise((resolve, reject) => {
-      this.dao.findPage(
-        'trs_asset',
-        where,
-        limit,
-        offset,
-        false,
-        [
-          ['transaction_id', 't_id'],
-          ['transaction_id', 'asset_trs_id'],
-          ['transaction_type', 'asset_trs_type'],
-          ['str1', 'asset_str1'],
-          ['str2', 'asset_str2'],
-          ['str3', 'asset_str3'],
-          ['str4', 'asset_str4'],
-          ['str5', 'asset_str5'],
-          ['str6', 'asset_str6'],
-          ['str7', 'asset_str7'],
-          ['str8', 'asset_str8'],
-          ['str9', 'asset_str9'],
-          ['str10', 'asset_str10'],
-          ['int1', 'asset_int1'],
-          ['int2', 'asset_int2'],
-          ['int3', 'asset_int3'],
-          ['timestamp1', 'asset_timestamp1'],
-          ['timestamp2', 'asset_timestamp2'],
-          ['timestamp', 'asset_timestamp']
-        ],
-        orders,
-        (err, rows) => {
-          if (err) {
-            reject(err)
-          } else {
-            resolve(rows)
-          }
-        }
-      )
+    const assetData = await this.dao.findList('trs_asset', {
+      where,
+      limit,
+      offset,
+      order: orders,
+      attributes: [
+        ['transaction_id', 't_id'],
+        ['transaction_id', 'asset_trs_id'],
+        ['transaction_type', 'asset_trs_type'],
+        ['str1', 'asset_str1'],
+        ['str2', 'asset_str2'],
+        ['str3', 'asset_str3'],
+        ['str4', 'asset_str4'],
+        ['str5', 'asset_str5'],
+        ['str6', 'asset_str6'],
+        ['str7', 'asset_str7'],
+        ['str8', 'asset_str8'],
+        ['str9', 'asset_str9'],
+        ['str10', 'asset_str10'],
+        ['int1', 'asset_int1'],
+        ['int2', 'asset_int2'],
+        ['int3', 'asset_int3'],
+        ['timestamp1', 'asset_timestamp1'],
+        ['timestamp2', 'asset_timestamp2'],
+        ['timestamp', 'asset_timestamp']
+      ]
     })
     const trsId = assetData.map(item => item.t_id)
     const queryData = await this.loadSimpleTransactionData({ id: { $in: trsId } }, limit, offset, null, false)
-    let transactionRows = queryData
+    const transactionRows = queryData
     // let count = 0
     // if (returnTotal) {
     //   transactionRows = queryData.rows
@@ -830,7 +679,7 @@ class DataQuery {
       }
       combineTransactionData(assetData)
       return transactionRows
-    }else{
+    } else {
       return []
     }
   }

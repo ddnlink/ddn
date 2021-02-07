@@ -1,22 +1,22 @@
 import ByteBuffer from 'bytebuffer'
-import DdnCrypto from '@ddn/crypto'
+import * as DdnCrypto from '@ddn/crypto'
 
 import Asset from '@ddn/asset-base'
 import DdnUtils from '@ddn/utils'
 import daoUtil from './daoUtil'
 
 /**
-  * 确认交易
-  * @receivedAddress 接收地址（媒体号的钱包地址）
-  * @senderAddress 投稿者的钱包地址
-  * @url 文章的dat地址
-  * @state 0-不接受，1-确认接收
-  * @contribution_trs_id 投稿的交易id，关联到投稿内容
-  * @transactionId 交易id
-  *
-  * @amout 等于投稿时作者设定的 @price 的数量
-  * @fee 0EBT
-  */
+ * 确认交易
+ * @receivedAddress 接收地址（媒体号的钱包地址）
+ * @senderAddress 投稿者的钱包地址
+ * @url 文章的dat地址
+ * @state 0-不接受，1-确认接收
+ * @contribution_trs_id 投稿的交易id，关联到投稿内容
+ * @transactionId 交易id
+ *
+ * @amout 等于投稿时作者设定的 @price 的数量
+ * @fee 0EBT
+ */
 class Confirmation extends Asset.Base {
   // eslint-disable-next-line no-useless-constructor
   constructor (context, transactionConfig) {
@@ -25,26 +25,27 @@ class Confirmation extends Asset.Base {
 
   // eslint-disable-next-line class-methods-use-this
   async propsMapping () {
-    return [{
-      field: 'str2', // 34 < 64
-      prop: 'received_address'
-    },
-    {
-      field: 'str3',
-      prop: 'sender_address'
-    },
-    {
-      field: 'str6', // 256
-      prop: 'url'
-    },
-    {
-      field: 'int1',
-      prop: 'state'
-    },
-    {
-      field: 'str4', // 128
-      prop: 'contribution_trs_id'
-    }
+    return [
+      {
+        field: 'str2', // 34 < 64
+        prop: 'received_address'
+      },
+      {
+        field: 'str3',
+        prop: 'sender_address'
+      },
+      {
+        field: 'str6', // 256
+        prop: 'url'
+      },
+      {
+        field: 'int1',
+        prop: 'state'
+      },
+      {
+        field: 'str4', // 128
+        prop: 'contribution_trs_id'
+      }
     ]
   }
 
@@ -71,7 +72,7 @@ class Confirmation extends Asset.Base {
     } else if (data[assetJsonName].state === 1) {
       trans.recipientId = data[assetJsonName].received_address // wxm block database
       // 此处交易金额=投稿的price
-      trans.amount = DdnUtils.bignum.new((data[assetJsonName].price || 0)).toString()
+      trans.amount = DdnUtils.bignum.new(data[assetJsonName].price || 0).toString()
     }
     trans.asset[assetJsonName] = data[assetJsonName]
 
@@ -112,16 +113,14 @@ class Confirmation extends Asset.Base {
       }
     }
 
-    if (!confirmation.received_address ||
-            confirmation.received_address.length > 34) {
+    if (!confirmation.received_address || confirmation.received_address.length > 34) {
       throw new Error('received_address is undefined or too long, don`t more than 34 characters.')
     }
     if (!this.address.isAddress(confirmation.received_address)) {
       throw new Error("Invalid confirmation's received_address")
     }
 
-    if (!confirmation.sender_address ||
-            confirmation.sender_address.length > 128) {
+    if (!confirmation.sender_address || confirmation.sender_address.length > 128) {
       throw new Error('senderAddress is undefined or too long, don`t more than 128 characters.')
     }
     if (!this.address.isAddress(confirmation.sender_address)) {
@@ -129,20 +128,24 @@ class Confirmation extends Asset.Base {
     }
 
     // TODO: 2020.4.8 如果使用dat协议，地址长度自然大于256，确认数据库字段从256 -> 512
-    if (!confirmation.url ||
-            confirmation.url.length > 512) {
+    if (!confirmation.url || confirmation.url.length > 512) {
       throw new Error('url is undefined or too long, don`t more than 512 characters.')
     }
 
-    if (!confirmation.contribution_trs_id ||
-            confirmation.contribution_trs_id.length > 128) {
+    if (!confirmation.contribution_trs_id || confirmation.contribution_trs_id.length > 128) {
       throw new Error('contribution_trs_id is undefined or too long, don`t more than 128 characters.')
     }
 
     // (1)查询getConfirmation是否存在
-    const confirmationRecords = await super.queryAsset({
-      contribution_trs_id: confirmation.contribution_trs_id
-    }, null, false, 1, 1)
+    const confirmationRecords = await super.queryAsset(
+      {
+        contribution_trs_id: confirmation.contribution_trs_id
+      },
+      null,
+      false,
+      1,
+      1
+    )
 
     if (confirmationRecords && confirmationRecords.length >= 1) {
       throw new Error(`The contribution has been confirmed: ${confirmation.contribution_trs_id}`)
@@ -151,9 +154,15 @@ class Confirmation extends Asset.Base {
     // (2)如果不存在则继续查询
     const contributionInst = await this.getAssetInstanceByName('DaoContribution')
 
-    const contributionRecords = await contributionInst.queryAsset({
-      trs_id: confirmation.contribution_trs_id
-    }, null, false, 1, 1)
+    const contributionRecords = await contributionInst.queryAsset(
+      {
+        trs_id: confirmation.contribution_trs_id
+      },
+      null,
+      false,
+      1,
+      1
+    )
     if (contributionRecords && contributionRecords.length >= 1) {
       const contribution = contributionRecords[0]
       // 确认的请求地址必须和投稿的接收地址一致
@@ -210,34 +219,37 @@ class Confirmation extends Asset.Base {
       throw new Error('Org not found: ' + org_id)
     }
 
-    const validateErrors = await this.ddnSchema.validate({
-      type: 'object',
-      properties: {
-        senderPublicKey: {
-          type: 'string'
+    const validateErrors = await this.ddnSchema.validate(
+      {
+        type: 'object',
+        properties: {
+          senderPublicKey: {
+            type: 'string'
+          },
+          multisigAccountPublicKey: {
+            type: 'string',
+            format: 'publicKey'
+          },
+          url: {
+            type: 'string'
+          },
+          timestamp: {
+            type: 'integer'
+          },
+          pageIndex: {
+            type: 'integer',
+            minimum: 1
+          },
+          pageSize: {
+            type: 'integer',
+            minimum: 1,
+            maximum: 500
+          }
         },
-        multisigAccountPublicKey: {
-          type: 'string',
-          format: 'publicKey'
-        },
-        url: {
-          type: 'string'
-        },
-        timestamp: {
-          type: 'integer'
-        },
-        pageIndex: {
-          type: 'integer',
-          minimum: 1
-        },
-        pageSize: {
-          type: 'integer',
-          minimum: 1,
-          maximum: 500
-        }
+        required: []
       },
-      required: []
-    }, req.query)
+      req.query
+    )
     if (validateErrors) {
       throw new Error(`Invalid parameters: ${validateErrors[0].schemaPath} ${validateErrors[0].message}`)
     }
@@ -263,7 +275,8 @@ class Confirmation extends Asset.Base {
       this.queryAsset(where, [], true, pageIndex, pageSize)
         .then(rows => {
           resolve({ success: true, state: 0, result: rows })
-        }).catch(err => {
+        })
+        .catch(err => {
           this.logger.error('confirmation error', err)
           reject(err)
         })
@@ -273,39 +286,42 @@ class Confirmation extends Asset.Base {
   async putConfirmation (req) {
     const body = req.body
 
-    const validateErrors = await this.ddnSchema.validate({
-      type: 'object',
-      properties: {
-        secret: {
-          type: 'string',
-          minLength: 1,
-          maxLength: 100
+    const validateErrors = await this.ddnSchema.validate(
+      {
+        type: 'object',
+        properties: {
+          secret: {
+            type: 'string',
+            minLength: 1,
+            maxLength: 100
+          },
+          secondSecret: {
+            type: 'string',
+            minLength: 1,
+            maxLength: 100
+          },
+          multisigAccountPublicKey: {
+            type: 'string',
+            format: 'publicKey'
+          },
+          contribution_trs_id: {
+            type: 'string'
+          },
+          url: {
+            type: 'string',
+            minimum: 1,
+            maximum: 256
+          },
+          state: {
+            type: 'integer',
+            minimum: 0,
+            maximum: 1
+          }
         },
-        secondSecret: {
-          type: 'string',
-          minLength: 1,
-          maxLength: 100
-        },
-        multisigAccountPublicKey: {
-          type: 'string',
-          format: 'publicKey'
-        },
-        contribution_trs_id: {
-          type: 'string'
-        },
-        url: {
-          type: 'string',
-          minimum: 1,
-          maximum: 256
-        },
-        state: {
-          type: 'integer',
-          minimum: 0,
-          maximum: 1
-        }
+        required: ['secret', 'contribution_trs_id', 'state']
       },
-      required: ['secret', 'contribution_trs_id', 'state']
-    }, body)
+      body
+    )
     if (validateErrors) {
       throw new Error(`Invalid parameters: ${validateErrors[0].schemaPath} ${validateErrors[0].message}`)
     }
@@ -314,9 +330,15 @@ class Confirmation extends Asset.Base {
     // const senderPublicKey = keypair.publicKey
 
     const contributionInst = await this.getAssetInstanceByName('DaoContribution')
-    const contributionRecords = await contributionInst.queryAsset({
-      trs_id: body.contribution_trs_id
-    }, null, false, 1, 1)
+    const contributionRecords = await contributionInst.queryAsset(
+      {
+        trs_id: body.contribution_trs_id
+      },
+      null,
+      false,
+      1,
+      1
+    )
 
     if (contributionRecords && contributionRecords.length) {
       const contribution = contributionRecords[0]
@@ -330,122 +352,125 @@ class Confirmation extends Asset.Base {
       }
 
       return new Promise((resolve, reject) => {
-        this.balancesSequence.add(async (cb) => {
-          if (body.multisigAccountPublicKey && body.multisigAccountPublicKey !== keypair.publicKey) {
-            let account
-            try {
-              account = await this.runtime.account.getAccountByPublicKey(body.multisigAccountPublicKey)
-            } catch (e) {
-              return cb(e)
-            }
-
-            if (!account) {
-              return cb('Multisignature account not found')
-            }
-
-            if (!account.multisignatures) {
-              return cb('Account does not have multisignatures enabled')
-            }
-
-            if (account.multisignatures.indexOf(keypair.publicKey) < 0) {
-              return cb('Account does not belong to multisignature group')
-            }
-
-            let requester
-            try {
-              requester = await this.runtime.account.getAccountByPublicKey(keypair.publicKey)
-            } catch (e) {
-              return cb(e)
-            }
-
-            if (!requester || !requester.publicKey) {
-              return cb('Invalid requester')
-            }
-
-            if (requester.second_signature && !body.secondSecret) {
-              return cb('Invalid second passphrase')
-            }
-
-            if (requester.publicKey === account.publicKey) {
-              return cb('Invalid requester')
-            }
-
-            let second_keypair = null
-            if (requester.second_signature) {
-              second_keypair = DdnCrypto.getKeys(body.secondSecret)
-            }
-
-            confirmation.sender_address = account.address
-
-            try {
-              const data = {
-                type: await this.getTransactionType(),
-                sender: account,
-                keypair,
-                requester: keypair,
-                second_keypair
+        this.balancesSequence.add(
+          async cb => {
+            if (body.multisigAccountPublicKey && body.multisigAccountPublicKey !== keypair.publicKey) {
+              let account
+              try {
+                account = await this.runtime.account.getAccountByPublicKey(body.multisigAccountPublicKey)
+              } catch (e) {
+                return cb(e)
               }
-              const assetJsonName = await this.getAssetJsonName()
-              data[assetJsonName] = confirmation
 
-              const transaction = await this.runtime.transaction.create(data)
-
-              const transactions = await this.runtime.transaction.receiveTransactions([transaction])
-              cb(null, transactions)
-            } catch (e) {
-              cb(e)
-            }
-          } else {
-            let account
-            try {
-              account = await this.runtime.account.getAccountByPublicKey(keypair.publicKey)
-            } catch (e) {
-              return cb(e)
-            }
-
-            if (!account) {
-              return cb('Account not found')
-            }
-
-            if (account.second_signature && !body.secondSecret) {
-              return cb('Invalid second passphrase')
-            }
-
-            let second_keypair = null
-            if (account.secondSignature) {
-              second_keypair = DdnCrypto.getKeys(body.secondSecret)
-            }
-
-            confirmation.sender_address = account.address
-
-            try {
-              const data = {
-                type: await this.getTransactionType(),
-                sender: account,
-                keypair,
-                second_keypair
+              if (!account) {
+                return cb('Multisignature account not found')
               }
-              const assetJsonName = await this.getAssetJsonName()
-              data[assetJsonName] = confirmation
 
-              const transaction = await this.runtime.transaction.create(data)
+              if (!account.multisignatures) {
+                return cb('Account does not have multisignatures enabled')
+              }
 
-              const transactions = await this.runtime.transaction.receiveTransactions([transaction])
-              cb(null, transactions)
-            } catch (e) {
-              cb(e)
+              if (account.multisignatures.indexOf(keypair.publicKey) < 0) {
+                return cb('Account does not belong to multisignature group')
+              }
+
+              let requester
+              try {
+                requester = await this.runtime.account.getAccountByPublicKey(keypair.publicKey)
+              } catch (e) {
+                return cb(e)
+              }
+
+              if (!requester || !requester.publicKey) {
+                return cb('Invalid requester')
+              }
+
+              if (requester.second_signature && !body.secondSecret) {
+                return cb('Invalid second passphrase')
+              }
+
+              if (requester.publicKey === account.publicKey) {
+                return cb('Invalid requester')
+              }
+
+              let second_keypair = null
+              if (requester.second_signature) {
+                second_keypair = DdnCrypto.getKeys(body.secondSecret)
+              }
+
+              confirmation.sender_address = account.address
+
+              try {
+                const data = {
+                  type: await this.getTransactionType(),
+                  sender: account,
+                  keypair,
+                  requester: keypair,
+                  second_keypair
+                }
+                const assetJsonName = await this.getAssetJsonName()
+                data[assetJsonName] = confirmation
+
+                const transaction = await this.runtime.transaction.create(data)
+
+                const transactions = await this.runtime.transaction.receiveTransactions([transaction])
+                cb(null, transactions)
+              } catch (e) {
+                cb(e)
+              }
+            } else {
+              let account
+              try {
+                account = await this.runtime.account.getAccountByPublicKey(keypair.publicKey)
+              } catch (e) {
+                return cb(e)
+              }
+
+              if (!account) {
+                return cb('Account not found')
+              }
+
+              if (account.second_signature && !body.secondSecret) {
+                return cb('Invalid second passphrase')
+              }
+
+              let second_keypair = null
+              if (account.secondSignature) {
+                second_keypair = DdnCrypto.getKeys(body.secondSecret)
+              }
+
+              confirmation.sender_address = account.address
+
+              try {
+                const data = {
+                  type: await this.getTransactionType(),
+                  sender: account,
+                  keypair,
+                  second_keypair
+                }
+                const assetJsonName = await this.getAssetJsonName()
+                data[assetJsonName] = confirmation
+
+                const transaction = await this.runtime.transaction.create(data)
+
+                const transactions = await this.runtime.transaction.receiveTransactions([transaction])
+                cb(null, transactions)
+              } catch (e) {
+                cb(e)
+              }
             }
-          }
-        }, (err, transactions) => {
-          if (err) {
-            return reject(err)
-          }
+          },
+          (err, transactions) => {
+            if (err) {
+              return reject(err)
+            }
 
-          resolve({
-            success: true,
-            transactionId: transactions[0].id
-          })
-        })
+            resolve({
+              success: true,
+              transactionId: transactions[0].id
+            })
+          }
+        )
       })
     } else {
       throw new Error('The contribution is not find: ' + body.contribution_trs_id)

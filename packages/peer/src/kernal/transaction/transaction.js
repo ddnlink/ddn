@@ -4,7 +4,8 @@
  */
 import extend from 'util-extend'
 import DdnUtils from '@ddn/utils'
-import DdnCrypto, { nacl } from '@ddn/crypto'
+import * as DdnCrypto from '@ddn/crypto'
+import { getId, nacl } from '@ddn/crypto'
 import Assets from '../../assets'
 
 let _singleton
@@ -42,23 +43,8 @@ class Transaction {
    * @param {*} trsId
    */
 
-  async deleteTransaction (trsId, dbTrans) {
-    return new Promise((resolve, reject) => {
-      this.dao.remove(
-        'tr',
-        {
-          id: trsId
-        },
-        dbTrans,
-        (err, result) => {
-          if (err) {
-            reject(err)
-          } else {
-            resolve(result)
-          }
-        }
-      )
-    })
+  async deleteTransaction ({ trsId, dbTrans }) {
+    return await this.dao.remove('tr', { where: { id: trsId }, transaction: dbTrans })
   }
 
   /**
@@ -74,42 +60,43 @@ class Transaction {
   }
 
   async create (data) {
-    if (!this._assets.hasType(data.type)) {
-      throw new Error(`Unknown transaction type 1 ${data.type}`)
+    const { type, sender, keypair, requester, message, args, second_keypair } = data
+    if (!this._assets.hasType(type)) {
+      throw new Error(`Unknown transaction type 1 ${type}`)
     }
 
-    if (!data.sender) {
+    if (!sender) {
       throw Error("Can't find sender")
     }
 
-    if (!data.keypair) {
+    if (!keypair) {
       throw Error("Can't find keypair")
     }
 
     let trs = {
-      type: data.type,
+      type: type,
       amount: '0',
       nethash: this.config.nethash,
-      senderPublicKey: data.sender.publicKey,
-      requester_public_key: data.requester ? data.requester.publicKey.toString('hex') : null, // 仅适用于多重签名
+      senderPublicKey: sender.publicKey,
+      requester_public_key: requester ? requester.publicKey.toString('hex') : null, // 仅适用于多重签名
       timestamp: this.runtime.slot.getTime(),
       asset: {},
-      message: data.message,
-      args: data.args
+      message: message,
+      args: args
     }
 
     trs = await this._assets.call(trs.type, 'create', data, trs) // 对应各个 asset 交易类型的 async create(data, trs) 方法
 
     // trs.signature = await DdnCrypto.sign(trs, data.keypair);
-    trs.signature = await this.sign(trs, data.keypair)
-    if (data.sender.second_signature && data.second_keypair) {
-      trs.sign_signature = await this.sign(trs, data.second_keypair)
+    trs.signature = await this.sign(trs, keypair)
+    if (sender.second_signature && second_keypair) {
+      trs.sign_signature = await this.sign(trs, second_keypair)
       // trs.sign_signature = await DdnCrypto.sign(trs, data.second_keypair);
     }
 
-    trs.id = await DdnCrypto.getId(trs)
+    trs.id = await getId(trs)
 
-    trs.fee = `${await this._assets.call(trs.type, 'calculateFee', trs, data.sender)}`
+    trs.fee = `${await this._assets.call(trs.type, 'calculateFee', trs, sender)}`
 
     return trs
   }
@@ -164,22 +151,15 @@ class Transaction {
       message: trs.message || null
     }
 
-    return new Promise((resolve, reject) => {
-      this.dao.insert('tr', newTrans, dbTrans, async (err, result) => {
-        if (err) {
-          reject(err)
-        } else {
-          try {
-            await this._assets.call(trs.type, 'dbSave', trs, dbTrans)
-          } catch (e) {
-            this.logger.debug(`insert tr error trsId: ${newTrans.id}`)
-            this.logger.debug(`insert tr error trsId: ${JSON.stringify(newTrans)}`)
-            return reject(new Error(`Insert tr fail ${e.toString()}`))
-          }
-          resolve(result)
-        }
-      })
-    })
+    const result = await this.dao.insert('tr', newTrans, { transaction: dbTrans })
+    try {
+      await this._assets.call(trs.type, 'dbSave', trs, dbTrans)
+    } catch (e) {
+      this.logger.debug(`insert tr error trsId: ${newTrans.id}`)
+      this.logger.debug(`insert tr error trsId: ${JSON.stringify(newTrans)}`)
+      throw new Error(`Insert tr fail ${e.toString()}`)
+    }
+    return result
   }
 
   async serializeDbData2Transaction (raw) {
@@ -268,7 +248,7 @@ class Transaction {
   }
 
   async undoUnconfirmed (transaction, dbTrans) {
-    const sender = await this.runtime.account.getAccountByPublicKey(transaction.senderPublicKey)
+    const sender = await this.runtime.account.getAccountByPublicKey(transaction.senderPublicKey, dbTrans)
     await this.removeUnconfirmedTransaction(transaction.id)
 
     if (!this._assets.hasType(transaction.type)) {
@@ -278,7 +258,7 @@ class Transaction {
     // 此处应该使用this._assets方法（transaction.type）来做判断
     // fixme: 2020.4.22 这里是 dapp 的交易，转移到别处？
     if (transaction.type === DdnUtils.assetTypes.DAPP_OUT) {
-      return await this._assets.call(transaction.type, 'undoUnconfirmed', transaction, sender)
+      return await this._assets.call(transaction.type, 'undoUnconfirmed', transaction, sender, dbTrans)
     }
 
     const amount = DdnUtils.bignum.plus(transaction.amount, transaction.fee).toString()
@@ -314,7 +294,7 @@ class Transaction {
     let requester = null
     if (trs.requester_public_key) {
       // wxm block database
-      requester = await this.runtime.account.getAccountByPublicKey(trs.requester_public_key)
+      requester = await this.runtime.account.getAccountByPublicKey(trs.requester_public_key, dbTrans)
       if (!requester) {
         throw new Error('Invalid requester')
       }
@@ -463,9 +443,9 @@ class Transaction {
     this._unconfirmedNumber--
   }
 
-  async addUnconfirmedTransaction (transaction, sender) {
+  async addUnconfirmedTransaction (transaction, sender, dbTrans) {
     try {
-      await this.applyUnconfirmed(transaction, sender)
+      await this.applyUnconfirmed(transaction, sender, dbTrans)
       this._unconfirmedTransactions.push(transaction)
       const index = this._unconfirmedTransactions.length - 1
       this._unconfirmedTransactionsIdIndex[transaction.id] = index
@@ -487,7 +467,9 @@ class Transaction {
     if (!this._assets.hasType(trs.type)) {
       throw new Error(`Unknown transaction type 10 ${trs.type}`)
     }
-    const txId = await DdnCrypto.getId(trs)
+
+    const txId = await getId(trs)
+
     // 确保客户端传入id，这里仅做验证
     if (typeof trs.id === 'undefined' || trs.id !== txId) {
       this.logger.debug('trs.id', trs.id)
@@ -522,35 +504,25 @@ class Transaction {
 
     trs = await this._assets.call(trs.type, 'process', trs, sender)
 
-    return new Promise((resolve, reject) => {
-      // shuai 2018-11-13
-      this.dao.count(
-        'tr',
-        {
-          id: trs.id
-        },
-        (err, count) => {
-          if (err) {
-            this.logger.error('Database error')
-            return reject(new Error('Database error'))
-          }
+    try {
+      const count = await this.dao.count('tr', { where: { id: trs.id } })
+      if (count) {
+        throw new Error('Ignoring already confirmed transaction')
+      }
+    } catch (err) {
+      this.logger.error('Database error')
+      throw new Error('Database error')
+    }
 
-          if (count) {
-            return reject(new Error('Ignoring already confirmed transaction'))
-          }
-
-          resolve(trs)
-        }
-      )
-    })
+    return trs
   }
 
-  async processUnconfirmedTransaction (transaction, broadcast) {
+  async processUnconfirmedTransaction (transaction, broadcast, dbTrans) {
     if (!transaction) {
       throw new Error('No transaction to process!')
     }
     if (!transaction.id) {
-      transaction.id = await DdnCrypto.getId(transaction)
+      transaction.id = await getId(transaction)
     }
     // Check transaction indexes
     if (this._unconfirmedTransactionsIdIndex[transaction.id] !== undefined) {
@@ -560,12 +532,12 @@ class Transaction {
     await this.runtime.account.setAccount({
       publicKey: transaction.senderPublicKey
     })
-    const sender = await this.runtime.account.getAccountByPublicKey(transaction.senderPublicKey)
+    const sender = await this.runtime.account.getAccountByPublicKey(transaction.senderPublicKey, dbTrans)
 
     let requester
     if (transaction.requester_public_key && sender && sender.multisignatures && sender.multisignatures.length) {
       // wxm block database
-      requester = await this.runtime.account.getAccountByPublicKey(transaction.requester_public_key)
+      requester = await this.runtime.account.getAccountByPublicKey(transaction.requester_public_key, dbTrans)
       if (!requester) {
         throw new Error('Invalid requester')
       }
@@ -793,17 +765,18 @@ class Transaction {
 
   // TODO: 与 @ddn/crypto 同名方法不同
   async verifySecondSignature (trs, publicKey) {
-    if (!this._assets.hasType(trs.type)) {
-      throw Error(`Unknown transaction type 14 ${trs.type}`)
+    const { type, sign_signature } = trs
+    if (!this._assets.hasType(type)) {
+      throw Error(`Unknown transaction type 14 ${type}`)
     }
 
-    if (!trs.sign_signature) {
+    if (!sign_signature) {
       return false
     }
 
     const bytes = await DdnCrypto.getBytes(trs, false, true)
     // const bytes = await this.getBytes(trs, false, true);
-    return await this.verifyBytes(bytes, trs.sign_signature, publicKey)
+    return await this.verifyBytes(bytes, sign_signature, publicKey)
   }
 }
 

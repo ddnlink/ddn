@@ -1,64 +1,31 @@
 let _dao
 
 class DBParams {
-  static init (dao, cb) {
+  static async init (dao, cb) {
     _dao = dao
-    cb(null, this)
+    return this
   }
 
-  static set (name, value, dbTrans, cb) {
-    if (_dao) {
-      _dao.insertOrUpdate('param', {
-        name,
-        value
-      }, dbTrans, cb)
-    } else {
-      if (typeof (cb) === 'function') {
-        return cb('数据库未初始化')
-      }
+  static async set (name, value, dbTrans, cb) {
+    if (!_dao) {
+      throw new Error('数据库未初始化')
     }
+    return await _dao.insertOrUpdate('param', { name, value }, { transaction: dbTrans })
   }
 
-  static get (name, cb) {
-    if (_dao) {
-      _dao.findOneByPrimaryKey('param', name, null,
-        (err, result) => {
-          if (err) {
-            return cb(err)
-          }
-
-          if (result && result.value) {
-            return cb(null, result.value)
-          } else {
-            // console.log('db-params.js cb= ', cb);
-
-            return cb(null, null)
-          }
-        }
-      )
-    } else {
-      if (typeof (cb) === 'function') {
-        return cb('数据库未初始化')
-      }
+  static async get (name, cb) {
+    if (!_dao) {
+      throw new Error('数据库未初始化')
     }
+    const result = await _dao.findOneByPrimaryKey('param', name)
+    return result && result.value
   }
 
-  static remove (name, cb) {
-    if (_dao) {
-      _dao.remove('param', {
-        name
-      }, (err, result) => {
-        if (err) {
-          return cb(err)
-        }
-
-        cb(null, result)
-      })
-    } else {
-      if (typeof (cb) === 'function') {
-        return cb('数据库未初始化')
-      }
+  static async remove (name, cb) {
+    if (!_dao) {
+      throw new Error('数据库未初始化')
     }
+    return await _dao.remove('param', { where: { name } })
   }
 }
 

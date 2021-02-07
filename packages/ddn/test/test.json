@@ -1,0 +1,11 @@
+{
+  "name": "{{name}}",
+  "link": "{{link}}",
+  "category": {{category}},
+  "description": "{{description}}",
+  "tags": "{{tags}}",
+  "icon": "{{icon}}",
+  "type": {{toInt type}},
+  "delegates": {{delegates}},
+  "unlock_delegates": {{toInt unlockDelegates}}
+}

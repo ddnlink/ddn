@@ -34,18 +34,21 @@ class Loader {
   }
 
   _registerAsset (type, inst, assetName) {
-    if (inst && typeof (inst.create) === 'function' &&
-            typeof (inst.getBytes) === 'function' &&
-            typeof (inst.calculateFee) === 'function' &&
-            typeof (inst.verify) === 'function' &&
-            typeof (inst.objectNormalize) === 'function' &&
-            typeof (inst.dbRead) === 'function' &&
-            typeof (inst.apply) === 'function' &&
-            typeof (inst.undo) === 'function' &&
-            typeof (inst.applyUnconfirmed) === 'function' &&
-            typeof (inst.undoUnconfirmed) === 'function' &&
-            typeof (inst.ready) === 'function' &&
-            typeof (inst.process) === 'function') {
+    if (
+      inst &&
+      typeof inst.create === 'function' &&
+      typeof inst.getBytes === 'function' &&
+      typeof inst.calculateFee === 'function' &&
+      typeof inst.verify === 'function' &&
+      typeof inst.objectNormalize === 'function' &&
+      typeof inst.dbRead === 'function' &&
+      typeof inst.apply === 'function' &&
+      typeof inst.undo === 'function' &&
+      typeof inst.applyUnconfirmed === 'function' &&
+      typeof inst.undoUnconfirmed === 'function' &&
+      typeof inst.ready === 'function' &&
+      typeof inst.process === 'function'
+    ) {
       this._assets[this._getAssetKey(type)] = inst
 
       if (assetName) {
@@ -57,8 +60,8 @@ class Loader {
   }
 
   /**
-     * 加载所有系统配置的资产插件
-     */
+   * 加载所有系统配置的资产插件
+   */
   async _attachAssetPlugins () {
     for (let i = 0; i < this.assetPlugins.getTransactionCount(); i++) {
       const transConfig = this.assetPlugins.getTransactionByIndex(i)
@@ -75,9 +78,9 @@ class Loader {
   }
 
   /**
-     * 根据资产配置名称获取资产实例
-     * @param {*} assetName
-     */
+   * 根据资产配置名称获取资产实例
+   * @param {*} assetName
+   */
   findInstanceByName (assetName) {
     if (assetName) {
       const keys = Object.getOwnPropertyNames(this._assetsNames)
@@ -101,7 +104,7 @@ class Loader {
       }
     }
 
-    assetsPackageList.map((packageName) => {
+    assetsPackageList.map(async packageName => {
       let assetModels
       try {
         assetModels = global._require_runtime_(`${packageName}/lib/define-models`) || []
@@ -111,17 +114,18 @@ class Loader {
       }
 
       if (assetModels) {
-        assetModels.map(({ name, data }) => {
-          // 挂载方法
-          dao.buildModel(name, data)
-          // 创建表
-          dao.createTable(name, false, (err) => {
-            if (err) {
-              this.logger.err(`${packageName} 资产包自定义数据模型生成失败。`, err)
-              process.emit('cleanup')
-            }
-          })
-        })
+        try {
+          for (const model of assetModels) {
+            const { name, data } = model
+            // 挂载方法
+            dao.buildModel(name, data)
+            // 创建表
+            await dao.createTable(name, false)
+          }
+        } catch (err) {
+          this.logger.error(`${packageName} 资产包自定义数据模型生成失败。`, err)
+          process.emit('cleanup')
+        }
       }
     })
   }
@@ -163,9 +167,9 @@ class Loader {
   }
 
   /**
-     * 在所有加载的扩展资产上执行指定方法
-     * @param {*} funcName
-     */
+   * 在所有加载的扩展资产上执行指定方法
+   * @param {*} funcName
+   */
   async execAssetFunc (funcName) {
     const args = []
     for (let i = 1; i < arguments.length; i++) {
@@ -176,8 +180,7 @@ class Loader {
     for (const p in keys) {
       const key = keys[p]
       const inst = this._assets[key]
-      if (inst !== null &&
-                typeof (inst[funcName]) === 'function') {
+      if (inst !== null && typeof inst[funcName] === 'function') {
         try {
           await inst[funcName](...args)
         } catch (err) {

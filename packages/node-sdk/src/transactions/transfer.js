@@ -6,7 +6,7 @@ import { config, constants } from '../config'
 
 const nethash = config.nethash
 
-async function createInTransfer(dappId, currency, amount, secret, secondSecret) {
+async function createInTransfer (dappId, currency, amount, secret, secondSecret) {
   const keys = crypto.getKeys(secret)
 
   const fee = bignum.multiply(constants.net.fees.dapp_in, constants.fixedPoint)
@@ -43,7 +43,7 @@ async function createInTransfer(dappId, currency, amount, secret, secondSecret) 
   return transaction
 }
 
-async function createOutTransfer(secret, recipientId, dappId, transactionId, currency, amount, withdrawal_sequence) {
+async function createOutTransfer (secret, recipientId, dappId, transactionId, currency, amount, withdrawal_sequence) {
   const keys = crypto.getKeys(secret)
   const fee = bignum.multiply(constants.net.fees.dapp_out, constants.fixedPoint)
 
@@ -61,7 +61,7 @@ async function createOutTransfer(secret, recipientId, dappId, transactionId, cur
         transaction_id: transactionId,
         currency,
         amount,
-        withdrawal_sequence:String(withdrawal_sequence)
+        withdrawal_sequence: String(withdrawal_sequence)
       }
     }
   }
@@ -110,7 +110,7 @@ async function createOutTransfer(secret, recipientId, dappId, transactionId, cur
 //   return transaction
 // }
 
-async function signOutTransfer(transaction, secret) {
+async function signOutTransfer (transaction, secret) {
   const keys = crypto.getKeys(secret)
   const signature = await crypto.sign(transaction, keys)
   return signature

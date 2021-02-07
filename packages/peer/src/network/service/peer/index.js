@@ -4,8 +4,8 @@
  */
 import ip from 'ip'
 
-import DdnUtils from '@ddn/utils'
-import DdnCrypto from '@ddn/crypto'
+import DdnUtils, { checkAndReport } from '@ddn/utils'
+import * as DdnCrypto from '@ddn/crypto'
 
 class PeerService {
   constructor (context) {
@@ -336,7 +336,12 @@ class PeerService {
         error: DdnUtils.system.getErrorMsg(e.message)
       }
     }
-
+    if (global.assets && global.assets.transTypeNames[90] && this.constants.net.superviseIp === this.config.publicIp) {
+      const res = await checkAndReport(transaction, this, null, this.constants.net.superviseBaseUrl)
+      if (!res.success) {
+        return res
+      }
+    }
     if (!transaction.id) {
       transaction.id = await DdnCrypto.getId(transaction)
     }

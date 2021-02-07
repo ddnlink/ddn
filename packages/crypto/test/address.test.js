@@ -2,14 +2,15 @@ import Debug from 'debug'
 import sha256 from 'fast-sha256'
 import RIPEMD160 from 'ripemd160'
 
-import crypto from '../lib'
+import * as crypto from '../lib'
 import base58check from '../lib/base58check'
 
-const debug = Debug('test')
+const debug = Debug('debug')
 
 const tokenPrefix = 'D'
 
 function isAddress (address) {
+  debug('crypto: ', crypto)
   return crypto.isAddress(address, tokenPrefix)
 }
 
@@ -58,6 +59,10 @@ describe('address', () => {
       // 2. 产生公私钥对
       // const kp = crypto.keypair(secret);
       const kp = crypto.getKeys(secret)
+      // debug('kp sodium ', sodium)
+      // const kpSodium = sodium.getKeys(sodium.createHash(secret))
+
+      // debug('kp sodium publicKey', kpSodium)
 
       // 3. 对公钥进行sha256 hash 计算
       const hashPubKey = Buffer.from(sha256.hash(kp.publicKey))
@@ -72,7 +77,10 @@ describe('address', () => {
       const address = tokenPrefix + strBase58
 
       expect(kp.publicKey).toEqual('1c4fd85dc2a0752864d1454bdc37a9e7f9a09fa2c83f1f8d4da9d9bfdd38ed65') // 2be3d7a21dd9715d949c58910b38d01a063cfe8159320aa426b2249a6aaf1340
-      expect(address).toEqual('DLNxuHtMwn7MrmcSmatFLHb9YPgfZ5uxMr')
+      expect(address).toEqual('DLNxuHtMwn7MrmcSmatFLHb9YPgfZ5uxMr') //
+
+      // kp.publicKey = "50e18b1d5ee084680fbc5cc34cdc4aaa1c4fe23662a3376c8bf5b33d3b16c4ae"
+      // address: DEbAEaup5irkiKx2C4KDDDSXQmE4CK9hQ7
     })
 
     it('Normal address should be ok', done => {

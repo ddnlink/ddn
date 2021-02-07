@@ -7,8 +7,9 @@ import path from 'path'
 import fs from 'fs'
 import ip from 'ip'
 import extend from 'extend2'
-import DdnCrypto from '@ddn/crypto'
+import * as DdnCrypto from '@ddn/crypto'
 import DdnUtils from '@ddn/utils'
+import tracer from 'tracer'
 
 import Context from './context'
 import Block from './block/block'
@@ -25,7 +26,6 @@ import HttpServer from '../network/http-server'
 import MultiSignature from './consensus/multisignature'
 
 import defaultConfig from '../config.default.js'
-import { logger } from '../utils/logger'
 
 /**
  * By default, Node has 4 workers to resolve DNS queries. If your DNS query takes long-ish time,
@@ -38,7 +38,28 @@ process.env.UV_THREADPOOL_SIZE = 20 // max: 128
 
 class Program {
   async _init (options) {
-    options.logger = logger(options)
+    options.logger = tracer.colorConsole({
+      level: options.configObject.logLevel,
+      format: [
+        '{{title}} {{timestamp}} {{file}}:{{line}} {{method}} {{message}}', // default format
+        {
+          error: '{{title}} {{timestamp}} {{file}}:{{line}} {{method}} {{message}} \nCall Stack:\n{{stack}}' // error format
+        }
+      ],
+      dateformat: 'HH:MM:ss.L',
+      transport: function (data) {
+        console.log(data.output)
+        fs.appendFile(path.join(options.baseDir, 'logs', 'debug.log'), data.rawoutput + '\n', err => {
+          if (err) throw err
+        })
+      }
+    })
+
+    // options.logger.dailyfile({
+    //   root: 'logs',
+    //   maxLogFiles: 30,
+    //   logPathFormat: '{{root}}/{{date}}.log'
+    // })
 
     if (!options.configObject.publicIp) {
       options.configObject.publicIp = DdnUtils.system.getPublicIp()
@@ -116,15 +137,7 @@ class Program {
    * 升级数据库结构
    */
   async _applyDatabaseUpgrade () {
-    return new Promise((resolve, reject) => {
-      dbUpgrade.upgrade(this._context, (err, result) => {
-        if (err) {
-          reject(err)
-        } else {
-          resolve(result)
-        }
-      })
-    })
+    return await dbUpgrade.upgrade(this._context)
   }
 
   /**
@@ -158,11 +171,11 @@ class Program {
       require('daemon')({ cwd: process.cwd() })
     }
     // 提供系统默认配置文件
-    options.configObject = extend(true, defaultConfig.default, options.configObject)
+    options.configObject = extend(true, defaultConfig, options.configObject)
 
-    process.once('cleanup', () => {
+    process.once('cleanup', async () => {
       this._context.logger.info('Cleaning up...')
-
+      await this._context.close()
       this._resetProcessState()
       process.exit(1)
     })
@@ -220,7 +233,10 @@ class Program {
 
     // 初始化账户以及余额
     try {
+      // TODO next optimize initAccountsAndBalances like onInitAccountsAndBalances use
       await this._context.runtime.account.initAccountsAndBalances()
+      // init asset banlance when start program
+      await this._context.runtime.transaction.execAssetFunc('onInitAccountsAndBalances')
     } catch (err) {
       this._context.logger.error('Failed to load blockchain', DdnUtils.system.getErrorMsg(err))
       return process.exit(1)
@@ -326,7 +342,7 @@ class Program {
 
       setTimeout(() => {
         this.startPeerSyncTask()
-      }, 1000 * 49)
+      }, 1000 * 19)
     }
   }
 
@@ -439,14 +455,6 @@ class Program {
    * 尝试铸造区块（轮询）
    */
   async startForgeBlockTask () {
-    // const lastBlock = this._context.runtime.block.getLastBlock()
-    // if (lastBlock.height > 3) {
-    //   console.log("我要回滚");
-    //   const result = await this._context.runtime.block._popLastBlock(
-    //     lastBlock
-    //   );
-    //   console.log("回滚结束", result);
-    // }
     await (async () => {
       if (this._context.runtime.state !== DdnUtils.runtimeState.Ready) {
         return

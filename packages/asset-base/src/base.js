@@ -76,31 +76,31 @@ class AssetBase {
   }
 
   /**
-     * 获取资产配置类型值
-     */
+   * 获取资产配置类型值
+   */
   async getTransactionType () {
     return this._transactionConfig.type
   }
 
   /**
-     * 获取资产配置名称
-     */
+   * 获取资产配置名称
+   */
   async getTransactionName () {
     return this._transactionConfig.name
   }
 
   /**
-     * 获取资产所属包名
-     */
+   * 获取资产所属包名
+   */
   async getPackageName () {
     return this._transactionConfig.package
   }
 
   /**
-     * transaction创建时调用，用来对输入参数根据资产进行个性化处理
-     * @param {*} data
-     * @param {*} trs
-     */
+   * transaction创建时调用，用来对输入参数根据资产进行个性化处理
+   * @param {*} data
+   * @param {*} trs
+   */
   async create (data, trs) {
     return trs
   }
@@ -140,16 +140,16 @@ class AssetBase {
   }
 
   /**
-     * 自定义资产Api
-     * @param {*} router
-     */
-  async attachApi () { }
+   * 自定义资产Api
+   * @param {*} router
+   */
+  async attachApi () {}
 
   /**
    * 判断是否包含Json扩展属性
    */
   async hasExtProps () {
-    if (this.isHasExtProps !== null && typeof (this.isHasExtProps) !== 'undefined') {
+    if (this.isHasExtProps !== null && typeof this.isHasExtProps !== 'undefined') {
       return this.isHasExtProps
     }
 
@@ -168,8 +168,7 @@ class AssetBase {
   }
 
   async getPropsMappingItemByProp (propName) {
-    if (!this.propsMappingItems ||
-      !this.propsMappingItems[propName.toLowerCase()]) {
+    if (!this.propsMappingItems || !this.propsMappingItems[propName.toLowerCase()]) {
       const props = await this.propsMapping()
 
       for (const currProp of props) {
@@ -191,8 +190,7 @@ class AssetBase {
   }
 
   async getPropsMappingItemByField (fieldName) {
-    if (!this.propsMappingItems ||
-      !this.propsMappingItems[fieldName.toLowerCase()]) {
+    if (!this.propsMappingItems || !this.propsMappingItems[fieldName.toLowerCase()]) {
       const props = await this.propsMapping()
 
       for (const currProp of props) {
@@ -214,9 +212,9 @@ class AssetBase {
   }
 
   /**
-     * 获取资产在交易对象中的名称
-     * @param {*} type
-     */
+   * 获取资产在交易对象中的名称
+   * @param {*} type
+   */
   async getAssetJsonName (type) {
     if (!type) {
       type = await this.getTransactionType()
@@ -225,9 +223,9 @@ class AssetBase {
   }
 
   /**
-     * 获得交易信息中的当前资产对象
-     * @param {*} trs
-     */
+   * 获得交易信息中的当前资产对象
+   * @param {*} trs
+   */
   async getAssetObject (trs) {
     if (!trs || !trs.asset) {
       return null
@@ -237,22 +235,22 @@ class AssetBase {
   }
 
   /**
-     * 根据资产配置名称获取资产对应实例
-     * @param {*} assetName
-     */
+   * 根据资产配置名称获取资产对应实例
+   * @param {*} assetName
+   */
   async getAssetInstanceByName (assetName) {
     return AssetUtils.getAssetInstanceByName(this._context, assetName)
   }
 
   // 资产模块相关方法
   /**
-     *
-     * @param {*} filter 查询条件，遵循jsonSql规则
-     * @param {*} hasExtProps 是否包含扩展内容，布尔值
-     * @param {*} pageIndex 查询的页码，从1开始
-     * @param {*} pageSize 页码的记录条数，默认50
-     * @param {*} cb
-     */
+   *
+   * @param {*} filter 查询条件，遵循jsonSql规则
+   * @param {*} hasExtProps 是否包含扩展内容，布尔值
+   * @param {*} pageIndex 查询的页码，从1开始
+   * @param {*} pageSize 页码的记录条数，默认50
+   * @param {*} cb
+   */
   async getAssetBase (filter, hasExtProps, pageIndex, pageSize, orders, returnTotal, attributes) {
     attributes = [
       ['transaction_id', 'asset_trs_id'],
@@ -282,64 +280,65 @@ class AssetBase {
     const limit = pageSize
     const offset = (pageIndex - 1) * pageSize
 
-    let result
-    return new Promise((resolve, reject) => {
-      this.dao.findPage('trs_asset', filter, limit, offset, returnTotal, attributes,
-        orders, (err, rows) => {
-          if (err) {
-            reject(err)
-          } else {
-            result = rows
+    const opts = {
+      where: filter,
+      limit,
+      offset,
+      returnTotal,
+      attributes,
+      order: orders
+    }
 
-            let trsIds = []
-            if (returnTotal) {
-              trsIds = _.map(rows.rows, 'asset_trs_id')
-            } else {
-              trsIds = _.map(rows, 'asset_trs_id')
-            }
+    let rows
+    if (returnTotal) {
+      rows = await this.dao.findPage('trs_asset', opts)
+    } else {
+      rows = await this.dao.findList('trs_asset', opts)
+    }
+    if (!hasExtProps) {
+      return rows
+    }
 
-            if (hasExtProps) {
-              this.dao.findPage('trs_asset_ext', { transaction_id: { $in: trsIds } },
-                limit, null, null, [['json_ext', 'asset_ext_json'], 'transaction_id'],
-                null, (err2, rows2) => {
-                  if (err2) {
-                    reject(err2)
-                  } else {
-                    if (rows2 && rows2.length > 0) {
-                      const obj = _.keyBy(rows2, 'transaction_id')
-                      if (returnTotal) {
-                        result.rows = _.map(result.rows, num => {
-                          num = _.extend(num, obj[num.asset_trs_id])
-                          return num
-                        })
-                      } else {
-                        result = _.map(result, num => {
-                          num = _.extend(num, obj[num.asset_trs_id])
-                          return num
-                        })
-                      }
-                    }
+    let result = rows
+    let trsIds = []
+    if (returnTotal) {
+      trsIds = _.map(result.rows, 'asset_trs_id')
+    } else {
+      trsIds = _.map(result, 'asset_trs_id')
+    }
 
-                    resolve(result)
-                  }
-                })
-            } else {
-              resolve(result)
-            }
-          }
-        })
+    const rows2 = await this.dao.findList('trs_asset_ext', {
+      where: { transaction_id: { $in: trsIds } },
+      limit,
+      attributes: [['json_ext', 'asset_ext_json'], 'transaction_id']
     })
+    if (!rows2 || !rows2.length) {
+      return result
+    }
+    const obj = _.keyBy(rows2, 'transaction_id')
+    if (returnTotal) {
+      result.rows = _.map(result.rows, num => {
+        num = _.extend(num, obj[num.asset_trs_id])
+        return num
+      })
+    } else {
+      result = _.map(result, num => {
+        num = _.extend(num, obj[num.asset_trs_id])
+        return num
+      })
+    }
+    return result
   }
 
   /**
-     * 查询规定条件的资产数据
-     * @param {*} where 查询条件，遵循sequelize规则，使用prop的名称定义
-     * @param {*} orders 排序条件，遵循sequelize规则，使用prop的名称定义
-     * @param {*} returnTotal 是否返回总条数，true/false
-     * @param {*} pageIndex 查询的页码，从1开始
-     * @param {*} pageSize 分页的大小，每页的返回的最大记录条数
-     * @param {*} asset 资产交易的配置name或type（config.asset.js文件中定义）
-     */
+   * 查询规定条件的资产数据
+   * @param {*} where 查询条件，遵循sequelize规则，使用prop的名称定义
+   * @param {*} orders 排序条件，遵循sequelize规则，使用prop的名称定义
+   * @param {*} returnTotal 是否返回总条数，true/false
+   * @param {*} pageIndex 查询的页码，从1开始
+   * @param {*} pageSize 分页的大小，每页的返回的最大记录条数
+   * @param {*} asset 资产交易的配置name或type（config.asset.js文件中定义）
+   */
   async queryAsset (where, orders, returnTotal, pageIndex, pageSize, asset, defaultTrsType) {
     let assetInst = this
     if (asset) {
@@ -368,15 +367,13 @@ class AssetBase {
 
     propsMapping.forEach(propMapping => {
       const field = propMapping.field
-      if (field !== 'str_ext' &&
-        field !== 'int_ext' &&
-        field !== 'timestamp_ext') {
+      if (field !== 'str_ext' && field !== 'int_ext' && field !== 'timestamp_ext') {
         attributes.push([field, `asset_${field}`])
       }
     })
 
     let useDefaultTrsType = true
-    if (typeof (defaultTrsType) !== 'undefined' && defaultTrsType !== null) {
+    if (typeof defaultTrsType !== 'undefined' && defaultTrsType !== null) {
       useDefaultTrsType = !!defaultTrsType
     }
 
@@ -408,7 +405,7 @@ class AssetBase {
     orders = orders || []
     let newOrders = []
     if (CommonUtils.isArray(orders) && orders.length > 0) {
-      const getFieldName = async (prop) => {
+      const getFieldName = async prop => {
         const condProp = await assetInst.getPropsMappingItemByProp(prop)
         if (condProp) {
           return condProp.field
@@ -420,8 +417,17 @@ class AssetBase {
             return 'transaction_type'
           } else if (pName === 'trs_timestamp' || pName === 'timestamp') {
             return 'timestamp'
-          } else if (pName === '$or' || pName === '$and' || pName === '$in' || pName === '$like' ||
-            pName === '$in' || pName === '$lt' || pName === '$lte' || pName === '$gt' || pName === '$gte') {
+          } else if (
+            pName === '$or' ||
+            pName === '$and' ||
+            pName === '$in' ||
+            pName === '$like' ||
+            pName === '$in' ||
+            pName === '$lt' ||
+            pName === '$lte' ||
+            pName === '$gt' ||
+            pName === '$gte'
+          ) {
             newConds[pName] = where[pName]
           } else {
             this.logger.warn(`Invalid order field: ${prop}`)
@@ -433,7 +439,7 @@ class AssetBase {
       for (const orderItem of orders) {
         if (CommonUtils.isArray(orderItem)) {
           if (orderItem.length === 2) {
-            if (typeof (orderItem[0]) === 'string' && typeof (orderItem[1]) === 'string') {
+            if (typeof orderItem[0] === 'string' && typeof orderItem[1] === 'string') {
               const fieldName = await getFieldName(orderItem[0])
               if (fieldName) {
                 newOrders.push([fieldName, orderItem[1]])
@@ -464,8 +470,15 @@ class AssetBase {
       newOrders = orders
     }
 
-    const data = await this.getAssetBase(newConds, await assetInst.hasExtProps(),
-      pageIndex, pageSize, newOrders, returnTotal, attributes)
+    const data = await this.getAssetBase(
+      newConds,
+      await assetInst.hasExtProps(),
+      pageIndex,
+      pageSize,
+      newOrders,
+      returnTotal,
+      attributes
+    )
 
     const rows = data && data.rows ? data.rows : data
 
@@ -501,12 +514,12 @@ class AssetBase {
   }
 
   /**
-     *
-     * @param {*} obj 模型数据, 必传
-     * @param {*} asset type
-     * @param {*} dbTrans
-     * @param {*} cb
-     */
+   *
+   * @param {*} obj 模型数据, 必传
+   * @param {*} asset type
+   * @param {*} dbTrans
+   * @param {*} cb
+   */
   async update (obj, where, dbTrans, asset) {
     let assetInst = this
     if (asset) {
@@ -561,22 +574,14 @@ class AssetBase {
       }
     }
 
-    return new Promise((resolve, reject) => {
-      this.dao.update('trs_asset', newObj, newWhere, dbTrans, (err, result) => {
-        if (err) {
-          reject(err)
-        } else {
-          resolve(result)
-        }
-      })
-    })
+    return await this.dao.update('trs_asset', newObj, { where: newWhere, transaction: dbTrans })
   }
 
   /**
-     * 查询规定条件的资产数据的个数
-     * @param {*} where 查询条件，遵循sequelize规则，使用prop的名称定义
-     * @param {*} asset 资产交易的配置name或type（config.asset.js文件中定义）
-     */
+   * 查询规定条件的资产数据的个数
+   * @param {*} where 查询条件，遵循sequelize规则，使用prop的名称定义
+   * @param {*} asset 资产交易的配置name或type（config.asset.js文件中定义）
+   */
   async queryAssetCount (where, asset) {
     let assetInst = this
     if (asset) {
@@ -614,21 +619,13 @@ class AssetBase {
       }
     }
 
-    return new Promise((resolve, reject) => {
-      this.dao.count('trs_asset', newWhere, (err, count) => {
-        if (err) {
-          reject(err)
-        } else {
-          resolve(count)
-        }
-      })
-    })
+    return await this.dao.count('trs_asset', { where: newWhere })
   }
 
   /**
-     * 校验输入数据格式是否符合规则（_assetFiledRules负责定义规则）
-     * @param {*} trs
-     */
+   * 校验输入数据格式是否符合规则（_assetFiledRules负责定义规则）
+   * @param {*} trs
+   */
   async fieldsIsValid (trs) {
     const assetJsonName = AssetUtils.getAssetJsonName(trs.type)
     if (!trs.asset || !trs.asset[assetJsonName]) {
@@ -646,8 +643,8 @@ class AssetBase {
         fieldType = fieldType.replace(/_ext$/, '')
         if (fieldType === 'str') {
           const strValue = asset[item.prop]
-          if (strValue !== null && typeof (strValue) !== 'undefined') {
-            if (typeof (strValue) !== 'string') {
+          if (strValue !== null && typeof strValue !== 'undefined') {
+            if (typeof strValue !== 'string') {
               var err = `The '${item.prop}' attribute type of '${assetJsonName}' must be a string.`
               throw new Error(err)
             }
@@ -659,7 +656,7 @@ class AssetBase {
               maxLen = itemRule.maxLen
             }
 
-            if (minLen !== null && typeof (minLen) !== 'undefined') {
+            if (minLen !== null && typeof minLen !== 'undefined') {
               try {
                 minLen = parseInt(minLen)
               } catch (err3) {
@@ -672,7 +669,7 @@ class AssetBase {
                 throw new Error(err)
               }
             }
-            if (maxLen !== null && typeof (maxLen) !== 'undefined') {
+            if (maxLen !== null && typeof maxLen !== 'undefined') {
               if (strValue.length > maxLen) {
                 const err = `The '${item.prop}' attribute max length of '${assetJsonName}' must be less than ${maxLen}`
                 throw new Error(err)
@@ -684,21 +681,21 @@ class AssetBase {
           }
         } else if (fieldType === 'int') {
           const intValue = asset[item.prop]
-          if (intValue !== null && typeof (intValue) !== 'undefined') {
-            if (typeof (intValue) !== 'number') {
+          if (intValue !== null && typeof intValue !== 'undefined') {
+            if (typeof intValue !== 'number') {
               const err = `The '${item.prop}' attribute type of '${assetJsonName}' must be a integer.`
               throw new Error(err)
             }
 
             if (itemRule) {
-              if (itemRule.maxValue !== null && typeof (itemRule.maxValue) !== 'undefined') {
+              if (itemRule.maxValue !== null && typeof itemRule.maxValue !== 'undefined') {
                 if (intValue > itemRule.maxValue) {
                   const err = `The '${item.prop}' attribute max value of '${assetJsonName}' must be less than ${itemRule.maxValue}`
                   throw new Error(err)
                 }
               }
 
-              if (itemRule.minValue !== null && typeof (itemRule.minValue) !== 'undefined') {
+              if (itemRule.minValue !== null && typeof itemRule.minValue !== 'undefined') {
                 if (intValue < itemRule.minValue) {
                   const err = `The '${item.prop}' attribute min value of '${assetJsonName}' must be greater than ${itemRule.maxValue}`
                   throw new Error(err)
@@ -711,8 +708,8 @@ class AssetBase {
           }
         } else if (fieldType === 'timestamp') {
           const timestampValue = asset[item.prop]
-          if (timestampValue !== null && typeof (timestampValue) !== 'undefined') {
-            if (typeof (timestampValue) !== 'object' && typeof (timestampValue.getDate) !== 'function') {
+          if (timestampValue !== null && typeof timestampValue !== 'undefined') {
+            if (typeof timestampValue !== 'object' && typeof timestampValue.getDate !== 'function') {
               try {
                 // FIXME: 你要干嘛？
                 console.log('Todo: what will you do?')
@@ -731,20 +728,25 @@ class AssetBase {
   }
 
   /**
-     *
-     * @param {*} trs
-     * @param {*} sender
-     * @param {*} cb
-     */
+   *
+   * @param {*} trs
+   * @param {*} sender
+   * @param {*} cb
+   */
   async verify (trs) {
-    if (DdnUtils.bignum.isZero(trs.amount)) { // 等于0
-      if (trs.recipientId) { // wxm block database
+    if (DdnUtils.bignum.isZero(trs.amount)) {
+      // 等于0
+      if (trs.recipientId) {
+        // wxm block database
         throw new Error('The recipientId attribute of the transaction must be null.')
       }
-    } else if (DdnUtils.bignum.isLessThan(trs.amount, 0)) { // 小于0
+    } else if (DdnUtils.bignum.isLessThan(trs.amount, 0)) {
+      // 小于0
       throw new Error(`Invalid amount: ${trs.amount}`)
-    } else { // 大于0
-      if (!trs.recipientId) { // wxm block database
+    } else {
+      // 大于0
+      if (!trs.recipientId) {
+        // wxm block database
         throw new Error('The recipientId attribute of the transaction can not be null.')
       }
     }
@@ -755,25 +757,23 @@ class AssetBase {
   }
 
   /**
-     *
-     * @param {*} trs
-     * @param {*} sender
-     */
+   *
+   * @param {*} trs
+   * @param {*} sender
+   */
   async process (trs, sender) {
     return trs
   }
 
   /**
-     * 获取资产的字节格式数据，用于签名计算
-     * @param {*} trs
-     */
+   * 获取资产的字节格式数据，用于签名计算
+   * @param {*} trs
+   */
   async getBytes (trs) {
     // await this.fieldsIsValid(trs)
-
     // const assetName = AssetUtils.getAssetJsonName(trs.type)
     // const asset = trs.asset[assetName]
     // const mapping = await this.propsMapping()
-
     // const bb = new ByteBuffer()
     // for (let i = 0; i < mapping.length; i++) {
     //   const item = mapping[i]
@@ -793,7 +793,6 @@ class AssetBase {
     //   }
     // }
     // bb.flip()
-
     // 插件 使用 bb , 最后 transaction.js 处理成 Uint8Array
     // if (typeof window !== 'undefined') {
     //   return new Uint8Array(bb.toArrayBuffer())
@@ -807,44 +806,52 @@ class AssetBase {
   }
 
   /**
-     * 应用交易业务金额，进行转账操作
-     * @param {*} trs
-     * @param {*} block
-     * @param {*} sender
-     * @param {*} dbTrans
-     */
+   * 应用交易业务金额，进行转账操作
+   * @param {*} trs
+   * @param {*} block
+   * @param {*} sender
+   * @param {*} dbTrans
+   */
   async apply ({ amount, recipientId }, { id, height }, _, dbTrans) {
     if (DdnUtils.bignum.isGreaterThan(amount, 0)) {
       await this.runtime.account.setAccount({ address: recipientId }, dbTrans)
 
-      await this.runtime.account.merge(recipientId, {
-        address: recipientId, // wxm block database
-        balance: amount,
-        u_balance: amount,
-        block_id: id, // wxm block database
-        round: await this.runtime.round.getRound(height)
-      }, dbTrans)
+      await this.runtime.account.merge(
+        recipientId,
+        {
+          address: recipientId, // wxm block database
+          balance: amount,
+          u_balance: amount,
+          block_id: id, // wxm block database
+          round: await this.runtime.round.getRound(height)
+        },
+        dbTrans
+      )
     }
   }
 
   /**
-     * 回滚交易业务金额，进行退回操作
-     * @param {*} trs
-     * @param {*} block
-     * @param {*} sender
-     * @param {*} dbTrans
-     */
+   * 回滚交易业务金额，进行退回操作
+   * @param {*} trs
+   * @param {*} block
+   * @param {*} sender
+   * @param {*} dbTrans
+   */
   async undo ({ id: trsId, amount, recipientId }, { id, height }, _, dbTrans) {
     if (DdnUtils.bignum.isGreaterThan(amount, 0)) {
       await this.runtime.account.setAccount({ address: recipientId }, dbTrans)
       const amountStr = DdnUtils.bignum.minus(0, amount).toString()
-      await this.runtime.account.merge(recipientId, {
-        address: recipientId, // wxm block database
-        balance: amountStr,
-        u_balance: amountStr,
-        block_id: id, // wxm block database
-        round: await this.runtime.round.getRound(height)
-      }, dbTrans)
+      await this.runtime.account.merge(
+        recipientId,
+        {
+          address: recipientId, // wxm block database
+          balance: amountStr,
+          u_balance: amountStr,
+          block_id: id, // wxm block database
+          round: await this.runtime.round.getRound(height)
+        },
+        dbTrans
+      )
     }
     await this.deleteBase(trsId, dbTrans)
   }
@@ -856,34 +863,17 @@ class AssetBase {
    * @param {*} dbTrans 事物
    */
   async deleteBase (transaction_id, dbTrans) {
-    await new Promise((resolve, reject) => {
-      this.dao.remove('trs_asset', {
-        transaction_id
-      }, dbTrans, (err) => {
-        if (err) {
-          return reject(err)
-        }
-        resolve(true)
-      })
-    })
-    return new Promise((resolve, reject) => {
-      this.dao.remove('trs_asset_ext', {
-        transaction_id
-      }, dbTrans, (err) => {
-        if (err) {
-          return reject(err)
-        }
-        resolve(true)
-      })
-    })
+    await this.dao.remove('trs_asset', { where: { transaction_id }, transaction: dbTrans })
+    await this.dao.remove('trs_asset_ext', { where: { transaction_id }, transaction: dbTrans })
+    return true
   }
 
   /**
-     * 应用未确认交易，锁定转账金额
-     * @param {*} trs
-     * @param {*} sender
-     * @param {*} dbTrans
-     */
+   * 应用未确认交易，锁定转账金额
+   * @param {*} trs
+   * @param {*} sender
+   * @param {*} dbTrans
+   */
   async applyUnconfirmed ({ type, id }) {
     const key = `${type}_${id}`
 
@@ -895,20 +885,20 @@ class AssetBase {
   }
 
   /**
-     * 回滚未确认交易，解锁转账金额
-     * @param {*} trs
-     * @param {*} sender
-     * @param {*} dbTrans
-     */
+   * 回滚未确认交易，解锁转账金额
+   * @param {*} trs
+   * @param {*} sender
+   * @param {*} dbTrans
+   */
   async undoUnconfirmed ({ type, id }) {
     const key = `${type}_${id}`
     this.oneoff.delete(key)
   }
 
   /**
-     * 校验交易传入数据是否符合规范，从数据格式、数据长度、是否必须角度进行
-     * @param {*} trs
-     */
+   * 校验交易传入数据是否符合规范，从数据格式、数据长度、是否必须角度进行
+   * @param {*} trs
+   */
   async objectNormalize (trs) {
     const assetName = AssetUtils.getAssetJsonName(trs.type)
 
@@ -936,11 +926,14 @@ class AssetBase {
       }
     }
 
-    const validateErrors = await this.ddnSchema.validate({
-      type: 'object',
-      properties: propsRules,
-      required: requiredFields
-    }, trs.asset[assetName])
+    const validateErrors = await this.ddnSchema.validate(
+      {
+        type: 'object',
+        properties: propsRules,
+        required: requiredFields
+      },
+      trs.asset[assetName]
+    )
     if (validateErrors) {
       this.logger.error(`Can't parse asset ${assetName}: ${validateErrors[0].schemaPath} ${validateErrors[0].message}`)
       throw new Error(`Can't parse asset data: ${validateErrors[0].schemaPath} ${validateErrors[0].message}`)
@@ -977,13 +970,13 @@ class AssetBase {
       }
 
       const json = raw.asset_ext_json
-      if (json !== null && typeof (json) !== 'undefined' && json !== '') {
+      if (json !== null && typeof json !== 'undefined' && json !== '') {
         try {
           const jsonObj = JSON.parse(json)
           Object.assign(result, jsonObj)
         } catch (err2) {
           // todo
-          throw new Error('Can\'t parse asset extend data')
+          throw new Error("Can't parse asset extend data")
         }
       }
 
@@ -997,10 +990,10 @@ class AssetBase {
   }
 
   /**
-     * 将交易存储到数据库中
-     * @param {*} trs
-     * @param {*} dbTrans
-     */
+   * 将交易存储到数据库中
+   * @param {*} trs
+   * @param {*} dbTrans
+   */
   async dbSave (trs, dbTrans) {
     const assetName = AssetUtils.getAssetJsonName(trs.type)
     const asset = trs.asset[assetName]
@@ -1023,9 +1016,7 @@ class AssetBase {
           assetInst[item.field] = itemValue
 
           const fieldType = item.field.replace(/[0-9]/g, '')
-          if (fieldType === 'str_ext' ||
-            fieldType === 'int_ext' ||
-            fieldType === 'timestamp_ext') {
+          if (fieldType === 'str_ext' || fieldType === 'int_ext' || fieldType === 'timestamp_ext') {
             hasJsonExt = true
             jsonExtObj[item.prop] = itemValue
           }
@@ -1033,37 +1024,23 @@ class AssetBase {
       }
     }
 
-    return new Promise((resolve, reject) => {
-      this.dao.insert('trs_asset', assetInst, dbTrans, (err, result) => {
-        if (err) {
-          reject(err)
-        } else {
-          if (hasJsonExt) {
-            const assetExtInst = {
-              transaction_id: trs.id,
-              json_ext: JSON.stringify(jsonExtObj)
-            }
+    let result = await this.dao.insert('trs_asset', assetInst, { transaction: dbTrans })
+    if (hasJsonExt) {
+      const assetExtInst = {
+        transaction_id: trs.id,
+        json_ext: JSON.stringify(jsonExtObj)
+      }
 
-            this.dao.insert('trs_asset_ext', assetExtInst, dbTrans, (err2, result2) => {
-              if (err2) {
-                reject(err2)
-              } else {
-                resolve(result2)
-              }
-            })
-          } else {
-            resolve(result)
-          }
-        }
-      })
-    })
+      result = await this.dao.insert('trs_asset_ext', assetExtInst, { transaction: dbTrans })
+    }
+    return result
   }
 
   /**
-     * 确认交易当前状态是否可以打包进当前区块
-     * @param {*} trs
-     * @param {*} sender
-     */
+   * 确认交易当前状态是否可以打包进当前区块
+   * @param {*} trs
+   * @param {*} sender
+   */
   async ready ({ signatures }, { multisignatures, multimin }) {
     if (multisignatures && multisignatures.length) {
       if (!signatures) {
@@ -1076,10 +1053,9 @@ class AssetBase {
   }
 
   /**
-     * 区块链启动成功后执行
-     */
-  async onBlockchainReady () {
-  }
+   * 区块链启动成功后执行
+   */
+  async onBlockchainReady () {}
 }
 
 export default AssetBase

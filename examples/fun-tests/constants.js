@@ -45,7 +45,9 @@ module.exports = {
     rewardDistance: 3000000, // Distance between each milestone
     rewardOffset: 1, // Start rewards at block (n)60480
     compatibleVersion: '0.0.0', // Peer isCompatible?
-
+    superviseIp: '', // Supervise ip
+    superviseBaseUrl: '', // Supervise address
+    superviseKey: '', // Supervise appky
     // Fees for transacton
     fees: {
       // base
@@ -97,7 +99,9 @@ module.exports = {
     rewardOffset: 1, // Start rewards at block (n)
     // If you have some different thing, Please set the compatibleVersion.
     compatibleVersion: '0.0.0', // Peer isCompatible?
-
+    superviseIp: '',
+    superviseBaseUrl: '', // Supervise address
+    superviseKey: '', // Supervise appky
     // Fees for transacton
     fees: {
       // base

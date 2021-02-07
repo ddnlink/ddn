@@ -1,4 +1,4 @@
-import DdnCrypto from '@ddn/crypto'
+import * as DdnCrypto from '@ddn/crypto'
 import DdnUtils from '@ddn/utils'
 
 const { assetTypes, bignum } = DdnUtils
@@ -55,7 +55,7 @@ class VotesRouter {
     }
 
     // const mem_accounts = await new Promise((reslove, reject) => {
-    //   this.dao.findPage('mem_account', filter, limit || 1000, offset, false, fields || null, sort, (err, data) => {
+    //   this.dao.findPage('mem_account', {where: filter, limit: limit || 1000, offset, attributes: fields, order: sort}, (err, data) => {
     //     if (err) {
     //       return reject(err)
     //     }
@@ -76,7 +76,7 @@ class VotesRouter {
     //     attributes: [
     //       [this.dao.db_fnGroupConcat('dependent_id'), 'delegates'], 'account_id'
     //     ]
-    //   }, (err, data) => { // wxm block database library.dao.db_fn('group_concat', library.dao.db_col('dependentId'))
+    //   }, (err, data) => {
     //     if (err) {
     //       return reject(err)
     //     }

@@ -7,24 +7,24 @@
 import ByteBuffer from 'bytebuffer'
 import Asset from '@ddn/asset-base'
 import DdnUtils from '@ddn/utils'
-import DdnCrypto from '@ddn/crypto'
+import * as DdnCrypto from '@ddn/crypto'
 
 import daoUtil from './daoUtil.js'
 
 /**
-  * 企业号、媒体号等交易
-  *
-  * 卖媒体号：
-  * @org_id 自治组织号 5-20，5位以下逐年开放注册；媒体号 midiumId 是自治组织的一种，可以以M为后缀，其他的以此类推；
-  * @price 卖的价格
-  * @receivedAddress 买方的钱包地址（即将绑定媒体号的新的钱包地址）
-  * @senderAddress 卖方的钱包地址
-  * @state 0-发起卖，1-确认买（同时向org增加一条绑定记录）
-  *
-  * @exchangeTrsId - 确认买的时候记录卖的记录id，发起卖的时候为空
-  * @amout 0-发起卖，确认买的数量=@price
-  * @fee 交易费用
-  */
+ * 企业号、媒体号等交易
+ *
+ * 卖媒体号：
+ * @org_id 自治组织号 5-20，5位以下逐年开放注册；媒体号 midiumId 是自治组织的一种，可以以M为后缀，其他的以此类推；
+ * @price 卖的价格
+ * @receivedAddress 买方的钱包地址（即将绑定媒体号的新的钱包地址）
+ * @senderAddress 卖方的钱包地址
+ * @state 0-发起卖，1-确认买（同时向org增加一条绑定记录）
+ *
+ * @exchangeTrsId - 确认买的时候记录卖的记录id，发起卖的时候为空
+ * @amout 0-发起卖，确认买的数量=@price
+ * @fee 交易费用
+ */
 class Exchange extends Asset.Base {
   // eslint-disable-next-line no-useless-constructor
   constructor (context, transactionConfig) {
@@ -33,30 +33,37 @@ class Exchange extends Asset.Base {
 
   // eslint-disable-next-line class-methods-use-this
   async propsMapping () {
-    return [{
-      field: 'str1',
-      prop: 'org_id',
-      required: true
-    }, {
-      field: 'str2',
-      prop: 'sender_address',
-      required: true
-    }, {
-      field: 'str3',
-      prop: 'received_address',
-      required: true
-    }, {
-      field: 'str4',
-      prop: 'exchange_trs_id'
-    }, {
-      field: 'str5',
-      prop: 'price',
-      required: true
-    }, {
-      field: 'int1',
-      prop: 'state',
-      required: true
-    }]
+    return [
+      {
+        field: 'str1',
+        prop: 'org_id',
+        required: true
+      },
+      {
+        field: 'str2',
+        prop: 'sender_address',
+        required: true
+      },
+      {
+        field: 'str3',
+        prop: 'received_address',
+        required: true
+      },
+      {
+        field: 'str4',
+        prop: 'exchange_trs_id'
+      },
+      {
+        field: 'str5',
+        prop: 'price',
+        required: true
+      },
+      {
+        field: 'int1',
+        prop: 'state',
+        required: true
+      }
+    ]
   }
 
   // eslint-disable-next-line class-methods-use-this
@@ -133,24 +140,42 @@ class Exchange extends Asset.Base {
       }
 
       // 获取出售记录
-      const exchangeRequestList = await this.queryAsset({ trs_id: asset.exchange_trs_id },
-        [['trs_timestamp', 'DESC']], false, 1, 1, null)
+      const exchangeRequestList = await this.queryAsset(
+        { trs_id: asset.exchange_trs_id },
+        [['trs_timestamp', 'DESC']],
+        false,
+        1,
+        1,
+        null
+      )
       if (!(exchangeRequestList && exchangeRequestList.length)) {
         throw new Error('request exchange not find: ' + asset.exchange_trs_id)
       }
       const exchangeRequestObj = exchangeRequestList[0]
 
       // 获取对应的购买记录
-      const confirmExchangeList = await this.queryAsset({ exchange_trs_id: asset.exchange_trs_id },
-        [['trs_timestamp', 'DESC']], false, 1, 10, null)
+      const confirmExchangeList = await this.queryAsset(
+        { exchange_trs_id: asset.exchange_trs_id },
+        [['trs_timestamp', 'DESC']],
+        false,
+        1,
+        10,
+        null
+      )
 
       if (confirmExchangeList && confirmExchangeList.length) {
         throw new Error('confirm exchange already exists: ' + asset.exchange_trs_id)
       }
 
       // 获取该组织号的最新出售交易
-      const latestExchangeRequestList = await this.queryAsset({ trs_type: await this.getTransactionType(), org_id: asset.org_id.toLowerCase(), state: 0 },
-        [['trs_timestamp', 'DESC']], false, 1, 1, null)
+      const latestExchangeRequestList = await this.queryAsset(
+        { trs_type: await this.getTransactionType(), org_id: asset.org_id.toLowerCase(), state: 0 },
+        [['trs_timestamp', 'DESC']],
+        false,
+        1,
+        1,
+        null
+      )
       const latestExchangeRequestObj = latestExchangeRequestList[0]
 
       // 不是一条记录了
@@ -239,8 +264,7 @@ class Exchange extends Asset.Base {
     let result = await super.dbSave(trs, dbTrans)
     const asset = await this.getAssetObject(trs)
     if (asset.state === 1) {
-      result = await daoUtil.exchangeOrg(this._context,
-        asset.org_id, asset.sender_address, dbTrans)
+      result = await daoUtil.exchangeOrg(this._context, asset.org_id, asset.sender_address, dbTrans)
     }
     return result
   }
@@ -258,42 +282,45 @@ class Exchange extends Asset.Base {
 
   async putExchange (req) {
     const body = req.body
-    const validateErrors = await this.ddnSchema.validate({
-      type: 'object',
-      properties: {
-        secret: {
-          type: 'string',
-          minLength: 1,
-          maxLength: 100
+    const validateErrors = await this.ddnSchema.validate(
+      {
+        type: 'object',
+        properties: {
+          secret: {
+            type: 'string',
+            minLength: 1,
+            maxLength: 100
+          },
+          publicKey: {
+            type: 'string',
+            format: 'publicKey'
+          },
+          price: {
+            type: 'string'
+          },
+          state: {
+            type: 'integer',
+            minimum: 0,
+            maximum: 1
+          },
+          org_id: {
+            type: 'string',
+            minLength: 1,
+            maxLength: 100
+          },
+          exchangeTrsId: {
+            type: 'string'
+          },
+          receivedAddress: {
+            type: 'string',
+            minLength: 1,
+            maxLength: 100
+          }
         },
-        publicKey: {
-          type: 'string',
-          format: 'publicKey'
-        },
-        price: {
-          type: 'string'
-        },
-        state: {
-          type: 'integer',
-          minimum: 0,
-          maximum: 1
-        },
-        org_id: {
-          type: 'string',
-          minLength: 1,
-          maxLength: 100
-        },
-        exchangeTrsId: {
-          type: 'string'
-        },
-        receivedAddress: {
-          type: 'string',
-          minLength: 1,
-          maxLength: 100
-        }
+        required: ['secret', 'org_id', 'price', 'receivedAddress']
       },
-      required: ['secret', 'org_id', 'price', 'receivedAddress']
-    }, body)
+      body
+    )
     if (validateErrors) {
       throw new Error(`Invalid parameters: ${validateErrors[0].schemaPath} ${validateErrors[0].message}`)
     }
@@ -315,118 +342,121 @@ class Exchange extends Asset.Base {
     }
 
     return new Promise((resolve, reject) => {
-      this.balancesSequence.add(async (cb) => {
-        if (body.multisigAccountPublicKey && body.multisigAccountPublicKey !== keypair.publicKey.toString('hex')) {
-          let account
-          try {
-            account = await this.runtime.account.getAccountByPublicKey(body.multisigAccountPublicKey)
-          } catch (e) {
-            return cb(e)
-          }
-
-          if (!account) {
-            return cb('Multisignature account not found')
-          }
-
-          if (!account.multisignatures) {
-            return cb('Account does not have multisignatures enabled')
-          }
-
-          if (account.multisignatures.indexOf(keypair.publicKey.toString('hex')) < 0) {
-            return cb('Account does not belong to multisignature group')
-          }
-
-          exchange.sender_address = account.address
-
-          let requester
-          try {
-            requester = await this.runtime.account.getAccountByPublicKey(keypair.publicKey)
-          } catch (e) {
-            return cb(e)
-          }
-
-          if (!requester || !requester.publicKey) {
-            return cb('Invalid requester')
-          }
-
-          if (requester.second_signature && !body.secondSecret) {
-            return cb('Invalid second passphrase')
-          }
-
-          if (requester.publicKey === account.publicKey) {
-            return cb('Invalid requester')
-          }
-
-          let second_keypair = null
-          if (requester.second_signature) {
-            second_keypair = DdnCrypto.getKeys(body.secondSecret)
-          }
-
-          try {
-            const data = {
-              type: await this.getTransactionType(),
-              sender: account,
-              keypair: keypair,
-              requester: keypair,
-              second_keypair
+      this.balancesSequence.add(
+        async cb => {
+          if (body.multisigAccountPublicKey && body.multisigAccountPublicKey !== keypair.publicKey.toString('hex')) {
+            let account
+            try {
+              account = await this.runtime.account.getAccountByPublicKey(body.multisigAccountPublicKey)
+            } catch (e) {
+              return cb(e)
             }
-            const assetJsonName = await this.getAssetJsonName()
-            data[assetJsonName] = exchange
 
-            const transaction = await this.runtime.transaction.create(data)
-
-            const transactions = await this.runtime.transaction.receiveTransactions([transaction])
-            cb(null, transactions)
-          } catch (e) {
-            cb(e)
-          }
-        } else {
-          let account
-          try {
-            account = await this.runtime.account.getAccountByPublicKey(keypair.publicKey)
-          } catch (e) {
-            return cb(e)
-          }
-
-          if (!account) {
-            return cb('Account not found')
-          }
-
-          if (account.second_signature && !body.secondSecret) {
-            return cb('Invalid second passphrase')
-          }
-
-          exchange.sender_address = account.address
-
-          let second_keypair = null
-          if (account.secondSignature) {
-            second_keypair = DdnCrypto.getKeys(body.secondSecret)
-          }
-
-          try {
-            const data = {
-              type: await this.getTransactionType(),
-              sender: account,
-              keypair,
-              second_keypair
+            if (!account) {
+              return cb('Multisignature account not found')
             }
-            const assetJsonName = await this.getAssetJsonName()
-            data[assetJsonName] = exchange
 
-            const transaction = await this.runtime.transaction.create(data)
-            const transactions = await this.runtime.transaction.receiveTransactions([transaction])
-            cb(null, transactions)
-          } catch (e) {
-            cb(e)
+            if (!account.multisignatures) {
+              return cb('Account does not have multisignatures enabled')
+            }
+
+            if (account.multisignatures.indexOf(keypair.publicKey.toString('hex')) < 0) {
+              return cb('Account does not belong to multisignature group')
+            }
+
+            exchange.sender_address = account.address
+
+            let requester
+            try {
+              requester = await this.runtime.account.getAccountByPublicKey(keypair.publicKey)
+            } catch (e) {
+              return cb(e)
+            }
+
+            if (!requester || !requester.publicKey) {
+              return cb('Invalid requester')
+            }
+
+            if (requester.second_signature && !body.secondSecret) {
+              return cb('Invalid second passphrase')
+            }
+
+            if (requester.publicKey === account.publicKey) {
+              return cb('Invalid requester')
+            }
+
+            let second_keypair = null
+            if (requester.second_signature) {
+              second_keypair = DdnCrypto.getKeys(body.secondSecret)
+            }
+
+            try {
+              const data = {
+                type: await this.getTransactionType(),
+                sender: account,
+                keypair: keypair,
+                requester: keypair,
+                second_keypair
+              }
+              const assetJsonName = await this.getAssetJsonName()
+              data[assetJsonName] = exchange
+
+              const transaction = await this.runtime.transaction.create(data)
+
+              const transactions = await this.runtime.transaction.receiveTransactions([transaction])
+              cb(null, transactions)
+            } catch (e) {
+              cb(e)
+            }
+          } else {
+            let account
+            try {
+              account = await this.runtime.account.getAccountByPublicKey(keypair.publicKey)
+            } catch (e) {
+              return cb(e)
+            }
+
+            if (!account) {
+              return cb('Account not found')
+            }
+
+            if (account.second_signature && !body.secondSecret) {
+              return cb('Invalid second passphrase')
+            }
+
+            exchange.sender_address = account.address
+
+            let second_keypair = null
+            if (account.secondSignature) {
+              second_keypair = DdnCrypto.getKeys(body.secondSecret)
+            }
+
+            try {
+              const data = {
+                type: await this.getTransactionType(),
+                sender: account,
+                keypair,
+                second_keypair
+              }
+              const assetJsonName = await this.getAssetJsonName()
+              data[assetJsonName] = exchange
+
+              const transaction = await this.runtime.transaction.create(data)
+              const transactions = await this.runtime.transaction.receiveTransactions([transaction])
+              cb(null, transactions)
+            } catch (e) {
+              cb(e)
+            }
           }
-        }
-      }, (err, transactions) => {
-        if (err) {
-          return reject(err)
-        }
+        },
+        (err, transactions) => {
+          if (err) {
+            return reject(err)
+          }
 
-        resolve({ success: true, transactionId: transactions[0].id })
-      })
+          resolve({ success: true, transactionId: transactions[0].id })
+        }
+      )
     })
   }
 }

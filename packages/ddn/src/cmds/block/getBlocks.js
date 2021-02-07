@@ -2,7 +2,7 @@ import { init, getBlocks } from '../../plugins/api'
 
 module.exports = {
   command: 'getBlocks',
-  aliases: ['gb', 'blocks'],
+  aliases: ['gbl', 'blocks'],
   desc: 'Get blocks list',
   builder: {
     offset: {

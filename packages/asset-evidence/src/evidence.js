@@ -85,48 +85,29 @@ class Evidence extends Asset.Base {
       1,
       1
     )
-    if (results && results.length > 0) {
-      const oldEvidence = results[0]
-      return await new Promise((resolve, reject) => {
-        this.dao.findOneByPrimaryKey(
-          'tr',
-          oldEvidence.transaction_id,
-          ['senderId'],
-          async (err, { senderId }) => {
-            if (err) {
-              return reject(err)
-            } else {
-              if (senderId !== sender.address) {
-                return reject(new Error(`The evidence ipid ${assetObj.ipid} has been registered by ${senderId})`))
-              } else {
-                let results2
-                try {
-                  results2 = await super.queryAsset(
-                    {
-                      ipid: assetObj.ipid,
-                      hash: assetObj.hash
-                    },
-                    ['ipid', 'hash'],
-                    false,
-                    1,
-                    1
-                  )
-                } catch (err2) {
-                  return reject(err2)
-                }
+    if (!results || !results.length) {
+      return trans
+    }
+    const oldEvidence = results[0]
+    const { senderId } = await this.dao.findOneByPrimaryKey('tr', oldEvidence.transaction_id, { attributes: ['senderId'] })
 
-                if (results2 && results2.length > 0) {
-                  return reject(new Error(`The evidence hash already exists: ${assetObj.hash}`))
-                } else {
-                  return resolve(trans)
-                }
-              }
-            }
-          }
+    if (senderId !== sender.address) {
+      throw new Error(`The evidence ipid ${assetObj.ipid} has been registered by ${senderId})`)
+    }
 
-        )
-      }
-      )
+    const results2 = await super.queryAsset(
+      {
+        ipid: assetObj.ipid,
+        hash: assetObj.hash
+      },
+      ['ipid', 'hash'],
+      false,
+      1,
+      1
+    )
+
+    if (results2 && results2.length > 0) {
+      throw new Error(`The evidence hash already exists: ${assetObj.hash}`)
     } else {
       return trans
     }

@@ -14,13 +14,14 @@ import evidence from './transactions/evidence'
 import dao from './transactions/dao'
 import coupon from './transactions/coupon'
 import assetPlugin from './transactions/asset-plugin'
+import supervise from './transactions/supervise'
 
 import { config, constants } from './config'
 
 export default {
   config,
   constants,
-
+  supervise,
   utils: {
     slots,
     format

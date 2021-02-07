@@ -30,37 +30,30 @@ class Round {
     const round = await this.getRound(this.runtime.block.getLastBlock().height)
     const roundStr = round.toString()
 
-    await new Promise((resolve, reject) => {
-      // 这里没有将 bignum 计算传进去，通过 / % 等运算符，字符串形式的 bignum 会自动转为 number
-      this.dao.findOne(
-        'block',
-        {
-          [roundStr]: this.dao.db_str(
-            `(select (cast(block.height / ${this.constants.delegates} as integer) + (case when block.height % ${this.constants.delegates} > 0 then 1 else 0 end))) = ${roundStr}`
-          )
-        },
-        [
-          [this.dao.db_fnSum(''), 'fees'], // wxm block database    library.dao.db_fn('sum', library.dao.db_col('totalFee'))
-          [this.dao.db_fnGroupConcat('reward'), 'rewards'], // wxm block database   library.dao.db_fn('group_concat', library.dao.db_col('reward'))
-          [this.dao.db_fnGroupConcat('generator_public_key'), 'delegates'] // wxm block database   library.dao.db_fn('group_concat', library.dao.db_col('generatorPublicKey'))
-        ],
-        (_err, row) => {
-          if (!row) {
-            row = {
-              fees: '',
-              rewards: [],
-              delegates: []
-            }
-          }
-
-          this._feesByRound[round] = row.fees
-          this._rewardsByRound[round] = row.rewards.length > 0 ? row.rewards.split(',') : []
-          this._delegatesByRound[round] = row.delegates.length ? row.delegates.split(',') : []
-
-          resolve()
-        }
-      )
+    // 这里没有将 bignum 计算传进去，通过 / % 等运算符，字符串形式的 bignum 会自动转为 number
+    let row = await this.dao.findOne('block', {
+      where: {
+        [roundStr]: this.dao.db_str(
+          `(select (cast(block.height / ${this.constants.delegates} as integer) + (case when block.height % ${this.constants.delegates} > 0 then 1 else 0 end))) = ${roundStr}`
+        )
+      },
+      attributes: [
+        [this.dao.db_fnSum('total_fee'), 'fees'],
+        [this.dao.db_fnGroupConcat('reward'), 'rewards'],
+        [this.dao.db_fnGroupConcat('generator_public_key'), 'delegates']
+      ]
     })
+    if (!row) {
+      row = {
+        fees: '',
+        rewards: [],
+        delegates: []
+      }
+    }
+
+    this._feesByRound[round] = row.fees
+    this._rewardsByRound[round] = row.rewards.length > 0 ? row.rewards.split(',') : []
+    this._delegatesByRound[round] = row.delegates.length ? row.delegates.split(',') : []
   }
 
   /**
@@ -78,41 +71,16 @@ class Round {
 
   async getVotes (round, dbTrans) {
     // shuai 2018-11-24
-    return new Promise((resolve, reject) => {
-      try {
-        this.dao.findListByGroup(
-          'mem_round',
-          { round: round.toString() },
-          {
-            group: ['delegate', 'round'],
-            attributes: ['delegate', 'round', [this.dao.db_fnSum('amount'), 'amount']] // wxm block database library.dao.db_fn('sum', library.dao.db_col('amount'))
-          },
-          dbTrans,
-          (err, data) => {
-            if (err) {
-              reject(err)
-            } else {
-              resolve(data)
-            }
-          }
-        )
-      } catch (e) {
-        reject(e)
-      }
+    return await this.dao.findListByGroup('mem_round', {
+      where: { round: round.toString() },
+      group: ['delegate', 'round'],
+      attributes: ['delegate', 'round', [this.dao.db_fnSum('amount'), 'amount']],
+      transaction: dbTrans
     })
   }
 
   async flush (round, dbTrans) {
-    return new Promise((resolve, reject) => {
-      // shuai 2018-11-21
-      this.dao.remove('mem_round', { round: round.toString() }, dbTrans, (err, result) => {
-        if (err) {
-          reject(err)
-        } else {
-          resolve(result)
-        }
-      })
-    })
+    return await this.dao.remove('mem_round', { where: { round: round.toString() }, transaction: dbTrans })
   }
 
   async directionSwap (direction, lastBlock) {

@@ -1,5 +1,5 @@
 import fs from 'fs'
-import DdnCrypto from '@ddn/crypto'
+import * as DdnCrypto from '@ddn/crypto'
 import NodeSdk from '@ddn/node-sdk'
 import Api from '../helpers/api'
 import blockHelper from '../helpers/block'
@@ -145,7 +145,6 @@ function getPeers (options) {
     port: options.port,
     version: options.version
   }
-  // var liskOptions = {host:'login.lisk.io', port:80};
   getApi().get('/api/peers/', params, function (err, result) {
     console.log(err || pretty(result.peers))
   })
@@ -216,11 +215,7 @@ async function sendAsset (options) {
 }
 
 async function registerDelegate (options) {
-  var trs = await NodeSdk.delegate.createDelegate(
-    options.username,
-    options.secret,
-    options.secondSecret
-  )
+  var trs = await NodeSdk.delegate.createDelegate(options.username, options.secret, options.secondSecret)
   getApi().broadcastTransaction(trs, function (err, result) {
     console.log(err || result.transactionId)
   })
@@ -240,11 +235,7 @@ async function vote (secret, publicKeys, op, secondSecret) {
   var votes = publicKeys.split(',').map(function (el) {
     return op + el
   })
-  var trs = await NodeSdk.vote.createVote(
-    votes,
-    secret,
-    secondSecret
-  )
+  var trs = await NodeSdk.vote.createVote(votes, secret, secondSecret)
   getApi().broadcastTransaction(trs, function (err, result) {
     console.log(err || result.transactionId)
   })
@@ -294,8 +285,8 @@ function listdiffvotes (options) {
           return x !== null && !a.has(x)
         })
 
-        console.log('you voted but doesn\'t vote you: \n\t', JSON.stringify(diffab))
-        console.log('\nvoted you but you don\'t voted: \n\t', JSON.stringify(diffba))
+        console.log("you voted but doesn't vote you: \n\t", JSON.stringify(diffab))
+        console.log("\nvoted you but you don't voted: \n\t", JSON.stringify(diffba))
       })
     })
   })
@@ -348,11 +339,14 @@ async function deposit (options) {
 }
 
 function dappTransaction (options) {
-  var trs = NodeSdk.dapp.createInnerTransaction({
-    fee: options.fee,
-    type: Number(options.type),
-    args: options.args
-  }, options.secret)
+  var trs = NodeSdk.dapp.createInnerTransaction(
+    {
+      fee: options.fee,
+      type: Number(options.type),
+      args: options.args
+    },
+    options.secret
+  )
   getApi().put('/api/dapps/' + options.dapp + '/transactions/signed', { transaction: trs }, function (err, result) {
     console.log(err || result.transactionId)
   })
