@@ -7,6 +7,7 @@ import os from 'os'
 import http from 'http'
 import request from 'request'
 import extend from 'extend'
+import querystring from'querystring'
 
 let _singleton
 
@@ -44,6 +45,9 @@ class PeerInvoker {
     if (args.api) {
       url = `/peer${args.api}`
     } else if (args.path) {
+      if(args.path==='/blocks/common'){
+        console.log(args)
+      }
       url = `${args.path}`
     } else {
       url = args.url
@@ -54,7 +58,7 @@ class PeerInvoker {
       peer.ip=ip.toLong(peer.host)
       if(dappId){
         // TODO 这个判断是为了dapp节点测试同步，通过后需要删除
-        peer.host==='0.0.0.0'?peer.host='192.168.1.5':''
+        peer.host==='0.0.0.0'?peer.host='192.168.1.8':''
         url = `http://${peer.host}:${peer.port}/dapps/${dappId}${url}`
       }else{
         url = `http://${peer.host}:${peer.port}${url}`
@@ -78,7 +82,16 @@ class PeerInvoker {
     } else {
       req.body = args.data
     }
-
+    if(args.query){
+      req.url=req.url+'?'+querystring.stringify(args.query)
+    }
+    // if ((args.query !== null && typeof args.query === 'object') ) {
+    //   req.body =JSON.stringify(args.query)
+    //   req.headers["content-type"]= "application/json"
+    // } else {
+    //   req.body =JSON.stringify(args.query)
+    // }
+    console.log('req======',req)
     return new Promise((resolve, reject) => {
       request(req, async (err, res, body) => {
         if (err || res.statusCode !== 200) {
@@ -100,6 +113,7 @@ class PeerInvoker {
           this.logger.error('request error: ', err)
           reject(new Error(`Request peer api failed: ${url}`))
         } else {
+          console.log('body',body)
           // TODO dapp侧链返回的规则和主链的规则不一致，这里先返回后期优化一下
           if(dappId){
             resolve({ body, peer })

@@ -81,6 +81,7 @@
     "pg-hstore": "^2.3.2",
     "pluralize": "^8.0.0",
     "protobufjs": "^6.8.6",
+    "querystring": "^0.2.1",
     "randomstring": "1.1.5",
     "request": "^2.88.2",
     "rimraf": "2.5.4",

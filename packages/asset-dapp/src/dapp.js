@@ -1716,22 +1716,10 @@ class Dapp extends Asset.Base {
   async getDeposits (req, cb) {
     // const that=this
     // TODO 这里查询的是dapp充值交易，能不能直接查询dapp资产表
-    const data = await this.runtime.dataquery.queryFullTransactionData(
-      {
-        block_height: {
-          $gt: req.body.seq
-        },
-        type: 6
-      },
-      10,
-      0,
-      null,
-      true
-    )
-
+    const data = await this.runtime.dataquery.loadAssetsWithDappChainCondition({seq:req.body.seq, dapp_id:req.dappId, type: DdnUtils.assetTypes.DAPP_IN })
     const transactions = []
-    for (let i = 0; i < data.transactions.length; i++) {
-      const row = data.transactions[i]
+    for (let i = 0; i < data.length; i++) {
+      const row = data[i]
       const trs = await this.runtime.transaction.serializeDbData2Transaction(row)
       transactions.push(trs)
     }
@@ -1759,8 +1747,8 @@ class Dapp extends Asset.Base {
     //TODO 这里查询的是dapp充值交易，能不能直接查询dapp资产表
     const data = await this.runtime.dataquery.loadAssetsWithDappChainCondition({ dapp_id, type: DdnUtils.assetTypes.DAPP_OUT })
     const transactions = []
-    for (let i = 0; i < data.transactions.length; i++) {
-      const row = data.transactions[i]
+    for (let i = 0; i < data.length; i++) {
+      const row = data[i]
       const trs = await this.runtime.transaction.serializeDbData2Transaction(row)
       transactions.push(trs)
     }
