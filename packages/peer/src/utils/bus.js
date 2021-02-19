@@ -10,18 +10,18 @@ import EventEmitter from 'events'
 import changeCase from 'change-case'
 
 /**
- * 订阅/广播类
  *
- * 接收者通过调用订阅方法进行注册
- * subscribe(接收者对象)
+ * subscription / broadcast
  *
- * 通过广播方法进行消息广播
+ * the receiver registers by calling the subscription method
+ * subscribe(receiver)
  *
+ * broadcast the message
  * ```
- * library.bus.message('blockchainReady');
+ * this.bus.message('blockchainReady');
  * ```
+ * the same method(onBlockchainReady) for all modules of the system will be called
  *
- * 将会调用系统所有模块的同一个方法（onBlockchainReady）
  */
 class Bus extends EventEmitter {
   constructor () {
@@ -30,7 +30,7 @@ class Bus extends EventEmitter {
   }
 
   /**
-   * 订阅消息
+   * @description subscribe message
    * @param {*} obj
    */
   subscribe (obj) {
@@ -40,7 +40,7 @@ class Bus extends EventEmitter {
   }
 
   /**
-   * 取消消息订阅
+   * @description unsubscribe
    * @param {*} obj
    */
   unsubscribe (obj) {
@@ -53,7 +53,9 @@ class Bus extends EventEmitter {
   }
 
   /**
-   * 发布消息，第一个参数是消息名，依次调用订阅者的同名函数（on开头，消息第一个字母大写），后面参数作为函数参数
+   * @description publish the message, all the subscriber will be called
+   * @param topic
+   * @param args[] other params pass to the event
    */
   publish () {
     const args = []
