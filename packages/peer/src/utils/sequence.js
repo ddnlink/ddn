@@ -4,23 +4,24 @@
  *  Copyright (c) 2019 DDN Foundation. All rights reserved.
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *-------------------------------------------------------------------------------------------- */
-import extend from 'extend'
 
 /**
- * 这是一个自定义的序列函数，只要把任务add进去，每3毫秒就会自动执行一个任务
+ * this is a function queue
+ * add the task into the queue
+ * every 3 milliseconds will automatically execute a task
  *
- * 序列长度没有严格限制，但超过 300 个任务时会警告。
+ * no strict limit on the length of the queue
+ * but a warning is given when there are more than 300 tasks.
  *
  * @param {config} config
  */
 class Sequence {
   constructor (config) {
-    let _default = {
+    const _default = {
       onWarning: null,
-      warningLimit: 300
+      warningLimit: 300,
+      ...config
     }
-
-    _default = extend(_default, config)
 
     const self = this
     this.sequence = []
@@ -43,11 +44,13 @@ class Sequence {
     if (!task) {
       return setImmediate(cb)
     }
-    let args = [(err, res) => {
-      // console.log(self.name + " sequence out " + task.counter + ' func ' + task.worker.name);
-      task.done && setImmediate(task.done, err, res)
-      setImmediate(cb)
-    }]
+    let args = [
+      (err, res) => {
+        // console.log(self.name + " sequence out " + task.counter + ' func ' + task.worker.name);
+        task.done && setImmediate(task.done, err, res)
+        setImmediate(cb)
+      }
+    ]
     if (task.args) {
       args = args.concat(task.args)
     }
@@ -55,11 +58,11 @@ class Sequence {
   }
 
   add (worker, args, done) {
-    if (!done && args && typeof (args) === 'function') {
+    if (!done && args && typeof args === 'function') {
       done = args
       args = undefined
     }
-    if (worker && typeof (worker) === 'function') {
+    if (worker && typeof worker === 'function') {
       const task = { worker, done }
       if (Array.isArray(args)) {
         task.args = args
