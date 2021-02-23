@@ -629,20 +629,20 @@ class Dapp extends Asset.Base {
 
     const self = this
     sandbox.on('exit', function (code) {
-      this.logger.info('Dapp ' + id + ' exited with code ' + code)
+      self.logger.info('Dapp ' + id + ' exited with code ' + code)
       try {
         // self.stopDapp(dapp)
       } catch (error) {
-        this.logger.error('Encountered error while stopping dapp: ' + error)
+        self.logger.error('Encountered error while stopping dapp: ' + error)
       }
     })
 
     sandbox.on('error', function (err) {
-      this.logger.info('Encountered error in dapp ' + id + ' ' + err.toString())
+      self.logger.info('Encountered error in dapp ' + id + ' ' + err.toString())
       try {
         self.stopDapp(dapp)
       } catch (error) {
-        this.logger.error('Encountered error while stopping dapp: ' + error)
+        self.logger.error('Encountered error while stopping dapp: ' + error)
       }
     })
 
@@ -1366,7 +1366,7 @@ class Dapp extends Asset.Base {
       // broadcast &&
       self.request(dappId, 'post', '/message', req, function (err) {
         if (err) {
-          this.logger.error('onNewBlock message', err)
+          self.logger.error('onNewBlock message', err)
         }
       })
     })
@@ -1414,7 +1414,7 @@ class Dapp extends Asset.Base {
     if (typeof this[call] !== 'function') {
       return cb(`Function not found in module: ${call}`)
     }
-    console.log('sandboxApi',call, args)
+    console.log('sandboxApi', call, args)
     const callArgs = [args, cb]
     return this[call].apply(this, callArgs)
   }
@@ -1708,7 +1708,7 @@ class Dapp extends Asset.Base {
       if (modules.transactions.hasUnconfirmedTransaction(trs)) {
         return cb('Already exists')
       }
-      this.logger.log('Submit outtransfer transaction ' + trs.id + ' from dapp ' + req.dappId)
+      self.logger.log('Submit outtransfer transaction ' + trs.id + ' from dapp ' + req.dappId)
       modules.transactions.receiveTransactions([trs], cb)
     }, cb)
   }
@@ -1717,7 +1717,11 @@ class Dapp extends Asset.Base {
   async getDeposits (req, cb) {
     // const that=this
     // TODO 这里查询的是dapp充值交易，能不能直接查询dapp资产表
-    const data = await this.runtime.dataquery.loadAssetsWithDappChainCondition({seq:req.body.seq, dapp_id:req.dappId, type: DdnUtils.assetTypes.DAPP_IN })
+    const data = await this.runtime.dataquery.loadAssetsWithDappChainCondition({
+      seq: req.body.seq,
+      dapp_id: req.dappId,
+      type: DdnUtils.assetTypes.DAPP_IN
+    })
     const transactions = []
     for (let i = 0; i < data.length; i++) {
       const row = data[i]
@@ -1742,11 +1746,15 @@ class Dapp extends Asset.Base {
     console.log(transactions)
     cb(null, transactions)
   }
+
   getLastWithdrawal = async function (req, cb) {
-    const that = this
-    const dapp_id = req.dappId;
-    //TODO 这里查询的是dapp充值交易，能不能直接查询dapp资产表
-    const data = await this.runtime.dataquery.loadAssetsWithDappChainCondition({ dapp_id, type: DdnUtils.assetTypes.DAPP_OUT })
+    // const that = this
+    const dapp_id = req.dappId
+    // TODO 这里查询的是dapp充值交易，能不能直接查询dapp资产表
+    const data = await this.runtime.dataquery.loadAssetsWithDappChainCondition({
+      dapp_id,
+      type: DdnUtils.assetTypes.DAPP_OUT
+    })
     const transactions = []
     for (let i = 0; i < data.length; i++) {
       const row = data[i]
