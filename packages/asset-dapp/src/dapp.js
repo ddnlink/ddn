@@ -295,13 +295,14 @@ class Dapp extends Asset.Base {
   }
 
   async dbSave (trs, dbTrans) {
+    const self = this
     await super.dbSave(trs, dbTrans)
 
     setImmediate(async () => {
       try {
         await this.runtime.socketio.emit('dapps/change', {})
       } catch (err) {
-        this.logger.error('socket emit error: dapps/change')
+        self.logger.error('socket emit error: dapps/change')
       }
     })
   }

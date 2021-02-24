@@ -6,7 +6,6 @@ import ip from 'ip'
 import os from 'os'
 import http from 'http'
 import request from 'request'
-import extend from 'extend'
 
 let _singleton
 
@@ -56,7 +55,7 @@ class PeerInvoker {
       url,
       method: args.method || 'GET',
       json: true,
-      headers: extend({}, this._headers, args.headers),
+      headers: { ...this._headers, ...args.headers },
       timeout: this.config.peers.options.timeout,
       forever: true,
       agent: new http.Agent({ keepAlive: true })
