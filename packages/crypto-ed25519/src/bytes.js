@@ -1,6 +1,9 @@
 import ByteBuffer from 'bytebuffer'
 
-async function getBytes (transaction, skipSignature, skipSecondSignature,height) {
+async function getBytes(transaction, skipSignature, skipSecondSignature, height) {
+  if (height && height > 2) {
+  return getBytesForBeforeHeight(transaction, skipSignature, skipSecondSignature, height)
+  }
   let assetSize = 0
   let assetBytes = null
 
@@ -94,9 +97,44 @@ async function getBytes (transaction, skipSignature, skipSecondSignature,height)
 
   return bb
 }
+async function getBytesForBeforeHeight(data, skipSignature, skipSecondSignature) {
+  const bb = new ByteBuffer(null, true)
+  data = objKeySort(data)
+  if (skipSignature) {
+    delete data.signature
+  }
+  if (skipSecondSignature) {
+    delete data.sign_signature
+  }
+  await getAsset(bb,data)
+  // if (transaction.__assetBytes__) {
+  //   assetBytes = data.__assetBytes__
+  //   delete data.__assetBytes__
+  // }
+  // for (let value of Object.values(data)) {
+  //   if (typeof value === 'string') {
+  //     bb.writeIString(value)
+  //   } else if (typeof value === 'number') {
+  //     bb.writeInt(value)
+  //   } else if (typeof value === 'object') {
+  //     if (Object.prototype.toString.call(value) === "[object Object]") {
 
-async function getAssetBytes (transaction) {
-  if (global.assets && global.assets.transTypeNames[transaction.type]) {
+  //     } else if (Object.prototype.toString.call(value) === "[object Array]") {
+  //       for (let i = 0; i < value.length; ++i) {
+  //         bb.writeString(value[i])
+  //       }
+  //     }
+
+  //   }
+  // }
+  getObjectBytes(bb, data)
+  bb.flip()
+  return bb
+}
+
+// 获取对应的资产插件中的getBytes方法 todo 切换到新的加密算法时要删除
+async function getAssetBytes(transaction) {
+  if (data.asset) {
     const trans = global.assets.transTypeNames[transaction.type]
     const TransCls = require(trans.package).default[trans.name]
     let transInst = new TransCls({})
@@ -107,6 +145,13 @@ async function getAssetBytes (transaction) {
     return buf
   }
   return null
+}
+async function getAsset(bb, data) {
+  if (data.asset) {
+    for (let value of Object.values(data)) {
+      getObjectBytes(bb, value)
+    }
+  }
 }
 function objKeySort(obj, sort) {//排序的函数
   var newkey = sortKeys({ obj, sort })
@@ -124,6 +169,24 @@ function sortKeys({ obj, sort = 1 }) {
     return Object.keys(obj).sort();
   } else {
     return (Object.keys(obj).sort()).reverse();
+  }
+}
+function getObjectBytes(bb, data) {
+  for (let value of Object.values(data)) {
+    if (typeof value === 'string') {
+      bb.writeIString(value)
+    } else if (typeof value === 'number') {
+      bb.writeInt(value)
+    } else if (typeof value === 'object') {
+      if (Object.prototype.toString.call(value) === "[object Object]") {
+
+      } else if (Object.prototype.toString.call(value) === "[object Array]") {
+        for (let i = 0; i < value.length; ++i) {
+          bb.writeString(value[i])
+        }
+      }
+
+    }
   }
 }
 export { getBytes }

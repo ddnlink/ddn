@@ -1,11 +1,12 @@
-import base58check from './base58check'
+// import base58check from './base58check'
+import  base58check from '@ddn/crypto-base'
 import RIPEMD160 from 'ripemd160'
+// import base58checkcheck from './base58checkcheck'
 import { createHash } from './nacl'
-
 /**
  * TODO: 太简单，需要添加更多可验证信息
  * 字符串形式的地址，不再支持纯数字地址；
- * 1. 把地址base58解码成字节数组
+ * 1. 把地址base58check解码成字节数组
  * 2. 把数组分成两个字节数组，字节数组（1）是后4字节数组，字节数组（2）是减去后4字节的数组
  * 3. 把字节数组（2）两次Sha256 Hash
  * 4. 取字节数组（2）hash后的前4位，跟字节数组（1）比较。如果相同校验通过。
@@ -13,7 +14,7 @@ import { createHash } from './nacl'
  * 6. 检验前缀的合法性（根据主网参数校验），注意大小写。
  * Note: address.slice(0, -4) === address.slice(0, address.length - 4)
  */
-function isAddress (address, tokenPrefix) {
+function isAddress(address, tokenPrefix) {
   if (typeof address !== 'string') {
     return false
   }
@@ -26,7 +27,7 @@ function isAddress (address, tokenPrefix) {
   return true
 }
 
-function generateAddress (publicKey, tokenPrefix) {
+function generateAddress(publicKey, tokenPrefix) {
   if (typeof publicKey === 'string') {
     publicKey = Buffer.from(publicKey, 'hex')
   }

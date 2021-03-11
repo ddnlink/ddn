@@ -1,6 +1,6 @@
 {
   "name": "@ddn/crypto",
-  "version": "1.0.0",
+  "version": "0.4.1",
   "description": "this is Adaptation",
   "main": "lib/index.js",
   "scripts": {
@@ -9,6 +9,11 @@
   "keywords": [
     "crypto"
   ],
+  "dependencies": {
+  
+    "@ddn/crypto-nacl": "^0.4.1"
+    
+  },
   "author": "",
   "license": "ISC"
 }

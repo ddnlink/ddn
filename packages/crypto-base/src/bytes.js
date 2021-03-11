@@ -1,8 +1,9 @@
 import ByteBuffer from 'bytebuffer'
-import { getBytes as dd } from '@ddn/crypto-base'
 
-async function getBytes(transaction, skipSignature, skipSecondSignature) {
-  // return dd(transaction, skipSignature, skipSecondSignature)
+async function getBytes(transaction, skipSignature, skipSecondSignature, height) {
+  // if (height && height > 2) {
+  return getBytesForBeforeHeight(transaction, skipSignature, skipSecondSignature)
+  // }
   let assetSize = 0
   let assetBytes = null
 
@@ -12,7 +13,8 @@ async function getBytes(transaction, skipSignature, skipSecondSignature) {
   }
   if (assetBytes) assetSize = assetBytes.byteLength
 
-  const size = 1 + // type (int)
+  const size =
+    1 + // type (int)
     4 + // timestamp (int)
     8 + // nethash 8
     32 + // senderPublicKey (int)
@@ -36,7 +38,8 @@ async function getBytes(transaction, skipSignature, skipSecondSignature) {
   }
 
   // +32
-  if (transaction.requester_public_key) { // wxm block database
+  if (transaction.requester_public_key) {
+    // wxm block database
     const requesterPublicKey = Buffer.from(transaction.requester_public_key, 'hex') // wxm block database
 
     for (let i = 0; i < requesterPublicKey.length; i++) {
@@ -82,7 +85,8 @@ async function getBytes(transaction, skipSignature, skipSecondSignature) {
   }
 
   // +64 验证的时候要再次减去
-  if (!skipSecondSignature && transaction.sign_signature) { // wxm block database
+  if (!skipSecondSignature && transaction.sign_signature) {
+    // wxm block database
     const signSignatureBuffer = Buffer.from(transaction.sign_signature, 'hex') // wxm block database
     for (let i = 0; i < signSignatureBuffer.length; i++) {
       bb.writeByte(signSignatureBuffer[i])
@@ -91,24 +95,30 @@ async function getBytes(transaction, skipSignature, skipSecondSignature) {
 
   bb.flip()
 
-  return arrayBufferToUnit8Array(bb)
+  return bb
 }
-
-// 系统需要 Uint8Array
-function arrayBufferToUnit8Array(byteBuffer) {
-  const unit8Buffer = new Uint8Array(byteBuffer.toArrayBuffer())
-  const buffer = []
-  for (let i = 0; i < unit8Buffer.length; i++) {
-    buffer[i] = unit8Buffer[i]
+async function getBytesForBeforeHeight(data, skipSignature, skipSecondSignature) {
+  const bb = new ByteBuffer(null, true)
+  data = objKeySort(data)
+  console.log('return sort data',data)
+  if (skipSignature) {
+    delete data.signature
   }
-  return Buffer.from(buffer)
+  if (skipSecondSignature) {
+    delete data.sign_signature
+  }
+  await getAsset(bb,data)
+  getObjectBytes(bb, data)
+  bb.flip()
+  return bb
 }
 
+// 获取对应的资产插件中的getBytes方法
 async function getAssetBytes(transaction) {
-  if (global.assets && global.assets.transTypeNames[transaction.type]) {
+  if (data.asset) {
     const trans = global.assets.transTypeNames[transaction.type]
     const TransCls = require(trans.package).default[trans.name]
-    let transInst = new TransCls()
+    let transInst = new TransCls({})
     const buf = await transInst.getBytes(transaction)
 
     transInst = null
@@ -117,7 +127,52 @@ async function getAssetBytes(transaction) {
   }
   return null
 }
-
-export {
-  getBytes
+async function getAsset(bb, data) {
+  console
+  if (data.asset) {
+    for (let value of Object.values(data.asset)) {
+      console.log('------',value)
+      getObjectBytes(bb, value)
+    }
+    delete data.asset
+  }
 }
+function objKeySort(obj, sort) {//排序的函数
+  var newkey = sortKeys({ obj, sort })
+  var newObj = {};//创建一个新的对象，用于存放排好序的键值对
+  newkey.map((item) => {
+    newObj[item] = obj[item]
+    if (Object.prototype.toString.call(obj[item]) === "[object Object]") {
+      newObj[item] = objKeySort(obj[item])
+    }
+  })
+  return newObj;//返回排好序的新对象
+}
+function sortKeys({ obj, sort = 1 }) {
+  console.log('sdfsdfsdf',obj)
+  if (sort > 0) {
+    console.log(Object.keys(obj).sort())
+    return Object.keys(obj).sort();
+  } else {
+    return (Object.keys(obj).sort()).reverse();
+  }
+}
+function getObjectBytes(bb, data) {
+  for (let value of Object.values(data)) {
+    if (typeof value === 'string') {
+      bb.writeIString(value)
+    } else if (typeof value === 'number') {
+      bb.writeInt(value)
+    } else if (typeof value === 'object') {
+      if (Object.prototype.toString.call(value) === "[object Object]") {
+
+      } else if (Object.prototype.toString.call(value) === "[object Array]") {
+        for (let i = 0; i < value.length; ++i) {
+          bb.writeString(value[i])
+        }
+      }
+
+    }
+  }
+}
+export { getBytes }
