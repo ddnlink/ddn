@@ -100,7 +100,6 @@ async function getBytes(transaction, skipSignature, skipSecondSignature, height)
 async function getBytesForBeforeHeight(data, skipSignature, skipSecondSignature) {
   const bb = new ByteBuffer(null, true)
   data = objKeySort(data)
-  console.log('return sort data',data)
   if (skipSignature) {
     delete data.signature
   }
@@ -128,10 +127,8 @@ async function getAssetBytes(transaction) {
   return null
 }
 async function getAsset(bb, data) {
-  console
   if (data.asset) {
     for (let value of Object.values(data.asset)) {
-      console.log('------',value)
       getObjectBytes(bb, value)
     }
     delete data.asset
@@ -149,9 +146,7 @@ function objKeySort(obj, sort) {//排序的函数
   return newObj;//返回排好序的新对象
 }
 function sortKeys({ obj, sort = 1 }) {
-  console.log('sdfsdfsdf',obj)
   if (sort > 0) {
-    console.log(Object.keys(obj).sort())
     return Object.keys(obj).sort();
   } else {
     return (Object.keys(obj).sort()).reverse();

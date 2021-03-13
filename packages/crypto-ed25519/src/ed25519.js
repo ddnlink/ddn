@@ -2,6 +2,7 @@
  * 该方法为加密算法涉及到的基础方法，如果更换其他的密码学算法，请注意实现下面的方法
  */
 import ed from 'ed25519'
+import crypto from "crypto";
 import { getBytes } from './bytes'
 
 // hex 不包含 asset 字段

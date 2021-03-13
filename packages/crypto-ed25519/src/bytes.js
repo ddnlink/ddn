@@ -1,9 +1,7 @@
 import ByteBuffer from 'bytebuffer'
 
 async function getBytes(transaction, skipSignature, skipSecondSignature, height) {
-  if (height && height > 2) {
-  return getBytesForBeforeHeight(transaction, skipSignature, skipSecondSignature, height)
-  }
+
   let assetSize = 0
   let assetBytes = null
 
@@ -134,10 +132,10 @@ async function getBytesForBeforeHeight(data, skipSignature, skipSecondSignature)
 
 // 获取对应的资产插件中的getBytes方法 todo 切换到新的加密算法时要删除
 async function getAssetBytes(transaction) {
-  if (data.asset) {
+  if (global.assets && global.assets.transTypeNames[transaction.type]) {
     const trans = global.assets.transTypeNames[transaction.type]
     const TransCls = require(trans.package).default[trans.name]
-    let transInst = new TransCls({})
+    let transInst = new TransCls()
     const buf = await transInst.getBytes(transaction)
 
     transInst = null

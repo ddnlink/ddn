@@ -1,8 +1,8 @@
 import ByteBuffer from 'bytebuffer'
-import { getBytes as dd } from '@ddn/crypto-base'
+import { getBytes as getBytesTobuffer } from '@ddn/crypto-base'
 
 async function getBytes(transaction, skipSignature, skipSecondSignature) {
-  // return dd(transaction, skipSignature, skipSecondSignature)
+  // return arrayBufferToUnit8Array(await getBytesTobuffer(transaction, skipSignature, skipSecondSignature))
   let assetSize = 0
   let assetBytes = null
 

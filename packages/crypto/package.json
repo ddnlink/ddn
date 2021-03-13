@@ -10,8 +10,8 @@
     "crypto"
   ],
   "dependencies": {
-  
-    "@ddn/crypto-nacl": "^0.4.1"
+    "@ddn/crypto-nacl": "^0.4.1",
+    "@ddn/core": "^0.2.15"
     
   },
   "author": "",
