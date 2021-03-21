@@ -40,6 +40,17 @@ async function sign (transaction, { privateKey }) {
 
 /**
  * Usage:
+ * data.signature =  signWithHash(hash, keypair);
+ * @param {object} hash to be signed hash
+ * @param {object} param1 keypair.privateKey
+ */
+function signWithHash (hash, { privateKey }) {
+  const signature = nacl.sign.detached(hash, Buffer.from(privateKey, 'hex'))
+  return bufToHex(signature)
+}
+
+/**
+ * Usage:
  * trs.sign_signature = await secondSign(trs, keypair)
  * @param {object} transaction to be signed
  * @param {object} param1 keypair.privateKey
@@ -88,7 +99,7 @@ function verifyHash (hash, signature, publicKey) {
  * @param {boolean} skipSecondSignature 跳过二次签名
  */
 async function getHash (trs, skipSignature, skipSecondSignature) {
-  const bytes = await getBytes(trs, skipSignature, skipSecondSignature)
+  const bytes = getBytes(trs, skipSignature, skipSecondSignature)
   return createHash(bytes)
 }
 
@@ -112,6 +123,7 @@ export {
   getHash,
   createHash,
   sign,
+  signWithHash,
   secondSign,
   verifyBytes,
   verifyHash

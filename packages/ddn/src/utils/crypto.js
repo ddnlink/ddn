@@ -10,6 +10,7 @@ import RIPEMD160 from 'ripemd160'
 import Mnemonic from 'bitcore-mnemonic'
 import { getBytes } from './bytes'
 
+
 // 根据助记词生成密钥对
 function keypair (secret) {
   return getKeys(secret)

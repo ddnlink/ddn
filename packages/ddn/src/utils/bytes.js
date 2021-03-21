@@ -1,5 +1,5 @@
 import ByteBuffer from 'bytebuffer'
-import { getBytes as naclGetBytes } from '@ddn/crypto-nacl'
+import { getBytes as naclGetBytes } from '@ddn/crypto'
 
 async function getBytes(transaction, skipSignature, skipSecondSignature) {
   return naclGetBytes(transaction, skipSignature, skipSecondSignature)

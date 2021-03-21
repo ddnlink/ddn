@@ -2,10 +2,11 @@
  * Consensus 共识
  * wangxm   2018-01-08
  */
-import ByteBuffer from 'bytebuffer'
+// import ByteBuffer from 'bytebuffer'
 import assert from 'assert'
-import ip from 'ip'
-import { nacl, createHash } from '@ddn/crypto'
+// import ip from 'ip'
+import * as DdnCrypto from '@ddn/crypto'
+import { createHash } from '@ddn/crypto'
 import { bignum } from '@ddn/utils'
 
 let _singleton
@@ -30,26 +31,27 @@ class Consensus {
   }
 
   getProposeHash (propose) {
-    const bytes = new ByteBuffer()
+    return createHash(DdnCrypto.getBytes(propose, true, true))
+    // const bytes = new ByteBuffer()
 
-    bytes.writeString(propose.height)
-    bytes.writeString(propose.id)
+    // bytes.writeString(propose.height)
+    // bytes.writeString(propose.id)
 
-    const generatorPublicKeyBuffer = Buffer.from(propose.generator_public_key, 'hex') // wxm block database
-    for (let i = 0; i < generatorPublicKeyBuffer.length; i++) {
-      bytes.writeByte(generatorPublicKeyBuffer[i])
-    }
+    // const generatorPublicKeyBuffer = Buffer.from(propose.generator_public_key, 'hex') // wxm block database
+    // for (let i = 0; i < generatorPublicKeyBuffer.length; i++) {
+    //   bytes.writeByte(generatorPublicKeyBuffer[i])
+    // }
 
-    bytes.writeInt(propose.timestamp)
+    // bytes.writeInt(propose.timestamp)
 
-    const parts = propose.address.split(':')
-    assert(parts.length === 2)
-    bytes.writeInt(ip.toLong(parts[0]))
-    bytes.writeInt(Number(parts[1]))
+    // const parts = propose.address.split(':')
+    // assert(parts.length === 2)
+    // bytes.writeInt(ip.toLong(parts[0]))
+    // bytes.writeInt(Number(parts[1]))
 
-    bytes.flip()
+    // bytes.flip()
 
-    return createHash(bytes.toBuffer())
+    // return createHash(bytes.toBuffer())
   }
 
   async createPropose (keypair, { generator_public_key, height, id, timestamp }, address) {
@@ -64,20 +66,37 @@ class Consensus {
     const hash = this.getProposeHash(propose)
     propose.hash = hash.toString('hex')
     // propose.signature = nacl.sign.detached(hash, Buffer.from(keypair.privateKey, 'hex'))
-    propose.signature = Buffer.from(nacl.sign.detached(hash, Buffer.from(keypair.privateKey, 'hex'))).toString('hex')
+    propose.signature = await DdnCrypto.sign(propose, keypair)
     return propose
   }
 
   acceptPropose (propose) {
-    const hash = this.getProposeHash(propose)
+    // {
+    //   height: '13',
+    //   id: '149be5d39cf0e6a8aeb16e1d0eb27636786b18b34e50e4d4f0b0f4dd3100d42aa446d47dcaf38e3cd91341f515e8a2b39f71a59b2e341d01f5e54c94707d3639',
+    //   timestamp: 104895420,
+    //   generator_public_key: 'a8ac0f8e0793d5c9b84b53796ee2879701c00807f6a18c04dfa827a15f59cc15',
+    //   address: '127.0.0.1:8000',
+    //   hash: 'e857ea94cabe9810aa937db5b4abd704c1038f876c03ddcbe0c6263a441f0aee4acca62fee8eef7d8961e98655b3896a36d22b8f6340279c867e5d98f3baf8e0',
+    //   signature: '886f206f3a15719fd334e721e48624392d9f7fa0bbe23dd60addf5d01b525dc5664cd7ff505dc1588345677a7dd11e10eec42f783481ad4e7a549e66bed8930a'
+    // }
+    const newPropose = {
+      height: propose.height,
+      id: propose.id,
+      timestamp: propose.timestamp,
+      generator_public_key: propose.generator_public_key,
+      address: propose.address
+    }
+    const hash = this.getProposeHash(newPropose)
     if (propose.hash !== hash.toString('hex')) {
       throw new Error('Propose hash is not correct')
     }
-
+    newPropose.hash = hash.toString('hex')
+    const newHash = this.getProposeHash(newPropose)
     try {
       const signature = Buffer.from(propose.signature, 'hex')
       const publicKey = Buffer.from(propose.generator_public_key, 'hex') // wxm block database
-      if (nacl.sign.detached.verify(hash, signature, publicKey)) {
+      if (DdnCrypto.verifyHash(newHash, signature, publicKey)) {
         return
       } else {
         throw new Error('Vefify signature failed')
@@ -166,13 +185,14 @@ class Consensus {
    * @param {string} id 块id
    */
   getVoteHash (height, id) {
-    const bytes = new ByteBuffer()
+    return createHash(DdnCrypto.getBytes({ height, id }, false, false, false))
+    // const bytes = new ByteBuffer()
 
-    bytes.writeString(`${height}`)
-    bytes.writeString(id)
+    // bytes.writeString(`${height}`)
+    // bytes.writeString(id)
 
-    bytes.flip()
-    return createHash(bytes.toBuffer())
+    // bytes.flip()
+    // return createHash(bytes.toBuffer())
   }
 
   /**
@@ -191,7 +211,7 @@ class Consensus {
     keypairs.forEach(el => {
       votes.signatures.push({
         key: el.publicKey.toString('hex'),
-        sig: Buffer.from(nacl.sign.detached(hash, Buffer.from(el.privateKey, 'hex'))).toString('hex')
+        sig: DdnCrypto.signWithHash(hash, el)
       })
     })
 
@@ -203,7 +223,7 @@ class Consensus {
       const hash = this.getVoteHash(height, id)
       const signature = Buffer.from(sig, 'hex')
       const publicKey = Buffer.from(key, 'hex')
-      return nacl.sign.detached.verify(hash, signature, publicKey)
+      return DdnCrypto.verifyHash(hash, signature, publicKey)
     } catch (e) {
       return false
     }

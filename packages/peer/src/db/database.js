@@ -205,10 +205,10 @@ class DAO {
     if (!modelObj) {
       throw new Error('无效的数据输入：' + modelObj)
     }
-
+    // TODO 如果不带where参数，启动时回报update peer error 缺少option where参数，别的方法应该也是这样
     const opts = {
       ...logOptions,
-      ...(options || {})
+      ...(options || { where: {} })
     }
     const result = await modelInst.update(modelObj, opts)
     return result && result.length > 0 ? result[0] : 0

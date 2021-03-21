@@ -5,7 +5,7 @@
 import extend from 'util-extend'
 import DdnUtils from '@ddn/utils'
 import * as DdnCrypto from '@ddn/crypto'
-import { getId, nacl } from '@ddn/crypto'
+import { getId } from '@ddn/crypto'
 import Assets from '../../assets'
 
 let _singleton
@@ -88,9 +88,9 @@ class Transaction {
     trs = await this._assets.call(trs.type, 'create', data, trs) // 对应各个 asset 交易类型的 async create(data, trs) 方法
 
     // trs.signature = await DdnCrypto.sign(trs, data.keypair);
-    trs.signature = await this.sign(trs, keypair)
+    trs.signature = await DdnCrypto.sign(trs, keypair)
     if (sender.second_signature && second_keypair) {
-      trs.sign_signature = await this.sign(trs, second_keypair)
+      trs.sign_signature = await DdnCrypto.sign(trs, second_keypair)
       // trs.sign_signature = await DdnCrypto.sign(trs, data.second_keypair);
     }
 
@@ -481,8 +481,6 @@ class Transaction {
       throw new Error('Invalid sender')
     }
 
-    trs.senderId = sender.address // wxm block database
-
     // Verify that requester in multisignature
     if (trs.requester_public_key) {
       // wxm block database
@@ -501,6 +499,7 @@ class Transaction {
         throw new Error('Failed to verify senderPublicKey signature here.')
       }
     }
+    trs.senderId = sender.address // wxm block database
 
     trs = await this._assets.call(trs.type, 'process', trs, sender)
 
@@ -575,23 +574,24 @@ class Transaction {
   }
 
   /// ///// TODO: delete it /////////////////////////////////
-  async sign (trs, { privateKey }) {
-    const hash = await this.getHash(trs, true, true)
-    const signature = nacl.sign.detached(hash, Buffer.from(privateKey, 'hex'))
-    return Buffer.from(signature).toString('hex')
-    // return await DdnCrypto.sign(trs, { privateKey })
-  }
+  // async sign (trs, { privateKey }) {
+  //   // const hash = await this.getHash(trs, true, true)
+  //   // const signature = nacl.sign.detached(hash, Buffer.from(privateKey, 'hex'))
+  //   // return Buffer.from(signature).toString('hex')
+  //   return await DdnCrypto.sign(trs, { privateKey })
+  //   // return await DdnCrypto.sign(trs, { privateKey })
+  // }
 
-  async multisign (trs, { privateKey }) {
-    const hash = await this.getHash(trs, true, true)
-    const signature = nacl.sign.detached(hash, Buffer.from(privateKey, 'hex'))
-    return Buffer.from(signature).toString('hex')
-  }
+  // async multisign (trs, { privateKey }) {
+  //   // const hash = await this.getHash(trs, true, true)
+  //   // const signature = nacl.sign.detached(hash, Buffer.from(privateKey, 'hex'))
+  //   // return Buffer.from(signature).toString('hex')
+  // }
 
-  async getHash (trs, skipSignature, skipSecondSignature) {
-    const bytes = await DdnCrypto.getBytes(trs, skipSignature, skipSecondSignature)
-    return Buffer.from(nacl.hash(bytes))
-  }
+  // async getHash (trs, skipSignature, skipSecondSignature) {
+  //   const bytes = await DdnCrypto.getBytes(trs, skipSignature, skipSecondSignature)
+  //   return Buffer.from(nacl.hash(bytes))
+  // }
 
   // TODO: 注意使用 @ddn/crypto 的对应方法重构 2020.5.3
   async verifyBytes (bytes, signature, publicKey) {
@@ -611,8 +611,12 @@ class Transaction {
     if (!signature) {
       return false
     }
-
-    const hash = await DdnCrypto.getHash(trs, true, true)
+    // sdk生成交易体加密时没有senderId字段，验证时去掉
+    const transaction = JSON.parse(JSON.stringify(trs))
+    if (transaction.senderId) {
+      delete transaction.senderId
+    }
+    const hash = await DdnCrypto.getHash(transaction, true, true)
     const result = DdnCrypto.verifyHash(hash, signature, publicKey)
 
     return result
