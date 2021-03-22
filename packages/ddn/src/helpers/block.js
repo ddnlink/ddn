@@ -87,7 +87,7 @@ const { bignum, assetTypes } = DdnUtils
 // }
 
 export default {
-  getBytes:DdnCrypto.getBytes,
+  getBytes: DdnCrypto.getBytes,
   async new ({ address, keypair }, nethash, tokenName, tokenPrefix, dapp, accountsFile, message) {
     let payloadLength = 0
     // let payloadBytes = new ByteBuffer(1, true);
@@ -254,7 +254,7 @@ export default {
 
     let payloadBytes = ''
     for (const tx of transactions) {
-      const bytes =  DdnCrypto.getBytes(tx)
+      const bytes = DdnCrypto.getBytes(tx)
       // let bytes = transactionsLib.getTransactionBytes(tx);
       payloadBytes += bytes
       payloadLength += bytes.length
@@ -334,9 +334,9 @@ export default {
     genesisBlock.generatorPublicKey = keypair.publicKey
 
     bytes = getBytes(genesisBlock)
-    genesisBlock.blockSignature =await DdnCrypto.sign(genesisBlock, keypair) // fixme...
+    genesisBlock.blockSignature = await DdnCrypto.sign(genesisBlock, keypair) // fixme...
     bytes = getBytes(genesisBlock)
-    genesisBlock.id = DdnCrypto.getId(genesisBlock) //getId(bytes)
+    genesisBlock.id = DdnCrypto.getId(genesisBlock) // getId(bytes)
 
     return {
       block: genesisBlock,

@@ -15,14 +15,14 @@ import BlockStatus from './block-status'
 let _singleton
 
 class Block {
-  static singleton (context) {
+  static singleton(context) {
     if (!_singleton) {
       _singleton = new Block(context)
     }
     return _singleton
   }
 
-  constructor (context) {
+  constructor(context) {
     Object.assign(this, context)
     this._context = context
 
@@ -37,27 +37,27 @@ class Block {
     this._blockStatus = new BlockStatus(context)
   }
 
-  async getCount (where) {
+  async getCount(where) {
     return await this.dao.count('block', { where })
   }
 
-  async calculateFee () {
+  async calculateFee() {
     return bignum.multiply(this.constants.net.fees.transfer, this.constants.fixedPoint).toString()
   }
 
-  getBlockStatus () {
+  getBlockStatus() {
     return this._blockStatus
   }
 
-  setLastBlock (block) {
+  setLastBlock(block) {
     this._lastBlock = block
   }
 
-  getLastBlock () {
+  getLastBlock() {
     return this._lastBlock
   }
 
-  getBytes (block) {
+  getBytes(block) {
     return DdnCrypto.getBytes(block, true, true)
     // const size =
     //   4 + // version (int)
@@ -123,26 +123,21 @@ class Block {
     // return bb.toBuffer()
   }
 
-  getHash (block) {
+  getHash(block) {
     // fixme: 2020.8.8 该方法返回 buffer, 还是使用原始 的nacl把
     return DdnCrypto.createHash(this.getBytes(block))
     // return nacl.hash(this.getBytes(block))
   }
 
-  // 2020.5.20 使用 NaCI 替代
-  async sign (block, { privateKey }) {
-    // const hash = this.getHash(block)
-    // return Buffer.from(nacl.sign.detached(hash, Buffer.from(privateKey, 'hex'))).toString('hex')
+  async sign(block, { privateKey }) {
     return await DdnCrypto.sign(block, { privateKey })
   }
 
-  async getId (block) {
-    // console.log(block)
-    // return this.getHash(block).toString('hex')
+  async getId(block) {
     return await DdnCrypto.getId(block)
   }
 
-  async objectNormalize (block) {
+  async objectNormalize(block) {
     for (const i in block) {
       if (block[i] === null || typeof block[i] === 'undefined') {
         delete block[i]
@@ -170,7 +165,7 @@ class Block {
   /**
    * 处理创世区块
    */
-  async handleGenesisBlock () {
+  async handleGenesisBlock() {
     const genesisblock = this.genesisblock
 
     try {
@@ -197,7 +192,7 @@ class Block {
   /**
    * 序列化区块数据到数据库（仅仅是区块数据本身一条数据记录，不处理其中的交易数据）
    */
-  async serializeBlock2Db (block, dbTrans) {
+  async serializeBlock2Db(block, dbTrans) {
     const newBlock = {
       id: block.id,
       height: block.height,
@@ -226,7 +221,7 @@ class Block {
    * 将数据对象序列化成区块JSON对象 dbRead
    * @param {*} data
    */
-  serializeDbData2Block (raw) {
+  serializeDbData2Block(raw) {
     if (!raw.b_id) {
       return null
     } else {
@@ -259,7 +254,7 @@ class Block {
    * @param {*} block
    * @param {*} dbTrans
    */
-  async saveBlock (block, dbTrans) {
+  async saveBlock(block, dbTrans) {
     this.logger.debug('saveBlock start!')
     try {
       await this.serializeBlock2Db(block, dbTrans)
@@ -280,7 +275,7 @@ class Block {
     return true
   }
 
-  async createBlock (data) {
+  async createBlock(data) {
     const transactions = this._sortTransactions(data.transactions)
 
     this.logger.debug('Height is being created!!')
@@ -344,7 +339,7 @@ class Block {
    * @param {*} block
    * @param {*} votes
    */
-  async receiveNewBlock (block, votes) {
+  async receiveNewBlock(block, votes) {
     if (this.runtime.state !== runtimeState.Ready || !this.runtime.loaded) {
       this.logger.debug(
         `prepare is not ready ,state: ${this.runtime.state}, Ready: ${runtimeState.Ready}, loaded: ${this.runtime.loaded}`
@@ -417,7 +412,7 @@ class Block {
     })
   }
 
-  async receiveVotes (votes) {
+  async receiveVotes(votes) {
     this.logger.debug('Receive votes start')
     if (this.runtime.state !== runtimeState.Ready) {
       return
@@ -460,7 +455,7 @@ class Block {
    * 接收其他节点铸造区块的授权申请提议，进行授权操作
    * @param {*} propose
    */
-  async receiveNewPropose (propose) {
+  async receiveNewPropose(propose) {
     this.logger.debug('receiveNewPropose start.')
     if (this.runtime.state !== runtimeState.Ready) {
       this.logger.debug(
@@ -589,7 +584,7 @@ class Block {
    * @param {*} isBroadcast 是否广播
    * @param {*} isSaveBlock 是否保存到数据库
    */
-  async applyBlock ({ block, votes, isBroadcast, isSaveBlock }) {
+  async applyBlock({ block, votes, isBroadcast, isSaveBlock }) {
     const applyedTrsIdSet = new Set()
 
     const doApplyBlock = async () => {
@@ -723,8 +718,9 @@ class Block {
     })
   }
 
-  verifySignature (block) {
-    // const remove = 64
+  verifySignature(block) {
+    // 接受到的block是protobuf 解密之后的，因为解密后的json是类似 Blcok{}这样，带个名称前缀，应该不是标准的json数据，所以使用Object.assign，这样数据就是{}
+    block = Object.assign({}, block)
     const newBlock = JSON.parse(JSON.stringify(block))
     let res = null
     const { block_signature, generator_public_key } = block
@@ -738,43 +734,6 @@ class Block {
     const data = this.getBytes(newBlock)
     const hash = DdnCrypto.createHash(data)
     res = DdnCrypto.verifyHash(hash, block_signature, generator_public_key)
-    /**
-     * verifySignature {
-  version: 0,
-  height: '33',
-  total_amount: '0',
-  total_fee: '0',
-  reward: '500000000',
-  payload_hash: 'cf83e1357eefb8bdf1542850d66d8007d620e4050b5715dc83f4a921d36ce9ce47d0d13c5d85f2b0ff8318d2877eec2f63b931bd47417a81a538327af927da3e',
-  timestamp: 104898450,
-  number_of_transactions: 0,
-  payload_length: 0,
-  previous_block: 'eed70160e85b7fe209c504569e2d02308112d42810be705bcd1565dc9a21190865ba3068d60bec32a25d0efb153423485744e414d7155dda936c9411f9bc3ba5',
-  generator_public_key: 'a8ac0f8e0793d5c9b84b53796ee2879701c00807f6a18c04dfa827a15f59cc15',
-  transactions: [],
-  block_signature: '6dd2dcfbadfe0b876472c85d5e503f61dfa6c8c3aa839fd2a4bfc52422cc2ec51725773ebac4dc9492e851ac5a223fdf7b2581caa064db43f26097355f7e3203',
-  id: '3ce11e7f6d0d111997582df3ac7fc2129160dc8b00a29bf2da5bbeb6a50d1baf265269b7982b6271e127ba54d7fcc3d948ef2f9459916dd92c491946c1d4e105'
-}
-     */
-    // try {
-    //   const data = this.getBytes(block)
-    //   const str = data.length - remove
-    //   const data2 = Buffer.allocUnsafe(str)
-
-    //   for (let i = 0; i < data2.length; i++) {
-    //     data2[i] = data[i]
-    //   }
-    //   const hash = DdnCrypto.createHash(data2)
-    //   const blockSignatureBuffer = Buffer.from(block_signature, 'hex')
-    //   const generatorPublicKeyBuffer = Buffer.from(generator_public_key, 'hex')
-    //   console.log(blockSignatureBuffer,generatorPublicKeyBuffer,hash)
-    //   res = nacl.sign.detached.verify(hash, blockSignatureBuffer || ' ', generatorPublicKeyBuffer || ' ')
-    // } catch (e) {
-    //   this.logger.error(e)
-    //   console.log('error=======',e)
-    //   throw Error(e.toString())
-    // }
-    // console.log('error=======',res)
     return res
   }
 
@@ -783,8 +742,7 @@ class Block {
    * @param {object} block block data
    * @param {object}} votes votes
    */
-  async verifyBlock (block, votes) {
-    console.log('vvvvv',block)
+  async verifyBlock(block, votes) {
     // TODO creazy 创建块时为什么id和height不再在createBlock中产生
     // try {
     //   block.id = await this.getId(block)
@@ -809,7 +767,6 @@ class Block {
     if (!bignum.isEqualTo(block.height, 1) && !bignum.isEqualTo(expectedReward, block.reward)) {
       throw new Error('Invalid block reward')
     }
-    console.log(block)
     try {
       if (!this.verifySignature(block)) {
         throw new Error('Failed to verify block signature')
@@ -902,7 +859,7 @@ class Block {
     }
   }
 
-  async verifyBlockVotes ({ height }, { height: votesHeight, id, signatures }) {
+  async verifyBlockVotes({ height }, { height: votesHeight, id, signatures }) {
     let delegatesList
     try {
       delegatesList = await this.runtime.delegate.getDisorderDelegatePublicKeys(height)
@@ -935,7 +892,7 @@ class Block {
    * @param {*} save
    * @param {*} verifyTrs
    */
-  async processBlock (block, votes, broadcast, save, verifyTrs) {
+  async processBlock(block, votes, broadcast, save, verifyTrs) {
     if (!this.runtime.loaded) {
       throw new Error('DDN is preparing')
     }
@@ -1045,7 +1002,7 @@ class Block {
    * @param {*} keypair
    * @param {*} timestamp
    */
-  async generateBlock (keypair, timestamp) {
+  async generateBlock(keypair, timestamp) {
     if (this.runtime.consensus.hasPendingBlock(timestamp)) {
       return
     }
@@ -1151,7 +1108,7 @@ class Block {
     }
   }
 
-  _sortTransactions (transactions) {
+  _sortTransactions(transactions) {
     return transactions.sort((a, b) => {
       if (a.type !== b.type) {
         if (a.type === 1) {
@@ -1179,7 +1136,7 @@ class Block {
    * 解析区块链完整数据（包括区块数据、交易数据和其他扩展交易数据）成JSON对象
    * @param {*} data
    */
-  async _parseObjectFromFullBlocksData (data) {
+  async _parseObjectFromFullBlocksData(data) {
     let blocks = {}
     const order = []
     for (let i = 0; i < data.length; i++) {
@@ -1216,7 +1173,7 @@ class Block {
     return blocks
   }
 
-  async _popLastBlock (oldLastBlock) {
+  async _popLastBlock(oldLastBlock) {
     const { id, height } = oldLastBlock
     return new Promise((resolve, reject) => {
       let previousBlock
@@ -1278,11 +1235,11 @@ class Block {
     })
   }
 
-  async deleteBlock ({ blockId, dbTrans }) {
+  async deleteBlock({ blockId, dbTrans }) {
     return await this.dao.remove('block', { where: { id: blockId }, transaction: dbTrans })
   }
 
-  async deleteBlocksBefore ({ height }) {
+  async deleteBlocksBefore({ height }) {
     const blocks = []
 
     while (bignum.isLessThan(height, this._lastBlock.height)) {
@@ -1301,7 +1258,7 @@ class Block {
     return blocks
   }
 
-  async simpleDeleteAfterBlock (blockId) {
+  async simpleDeleteAfterBlock(blockId) {
     const result = await this.dao.findOne('block', {
       where: {
         id: blockId
@@ -1320,7 +1277,7 @@ class Block {
     })
   }
 
-  async loadBlocksOffset (limit, offset, verify) {
+  async loadBlocksOffset(limit, offset, verify) {
     this.logger.debug(`loadBlockOffset limit: ${limit}, offset: ${offset}, verify: ${verify}`)
 
     return new Promise((resolve, reject) => {
@@ -1384,7 +1341,7 @@ class Block {
     })
   }
 
-  async queryBlockData (where, sorts, offset, limit, returnTotal) {
+  async queryBlockData(where, sorts, offset, limit, returnTotal) {
     const w = where || {}
     const s = sorts || null
     const o = offset || 0
@@ -1444,7 +1401,7 @@ class Block {
    * 根据id、height、hash任一属性，查询对应的区块数据，不包括包含的交易列表
    * @param {*} query
    */
-  async querySimpleBlockData (query) {
+  async querySimpleBlockData(query) {
     this.logger.debug('start querySimpleBlockData, query is ', query)
     const validateErrors = await this.ddnSchema.validate(
       {
