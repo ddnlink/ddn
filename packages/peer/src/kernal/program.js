@@ -9,7 +9,8 @@ import ip from 'ip'
 import extend from 'extend2'
 import * as DdnCrypto from '@ddn/crypto'
 import DdnUtils from '@ddn/utils'
-import tracer from 'tracer'
+// import tracer from 'tracer'
+import { logger } from '../utils/logger'
 
 import Context from './context'
 import Block from './block/block'
@@ -38,22 +39,23 @@ process.env.UV_THREADPOOL_SIZE = 20 // max: 128
 
 class Program {
   async _init (options) {
-    options.logger = tracer.colorConsole({
-      level: options.configObject.logLevel,
-      format: [
-        '{{title}} {{timestamp}} {{file}}:{{line}} {{method}} {{message}}', // default format
-        {
-          error: '{{title}} {{timestamp}} {{file}}:{{line}} {{method}} {{message}} \nCall Stack:\n{{stack}}' // error format
-        }
-      ],
-      dateformat: 'HH:MM:ss.L',
-      transport: function (data) {
-        console.log(data.output)
-        fs.appendFile(path.join(options.baseDir, 'logs', 'debug.log'), data.rawoutput + '\n', err => {
-          if (err) throw err
-        })
-      }
-    })
+    options.logger = logger(options)
+    // options.logger = tracer.colorConsole({
+    //   level: options.configObject.logLevel,
+    //   format: [
+    //     '{{title}} {{timestamp}} {{file}}:{{line}} {{method}} {{message}}', // default format
+    //     {
+    //       error: '{{title}} {{timestamp}} {{file}}:{{line}} {{method}} {{message}} \nCall Stack:\n{{stack}}' // error format
+    //     }
+    //   ],
+    //   dateformat: 'HH:MM:ss.L',
+    //   transport: function (data) {
+    //     console.log(data.output)
+    //     fs.appendFile(path.join(options.baseDir, 'logs', 'debug.log'), data.rawoutput + '\n', err => {
+    //       if (err) throw err
+    //     })
+    //   }
+    // })
 
     // options.logger.dailyfile({
     //   root: 'logs',

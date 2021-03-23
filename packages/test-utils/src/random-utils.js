@@ -1,4 +1,3 @@
-import _ from 'lodash'
 import { randomName } from '@ddn/utils'
 
 // Used to create random delegates names
@@ -85,12 +84,13 @@ function randomAccount () {
 
 // Used to create random transaction accounts (holds additional info to regular account)
 function randomTxAccount () {
-  return _.defaults(randomAccount(), {
+  return {
     sentAmount: '',
     paidFee: '',
     totalPaidFee: '',
-    transactions: []
-  })
+    transactions: [],
+    ...randomAccount()
+  }
 }
 
 // Used to create random passwords

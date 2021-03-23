@@ -1,7 +1,6 @@
-import extend from 'extend'
 import Debug from 'debug'
 import DdnUtils from '@ddn/utils'
-import {DdnJS, node} from '../../ddn-js'
+import { DdnJS, node } from '../../ddn-js'
 
 const expect = node.expect
 const debug = Debug('debug')
@@ -18,11 +17,11 @@ const DAPP_TEMPLATE = {
   type: 0
 }
 
-async function createPluginAsset(type, asset, secret, secondSecret) {
+async function createPluginAsset (type, asset, secret, secondSecret) {
   return await DdnJS.assetPlugin.createPluginAsset(type, asset, secret, secondSecret)
 }
 
-function genNormalAccounts(n) {
+function genNormalAccounts (n) {
   const accounts = []
   for (let i = 0; i < n; ++i) {
     accounts.push(node.genNormalAccount())
@@ -30,11 +29,11 @@ function genNormalAccounts(n) {
   return accounts
 }
 
-async function createTransfer(address, amount, secret, second_secret) {
+async function createTransfer (address, amount, secret, second_secret) {
   return await DdnJS.transaction.createTransaction(address, amount, null, secret, second_secret)
 }
 
-async function registerDAppAsync(options, {password}) {
+async function registerDAppAsync (options, { password }) {
   // DdnJS.init();
   options.fee = '10000000000'
   const dappData = await createPluginAsset(DdnUtils.assetTypes.DAPP, options, password)
@@ -43,7 +42,7 @@ async function registerDAppAsync(options, {password}) {
   return res
 }
 
-async function inTransferAsync(options, {password}) {
+async function inTransferAsync (options, { password }) {
   // DdnJS.init();
   const inTransferData = await createPluginAsset(DdnUtils.assetTypes.DAPP_IN, options, password)
   const res = await node.submitTransactionAsync(inTransferData)
@@ -59,14 +58,14 @@ async function inTransferAsync(options, {password}) {
 //     return res
 // }
 
-async function getAssetBalanceAsync(address, currency) {
+async function getAssetBalanceAsync (address, currency) {
   const res = await node.apiGetAsync(`/aob/assets/balances/${address}/${currency}`)
   debug('get asset balance response', res.body)
   expect(res.body.result.currency).to.equal(currency)
   return res.body.result.balance
 }
 
-async function getDAppBalanceAsync(dappId, currency) {
+async function getDAppBalanceAsync (dappId, currency) {
   const res = await node.apiGetAsync(`/dapps/balances/${dappId}/${currency}`)
   debug('/dapps/balances', res.body)
   expect(res.body).to.have.property('success').to.be.true
@@ -77,7 +76,7 @@ export const Transfer = () => {
   describe('dapp transfer', () => {
     const delegateAccounts = genNormalAccounts(5)
     const publicKeys = delegateAccounts.map(a => a.publicKey)
-    const dapp = extend(true, {delegates: publicKeys, unlock_delegates: 3}, DAPP_TEMPLATE)
+    const dapp = { delegates: publicKeys, unlock_delegates: 3, ...DAPP_TEMPLATE }
     dapp.name = node.randomUsername()
     dapp.link = dapp.link.replace('ddn', node.randomUsername())
     debug('dapp', dapp)
@@ -301,7 +300,7 @@ export const Transfer = () => {
         })
         .expect('Content-Type', /json/)
         .expect(200)
-        .end((_err, {body}) => {
+        .end((_err, { body }) => {
           // console.log(res.body);
           node.expect(body).to.have.property('success').to.be.true
         })
