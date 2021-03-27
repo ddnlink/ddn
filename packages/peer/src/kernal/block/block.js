@@ -676,34 +676,32 @@ class Block {
         process.exit(1)
       }
     }
-
+    const self = this
     return new Promise((resolve, reject) => {
       this.balancesSequence.add(
         async cb => {
           const unconfirmedTrs = await this.runtime.transaction.getUnconfirmedTransactionList(true)
-
           try {
             await this.runtime.transaction.undoUnconfirmedList()
           } catch (err) {
-            this.logger.error('Failed to undo uncomfirmed transactions', err)
+            self.logger.error('Failed to undo uncomfirmed transactions', err)
             return process.exit(0)
           }
 
-          this.oneoff.clear()
+          self.oneoff.clear()
 
           try {
             await doApplyBlock()
           } catch (err) {
-            this.logger.error(`Failed to apply block 1: ${err}`)
+            self.logger.error(`Failed to apply block 1: ${err}`)
           }
 
           const redoTrs = unconfirmedTrs.filter(item => !applyedTrsIdSet.has(item.id))
           try {
-            await this.runtime.transaction.receiveTransactions(redoTrs)
+            await self.runtime.transaction.receiveTransactions(redoTrs)
           } catch (err) {
-            this.logger.error('Failed to redo unconfirmed transactions', err)
+            self.logger.error('Failed to redo unconfirmed transactions', err)
           }
-
           cb()
         },
         err => {

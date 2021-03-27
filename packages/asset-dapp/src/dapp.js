@@ -1414,7 +1414,7 @@ class Dapp extends Asset.Base {
     if (typeof this[call] !== 'function') {
       return cb(`Function not found in module: ${call}`)
     }
-    console.log('sandboxApi', call, args)
+    this.logger.debug('sandboxApi', call, args)
     const callArgs = [args, cb]
     return this[call].apply(this, callArgs)
   }
@@ -1689,11 +1689,10 @@ class Dapp extends Asset.Base {
       `SELECT t.id as id, lower(hex(t.senderPublicKey)) as senderPublicKey, t.amount as amount, dt.currency as currency, dt.amount as amount2 FROM trs t 
     inner join blocks b on t.blockId = b.id and t.type = ? 
     inner join intransfer dt on dt.transactionId = t.id and dt.dappId = ?
-    ${
-      req.body.lastTransactionId
+    ${req.body.lastTransactionId
         ? 'where b.height > (select height from blocks ib inner join trs it on ib.id = it.blockId and it.id = ?) '
         : ''
-    }
+      }
     order by b.height`,
       {
         replacements
@@ -1701,16 +1700,21 @@ class Dapp extends Asset.Base {
     )
   }
 
-  submitOutTransfer (req, cb) {
+  submitOutTransfer (req, callback) {
     const self = this
     const trs = req.body
-    self.balancesSequence.add(function (cb) {
-      if (modules.transactions.hasUnconfirmedTransaction(trs)) {
+    self.balancesSequence.add(async function (cb) {
+      if (await modules.transactions.hasUnconfirmedTransaction(trs)) {
         return cb('Already exists')
       }
-      self.logger.log('Submit outtransfer transaction ' + trs.id + ' from dapp ' + req.dappId)
-      modules.transactions.receiveTransactions([trs], cb)
-    }, cb)
+      self.logger.debug('Submit outtransfer transaction ' + trs.id + ' from dapp ' + req.dappId)
+      try {
+        const tr = await modules.transactions.receiveTransactions([trs])
+        cb(null, tr)
+      } catch (error) {
+        cb(error)
+      }
+    }, callback)
   }
 
   // TODO will delete or complete (要么完善这个方法，要么在侧链里去掉该方法的调用,这里是同步充值侧链token的方法需要完善)
@@ -1750,7 +1754,6 @@ class Dapp extends Asset.Base {
   getLastWithdrawal = async function (req, cb) {
     // const that = this
     const dapp_id = req.dappId
-    // TODO 这里查询的是dapp充值交易，能不能直接查询dapp资产表
     const data = await this.runtime.dataquery.loadAssetsWithDappChainCondition({
       dapp_id,
       type: DdnUtils.assetTypes.DAPP_OUT
