@@ -1340,7 +1340,6 @@ class Dapp extends Asset.Base {
 
   async onBlockchainReady () {
     const installIds = await this.getInstalledDappIds()
-    console.log(installIds)
     for (let i = 0; i < installIds.length; i++) {
       const dappId = installIds[i]
       const dappPath = path.join(this.config.dappsDir, dappId)
@@ -1362,7 +1361,6 @@ class Dapp extends Asset.Base {
       }
     }
     Object.keys(_dappLaunched).forEach(function (dappId) {
-      console.log('request', dappId, broadcast)
       // broadcast &&
       self.request(dappId, 'post', '/message', req, function (err) {
         if (err) {
@@ -1726,6 +1724,7 @@ class Dapp extends Asset.Base {
       dapp_id: req.dappId,
       type: DdnUtils.assetTypes.DAPP_IN
     })
+    console.log(data)
     const transactions = []
     for (let i = 0; i < data.length; i++) {
       const row = data[i]
@@ -1747,7 +1746,6 @@ class Dapp extends Asset.Base {
     //     }
     //   });
     //   });
-    console.log(transactions)
     cb(null, transactions)
   }
 
