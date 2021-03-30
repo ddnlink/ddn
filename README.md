@@ -39,7 +39,7 @@ More infomation please visit our [official website](https://www.ddn.link) , [doc
 - [x] **Multi databases**, you can use Mysql, SQLite, Oracle, etc;
 - [x] **Multi function**, payment, certificate storage, AOB, DAPP, etc;
 - [x] **Multi industry**, currently covering copyright protection, electronic medicine, food safety, anti-counterfeiting traceability and other fields
-- [ ] **Visual deployment**, you can customize your own blockchain by clicking the mouse and publish it to the peer server;
+- [x] **Visual deployment**, you can customize your own blockchain by clicking the mouse and publish it to the peer server, please access <http://ui.ddn.net>;
 - [ ] **Docker**, tod support mainstream deployment methods such as docker;
 - [ ] More...
 
