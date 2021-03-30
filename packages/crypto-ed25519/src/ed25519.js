@@ -94,8 +94,12 @@ function verifyHash (hash, signature, publicKey) {
  * @param {boolean} skipSecondSignature 跳过二次签名
  */
 async function getHash (trs, skipSignature, skipSecondSignature) {
-  const bytes = await getBytes(trs, skipSignature, skipSecondSignature)
-  return createHash(bytes)
+  try {
+    const bytes = await getBytes(trs, skipSignature, skipSecondSignature)
+    return createHash(bytes)
+  } catch (error) {
+    console.log(error)
+  }
 }
 
 /**
