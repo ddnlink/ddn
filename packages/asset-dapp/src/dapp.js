@@ -730,7 +730,8 @@ class Dapp extends Asset.Base {
                   }
 
                   self.request(id, router.method, router.path, reqParams, function (err, body) {
-                    if (!err && body.error) {
+                    self.logger.debug('response body: ', err, body)
+                    if (!err && body && body.error) {
                       err = body.error
                     }
                     if (err) {
@@ -753,6 +754,21 @@ class Dapp extends Asset.Base {
           }
         }
       }
+      /**
+       * 添加模版渲染路由
+       */
+      const handler = async function (req, res) {
+        try {
+          const dappPath = path.join(self.dappsPath, id)
+          const dappPublicPath = path.resolve(dappPath, 'public')
+          res.render(`${dappPublicPath}/index.html`)
+        } catch (err) {
+          res.json({ success: false, error: `${err}` })
+        }
+      }
+
+      dappRouter.get(`/${name}`, handler)
+      dappRouter.get(`/${id}`, handler)
       self.logger.debug('Dapp`s APIs have been attached. ')
     }
   }
