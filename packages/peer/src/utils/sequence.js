@@ -54,7 +54,7 @@ class Sequence {
     if (task.args) {
       args = args.concat(task.args)
     }
-    task.worker.apply(task.worker, args)
+    task.worker.apply(task, args) // FIXME?
   }
 
   add (worker, args, done) {

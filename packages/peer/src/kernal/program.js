@@ -22,6 +22,8 @@ import Delegate from './consensus/delegate'
 import Consensus from './consensus/consensus'
 import DataQuery from './consensus/data-query'
 import Peer from './peer/peer'
+import Energy from '../helpers/energy'
+import { DVM, Compiler } from '@ddn/contract'
 import dbUpgrade from '../db/db-upgrade'
 import HttpServer from '../network/http-server'
 import MultiSignature from './consensus/multisignature'
@@ -40,28 +42,6 @@ process.env.UV_THREADPOOL_SIZE = 20 // max: 128
 class Program {
   async _init (options) {
     options.logger = logger(options)
-    // options.logger = tracer.colorConsole({
-    //   level: options.configObject.logLevel,
-    //   format: [
-    //     '{{title}} {{timestamp}} {{file}}:{{line}} {{method}} {{message}}', // default format
-    //     {
-    //       error: '{{title}} {{timestamp}} {{file}}:{{line}} {{method}} {{message}} \nCall Stack:\n{{stack}}' // error format
-    //     }
-    //   ],
-    //   dateformat: 'HH:MM:ss.L',
-    //   transport: function (data) {
-    //     console.log(data.output)
-    //     fs.appendFile(path.join(options.baseDir, 'logs', 'debug.log'), data.rawoutput + '\n', err => {
-    //       if (err) throw err
-    //     })
-    //   }
-    // })
-
-    // options.logger.dailyfile({
-    //   root: 'logs',
-    //   maxLogFiles: 30,
-    //   logPathFormat: '{{root}}/{{date}}.log'
-    // })
 
     if (!options.configObject.publicIp) {
       options.configObject.publicIp = DdnUtils.system.getPublicIp()
@@ -93,7 +73,28 @@ class Program {
     this._context.runtime.peer = Peer.singleton(this._context)
     // Data Query
     this._context.runtime.dataquery = DataQuery.singleton(this._context)
+    // Energy
+    this._context.runtime.energy = Energy.singleton(this._context)
+    // Compiler
+    this._context.runtime.compiler = new Compiler()
+    // negotiate
+    this._context.runtime.dvm = new DVM({
+      dataDir: path.join(this._context.baseDir, '/contracts'),
+      logDir: path.join(this._context.baseDir, '/logs/dvm/')
+      // memoryConfig: {
+      //   maxOldSpace: Math.round(os.totalmem() / (1024 * 1024)) - 2048
+      // }
+    })
 
+    try {
+      await this._context.runtime.dvm.run()
+
+      const contracts = await this._context.dao.findList('contract', { where: { state: 0 } })
+      await this._context.runtime.dvm.loadContracts(contracts.map(c => c.id))
+    } catch (err) {
+      console.log(err)
+      throw err
+    }
     // 锁文件，存储当前运行进程的ID
     this._pid_file = path.join(options.baseDir, 'ddn.pid')
 

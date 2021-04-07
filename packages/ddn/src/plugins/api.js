@@ -435,6 +435,80 @@ async function getBlockId (options) {
   console.log(await DdnCrypto.getId(bytes))
 }
 
+async function publishContract (options) {
+  if (options.file && !fs.existsSync(options.file)) {
+    console.error('Error: invalid params, contract file not exists')
+    return
+  }
+  if (!options.file && !options.code) {
+    console.error('Error: invalid params, contract code or file not exists')
+    return
+  }
+
+  if (!options.secret) {
+    console.error('Error: invalid params, secret must exists')
+    return
+  }
+
+  var code = options.code || fs.readFileSync(options.file, 'utf8')
+  var opts = { name: options.name, desc: options.desc, gasLimit: options.gas, version: options.ver, code }
+  var trs = await NodeSdk.contract.createContract(opts, options.secret, options.secondSecret)
+  getApi().broadcastTransaction(trs, function (err, result) {
+    console.log(err || result.transactionId)
+  })
+}
+
+async function executeContract (options) {
+  if (!options.address) {
+    console.error('Error: invalid params, contract address should provide')
+    return
+  }
+  if (!options.method) {
+    console.error('Error: invalid params, contract method should provide')
+    return
+  }
+
+  if (!options.secret) {
+    console.error('Error: invalid params, secret must exists')
+    return
+  }
+
+  var opts = { gasLimit: options.gas, address: options.address, method: options.method, args: options.args }
+  var trs = await NodeSdk.contract.executeContract(opts, options.secret, options.secondSecret)
+  getApi().broadcastTransaction(trs, function (err, result) {
+    console.log(err || result.transactionId)
+  })
+}
+
+async function transferContract (options) {
+  if (!options.address) {
+    console.error('Error: invalid params, contract address should provide')
+    return
+  }
+  if (!options.method) {
+    console.error('Error: invalid params, contract method should provide')
+    return
+  }
+
+  if (!options.secret) {
+    console.error('Error: invalid params, secret must exists')
+    return
+  }
+
+  var opts = {
+    gasLimit: options.gas,
+    address: options.address,
+    amount: options.amount,
+    currency: options.currency,
+    method: options.method,
+    args: options.args
+  }
+  var trs = await NodeSdk.contract.transferContract(opts, options.secret, options.secondSecret)
+  getApi().broadcastTransaction(trs, function (err, result) {
+    console.log(err || result.transactionId)
+  })
+}
+
 function verifyBytes (options) {
   console.log(NodeSdk.crypto.verifyBytes(options.bytes, options.signature, options.publicKey))
 }
@@ -478,7 +552,10 @@ export {
   getBlockPayloadHash,
   getBlockId,
   verifyBytes,
-  registerDapp
+  registerDapp,
+  publishContract,
+  executeContract,
+  transferContract
 }
 
 //   program

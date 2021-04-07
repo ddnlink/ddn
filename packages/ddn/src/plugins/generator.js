@@ -224,7 +224,44 @@ function generateBlockchain (name) {
 
 // TODO: 产生合约交易
 function generateContract (name) {
-  console.log('Hi, I`m coming soon...')
+  console.log(name)
+  tempaleContract(name)
+}
+
+async function tempaleContract (name) {
+  const filename = `${name}.ts`
+  if (!fs.existsSync(filename)) {
+    console.log('Generate Contract project ...')
+
+    const spinner = ora('Contract template is downloading ...\n')
+    spinner.start()
+    shell.rm('-rf', '.tmp')
+
+    child_process.exec('git clone https://github.com/ddnlink/ddn-templates.git .tmp', function (err, stdout, stderr) {
+      console.log(err)
+      if (err) {
+        spinner.fail()
+        console.log(symbols.error, chalk.red('Template download failed'))
+      } else {
+        spinner.succeed()
+        shell.mv('/home/wu/workspace/ddn-templates/contract/sample-contract.ts', './' + filename)
+
+        if (fs.existsSync(filename)) {
+          // 清理代码
+          shell.rm('-rf', '.tmp')
+
+          console.log(symbols.success, chalk.green('Contract Generate successful.'))
+        } else {
+          console.log(
+            symbols.error,
+            chalk.red('contract file does not exist, please check whether the template is correct!')
+          )
+        }
+      }
+    })
+  } else {
+    console.log(symbols.error, chalk.red('项目已存在'))
+  }
 }
 
 function tempaleBlockchain (name) {
@@ -248,42 +285,41 @@ function tempaleBlockchain (name) {
         const spinner = ora('正在下载模板...\n')
         spinner.start()
 
-        child_process.exec('git clone https://github.com/ddnlink/ddn-templates.git .tmp', function (
-          err,
-          stdout,
-          stderr
-        ) {
-          if (err) {
-            spinner.fail()
-            console.log(symbols.error, chalk.red('模板下载失败'))
-          } else {
-            spinner.succeed()
-            shell.mv('./.tmp/blockchain', './' + name)
-            const filename = `${name}/package.json`
-            const meta = {
-              name,
-              description: answers.description,
-              author: answers.author
-            }
-
-            if (fs.existsSync(filename)) {
-              const content = fs.readFileSync(filename).toString()
-              // const dt = JSON.parse(content)
-              // dt.name = '{{name}}'
-              // dt.description = '{{description}}'
-              const result = handlebars.compile(content)(meta, helpers)
-              // const result = handlebars.compile(JSON.stringify(dt, null, 2))(meta)
-              fs.writeFileSync(filename, result)
-
-              // 清理代码
-              shell.rm('-rf', '.tmp')
-
-              console.log(symbols.success, chalk.green('项目初始化完成'))
+        child_process.exec(
+          'git clone https://github.com/ddnlink/ddn-templates.git .tmp',
+          function (err, stdout, stderr) {
+            if (err) {
+              spinner.fail()
+              console.log(symbols.error, chalk.red('模板下载失败'))
             } else {
-              console.log(symbols.error, chalk.red('package.json 不存在，请检查模板是否正确！'))
+              spinner.succeed()
+              shell.mv('./.tmp/blockchain', './' + name)
+              const filename = `${name}/package.json`
+              const meta = {
+                name,
+                description: answers.description,
+                author: answers.author
+              }
+
+              if (fs.existsSync(filename)) {
+                const content = fs.readFileSync(filename).toString()
+                // const dt = JSON.parse(content)
+                // dt.name = '{{name}}'
+                // dt.description = '{{description}}'
+                const result = handlebars.compile(content)(meta, helpers)
+                // const result = handlebars.compile(JSON.stringify(dt, null, 2))(meta)
+                fs.writeFileSync(filename, result)
+
+                // 清理代码
+                shell.rm('-rf', '.tmp')
+
+                console.log(symbols.success, chalk.green('项目初始化完成'))
+              } else {
+                console.log(symbols.error, chalk.red('package.json 不存在，请检查模板是否正确！'))
+              }
             }
           }
-        })
+        )
       })
   } else {
     console.log(symbols.error, chalk.red('项目已存在'))

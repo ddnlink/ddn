@@ -13,6 +13,7 @@ import Delegate from './system/delegate'
 import Vote from './system/vote'
 import Multisignatures from './system/multisignature'
 import Lock from './system/lock'
+import SC from './contract'
 
 import Router from './router'
 
@@ -148,6 +149,13 @@ class Loader {
 
     const lock = new Lock(this._context)
     this._registerAsset(assetTypes.LOCK, lock)
+
+    const contract = new SC.Contract(this._context)
+    this._registerAsset(assetTypes.CONTRACT, contract)
+    const contractExecute = new SC.ContractExecute(this._context)
+    this._registerAsset(assetTypes.CONTRACT_EXECUTE, contractExecute)
+    const contractTransfer = new SC.ContractTransfer(this._context)
+    this._registerAsset(assetTypes.CONTRACT_TRANSFER, contractTransfer)
 
     await this._attachAssetPlugins()
     await this._addAsesstModels()

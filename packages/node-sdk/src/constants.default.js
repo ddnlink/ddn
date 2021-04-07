@@ -69,6 +69,11 @@ module.exports = {
       dapp_out: '0.1',
       dapp_in: '0.1',
 
+      // contract
+      contract: '100',
+      contract_execute: '0.1',
+      contract_transport: '0.1',
+
       // todo: 测试中提供的费用
       username: '0.1',
 
@@ -120,6 +125,11 @@ module.exports = {
       dapp: '100',
       dapp_out: '0.1',
       dapp_in: '0.1',
+
+      // contract
+      contract: '100',
+      contract_execute: '0.1',
+      contract_transport: '0.1',
 
       // todo: 测试中提供的费用
       username: '0.1',

@@ -638,8 +638,15 @@ class Block {
           this.logger.debug('save block ok')
         })
 
-        // 出错但回滚成功
-        if (result) throw new Error(result)
+        this.runtime.dvm.commit(block.height)
+        // found errors but rollback success
+        if (result) {
+          const lastHeight = await this.runtime.dvm.getLastHeight()
+          if (lastHeight >= 0) {
+            await this.runtime.dvm.rollback(this._lastBlock.height)
+          }
+          throw new Error(result)
+        }
 
         this.logger.debug(`The dao.transaction is finished, err: ${result} `)
         this.setLastBlock(block)

@@ -99,7 +99,7 @@ class Delegate {
         if (account.is_delegate) {
           this._myDelegateKeypairs[account.publicKey] = delegateKeypairs[account.publicKey] // wxm block database
           this._myDelegateNum++
-          this.logger.info(`Forging enabled on account: ${account.address}`)
+          this.logger.trace(`Forging enabled on account: ${account.address}`)
         } else {
           this.logger.info(`Delegate with this public key not found: ${account.publicKey}`) // wxm block database
         }
