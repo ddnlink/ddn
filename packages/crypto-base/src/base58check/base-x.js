@@ -11,7 +11,9 @@ function Base (ALPHABET) {
   for (let z = 0; z < ALPHABET.length; z++) {
     const x = ALPHABET.charAt(z)
 
-    if (ALPHABET_MAP[x] !== undefined) { throw new TypeError(x + ' is ambiguous') }
+    if (ALPHABET_MAP[x] !== undefined) {
+      throw new TypeError(x + ' is ambiguous')
+    }
     ALPHABET_MAP[x] = z
   }
 
@@ -36,9 +38,13 @@ function Base (ALPHABET) {
     let string = ''
 
     // deal with leading zeros
-    for (var k = 0; source[k] === 0 && k < source.length - 1; ++k) { string += ALPHABET[0] }
+    for (var k = 0; source[k] === 0 && k < source.length - 1; ++k) {
+      string += ALPHABET[0]
+    }
     // convert digits to a string
-    for (var q = digits.length - 1; q >= 0; --q) { string += ALPHABET[digits[q]] }
+    for (var q = digits.length - 1; q >= 0; --q) {
+      string += ALPHABET[digits[q]]
+    }
 
     return string
   }

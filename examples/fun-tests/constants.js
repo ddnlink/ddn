@@ -35,6 +35,7 @@ module.exports = {
   energyPerDDN: 10000,
   gasPrice: 1,
 
+  crypto: '@ddn/crypto-nacl',
   testnet: {
     rewardRatio: 0.2,
     milestones: [

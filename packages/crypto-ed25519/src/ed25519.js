@@ -1,7 +1,8 @@
 /**
  * 该方法为加密算法涉及到的基础方法，如果更换其他的密码学算法，请注意实现下面的方法
  */
-import nacl from 'tweetnacl'
+import ed from 'ed25519'
+import crypto from 'crypto'
 import { getBytes } from './bytes'
 
 // hex 不包含 asset 字段
@@ -12,16 +13,11 @@ async function getId (transaction) {
 
 // 兼容处理
 function getKeys (secret) {
-  const hash = createHash(Buffer.from(secret))
-
-  const m = new Uint8Array(nacl.sign.seedLength)
-  for (let i = 0; i < m.length; i++) m[i] = hash[i]
-
-  const keypair = nacl.sign.keyPair.fromSeed(m)
+  const keypair = ed.MakeKeypair(crypto.createHash('sha256').update(secret, 'utf8').digest())
 
   return {
-    publicKey: bufToHex(keypair.publicKey),
-    privateKey: bufToHex(keypair.secretKey)
+    publicKey: keypair.publicKey.toString('hex'),
+    privateKey: keypair.privateKey.toString('hex')
   }
 }
 
@@ -33,9 +29,19 @@ function getKeys (secret) {
  */
 async function sign (transaction, { privateKey }) {
   const hash = await getHash(transaction, true, true)
-  const signature = nacl.sign.detached(hash, Buffer.from(privateKey, 'hex'))
+  const signature = ed.Sign(hash, { privateKey }).toString('hex')
 
-  return bufToHex(signature)
+  return signature
+}
+/**
+ * Usage:
+ * data.signature =  signWithHash(hash, keypair);
+ * @param {object} hash to be signed hash
+ * @param {object} param1 keypair.privateKey
+ */
+function signWithHash (hash, { privateKey }) {
+  const signature = ed.Sign(hash, { privateKey }).toString('hex')
+  return signature
 }
 
 /**
@@ -46,8 +52,8 @@ async function sign (transaction, { privateKey }) {
  */
 async function secondSign (transaction, { privateKey }) {
   const hash = await getHash(transaction, false, true)
-  const signature = nacl.sign.detached(hash, Buffer.from(privateKey, 'hex'))
-  return bufToHex(signature)
+  const signature = ed.Sign(hash, { privateKey }).toString('hex')
+  return signature
 }
 
 // 验证，TODO trs重构： peer/src/kernal/transaction.js  2020.5.3
@@ -67,14 +73,14 @@ function verifyBytes (bytes, signature, publicKey) {
 
   const signatureBuffer = Buffer.from(signature, 'hex')
   const publicKeyBuffer = Buffer.from(publicKey, 'hex')
-  const res = nacl.sign.detached.verify(hash, signatureBuffer, publicKeyBuffer)
+  const res = ed.Verify(hash, signatureBuffer || ' ', publicKeyBuffer || ' ')
   return res
 }
 
 function verifyHash (hash, signature, publicKey) {
   const signatureBuffer = Buffer.from(signature, 'hex')
   const publicKeyBuffer = Buffer.from(publicKey, 'hex')
-  const res = nacl.sign.detached.verify(hash, signatureBuffer, publicKeyBuffer)
+  const res = ed.Verify(hash, signatureBuffer || ' ', publicKeyBuffer || ' ')
   return res
 }
 
@@ -88,8 +94,12 @@ function verifyHash (hash, signature, publicKey) {
  * @param {boolean} skipSecondSignature 跳过二次签名
  */
 async function getHash (trs, skipSignature, skipSecondSignature) {
-  const bytes = await getBytes(trs, skipSignature, skipSecondSignature)
-  return createHash(bytes)
+  try {
+    const bytes = await getBytes(trs, skipSignature, skipSecondSignature)
+    return createHash(bytes)
+  } catch (error) {
+    console.log(error)
+  }
 }
 
 /**
@@ -98,20 +108,21 @@ async function getHash (trs, skipSignature, skipSecondSignature) {
  * @param {String}  data 需要 hash 的数据，格式为 unit8Arrary, 这里的方法与 crypto.createHash('sha256').update(strBuffer).digest() 相似，结果不同
  */
 function createHash (data) {
-  return Buffer.from(nacl.hash(data))
+  return crypto.createHash('sha256').update(data).digest()
 }
 
-function bufToHex (data) {
-  return Buffer.from(data).toString('hex')
-}
+// function bufToHex (data) {
+//   return Buffer.from(data).toString('hex')
+// }
 
 export {
-  nacl, // 这里不应该导出
+  // nacl, // 这里不应该导出
   getKeys,
   getId,
   getHash,
   createHash,
   sign,
+  signWithHash,
   secondSign,
   verifyBytes,
   verifyHash

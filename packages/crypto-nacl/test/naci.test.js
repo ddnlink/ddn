@@ -43,7 +43,6 @@ describe('NaCI', () => {
 
     const hashes = crypto.createHash('sha256')
     hashes.update(strBuffer)
-
     ;[1, 2, 3].forEach(e => {
       strBuffer = Buffer.from('tt' + e)
       hashStrs += 'tt' + e

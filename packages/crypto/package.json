@@ -1,41 +1,19 @@
 {
   "name": "@ddn/crypto",
   "version": "0.4.1",
-  "description": "Crypto for DDN",
-  "keywords": [
-    "crypto",
-    "ddn",
-    "blockchain"
-  ],
-  "author": "imfly <kubying@qq.com>",
-  "homepage": "https://github.com/ddnlink/ddn/tree/master/packages/crypto#readme",
-  "license": "MIT",
+  "description": "this is Adaptation",
   "main": "lib/index.js",
-  "module": "dist/index.esm.js",
-  "files": [
-    "lib",
-    "dist"
-  ],
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/ddnlink/ddn.git"
-  },
   "scripts": {
-    "test": "echo \"Error: run tests from root\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "bugs": {
-    "url": "https://github.com/ddnlink/ddn/issues"
-  },
+  "keywords": [
+    "crypto"
+  ],
   "dependencies": {
-    "bitcore-mnemonic": "^8.20.5",
-    "bytebuffer": "^5.0.1",
-    "crypto": "^1.0.1",
-    "fast-sha256": "^1.3.0",
-    "ripemd160": "^2.0.2",
-    "safe-buffer": "^5.2.1",
-    "tweetnacl": "^1.0.2"
+    "@ddn/crypto-nacl": "^0.4.1",
+    "@ddn/core": "^0.2.15"
+    
   },
-  "devDependencies": {
-    "@ddn/utils": "^0.2.1"
-  }
+  "author": "",
+  "license": "ISC"
 }
