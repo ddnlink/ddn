@@ -467,8 +467,18 @@ class Transaction {
     if (!this._assets.hasType(trs.type)) {
       throw new Error(`Unknown transaction type 10 ${trs.type}`)
     }
-
-    const txId = await getId(trs)
+    // TODO creazy 验证交易id时，程序会在交易体中添加下面几个字段，所以要去掉，保持和sdk生成交易体时有同样的数据
+    const trss = JSON.parse(JSON.stringify(trs))
+    if (trss.senderId) {
+      delete trss.senderId
+    }
+    if (trss.block_height) {
+      delete trss.block_height
+    }
+    if (trss.block_id) {
+      delete trss.block_id
+    }
+    const txId = await getId(trss)
 
     // 确保客户端传入id，这里仅做验证
     if (typeof trs.id === 'undefined' || trs.id !== txId) {
@@ -615,6 +625,13 @@ class Transaction {
     const transaction = JSON.parse(JSON.stringify(trs))
     if (transaction.senderId) {
       delete transaction.senderId
+    }
+    // TODO creazy 铸块时会再次进行交易验证，这时交易会多处下面两个字段
+    if (transaction.block_height) {
+      delete transaction.block_height
+    }
+    if (transaction.block_id) {
+      delete transaction.block_id
     }
     const hash = await DdnCrypto.getHash(transaction, true, true)
     const result = DdnCrypto.verifyHash(hash, signature, publicKey)

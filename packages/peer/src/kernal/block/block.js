@@ -6,23 +6,23 @@ import os from 'os'
 import ip from 'ip'
 import assert from 'assert'
 
-import ByteBuffer from 'bytebuffer'
+// import ByteBuffer from 'bytebuffer'
 import * as DdnCrypto from '@ddn/crypto'
-import { nacl } from '@ddn/crypto'
+// import { nacl } from '@ddn/crypto'
 import { runtimeState, system, bignum } from '@ddn/utils'
 import BlockStatus from './block-status'
 
 let _singleton
 
 class Block {
-  static singleton(context) {
+  static singleton (context) {
     if (!_singleton) {
       _singleton = new Block(context)
     }
     return _singleton
   }
 
-  constructor(context) {
+  constructor (context) {
     Object.assign(this, context)
     this._context = context
 
@@ -37,27 +37,27 @@ class Block {
     this._blockStatus = new BlockStatus(context)
   }
 
-  async getCount(where) {
+  async getCount (where) {
     return await this.dao.count('block', { where })
   }
 
-  async calculateFee() {
+  async calculateFee () {
     return bignum.multiply(this.constants.net.fees.transfer, this.constants.fixedPoint).toString()
   }
 
-  getBlockStatus() {
+  getBlockStatus () {
     return this._blockStatus
   }
 
-  setLastBlock(block) {
+  setLastBlock (block) {
     this._lastBlock = block
   }
 
-  getLastBlock() {
+  getLastBlock () {
     return this._lastBlock
   }
 
-  getBytes(block) {
+  getBytes (block) {
     return DdnCrypto.getBytes(block, true, true)
     // const size =
     //   4 + // version (int)
@@ -123,21 +123,21 @@ class Block {
     // return bb.toBuffer()
   }
 
-  getHash(block) {
+  getHash (block) {
     // fixme: 2020.8.8 该方法返回 buffer, 还是使用原始 的nacl把
     return DdnCrypto.createHash(this.getBytes(block))
     // return nacl.hash(this.getBytes(block))
   }
 
-  async sign(block, { privateKey }) {
+  async sign (block, { privateKey }) {
     return await DdnCrypto.sign(block, { privateKey })
   }
 
-  async getId(block) {
+  async getId (block) {
     return await DdnCrypto.getId(block)
   }
 
-  async objectNormalize(block) {
+  async objectNormalize (block) {
     for (const i in block) {
       if (block[i] === null || typeof block[i] === 'undefined') {
         delete block[i]
@@ -165,7 +165,7 @@ class Block {
   /**
    * 处理创世区块
    */
-  async handleGenesisBlock() {
+  async handleGenesisBlock () {
     const genesisblock = this.genesisblock
 
     try {
@@ -192,7 +192,7 @@ class Block {
   /**
    * 序列化区块数据到数据库（仅仅是区块数据本身一条数据记录，不处理其中的交易数据）
    */
-  async serializeBlock2Db(block, dbTrans) {
+  async serializeBlock2Db (block, dbTrans) {
     const newBlock = {
       id: block.id,
       height: block.height,
@@ -221,7 +221,7 @@ class Block {
    * 将数据对象序列化成区块JSON对象 dbRead
    * @param {*} data
    */
-  serializeDbData2Block(raw) {
+  serializeDbData2Block (raw) {
     if (!raw.b_id) {
       return null
     } else {
@@ -254,7 +254,7 @@ class Block {
    * @param {*} block
    * @param {*} dbTrans
    */
-  async saveBlock(block, dbTrans) {
+  async saveBlock (block, dbTrans) {
     this.logger.debug('saveBlock start!')
     try {
       await this.serializeBlock2Db(block, dbTrans)
@@ -275,7 +275,7 @@ class Block {
     return true
   }
 
-  async createBlock(data) {
+  async createBlock (data) {
     const transactions = this._sortTransactions(data.transactions)
 
     this.logger.debug('Height is being created!!')
@@ -321,7 +321,6 @@ class Block {
       generator_public_key: data.keypair.publicKey.toString('hex'),
       transactions: blockTransactions
     }
-
     try {
       block.block_signature = await this.sign(block, data.keypair)
       block = await this.objectNormalize(block)
@@ -339,7 +338,7 @@ class Block {
    * @param {*} block
    * @param {*} votes
    */
-  async receiveNewBlock(block, votes) {
+  async receiveNewBlock (block, votes) {
     if (this.runtime.state !== runtimeState.Ready || !this.runtime.loaded) {
       this.logger.debug(
         `prepare is not ready ,state: ${this.runtime.state}, Ready: ${runtimeState.Ready}, loaded: ${this.runtime.loaded}`
@@ -412,7 +411,7 @@ class Block {
     })
   }
 
-  async receiveVotes(votes) {
+  async receiveVotes (votes) {
     this.logger.debug('Receive votes start')
     if (this.runtime.state !== runtimeState.Ready) {
       return
@@ -455,7 +454,7 @@ class Block {
    * 接收其他节点铸造区块的授权申请提议，进行授权操作
    * @param {*} propose
    */
-  async receiveNewPropose(propose) {
+  async receiveNewPropose (propose) {
     this.logger.debug('receiveNewPropose start.')
     if (this.runtime.state !== runtimeState.Ready) {
       this.logger.debug(
@@ -584,7 +583,7 @@ class Block {
    * @param {*} isBroadcast 是否广播
    * @param {*} isSaveBlock 是否保存到数据库
    */
-  async applyBlock({ block, votes, isBroadcast, isSaveBlock }) {
+  async applyBlock ({ block, votes, isBroadcast, isSaveBlock }) {
     const applyedTrsIdSet = new Set()
 
     const doApplyBlock = async () => {
@@ -718,7 +717,7 @@ class Block {
     })
   }
 
-  verifySignature(block) {
+  verifySignature (block) {
     // 接受到的block是protobuf 解密之后的，因为解密后的json是类似 Blcok{}这样，带个名称前缀，应该不是标准的json数据，所以使用Object.assign，这样数据就是{}
     block = Object.assign({}, block)
     const newBlock = JSON.parse(JSON.stringify(block))
@@ -731,7 +730,8 @@ class Block {
     if (newBlock.totalForged) {
       delete newBlock.totalForged
     }
-    const data = this.getBytes(newBlock)
+    // 块进行签名时是没有block_singuter字段的，所以验证时也跳过获取block_singuter的字节，这里第二个参数是跳过获取block_singuter字节
+    const data = this.getBytes(newBlock, true)
     const hash = DdnCrypto.createHash(data)
     res = DdnCrypto.verifyHash(hash, block_signature, generator_public_key)
     return res
@@ -742,7 +742,7 @@ class Block {
    * @param {object} block block data
    * @param {object}} votes votes
    */
-  async verifyBlock(block, votes) {
+  async verifyBlock (block, votes) {
     // TODO creazy 创建块时为什么id和height不再在createBlock中产生
     // try {
     //   block.id = await this.getId(block)
@@ -859,7 +859,7 @@ class Block {
     }
   }
 
-  async verifyBlockVotes({ height }, { height: votesHeight, id, signatures }) {
+  async verifyBlockVotes ({ height }, { height: votesHeight, id, signatures }) {
     let delegatesList
     try {
       delegatesList = await this.runtime.delegate.getDisorderDelegatePublicKeys(height)
@@ -892,7 +892,7 @@ class Block {
    * @param {*} save
    * @param {*} verifyTrs
    */
-  async processBlock(block, votes, broadcast, save, verifyTrs) {
+  async processBlock (block, votes, broadcast, save, verifyTrs) {
     if (!this.runtime.loaded) {
       throw new Error('DDN is preparing')
     }
@@ -964,8 +964,10 @@ class Block {
           await this.runtime.account.setAccount({
             publicKey: transaction.senderPublicKey
           })
-
-          transaction.id = await DdnCrypto.getId(transaction) // 2020.5.18
+          // TODO creazy 这里的交易都是经过验证的，而且到这里的交易都是合法合规的，没有必要重新获取id
+          if (!transaction.id) {
+            transaction.id = await DdnCrypto.getId(transaction) // 2020.5.18
+          }
           transaction.block_id = block.id // wxm block database
 
           const existsTrs = existsTrsIds.find(item => {
@@ -1002,7 +1004,7 @@ class Block {
    * @param {*} keypair
    * @param {*} timestamp
    */
-  async generateBlock(keypair, timestamp) {
+  async generateBlock (keypair, timestamp) {
     if (this.runtime.consensus.hasPendingBlock(timestamp)) {
       return
     }
@@ -1108,7 +1110,7 @@ class Block {
     }
   }
 
-  _sortTransactions(transactions) {
+  _sortTransactions (transactions) {
     return transactions.sort((a, b) => {
       if (a.type !== b.type) {
         if (a.type === 1) {
@@ -1136,7 +1138,7 @@ class Block {
    * 解析区块链完整数据（包括区块数据、交易数据和其他扩展交易数据）成JSON对象
    * @param {*} data
    */
-  async _parseObjectFromFullBlocksData(data) {
+  async _parseObjectFromFullBlocksData (data) {
     let blocks = {}
     const order = []
     for (let i = 0; i < data.length; i++) {
@@ -1173,7 +1175,7 @@ class Block {
     return blocks
   }
 
-  async _popLastBlock(oldLastBlock) {
+  async _popLastBlock (oldLastBlock) {
     const { id, height } = oldLastBlock
     return new Promise((resolve, reject) => {
       let previousBlock
@@ -1235,11 +1237,11 @@ class Block {
     })
   }
 
-  async deleteBlock({ blockId, dbTrans }) {
+  async deleteBlock ({ blockId, dbTrans }) {
     return await this.dao.remove('block', { where: { id: blockId }, transaction: dbTrans })
   }
 
-  async deleteBlocksBefore({ height }) {
+  async deleteBlocksBefore ({ height }) {
     const blocks = []
 
     while (bignum.isLessThan(height, this._lastBlock.height)) {
@@ -1258,7 +1260,7 @@ class Block {
     return blocks
   }
 
-  async simpleDeleteAfterBlock(blockId) {
+  async simpleDeleteAfterBlock (blockId) {
     const result = await this.dao.findOne('block', {
       where: {
         id: blockId
@@ -1277,7 +1279,7 @@ class Block {
     })
   }
 
-  async loadBlocksOffset(limit, offset, verify) {
+  async loadBlocksOffset (limit, offset, verify) {
     this.logger.debug(`loadBlockOffset limit: ${limit}, offset: ${offset}, verify: ${verify}`)
 
     return new Promise((resolve, reject) => {
@@ -1341,7 +1343,7 @@ class Block {
     })
   }
 
-  async queryBlockData(where, sorts, offset, limit, returnTotal) {
+  async queryBlockData (where, sorts, offset, limit, returnTotal) {
     const w = where || {}
     const s = sorts || null
     const o = offset || 0
@@ -1401,7 +1403,7 @@ class Block {
    * 根据id、height、hash任一属性，查询对应的区块数据，不包括包含的交易列表
    * @param {*} query
    */
-  async querySimpleBlockData(query) {
+  async querySimpleBlockData (query) {
     this.logger.debug('start querySimpleBlockData, query is ', query)
     const validateErrors = await this.ddnSchema.validate(
       {
