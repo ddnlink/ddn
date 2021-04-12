@@ -124,16 +124,29 @@ class Block {
   }
 
   getHash (block) {
+    const newBlock = JSON.parse(JSON.stringify(block))
+    if (newBlock.transactions) {
+      delete newBlock.transactions
+    }
     // fixme: 2020.8.8 该方法返回 buffer, 还是使用原始 的nacl把
     return DdnCrypto.createHash(this.getBytes(block))
     // return nacl.hash(this.getBytes(block))
   }
 
   async sign (block, { privateKey }) {
-    return await DdnCrypto.sign(block, { privateKey })
+    const newBlock = JSON.parse(JSON.stringify(block))
+    if (newBlock.transactions) {
+      delete newBlock.transactions
+    }
+    console.log(JSON.stringify(block))
+    return await DdnCrypto.sign(newBlock, { privateKey })
   }
 
   async getId (block) {
+    const newBlock = JSON.parse(JSON.stringify(block))
+    if (newBlock.transactions) {
+      delete newBlock.transactions
+    }
     return await DdnCrypto.getId(block)
   }
 
@@ -730,6 +743,9 @@ class Block {
     if (newBlock.totalForged) {
       delete newBlock.totalForged
     }
+    if (newBlock.transactions) {
+      delete newBlock.transactions
+    }
     // 块进行签名时是没有block_singuter字段的，所以验证时也跳过获取block_singuter的字节，这里第二个参数是跳过获取block_singuter字节
     const data = this.getBytes(newBlock, true)
     const hash = DdnCrypto.createHash(data)
@@ -813,7 +829,14 @@ class Block {
     const appliedTransactions = {}
 
     for (const i in block.transactions) {
-      const transaction = block.transactions[i]
+      const item = block.transactions[i]
+      const transaction = JSON.parse(JSON.stringify(item))
+      if (transaction.height) {
+        delete transaction.height
+      }
+      if (transaction.height) {
+        delete transaction.block_id
+      }
       let bytes
       try {
         bytes = DdnCrypto.getBytes(transaction)

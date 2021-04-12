@@ -12,7 +12,7 @@ module.exports = {
   port: 8001,
   address: '0.0.0.0',
   publicIp: '127.0.0.1',
-  logLevel: 'debug',
+  logLevel: 'trace',
   net: 'testnet',
   nethash: '0ab796cd',
   payloadLimitSize: '8mb',
