@@ -67,13 +67,18 @@ function getDAppTransactionBytes (trs, skipSignature) {
   bb.flip()
   return bb.toBuffer()
 }
-
+/**
+ * 侧链提现、转账生成交易体接口
+ * @param {*} options optinos.type=2 提现 type=3转账
+ * @param {*} secret
+ * @returns
+ */
 function createInnerTransaction (options, secret) {
   const keys = crypto.getKeys(secret)
   let args = options.args
   if (args instanceof Array) args = JSON.stringify(args)
   const trs = {
-    nethash: config.nethash,
+    // nethash: config.nethash,
     fee: options.fee,
     timestamp: slots.getTime() - config.clientDriftSeconds,
     senderPublicKey: keys.publicKey,

@@ -361,6 +361,14 @@ class Dapp extends Asset.Base {
         res.json({ success: false, error: err.message || err.toString() })
       }
     })
+    router.get('/uninstalled', async (req, res) => {
+      try {
+        const result = await self.getUninstalled()
+        res.json(result)
+      } catch (err) {
+        res.json({ success: false, error: err.message || err.toString() })
+      }
+    })
 
     router.post('/install', async (req, res) => {
       try {
@@ -761,7 +769,12 @@ class Dapp extends Asset.Base {
         try {
           const dappPath = path.join(self.dappsPath, id)
           const dappPublicPath = path.resolve(dappPath, 'public')
+          const dappPublicDist = path.resolve(dappPublicPath, 'dist')
+          // if (fs.existsSync(dappPublicDist)) {
+          //   res.render(`${dappPublicDist}/index.html`)
+          // } else {
           res.render(`${dappPublicPath}/index.html`)
+          // }
         } catch (err) {
           res.json({ success: false, error: `${err}` })
         }
@@ -863,8 +876,7 @@ class Dapp extends Asset.Base {
         type: 'object',
         properties: {
           category: {
-            type: 'string',
-            minLength: 1
+            type: 'array'
           },
           name: {
             type: 'string',
@@ -876,6 +888,11 @@ class Dapp extends Asset.Base {
             minimum: 0
           },
           link: {
+            type: 'string',
+            maxLength: 2000,
+            minLength: 1
+          },
+          install: {
             type: 'string',
             maxLength: 2000,
             minLength: 1
@@ -905,10 +922,18 @@ class Dapp extends Asset.Base {
       throw new Error(`Invalid parameters: ${validateErrors[0].schemaPath} ${validateErrors[0].message}`)
     }
 
-    const where = {
+    let where = {
       trs_type: await this.getTransactionType()
     }
-
+    const ids = await this.getInstalledDappIds()
+    if (query.install === 'true') {
+      where = { ...where, trs_id: { $in: ids } }
+    } else if (query.install === 'false') {
+      where = { ...where, trs_id: { $notIn: ids } }
+    }
+    if (query.category) {
+      where = { ...where, category: { $in: query.category } }
+    }
     const orders = []
 
     let sort = query.sort || query.orderBy
@@ -975,6 +1000,11 @@ class Dapp extends Asset.Base {
       throw new Error(`Invalid parameters: ${validateErrors[0].schemaPath} ${validateErrors[0].message}`)
     }
     const dapp = await this.getDappByTransactionId(query.id)
+    if (_dappLaunched[query.id]) {
+      dapp.launched = true
+    } else {
+      dapp.launched = false
+    }
 
     return { success: true, dapp }
   }
@@ -1017,6 +1047,15 @@ class Dapp extends Asset.Base {
     const ids = await this.getInstalledDappIds()
     if (ids && ids.length) {
       const dapps = await this.queryAsset({ trs_id: { $in: ids } }, null, false, 1, ids.length)
+      return { success: true, result: { rows: dapps } }
+    }
+    return { success: true, result: { rows: [] } }
+  }
+
+  async getUninstalled () {
+    const ids = await this.getInstalledDappIds()
+    if (ids && ids.length) {
+      const dapps = await this.queryAsset({ trs_id: { $notIn: ids } }, null, false, 1, ids.length)
       return { success: true, result: { rows: dapps } }
     }
     return { success: true, result: { rows: [] } }
@@ -1740,7 +1779,6 @@ class Dapp extends Asset.Base {
       dapp_id: req.dappId,
       type: DdnUtils.assetTypes.DAPP_IN
     })
-    console.log(data)
     const transactions = []
     for (let i = 0; i < data.length; i++) {
       const row = data[i]
