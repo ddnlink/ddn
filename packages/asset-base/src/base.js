@@ -486,7 +486,12 @@ class AssetBase {
       const rowObjs = []
 
       for (const rowInfo of rows) {
-        const rowObj = await assetInst.dbRead(rowInfo)
+        let rowObj
+        if (assetInst.dbRead2Front && typeof assetInst.dbRead2Front === 'function') {
+          rowObj = await assetInst.dbRead2Front(rowInfo)
+        } else {
+          rowObj = await assetInst.dbRead(rowInfo)
+        }
         if (rowObj) {
           const assetName = AssetUtils.getAssetJsonName(rowInfo.asset_trs_type)
           rowObjs.push(rowObj[assetName])

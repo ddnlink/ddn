@@ -124,7 +124,7 @@ class Block {
   }
 
   getHash (block) {
-    const newBlock = JSON.parse(JSON.stringify(block))
+    const newBlock = { ...block }
     if (newBlock.transactions) {
       delete newBlock.transactions
     }
@@ -134,16 +134,15 @@ class Block {
   }
 
   async sign (block, { privateKey }) {
-    const newBlock = JSON.parse(JSON.stringify(block))
+    const newBlock = { ...block }
     if (newBlock.transactions) {
       delete newBlock.transactions
     }
-    console.log(JSON.stringify(block))
     return await DdnCrypto.sign(newBlock, { privateKey })
   }
 
   async getId (block) {
-    const newBlock = JSON.parse(JSON.stringify(block))
+    const newBlock = { ...block }
     if (newBlock.transactions) {
       delete newBlock.transactions
     }
@@ -733,7 +732,7 @@ class Block {
   verifySignature (block) {
     // 接受到的block是protobuf 解密之后的，因为解密后的json是类似 Blcok{}这样，带个名称前缀，应该不是标准的json数据，所以使用Object.assign，这样数据就是{}
     block = Object.assign({}, block)
-    const newBlock = JSON.parse(JSON.stringify(block))
+    const newBlock = { ...block }
     let res = null
     const { block_signature, generator_public_key } = block
     // TODO creazy 铸造区块时没有下面这两个字段，同步时有，验证时不通过，现在手动删除，应该提出一个方法，生成一个需要验证的区块信息统一处理
@@ -827,19 +826,12 @@ class Block {
 
     let payloadBytes = ''
     const appliedTransactions = {}
-
     for (const i in block.transactions) {
-      const item = block.transactions[i]
-      const transaction = JSON.parse(JSON.stringify(item))
-      if (transaction.height) {
-        delete transaction.height
-      }
-      if (transaction.height) {
-        delete transaction.block_id
-      }
+      const transaction = block.transactions[i]
+      const newTransaction = this.runtime.transaction.deepCloneTransaction(transaction)
       let bytes
       try {
-        bytes = DdnCrypto.getBytes(transaction)
+        bytes = DdnCrypto.getBytes(newTransaction)
       } catch (e) {
         throw new Error(`Failed to get transaction bytes: ${e.toString()}`)
       }

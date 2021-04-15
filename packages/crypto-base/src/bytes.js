@@ -59,6 +59,9 @@ function sortKeys ({ obj, sort = 1 }) {
 }
 function getObjectBytes (bb, data) {
   for (const value of Object.values(data)) {
+    if (value === undefined || value === null || value === '') {
+      continue
+    }
     if (typeof value === 'string') {
       bb.writeIString(value)
     } else if (typeof value === 'number') {

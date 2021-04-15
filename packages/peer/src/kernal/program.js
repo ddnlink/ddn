@@ -152,7 +152,7 @@ class Program {
     let payloadLength = 0
 
     for (const trs of block.transactions) {
-      const bytes = await DdnCrypto.getBytes(trs)
+      const bytes = DdnCrypto.getBytes(trs)
       payloadLength += bytes.length
       payloadBytes += bytes
     }
@@ -489,7 +489,7 @@ class Program {
           async cb => {
             if (
               this._context.runtime.slot.getSlotNumber(forgeDelegateInfo.time) ===
-              this._context.runtime.slot.getSlotNumber() &&
+                this._context.runtime.slot.getSlotNumber() &&
               this._context.runtime.block.getLastBlock().timestamp < forgeDelegateInfo.time
             ) {
               try {

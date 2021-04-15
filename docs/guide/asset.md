@@ -137,6 +137,7 @@ async objectNormalize(trs)
 /**
  * 读取数据库数据并反序列成交易对象体
  * @param {*} raw 数据库查询返回对象
+ * @description 节点同步时构造资产数据，如果在dbSave中新增了字段，这里构造时要去掉
  */
 async dbRead(raw)
 
@@ -144,6 +145,7 @@ async dbRead(raw)
  * 将交易存储到数据库中
  * @param {*} trs 交易对象
  * @param {*} dbTrans 数据库事务对象
+ * @description 在这里不要修改交易体中的资产的数据，可以新增字段，但必须实现dbRead方法，把在这里新增的字段去掉
  */
 async dbSave(trs, dbTrans)
 

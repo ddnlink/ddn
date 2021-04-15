@@ -182,9 +182,7 @@ class Loader {
       const inst = this._assets[key]
       if (inst !== null && typeof inst[funcName] === 'function') {
         try {
-          console.log(key,funcName,JSON.stringify(inst[funcName]),inst[funcName])
           await inst[funcName](...args)
-          console.log('inst,funcName')
         } catch (err) {
           this.logger.error(err)
         }

@@ -168,7 +168,7 @@ class Transaction {
     } else {
       const trs = {
         id: raw.t_id,
-        height: `${raw.b_height}`,
+        block_height: `${raw.b_height}`,
         block_id: raw.b_id || raw.t_blockId, // wxm block database
         type: parseInt(raw.t_type),
         timestamp: parseInt(raw.t_timestamp),
@@ -468,7 +468,7 @@ class Transaction {
       throw new Error(`Unknown transaction type 10 ${trs.type}`)
     }
     // TODO creazy 验证交易id时，程序会在交易体中添加下面几个字段，所以要去掉，保持和sdk生成交易体时有同样的数据
-    const trss = JSON.parse(JSON.stringify(trs))
+    const trss = { ...trs }
     if (trss.senderId) {
       delete trss.senderId
     }
@@ -622,7 +622,7 @@ class Transaction {
       return false
     }
     // sdk生成交易体加密时没有senderId字段，验证时去掉
-    const transaction = JSON.parse(JSON.stringify(trs))
+    const transaction = { ...trs }
     if (transaction.senderId) {
       delete transaction.senderId
     }
@@ -677,14 +677,34 @@ class Transaction {
     if (!trs.nethash) {
       throw new Error("Transaction's nethash property is required.")
     }
-
+    // const newTransaction = { ...trs }
+    // if (newTransaction.height) {
+    //   delete newTransaction.height
+    // }
+    // if (newTransaction.block_id) {
+    //   delete newTransaction.block_id
+    // }
+    // if (newTransaction.block_height) {
+    //   delete newTransaction.block_height
+    // }
+    // if (newTransaction.asset) {
+    //   for (const key in newTransaction.asset) {
+    //     if (Object.hasOwnProperty.call(newTransaction.asset, key)) {
+    //       const element = newTransaction.asset[key]
+    //       delete element.transaction_type
+    //       delete element.transaction_id
+    //       delete element.timestamp
+    //     }
+    //   }
+    // }
+    const newTransaction = this.deepCloneTransaction(trs)
     // Verify signature
     let valid = false
     if (trs.requester_public_key) {
       // wxm block database
-      valid = await this.verifySignature(trs, trs.signature, trs.requester_public_key) // wxm block database
+      valid = await this.verifySignature(newTransaction, trs.signature, trs.requester_public_key) // wxm block database
     } else {
-      valid = await this.verifySignature(trs, trs.signature, trs.senderPublicKey)
+      valid = await this.verifySignature(newTransaction, trs.signature, trs.senderPublicKey)
     }
 
     if (!valid) {
@@ -805,9 +825,43 @@ class Transaction {
       return false
     }
 
-    const bytes = await DdnCrypto.getBytes(trs, false, true)
+    const bytes = DdnCrypto.getBytes(trs, false, true)
     // const bytes = await this.getBytes(trs, false, true);
     return await this.verifyBytes(bytes, sign_signature, publicKey)
+  }
+
+  /**
+   * @param {object} trs 交易信息
+   * @returns {object} trs处理后的交易体
+   * @description 深度复制交易信息后并删除交易某些字段
+   */
+  deepCloneTransaction (trs) {
+    const newTransaction = { ...trs }
+    // if (newTransaction.height) {
+    //   delete newTransaction.height
+    // }
+    if (newTransaction.block_id) {
+      delete newTransaction.block_id
+    }
+    if (newTransaction.block_height) {
+      delete newTransaction.block_height
+    }
+    if (newTransaction.asset) {
+      newTransaction.asset = { ...newTransaction.asset }
+      for (const key in newTransaction.asset) {
+        newTransaction.asset[key] = { ...newTransaction.asset[key] }
+        if (Object.hasOwnProperty.call(newTransaction.asset, key)) {
+          const element = newTransaction.asset[key]
+          delete element.transaction_type
+          delete element.transaction_id
+          delete element.timestamp
+          // if(element.quantity){
+          //   delete element.quantity
+          // }
+        }
+      }
+    }
+    return newTransaction
   }
 }
 
