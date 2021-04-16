@@ -824,10 +824,23 @@ class Transaction {
     if (!sign_signature) {
       return false
     }
+    const transaction = await this.deepCloneTransaction(trs)
+    if (transaction.senderId) {
+      delete transaction.senderId
+    }
+    // // TODO creazy 铸块时会再次进行交易验证，这时交易会多处下面两个字段
+    // if (transaction.block_height) {
+    //   delete transaction.block_height
+    // }
+    // if (transaction.block_id) {
+    //   delete transaction.block_id
+    // }
+    const hash = await DdnCrypto.getHash(transaction, false, true)
+    const result = DdnCrypto.verifyHash(hash, sign_signature, publicKey)
 
-    const bytes = DdnCrypto.getBytes(trs, false, true)
+    // const bytes = DdnCrypto.getBytes(trs, false, true)
     // const bytes = await this.getBytes(trs, false, true);
-    return await this.verifyBytes(bytes, sign_signature, publicKey)
+    return result
   }
 
   /**

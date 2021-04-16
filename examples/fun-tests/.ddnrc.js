@@ -201,5 +201,5 @@ module.exports = {
    *  "@ddn/asset-aob"
    * ]
    */
-  assets: ['@ddn/asset-evidence', '@ddn/asset-dapp']
+  assets: ['@ddn/asset-evidence', '@ddn/asset-aob', '@ddn/asset-dapp']
 }
