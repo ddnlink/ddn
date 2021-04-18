@@ -9,7 +9,7 @@ const path = require('path')
 const fs = require('fs')
 const DdnCore = require('@ddn/core').default
 const DdnPeer = require('@ddn/peer').default
-const DdnUtils = require('@ddn/utils').default
+const DdnUtils = require('@ddn/utils-system').default
 const constants = require('./constants')
 
 /**
@@ -93,7 +93,7 @@ function genOptions () {
 
 async function main () {
   global._require_runtime_ = m => {
-    if (typeof (global._require_native_) === 'function') {
+    if (typeof global._require_native_ === 'function') {
       return global._require_native_(m)
     } else {
       return require(m).default || require(m) // 兼容 ESM

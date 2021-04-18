@@ -435,7 +435,7 @@ async function getBlockId (options) {
   console.log(await DdnCrypto.getId(bytes))
 }
 
-async function publishContract (options) {
+async function deployContract (options) {
   if (options.file && !fs.existsSync(options.file)) {
     console.error('Error: invalid params, contract file not exists')
     return
@@ -450,17 +450,18 @@ async function publishContract (options) {
     return
   }
 
-  var code = options.code || fs.readFileSync(options.file, 'utf8')
-  var opts = { name: options.name, desc: options.desc, gasLimit: options.gas, version: options.ver, code }
-  var trs = await NodeSdk.contract.createContract(opts, options.secret, options.secondSecret)
+  const code = options.code || fs.readFileSync(options.file, 'utf8')
+  const opts = { name: options.name, desc: options.desc, gasLimit: options.gas, version: options.ver, code }
+  const trs = await NodeSdk.contract.deploy(opts, options.secret, options.secondSecret)
+  console.log(trs)
   getApi().broadcastTransaction(trs, function (err, result) {
-    console.log(err || result.transactionId)
+    console.log(err || result)
   })
 }
 
-async function executeContract (options) {
-  if (!options.address) {
-    console.error('Error: invalid params, contract address should provide')
+async function sendContract (options) {
+  if (!options.id) {
+    console.error('Error: invalid params, contract id should provide')
     return
   }
   if (!options.method) {
@@ -473,39 +474,132 @@ async function executeContract (options) {
     return
   }
 
-  var opts = { gasLimit: options.gas, address: options.address, method: options.method, args: options.args }
-  var trs = await NodeSdk.contract.executeContract(opts, options.secret, options.secondSecret)
-  getApi().broadcastTransaction(trs, function (err, result) {
-    console.log(err || result.transactionId)
-  })
-}
-
-async function transferContract (options) {
-  if (!options.address) {
-    console.error('Error: invalid params, contract address should provide')
-    return
-  }
-  if (!options.method) {
-    console.error('Error: invalid params, contract method should provide')
-    return
-  }
-
-  if (!options.secret) {
-    console.error('Error: invalid params, secret must exists')
-    return
-  }
-
-  var opts = {
+  const opts = {
+    id: options.id,
     gasLimit: options.gas,
-    address: options.address,
+    method: options.method,
+    args: options.args
+  }
+  const trs = await NodeSdk.contract.send(opts, options.secret, options.secondSecret)
+  console.log(trs)
+  getApi().broadcastTransaction(trs, function (err, result) {
+    console.log(err || result)
+  })
+}
+
+async function payContract (options) {
+  if (!options.id) {
+    console.error('Error: invalid params, contract id should provide')
+    return
+  }
+  if (!options.method) {
+    console.error('Error: invalid params, contract method should provide')
+    return
+  }
+
+  if (!options.secret) {
+    console.error('Error: invalid params, secret must exists')
+    return
+  }
+
+  const opts = {
+    id: options.id,
+    gasLimit: options.gas,
     amount: options.amount,
     currency: options.currency,
     method: options.method,
     args: options.args
   }
-  var trs = await NodeSdk.contract.transferContract(opts, options.secret, options.secondSecret)
+  const trs = await NodeSdk.contract.pay(opts, options.secret, options.secondSecret)
+  console.log(trs)
   getApi().broadcastTransaction(trs, function (err, result) {
-    console.log(err || result.transactionId)
+    console.log(err || result)
+  })
+}
+
+async function callContract (options) {
+  if (!options.id) {
+    console.error('Error: invalid params, contract id should provide')
+    return
+  }
+
+  const body = { id: options.id, method: options.method, args: options.args }
+  console.log('query body: ', body)
+  getApi().post('/api/contracts/call', body, function (err, res) {
+    console.log(err || res.result)
+  })
+}
+
+async function getContract (options) {
+  if (!options.id) {
+    console.error('Error: invalid params, contract id should provide')
+    return
+  }
+
+  getApi().get('/api/contracts/get', { id: options.id }, function (err, res) {
+    console.log(err || res.result)
+  })
+}
+
+async function getContractCode (options) {
+  if (!options.id) {
+    console.error('Error: invalid params, contract id should provide')
+    return
+  }
+
+  getApi().get('/api/contracts/code', { id: options.id }, function (err, res) {
+    console.log(err || res.result)
+  })
+}
+
+async function getContractMetadata (options) {
+  if (!options.id) {
+    console.error('Error: invalid params, contract id should provide')
+    return
+  }
+
+  getApi().get('/api/contracts/metadata', { id: options.id }, function (err, res) {
+    console.log(err || res.result)
+  })
+}
+
+async function getContracts (options) {
+  getApi().get('/api/contracts', options, function (err, res) {
+    console.log(err || res.result)
+  })
+}
+
+async function getContractResults (options) {
+  if (!options.id) {
+    console.error('Error: invalid params, contract id should provide')
+    return
+  }
+
+  getApi().get('/api/contracts/results', { id: options.id }, function (err, res) {
+    console.log(err || res.result)
+  })
+}
+
+async function getContractResult (options) {
+  if (!options.id || !options.tid) {
+    console.error('Error: invalid params, contract id and transaction id should provide')
+    return
+  }
+
+  getApi().get('/api/contracts/results', options, function (err, res) {
+    console.log(err || res.result)
+  })
+}
+
+async function getContractStates (options) {
+  if (!options.id || !options.path) {
+    console.error('Error: invalid params, contract id and state path should provide')
+    return
+  }
+
+  const params = { id: options.id, statePath: options.path }
+  getApi().get('/api/contracts/states', params, function (err, res) {
+    console.log(err || res.result)
   })
 }
 
@@ -553,9 +647,17 @@ export {
   getBlockId,
   verifyBytes,
   registerDapp,
-  publishContract,
-  executeContract,
-  transferContract
+  deployContract,
+  payContract,
+  sendContract,
+  callContract,
+  getContract,
+  getContracts,
+  getContractCode,
+  getContractMetadata,
+  getContractResult,
+  getContractResults,
+  getContractStates
 }
 
 //   program

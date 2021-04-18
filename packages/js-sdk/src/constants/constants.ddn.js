@@ -32,6 +32,11 @@ export default {
   confirmationLength: 77,
   maxTxsPerBlock: 500,
 
+  energyPerDDN: 10000,
+  gasPrice: 1,
+
+  crypto: '@ddn/crypto-nacl',
+
   testnet: {
     rewardRatio: 0.2,
     milestones: [
@@ -68,6 +73,10 @@ export default {
       dapp: '100',
       dapp_out: '0.1',
       dapp_in: '0.1',
+
+      // contract
+      contract: '100',
+      contract_transfer: '0.1',
 
       // todo: 测试中提供的费用
       username: '0.1',
@@ -120,6 +129,10 @@ export default {
       dapp: '100',
       dapp_out: '0.1',
       dapp_in: '0.1',
+
+      // contract
+      contract: '100',
+      contract_transfer: '0.1',
 
       // todo: 测试中提供的费用
       username: '0.1',

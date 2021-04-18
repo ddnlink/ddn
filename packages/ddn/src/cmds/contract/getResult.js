@@ -1,10 +1,19 @@
 import { init, getContractResults } from '../../plugins/api'
 
 module.exports = {
-  command: 'results [id]',
-  aliases: 'rs',
+  command: 'result',
+  aliases: 'r',
   desc: 'Get contract results list',
-  builder: {},
+  builder: {
+    id: {
+      alias: 'i',
+      describe: 'contract id'
+    },
+    tid: {
+      alias: 't',
+      describe: 'transaction id'
+    }
+  },
 
   handler: function (argv) {
     init(argv)

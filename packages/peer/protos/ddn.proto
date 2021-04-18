@@ -37,7 +37,7 @@ message Transaction {
   optional string height = 14;  //Bignum update         int64
   optional string block_id = 15;
   required Asset asset = 16;
-  repeated string args = 17;
+  optional string args = 17;
   optional string message = 18;
 }
 

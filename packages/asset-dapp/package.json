@@ -24,7 +24,7 @@
     "@ddn/asset-base": "^0.4.1",
     "@ddn/crypto": "^0.4.1",
     "@ddn/sandbox": "^0.1.9",
-    "@ddn/utils": "^0.2.1",
+    "@ddn/utils": "^0.2.2",
     "async": "^2.6.1",
     "bytebuffer": "^5.0.1",
     "decompress-zip": "^0.2.2",

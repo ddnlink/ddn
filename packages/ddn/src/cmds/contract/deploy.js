@@ -1,9 +1,9 @@
-import { init, publishContract } from '../../plugins/api'
+import { init, deployContract } from '../../plugins/api'
 
 module.exports = {
-  command: 'publish',
-  aliases: 'p',
-  desc: 'publish a smart contract',
+  command: 'deploy',
+  aliases: 'd',
+  desc: 'deploy a smart contract',
   builder: {
     secret: {
       alias: 'e',
@@ -41,6 +41,6 @@ module.exports = {
 
   handler: function (argv) {
     init(argv)
-    publishContract(argv)
+    deployContract(argv)
   }
 }

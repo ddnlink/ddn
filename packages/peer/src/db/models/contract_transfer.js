@@ -10,10 +10,32 @@ export default connection => {
   return connection.define(
     'contract_transfer',
     {
+      contract_id: {
+        type: Sequelize.STRING(64),
+        primaryKey: true,
+        allowNull: true
+      },
       transaction_id: {
         type: Sequelize.STRING(64),
         primaryKey: true,
         allowNull: false
+      },
+      block_height: {
+        type: Sequelize.STRING(64),
+        primaryKey: true,
+        allowNull: false
+      },
+      sender_id: {
+        type: Sequelize.STRING(64),
+        allowNull: false
+      },
+      recipient_id: {
+        type: Sequelize.STRING(64),
+        allowNull: true
+      },
+      gas: {
+        type: Sequelize.INTEGER,
+        allowNull: true
       },
       amount: {
         type: Sequelize.STRING(50),

@@ -152,8 +152,6 @@ class Loader {
 
     const contract = new SC.Contract(this._context)
     this._registerAsset(assetTypes.CONTRACT, contract)
-    const contractExecute = new SC.ContractExecute(this._context)
-    this._registerAsset(assetTypes.CONTRACT_EXECUTE, contractExecute)
     const contractTransfer = new SC.ContractTransfer(this._context)
     this._registerAsset(assetTypes.CONTRACT_TRANSFER, contractTransfer)
 

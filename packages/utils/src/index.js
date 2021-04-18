@@ -4,12 +4,22 @@ import LimitCache from './limit-cache'
 import amount from './amount'
 import bignum from './bignumber'
 import BufferCache from './buffer-cache'
-import system from './system'
-import routesMap from './routes-map'
 import { checkWord, reportWord, beforeSaveReportWord, checkAndReport, superviseTrs } from './supervise'
 export * from './random'
 
-export { LimitCache, assetTypes, runtimeState, amount, bignum, BufferCache, system, routesMap, checkWord, reportWord, beforeSaveReportWord, checkAndReport, superviseTrs }
+export {
+  LimitCache,
+  assetTypes,
+  runtimeState,
+  amount,
+  bignum,
+  BufferCache,
+  checkWord,
+  reportWord,
+  beforeSaveReportWord,
+  checkAndReport,
+  superviseTrs
+}
 
 // TODO: delete it
 export default {
@@ -18,7 +28,5 @@ export default {
   runtimeState,
   amount,
   bignum,
-  BufferCache,
-  system,
-  routesMap
+  BufferCache
 }

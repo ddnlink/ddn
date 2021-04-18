@@ -23,16 +23,13 @@ export default connection => {
         type: Sequelize.STRING(64),
         allowNull: false
       },
-      publisher: {
+      owner: {
         type: Sequelize.STRING(64), // 原来是 BINARY(32)
         allowNull: false
       },
       gas_limit: {
         type: Sequelize.INTEGER,
         allowNull: false
-      },
-      use_register_gas: {
-        type: Sequelize.INTEGER
       },
       desc: {
         type: Sequelize.STRING(256),
@@ -41,9 +38,6 @@ export default connection => {
       version: {
         type: Sequelize.STRING(128), // 原来是 BINARY(64)
         allowNull: false
-      },
-      vm_version: {
-        type: Sequelize.STRING(64) // 原来是 BINARY(64)
       },
       state: {
         type: Sequelize.STRING(32) // 原来是 BINARY(32)
@@ -66,7 +60,7 @@ export default connection => {
           fields: ['transaction_id']
         },
         {
-          fields: ['publisher']
+          fields: ['owner']
         }
       ]
     }

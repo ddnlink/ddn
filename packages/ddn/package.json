@@ -22,7 +22,7 @@
     "dependencies": {
         "@ddn/crypto": "^0.4.1",
         "@ddn/node-sdk": "^0.4.15",
-        "@ddn/utils": "^0.2.1",
+        "@ddn/utils": "^0.2.2",
         "async": "1.5.2",
         "bytebuffer": "^4.0.0",
         "fs-extra": "0.30.0",

@@ -9,7 +9,8 @@ import assert from 'assert'
 // import ByteBuffer from 'bytebuffer'
 import * as DdnCrypto from '@ddn/crypto'
 // import { nacl } from '@ddn/crypto'
-import { runtimeState, system, bignum } from '@ddn/utils'
+import { runtimeState, bignum } from '@ddn/utils'
+import { system } from '@ddn/utils-sytem'
 import BlockStatus from './block-status'
 
 let _singleton
@@ -972,7 +973,7 @@ class Block {
             publicKey: transaction.senderPublicKey
           })
 
-          transaction.id = await DdnCrypto.getId(transaction) // 2020.5.18
+          // transaction.id = await DdnCrypto.getId(transaction) // 2020.5.18
           transaction.block_id = block.id // wxm block database
 
           const existsTrs = existsTrsIds.find(item => {

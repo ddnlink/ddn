@@ -3,7 +3,8 @@
  * wangxm   2019-03-27
  */
 import * as DdnCrypto from '@ddn/crypto'
-import { assetTypes, bignum, system } from '@ddn/utils'
+import { assetTypes, bignum } from '@ddn/utils'
+import { system } from '@ddn/utils-system'
 
 class MultisignaturesRouter {
   constructor (context) {

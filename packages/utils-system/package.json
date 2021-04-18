@@ -1,7 +1,7 @@
 {
-  "name": "@ddn/utils",
+  "name": "@ddn/utils-system",
   "version": "0.2.2",
-  "description": "DDN utils.",
+  "description": "DDN utils for node.",
   "main": "lib/index.js",
   "module": "dist/index.esm.js",
   "repository": {
@@ -17,9 +17,10 @@
     "lib"
   ],
   "dependencies": {
-    "@ddn/core": "^0.2.15",
-    "bignumber.js": "^7.2.1",
-    "request-promise": "^4.2.6"
+    "ip": "^1.1.5"
+  },
+  "peerDependencies": {
+    "shelljs": "^0.8.3"
   },
   "author": "wly",
   "license": "MIT"

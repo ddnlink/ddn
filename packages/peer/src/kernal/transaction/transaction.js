@@ -3,7 +3,8 @@
  * wangxm   2018-12-28
  */
 import extend from 'util-extend'
-import DdnUtils from '@ddn/utils'
+import { bignum, assetTypes } from '@ddn/utils'
+import { system } from '@ddn/utils-system'
 import * as DdnCrypto from '@ddn/crypto'
 import { getId } from '@ddn/crypto'
 import Assets from '../../assets'
@@ -176,8 +177,8 @@ class Transaction {
         requester_public_key: raw.t_requesterPublicKey, // wxm block database
         senderId: raw.t_senderId, // wxm block database
         recipientId: raw.t_recipientId, // wxm block database
-        amount: `${raw.t_amount}`, // DdnUtils.bignum update parseInt(raw.t_amount),
-        fee: `${raw.t_fee}`, // DdnUtils.bignum update parseInt(raw.t_fee),
+        amount: `${raw.t_amount}`, // bignum update parseInt(raw.t_amount),
+        fee: `${raw.t_fee}`, // bignum update parseInt(raw.t_fee),
         signature: raw.t_signature,
         sign_signature: raw.t_signSignature, // wxm block database
         signatures: raw.t_signatures ? raw.t_signatures.split(',') : null,
@@ -204,11 +205,11 @@ class Transaction {
     if (!this._assets.hasType(trs.type)) {
       throw new Error(`Unknown transaction type 5 ${trs.type}`)
     }
-    if (trs.type === DdnUtils.assetTypes.DAPP_OUT) {
+    if (trs.type === assetTypes.DAPP_OUT) {
       //
       return await this._assets.call(trs.type, 'undo', trs, block, sender, dbTrans)
     }
-    const amount = DdnUtils.bignum.plus(trs.amount, trs.fee)
+    const amount = bignum.plus(trs.amount, trs.fee)
 
     const sender1 = await this.runtime.account.merge(
       sender.address,
@@ -257,11 +258,11 @@ class Transaction {
     // wxm TODO
     // 此处应该使用this._assets方法（transaction.type）来做判断
     // fixme: 2020.4.22 这里是 dapp 的交易，转移到别处？
-    if (transaction.type === DdnUtils.assetTypes.DAPP_OUT) {
+    if (transaction.type === assetTypes.DAPP_OUT) {
       return await this._assets.call(transaction.type, 'undoUnconfirmed', transaction, sender, dbTrans)
     }
 
-    const amount = DdnUtils.bignum.plus(transaction.amount, transaction.fee).toString()
+    const amount = bignum.plus(transaction.amount, transaction.fee).toString()
     this.balanceCache.addNativeBalance(sender.address, amount)
 
     await this.runtime.account.merge(
@@ -306,7 +307,7 @@ class Transaction {
     if (
       !trs.requester_public_key &&
       sender.second_signature &&
-      !DdnUtils.bignum.isEqualTo(sender.second_signature, 0) &&
+      !bignum.isEqualTo(sender.second_signature, 0) &&
       !trs.sign_signature &&
       trs.block_id !== this.genesisblock.id
     ) {
@@ -316,7 +317,7 @@ class Transaction {
 
     if (
       !trs.requester_public_key &&
-      (!sender.second_signature || DdnUtils.bignum.isEqualTo(sender.second_signature, 0)) &&
+      (!sender.second_signature || bignum.isEqualTo(sender.second_signature, 0)) &&
       trs.sign_signature &&
       trs.sign_signature.length > 0
     ) {
@@ -327,7 +328,7 @@ class Transaction {
     if (
       trs.requester_public_key &&
       requester.second_signature &&
-      !DdnUtils.bignum.isEqualTo(requester.second_signature, 0) &&
+      !bignum.isEqualTo(requester.second_signature, 0) &&
       !trs.sign_signature
     ) {
       // wxm block database
@@ -336,7 +337,7 @@ class Transaction {
 
     if (
       trs.requester_public_key &&
-      (!requester.second_signature || DdnUtils.bignum.isEqualTo(requester.second_signature, 0)) &&
+      (!requester.second_signature || bignum.isEqualTo(requester.second_signature, 0)) &&
       trs.sign_signature &&
       trs.sign_signature.length > 0
     ) {
@@ -344,19 +345,19 @@ class Transaction {
       throw new Error('Requester account does not have a second signature')
     }
     // wxm 这个逻辑应该去掉，不应该这么使用序号特殊处理，如果必须，应该是用assetTypes.type枚举
-    if (trs.type === DdnUtils.assetTypes.DAPP_OUT) {
+    if (trs.type === assetTypes.DAPP_OUT) {
       return await this._assets.call(trs.type, 'applyUnconfirmed', trs, sender, dbTrans)
     }
-    const amount = DdnUtils.bignum.plus(trs.amount, trs.fee)
-    if (DdnUtils.bignum.isLessThan(sender.u_balance, amount) && trs.block_id !== this.genesisblock.id) {
+    const amount = bignum.plus(trs.amount, trs.fee)
+    if (bignum.isLessThan(sender.u_balance, amount) && trs.block_id !== this.genesisblock.id) {
       // wxm block database
       throw new Error(`Insufficient balance: ${sender.address}`)
     }
-    this.balanceCache.addNativeBalance(sender.address, DdnUtils.bignum.minus(0, amount))
+    this.balanceCache.addNativeBalance(sender.address, bignum.minus(0, amount))
     const accountInfo = await this.runtime.account.merge(
       sender.address,
       {
-        u_balance: DdnUtils.bignum.minus(0, amount)
+        u_balance: bignum.minus(0, amount)
       },
       dbTrans
     )
@@ -406,13 +407,13 @@ class Transaction {
     }
 
     // todo: 2020.6.25 特殊 asset 的处理
-    if (trs.type === DdnUtils.assetTypes.DAPP_OUT) {
+    if (trs.type === assetTypes.DAPP_OUT) {
       return this._assets.call(trs.type, 'apply', trs, block, sender, dbTrans)
     }
 
-    const amount = DdnUtils.bignum.plus(trs.amount, trs.fee)
+    const amount = bignum.plus(trs.amount, trs.fee)
 
-    if (trs.block_id !== this.genesisblock.id && DdnUtils.bignum.isLessThan(sender.balance, amount)) {
+    if (trs.block_id !== this.genesisblock.id && bignum.isLessThan(sender.balance, amount)) {
       // wxm block database
       throw new Error(`apply, insufficient balance: ${sender.balance}`)
       // this.logger.info(`apply, insufficient balance: ${sender.balance}`)
@@ -422,7 +423,7 @@ class Transaction {
     const accountInfo = await this.runtime.account.merge(
       sender.address,
       {
-        balance: DdnUtils.bignum.minus(0, amount),
+        balance: bignum.minus(0, amount),
         block_id: block.id, // wxm block database
         round: await this.runtime.round.getRound(block.height)
       },
@@ -468,7 +469,23 @@ class Transaction {
       throw new Error(`Unknown transaction type 10 ${trs.type}`)
     }
 
-    const txId = await getId(trs)
+    const tempTrs = { ...trs }
+    if (tempTrs.asset && tempTrs.asset.contract) {
+      delete tempTrs.asset.contract.metadata
+    }
+    if (tempTrs.block_height) {
+      delete tempTrs.block_height
+    }
+    if (tempTrs.block_id) {
+      delete tempTrs.block_id
+    }
+    if (tempTrs.senderId) {
+      delete tempTrs.senderId
+    }
+    if (tempTrs.id) {
+      delete tempTrs.id
+    }
+    const txId = await getId(tempTrs)
 
     // 确保客户端传入id，这里仅做验证
     if (typeof trs.id === 'undefined' || trs.id !== txId) {
@@ -549,7 +566,7 @@ class Transaction {
         try {
           await this.runtime.peer.broadcast.broadcastUnconfirmedTransaction(transaction)
         } catch (err) {
-          this.logger.error(`Broadcast unconfirmed transaction failed: ${DdnUtils.system.getErrorMsg(err)}`)
+          this.logger.error(`Broadcast unconfirmed transaction failed: ${system.getErrorMsg(err)}`)
         }
       })
     }
@@ -611,6 +628,12 @@ class Transaction {
     if (transaction.senderId) {
       delete transaction.senderId
     }
+    if (transaction.block_id && transaction.block_id) {
+      delete transaction.block_id
+    }
+    if (transaction.block_height && transaction.block_height) {
+      delete transaction.block_height
+    }
     const hash = await DdnCrypto.getHash(transaction, true, true)
     const result = DdnCrypto.verifyHash(hash, signature, publicKey)
 
@@ -635,7 +658,7 @@ class Transaction {
         isLockedType &&
         sender.lock_height &&
         lastBlock &&
-        DdnUtils.bignum.isLessThanOrEqualTo(DdnUtils.bignum.plus(lastBlock.height, 1), sender.lock_height)
+        bignum.isLessThanOrEqualTo(bignum.plus(lastBlock.height, 1), sender.lock_height)
       ) {
         throw new Error('Account is locked')
       }
@@ -708,7 +731,7 @@ class Transaction {
 
     // wxm TODO
     // 此处应该用this._assets.方法（trs.type） 来判断是否能够进入下面处理
-    if (trs.signatures && trs.type !== DdnUtils.assetTypes.DAPP_OUT) {
+    if (trs.signatures && trs.type !== assetTypes.DAPP_OUT) {
       // 13 ?
       for (let d = 0; d < trs.signatures.length; d++) {
         let verify = false
@@ -739,17 +762,14 @@ class Transaction {
     const fee = `${await this._assets.call(trs.type, 'calculateFee', trs, sender)}`
 
     // trs 需要加密签名，所以从客户端传来的 trs 必须包含 fee 字段，但又不能让用户随意填写，因此这里需要再次计算并验证
-    if (!DdnUtils.bignum.isEqualTo(trs.fee, fee)) {
+    if (!bignum.isEqualTo(trs.fee, fee)) {
       throw new Error(`Invalid transaction fee: trs.fee: ${trs.fee}, asset.fee: ${fee}`)
     }
 
     // amount 需要整理成 正整数 形式，不包含科学计数法和点号，范围在 0 ~ totalAmount 之间
     if (
-      DdnUtils.bignum.isLessThan(trs.amount, 0) ||
-      DdnUtils.bignum.isGreaterThan(
-        trs.amount,
-        DdnUtils.bignum.multiply(this.constants.maxAmount, this.constants.fixedPoint)
-      ) ||
+      bignum.isLessThan(trs.amount, 0) ||
+      bignum.isGreaterThan(trs.amount, bignum.multiply(this.constants.maxAmount, this.constants.fixedPoint)) ||
       `${trs.amount}`.includes('.') ||
       `${trs.amount}`.includes('e')
     ) {

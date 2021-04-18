@@ -23,7 +23,7 @@ import compression from 'compression'
 import cors from 'cors'
 import bodyParser from 'body-parser'
 import methodOverride from 'method-override'
-import DdnUtils from '@ddn/utils'
+import { routesMap } from '@ddn/utils-system'
 import queryParser from './middleware/query-int'
 import SocketioEmiter from './socketio/'
 import errorHandler from './middleware/errorHandler'
@@ -402,7 +402,7 @@ class HttpServer {
     this._add404ErrorHandleMiddleware()
 
     if (process.env.NODE_ENV === 'development') {
-      DdnUtils.routesMap(this._app, 'routes.log', this.logger)
+      routesMap(this._app, 'routes.log', this.logger)
     }
 
     const self = this

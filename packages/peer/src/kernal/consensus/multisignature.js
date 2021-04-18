@@ -1,4 +1,5 @@
-import DdnUtils from '@ddn/utils'
+import { assetTypes } from '@ddn/utils'
+import { system } from '@ddn/utils-system'
 
 let _singleton
 
@@ -22,7 +23,7 @@ class MultiSignature {
           async cb => {
             const transaction = await this.runtime.transaction.getUnconfirmedTransaction(tx.transaction)
             if (!transaction) {
-              return reject('Transaction not found')
+              return reject(new Error('Transaction not found'))
             }
 
             transaction.signatures = transaction.signatures || []
@@ -35,7 +36,7 @@ class MultiSignature {
                   transaction: transaction.id
                 })
               } catch (err) {
-                this.logger.error(`Broadcast new signature failed: ${DdnUtils.system.getErrorMsg(err)}`)
+                this.logger.error(`Broadcast new signature failed: ${system.getErrorMsg(err)}`)
               }
             })
 
@@ -57,7 +58,7 @@ class MultiSignature {
       throw new Error('Transaction not found')
     }
 
-    if (transaction.type === DdnUtils.assetTypes.MULTISIGNATURE) {
+    if (transaction.type === assetTypes.MULTISIGNATURE) {
       transaction.signatures = transaction.signatures || []
 
       if (transaction.asset.multisignature.signatures || transaction.signatures.includes(tx.signature)) {

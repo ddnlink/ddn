@@ -21,13 +21,11 @@ class Contract {
     const contract = {
       name,
       transaction_id: trs.id,
-      publisher: sender.address,
+      owner: sender.address,
       state: 0,
       code,
       desc,
       version,
-      vmVersion: this.contract.vmVersion,
-      useRegisterGas: useRegisterGas !== false ? 1 : 0,
       gas_limit: gasLimit,
       timestamp: trs.timestamp
     }
@@ -121,65 +119,11 @@ class Contract {
   }
 
   async apply (trs, block, sender, dbTrans) {
-    const { id, height, delegate, prevBlockId, payloadHash, timestamp } = this.runtime.block.getLastBlock()
-    const lastBlock = { id, height, delegate, prevBlockId, payloadHash, timestamp }
-    const context = { senderAddress: sender.address, transaction: trs, block, lastBlock, sender }
-    const contract = trs.asset.contract
-
-    console.log('create contract ', contract)
-
-    const checkResult = await this.runtime.energy.checkGas(sender.address, contract.gas_limit)
-
-    const publishResult = await this.runtime.dvm.publishContract(
-      contract.gas_limit,
-      context,
-      contract.id,
-      contract.name,
-      contract.code
-    )
-
-    const resultData = publishResult.data
-    if (publishResult.success) {
-      contract.metadata = JSON.stringify(resultData)
-    }
-    publishResult.data = undefined
-
-    await this.runtime.energy.handleResult(contract.id, publishResult, trs, block.height, checkResult.payer, dbTrans)
-
-    // create contract account
-    const data = {
-      address: contract.id,
-      u_is_delegate: 0, // wxm block database
-      is_delegate: 0, // wxm block database
-      vote: 0
-    }
-
-    if (contract.name) {
-      data.u_username = null
-      data.username = contract.name
-    }
-    this.runtime.account.setAccount(data)
-
-    // return publishResult
+    await this.runtime.energy.deploy(trs, block, sender, dbTrans)
   }
 
-  async undo ({ id, asset }, _, { address, nameexist }, dbTrans) {
-    // const data = {
-    //   address,
-    //   u_is_delegate: 0, // wxm block database
-    //   is_delegate: 0, // wxm block database
-    //   vote: 0
-    // }
-
-    // if (asset.contract.name) {
-    //   data.u_username = null
-    //   data.username = asset.contract.name
-    // }
-
-    // let account = await this.runtime.account.getAccountByAddress(address)
-
-    // await this.runtime.account.setAccount(data, dbTrans)
-    await this.dao.remove('contract', { where: { transaction_id: id }, transaction: dbTrans })
+  async undo (trs, _, sender, dbTrans) {
+    await this.dao.remove('contract', { where: { transaction_id: trs.id }, transaction: dbTrans })
   }
 
   async applyUnconfirmed (trs, sender) {}
@@ -221,30 +165,23 @@ class Contract {
   }
 
   async dbRead (raw) {
-    return raw
+    const contract = {
+      id: raw.c_id,
+      gas_limit: raw.c_gas_limit,
+      name: raw.c_name,
+      desc: raw.c_desc,
+      owner: raw.c_owner,
+      version: raw.c_version,
+      code: raw.c_code
+    }
+    return { contract }
   }
 
   // 替换dbSave方法 ---wly
   /**
    * 功能:新增一条contract数据
    */
-  async dbSave (trs, dbTrans) {
-    return await this.dao.insert(
-      'contract',
-      {
-        ...trs.asset.contract,
-        transaction_id: trs.id,
-        publisher: trs.senderId,
-        vmVersion: this.runtime.dvm.vmVersion,
-        state: 0,
-        useRegisterGas: trs.asset.contract.useRegisterGas !== false ? 1 : 0,
-        timestamp: trs.timestamp
-      },
-      {
-        transaction: dbTrans
-      }
-    )
-  }
+  async dbSave (trs, dbTrans) {}
 
   async ready ({ signatures }, { multisignatures, multimin }) {
     if (Array.isArray(multisignatures) && multisignatures.length) {

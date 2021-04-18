@@ -3,10 +3,10 @@ import constants from '../constants'
 import ddnrc from './ddnrc'
 import assets from './config.asset'
 
-let config = ddnrc
-if (process.env.DDN_ENV === 'custom') {
-  config = require('./ddnrc.custom').default
-}
+const config = ddnrc
+// if (process.env.DDN_ENV === 'custom') {
+//   config = require('./ddnrc.custom').default
+// }
 
 constants.net = constants[config.net]
 
@@ -15,7 +15,4 @@ constants.net = constants[config.net]
  */
 Asset.Utils.loadFromJson(assets)
 
-export {
-  config,
-  constants
-}
+export { config, constants }

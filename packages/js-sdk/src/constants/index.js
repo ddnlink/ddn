@@ -7,11 +7,11 @@
 
 import ddn from './constants.ddn'
 
-let constants = ddn
+const constants = ddn
 
 // Todo: get it when building
-if (process.env.DDN_ENV === 'custom') {
-  constants = require('./constants.custom').default
-}
+// if (process.env.DDN_ENV === 'custom') {
+//   constants = require('./constants.custom').default
+// }
 
 export default constants

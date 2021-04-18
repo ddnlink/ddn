@@ -71,8 +71,7 @@ module.exports = {
 
       // contract
       contract: '100',
-      contract_execute: '0.1',
-      contract_transport: '0.1',
+      contract_transfer: '0.1',
 
       // todo: 测试中提供的费用
       username: '0.1',
@@ -128,8 +127,7 @@ module.exports = {
 
       // contract
       contract: '100',
-      contract_execute: '0.1',
-      contract_transport: '0.1',
+      contract_transfer: '0.1',
 
       // todo: 测试中提供的费用
       username: '0.1',

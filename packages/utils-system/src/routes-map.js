@@ -47,9 +47,7 @@ const parseExpressPath = (expressPathRegexp, params) => {
   while (hasParams(parsedRegexp)) {
     const paramId = `:${params[paramIdx].name}`
 
-    parsedRegexp = parsedRegexp
-      .toString()
-      .replace(/\(\?:\(\[\^\\\/]\+\?\)\)/, paramId)
+    parsedRegexp = parsedRegexp.toString().replace(/\(\?:\(\[\^\\\/]\+\?\)\)/, paramId)
 
     paramIdx++
   }
@@ -140,7 +138,7 @@ const routeMap = (app, filename, logger) => {
   routes.push(`\n Created at: ${Date()}`)
 
   if (typeof filename === 'string') {
-    return fs.writeFile(filename, routes.join('\n'), (error) => {
+    return fs.writeFile(filename, routes.join('\n'), error => {
       if (error) throw error
       if (logger) logger.info(`Printed routes to ${filename} at ${Date()}`)
     })

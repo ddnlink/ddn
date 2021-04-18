@@ -11,7 +11,7 @@ function getBytes (data, skipSignature, skipSecondSignature, skipId) {
   return getBytesForBeforeHeight(transaction, skipSignature, skipSecondSignature, skipId)
 }
 function getBytesForBeforeHeight (data, skipSignature, skipSecondSignature, skipId) {
-  const bb = new ByteBuffer(null, true)
+  const bb = new ByteBuffer(128, true)
   data = objKeySort(data)
   if (skipSignature) {
     delete data.signature
@@ -60,7 +60,7 @@ function sortKeys ({ obj, sort = 1 }) {
 function getObjectBytes (bb, data) {
   for (const value of Object.values(data)) {
     if (typeof value === 'string') {
-      bb.writeIString(value)
+      bb.writeString(value)
     } else if (typeof value === 'number') {
       bb.writeInt(value)
     } else if (typeof value === 'object') {

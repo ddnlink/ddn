@@ -1,9 +1,7 @@
-import Contract from './publish'
-import ContractExecute from './execute'
-import ContractTransfer from './transfer'
+import Contract from './deploy'
+import ContractTransfer from './send'
 
 export default {
   Contract, // type: 11
-  ContractExecute, // type: 12
-  ContractTransfer // type: 13
+  ContractTransfer // type: 12
 }

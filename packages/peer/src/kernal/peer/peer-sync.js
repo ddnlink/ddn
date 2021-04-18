@@ -3,7 +3,8 @@
  * wangxm   2019-01-15
  */
 import ip from 'ip'
-import { bignum, system } from '@ddn/utils'
+import { bignum } from '@ddn/utils'
+import { system } from '@ddn/utils-system'
 
 let _singleton
 

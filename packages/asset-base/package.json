@@ -20,7 +20,7 @@
   "author": "wangxm",
   "license": "MIT",
   "dependencies": {
-    "@ddn/utils": "^0.2.1",
+    "@ddn/utils": "^0.2.2",
     "lodash": "^4.17.15"
   }
 }

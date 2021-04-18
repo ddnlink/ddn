@@ -2,13 +2,12 @@
 
 import fs from 'fs'
 import * as DdnCrypto from '@ddn/crypto'
-import DdnUtils, { randomNethash } from '@ddn/utils'
+import { bignum, assetTypes, randomNethash } from '@ddn/utils'
 // import ByteBuffer from 'bytebuffer'
 import NodeSdk from '@ddn/node-sdk'
 
 // import transactionsLib from '../utils/transactions'
 import accounts from './account.js'
-const { bignum, assetTypes } = DdnUtils
 
 // // 针对区块的
 // function getBytes (block, skipSignature) {

@@ -1,9 +1,9 @@
 import { init, getContract } from '../../plugins/api'
 
 module.exports = {
-  command: 'getContract [id]',
-  aliases: 'gt',
-  desc: 'Get contract by id or address',
+  command: 'get [id]',
+  aliases: 'g',
+  desc: 'Get contract by id',
   builder: {},
 
   handler: function (argv) {

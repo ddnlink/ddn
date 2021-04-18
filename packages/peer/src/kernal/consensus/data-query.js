@@ -7,19 +7,19 @@ import DdnUtils from '@ddn/utils'
 let _singleton
 
 class DataQuery {
-  static singleton(context) {
+  static singleton (context) {
     if (!_singleton) {
       _singleton = new DataQuery(context)
     }
     return _singleton
   }
 
-  constructor(context) {
+  constructor (context) {
     Object.assign(this, context)
     this._context = context
   }
 
-  async loadSimpleBlocksData(where, limit, offset, orders) {
+  async loadSimpleBlocksData (where, limit, offset, orders) {
     return await this.dao.findList('block', {
       where,
       limit,
@@ -43,7 +43,7 @@ class DataQuery {
     })
   }
 
-  async loadTransactionsWithBlockIds(blockIds) {
+  async loadTransactionsWithBlockIds (blockIds) {
     if (!blockIds || !blockIds.length) {
       throw new Error('Invalid params: blockIds')
     }
@@ -72,7 +72,7 @@ class DataQuery {
     })
   }
 
-  async loadDelegatesWithTransactionIds(transactionIds) {
+  async loadDelegatesWithTransactionIds (transactionIds) {
     if (!transactionIds || !transactionIds.length) {
       throw new Error('Invalid params: transactionIds')
     }
@@ -89,7 +89,7 @@ class DataQuery {
     })
   }
 
-  async loadVotesWithTransactionIds(transactionIds) {
+  async loadVotesWithTransactionIds (transactionIds) {
     if (!transactionIds || !transactionIds.length) {
       throw new Error('Invalid params: transactionIds')
     }
@@ -106,7 +106,7 @@ class DataQuery {
     })
   }
 
-  async loadAssetsWithTransactionIds(transactionIds) {
+  async loadAssetsWithTransactionIds (transactionIds) {
     if (!transactionIds || !transactionIds.length) {
       throw new Error('Invalid params: transactionIds')
     }
@@ -140,7 +140,7 @@ class DataQuery {
     })
   }
 
-  async loadAssetExtsWithTransactionIds(transactionIds) {
+  async loadAssetExtsWithTransactionIds (transactionIds) {
     if (!transactionIds || !transactionIds.length) {
       throw new Error('Invalid params: transactionIds')
     }
@@ -157,7 +157,7 @@ class DataQuery {
     })
   }
 
-  async loadSignaturesWithTransactionIds(transactionIds) {
+  async loadSignaturesWithTransactionIds (transactionIds) {
     if (!transactionIds || !transactionIds.length) {
       throw new Error('Invalid params: transactionIds')
     }
@@ -174,7 +174,7 @@ class DataQuery {
     })
   }
 
-  async loadMultiSignaturesWithTransactionIds(transactionIds) {
+  async loadMultiSignaturesWithTransactionIds (transactionIds) {
     if (!transactionIds || !transactionIds.length) {
       throw new Error('Invalid params: transactionIds')
     }
@@ -193,7 +193,30 @@ class DataQuery {
     })
   }
 
-  async loadDappsWithTransactionIds(transactionIds) {
+  async loadContractWithTransactionIds (transactionIds) {
+    if (!transactionIds || !transactionIds.length) {
+      throw new Error('Invalid params: transactionIds')
+    }
+    return await this.dao.findList('contract', {
+      where: {
+        transaction_id: {
+          $in: transactionIds
+        }
+      },
+      attributes: [
+        ['id', 'c_id'],
+        ['name', 'c_name'],
+        ['desc', 'c_desc'],
+        ['owner', 'c_owner'],
+        ['gas_limit', 'c_gas_limit'],
+        ['version', 'c_version'],
+        ['code', 'c_code'],
+        ['timestamp', 'c_timestamp']
+      ]
+    })
+  }
+
+  async loadDappsWithTransactionIds (transactionIds) {
     if (!transactionIds || !transactionIds.length) {
       throw new Error('Invalid params: transactionIds')
     }
@@ -218,7 +241,7 @@ class DataQuery {
     })
   }
 
-  async loadDappIntransfersWithTransactionIds(transactionIds) {
+  async loadDappIntransfersWithTransactionIds (transactionIds) {
     if (!transactionIds || !transactionIds.length) {
       throw new Error('Invalid params: transactionIds')
     }
@@ -237,7 +260,7 @@ class DataQuery {
     })
   }
 
-  async loadDappOuttransfersWithTransactionIds(transactionIds) {
+  async loadDappOuttransfersWithTransactionIds (transactionIds) {
     if (!transactionIds || !transactionIds.length) {
       throw new Error('Invalid params: transactionIds')
     }
@@ -257,7 +280,7 @@ class DataQuery {
     })
   }
 
-  async queryFullBlockData(where, limit, offset, orders) {
+  async queryFullBlockData (where, limit, offset, orders) {
     const blockRows = await this.loadSimpleBlocksData(where, limit, offset, orders)
 
     const blockIds = []
@@ -276,6 +299,7 @@ class DataQuery {
         const voteTrsIds = []
         const signatureTrsIds = []
         const multiSignatureTrsIds = []
+        const contractTrsIds = []
         const dappTrsIds = []
         const dappIntransferTrsIds = []
         const dappOuttransferTrsIds = []
@@ -305,6 +329,9 @@ class DataQuery {
               }
               if (trsItem.t_type === DdnUtils.assetTypes.MULTISIGNATURE) {
                 multiSignatureTrsIds.push(trsItem.t_id)
+              }
+              if (trsItem.t_type === DdnUtils.assetTypes.CONTRACT) {
+                contractTrsIds.push(trsItem.t_id)
               }
               if (trsItem.t_type === DdnUtils.assetTypes.DAPP) {
                 dappTrsIds.push(trsItem.t_id)
@@ -363,6 +390,12 @@ class DataQuery {
           combineBlockData(multisignaturesRows)
         }
 
+        // 合约资产数据
+        if (contractTrsIds.length > 0) {
+          const rows = await this.loadContractWithTransactionIds(contractTrsIds)
+          combineBlockData(rows)
+        }
+
         // //Dapp交易数据
         // if (dappTrsIds.length > 0) {
         //     var dappsRows = await this.loadDappsWithTransactionIds(dappTrsIds);
@@ -398,7 +431,7 @@ class DataQuery {
     }
   }
 
-  async loadSimpleTransactionData(where, limit, offset, orders, returnTotal) {
+  async loadSimpleTransactionData (where, limit, offset, orders, returnTotal) {
     const row = await this.dao.findOne('block', {
       attributes: [[this.dao.db_fnMax('height'), 'maxHeight']]
     })
@@ -443,7 +476,7 @@ class DataQuery {
     }
   }
 
-  async queryFullTransactionData(where, limit, offset, orders, returnTotal) {
+  async queryFullTransactionData (where, limit, offset, orders, returnTotal) {
     const queryData = await this.loadSimpleTransactionData(where, limit, offset, orders, returnTotal)
 
     let transactionRows = queryData
@@ -576,7 +609,7 @@ class DataQuery {
     }
   }
 
-  async loadAssetsWithDappChainCondition({ dapp_id, seq, type, limit = 1000, offset = 0 }) {
+  async loadAssetsWithDappChainCondition ({ dapp_id, seq, type, limit = 1000, offset = 0 }) {
     const where = { str2: dapp_id, transaction_type: type }
     // let limit = 1000
     // let offset = 0

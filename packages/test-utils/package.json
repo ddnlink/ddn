@@ -18,7 +18,7 @@
   "license": "MIT",
   "dependencies": {
     "@ddn/core": "^0.2.15",
-    "@ddn/utils": "^0.2.1"
+    "@ddn/utils": "^0.2.2"
   },
   "devDependencies": {
     "chai": "^4.2.0",

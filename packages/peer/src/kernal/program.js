@@ -8,7 +8,8 @@ import fs from 'fs'
 import ip from 'ip'
 import extend from 'extend2'
 import * as DdnCrypto from '@ddn/crypto'
-import DdnUtils from '@ddn/utils'
+import { bignum, runtimeState } from '@ddn/utils'
+import { system } from '@ddn/utils-system'
 // import tracer from 'tracer'
 import { logger } from '../utils/logger'
 
@@ -44,13 +45,13 @@ class Program {
     options.logger = logger(options)
 
     if (!options.configObject.publicIp) {
-      options.configObject.publicIp = DdnUtils.system.getPublicIp()
+      options.configObject.publicIp = system.getPublicIp()
     }
 
     this._context = new Context()
     await this._context.init(options)
 
-    this._context.runtime.state = DdnUtils.runtimeState.Pending
+    this._context.runtime.state = runtimeState.Pending
     this._context.runtime.loaded = false
 
     // 区块核心处理模块
@@ -132,7 +133,7 @@ class Program {
         fs.unlinkSync(this._pid_file)
       }
     } catch (err) {
-      console.error(DdnUtils.system.getErrorMsg(err))
+      console.error(system.getErrorMsg(err))
     }
   }
 
@@ -160,9 +161,9 @@ class Program {
 
     const payloadHash = DdnCrypto.createHash(Buffer.from(payloadBytes))
     const id = await this._context.runtime.block.getId(block)
-    assert.equal(payloadLength, block.payload_length, 'Unexpected payloadLength')
-    assert.equal(payloadHash.toString('hex'), block.payload_hash, 'Unexpected payloadHash')
-    assert.equal(id, block.id, 'Unexpected block id')
+    assert(payloadLength === block.payload_length, 'Unexpected payloadLength')
+    assert(payloadHash.toString('hex') === block.payload_hash, 'Unexpected payloadHash')
+    assert(id === block.id, 'Unexpected block id')
 
     return true
   }
@@ -240,7 +241,7 @@ class Program {
       // init asset banlance when start program
       await this._context.runtime.transaction.execAssetFunc('onInitAccountsAndBalances')
     } catch (err) {
-      this._context.logger.error('Failed to load blockchain', DdnUtils.system.getErrorMsg(err))
+      this._context.logger.error('Failed to load blockchain', system.getErrorMsg(err))
       return process.exit(1)
     }
 
@@ -289,7 +290,7 @@ class Program {
   }
 
   async _blockchainReady () {
-    if (!this._blockchainReadyFired && this._context.runtime.state === DdnUtils.runtimeState.Ready) {
+    if (!this._blockchainReadyFired && this._context.runtime.state === runtimeState.Ready) {
       // 通知资产系统已就绪事件
       await this._context.runtime.transaction.execAssetFunc('onBlockchainReady')
       // 块加载完成
@@ -376,7 +377,7 @@ class Program {
     if (validPeer) {
       try {
         await (async () => {
-          if (this._context.runtime.state === DdnUtils.runtimeState.Syncing) {
+          if (this._context.runtime.state === runtimeState.Syncing) {
             return
           }
 
@@ -400,14 +401,14 @@ class Program {
     if (validPeer) {
       try {
         await (async () => {
-          if (this._context.runtime.state === DdnUtils.runtimeState.Syncing) {
+          if (this._context.runtime.state === runtimeState.Syncing) {
             return
           }
 
           const lastBlock = this._context.runtime.block.getLastBlock()
           const lastSlot = this._context.runtime.slot.getSlotNumber(lastBlock.timestamp)
           if (this._context.runtime.slot.getNextSlot() - lastSlot >= 3) {
-            this._context.runtime.state = DdnUtils.runtimeState.Syncing
+            this._context.runtime.state = runtimeState.Syncing
 
             this._context.logger.debug('startSyncBlocks enter')
 
@@ -426,11 +427,11 @@ class Program {
                   this._context.logger.debug('startSyncBlocks end')
 
                   if (syncCompleted) {
-                    this._context.runtime.state = DdnUtils.runtimeState.Ready
+                    this._context.runtime.state = runtimeState.Ready
                     await this._blockchainReady()
                   } else {
                     this._context.logger.debug('startSyncBlocks not complete change state pending')
-                    this._context.runtime.state = DdnUtils.runtimeState.Pending
+                    this._context.runtime.state = runtimeState.Pending
                   }
 
                   resolve()
@@ -448,7 +449,7 @@ class Program {
       }, 1000 * 10)
     } else {
       this._context.logger.debug('change state is ready')
-      this._context.runtime.state = DdnUtils.runtimeState.Ready
+      this._context.runtime.state = runtimeState.Ready
       await this._blockchainReady()
     }
   }
@@ -458,7 +459,7 @@ class Program {
    */
   async startForgeBlockTask () {
     await (async () => {
-      if (this._context.runtime.state !== DdnUtils.runtimeState.Ready) {
+      if (this._context.runtime.state !== runtimeState.Ready) {
         return
       }
 
@@ -487,7 +488,7 @@ class Program {
 
       const forgeDelegateInfo = await this._context.runtime.delegate.getForgeDelegateWithCurrentTime(
         currentSlot,
-        DdnUtils.bignum.plus(lastBlock.height, 1)
+        bignum.plus(lastBlock.height, 1)
       )
       if (forgeDelegateInfo === null) {
         this._context.logger.trace('Loop:', 'skipping slot')
@@ -505,7 +506,7 @@ class Program {
               try {
                 await this._context.runtime.block.generateBlock(forgeDelegateInfo.keypair, forgeDelegateInfo.time)
               } catch (err) {
-                this._context.logger.error('Forged new block failed: ' + DdnUtils.system.getErrorMsg(err))
+                this._context.logger.error('Forged new block failed: ' + system.getErrorMsg(err))
                 cb('Forged new block failed: ' + err) // Added: 2020.9.4
               }
             }

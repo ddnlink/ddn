@@ -28,7 +28,7 @@ class System {
 
   static getErrorMsg (err) {
     let stack = err
-    if (process.env.NODE_ENV === 'development' & err.stack) {
+    if ((process.env.NODE_ENV === 'development') & err.stack) {
       stack = err.stack
     }
     return err.message ? err.message : stack

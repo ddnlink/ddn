@@ -1,5 +1,5 @@
-import DdnUtils from '@ddn/utils'
 import assert from 'assert'
+import DdnUtils from '@ddn/utils'
 
 // due to contract sandbox always return json object
 function convertBigintMemberToString (obj) {
@@ -18,19 +18,18 @@ function convertBigintMemberToString (obj) {
 
 function convertResult (result) {
   convertBigintMemberToString(result)
-  const { gas = 0, error, stateChangesHash, transactionId, contractId, data } = result
-  return { gas, error, stateChangesHash, transactionId, data, contractId, success: !!result.success }
+  const { gas = 0, error, stateChangesHash, transaction_id, contract_id, data } = result
+  return { gas, error, stateChangesHash, transaction_id, data, contract_id, success: !!result.success }
 }
 
-async function attachTransactions (results) {
-  const condition =
-    results.length === 1 ? { id: results[0].transactionId } : { id: { $in: results.map(r => r.transactionId) } }
+async function attachTransactions (results, dao) {
+  const where = results.length === 1 ? { id: results[0].transaction_id } : { id: { $in: results.map(r => r.transaction_id) } }
 
-  const transactions = await this.dao.find('tr', condition)
+  const transactions = await dao.findList('tr', { where })
   const transMap = new Map()
   transactions.forEach(t => transMap.set(t.id, t))
 
-  results.forEach(r => (r.transaction = transMap.get(r.transactionId)))
+  results.forEach(r => (r.transaction = transMap.get(r.transaction_id)))
   return results
 }
 
@@ -46,7 +45,7 @@ class ContractService {
 
   /**
    *
-   * @param {*} req { id, name, publisher, orderBy = id ASC, limit = 20, offset = 0 }
+   * @param {*} req { id, name, owner, orderBy = id ASC, limit = 20, offset = 0 }
    * @returns
    */
   async get (req) {
@@ -58,7 +57,7 @@ class ContractService {
     // query.offset = Number(query.offset || 0)
     // query.limit = Number(query.limit || 100)
 
-    console.log('=--------------------', query)
+    // console.log('=--------------------', query)
 
     const validateErrors = await this.ddnSchema.validate(
       {
@@ -82,7 +81,7 @@ class ContractService {
           name: {
             type: 'string'
           },
-          publisher: {
+          owner: {
             type: 'string'
           }
         }
@@ -100,8 +99,8 @@ class ContractService {
     if (query.name) {
       where.name = query.name
     }
-    if (query.publisher) {
-      where.publisher = query.publisher
+    if (query.owner) {
+      where.owner = query.owner
     }
 
     let sorts = null
@@ -120,7 +119,7 @@ class ContractService {
       sorts[0].push(sortMethod)
 
       sortField = `b.${sortField}`
-      const sortFields = ['b.id', 'b.name', 'b.transactionId', 'b.publisher', 'b.code', 'b.vmVersion', 'b.timestamp']
+      const sortFields = ['b.id', 'b.name', 'b.transactionId', 'b.owner', 'b.code', 'b.vmVersion', 'b.timestamp']
       if (!sortFields.includes(sortField)) {
         throw new Error('Invalid sort field')
       }
@@ -128,92 +127,131 @@ class ContractService {
 
     const offset = query.offset
     const limit = query.limit
-    // const attributes = ['id', 'name', 'publisher', 'transaction_id', 'gas_limit', 'timestamp', 'version', 'desc']
+    // const attributes = ['id', 'name', 'owner', 'transaction_id', 'gas_limit', 'timestamp', 'version', 'desc']
 
     const result = await this.dao.findPage('contract', { where, order: sorts, offset, limit })
-    return { success: true, contracts: result.rows, totalCount: result.total }
+    return { success: true, rows: result.rows, totalCount: result.total }
   }
 
   /**
    * Get contract details
-   * @param address  contract address
-   * @returns contract detail { contract : { id, name, transactionId, address, owner, vmVersion,
+   * @param id  contract id
+   * @returns contract detail { contract : { id, name, transactionId, id, owner, vmVersion,
    * desc, timestamp, metadata } }
    */
   async getGet (req) {
-    const contract = await this.dao.findOne('contract', req.params.id) // 实际传的是address
+    const contract = await this.dao.findOne('contract', req.params.id)
     return { success: true, contract }
   }
 
   /**
    * Get contract metadata
-   * @param address  contract address
+   * @param id  contract id
    * @returns contract metadata
-   * '/:address/metadata'
+   * '/metadata'
    */
-  async getDetail (req) {
-    const { metadata } = await this.dao.findOne('contract', req.params.address, { attributes: ['id', 'metadata'] })
+  async getMetadata (req) {
+    const { metadata } = await this.dao.findOne('contract', req.params.id, { attributes: ['id', 'metadata'] })
     return { success: true, metadata }
   }
 
   /**
    * Get contract code
-   * @param address  contract address
+   * @param id  contract id
    * @returns contract code
-   * '/:name/code'
+   * '/code'
    */
   async getCode (req) {
-    const { code } = await this.dao.findOne('contract', req.params.address, { attributes: ['id', 'code'] })
+    const { code } = await this.dao.findOne('contract', req.params.id, { attributes: ['id', 'code'] })
     return { success: true, code }
   }
 
   /**
-   * Query contract call results, query: limit={limit}&offset={offset}
-   * @param address contract address
+   * Query contract tansfer record, query: limit={limit}&offset={offset}
+   * @param id contract id
    * @param limit max items count to return, default = 20
    * @param offset return items offset, default = 0
-   * @returns query result { count, results: [{ transactionId, contractId, success, gas, error, stateChangesHash, transaction }...] }
-   * '/:address/results', async (
+   * @returns query result { count, transfer: [{ transactionId, contractId, success, gas, error, stateChangesHash, transaction }...] }
+   * '/results'
    */
-  async getResults (req) {
+  async getTransfers (req) {
     const { params, query } = req
-    const { id } = await this.dao.findOne('contract', params.name, { attributes: ['id', 'name'] })
-    const condition = { contractId: id }
+    // const { id } = await this.dao.findOne('contract', params.name, { attributes: ['id', 'name'] })
+    const where = { $or: [{ sender_id: params.id || query.id }, { recipient_id: params.id || query.id }] }
     const offset = query.offset ? Math.max(0, Number.parseInt(query.offset)) : 0
     const limit = query.limit ? Math.min(100, Number.parseInt(query.limit)) : 20
-    const order = query.order || 'ASC'
+    // const order = query.order || 'ASC'
 
-    const count = await this.dao.count('contract_result', condition)
-    const range = { limit, offset }
-    const callResults = await this.dao.find('contract_result', condition, range, { rowid: order })
-    const results = await attachTransactions(callResults.map(r => convertResult(r)))
+    const result = await this.dao.findPage('contract_transfer', { where, offset, limit })
+    const transfers = await attachTransactions(
+      result.rows.map(r => convertResult(r)),
+      this.dao
+    )
 
-    return { success: true, count, results }
+    return { success: true, count: result.total, rows: transfers }
   }
 
   /**
-   * Query single call reult by transaction id,
-   * @param address contract address
+   * Query contract execute results, query: limit={limit}&offset={offset}
+   * @param id contract id
+   * @param limit max items count to return, default = 20
+   * @param offset return items offset, default = 0
+   * @returns query result
+   *
+   */
+  async getResults (req) {
+    const { params, query } = req
+    // const { id } = await this.dao.findOne('contract', params.name, { attributes: ['id', 'name'] })
+    const where = { contract_id: params.id || query.id }
+    const offset = query.offset ? Math.max(0, Number.parseInt(query.offset)) : 0
+    const limit = query.limit ? Math.min(100, Number.parseInt(query.limit)) : 20
+    // const order = query.order || 'ASC'
+
+    const result = await this.dao.findPage('contract_result', { where, offset, limit })
+
+    const rows = []
+    for (let row of result.rows) {
+      row = convertResult(row)
+      const trf = await this.dao.findOne('contract_transfer', { where: { transaction_id: row.transaction_id } })
+      if (trf) {
+        row.sender_id = trf.sender_id
+        row.recipient_id = trf.recipient_id
+        row.amount = trf.amount
+        row.currency = trf.currency
+        row.block_height = trf.block_height
+      }
+      rows.push(row)
+    }
+
+    return { success: true, count: result.total, rows: rows }
+  }
+
+  /**
+   * Query single send reult by transaction id,
+   * @param id contract id
    * @param transactionId transaction id
    * @returns query result { result: { transactionId, contractId, success, gas, error, stateChangesHash, transaction } }
-   * '/:address/results/:transactionId', async (
+   * '/result', async (
    */
   async getResult (req) {
-    const { transactionId, address } = req.params
+    const { transactionId, id } = req.params
     assert(!!transactionId, 'Invalid transaction id')
-    const contract = await this.dao.findOne('contract', address, { attributes: ['id', 'name'] })
+    const contract = await this.dao.findOne('contract', id, { attributes: ['id', 'name'] })
     const condition = { transactionId }
 
-    const results = await this.dao.find('contract_result', condition)
-    assert(results.length > 0, `Call result not found (transactionId = ${transactionId})`)
-    const resultsWithTransactions = await attachTransactions(results.map(r => convertResult(r)))
+    const results = await this.dao.findOne('contract_result', condition)
+    assert(results.length > 0, `send result not found (transactionId = ${transactionId})`)
+    const resultsWithTransactions = await attachTransactions(
+      results.map(r => convertResult(r)),
+      this.dao
+    )
 
     const result = resultsWithTransactions[0]
     const transaction = result.transaction
     if (transaction.type === DdnUtils.assetTypes.CONTRACT) {
-      assert(address === transaction.args[1], `Invalid contract address ${address}`)
+      assert(transaction.args && transaction.args[0] && id === transaction.args[0].id, `Invalid contract id ${id}`)
     } else {
-      assert(contract && contract.id === result.contractId, `Invalid contract address ${address}`)
+      assert(contract && contract.id === result.contractId, `Invalid contract id ${id}`)
     }
 
     return { success: true, result }
@@ -221,38 +259,39 @@ class ContractService {
 
   /**
    * Get state of contract
-   * @param address  contract address
+   * @param id  contract id
    * @param statePath  path of state, separated by '.' , eg: 'holding.0' => contract['holding'][0]
    * @returns state value if primitive, else return count of children states
-   * '/:address/states/:statePath'
+   * '/states'
    */
   async getStates (req) {
-    const { address, statePath } = req.params
+    const { id, statePath } = req.params
     if (!statePath) throw new Error(`Invalid state path '${statePath}'`)
 
-    const result = await this.contract.queryState(address, String(statePath).split('.'))
-    convertBigintMemberToString(result)
-    return result
+    const states = await this.runtime.dvm.queryState(id, String(statePath).split('.'))
+    convertBigintMemberToString(states)
+    return { success: true, states }
   }
 
   /**
    * Get state of contract
-   * @param address  contract address
-   * @param method  constant method address
-   * @param request.body arguments of method
+   * @param id  contract id
+   * @param method  constant method id
+   * @param args arguments of method
    * @returns constant method call result
-   * '/:address/constant/:method'
+   * '/call'
    */
-  async postState (req) {
-    const { address, method } = req.params
-    const methodArgs = req.body || []
+  async postCall (req) {
+    const { id, method, args } = req.body
+    // console.log(args)
+    const methodArgs = args || []
     if (!Array.isArray(methodArgs)) {
       throw new Error('Arguments should be array')
     }
 
-    const result = await this.contract.getConstant(address, method, ...methodArgs)
+    const result = await this.runtime.dvm.callConstant(id, method, ...methodArgs)
     convertBigintMemberToString(result)
-    return result
+    return { success: true, result }
   }
 }
 

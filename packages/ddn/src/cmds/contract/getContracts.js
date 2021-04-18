@@ -1,14 +1,10 @@
-import { init, getTransactions } from '../../plugins/api'
+import { init, getContracts } from '../../plugins/api'
 
 module.exports = {
-  command: 'getTransactions',
-  aliases: 'gts',
-  desc: 'Get peers list',
+  command: 'all',
+  aliases: 'a',
+  desc: 'Get contracts list',
   builder: {
-    blockId: {
-      alias: 'b',
-      describe: 'block id'
-    },
     offset: {
       alias: 'o',
       describe: 'Offset'
@@ -17,40 +13,31 @@ module.exports = {
       alias: 'l',
       describe: 'Limit'
     },
-    type: {
-      alias: 'v',
-      describe: 'transaction type'
-    },
     // sort
     orderBy: {
       alias: 's',
       describe: 'sort, e.g: fee:desc ...'
     },
-    amount: {
-      alias: 'a',
-      describe: 'amount'
+    blockId: {
+      alias: 'b',
+      describe: 'block id'
     },
-    fee: {
-      alias: 'f',
-      describe: 'fee'
+    tid: {
+      alias: 't',
+      describe: 'block id'
     },
-    message: {
-      alias: 'm',
-      describe: 'message'
+    name: {
+      alias: 'n',
+      describe: 'name'
     },
-    senderPublicKey: {
-      describe: 'senderPublicKey'
-    },
-    senderId: {
+    owner: {
+      alias: 'w',
       describe: 'senderId'
-    },
-    recipientId: {
-      describe: 'recipientId'
     }
   },
 
   handler: function (argv) {
     init(argv)
-    getTransactions(argv)
+    getContracts(argv)
   }
 }

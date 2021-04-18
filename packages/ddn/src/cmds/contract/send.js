@@ -1,9 +1,9 @@
-import { init, executeContract } from '../../plugins/api'
+import { init, sendContract } from '../../plugins/api'
 
 module.exports = {
-  command: 'execute',
-  aliases: 'x',
-  desc: 'execute a contract method',
+  command: 'send',
+  aliases: 's',
+  desc: 'Call the not constant or payable method of a contract',
   builder: {
     secret: {
       alias: 'e',
@@ -13,9 +13,9 @@ module.exports = {
       alias: 's',
       describe: 'secondSecret'
     },
-    address: {
-      alias: 'a',
-      describe: 'contract address'
+    id: {
+      alias: 'i',
+      describe: 'contract id'
     },
     gas: {
       alias: 'g',
@@ -23,16 +23,16 @@ module.exports = {
     },
     method: {
       alias: 'm',
-      describe: 'the contract method to execute'
+      describe: 'contract method'
     },
     args: {
       alias: 'v',
-      describe: 'params pass to the contract method'
+      describe: 'contract method args, should be array'
     }
   },
 
   handler: function (argv) {
     init(argv)
-    executeContract(argv)
+    sendContract(argv)
   }
 }

@@ -2,6 +2,7 @@ blockchain.*
 *.db
 *.db-journal
 dapps/
+contracts/
 .DS_Store
 .ed25519-node
 .idea/

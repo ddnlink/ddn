@@ -1,5 +1,4 @@
 import DdnUtils from '@ddn/utils'
-// import { Compiler } from '@ddn/contract'
 
 import crypto from '../utils/crypto'
 
@@ -12,19 +11,14 @@ async function deploy (options, secret, secondSecret) {
   const fee = DdnUtils.bignum.multiply(constants.net.fees.contract, constants.fixedPoint)
 
   const timestamp = slots.getTime() - config.clientDriftSeconds
-  // const compiler = new Compiler()
-  // const { metadata } = compiler.compile(options.code)
-
-  // console.log(metadata.toJSONObject())
 
   const contract = {
-    name: options.name,
-    gas_limit: `${options.gasLimit}`,
     owner: await crypto.generateAddress(keys.publicKey, constants.tokenPrefix),
+    gas_limit: `${options.gasLimit}`,
+    name: options.name,
     desc: options.desc,
     version: options.version,
     code: options.code
-    // metadata: metadata.toJSONObject(),
   }
 
   contract.id = await crypto.generateAddress(`${timestamp}_${keys.publicKey}`, constants.tokenPrefix)
@@ -42,10 +36,7 @@ async function deploy (options, secret, secondSecret) {
       contract
     }
   }
-
   transaction.signature = await crypto.sign(transaction, keys)
-
-  // console.log(transaction)
 
   if (secondSecret) {
     const secondKeys = crypto.getKeys(secondSecret)
@@ -56,7 +47,7 @@ async function deploy (options, secret, secondSecret) {
   return transaction
 }
 
-async function send (options, secret, secondSecret) {
+async function pay (options, secret, secondSecret) {
   const keys = crypto.getKeys(secret)
   let args = options.args
   if (args instanceof Array) args = JSON.stringify(args)
@@ -65,8 +56,10 @@ async function send (options, secret, secondSecret) {
 
   const timestamp = slots.getTime() - config.clientDriftSeconds
   const opts = {
-    id: options.address,
+    id: options.id,
     gas_limit: `${options.gasLimit}`,
+    amount: options.amount,
+    currency: options.currency,
     method: options.method,
     args
   }
@@ -90,7 +83,7 @@ async function send (options, secret, secondSecret) {
   return trs
 }
 
-async function pay (options, secret, secondSecret) {
+async function send (options, secret, secondSecret) {
   const keys = crypto.getKeys(secret)
   let args = options.args
   if (args instanceof Array) args = JSON.stringify(args)
@@ -101,8 +94,6 @@ async function pay (options, secret, secondSecret) {
   const opts = {
     id: options.id,
     gas_limit: `${options.gasLimit}`,
-    amount: options.amount,
-    currency: options.currency,
     method: options.method,
     args
   }

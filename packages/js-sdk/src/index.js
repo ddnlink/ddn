@@ -6,6 +6,7 @@ import delegate from './transactions/delegate'
 import signature from './transactions/signature'
 import transaction from './transactions/transaction'
 import vote from './transactions/vote'
+import contract from './transactions/contract'
 import username from './transactions/username'
 import multisignature from './transactions/multisignature'
 import dapp from './transactions/dapp'
@@ -35,6 +36,7 @@ export default {
   signature,
   transaction,
   vote,
+  contract,
   username,
   multisignature,
 

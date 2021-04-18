@@ -1,23 +1,20 @@
-import { readdirSync } from 'fs';
-import { join } from 'path';
+import {readdirSync} from 'fs'
+import {join} from 'path'
 
-const headPkgs = ['utils', 'core', 'crypto'];
-const tailPkgs = ['peer', 'test-utils', 'node-sdk', 'js-sdk'];
+const headPkgs = ['utils', 'utils-system', 'core', 'crypto']
+const tailPkgs = ['peer', 'test-utils', 'node-sdk', 'js-sdk']
 const otherPkgs = readdirSync(join(__dirname, 'packages')).filter(
-  (pkg) =>
-    pkg.charAt(0) !== '.' && !headPkgs.includes(pkg) && !tailPkgs.includes(pkg),
-);
+  pkg => pkg.charAt(0) !== '.' && !headPkgs.includes(pkg) && !tailPkgs.includes(pkg)
+)
 
 export default {
   target: 'node',
-  cjs: { type: 'babel', lazy: true, minify: true },
+  cjs: {type: 'babel', lazy: true, minify: true},
   disableTypeCheck: false,
   pkgs: [...headPkgs, ...otherPkgs, ...tailPkgs],
   doc: {
-    themeConfig: { mode: 'light' },
+    themeConfig: {mode: 'light'},
     base: '/doc'
   },
-  extraBabelPlugins: [
-    ['@babel/plugin-transform-classes'],
-  ],
-};
+  extraBabelPlugins: [['@babel/plugin-transform-classes']]
+}

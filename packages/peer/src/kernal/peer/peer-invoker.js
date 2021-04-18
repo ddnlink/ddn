@@ -111,7 +111,7 @@ class PeerInvoker {
           this.logger.error('request error: ', err)
           reject(new Error(`Request peer api failed: ${url}`))
         } else {
-          console.log('body', body)
+          // console.log('body', body)
           // TODO dapp侧链返回的规则和主链的规则不一致，这里先返回后期优化一下
           if (dappId) {
             resolve({ body, peer })

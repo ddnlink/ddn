@@ -23,7 +23,7 @@
   "dependencies": {
     "@ddn/asset-base": "^0.4.1",
     "@ddn/crypto": "^0.4.1",
-    "@ddn/utils": "^0.2.1",
+    "@ddn/utils": "^0.2.2",
     "bytebuffer": "^5.0.1",
     "sequelize": "^5.8.7",
     "valid-url": "^1.0.9"
