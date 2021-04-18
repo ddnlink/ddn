@@ -10,15 +10,7 @@ function getClientFixedTime () {
   return slots.getTime() - config.clientDriftSeconds
 }
 
-async function createTransaction (
-  asset,
-  fee,
-  type,
-  recipientId,
-  message,
-  secret,
-  secondSecret
-) {
+async function createTransaction (asset, fee, type, recipientId, message, secret, secondSecret) {
   const keys = DdnCrypto.getKeys(secret)
 
   const transaction = {
@@ -32,36 +24,28 @@ async function createTransaction (
     message,
     asset
   }
-
   transaction.signature = await DdnCrypto.sign(transaction, keys)
   if (secondSecret) {
     const secondKeys = DdnCrypto.getKeys(secondSecret)
     transaction.sign_signature = await DdnCrypto.secondSign(transaction, secondKeys)
   }
-
   transaction.id = await DdnCrypto.getId(transaction)
-
   return transaction
 }
 
 export default {
   async createIssuer (name, desc, secret, secondSecret) {
+    const keys = DdnCrypto.getKeys(secret)
+    const issuer_id = DdnCrypto.generateAddress(keys.publicKey)
     const asset = {
       aobIssuer: {
         name,
-        desc
+        desc,
+        issuer_id
       }
     }
     const fee = bignum.multiply(constants.net.fees.aob_issuer, constants.fixedPoint)
-    const trs = await createTransaction(
-      asset,
-      fee,
-      DdnUtils.assetTypes.AOB_ISSUER,
-      null,
-      null,
-      secret,
-      secondSecret
-    )
+    const trs = await createTransaction(asset, fee, DdnUtils.assetTypes.AOB_ISSUER, null, null, secret, secondSecret)
 
     return trs
   },
@@ -78,11 +62,18 @@ export default {
     secret,
     secondSecret
   ) {
+    const nameParts = name.split('.')
+    // assert(nameParts.length === 2)
+    if (nameParts.length !== 2) {
+      return 'inavailable name'
+    }
     const asset = {
       aobAsset: {
         name,
         desc,
         maximum,
+        quantity: '0',
+        issuer_name: nameParts[0],
         precision,
         strategy,
         allow_blacklist: `${allowBlacklist}`,
@@ -92,15 +83,7 @@ export default {
     }
     // var fee = (500 + (Math.floor(bytes.length / 200) + 1) * 0.1) * constants.fixedPoint
     const fee = bignum.multiply(constants.net.fees.aob_asset, constants.fixedPoint)
-    return await createTransaction(
-      asset,
-      fee,
-      DdnUtils.assetTypes.AOB_ASSET,
-      null,
-      null,
-      secret,
-      secondSecret
-    )
+    return await createTransaction(asset, fee, DdnUtils.assetTypes.AOB_ASSET, null, null, secret, secondSecret)
   },
 
   async createFlags (currency, flagType, flag, secret, secondSecret) {
@@ -112,15 +95,7 @@ export default {
       }
     }
     const fee = bignum.multiply(constants.net.fees.aob_flag, constants.fixedPoint)
-    return await createTransaction(
-      asset,
-      fee,
-      DdnUtils.assetTypes.AOB_FLAG,
-      null,
-      null,
-      secret,
-      secondSecret
-    )
+    return await createTransaction(asset, fee, DdnUtils.assetTypes.AOB_FLAG, null, null, secret, secondSecret)
   },
 
   async createAcl (currency, operator, flag, list, secret, secondSecret) {
@@ -133,15 +108,7 @@ export default {
       }
     }
     const fee = bignum.multiply(constants.net.fees.aob_acl, constants.fixedPoint)
-    return await createTransaction(
-      asset,
-      fee,
-      DdnUtils.assetTypes.AOB_ACL,
-      null,
-      null,
-      secret,
-      secondSecret
-    )
+    return await createTransaction(asset, fee, DdnUtils.assetTypes.AOB_ACL, null, null, secret, secondSecret)
   },
 
   async createIssue (currency, amount, secret, secondSecret) {
@@ -155,15 +122,7 @@ export default {
 
     // console.log('createIssue', fee, `${fee}`)
 
-    const trs = await createTransaction(
-      asset,
-      fee,
-      DdnUtils.assetTypes.AOB_ISSUE,
-      null,
-      null,
-      secret,
-      secondSecret
-    )
+    const trs = await createTransaction(asset, fee, DdnUtils.assetTypes.AOB_ISSUE, null, null, secret, secondSecret)
 
     return trs
   },

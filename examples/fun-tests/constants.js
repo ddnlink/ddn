@@ -31,7 +31,7 @@ module.exports = {
   maxConfirmations: 77 * 100,
   confirmationLength: 77,
   maxTxsPerBlock: 500,
-
+  crypto: '@ddn/crypto-nacl',
   testnet: {
     rewardRatio: 0.2,
     milestones: [

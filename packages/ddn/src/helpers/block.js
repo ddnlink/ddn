@@ -10,84 +10,84 @@ import transactionsLib from '../utils/transactions'
 import accounts from './account.js'
 const { bignum, assetTypes } = DdnUtils
 
-// 针对区块的
-function getBytes (block, skipSignature) {
-  // const size = 4 + 4 + 8 + 4 + 8 + 8 + 8 + 4 + 32 + 32 + 64;
-  const size =
-    4 + // version (int)
-    4 + // timestamp (int)
-    64 + // previousBlock 64
-    4 + // numberOfTransactions (int)
-    64 + // totalAmount (long)
-    64 + // totalFee (long)
-    64 + // reward (long)
-    4 + // payloadLength (int)
-    32 + // payloadHash
-    32 + // generatorPublicKey
-    64 // blockSignature or unused
+// // 针对区块的
+// function getBytes (block, skipSignature) {
+//   // const size = 4 + 4 + 8 + 4 + 8 + 8 + 8 + 4 + 32 + 32 + 64;
+//   const size =
+//     4 + // version (int)
+//     4 + // timestamp (int)
+//     64 + // previousBlock 64
+//     4 + // numberOfTransactions (int)
+//     64 + // totalAmount (long)
+//     64 + // totalFee (long)
+//     64 + // reward (long)
+//     4 + // payloadLength (int)
+//     32 + // payloadHash
+//     32 + // generatorPublicKey
+//     64 // blockSignature or unused
 
-  const bb = new ByteBuffer(size, true)
+//   const bb = new ByteBuffer(size, true)
 
-  bb.writeInt(block.version)
-  bb.writeInt(block.timestamp)
+//   bb.writeInt(block.version)
+//   bb.writeInt(block.timestamp)
 
-  if (block.previous_block) {
-    // wxm block database
-    bb.writeString(block.previous_block) // wxm block database
-  } else {
-    bb.writeString('0')
-  }
+//   if (block.previous_block) {
+//     // wxm block database
+//     bb.writeString(block.previous_block) // wxm block database
+//   } else {
+//     bb.writeString('0')
+//   }
 
-  bb.writeInt(block.number_of_transactions) // wxm block database
+//   bb.writeInt(block.number_of_transactions) // wxm block database
 
-  bb.writeString(bignum.new(block.total_amount).toString()) // wxm block database
-  bb.writeString(bignum.new(block.total_fee).toString()) // wxm block database
-  bb.writeString(bignum.new(block.reward).toString())
+//   bb.writeString(bignum.new(block.total_amount).toString()) // wxm block database
+//   bb.writeString(bignum.new(block.total_fee).toString()) // wxm block database
+//   bb.writeString(bignum.new(block.reward).toString())
 
-  bb.writeInt(block.payload_length) // wxm block database
+//   bb.writeInt(block.payload_length) // wxm block database
 
-  const payloadHashBuffer = Buffer.from(block.payload_hash, 'hex') // wxm block database
+//   const payloadHashBuffer = Buffer.from(block.payload_hash, 'hex') // wxm block database
 
-  for (let i = 0; i < payloadHashBuffer.length; i++) {
-    bb.writeByte(payloadHashBuffer[i])
-  }
+//   for (let i = 0; i < payloadHashBuffer.length; i++) {
+//     bb.writeByte(payloadHashBuffer[i])
+//   }
 
-  const generatorPublicKeyBuffer = Buffer.from(block.generator_public_key, 'hex') // wxm block database
-  for (let i = 0; i < generatorPublicKeyBuffer.length; i++) {
-    bb.writeByte(generatorPublicKeyBuffer[i])
-  }
+//   const generatorPublicKeyBuffer = Buffer.from(block.generator_public_key, 'hex') // wxm block database
+//   for (let i = 0; i < generatorPublicKeyBuffer.length; i++) {
+//     bb.writeByte(generatorPublicKeyBuffer[i])
+//   }
 
-  if (!skipSignature && block.block_signature) {
-    // wxm block database
-    const blockSignatureBuffer = Buffer.from(block.block_signature, 'hex')
-    for (let i = 0; i < blockSignatureBuffer.length; i++) {
-      bb.writeByte(blockSignatureBuffer[i])
-    }
-  }
+//   if (!skipSignature && block.block_signature) {
+//     // wxm block database
+//     const blockSignatureBuffer = Buffer.from(block.block_signature, 'hex')
+//     for (let i = 0; i < blockSignatureBuffer.length; i++) {
+//       bb.writeByte(blockSignatureBuffer[i])
+//     }
+//   }
 
-  bb.flip()
+//   bb.flip()
 
-  return bb.toBuffer()
-}
+//   return bb.toBuffer()
+// }
 
-// for block
-function getHash (block) {
-  return Buffer.from(nacl.hash(getBytes(block)))
-}
+// // for block
+// function getHash (block) {
+//   return Buffer.from(nacl.hash(getBytes(block)))
+// }
 
-function sign (block, { privateKey }) {
-  const hash = getHash(block)
+// function sign (block, { privateKey }) {
+//   const hash = getHash(block)
 
-  const data = nacl.sign.detached(hash, Buffer.from(privateKey, 'hex'))
-  return Buffer.from(data).toString('hex')
-}
+//   const data = nacl.sign.detached(hash, Buffer.from(privateKey, 'hex'))
+//   return Buffer.from(data).toString('hex')
+// }
 
-function getId (block) {
-  return getHash(block).toString('hex')
-}
+// function getId (block) {
+//   return getHash(block).toString('hex')
+// }
 
 export default {
-  getBytes,
+  getBytes: DdnCrypto.getBytes,
   async new ({ address, keypair }, nethash, tokenName, tokenPrefix, dapp, accountsFile, message) {
     let payloadLength = 0
     // let payloadBytes = new ByteBuffer(1, true);
@@ -253,14 +253,12 @@ export default {
     })
 
     let payloadBytes = ''
-
     for (const tx of transactions) {
-      const bytes = await DdnCrypto.getBytes(tx)
+      const bytes = DdnCrypto.getBytes(tx)
       // let bytes = transactionsLib.getTransactionBytes(tx);
       payloadBytes += bytes
       payloadLength += bytes.length
     }
-
     payloadHash = DdnCrypto.createHash(Buffer.from(payloadBytes)) // payloadHash.digest();
 
     const block = {
@@ -278,9 +276,8 @@ export default {
       height: '1'
     }
 
-    block.block_signature = sign(block, sender.keypair) // wxm block database
-    block.id = getId(block)
-
+    block.block_signature = await DdnCrypto.sign(block, sender.keypair) // wxm block database
+    block.id = await DdnCrypto.getId(block)
     return {
       block,
       dapp: dappTransaction,
@@ -324,7 +321,8 @@ export default {
     // let bytes = transactionsLib.getTransactionBytes(dappTransaction);
     dappTransaction.signature = await DdnCrypto.sign(dappTransaction, keypair)
     dappTransaction.id = await DdnCrypto.getId(dappTransaction)
-    let bytes = transactionsLib.getTransactionBytes(dappTransaction)
+    // let bytes = transactionsLib.getTransactionBytes(dappTransaction)
+    let bytes = DdnCrypto.getBytes(dappTransaction)
 
     genesisBlock.payloadLength += bytes.length
     bytes.writeByte(Buffer.from(genesisBlock.payloadHash, 'hex'))
@@ -336,9 +334,9 @@ export default {
     genesisBlock.generatorPublicKey = keypair.publicKey
 
     bytes = getBytes(genesisBlock)
-    genesisBlock.blockSignature = sign(genesisBlock, keypair) // fixme...
+    genesisBlock.blockSignature = await DdnCrypto.sign(genesisBlock, keypair) // fixme...
     bytes = getBytes(genesisBlock)
-    genesisBlock.id = getId(bytes)
+    genesisBlock.id = DdnCrypto.getId(genesisBlock) // getId(bytes)
 
     return {
       block: genesisBlock,

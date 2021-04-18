@@ -34,7 +34,7 @@ message Transaction {
   optional bytes sign_signature = 11;
   repeated string signatures = 12;
   optional string id = 13;
-  optional string height = 14;  //Bignum update         int64
+  optional string block_height = 14;  //Bignum update         int64
   optional string block_id = 15;
   required Asset asset = 16;
   repeated string args = 17;

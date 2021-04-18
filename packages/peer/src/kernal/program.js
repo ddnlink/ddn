@@ -152,14 +152,13 @@ class Program {
     let payloadLength = 0
 
     for (const trs of block.transactions) {
-      const bytes = await DdnCrypto.getBytes(trs)
+      const bytes = DdnCrypto.getBytes(trs)
       payloadLength += bytes.length
       payloadBytes += bytes
     }
 
     const payloadHash = DdnCrypto.createHash(Buffer.from(payloadBytes))
-    const id = this._context.runtime.block.getId(block)
-
+    const id = await this._context.runtime.block.getId(block)
     assert.equal(payloadLength, block.payload_length, 'Unexpected payloadLength')
     assert.equal(payloadHash.toString('hex'), block.payload_hash, 'Unexpected payloadHash')
     assert.equal(id, block.id, 'Unexpected block id')

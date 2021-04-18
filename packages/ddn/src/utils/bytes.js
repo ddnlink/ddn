@@ -1,18 +1,20 @@
 import ByteBuffer from 'bytebuffer'
+import { getBytes as naclGetBytes } from '@ddn/crypto'
 
-async function getBytes (transaction, skipSignature, skipSecondSignature) {
+async function getBytes(transaction, skipSignature, skipSecondSignature) {
+  return naclGetBytes(transaction, skipSignature, skipSecondSignature)
   const assetSize = 0
   const assetBytes = null
 
   const size = 1 + // type (int)
-        4 + // timestamp (int)
-        // 8 + // nethash 8
-        32 + // senderPublicKey (int)
-        32 + // requesterPublicKey (long)
-        8 + // recipientId (long)
-        8 + // amount (long)
-        64 + // message
-        64 // args or unused
+    4 + // timestamp (int)
+    // 8 + // nethash 8
+    32 + // senderPublicKey (int)
+    32 + // requesterPublicKey (long)
+    8 + // recipientId (long)
+    8 + // amount (long)
+    64 + // message
+    64 // args or unused
 
   const bb = new ByteBuffer(size + assetSize, true)
   // const bb = new ByteBuffer(1, true);
@@ -87,7 +89,7 @@ async function getBytes (transaction, skipSignature, skipSecondSignature) {
 }
 
 // 系统需要 Uint8Array
-function arrayBufferToUnit8Array (byteBuffer) {
+function arrayBufferToUnit8Array(byteBuffer) {
   const unit8Buffer = new Uint8Array(byteBuffer.toArrayBuffer())
   const buffer = []
   for (let i = 0; i < unit8Buffer.length; i++) {

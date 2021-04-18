@@ -1,0 +1,15 @@
+{
+  "name": "@ddn/crypto-base",
+  "version": "1.0.0",
+  "description": "this is crypto common plugin",
+  "main": "lib/index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "creazy",
+  "license": "ISC",
+  "dependencies": {
+    "bytebuffer": "^5.0.1",
+    "fast-sha256": "^1.3.0"
+  }
+}
