@@ -336,7 +336,7 @@ class PeerService {
         error: DdnUtils.system.getErrorMsg(e.message)
       }
     }
-    if ((global.assets && global.assets.transTypeNames[90]) && (this.constants.net.superviseIp === this.config.publicIp)) {
+    if (global.assets && global.assets.transTypeNames[90] && this.constants.net.superviseIp === this.config.publicIp) {
       const res = await checkAndReport(transaction, this, null, this.constants.net.superviseBaseUrl)
       if (!res.success) {
         return res
@@ -383,6 +383,7 @@ class PeerService {
           }
 
           if (err) {
+            console.log(err)
             // 这里的错误就是上面 catch 的 exp，所以统一在这里处理就好
             this.logger.warn(
               `Receive invalid transaction, transaction is ${JSON.stringify(

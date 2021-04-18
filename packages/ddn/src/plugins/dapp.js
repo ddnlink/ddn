@@ -313,9 +313,8 @@ async function createGenesisBlock () {
     message: 'Do you want to publish a inbuilt asset in this dapp?',
     default: false
   })
-
   var assetInfo = null
-  if (wantInbuiltAsset) {
+  if (wantInbuiltAsset.wantInbuiltAsset) {
     var name = await prompt({
       type: 'input',
       name: 'assetName',
@@ -344,7 +343,7 @@ async function createGenesisBlock () {
   // console.log('assetInfo', assetInfo)
 
   var account = accountHelper.account(genesisSecret)
-  var dappBlock = dappHelper.new(account, null, assetInfo)
+  var dappBlock = await dappHelper.new(account, null, assetInfo)
   var dappGenesisBlockJson = JSON.stringify(dappBlock, null, 2)
   fs.writeFileSync('genesis.json', dappGenesisBlockJson, 'utf8')
   console.log('New genesis block is created at: ./genesis.json')

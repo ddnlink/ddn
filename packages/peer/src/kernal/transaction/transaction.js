@@ -5,7 +5,7 @@
 import extend from 'util-extend'
 import DdnUtils from '@ddn/utils'
 import * as DdnCrypto from '@ddn/crypto'
-import { getId, nacl } from '@ddn/crypto'
+import { getId } from '@ddn/crypto'
 import Assets from '../../assets'
 
 let _singleton
@@ -88,9 +88,9 @@ class Transaction {
     trs = await this._assets.call(trs.type, 'create', data, trs) // 对应各个 asset 交易类型的 async create(data, trs) 方法
 
     // trs.signature = await DdnCrypto.sign(trs, data.keypair);
-    trs.signature = await this.sign(trs, keypair)
+    trs.signature = await DdnCrypto.sign(trs, keypair)
     if (sender.second_signature && second_keypair) {
-      trs.sign_signature = await this.sign(trs, second_keypair)
+      trs.sign_signature = await DdnCrypto.sign(trs, second_keypair)
       // trs.sign_signature = await DdnCrypto.sign(trs, data.second_keypair);
     }
 
@@ -168,7 +168,7 @@ class Transaction {
     } else {
       const trs = {
         id: raw.t_id,
-        height: `${raw.b_height}`,
+        block_height: `${raw.b_height}`,
         block_id: raw.b_id || raw.t_blockId, // wxm block database
         type: parseInt(raw.t_type),
         timestamp: parseInt(raw.t_timestamp),
@@ -467,8 +467,18 @@ class Transaction {
     if (!this._assets.hasType(trs.type)) {
       throw new Error(`Unknown transaction type 10 ${trs.type}`)
     }
-
-    const txId = await getId(trs)
+    // TODO creazy 验证交易id时，程序会在交易体中添加下面几个字段，所以要去掉，保持和sdk生成交易体时有同样的数据
+    const trss = { ...trs }
+    if (trss.senderId) {
+      delete trss.senderId
+    }
+    if (trss.block_height) {
+      delete trss.block_height
+    }
+    if (trss.block_id) {
+      delete trss.block_id
+    }
+    const txId = await getId(trss)
 
     // 确保客户端传入id，这里仅做验证
     if (typeof trs.id === 'undefined' || trs.id !== txId) {
@@ -480,8 +490,6 @@ class Transaction {
     if (!sender) {
       throw new Error('Invalid sender')
     }
-
-    trs.senderId = sender.address // wxm block database
 
     // Verify that requester in multisignature
     if (trs.requester_public_key) {
@@ -501,6 +509,7 @@ class Transaction {
         throw new Error('Failed to verify senderPublicKey signature here.')
       }
     }
+    trs.senderId = sender.address // wxm block database
 
     trs = await this._assets.call(trs.type, 'process', trs, sender)
 
@@ -521,11 +530,9 @@ class Transaction {
     if (!transaction) {
       throw new Error('No transaction to process!')
     }
-
     if (!transaction.id) {
       transaction.id = await getId(transaction)
     }
-
     // Check transaction indexes
     if (this._unconfirmedTransactionsIdIndex[transaction.id] !== undefined) {
       throw new Error(`Transaction ${transaction.id} already exists, ignoring...`)
@@ -544,12 +551,9 @@ class Transaction {
         throw new Error('Invalid requester')
       }
     }
-
     transaction = await this.process(transaction, sender, requester)
-
     await this.verify(transaction, sender, requester)
     await this.addUnconfirmedTransaction(transaction, sender)
-
     if (broadcast) {
       setImmediate(async () => {
         try {
@@ -575,23 +579,24 @@ class Transaction {
   }
 
   /// ///// TODO: delete it /////////////////////////////////
-  async sign (trs, { privateKey }) {
-    const hash = await this.getHash(trs, true, true)
-    const signature = nacl.sign.detached(hash, Buffer.from(privateKey, 'hex'))
-    return Buffer.from(signature).toString('hex')
-    // return await DdnCrypto.sign(trs, { privateKey })
-  }
+  // async sign (trs, { privateKey }) {
+  //   // const hash = await this.getHash(trs, true, true)
+  //   // const signature = nacl.sign.detached(hash, Buffer.from(privateKey, 'hex'))
+  //   // return Buffer.from(signature).toString('hex')
+  //   return await DdnCrypto.sign(trs, { privateKey })
+  //   // return await DdnCrypto.sign(trs, { privateKey })
+  // }
 
-  async multisign (trs, { privateKey }) {
-    const hash = await this.getHash(trs, true, true)
-    const signature = nacl.sign.detached(hash, Buffer.from(privateKey, 'hex'))
-    return Buffer.from(signature).toString('hex')
-  }
+  // async multisign (trs, { privateKey }) {
+  //   // const hash = await this.getHash(trs, true, true)
+  //   // const signature = nacl.sign.detached(hash, Buffer.from(privateKey, 'hex'))
+  //   // return Buffer.from(signature).toString('hex')
+  // }
 
-  async getHash (trs, skipSignature, skipSecondSignature) {
-    const bytes = await DdnCrypto.getBytes(trs, skipSignature, skipSecondSignature)
-    return Buffer.from(nacl.hash(bytes))
-  }
+  // async getHash (trs, skipSignature, skipSecondSignature) {
+  //   const bytes = await DdnCrypto.getBytes(trs, skipSignature, skipSecondSignature)
+  //   return Buffer.from(nacl.hash(bytes))
+  // }
 
   // TODO: 注意使用 @ddn/crypto 的对应方法重构 2020.5.3
   async verifyBytes (bytes, signature, publicKey) {
@@ -611,8 +616,19 @@ class Transaction {
     if (!signature) {
       return false
     }
-
-    const hash = await DdnCrypto.getHash(trs, true, true)
+    // sdk生成交易体加密时没有senderId字段，验证时去掉
+    const transaction = { ...trs }
+    if (transaction.senderId) {
+      delete transaction.senderId
+    }
+    // TODO creazy 铸块时会再次进行交易验证，这时交易会多处下面两个字段
+    if (transaction.block_height) {
+      delete transaction.block_height
+    }
+    if (transaction.block_id) {
+      delete transaction.block_id
+    }
+    const hash = await DdnCrypto.getHash(transaction, true, true)
     const result = DdnCrypto.verifyHash(hash, signature, publicKey)
 
     return result
@@ -656,16 +672,35 @@ class Transaction {
     if (!trs.nethash) {
       throw new Error("Transaction's nethash property is required.")
     }
-
+    // const newTransaction = { ...trs }
+    // if (newTransaction.height) {
+    //   delete newTransaction.height
+    // }
+    // if (newTransaction.block_id) {
+    //   delete newTransaction.block_id
+    // }
+    // if (newTransaction.block_height) {
+    //   delete newTransaction.block_height
+    // }
+    // if (newTransaction.asset) {
+    //   for (const key in newTransaction.asset) {
+    //     if (Object.hasOwnProperty.call(newTransaction.asset, key)) {
+    //       const element = newTransaction.asset[key]
+    //       delete element.transaction_type
+    //       delete element.transaction_id
+    //       delete element.timestamp
+    //     }
+    //   }
+    // }
+    const newTransaction = this.deepCloneTransaction(trs)
     // Verify signature
     let valid = false
     if (trs.requester_public_key) {
       // wxm block database
-      valid = await this.verifySignature(trs, trs.signature, trs.requester_public_key) // wxm block database
+      valid = await this.verifySignature(newTransaction, trs.signature, trs.requester_public_key) // wxm block database
     } else {
-      valid = await this.verifySignature(trs, trs.signature, trs.senderPublicKey)
+      valid = await this.verifySignature(newTransaction, trs.signature, trs.senderPublicKey)
     }
-
     if (!valid) {
       throw new Error('Failed to verify requester or sender signature, 5')
     }
@@ -673,7 +708,6 @@ class Transaction {
     if (trs.nethash && trs.nethash !== this.config.nethash) {
       throw new Error('Failed to verify nethash')
     }
-
     // Verify second signature
     if (!trs.requester_public_key && sender.second_signature) {
       valid = await this.verifySecondSignature(trs, sender.second_public_key)
@@ -687,7 +721,6 @@ class Transaction {
         throw new Error(`Failed to verify requester second signature: ${trs.id}`)
       }
     }
-
     // Check that signatures unique
     if (trs.signatures && trs.signatures.length) {
       const signatures = trs.signatures.reduce((p, c) => {
@@ -769,7 +802,6 @@ class Transaction {
       })
       throw new Error('Invalid transaction timestamp')
     }
-
     return await this._assets.call(trs.type, 'verify', trs, sender)
   }
 
@@ -783,10 +815,57 @@ class Transaction {
     if (!sign_signature) {
       return false
     }
+    const transaction = await this.deepCloneTransaction(trs)
+    if (transaction.senderId) {
+      delete transaction.senderId
+    }
+    // // TODO creazy 铸块时会再次进行交易验证，这时交易会多处下面两个字段
+    // if (transaction.block_height) {
+    //   delete transaction.block_height
+    // }
+    // if (transaction.block_id) {
+    //   delete transaction.block_id
+    // }
+    const hash = await DdnCrypto.getHash(transaction, false, true)
+    const result = DdnCrypto.verifyHash(hash, sign_signature, publicKey)
 
-    const bytes = await DdnCrypto.getBytes(trs, false, true)
+    // const bytes = DdnCrypto.getBytes(trs, false, true)
     // const bytes = await this.getBytes(trs, false, true);
-    return await this.verifyBytes(bytes, sign_signature, publicKey)
+    return result
+  }
+
+  /**
+   * @param {object} trs 交易信息
+   * @returns {object} trs处理后的交易体
+   * @description 深度复制交易信息后并删除交易某些字段
+   */
+  deepCloneTransaction (trs) {
+    const newTransaction = { ...trs }
+    // if (newTransaction.height) {
+    //   delete newTransaction.height
+    // }
+    if (newTransaction.block_id) {
+      delete newTransaction.block_id
+    }
+    if (newTransaction.block_height) {
+      delete newTransaction.block_height
+    }
+    if (newTransaction.asset) {
+      newTransaction.asset = { ...newTransaction.asset }
+      for (const key in newTransaction.asset) {
+        newTransaction.asset[key] = { ...newTransaction.asset[key] }
+        if (Object.hasOwnProperty.call(newTransaction.asset, key)) {
+          const element = newTransaction.asset[key]
+          delete element.transaction_type
+          delete element.transaction_id
+          delete element.timestamp
+          // if(element.quantity){
+          //   delete element.quantity
+          // }
+        }
+      }
+    }
+    return newTransaction
   }
 }
 

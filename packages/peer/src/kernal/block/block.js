@@ -6,9 +6,9 @@ import os from 'os'
 import ip from 'ip'
 import assert from 'assert'
 
-import ByteBuffer from 'bytebuffer'
+// import ByteBuffer from 'bytebuffer'
 import * as DdnCrypto from '@ddn/crypto'
-import { nacl } from '@ddn/crypto'
+// import { nacl } from '@ddn/crypto'
 import { runtimeState, system, bignum } from '@ddn/utils'
 import BlockStatus from './block-status'
 
@@ -58,84 +58,95 @@ class Block {
   }
 
   getBytes (block) {
-    const size =
-      4 + // version (int)
-      4 + // timestamp (int)
-      64 + // previousBlock 64
-      4 + // numberOfTransactions (int)
-      64 + // totalAmount (long)
-      64 + // totalFee (long)
-      64 + // reward (long)
-      4 + // payloadLength (int)
-      32 + // payloadHash
-      32 + // generatorPublicKey
-      64 // blockSignature or unused
-    const bb = new ByteBuffer(size, true)
-    const {
-      version,
-      timestamp,
-      previous_block,
-      number_of_transactions,
-      total_amount,
-      total_fee,
-      reward,
-      payload_length,
-      payload_hash,
-      generator_public_key,
-      block_signature
-    } = block
-    bb.writeInt(version)
-    bb.writeInt(timestamp)
+    return DdnCrypto.getBytes(block, true, true)
+    // const size =
+    //   4 + // version (int)
+    //   4 + // timestamp (int)
+    //   64 + // previousBlock 64
+    //   4 + // numberOfTransactions (int)
+    //   64 + // totalAmount (long)
+    //   64 + // totalFee (long)
+    //   64 + // reward (long)
+    //   4 + // payloadLength (int)
+    //   32 + // payloadHash
+    //   32 + // generatorPublicKey
+    //   64 // blockSignature or unused
+    // const bb = new ByteBuffer(size, true)
+    // const {
+    //   version,
+    //   timestamp,
+    //   previous_block,
+    //   number_of_transactions,
+    //   total_amount,
+    //   total_fee,
+    //   reward,
+    //   payload_length,
+    //   payload_hash,
+    //   generator_public_key,
+    //   block_signature
+    // } = block
+    // bb.writeInt(version)
+    // bb.writeInt(timestamp)
 
-    if (previous_block) {
-      bb.writeString(previous_block)
-    } else {
-      bb.writeString('0')
-    }
+    // if (previous_block) {
+    //   bb.writeString(previous_block)
+    // } else {
+    //   bb.writeString('0')
+    // }
 
-    bb.writeInt(number_of_transactions)
-    bb.writeString(total_amount.toString())
-    bb.writeString(total_fee.toString())
-    bb.writeString(reward.toString())
+    // bb.writeInt(number_of_transactions)
+    // bb.writeString(total_amount.toString())
+    // bb.writeString(total_fee.toString())
+    // bb.writeString(reward.toString())
 
-    bb.writeInt(payload_length)
+    // bb.writeInt(payload_length)
 
-    const payloadHashBuffer = Buffer.from(payload_hash, 'hex')
-    for (let i = 0; i < payloadHashBuffer.length; i++) {
-      bb.writeByte(payloadHashBuffer[i])
-    }
+    // const payloadHashBuffer = Buffer.from(payload_hash, 'hex')
+    // for (let i = 0; i < payloadHashBuffer.length; i++) {
+    //   bb.writeByte(payloadHashBuffer[i])
+    // }
 
-    const generatorPublicKeyBuffer = Buffer.from(generator_public_key, 'hex')
-    for (let i = 0; i < generatorPublicKeyBuffer.length; i++) {
-      bb.writeByte(generatorPublicKeyBuffer[i])
-    }
+    // const generatorPublicKeyBuffer = Buffer.from(generator_public_key, 'hex')
+    // for (let i = 0; i < generatorPublicKeyBuffer.length; i++) {
+    //   bb.writeByte(generatorPublicKeyBuffer[i])
+    // }
 
-    if (block_signature) {
-      const blockSignatureBuffer = Buffer.from(block_signature, 'hex')
-      for (let i = 0; i < blockSignatureBuffer.length; i++) {
-        bb.writeByte(blockSignatureBuffer[i])
-      }
-    }
+    // if (block_signature) {
+    //   const blockSignatureBuffer = Buffer.from(block_signature, 'hex')
+    //   for (let i = 0; i < blockSignatureBuffer.length; i++) {
+    //     bb.writeByte(blockSignatureBuffer[i])
+    //   }
+    // }
 
-    bb.flip()
+    // bb.flip()
 
-    return bb.toBuffer()
+    // return bb.toBuffer()
   }
 
   getHash (block) {
+    const newBlock = { ...block }
+    if (newBlock.transactions) {
+      delete newBlock.transactions
+    }
     // fixme: 2020.8.8 该方法返回 buffer, 还是使用原始 的nacl把
     return DdnCrypto.createHash(this.getBytes(block))
     // return nacl.hash(this.getBytes(block))
   }
 
-  // 2020.5.20 使用 NaCI 替代
-  sign (block, { privateKey }) {
-    const hash = this.getHash(block)
-    return Buffer.from(nacl.sign.detached(hash, Buffer.from(privateKey, 'hex'))).toString('hex')
+  async sign (block, { privateKey }) {
+    const newBlock = { ...block }
+    if (newBlock.transactions) {
+      delete newBlock.transactions
+    }
+    return await DdnCrypto.sign(newBlock, { privateKey })
   }
 
-  getId (block) {
-    return this.getHash(block).toString('hex')
+  async getId (block) {
+    const newBlock = { ...block }
+    if (newBlock.transactions) {
+      delete newBlock.transactions
+    }
+    return await DdnCrypto.getId(block)
   }
 
   async objectNormalize (block) {
@@ -292,7 +303,7 @@ class Block {
     let payloadBytes = ''
 
     for (const transaction of transactions) {
-      const bytes = await DdnCrypto.getBytes(transaction)
+      const bytes = DdnCrypto.getBytes(transaction)
       if (size + bytes.length > this.constants.maxPayloadLength) {
         break
       }
@@ -310,6 +321,7 @@ class Block {
 
     let block = {
       version: 0,
+      height: bignum.plus(this._lastBlock.height, 1).toString(),
       total_amount: totalAmount.toString(), // Bignum update
       total_fee: totalFee.toString(), // Bignum update
       reward: reward.toString(), // Bignum update
@@ -321,10 +333,10 @@ class Block {
       generator_public_key: data.keypair.publicKey.toString('hex'),
       transactions: blockTransactions
     }
-
     try {
-      block.block_signature = this.sign(block, data.keypair)
+      block.block_signature = await this.sign(block, data.keypair)
       block = await this.objectNormalize(block)
+      block.id = await this.getId(block)
     } catch (e) {
       this.logger.error(e)
       throw new Error(e.toString())
@@ -676,34 +688,32 @@ class Block {
         process.exit(1)
       }
     }
-
+    const self = this
     return new Promise((resolve, reject) => {
       this.balancesSequence.add(
         async cb => {
           const unconfirmedTrs = await this.runtime.transaction.getUnconfirmedTransactionList(true)
-
           try {
             await this.runtime.transaction.undoUnconfirmedList()
           } catch (err) {
-            this.logger.error('Failed to undo uncomfirmed transactions', err)
+            self.logger.error('Failed to undo uncomfirmed transactions', err)
             return process.exit(0)
           }
 
-          this.oneoff.clear()
+          self.oneoff.clear()
 
           try {
             await doApplyBlock()
           } catch (err) {
-            this.logger.error(`Failed to apply block 1: ${err}`)
+            self.logger.error(`Failed to apply block 1: ${err}`)
           }
 
           const redoTrs = unconfirmedTrs.filter(item => !applyedTrsIdSet.has(item.id))
           try {
-            await this.runtime.transaction.receiveTransactions(redoTrs)
+            await self.runtime.transaction.receiveTransactions(redoTrs)
           } catch (err) {
-            this.logger.error('Failed to redo unconfirmed transactions', err)
+            self.logger.error('Failed to redo unconfirmed transactions', err)
           }
-
           cb()
         },
         err => {
@@ -718,26 +728,25 @@ class Block {
   }
 
   verifySignature (block) {
-    const remove = 64
+    // 接受到的block是protobuf 解密之后的，因为解密后的json是类似 Blcok{}这样，带个名称前缀，应该不是标准的json数据，所以使用Object.assign，这样数据就是{}
+    block = Object.assign({}, block)
+    const newBlock = { ...block }
     let res = null
     const { block_signature, generator_public_key } = block
-    try {
-      const data = this.getBytes(block)
-      const str = data.length - remove
-      const data2 = Buffer.allocUnsafe(str)
-
-      for (let i = 0; i < data2.length; i++) {
-        data2[i] = data[i]
-      }
-      const hash = DdnCrypto.createHash(data2)
-      const blockSignatureBuffer = Buffer.from(block_signature, 'hex')
-      const generatorPublicKeyBuffer = Buffer.from(generator_public_key, 'hex')
-      res = nacl.sign.detached.verify(hash, blockSignatureBuffer || ' ', generatorPublicKeyBuffer || ' ')
-    } catch (e) {
-      this.logger.error(e)
-      throw Error(e.toString())
+    // TODO creazy 铸造区块时没有下面这两个字段，同步时有，验证时不通过，现在手动删除，应该提出一个方法，生成一个需要验证的区块信息统一处理
+    if (newBlock.generator_id) {
+      delete newBlock.generator_id
     }
-
+    if (newBlock.totalForged) {
+      delete newBlock.totalForged
+    }
+    if (newBlock.transactions) {
+      delete newBlock.transactions
+    }
+    // 块进行签名时是没有block_singuter字段的，所以验证时也跳过获取block_singuter的字节，这里第二个参数是跳过获取block_singuter字节
+    const data = this.getBytes(newBlock, true)
+    const hash = DdnCrypto.createHash(data)
+    res = DdnCrypto.verifyHash(hash, block_signature, generator_public_key)
     return res
   }
 
@@ -747,12 +756,12 @@ class Block {
    * @param {object}} votes votes
    */
   async verifyBlock (block, votes) {
-    try {
-      block.id = this.getId(block)
-    } catch (e) {
-      throw new Error(`Failed to get block id: ${e.toString()}`)
-    }
-
+    // TODO creazy 创建块时为什么id和height不再在createBlock中产生
+    // try {
+    //   block.id = await this.getId(block)
+    // } catch (e) {
+    //   throw new Error(`Failed to get block id: ${e.toString()}`)
+    // }
     block.height = bignum.plus(this._lastBlock.height, 1).toString()
 
     if (typeof this._lastBlock.height === 'undefined') {
@@ -771,7 +780,6 @@ class Block {
     if (!bignum.isEqualTo(block.height, 1) && !bignum.isEqualTo(expectedReward, block.reward)) {
       throw new Error('Invalid block reward')
     }
-
     try {
       if (!this.verifySignature(block)) {
         throw new Error('Failed to verify block signature')
@@ -816,12 +824,12 @@ class Block {
 
     let payloadBytes = ''
     const appliedTransactions = {}
-
     for (const i in block.transactions) {
       const transaction = block.transactions[i]
+      const newTransaction = this.runtime.transaction.deepCloneTransaction(transaction)
       let bytes
       try {
-        bytes = await DdnCrypto.getBytes(transaction)
+        bytes = DdnCrypto.getBytes(newTransaction)
       } catch (e) {
         throw new Error(`Failed to get transaction bytes: ${e.toString()}`)
       }
@@ -969,8 +977,10 @@ class Block {
           await this.runtime.account.setAccount({
             publicKey: transaction.senderPublicKey
           })
-
-          transaction.id = await DdnCrypto.getId(transaction) // 2020.5.18
+          // TODO creazy 这里的交易都是经过验证的，而且到这里的交易都是合法合规的，没有必要重新获取id
+          if (!transaction.id) {
+            transaction.id = await DdnCrypto.getId(transaction) // 2020.5.18
+          }
           transaction.block_id = block.id // wxm block database
 
           const existsTrs = existsTrsIds.find(item => {
@@ -1496,6 +1506,21 @@ class Block {
         }
       )
     })
+  }
+
+  sandboxApi (call, args, cb) {
+    // sandboxHelper.callMethod(shared, call, args, cb)
+    if (typeof this[call] !== 'function') {
+      return cb(`Function not found in module: ${call}`)
+    }
+
+    const callArgs = [args, cb]
+    return this[call].apply(this, callArgs)
+  }
+
+  getHeight (req, cb) {
+    const lastBlock = this.runtime.block.getLastBlock()
+    return cb(null, lastBlock && lastBlock.height ? lastBlock.height : '0')
   }
 }
 

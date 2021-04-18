@@ -29,6 +29,7 @@
         "gift": "0.6.1",
         "handlebars-helpers": "^0.10.0",
         "inquirer": "^7.0.3",
+        "moment": "^2.29.1",
         "ora": "^4.0.3",
         "request": "^2.62.0",
         "rmdir": "^1.1.0",

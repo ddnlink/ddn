@@ -152,14 +152,13 @@ class Program {
     let payloadLength = 0
 
     for (const trs of block.transactions) {
-      const bytes = await DdnCrypto.getBytes(trs)
+      const bytes = DdnCrypto.getBytes(trs)
       payloadLength += bytes.length
       payloadBytes += bytes
     }
 
     const payloadHash = DdnCrypto.createHash(Buffer.from(payloadBytes))
-    const id = this._context.runtime.block.getId(block)
-
+    const id = await this._context.runtime.block.getId(block)
     assert.equal(payloadLength, block.payload_length, 'Unexpected payloadLength')
     assert.equal(payloadHash.toString('hex'), block.payload_hash, 'Unexpected payloadHash')
     assert.equal(id, block.id, 'Unexpected block id')
@@ -263,6 +262,8 @@ class Program {
       this._context.logger.info('DDN Start Successfully!')
     }
 
+    await this._bindReady()
+
     // 启动节点管理任务
     await this.startPeerSyncTask()
 
@@ -277,15 +278,22 @@ class Program {
 
     // 启动区块铸造任务
     await this.startForgeBlockTask()
+  }
 
-    // 块加载完成
-    this._context.runtime.loaded = true
+  async _bindReady () {
+    // if (this._context.runtime.loaded) {
+    // 通知资产系统已就绪事件
+    await this._context.runtime.transaction.execAssetFunc('onBind')
+    // }
   }
 
   async _blockchainReady () {
     if (!this._blockchainReadyFired && this._context.runtime.state === DdnUtils.runtimeState.Ready) {
       // 通知资产系统已就绪事件
       await this._context.runtime.transaction.execAssetFunc('onBlockchainReady')
+      // 块加载完成
+      this._context.runtime.loaded = true
+
       this._blockchainReadyFired = true
     }
   }

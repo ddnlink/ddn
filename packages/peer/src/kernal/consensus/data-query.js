@@ -3,6 +3,7 @@
  * wangxm   2019-03-25
  */
 import DdnUtils from '@ddn/utils'
+import Sequelize from 'sequelize'
 
 let _singleton
 
@@ -573,6 +574,114 @@ class DataQuery {
       } else {
         return []
       }
+    }
+  }
+
+  async loadAssetsWithDappChainCondition ({ dapp_id, seq, type, limit = 1000, offset = 0 }) {
+    const where = { str2: dapp_id, transaction_type: type }
+    // let limit = 1000
+    // let offset = 0
+    let orders = null
+    if (type === DdnUtils.assetTypes.DAPP_IN) {
+      where.str5 = Sequelize.literal(`str5-0>${seq}`)
+    } else if (type === DdnUtils.assetTypes.DAPP_OUT) {
+      limit = 1
+      offset = 0
+      orders = [[Sequelize.literal('str5-0'), 'DESC']]
+    }
+    console.log('where', where)
+    const assetData = await this.dao.findList('trs_asset', {
+      where,
+      limit,
+      offset,
+      order: orders,
+      attributes: [
+        ['transaction_id', 't_id'],
+        ['transaction_id', 'asset_trs_id'],
+        ['transaction_type', 'asset_trs_type'],
+        ['str1', 'asset_str1'],
+        ['str2', 'asset_str2'],
+        ['str3', 'asset_str3'],
+        ['str4', 'asset_str4'],
+        ['str5', 'asset_str5'],
+        ['str6', 'asset_str6'],
+        ['str7', 'asset_str7'],
+        ['str8', 'asset_str8'],
+        ['str9', 'asset_str9'],
+        ['str10', 'asset_str10'],
+        ['int1', 'asset_int1'],
+        ['int2', 'asset_int2'],
+        ['int3', 'asset_int3'],
+        ['timestamp1', 'asset_timestamp1'],
+        ['timestamp2', 'asset_timestamp2'],
+        ['timestamp', 'asset_timestamp']
+      ]
+    })
+    const trsId = assetData.map(item => item.t_id)
+    const queryData = await this.loadSimpleTransactionData({ id: { $in: trsId } }, limit, offset, null, false)
+    const transactionRows = queryData
+    // let count = 0
+    // if (returnTotal) {
+    //   transactionRows = queryData.rows
+    //   count = queryData.total
+    // }
+
+    if (transactionRows && transactionRows.length) {
+      const transactionsMap = {}
+
+      const trsIds = []
+      const delegateTrsIds = []
+      const voteTrsIds = []
+      const signatureTrsIds = []
+      const multiSignatureTrsIds = []
+      const dappTrsIds = []
+      const dappIntransferTrsIds = []
+      const dappOuttransferTrsIds = []
+
+      for (let i = 0; i < transactionRows.length; i++) {
+        const trsItem = transactionRows[i]
+
+        transactionsMap[trsItem.t_id] = trsItem
+        trsIds.push(trsItem.t_id)
+
+        if (trsItem.t_type === DdnUtils.assetTypes.DELEGATE) {
+          delegateTrsIds.push(trsItem.t_id)
+        }
+        if (trsItem.t_type === DdnUtils.assetTypes.VOTE) {
+          voteTrsIds.push(trsItem.t_id)
+        }
+        if (trsItem.t_type === DdnUtils.assetTypes.SIGNATURE) {
+          signatureTrsIds.push(trsItem.t_id)
+        }
+        if (trsItem.t_type === DdnUtils.assetTypes.MULTISIGNATURE) {
+          multiSignatureTrsIds.push(trsItem.t_id)
+        }
+        if (trsItem.t_type === DdnUtils.assetTypes.DAPP) {
+          dappTrsIds.push(trsItem.t_id)
+        }
+        if (trsItem.t_type === DdnUtils.assetTypes.DAPP_IN) {
+          dappIntransferTrsIds.push(trsItem.t_id)
+        }
+        if (trsItem.t_type === DdnUtils.assetTypes.DAPP_OUT) {
+          dappOuttransferTrsIds.push(trsItem.t_id)
+        }
+      }
+
+      const combineTransactionData = trsExtRows => {
+        if (trsExtRows && trsExtRows.length > 0) {
+          for (let i = 0; i < trsExtRows.length; i++) {
+            const dataObj = trsExtRows[i]
+            const transactionObj = transactionsMap[dataObj.t_id]
+            if (transactionObj) {
+              Object.assign(transactionObj, dataObj)
+            }
+          }
+        }
+      }
+      combineTransactionData(assetData)
+      return transactionRows
+    } else {
+      return []
     }
   }
 }
