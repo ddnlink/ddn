@@ -61,7 +61,8 @@ async function createOrg (org, secret, second_secret) {
     feeBase = 800
   } else if (olen === 5) {
     feeBase = 1600
-  } else { // length <= 4
+  } else {
+    // length <= 4
     feeBase = 999999 // not allow
   }
 
@@ -120,7 +121,7 @@ async function createTransfer (address, amount, secret, second_secret) {
 async function createConfirmation (trsAmount, confirmation, secret, second_secret) {
   const keys = crypto.getKeys(secret)
 
-  if (typeof (confirmation) !== 'object') {
+  if (typeof confirmation !== 'object') {
     throw new Error('The first argument should be a object!')
   }
 
@@ -139,7 +140,7 @@ async function createConfirmation (trsAmount, confirmation, secret, second_secre
   if (!confirmation.url || confirmation.url.length === 0) {
     throw new Error('Invalid url format')
   }
-
+  confirmation.url = (confirmation.url + '').toLowerCase()
   if (confirmation.state !== 0 && confirmation.state !== 1) {
     throw new Error('Invalid state format')
   }
@@ -188,7 +189,7 @@ async function createConfirmation (trsAmount, confirmation, secret, second_secre
 async function createContribution (contribution, secret, second_secret) {
   const keys = crypto.getKeys(secret)
 
-  if (typeof (contribution) !== 'object') {
+  if (typeof contribution !== 'object') {
     throw new Error('The first argument should be a object!')
   }
 
@@ -207,7 +208,7 @@ async function createContribution (contribution, secret, second_secret) {
   if (!contribution.url || contribution.url.length === 0) {
     throw new Error('Invalid url format')
   }
-
+  contribution.url = (contribution.url + '').toLowerCase()
   const fee = bignum.multiply(constants.net.fees.dao_contribution, constants.fixedPoint)
   // contribution.sender_address = contribution.sender_address
   // contribution.received_address = contribution.received_address
@@ -255,19 +256,22 @@ async function createExchange (trsopt, exchange, secret, secondSecret) {
 
   const fee = bignum.multiply(constants.net.fees.exchange, constants.fixedPoint)
 
-  const transaction = Object.assign({
-    type: DdnUtils.assetTypes.DAO_EXCHANGE,
-    nethash: config.nethash,
-    amount: '0', // Bignum update
-    fee: `${fee}`,
-    recipientId: exchange.recipientId || null,
-    senderPublicKey: keys.publicKey,
-    // senderPublicKey: keys.publicKey,
-    timestamp: slots.getTime() - config.clientDriftSeconds,
-    asset: {
-      daoExchange: exchange
-    }
-  }, trsopt || {})
+  const transaction = Object.assign(
+    {
+      type: DdnUtils.assetTypes.DAO_EXCHANGE,
+      nethash: config.nethash,
+      amount: '0', // Bignum update
+      fee: `${fee}`,
+      recipientId: exchange.recipientId || null,
+      senderPublicKey: keys.publicKey,
+      // senderPublicKey: keys.publicKey,
+      timestamp: slots.getTime() - config.clientDriftSeconds,
+      asset: {
+        daoExchange: exchange
+      }
+    },
+    trsopt || {}
+  )
 
   transaction.signature = await crypto.sign(transaction, keys)
 

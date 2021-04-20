@@ -55,13 +55,13 @@ class PeerInvoker {
       url = `http://${peer.address}${url}`
     } else if (peer.host) {
       peer.ip = ip.toLong(peer.host)
-      // if (dappId) {
-      //   // TODO 这个判断是为了dapp节点测试同步，通过后需要删除
-      //   peer.host === '0.0.0.0' ? (peer.host = '192.168.56.101') : ''
-      //   url = `http://${peer.host}:${peer.port}/dapps/${dappId}${url}`
-      // } else {
-      url = `http://${peer.host}:${peer.port}${url}`
-      // }
+      if (dappId) {
+        // TODO 这个判断是为了dapp节点测试同步，通过后需要删除
+        // peer.host === '0.0.0.0' ? (peer.host = '192.168.1.8') : ''
+        url = `http://${peer.host}:${peer.port}/dapps/${dappId}${url}`
+      } else {
+        url = `http://${peer.host}:${peer.port}${url}`
+      }
     } else {
       url = `http://${ip.fromLong(peer.ip)}:${peer.port}${url}`
     }

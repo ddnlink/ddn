@@ -4,7 +4,7 @@ import ByteBuffer from 'bytebuffer'
  * @param {object} data  获取字节的数据源
  * @param {boolean} skipSignature 是否排除签名字段 默认 false
  * @param {*} skipSecondSignature 是否排除二次签名字段 默认 false
- * @param {*} skipId 是否排除id字段 默认 true
+ * @param {*} skipId 是否排除id字段 默认false  排除id
  */
 function getBytes (data, skipSignature, skipSecondSignature, skipId) {
   const transaction = JSON.parse(JSON.stringify(data))
@@ -59,6 +59,9 @@ function sortKeys ({ obj, sort = 1 }) {
 }
 function getObjectBytes (bb, data) {
   for (const value of Object.values(data)) {
+    if (value === undefined || value === null || value === '') {
+      continue
+    }
     if (typeof value === 'string') {
       bb.writeString(value)
     } else if (typeof value === 'number') {

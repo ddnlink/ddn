@@ -60,21 +60,23 @@ var desc = 'IssuerDesc'
 var trs = DdnJS.aob.createIssuer(name, desc, secret, secondSecret)
 console.log(JSON.stringify(trs))
 {
-    "type": 60,
-    "nethash": "0ab796cd",
-    "amount": "0",
-    "fee": "10000000000",
-    "recipientId": null,
-    "senderPublicKey": "1e18845d5fbbdf0a6820610e042dcb9a250205964b8075a395453b4a1d1ed10c",
-    "timestamp": 84671055,
-    "message": null,
-    "asset": {
-        "aobIssuer": {
-            "name": "rcpDa",
-            "desc": "资产描述"
-        }
-    },
-    "signature": "f8f8bb32e84fda67bdbf6cef27b83ae13684e5e9b4cf1ea3d22e4c1c1d013d10028422ffa199717fe55b4e73470b9f0d33f0a7123059a2fe628f8e58c824900f"
+	"type": 60,
+	"nethash": "0ab796cd",
+	"amount": "0",
+	"fee": "10000000000",
+	"recipientId": null,
+	"senderPublicKey": "e382a23e136866863c2d8c7f743b1ada594da39f6a425c9ad031f69fe15a9352",
+	"timestamp": 107116316,
+	"message": null,
+	"asset": {
+		"aobIssuer": {
+			"name": "IssuerName",
+			"desc": "IssuerDesc",
+			"issuer_id": "D4g4BztXXU2vguNhx45qGSVB9GtSTp8329"
+		}
+	},
+	"signature": "41f18e0e181d2a07c491ef60599b81e3d8eeef486b4359c3f81415a54623dc34f3505b33bac50f53b09a560e1b58d0f692183178d059ac692a85b354ffe70602",
+	"id": "0ee7a3909cef660ecfb8a81c76747cc815310be7f52232f6533a32f45e6657cb196c4d172b286bc96093c2e09de5935c91c790839c7ebed3d16b1430c0c0674f"
 }
 ```
 将生成的交易数据以transaction为key，放入json，调用上链接口提交，注册资产发行商IssuerName

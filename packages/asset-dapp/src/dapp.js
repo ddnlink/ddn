@@ -361,6 +361,14 @@ class Dapp extends Asset.Base {
         res.json({ success: false, error: err.message || err.toString() })
       }
     })
+    router.get('/uninstalled', async (req, res) => {
+      try {
+        const result = await self.getUninstalled()
+        res.json(result)
+      } catch (err) {
+        res.json({ success: false, error: err.message || err.toString() })
+      }
+    })
 
     router.post('/install', async (req, res) => {
       try {
@@ -730,7 +738,8 @@ class Dapp extends Asset.Base {
                   }
 
                   self.request(id, router.method, router.path, reqParams, function (err, body) {
-                    if (!err && body.error) {
+                    self.logger.debug('response body: ', err, body)
+                    if (!err && body && body.error) {
                       err = body.error
                     }
                     if (err) {
@@ -753,6 +762,26 @@ class Dapp extends Asset.Base {
           }
         }
       }
+      /**
+       * 添加模版渲染路由
+       */
+      const handler = async function (req, res) {
+        try {
+          const dappPath = path.join(self.dappsPath, id)
+          const dappPublicPath = path.resolve(dappPath, 'public')
+          // const dappPublicDist = path.resolve(dappPublicPath, 'dist')
+          // if (fs.existsSync(dappPublicDist)) {
+          //   res.render(`${dappPublicDist}/index.html`)
+          // } else {
+          res.render(`${dappPublicPath}/index.html`)
+          // }
+        } catch (err) {
+          res.json({ success: false, error: `${err}` })
+        }
+      }
+
+      dappRouter.get(`/${name}`, handler)
+      dappRouter.get(`/${id}`, handler)
       self.logger.debug('Dapp`s APIs have been attached. ')
     }
   }
@@ -847,8 +876,7 @@ class Dapp extends Asset.Base {
         type: 'object',
         properties: {
           category: {
-            type: 'string',
-            minLength: 1
+            type: 'array'
           },
           name: {
             type: 'string',
@@ -860,6 +888,11 @@ class Dapp extends Asset.Base {
             minimum: 0
           },
           link: {
+            type: 'string',
+            maxLength: 2000,
+            minLength: 1
+          },
+          install: {
             type: 'string',
             maxLength: 2000,
             minLength: 1
@@ -889,10 +922,18 @@ class Dapp extends Asset.Base {
       throw new Error(`Invalid parameters: ${validateErrors[0].schemaPath} ${validateErrors[0].message}`)
     }
 
-    const where = {
+    let where = {
       trs_type: await this.getTransactionType()
     }
-
+    const ids = await this.getInstalledDappIds()
+    if (query.install === 'true') {
+      where = { ...where, trs_id: { $in: ids } }
+    } else if (query.install === 'false') {
+      where = { ...where, trs_id: { $notIn: ids } }
+    }
+    if (query.category) {
+      where = { ...where, category: { $in: query.category } }
+    }
     const orders = []
 
     let sort = query.sort || query.orderBy
@@ -959,6 +1000,11 @@ class Dapp extends Asset.Base {
       throw new Error(`Invalid parameters: ${validateErrors[0].schemaPath} ${validateErrors[0].message}`)
     }
     const dapp = await this.getDappByTransactionId(query.id)
+    if (_dappLaunched[query.id]) {
+      dapp.launched = true
+    } else {
+      dapp.launched = false
+    }
 
     return { success: true, dapp }
   }
@@ -1001,6 +1047,15 @@ class Dapp extends Asset.Base {
     const ids = await this.getInstalledDappIds()
     if (ids && ids.length) {
       const dapps = await this.queryAsset({ trs_id: { $in: ids } }, null, false, 1, ids.length)
+      return { success: true, result: { rows: dapps } }
+    }
+    return { success: true, result: { rows: [] } }
+  }
+
+  async getUninstalled () {
+    const ids = await this.getInstalledDappIds()
+    if (ids && ids.length) {
+      const dapps = await this.queryAsset({ trs_id: { $notIn: ids } }, null, false, 1, ids.length)
       return { success: true, result: { rows: dapps } }
     }
     return { success: true, result: { rows: [] } }
@@ -1340,7 +1395,6 @@ class Dapp extends Asset.Base {
 
   async onBlockchainReady () {
     const installIds = await this.getInstalledDappIds()
-    console.log(installIds)
     for (let i = 0; i < installIds.length; i++) {
       const dappId = installIds[i]
       const dappPath = path.join(this.config.dappsDir, dappId)
@@ -1362,7 +1416,6 @@ class Dapp extends Asset.Base {
       }
     }
     Object.keys(_dappLaunched).forEach(function (dappId) {
-      console.log('request', dappId, broadcast)
       // broadcast &&
       self.request(dappId, 'post', '/message', req, function (err) {
         if (err) {
@@ -1414,7 +1467,7 @@ class Dapp extends Asset.Base {
     if (typeof this[call] !== 'function') {
       return cb(`Function not found in module: ${call}`)
     }
-    console.log('sandboxApi', call, args)
+    this.logger.debug('sandboxApi', call, args)
     const callArgs = [args, cb]
     return this[call].apply(this, callArgs)
   }
@@ -1701,16 +1754,21 @@ class Dapp extends Asset.Base {
     )
   }
 
-  submitOutTransfer (req, cb) {
+  submitOutTransfer (req, callback) {
     const self = this
     const trs = req.body
-    self.balancesSequence.add(function (cb) {
-      if (modules.transactions.hasUnconfirmedTransaction(trs)) {
+    self.balancesSequence.add(async function (cb) {
+      if (await modules.transactions.hasUnconfirmedTransaction(trs)) {
         return cb('Already exists')
       }
-      self.logger.log('Submit outtransfer transaction ' + trs.id + ' from dapp ' + req.dappId)
-      modules.transactions.receiveTransactions([trs], cb)
-    }, cb)
+      self.logger.debug('Submit outtransfer transaction ' + trs.id + ' from dapp ' + req.dappId)
+      try {
+        const tr = await modules.transactions.receiveTransactions([trs])
+        cb(null, tr)
+      } catch (error) {
+        cb(error)
+      }
+    }, callback)
   }
 
   // TODO will delete or complete (要么完善这个方法，要么在侧链里去掉该方法的调用,这里是同步充值侧链token的方法需要完善)
@@ -1743,14 +1801,12 @@ class Dapp extends Asset.Base {
     //     }
     //   });
     //   });
-    console.log(transactions)
     cb(null, transactions)
   }
 
   getLastWithdrawal = async function (req, cb) {
     // const that = this
     const dapp_id = req.dappId
-    // TODO 这里查询的是dapp充值交易，能不能直接查询dapp资产表
     const data = await this.runtime.dataquery.loadAssetsWithDappChainCondition({
       dapp_id,
       type: DdnUtils.assetTypes.DAPP_OUT

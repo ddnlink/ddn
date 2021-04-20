@@ -154,7 +154,7 @@ class Program {
     let payloadLength = 0
 
     for (const trs of block.transactions) {
-      const bytes = await DdnCrypto.getBytes(trs)
+      const bytes = DdnCrypto.getBytes(trs)
       payloadLength += bytes.length
       payloadBytes += bytes
     }

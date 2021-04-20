@@ -3,6 +3,7 @@
  * wangxm   2019-03-25
  */
 import DdnUtils from '@ddn/utils'
+import Sequelize from 'sequelize'
 
 let _singleton
 
@@ -614,14 +615,14 @@ class DataQuery {
     // let limit = 1000
     // let offset = 0
     let orders = null
-
     if (type === DdnUtils.assetTypes.DAPP_IN) {
-      where.str5 = { $gt: seq }
+      where.str5 = Sequelize.literal(`str5-0>${seq}`)
     } else if (type === DdnUtils.assetTypes.DAPP_OUT) {
       limit = 1
       offset = 0
-      orders = [['str5', 'DESC']]
+      orders = [[Sequelize.literal('str5-0'), 'DESC']]
     }
+    console.log('where', where)
     const assetData = await this.dao.findList('trs_asset', {
       where,
       limit,

@@ -125,16 +125,28 @@ class Block {
   }
 
   getHash (block) {
+    const newBlock = { ...block }
+    if (newBlock.transactions) {
+      delete newBlock.transactions
+    }
     // fixme: 2020.8.8 该方法返回 buffer, 还是使用原始 的nacl把
     return DdnCrypto.createHash(this.getBytes(block))
     // return nacl.hash(this.getBytes(block))
   }
 
   async sign (block, { privateKey }) {
-    return await DdnCrypto.sign(block, { privateKey })
+    const newBlock = { ...block }
+    if (newBlock.transactions) {
+      delete newBlock.transactions
+    }
+    return await DdnCrypto.sign(newBlock, { privateKey })
   }
 
   async getId (block) {
+    const newBlock = { ...block }
+    if (newBlock.transactions) {
+      delete newBlock.transactions
+    }
     return await DdnCrypto.getId(block)
   }
 
@@ -322,7 +334,6 @@ class Block {
       generator_public_key: data.keypair.publicKey.toString('hex'),
       transactions: blockTransactions
     }
-
     try {
       block.block_signature = await this.sign(block, data.keypair)
       block = await this.objectNormalize(block)
@@ -685,34 +696,32 @@ class Block {
         process.exit(1)
       }
     }
-
+    const self = this
     return new Promise((resolve, reject) => {
       this.balancesSequence.add(
         async cb => {
           const unconfirmedTrs = await this.runtime.transaction.getUnconfirmedTransactionList(true)
-
           try {
             await this.runtime.transaction.undoUnconfirmedList()
           } catch (err) {
-            this.logger.error('Failed to undo uncomfirmed transactions', err)
+            self.logger.error('Failed to undo uncomfirmed transactions', err)
             return process.exit(0)
           }
 
-          this.oneoff.clear()
+          self.oneoff.clear()
 
           try {
             await doApplyBlock()
           } catch (err) {
-            this.logger.error(`Failed to apply block 1: ${err}`)
+            self.logger.error(`Failed to apply block 1: ${err}`)
           }
 
           const redoTrs = unconfirmedTrs.filter(item => !applyedTrsIdSet.has(item.id))
           try {
-            await this.runtime.transaction.receiveTransactions(redoTrs)
+            await self.runtime.transaction.receiveTransactions(redoTrs)
           } catch (err) {
-            this.logger.error('Failed to redo unconfirmed transactions', err)
+            self.logger.error('Failed to redo unconfirmed transactions', err)
           }
-
           cb()
         },
         err => {
@@ -729,7 +738,7 @@ class Block {
   verifySignature (block) {
     // 接受到的block是protobuf 解密之后的，因为解密后的json是类似 Blcok{}这样，带个名称前缀，应该不是标准的json数据，所以使用Object.assign，这样数据就是{}
     block = Object.assign({}, block)
-    const newBlock = JSON.parse(JSON.stringify(block))
+    const newBlock = { ...block }
     let res = null
     const { block_signature, generator_public_key } = block
     // TODO creazy 铸造区块时没有下面这两个字段，同步时有，验证时不通过，现在手动删除，应该提出一个方法，生成一个需要验证的区块信息统一处理
@@ -739,7 +748,11 @@ class Block {
     if (newBlock.totalForged) {
       delete newBlock.totalForged
     }
-    const data = this.getBytes(newBlock)
+    if (newBlock.transactions) {
+      delete newBlock.transactions
+    }
+    // 块进行签名时是没有block_singuter字段的，所以验证时也跳过获取block_singuter的字节，这里第二个参数是跳过获取block_singuter字节
+    const data = this.getBytes(newBlock, true)
     const hash = DdnCrypto.createHash(data)
     res = DdnCrypto.verifyHash(hash, block_signature, generator_public_key)
     return res
@@ -819,12 +832,12 @@ class Block {
 
     let payloadBytes = ''
     const appliedTransactions = {}
-
     for (const i in block.transactions) {
       const transaction = block.transactions[i]
+      const newTransaction = this.runtime.transaction.deepCloneTransaction(transaction)
       let bytes
       try {
-        bytes = DdnCrypto.getBytes(transaction)
+        bytes = DdnCrypto.getBytes(newTransaction)
       } catch (e) {
         throw new Error(`Failed to get transaction bytes: ${e.toString()}`)
       }
@@ -972,8 +985,10 @@ class Block {
           await this.runtime.account.setAccount({
             publicKey: transaction.senderPublicKey
           })
-
-          // transaction.id = await DdnCrypto.getId(transaction) // 2020.5.18
+          // TODO creazy 这里的交易都是经过验证的，而且到这里的交易都是合法合规的，没有必要重新获取id
+          if (!transaction.id) {
+            transaction.id = await DdnCrypto.getId(transaction) // 2020.5.18
+          }
           transaction.block_id = block.id // wxm block database
 
           const existsTrs = existsTrsIds.find(item => {
