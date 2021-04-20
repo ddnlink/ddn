@@ -44,9 +44,7 @@
     "node": ">=8.6.0"
   },
   "dependencies": {
-    "@ddn/asset-aob": "^0.5.3",
     "@ddn/asset-base": "^0.4.1",
-    "@ddn/asset-dao": "^0.4.1",
     "@ddn/asset-dapp": "^0.3.1",
     "@ddn/asset-evidence": "^0.2.1",
     "@ddn/core": "^0.2.15",
@@ -77,8 +75,8 @@
     "mysql2": "^1.6.1",
     "node-fetch": "^1.7.3",
     "node-gyp": "^3.6.2",
-    "pg": "^7.7.1",
-    "pg-hstore": "^2.3.2",
+    "pg": "^8.6.0",
+    "pg-hstore": "^2.3.3",
     "pluralize": "^8.0.0",
     "protobufjs": "^6.8.6",
     "querystring": "^0.2.1",

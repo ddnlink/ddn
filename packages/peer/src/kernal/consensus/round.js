@@ -29,12 +29,18 @@ class Round {
   async prepare () {
     const round = await this.getRound(this.runtime.block.getLastBlock().height)
     const roundStr = round.toString()
-
-    // 这里没有将 bignum 计算传进去，通过 / % 等运算符，字符串形式的 bignum 会自动转为 number
+    // console.log(this.config.database.options.dialect)
+    let aliases = 'INTEGER'
+    if (this.config.database.options.dialect === 'mysql') {
+      aliases = 'SIGNED'
+    } else {
+      aliases = 'INTEGER'
+    }
+    // 这里没有将 bignum 计算传进去，通过 / % 等运算符，字符串形式的 bignum 会自动转为 number cast函数mysql中转number 是SIGNED psql和sqlite中是INTEGER
     let row = await this.dao.findOne('block', {
       where: {
         [roundStr]: this.dao.db_str(
-          `(select (cast(block.height / ${this.constants.delegates} as integer) + (case when block.height % ${this.constants.delegates} > 0 then 1 else 0 end))) = ${roundStr}`
+          `(select (cast(block.height / ${this.constants.delegates} as ${aliases}) + (case when block.height % ${this.constants.delegates} > 0 then 1 else 0 end))) = ${roundStr}`
         )
       },
       attributes: [

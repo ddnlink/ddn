@@ -5,7 +5,7 @@ export default connection => {
     'trs_asset',
     {
       transaction_id: {
-        type: Sequelize.STRING(64),
+        type: Sequelize.STRING(255),
         primaryKey: true,
         allowNull: false
       },
