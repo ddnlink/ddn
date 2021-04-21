@@ -24,10 +24,10 @@ import Consensus from './consensus/consensus'
 import DataQuery from './consensus/data-query'
 import Peer from './peer/peer'
 import Energy from '../helpers/energy'
-import { DVM, Compiler } from '@ddn/contract'
 import dbUpgrade from '../db/db-upgrade'
 import HttpServer from '../network/http-server'
 import MultiSignature from './consensus/multisignature'
+import { DVM, Compiler } from '@ddn/contract'
 
 import defaultConfig from '../config.default.js'
 

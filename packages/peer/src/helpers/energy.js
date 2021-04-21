@@ -241,7 +241,7 @@ class Energy {
             dbTrans
           )
         }
-      } else if (!mtd.payable) {
+      } else if (!mtd.send) {
         this.logger.info(`Send to contract method: ${mtd.name}`)
         result = await this.runtime.dvm.sendContract(gas_limit, context, contract_id, method, ...args)
         if (result.transfers && result.transfers.length > 0) {
