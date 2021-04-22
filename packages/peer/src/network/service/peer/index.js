@@ -5,8 +5,8 @@
 import ip from 'ip'
 
 import { LimitCache, checkAndReport } from '@ddn/utils'
-import { system } from '@ddn/utils-system'
 import * as DdnCrypto from '@ddn/crypto'
+import { System } from '../../../utils/system'
 
 class PeerService {
   constructor (context) {
@@ -334,7 +334,7 @@ class PeerService {
 
       return {
         success: false,
-        error: system.getErrorMsg(e.message)
+        error: System.getErrorMsg(e.message)
       }
     }
     if (global.assets && global.assets.transTypeNames[90] && this.constants.net.superviseIp === this.config.publicIp) {
@@ -387,7 +387,7 @@ class PeerService {
             console.log(err)
             // 这里的错误就是上面 catch 的 exp，所以统一在这里处理就好
             this.logger.warn(
-              `Receive invalid transaction, transaction is ${JSON.stringify(transaction)}, ${system.getErrorMsg(err)}`
+              `Receive invalid transaction, transaction is ${JSON.stringify(transaction)}, ${System.getErrorMsg(err)}`
             )
 
             // 缓存非法交易

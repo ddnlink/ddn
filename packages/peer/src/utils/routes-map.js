@@ -124,7 +124,7 @@ const getEndpoints = app => {
  * @param {object} app the express/route instance
  * @param {string} filename filename to write routes to
  */
-const routeMap = (app, filename, logger) => {
+export const routesMap = (app, filename, logger) => {
   if (typeof filename === 'object') {
     logger = filename
     filename = null
@@ -151,4 +151,4 @@ const routeMap = (app, filename, logger) => {
   }
 }
 
-export default routeMap
+export default routesMap

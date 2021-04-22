@@ -9,7 +9,7 @@ import ip from 'ip'
 import extend from 'extend2'
 import * as DdnCrypto from '@ddn/crypto'
 import { bignum, runtimeState } from '@ddn/utils'
-import { system } from '@ddn/utils-system'
+import { System } from '../utils/system'
 // import tracer from 'tracer'
 import { logger } from '../utils/logger'
 
@@ -45,7 +45,7 @@ class Program {
     options.logger = logger(options)
 
     if (!options.configObject.publicIp) {
-      options.configObject.publicIp = system.getPublicIp()
+      options.configObject.publicIp = System.getPublicIp()
     }
 
     this._context = new Context()
@@ -133,7 +133,7 @@ class Program {
         fs.unlinkSync(this._pid_file)
       }
     } catch (err) {
-      console.error(system.getErrorMsg(err))
+      console.error(System.getErrorMsg(err))
     }
   }
 
@@ -241,7 +241,7 @@ class Program {
       // init asset banlance when start program
       await this._context.runtime.transaction.execAssetFunc('onInitAccountsAndBalances')
     } catch (err) {
-      this._context.logger.error('Failed to load blockchain', system.getErrorMsg(err))
+      this._context.logger.error('Failed to load blockchain', System.getErrorMsg(err))
       return process.exit(1)
     }
 
@@ -506,7 +506,7 @@ class Program {
               try {
                 await this._context.runtime.block.generateBlock(forgeDelegateInfo.keypair, forgeDelegateInfo.time)
               } catch (err) {
-                this._context.logger.error('Forged new block failed: ' + system.getErrorMsg(err))
+                this._context.logger.error('Forged new block failed: ' + System.getErrorMsg(err))
                 cb('Forged new block failed: ' + err) // Added: 2020.9.4
               }
             }

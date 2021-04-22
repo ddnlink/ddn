@@ -9,7 +9,6 @@ const path = require('path')
 const fs = require('fs')
 const DdnCore = require('@ddn/core').default
 const DdnPeer = require('@ddn/peer').default
-const DdnUtils = require('@ddn/utils-system').default
 const constants = require('./constants')
 
 /**
@@ -107,7 +106,7 @@ async function main () {
     peer = new DdnPeer()
     await peer.run(options)
   } catch (err) {
-    console.error(DdnUtils.system.getErrorMsg(err))
+    console.error(err)
 
     if (peer) {
       peer.destory()

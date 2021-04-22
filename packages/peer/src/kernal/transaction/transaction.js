@@ -4,7 +4,7 @@
  */
 import extend from 'util-extend'
 import { bignum, assetTypes } from '@ddn/utils'
-import { system } from '@ddn/utils-system'
+import { System } from '../../utils/system'
 import * as DdnCrypto from '@ddn/crypto'
 import { getId } from '@ddn/crypto'
 import Assets from '../../assets'
@@ -560,7 +560,7 @@ class Transaction {
         try {
           await this.runtime.peer.broadcast.broadcastUnconfirmedTransaction(transaction)
         } catch (err) {
-          this.logger.error(`Broadcast unconfirmed transaction failed: ${system.getErrorMsg(err)}`)
+          this.logger.error(`Broadcast unconfirmed transaction failed: ${System.getErrorMsg(err)}`)
         }
       })
     }

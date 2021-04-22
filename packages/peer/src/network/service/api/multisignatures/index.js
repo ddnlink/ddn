@@ -4,7 +4,7 @@
  */
 import * as DdnCrypto from '@ddn/crypto'
 import { assetTypes, bignum } from '@ddn/utils'
-import { system } from '@ddn/utils-system'
+import { System } from '../../../../utils/system'
 
 class MultisignaturesRouter {
   constructor (context) {
@@ -114,7 +114,7 @@ class MultisignaturesRouter {
             const transactions = await this.runtime.transaction.receiveTransactions([transaction])
             cb(null, transactions)
           } catch (e) {
-            this.logger.error('create multisignatures error', system.getErrorMsg(e))
+            this.logger.error('create multisignatures error', System.getErrorMsg(e))
             return cb(e)
           }
         },
@@ -126,7 +126,7 @@ class MultisignaturesRouter {
               try {
                 await this.runtime.socketio.emit('multisignatures/change', {})
               } catch (err2) {
-                this.logger.error('socket emit error: multisignatures/change', system.getErrorMsg(err2))
+                this.logger.error('socket emit error: multisignatures/change', System.getErrorMsg(err2))
               }
             })
 
@@ -258,7 +258,7 @@ class MultisignaturesRouter {
                 transaction: transaction.id
               })
             } catch (err) {
-              this.logger.error(`Broadcast new signature failed: ${system.getErrorMsg(err)}`)
+              this.logger.error(`Broadcast new signature failed: ${System.getErrorMsg(err)}`)
             }
           })
 
@@ -320,7 +320,7 @@ class MultisignaturesRouter {
           try {
             verify = await this.runtime.transaction.verifySignature(item, signature, query.publicKey)
           } catch (e) {
-            this.logger.error('/multisignatures/pending verify fail, error is ', system.getErrorMsg(e))
+            this.logger.error('/multisignatures/pending verify fail, error is ', System.getErrorMsg(e))
             verify = false
           }
 
@@ -443,11 +443,11 @@ class MultisignaturesRouter {
           accounts: rows
         }
       } catch (e) {
-        this.logger.error('findList: ', system.getErrorMsg(e))
+        this.logger.error('findList: ', System.getErrorMsg(e))
         throw e
       }
     } catch (err) {
-      this.logger.error('Can`t find multisignatures, ', system.getErrorMsg(err))
+      this.logger.error('Can`t find multisignatures, ', System.getErrorMsg(err))
       throw err
     }
   }

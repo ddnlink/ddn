@@ -1,5 +1,5 @@
 import { assetTypes } from '@ddn/utils'
-import { system } from '@ddn/utils-system'
+import { System } from '../../utils/system'
 
 let _singleton
 
@@ -36,7 +36,7 @@ class MultiSignature {
                   transaction: transaction.id
                 })
               } catch (err) {
-                this.logger.error(`Broadcast new signature failed: ${system.getErrorMsg(err)}`)
+                this.logger.error(`Broadcast new signature failed: ${System.getErrorMsg(err)}`)
               }
             })
 

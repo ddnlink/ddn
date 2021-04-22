@@ -10,7 +10,7 @@ import assert from 'assert'
 import * as DdnCrypto from '@ddn/crypto'
 // import { nacl } from '@ddn/crypto'
 import { runtimeState, bignum } from '@ddn/utils'
-import { system } from '@ddn/utils-sytem'
+import { System } from '../../utils/system'
 import BlockStatus from './block-status'
 
 let _singleton
@@ -516,7 +516,7 @@ class Block {
             try {
               await this.runtime.peer.broadcast.broadcastNewPropose(propose)
             } catch (err) {
-              this.logger.error(`Broadcast new propose failed: ${system.getErrorMsg(err)}`)
+              this.logger.error(`Broadcast new propose failed: ${System.getErrorMsg(err)}`)
             }
           })
 
@@ -563,7 +563,7 @@ class Block {
                   }
                 } catch (err) {
                   if (err) {
-                    this.logger.error(`Replay propose request failed: ${system.getErrorMsg(err)}`)
+                    this.logger.error(`Replay propose request failed: ${System.getErrorMsg(err)}`)
                   }
                 }
               })
@@ -681,9 +681,9 @@ class Block {
               await this.runtime.peer.broadcast.broadcastNewBlock(block, votes)
               await this.runtime.transaction.execAssetFunc('onNewBlock', block, votes)
             } catch (err) {
-              this.logger.error(`Broadcast new block failed: ${system.getErrorMsg(err)}`)
+              this.logger.error(`Broadcast new block failed: ${System.getErrorMsg(err)}`)
               // TODO: 2020.8.30 检查该处是否抛出错误
-              // throw new Error(`Broadcast new block failed: ${system.getErrorMsg(err)}`)
+              // throw new Error(`Broadcast new block failed: ${System.getErrorMsg(err)}`)
             }
           })
         }
@@ -1124,8 +1124,8 @@ class Block {
         try {
           await this.runtime.peer.broadcast.broadcastNewPropose(propose)
         } catch (err) {
-          this.logger.error(`Broadcast new propose failed: ${system.getErrorMsg(err)}`)
-          throw new Error(`Broadcast new propose failed: ${system.getErrorMsg(err)}`)
+          this.logger.error(`Broadcast new propose failed: ${System.getErrorMsg(err)}`)
+          throw new Error(`Broadcast new propose failed: ${System.getErrorMsg(err)}`)
         }
       })
     }

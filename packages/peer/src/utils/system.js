@@ -2,7 +2,7 @@ import os from 'os'
 import shell from 'shelljs'
 import ip from 'ip'
 
-class System {
+export class System {
   static getPublicIp () {
     let publicIp = null
     try {

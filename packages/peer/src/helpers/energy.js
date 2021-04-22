@@ -147,6 +147,7 @@ class Energy {
     const checkResult = await this.runtime.energy.checkGas(sender.address, contract.gas_limit)
 
     this.logger.info(`Deploy smart contract id: ${contract.id}, name: ${contract.name}`)
+    console.log('----------------------1')
     const publishResult = await this.runtime.dvm.deployContract(
       contract.gas_limit,
       context,
@@ -154,7 +155,8 @@ class Energy {
       contract.name,
       contract.code
     )
-
+    console.log(publishResult)
+    this.logger.info(`Deploy smart contract id: ${contract.id}, success: ${publishResult.success}`)
     const resultData = publishResult.data
     if (publishResult.success) {
       await this.dao.insert(

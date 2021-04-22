@@ -4,7 +4,7 @@
  */
 import ip from 'ip'
 import { bignum } from '@ddn/utils'
-import { system } from '@ddn/utils-system'
+import { System } from '../../utils/system'
 
 let _singleton
 
@@ -227,7 +227,7 @@ class PeerSync {
         await this.runtime.block.deleteBlocksBefore(lastLackBlock)
         await this.runtime.round.directionSwap('forward', lastBlock)
       } catch (err) {
-        this.logger.error(`Failed to rollback blocks before ${lastLackBlock.height}`, system.getErrorMsg(err))
+        this.logger.error(`Failed to rollback blocks before ${lastLackBlock.height}`, System.getErrorMsg(err))
         process.exit(1)
       }
     }

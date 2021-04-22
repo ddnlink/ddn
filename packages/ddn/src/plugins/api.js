@@ -530,36 +530,36 @@ async function callContract (options) {
   })
 }
 
-async function getContract (options) {
-  if (!options.id) {
+async function getContract (id) {
+  if (!id) {
     console.error('Error: invalid params, contract id should provide')
     return
   }
 
-  getApi().get('/api/contracts/get', { id: options.id }, function (err, res) {
-    console.log(err || res.result)
+  getApi().get('/api/contracts/get', { id }, function (err, res) {
+    console.log(err || res)
   })
 }
 
-async function getContractCode (options) {
-  if (!options.id) {
+async function getContractCode (id) {
+  if (!id) {
     console.error('Error: invalid params, contract id should provide')
     return
   }
 
-  getApi().get('/api/contracts/code', { id: options.id }, function (err, res) {
-    console.log(err || res.result)
+  getApi().get('/api/contracts/code', { id }, function (err, res) {
+    console.log(err || res)
   })
 }
 
-async function getContractMetadata (options) {
-  if (!options.id) {
+async function getContractMetadata (id) {
+  if (!id) {
     console.error('Error: invalid params, contract id should provide')
     return
   }
 
-  getApi().get('/api/contracts/metadata', { id: options.id }, function (err, res) {
-    console.log(err || res.result)
+  getApi().get('/api/contracts/metadata', { id }, function (err, res) {
+    console.log(err || res)
   })
 }
 
@@ -576,7 +576,7 @@ async function getContractResults (options) {
   }
 
   getApi().get('/api/contracts/results', { id: options.id }, function (err, res) {
-    console.log(err || res.result)
+    console.log(err || res)
   })
 }
 
@@ -587,7 +587,7 @@ async function getContractResult (options) {
   }
 
   getApi().get('/api/contracts/results', options, function (err, res) {
-    console.log(err || res.result)
+    console.log(err || res)
   })
 }
 

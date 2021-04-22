@@ -4,9 +4,9 @@
  */
 import path from 'path'
 import fs from 'fs'
-import DdnUtils from '@ddn/utils'
 import Asset from '@ddn/asset-base'
 import Bus from '../utils/bus'
+import System from '../utils/system'
 import protobuf from '../utils/protobuf'
 import Sequence from '../utils/sequence'
 import Address from '../helpers/address'
@@ -18,7 +18,7 @@ import DdnSchema from '../schema/ddn-schema'
 class Context {
   async init (options) {
     if (!options.configObject.publicIp) {
-      options.configObject.publicIp = DdnUtils.system.getPublicIp()
+      options.configObject.publicIp = System.getPublicIp()
     }
 
     this.isDaemonMode = options.isDaemonMode
