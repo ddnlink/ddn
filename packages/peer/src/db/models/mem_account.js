@@ -8,19 +8,19 @@ export default connection =>
         type: Sequelize.STRING(20) // 原类型:varchar,size:20
       },
       is_delegate: {
-        type: Sequelize.BIGINT, // 原类型:bigint
+        type: Sequelize.INTEGER, // 原类型:bigint
         defaultValue: 0
       },
       u_isdelegate: {
-        type: Sequelize.BIGINT, // 原类型:bigint
+        type: Sequelize.INTEGER, // 原类型:bigint
         defaultValue: 0
       },
       second_signature: {
-        type: Sequelize.BIGINT, // 原类型:bigint
+        type: Sequelize.INTEGER, // 原类型:bigint
         defaultValue: 0
       },
       u_second_signature: {
-        type: Sequelize.BIGINT, // 原类型:bigint
+        type: Sequelize.INTEGER, // 原类型:bigint
         defaultValue: 0
       },
       u_username: {
@@ -32,10 +32,10 @@ export default connection =>
         allowNull: false
       },
       publicKey: {
-        type: Sequelize.STRING(64) // 原类型:binary,size:32
+        type: Sequelize.STRING(255) // 原类型:binary,size:255
       },
       second_public_key: {
-        type: Sequelize.STRING(32) // 原类型:binary,size:32
+        type: Sequelize.STRING(255) // 原类型:binary,size:255
       },
       balance: {
         type: Sequelize.BIGINT, // 原类型:bigint
@@ -82,7 +82,7 @@ export default connection =>
         defaultValue: 0
       },
       block_id: {
-        type: Sequelize.STRING(64) // 原类型:varchar,size:64
+        type: Sequelize.STRING(255) // 原类型:varchar,size:64
       },
       nameexist: {
         type: Sequelize.INTEGER, // 原类型:tinyint,size:1

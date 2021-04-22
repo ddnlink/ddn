@@ -9,7 +9,7 @@ export default connection => {
         allowNull: false
       },
       dapp_id: {
-        type: Sequelize.STRING(20),
+        type: Sequelize.STRING(255),
         allowNull: false
       }
     },

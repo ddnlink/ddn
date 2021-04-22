@@ -8,10 +8,10 @@ export default connection => {
         type: Sequelize.INTEGER
       },
       block_id: {
-        type: Sequelize.STRING(64)
+        type: Sequelize.STRING(255)
       },
       delegate: {
-        type: Sequelize.STRING(64)
+        type: Sequelize.STRING(255)
       },
       address: {
         type: Sequelize.STRING(50)

@@ -9,7 +9,7 @@ export default connection =>
         allowNull: false
       },
       transaction_id: {
-        type: Sequelize.STRING(64), // 原类型:VARCHAR,size:64
+        type: Sequelize.STRING(255), // 原类型:VARCHAR,size:255
         allowNull: false,
         primaryKey: true
       }

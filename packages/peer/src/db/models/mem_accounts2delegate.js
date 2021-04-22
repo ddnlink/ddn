@@ -5,11 +5,11 @@ export default connection =>
     'mem_accounts2delegate',
     {
       account_id: {
-        type: Sequelize.STRING(50), // 原类型:varchar,size:50
+        type: Sequelize.STRING(255), // 原类型:varchar,size:255
         allowNull: false
       },
       dependent_id: {
-        type: Sequelize.STRING(64), // 原类型:varchar,size:64
+        type: Sequelize.STRING(255), // 原类型:varchar,size:255
         allowNull: false
       }
     },

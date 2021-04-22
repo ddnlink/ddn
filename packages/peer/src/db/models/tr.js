@@ -11,12 +11,12 @@ export default connection => {
     'tr',
     {
       id: {
-        type: Sequelize.STRING(64),
+        type: Sequelize.STRING(255),
         primaryKey: true,
         allowNull: false
       },
       block_id: {
-        type: Sequelize.STRING(64),
+        type: Sequelize.STRING(255),
         allowNull: false
       },
       block_height: {
@@ -32,7 +32,7 @@ export default connection => {
         allowNull: false
       },
       senderPublicKey: {
-        type: Sequelize.STRING(64), // 原来是 BINARY(32)
+        type: Sequelize.STRING(255), // 原来是 BINARY(32)
         allowNull: false
       },
       senderId: {
@@ -51,14 +51,14 @@ export default connection => {
         allowNull: false
       },
       signature: {
-        type: Sequelize.STRING(128), // 原来是 BINARY(64)
+        type: Sequelize.STRING(255), // 原来是 BINARY(255)
         allowNull: false
       },
       sign_signature: {
-        type: Sequelize.STRING(64) // 原来是 BINARY(64)
+        type: Sequelize.STRING(255) // 原来是 BINARY(255)
       },
       requester_public_key: {
-        type: Sequelize.STRING(32) // 原来是 BINARY(32)
+        type: Sequelize.STRING(255) // 原来是 BINARY(32)
       },
       signatures: {
         type: Sequelize.TEXT

@@ -164,7 +164,7 @@ class Account {
 
     const mem_account = await this.dao.findOne('mem_account', { where, attributes, transaction: dbTrans })
     if (!mem_account) return
-
+    console.log(mem_account, attributes)
     const delegates = await this.dao.findList('mem_accounts2delegate', {
       where: {
         account_id: mem_account.address

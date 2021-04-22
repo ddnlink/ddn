@@ -5,7 +5,7 @@ export default connection =>
     'forks_stat',
     {
       delegate_public_key: {
-        type: Sequelize.STRING(32), // 原类型:BINARY,size:32
+        type: Sequelize.STRING(255), // 原类型:BINARY,size:32
         allowNull: false
       },
       block_timestamp: {
@@ -13,7 +13,7 @@ export default connection =>
         allowNull: false
       },
       block_id: {
-        type: Sequelize.STRING(64), // 原类型:VARCHAR,size:64
+        type: Sequelize.STRING(255), // 原类型:VARCHAR,size:255
         allowNull: false
       },
       block_height: {
@@ -21,7 +21,7 @@ export default connection =>
         allowNull: false
       },
       previous_block: {
-        type: Sequelize.STRING(64), // 原类型:VARCHAR,size:64
+        type: Sequelize.STRING(255), // 原类型:VARCHAR,size:255
         allowNull: false
       },
       cause: {
