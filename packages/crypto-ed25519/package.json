@@ -6,6 +6,10 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
+  "files": [
+    "lib",
+    "dist"
+  ],
   "dependencies": {
     "bitcore-mnemonic": "^8.20.5",
     "@ddn/crypto-base":"^0.0.1",

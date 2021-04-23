@@ -9,6 +9,10 @@
   "keywords": [
     "crypto"
   ],
+  "files": [
+    "lib",
+    "dist"
+  ],
   "dependencies": {
     "@ddn/crypto-nacl": "^0.0.1",
     "@ddn/core": "^0.2.15"
