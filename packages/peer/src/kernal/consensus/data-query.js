@@ -578,7 +578,7 @@ class DataQuery {
   }
 
   async loadAssetsWithDappChainCondition ({ dapp_id, seq, type, limit = 1000, offset = 0 }) {
-    const where = { str2: dapp_id, transaction_type: type }
+    const where = { str6: dapp_id, transaction_type: type }
     // let limit = 1000
     // let offset = 0
     let orders = null
@@ -589,7 +589,7 @@ class DataQuery {
       offset = 0
       orders = [[Sequelize.literal('str5-0'), 'DESC']]
     }
-    console.log('where', where)
+
     const assetData = await this.dao.findList('trs_asset', {
       where,
       limit,

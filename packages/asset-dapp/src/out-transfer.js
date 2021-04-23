@@ -13,7 +13,7 @@ class OutTransfer extends Asset.Base {
   async propsMapping () {
     return [
       {
-        field: 'str2',
+        field: 'str6',
         prop: 'dapp_id',
         required: true
       },
@@ -165,13 +165,16 @@ class OutTransfer extends Asset.Base {
     if (!trs.signatures || trs.signatures.length !== dapp.unlock_delegates) {
       throw new Error('Invalid signature number')
     }
-
+    const transaction = JSON.parse(JSON.stringify(trs))
+    if (transaction.senderId) {
+      delete transaction.senderId
+    }
     let validSignatureNumber = 0
-    const bytes = DdnCrypto.getBytes(trs, true, true)
+    const bytes = DdnCrypto.getBytes(transaction, true, true)
     try {
       for (const i in trs.signatures) {
         for (const j in dapp.delegates) {
-          if (await this.runtime.transaction.verifyBytes(bytes, trs.signatures[i], dapp.delegates[j])) {
+          if (await DdnCrypto.verifyBytes(bytes, trs.signatures[i], dapp.delegates[j])) {
             validSignatureNumber++
             break
           }

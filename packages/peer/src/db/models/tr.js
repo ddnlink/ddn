@@ -20,7 +20,7 @@ export default connection => {
         allowNull: false
       },
       block_height: {
-        type: Sequelize.INTEGER,
+        type: Sequelize.BIGINT,
         allowNull: false
       },
       type: {

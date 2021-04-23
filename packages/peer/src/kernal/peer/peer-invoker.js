@@ -89,7 +89,6 @@ class PeerInvoker {
     // } else {
     //   req.body =JSON.stringify(args.query)
     // }
-    console.log('req======', req)
     return new Promise((resolve, reject) => {
       request(req, async (err, res, body) => {
         if (err || res.statusCode !== 200) {
@@ -111,7 +110,7 @@ class PeerInvoker {
           this.logger.error('request error: ', err)
           reject(new Error(`Request peer api failed: ${url}`))
         } else {
-          console.log('body', body)
+          // console.log('body', body)
           // TODO dapp侧链返回的规则和主链的规则不一致，这里先返回后期优化一下
           if (dappId) {
             resolve({ body, peer })
