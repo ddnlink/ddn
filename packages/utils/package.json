@@ -1,6 +1,6 @@
 {
   "name": "@ddn/utils",
-  "version": "0.2.2",
+  "version": "0.2.3",
   "description": "DDN utils.",
   "main": "lib/index.js",
   "module": "dist/index.esm.js",
@@ -17,7 +17,7 @@
     "lib"
   ],
   "dependencies": {
-    "@ddn/core": "^0.2.15",
+    "@ddn/core": "^0.2.16",
     "bignumber.js": "^7.2.1",
     "request-promise": "^4.2.6"
   },
