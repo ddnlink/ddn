@@ -1,7 +1,7 @@
 import {readdirSync} from 'fs'
 import {join} from 'path'
 
-const headPkgs = ['utils', 'utils-system', 'core', 'crypto']
+const headPkgs = ['utils', 'core', 'crypto']
 const tailPkgs = ['peer', 'test-utils', 'node-sdk', 'js-sdk']
 const otherPkgs = readdirSync(join(__dirname, 'packages')).filter(
   pkg => pkg.charAt(0) !== '.' && !headPkgs.includes(pkg) && !tailPkgs.includes(pkg)
