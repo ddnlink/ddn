@@ -18,5 +18,5 @@
     "@ddn/crypto-nacl": "^0.0.2"
   },
   "author": "",
-  "license": "ISC"
+  "license": "MIT"
 }

@@ -11,7 +11,7 @@
     "dist"
   ],
   "author": "creazy",
-  "license": "ISC",
+  "license": "MIT",
   "dependencies": {
     "bytebuffer": "^5.0.1",
     "fast-sha256": "^1.3.0"
