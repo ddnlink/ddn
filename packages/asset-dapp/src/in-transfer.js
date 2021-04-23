@@ -11,7 +11,7 @@ class InTransfer extends Asset.Base {
   async propsMapping () {
     return [
       {
-        field: 'str2',
+        field: 'str6',
         prop: 'dapp_id',
         required: true
       },

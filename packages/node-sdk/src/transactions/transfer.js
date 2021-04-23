@@ -19,17 +19,16 @@ async function createInTransfer (dappId, currency, amount, secret, secondSecret)
     senderPublicKey: keys.publicKey,
     timestamp: slots.getTime() - config.clientDriftSeconds,
     asset: {
-      in: {
+      dappIn: {
         dapp_id: dappId,
         currency
       }
     }
   }
-
-  if (currency === constants.nethash[nethash].tokenName) {
+  if (currency === constants.tokenName) {
     transaction.amount = amount // Bignum update Number(amount)
   } else {
-    transaction.asset.in.amount = String(amount)
+    transaction.asset.dappIn.amount = String(amount)
   }
 
   transaction.signature = await crypto.sign(transaction, keys)
@@ -58,7 +57,7 @@ async function createOutTransfer (secret, recipientId, dappId, transactionId, cu
     asset: {
       dappOut: {
         dapp_id: dappId,
-        transaction_id: transactionId,
+        outtransaction_id: transactionId,
         currency,
         amount,
         withdrawal_sequence: String(withdrawal_sequence)

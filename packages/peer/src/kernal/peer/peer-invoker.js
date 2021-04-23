@@ -89,7 +89,6 @@ class PeerInvoker {
     // } else {
     //   req.body =JSON.stringify(args.query)
     // }
-    // console.log('req======', req)
     return new Promise((resolve, reject) => {
       request(req, async (err, res, body) => {
         if (err || res.statusCode !== 200) {

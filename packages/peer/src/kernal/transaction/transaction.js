@@ -857,8 +857,11 @@ class Transaction {
           delete element.transaction_type
           delete element.transaction_id
           delete element.timestamp
-          // if(element.quantity){
-          //   delete element.quantity
+          if (element.deposit_sequence) {
+            delete element.deposit_sequence
+          }
+          // if (element.deposit_sequence) {
+          //   delete element.deposit_sequence
           // }
         }
       }

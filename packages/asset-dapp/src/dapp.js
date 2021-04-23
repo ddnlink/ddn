@@ -1766,6 +1766,7 @@ class Dapp extends Asset.Base {
         const tr = await modules.transactions.receiveTransactions([trs])
         cb(null, tr)
       } catch (error) {
+        self.logger.debug('submitOutTransfer', error)
         cb(error)
       }
     }, callback)

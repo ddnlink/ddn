@@ -24,6 +24,10 @@ function getBytesForBeforeHeight (data, skipSignature, skipSecondSignature, skip
   if (!skipId && data.id) {
     delete data.id
   }
+  // 去掉signatures字段(dapp提现操作会额外加入该字段，没有存储只有认证)
+  if (data.signatures) {
+    delete data.signatures
+  }
   getAsset(bb, data)
   getObjectBytes(bb, data)
   bb.flip()
