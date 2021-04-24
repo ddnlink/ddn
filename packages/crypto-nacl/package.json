@@ -18,8 +18,8 @@
   ],
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/ddnlink/ddn.git"
-  },
+    "url": "https://github.com/ddnlink/ddn/tree/master/packages/crypto-nacl"
+},
   "scripts": {
     "test": "echo \"Error: run tests from root\" && exit 1"
   },

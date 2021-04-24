@@ -20,6 +20,10 @@
     "safe-buffer": "^5.2.1",
     "tweetnacl": "^1.0.2"
   },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ddnlink/ddn/tree/master/packages/crypto-ed25519"
+},
   "author": "",
   "license": "MIT"
 }
