@@ -147,7 +147,7 @@ class Energy {
     const checkResult = await this.runtime.energy.checkGas(sender.address, contract.gas_limit)
 
     this.logger.info(`Deploy smart contract id: ${contract.id}, name: ${contract.name}`)
-    console.log('----------------------1')
+
     const publishResult = await this.runtime.dvm.deployContract(
       contract.gas_limit,
       context,
@@ -214,6 +214,8 @@ class Energy {
     const { metadata } = await this.dao.findOne('contract', contract_id, { attributes: ['id', 'metadata'] })
     const meta = JSON.parse(metadata)
     const mtd = meta.methods.find(t => t.name === method)
+    assert(!!mtd, 'Invalid contract method, method name not found')
+
     try {
       let result
       let amount = options.amount
@@ -243,7 +245,7 @@ class Energy {
             dbTrans
           )
         }
-      } else if (!mtd.send) {
+      } else if (!mtd.payable) {
         this.logger.info(`Send to contract method: ${mtd.name}`)
         result = await this.runtime.dvm.sendContract(gas_limit, context, contract_id, method, ...args)
         if (result.transfers && result.transfers.length > 0) {
