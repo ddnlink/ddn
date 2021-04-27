@@ -1,6 +1,6 @@
 {
   "name": "@ddn/test",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "bin": {
     "test": "./bin/test.js"
   },
