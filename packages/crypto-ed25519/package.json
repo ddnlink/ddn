@@ -1,6 +1,6 @@
 {
   "name": "@ddn/crypto-ed25519",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "description": "crypto ed25519 for ddn",
   "main": "lib/index.js",
   "scripts": {
