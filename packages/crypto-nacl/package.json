@@ -1,6 +1,6 @@
 {
   "name": "@ddn/crypto-nacl",
-  "version": "0.0.2",
+  "version": "1.0.0",
   "description": "Crypto for DDN",
   "keywords": [
     "crypto",
@@ -19,7 +19,10 @@
   "repository": {
     "type": "git",
     "url": "https://github.com/ddnlink/ddn/tree/master/packages/crypto-nacl"
-},
+  },
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
     "test": "echo \"Error: run tests from root\" && exit 1"
   },
@@ -37,6 +40,6 @@
     "tweetnacl": "^1.0.2"
   },
   "devDependencies": {
-    "@ddn/utils": "^0.2.3"
+    "@ddn/utils": "^1.0.0"
   }
 }
