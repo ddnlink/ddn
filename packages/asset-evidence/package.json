@@ -1,6 +1,6 @@
 {
   "name": "@ddn/asset-evidence",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "DDN evidence",
   "main": "lib/index.js",
   "module": "dist/index.esm.js",
@@ -21,8 +21,8 @@
   "author": "wangxm",
   "license": "MIT",
   "dependencies": {
-    "@ddn/asset-base": "^1.0.4",
-    "@ddn/utils": "^1.0.4",
+    "@ddn/asset-base": "^1.0.6",
+    "@ddn/utils": "^1.0.6",
     "bytebuffer": "^5.0.1"
   }
 }
