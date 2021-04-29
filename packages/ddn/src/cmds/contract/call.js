@@ -3,7 +3,7 @@ import { init, callContract } from '../../plugins/api'
 module.exports = {
   command: 'call',
   aliases: 'x',
-  desc: 'call a contract constant method',
+  desc: 'call a contract readonly method',
   builder: {
     id: {
       alias: 'i',

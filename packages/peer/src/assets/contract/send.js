@@ -54,8 +54,13 @@ class ContractTransfer {
   }
 
   async apply (trs, block, sender, dbTrans) {
-    // console.log(trs.args)
-    await this.runtime.energy.execute(trs, block, sender, dbTrans)
+    try {
+      // console.log(trs.args)
+      await this.runtime.energy.execute(trs, block, sender, dbTrans)
+    } catch (err) {
+      console.error(err)
+      throw err
+    }
   }
 
   async undo (trs, _, sender, dbTrans) {

@@ -289,7 +289,7 @@ class ContractService {
       throw new Error('Arguments should be array')
     }
 
-    const result = await this.runtime.dvm.callConstant(id, method, ...methodArgs)
+    const result = await this.runtime.dvm.callReadonly(id, method, ...methodArgs)
     convertBigintMemberToString(result)
     return { success: true, result }
   }

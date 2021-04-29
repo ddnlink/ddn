@@ -474,12 +474,25 @@ async function sendContract (options) {
     return
   }
 
+  let args = options.args
+  if (!args) args = options._.slice(2)
+  if (typeof args === 'string') {
+    try {
+      args = JSON.parse(args)
+    } catch (err) {
+      console.error(`param args is malformed: '${args}', should be '["a", "b"]'`)
+      console.error(err)
+      return
+    }
+  }
+
   const opts = {
     id: options.id,
     gasLimit: options.gas,
     method: options.method,
-    args: options.args
+    args
   }
+
   const trs = await NodeSdk.contract.send(opts, options.secret, options.secondSecret)
   console.log(trs)
   getApi().broadcastTransaction(trs, function (err, result) {
@@ -502,13 +515,25 @@ async function payContract (options) {
     return
   }
 
+  let args = options.args
+  if (!args) args = options._.slice(2)
+  if (typeof args === 'string') {
+    try {
+      args = JSON.parse(args)
+    } catch (err) {
+      console.error(`param args is malformed: '${args}', should be '["a", "b"]'`)
+      console.error(err)
+      return
+    }
+  }
+
   const opts = {
     id: options.id,
     gasLimit: options.gas,
     amount: options.amount,
     currency: options.currency,
     method: options.method,
-    args: options.args
+    args
   }
   const trs = await NodeSdk.contract.pay(opts, options.secret, options.secondSecret)
   console.log(trs)
@@ -523,7 +548,18 @@ async function callContract (options) {
     return
   }
 
-  const body = { id: options.id, method: options.method, args: options.args }
+  let args = options.args
+  if (!args) args = options._.slice(2)
+  if (typeof args === 'string') {
+    try {
+      args = JSON.parse(args)
+    } catch (err) {
+      console.error(`param args is malformed: '${args}', should be '["a", "b"]'`)
+      console.error(err)
+      return
+    }
+  }
+  const body = { id: options.id, method: options.method, args }
   console.log('query body: ', body)
   getApi().post('/api/contracts/call', body, function (err, res) {
     console.log(err || res.result)
@@ -564,9 +600,22 @@ async function getContractMetadata (id) {
 }
 
 async function getContracts (options) {
-  getApi().get('/api/contracts', options, function (err, res) {
-    console.log(err || res.result)
-  })
+  const { offset, limit, orderBy, blockId, tid, name, owner } = options
+  getApi().get(
+    '/api/contracts',
+    {
+      offset,
+      limit,
+      orderBy,
+      blockId,
+      tid,
+      name,
+      owner
+    },
+    function (err, res) {
+      console.log(err || res)
+    }
+  )
 }
 
 async function getContractResults (options) {

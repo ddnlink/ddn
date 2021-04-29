@@ -3,7 +3,7 @@ import { init, sendContract } from '../../plugins/api'
 module.exports = {
   command: 'send',
   aliases: 's',
-  desc: 'Call the not constant or payable method of a contract',
+  desc: 'Call the not readonly or payable method of a contract',
   builder: {
     secret: {
       alias: 'e',

@@ -139,30 +139,47 @@ class Energy {
   }
 
   async deploy (trs, block, sender, dbTrans) {
-    const { id, height, delegate, prevBlockId, payloadHash, timestamp } = this.runtime.block.getLastBlock()
-    const lastBlock = { id, height, delegate, prevBlockId, payloadHash, timestamp }
-    const context = { senderAddress: sender.address, transaction: trs, block, lastBlock, sender }
+    const last = this.runtime.block.getLastBlock()
+    const lastBlock = {
+      id: last.id,
+      height: last.height,
+      payloadHash: last.payload_hash,
+      prevBlockId: last.previous_block,
+      miner: last.generator_public_key,
+      timestamp: last.timestamp
+    }
+    const currentBlock = {
+      id: block.id,
+      height: block.height,
+      payloadHash: block.payload_hash,
+      prevBlockId: block.previous_block,
+      miner: block.generator_public_key,
+      timestamp: block.timestamp
+    }
+    const origin = {
+      username: sender.username,
+      address: sender.address,
+      publicKey: sender.publicKey,
+      second_public_key: sender.second_public_key,
+      balance: sender.balance
+    }
+    const ctx = { senderId: sender.address, tx: trs, block: currentBlock, lastBlock, origin }
 
-    const contract = trs.asset.contract
-    const checkResult = await this.runtime.energy.checkGas(sender.address, contract.gas_limit)
+    const { gas_limit, id, name, code } = trs.asset.contract
 
-    this.logger.info(`Deploy smart contract id: ${contract.id}, name: ${contract.name}`)
+    const checkResult = await this.runtime.energy.checkGas(sender.address, gas_limit)
 
-    const publishResult = await this.runtime.dvm.deployContract(
-      contract.gas_limit,
-      context,
-      contract.id,
-      contract.name,
-      contract.code
-    )
-    console.log(publishResult)
-    this.logger.info(`Deploy smart contract id: ${contract.id}, success: ${publishResult.success}`)
+    this.logger.info(`Deploy smart contract id: ${id}, name: ${name}`)
+
+    const publishResult = await this.runtime.dvm.deployContract(gas_limit, ctx, id, name, code)
+    this.logger.debug(publishResult)
+    this.logger.info(`Deploy smart contract id: ${id}, success: ${publishResult.success}`)
     const resultData = publishResult.data
     if (publishResult.success) {
       await this.dao.insert(
         'contract',
         {
-          ...contract,
+          ...trs.asset.contract,
           transaction_id: trs.id,
           timestamp: trs.timestamp,
           state: 0,
@@ -175,19 +192,19 @@ class Energy {
     }
     publishResult.data = undefined
 
-    await this.handleResult(contract.id, publishResult, trs, block.height, checkResult.payer, dbTrans)
+    await this.handleResult(id, publishResult, trs, block.height, checkResult.payer, dbTrans)
 
     // create contract account
     const data = {
-      address: contract.id,
+      address: id,
       u_is_delegate: 0, // wxm block database
       is_delegate: 0, // wxm block database
       vote: 0
     }
 
-    if (contract.name) {
+    if (name) {
       data.u_username = null
-      data.username = contract.name
+      data.username = name
     }
     this.runtime.account.setAccount(data)
 
@@ -195,14 +212,42 @@ class Energy {
   }
 
   async execute (trs, block, sender, dbTrans) {
-    const { id, height, delegate, prevBlockId, payloadHash, timestamp } = this.runtime.block.getLastBlock()
-    const lastBlock = { id, height, delegate, prevBlockId, payloadHash, timestamp }
-    const context = { senderAddress: sender.address, transaction: trs, block, lastBlock, sender }
+    const last = this.runtime.block.getLastBlock()
+    const lastBlock = {
+      id: last.id,
+      height: last.height,
+      payloadHash: last.payload_hash,
+      prevBlockId: last.previous_block,
+      miner: last.generator_public_key,
+      timestamp: last.timestamp
+    }
+    const currentBlock = {
+      id: block.id,
+      height: block.height,
+      payloadHash: block.payload_hash,
+      prevBlockId: block.previous_block,
+      miner: block.generator_public_key,
+      timestamp: block.timestamp
+    }
+    const origin = {
+      username: sender.username,
+      address: sender.address,
+      publicKey: sender.publicKey,
+      second_public_key: sender.second_public_key,
+      balance: sender.balance
+    }
+    const ctx = { senderId: sender.address, tx: trs, block: currentBlock, lastBlock, origin }
 
     const options = trs.args && trs.args[0] // { address, gas_limit, method, args }
     const { id: contract_id, gas_limit, method, currency } = options
 
-    const args = options.args || []
+    let args = []
+    try {
+      args = JSON.parse(options.args)
+    } catch (err) {
+      this.logger.error(err)
+      throw err
+    }
     // console.log('args...', args, `contract_id: ${contract_id}`, options)
 
     assert(method !== undefined && method !== null, 'method name can not be null or undefined')
@@ -226,7 +271,7 @@ class Energy {
         this.logger.info(`Transfer to contract ${amount} ${currency} transactions`)
         result = await this.runtime.dvm.payContract(
           gas_limit,
-          context,
+          ctx,
           contract_id,
           method,
           amount.toString(),
@@ -247,7 +292,7 @@ class Energy {
         }
       } else if (!mtd.payable) {
         this.logger.info(`Send to contract method: ${mtd.name}`)
-        result = await this.runtime.dvm.sendContract(gas_limit, context, contract_id, method, ...args)
+        result = await this.runtime.dvm.sendContract(gas_limit, ctx, contract_id, method, ...args)
         if (result.transfers && result.transfers.length > 0) {
           for (const t of result.transfers) {
             await this.transfer(
@@ -269,7 +314,7 @@ class Energy {
       // console.log(result)
       await this.handleResult(contract_id, result, trs, block.height, checkResult.payer, dbTrans)
     } catch (err) {
-      console.log(err)
+      this.logger.error(err)
       throw err
     }
   }

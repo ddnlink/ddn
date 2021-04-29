@@ -65,7 +65,7 @@ async function send (options, secret, secondSecret) {
 
   const timestamp = slots.getTime() - config.clientDriftSeconds
   const opts = {
-    id: options.address,
+    id: options.id,
     gas_limit: `${options.gasLimit}`,
     method: options.method,
     args
