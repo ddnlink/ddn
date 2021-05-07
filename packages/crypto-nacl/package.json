@@ -40,6 +40,6 @@
     "tweetnacl": "^1.0.2"
   },
   "devDependencies": {
-    "@ddn/utils": "^1.0.6"
+    "@ddn/utils": "^1.0.7"
   }
 }
