@@ -35,10 +35,16 @@ module.exports = {
     message: {
       alias: 'm',
       describe: 'message'
+    },
+    count: {
+      alias: 'c',
+      describe: 'secret count',
+      default: 101
     }
   },
 
   handler: function (argv) {
+    console.log(argv)
     genGenesisBlock(argv)
   }
 }

@@ -347,7 +347,16 @@ function genGenesisBlock (options) {
 
   // let newBlockInfo;
   blockHelper
-    .new(genesisAccount, options.nethash, options.tokenName, options.tokenPrefix, null, options.file, options.message)
+    .new(
+      genesisAccount,
+      options.nethash,
+      options.tokenName,
+      options.tokenPrefix,
+      null,
+      options.file,
+      options.message,
+      options.count
+    )
     .then(function (newBlockInfo) {
       const delegateSecrets = newBlockInfo.delegates.map(i => {
         const rv = (Math.random() * 100 + index).toFixed(0) % 3

@@ -87,7 +87,7 @@ import accounts from './account.js'
 
 export default {
   getBytes: DdnCrypto.getBytes,
-  async new ({ address, keypair }, nethash, tokenName, tokenPrefix, dapp, accountsFile, message) {
+  async new ({ address, keypair }, nethash, tokenName, tokenPrefix, dapp, accountsFile, message, count) {
     let payloadLength = 0
     // let payloadBytes = new ByteBuffer(1, true);
     let payloadHash = null
@@ -161,7 +161,7 @@ export default {
     }
 
     // make delegates
-    for (let i = 0; i < 101; i++) {
+    for (let i = 0; i < count; i++) {
       const delegate = accounts.account(DdnCrypto.generateSecret(), tokenPrefix)
       delegates.push(delegate)
 
