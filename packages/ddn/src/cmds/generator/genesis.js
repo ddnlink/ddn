@@ -44,7 +44,6 @@ module.exports = {
   },
 
   handler: function (argv) {
-    console.log(argv)
     genGenesisBlock(argv)
   }
 }

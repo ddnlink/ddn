@@ -129,8 +129,10 @@ export default {
           senderId: sender.address, // wxm block database
           senderPublicKey: sender.keypair.publicKey // wxm block database
         }
-
-        if (message && i === '0') {
+        if (i === 0) {
+          trs.message = 'Powered by DDN Blockchain, http://ddn.net'
+        }
+        if (message && i === 1) {
           trs.message = message
         }
 
@@ -159,7 +161,6 @@ export default {
       balanceTransaction.id = await DdnCrypto.getId(balanceTransaction)
       transactions.push(balanceTransaction)
     }
-
     // make delegates
     for (let i = 0; i < count; i++) {
       const delegate = accounts.account(DdnCrypto.generateSecret(), tokenPrefix)
@@ -182,13 +183,17 @@ export default {
           }
         }
       }
-
+      if (i === 0) {
+        transaction.message = 'Powered by DDN Blockchain, http://ddn.net'
+      }
+      if (message && i === 1) {
+        transaction.message = message
+      }
       transaction.signature = await DdnCrypto.sign(transaction, sender.keypair)
       transaction.id = await DdnCrypto.getId(transaction)
 
       transactions.push(transaction)
     }
-
     // make votes
     const votes = delegates.map(({ keypair }) => `+${keypair.publicKey}`)
 

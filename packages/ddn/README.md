@@ -11,12 +11,12 @@ $ yarn global add @ddn/ddn
 or
 
 ```
-npm install -g @ddn/ddn
+$ npm install -g @ddn/ddn
 ```
 
 ## Usage
 
-```
+```bash
 $ ddn
 
 ddn <命令>
@@ -41,4 +41,4 @@ copyright 2020
 
 ## Documents
 
-[ddn-docs](http://docs.ddn.link/guide/ddn-cli)
+[ddn-docs](http://docs.ddn.net/guide/ddn-cli)
