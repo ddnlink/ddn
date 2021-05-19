@@ -1,5 +1,5 @@
 <h1 align="center">
-  <a href="https://ddn.link"><img src="https://avatars3.githubusercontent.com/u/34602359?s=200&v=4" alt="DDN Blockchain" width="200"></a>
+  <a href="https://ddn.net"><img src="https://avatars3.githubusercontent.com/u/34602359?s=200&v=4" alt="DDN Blockchain" width="200"></a>
   <br>
   数据分发网络
   <br>
@@ -12,7 +12,7 @@
   <a href="https://www.npmjs.com/package/ddn"><img src="https://img.shields.io/npm/v/ddn.svg?style=flat" alt="npm version"></a>
   <a href="https://www.npmjs.com/package/ddn"><img src="https://img.shields.io/npm/dm/ddn.svg?style=flat" alt="Downloads"></a>
   <a href="https://github.com/ddnlink/ddn/actions"><img src="https://github.com/ddnlink/ddn/workflows/Node.js%20CI/badge.svg" alt="Build Status"></a>
-  <a href="http://docs.ddn.link/#/community/greenpaper"><img src="https://img.shields.io/badge/PRs-welcome-brightgreen.svg" alt="PRs Welcome"></a>
+  <a href="http://docs.ddn.net/#/community/greenpaper"><img src="https://img.shields.io/badge/PRs-welcome-brightgreen.svg" alt="PRs Welcome"></a>
 </p>
 
 <p align="center">
@@ -20,15 +20,15 @@
   <a href="/README-zh-CN.md">简体中文 (Simplified Chinese)</a> •
 </p>
 
-<!-- **基于当前版本的测试链**: <http://testnet.ddn.link> -->
+<!-- **基于当前版本的测试链**: <http://testnet.ddn.net> -->
 
 DDN, 是一个成熟的企业级区块链系统，已经服务于版权存证、检验检测、电子医疗等10多个领域。
 
-更多信息，请查看 [官网](https://www.ddn.link) , [docs](http://docs.ddn.link).
+更多信息，请查看 [官网](http://www.ddn.net) , [docs](http://docs.ddn.net).
 
 **配套书籍和视频**: [《Nodejs区块链开发2》](https://github.com/imfly/blockchain-on-nodejs), [旧版电子书](https://github.com/imfly/bitcoin-on-nodejs), [旧版纸质书籍](https://item.jd.com/12206128.html), [旧版代码](https://github.com/ebookcoin/ebookcoin)
 
-测试网络：<http://testnet.ddn.link>
+测试网络：<http://testnet.ddn.net>
 
 > 特别注意：> 3.* 的版本并未兼容当前主网，切记不要使用主网测试你的Dapp应用。
 
@@ -56,11 +56,11 @@ DDN, 是一个成熟的企业级区块链系统，已经服务于版权存证、
 
 ## 案例
 
-- [DDN 官网](https://ddn.link)
-- [DDN 主网](http://mainnet.ddn.link)
-- [DDN 测试网](http://testnet.ddn.link)
-- [DDN 钱包](http://wallet.ddn.link)
-- [DDN手机钱包](https://www.ddn.link/product/wallet)
+- [DDN 官网](https://ddn.net)
+- [DDN 主网](http://mainnet.ddn.net)
+- [DDN 测试网](http://testnet.ddn.net)
+- [DDN 钱包](http://wallet.ddn.net)
+- [DDN手机钱包](http://www.ddn.net/product/wallet)
 
 ## 社区
 
@@ -76,7 +76,7 @@ DDN, 是一个成熟的企业级区块链系统，已经服务于版权存证、
 
 ## 捐赠
 
-你可以通过[DDN钱包](http://wallet.ddn.link)或者[DDN手机钱包](https://www.ddn.link/product/wallet)向下面的地址捐赠`DDN`，这些DDN将被用于奖励本项目的贡献者.
+你可以通过[DDN钱包](http://wallet.ddn.net)或者[DDN手机钱包](http://www.ddn.net/product/wallet)向下面的地址捐赠`DDN`，这些DDN将被用于奖励本项目的贡献者.
 
 | DDN基金会钱包转账地址 | DDN手机钱包扫码转账 |
 | ------------------------------------------------------- | ------------------------------------------------------------------------------------------- |
