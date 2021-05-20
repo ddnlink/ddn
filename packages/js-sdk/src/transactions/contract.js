@@ -21,7 +21,6 @@ async function deploy (options, secret, secondSecret) {
     code: options.code
   }
 
-  contract.id = await crypto.generateAddress(`${timestamp}_${keys.publicKey}`, constants.tokenPrefix)
   // contract.code = options.code,
 
   const transaction = {

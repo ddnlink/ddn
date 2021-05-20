@@ -2,7 +2,7 @@
 import base58check from '@ddn/crypto-base'
 import RIPEMD160 from 'ripemd160'
 // import base58checkcheck from './base58checkcheck'
-import { createHash } from './nacl'
+import { createHash, getHash } from './nacl'
 /**
  * TODO: 太简单，需要添加更多可验证信息
  * 字符串形式的地址，不再支持纯数字地址；
@@ -37,4 +37,12 @@ function generateAddress (publicKey, tokenPrefix) {
   return tokenPrefix + base58check.encode(h2)
 }
 
-export { RIPEMD160, generateAddress, isAddress }
+function generateContractAddress (contract, tokenPrefix) {
+  console.log('--------1-----', contract)
+  const h1 = getHash(contract, true, true, true)
+  console.log('--------', h1)
+  const h2 = new RIPEMD160().update(h1).digest() // fixme: 2020.9.20 这里的参数只能使用 string ？
+  return tokenPrefix + base58check.encode(h2)
+}
+
+export { RIPEMD160, generateAddress, generateContractAddress, isAddress }

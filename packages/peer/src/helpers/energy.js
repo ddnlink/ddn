@@ -1,6 +1,6 @@
 import { bignum } from '@ddn/utils'
 import assert from 'assert'
-// import { getId } from '@ddn/crypto'
+import * as crypto from '@ddn/crypto'
 
 const MAX_GAS_LIMIT = 100000000000
 const MAX_ARGS_SIZE = 16
@@ -165,7 +165,12 @@ class Energy {
     }
     const ctx = { senderId: sender.address, tx: trs, block: currentBlock, lastBlock, origin }
 
-    const { gas_limit, id, name, code } = trs.asset.contract
+    const { id: contract_id, name, gas_limit, owner, desc, version, code } = trs.asset.contract
+    const id = await crypto.generateContractAddress(
+      { name, gas_limit, owner, desc, version, code },
+      this.constants.tokenPrefix
+    )
+    assert(!contract_id || contract_id === id, 'contract id is not correct')
 
     const checkResult = await this.runtime.energy.checkGas(sender.address, gas_limit)
 
@@ -180,6 +185,7 @@ class Energy {
         'contract',
         {
           ...trs.asset.contract,
+          id,
           transaction_id: trs.id,
           timestamp: trs.timestamp,
           state: 0,
