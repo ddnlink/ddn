@@ -2,7 +2,7 @@
 
 # DDN
 
-DDN`s peer, More infomation please visit our [official website](https://www.ddn.link) or [ddn-docs](https://github.com/ddnlink/ddn-docs)
+DDN`s peer, More infomation please visit our [official website](http://www.ddn.net) or [ddn-docs](https://github.com/ddnlink/ddn-docs)
 
 ## Install 
 
@@ -12,7 +12,7 @@ $ yarn add @ddn/peer
 
 ## Default localnet genesis account
 
-**Note**: You get test DDN from <https://ddn.link>
+**Note**: You get test DDN from <http://ddn.net>
 
 ## Test
 
@@ -31,7 +31,7 @@ $ yarn test
 - [ddn-docs](https://github.com/ddnlink/ddn-docs)
 - [ddn](https://github.com/ddnlink/ddn)
 - [node-sdk](https://github.com/ddnlink/node-sdk)
-- [ddn-explorer] website: [ddn.link](http://mainnet.ddn.link)
+- [ddn-explorer] website: [ddn.net](http://mainnet.ddn.net)
 
 ## License
 

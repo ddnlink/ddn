@@ -14,24 +14,24 @@ sidebar_label: integration exchange
 发行总量：1亿，目前总的供应量为134287466个DDN（有一个动态变化的通胀率,发行时间越长,通胀率越低）<br>
 共识算法：DPoS <br>
 交易模式：账户余额模式，非UTXO<br>
-官网：https://www.ddn.link/<br>
-在线钱包：http://wallet.ddn.link/，基本功能可以在这里进行体验<br>
-区块链浏览器：http://mainnet.ddn.link/<br>
+官网：http://www.ddn.net/<br>
+在线钱包：http://wallet.ddn.net/，基本功能可以在这里进行体验<br>
+区块链浏览器：http://mainnet.ddn.net/<br>
 地址格式：字母数字混合，base58格式且以大写字母D开头且长度不低于10，比如DFbgKEUeYTkwEShjBjqFe2L3awJUHjWMw8<br>
 
 DDN 不是 BTC 源码的山寨，而是用 Node.js 全新开发的，目前都是纯 HTTP API，所以对接的时候请勿用 BTC 模板的交易网站代码去生拉硬套，目前有  Node.js 版本的 SDK，交易平台可以直接用，其它开发语言，需要自己封装 HTTP API。<br>
 DDN 没有钱包的概念，每个密码对应一个账户地址，也就是说一个“钱包”中只包含一个地址(实质为脑钱包)，与BTC、ETH等区别较大。<br>
 DDN 的精度是小数点后8位，但后台处理的时候都是按照整数来处理，比如想转0.1DDN，后台实际处理的是0.1 * 100000000。<br>
-DDN http接口文档-中文版：http://docs.ddn.link/zh-CN/api<br>
-DDN http接口文档-英文版：http://docs.ddn.link/api<br>
+DDN http接口文档-中文版：http://docs.ddn.net/zh-CN/api<br>
+DDN http接口文档-英文版：http://docs.ddn.net/api<br>
 该文档包含大部分的DDN接口，比如查询余额、转账、交易详情等，调用api返回结果为 JSON 数据。<br>
 
 ## 2 建议交易平台在局域网内搭建一个DDN全节点
 
 节点安装文档：
 
-中文：http://docs.ddn.link/zh-CN/guide/peer-install-mainnet<br>
-英文：http://docs.ddn.link/guide/peer-install-mainnet
+中文：http://docs.ddn.net/zh-CN/guide/peer-install-mainnet<br>
+英文：http://docs.ddn.net/guide/peer-install-mainnet
 
 ## 3 用户充值DDN
 
@@ -88,7 +88,7 @@ console.log(data)
 
 #### 3.1.2 用户进行充值
 
-用户UserA在DDN钱包（比如http://wallet.ddn.link/#/user/login）往充值地址转DDN,比如转0.8DDN。
+用户UserA在DDN钱包（比如http://wallet.ddn.net/#/user/login）往充值地址转DDN,比如转0.8DDN。
 
 #### 3.1.3 交易平台确认用户充值
 

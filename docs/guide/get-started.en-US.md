@@ -6,7 +6,7 @@ title: 开发入门
 
 For developer, if you want to install mainnet peer, please visit [Peer install](./peer-install)
 
-More infomation please visit our [official website](https://www.ddn.link) or [ddn-docs](http://docs.ddn.link)
+More infomation please visit our [official website](http://www.ddn.net) or [ddn-docs](http://docs.ddn.net)
 
 ## System Dependency
 
@@ -169,10 +169,10 @@ $ yarn test
 - [ddn](https://github.com/ddnlink/ddn)
 - [js-sdk](https://github.com/ddnlink/ddn/packages/js-sdk)
 - [node-sdk](https://github.com/ddnlink/node-sdk)
-- [ddn-explorer] website: [ddn.link](http://mainnet.ddn.link)
+- [ddn-explorer] website: [ddn.net](http://mainnet.ddn.net)
 
 ## License
 
 The MIT License (MIT)
 
-Copyright (c) 2016-2019 DDN.link. All rights reserved. See License.txt in the project root for license information.
+Copyright (c) 2016-2019 DDN.net. All rights reserved. See License.txt in the project root for license information.

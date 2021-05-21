@@ -1,5 +1,5 @@
 <h1 align="center">
-  <a href="https://ddn.link"><img src="https://avatars3.githubusercontent.com/u/34602359?s=200&v=4" alt="DDN Blockchain" width="200"></a>
+  <a href="http://ddn.net"><img src="https://avatars3.githubusercontent.com/u/34602359?s=200&v=4" alt="DDN Blockchain" width="200"></a>
   <br>
   Data Delivery Network
   <br>
@@ -12,7 +12,7 @@
   <a href="https://www.npmjs.com/package/ddn"><img src="https://img.shields.io/npm/v/ddn.svg?style=flat" alt="npm version"></a>
   <a href="https://www.npmjs.com/package/ddn"><img src="https://img.shields.io/npm/dm/ddn.svg?style=flat" alt="Downloads"></a>
   <a href="https://github.com/ddnlink/ddn/actions"><img src="https://github.com/ddnlink/ddn/workflows/Node.js%20CI/badge.svg" alt="Build Status"></a>
-  <a href="http://docs.ddn.link/#/community/greenpaper"><img src="https://img.shields.io/badge/PRs-welcome-brightgreen.svg" alt="PRs Welcome"></a>
+  <a href="http://docs.ddn.net/#/community/greenpaper"><img src="https://img.shields.io/badge/PRs-welcome-brightgreen.svg" alt="PRs Welcome"></a>
 </p>
 
 <p align="center">
@@ -23,11 +23,11 @@
 
 <!-- **Testnet Powered by Current version**: <http://testnet.ddn.link> -->
 
-More infomation please visit our [official website](https://www.ddn.link) , [docs](http://docs.ddn.link).
+More infomation please visit our [official website](http://www.ddn.net) , [docs](http://docs.ddn.net).
 
 **Professional books and videos**：[nodejs on blockchain 2](https://github.com/imfly/blockchain-on-nodejs), and [The old book](https://github.com/imfly/bitcoin-on-nodejs), [The old paper book](https://item.jd.com/12206128.html), [The old code](https://github.com/ebookcoin/ebookcoin)
 
-> **Special note**: The 3.* versions are not compatible with the [mainnet](http://mainnet.ddn.link). Do not use the mainnet to test your Dapps.
+> **Special note**: The 3.* versions are not compatible with the [mainnet](http://mainnet.ddn.net). Do not use the mainnet to test your Dapps.
 
 ## Features
 
@@ -53,11 +53,11 @@ More infomation please visit our [official website](https://www.ddn.link) , [doc
 
 ## Examples
 
-- [DDN Site](https://ddn.link)
-- [DDN Mainnet](http://mainnet.ddn.link)
-- [DDN Testnet](http://mainnet.ddn.link)
-- [DDN Wallet](http://wallet.ddn.link)
-- [DDN Mobile Wallet](https://www.ddn.link/product/wallet)
+- [DDN Site](http://ddn.net)
+- [DDN Mainnet](http://mainnet.ddn.net)
+- [DDN Testnet](http://mainnet.ddn.net)
+- [DDN Wallet](http://wallet.ddn.net)
+- [DDN Mobile Wallet](http://www.ddn.net/product/wallet)
 
 ## Community
 
@@ -69,7 +69,7 @@ More infomation please visit our [official website](https://www.ddn.link) , [doc
 
 ## Donation
 
-You can donate DDN to the follow address with [DDN Wallet](http://wallet.ddn.link), or [DDN Mobile Wallet](https://www.ddn.link/product/wallet), and these DDN will be paid to those who contribute to this project.
+You can donate DDN to the follow address with [DDN Wallet](http://wallet.ddn.net), or [DDN Mobile Wallet](http://www.ddn.net/product/wallet), and these DDN will be paid to those who contribute to this project.
 
 | DDN FOUNDATION Wallet Address | DDN Mobile Wallet QRCode |
 | ------------------------------------------------------- | ------------------------------------------------------------------------------------------- |
