@@ -27,9 +27,6 @@ async function deploy (options, secret, secondSecret) {
     // metadata: metadata.toJSONObject(),
   }
 
-  contract.id = await crypto.generateAddress(`${timestamp}_${keys.publicKey}`, constants.tokenPrefix)
-  // contract.code = options.code,
-
   const transaction = {
     nethash: config.nethash,
     type: DdnUtils.assetTypes.CONTRACT,

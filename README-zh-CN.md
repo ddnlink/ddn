@@ -20,7 +20,7 @@
   <a href="/README-zh-CN.md">简体中文 (Simplified Chinese)</a> •
 </p>
 
-<!-- **基于当前版本的测试链**: <http://testnet.ddn.link> -->
+<!-- **基于当前版本的测试链**: <http://testnet.ddn.net> -->
 
 DDN, 是一个成熟的企业级区块链系统，已经服务于版权存证、检验检测、电子医疗等10多个领域。
 

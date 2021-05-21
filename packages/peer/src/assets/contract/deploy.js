@@ -48,11 +48,11 @@ class Contract {
       throw new Error('Invalid transaction asset')
     }
 
-    const { id, name, code, desc, version, gas_limit } = trs.asset.contract
+    const { name, code, desc, version, gas_limit } = trs.asset.contract
 
-    if (!id || !id.length) {
-      throw new Error('id is not exist')
-    }
+    // if (!id || !id.length) {
+    //   throw new Error('id is not exist')
+    // }
 
     if (desc && desc.length >= 255) {
       throw new Error('desc is too long')
@@ -140,9 +140,6 @@ class Contract {
       {
         type: 'object',
         properties: {
-          id: {
-            type: 'string'
-          },
           name: {
             type: 'string'
           },
@@ -156,7 +153,7 @@ class Contract {
             type: 'string'
           }
         },
-        required: ['id', 'name', 'version', 'code']
+        required: ['name', 'version', 'code']
       },
       trs.asset.contract
     )

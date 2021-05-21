@@ -1,6 +1,6 @@
 import base58check from './base58check'
 import RIPEMD160 from 'ripemd160'
-import { createHash } from './ed25519'
+import { createHash, getHash } from './ed25519'
 
 /**
  * TODO: 太简单，需要添加更多可验证信息
@@ -36,4 +36,10 @@ function generateAddress (publicKey, tokenPrefix) {
   return tokenPrefix + base58check.encode(h2)
 }
 
-export { RIPEMD160, generateAddress, isAddress }
+function generateContractAddress (contract, tokenPrefix) {
+  const h1 = getHash(contract, true, true, true)
+  const h2 = new RIPEMD160().update(h1).digest() // fixme: 2020.9.20 这里的参数只能使用 string ？
+  return tokenPrefix + base58check.encode(h2)
+}
+
+export { RIPEMD160, generateAddress, generateContractAddress, isAddress }

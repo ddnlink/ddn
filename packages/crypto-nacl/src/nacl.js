@@ -98,8 +98,8 @@ function verifyHash (hash, signature, publicKey) {
  * @param {boolean} skipSignature 跳过签名
  * @param {boolean} skipSecondSignature 跳过二次签名
  */
-async function getHash (trs, skipSignature, skipSecondSignature) {
-  const bytes = getBytes(trs, skipSignature, skipSecondSignature)
+function getHash (trs, skipSignature, skipSecondSignature, skipId) {
+  const bytes = getBytes(trs, skipSignature, skipSecondSignature, skipId)
   return createHash(bytes)
 }
 

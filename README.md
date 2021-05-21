@@ -21,7 +21,7 @@
 </p>
 
 
-<!-- **Testnet Powered by Current version**: <http://testnet.ddn.link> -->
+<!-- **Testnet Powered by Current version**: <http://testnet.ddn.net> -->
 
 More infomation please visit our [official website](http://www.ddn.net) , [docs](http://docs.ddn.net).
 
