@@ -1,6 +1,6 @@
 {
   "name": "@ddn/crypto-nacl",
-  "version": "1.0.7",
+  "version": "1.0.8",
   "description": "Crypto for DDN",
   "keywords": [
     "crypto",
@@ -30,7 +30,7 @@
     "url": "https://github.com/ddnlink/ddn/issues"
   },
   "dependencies": {
-    "@ddn/crypto-base": "^1.0.7",
+    "@ddn/crypto-base": "^1.0.8",
     "bitcore-mnemonic": "^8.20.5",
     "bytebuffer": "^5.0.1",
     "crypto": "^1.0.1",
@@ -40,6 +40,6 @@
     "tweetnacl": "^1.0.2"
   },
   "devDependencies": {
-    "@ddn/utils": "^1.0.7"
+    "@ddn/utils": "^1.0.8"
   }
 }

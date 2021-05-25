@@ -1,6 +1,6 @@
 {
   "name": "@ddn/crypto",
-  "version": "1.0.7",
+  "version": "1.0.8",
   "description": "this is Adaptation",
   "main": "lib/index.js",
   "scripts": {
@@ -18,8 +18,8 @@
     "url": "https://github.com/ddnlink/ddn/tree/master/packages/crypto"
   },
   "dependencies": {
-    "@ddn/core": "^1.0.7",
-    "@ddn/crypto-nacl": "^1.0.7"
+    "@ddn/core": "^1.0.8",
+    "@ddn/crypto-nacl": "^1.0.8"
   },
   "author": "",
   "license": "MIT"

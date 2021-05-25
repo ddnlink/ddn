@@ -1,16 +1,16 @@
 import fs from 'fs'
 import nodeSdk from '@ddn/node-sdk'
-import cryptoLib from '@ddn/crypto'
+import * as cryptoLib from '@ddn/crypto'
 
 import accountHelper from '../helpers/account.js'
 
 function writeFileSync (file, obj) {
-  const content = (typeof obj === 'string' ? obj : JSON.stringify(obj, null, 2))
+  const content = typeof obj === 'string' ? obj : JSON.stringify(obj, null, 2)
   fs.writeFileSync(file, content, 'utf8')
 }
 
 function appendFileSync (file, obj) {
-  const content = (typeof obj === 'string' ? obj : JSON.stringify(obj, null, 2))
+  const content = typeof obj === 'string' ? obj : JSON.stringify(obj, null, 2)
   fs.appendFileSync(file, content, 'utf8')
 }
 
@@ -66,6 +66,4 @@ function genUsers ({ tokenPrefix, tokenName }) {
   console.log('New team and related users have been created, please see the two files: ./teams.log and ./teams.txt')
 }
 
-export {
-  genUsers
-}
+export { genUsers }

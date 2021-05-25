@@ -1,6 +1,6 @@
 {
   "name": "@ddn/crypto-base",
-  "version": "1.0.7",
+  "version": "1.0.8",
   "description": "this is crypto common plugin",
   "main": "lib/index.js",
   "scripts": {
