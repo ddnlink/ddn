@@ -1,5 +1,5 @@
 <h1 align="center">
-  <a href="https://ddn.net"><img src="https://avatars3.githubusercontent.com/u/34602359?s=200&v=4" alt="DDN Blockchain" width="200"></a>
+  <a href="http://ddn.net"><img src="https://avatars3.githubusercontent.com/u/34602359?s=200&v=4" alt="DDN Blockchain" width="200"></a>
   <br>
   Data Delivery Network
   <br>
@@ -53,7 +53,7 @@ More infomation please visit our [official website](http://www.ddn.net) , [docs]
 
 ## Examples
 
-- [DDN Site](https://ddn.net)
+- [DDN Site](http://ddn.net)
 - [DDN Mainnet](http://mainnet.ddn.net)
 - [DDN Testnet](http://mainnet.ddn.net)
 - [DDN Wallet](http://wallet.ddn.net)

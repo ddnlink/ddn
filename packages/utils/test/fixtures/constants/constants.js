@@ -3,7 +3,7 @@ export default {
   tokenName: 'DDN',
   tokenPrefix: 'D',
   foundAddress: 'DLjrrVwnmMXstcAYVjcrpwyYb3kY1ehABU', // Please protect its private key
-  walletUrl: 'http://wallet.ddn.link',
+  walletUrl: 'http://wallet.ddn.net',
   enableMoreLockTypes: true,
 
   interval: 10, // 10ms

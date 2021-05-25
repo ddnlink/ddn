@@ -1,1 +1,1 @@
-[ddn-docs](http://docs.ddn.link)
+[ddn-docs](http://docs.ddn.net)
