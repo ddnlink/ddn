@@ -807,11 +807,173 @@ DdnJS.crypto.verifyBytes(buf,transaction.signature,transaction.senderPublicKey)
 > true
 ```
 
-## **8 其它**
+## **8 智能合约**
+### **8.1 部署智能合约**
+请求参数说明：
 
-### **8.1 时间相关slot.time**
+|名称	|类型   |必填 |说明              |
+|------ |-----  |---  |----              |
+|transaction|json|Y|DdnJS.contract.deploy生成部署合约交易|
 
-#### **8.1.1 DDN主网创世块生成时间**
+返回参数说明：
+
+|名称|类型|说明|
+|------|-----|----|
+|success|boolean|是否成功获得response数据。|
+|transactionId|string|交易id|
+
+
+请求示例：
+```js
+// 合约参数
+const options = {
+    name: 'test contract', // 合约名称
+    desc: '合约描述',       // 合约描述
+    gas_limit: '100000',   // 本次交易消耗的最大gas
+    owner: 'DM3j18U3zmW87HcwGPZviaRrnmZfhJmYoG', //合约所有者地址，默认是交易发起人
+    version: 'v1.0',       // 合约代码版本
+    code: '...' // 略, 合约的ts源代码，可以用fs.readFileSync('./contract.ts')的方式读取
+}
+
+// 构造交易数据
+const trs = DdnJS.contract.deploy(options, secret)
+console.log(JSON.stringify(trs))
+{
+	"type": 60,
+	"nethash": "0ab796cd",
+	"amount": "0",
+	"fee": "10000000000",
+	"recipientId": null,
+	"senderPublicKey": "e382a23e136866863c2d8c7f743b1ada594da39f6a425c9ad031f69fe15a9352",
+	"timestamp": 107116316,
+	"message": null,
+	"asset": {
+		"contract": {
+			"name": "test contract",
+			"gas_limit": 5000,
+			"owner": "D4g4BztXXU2vguNhx45qGSVB9GtSTp8329",
+			"desc": "test contract",
+			"version": "1.0.0",
+			"code": "合约代码"
+		}
+	},
+	"signature": "41f18e0e181d2a07c491ef60599b81e3d8eeef486b4359c3f81415a54623dc34f3505b33bac50f53b09a560e1b58d0f692183178d059ac692a85b354ffe70602",
+	"id": "0ee7a3909cef660ecfb8a81c76747cc815310be7f52232f6533a32f45e6657cb196c4d172b286bc96093c2e09de5935c91c790839c7ebed3d16b1430c0c0674f"
+}
+```
+将生成的交易数据以transaction为key，放入json，调用上链接口提交，注册合约
+```sh
+curl --location --request POST 'http://127.0.0.1:8001/peer/transactions' \
+--header 'Content-Type: application/json' \
+--header 'nethash: 0ab796cd' \
+--header 'version: 3.0' \
+--data-raw '{
+    "transaction": {
+        "type": 60,
+        "nethash": "0ab796cd",
+        "amount": "0",
+        "fee": "10000000000",
+        "recipientId": null,
+        "senderPublicKey": "1e18845d5fbbdf0a6820610e042dcb9a250205964b8075a395453b4a1d1ed10c",
+        "timestamp": 84314217,
+        "message": null,
+        "asset": {
+            "contract": {
+				"name": "test contract",
+				"gas_limit": 5000,
+				"owner": "D4g4BztXXU2vguNhx45qGSVB9GtSTp8329",
+				"desc": "test contract",
+				"version": "1.0.0",
+				"code": "合约代码"
+            }
+        },
+        "signature": "4043460ca15d3b24361e611b3009ad3212ae97c0872267bf855b765b38a9386580db368a7f12dcf9165a6367c08ee30d67c48ffe68e08a382e2ab0638dd1560f"
+    }
+}'
+```
+返回结果
+```json
+{
+    "success": true,
+    "transactionId": "8c70ba13ddac0a3d6d1d4abf5d7cc1af43c4cc3a1c96c6b04ccf0e604b88f64115b8a57245318da424dd6daf6dbf3b41eebe529f464e0cceea045587246d8f9c"
+}
+```
+
+### **8.2 调用send方法，修改合约状态**
+请求参数说明：
+
+|名称	|类型   |必填 |说明              |
+|------ |-----  |---  |----              |
+|transaction|json|Y|DdnJS.aob.createAsset根据资产名字、描述、上限、精度、策略、一级密码、二级密码生成的交易数据|
+
+返回参数说明：
+
+|名称|类型|说明|
+|------|-----|----|
+|success|boolean|是否成功获得response数据。|
+|transactionId|string|交易id|
+
+
+请求示例：
+```js
+const options = {
+    id: 'xxxxxx',         // 合约地址，唯一标识
+    gas_limit: 10000,     // 本次调用最大可消耗的gas
+    method: 'transfer',   // 合约方法名，合约代码中确实存在的方法
+    args: ['200', 'DDN'], // 方法变量，按照合约中方法参数顺序，以数组的形式提供
+}
+// 构造交易数据
+const trs = DdnJS.contract.send(options, secret)
+console.log(JSON.stringify(trs))
+{
+    "type": DdnUtils.assetTypes.CONTRACT_TRANSFER, // 12
+    "nethash": "0ab796cd",
+    "amount": "0",
+    "fee": "50000000000",
+    "args": "['DKAzdDnLnB6TcgwfTCGfEQ7pTE94a5FW1C', 'transfer', '10000', [200, 'ddn']]",
+    "recipientId": null,
+    "senderPublicKey": "1e18845d5fbbdf0a6820610e042dcb9a250205964b8075a395453b4a1d1ed10c",
+    "timestamp": 84314778,
+    "message": null,
+    "signature": "d06ac3ee9ecbca7e856a02a7fa9ac38283269bce02d187daa1e59ac3957a10aff756506816d1e7f528f9f9c0ce90e2dae07ccb36f8076157aa0e6c668e1ff60b"
+}
+
+```
+将生成的交易数据以transaction为key，放入json，调用上链接口提交，注册资产IssuerName.CNY
+```sh
+curl --location --request POST 'http://127.0.0.1:8001/peer/transactions' \
+--header 'Content-Type: application/json' \
+--header 'nethash: 0ab796cd' \
+--header 'version: 3.0' \
+--data-raw `{
+    "transaction": {
+        "type": 12,
+        "nethash": "0ab796cd",
+        "amount": "0",
+        "fee": "50000000000",
+		"args": "['DKAzdDnLnB6TcgwfTCGfEQ7pTE94a5FW1C', 'transfer', '10000', [200, 'ddn']]",
+        "recipientId": null,
+        "senderPublicKey": "1e18845d5fbbdf0a6820610e042dcb9a250205964b8075a395453b4a1d1ed10c",
+        "timestamp": 84314778,
+        "message": null,
+        "signature": "d06ac3ee9ecbca7e856a02a7fa9ac38283269bce02d187daa1e59ac3957a10aff756506816d1e7f528f9f9c0ce90e2dae07ccb36f8076157aa0e6c668e1ff60b"
+    }
+}`
+
+```
+JSON返回示例：
+```json
+{
+    "success": true,
+    "transactionId": "b763c260aea7769d71063c3dcf4aa7b07d58a3765d6561967f3a09b99e8348e70ab701d52a149348be00494fe84c62bb58cd677a0de3fdcef472899569ef407a"
+}
+```
+
+## **9 其它**
+
+### **9.1 时间相关slot.time**
+
+#### **9.1.1 DDN主网创世块生成时间**
 
 同步方法：`utils.slots.beginEpochTime()`
 `备注` 结果为UTC时间,即DDN纪元的开始时间。
@@ -822,7 +984,7 @@ DdnJS.utils.slots.beginEpochTime()
 ```
 
 
-#### **8.1.2 根据unix时间戳获获DDN时间戳**
+#### **9.1.2 根据unix时间戳获获DDN时间戳**
 
 同步方法：`utils.slots.getTime(time)`
 `备注` 获得结果叫做EpochTim（DDN时间戳），传入的time相对于DDN纪元经历的秒数
@@ -838,7 +1000,7 @@ const epochTime = DdnJS.utils.slots.getTime(unix_timestamp * 1000)
 > 40655896    // DDN时间戳
 ```
 
-#### **8.1.3 根据DDN时间戳获取unix时间戳**
+#### **9.1.3 根据DDN时间戳获取unix时间戳**
 
 同步方法：`utils.slots.getRealTime(epochTime)`
 `备注` 返回结果是真实的 unix时间戳* 1000
@@ -857,7 +1019,7 @@ const unix_timestamp === real_time / 1000
 > true // 换算结果一致
 ```
 
-#### **8.1.4 时间格式化**
+#### **9.1.4 时间格式化**
 
 同步方法：`DdnJS.utils.format.timeAgo()`
 计算时间戳发生的时间
