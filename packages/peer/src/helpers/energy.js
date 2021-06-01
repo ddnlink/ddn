@@ -156,14 +156,14 @@ class Energy {
       miner: block.generator_public_key,
       timestamp: block.timestamp
     }
-    const origin = {
+    const senderInfo = {
       username: sender.username,
       address: sender.address,
       publicKey: sender.publicKey,
       second_public_key: sender.second_public_key,
       balance: sender.balance
     }
-    const ctx = { senderId: sender.address, tx: trs, block: currentBlock, lastBlock, origin }
+    const ctx = { senderId: sender.address, tx: trs, block: currentBlock, lastBlock, sender: senderInfo }
 
     const { id: contract_id, name, gas_limit, owner, desc, version, code } = trs.asset.contract
     const id = await crypto.generateContractAddress(
@@ -235,14 +235,14 @@ class Energy {
       miner: block.generator_public_key,
       timestamp: block.timestamp
     }
-    const origin = {
+    const senderInfo = {
       username: sender.username,
       address: sender.address,
       publicKey: sender.publicKey,
       second_public_key: sender.second_public_key,
       balance: sender.balance
     }
-    const ctx = { senderId: sender.address, tx: trs, block: currentBlock, lastBlock, origin }
+    const ctx = { senderId: sender.address, tx: trs, block: currentBlock, lastBlock, sender: senderInfo }
 
     const options = trs.args && trs.args[0] // { address, gas_limit, method, args }
     const { id: contract_id, gas_limit, method, currency } = options
