@@ -1,11 +1,7 @@
 import getPaths from './getPaths'
-import getUserConfig, { requireFile, mergeConfigs } from './getUserConfig'
+import { getUserConfig, requireFile, mergeConfigs } from './getUserConfig'
 
-export {
-  getUserConfig,
-  requireFile,
-  mergeConfigs
-}
+export { getPaths, getUserConfig, requireFile, mergeConfigs }
 
 // todo: delete it
 export default {

@@ -3,33 +3,25 @@ import { existsSync } from 'fs'
 import assert from 'assert'
 import extend from 'extend2'
 import winPath from './winPath'
-import { IConfig } from 'umi-types'
 
-interface IOpts {
-    cwd?: string;
-    defaultConfig?: IConfig;
-    onError?: Function;
-}
+// import { IConfig } from 'umi-types'
+// interface IOpts {
+//     cwd?: string;
+//     defaultConfig?: IConfig;
+//     onError?: Function;
+// }
 
 export function getConfigFile (cwd) {
   const files = process.env.DDN_CONFIG_FILE
     ? process.env.DDN_CONFIG_FILE.split(',').filter(v => v && v.trim())
-    : [
-      '.ddnrc.ts',
-      '.ddnrc.js',
-      'config/config.json',
-      'config/config.ts',
-      'config/config.js'
-    ]
+    : ['.ddnrc.ts', '.ddnrc.js', 'config/config.json', 'config/config.ts', 'config/config.js']
 
   // const validFiles = files.filter(f => {})
   const validFiles = files.filter(f => existsSync(join(cwd, f)))
 
   assert(
     validFiles.length <= 1,
-        `Multiple config files (${validFiles.join(
-            ', '
-        )}) were detected, please keep only one.`
+    `Multiple config files (${validFiles.join(', ')}) were detected, please keep only one.`
   )
   if (validFiles[0]) {
     return winPath(join(cwd, validFiles[0]))
@@ -45,15 +37,15 @@ function defaultOnError (e) {
   console.error(e)
 }
 
-export function requireFile (f, opts: IOpts = {}) {
+export function requireFile (f, opts = {}) {
   if (!existsSync(f)) {
     return {}
   }
 
   const { onError = defaultOnError } = opts
-  let ret: any = {}
+  let ret = {}
   try {
-    ret = require(f) || {}; // eslint-disable-line
+    ret = require(f) || {} // eslint-disable-line
   } catch (e) {
     onError(e, f)
   }
@@ -61,11 +53,11 @@ export function requireFile (f, opts: IOpts = {}) {
   return ret.default || ret
 }
 
-export function mergeConfigs (...configs): IConfig {
+export function mergeConfigs (...configs) {
   return extend(true, ...configs)
 }
 
-export function getConfigByConfigFile (configFile, opts: IOpts = {}): IConfig {
+export function getConfigByConfigFile (configFile, opts = {}) {
   const ddnEnv = process.env.DDN_ENV
   const isDev = process.env.NODE_ENV === 'development'
   const { defaultConfig, onError } = opts
@@ -73,9 +65,9 @@ export function getConfigByConfigFile (configFile, opts: IOpts = {}): IConfig {
   const requireOpts = { onError }
 
   /**
-     * development: config.local.* and config.testnet.*;
-     * other: mainnet
-     */
+   * development: config.local.* and config.testnet.*;
+   * other: mainnet
+   */
   const configs = [
     defaultConfig,
     requireFile(configFile, requireOpts),
@@ -89,7 +81,7 @@ export function getConfigByConfigFile (configFile, opts: IOpts = {}): IConfig {
 }
 
 // Use DDN_ENV to add yoursef config, e.g: DDN_ENV=prod config.prod.js
-export function getConfigPaths (cwd): string[] {
+export function getConfigPaths (cwd) {
   const env = process.env.DDN_ENV
   return [
     join(cwd, 'config/'),
@@ -97,9 +89,7 @@ export function getConfigPaths (cwd): string[] {
     join(cwd, '.ddnrc.ts'),
     join(cwd, '.ddnrc.local.js'),
     join(cwd, '.ddnrc.local.ts'),
-    ...(env
-      ? [join(cwd, `.ddnrc.${env}.js`), join(cwd, `.ddnrc.${env}.ts`)]
-      : [])
+    ...(env ? [join(cwd, `.ddnrc.${env}.js`), join(cwd, `.ddnrc.${env}.ts`)] : [])
   ]
 }
 
@@ -123,7 +113,7 @@ export function cleanConfigRequireCache (cwd) {
  * 主配置文件而生效。
  * @param opts {cwd: cwd, defaultConfig: config.default.js }
  */
-export default function (opts: IOpts = {}): IConfig {
+export function getUserConfig (opts = {}) {
   const { cwd, defaultConfig } = opts
   const absConfigFile = getConfigFile(cwd)
 

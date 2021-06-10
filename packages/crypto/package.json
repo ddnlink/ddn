@@ -3,6 +3,7 @@
   "version": "1.0.8",
   "description": "this is Adaptation",
   "main": "lib/index.js",
+  "module": "dist/index.esm.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -18,7 +19,6 @@
     "url": "https://github.com/ddnlink/ddn/tree/master/packages/crypto"
   },
   "dependencies": {
-    "@ddn/core": "^1.0.8",
     "@ddn/crypto-nacl": "^1.0.8"
   },
   "author": "",

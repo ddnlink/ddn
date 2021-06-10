@@ -3,7 +3,7 @@
   "version": "1.0.8",
   "description": "DDN Node.js SDK",
   "main": "lib/index.js",
-  "unpkg": "build/index.browserify.js",
+  "module": "dist/index.esm.js",
   "files": [
     "lib",
     "dist",
@@ -34,11 +34,6 @@
     "url": "http://github.com/ddnlink/ddn/issues"
   },
   "dependencies": {
-    "@ddn/asset-aob": "^1.0.8",
-    "@ddn/asset-base": "^1.0.8",
-    "@ddn/asset-dao": "^1.0.8",
-    "@ddn/asset-dapp": "^1.0.8",
-    "@ddn/asset-evidence": "^1.0.8",
     "@ddn/crypto-nacl": "^1.0.8",
     "@ddn/utils": "^1.0.8",
     "JSONStream": "^1.3.1",

@@ -1,5 +1,5 @@
-import { requireFile } from '@ddn/core'
 import path from 'path'
+const { requireFile } = require('@ddn/core')
 // const baseDir = path.resolve(process.cwd(), './')
 // const userConfig = getUserConfig({ cwd: baseDir })
 

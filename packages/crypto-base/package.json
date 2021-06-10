@@ -3,6 +3,7 @@
   "version": "1.0.8",
   "description": "this is crypto common plugin",
   "main": "lib/index.js",
+  "module": "dist/index.esm.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
