@@ -1,5 +1,5 @@
 import inquirer from 'inquirer'
-import crypto from '@ddn/crypto'
+import * as crypto from '@ddn/crypto'
 import accountHelper from '../helpers/account.js'
 
 async function genPubkey () {
@@ -25,7 +25,6 @@ async function genAccount () {
   ])
   const n = parseInt(result.amount)
   const accounts = []
-
   for (let i = 0; i < n; i++) {
     const a = accountHelper.account(crypto.generateSecret())
     accounts.push({
