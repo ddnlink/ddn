@@ -1,6 +1,8 @@
 /**
  * MultisignaturesRouter接口
  * wangxm   2019-03-27
+ *
+ * Todo: 修改成带有特殊前缀的多重签名账户 2021.6.15 imfly
  */
 import * as DdnCrypto from '@ddn/crypto'
 import { assetTypes, bignum } from '@ddn/utils'
@@ -188,7 +190,7 @@ class MultisignaturesRouter {
       }
     }
 
-    const sign = await this.runtime.transaction.multisign(transaction, keypair)
+    const sign = await DdnCrypto.sign(transaction, keypair)
 
     if (transaction.type === assetTypes.MULTISIGNATURE) {
       if (
