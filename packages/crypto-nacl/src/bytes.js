@@ -6,10 +6,10 @@ import { getBytes as getBytesTobuffer } from '@ddn/crypto-base'
  * @param {boolean} skipSignature 是否排除签名字段 默认 false
  * @param {*} skipSecondSignature 是否排除二次签名字段 默认 false
  * @param {*} skipId 是否排除id字段 默认 true
- * @description 根据排序json key排序后的数据逐个字段获取字节
+ * @description 根据排序json key排序后的数据逐个字段获取字节，适用于交易和区块
  */
-function getBytes (transaction, skipSignature, skipSecondSignature, skipId) {
-  return arrayBufferToUnit8Array(getBytesTobuffer(transaction, skipSignature, skipSecondSignature, skipId))
+function getBytes (data, skipSignature, skipSecondSignature, skipId) {
+  return arrayBufferToUnit8Array(getBytesTobuffer(data, skipSignature, skipSecondSignature, skipId))
 }
 
 // 系统需要 Uint8Array
