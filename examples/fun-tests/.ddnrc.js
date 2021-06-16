@@ -163,55 +163,62 @@ module.exports = {
    * Database options
    * https://sequelize.org/master/class/lib/sequelize.js~Sequelize.html#instance-constructor-constructor
    * */
-  database: {
-    database: process.env.DBNAME || 'ddn',
-    username: process.env.DBUSERNAME || 'root',
-    password: process.env.DBPASSWORD || 'root', // Please use process.env.DBPASSWORD
+  // database: {
+  //   database: 'ddn',
+  //   username: 'root',
+  //   password: 'wawjr1314', // Please use process.env.DBPASSWORD
 
-    options: {
-      // the sql dialect of the database
-      // currently supported: 'mysql', 'sqlite', 'postgres', 'mssql'
-      dialect: 'sqlite',
+  //   options: {
+  //     // the sql dialect of the database
+  //     // currently supported: 'mysql', 'sqlite', 'postgres', 'mssql'
+  //     dialect: 'mysql',
 
-      // custom host; default: localhost
-      host: '127.0.0.1',
+  //     // custom host; default: localhost
+  //     host: '127.0.0.1',
 
-      // custom port; default: dialect default
-      // port: 12345,
+  //     // custom port; default: dialect default
+  //     // port: 12345,
 
-      pool: {
-        maxactive: 1,
-        max: 5,
-        min: 0,
-        idle: 20000,
-        acquire: 20000
-      },
-      logging: console.log,
+  //     pool: {
+  //       max: 10,
+  //       min: 1,
+  //       idle: 10000
+  //     }
 
-      // SQLite only
-      storage: 'db/blockchain.db',
-      transactionType: 'IMMEDIATE'
-      // Sequelize will warn you if you're using the default aliases and not limiting them
-      // https://sequelize.org/master/manual/querying.html#operators-aliases
-      // Sequelize will warn you if you're using the default aliases and not limiting them
-      // https://sequelize.org/master/manual/querying.html#operators-aliases
-      // operatorsAliases: {
-      //   $and: Op.and,
-      //   $or: Op.or,
-      //   $eq: Op.eq,
-      //   $gt: Op.gt,
-      //   $lt: Op.lt,
-      //   $lte: Op.lte,
-      //   $like: Op.like,
-      //   $in: Op.in,
-      //   $is: Op.is,
-      //   $gte: Op.gte,
-      //   $between: Op.between,
-      //   $not: Op.not,
-      //   $contains: Op.contains
-      // }
-    }
-  },
+  //     // SQLite only
+
+  //     // Sequelize will warn you if you're using the default aliases and not limiting them
+  //     // https://sequelize.org/master/manual/querying.html#operators-aliases
+  //   }
+  // },
+  // database: {
+  //   database:  'ddn2',
+  //   username:  'postgres',
+  //   password: 'wawjr1314', // Please use process.env.DBPASSWORD
+
+  //   options: {
+  //     // the sql dialect of the database
+  //     // currently supported: 'mysql', 'sqlite', 'postgres', 'mssql'
+  //     dialect: 'postgres',
+
+  //     // custom host; default: localhost
+  //     host: 'localhost',
+
+  //     // custom port; default: dialect default
+  //     // port: 12345,
+
+  //     pool: {
+  //       max: 10,
+  //       min: 1,
+  //       idle: 10000
+  //     },
+
+  //     // SQLite only
+
+  //     // Sequelize will warn you if you're using the default aliases and not limiting them
+  //     // https://sequelize.org/master/manual/querying.html#operators-aliases
+  //   }
+  // },
 
   /**
    * 扩展资产插件，对于区块链而言就是资产包，所以使用 assets

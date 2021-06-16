@@ -19,10 +19,7 @@ export const config = mergeConfigs(defaultConfig, userConfig)
 const constantsFile = path.resolve(process.cwd(), './config/constants.js')
 const userConstants = requireFile(constantsFile)
 
-const constantsMerge = mergeConfigs(defaultConstants, userConstants)
-constantsMerge.net = constantsMerge[config.net]
-
-export const constants = constantsMerge
+export const constants = mergeConfigs(defaultConstants, userConstants)
 
 /**
  * 用于初始化 Sdk 的 插件

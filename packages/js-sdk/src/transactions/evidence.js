@@ -21,7 +21,7 @@ async function createEvidence (evidence, secret, secondSecret) {
     throw new Error('Invalid ipid format')
   }
 
-  const fee = DdnUtils.bignum.multiply(constants.net.fees.evidence, constants.fixedPoint).toString()
+  const fee = DdnUtils.bignum.multiply(constants.fees.evidence, constants.fixedPoint).toString()
 
   const transaction = {
     type: DdnUtils.assetTypes.EVIDENCE, // 10 -> 20

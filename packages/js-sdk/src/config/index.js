@@ -8,8 +8,6 @@ const config = ddnrc
 //   config = require('./ddnrc.custom').default
 // }
 
-constants.net = constants[config.net]
-
 /**
  * 初始化 Sdk 的 插件，不然前端无法使用
  */

@@ -89,7 +89,6 @@ class Energy {
       stateChangesHash,
       data
     }
-    // crt.id = await getId(crt)
     this.dao.insert('contract_result', crt, {
       transaction: dbTrans
     })
@@ -132,7 +131,6 @@ class Energy {
       amount
       // timestamp: trs.timestamp,
     }
-    // trsf.id = await getId(trsf)
     this.dao.insert('contract_transfer', trsf, {
       transaction: dbTrans
     })
@@ -299,22 +297,12 @@ class Energy {
       } else if (!mtd.payable) {
         this.logger.info(`Send to contract method: ${mtd.name}`)
         result = await this.runtime.dvm.sendContract(gas_limit, ctx, contract_id, method, ...args)
+        this.logger.info(`Send to contract result: ${mtd.name}`, result)
         if (result.transfers && result.transfers.length > 0) {
           for (const t of result.transfers) {
-            await this.transfer(
-              contract_id,
-              t.currency,
-              String(t.amount),
-              contract_id,
-              t.recipientAddress,
-              trs.id,
-              block,
-              dbTrans
-            )
+            await this.transfer(contract_id, t.currency, String(t.amount), contract_id, t.to, trs.id, block, dbTrans)
           }
         }
-
-        result.transfers = undefined
       }
 
       // console.log(result)

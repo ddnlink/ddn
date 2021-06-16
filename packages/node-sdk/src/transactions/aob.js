@@ -44,7 +44,7 @@ export default {
         issuer_id
       }
     }
-    const fee = bignum.multiply(constants.net.fees.aob_issuer, constants.fixedPoint)
+    const fee = bignum.multiply(constants.fees.aob_issuer, constants.fixedPoint)
     const trs = await createTransaction(asset, fee, DdnUtils.assetTypes.AOB_ISSUER, null, null, secret, secondSecret)
 
     return trs
@@ -82,7 +82,7 @@ export default {
       }
     }
     // var fee = (500 + (Math.floor(bytes.length / 200) + 1) * 0.1) * constants.fixedPoint
-    const fee = bignum.multiply(constants.net.fees.aob_asset, constants.fixedPoint)
+    const fee = bignum.multiply(constants.fees.aob_asset, constants.fixedPoint)
     return await createTransaction(asset, fee, DdnUtils.assetTypes.AOB_ASSET, null, null, secret, secondSecret)
   },
 
@@ -94,7 +94,7 @@ export default {
         flag
       }
     }
-    const fee = bignum.multiply(constants.net.fees.aob_flag, constants.fixedPoint)
+    const fee = bignum.multiply(constants.fees.aob_flag, constants.fixedPoint)
     return await createTransaction(asset, fee, DdnUtils.assetTypes.AOB_FLAG, null, null, secret, secondSecret)
   },
 
@@ -107,7 +107,7 @@ export default {
         list
       }
     }
-    const fee = bignum.multiply(constants.net.fees.aob_acl, constants.fixedPoint)
+    const fee = bignum.multiply(constants.fees.aob_acl, constants.fixedPoint)
     return await createTransaction(asset, fee, DdnUtils.assetTypes.AOB_ACL, null, null, secret, secondSecret)
   },
 
@@ -118,7 +118,7 @@ export default {
         amount: `${amount}`
       }
     }
-    const fee = bignum.multiply(constants.net.fees.aob_issue, constants.fixedPoint)
+    const fee = bignum.multiply(constants.fees.aob_issue, constants.fixedPoint)
 
     // console.log('createIssue', fee, `${fee}`)
 
@@ -135,7 +135,7 @@ export default {
         content
       }
     }
-    const fee = bignum.multiply(constants.net.fees.aob_transfer, constants.fixedPoint)
+    const fee = bignum.multiply(constants.fees.aob_transfer, constants.fixedPoint)
 
     return await createTransaction(
       asset,

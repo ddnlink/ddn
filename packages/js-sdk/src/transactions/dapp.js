@@ -8,7 +8,7 @@ import { config, constants } from '../config'
 async function createDApp (options, secret, secondSecret) {
   const keys = crypto.getKeys(secret)
 
-  const fee = DdnUtils.bignum.multiply(constants.net.fees.dapp, constants.fixedPoint)
+  const fee = DdnUtils.bignum.multiply(constants.fees.dapp, constants.fixedPoint)
   const transaction = {
     nethash: config.nethash,
     type: DdnUtils.assetTypes.DAPP,

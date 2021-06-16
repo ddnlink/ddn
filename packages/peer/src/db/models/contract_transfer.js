@@ -12,17 +12,14 @@ export default connection => {
     {
       contract_id: {
         type: Sequelize.STRING(64),
-        primaryKey: true,
         allowNull: true
       },
       transaction_id: {
         type: Sequelize.STRING(64),
-        primaryKey: true,
         allowNull: false
       },
       block_height: {
         type: Sequelize.STRING(64),
-        primaryKey: true,
         allowNull: false
       },
       sender_id: {
@@ -48,6 +45,9 @@ export default connection => {
     {
       timestamps: false,
       indexes: [
+        {
+          fields: ['contract_id']
+        },
         {
           fields: ['transaction_id']
         }

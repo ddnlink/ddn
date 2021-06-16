@@ -18,7 +18,7 @@ async function createSignature (secret, secondSecret) {
   const keys = crypto.getKeys(secret)
 
   const signature = signSignature(secondSecret)
-  const fee = DdnUtils.bignum.multiply(constants.net.fees.signature, constants.fixedPoint)
+  const fee = DdnUtils.bignum.multiply(constants.fees.signature, constants.fixedPoint)
 
   const transaction = {
     type: DdnUtils.assetTypes.SIGNATURE,

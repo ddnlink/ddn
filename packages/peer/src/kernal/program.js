@@ -83,7 +83,7 @@ class Program {
       dataDir: path.join(this._context.baseDir, '/contracts'),
       logDir: path.join(this._context.baseDir, '/logs/dvm/'),
       logLevel: options.configObject.logLevel,
-      development: process.env.NODE_ENV !== 'production'
+      isDev: process.env.NODE_ENV !== 'production'
     })
 
     try {

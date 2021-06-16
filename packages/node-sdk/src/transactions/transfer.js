@@ -9,7 +9,7 @@ const nethash = config.nethash
 async function createInTransfer (dappId, currency, amount, secret, secondSecret) {
   const keys = crypto.getKeys(secret)
 
-  const fee = bignum.multiply(constants.net.fees.dapp_in, constants.fixedPoint)
+  const fee = bignum.multiply(constants.fees.dapp_in, constants.fixedPoint)
   const transaction = {
     type: assetTypes.DAPP_IN,
     nethash,
@@ -44,7 +44,7 @@ async function createInTransfer (dappId, currency, amount, secret, secondSecret)
 
 async function createOutTransfer (secret, recipientId, dappId, transactionId, currency, amount, withdrawal_sequence) {
   const keys = crypto.getKeys(secret)
-  const fee = bignum.multiply(constants.net.fees.dapp_out, constants.fixedPoint)
+  const fee = bignum.multiply(constants.fees.dapp_out, constants.fixedPoint)
 
   const transaction = {
     nethash,
@@ -78,7 +78,7 @@ async function createOutTransfer (secret, recipientId, dappId, transactionId, cu
 // async function createOutTransfer (recipientId, dappId, transactionId, currency, amount, secret, secondSecret) {
 //   const keys = crypto.getKeys(secret)
 
-//   const fee = bignum.multiply(constants.net.fees.dapp_out, constants.fixedPoint)
+//   const fee = bignum.multiply(constants.fees.dapp_out, constants.fixedPoint)
 
 //   const transaction = {
 //     nethash,

@@ -57,8 +57,6 @@ class ContractService {
     // query.offset = Number(query.offset || 0)
     // query.limit = Number(query.limit || 100)
 
-    // console.log('=--------------------', query)
-
     const validateErrors = await this.ddnSchema.validate(
       {
         type: 'object',
@@ -176,19 +174,23 @@ class ContractService {
    */
   async getTransfers (req) {
     const { params, query } = req
-    // const { id } = await this.dao.findOne('contract', params.name, { attributes: ['id', 'name'] })
-    const where = { $or: [{ sender_id: params.id || query.id }, { recipient_id: params.id || query.id }] }
+    const senderId = query.senderId || params.senderId
+    const recipientId = query.recipientId || params.recipientId
+    const where = {}
+    if (senderId && recipientId) {
+      where.$or = [{ sender_id: senderId }, { recipient_id: recipientId }]
+    } else if (senderId) {
+      where.sender_id = senderId
+    } else if (senderId) {
+      where.recipient_id = recipientId
+    }
     const offset = query.offset ? Math.max(0, Number.parseInt(query.offset)) : 0
     const limit = query.limit ? Math.min(100, Number.parseInt(query.limit)) : 20
     // const order = query.order || 'ASC'
 
     const result = await this.dao.findPage('contract_transfer', { where, offset, limit })
-    const transfers = await attachTransactions(
-      result.rows.map(r => convertResult(r)),
-      this.dao
-    )
 
-    return { success: true, count: result.total, rows: transfers }
+    return { success: true, count: result.total, rows: result.rows }
   }
 
   /**
@@ -210,17 +212,35 @@ class ContractService {
     const result = await this.dao.findPage('contract_result', { where, offset, limit })
 
     const rows = []
-    for (let row of result.rows) {
-      row = convertResult(row)
-      const trf = await this.dao.findOne('contract_transfer', { where: { transaction_id: row.transaction_id } })
-      if (trf) {
-        row.sender_id = trf.sender_id
-        row.recipient_id = trf.recipient_id
-        row.amount = trf.amount
-        row.currency = trf.currency
-        row.block_height = trf.block_height
+    for (const row of result.rows) {
+      try {
+        const record = convertResult(row)
+        const trs = await this.dao.findOne('tr', { where: { id: row.transaction_id } })
+        if (trs.args) {
+          const args = JSON.parse(trs.args)
+          const data = args && args[0]
+          const method = data.method
+          const param = data.args
+          record.interface = `${method}(${param})`
+        }
+        const trfs = await this.dao.findList('contract_transfer', { where: { transaction_id: row.transaction_id } })
+        if (trfs && trfs.length) {
+          for (const trf of trfs) {
+            rows.push({
+              ...record,
+              sender_id: trf.sender_id,
+              recipient_id: trf.recipient_id,
+              amount: trf.amount,
+              currency: trf.currency,
+              block_height: trf.block_height
+            })
+          }
+        } else {
+          rows.push(record)
+        }
+      } catch (err) {
+        console.error(err)
       }
-      rows.push(row)
     }
 
     return { success: true, count: result.total, rows: rows }
@@ -265,7 +285,7 @@ class ContractService {
    * '/states'
    */
   async getStates (req) {
-    const { id, statePath } = req.params
+    const { id, statePath } = req.query
     if (!statePath) throw new Error(`Invalid state path '${statePath}'`)
 
     const states = await this.runtime.dvm.queryState(id, String(statePath).split('.'))
@@ -283,7 +303,6 @@ class ContractService {
    */
   async postCall (req) {
     const { id, method, args } = req.body
-    // console.log(args)
     const methodArgs = args || []
     if (!Array.isArray(methodArgs)) {
       throw new Error('Arguments should be array')

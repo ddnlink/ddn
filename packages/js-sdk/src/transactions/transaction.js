@@ -5,7 +5,7 @@ import slots from '../time/slots'
 import { config, constants } from '../config'
 
 function calculateFee (amount) {
-  const min = constants.net.fees.transfer
+  const min = constants.fees.transfer
 
   const fee = bignum.multiply(amount, 0.0001).toFixed(0)
 
@@ -17,7 +17,7 @@ function calculateFee (amount) {
 }
 
 async function createTransaction (recipientId, amount, message, secret, second_secret) {
-  const fee = bignum.multiply(constants.net.fees.transfer, constants.fixedPoint)
+  const fee = bignum.multiply(constants.fees.transfer, constants.fixedPoint)
   const amount2 = bignum.multiply(amount, constants.fixedPoint).toString() // 传来的 amount 原本就该是含精度的值
   const transaction = {
     type: assetTypes.TRANSFER,
@@ -45,7 +45,7 @@ async function createTransaction (recipientId, amount, message, secret, second_s
 }
 
 async function createLock (height, secret, second_secret) {
-  const fee = bignum.multiply(constants.net.fees.lock, constants.fixedPoint)
+  const fee = bignum.multiply(constants.fees.lock, constants.fixedPoint)
   const transaction = {
     type: 100, // TODO: update to string lock
     amount: '0',

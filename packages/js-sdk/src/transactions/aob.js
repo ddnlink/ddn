@@ -9,15 +9,7 @@ function getClientFixedTime () {
   return slots.getTime() - config.clientDriftSeconds
 }
 
-async function createTransaction (
-  asset,
-  fee,
-  type,
-  recipientId,
-  message,
-  secret,
-  secondSecret
-) {
+async function createTransaction (asset, fee, type, recipientId, message, secret, secondSecret) {
   const keys = DdnCrypto.getKeys(secret)
 
   const transaction = {
@@ -51,16 +43,8 @@ export default {
         desc
       }
     }
-    const fee = bignum.multiply(constants.net.fees.aob_issuer, constants.fixedPoint)
-    const trs = await createTransaction(
-      asset,
-      fee,
-      DdnUtils.assetTypes.AOB_ISSUER,
-      null,
-      null,
-      secret,
-      secondSecret
-    )
+    const fee = bignum.multiply(constants.fees.aob_issuer, constants.fixedPoint)
+    const trs = await createTransaction(asset, fee, DdnUtils.assetTypes.AOB_ISSUER, null, null, secret, secondSecret)
 
     return trs
   },
@@ -90,16 +74,8 @@ export default {
       }
     }
     // var fee = (500 + (Math.floor(bytes.length / 200) + 1) * 0.1) * constants.fixedPoint
-    const fee = bignum.multiply(constants.net.fees.aob_asset, constants.fixedPoint)
-    return await createTransaction(
-      asset,
-      fee,
-      DdnUtils.assetTypes.AOB_ASSET,
-      null,
-      null,
-      secret,
-      secondSecret
-    )
+    const fee = bignum.multiply(constants.fees.aob_asset, constants.fixedPoint)
+    return await createTransaction(asset, fee, DdnUtils.assetTypes.AOB_ASSET, null, null, secret, secondSecret)
   },
 
   async createFlags (currency, flagType, flag, secret, secondSecret) {
@@ -110,16 +86,8 @@ export default {
         flag
       }
     }
-    const fee = bignum.multiply(constants.net.fees.aob_flag, constants.fixedPoint)
-    return await createTransaction(
-      asset,
-      fee,
-      DdnUtils.assetTypes.AOB_FLAG,
-      null,
-      null,
-      secret,
-      secondSecret
-    )
+    const fee = bignum.multiply(constants.fees.aob_flag, constants.fixedPoint)
+    return await createTransaction(asset, fee, DdnUtils.assetTypes.AOB_FLAG, null, null, secret, secondSecret)
   },
 
   async createAcl (currency, operator, flag, list, secret, secondSecret) {
@@ -131,16 +99,8 @@ export default {
         list
       }
     }
-    const fee = bignum.multiply(constants.net.fees.aob_acl, constants.fixedPoint)
-    return await createTransaction(
-      asset,
-      fee,
-      DdnUtils.assetTypes.AOB_ACL,
-      null,
-      null,
-      secret,
-      secondSecret
-    )
+    const fee = bignum.multiply(constants.fees.aob_acl, constants.fixedPoint)
+    return await createTransaction(asset, fee, DdnUtils.assetTypes.AOB_ACL, null, null, secret, secondSecret)
   },
 
   async createIssue (currency, amount, secret, secondSecret) {
@@ -150,29 +110,13 @@ export default {
         amount: `${amount}`
       }
     }
-    const fee = bignum.multiply(constants.net.fees.aob_issue, constants.fixedPoint)
-    const trs = await createTransaction(
-      asset,
-      fee,
-      DdnUtils.assetTypes.AOB_ISSUE,
-      null,
-      null,
-      secret,
-      secondSecret
-    )
+    const fee = bignum.multiply(constants.fees.aob_issue, constants.fixedPoint)
+    const trs = await createTransaction(asset, fee, DdnUtils.assetTypes.AOB_ISSUE, null, null, secret, secondSecret)
 
     return trs
   },
 
-  async createTransfer (
-    currency,
-    amount,
-    recipientId,
-    message,
-    content,
-    secret,
-    secondSecret
-  ) {
+  async createTransfer (currency, amount, recipientId, message, content, secret, secondSecret) {
     const asset = {
       aobTransfer: {
         currency,
@@ -180,7 +124,7 @@ export default {
         content
       }
     }
-    const fee = bignum.multiply(constants.net.fees.aob_transfer, constants.fixedPoint)
+    const fee = bignum.multiply(constants.fees.aob_transfer, constants.fixedPoint)
 
     return await createTransaction(
       asset,

@@ -41,6 +41,7 @@
   "scripts": {
     "start": "cross-env NODE_ENV=development node app.js",
     "test": "./node_modules/.bin/mocha -r intelli-espower-loader test/**/*.test.js",
+    "clean": "rm contracts/* && rm db/blockchain.db && rm logs/debug.log && rm logs/dvm/*",
     "build": "cross-env NODE_ENV=production ./node_modules/.bin/gulp linux-build-main",
     "build-testnet": "./node_modules/.bin/gulp linux-build-test",
     "build-testnet-mac": "./node_modules/.bin/gulp mac-build-test",
