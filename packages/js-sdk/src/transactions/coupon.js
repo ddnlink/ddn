@@ -7,7 +7,7 @@ import slots from '../time/slots'
 async function createIssuerAuditorBuy (received_address, amount, secret, secondSecret) {
   const keys = crypto.getKeys(secret)
 
-  const fee = bignum.multiply(constants.net.fees.transfer, constants.fixedPoint)
+  const fee = bignum.multiply(constants.fees.transfer, constants.fixedPoint)
 
   const transaction = {
     type: assetTypes.COUPON_ISSUER_AUDITOR_BUY,
@@ -39,7 +39,7 @@ async function createIssuerAuditorBuy (received_address, amount, secret, secondS
 async function createIssuerApply (orgName, org_id, orgOwner, orgOwnerPhone, secret, secondSecret) {
   const keys = crypto.getKeys(secret)
 
-  const fee = bignum.multiply(constants.net.fees.transfer, constants.fixedPoint)
+  const fee = bignum.multiply(constants.fees.transfer, constants.fixedPoint)
 
   const transaction = {
     type: assetTypes.COUPON_ISSUER_APPLY,
@@ -75,7 +75,7 @@ async function createIssuerApply (orgName, org_id, orgOwner, orgOwnerPhone, secr
 async function createIssuerUpdate (orgName, org_id, orgOwner, orgOwnerPhone, secret, secondSecret) {
   const keys = crypto.getKeys(secret)
 
-  const fee = bignum.multiply(constants.net.fees.transfer, constants.fixedPoint)
+  const fee = bignum.multiply(constants.fees.transfer, constants.fixedPoint)
 
   const transaction = {
     type: assetTypes.COUPON_ISSUER_UPDATE,
@@ -111,7 +111,7 @@ async function createIssuerUpdate (orgName, org_id, orgOwner, orgOwnerPhone, sec
 async function createIssuerCheck (address, orgName, org_id, orgOwner, orgOwnerPhone, state, secret, secondSecret) {
   const keys = crypto.getKeys(secret)
 
-  const fee = bignum.multiply(constants.net.fees.transfer, constants.fixedPoint)
+  const fee = bignum.multiply(constants.fees.transfer, constants.fixedPoint)
 
   const transaction = {
     type: assetTypes.COUPON_ISSUER_CHECK,
@@ -147,7 +147,7 @@ async function createIssuerCheck (address, orgName, org_id, orgOwner, orgOwnerPh
 async function createIssuerFreeze (address, orgName, org_id, orgOwner, orgOwnerPhone, secret, secondSecret) {
   const keys = crypto.getKeys(secret)
 
-  const fee = bignum.multiply(constants.net.fees.transfer, constants.fixedPoint)
+  const fee = bignum.multiply(constants.fees.transfer, constants.fixedPoint)
 
   const transaction = {
     type: assetTypes.COUPON_ISSUER_FREEZE,
@@ -182,7 +182,7 @@ async function createIssuerFreeze (address, orgName, org_id, orgOwner, orgOwnerP
 async function createIssuerUnfreeze (address, orgName, org_id, orgOwner, orgOwnerPhone, state, secret, secondSecret) {
   const keys = crypto.getKeys(secret)
 
-  const fee = bignum.multiply(constants.net.fees.transfer, constants.fixedPoint)
+  const fee = bignum.multiply(constants.fees.transfer, constants.fixedPoint)
 
   const transaction = {
     type: assetTypes.COUPON_ISSUER_UNFREEZE,
@@ -216,11 +216,22 @@ async function createIssuerUnfreeze (address, orgName, org_id, orgOwner, orgOwne
   return transaction
 }
 
-async function createIssueNew (goodsName, goodsSpecs, goodsUnit, goodsNum, unitPrice,
-  batchValue, issueNum, issueTime, expireTime, secret, secondSecret) {
+async function createIssueNew (
+  goodsName,
+  goodsSpecs,
+  goodsUnit,
+  goodsNum,
+  unitPrice,
+  batchValue,
+  issueNum,
+  issueTime,
+  expireTime,
+  secret,
+  secondSecret
+) {
   const keys = crypto.getKeys(secret)
 
-  const fee = bignum.multiply(constants.net.fees.transfer, constants.fixedPoint)
+  const fee = bignum.multiply(constants.fees.transfer, constants.fixedPoint)
 
   const transaction = {
     type: assetTypes.COUPON_ISSUE_NEW,
@@ -257,11 +268,22 @@ async function createIssueNew (goodsName, goodsSpecs, goodsUnit, goodsNum, unitP
   return transaction
 }
 
-async function createIssueClose (goodsName, goodsSpecs, goodsUnit, goodsNum, unitPrice,
-  batchValue, issueNum, issueTime, expireTime, secret, secondSecret) {
+async function createIssueClose (
+  goodsName,
+  goodsSpecs,
+  goodsUnit,
+  goodsNum,
+  unitPrice,
+  batchValue,
+  issueNum,
+  issueTime,
+  expireTime,
+  secret,
+  secondSecret
+) {
   const keys = crypto.getKeys(secret)
 
-  const fee = bignum.multiply(constants.net.fees.transfer, constants.fixedPoint)
+  const fee = bignum.multiply(constants.fees.transfer, constants.fixedPoint)
 
   const transaction = {
     type: assetTypes.COUPON_ISSUE_CLOSE,
@@ -298,11 +320,22 @@ async function createIssueClose (goodsName, goodsSpecs, goodsUnit, goodsNum, uni
   return transaction
 }
 
-async function createIssueReopen (goodsName, goodsSpecs, goodsUnit, goodsNum, unitPrice,
-  batchValue, issueNum, issueTime, expireTime, secret, secondSecret) {
+async function createIssueReopen (
+  goodsName,
+  goodsSpecs,
+  goodsUnit,
+  goodsNum,
+  unitPrice,
+  batchValue,
+  issueNum,
+  issueTime,
+  expireTime,
+  secret,
+  secondSecret
+) {
   const keys = crypto.getKeys(secret)
 
-  const fee = bignum.multiply(constants.net.fees.transfer, constants.fixedPoint)
+  const fee = bignum.multiply(constants.fees.transfer, constants.fixedPoint)
 
   const transaction = {
     type: assetTypes.COUPON_ISSUE_REOPEN,
@@ -339,11 +372,10 @@ async function createIssueReopen (goodsName, goodsSpecs, goodsUnit, goodsNum, un
   return transaction
 }
 
-async function createExchangeBuy (batchValue, code, received_address,
-  price, secret, secondSecret) {
+async function createExchangeBuy (batchValue, code, received_address, price, secret, secondSecret) {
   const keys = crypto.getKeys(secret)
 
-  const fee = bignum.multiply(constants.net.fees.transfer, constants.fixedPoint)
+  const fee = bignum.multiply(constants.fees.transfer, constants.fixedPoint)
 
   const transaction = {
     type: assetTypes.COUPON_EXCH_BUY,
@@ -375,11 +407,10 @@ async function createExchangeBuy (batchValue, code, received_address,
   return transaction
 }
 
-async function createExchangePay (batchValue, code, received_address,
-  secret, secondSecret) {
+async function createExchangePay (batchValue, code, received_address, secret, secondSecret) {
   const keys = crypto.getKeys(secret)
 
-  const fee = bignum.multiply(constants.net.fees.transfer, constants.fixedPoint)
+  const fee = bignum.multiply(constants.fees.transfer, constants.fixedPoint)
 
   const transaction = {
     type: assetTypes.COUPON_EXCH_PAY,
@@ -411,11 +442,19 @@ async function createExchangePay (batchValue, code, received_address,
   return transaction
 }
 
-async function createExchangeTransferConfirm (batchValue, code, received_address,
-  price, related_trs_id, state, secret, secondSecret) {
+async function createExchangeTransferConfirm (
+  batchValue,
+  code,
+  received_address,
+  price,
+  related_trs_id,
+  state,
+  secret,
+  secondSecret
+) {
   const keys = crypto.getKeys(secret)
 
-  const fee = bignum.multiply(constants.net.fees.transfer, constants.fixedPoint)
+  const fee = bignum.multiply(constants.fees.transfer, constants.fixedPoint)
 
   const transaction = {
     type: assetTypes.COUPON_EXCH_TRANSFER_CONFIRM,
@@ -449,11 +488,10 @@ async function createExchangeTransferConfirm (batchValue, code, received_address
   return transaction
 }
 
-async function createExchangeTransferAsk (batchValue, code, received_address,
-  price, secret, secondSecret) {
+async function createExchangeTransferAsk (batchValue, code, received_address, price, secret, secondSecret) {
   const keys = crypto.getKeys(secret)
 
-  const fee = bignum.multiply(constants.net.fees.transfer, constants.fixedPoint)
+  const fee = bignum.multiply(constants.fees.transfer, constants.fixedPoint)
 
   const transaction = {
     type: assetTypes.COUPON_EXCH_TRANSFER_ASK,

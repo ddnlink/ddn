@@ -9,7 +9,7 @@ import { config, constants } from '../config'
 async function deploy (options, secret, secondSecret) {
   const keys = crypto.getKeys(secret)
 
-  const fee = DdnUtils.bignum.multiply(constants.net.fees.contract, constants.fixedPoint)
+  const fee = DdnUtils.bignum.multiply(constants.fees.contract, constants.fixedPoint)
 
   const timestamp = slots.getTime() - config.clientDriftSeconds
   // const compiler = new Compiler()
@@ -58,7 +58,7 @@ async function send (options, secret, secondSecret) {
   let args = options.args
   if (args instanceof Array) args = JSON.stringify(args)
 
-  const fee = DdnUtils.bignum.multiply(constants.net.fees.contract, constants.fixedPoint)
+  const fee = DdnUtils.bignum.multiply(constants.fees.contract, constants.fixedPoint)
 
   const timestamp = slots.getTime() - config.clientDriftSeconds
   const opts = {
@@ -92,7 +92,7 @@ async function pay (options, secret, secondSecret) {
   let args = options.args
   if (args instanceof Array) args = JSON.stringify(args)
 
-  const fee = DdnUtils.bignum.multiply(constants.net.fees.contract, constants.fixedPoint)
+  const fee = DdnUtils.bignum.multiply(constants.fees.contract, constants.fixedPoint)
 
   const timestamp = slots.getTime() - config.clientDriftSeconds
   const opts = {

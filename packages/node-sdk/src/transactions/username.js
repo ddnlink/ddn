@@ -10,7 +10,7 @@ async function createUsername (name, secret, secondSecret) {
   if (!name || name.length === 0) {
     throw new Error('Invalid name format')
   }
-  const fee = DdnUtils.bignum.multiply(constants.net.fees.username, constants.fixedPoint)
+  const fee = DdnUtils.bignum.multiply(constants.fees.username, constants.fixedPoint)
 
   const transaction = {
     type: DdnUtils.assetTypes.USERINFO,

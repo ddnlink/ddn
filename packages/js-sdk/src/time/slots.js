@@ -7,7 +7,7 @@ const delegates = constants.delegates
  * 周期开始时间
  */
 function beginEpochTime () {
-  return constants.net.beginDate
+  return constants.beginDate
 }
 
 /**
@@ -16,7 +16,7 @@ function beginEpochTime () {
  */
 function getEpochTime (time) {
   if (time === undefined) {
-    time = (new Date()).getTime()
+    time = new Date().getTime()
   }
   const d = beginEpochTime()
   const t = d.getTime()

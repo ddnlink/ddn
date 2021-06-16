@@ -20,21 +20,24 @@ async function createExchange (trsopt, exchange, secret, secondSecret) {
     throw new Error('Invalid org_id format')
   }
 
-  const fee = DdnUtils.bignum.multiply(constants.net.fees.dao_exchange, constants.fixedPoint)
+  const fee = DdnUtils.bignum.multiply(constants.fees.dao_exchange, constants.fixedPoint)
 
-  const transaction = Object.assign({
-    type: DdnUtils.assetTypes.DAO_EXCHANGE,
-    nethash: config.nethash,
-    amount: '0', // Bignum update
-    fee: `${fee}`,
-    recipientId: null,
-    senderPublicKey: keys.publicKey,
-    // senderPublicKey: keys.publicKey,
-    timestamp: slots.getTime() - config.clientDriftSeconds,
-    asset: {
-      exchange
-    }
-  }, trsopt || {})
+  const transaction = Object.assign(
+    {
+      type: DdnUtils.assetTypes.DAO_EXCHANGE,
+      nethash: config.nethash,
+      amount: '0', // Bignum update
+      fee: `${fee}`,
+      recipientId: null,
+      senderPublicKey: keys.publicKey,
+      // senderPublicKey: keys.publicKey,
+      timestamp: slots.getTime() - config.clientDriftSeconds,
+      asset: {
+        exchange
+      }
+    },
+    trsopt || {}
+  )
 
   transaction.signature = await crypto.sign(transaction, keys)
 

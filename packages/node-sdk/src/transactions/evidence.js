@@ -22,7 +22,7 @@ async function createEvidence (evidence, secret, secondSecret) {
     throw new Error('Invalid ipid format')
   }
 
-  const fee = bignum.multiply(constants.net.fees.evidence, constants.fixedPoint)
+  const fee = bignum.multiply(constants.fees.evidence, constants.fixedPoint)
 
   const transaction = {
     type: assetTypes.EVIDENCE, // 10 -> 20
