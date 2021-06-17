@@ -617,18 +617,14 @@ class Transaction {
     if (!signature) {
       return false
     }
+
+    const transaction = this.deepCloneTransaction(trs)
+
     // sdk生成交易体加密时没有senderId字段，验证时去掉
-    const transaction = { ...trs }
     if (transaction.senderId) {
       delete transaction.senderId
     }
-    // TODO creazy 铸块时会再次进行交易验证，这时交易会多处下面两个字段
-    if (transaction.block_height) {
-      delete transaction.block_height
-    }
-    if (transaction.block_id) {
-      delete transaction.block_id
-    }
+
     const hash = await DdnCrypto.getHash(transaction, true, true)
     const result = DdnCrypto.verifyHash(hash, signature, publicKey)
 
@@ -673,34 +669,15 @@ class Transaction {
     if (!trs.nethash) {
       throw new Error("Transaction's nethash property is required.")
     }
-    // const newTransaction = { ...trs }
-    // if (newTransaction.height) {
-    //   delete newTransaction.height
-    // }
-    // if (newTransaction.block_id) {
-    //   delete newTransaction.block_id
-    // }
-    // if (newTransaction.block_height) {
-    //   delete newTransaction.block_height
-    // }
-    // if (newTransaction.asset) {
-    //   for (const key in newTransaction.asset) {
-    //     if (Object.hasOwnProperty.call(newTransaction.asset, key)) {
-    //       const element = newTransaction.asset[key]
-    //       delete element.transaction_type
-    //       delete element.transaction_id
-    //       delete element.timestamp
-    //     }
-    //   }
-    // }
-    const newTransaction = this.deepCloneTransaction(trs)
+
+    // const newTransaction = this.deepCloneTransaction(trs)
     // Verify signature
     let valid = false
     if (trs.requester_public_key) {
       // wxm block database
-      valid = await this.verifySignature(newTransaction, trs.signature, trs.requester_public_key) // wxm block database
+      valid = await this.verifySignature(trs, trs.signature, trs.requester_public_key) // wxm block database
     } else {
-      valid = await this.verifySignature(newTransaction, trs.signature, trs.senderPublicKey)
+      valid = await this.verifySignature(trs, trs.signature, trs.senderPublicKey)
     }
     if (!valid) {
       throw new Error('Failed to verify requester or sender signature, 5')
@@ -763,6 +740,7 @@ class Transaction {
         }
 
         if (!verify) {
+          console.log('trs: ', trs)
           throw new Error(`Failed to verify multisignature: ${trs.id}`)
         }
       }
@@ -817,13 +795,7 @@ class Transaction {
     if (transaction.senderId) {
       delete transaction.senderId
     }
-    // // TODO creazy 铸块时会再次进行交易验证，这时交易会多处下面两个字段
-    // if (transaction.block_height) {
-    //   delete transaction.block_height
-    // }
-    // if (transaction.block_id) {
-    //   delete transaction.block_id
-    // }
+
     const hash = await DdnCrypto.getHash(transaction, false, true)
     const result = DdnCrypto.verifyHash(hash, sign_signature, publicKey)
 
@@ -860,9 +832,6 @@ class Transaction {
           if (element.deposit_sequence) {
             delete element.deposit_sequence
           }
-          // if (element.deposit_sequence) {
-          //   delete element.deposit_sequence
-          // }
         }
       }
     }
