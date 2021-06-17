@@ -10,7 +10,6 @@ import extend from 'extend2'
 import * as DdnCrypto from '@ddn/crypto'
 import { bignum, runtimeState } from '@ddn/utils'
 import { System } from '../utils/system'
-// import tracer from 'tracer'
 import { logger } from '../utils/logger'
 
 import Context from './context'

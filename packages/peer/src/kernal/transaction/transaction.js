@@ -43,7 +43,6 @@ class Transaction {
    * 删除交易
    * @param {*} trsId
    */
-
   async deleteTransaction ({ trsId, dbTrans }) {
     return await this.dao.remove('tr', { where: { id: trsId }, transaction: dbTrans })
   }
@@ -61,7 +60,7 @@ class Transaction {
   }
 
   async create (data) {
-    const { type, sender, keypair, requester, message, args, second_keypair } = data
+    const { type, sender, keypair, requester, message, second_keypair, args } = data
     if (!this._assets.hasType(type)) {
       throw new Error(`Unknown transaction type 1 ${type}`)
     }
@@ -75,29 +74,28 @@ class Transaction {
     }
 
     let trs = {
-      type: type,
-      amount: '0',
+      type,
       nethash: this.config.nethash,
+      amount: '0',
       senderPublicKey: sender.publicKey,
       requester_public_key: requester ? requester.publicKey.toString('hex') : null, // 仅适用于多重签名
       timestamp: this.runtime.slot.getTime(),
       asset: {},
-      message: message,
-      args: args
+      message,
+      args
     }
 
     trs = await this._assets.call(trs.type, 'create', data, trs) // 对应各个 asset 交易类型的 async create(data, trs) 方法
+    trs.fee = `${await this._assets.call(trs.type, 'calculateFee', trs, sender)}`
 
-    // trs.signature = await DdnCrypto.sign(trs, data.keypair);
     trs.signature = await DdnCrypto.sign(trs, keypair)
     if (sender.second_signature && second_keypair) {
       trs.sign_signature = await DdnCrypto.sign(trs, second_keypair)
-      // trs.sign_signature = await DdnCrypto.sign(trs, data.second_keypair);
     }
 
-    trs.id = await getId(trs)
+    this.logger.debug('Created trs is ', trs)
 
-    trs.fee = `${await this._assets.call(trs.type, 'calculateFee', trs, sender)}`
+    trs.id = await getId(trs)
 
     return trs
   }
@@ -416,8 +414,6 @@ class Transaction {
     if (trs.block_id !== this.genesisblock.id && bignum.isLessThan(sender.balance, amount)) {
       // wxm block database
       throw new Error(`apply, insufficient balance: ${sender.balance}`)
-      // this.logger.info(`apply, insufficient balance: ${sender.balance}`)
-      // return
     }
 
     const accountInfo = await this.runtime.account.merge(
@@ -469,17 +465,14 @@ class Transaction {
       throw new Error(`Unknown transaction type 10 ${trs.type}`)
     }
     // TODO creazy 验证交易id时，程序会在交易体中添加下面几个字段，所以要去掉，保持和sdk生成交易体时有同样的数据
-    const trss = { ...trs }
-    if (trss.senderId) {
-      delete trss.senderId
+    const transaction = this.deepCloneTransaction(trs)
+
+    // sdk生成交易体加密时没有senderId字段，验证时去掉
+    if (transaction.senderId) {
+      delete transaction.senderId
     }
-    if (trss.block_height) {
-      delete trss.block_height
-    }
-    if (trss.block_id) {
-      delete trss.block_id
-    }
-    const txId = await getId(trss)
+
+    const txId = await getId(transaction)
 
     // 确保客户端传入id，这里仅做验证
     if (typeof trs.id === 'undefined' || trs.id !== txId) {
