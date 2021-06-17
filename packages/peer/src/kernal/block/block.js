@@ -473,7 +473,7 @@ class Block {
                 data: votes,
                 peer: {
                   id: 1,
-                  version: this.config.vertion,
+                  version: this.config.version,
                   os: os.platform() + os.release(),
                   clock: null
                 }
