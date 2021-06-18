@@ -189,7 +189,7 @@ async function tempaleDapp (name) {
           description: answer.description || '',
           tags: answer.tags || '',
           icon: answer.icon || '',
-          delegates: answer.delegates,
+          delegates: `${answer.delegates}`,
           unlock_delegates: Number(answer.unlock_delegates),
           type: 0
         }

@@ -726,8 +726,9 @@ class Transaction {
           if (trs.requester_public_key && multisignatures[s] === trs.requester_public_key) {
             continue
           }
-
-          if (await this.verifySignature(trs, trs.signatures[d], multisignatures[s])) {
+          const newTrs = JSON.parse(JSON.stringify(trs))
+          delete newTrs.signatures
+          if (await this.verifySignature(newTrs, trs.signatures[d], multisignatures[s])) {
             verify = true
           }
         }
