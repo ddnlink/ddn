@@ -263,7 +263,7 @@ class Energy {
     const { metadata } = await this.dao.findOne('contract', contract_id, { attributes: ['id', 'metadata'] })
     const meta = JSON.parse(metadata)
     const mtd = meta.methods.find(t => t.name === method)
-    assert(!!mtd, 'Invalid contract method, method name not found')
+    assert(!!mtd, `Invalid contract method ${method}, method name not found`)
 
     try {
       let result
