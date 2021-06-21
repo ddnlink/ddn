@@ -1,10 +1,14 @@
 /**
- * 该方法为加密算法涉及到的基础方法，如果更换其他的密码学算法，请注意实现下面的方法
+ * 该文件为加密算法涉及到的基础方法，如果更换其他的密码学算法，请注意实现下面的方法
  */
 import nacl from 'tweetnacl'
 import { getBytes } from './bytes'
 
-// hex 不包含 asset 字段
+/**
+ * 该方法用于生成交易Id，仅包含核心交易字段信息。所以，在调用本方法之前，要过滤掉系统生成的字段。
+ * @param {object} transaction 交易体
+ * @returns 16进制的Hash值（不包含 asset 字段）
+ */
 async function getId (transaction) {
   const hash = await getHash(transaction)
   return hash.toString('hex')
@@ -61,7 +65,6 @@ async function secondSign (transaction, { privateKey }) {
   return bufToHex(signature)
 }
 
-// 验证，TODO trs重构： peer/src/kernal/transaction.js  2020.5.3
 /**
  * 该方法验证使用私钥签名的字节信息是否正确，参数公钥与私钥对应，即：私钥签名的信息，公钥可以验证通过
  * @param {hash} bytes 字节流 hash 值

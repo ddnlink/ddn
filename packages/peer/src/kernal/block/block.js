@@ -599,7 +599,7 @@ class Block {
           throw new Error(result)
         }
 
-        this.logger.debug(`The dao.transaction is finished, err: ${result} `)
+        this.logger.debug('The dao.transaction is finished.')
         this.setLastBlock(block)
 
         this._blockCache = {}

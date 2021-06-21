@@ -189,8 +189,9 @@ class MultisignaturesRouter {
         throw new Error('Invalid passphrase')
       }
     }
-
-    const sign = await DdnCrypto.sign(transaction, keypair)
+    const newTrs = JSON.parse(JSON.stringify(transaction))
+    delete newTrs.senderId
+    const sign = await DdnCrypto.sign(newTrs, keypair)
 
     if (transaction.type === assetTypes.MULTISIGNATURE) {
       if (

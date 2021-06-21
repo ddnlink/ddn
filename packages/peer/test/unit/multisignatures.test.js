@@ -5,7 +5,7 @@ import Debug from 'debug'
 import { bignum } from '@ddn/utils'
 import { node } from '../ddn-js'
 
-const debug = Debug('debug')
+const debug = Debug('multisign')
 const expect = node.expect
 
 const totalMembers = 3 // node.randomNumber(2, 16);
@@ -74,7 +74,7 @@ async function sendDDN ({ address }, i) {
           return reject(err)
         }
 
-        // debug(JSON.stringify(res.body));
+        debug(JSON.stringify(body))
         debug(`sendDDN Sending ${randomCoin} DDN to ${address}`)
         expect(body).to.have.property('success').to.be.true
         if (body.success === true && i !== null) {
@@ -132,12 +132,7 @@ async function confirmTransaction ({ password }, id) {
           return reject(err)
         }
         debug(
-          'Signing Tx ID = ' +
-            id +
-            ' from account with password = ' +
-            password +
-            ' Got reply: ' +
-            JSON.stringify(body)
+          'Signing Tx ID = ' + id + ' from account with password = ' + password + ' Got reply: ' + JSON.stringify(body)
         )
         expect(body).to.have.property('success').to.be.true
 
@@ -641,9 +636,7 @@ describe('GET /multisignatures/pending', () => {
         // debug(JSON.stringify(res.body));
         expect(body).to.have.property('success')
         expect(body).to.have.property('success').to.be.true
-        expect(body)
-          .to.have.property('transactions')
-          .that.is.an('array')
+        expect(body).to.have.property('transactions').that.is.an('array')
         expect(body.transactions.length).to.equal(0)
         done()
       })
@@ -659,44 +652,32 @@ describe('GET /multisignatures/pending', () => {
       .end((_err, { body }) => {
         // debug('res.body', res.body)
         expect(body).to.have.property('success').to.be.true
-        expect(body)
-          .to.have.property('transactions')
-          .that.is.an('array')
+        expect(body).to.have.property('transactions').that.is.an('array')
         expect(body.transactions.length).to.be.at.least(1)
         let flag = 0
         for (let i = 0; i < body.transactions.length; i++) {
           // debug(MultisigAccount.publicKey);
-          if (
-            body.transactions[i].transaction.senderPublicKey ===
-            MultisigAccount.publicKey
-          ) {
+          if (body.transactions[i].transaction.senderPublicKey === MultisigAccount.publicKey) {
             flag += 1
-            expect(body.transactions[i].transaction)
-              .to.have.property('type')
-              .to.equal(node.AssetTypes.MULTISIGNATURE)
-            expect(body.transactions[i].transaction)
-              .to.have.property('amount')
-              .to.equal('0')
-            expect(body.transactions[i].transaction)
-              .to.have.property('asset')
-              .that.is.an('object')
+            expect(body.transactions[i].transaction).to.have.property('type').to.equal(node.AssetTypes.MULTISIGNATURE)
+            expect(body.transactions[i].transaction).to.have.property('amount').to.equal('0')
+            expect(body.transactions[i].transaction).to.have.property('asset').that.is.an('object')
             expect(body.transactions[i].transaction)
               .to.have.property('fee')
               .to.equal(
-                bignum.multiply(bignum.multiply(node.constants.net.fees.multiSignature, node.constants.fixedPoint), (Keys.length + 1)).toString()
+                bignum
+                  .multiply(
+                    bignum.multiply(node.constants.net.fees.multiSignature, node.constants.fixedPoint),
+                    Keys.length + 1
+                  )
+                  .toString()
               )
-            expect(body.transactions[i].transaction)
-              .to.have.property('id')
-              .to.equal(MultiSigTX.txId)
+            expect(body.transactions[i].transaction).to.have.property('id').to.equal(MultiSigTX.txId)
             expect(body.transactions[i].transaction)
               .to.have.property('senderPublicKey')
               .to.equal(MultisigAccount.publicKey)
-            expect(body.transactions[i])
-              .to.have.property('lifetime')
-              .to.equal(Number(MultiSigTX.lifetime))
-            expect(body.transactions[i])
-              .to.have.property('min')
-              .to.equal(MultiSigTX.min)
+            expect(body.transactions[i]).to.have.property('lifetime').to.equal(Number(MultiSigTX.lifetime))
+            expect(body.transactions[i]).to.have.property('min').to.equal(MultiSigTX.min)
           }
         }
         expect(flag).to.equal(1)
@@ -790,10 +771,7 @@ describe('Sending another transaction', () => {
   it('When other transactions are still pending. Should be ok', done => {
     node.onNewBlock(async () => {
       try {
-        sendTrsId = await sendDDNfromMultisigAccount(
-          100000000,
-          node.Gaccount.address
-        )
+        sendTrsId = await sendDDNfromMultisigAccount(100000000, node.Gaccount.address)
         // todo
         done()
       } catch (err) {
@@ -813,9 +791,7 @@ describe('Sending another transaction', () => {
         expect(err).be.not.ok
 
         expect(body).to.have.property('success').to.be.true
-        expect(body)
-          .to.have.property('transaction')
-          .that.is.an('object')
+        expect(body).to.have.property('transaction').that.is.an('object')
 
         done()
       })
