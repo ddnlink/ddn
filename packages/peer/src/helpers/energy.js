@@ -1,5 +1,5 @@
-import { bignum } from '@ddn/utils'
 import assert from 'assert'
+import { bignum } from '@ddn/utils'
 import * as crypto from '@ddn/crypto'
 
 const MAX_GAS_LIMIT = 100000000000
@@ -247,7 +247,7 @@ class Energy {
 
     let args = []
     try {
-      args = JSON.parse(options.args)
+      args = options.args ? JSON.parse(options.args) : []
     } catch (err) {
       this.logger.error(err)
       throw err
@@ -260,8 +260,9 @@ class Energy {
 
     const checkResult = await this.checkGas(sender.address, options.gas_limit)
 
-    const { metadata } = await this.dao.findOne('contract', contract_id, { attributes: ['id', 'metadata'] })
-    const meta = JSON.parse(metadata)
+    const record = await this.dao.findOne('contract', { where: { id: contract_id }, attributes: ['id', 'metadata'] })
+    assert(!!record, `Contract ${contract_id} not found`)
+    const meta = JSON.parse(record.metadata)
     const mtd = meta.methods.find(t => t.name === method)
     assert(!!mtd, `Invalid contract method ${method}, method name not found`)
 

@@ -241,7 +241,8 @@ class Block {
     const blockTransactions = []
     let payloadBytes = ''
 
-    for (const transaction of transactions) {
+    for (const trs of transactions) {
+      const transaction = this.runtime.transaction.deepCloneTransaction(trs)
       const bytes = DdnCrypto.getBytes(transaction)
       if (size + bytes.length > this.constants.maxPayloadLength) {
         break
@@ -565,9 +566,8 @@ class Block {
               throw new Error(`Apply unconfirmed ${err.toString()}`)
             } finally {
               await this.runtime.transaction.removeUnconfirmedTransaction(transaction.id)
+              applyedTrsIdSet.add(transaction.id)
             }
-
-            applyedTrsIdSet.add(transaction.id)
           }
 
           this.logger.debug('apply block ok')
@@ -589,15 +589,17 @@ class Block {
           this.logger.debug('save block ok')
         })
 
-        this.runtime.dvm.commit(block.height)
-        // found errors but rollback success
+        this.logger.debug('Apply block transaction result: ', result)
         if (result) {
+          // found errors but rollback success
           const lastHeight = await this.runtime.dvm.getLastHeight()
           if (lastHeight >= 0) {
             await this.runtime.dvm.rollback(this._lastBlock.height)
           }
-          throw new Error(result)
+          // throw new Error(result)
+          return
         }
+        this.runtime.dvm.commit(block.height)
 
         this.logger.debug('The dao.transaction is finished.')
         this.setLastBlock(block)

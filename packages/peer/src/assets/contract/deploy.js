@@ -119,12 +119,7 @@ class Contract {
   }
 
   async apply (trs, block, sender, dbTrans) {
-    try {
-      await this.runtime.energy.deploy(trs, block, sender, dbTrans)
-    } catch (err) {
-      console.error(err)
-      throw err
-    }
+    await this.runtime.energy.deploy(trs, block, sender, dbTrans)
   }
 
   async undo (trs, _, sender, dbTrans) {

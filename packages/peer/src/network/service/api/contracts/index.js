@@ -138,7 +138,7 @@ class ContractService {
    * desc, timestamp, metadata } }
    */
   async getGet (req) {
-    const contract = await this.dao.findOne('contract', req.params.id)
+    const contract = await this.dao.findOneByPrimaryKey('contract', req.params.id)
     return { success: true, contract }
   }
 
@@ -149,7 +149,7 @@ class ContractService {
    * '/metadata'
    */
   async getMetadata (req) {
-    const { metadata } = await this.dao.findOne('contract', req.params.id, { attributes: ['id', 'metadata'] })
+    const { metadata } = await this.dao.findOneByPrimaryKey('contract', req.params.id, { attributes: ['id', 'metadata'] })
     return { success: true, metadata }
   }
 
@@ -160,7 +160,7 @@ class ContractService {
    * '/code'
    */
   async getCode (req) {
-    const { code } = await this.dao.findOne('contract', req.params.id, { attributes: ['id', 'code'] })
+    const { code } = await this.dao.findOneByPrimaryKey('contract', req.params.id, { attributes: ['id', 'code'] })
     return { success: true, code }
   }
 
@@ -203,7 +203,7 @@ class ContractService {
    */
   async getResults (req) {
     const { params, query } = req
-    // const { id } = await this.dao.findOne('contract', params.name, { attributes: ['id', 'name'] })
+    // const { id } = await this.dao.findOne('contract', { where: { name: params.name}, attributes: ['id', 'name'] })
     const where = { contract_id: params.id || query.id }
     const offset = query.offset ? Math.max(0, Number.parseInt(query.offset)) : 0
     const limit = query.limit ? Math.min(100, Number.parseInt(query.limit)) : 20
@@ -256,10 +256,9 @@ class ContractService {
   async getResult (req) {
     const { transactionId, id } = req.params
     assert(!!transactionId, 'Invalid transaction id')
-    const contract = await this.dao.findOne('contract', id, { attributes: ['id', 'name'] })
-    const condition = { transactionId }
+    const contract = await this.dao.findOneByPrimaryKey('contract', id, { attributes: ['id', 'name'] })
 
-    const results = await this.dao.findOne('contract_result', condition)
+    const results = await this.dao.findOne('contract_result', { where: { transactionId } })
     assert(results.length > 0, `send result not found (transactionId = ${transactionId})`)
     const resultsWithTransactions = await attachTransactions(
       results.map(r => convertResult(r)),
