@@ -2,7 +2,7 @@ import assert from 'assert'
 import DdnUtils from '@ddn/utils'
 
 // due to contract sandbox always return json object
-function convertBigintMemberToString (obj) {
+function BigintToString (obj) {
   if (typeof obj !== 'object' || obj === null) return
 
   Object.keys(obj).forEach(key => {
@@ -11,18 +11,18 @@ function convertBigintMemberToString (obj) {
     if (type === 'bigint') {
       obj[key] = String(value)
     } else if (type === 'object') {
-      convertBigintMemberToString(value)
+      BigintToString(value)
     }
   })
 }
 
-function convertResult (result) {
-  convertBigintMemberToString(result)
+function processResult (result) {
+  BigintToString(result)
   const { gas = 0, error, stateChangesHash, transaction_id, contract_id, data } = result
   return { gas, error, stateChangesHash, transaction_id, data, contract_id, success: !!result.success }
 }
 
-async function attachTransactions (results, dao) {
+async function populateTrs (results, dao) {
   const where = results.length === 1 ? { id: results[0].transaction_id } : { id: { $in: results.map(r => r.transaction_id) } }
 
   const transactions = await dao.findList('tr', { where })
@@ -53,7 +53,7 @@ class ContractService {
       throw new Error('Blockchain is loading')
     }
 
-    const query = { ...req.query }
+    const query = { ...req.query, ...req.params }
     // query.offset = Number(query.offset || 0)
     // query.limit = Number(query.limit || 100)
 
@@ -138,7 +138,7 @@ class ContractService {
    * desc, timestamp, metadata } }
    */
   async getGet (req) {
-    const contract = await this.dao.findOneByPrimaryKey('contract', req.params.id)
+    const contract = await this.dao.findOneByPrimaryKey('contract', req.query.id || req.params.id)
     return { success: true, contract }
   }
 
@@ -149,7 +149,9 @@ class ContractService {
    * '/metadata'
    */
   async getMetadata (req) {
-    const { metadata } = await this.dao.findOneByPrimaryKey('contract', req.params.id, { attributes: ['id', 'metadata'] })
+    const { metadata } = await this.dao.findOneByPrimaryKey('contract', req.query.id || req.params.id, {
+      attributes: ['id', 'metadata']
+    })
     return { success: true, metadata }
   }
 
@@ -160,7 +162,9 @@ class ContractService {
    * '/code'
    */
   async getCode (req) {
-    const { code } = await this.dao.findOneByPrimaryKey('contract', req.params.id, { attributes: ['id', 'code'] })
+    const { code } = await this.dao.findOneByPrimaryKey('contract', req.query.id || req.params.id, {
+      attributes: ['id', 'code']
+    })
     return { success: true, code }
   }
 
@@ -214,7 +218,7 @@ class ContractService {
     const rows = []
     for (const row of result.rows) {
       try {
-        const record = convertResult(row)
+        const record = processResult(row)
         const trs = await this.dao.findOne('tr', { where: { id: row.transaction_id } })
         if (trs.args) {
           const args = JSON.parse(trs.args)
@@ -254,14 +258,16 @@ class ContractService {
    * '/result', async (
    */
   async getResult (req) {
-    const { transactionId, id } = req.params
+    const { params, query } = req
+    const id = params.id || query.id
+    const transactionId = params.transactionId || query.transactionId
     assert(!!transactionId, 'Invalid transaction id')
     const contract = await this.dao.findOneByPrimaryKey('contract', id, { attributes: ['id', 'name'] })
 
     const results = await this.dao.findOne('contract_result', { where: { transactionId } })
     assert(results.length > 0, `send result not found (transactionId = ${transactionId})`)
-    const resultsWithTransactions = await attachTransactions(
-      results.map(r => convertResult(r)),
+    const resultsWithTransactions = await populateTrs(
+      results.map(r => processResult(r)),
       this.dao
     )
 
@@ -284,11 +290,13 @@ class ContractService {
    * '/states'
    */
   async getStates (req) {
-    const { id, statePath } = req.query
+    const { params, query } = req
+    const id = params.id || query.id
+    const statePath = params.statePath || query.statePath
     if (!statePath) throw new Error(`Invalid state path '${statePath}'`)
 
     const states = await this.runtime.dvm.queryState(id, String(statePath).split('.'))
-    convertBigintMemberToString(states)
+    BigintToString(states)
     return { success: true, states }
   }
 
@@ -308,7 +316,7 @@ class ContractService {
     }
 
     const result = await this.runtime.dvm.callReadonly(id, method, ...methodArgs)
-    convertBigintMemberToString(result)
+    BigintToString(result)
     return { success: true, result }
   }
 }
