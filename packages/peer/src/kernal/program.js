@@ -79,8 +79,8 @@ class Program {
     this._context.runtime.compiler = new Compiler()
     // negotiate
     this._context.runtime.dvm = new DVM({
-      dataDir: path.join(this._context.baseDir, '/contracts'),
-      logDir: path.join(this._context.baseDir, '/logs/dvm/'),
+      dataDir: path.join(this._context.baseDir, '/db/contracts'),
+      logDir: path.join(this._context.baseDir, '/logs/'),
       logLevel: options.configObject.logLevel,
       isDev: process.env.NODE_ENV !== 'production'
     })
