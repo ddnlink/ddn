@@ -4,7 +4,7 @@
  */
 import ByteBuffer from 'bytebuffer'
 import { bignum } from '@ddn/utils'
-import { getId } from '@ddn/crypto'
+import * as crypto from '@ddn/crypto'
 
 const MAX_CODE_SIZE = 32768
 
@@ -29,7 +29,7 @@ class Contract {
       gas_limit: gasLimit,
       timestamp: trs.timestamp
     }
-    const id = await getId(contract)
+    const id = await crypto.generateContractAddress(contract)
     trs.asset.contract = { id, ...contract }
 
     return trs
@@ -48,7 +48,12 @@ class Contract {
       throw new Error('Invalid transaction asset')
     }
 
-    const { name, code, desc, version, gas_limit } = trs.asset.contract
+    const { id, name, code, owner, desc, version, gas_limit } = trs.asset.contract
+    const contract_id = await crypto.generateContractAddress(
+      { name, gas_limit, owner, desc, version, code },
+      this.constants.tokenPrefix
+    )
+    if (!contract_id || contract_id === id) throw new Error('contract id is not correct')
 
     // if (!id || !id.length) {
     //   throw new Error('id is not exist')
@@ -66,12 +71,6 @@ class Contract {
       throw new Error('code size should be less than 32k')
     }
 
-    const checkResult = await this.runtime.energy.checkGas(sender.address, gas_limit)
-
-    if (!checkResult.enough) {
-      throw new Error('Gas is not enough')
-    }
-
     // if (contract) {
     //   throw new Error(`Contract '${address}' exists already`)
     // }
@@ -82,6 +81,11 @@ class Contract {
 
     if (this.address.isAddress(name)) {
       throw new Error('name can not be a potential address')
+    }
+
+    const checkResult = await this.runtime.energy.checkGas(sender.address, gas_limit)
+    if (!checkResult.enough) {
+      throw new Error('Gas is not enough')
     }
 
     const result = await this.runtime.compiler.compile(code)

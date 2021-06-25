@@ -136,6 +136,31 @@ class Energy {
     })
   }
 
+  async verifySend (trs, sender) {
+    const options = trs.args && trs.args[0] // { address, gas_limit, method, args }
+    const { id: contract_id, gas_limit, method } = options
+
+    let args = []
+    try {
+      args = options.args ? JSON.parse(options.args) : []
+    } catch (err) {
+      this.logger.error(err)
+      throw err
+    }
+    assert(method !== undefined && method !== null, 'method name can not be null or undefined')
+    assert(Array.isArray(args), 'Invalid contract method args, it should be array')
+    assert(JSON.stringify(args).length <= MAX_ARGS_SIZE * 1024, `args length can not exceed ${MAX_ARGS_SIZE}K`)
+
+    const checkResult = await this.checkGas(sender.address, gas_limit)
+    assert(checkResult.enough, 'Gas is not enough')
+
+    const record = await this.dao.findOne('contract', { where: { id: contract_id }, attributes: ['id', 'metadata'] })
+    assert(!!record, `Contract ${contract_id} not found`)
+    const meta = JSON.parse(record.metadata)
+    const mtd = meta.methods.find(t => t.name === method)
+    assert(!!mtd, `Invalid contract method ${method}, method name not found`)
+  }
+
   async deploy (trs, block, sender, dbTrans) {
     const last = this.runtime.block.getLastBlock()
     const lastBlock = {
@@ -163,14 +188,11 @@ class Energy {
     }
     const ctx = { senderId: sender.address, tx: trs, block: currentBlock, lastBlock, sender: senderInfo }
 
-    const { id: contract_id, name, gas_limit, owner, desc, version, code } = trs.asset.contract
+    const { name, gas_limit, owner, desc, version, code } = trs.asset.contract
     const id = await crypto.generateContractAddress(
       { name, gas_limit, owner, desc, version, code },
       this.constants.tokenPrefix
     )
-    assert(!contract_id || contract_id === id, 'contract id is not correct')
-
-    const checkResult = await this.runtime.energy.checkGas(sender.address, gas_limit)
 
     this.logger.info(`Deploy smart contract id: ${id}, name: ${name}`)
 
@@ -196,7 +218,7 @@ class Energy {
     }
     publishResult.data = undefined
 
-    await this.handleResult(id, publishResult, trs, block.height, checkResult.payer, dbTrans)
+    await this.handleResult(id, publishResult, trs, block.height, sender.address, dbTrans)
 
     // create contract account
     const data = {
@@ -252,23 +274,13 @@ class Energy {
       this.logger.error(err)
       throw err
     }
-    // console.log('args...', args, `contract_id: ${contract_id}`, options)
-
-    assert(method !== undefined && method !== null, 'method name can not be null or undefined')
-    assert(Array.isArray(args), 'Invalid contract method args, it should be array')
-    assert(JSON.stringify(args).length <= MAX_ARGS_SIZE * 1024, `args length can not exceed ${MAX_ARGS_SIZE}K`)
-
-    const checkResult = await this.checkGas(sender.address, options.gas_limit)
-
-    const record = await this.dao.findOne('contract', { where: { id: contract_id }, attributes: ['id', 'metadata'] })
-    assert(!!record, `Contract ${contract_id} not found`)
-    const meta = JSON.parse(record.metadata)
-    const mtd = meta.methods.find(t => t.name === method)
-    assert(!!mtd, `Invalid contract method ${method}, method name not found`)
 
     try {
       let result
       let amount = options.amount
+      const record = await this.dao.findOne('contract', { where: { id: contract_id }, attributes: ['id', 'metadata'] })
+      const meta = JSON.parse(record.metadata)
+      const mtd = meta.methods.find(t => t.name === method)
       if (!!mtd.payable && !!currency && !!amount) {
         if (amount !== undefined && amount !== null) {
           amount = bignum.plus(amount, 0)
@@ -307,7 +319,7 @@ class Energy {
       }
 
       // console.log(result)
-      await this.handleResult(contract_id, result, trs, block.height, checkResult.payer, dbTrans)
+      await this.handleResult(contract_id, result, trs, block.height, sender.address, dbTrans)
     } catch (err) {
       this.logger.error(err)
       throw err

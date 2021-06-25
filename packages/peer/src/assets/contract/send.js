@@ -35,11 +35,9 @@ class ContractTransfer {
     return bignum.multiply(this.constants.net.fees.contract, this.constants.fixedPoint)
   }
 
-  async verify (trs) {
-    // const basicGas = this.runtime.dvm.calcTransactionStorageGas(trs)
-    // if(gasLimit < basicGas || gasLimit > MAX_GAS_LIMIT) {
-    //   throw new Error(`gas limit must greater than ${basicGas} and less than ${MAX_GAS_LIMIT}`)
-    // }
+  async verify (trs, sender) {
+    await this.runtime.energy.verifySend(trs, sender)
+
     return trs
   }
 
