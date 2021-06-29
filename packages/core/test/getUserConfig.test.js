@@ -3,7 +3,8 @@ import { join } from 'path'
 import { writeFileSync } from 'fs'
 import rimraf from 'rimraf'
 import slash2 from 'slash2'
-import getUserConfig, {
+import {
+  getUserConfig,
   requireFile,
   getConfigFile,
   mergeConfigs,
@@ -35,9 +36,7 @@ describe('getUserConfig', () => {
     })
 
     test('config/config.js', () => {
-      expect(stripPrefix(getConfigFile(`${fixtures}/config-directory`))).toEqual(
-        'config-directory/config/config.js'
-      )
+      expect(stripPrefix(getConfigFile(`${fixtures}/config-directory`))).toEqual('config-directory/config/config.js')
     })
 
     test('conflicts', () => {
@@ -196,14 +195,14 @@ test('requireFile with syntax error', () => {
 xtest('cleanConfigRequireCache', () => {
   const cwd = join(fixtures, 'cleanConfigRequireCache')
   const configPath = join(cwd, '.ddnrc.js')
-  writeFileSync(configPath, 'export default { foo: \'bar\' };', 'utf-8')
+  writeFileSync(configPath, "export default { foo: 'bar' };", 'utf-8')
   expect(
     getUserConfig({
       cwd
     })
   ).toEqual({ foo: 'bar' })
   cleanConfigRequireCache(cwd)
-  writeFileSync(configPath, 'export default { bar: \'foo\' };', 'utf-8')
+  writeFileSync(configPath, "export default { bar: 'foo' };", 'utf-8')
   expect(
     getUserConfig({
       cwd

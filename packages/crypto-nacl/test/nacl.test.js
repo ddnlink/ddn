@@ -1,7 +1,7 @@
 import nacl from 'tweetnacl'
 import crypto from 'crypto'
 import Tester from '@ddn/test-utils'
-import * as DdnCrypto from '../'
+import * as DdnCrypto from '../lib'
 
 import Debug from 'debug'
 import { Buffer } from 'buffer'
@@ -9,7 +9,7 @@ import { Buffer } from 'buffer'
 const debug = Debug('debug')
 const expect = Tester.expect
 
-describe('NaCI', () => {
+describe('NACL', () => {
   it('Length is 32', () => {
     const kp = nacl.box.keyPair('test')
 
