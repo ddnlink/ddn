@@ -155,7 +155,7 @@ class Account {
 
   async getAccount (where, attributes, dbTrans) {
     const address = (where || {}).address
-    if (typeof address === 'string' && !this.isAddress(address)) {
+    if (typeof address !== 'string' || !this.isAddress(address)) {
       this.logger.error('account address', address)
       throw new Error('Invalid address getAccount')
     }
