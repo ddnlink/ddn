@@ -12,11 +12,12 @@ describe('node-sdk contract.js', () => {
   })
 
   it('should have properties', () => {
-    expect(contract).to.have.property('createContract')
+    expect(contract).to.have.property('deploy')
+    expect(contract).to.have.property('send')
   })
 
   describe('#createContract', () => {
-    const createContract = contract.createContract
+    const createContract = contract.deploy
     let trs = null
 
     const options = {

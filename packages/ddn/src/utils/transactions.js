@@ -87,12 +87,13 @@ function getTransactionBytes (trs, skipSignature) {
     bb.writeByte(senderPublicKeyBuffer[i])
   }
 
-  if (trs.recipientId) { // wxm block database
+  if (trs.recipientId) {
+    // wxm block database
     // if (/^[0-9]{1,20}$/g.test(trs.recipientId)) {   //wxm block database
-    // 	const recipient = DdnUtils.bignum.toBuffer(trs.recipientId, { size: 8 }).toString();   //wxm block database
-    // 	for (let i = 0; i < 8; i++) {
-    // 		bb.writeByte(recipient[i] || 0);
-    // 	}
+    //  const recipient = DdnUtils.bignum.toBuffer(trs.recipientId, { size: 8 }).toString();   //wxm block database
+    //  for (let i = 0; i < 8; i++) {
+    //    bb.writeByte(recipient[i] || 0);
+    //  }
     // } else {
     bb.writeString(trs.recipientId) // wxm block database
     // }

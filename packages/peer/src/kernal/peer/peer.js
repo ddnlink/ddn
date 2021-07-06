@@ -65,7 +65,7 @@ class Peer {
   }
 
   async addDapp ({ ip: configIp, port, dappId }) {
-    const data = await this.dao.findOne('peer', { where: { ip:ip.toLong(configIp) , port: port } })
+    const data = await this.dao.findOne('peer', { where: { ip: ip.toLong(configIp), port: port } })
     if (!data) {
       throw new Error(`Peer not found: ${configIp}`)
     }

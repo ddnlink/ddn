@@ -39,7 +39,6 @@ describe('Node SDK', () => {
 
     describe('#getBytes', () => {
       const getBytes = crypto.getBytes
-      let bytes = null
 
       it('should be ok', () => {
         expect(getBytes).to.be.ok
@@ -63,12 +62,14 @@ describe('Node SDK', () => {
           id: '13987348420913138422'
         }
 
-        bytes = await getBytes(transaction)
+        const bytes = await getBytes(transaction)
+        const bytes2 = await getBytes(transaction, true, true, true)
         debug('#getBytes first, bytes: ', bytes)
         expect(bytes).to.be.ok
         // expect(bytes).that.is.an("object");
         // expect(bytes.length).to.equal(117);
-        expect(bytes.length).to.equal(130)
+        expect(bytes.length).to.equal(229)
+        expect(bytes2.length).to.equal(121)
         done()
       })
 
@@ -88,12 +89,14 @@ describe('Node SDK', () => {
           id: '13987348420913138422'
         }
 
-        bytes = await getBytes(transaction)
+        const bytes = await getBytes(transaction)
+        const bytes2 = await getBytes(transaction, true, true, true)
         debug('#getBytes secend, bytes:', bytes)
         expect(bytes).to.be.ok
         // expect(bytes).that.is.an("object");
         // expect(bytes.length).to.equal(181);
-        expect(bytes.length).to.equal(194)
+        expect(bytes.length).to.equal(357)
+        expect(bytes2.length).to.equal(121)
         done()
       })
     })
@@ -163,7 +166,7 @@ describe('Node SDK', () => {
         expect(id)
           .to.be.a('string')
           .be.equal(
-            '23e9d76cdaf4ad10c8f1a9a416a386ec5a19110c489b9ba0d9b00d5890fcfe92a060f28c19132f795c444ed7c2fc63c7e98bd855d67a46487db60df747c19830'
+            'a0136efe3623fb02509a3a75765db1950838c1bcb0bdf472db891ef08283b271d5d1e57e8dd58bd8577a7214c309450f5bd5155c26615491fa348bd39adc58fb'
           )
         // expect(id).to.be.a("string").be.equal("f60a26da470b1dc233fd526ed7306c1d84836f9e2ecee82c9ec47319e0910474");
         done()
