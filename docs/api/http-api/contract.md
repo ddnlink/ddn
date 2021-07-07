@@ -10,7 +10,7 @@ sidebar_label: Http api contract
 查询链上的合约代码、执行结果等
 
 ## **1 查询合约列表**
-接口地址：/api/signatures   
+接口地址：/api/contracts   
 请求方式：get   
 支持格式：json   
 请求参数说明：   
@@ -176,6 +176,45 @@ JSON返回示例：
 请求示例：   
 ```bash   
 curl -k http://127.0.0.1:8001/api/contracts/results -X GET -d '{"id":"xxxxxx"}'   
+```
+   
+JSON返回示例：   
+```js   
+{   
+	"success": true,   
+	"rows": [{
+        "name": "test contract",
+        ...
+    }],
+    "count": 1
+}     
+```
+
+## **6 获取合约转账**
+接口地址：/api/contracts/transfers   
+请求方式：get   
+支持格式：无   
+请求参数说明：
+
+|名称	      |类型   |必填 |说明              |   
+|------      |-----  |---  |----              |   
+|id          |string |N    |合约id       |   
+|senderId    |string |N    |发送人地址    |   
+|recipientId |string |N    |接收人地址    |   
+      
+   
+返回参数说明：   
+
+|名称	|类型   |说明              |   
+|------ |-----  |----              |   
+|success|boolean  |请求是否成功 |    
+|rows|json  |结果数组      |    
+|count|number  |结果数量      |    
+   
+   
+请求示例：   
+```bash   
+curl -k http://127.0.0.1:8001/api/contracts/transfers -X GET -d '{"id":"xxxxxx"}'   
 ```
    
 JSON返回示例：   
