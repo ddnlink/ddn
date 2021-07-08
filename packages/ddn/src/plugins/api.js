@@ -1,6 +1,7 @@
 import fs from 'fs'
 import * as DdnCrypto from '@ddn/crypto'
 import NodeSdk from '@ddn/node-sdk'
+import { Compiler, GasCounter } from '@ddn/contract'
 import Api from '../helpers/api'
 import blockHelper from '../helpers/block'
 
@@ -652,6 +653,34 @@ async function getContractStates (options) {
   })
 }
 
+async function compileContract (options) {
+  if (options.file && !fs.existsSync(options.file)) {
+    console.error('Error: invalid params, contract file not exists')
+    return
+  }
+  if (!options.file && !options.code) {
+    console.error('Error: invalid params, contract code or file not exists')
+    return
+  }
+
+  const code = options.code || fs.readFileSync(options.file, 'utf8')
+
+  const compiler = new Compiler()
+  const result = compiler.compile(code)
+
+  if (!result || !result.compiledCode || !result.metadata) {
+    throw new Error('failed compile contract')
+  }
+  const c = GasCounter.feeTable
+  const gas = code.length * c.Contract.storePerChar + c.Contract.register
+  fs.writeFileSync('contract.js', result.compiledCode)
+  fs.writeFileSync('metadata.json', JSON.stringify(result.metadata, 4))
+
+  console.log('compiled success: contract.js')
+  console.log('contract metadata: metadata.json')
+  console.log(`deploy this contract need gas: ${gas}`)
+}
+
 function verifyBytes (options) {
   console.log(NodeSdk.crypto.verifyBytes(options.bytes, options.signature, options.publicKey))
 }
@@ -706,7 +735,8 @@ export {
   getContractMetadata,
   getContractResult,
   getContractResults,
-  getContractStates
+  getContractStates,
+  compileContract
 }
 
 //   program
