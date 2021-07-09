@@ -34,6 +34,8 @@ export default {
 
   energyPerDDN: 10000,
   gasPrice: 1,
+  maxGasLimit: 10000000,
+  maxCodeSize: 32768,
 
   crypto: '@ddn/crypto-nacl',
 
@@ -75,7 +77,7 @@ export default {
     dapp_in: '0.1',
 
     // contract
-    contract: '100',
+    contract: '1.0',
     contract_transfer: '0.1',
 
     // todo: 测试中提供的费用

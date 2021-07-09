@@ -2,9 +2,6 @@ import assert from 'assert'
 import { bignum } from '@ddn/utils'
 import * as crypto from '@ddn/crypto'
 
-const MAX_GAS_LIMIT = 100000000000
-const MAX_ARGS_SIZE = 16
-
 let _singleton
 class Energy {
   static singleton (context) {
@@ -22,8 +19,8 @@ class Energy {
   ensureGasLimitValid (gasLimit, trs) {
     const basicGas = this.runtime.dvm.calcTransactionStorageGas(trs)
     assert(
-      gasLimit > basicGas && gasLimit <= MAX_GAS_LIMIT,
-      `gas limit must greater than ${basicGas} and less than ${MAX_GAS_LIMIT}`
+      gasLimit > basicGas && gasLimit <= this.constants.maxGasLimit,
+      `gas limit must greater than ${basicGas} and less than ${this.constants.maxGasLimit}`
     )
   }
 
@@ -149,7 +146,10 @@ class Energy {
     }
     assert(method !== undefined && method !== null, 'method name can not be null or undefined')
     assert(Array.isArray(args), 'Invalid contract method args, it should be array')
-    assert(JSON.stringify(args).length <= MAX_ARGS_SIZE * 1024, `args length can not exceed ${MAX_ARGS_SIZE}K`)
+    assert(
+      JSON.stringify(args).length <= this.constants.maxCodeSize,
+      `args length can not exceed ${this.constants.maxCodeSize} bytes`
+    )
 
     const checkResult = await this.checkGas(sender.address, gas_limit)
     assert(checkResult.enough, 'Gas is not enough')

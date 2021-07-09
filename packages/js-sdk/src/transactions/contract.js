@@ -14,7 +14,7 @@ async function deploy (options, secret, secondSecret) {
 
   const contract = {
     owner: await crypto.generateAddress(keys.publicKey, constants.tokenPrefix),
-    gas_limit: `${options.gasLimit}`,
+    gas_limit: `${options.gasLimit || constants.maxGasLimit}`,
     name: options.name,
     desc: options.desc,
     version: options.version,
@@ -56,7 +56,7 @@ async function pay (options, secret, secondSecret) {
   const timestamp = slots.getTime() - config.clientDriftSeconds
   const opts = {
     id: options.id,
-    gas_limit: `${options.gasLimit}`,
+    gas_limit: `${options.gasLimit || constants.maxGasLimit}`,
     amount: options.amount,
     currency: options.currency,
     method: options.method,
@@ -92,7 +92,7 @@ async function send (options, secret, secondSecret) {
   const timestamp = slots.getTime() - config.clientDriftSeconds
   const opts = {
     id: options.id,
-    gas_limit: `${options.gasLimit}`,
+    gas_limit: `${options.gasLimit || constants.maxGasLimit}`,
     method: options.method,
     args
   }

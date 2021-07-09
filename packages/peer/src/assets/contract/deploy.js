@@ -6,8 +6,6 @@ import ByteBuffer from 'bytebuffer'
 import { bignum } from '@ddn/utils'
 import * as crypto from '@ddn/crypto'
 
-const MAX_CODE_SIZE = 32768
-
 class Contract {
   constructor (context) {
     Object.assign(this, context)
@@ -67,7 +65,7 @@ class Contract {
       throw new Error('version is too long')
     }
 
-    if (!code || code.length >= MAX_CODE_SIZE) {
+    if (!code || code.length >= this.constants.maxCodeSize) {
       throw new Error('code size should be less than 32k')
     }
 

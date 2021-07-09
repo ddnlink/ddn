@@ -32,6 +32,11 @@ module.exports = {
   confirmationLength: 77,
   maxTxsPerBlock: 500,
 
+  energyPerDDN: 10000,
+  gasPrice: 1,
+  maxGasLimit: 10000000,
+  maxCodeSize: 32768,
+
   // mainet config
   rewardRatio: 0.2,
   milestones: [
@@ -71,7 +76,7 @@ module.exports = {
     dapp_in: '0.1',
 
     // contract
-    contract: '100',
+    contract: '1.0',
     contract_transfer: '0.1',
 
     // todo: 测试中提供的费用
