@@ -1,10 +1,9 @@
 function randomName () {
   // Convert arguments to Array
   const array = Array.prototype.slice.apply(arguments)
-
   let size = 16
   if (array.length > 2) {
-    size = array.shift()
+    size = array.pop()
   }
 
   let name = array[0]
