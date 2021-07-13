@@ -228,3 +228,38 @@ JSON返回示例：
     "count": 1
 }     
 ```
+
+## **7 调用合约查询方法**
+接口地址：/api/contracts/call   
+请求方式：post   
+支持格式：无   
+请求参数说明：
+
+|名称	      |类型   |必填 |说明              |   
+|------      |-----  |---  |----              |   
+|id          |string |N    |合约id       |   
+|method    |string |N    |查询方法    |   
+|methodArgs |string[] |N    |方法参数    |   
+      
+   
+返回参数说明：   
+
+|名称	|类型   |说明              |   
+|------ |-----  |----              |   
+|success|boolean  |请求是否成功 |    
+|rows|json  |结果数组      |    
+|count|number  |结果数量      |    
+   
+   
+请求示例：   
+```bash   
+curl -k http://127.0.0.1:8001/api/contracts/transfers -X POST -d '{"id":"xxxxxx", method:"hello", methodArgs:["world"]}'   
+```
+   
+JSON返回示例：   
+```js   
+{   
+	"success": true,   
+	"result": ...,
+}     
+```
