@@ -23,6 +23,7 @@ DDN智能合约是基于typescript（以下简称ts）裁剪定制而成，是ts
 
 - vs code编辑器
 - @ddn/node-sdk
+- @ddn/ddn 命令行工具
 - DDN 测试节点， 参见[节点安装](./peer-install-testnet.zh-CN.md)
 
 ## 智能合约开发部署
@@ -81,6 +82,7 @@ deploy this contract need gas: 33324
 按照上一节进行编译,如下编写测试文件，在vs code里直接运行
 to be contined ...
 
+ 
 ## 智能合约参考
 智能合约在DDN区块链上运行，链上数据是合约运行的基本环境。同时因为合约代码是在沙箱环境下执行，DVM会把必要的链上数据准备好发送到合约上下文。这些数据都是链上数据的拷贝，合约执行不会影响链上数据。
 

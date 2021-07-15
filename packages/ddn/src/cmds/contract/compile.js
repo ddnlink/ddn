@@ -12,6 +12,10 @@ module.exports = {
     code: {
       alias: 'c',
       describe: 'code body'
+    },
+    out: {
+      alias: 'o',
+      describe: 'built file outpath'
     }
   },
 

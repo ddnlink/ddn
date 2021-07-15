@@ -1,4 +1,5 @@
 import fs from 'fs'
+import path from 'path'
 import * as DdnCrypto from '@ddn/crypto'
 import NodeSdk from '@ddn/node-sdk'
 import { Compiler, GasCounter } from '@ddn/contract'
@@ -662,8 +663,17 @@ async function compileContract (options) {
     console.error('Error: invalid params, contract code or file not exists')
     return
   }
+  if (options.out && !fs.existsSync(options.out)) {
+    try {
+      fs.mkdirSync(options.out, { recursive: true })
+    } catch (err) {
+      console.error('Error: outpath created failed', err)
+      return
+    }
+  }
 
   const code = options.code || fs.readFileSync(options.file, 'utf8')
+  const out = options.out || '.'
 
   const compiler = new Compiler()
   const result = compiler.compile(code)
@@ -673,11 +683,14 @@ async function compileContract (options) {
   }
   const c = GasCounter.feeTable
   const gas = code.length * c.Contract.storePerChar + c.Contract.register
-  fs.writeFileSync('contract.js', result.compiledCode)
-  fs.writeFileSync('metadata.json', JSON.stringify(result.metadata, 4))
 
-  console.log('compiled success: contract.js')
-  console.log('contract metadata: metadata.json')
+  fs.writeFileSync(path.resolve(out, 'contract.js'), result.compiledCode)
+  fs.writeFileSync(path.resolve(out, 'metadata.json'), JSON.stringify(result.metadata, 4))
+
+  console.log('compiled success!')
+  console.log(`built file path: ${path.resolve(out)}`)
+  console.log('compiled contract file: contract.js')
+  console.log('contract metadata file: metadata.json')
   console.log(`deploy this contract need gas: ${gas}`)
 }
 
