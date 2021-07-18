@@ -264,16 +264,14 @@ class ContractService {
     assert(!!transactionId, 'Invalid transaction id')
     const contract = await this.dao.findOneByPrimaryKey('contract', id, { attributes: ['id', 'name'] })
 
-    const results = await this.dao.findOne('contract_result', { where: { transactionId } })
-    assert(results.length > 0, `send result not found (transactionId = ${transactionId})`)
-    const resultsWithTransactions = await populateTrs(
-      results.map(r => processResult(r)),
-      this.dao
-    )
+    let result = await this.dao.findOne('contract_result', { where: { transactionId } })
+    assert(result, `send result not found (transactionId = ${transactionId})`)
+    const record = processResult(result)
+    const resultWithTransactions = await populateTrs([record], this.dao)
 
-    const result = resultsWithTransactions[0]
-    const transaction = result.transaction
-    if (transaction.type === DdnUtils.assetTypes.CONTRACT) {
+    result = resultWithTransactions[0]
+    const transaction = result && result.transaction
+    if (transaction && transaction.type === DdnUtils.assetTypes.CONTRACT) {
       assert(transaction.args && transaction.args[0] && id === transaction.args[0].id, `Invalid contract id ${id}`)
     } else {
       assert(contract && contract.id === result.contractId, `Invalid contract id ${id}`)

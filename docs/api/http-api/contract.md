@@ -152,7 +152,7 @@ JSON返回示例：
 }     
 ```
 
-## **5 获取合约结果**
+## **5 获取合约的所有执行结果**
 接口地址：/api/contracts/results   
 请求方式：get   
 支持格式：无   
@@ -161,6 +161,45 @@ JSON返回示例：
 |名称	|类型   |必填 |说明              |   
 |------ |-----  |---  |----              |   
 |id |string |Y    |合约id       |   
+      
+   
+   
+返回参数说明：   
+
+|名称	|类型   |说明              |   
+|------ |-----  |----              |   
+|success|boolean  |请求是否成功 |    
+|rows|json  |结果数组      |    
+|count|number  |结果数量      |    
+   
+   
+请求示例：   
+```bash   
+curl -k http://127.0.0.1:8001/api/contracts/results -X GET -d '{"id":"xxxxxx"}'   
+```
+   
+JSON返回示例：   
+```js   
+{   
+	"success": true,   
+	"rows": [{
+        "name": "test contract",
+        ...
+    }],
+    "count": 1
+}     
+```
+
+## **5 获取交易的合约执行结果**
+接口地址：/api/contracts/result  
+请求方式：get   
+支持格式：无   
+请求参数说明：
+
+|名称	|类型   |必填 |说明              |   
+|------ |-----  |---  |----              |   
+|id |string |N    |合约id       |   
+|transactionId |string |Y    |交易id       |   
       
    
    
