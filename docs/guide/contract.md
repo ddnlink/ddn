@@ -78,9 +78,19 @@ deploy this contract need gas: 33324
 ```
 ### 离线调试
 为方便开发，我们提供了离线调试方法和调试工具
-- 1. 直接运行
-按照上一节进行编译,如下编写测试文件，在vs code里直接运行
-to be contined ...
+- 编写调试项目
+参照github上智能合约调试demo项目，根据合约内容编写测试脚本
+- 安装调试环境
+命令行运行：
+```
+npm install 
+或
+yarn
+```
+- 运行测试脚本
+```
+node contract.test.js
+```
 
  
 ## 智能合约参考
