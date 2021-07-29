@@ -41,31 +41,33 @@ var secondSecret = 'ddnaobtest001'
 ### **2.1.1 上传资产数据**
 请求参数说明：
 
-|名称 |类型   |说明        |必填       |
-|------ |-----  |---  |----              |
-|transaction|json|DdnJS.evidence.createEvidence根据资产信息、一级密码、二级密码生成的交易数据|true
+| 名称        | 类型 | 说明                                                                        | 必填 |
+| ----------- | ---- | --------------------------------------------------------------------------- | ---- |
+| transaction | json | DdnJS.evidence.createEvidence根据资产信息、一级密码、二级密码生成的交易数据 | true |
 
 返回参数说明：
 
-|名称|类型|说明|
-|------|-----|----|
-|success|boolean|是否成功获得response数据。|
-|transactionId|string|交易id|
+| 名称          | 类型    | 说明                       |
+| ------------- | ------- | -------------------------- |
+| success       | boolean | 是否成功获得response数据。 |
+| transactionId | string  | 交易id                     |
 
 
 请求示例：
 ```js
 (async () => {
   const evidencee = {
-    ipid: 'ipid3', // 资产id
-    title: 'node.randomUsername()', // 标题
-    description: ' has been evidence.', // 描述
-    hash: 'f082022ee664008a1f15d62514811dfd', // 数据哈希
-    author: 'Evanlai', //作者
-    size: '2448kb',  //大小
-    type: 'html', //类型
-    url: 'dat://f76e1e82cf4eab4bf173627ff93662973c6fab110c70fb0f86370873a9619aa6+18/public/test.html', // 链接地址
-    tags: 'world,cup,test', // 标签
+    sourceAddress: '资源地址', // string 
+    title: '标题', // string length: 128
+    description: '描述', // string  length: 512
+    hash: 'md5Values', // string length:128
+    shortHash: 'md5SliceValues', // string length:64
+    author: '作者', // string tring length:20
+    size: '大小', // string tring length:64
+    type: '类型', // string tring length:32
+    time: "", // string tring length:64
+    tags: 'evidence', // string tring length:128
+    metadata: '{userId:11,photourl:"xxx"}' // string tring length:1024
   };
 
   // 其中password是在用户登录的时候记录下来的，secondPassword需要每次让用户输入
@@ -81,79 +83,78 @@ curl --location --request POST 'http://127.0.0.1:8001/peer/transactions' \
 --header 'nethash: 0ab796cd' \
 --header 'version: 0' \
 --header 'Content-Type: application/json' \
---data-raw '{"transaction":{"type":20,"nethash":"0ab796cd","amount":"0","fee":"10000000","recipientId":null,"senderPublicKey":"daeee33def7eef0c7ba06ec66eda7204437ba88ace8f04e4a6aa4d7bfbd18bc1","timestamp":93994165,"asset":{"evidence":{"ipid":"ipid3","title":"node.randomUsername()","description":" has been evidence.","hash":"f082022ee664008a1f15d62514811dfd","author":"Evanlai","size":"2448kb","type":"html","url":"dat://f76e1e82cf4eab4bf173627ff93662973c6fab110c70fb0f86370873a9619aa6+18/public/test.html","tags":"world,cup,test","ext":"china","ext1":12345,"ext2":"2020-11-12T09:49:50.503Z"}},"signature":"26bd82046495f3dc4b2ed9d4452aa0f25be2a5a542fc52c5561a34c06dc8e1ebec03f6fcdbca115517d898c319c56cb448b35596e61bdd677adf9dfd4a87350f","id":"0ff3ba6dc2ceab676107f9a6a66c60d9ec17745a8cd53e3f25ff0da6829727da7d2fc6d470d43d85bd13923b7bdfe54bca6d4da97b0ac60ccd5b55b6a11b51b6"}}'
+--data-raw '{"transaction":{"type":20,"nethash":"0ab796cd","amount":"0","fee":"10000000","recipientId":null,"senderPublicKey":"daeee33def7eef0c7ba06ec66eda7204437ba88ace8f04e4a6aa4d7bfbd18bc1","timestamp":113220399,"asset":{"evidence":{"sourceAddress":"资源地址","title":"标题","description":"描述","hash":"md5Values","shortHash":"md5SliceValues","author":"作者","size":"大小","type":"类型","time":"","tags":"evidence","metadata":"{userId:11,photourl:\"xxx\"}"}},"signature":"39e1c751fec7336ef32905d4579e5e95e9d7df51a72e348e6742a4440d338df24445041399273281f2990229af29b2511f65a4899e5872c0b6137f57d44e9d06","id":"774c908cb1d18ac128acae27c1d0c1f2331e0b0afc58cba584b4c816f7e013ee8c8d857db6b039df5eee063bf10c12b09b77c4a31c03b6c7fe1549dfbacf5e61"}}'
 ```
 返回结果
 ```json
 {
     "success": true,
-    "transactionId": "0ff3ba6dc2ceab676107f9a6a66c60d9ec17745a8cd53e3f25ff0da6829727da7d2fc6d470d43d85bd13923b7bdfe54bca6d4da97b0ac60ccd5b55b6a11b51b6"
+    "transactionId": "16d22ebb8135ccd45cbe2242c7fac649f8d876be8f66ba9331cdf338c58b3b6946149de41a5430bf65b7b45d315d9430498dd055f098b45c8404c4f2a187b826"
 }
 ```
 
-## **3 根据ipid获取资产详情**
+## **3 根据shortHash获取资产详情**
 
-接口地址： /api/evidences/ipid/:ipid<br/>
-请求方式：PUT<br/>
+接口地址： /api/evidences/shortHash/:shortHash<br/>
+请求方式：GET<br/>
 请求参数：<br/>
 
-名称 | 类型 | 说明 |required
--|-|-|-
-ipid |string|资产id|true
+| 名称      | 类型   | 说明 | required |
+| --------- | ------ | ---- | -------- |
+| shortHash | string | 哈希 | true     |
 
 返回参数说明：
 
-|名称 |类型   |说明              |
-|------ |-----  |----              |
-|success|boolean  |请求是否成功 |
-|result|object |资产详情     |
+| 名称    | 类型    | 说明         |
+| ------- | ------- | ------------ |
+| success | boolean | 请求是否成功 |
+| result  | object  | 资产详情     |
 
 请求示例：
 ```bash
-curl --location --request GET 'http://127.0.0.1:8001/api/evidences/ipid/ipid3'
+curl --location --request GET 'http://127.0.0.1:8001/api/evidences/shortHash/hmd5SliceValues'
 ```
 
 JSON返回示例：
 
 ```js
 {
-    "success": true,
-    "result": {
-        "transaction_id": "0ff3ba6dc2ceab676107f9a6a66c60d9ec17745a8cd53e3f25ff0da6829727da7d2fc6d470d43d85bd13923b7bdfe54bca6d4da97b0ac60ccd5b55b6a11b51b6",
-        "transaction_type": 20,
-        "timestamp": 93994165,
-        "ipid": "ipid3",
-        "title": "node.randomUsername()",
-        "description": " has been evidence.",
-        "hash": "f082022ee664008a1f15d62514811dfd",
-        "tags": "world,cup,test",
-        "author": "Evanlai",
-        "url": "dat://f76e1e82cf4eab4bf173627ff93662973c6fab110c70fb0f86370873a9619aa6+18/public/test.html",
-        "type": "html",
-        "size": "2448kb"
-    }
+    "transaction_id": "774c908cb1d18ac128acae27c1d0c1f2331e0b0afc58cba584b4c816f7e013ee8c8d857db6b039df5eee063bf10c12b09b77c4a31c03b6c7fe1549dfbacf5e61",
+    "transaction_type": 20,
+    "timestamp": 113220399,
+    "shortHash": "md5SliceValues",
+    "title": "标题",
+    "description": "描述",
+    "hash": "md5Values",
+    "tags": "evidence",
+    "author": "作者",
+    "sourceAddress": "资源地址",
+    "type": "类型",
+    "size": "大小",
+    "metadata": "{userId:11,photourl:\"xxx\"}",
+    "time": ""
 }
 ```
-## **4 根据标题获取资产详情**
+<!-- ## **4 根据标题获取资产详情**
 
 接口地址： /api/evidences/title/:title<br/>
 请求方式：PUT<br/>
 请求参数：<br/>
 
-名称 | 类型 | 说明 |required
--|-|-|-
-title |string|资产标题|true
+| 名称  | 类型   | 说明     | required |
+| ----- | ------ | -------- | -------- |
+| title | string | 资产标题 | true     |
 
 返回参数说明：
 
-|名称 |类型   |说明              |
-|------ |-----  |----              |
-|success|boolean  |请求是否成功 |
-|result|object |资产详情     |
+| 名称    | 类型    | 说明         |
+| ------- | ------- | ------------ |
+| success | boolean | 请求是否成功 |
+| result  | object  | 资产详情     |
 
 请求示例：
 ```bash
-curl --location --request GET 'http://127.0.0.1:8001/api/evidences/title/node.randomUsername()'
+curl --location --request GET 'http://127.0.0.1:8001/api/evidences/title/标题'
 ```
 
 JSON返回示例：
@@ -183,18 +184,18 @@ JSON返回示例：
 请求方式：PUT<br/>
 请求参数：<br/>
 
-名称 | 类型 | 说明 |required
--|-|-|-
-title |string|资产标题|true
-pagesize|string|每页条数|false
-pageindex|string|页码|false
+| 名称      | 类型   | 说明     | required |
+| --------- | ------ | -------- | -------- |
+| title     | string | 资产标题 | true     |
+| pagesize  | string | 每页条数 | false    |
+| pageindex | string | 页码     | false    |
 
 返回参数说明：
 
-|名称 |类型   |说明              |
-|------ |-----  |----              |
-|success|boolean  |请求是否成功 |
-|result|object |资产详情     |
+| 名称    | 类型    | 说明         |
+| ------- | ------- | ------------ |
+| success | boolean | 请求是否成功 |
+| result  | object  | 资产详情     |
 
 请求示例：
 ```bash
@@ -226,27 +227,27 @@ JSON返回示例：
         "total": 1
     }
 }
-```
-## **6 根据数据hash获取资产详情**
+``` -->
+## **4 根据数据hash获取资产详情**
 
 接口地址： /api/evidences/hash/:hash<br/>
 请求方式：PUT<br/>
 请求参数：<br/>
 
-名称 | 类型 | 说明 |required
--|-|-|-
-hash |string|数据哈希|true
+| 名称 | 类型   | 说明     | required |
+| ---- | ------ | -------- | -------- |
+| hash | string | 数据哈希 | true     |
 
 返回参数说明：
 
-|名称 |类型   |说明              |
-|------ |-----  |----              |
-|success|boolean  |请求是否成功 |
-|result|object |资产详情     |
+| 名称    | 类型    | 说明         |
+| ------- | ------- | ------------ |
+| success | boolean | 请求是否成功 |
+| result  | object  | 资产详情     |
 
 请求示例：
 ```bash
-curl --location --request GET 'http://127.0.0.1:8001/api/evidences/hash/f082022ee664008a1f15d62514811dfd'
+curl --location --request GET 'http://127.0.0.1:8001/api/evidences/hash/md5Values'
 ```
 
 JSON返回示例：
@@ -255,40 +256,42 @@ JSON返回示例：
 {
     "success": true,
     "result": {
-        "transaction_id": "0ff3ba6dc2ceab676107f9a6a66c60d9ec17745a8cd53e3f25ff0da6829727da7d2fc6d470d43d85bd13923b7bdfe54bca6d4da97b0ac60ccd5b55b6a11b51b6",
+        "transaction_id": "774c908cb1d18ac128acae27c1d0c1f2331e0b0afc58cba584b4c816f7e013ee8c8d857db6b039df5eee063bf10c12b09b77c4a31c03b6c7fe1549dfbacf5e61",
         "transaction_type": 20,
-        "timestamp": 93994165,
-        "ipid": "ipid3",
-        "title": "node.randomUsername()",
-        "description": " has been evidence.",
-        "hash": "f082022ee664008a1f15d62514811dfd",
-        "tags": "world,cup,test",
-        "author": "Evanlai",
-        "url": "dat://f76e1e82cf4eab4bf173627ff93662973c6fab110c70fb0f86370873a9619aa6+18/public/test.html",
-        "type": "html",
-        "size": "2448kb"
+        "timestamp": 113220399,
+        "shortHash": "md5SliceValues",
+        "title": "标题",
+        "description": "描述",
+        "hash": "md5Values",
+        "tags": "evidence",
+        "author": "作者",
+        "sourceAddress": "资源地址",
+        "type": "类型",
+        "size": "大小",
+        "metadata": "{userId:11,photourl:\"xxx\"}",
+        "time": ""
     }
 }
 ```
 
-## **7 获取某个作者的资产列表**
+<!-- ## **7 获取某个作者的资产列表**
 
 接口地址： /api/evidences/author/:author/all<br/>
 请求方式：PUT<br/>
 请求参数：<br/>
 
-名称 | 类型 | 说明 |required
--|-|-|-
-author |author|作者|true
-pagesize|string|每页条数|false
-pageindex|string|页码|false
+| 名称      | 类型   | 说明     | required |
+| --------- | ------ | -------- | -------- |
+| author    | author | 作者     | true     |
+| pagesize  | string | 每页条数 | false    |
+| pageindex | string | 页码     | false    |
 
 返回参数说明：
 
-|名称 |类型   |说明              |
-|------ |-----  |----              |
-|success|boolean  |请求是否成功 |
-|result|object |资产详情     |
+| 名称    | 类型    | 说明         |
+| ------- | ------- | ------------ |
+| success | boolean | 请求是否成功 |
+| result  | object  | 资产详情     |
 
 请求示例：
 ```bash
@@ -320,67 +323,66 @@ JSON返回示例：
         "total": 1
     }
 }
-```
-## **8 根据数据交易id获取资产详情**
+``` -->
+## **5 根据数据交易id获取资产详情**
 
 接口地址： /api/evidences/transaction/:trs_id <br/>
 请求方式：PUT<br/>
 请求参数：<br/>
 
-名称 | 类型 | 说明 |required
--|-|-|-
-trs_id |string|交易id|true
+| 名称   | 类型   | 说明   | required |
+| ------ | ------ | ------ | -------- |
+| trs_id | string | 交易id | true     |
 
 返回参数说明：
 
-|名称 |类型   |说明              |
-|------ |-----  |----              |
-|success|boolean  |请求是否成功 |
-|result|object |资产详情     |
+| 名称    | 类型    | 说明         |
+| ------- | ------- | ------------ |
+| success | boolean | 请求是否成功 |
+| result  | object  | 资产详情     |
 
 请求示例：
 ```bash
-curl --location --request GET 'http://127.0.0.1:8001/api/evidences/transaction/0ff3ba6dc2ceab676107f9a6a66c60d9ec17745a8cd53e3f25ff0da6829727da7d2fc6d470d43d85bd13923b7bdfe54bca6d4da97b0ac60ccd5b55b6a11b51b6'
+curl --location --request GET 'http://127.0.0.1:8001/api/evidences/transaction/774c908cb1d18ac128acae27c1d0c1f2331e0b0afc58cba584b4c816f7e013ee8c8d857db6b039df5eee063bf10c12b09b77c4a31c03b6c7fe1549dfbacf5e61'
 ```
 
 JSON返回示例：
 
 ```js
 {
-    "success": true,
-    "result": {
-        "transaction_id": "0ff3ba6dc2ceab676107f9a6a66c60d9ec17745a8cd53e3f25ff0da6829727da7d2fc6d470d43d85bd13923b7bdfe54bca6d4da97b0ac60ccd5b55b6a11b51b6",
-        "transaction_type": 20,
-        "timestamp": 93994165,
-        "ipid": "ipid3",
-        "title": "node.randomUsername()",
-        "description": " has been evidence.",
-        "hash": "f082022ee664008a1f15d62514811dfd",
-        "tags": "world,cup,test",
-        "author": "Evanlai",
-        "url": "dat://f76e1e82cf4eab4bf173627ff93662973c6fab110c70fb0f86370873a9619aa6+18/public/test.html",
-        "type": "html",
-        "size": "2448kb"
-    }
+    "transaction_id": "774c908cb1d18ac128acae27c1d0c1f2331e0b0afc58cba584b4c816f7e013ee8c8d857db6b039df5eee063bf10c12b09b77c4a31c03b6c7fe1549dfbacf5e61",
+    "transaction_type": 20,
+    "timestamp": 113220399,
+    "shortHash": "md5SliceValues",
+    "title": "标题",
+    "description": "描述",
+    "hash": "md5Values",
+    "tags": "evidence",
+    "author": "作者",
+    "sourceAddress": "资源地址",
+    "type": "类型",
+    "size": "大小",
+    "metadata": "{userId:11,photourl:\"xxx\"}",
+    "time": ""
 }
 ```
-## **9 获取所有资产列表**
+## **6 获取所有资产列表**
 
 接口地址： /api/evidences/alll<br/>
 请求方式：PUT<br/>
 请求参数：<br/>
 
-名称 | 类型 | 说明 |required
--|-|-|-
-pagesize|string|每页条数|false
-pageindex|string|页码|false
+| 名称      | 类型   | 说明     | required |
+| --------- | ------ | -------- | -------- |
+| pagesize  | string | 每页条数 | false    |
+| pageindex | string | 页码     | false    |
 
 返回参数说明：
 
-|名称 |类型   |说明              |
-|------ |-----  |----              |
-|success|boolean  |请求是否成功 |
-|result|object |资产详情     |
+| 名称    | 类型    | 说明         |
+| ------- | ------- | ------------ |
+| success | boolean | 请求是否成功 |
+| result  | object  | 资产详情     |
 
 请求示例：
 ```bash
@@ -395,85 +397,92 @@ JSON返回示例：
     "result": {
         "rows": [
             {
-                "transaction_id": "0ff3ba6dc2ceab676107f9a6a66c60d9ec17745a8cd53e3f25ff0da6829727da7d2fc6d470d43d85bd13923b7bdfe54bca6d4da97b0ac60ccd5b55b6a11b51b6",
+                "transaction_id": "ed05a076f26e67143739b3671a1b18f6f33859f443772f0e940566ab9c5ea37b80ec9cfcf36a3e2585c5531c93a5cf8ac5175bbe0aac5e2b4d92625af1ca3a06",
                 "transaction_type": 20,
-                "timestamp": 93994165,
-                "ipid": "ipid3",
-                "title": "node.randomUsername()",
-                "description": " has been evidence.",
-                "hash": "f082022ee664008a1f15d62514811dfd",
-                "tags": "world,cup,test",
-                "author": "Evanlai",
-                "url": "dat://f76e1e82cf4eab4bf173627ff93662973c6fab110c70fb0f86370873a9619aa6+18/public/test.html",
-                "type": "html",
-                "size": "2448kb"
+                "timestamp": 113220073,
+                "shortHash": "md5SliceValue",
+                "title": "ddn online evidence",
+                "description": "description",
+                "hash": "md5Value",
+                "tags": "evidence",
+                "author": "Online",
+                "sourceAddress": "资源地址",
+                "type": "text",
+                "size": "12KB",
+                "metadata": "{userId:11,photourl:\"xxx\"}",
+                "time": "",
+                "timex": "1626962107472"
+            },
+            {
+                "transaction_id": "774c908cb1d18ac128acae27c1d0c1f2331e0b0afc58cba584b4c816f7e013ee8c8d857db6b039df5eee063bf10c12b09b77c4a31c03b6c7fe1549dfbacf5e61",
+                "transaction_type": 20,
+                "timestamp": 113220399,
+                "shortHash": "md5SliceValues",
+                "title": "标题",
+                "description": "描述",
+                "hash": "md5Values",
+                "tags": "evidence",
+                "author": "作者",
+                "sourceAddress": "资源地址",
+                "type": "类型",
+                "size": "大小",
+                "metadata": "{userId:11,photourl:\"xxx\"}",
+                "time": ""
             }
         ],
-        "total": 1
+        "total": 2
     }
 }
 ```
 
-## 10 根据数据类型获取这一类存证列表
+## 7 根据数据类型获取这一类存证列表
 接口地址： /api/evidences/type/:type/all<br/>
 请求方式：get<br/>
 请求参数：<br/>
 
-名称 | 类型 | 说明|required
--|-|-|-|
-type |string|数据类型|true
+| 名称 | 类型   | 说明     | required |
+| ---- | ------ | -------- | -------- |
+| type | string | 数据类型 | true     |
 
 返回参数说明：
-|名称 |类型   |说明              |
-|------ |-----  |----              |
-|success|boolean  |请求是否成功 |
-|result|object |返回结果
-|rows|array |返回结果列表
-|total|number |总条数
+| 名称    | 类型    | 说明         |
+| ------- | ------- | ------------ |
+| success | boolean | 请求是否成功 |
+| result  | object  | 返回结果     |
+| rows    | array   | 返回结果列表 |
+| total   | number  | 总条数       |
 
 
 请求示例：
 ```bash
-curl --location --request GET 'http://127.0.0.1:8001/api/evidences/type/html/all'
+curl --location --request GET 'http://127.0.0.1:8001/api/evidences/type/text/all'
 ```
 
 JSON返回示例：
 
 ```js
-{
-    "success": true,
-    "result": {
-        "rows": [
-            {
-                "transaction_id": "bf1e36605a970af966b8dfcf1551a578cdf83447bab214699d9f07d8b83dae49c0272355456b64741633288407710c92cc9f0f06d54b91097f410e5b7059bb57",
-                "transaction_type": 20,
-                "timestamp": 91910185,
-                "ipid": "ipid2",
-                "title": "node.randomUsername()",
-                "description": " has been evidence.",
-                "hash": "f082022ee664008a1f15d62514811dfd",
-                "tags": "world,cup,test",
-                "author": "Evanlai",
-                "url": "dat://f76e1e82cf4eab4bf173627ff93662973c6fab110c70fb0f86370873a9619aa6+18/public/test.html",
-                "type": "html",
-                "size": "2448kb"
-            },
-            {
-                "transaction_id": "c48781e81ec82bc7b2c3cf88767d94178641d845a86d4b2e607e0026a4f17666152481d107c9b09e58914029be1408a0e816ca6a43f8694670b95d8fef2cd91b",
-                "transaction_type": 20,
-                "timestamp": 91927612,
-                "ipid": "ipid3",
-                "title": "node.randomUsername()",
-                "description": " has been evidence.",
-                "hash": "f082022ee664008a1f15d62514811dfd",
-                "tags": "world,cup,test",
-                "author": "Evanlai",
-                "url": "dat://f76e1e82cf4eab4bf173627ff93662973c6fab110c70fb0f86370873a9619aa6+18/public/test.html",
-                "type": "html",
-                "size": "2448kb"
-            }
-        ],
-        "total": 2
-    }
+"success": true,
+"result": {
+    "rows": [
+        {
+            "transaction_id": "ed05a076f26e67143739b3671a1b18f6f33859f443772f0e940566ab9c5ea37b80ec9cfcf36a3e2585c5531c93a5cf8ac5175bbe0aac5e2b4d92625af1ca3a06",
+            "transaction_type": 20,
+            "timestamp": 113220073,
+            "shortHash": "md5SliceValue",
+            "title": "ddn online evidence",
+            "description": "description",
+            "hash": "md5Value",
+            "tags": "evidence",
+            "author": "Online",
+            "sourceAddress": "资源地址",
+            "type": "text",
+            "size": "12KB",
+            "metadata": "{userId:11,photourl:\"xxx\"}",
+            "time": "",
+            "timex": "1626962107472"
+        }
+    ],
+    "total": 1
+}
 }
 ```

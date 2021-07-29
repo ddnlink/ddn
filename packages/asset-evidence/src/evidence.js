@@ -1,4 +1,3 @@
-import ByteBuffer from 'bytebuffer'
 import Asset from '@ddn/asset-base'
 import DdnUtils from '@ddn/utils'
 
@@ -10,32 +9,47 @@ class Evidence extends Asset.Base {
 
   async propsMapping () {
     return [
-      { field: 'str4', prop: 'ipid', required: true, maxLen: 64 },
-      { field: 'str6', prop: 'title', required: true, maxLen: 128 },
-      { field: 'str8', prop: 'description' },
+      { field: 'str4', prop: 'shortHash', maxLen: 64 }, // 短hash，截取原始hash的一部分的值
+      { field: 'str6', prop: 'title', maxLen: 128 }, // 该数据的标题
+      { field: 'str8', prop: 'description' }, // 该数据的描述
       { field: 'str7', prop: 'hash', required: true, maxLen: 128 },
-      { field: 'str5', prop: 'tags' },
-      { field: 'str3', prop: 'author', required: true, maxLen: 20 },
-      { field: 'str9', prop: 'url', required: true, maxLen: 256 },
-      { field: 'str1', prop: 'type', required: true },
-      { field: 'str2', prop: 'size' }
+      { field: 'str5', prop: 'tags' }, // 存证数据的标签
+      { field: 'str3', prop: 'author', required: true, maxLen: 20 }, // 该存证数据的使用者，或者是所有人
+      { field: 'str9', prop: 'sourceAddress', maxLen: 256 }, // 存证数据的原始地址，有可以填，没有为空
+      { field: 'str1', prop: 'type', required: true }, // 存证的数据类型（video、image、videostram、voice）
+      { field: 'str2', prop: 'size' }, // string length:64
+      { field: 'str10', prop: 'metadata' }, // 元数据 ，上面这些字段如果不能够满足存储的条件，其它数据可以序列化一下存到这里，该字段不能检索
+      { field: 'str_ext', prop: 'time' } // 时间
     ]
   }
 
+  async attachApi (router) {
+    router.get('/shortHash/:shortHash', async (req, res) => {
+      try {
+        const result = await this.queryAsset({ shortHash: req.params.shortHash }, null, false, 1)
+        res.json(result[0])
+      } catch (err) {
+        res.json({ success: false, error: err.message || err.toString() })
+      }
+    })
+  }
   /**
    * All Fields：
-   * ipid - Article`s or file`s identity
-   * title - Article`s title or file`s name.
-   * hash - Article`s or file`s content Hash.
-   * tags - Key words for description of article or file.
-   * author - author`s name.
-   * url - URI in the DDN P2P network
-   * size - Article`s content length or file size
-   * `timestamp` - timestamp from transaction.
-   * type - Extension，e.g: dat://Daesgeadfedfa/first.html , extension is .html
+   * shortHash - 截取hash的一部分，在链上也是唯一的
+   * title - 存证的标题.
+   * hash - 数据的hash.
+   * tags - 存证的标签.
+   * author - 存证人，或者存证的所有者.
+   * sourceAddress -原始数据的地址，对应存证人存证数据的原始地址
+   * size - 存证数据的大小
+   * `timestamp` - 时间戳
+   * type - 存证的数据类型
+   * time - 需要存证的时间
+   * metadata - 元数据，上面这些字段如果不能够满足存储的条件，其它数据可以序列化一下存到这里，该字段不能检索
    * @param {object} data Evidence data
    * @param {object} trs translation
    */
+
   async create (data, trs) {
     trs.recipientId = null
     trs.amount = '0' // bignum update
@@ -51,22 +65,22 @@ class Evidence extends Asset.Base {
     return trs
   }
 
-  async getBytes (trs) {
-    const asset = await this.getAssetObject(trs)
+  // async getBytes(trs) {
+  //   const asset = await this.getAssetObject(trs)
 
-    const bb = new ByteBuffer(1, true)
-    bb.writeString(asset.ipid)
-    bb.writeString(asset.title)
-    bb.writeString(asset.tags)
-    bb.writeString(asset.author)
-    bb.writeString(asset.url)
-    bb.writeString(asset.size)
-    bb.writeString(asset.type) // eg: .html, .doc
-    bb.writeString(asset.hash)
-    bb.flip()
+  //   const bb = new ByteBuffer(1, true)
+  //   bb.writeString(asset.ipid)
+  //   bb.writeString(asset.title)
+  //   bb.writeString(asset.tags)
+  //   bb.writeString(asset.author)
+  //   bb.writeString(asset.url)
+  //   bb.writeString(asset.size)
+  //   bb.writeString(asset.type) // eg: .html, .doc
+  //   bb.writeString(asset.hash)
+  //   bb.flip()
 
-    return bb.toBuffer()
-  }
+  //   return bb.toBuffer()
+  // }
 
   async calculateFee () {
     return DdnUtils.bignum.multiply(this.constants.net.fees.evidence, this.constants.fixedPoint)
@@ -78,9 +92,9 @@ class Evidence extends Asset.Base {
 
     const results = await super.queryAsset(
       {
-        ipid: assetObj.ipid
+        shortHash: assetObj.shortHash
       },
-      ['ipid'],
+      ['shortHash'],
       false,
       1,
       1
@@ -92,15 +106,15 @@ class Evidence extends Asset.Base {
     const { senderId } = await this.dao.findOneByPrimaryKey('tr', oldEvidence.transaction_id, { attributes: ['senderId'] })
 
     if (senderId !== sender.address) {
-      throw new Error(`The evidence ipid ${assetObj.ipid} has been registered by ${senderId})`)
+      throw new Error(`The evidence shortHash ${assetObj.shortHash} has been registered by ${senderId})`)
     }
 
     const results2 = await super.queryAsset(
       {
-        ipid: assetObj.ipid,
+        shortHash: assetObj.shortHash,
         hash: assetObj.hash
       },
-      ['ipid', 'hash'],
+      ['shortHash', 'hash'],
       false,
       1,
       1
@@ -115,9 +129,9 @@ class Evidence extends Asset.Base {
 
   async applyUnconfirmed (trs, sender, dbTrans) {
     const assetObj = await this.getAssetObject(trs)
-    const key = `${sender.address}:${trs.type}:${assetObj.ipid}`
+    const key = `${sender.address}:${trs.type}:${assetObj.shortHash}`
     if (this.oneoff.has(key)) {
-      throw new Error(`The evidence ${assetObj.ipid} is in process already.`)
+      throw new Error(`The evidence ${assetObj.shortHash} is in process already.`)
     }
 
     await super.applyUnconfirmed(trs, sender, dbTrans)
@@ -127,7 +141,7 @@ class Evidence extends Asset.Base {
 
   async undoUnconfirmed (trs, sender, dbTrans) {
     const assetObj = await this.getAssetObject(trs)
-    const key = `${sender.address}:${trs.type}:${assetObj.ipid}`
+    const key = `${sender.address}:${trs.type}:${assetObj.shortHash}`
     this.oneoff.delete(key)
 
     const result = await super.undoUnconfirmed(trs, sender, dbTrans)

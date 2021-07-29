@@ -7,7 +7,7 @@ import { config, constants } from '../config'
 
 /**
  * Create evidence transaction
- * @param {Evidence} evidence object {ipid: ipid, title: title, description: description, tags: tags, hash: hash, type: type, size: size, url: url}
+ * @param {Evidence} evidence object
  * @param {*} secret
  * @param {*} secondSecret
  */
@@ -18,8 +18,14 @@ async function createEvidence (evidence, secret, secondSecret) {
     throw new Error('The first argument should be a object!')
   }
 
-  if (!evidence.ipid || evidence.ipid.length === 0) {
-    throw new Error('Invalid ipid format')
+  if (!evidence.author) {
+    throw new Error('Invalid author format')
+  }
+  if (!evidence.hash) {
+    throw new Error('Invalid hash format')
+  }
+  if (!evidence.type) {
+    throw new Error('Invalid type format')
   }
 
   const fee = bignum.multiply(constants.fees.evidence, constants.fixedPoint)
