@@ -51,7 +51,7 @@ async function pay (options, secret, secondSecret) {
   let args = options.args
   if (args instanceof Array) args = JSON.stringify(args)
 
-  const fee = DdnUtils.bignum.multiply(constants.fees.contract, constants.fixedPoint)
+  const fee = DdnUtils.bignum.multiply(constants.fees.contract_transfer, constants.fixedPoint)
 
   const timestamp = slots.getTime() - config.clientDriftSeconds
   const opts = {
@@ -87,7 +87,7 @@ async function send (options, secret, secondSecret) {
   let args = options.args
   if (args instanceof Array) args = JSON.stringify(args)
 
-  const fee = DdnUtils.bignum.multiply(constants.fees.contract, constants.fixedPoint)
+  const fee = DdnUtils.bignum.multiply(constants.fees.contract_transfer, constants.fixedPoint)
 
   const timestamp = slots.getTime() - config.clientDriftSeconds
   const opts = {

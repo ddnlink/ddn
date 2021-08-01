@@ -32,7 +32,7 @@ class ContractTransfer {
   }
 
   async calculateFee () {
-    return bignum.multiply(this.constants.net.fees.contract, this.constants.fixedPoint)
+    return bignum.multiply(this.constants.net.fees.contract_transfer, this.constants.fixedPoint)
   }
 
   async verify (trs, sender) {
