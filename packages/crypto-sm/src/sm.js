@@ -37,8 +37,9 @@ function getKeys (secret) {
  */
 async function sign (transaction, { privateKey }) {
   const hash = await getHash(transaction, true, true)
+  console.log(hash, privateKey)
   // const signature = nacl.sign.detached(hash, Buffer.from(privateKey, 'hex'))
-  const signature = sm2.doEncrypt(hash, privateKey)
+  const signature = sm2.doSignature(hash, privateKey)
 
   return signature
 }
@@ -50,7 +51,7 @@ async function sign (transaction, { privateKey }) {
  * @param {object} param1 keypair.privateKey
  */
 function signWithHash (hash, { privateKey }) {
-  const signature = sm2.doEncrypt(hash, privateKey) // nacl.sign.detached(hash, Buffer.from(privateKey, 'hex'))
+  const signature = sm2.doSignature(hash, privateKey) // nacl.sign.detached(hash, Buffer.from(privateKey, 'hex'))
   return signature
 }
 
@@ -62,7 +63,7 @@ function signWithHash (hash, { privateKey }) {
  */
 async function secondSign (transaction, { privateKey }) {
   const hash = await getHash(transaction, false, true)
-  const signature = sm2.doEncrypt(hash, privateKey) // nacl.sign.detached(hash, Buffer.from(privateKey, 'hex'))
+  const signature = sm2.doSignature(hash, privateKey) // nacl.sign.detached(hash, Buffer.from(privateKey, 'hex'))
   return signature
 }
 

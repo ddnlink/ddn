@@ -9,13 +9,13 @@ class Evidence extends Asset.Base {
 
   async propsMapping () {
     return [
-      { field: 'str4', prop: 'shortHash', maxLen: 64 }, // 短hash，截取原始hash的一部分的值
+      { field: 'str4', prop: 'short_hash', maxLen: 64 }, // 短hash，截取原始hash的一部分的值
       { field: 'str6', prop: 'title', maxLen: 128 }, // 该数据的标题
       { field: 'str8', prop: 'description' }, // 该数据的描述
       { field: 'str7', prop: 'hash', required: true, maxLen: 128 },
       { field: 'str5', prop: 'tags' }, // 存证数据的标签
       { field: 'str3', prop: 'author', required: true, maxLen: 20 }, // 该存证数据的使用者，或者是所有人
-      { field: 'str9', prop: 'sourceAddress', maxLen: 256 }, // 存证数据的原始地址，有可以填，没有为空
+      { field: 'str9', prop: 'source_address', maxLen: 256 }, // 存证数据的原始地址，有可以填，没有为空
       { field: 'str1', prop: 'type', required: true }, // 存证的数据类型（video、image、videostram、voice）
       { field: 'str2', prop: 'size' }, // string length:64
       { field: 'str10', prop: 'metadata' }, // 元数据 ，上面这些字段如果不能够满足存储的条件，其它数据可以序列化一下存到这里，该字段不能检索
@@ -24,9 +24,9 @@ class Evidence extends Asset.Base {
   }
 
   async attachApi (router) {
-    router.get('/shortHash/:shortHash', async (req, res) => {
+    router.get('/short_hash/:short_hash', async (req, res) => {
       try {
-        const result = await this.queryAsset({ shortHash: req.params.shortHash }, null, false, 1)
+        const result = await this.queryAsset({ short_hash: req.params.short_hash }, null, false, 1)
         res.json(result[0])
       } catch (err) {
         res.json({ success: false, error: err.message || err.toString() })
@@ -35,12 +35,12 @@ class Evidence extends Asset.Base {
   }
   /**
    * All Fields：
-   * shortHash - 截取hash的一部分，在链上也是唯一的
+   * short_hash - 截取hash的一部分，在链上也是唯一的
    * title - 存证的标题.
    * hash - 数据的hash.
    * tags - 存证的标签.
    * author - 存证人，或者存证的所有者.
-   * sourceAddress -原始数据的地址，对应存证人存证数据的原始地址
+   * source_address -原始数据的地址，对应存证人存证数据的原始地址
    * size - 存证数据的大小
    * `timestamp` - 时间戳
    * type - 存证的数据类型
@@ -92,9 +92,9 @@ class Evidence extends Asset.Base {
 
     const results = await super.queryAsset(
       {
-        shortHash: assetObj.shortHash
+        short_hash: assetObj.short_hash
       },
-      ['shortHash'],
+      ['short_hash'],
       false,
       1,
       1
@@ -106,15 +106,15 @@ class Evidence extends Asset.Base {
     const { senderId } = await this.dao.findOneByPrimaryKey('tr', oldEvidence.transaction_id, { attributes: ['senderId'] })
 
     if (senderId !== sender.address) {
-      throw new Error(`The evidence shortHash ${assetObj.shortHash} has been registered by ${senderId})`)
+      throw new Error(`The evidence short_hash ${assetObj.short_hash} has been registered by ${senderId})`)
     }
 
     const results2 = await super.queryAsset(
       {
-        shortHash: assetObj.shortHash,
+        short_hash: assetObj.short_hash,
         hash: assetObj.hash
       },
-      ['shortHash', 'hash'],
+      ['short_hash', 'hash'],
       false,
       1,
       1
@@ -129,9 +129,9 @@ class Evidence extends Asset.Base {
 
   async applyUnconfirmed (trs, sender, dbTrans) {
     const assetObj = await this.getAssetObject(trs)
-    const key = `${sender.address}:${trs.type}:${assetObj.shortHash}`
+    const key = `${sender.address}:${trs.type}:${assetObj.short_hash}`
     if (this.oneoff.has(key)) {
-      throw new Error(`The evidence ${assetObj.shortHash} is in process already.`)
+      throw new Error(`The evidence ${assetObj.short_hash} is in process already.`)
     }
 
     await super.applyUnconfirmed(trs, sender, dbTrans)
@@ -141,7 +141,7 @@ class Evidence extends Asset.Base {
 
   async undoUnconfirmed (trs, sender, dbTrans) {
     const assetObj = await this.getAssetObject(trs)
-    const key = `${sender.address}:${trs.type}:${assetObj.shortHash}`
+    const key = `${sender.address}:${trs.type}:${assetObj.short_hash}`
     this.oneoff.delete(key)
 
     const result = await super.undoUnconfirmed(trs, sender, dbTrans)
