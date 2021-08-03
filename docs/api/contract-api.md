@@ -157,6 +157,89 @@ curl --location --request POST 'http://127.0.0.1:8001/peer/transactions' \
 }
 ```
 
+### **2.1.2 调用pay方法，向合约转账**
+请求参数说明：
+
+|名称	|类型   |必填 |说明              |
+|------ |-----  |---  |----              |
+|transaction|json|Y|交易数据|
+
+返回参数说明：
+
+|名称|类型|说明|
+|------|-----|----|
+|success|boolean|是否成功获得response数据。|
+|transactionId|string|交易id|
+
+
+请求示例：
+```js
+
+const options = {
+    id: 'xxxxxx',         // 合约地址，唯一标识
+    gas_limit: 10000,     // 本次调用最大可消耗的gas，不填默认为100000
+    method: 'pay',   // 合约方法名，合约代码中确实存在的方法
+    amount: '1000',   // 金额，字符串类型的数字
+    currency: 'DDN', // token类型
+}
+
+// 构造交易数据
+const trs = DdnJS.contract.pay({
+		id, gas_limit, method, amount, currency
+	}, secret, secondSecret)
+console.log(JSON.stringify(trs))
+{ 
+    nethash: '0ab796cd',
+    amount: '0',
+    fee: '10000000',
+    recipientId: null,
+    timestamp: 113882476,
+    senderPublicKey:
+    '55de4e63127573eae71e5a649c00c39153339e3094d158f77f5f9b07ede17d43',
+    type: 12,
+    args:
+    [ { id: 'DAGatZMriKaUA7p3FzwHRamHMusdZ9Q8WS',
+        gas_limit: '10000000',
+        amount: 1000,
+        currency: 'DDN',
+        method: 'pay',
+        args: '[]' } ],
+    signature:
+    '9d335b514864d2615ed787828450136f2cf39d135e44b205a8bf0d3f1cf60d67fabbba9168ba81eebfc0dbfacb9a5c3d5eaa080e351e9993ce627be5d443130f',
+    id:
+    'e0853763f6ff19e9d4ddd2263aacc918ff8038b29ecdd53b522012af5a29cb3e7c651666218c6caa9bb0ac2410714863d09a1d95c5cd2f882b047e0f64d78e50' 
+}
+
+```
+将生成的交易数据以transaction为key，放入json，调用上链接口提交
+```sh
+curl --location --request POST 'http://127.0.0.1:8001/peer/transactions' \
+--header 'Content-Type: application/json' \
+--header 'nethash: 0ab796cd' \
+--header 'version: 3.0' \
+--data-raw `{
+    "transaction": {
+        "type": 12,
+        "nethash": "0ab796cd",
+        "amount": "0",
+        "fee": "50000000000",
+		"args": "[{id: 'DAGatZMriKaUA7p3FzwHRamHMusdZ9Q8WS', method: 'pay', currency: 'ddn', amount: '1000', args:[]}]",
+        "recipientId": null,
+        "senderPublicKey": "1e18845d5fbbdf0a6820610e042dcb9a250205964b8075a395453b4a1d1ed10c",
+        "timestamp": 84314778,
+        "message": null,
+        "signature": "d06ac3ee9ecbca7e856a02a7fa9ac38283269bce02d187daa1e59ac3957a10aff756506816d1e7f528f9f9c0ce90e2dae07ccb36f8076157aa0e6c668e1ff60b"
+    }
+}`
+```
+JSON返回示例：
+```json
+{
+    "success": true,
+    "transactionId": "b763c260aea7769d71063c3dcf4aa7b07d58a3765d6561967f3a09b99e8348e70ab701d52a149348be00494fe84c62bb58cd677a0de3fdcef472899569ef407a"
+}
+```
+
 ### **2.1.2 调用send方法，修改合约状态**
 请求参数说明：
 
