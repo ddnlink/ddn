@@ -9,7 +9,16 @@ import { getBytes as getBytesTobuffer } from '@ddn/crypto-base'
  * @description 根据排序json key排序后的数据逐个字段获取字节，适用于交易和区块
  */
 function getBytes (data, skipSignature, skipSecondSignature, skipId) {
-  return getBytesTobuffer(data, skipSignature, skipSecondSignature, skipId)
+  return arrayBufferToUnit8Array(getBytesTobuffer(data, skipSignature, skipSecondSignature, skipId))
+}
+// 系统需要 Uint8Array
+function arrayBufferToUnit8Array (byteBuffer) {
+  const unit8Buffer = new Uint8Array(byteBuffer.toArrayBuffer())
+  const buffer = []
+  for (let i = 0; i < unit8Buffer.length; i++) {
+    buffer[i] = unit8Buffer[i]
+  }
+  return Buffer.from(buffer)
 }
 
 export { getBytes }

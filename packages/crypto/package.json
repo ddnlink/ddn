@@ -19,7 +19,8 @@
     "url": "https://github.com/ddnlink/ddn/tree/master/packages/crypto"
   },
   "dependencies": {
-    "@ddn/crypto-nacl": "^1.2.0"
+    "@ddn/crypto-nacl": "^1.2.0",
+    "@ddn/crypto-sm": "^1.2.0"
   },
   "author": "",
   "license": "MIT"

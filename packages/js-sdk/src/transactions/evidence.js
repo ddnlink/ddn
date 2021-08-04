@@ -17,17 +17,23 @@ async function createEvidence (evidence, secret, secondSecret) {
     throw new Error('The first argument should be a object!')
   }
 
-  if (!evidence.ipid || evidence.ipid.length === 0) {
-    throw new Error('Invalid ipid format')
+  if (!evidence.author) {
+    throw new Error('Invalid author format')
+  }
+  if (!evidence.hash) {
+    throw new Error('Invalid hash format')
+  }
+  if (!evidence.type) {
+    throw new Error('Invalid type format')
   }
 
-  const fee = DdnUtils.bignum.multiply(constants.fees.evidence, constants.fixedPoint).toString()
+  const fee = DdnUtils.bignum.multiply(constants.fees.evidence, constants.fixedPoint)
 
   const transaction = {
     type: DdnUtils.assetTypes.EVIDENCE, // 10 -> 20
     nethash: config.nethash,
     amount: '0',
-    fee,
+    fee: `${fee}`,
     recipientId: null,
     senderPublicKey: keys.publicKey,
     timestamp: slots.getTime() - config.clientDriftSeconds,
