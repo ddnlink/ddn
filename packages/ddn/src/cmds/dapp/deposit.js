@@ -1,4 +1,5 @@
 import { depositDapp } from '../../plugins/dapp'
+import { init } from '../../plugins/api'
 
 module.exports = {
   command: 'deposit',
@@ -7,6 +8,7 @@ module.exports = {
   builder: {},
 
   handler: function (argv) {
+    init(argv)
     depositDapp()
   }
 }

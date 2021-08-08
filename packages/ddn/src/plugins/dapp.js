@@ -5,6 +5,8 @@ import request from 'request'
 import accountHelper from '../helpers/account.js'
 import dappHelper from '../helpers/dapp.js'
 import { prompt } from '../utils/prompt'
+import NodeSdk from '@ddn/node-sdk'
+import { getApi } from './api'
 
 function bip39Validator (input) {
   const done = this.async()
@@ -42,8 +44,8 @@ function precisionValidator (input) {
   done(null, true)
 }
 
-function depositDapp () {
-  inquirer.prompt(
+async function depositDapp () {
+  const result = await inquirer.prompt(
     [
       {
         type: 'password',
@@ -65,8 +67,14 @@ function depositDapp () {
       },
       {
         type: 'input',
-        name: 'dappId',
+        name: 'dapp_id',
         message: 'DApp Id',
+        required: true
+      },
+      {
+        type: 'input',
+        name: 'currency',
+        message: 'currency',
         required: true
       },
       {
@@ -78,54 +86,69 @@ function depositDapp () {
         },
         required: false
       }
-    ],
-    function (result) {
-      var realAmount = parseFloat((parseInt(result.amount) * 100000000).toFixed(0))
-      var body = {
-        secret: result.secret,
-        dappId: result.dappId,
-        amount: realAmount
-      }
+    ]
+    // async function (result) {
+    //   var trs = await NodeSdk.transfer.createInTransfer(result.dappid, result.currency, result.amount, result.secret, result.secondSecret || undefined);
+    //   getApi().broadcastTransaction(trs, function (err, result) {
+    //     console.log(err || result.transactionId)
+    //   })
+    //   //   var realAmount = parseFloat((parseInt(result.amount) * 100000000).toFixed(0))
+    //   //   var body = {
+    //   //     secret: result.secret,
+    //   //     dappId: result.dappId,
+    //   //     amount: realAmount
+    //   //   }
 
-      if (result.secondSecret && result.secondSecret.length > 0) {
-        body.secondSecret = result.secondSecret
-      }
+    //   //   if (result.secondSecret && result.secondSecret.length > 0) {
+    //   //     body.secondSecret = result.secondSecret
+    //   //   }
 
-      inquirer.prompt(
-        [
-          {
-            type: 'input',
-            name: 'host',
-            message: 'Host and port',
-            default: 'localhost:8001',
-            required: true
-          }
-        ],
-        function (result) {
-          request(
-            {
-              url: 'http://' + result.host + '/api/dapps/transaction',
-              method: 'put',
-              json: true,
-              body: body
-            },
-            function (err, resp, body) {
-              console.log(err, body)
-              if (err) {
-                return console.log(err.toString())
-              }
+    //   //   inquirer.prompt(
+    //   //     [
+    //   //       {
+    //   //         type: 'input',
+    //   //         name: 'host',
+    //   //         message: 'Host and port',
+    //   //         default: 'localhost:8001',
+    //   //         required: true
+    //   //       }
+    //   //     ],
+    //   //     function (result) {
+    //   //       request(
+    //   //         {
+    //   //           url: 'http://' + result.host + '/api/dapps/transaction',
+    //   //           method: 'put',
+    //   //           json: true,
+    //   //           body: body
+    //   //         },
+    //   //         function (err, resp, body) {
+    //   //           console.log(err, body)
+    //   //           if (err) {
+    //   //             return console.log(err.toString())
+    //   //           }
 
-              if (body.success) {
-                console.log(body.transactionId)
-              } else {
-                return console.log(body.error)
-              }
-            }
-          )
-        }
-      )
-    }
+    //   //           if (body.success) {
+    //   //             console.log(body.transactionId)
+    //   //           } else {
+    //   //             return console.log(body.error)
+    //   //           }
+    //   //         }
+    //   //       )
+    //   //     }
+    //   //   )
+    // }
   )
+
+  var trs = await NodeSdk.transfer.createInTransfer(
+    result.dapp_id,
+    result.currency,
+    result.amount,
+    result.secret,
+    result.secondSecret || undefined
+  )
+  getApi().broadcastTransaction(trs, function (err, result) {
+    console.log(err || result.transactionId)
+  })
 }
 
 function withdrawalDapp () {
