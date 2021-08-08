@@ -321,6 +321,53 @@ function installDapp () {
     }
   )
 }
+async function launchDapp () {
+  const result = await inquirer.prompt([
+    {
+      type: 'input',
+      name: 'dappId',
+      message: 'Enter dapp id',
+      required: true
+    },
+    {
+      type: 'input',
+      name: 'host',
+      message: 'Host and port',
+      default: 'localhost:8001',
+      required: true
+    },
+    {
+      type: 'password',
+      name: 'masterpassword',
+      message: 'Enter dapp master password',
+      required: true
+    }
+  ])
+  var body = {
+    id: String(result.dappId),
+    master: String(result.masterpassword)
+  }
+
+  request(
+    {
+      url: 'http://' + result.host + '/api/dapps/launch',
+      method: 'post',
+      json: true,
+      body: body
+    },
+    function (err, resp, body) {
+      if (err) {
+        return console.log(err.toString())
+      }
+
+      if (body.success) {
+        console.log('Done!', body.path)
+      } else {
+        return console.log(body.error)
+      }
+    }
+  )
+}
 
 async function createGenesisBlock () {
   var genesisSecret = await prompt({
@@ -372,4 +419,4 @@ async function createGenesisBlock () {
   console.log('New genesis block is created at: ./genesis.json')
 }
 
-export { depositDapp, withdrawalDapp, installDapp, uninstallDapp, createGenesisBlock }
+export { depositDapp, withdrawalDapp, installDapp, uninstallDapp, createGenesisBlock, launchDapp }
