@@ -14,7 +14,7 @@ async function deploy (options, secret, secondSecret) {
 
   const contract = {
     owner: await crypto.generateAddress(keys.publicKey, constants.tokenPrefix),
-    gas_limit: `${options.gasLimit || constants.maxGasLimit}`,
+    gas_limit: +options.gasLimit || constants.maxGasLimit,
     name: options.name,
     desc: options.desc,
     version: options.version,

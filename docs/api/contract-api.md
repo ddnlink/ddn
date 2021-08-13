@@ -157,11 +157,11 @@ curl --location --request POST 'http://127.0.0.1:8001/peer/transactions' \
 }
 ```
 
-### **2.1.2 调用pay方法，向合约转账**
+### **2.1.2 向合约转账**
 请求参数说明：
 
 |名称	|类型   |必填 |说明              |
-|------ |-----  |---  |----              |
+|------ |-----  |---  |----             |
 |transaction|json|Y|交易数据|
 
 返回参数说明：
@@ -178,9 +178,9 @@ curl --location --request POST 'http://127.0.0.1:8001/peer/transactions' \
 const options = {
     id: 'xxxxxx',         // 合约地址，唯一标识
     gas_limit: 10000,     // 本次调用最大可消耗的gas，不填默认为100000
-    method: 'pay',   // 合约方法名，合约代码中确实存在的方法
-    amount: '1000',   // 金额，字符串类型的数字
-    currency: 'DDN', // token类型
+    method: 'pay',        // 合约方法名，合约代码中确实存在的方法
+    amount: '1000',       // 金额，字符串类型的数字
+    currency: 'DDN',      // token类型
 }
 
 // 构造交易数据
