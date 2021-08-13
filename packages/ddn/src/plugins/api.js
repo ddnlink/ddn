@@ -699,6 +699,7 @@ function verifyBytes (options) {
 }
 
 export {
+  getApi,
   init,
   getHeight,
   getBlockStatus,
