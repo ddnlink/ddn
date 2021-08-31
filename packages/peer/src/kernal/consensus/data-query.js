@@ -213,7 +213,8 @@ class DataQuery {
         ['gas_limit', 'c_gas_limit'],
         ['version', 'c_version'],
         ['code', 'c_code'],
-        ['timestamp', 'c_timestamp']
+        ['timestamp', 'c_timestamp'],
+        ['transaction_id', 't_id']
       ]
     })
   }
@@ -497,6 +498,7 @@ class DataQuery {
       const voteTrsIds = []
       const signatureTrsIds = []
       const multiSignatureTrsIds = []
+      const contractTrsIds = []
       const dappTrsIds = []
       const dappIntransferTrsIds = []
       const dappOuttransferTrsIds = []
@@ -518,6 +520,9 @@ class DataQuery {
         }
         if (trsItem.t_type === DdnUtils.assetTypes.MULTISIGNATURE) {
           multiSignatureTrsIds.push(trsItem.t_id)
+        }
+        if (trsItem.t_type === DdnUtils.assetTypes.CONTRACT) {
+          contractTrsIds.push(trsItem.t_id)
         }
         if (trsItem.t_type === DdnUtils.assetTypes.DAPP) {
           dappTrsIds.push(trsItem.t_id)
@@ -564,6 +569,12 @@ class DataQuery {
       if (multiSignatureTrsIds.length > 0) {
         const multisignaturesRows = await this.loadMultiSignaturesWithTransactionIds(multiSignatureTrsIds)
         combineTransactionData(multisignaturesRows)
+      }
+
+      // 合约交易数据
+      if (contractTrsIds.length > 0) {
+        const contractsRows = await this.loadContractWithTransactionIds(contractTrsIds)
+        combineTransactionData(contractsRows)
       }
 
       // //Dapp交易数据
