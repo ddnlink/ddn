@@ -38,7 +38,7 @@ module.exports = {
       },
       {
         title: 'Frame extension',
-        children: ['guide/crypto', 'guide/cryptoDevelop', 'guide/asset', 'guide/app/dapp']
+        children: ['guide/crypto', 'guide/cryptoDevelop', 'guide/asset', 'guide/contract']
       },
       {
         title: 'Core development',
@@ -70,7 +70,7 @@ module.exports = {
       },
       {
         title: '框架扩展',
-        children: ['guide/crypto', 'guide/asset', 'guide/app/dapp']
+        children: ['guide/crypto', 'guide/asset', 'guide/contract']
       },
       {
         title: '底层开发',
