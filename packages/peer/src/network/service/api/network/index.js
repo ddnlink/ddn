@@ -32,12 +32,12 @@ class NetworkRouter {
   }
 
   async getSync (req) {
-    const remotePeerHeight = await this.runtime.peer.request({ api: '/height' })
+    const res = await this.runtime.peer.p2p.get('/height')
     let blocks = this.runtime.block.getLastBlock().height
 
     // 本地服务不需要同步，块等于最新块高
-    if (remotePeerHeight) {
-      blocks = remotePeerHeight.body.height
+    if (res && res.body) {
+      blocks = res.body.height
     }
 
     return {

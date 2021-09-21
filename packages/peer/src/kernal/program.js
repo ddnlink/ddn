@@ -5,7 +5,6 @@
 import assert from 'assert'
 import path from 'path'
 import fs from 'fs'
-import ip from 'ip'
 import extend from 'extend2'
 import * as DdnCrypto from '@ddn/crypto'
 import { bignum, runtimeState } from '@ddn/utils'
@@ -85,15 +84,6 @@ class Program {
       isDev: process.env.NODE_ENV !== 'production'
     })
 
-    try {
-      await this._context.runtime.dvm.run()
-
-      const contracts = await this._context.dao.findList('contract', { where: { state: 0 } })
-      await this._context.runtime.dvm.loadContracts(contracts.map(c => c.id))
-    } catch (err) {
-      console.log(err)
-      throw err
-    }
     // 锁文件，存储当前运行进程的ID
     this._pid_file = path.join(options.baseDir, 'ddn.pid')
 
@@ -176,6 +166,7 @@ class Program {
 
     process.once('cleanup', async () => {
       this._context.logger.info('Cleaning up...')
+      await this._beforeClose()
       await this._context.close()
       this._resetProcessState()
       process.exit(1)
@@ -186,6 +177,7 @@ class Program {
     })
 
     process.once('exit', () => {
+      process.emit('cleanup')
       this._context.logger.info('process exited')
     })
 
@@ -209,8 +201,12 @@ class Program {
       }, 1000 * 60 * 30)
     }
 
+    // 配置加載之前回調函數
+    await this._configWillLoad(options)
     // 初始化运行时上下文、核心模块等
     await this._init(options)
+    // 配置加載完成回調函數
+    await this._configLoaded()
 
     // 文件锁，保证系统只能运行一份
     this._checkProcessState()
@@ -228,6 +224,13 @@ class Program {
     if (!this._context.config.publicIp) {
       this._context.logger.warn('Failed to get public ip, block forging may not work!')
     }
+
+    // 启动dvm
+    await this._context.runtime.dvm.run()
+    // const contracts = await this._context.dao.findList('contract', { where: { state: 0 } })
+    // await this._context.runtime.dvm.loadContracts(contracts.map(c => c.id))
+    // dvm 就緒回調函數
+    this._dvmReady()
 
     // 初始化创世区块
     await this._context.runtime.block.handleGenesisBlock()
@@ -263,10 +266,8 @@ class Program {
     }
 
     await this._bindReady()
-
-    // 启动节点管理任务
-    await this.startPeerSyncTask()
-
+    // assets 加載完成回調函數
+    await this._assetsLoaded()
     // 启动区块数据同步任务
     await this.startBlockDataSyncTask()
 
@@ -296,161 +297,115 @@ class Program {
       // 块加载完成
 
       this._blockchainReadyFired = true
+      // 節點就緒回調函數
+      await this._appReady()
     }
   }
 
-  /**
-   * 获取一个有效节点（非本机自己）
-   */
-  async getValidPeer () {
-    try {
-      const publicIp = this._context.config.publicIp || '127.0.0.1'
-      const publicIpLongValue = ip.toLong(publicIp)
-      const port = this._context.config.port
-      const result = await this._context.runtime.peer.queryList(
-        null,
-        { state: { $gt: 0 }, $not: { ip: publicIpLongValue, port: port } },
-        1
-      )
-      if (result && result.length) {
-        return result[0]
-      }
-    } catch (err) {
-      this._context.logger.error('Error: ' + err)
-    }
-    return null
+  // lifeCycle function
+  async _configWillLoad (options) {
+    if ((options.lifeCycle || {}).configWillLoad) await this._context.configWillLoad()
   }
 
-  /**
-   * 同步节点列表 & 维护本地节点状态（轮询）
-   */
-  async startPeerSyncTask () {
-    const validPeer = await this.getValidPeer()
-    if (validPeer) {
-      try {
-        await (async () => {
-          if (this._peerSyncCounter === 0) {
-            await this._context.runtime.peer.syncPeersList()
-            this._peerSyncCounter = 3 // TODO: this.constants.try_time
-          }
-          this._peerSyncCounter--
+  async _configLoaded () {
+    if (this._context.configLoaded) await this._context.configLoaded()
+  }
 
-          await this._context.runtime.peer.restoreBanState()
-          this._context.logger.debug('Peers ban is restored:  this._peerSyncCounter = ' + this._peerSyncCounter)
-        })()
-      } catch (err) {
-        this._context.logger.warn('The peer sync task error: ' + err)
-      }
+  async _assetsLoaded () {
+    if (this._context.assetsLoaded) await this._context.assetsLoaded()
+  }
 
-      setTimeout(() => {
-        this.startPeerSyncTask()
-      }, 1000 * 19)
-    }
+  async _dvmReady () {
+    if (this._context.dvmReady) await this._context.dvmReady()
+  }
+
+  async _appReady () {
+    if (this._context.appReady) await this._context.appReady()
+  }
+
+  async _beforeClose () {
+    if (this._context.beforeClose) await this._context.beforeClose()
   }
 
   /**
    * 签名同步任务（轮询）
    */
   async startSignaturesSyncTask () {
-    const validPeer = await this.getValidPeer()
-    if (validPeer) {
-      try {
-        await (async () => {
-          await this._context.runtime.peer.syncSignatures()
-        })()
-      } catch (err) {
-        this._context.logger.warn('The signatures sync task error: ' + err)
-      }
-
-      setTimeout(() => {
-        this.startSignaturesSyncTask()
-      }, 1000 * 14)
+    try {
+      await this._context.runtime.peer.syncSignatures()
+    } catch (err) {
+      this._context.logger.warn('The signatures sync task error: ' + err)
     }
+
+    setTimeout(() => {
+      this.startSignaturesSyncTask()
+    }, 1000 * 14)
   }
 
   /**
    * 同步未确认交易（轮询）
    */
   async startUnconfirmedTransactionSyncTask () {
-    const validPeer = await this.getValidPeer()
-    if (validPeer) {
-      try {
-        await (async () => {
-          if (this._context.runtime.state === runtimeState.Syncing) {
-            return
-          }
-
-          await this._context.runtime.peer.syncUnconfirmedTransactions()
-        })()
-      } catch (err) {
-        this._context.logger.warn('The unconfirmed transaction sync task error: ' + err)
+    try {
+      if (this._context.runtime.state === runtimeState.Syncing) {
+        return
       }
 
-      setTimeout(() => {
-        this.startUnconfirmedTransactionSyncTask()
-      }, 1000 * 14)
+      await this._context.runtime.peer.syncUnconfirmedTransactions()
+    } catch (err) {
+      this._context.logger.warn('The unconfirmed transaction sync task error: ' + err)
     }
+
+    setTimeout(() => {
+      this.startUnconfirmedTransactionSyncTask()
+    }, 1000 * 14)
   }
 
   /**
    * 同步节点区块数据（轮询）
    */
   async startBlockDataSyncTask () {
-    const validPeer = await this.getValidPeer()
-    if (validPeer) {
-      try {
-        await (async () => {
-          if (this._context.runtime.state === runtimeState.Syncing) {
-            return
-          }
-
-          const lastBlock = this._context.runtime.block.getLastBlock()
-          const lastSlot = this._context.runtime.slot.getSlotNumber(lastBlock.timestamp)
-          if (this._context.runtime.slot.getNextSlot() - lastSlot >= 3) {
-            this._context.runtime.state = runtimeState.Syncing
-
-            this._context.logger.debug('startSyncBlocks enter')
-
-            await new Promise(resolve => {
-              this._context.sequence.add(
-                async cb => {
-                  try {
-                    const syncCompleted = await this._context.runtime.peer.syncBlocks()
-                    cb(null, syncCompleted)
-                  } catch (syncErr) {
-                    cb(syncErr)
-                  }
-                },
-                async (err, syncCompleted) => {
-                  err && this._context.logger.error('loadBlocks timer:', err)
-                  this._context.logger.debug('startSyncBlocks end')
-
-                  if (syncCompleted) {
-                    this._context.runtime.state = runtimeState.Ready
-                    await this._blockchainReady()
-                  } else {
-                    this._context.logger.debug('startSyncBlocks not complete change state pending')
-                    this._context.runtime.state = runtimeState.Pending
-                  }
-
-                  resolve()
-                }
-              )
-            })
-          }
-        })()
-      } catch (err) {
-        this._context.logger.warn('The block sync task error: ' + err)
-      }
-
-      setTimeout(async () => {
-        await this.startBlockDataSyncTask()
+    const next = () => {
+      setTimeout(() => {
+        this.startBlockDataSyncTask()
       }, 1000 * 10)
-    } else {
+    }
+    const peer = await this._context.runtime.peer.p2p.getPeer()
+
+    // console.log('-----------', peer)
+    if (!peer) {
       this._context.logger.debug('change state is ready')
       this._context.runtime.state = runtimeState.Ready
       await this._blockchainReady()
+      next()
+      return
     }
+    try {
+      if (this._context.runtime.state === runtimeState.Syncing) {
+        return
+      }
+
+      const lastBlock = this._context.runtime.block.getLastBlock()
+      const lastSlot = this._context.runtime.slot.getSlotNumber(lastBlock.timestamp)
+      if (this._context.runtime.slot.getNextSlot() - lastSlot < 3) {
+        return
+      }
+      this._context.runtime.state = runtimeState.Syncing
+      this._context.logger.debug('SyncBlocks enter')
+      const success = await this._context.runtime.peer.syncBlocks()
+      this._context.logger.debug('SyncBlocks outer')
+      if (success) {
+        this._context.runtime.state = runtimeState.Ready
+        await this._blockchainReady()
+      } else {
+        this._context.logger.debug('SyncBlocks not complete change state pending')
+        this._context.runtime.state = runtimeState.Pending
+      }
+    } catch (err) {
+      this._context.logger.error('The block sync task error: ' + err)
+    }
+
+    next()
   }
 
   /**
