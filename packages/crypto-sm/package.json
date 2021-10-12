@@ -36,8 +36,7 @@
     "crypto": "^1.0.1",
     "fast-sha256": "^1.3.0",
     "ripemd160": "^2.0.2",
-    "safe-buffer": "^5.2.1",
-    "sm-crypto": "^0.3.0"
+    "safe-buffer": "^5.2.1"
   },
   "devDependencies": {
     "@ddn/utils": "^1.2.0"

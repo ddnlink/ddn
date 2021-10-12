@@ -121,6 +121,19 @@ $ ddn g dapp MyDapp // 与上述命令正好相反，但是效果一样
   -h, --help     显示帮助信息   
 ```
 
-## 4. 参考
+## 4. 全局配置加密算法
+
+命令行默认使用氯化钠加密算法，但同时也支持配置：
+
+```shell
+$ ddn crypto sc    
+? Choose crypto 
+  1) @ddn/crypto-ed25519
+  2) @ddn/crypto-nacl
+  3) @ddn/crypto-sm
+  Answer:   
+```
+
+## 5. 参考
 
 更多应用案例，请参考 《DDN-UBL 高校实验教程》

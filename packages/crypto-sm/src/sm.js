@@ -2,7 +2,7 @@
  * 该文件为加密算法涉及到的基础方法，如果更换其他的密码学算法，请注意实现下面的方法
  */
 import { getBytes } from './bytes'
-import { sm2, sm3 } from 'sm-crypto'
+import { sm2, sm3 } from '@ddn/sm-crypto'
 
 /**
  * 该方法用于生成交易Id，仅包含核心交易字段信息。所以，在调用本方法之前，要过滤掉系统生成的字段。
@@ -16,13 +16,7 @@ async function getId (transaction) {
 
 // 兼容处理
 function getKeys (secret) {
-  // const hash = createHash(Buffer.from(secret))
-
-  // const m = new Uint8Array(nacl.sign.seedLength)
-  // for (let i = 0; i < m.length; i++) m[i] = hash[i]
-
-  // const keypair = nacl.sign.keyPair.fromSeed(m)
-  const keypair = sm2.generateKeyPairHex(secret)
+  const keypair = sm2.generateKeyPairHexBySecret(secret)
   return {
     publicKey: keypair.publicKey,
     privateKey: keypair.privateKey
@@ -33,14 +27,11 @@ function getKeys (secret) {
  * Usage:
  * trs.signature = await sign(trs, keypair);
  * @param {object} transaction to be signed
- * @param {object} param1 keypair.privateKey
+ * @param {object} privateKey keypair.privateKey
  */
 async function sign (transaction, { privateKey }) {
   const hash = await getHash(transaction, true, true)
-  console.log(hash, privateKey)
-  // const signature = nacl.sign.detached(hash, Buffer.from(privateKey, 'hex'))
   const signature = sm2.doSignature(hash, privateKey)
-
   return signature
 }
 
@@ -51,7 +42,7 @@ async function sign (transaction, { privateKey }) {
  * @param {object} param1 keypair.privateKey
  */
 function signWithHash (hash, { privateKey }) {
-  const signature = sm2.doSignature(hash, privateKey) // nacl.sign.detached(hash, Buffer.from(privateKey, 'hex'))
+  const signature = sm2.doSignature(hash, privateKey)
   return signature
 }
 
@@ -63,7 +54,7 @@ function signWithHash (hash, { privateKey }) {
  */
 async function secondSign (transaction, { privateKey }) {
   const hash = await getHash(transaction, false, true)
-  const signature = sm2.doSignature(hash, privateKey) // nacl.sign.detached(hash, Buffer.from(privateKey, 'hex'))
+  const signature = sm2.doSignature(hash, privateKey)
   return signature
 }
 
@@ -78,27 +69,29 @@ function verifyBytes (bytes, signature, publicKey) {
   if (!(bytes instanceof Buffer)) {
     bytes = Buffer.from(bytes)
   }
-
   const hash = createHash(bytes)
-
-  // const signatureBuffer = Buffer.from(signature, 'hex')
-  // const publicKeyBuffer = Buffer.from(publicKey, 'hex')
-  const res = sm2.doDecrypt(hash, signature, publicKey)
+  const res = sm2.doVerifySignature(hash, signature, publicKey)
   return res
 }
+/**
+ *
+ * @param {*} hash hash数据格式为16进制str
+ * @param {*} signature 签名
+ * @param {*} publicKey  公匙
+ * @returns Boolean
+ */
 
 function verifyHash (hash, signature, publicKey) {
-  // const signatureBuffer = Buffer.from(signature, 'hex')
-  // const publicKeyBuffer = Buffer.from(publicKey, 'hex')
-  const res = sm2.doDecrypt(hash, signature, publicKey)
+  // 这里这样处理是因为程序中调用该方法时有的传的值时16进制的signature, publicKey，有的传的时buffer.from(signature, publicKey),需要转为16进制
+  const signatureStr = signature.toString('hex')
+  const publicKeyStr = publicKey.toString('hex')
+  const res = sm2.doVerifySignature(hash, signatureStr, publicKeyStr)
   return res
 }
 
 /**
  * 获得交易数据的哈希值
  * 等于 getBytes + createHash
- *
- * note: tweetnacl 包的所有方法必须使用 Uint8Array 类型的参数。
  * @param {object} trs 交易数据
  * @param {boolean} skipSignature 跳过签名
  * @param {boolean} skipSecondSignature 跳过二次签名
@@ -109,27 +102,12 @@ function getHash (trs, skipSignature, skipSecondSignature, skipId) {
 }
 
 /**
- * 使用中注意 data 格式，默认是unit8Arrary，如果是涉密字段（经过 buffer、签名、加密的字段）都是可以直接使用的，不然就要对其简单处理 Buffer.from(data)
- * 返回值为 Buffer
- * @param {String}  data 需要 hash 的数据，格式为 unit8Arrary, 这里的方法与 crypto.createHash('sha256').update(strBuffer).digest() 相似，结果不同
+ * 使用中注意 data 格式是 Buffer.from(data)或者string，SM3杂凑算法，与sha256类似
+ * 返回值为 16进制str
+ * @param {String}  data 需要 hash 的数据，格式为 Buffer.from(data)或string, 这里的方法与 crypto.createHash('sha256').update(strBuffer).digest() 相似
  */
 function createHash (data) {
-  return sm3(data.toString())
+  return Buffer.from(sm3(data.toString()))
 }
 
-// function bufToHex(data) {
-//   return Buffer.from(data).toString('hex')
-// }
-
-export {
-  // nacl, // 这里不应该导出
-  getKeys,
-  getId,
-  getHash,
-  createHash,
-  sign,
-  signWithHash,
-  secondSign,
-  verifyBytes,
-  verifyHash
-}
+export { getKeys, getId, getHash, createHash, sign, signWithHash, secondSign, verifyBytes, verifyHash }
