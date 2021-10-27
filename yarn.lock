@@ -1517,6 +1517,13 @@
     typescript "^3.3.0"
     uglify-es "3.3.9"
 
+"@ddn/sm-crypto@^0.0.5":
+  version "0.0.5"
+  resolved "https://registry.yarnpkg.com/@ddn/sm-crypto/-/sm-crypto-0.0.5.tgz#d6c84e32575966cd57ddb13bb4693cf8cb4c59f9"
+  integrity sha512-W78S39/HfHv4eACRtzslQHdGSB88khs84zoPFWG6wuJsuUxbJHwUQA3Lv3yNPblwjF0zKsAblC/skeKKZqRMRg==
+  dependencies:
+    jsbn "^1.1.0"
+
 "@eslint/eslintrc@^0.4.2":
   version "0.4.2"
   resolved "https://registry.yarnpkg.com/@eslint/eslintrc/-/eslintrc-0.4.2.tgz#f63d0ef06f5c0c57d76c4ab5f63d3835c51b0179"
@@ -18501,13 +18508,6 @@ slide@^1.1.6:
   resolved "https://registry.yarnpkg.com/slide/-/slide-1.1.6.tgz#56eb027d65b4d2dce6cb2e2d32c4d4afc9e1d707"
   integrity sha1-VusCfWW00tzmyy4tMsTUr8nh1wc=
 
-sm-crypto@^0.3.0:
-  version "0.3.5"
-  resolved "https://registry.yarnpkg.com/sm-crypto/-/sm-crypto-0.3.5.tgz#0e668bbdd8d996e72a4bc0cd606673938811c33d"
-  integrity sha512-bTX0MGmoiVvoIq+mKn1w2399iQcjIOhdUIQ18twhMKkUD5iyhKN9flNiesGzk1udJe3P+H09A5CKSTt1dYoz0Q==
-  dependencies:
-    jsbn "^1.1.0"
-
 smart-buffer@^4.1.0:
   version "4.1.0"
   resolved "https://registry.yarnpkg.com/smart-buffer/-/smart-buffer-4.1.0.tgz#91605c25d91652f4661ea69ccf45f1b331ca21ba"
@@ -19313,6 +19313,11 @@ syntax-error@^1.1.1:
   integrity sha512-YPPlu67mdnHGTup2A8ff7BC2Pjq0e0Yp/IyTFN03zWO0RcK07uLcbi7C2KpGR2FvWbaB0+bfE27a+sBKebSo7w==
   dependencies:
     acorn-node "^1.2.0"
+
+systeminformation@^5.9.8:
+  version "5.9.8"
+  resolved "https://registry.yarnpkg.com/systeminformation/-/systeminformation-5.9.8.tgz#470d5781647418fd2f2ec945e507cd522a69d565"
+  integrity sha512-Dt54Vuu4Q5pGCsBtbVjIzD3Lahek7qIL+2vqAPqcPtPAlFRPf+ef4VKB4F5AL5UmdjYm7NFCTnwjoiu7qtxmQQ==
 
 table@^6.0.9:
   version "6.7.1"

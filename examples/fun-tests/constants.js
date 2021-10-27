@@ -37,7 +37,7 @@ module.exports = {
   maxGasLimit: 10000000,
   maxCodeSize: 32768,
 
-  crypto: '@ddn/crypto-nacl', // 绿化钠 @ddn/crypto-nacl ，ed25519 @ddn/crypto-ed25519 ，国密 @ddn/crypto-sm
+  crypto: '@ddn/crypto-sm', // 绿化钠 @ddn/crypto-nacl ，ed25519 @ddn/crypto-ed25519 ，国密 @ddn/crypto-sm
   testnet: {
     rewardRatio: 0.2,
     milestones: [

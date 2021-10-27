@@ -31,6 +31,7 @@
   },
   "dependencies": {
     "@ddn/crypto-base": "^1.2.0",
+    "@ddn/sm-crypto": "^0.0.5",
     "bitcore-mnemonic": "^8.20.5",
     "bytebuffer": "^5.0.1",
     "crypto": "^1.0.1",
