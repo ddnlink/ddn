@@ -1,6 +1,6 @@
 {
   "name": "@ddn/peer",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "description": "DDN Peer.",
   "files": [
     "lib",
@@ -51,7 +51,7 @@
     "@ddn/asset-evidence": "^1.2.0",
     "@ddn/contract": "^0.3.0",
     "@ddn/core": "^1.2.0",
-    "@ddn/crypto": "^1.2.0",
+    "@ddn/crypto": "^1.2.1",
     "@ddn/test-utils": "^1.2.0",
     "@ddn/utils": "^1.2.0",
     "ajv": "^6.3.0",
