@@ -25,7 +25,7 @@ import bodyParser from 'body-parser'
 import methodOverride from 'method-override'
 import routesMap from '../utils/routes-map'
 import queryParser from './middleware/query-int'
-import SocketioEmiter from './socketio/'
+import SocketioEmiter from './socketio'
 import errorHandler from './middleware/errorHandler'
 
 class HttpServer {

@@ -21,75 +21,6 @@ class PeerSync {
     this._context = context
   }
 
-  async trySyncBlockData () {
-    let remotePeerHeight = await this.runtime.peer.request({ api: '/height' })
-    if (remotePeerHeight === false) {
-      return false
-    }
-
-    const peerStr =
-      remotePeerHeight && remotePeerHeight.peer
-        ? `${ip.fromLong(remotePeerHeight.peer.ip)}:${remotePeerHeight.peer.port}`
-        : 'unknown'
-
-    if (remotePeerHeight && remotePeerHeight.body) {
-      this.logger.info(`Check blockchain on ${peerStr}`)
-
-      const validateErrors = await this.ddnSchema.validate(
-        {
-          type: 'object',
-          properties: {
-            height: {
-              type: 'string'
-            }
-          },
-          required: ['height']
-        },
-        remotePeerHeight.body
-      )
-      if (validateErrors) {
-        this.logger.log(
-          `Failed to parse blockchain height: ${peerStr} ${validateErrors[0].schemaPath} ${validateErrors[0].message}`
-        )
-        // 2020.8.28 添加返回结果
-        return false
-      }
-
-      const lastBlock = this.runtime.block.getLastBlock()
-      if (bignum.isLessThan(lastBlock.height, remotePeerHeight.body.height)) {
-        let syncLastBlock = null
-
-        this.logger.debug(`Got lastBlock height is ${lastBlock.height}`)
-        if (lastBlock.id !== this.genesisblock.id) {
-          this.logger.debug('Must get syncLastBlock')
-          syncLastBlock = await this._addLackBlocks(remotePeerHeight.peer, lastBlock)
-        } else {
-          syncLastBlock = await this._cloneBlocksFromPeer(remotePeerHeight.peer, lastBlock.id)
-        }
-        this.logger.debug(`Got syncLastBlock: ${syncLastBlock}`)
-        if (syncLastBlock) {
-          remotePeerHeight = await this.runtime.peer.request({ api: '/height' }) // fixme ???
-          if (
-            remotePeerHeight &&
-            remotePeerHeight.body &&
-            bignum.new(syncLastBlock.height).eq(remotePeerHeight.body.height)
-          ) {
-            return true
-          } else {
-            return false
-          }
-        } else {
-          return false
-        }
-      } else {
-        return true
-      }
-    } else {
-      this.logger.log(`Failed to get height from peer: ${peerStr}`)
-      return false
-    }
-  }
-
   async _getIdSequence (height) {
     const rows = await this.dao.findList('block', {
       where: {
@@ -123,7 +54,7 @@ class PeerSync {
   }
 
   async _addLackBlocks (peer, lastBlock) {
-    const peerStr = peer ? `${ip.fromLong(peer.ip)}:${peer.port}` : 'unknown'
+    const peerStr = peer ? `${ip.fromLong(peer.host)}:${peer.port}` : 'unknown'
     this.logger.info(`Looking for common block with ${peerStr}`)
 
     // modules.blocks.getCommonBlock
@@ -138,10 +69,15 @@ class PeerSync {
       const maxHeight = currProcessHeight // 119
       currProcessHeight = data.firstHeight // 114
 
-      const result = await this.runtime.peer.request({
-        peer,
-        api: `/blocks/common?ids=${data.ids}&max=${maxHeight}&min=${currProcessHeight}`
-      })
+      const result = await this.runtime.peer.p2p.get(
+        '/block/common',
+        {
+          ids: data.ids,
+          max: +maxHeight,
+          min: currProcessHeight
+        },
+        peer
+      )
       if (result && result.body && result.body.common) {
         const row = await this.dao.findOne('block', {
           where: {
@@ -179,7 +115,6 @@ class PeerSync {
 
     if (bignum.isGreaterThanOrEqualTo(toRemove, 5)) {
       this.logger.error('long fork, ban 60 min', peerStr)
-      this.runtime.peer.changeState(peer.ip, peer.port, 0, 3600)
       return
     }
 
@@ -240,7 +175,6 @@ class PeerSync {
       lastLackBlock = await this._cloneBlocksFromPeer(peer, lastLackBlock.id)
     } catch (err) {
       this.logger.error(`Failed to load blocks, ban 60 min: ${peerStr}`, err)
-      await this.runtime.peer.changeState(peer.ip, peer.port, 0, 3600)
     }
 
     try {
@@ -258,7 +192,7 @@ class PeerSync {
    * @param {string} blockId block id
    */
   async _cloneBlocksFromPeer (peer, blockId) {
-    const peerStr = peer ? `${ip.fromLong(peer.ip)}:${peer.port}` : 'unknown'
+    const peerStr = peer ? `${ip.fromLong(peer.host)}:${peer.port}` : 'unknown'
 
     let lastClonedBlock = null
     let queryBlockId = blockId
@@ -267,9 +201,13 @@ class PeerSync {
 
     while (!loaded && count < 30) {
       count++
-      const data = await this.runtime.peer.request({ peer, api: `/blocks?lastBlockId=${queryBlockId}&limit=200` })
+      const res = await this.runtime.peer.p2p.get('/block', { lastBlockId: queryBlockId, limit: 200 }, peer)
+      let blocks = (res && res.body && res.body.blocks) || []
 
-      let blocks = data.body.blocks
+      if (blocks.length === 0) {
+        loaded = true
+        break
+      }
 
       const validateErrors = await this.ddnSchema.validate(
         {
@@ -283,56 +221,111 @@ class PeerSync {
 
       // wxm block databsae
       blocks = await this.runtime.block._parseObjectFromFullBlocksData(blocks)
-      if (blocks.length === 0) {
-        loaded = true
-        break
-      } else {
-        for (let j = 0; j < blocks.length; j++) {
-          let block = blocks[j]
 
-          try {
-            block = await this.runtime.block.objectNormalize(block)
-          } catch (e) {
-            this.logger.error(`Failed to normalize block, ban 60 min, block: ${block ? block.id : 'null'} `, peerStr)
-            this.runtime.peer.changeState(peer.ip, peer.port, 0, 3600) // 3600 s
-            return null
-          }
+      for (let j = 0; j < blocks.length; j++) {
+        let block = blocks[j]
 
-          try {
-            await this.runtime.block.processBlock(block, null, false, true, true)
-          } catch (err) {
-            this.logger.error(`Failed to process block: ${err}`)
-            if (err.message === 'DDN is preparing') {
-              // return setTimeout(() => {
-              //   _cloneBlocksFromPeer(peer, blockId)
-              // }, 10)
-              return
-            }
-            this.logger.error(`Block is not valid, ban 60 min, block: ${block ? block.id : 'null'} `, peerStr)
-            this.runtime.peer.changeState(peer.ip, peer.port, 0, 3600) // 3600 ms
-            return null
-          }
-
-          queryBlockId = block.id
-          lastClonedBlock = block
-          this.logger.log(`Block ${block.id} loaded from ${peerStr} at`, block.height)
+        try {
+          block = await this.runtime.block.objectNormalize(block)
+        } catch (e) {
+          this.logger.error(`Failed to normalize block, ban 60 min, block: ${block ? block.id : 'null'} `, peerStr)
+          return null
         }
+
+        try {
+          await this.runtime.block.processBlock(block, null, false, true, true)
+        } catch (err) {
+          this.logger.error(`Failed to process block: ${err}`)
+          if (err.message === 'DDN is preparing') {
+            // return setTimeout(() => {
+            //   _cloneBlocksFromPeer(peer, blockId)
+            // }, 10)
+            return
+          }
+          this.logger.error(`Block is not valid, ban 60 min, block: ${block ? block.id : 'null'} `, peerStr)
+          return null
+        }
+
+        queryBlockId = block.id
+        lastClonedBlock = block
+        this.logger.log(`Block ${block.id} loaded from ${peerStr} at`, block.height)
       }
     }
 
     return lastClonedBlock
   }
 
+  /**
+   * 从随机节点同步区块数据
+   */
+  async trySyncBlockData () {
+    let res = await this.runtime.peer.p2p.get('/height')
+    if (!res) {
+      return false
+    }
+
+    if (res && res.body) {
+      const validateErrors = await this.ddnSchema.validate(
+        {
+          type: 'object',
+          properties: {
+            height: {
+              type: 'string'
+            }
+          },
+          required: ['height']
+        },
+        res.body
+      )
+      if (validateErrors) {
+        this.logger.log(
+          `Failed to parse blockchain height: ${validateErrors[0].schemaPath} ${validateErrors[0].message}`
+        )
+        // 2020.8.28 添加返回结果
+        return false
+      }
+
+      const lastBlock = this.runtime.block.getLastBlock()
+      if (bignum.isLessThan(lastBlock.height, res.body.height)) {
+        let syncLastBlock = null
+
+        this.logger.debug(`Got lastBlock height is ${lastBlock.height}`)
+        if (lastBlock.id !== this.genesisblock.id) {
+          this.logger.debug('Must get syncLastBlock')
+          syncLastBlock = await this._addLackBlocks(res.peer, lastBlock)
+        } else {
+          syncLastBlock = await this._cloneBlocksFromPeer(res.peer, lastBlock.id)
+        }
+        this.logger.debug(`Got syncLastBlock: ${syncLastBlock}`)
+        if (syncLastBlock) {
+          res = await this.runtime.peer.p2p.get('/height')
+          if (res && res.body && bignum.new(syncLastBlock.height).eq(res.body.height)) {
+            return true
+          } else {
+            return false
+          }
+        } else {
+          return false
+        }
+      } else {
+        return true
+      }
+    } else {
+      this.logger.log('Failed to get height from remote peer')
+      return false
+    }
+  }
+
   async trySyncSignatures () {
-    let data
+    let res
     try {
-      data = await this.runtime.peer.request({ api: '/signatures' })
+      res = await this.runtime.peer.p2p.get('/signature')
     } catch (err) {
       this.logger.error(`Sync Signatures has error: ${err}`)
       return
     }
 
-    if (data === false) {
+    if (!res || !res.body || !res.body.success) {
       return
     }
 
@@ -347,7 +340,7 @@ class PeerSync {
         },
         required: ['signatures']
       },
-      data.body
+      res.body
     )
     if (validateErrors) {
       this.logger.error(`${validateErrors[0].schemaPath} ${validateErrors[0].message}`)
@@ -357,8 +350,8 @@ class PeerSync {
     return new Promise((resolve, reject) => {
       this.sequence.add(
         async cb => {
-          for (let i = 0; i < data.body.signatures.length; i++) {
-            const signature = data.body.signatures[i]
+          for (let i = 0; i < res.body.signatures.length; i++) {
+            const signature = res.body.signatures[i]
             for (let j = 0; j < signature.signatures; j++) {
               const s = signature.signatures[j]
               try {
@@ -385,16 +378,19 @@ class PeerSync {
     })
   }
 
+  /**
+   * 从随机节点同步未确认交易
+   */
   async trySyncUnconfirmedTransactions () {
-    let data
+    let res
     try {
-      data = await this.runtime.peer.request({ api: '/transactions' })
+      res = await this.runtime.peer.p2p.get('/tx')
     } catch (err) {
       this.logger.error(`Sync UnconfirmedTransactions has error: ${err}`)
       return
     }
 
-    if (data === false) {
+    if (!res || !res.body) {
       return
     }
 
@@ -409,24 +405,19 @@ class PeerSync {
         },
         required: ['transactions']
       },
-      data.body
+      res.body
     )
     if (validateErrors) {
       this.logger.error(validateErrors[0].message)
       return
     }
 
-    const transactions = data.body.transactions
+    const transactions = res.body.transactions
     for (let i = 0; i < transactions.length; i++) {
       try {
         transactions[i] = await this.runtime.transaction.objectNormalize(transactions[i])
       } catch (e) {
-        const peerStr = data.peer ? `${ip.fromLong(data.peer.ip)}:${data.peer.port}` : 'unknown'
-        this.logger.log(
-          `Transaction ${transactions[i] ? transactions[i].id : 'null'} is not valid, ban 60 min`,
-          peerStr
-        )
-        await this.runtime.peer.changeState(data.peer.ip, data.peer.port, 0, 3600)
+        this.logger.log(`Transaction ${transactions[i] ? transactions[i].id : 'null'} is not valid`)
         return
       }
     }

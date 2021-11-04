@@ -94,6 +94,9 @@ class Context {
 
     // 运行时核心逻辑处理模块组
     this.runtime = {}
+
+    // 程序生命周期函數
+    this.lifeCycle = options.lifeCycle || {}
   }
 
   async _buildProtobuf (protoFile) {

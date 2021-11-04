@@ -310,6 +310,11 @@ class TransactionService {
       throw new Error(`Invalid parameters: ${validateErrors[0].schemaPath} ${validateErrors[0].message}`)
     }
 
+    console.log(`-----------------amount: ${body.amount}, ${/^[0-9]+$/.test(body.amount)}`)
+    if (!/^[0-9]+$/.test(body.amount)) {
+      throw new Error('Invalid transaction amount')
+    }
+
     const keypair = DdnCrypto.getKeys(body.secret)
     if (body.publicKey) {
       if (keypair.publicKey.toString('hex') !== body.publicKey) {
