@@ -1477,6 +1477,14 @@
     mathjs "^5.4.0"
     sequelize "^4.42.0"
 
+"@ddn/asset-base@^1.2.0":
+  version "1.2.0"
+  resolved "https://registry.yarnpkg.com/@ddn/asset-base/-/asset-base-1.2.0.tgz#0c3af33a578e01bcb12b6cce405c351b87216723"
+  integrity sha512-0RG6TJhwAWVyJiv/PqbHmWp/mNmx+2ODlGyL+L9fKu/9CbeyHwzFwcILuxOErf5E2x5GSRw2v/8ZTEC4L4y7+A==
+  dependencies:
+    "@ddn/utils" "^1.2.0"
+    lodash "^4.17.15"
+
 "@ddn/asset-dao@^1.2.0":
   version "1.2.0"
   resolved "https://registry.yarnpkg.com/@ddn/asset-dao/-/asset-dao-1.2.0.tgz#8a376e7d064b24675ca4719dd65b94a2c3b924f7"
@@ -1517,12 +1525,64 @@
     typescript "^3.3.0"
     uglify-es "3.3.9"
 
+"@ddn/crypto-base@^1.2.0":
+  version "1.2.0"
+  resolved "https://registry.yarnpkg.com/@ddn/crypto-base/-/crypto-base-1.2.0.tgz#4d7f3d35dff2130891667b81fcbe048baaadabfe"
+  integrity sha512-Diw93kGpcbI98NhIiv5RRhM/G4pVnorQlh8T003h0Xw3TUZCueapPP4A9Gfe5NjLi3d0eRClANPzO45xR2B3eA==
+  dependencies:
+    bytebuffer "^5.0.1"
+    fast-sha256 "^1.3.0"
+
+"@ddn/crypto-nacl@^1.2.0":
+  version "1.2.0"
+  resolved "https://registry.yarnpkg.com/@ddn/crypto-nacl/-/crypto-nacl-1.2.0.tgz#9c89f78da7012f8382eef647b55fac7951ff3fe6"
+  integrity sha512-KSI/TG7X708gmgU02IbkKuNcMlkLC4+fQyJgMLDKRgaJHOEabn1sW3QiSCngp1RWaioNzgHiCpSyoqySZoMDoQ==
+  dependencies:
+    "@ddn/crypto-base" "^1.2.0"
+    bitcore-mnemonic "^8.20.5"
+    bytebuffer "^5.0.1"
+    crypto "^1.0.1"
+    fast-sha256 "^1.3.0"
+    ripemd160 "^2.0.2"
+    safe-buffer "^5.2.1"
+    tweetnacl "^1.0.2"
+
+"@ddn/crypto-sm@^1.2.0":
+  version "1.2.0"
+  resolved "https://registry.yarnpkg.com/@ddn/crypto-sm/-/crypto-sm-1.2.0.tgz#358ef2375f3495a17ce0703a8c7ca54c1af3c485"
+  integrity sha512-uOC0DdLo/tP8pmzPw7UVgCKF0nbtHw+d09jjQ4m6t4izPrfe52uILN+duVF7CbudYV74KTVRWYb2rbth5/JpEQ==
+  dependencies:
+    "@ddn/crypto-base" "^1.2.0"
+    "@ddn/sm-crypto" "^0.0.5"
+    bitcore-mnemonic "^8.20.5"
+    bytebuffer "^5.0.1"
+    crypto "^1.0.1"
+    fast-sha256 "^1.3.0"
+    ripemd160 "^2.0.2"
+    safe-buffer "^5.2.1"
+
+"@ddn/crypto@^1.2.0":
+  version "1.2.1"
+  resolved "https://registry.yarnpkg.com/@ddn/crypto/-/crypto-1.2.1.tgz#11429cf7f37f55dfd3556558c1e73254de9dc6b7"
+  integrity sha512-5W7WoBGsUM0jKnCl0RfgQhH7oVn3Q5Xi7ih7uXe6R7XXocQpK28GGJHqHC5QzJEY4HoTfZdh0cjawGXZ0MHIFQ==
+  dependencies:
+    "@ddn/crypto-nacl" "^1.2.0"
+    "@ddn/crypto-sm" "^1.2.0"
+
 "@ddn/sm-crypto@^0.0.5":
   version "0.0.5"
   resolved "https://registry.yarnpkg.com/@ddn/sm-crypto/-/sm-crypto-0.0.5.tgz#d6c84e32575966cd57ddb13bb4693cf8cb4c59f9"
   integrity sha512-W78S39/HfHv4eACRtzslQHdGSB88khs84zoPFWG6wuJsuUxbJHwUQA3Lv3yNPblwjF0zKsAblC/skeKKZqRMRg==
   dependencies:
     jsbn "^1.1.0"
+
+"@ddn/utils@^1.2.0":
+  version "1.2.0"
+  resolved "https://registry.yarnpkg.com/@ddn/utils/-/utils-1.2.0.tgz#d87691d8f749693eac1a02a7233feff721aaa2ff"
+  integrity sha512-9AMCXs7ekSHU/G/0jYv9u6uTWwy1jOA+vYJ6YTeyNzcUMURezK5Obk8XkOi1kTrgZKV4TdNXqyjzwQPv/jITDA==
+  dependencies:
+    bignumber.js "^7.2.1"
+    request-promise "^4.2.6"
 
 "@eslint/eslintrc@^0.4.2":
   version "0.4.2"
