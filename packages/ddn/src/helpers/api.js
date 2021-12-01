@@ -40,42 +40,54 @@ class Api {
     } else {
       qs = params
     }
-    request({
-      method: 'GET',
-      url: this.baseUrl + path,
-      json: true,
-      qs
-    }, resultHandler(cb))
+    request(
+      {
+        method: 'GET',
+        url: this.baseUrl + path,
+        json: true,
+        qs
+      },
+      resultHandler(cb)
+    )
   }
 
   put (path, data, cb) {
-    request({
-      method: 'PUT',
-      url: this.baseUrl + path,
-      json: data
-    }, resultHandler(cb))
+    request(
+      {
+        method: 'PUT',
+        url: this.baseUrl + path,
+        json: data
+      },
+      resultHandler(cb)
+    )
   }
 
   post (path, data, cb) {
-    request({
-      method: 'POST',
-      url: this.baseUrl + path,
-      json: data
-    }, resultHandler(cb))
+    request(
+      {
+        method: 'POST',
+        url: this.baseUrl + path,
+        json: data
+      },
+      resultHandler(cb)
+    )
   }
 
   broadcastTransaction (trs, cb) {
-    request({
-      method: 'POST',
-      url: `${this.baseUrl}/peer/transactions`,
-      headers: {
-        nethash: this.nethash,
-        version: ''
+    request(
+      {
+        method: 'POST',
+        url: `${this.baseUrl}/api/transactions`,
+        headers: {
+          nethash: this.nethash,
+          version: ''
+        },
+        json: {
+          transaction: trs
+        }
       },
-      json: {
-        transaction: trs
-      }
-    }, resultHandler(cb))
+      resultHandler(cb)
+    )
   }
 }
 

@@ -114,7 +114,6 @@ class Protobuf {
   transactionStringToBytes (obj) {
     obj.senderPublicKey = Buffer.from(obj.senderPublicKey, 'hex') // wxm block database
     obj.signature = Buffer.from(obj.signature, 'hex')
-    obj.args = JSON.stringify(obj.args)
     if (obj.requester_public_key) {
       // wxm block database
       obj.requester_public_key = Buffer.from(obj.requester_public_key, 'hex') // wxm block database
@@ -141,7 +140,6 @@ class Protobuf {
   transactionBytesToString (obj) {
     obj.senderPublicKey = Buffer.from(obj.senderPublicKey, 'base64').toString('hex') // obj.senderPublicKey.toString('hex');  //wxm block database
     obj.signature = Buffer.from(obj.signature, 'base64').toString('hex') // obj.signature.toString('hex');
-    obj.args = JSON.parse(obj.args)
     if (obj.requester_public_key) {
       // wxm block database
       obj.requester_public_key = Buffer.from(obj.requester_public_key, 'base64').toString('hex') // obj.requester_public_key.toString('hex');  //wxm block database

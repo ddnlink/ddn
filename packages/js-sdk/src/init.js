@@ -1,7 +1,8 @@
 import Asset from '@ddn/asset-base'
-import options from './utils/options'
+// import options from './utils/options'
 
-import assetPlugins from './config.asset'
+import assetPlugins from './config/config.asset'
+import { config } from './config'
 
 /**
  * 用于初始化 Sdk
@@ -9,7 +10,8 @@ import assetPlugins from './config.asset'
  */
 export default function (nethash) {
   if (nethash) {
-    options.set('nethash', nethash)
+    // options.set('nethash', nethash)
+    config.nethash = nethash
   }
 
   // Todo: sdk 不需要完整加载资产插件包，仅仅注册名称即可，这里可以简化成配置式的，让打包之后更小

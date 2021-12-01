@@ -74,7 +74,7 @@ async function send (options, secret, secondSecret) {
     timestamp,
     senderPublicKey: keys.publicKey,
     type: DdnUtils.assetTypes.CONTRACT_TRANSFER,
-    args: [opts]
+    args: JSON.stringify(opts)
   }
   // console.log(trs)
   trs.signature = await crypto.sign(trs, keys)
@@ -110,7 +110,7 @@ async function pay (options, secret, secondSecret) {
     timestamp,
     senderPublicKey: keys.publicKey,
     type: DdnUtils.assetTypes.CONTRACT_TRANSFER,
-    args: [opts]
+    args: JSON.stringify(opts)
   }
   // console.log(trs)
   trs.signature = await crypto.sign(trs, keys)

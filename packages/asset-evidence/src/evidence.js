@@ -11,7 +11,7 @@ class Evidence extends Asset.Base {
     return [
       { field: 'str4', prop: 'short_hash', maxLen: 64 }, // 短hash，截取原始hash的一部分的值
       { field: 'str6', prop: 'title', maxLen: 128 }, // 该数据的标题
-      { field: 'str8', prop: 'description' }, // 该数据的描述
+      { field: 'str8', prop: 'address', required: true }, // 地址
       { field: 'str7', prop: 'hash', required: true, maxLen: 128 },
       { field: 'str5', prop: 'tags' }, // 存证数据的标签
       { field: 'str3', prop: 'author', required: true, maxLen: 20 }, // 该存证数据的使用者，或者是所有人
@@ -19,7 +19,8 @@ class Evidence extends Asset.Base {
       { field: 'str1', prop: 'type', required: true }, // 存证的数据类型（video、image、videostram、voice）
       { field: 'str2', prop: 'size' }, // string length:64
       { field: 'str10', prop: 'metadata' }, // 元数据 ，上面这些字段如果不能够满足存储的条件，其它数据可以序列化一下存到这里，该字段不能检索
-      { field: 'str_ext', prop: 'time' } // 时间
+      { field: 'str_ext', prop: 'time' }, // 时间
+      { field: 'str_ext', prop: 'description', required: false } // 描述
     ]
   }
 
@@ -28,6 +29,14 @@ class Evidence extends Asset.Base {
       try {
         const result = await this.queryAsset({ short_hash: req.params.short_hash }, null, false, 1)
         res.json(result[0])
+      } catch (err) {
+        res.json({ success: false, error: err.message || err.toString() })
+      }
+    })
+    router.get('/address/:address', async (req, res) => {
+      try {
+        const result = await this.queryAsset({ address: req.params.address }, null, false, 1)
+        res.json(result)
       } catch (err) {
         res.json({ success: false, error: err.message || err.toString() })
       }

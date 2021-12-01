@@ -55,6 +55,11 @@ class Router {
         trs: transaction,
         error: e.message
       })
+
+      return {
+        success: false,
+        error: e.message
+      }
     }
     if (global.assets && global.assets.transTypeNames[90] && this.constants.net.superviseIp === this.config.publicIp) {
       const res = await checkAndReport(transaction, this, null, this.constants.net.superviseBaseUrl)
@@ -69,34 +74,36 @@ class Router {
     // 对缓存的非法交易直接返回
     if (this._invalidTrsCache.has(transaction.id)) {
       this.logger.debug(`The transaction ${transaction.id} is invalid, don't commit it again.`)
+      return {
+        success: false,
+        error: `The transaction ${transaction.id} is invalid, don't commit it again.`
+      }
     }
 
-    this.balancesSequence.add(
-      async cb => {
-        if (await this.runtime.transaction.hasUnconfirmedTransaction(transaction)) {
-          this._invalidTrsCache.set(transaction.id, true)
-          return cb(`The transaction ${transaction.id} is in process already..`)
-        }
+    let result = {
+      success: true
+    }
 
-        this.logger.log(`Received transaction ${transaction.id} from peer ${peer.host}:${peer.port}`)
-
-        try {
-          const transactions = await this.runtime.transaction.receiveTransactions([transaction])
-          cb(null, transactions)
-        } catch (exp) {
-          cb(exp)
-        }
-      },
-
-      (err, transactions) => {
-        if (err) {
-          // 这里的错误就是上面 catch 的 exp，所以统一在这里处理就好
-          this.logger.warn(`Receive invalid transaction, transaction is ${JSON.stringify(transaction)}, ${err.message}`)
-          // 缓存非法交易
-          this._invalidTrsCache.set(transaction.id, true)
-        }
+    try {
+      if (await this.runtime.transaction.hasUnconfirmedTransaction(transaction)) {
+        throw new Error(`The transaction ${transaction.id} is in process already..`)
       }
-    )
+
+      this.logger.log(`Received transaction ${transaction.id} from peer ${peer.host}:${peer.port}`)
+      const transactions = await this.runtime.transaction.receiveTransactions([transaction])
+      if (transactions && transactions.length > 0) {
+        result.transactionId = transactions[0].id
+      }
+    } catch (err) {
+      this._invalidTrsCache.set(transaction.id, true)
+      this.logger.warn(`Receive invalid transaction, transaction is ${JSON.stringify(transaction)}, ${err.message}`)
+      result = {
+        success: false,
+        error: err.message ? err.message : err
+      }
+    }
+
+    return result
   }
 
   async newBlock ({ body, peer }) {
@@ -113,6 +120,7 @@ class Router {
       votes = await this.runtime.consensus.normalizeVotes(body.votes)
     } catch (e) {
       this.logger.error(`normalize block or votes object error: ${e.toString()}`)
+      return { success: false, error: e }
     }
 
     setImmediate(async () => {
@@ -122,6 +130,8 @@ class Router {
         this.logger.error(`Process received new block failed: ${err}`)
       }
     })
+
+    return { success: true }
   }
 
   async newPropose ({ body, peer }) {
@@ -166,11 +176,18 @@ class Router {
 
     if (validateErrors) {
       this.logger.error(`Invalid parameters: : ${validateErrors[0].schemaPath} ${validateErrors[0].message}`)
+      return {
+        success: false,
+        error: `Invalid parameters: : ${validateErrors[0].schemaPath} ${validateErrors[0].message}`
+      }
     }
 
     setImmediate(async () => {
       await this.runtime.block.receiveNewPropose(body.propose)
     })
+    return {
+      success: true
+    }
   }
 
   async newVote ({ body, peer }) {
@@ -199,11 +216,19 @@ class Router {
     // Todo: 2020.9.3 请求本接口的方法应该对 success 做个判断，或者改成 throw
     if (validateErrors) {
       this.logger.error(`Invalid parameters: : ${validateErrors[0].schemaPath} ${validateErrors[0].message}`)
+      return {
+        success: false,
+        error: `Invalid parameters: : ${validateErrors[0].schemaPath} ${validateErrors[0].message}`
+      }
     }
 
     setImmediate(async () => {
       await this.runtime.block.receiveVotes(body)
     })
+
+    return {
+      success: true
+    }
   }
 
   async newSignature ({ body, peer }) {
@@ -231,12 +256,23 @@ class Router {
     )
     if (validateErrors) {
       this.logger.error(`Invalid parameters: : ${validateErrors[0].schemaPath} ${validateErrors[0].message}`)
+      return {
+        success: false,
+        error: `Validation error: ${validateErrors[0].schemaPath} ${validateErrors[0].message}`
+      }
     }
 
     try {
       await this.runtime.multisignature.processSignature(body.signature)
+      return {
+        success: true
+      }
     } catch (err) {
       this.logger.error('Process signature error', err)
+      return {
+        success: false,
+        error: 'Process signature error'
+      }
     }
   }
 

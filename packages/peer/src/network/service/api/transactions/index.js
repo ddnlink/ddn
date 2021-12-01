@@ -1,5 +1,5 @@
 import * as DdnCrypto from '@ddn/crypto'
-import DdnUtils, { checkAndReport, superviseTrs } from '@ddn/utils'
+import DdnUtils, { LimitCache, checkAndReport, superviseTrs } from '@ddn/utils'
 
 /**
  * TransactionService 接口
@@ -9,6 +9,8 @@ class TransactionService {
   constructor (context) {
     Object.assign(this, context)
     this._context = context
+
+    this._invalidTrsCache = new LimitCache()
   }
 
   async get (req) {
@@ -310,7 +312,6 @@ class TransactionService {
       throw new Error(`Invalid parameters: ${validateErrors[0].schemaPath} ${validateErrors[0].message}`)
     }
 
-    console.log(`-----------------amount: ${body.amount}, ${/^[0-9]+$/.test(body.amount)}`)
     if (!/^[0-9]+$/.test(body.amount)) {
       throw new Error('Invalid transaction amount')
     }
@@ -471,6 +472,80 @@ class TransactionService {
         }
       )
     })
+  }
+
+  async post ({ body }) {
+    const lastBlock = await this.runtime.block.getLastBlock()
+    const lastSlot = this.runtime.slot.getSlotNumber(lastBlock.timestamp)
+
+    if (this.runtime.slot.getNextSlot() - lastSlot >= 12) {
+      this.logger.error('Blockchain is not ready', {
+        getNextSlot: this.runtime.slot.getNextSlot(),
+        lastSlot,
+        lastBlockHeight: lastBlock.height
+      })
+      return {
+        success: false,
+        error: 'Blockchain is not ready'
+      }
+    }
+
+    if (typeof body.transaction === 'string') {
+      body.transaction = this.protobuf.decodeTransaction(Buffer.from(body.transaction, 'base64'))
+    }
+
+    let transaction
+    try {
+      transaction = await this.runtime.transaction.objectNormalize(body.transaction)
+      transaction.asset = transaction.asset || {}
+    } catch (e) {
+      this.logger.error('transaction parse error', {
+        raw: JSON.stringify(body),
+        trs: transaction,
+        error: e.message
+      })
+
+      return {
+        success: false,
+        error: e.message
+      }
+    }
+    if (!transaction.id) {
+      transaction.id = await DdnCrypto.getId(transaction)
+    }
+
+    // 对缓存的非法交易直接返回
+    if (this._invalidTrsCache.has(transaction.id)) {
+      this.logger.debug(`The transaction ${transaction.id} is invalid, don't commit it again.`)
+      return {
+        success: false,
+        error: `The transaction ${transaction.id} is invalid, don't commit it again.`
+      }
+    }
+
+    let result = {
+      success: true
+    }
+
+    try {
+      if (await this.runtime.transaction.hasUnconfirmedTransaction(transaction)) {
+        throw new Error(`The transaction ${transaction.id} is in process already..`)
+      }
+
+      const transactions = await this.runtime.transaction.receiveTransactions([transaction])
+      if (transactions && transactions.length > 0) {
+        result.transactionId = transactions[0].id
+      }
+    } catch (err) {
+      this._invalidTrsCache.set(transaction.id, true)
+      this.logger.warn(`Receive invalid transaction, transaction is ${JSON.stringify(transaction)}, ${err.message}`)
+      result = {
+        success: false,
+        error: err.message ? err.message : err
+      }
+    }
+
+    return result
   }
 
   /**

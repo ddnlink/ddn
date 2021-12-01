@@ -372,7 +372,7 @@ class Program {
     }
     const peer = await this._context.runtime.peer.p2p.getPeer()
 
-    // console.log('-----------', peer)
+    // this._context.logger.warn('-----startBlockDataSyncTask------', peer)
     if (!peer) {
       this._context.logger.debug('change state is ready')
       this._context.runtime.state = runtimeState.Ready
@@ -382,12 +382,14 @@ class Program {
     }
     try {
       if (this._context.runtime.state === runtimeState.Syncing) {
+        next()
         return
       }
 
       const lastBlock = this._context.runtime.block.getLastBlock()
       const lastSlot = this._context.runtime.slot.getSlotNumber(lastBlock.timestamp)
       if (this._context.runtime.slot.getNextSlot() - lastSlot < 3) {
+        next()
         return
       }
       this._context.runtime.state = runtimeState.Syncing

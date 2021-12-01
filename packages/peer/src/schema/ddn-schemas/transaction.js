@@ -48,7 +48,7 @@ export default {
       type: 'object'
     },
     args: {
-      type: 'array'
+      type: 'string'
     },
     message: {
       type: 'string',

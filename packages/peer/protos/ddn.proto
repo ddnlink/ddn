@@ -63,6 +63,7 @@ message Asset {
     DaoExchange daoExchange = 18;
     DaoContribution daoContribution = 19;
     DaoConfirmation daoConfirmation = 20;
+    AssetContract contract = 21;
   }
 }
 
@@ -166,6 +167,15 @@ message AssetEvidence {
   required string url = 7;
   optional string size = 8;
   required string type = 9;
+}
+
+message AssetContract {
+  required string name = 1;
+  optional int32 gas_limit = 2;
+  required string owner = 3;
+  required string desc = 4;
+  required string version = 5;
+  required string code = 6;
 }
 
 message BlockPropose {

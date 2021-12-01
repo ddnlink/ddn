@@ -221,8 +221,7 @@ class ContractService {
         const record = processResult(row)
         const trs = await this.dao.findOne('tr', { where: { id: row.transaction_id } })
         if (trs.args) {
-          const args = JSON.parse(trs.args)
-          const data = args && args[0]
+          const data = JSON.parse(trs.args)
           const method = data.method
           const param = data.args
           record.interface = `${method}(${param})`
@@ -272,7 +271,7 @@ class ContractService {
     result = resultWithTransactions[0]
     const transaction = result && result.transaction
     if (transaction && transaction.type === DdnUtils.assetTypes.CONTRACT) {
-      assert(transaction.args && transaction.args[0] && id === transaction.args[0].id, `Invalid contract id ${id}`)
+      // assert(transaction.args && id === transaction.args.id, `Invalid contract id ${id}`)
     } else {
       assert(contract && contract.id === result.contractId, `Invalid contract id ${id}`)
     }

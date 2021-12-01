@@ -134,7 +134,13 @@ class Energy {
   }
 
   async verifySend (trs, sender) {
-    const options = trs.args && trs.args[0] // { address, gas_limit, method, args }
+    let options = {} // { address, gas_limit, method, args }
+    try {
+      options = JSON.parse(trs.args)
+    } catch (err) {
+      this.logger.error(err)
+      throw err
+    }
     const { id: contract_id, gas_limit, method } = options
 
     let args = []
@@ -264,7 +270,13 @@ class Energy {
     }
     const ctx = { senderId: sender.address, tx: trs, block: currentBlock, lastBlock, sender: senderInfo }
 
-    const options = trs.args && trs.args[0] // { address, gas_limit, method, args }
+    let options = {} // { address, gas_limit, method, args }
+    try {
+      options = JSON.parse(trs.args)
+    } catch (err) {
+      this.logger.error(err)
+      throw err
+    }
     const { id: contract_id, gas_limit, method, currency } = options
 
     let args = []

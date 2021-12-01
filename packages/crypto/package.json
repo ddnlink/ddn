@@ -1,6 +1,6 @@
 {
   "name": "@ddn/crypto",
-  "version": "1.2.1",
+  "version": "2.0.4",
   "description": "this is Adaptation",
   "main": "lib/index.js",
   "module": "dist/index.esm.js",
@@ -19,8 +19,8 @@
     "url": "https://github.com/ddnlink/ddn/tree/master/packages/crypto"
   },
   "dependencies": {
-    "@ddn/crypto-nacl": "^1.2.0",
-    "@ddn/crypto-sm": "^1.2.0"
+    "@ddn/crypto-nacl": "^2.0.4",
+    "@ddn/crypto-sm": "^2.0.4"
   },
   "author": "",
   "license": "MIT"

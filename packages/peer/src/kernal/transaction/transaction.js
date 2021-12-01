@@ -146,7 +146,7 @@ class Transaction {
       signature: trs.signature,
       sign_signature: trs.sign_signature,
       signatures: trs.signatures ? trs.signatures.join(',') : null,
-      args: JSON.stringify(trs.args) || null,
+      args: trs.args,
       message: trs.message || null
     }
 
@@ -181,7 +181,7 @@ class Transaction {
         sign_signature: raw.t_signSignature, // wxm block database
         signatures: raw.t_signatures ? raw.t_signatures.split(',') : null,
         confirmations: raw.confirmations,
-        args: raw.t_args ? JSON.parse(raw.t_args) : null,
+        args: raw.t_args,
         message: raw.t_message,
         asset: {}
       }
@@ -513,7 +513,7 @@ class Transaction {
         throw new Error('Ignoring already confirmed transaction')
       }
     } catch (err) {
-      this.logger.error('Database error')
+      this.logger.error('Database error', err)
       throw new Error('Database error')
     }
 
