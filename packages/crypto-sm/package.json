@@ -40,6 +40,6 @@
     "safe-buffer": "^5.2.1"
   },
   "devDependencies": {
-    "@ddn/utils": "^2.0.0"
+    "@ddn/utils": "^2.0.4"
   }
 }
