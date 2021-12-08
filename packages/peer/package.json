@@ -52,7 +52,7 @@
     "@ddn/contract": "^0.3.2",
     "@ddn/core": "^2.0.4",
     "@ddn/crypto": "^2.0.4",
-    "@ddn/p2p": "^1.2.6",
+    "@ddn/p2p": "^1.2.9",
     "@ddn/test-utils": "^2.0.4",
     "@ddn/utils": "^2.0.4",
     "ajv": "^6.3.0",
