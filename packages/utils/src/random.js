@@ -3,7 +3,7 @@ function randomName () {
   const array = Array.prototype.slice.apply(arguments)
   let size = 16
   if (array.length > 2) {
-    size = array.pop()
+    size = array.shift()
   }
 
   let name = array[0]

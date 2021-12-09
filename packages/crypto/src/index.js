@@ -1,5 +1,5 @@
 import path from 'path'
-const { requireFile } = require('@ddn/core')
+const { requireFile, getUserConfig } = require('@ddn/core')
 // const baseDir = path.resolve(process.cwd(), './')
 // const userConfig = getUserConfig({ cwd: baseDir })
 
@@ -12,7 +12,9 @@ const { requireFile } = require('@ddn/core')
  * 读取项目根目录下contants.js文件，读取其中的crypto配置
  */
 const constantsFile = path.resolve(process.cwd(), './constants.js')
-const userConstants = requireFile(constantsFile)
+const userConfig = getUserConfig({ cwd: process.cwd() })
+let userConstants = requireFile(constantsFile)
+userConstants = { ...userConstants, ...userConfig }
 if (!userConstants.crypto) {
   userConstants.crypto = '@ddn/crypto-nacl'
 }
