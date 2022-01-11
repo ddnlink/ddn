@@ -20,8 +20,8 @@
   },
   "dependencies": {
     "@ddn/core": "^2.0.4",
-    "@ddn/crypto-nacl": "^2.1.0",
-    "@ddn/crypto-sm": "^2.1.0"
+    "@ddn/crypto-nacl": "^2.1.2",
+    "@ddn/crypto-sm": "^2.1.2"
   },
   "author": "",
   "license": "MIT",
