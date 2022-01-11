@@ -1,7 +1,7 @@
 {
     "name": "@ddn/ddn",
     "preferGlobal": true,
-    "version": "2.1.0",
+    "version": "2.1.2",
     "description": "A Command line tool to manage ddn",
     "main": "./lib/index.js",
     "scripts": {
@@ -47,5 +47,6 @@
         "type": "git",
         "url": "https://github.com/ddnlink/ddn/tree/master/packages/ddn"
     },
-    "homepage": "https://github.com/ddnlink/ddn/tree/master/packages/ddn"
+    "homepage": "https://github.com/ddnlink/ddn/tree/master/packages/ddn",
+    "gitHead": "3154dbe3d985f295fb9592fcdbbf2b3435efe94d"
 }

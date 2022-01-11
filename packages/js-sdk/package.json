@@ -1,6 +1,6 @@
 {
   "name": "@ddn/js-sdk",
-  "version": "2.1.0",
+  "version": "2.1.2",
   "description": "DDN Node.js SDK",
   "main": "lib/index.js",
   "module": "dist/index.esm.js",
@@ -60,5 +60,6 @@
     "browserify": "^13.1.0",
     "rollup-plugin-replace": "^2.2.0",
     "tinyify": "^2.5.2"
-  }
+  },
+  "gitHead": "3154dbe3d985f295fb9592fcdbbf2b3435efe94d"
 }

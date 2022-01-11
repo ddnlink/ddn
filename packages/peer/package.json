@@ -1,6 +1,6 @@
 {
   "name": "@ddn/peer",
-  "version": "2.1.0",
+  "version": "2.1.2",
   "description": "DDN Peer.",
   "files": [
     "lib",
@@ -94,5 +94,6 @@
     "tracer": "^0.8.11",
     "util-extend": "1.0.3",
     "valid-url": "1.0.9"
-  }
+  },
+  "gitHead": "3154dbe3d985f295fb9592fcdbbf2b3435efe94d"
 }

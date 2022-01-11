@@ -1,6 +1,6 @@
 {
   "name": "@ddn/crypto",
-  "version": "2.1.0",
+  "version": "2.1.2",
   "description": "this is Adaptation",
   "main": "lib/index.js",
   "module": "dist/index.esm.js",
@@ -24,5 +24,6 @@
     "@ddn/crypto-sm": "^2.1.0"
   },
   "author": "",
-  "license": "MIT"
+  "license": "MIT",
+  "gitHead": "3154dbe3d985f295fb9592fcdbbf2b3435efe94d"
 }

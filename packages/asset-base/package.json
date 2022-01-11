@@ -1,6 +1,6 @@
 {
   "name": "@ddn/asset-base",
-  "version": "2.1.0",
+  "version": "2.1.2",
   "description": "DDN资产基类相关信息",
   "main": "lib/index.js",
   "module": "dist/index.esm.js",
@@ -22,5 +22,6 @@
   "dependencies": {
     "@ddn/utils": "^2.1.0",
     "lodash": "^4.17.15"
-  }
+  },
+  "gitHead": "3154dbe3d985f295fb9592fcdbbf2b3435efe94d"
 }

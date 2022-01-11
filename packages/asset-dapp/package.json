@@ -1,6 +1,6 @@
 {
   "name": "@ddn/asset-dapp",
-  "version": "2.1.0",
+  "version": "2.1.2",
   "description": "this is asset-dapp package",
   "main": "lib/index.js",
   "module": "dist/index.esm.js",
@@ -30,5 +30,6 @@
     "decompress-zip": "^0.2.2",
     "request": "^2.88.0",
     "valid-url": "^1.0.9"
-  }
+  },
+  "gitHead": "3154dbe3d985f295fb9592fcdbbf2b3435efe94d"
 }

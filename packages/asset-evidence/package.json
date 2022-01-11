@@ -1,6 +1,6 @@
 {
   "name": "@ddn/asset-evidence",
-  "version": "2.1.0",
+  "version": "2.1.2",
   "description": "DDN evidence",
   "main": "lib/index.js",
   "module": "dist/index.esm.js",
@@ -24,5 +24,6 @@
     "@ddn/asset-base": "^2.1.0",
     "@ddn/utils": "^2.1.0",
     "bytebuffer": "^5.0.1"
-  }
+  },
+  "gitHead": "3154dbe3d985f295fb9592fcdbbf2b3435efe94d"
 }

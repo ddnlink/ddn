@@ -21,5 +21,6 @@
     "request-promise": "^4.2.6"
   },
   "author": "wly",
-  "license": "MIT"
+  "license": "MIT",
+  "gitHead": "3154dbe3d985f295fb9592fcdbbf2b3435efe94d"
 }

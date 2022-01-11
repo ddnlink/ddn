@@ -1,6 +1,6 @@
 {
   "name": "@ddn/node-sdk",
-  "version": "2.1.0",
+  "version": "2.1.2",
   "description": "DDN Node.js SDK",
   "main": "lib/index.js",
   "files": [
@@ -46,5 +46,6 @@
   "devDependencies": {
     "@ddn/test-utils": "^2.1.0",
     "rollup-plugin-replace": "^2.2.0"
-  }
+  },
+  "gitHead": "3154dbe3d985f295fb9592fcdbbf2b3435efe94d"
 }
