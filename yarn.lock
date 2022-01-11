@@ -1462,14 +1462,14 @@
   resolved "https://registry.yarnpkg.com/@csstools/convert-colors/-/convert-colors-1.4.0.tgz#ad495dc41b12e75d588c6db8b9834f08fa131eb7"
   integrity sha512-5a6wqoJV/xEdbRNKVo6I4hO3VjyDq//8q2f9I6PBAvMesJHFauXDorcNCsr9RzvsZnaWi5NYCcfyqP1QeFHFbw==
 
-"@ddn/asset-aob@^1.2.0":
-  version "1.2.0"
-  resolved "https://registry.yarnpkg.com/@ddn/asset-aob/-/asset-aob-1.2.0.tgz#3c963fef3a927c99b09c2e802f90cc1cbb39fdf0"
-  integrity sha512-k12Iu/oYJhchfO327f2ZbfSs1FLoPNbD6bWj3XPoty1aUYff30ex6Qfie+Q1gqSBvnNtqlGitM7XfvgPn6uChw==
+"@ddn/asset-aob@^1.2.1":
+  version "1.2.1"
+  resolved "https://registry.yarnpkg.com/@ddn/asset-aob/-/asset-aob-1.2.1.tgz#6b9d524fff8bf9cb52f3d8abf0e6100bdc6800c5"
+  integrity sha512-AFFl31ZCYF9hyo45w2DOHt72z3CvCTxGXzOIIhI3mMxNzhu64zLxSRdN63Osf039euDeNpcVwp8uvz08+la0ew==
   dependencies:
-    "@ddn/asset-base" "^1.2.0"
-    "@ddn/crypto" "^1.2.0"
-    "@ddn/utils" "^1.2.0"
+    "@ddn/asset-base" "^2.0.6"
+    "@ddn/crypto" "^2.0.6"
+    "@ddn/utils" "^2.0.6"
     assert "^2.0.0"
     async "^2.6.1"
     bytebuffer "^5.0.1"
@@ -1485,10 +1485,10 @@
     "@ddn/utils" "^1.2.0"
     lodash "^4.17.15"
 
-"@ddn/asset-dao@^1.2.0":
-  version "1.2.0"
-  resolved "https://registry.yarnpkg.com/@ddn/asset-dao/-/asset-dao-1.2.0.tgz#8a376e7d064b24675ca4719dd65b94a2c3b924f7"
-  integrity sha512-Ic5ffgBMzWOAQc0EuFYkyn+Lw/7tHUvfe9C+9/GDye8M+wPc3DDJnsYb0oLgwDYbhFWUnXW67XqZeLKE/ckEmw==
+"@ddn/asset-dao@^1.2.1":
+  version "1.2.1"
+  resolved "https://registry.yarnpkg.com/@ddn/asset-dao/-/asset-dao-1.2.1.tgz#075fde4026740bae0a3fd6e0b6e44cb6df152c9d"
+  integrity sha512-bi94QoNIswlRUy/UESAhk4XBHV2B+HTR/wwAKQU03b4yCPC0cPyG2v9hweAOZHXClpqQjW2F306dY4BaD0ogIQ==
   dependencies:
     "@babel/plugin-transform-classes" "^7.10.4"
     "@ddn/asset-base" "^1.2.0"
@@ -21182,9 +21182,9 @@ write-pkg@^3.1.0:
     write-json-file "^2.2.0"
 
 ws@^5.2.0:
-  version "5.2.2"
-  resolved "https://registry.yarnpkg.com/ws/-/ws-5.2.2.tgz#dffef14866b8e8dc9133582514d1befaf96e980f"
-  integrity sha512-jaHFD6PFv6UgoIVda6qZllptQsMlDEJkTQcybzzXDYM1XO9Y8em691FGMPmM46WGyLU4z9KMgQN+qrux/nhlHA==
+  version "5.2.3"
+  resolved "https://registry.yarnpkg.com/ws/-/ws-5.2.3.tgz#05541053414921bc29c63bee14b8b0dd50b07b3d"
+  integrity sha512-jZArVERrMsKUatIdnLzqvcfydI85dvd/Fp1u/VOpfdDWQ4c9qWXe+VIeAbQ5FrDwciAkr+lzofXLz3Kuf26AOA==
   dependencies:
     async-limiter "~1.0.0"
 
