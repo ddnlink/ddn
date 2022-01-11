@@ -28,7 +28,7 @@ class Evidence extends Asset.Base {
     router.get('/short_hash/:short_hash', async (req, res) => {
       try {
         const result = await this.queryAsset({ short_hash: req.params.short_hash }, null, false, 1)
-        res.json(result[0])
+        res.json({ success: true, result: result[0] })
       } catch (err) {
         res.json({ success: false, error: err.message || err.toString() })
       }
@@ -36,7 +36,7 @@ class Evidence extends Asset.Base {
     router.get('/address/:address', async (req, res) => {
       try {
         const result = await this.queryAsset({ address: req.params.address }, null, false, 1)
-        res.json(result)
+        res.json({ success: true, result })
       } catch (err) {
         res.json({ success: false, error: err.message || err.toString() })
       }
@@ -134,6 +134,20 @@ class Evidence extends Asset.Base {
     } else {
       return trans
     }
+  }
+
+  async objectNormalize (trs) {
+    const assetObj = await this.getAssetObject(trs)
+    const validateErrors = await this.ddnSchema.validateEvidence(assetObj)
+    if (validateErrors) {
+      this.logger.error(
+        `Failed to normalize Evidence: ${trs.type} ${validateErrors[0].schemaPath} ${validateErrors[0].message}`
+      )
+      this.logger.debug(`Failed to normalize Evidence asset: ${trs}`)
+      throw new Error(`Failed to normalize Evidence: ${validateErrors[0].schemaPath} ${validateErrors[0].message}`)
+    }
+
+    return trs
   }
 
   async applyUnconfirmed (trs, sender, dbTrans) {

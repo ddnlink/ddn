@@ -37,10 +37,13 @@ async function createTransaction (asset, fee, type, recipientId, message, secret
 
 export default {
   async createIssuer (name, desc, secret, secondSecret) {
+    const keys = DdnCrypto.getKeys(secret)
+    const issuer_id = DdnCrypto.generateAddress(keys.publicKey, 'D')
     const asset = {
       aobIssuer: {
         name,
-        desc
+        desc,
+        issuer_id
       }
     }
     const fee = bignum.multiply(constants.fees.aob_issuer, constants.fixedPoint)
@@ -61,12 +64,15 @@ export default {
     secret,
     secondSecret
   ) {
+    const nameParts = name.split('.')
     const asset = {
       aobAsset: {
+        issuer_name: nameParts[0],
         name,
         desc,
         maximum,
         precision,
+        quantity: '0',
         strategy,
         allow_blacklist: `${allowBlacklist}`,
         allow_whitelist: `${allowWhitelist}`,

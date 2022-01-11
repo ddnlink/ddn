@@ -215,6 +215,20 @@ class Dapp extends Asset.Base {
     return trs
   }
 
+  async objectNormalize (trs) {
+    const assetObj = await this.getAssetObject(trs)
+    const validateErrors = await this.ddnSchema.validateDappInTransfer(assetObj)
+    if (validateErrors) {
+      this.logger.error(
+        `Failed to normalize Dapp: ${trs.type} ${validateErrors[0].schemaPath} ${validateErrors[0].message}`
+      )
+      this.logger.debug(`Failed to normalize Dapp asset: ${trs}`)
+      throw new Error(`Failed to normalize Dapp: ${validateErrors[0].schemaPath} ${validateErrors[0].message}`)
+    }
+
+    return trs
+  }
+
   async getBytes (trs) {
     const { dapp } = trs.asset
     let buf = Buffer.from([])

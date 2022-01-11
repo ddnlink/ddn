@@ -1,11 +1,11 @@
 // passed
 import Debug from 'debug'
 import DdnUtils from '@ddn/utils'
-import {DdnJS, node} from '../../ddn-js'
+import { DdnJS, node } from '../../ddn-js'
 
 const debug = Debug('debug')
 
-async function createTransfer(address, amount, secret, second_secret) {
+async function createTransfer (address, amount, secret, second_secret) {
   return await DdnJS.transaction.createTransaction(address, amount, null, secret, second_secret)
 }
 
@@ -21,8 +21,9 @@ export const Contribution = () => {
 
     beforeAll(async done => {
       // 先要获取组织号
-      const transaction = await createTransfer(node.Daccount.address, 10000000000, node.Gaccount.password)
-      node.peer
+      const transaction = await createTransfer(node.Daccount.address, 1000, node.Gaccount.password)
+      console.log(transaction)
+      node.api
         .post('/transactions')
         .set('Accept', 'application/json')
         .set('version', node.version)
@@ -33,8 +34,9 @@ export const Contribution = () => {
         })
         .expect('Content-Type', /json/)
         .expect(200)
-        .end((err, {body}) => {
-          debug(JSON.stringify(body))
+        .end((err, { body }) => {
+          console.log(body)
+          // debug(JSON.stringify(body))
           node.expect(err).to.be.not.ok
           node.expect(body).to.have.property('success').to.be.true
           done()
@@ -48,7 +50,7 @@ export const Contribution = () => {
         .set('nethash', node.config.nethash)
         .set('port', node.config.port)
         .expect(200)
-        .end((err, {body}) => {
+        .end((err, { body }) => {
           node.expect(err).to.be.not.ok
           node.expect(body).to.have.property('success').to.be.true
 
@@ -60,7 +62,7 @@ export const Contribution = () => {
     })
 
     // Daccount 用户投稿给 Gaccount
-    it('POST peers/transactions to contribute should be ok', async done => {
+    it('POST api/transactions to contribute should be ok', async done => {
       await node.onNewBlockAsync()
 
       contribution = {
@@ -76,7 +78,7 @@ export const Contribution = () => {
         contribution,
         node.Daccount.password
       ) // 42
-      node.peer
+      node.api
         .post('/transactions')
         .set('Accept', 'application/json')
         .set('version', node.version)
@@ -87,8 +89,8 @@ export const Contribution = () => {
         })
         .expect('Content-Type', /json/)
         .expect(200)
-        .end((err, {body}) => {
-          debug('POST peers/transactions', JSON.stringify(body))
+        .end((err, { body }) => {
+          console.log('POST api/transactions', JSON.stringify(body))
           node.expect(err).to.be.not.ok
 
           node.expect(body).to.have.property('success').to.be.true
@@ -118,7 +120,7 @@ export const Contribution = () => {
           .send(contribution)
           .expect('Content-Type', /json/)
           .expect(200)
-          .end((err, {body}) => {
+          .end((err, { body }) => {
             debug('PUT /api/dao/contributions/:org_id', JSON.stringify(body))
             node.expect(err).to.be.not.ok
 
@@ -128,7 +130,7 @@ export const Contribution = () => {
       })
     })
 
-    // 检索投稿者投过的记录
+    // // 检索投稿者投过的记录
     it('GET /api/dao/contributions/all?sender_address= should be ok', done => {
       node.onNewBlock(err => {
         node.expect(err).to.be.not.ok
@@ -144,7 +146,7 @@ export const Contribution = () => {
           .set('port', node.config.port)
           .expect('Content-Type', /json/)
           .expect(200)
-          .end((err, {body}) => {
+          .end((err, { body }) => {
             debug('GET /api/dao/contributions/all?sender_address=', JSON.stringify(body))
             node.expect(err).to.be.not.ok
 
@@ -154,7 +156,7 @@ export const Contribution = () => {
       })
     })
 
-    // 检索组织号收到的投稿记录
+    // // 检索组织号收到的投稿记录
     it('GET /api/dao/contributions/:org_id/all', done => {
       node.onNewBlock(err => {
         node.expect(err).to.be.not.ok
@@ -169,7 +171,7 @@ export const Contribution = () => {
           .set('port', node.config.port)
           .expect('Content-Type', /json/)
           .expect(200)
-          .end((err, {body}) => {
+          .end((err, { body }) => {
             debug(reqUrl, JSON.stringify(body))
             node.expect(err).to.be.not.ok
 
@@ -179,7 +181,7 @@ export const Contribution = () => {
       })
     })
 
-    // 可以根据文章 url 以及投稿人的公钥检索
+    // // 可以根据文章 url 以及投稿人的公钥检索
     it('GET /api/dao/contributions/:org_id/all?url should be ok', done => {
       node.onNewBlock(err => {
         node.expect(err).to.be.not.ok
@@ -199,7 +201,7 @@ export const Contribution = () => {
           .set('port', node.config.port)
           .expect('Content-Type', /json/)
           .expect(200)
-          .end((err, {body}) => {
+          .end((err, { body }) => {
             debug('GET /api/dao/contributions/:org_id/all?', JSON.stringify(body))
             node.expect(err).to.be.not.ok
 
@@ -209,7 +211,7 @@ export const Contribution = () => {
       })
     })
 
-    // 根据收稿地址检索全部收稿记录
+    // // 根据收稿地址检索全部收稿记录
     it('GET /api/dao/contributions/all', done => {
       node.onNewBlock(err => {
         node.expect(err).to.be.not.ok
@@ -225,7 +227,7 @@ export const Contribution = () => {
           .set('port', node.config.port)
           .expect('Content-Type', /json/)
           .expect(200)
-          .end((err, {body}) => {
+          .end((err, { body }) => {
             debug('GET /api/dao/contributions/all', JSON.stringify(body))
             node.expect(err).to.be.not.ok
 
@@ -257,7 +259,7 @@ export const Contribution = () => {
         .set('nethash', node.config.nethash)
         .set('port', node.config.port)
         .expect(200)
-        .end((err, {body}) => {
+        .end((err, { body }) => {
           debug('getContributionTrsIdUrl', getContributionTrsIdUrl)
 
           node.expect(err).to.be.not.ok
@@ -271,8 +273,8 @@ export const Contribution = () => {
         })
     })
 
-    // 通用：确认收稿
-    it('POST peers/transactions to confirmate should be ok', done => {
+    //   // 通用：确认收稿
+    it('POST api/transactions to confirmate should be ok', done => {
       node.onNewBlock(async err => {
         node.expect(err).to.be.not.ok
 
@@ -293,7 +295,7 @@ export const Contribution = () => {
           confirmation,
           node.Gaccount.password
         )
-        node.peer
+        node.api
           .post('/transactions')
           .set('Accept', 'application/json')
           .set('version', node.version)
@@ -304,7 +306,7 @@ export const Contribution = () => {
           })
           .expect('Content-Type', /json/)
           .expect(200)
-          .end((err, {body}) => {
+          .end((err, { body }) => {
             debug('contribute, ok', JSON.stringify(body))
 
             node.expect(err).to.be.not.ok
@@ -314,7 +316,7 @@ export const Contribution = () => {
       })
     })
 
-    // 接口：确认交易
+    //   // 接口：确认交易
     it('PUT /api/dao/confirmations/ again should be fail', done => {
       node.onNewBlock(err => {
         node.expect(err).to.be.not.ok
@@ -338,7 +340,7 @@ export const Contribution = () => {
           .send(confirmation)
           .expect('Content-Type', /json/)
           .expect(200)
-          .end((err, {body}) => {
+          .end((err, { body }) => {
             debug('already confirmed ok', JSON.stringify(body))
             node.expect(err).to.be.not.ok
 
@@ -366,7 +368,7 @@ export const Contribution = () => {
           .set('port', node.config.port)
           .expect('Content-Type', /json/)
           .expect(200)
-          .end((err, {body}) => {
+          .end((err, { body }) => {
             debug(reqUrl, JSON.stringify(body))
             node.expect(err).to.be.not.ok
 
@@ -395,7 +397,7 @@ export const Contribution = () => {
           .set('port', node.config.port)
           .expect('Content-Type', /json/)
           .expect(200)
-          .end((err, {body}) => {
+          .end((err, { body }) => {
             debug(reqUrl, JSON.stringify(body))
             node.expect(err).to.be.not.ok
             node.expect(body).to.have.property('success').to.be.true

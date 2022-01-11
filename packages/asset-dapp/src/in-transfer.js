@@ -120,6 +120,22 @@ class InTransfer extends Asset.Base {
     }
   }
 
+  async objectNormalize (trs) {
+    const assetObj = await this.getAssetObject(trs)
+    const validateErrors = await this.ddnSchema.validateDapp(assetObj)
+    if (validateErrors) {
+      this.logger.error(
+        `Failed to normalize Dapp in transfer: ${trs.type} ${validateErrors[0].schemaPath} ${validateErrors[0].message}`
+      )
+      this.logger.debug(`Failed to normalize Dapp in transfer asset: ${trs}`)
+      throw new Error(
+        `Failed to normalize Dapp in transfer: ${validateErrors[0].schemaPath} ${validateErrors[0].message}`
+      )
+    }
+
+    return trs
+  }
+
   async getBytes (trs) {
     const transfer = await this.getAssetObject(trs)
 

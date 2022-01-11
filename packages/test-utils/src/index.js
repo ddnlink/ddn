@@ -211,7 +211,7 @@ export class TestUtil {
   }
 
   submitTransaction (trs, cb) {
-    this.peer
+    this.api
       .post('/transactions')
       .set('Accept', 'application/json')
       .set('version', this.version)

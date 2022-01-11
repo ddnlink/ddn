@@ -1,7 +1,7 @@
 // passed
 import Debug from 'debug'
 import DdnUtils from '@ddn/utils'
-import {DdnJS, node} from '../../ddn-js'
+import { DdnJS, node } from '../../ddn-js'
 
 const debug = Debug('debug')
 
@@ -12,7 +12,7 @@ jest.setTimeout(50000)
 export const Dao = () => {
   describe('Test Dao', () => {
     // 通用接口
-    describe('post /peer/transactions', () => {
+    describe('post /api/transactions', () => {
       // Common api
       it('Using valid parameters to create a org_id is ok.', async done => {
         const orgs = {
@@ -32,7 +32,7 @@ export const Dao = () => {
         )
         debug('valid parameters ok, trs:', transaction)
 
-        node.peer
+        node.api
           .post('/transactions')
           .set('Accept', 'application/json')
           .set('version', node.version)
@@ -43,7 +43,7 @@ export const Dao = () => {
           })
           .expect('Content-Type', /json/)
           .expect(200)
-          .end((err, {body}) => {
+          .end((err, { body }) => {
             debug('valid parameters ok', JSON.stringify(body))
             node.expect(err).to.be.not.ok
             node.expect(body).to.have.property('success').to.be.true
@@ -62,7 +62,7 @@ export const Dao = () => {
           address: node.Eaccount.address
         }
         const transaction = await DdnJS.assetPlugin.createPluginAsset(40, orgs, node.Eaccount.password)
-        node.peer
+        node.api
           .post('/transactions')
           .set('Accept', 'application/json')
           .set('version', node.version)
@@ -73,7 +73,7 @@ export const Dao = () => {
           })
           .expect('Content-Type', /json/)
           .expect(200)
-          .end((err, {body}) => {
+          .end((err, { body }) => {
             debug('Fee is less', JSON.stringify(body))
 
             node.expect(err).to.be.not.ok
@@ -117,7 +117,7 @@ export const Dao = () => {
           })
           .expect('Content-Type', /json/)
           .expect(200)
-          .end((err, {body}) => {
+          .end((err, { body }) => {
             debug('put /api/dao/orgs', JSON.stringify(body))
             node.expect(err).to.be.not.ok
             node.expect(body).to.have.property('success').to.be.true
@@ -140,7 +140,7 @@ export const Dao = () => {
           })
           .expect('Content-Type', /json/)
           .expect(200)
-          .end((err, {body}) => {
+          .end((err, { body }) => {
             debug('Update the Org`s name in the save 10s', JSON.stringify(body))
             node.expect(err).to.be.not.ok
 
@@ -161,7 +161,7 @@ export const Dao = () => {
             .set('port', node.config.port)
             .expect('Content-Type', /json/)
             .expect(200)
-            .end((err, {body}) => {
+            .end((err, { body }) => {
               debug('Org`s name is not modified ok', JSON.stringify(body))
               node.expect(err).to.be.not.ok
 
@@ -200,7 +200,7 @@ export const Dao = () => {
             })
             .expect('Content-Type', /json/)
             .expect(200)
-            .end(async (err, {body}) => {
+            .end(async (err, { body }) => {
               debug('Update the Org`s name ok', JSON.stringify(body))
               node.expect(err).to.be.not.ok
 
@@ -224,7 +224,7 @@ export const Dao = () => {
             .set('port', node.config.port)
             .expect('Content-Type', /json/)
             .expect(200)
-            .end((err, {body}) => {
+            .end((err, { body }) => {
               debug('Org`s name is modified ok', JSON.stringify(body))
               node.expect(err).to.be.not.ok
 
@@ -262,7 +262,7 @@ export const Dao = () => {
             })
             .expect('Content-Type', /json/)
             .expect(200)
-            .end((err, {body}) => {
+            .end((err, { body }) => {
               // console.log(JSON.stringify(res.body));
               node.expect(err).to.be.not.ok
 
@@ -289,7 +289,7 @@ export const Dao = () => {
           })
           .expect('Content-Type', /json/)
           .expect(200)
-          .end((err, {body}) => {
+          .end((err, { body }) => {
             // console.log(JSON.stringify(res.body));
             node.expect(err).to.be.not.ok
 
@@ -315,7 +315,7 @@ export const Dao = () => {
           })
           .expect('Content-Type', /json/)
           .expect(200)
-          .end((err, {body}) => {
+          .end((err, { body }) => {
             // console.log(JSON.stringify(res.body));
             node.expect(err).to.be.not.ok
 
@@ -379,7 +379,7 @@ export const Dao = () => {
           .set('port', node.config.port)
           .expect('Content-Type', /json/)
           .expect(200)
-          .end((err, {body}) => {
+          .end((err, { body }) => {
             debug(JSON.stringify(body))
             node.expect(err).to.be.not.ok
 
@@ -403,7 +403,7 @@ export const Dao = () => {
           .set('port', node.config.port)
           .expect('Content-Type', /json/)
           .expect(200)
-          .end((err, {body}) => {
+          .end((err, { body }) => {
             debug('Given filter ok', JSON.stringify(body))
             node.expect(err).to.be.not.ok
 

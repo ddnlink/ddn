@@ -122,6 +122,22 @@ class OutTransfer extends Asset.Base {
     return trs
   }
 
+  async objectNormalize (trs) {
+    const assetObj = await this.getAssetObject(trs)
+    const validateErrors = await this.ddnSchema.validateDappOutTransfer(assetObj)
+    if (validateErrors) {
+      this.logger.error(
+        `Failed to normalize Dapp out transfer: ${trs.type} ${validateErrors[0].schemaPath} ${validateErrors[0].message}`
+      )
+      this.logger.debug(`Failed to normalize Dapp out transfer asset: ${trs}`)
+      throw new Error(
+        `Failed to normalize Dapp out transfer: ${validateErrors[0].schemaPath} ${validateErrors[0].message}`
+      )
+    }
+
+    return trs
+  }
+
   async verifySignature (trs) {
     const transfer = await this.getAssetObject(trs)
     // TODO 这里做签名认证，但是为什么取不到dapp呢？？？？？

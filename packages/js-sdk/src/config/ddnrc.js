@@ -13,7 +13,7 @@ export default {
   address: '0.0.0.0',
   publicIp: '',
   logLevel: 'error',
-  nethash: '0ab796cd',
+  nethash: 'p2acrv2c',
   payloadLimitSize: '8mb',
   clientDriftSeconds: 5,
 

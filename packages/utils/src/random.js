@@ -3,7 +3,7 @@ function randomName () {
   const array = Array.prototype.slice.apply(arguments)
   let size = 16
   if (array.length > 2) {
-    size = array.shift()
+    size = array.pop()
   }
 
   let name = array[0]
@@ -21,7 +21,7 @@ function randomName () {
 }
 
 function randomNethash () {
-  return randomName(8, '', 'abcdefghijklmnopqrstuvwxyz0123456789')
+  return randomName('', 'abcdefghijklmnopqrstuvwxyz0123456789', 8)
 }
 
 function randomString (max) {

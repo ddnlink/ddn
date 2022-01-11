@@ -26,9 +26,9 @@
     "url": "http://github.com/ddnlink/ddn/issues"
   },
   "dependencies": {
-    "@ddn/asset-aob": "^1.2.0",
+    "@ddn/asset-aob": "^1.2.1",
     "@ddn/asset-base": "^2.0.6",
-    "@ddn/asset-dao": "^1.2.0",
+    "@ddn/asset-dao": "^1.2.1",
     "@ddn/asset-dapp": "^2.0.6",
     "@ddn/asset-evidence": "^2.0.6",
     "@ddn/core": "^2.0.4",

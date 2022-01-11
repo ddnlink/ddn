@@ -1,6 +1,43 @@
 import crypto from 'crypto'
+import path from 'path'
+// import {
+//   nacl,
+//   getKeys,
+//   getId,
+//   getHash,
+//   createHash,
+//   sign,
+//   secondSign,
+//   verifyBytes,
+//   getBytes,
+//   generateAddress,
+//   isAddress,
+//   generateSecret, // 测试和前端用,重构： generatePhasekey() -> generateSecret()
+//   isValidSecret,
+//   verify,
+//   verifySecondSignature
+// } from '@ddn/crypto'
 
-import {
+import { constants } from '../config'
+import { getFee } from '../fees'
+
+const constantsFile = path.resolve(process.cwd(), './constants.js')
+let userConstantsFile, cryptoModule
+try {
+  userConstantsFile = require(constantsFile)
+} catch (error) {
+  userConstantsFile = {}
+}
+if (!userConstantsFile.crypto) {
+  // userConstantsFile.crypto = '@ddn/crypto-nacl'
+  cryptoModule = require('@ddn/crypto-nacl')
+} else if (userConstantsFile.crypto === '@ddn/crypto-nacl') {
+  cryptoModule = require('@ddn/crypto-nacl')
+} else if (userConstantsFile.crypto === '@ddn/crypto-sm') {
+  cryptoModule = require('@ddn/crypto-sm')
+}
+//  cryptoModule = require(`${userConstantsFile.crypto}`)
+const {
   nacl,
   getKeys,
   getId,
@@ -16,10 +53,7 @@ import {
   isValidSecret,
   verify,
   verifySecondSignature
-} from '@ddn/crypto-nacl'
-
-import { constants } from '../config'
-import { getFee } from '../fees'
+} = cryptoModule
 
 // const Buffer = require('safe-buffer').Buffer
 

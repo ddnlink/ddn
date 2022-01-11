@@ -1,10 +1,14 @@
 export default {
   type: 'object',
+  additionalProperties: false, // 必须是下面的字段，不是会提示错误
   properties: {
     id: {
       type: 'string'
     },
     height: {
+      type: 'string'
+    },
+    block_height: {
       type: 'string'
     },
     block_id: {
@@ -53,6 +57,9 @@ export default {
     message: {
       type: 'string',
       maxLength: 256
+    },
+    nethash: {
+      type: 'string'
     }
   },
   required: ['type', 'timestamp', 'senderPublicKey', 'signature']

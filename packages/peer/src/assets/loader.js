@@ -113,7 +113,6 @@ class Loader {
         this.logger.info(`${packageName} 资产包不包含自定义数据模型内容。`)
         return
       }
-
       if (assetModels) {
         try {
           for (const model of assetModels) {

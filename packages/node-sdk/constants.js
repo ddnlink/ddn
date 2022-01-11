@@ -1,3 +1,3 @@
 module.exports = {
-  crypto: '@ddn/crypto-sm'
+  crypto: '@ddn/crypto-nacl'
 }
