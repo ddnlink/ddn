@@ -1,6 +1,6 @@
 {
   "name": "@ddn/crypto-sm",
-  "version": "2.0.6",
+  "version": "2.1.0",
   "description": "Crypto for DDN",
   "keywords": [
     "crypto",
@@ -40,6 +40,6 @@
     "safe-buffer": "^5.2.1"
   },
   "devDependencies": {
-    "@ddn/utils": "^2.0.6"
+    "@ddn/utils": "^2.1.0"
   }
 }
