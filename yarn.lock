@@ -1462,14 +1462,14 @@
   resolved "https://registry.yarnpkg.com/@csstools/convert-colors/-/convert-colors-1.4.0.tgz#ad495dc41b12e75d588c6db8b9834f08fa131eb7"
   integrity sha512-5a6wqoJV/xEdbRNKVo6I4hO3VjyDq//8q2f9I6PBAvMesJHFauXDorcNCsr9RzvsZnaWi5NYCcfyqP1QeFHFbw==
 
-"@ddn/asset-aob@^1.2.0":
-  version "1.2.0"
-  resolved "https://registry.yarnpkg.com/@ddn/asset-aob/-/asset-aob-1.2.0.tgz#3c963fef3a927c99b09c2e802f90cc1cbb39fdf0"
-  integrity sha512-k12Iu/oYJhchfO327f2ZbfSs1FLoPNbD6bWj3XPoty1aUYff30ex6Qfie+Q1gqSBvnNtqlGitM7XfvgPn6uChw==
+"@ddn/asset-aob@^1.2.1":
+  version "1.2.1"
+  resolved "https://registry.yarnpkg.com/@ddn/asset-aob/-/asset-aob-1.2.1.tgz#6b9d524fff8bf9cb52f3d8abf0e6100bdc6800c5"
+  integrity sha512-AFFl31ZCYF9hyo45w2DOHt72z3CvCTxGXzOIIhI3mMxNzhu64zLxSRdN63Osf039euDeNpcVwp8uvz08+la0ew==
   dependencies:
-    "@ddn/asset-base" "^1.2.0"
-    "@ddn/crypto" "^1.2.0"
-    "@ddn/utils" "^1.2.0"
+    "@ddn/asset-base" "^2.0.6"
+    "@ddn/crypto" "^2.0.6"
+    "@ddn/utils" "^2.0.6"
     assert "^2.0.0"
     async "^2.6.1"
     bytebuffer "^5.0.1"
@@ -1485,10 +1485,10 @@
     "@ddn/utils" "^1.2.0"
     lodash "^4.17.15"
 
-"@ddn/asset-dao@^1.2.0":
-  version "1.2.0"
-  resolved "https://registry.yarnpkg.com/@ddn/asset-dao/-/asset-dao-1.2.0.tgz#8a376e7d064b24675ca4719dd65b94a2c3b924f7"
-  integrity sha512-Ic5ffgBMzWOAQc0EuFYkyn+Lw/7tHUvfe9C+9/GDye8M+wPc3DDJnsYb0oLgwDYbhFWUnXW67XqZeLKE/ckEmw==
+"@ddn/asset-dao@^1.2.1":
+  version "1.2.1"
+  resolved "https://registry.yarnpkg.com/@ddn/asset-dao/-/asset-dao-1.2.1.tgz#075fde4026740bae0a3fd6e0b6e44cb6df152c9d"
+  integrity sha512-bi94QoNIswlRUy/UESAhk4XBHV2B+HTR/wwAKQU03b4yCPC0cPyG2v9hweAOZHXClpqQjW2F306dY4BaD0ogIQ==
   dependencies:
     "@babel/plugin-transform-classes" "^7.10.4"
     "@ddn/asset-base" "^1.2.0"
@@ -18464,9 +18464,9 @@ shell-quote@^1.6.1:
   integrity sha512-mRz/m/JVscCrkMyPqHc/bczi3OQHkLTqXHEFu0zDhK/qfv3UcOA4SVmRCLmos4bhjr9ekVQubj/R7waKapmiQg==
 
 shelljs@^0.8.3, shelljs@^0.8.4:
-  version "0.8.4"
-  resolved "https://registry.yarnpkg.com/shelljs/-/shelljs-0.8.4.tgz#de7684feeb767f8716b326078a8a00875890e3c2"
-  integrity sha512-7gk3UZ9kOfPLIAbslLzyWeGiEqx9e3rxwZM0KE6EL8GlGwjym9Mrlx5/p33bWTu9YG6vcS4MBxYZDHYr5lr8BQ==
+  version "0.8.5"
+  resolved "https://registry.yarnpkg.com/shelljs/-/shelljs-0.8.5.tgz#de055408d8361bed66c669d2f000538ced8ee20c"
+  integrity sha512-TiwcRcrkhHvbrZbnRcFYMLl30Dfov3HKqzp5tO5b4pt6G/SezKcYhmDg15zXVBswHmctSAQKznqNW2LO5tTDow==
   dependencies:
     glob "^7.0.0"
     interpret "^1.0.0"
