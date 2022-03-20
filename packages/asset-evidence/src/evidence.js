@@ -137,7 +137,10 @@ class Evidence extends Asset.Base {
   }
 
   async objectNormalize (trs) {
-    const assetObj = await this.getAssetObject(trs)
+    let assetObj = await this.getAssetObject(trs)
+    // 验证为严格模式，通过推送过来的数据会通过protobuf加密，解密后数据是protobuf定义的数据类型中类的实例，实例有一些构造函数属性
+    // 验证不会通过，所以需要把实例专为标准的json数据
+    assetObj = Object.assign({}, assetObj)
     const validateErrors = await this.ddnSchema.validateEvidence(assetObj)
     if (validateErrors) {
       this.logger.error(

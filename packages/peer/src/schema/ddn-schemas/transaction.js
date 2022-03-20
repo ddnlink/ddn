@@ -60,6 +60,9 @@ export default {
     },
     nethash: {
       type: 'string'
+    },
+    signatures: {
+      type: 'array'
     }
   },
   required: ['type', 'timestamp', 'senderPublicKey', 'signature']

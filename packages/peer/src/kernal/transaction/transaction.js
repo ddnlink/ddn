@@ -110,7 +110,7 @@ class Transaction {
         delete trs[p]
       }
     }
-
+    trs = Object.assign({}, trs)
     const validateErrors = await this.ddnSchema.validateTransaction(trs)
     if (validateErrors) {
       this.logger.error(

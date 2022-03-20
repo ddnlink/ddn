@@ -121,7 +121,8 @@ class InTransfer extends Asset.Base {
   }
 
   async objectNormalize (trs) {
-    const assetObj = await this.getAssetObject(trs)
+    let assetObj = await this.getAssetObject(trs)
+    assetObj = Object.assign({}, assetObj)
     const validateErrors = await this.ddnSchema.validateDapp(assetObj)
     if (validateErrors) {
       this.logger.error(
