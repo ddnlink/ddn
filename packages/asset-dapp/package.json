@@ -1,6 +1,6 @@
 {
   "name": "@ddn/asset-dapp",
-  "version": "2.1.2",
+  "version": "2.1.3",
   "description": "this is asset-dapp package",
   "main": "lib/index.js",
   "module": "dist/index.esm.js",
