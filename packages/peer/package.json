@@ -1,6 +1,6 @@
 {
   "name": "@ddn/peer",
-  "version": "2.1.3",
+  "version": "2.1.4",
   "description": "DDN Peer.",
   "files": [
     "lib",
