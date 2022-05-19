@@ -1,6 +1,6 @@
 {
   "name": "@ddn/crypto",
-  "version": "2.1.2",
+  "version": "2.2.0",
   "description": "this is Adaptation",
   "main": "lib/index.js",
   "module": "dist/index.esm.js",
@@ -20,9 +20,9 @@
   },
   "dependencies": {
     "@ddn/core": "^2.0.4",
-    "@ddn/crypto-nacl": "^2.1.2",
-    "@ddn/crypto-sm": "^2.1.2",
-    "@ddn/crypto-ed25519":"^2.0.4"
+    "@ddn/crypto-ed25519": "^2.0.4",
+    "@ddn/crypto-nacl": "^2.2.0",
+    "@ddn/crypto-sm": "^2.1.2"
   },
   "author": "",
   "license": "MIT",

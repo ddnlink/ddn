@@ -1,6 +1,6 @@
 {
   "name": "@ddn/test-utils",
-  "version": "2.1.2",
+  "version": "2.2.0",
   "description": "Test utils for DDN",
   "main": "lib/index.js",
   "files": [
