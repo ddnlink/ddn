@@ -1,6 +1,6 @@
 {
   "name": "@ddn/crypto-nacl",
-  "version": "2.1.2",
+  "version": "2.1.3",
   "description": "Crypto for DDN",
   "keywords": [
     "crypto",

@@ -21,7 +21,7 @@ import path from 'path'
 import { constants } from '../config'
 import { getFee } from '../fees'
 
-const constantsFile = path.resolve(process.cwd(), './constants.js')
+const constantsFile = path.resolve(__dirname, '..', '..', './constants.js')
 let userConstantsFile, cryptoModule
 try {
   userConstantsFile = require(constantsFile)
@@ -36,7 +36,6 @@ if (!userConstantsFile.crypto) {
 } else if (userConstantsFile.crypto === '@ddn/crypto-sm') {
   cryptoModule = require('@ddn/crypto-sm')
 }
-//  cryptoModule = require(`${userConstantsFile.crypto}`)
 const {
   nacl,
   getKeys,

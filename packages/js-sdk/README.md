@@ -15,8 +15,10 @@ npm install @ddn/js-sdk --save
 只要基于 ES6 开发，Node.js或浏览器端都可以这样调用
 
 ```
+// 初始化网络标示以及加密算法
 import DdnJS from '@ddn/js-sdk';
-// DdnJS.init('0ab796cd', 'testnet') 这是默认值
+// 加密算法 是['@ddn/crypto-ed25519', '@ddn/crypto-nacl', '@ddn/crypto-sm']其中之一默认为@ddn/crypto-nacl
+// DdnJS.init('0ab796cd','@ddn/crypto-nacl) 这是默认值
 DdnJS.init('0ab796cd')
 ```
 

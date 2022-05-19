@@ -3,6 +3,7 @@
  */
 import nacl from 'tweetnacl'
 import { getBytes } from './bytes'
+import sha256 from 'fast-sha256'
 
 /**
  * 该方法用于生成交易Id，仅包含核心交易字段信息。所以，在调用本方法之前，要过滤掉系统生成的字段。
@@ -108,11 +109,13 @@ function getHash (trs, skipSignature, skipSecondSignature, skipId) {
 
 /**
  * 使用中注意 data 格式，默认是unit8Arrary，如果是涉密字段（经过 buffer、签名、加密的字段）都是可以直接使用的，不然就要对其简单处理 Buffer.from(data)
+ * nacl.hash 底层使用512 生成长度为64 unit8Arrary，sha256 生成长度为32 unit8Arrary
  * 返回值为 Buffer
  * @param {String}  data 需要 hash 的数据，格式为 unit8Arrary, 这里的方法与 crypto.createHash('sha256').update(strBuffer).digest() 相似，结果不同
  */
 function createHash (data) {
-  return Buffer.from(nacl.hash(data))
+  // console.log(nacl.hash(data),sha256(data))
+  return Buffer.from(sha256(data))
 }
 
 function bufToHex (data) {
