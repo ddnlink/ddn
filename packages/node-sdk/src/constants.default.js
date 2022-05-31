@@ -8,7 +8,7 @@ module.exports = {
   tokenPrefix: 'D',
   maxAmount: 100 * 10 ** 8,
   fixedPoint: 10 ** 8,
-  totalAmount: '1000000000000000000',
+  totalAmount: 100 * 10 ** 16,
   foundAddress: 'DLjrrVwnmMXstcAYVjcrpwyYb3kY1ehABU',
   walletUrl: 'http://wallet.ddn.net',
   enableMoreLockTypes: true,

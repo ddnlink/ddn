@@ -1,5 +1,4 @@
 import fs from 'fs'
-import nodeSdk from '@ddn/node-sdk'
 import * as cryptoLib from '@ddn/crypto'
 
 import accountHelper from '../helpers/account.js'
@@ -14,43 +13,35 @@ function appendFileSync (file, obj) {
   fs.appendFileSync(file, content, 'utf8')
 }
 
-// 用于分割原始100亿
-function genUsers ({ tokenPrefix, tokenName }) {
-  // console.log(nodeSdk.constants)
-  const _tokenPrefix = tokenPrefix || nodeSdk.constants.tokenPrefix
-
-  const wan = 10000
+function genUsers ({ tokenPrefix, tokenName, totalAmount, count, one }) {
   const users = []
-  // 1亿的75个，75亿
-  for (let i = 1; i < 76; i++) {
-    const user = accountHelper.account(cryptoLib.generateSecret(), _tokenPrefix)
-    user.username = `user_${i}`
-    user.amount = 10000 * wan
-    users.push(user)
-  }
 
-  // 2000万的75个, 15亿
-  for (let i = 76; i < 151; i++) {
-    const user = accountHelper.account(cryptoLib.generateSecret(), _tokenPrefix)
-    user.username = `user_${i}`
-    user.amount = 2000 * wan
-    users.push(user)
-  }
-
-  // 1000万的100个，10亿
-  for (let i = 151; i < 251; i++) {
-    const user = accountHelper.account(cryptoLib.generateSecret(), _tokenPrefix)
-    user.username = `user_${i}`
-    user.amount = 1000 * wan
-    users.push(user)
-  }
-
-  // 基金账号
-  const user = accountHelper.account(cryptoLib.generateSecret(), _tokenPrefix)
+  // 1个默认基金账号
+  const user = accountHelper.account(cryptoLib.generateSecret(), tokenPrefix)
 
   user.username = `${tokenName} Foundation`
   user.amount = 0
   users.push(user)
+
+  // 1个特殊账号
+  const oneUser = accountHelper.account(cryptoLib.generateSecret(), tokenPrefix)
+
+  oneUser.username = `${tokenName} one`
+  oneUser.amount = one
+  users.push(oneUser)
+
+  // 其他账号 total 被分成 count 个账号
+  const total = totalAmount - one
+  const everyAmount = Math.ceil(total / (count - 1))
+  const onlyOne = total % everyAmount
+
+  // 常规账号
+  for (let i = 1; i < count; i++) {
+    const user = accountHelper.account(cryptoLib.generateSecret(), tokenPrefix)
+    user.username = `${tokenName}_${i}`
+    user.amount = i === count - 1 && onlyOne !== 0 ? onlyOne : everyAmount
+    users.push(user)
+  }
 
   let liststr = ''
   const teamusers = users.map(i => {
