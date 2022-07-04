@@ -1,93 +1,11 @@
-// import nacl from 'tweetnacl'
-
 import fs from 'fs'
 import * as DdnCrypto from '@ddn/crypto'
 import { bignum, assetTypes, randomNethash } from '@ddn/utils'
-// import ByteBuffer from 'bytebuffer'
-import NodeSdk from '@ddn/node-sdk'
-
-// import transactionsLib from '../utils/transactions'
 import accounts from './account.js'
-
-// // 针对区块的
-// function getBytes (block, skipSignature) {
-//   // const size = 4 + 4 + 8 + 4 + 8 + 8 + 8 + 4 + 32 + 32 + 64;
-//   const size =
-//     4 + // version (int)
-//     4 + // timestamp (int)
-//     64 + // previousBlock 64
-//     4 + // numberOfTransactions (int)
-//     64 + // totalAmount (long)
-//     64 + // totalFee (long)
-//     64 + // reward (long)
-//     4 + // payloadLength (int)
-//     32 + // payloadHash
-//     32 + // generatorPublicKey
-//     64 // blockSignature or unused
-
-//   const bb = new ByteBuffer(size, true)
-
-//   bb.writeInt(block.version)
-//   bb.writeInt(block.timestamp)
-
-//   if (block.previous_block) {
-//     // wxm block database
-//     bb.writeString(block.previous_block) // wxm block database
-//   } else {
-//     bb.writeString('0')
-//   }
-
-//   bb.writeInt(block.number_of_transactions) // wxm block database
-
-//   bb.writeString(bignum.new(block.total_amount).toString()) // wxm block database
-//   bb.writeString(bignum.new(block.total_fee).toString()) // wxm block database
-//   bb.writeString(bignum.new(block.reward).toString())
-
-//   bb.writeInt(block.payload_length) // wxm block database
-
-//   const payloadHashBuffer = Buffer.from(block.payload_hash, 'hex') // wxm block database
-
-//   for (let i = 0; i < payloadHashBuffer.length; i++) {
-//     bb.writeByte(payloadHashBuffer[i])
-//   }
-
-//   const generatorPublicKeyBuffer = Buffer.from(block.generator_public_key, 'hex') // wxm block database
-//   for (let i = 0; i < generatorPublicKeyBuffer.length; i++) {
-//     bb.writeByte(generatorPublicKeyBuffer[i])
-//   }
-
-//   if (!skipSignature && block.block_signature) {
-//     // wxm block database
-//     const blockSignatureBuffer = Buffer.from(block.block_signature, 'hex')
-//     for (let i = 0; i < blockSignatureBuffer.length; i++) {
-//       bb.writeByte(blockSignatureBuffer[i])
-//     }
-//   }
-
-//   bb.flip()
-
-//   return bb.toBuffer()
-// }
-
-// // for block
-// function getHash (block) {
-//   return Buffer.from(nacl.hash(getBytes(block)))
-// }
-
-// function sign (block, { privateKey }) {
-//   const hash = getHash(block)
-
-//   const data = nacl.sign.detached(hash, Buffer.from(privateKey, 'hex'))
-//   return Buffer.from(data).toString('hex')
-// }
-
-// function getId (block) {
-//   return getHash(block).toString('hex')
-// }
 
 export default {
   getBytes: DdnCrypto.getBytes,
-  async new ({ address, keypair }, nethash, tokenName, tokenPrefix, dapp, accountsFile, message, count) {
+  async new ({ address, keypair }, nethash, tokenName, tokenPrefix, dapp, accountsFile, message, count, amount) {
     let payloadLength = 0
     // let payloadBytes = new ByteBuffer(1, true);
     let payloadHash = null
@@ -105,6 +23,10 @@ export default {
 
     if (!tokenPrefix) {
       tokenPrefix = 'D'
+    }
+
+    if (!amount) {
+      amount = 1 * 10 ** 16 // 默认 1 亿
     }
 
     const sender = accounts.account(DdnCrypto.generateSecret(), tokenPrefix)
@@ -130,7 +52,7 @@ export default {
           senderPublicKey: sender.keypair.publicKey // wxm block database
         }
         if (i === 0) {
-          trs.message = 'Powered by DDN Blockchain, http://ddn.net'
+          trs.message = 'Powered by DDN Blockchain, https://ddn.net'
         }
         if (message && i === 1) {
           trs.message = message
@@ -147,7 +69,7 @@ export default {
       const balanceTransaction = {
         type: assetTypes.TRANSFER,
         nethash,
-        amount: NodeSdk.constants.totalAmount,
+        amount,
         fee: '0',
         timestamp: 0,
         recipientId: address, // wxm   block database
@@ -161,6 +83,7 @@ export default {
       balanceTransaction.id = await DdnCrypto.getId(balanceTransaction)
       transactions.push(balanceTransaction)
     }
+
     // make delegates
     for (let i = 0; i < count; i++) {
       const delegate = accounts.account(DdnCrypto.generateSecret(), tokenPrefix)
@@ -184,7 +107,7 @@ export default {
         }
       }
       if (i === 0) {
-        transaction.message = 'Powered by DDN Blockchain, http://ddn.net'
+        transaction.message = 'Powered by DDN Blockchain, https://ddn.net'
       }
       if (message && i === 1) {
         transaction.message = message

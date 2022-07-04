@@ -1,3 +1,25 @@
+/**
+ * Description: Random string
+ *
+ *
+ * Last Modified: Tuesday, 31st May 2022 6:41:47 pm
+ * Modified By: imfly (kubying@qq.com>)
+
+ * Copyright（c) 2022 DATM FOUNDATION
+ */
+
+/**
+ * const randomStr = randomName(size, name, random)
+ *
+ * name: The first string
+ * random: Possible chars
+ * size: Random name length, default 16
+ *
+ * e.g:
+ * randomName('D', 'abcdefghigk1234', 20)
+ *
+ * @returns string
+ */
 function randomName () {
   // Convert arguments to Array
   const array = Array.prototype.slice.apply(arguments)
@@ -26,7 +48,7 @@ function randomNethash () {
 
 function randomString (max) {
   const possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789#$%^&*@'
-  return randomName(max, '', possible)
+  return randomName('', possible, max)
 }
 
 export { randomName, randomNethash, randomString }

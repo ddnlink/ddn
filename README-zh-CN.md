@@ -1,5 +1,5 @@
 <h1 align="center">
-  <a href="http://ddn.net"><img src="https://avatars3.githubusercontent.com/u/34602359?s=200&v=4" alt="DDN Blockchain" width="200"></a>
+  <a href="https://ddn.net"><img src="https://avatars3.githubusercontent.com/u/34602359?s=200&v=4" alt="DDN Blockchain" width="200"></a>
   <br>
   数据分发网络
   <br>
@@ -56,7 +56,7 @@ DDN, 是一个成熟的企业级区块链系统，已经服务于版权存证、
 
 ## 案例
 
-- [DDN 官网](http://ddn.net)
+- [DDN 官网](https://ddn.net)
 - [DDN 主网](http://mainnet.ddn.net)
 - [DDN 测试网](http://testnet.ddn.net)
 - [DDN 钱包](http://wallet.ddn.net)
