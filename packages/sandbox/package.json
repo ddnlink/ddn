@@ -1,6 +1,6 @@
 {
   "name": "@ddn/sandbox",
-  "version": "2.0.4",
+  "version": "2.2.1",
   "description": "ddn sandbox which is used to run sidechain dapps",
   "main": "./lib/index.js",
   "files": [
