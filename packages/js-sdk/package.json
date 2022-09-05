@@ -1,6 +1,6 @@
 {
   "name": "@ddn/js-sdk",
-  "version": "2.2.1",
+  "version": "2.2.2",
   "description": "DDN Node.js SDK",
   "main": "lib/index.js",
   "module": "dist/index.esm.js",
@@ -34,10 +34,10 @@
     "url": "http://github.com/ddnlink/ddn/issues"
   },
   "dependencies": {
-    "@ddn/core": "^2.2.1",
-    "@ddn/crypto-nacl": "^2.2.1",
-    "@ddn/crypto-sm": "^2.2.1",
-    "@ddn/utils": "^2.2.1",
+    "@ddn/core": "^2.2.2",
+    "@ddn/crypto-nacl": "^2.2.2",
+    "@ddn/crypto-sm": "^2.2.2",
+    "@ddn/utils": "^2.2.2",
     "JSONStream": "^1.3.1",
     "bitcore-mnemonic": "^8.20.5",
     "buffer": "^4.7.0",

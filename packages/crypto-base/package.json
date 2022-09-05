@@ -1,6 +1,6 @@
 {
   "name": "@ddn/crypto-base",
-  "version": "2.2.1",
+  "version": "2.2.2",
   "description": "this is crypto common plugin",
   "main": "lib/index.js",
   "module": "dist/index.esm.js",
