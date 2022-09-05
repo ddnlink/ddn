@@ -1477,6 +1477,21 @@
     mathjs "^5.4.0"
     sequelize "^4.42.0"
 
+"@ddn/asset-aob@^1.2.2":
+  version "1.2.2"
+  resolved "https://registry.yarnpkg.com/@ddn/asset-aob/-/asset-aob-1.2.2.tgz#815347313e8b402f4174ee246c0e70c021a32a39"
+  integrity sha512-e/zzI3CN07evtA4Tt+tQOF6d1PF8oRk1tko/awq/J7hVP7EvZmCMizJxqJxqvMoHbJqTitHYFZCbHt7/Q+onOg==
+  dependencies:
+    "@ddn/asset-base" "^2.0.6"
+    "@ddn/crypto" "^2.0.6"
+    "@ddn/utils" "^2.0.6"
+    assert "^2.0.0"
+    async "^2.6.1"
+    bytebuffer "^5.0.1"
+    lodash "^4.17.15"
+    mathjs "^5.4.0"
+    sequelize "^4.42.0"
+
 "@ddn/asset-base@^1.2.0":
   version "1.2.0"
   resolved "https://registry.yarnpkg.com/@ddn/asset-base/-/asset-base-1.2.0.tgz#0c3af33a578e01bcb12b6cce405c351b87216723"
@@ -1489,6 +1504,20 @@
   version "1.2.1"
   resolved "https://registry.yarnpkg.com/@ddn/asset-dao/-/asset-dao-1.2.1.tgz#075fde4026740bae0a3fd6e0b6e44cb6df152c9d"
   integrity sha512-bi94QoNIswlRUy/UESAhk4XBHV2B+HTR/wwAKQU03b4yCPC0cPyG2v9hweAOZHXClpqQjW2F306dY4BaD0ogIQ==
+  dependencies:
+    "@babel/plugin-transform-classes" "^7.10.4"
+    "@ddn/asset-base" "^1.2.0"
+    "@ddn/crypto" "^1.2.0"
+    "@ddn/utils" "^1.2.0"
+    bytebuffer "^5.0.1"
+    father-build "^1.19.3"
+    sequelize "^5.8.7"
+    valid-url "^1.0.9"
+
+"@ddn/asset-dao@^1.2.2":
+  version "1.2.2"
+  resolved "https://registry.yarnpkg.com/@ddn/asset-dao/-/asset-dao-1.2.2.tgz#b1f65ff0810f7ae93cdc63e97f2e20b0c478fbc7"
+  integrity sha512-7wFStV8xfvoCM0cqgkQnhmvIkNwLQhOjFjlcVlyP8rWaBZamvYGzDjVH7g7xicjZMFnnqX96uT1hSLgwZqYuJg==
   dependencies:
     "@babel/plugin-transform-classes" "^7.10.4"
     "@ddn/asset-base" "^1.2.0"
@@ -1569,10 +1598,10 @@
     "@ddn/crypto-nacl" "^1.2.0"
     "@ddn/crypto-sm" "^1.2.0"
 
-"@ddn/p2p@^1.2.9":
-  version "1.2.9"
-  resolved "https://registry.yarnpkg.com/@ddn/p2p/-/p2p-1.2.9.tgz#00c7e9dcf3504b4183991f94aebf7996d58cc019"
-  integrity sha512-laWIN7++dj7eXjZ9bCE+vFzCf0+7xfzMp6am9Gqfj9g+34v19QuQMwsePN1/Fpnq9oEBCYPjYPFvQSszb44MjQ==
+"@ddn/p2p@^1.3.0":
+  version "1.3.0"
+  resolved "https://registry.yarnpkg.com/@ddn/p2p/-/p2p-1.3.0.tgz#5956de5e632d2e03dd70f6d6892377dbc218520f"
+  integrity sha512-OGDrLtLEo8JtFDUb8vWZygyiwYofRN+Tk171B/pGXmzOOI+uTlHm543Q/InTPsYJjzZXPJ1MTOrIpyLkt0YsqQ==
   dependencies:
     socks5-client "^1.2.8"
 
@@ -3711,6 +3740,11 @@ acorn-walk@^7.0.0, acorn-walk@^7.1.1:
   resolved "https://registry.yarnpkg.com/acorn-walk/-/acorn-walk-7.2.0.tgz#0de889a601203909b0fbe07b8938dc21d2e967bc"
   integrity sha512-OPdCF6GsMIP+Az+aWfAAOEt2/+iVDKE7oy6lJ098aoe59oAmK76qV6Gw60SbZ8jHuG2wH058GF4pLFbYamYrVA==
 
+acorn-walk@^8.2.0:
+  version "8.2.0"
+  resolved "https://registry.yarnpkg.com/acorn-walk/-/acorn-walk-8.2.0.tgz#741210f2e2426454508853a2f44d0ab83b7f69c1"
+  integrity sha512-k+iyHEuPgSw6SbuDpGQM+06HQUa04DZ3o+F6CSzXMvvI5KMvnaEqXe+YVe555R9nn6GPt404fos4wcgpw12SDA==
+
 acorn@6.1.0:
   version "6.1.0"
   resolved "https://registry.yarnpkg.com/acorn/-/acorn-6.1.0.tgz#b0a3be31752c97a0f7013c5f4903b71a05db6818"
@@ -3736,10 +3770,10 @@ acorn@^7.0.0, acorn@^7.1.1, acorn@^7.4.0:
   resolved "https://registry.yarnpkg.com/acorn/-/acorn-7.4.1.tgz#feaed255973d2e77555b83dbc08851a6c63520fa"
   integrity sha512-nQyp0o1/mNdbTO1PO6kHkwSrmgZ0MT/jCCpNiwbUjGoRN4dlBhqJtoQuCnEOKzgTVwg0ZWiCoQy6SxMebQVh8A==
 
-acorn@^8.2.4:
-  version "8.3.0"
-  resolved "https://registry.yarnpkg.com/acorn/-/acorn-8.3.0.tgz#1193f9b96c4e8232f00b11a9edff81b2c8b98b88"
-  integrity sha512-tqPKHZ5CaBJw0Xmy0ZZvLs1qTV+BNFSyvn77ASXkpBNfIRk8ev26fKrD9iLGwGA9zedPao52GSHzq8lyZG0NUw==
+acorn@^8.2.4, acorn@^8.7.0:
+  version "8.8.0"
+  resolved "https://registry.yarnpkg.com/acorn/-/acorn-8.8.0.tgz#88c0187620435c7f6015803f5539dae05a9dbea8"
+  integrity sha512-QOxyigPVrpZ2GXT+PFyZTl6TtOFc5egxHIP9IlQ+RbupQuX4RkT/Bee4/kQuC02Xkzg84JcT7oLYtDIQxp+v7w==
 
 add-stream@^1.0.0:
   version "1.0.0"
@@ -20805,9 +20839,12 @@ vm-browserify@~0.0.1:
     indexof "0.0.1"
 
 vm2@^3.8.2:
-  version "3.9.3"
-  resolved "https://registry.yarnpkg.com/vm2/-/vm2-3.9.3.tgz#29917f6cc081cc43a3f580c26c5b553fd3c91f40"
-  integrity sha512-smLS+18RjXYMl9joyJxMNI9l4w7biW8ilSDaVRvFBDwOH8P0BK1ognFQTpg0wyQ6wIKLTblHJvROW692L/E53Q==
+  version "3.9.6"
+  resolved "https://registry.yarnpkg.com/vm2/-/vm2-3.9.6.tgz#2f9b2fd0d82802dcd872e1011869ba8ae6b74778"
+  integrity sha512-BF7euUjgO+ezsz2UKex9kO9M/PtDNOf+KEpiqNepZsgf1MT7JYfJEIvG8BoYhZMLAVjqevFJ0UmXNuETe8m5dQ==
+  dependencies:
+    acorn "^8.7.0"
+    acorn-walk "^8.2.0"
 
 w3c-hr-time@^1.0.1, w3c-hr-time@^1.0.2:
   version "1.0.2"
