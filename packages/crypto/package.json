@@ -20,7 +20,6 @@
   },
   "dependencies": {
     "@ddn/core": "^2.0.4",
-    "@ddn/crypto-ed25519": "^2.0.4",
     "@ddn/crypto-nacl": "^2.2.0",
     "@ddn/crypto-sm": "^2.1.2"
   },

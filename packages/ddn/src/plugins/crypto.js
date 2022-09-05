@@ -1,7 +1,7 @@
 import fs from 'fs'
 import inquirer from 'inquirer'
 
-const cryptoCategories = ['@ddn/crypto-ed25519', '@ddn/crypto-nacl', '@ddn/crypto-sm']
+const cryptoCategories = ['@ddn/crypto-nacl', '@ddn/crypto-sm']
 export async function setCrypto (options) {
   const result = await inquirer.prompt([
     {

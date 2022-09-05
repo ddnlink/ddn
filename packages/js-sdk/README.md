@@ -17,7 +17,7 @@ npm install @ddn/js-sdk --save
 ```
 // 初始化网络标示以及加密算法
 import DdnJS from '@ddn/js-sdk';
-// 加密算法 是['@ddn/crypto-ed25519', '@ddn/crypto-nacl', '@ddn/crypto-sm']其中之一默认为@ddn/crypto-nacl
+// 加密算法 是['@ddn/crypto-nacl', '@ddn/crypto-sm']其中之一默认为@ddn/crypto-nacl
 // DdnJS.init('0ab796cd','@ddn/crypto-nacl) 这是默认值
 DdnJS.init('0ab796cd')
 ```

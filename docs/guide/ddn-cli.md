@@ -128,7 +128,7 @@ $ ddn g dapp MyDapp // 与上述命令正好相反，但是效果一样
 ```shell
 $ ddn crypto sc    
 ? Choose crypto 
-  1) @ddn/crypto-ed25519
+  1) @ddn/crypto-ed25519 # 作废
   2) @ddn/crypto-nacl
   3) @ddn/crypto-sm
   Answer:   
