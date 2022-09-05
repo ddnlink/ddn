@@ -47,5 +47,5 @@
     "@ddn/test-utils": "^2.2.1",
     "rollup-plugin-replace": "^2.2.0"
   },
-  "gitHead": "3154dbe3d985f295fb9592fcdbbf2b3435efe94d"
+  "gitHead": "0e408aa8284ccd776659503df9e35a079ee912d6"
 }

@@ -41,5 +41,6 @@
     "typescript": "^3.5.2",
     "umi-utils": "1.7.1",
     "yargs-parser": "13.1.1"
-  }
+  },
+  "gitHead": "0e408aa8284ccd776659503df9e35a079ee912d6"
 }
