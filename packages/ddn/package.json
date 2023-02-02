@@ -1,7 +1,7 @@
 {
     "name": "@ddn/ddn",
     "preferGlobal": true,
-    "version": "2.2.0",
+    "version": "2.2.3",
     "description": "A Command line tool to manage ddn",
     "main": "./lib/index.js",
     "scripts": {

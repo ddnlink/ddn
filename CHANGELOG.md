@@ -1,7 +1,16 @@
+## [3.6.4](https://github.com/ddnlink/ddn/compare/v2.2.0...v3.6.4) (2022-08-06)
+
+
+### Features
+
+* modify the command-line tool nethash generation error ([3fb2dd1](https://github.com/ddnlink/ddn/commit/3fb2dd1722ef9263375c033f63b28a0f9232cf12))
+
+
+
 ## [3.6.3](https://github.com/ddnlink/ddn/compare/v3.6.0...v3.6.3) (2020-12-11)
 
 
-### Bug Fixes
+### Bug
 
 * 🐛 Add locales to @ddn/ddn ([83a4ad6](https://github.com/ddnlink/ddn/commit/83a4ad650b3c4b0dc2b4bade44f67e2c930d1dae)), closes [#91](https://github.com/ddnlink/ddn/issues/91)
 * 🐛 dapp test bugs ([3c64b87](https://github.com/ddnlink/ddn/commit/3c64b87fa5054bfa242fa5fca566b6c03beeb3e0))

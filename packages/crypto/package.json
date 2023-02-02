@@ -1,6 +1,6 @@
 {
   "name": "@ddn/crypto",
-  "version": "2.2.0",
+  "version": "2.2.3",
   "description": "this is Adaptation",
   "main": "lib/index.js",
   "module": "dist/index.esm.js",

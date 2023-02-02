@@ -1,6 +1,6 @@
 {
   "name": "@ddn/asset-base",
-  "version": "2.1.2",
+  "version": "2.2.3",
   "description": "DDN资产基类相关信息",
   "main": "lib/index.js",
   "module": "dist/index.esm.js",
