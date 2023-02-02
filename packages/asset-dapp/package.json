@@ -21,15 +21,15 @@
   "author": "wly",
   "license": "MIT",
   "dependencies": {
-    "@ddn/asset-base": "^2.1.2",
-    "@ddn/crypto": "^2.2.0",
-    "@ddn/sandbox": "^2.0.4",
-    "@ddn/utils": "^2.1.2",
+    "@ddn/asset-base": "^2.2.2",
+    "@ddn/crypto": "^2.2.2",
+    "@ddn/sandbox": "^2.2.2",
+    "@ddn/utils": "^2.2.2",
     "async": "^2.6.1",
     "bytebuffer": "^5.0.1",
     "decompress-zip": "^0.2.2",
     "request": "^2.88.0",
     "valid-url": "^1.0.9"
   },
-  "gitHead": "3154dbe3d985f295fb9592fcdbbf2b3435efe94d"
+  "gitHead": "0e408aa8284ccd776659503df9e35a079ee912d6"
 }

@@ -19,12 +19,11 @@
     "url": "https://github.com/ddnlink/ddn/tree/master/packages/crypto"
   },
   "dependencies": {
-    "@ddn/core": "^2.0.4",
-    "@ddn/crypto-ed25519": "^2.0.4",
-    "@ddn/crypto-nacl": "^2.2.0",
-    "@ddn/crypto-sm": "^2.1.2"
+    "@ddn/core": "^2.2.2",
+    "@ddn/crypto-nacl": "^2.2.2",
+    "@ddn/crypto-sm": "^2.2.2"
   },
   "author": "",
   "license": "MIT",
-  "gitHead": "3154dbe3d985f295fb9592fcdbbf2b3435efe94d"
+  "gitHead": "0e408aa8284ccd776659503df9e35a079ee912d6"
 }

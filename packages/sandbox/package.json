@@ -14,5 +14,6 @@
   "license": "ISC",
   "dependencies": {
     "vm2": "^3.8.2"
-  }
+  },
+  "gitHead": "0e408aa8284ccd776659503df9e35a079ee912d6"
 }

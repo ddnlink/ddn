@@ -21,9 +21,9 @@
   "author": "wangxm",
   "license": "MIT",
   "dependencies": {
-    "@ddn/asset-base": "^2.1.2",
-    "@ddn/utils": "^2.1.2",
+    "@ddn/asset-base": "^2.2.2",
+    "@ddn/utils": "^2.2.2",
     "bytebuffer": "^5.0.1"
   },
-  "gitHead": "3154dbe3d985f295fb9592fcdbbf2b3435efe94d"
+  "gitHead": "0e408aa8284ccd776659503df9e35a079ee912d6"
 }

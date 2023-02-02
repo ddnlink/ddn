@@ -34,11 +34,10 @@
     "url": "http://github.com/ddnlink/ddn/issues"
   },
   "dependencies": {
-    "@ddn/core": "^2.0.4",
-    "@ddn/crypto-ed25519": "^2.0.6",
-    "@ddn/crypto-nacl": "^2.2.0",
-    "@ddn/crypto-sm": "^2.1.2",
-    "@ddn/utils": "^2.1.2",
+    "@ddn/core": "^2.2.2",
+    "@ddn/crypto-nacl": "^2.2.2",
+    "@ddn/crypto-sm": "^2.2.2",
+    "@ddn/utils": "^2.2.2",
     "JSONStream": "^1.3.1",
     "bitcore-mnemonic": "^8.20.5",
     "buffer": "^4.7.0",
@@ -62,5 +61,5 @@
     "rollup-plugin-replace": "^2.2.0",
     "tinyify": "^2.5.2"
   },
-  "gitHead": "3154dbe3d985f295fb9592fcdbbf2b3435efe94d"
+  "gitHead": "0e408aa8284ccd776659503df9e35a079ee912d6"
 }
