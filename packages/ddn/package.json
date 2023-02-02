@@ -21,9 +21,9 @@
     "license": "MIT",
     "dependencies": {
         "@ddn/contract": "^0.3.2",
-        "@ddn/crypto": "^2.2.2",
-        "@ddn/node-sdk": "^2.2.2",
-        "@ddn/utils": "^2.2.2",
+        "@ddn/crypto": "^2.2.3",
+        "@ddn/node-sdk": "^2.2.3",
+        "@ddn/utils": "^2.2.3",
         "async": "1.5.2",
         "bytebuffer": "^4.0.0",
         "fs-extra": "0.30.0",

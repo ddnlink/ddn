@@ -17,8 +17,8 @@
   "author": "limsbase",
   "license": "MIT",
   "dependencies": {
-    "@ddn/core": "^2.2.2",
-    "@ddn/utils": "^2.2.2"
+    "@ddn/core": "^2.2.3",
+    "@ddn/utils": "^2.2.3"
   },
   "devDependencies": {
     "chai": "^4.2.0",
