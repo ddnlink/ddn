@@ -87,7 +87,7 @@
     "randomstring": "1.1.5",
     "request": "^2.88.2",
     "rimraf": "2.5.4",
-    "sequelize": "^5.21.3",
+    "sequelize": "^6.29.0",
     "socket.io": "^2.2.0",
     "sqlite3": "^5.0.0",
     "systeminformation": "^5.9.8",
