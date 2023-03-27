@@ -19,7 +19,7 @@ class Evidence extends Asset.Base {
       { field: 'str1', prop: 'type', required: true }, // 存证的数据类型（video、image、videostram、voice）
       { field: 'str2', prop: 'size' }, // string length:64
       { field: 'str10', prop: 'metadata' }, // 元数据 ，上面这些字段如果不能够满足存储的条件，其它数据可以序列化一下存到这里，该字段不能检索
-      { field: 'str_ext', prop: 'time' }, // 时间
+      { field: 'timestamp1', prop: 'time' }, // 时间
       { field: 'str_ext', prop: 'description', required: false } // 描述
     ]
   }
@@ -36,6 +36,87 @@ class Evidence extends Asset.Base {
     router.get('/address/:address', async (req, res) => {
       try {
         const result = await this.queryAsset({ address: req.params.address }, null, false, 1)
+        res.json({ success: true, result })
+      } catch (err) {
+        res.json({ success: false, error: err.message || err.toString() })
+      }
+    })
+    // 根据type统计数据，根据时间过滤
+    // req.params.startTime 开始时间
+    // req.params.endTime 结束时间
+    router.get('/type/statistics', async (req, res) => {
+      try {
+        console.log('/type/statistics')
+        const result = await this.dao.findList('trs_asset', {
+          where: { timestamp: { $gte: req.params.startTime, $lte: req.params.endTime } },
+          attributes: ['str1', [this.dao.db_fn('SUM', this.dao.db_col('str1')), 'total']],
+          group: 'str1'
+        })
+        res.json({ success: true, result })
+      } catch (err) {
+        res.json({ success: false, error: err.message || err.toString() })
+      }
+    })
+    // 根据author统计数据，根据时间过滤
+    // req.params.startTime 开始时间
+    // req.params.endTime 结束时间
+    router.get('/author/statistics', async (req, res) => {
+      try {
+        const result = await this.dao.findList('trs_asset', {
+          where: { timestamp: { $gte: req.params.startTime, $lte: req.params.endTime } },
+          attributes: ['str3', [this.dao.db_fn('SUM', this.dao.db_fn('str3')), 'total']],
+          group: 'str3'
+        })
+        res.json({ success: true, result })
+      } catch (err) {
+        res.json({ success: false, error: err.message || err.toString() })
+      }
+    })
+    // 根据short_hash查询数据
+    // req.params.short_hash 是hash的截取，也可以存储其含义的数据
+    router.get('/short_hash/trace_source', async (req, res) => {
+      try {
+        const result = await this.dao.findList('trs_asset', { where: { str4: req.params.short_hash } })
+        res.json({ success: true, result })
+      } catch (err) {
+        res.json({ success: false, error: err.message || err.toString() })
+      }
+    })
+    // 根据时间分组
+    // req.params.startTime 开始时间
+    // req.params.endTime 结束时间
+    // req.params.type :可以根据year、month、day来统计
+    router.get('/group/time', async (req, res) => {
+      try {
+        let result
+        if (!req.params.type || req.params.type === 'year') {
+          result = await this.dao.findList('trs_asset', {
+            where: { timestamp: { $gte: req.params.startTime, $lte: req.params.endTime } },
+            attributes: [
+              [this.dao.db_str('strftime("%Y",timestamp) '), 'date'],
+              [this.dao.db_str('COUNT(*)'), 'count']
+            ],
+            group: ['date']
+          })
+        } else if (req.paraps.type === 'month') {
+          result = await this.dao.findList('trs_asset', {
+            where: { timestamp: { $gte: req.params.startTime, $lte: req.params.endTime } },
+            attributes: [
+              [this.dao.db_str('strftime("%Y,%m",timestamp) '), 'date'],
+              [this.dao.db_str('COUNT(*)'), 'count']
+            ],
+            group: ['date']
+          })
+        } else {
+          result = await this.dao.findList('trs_asset', {
+            where: { timestamp: { $gte: req.params.startTime, $lte: req.params.endTime } },
+            attributes: [
+              [this.dao.db_str('strftime("%Y,%m,%d",timestamp) '), 'date'],
+              [this.dao.db_str('COUNT(*)'), 'count']
+            ],
+            group: ['date']
+          })
+        }
         res.json({ success: true, result })
       } catch (err) {
         res.json({ success: false, error: err.message || err.toString() })
