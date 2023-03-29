@@ -46,10 +46,17 @@ class Evidence extends Asset.Base {
     // req.params.endTime 结束时间
     router.get('/type/statistics', async (req, res) => {
       try {
-        console.log('/type/statistics')
+        let where = {}
+        if (req.query.startTime) {
+          where = { timestamp: { $gte: this.runtime.slot.getEpochTime(req.query.startTime) } }
+        }
+        if (req.query.endTime) {
+          where = { timestamp: { $lte: this.runtime.slot.getEpochTime(req.query.endTime) } }
+        }
+
         const result = await this.dao.findList('trs_asset', {
-          where: { timestamp: { $gte: req.params.startTime, $lte: req.params.endTime } },
-          attributes: ['str1', [this.dao.db_fn('SUM', this.dao.db_col('str1')), 'total']],
+          where,
+          attributes: ['str1', [this.dao.db_fn('count', this.dao.db_col('str1')), 'total']],
           group: 'str1'
         })
         res.json({ success: true, result })
@@ -62,9 +69,16 @@ class Evidence extends Asset.Base {
     // req.params.endTime 结束时间
     router.get('/author/statistics', async (req, res) => {
       try {
+        let where = {}
+        if (req.query.startTime) {
+          where = { timestamp: { $gte: this.runtime.slot.getEpochTime(req.query.startTime) } }
+        }
+        if (req.query.endTime) {
+          where = { timestamp: { $lte: this.runtime.slot.getEpochTime(req.query.endTime), ...where.timestamp } }
+        }
         const result = await this.dao.findList('trs_asset', {
-          where: { timestamp: { $gte: req.params.startTime, $lte: req.params.endTime } },
-          attributes: ['str3', [this.dao.db_fn('SUM', this.dao.db_fn('str3')), 'total']],
+          where,
+          attributes: ['str3', [this.dao.db_fn('count', this.dao.db_col('str3')), 'total']],
           group: 'str3'
         })
         res.json({ success: true, result })
@@ -74,14 +88,14 @@ class Evidence extends Asset.Base {
     })
     // 根据short_hash查询数据
     // req.params.short_hash 是hash的截取，也可以存储其含义的数据
-    router.get('/short_hash/trace_source', async (req, res) => {
-      try {
-        const result = await this.dao.findList('trs_asset', { where: { str4: req.params.short_hash } })
-        res.json({ success: true, result })
-      } catch (err) {
-        res.json({ success: false, error: err.message || err.toString() })
-      }
-    })
+    // router.get('/short_hash/trace_source', async (req, res) => {
+    //   try {
+    //     const result = await this.dao.findList('trs_asset', { where: { str4: req.params.short_hash } })
+    //     res.json({ success: true, result })
+    //   } catch (err) {
+    //     res.json({ success: false, error: err.message || err.toString() })
+    //   }
+    // })
     // 根据时间分组
     // req.params.startTime 开始时间
     // req.params.endTime 结束时间
@@ -89,29 +103,43 @@ class Evidence extends Asset.Base {
     router.get('/group/time', async (req, res) => {
       try {
         let result
-        if (!req.params.type || req.params.type === 'year') {
+        let where = {}
+        if (req.query.startTime) {
+          where = { timestamp: { $gte: this.runtime.slot.getEpochTime(req.query.startTime) } }
+        }
+        if (req.query.endTime) {
+          where = { timestamp: { $lte: this.runtime.slot.getEpochTime(req.query.endTime), ...where.timestamp } }
+        }
+        const beginTime = Math.floor(this._context.constants.net.beginDate.getTime() / 1000)
+        if (!req.query.type || req.query.type === 'year') {
           result = await this.dao.findList('trs_asset', {
-            where: { timestamp: { $gte: req.params.startTime, $lte: req.params.endTime } },
+            where,
             attributes: [
-              [this.dao.db_str('strftime("%Y",timestamp) '), 'date'],
+              [this.dao.db_str(`strftime("%Y",datetime(timestamp + ${beginTime}, 'unixepoch', 'localtime'))`), 'date'],
               [this.dao.db_str('COUNT(*)'), 'count']
             ],
             group: ['date']
           })
-        } else if (req.paraps.type === 'month') {
+        } else if (req.query.type === 'month') {
           result = await this.dao.findList('trs_asset', {
-            where: { timestamp: { $gte: req.params.startTime, $lte: req.params.endTime } },
+            where,
             attributes: [
-              [this.dao.db_str('strftime("%Y,%m",timestamp) '), 'date'],
+              [
+                this.dao.db_str(`strftime("%Y,%m",datetime(timestamp + ${beginTime}, 'unixepoch', 'localtime')) `),
+                'date'
+              ],
               [this.dao.db_str('COUNT(*)'), 'count']
             ],
             group: ['date']
           })
         } else {
           result = await this.dao.findList('trs_asset', {
-            where: { timestamp: { $gte: req.params.startTime, $lte: req.params.endTime } },
+            where,
             attributes: [
-              [this.dao.db_str('strftime("%Y,%m,%d",timestamp) '), 'date'],
+              [
+                this.dao.db_str(`strftime("%Y,%m,%d",datetime(timestamp + ${beginTime}, 'unixepoch', 'localtime'))`),
+                'date'
+              ],
               [this.dao.db_str('COUNT(*)'), 'count']
             ],
             group: ['date']
