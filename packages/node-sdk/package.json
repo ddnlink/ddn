@@ -1,6 +1,6 @@
 {
   "name": "@ddn/node-sdk",
-  "version": "2.2.3",
+  "version": "2.3.0",
   "description": "DDN Node.js SDK",
   "main": "lib/index.js",
   "files": [
@@ -30,7 +30,7 @@
     "@ddn/asset-base": "^2.2.3",
     "@ddn/asset-dao": "^1.2.1",
     "@ddn/asset-dapp": "^2.2.3",
-    "@ddn/asset-evidence": "^2.2.3",
+    "@ddn/asset-evidence": "^2.3.0",
     "@ddn/core": "^2.2.3",
     "@ddn/crypto": "^2.2.3",
     "@ddn/crypto-nacl": "^2.2.3",
