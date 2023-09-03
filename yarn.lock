@@ -1477,6 +1477,21 @@
     mathjs "^5.4.0"
     sequelize "^4.42.0"
 
+"@ddn/asset-aob@^1.2.2":
+  version "1.2.2"
+  resolved "https://registry.yarnpkg.com/@ddn/asset-aob/-/asset-aob-1.2.2.tgz#815347313e8b402f4174ee246c0e70c021a32a39"
+  integrity sha512-e/zzI3CN07evtA4Tt+tQOF6d1PF8oRk1tko/awq/J7hVP7EvZmCMizJxqJxqvMoHbJqTitHYFZCbHt7/Q+onOg==
+  dependencies:
+    "@ddn/asset-base" "^2.0.6"
+    "@ddn/crypto" "^2.0.6"
+    "@ddn/utils" "^2.0.6"
+    assert "^2.0.0"
+    async "^2.6.1"
+    bytebuffer "^5.0.1"
+    lodash "^4.17.15"
+    mathjs "^5.4.0"
+    sequelize "^4.42.0"
+
 "@ddn/asset-base@^1.2.0":
   version "1.2.0"
   resolved "https://registry.yarnpkg.com/@ddn/asset-base/-/asset-base-1.2.0.tgz#0c3af33a578e01bcb12b6cce405c351b87216723"
@@ -1489,6 +1504,20 @@
   version "1.2.1"
   resolved "https://registry.yarnpkg.com/@ddn/asset-dao/-/asset-dao-1.2.1.tgz#075fde4026740bae0a3fd6e0b6e44cb6df152c9d"
   integrity sha512-bi94QoNIswlRUy/UESAhk4XBHV2B+HTR/wwAKQU03b4yCPC0cPyG2v9hweAOZHXClpqQjW2F306dY4BaD0ogIQ==
+  dependencies:
+    "@babel/plugin-transform-classes" "^7.10.4"
+    "@ddn/asset-base" "^1.2.0"
+    "@ddn/crypto" "^1.2.0"
+    "@ddn/utils" "^1.2.0"
+    bytebuffer "^5.0.1"
+    father-build "^1.19.3"
+    sequelize "^5.8.7"
+    valid-url "^1.0.9"
+
+"@ddn/asset-dao@^1.2.2":
+  version "1.2.2"
+  resolved "https://registry.yarnpkg.com/@ddn/asset-dao/-/asset-dao-1.2.2.tgz#b1f65ff0810f7ae93cdc63e97f2e20b0c478fbc7"
+  integrity sha512-7wFStV8xfvoCM0cqgkQnhmvIkNwLQhOjFjlcVlyP8rWaBZamvYGzDjVH7g7xicjZMFnnqX96uT1hSLgwZqYuJg==
   dependencies:
     "@babel/plugin-transform-classes" "^7.10.4"
     "@ddn/asset-base" "^1.2.0"
@@ -1569,10 +1598,10 @@
     "@ddn/crypto-nacl" "^1.2.0"
     "@ddn/crypto-sm" "^1.2.0"
 
-"@ddn/p2p@^1.2.9":
-  version "1.2.9"
-  resolved "https://registry.yarnpkg.com/@ddn/p2p/-/p2p-1.2.9.tgz#00c7e9dcf3504b4183991f94aebf7996d58cc019"
-  integrity sha512-laWIN7++dj7eXjZ9bCE+vFzCf0+7xfzMp6am9Gqfj9g+34v19QuQMwsePN1/Fpnq9oEBCYPjYPFvQSszb44MjQ==
+"@ddn/p2p@^1.3.0":
+  version "1.3.0"
+  resolved "https://registry.yarnpkg.com/@ddn/p2p/-/p2p-1.3.0.tgz#5956de5e632d2e03dd70f6d6892377dbc218520f"
+  integrity sha512-OGDrLtLEo8JtFDUb8vWZygyiwYofRN+Tk171B/pGXmzOOI+uTlHm543Q/InTPsYJjzZXPJ1MTOrIpyLkt0YsqQ==
   dependencies:
     socks5-client "^1.2.8"
 
@@ -7063,9 +7092,9 @@ cookie@~0.4.1:
   integrity sha512-ZwrFkGJxUR3EIoXtO+yVE69Eb7KlixbaeAWfBQB9vVsNn/o+Yw69gBWSSDK825hQNdN+wF8zELf3dFNl/kxkUA==
 
 cookiejar@^2.1.0:
-  version "2.1.2"
-  resolved "https://registry.yarnpkg.com/cookiejar/-/cookiejar-2.1.2.tgz#dd8a235530752f988f9a0844f3fc589e3111125c"
-  integrity sha512-Mw+adcfzPxcPeI+0WlvRrr/3lGVO0bD75SxX6811cxSh1Wbxx7xZBGK1eVtDf6si8rg2lhnUjsVLMFMfbRIuwA==
+  version "2.1.4"
+  resolved "https://registry.yarnpkg.com/cookiejar/-/cookiejar-2.1.4.tgz#ee669c1fea2cf42dc31585469d193fef0d65771b"
+  integrity sha512-LDx6oHrK+PhzLKJU9j5S7/Y3jM/mUHvD/DeI1WQmJn652iPC5Y4TBzC9l+5OMOXlyTTA+SmVUPm0HQUwpD5Jqw==
 
 copy-anything@^2.0.1:
   version "2.0.3"
