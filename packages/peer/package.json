@@ -67,7 +67,7 @@
     "compression": "^1.7.3",
     "cors": "^2.8.5",
     "daemon": "1.1.0",
-    "ejs": "2.5.7",
+    "ejs": "3.1.7",
     "express": "^4.16.4",
     "express-domain-middleware": "0.1.0",
     "express-routemap": "^1.6.0",
