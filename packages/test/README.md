@@ -5,14 +5,21 @@ Test based on jest.
 ## Use
 
 ```
-$ cd ddn/
-$ yarn test
+// In the project root path
+$ cd ddn/ 
+$ yarn test 
 ```
 
 For test files named `a.test.js` in the all packages, 
 
 ```
-$ yarn test "a.test.js"
+$ yarn test a.test.js
+```
+
+For debug ，etc：
+
+```
+$ DEBUG=debug_name yarn test nodeSdk.aob.test.js // debug_name -> debug('debug_name') in the test files。
 ```
 
 ## Warning

@@ -1,0 +1,47 @@
+version: '3'
+
+services:
+  peer:
+    container_name: "${APP_ID}-peer"
+    image: node:12.18.3
+    # command: /bin/bash -c "apt-get update && apt-get install -y nginx"
+    ports:
+      - "${APP_PORT}:8001"
+    volumes:
+      - ../examples/fun-tests:/var/www/peer
+    networks:
+      - ddnnet
+    # links:
+      # - postgres
+      # - redis
+    restart: unless-stopped
+
+  # redis:
+  #   container_name: "${APP_ID}-redis"
+  #   image: "redis:alpine"
+  #   environment:
+  #     TZ: "Asia/Shanghai"
+  #   ports:
+  #     - "6379:6379"
+  #   networks:
+  #     - ddnnet
+  #   restart: unless-stopped
+
+  postgres:
+    container_name: "${APP_ID}-postgres"
+    image: postgres:13
+    environment:
+      POSTGRES_DATABASE: "${DB_DATABASE}"
+      POSTGRES_USER: "${DB_USERNAME}"
+      POSTGRES_PASSWORD: "${DB_PASSWORD}"
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./postgres/data:/var/lib/postgresql/data
+    networks:
+      - ddnnet
+    restart: unless-stopped
+
+networks:
+  ddnnet:
+    driver: bridge

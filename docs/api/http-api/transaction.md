@@ -246,9 +246,10 @@ JSON返回示例：
 |transactionId|string  |交易id      |    
    
    
-请求示例：   
+请求示例：    D7868UnSiVUf7xShPmayvjo9gRrhuCDV85
 ```bash   
 curl -k -H "Content-Type: application/json" -X PUT -d '{"secret": "grunt grain siege churn chicken phrase shell arrange fox recipe scan tube","amount":"1000000","recipientId":"DDr1KLYLRos6iZ55HvNrKo2X8Zpg2mT1oh"}' 'http://127.0.0.1:8001/api/transactions'    
+curl -k -H "Content-Type: application/json" -X PUT -d '{"secret": "vendor device hollow two glad vibrant off toe short where talent upper","amount":"1000000","recipientId":"D7868UnSiVUf7xShPmayvjo9gRrhuCDV85"}' 'http://127.0.0.1:8001/api/transactions'    
 ```
    
 JSON返回示例：   

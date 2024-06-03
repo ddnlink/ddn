@@ -39,6 +39,7 @@ screenshot
 .eslintcache
 
 # packages
+/packages/asset-aob
 /packages/*/node_modules
 /packages/*/lib
 /packages/*/dist
