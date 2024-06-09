@@ -2,7 +2,7 @@
  *  Created by Imfly on Sun Dec 29 2019 15:57:56
  *
  *  Copyright (c) 2019 DDN FOUNDATION. All rights reserved.
- *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *  Licensed under the AGPL 3.0 License. See License.txt in the project root for license information.
  *-------------------------------------------------------------------------------------------- */
 const Sequelize = require('sequelize')
 const Op = Sequelize.Op
@@ -10,7 +10,7 @@ const Op = Sequelize.Op
 module.exports = {
   /**
    * About Peer
-  */
+   */
   port: 8001,
   address: '0.0.0.0',
   publicIp: '',
@@ -217,10 +217,5 @@ module.exports = {
    *  "@ddn/asset-aob"
    * ]
    */
-  assets: [
-    '@ddn/asset-evidence',
-    '@ddn/asset-aob',
-    '@ddn/asset-dapp',
-    '@ddn/asset-dao'
-  ]
+  assets: ['@ddn/asset-evidence', '@ddn/asset-aob', '@ddn/asset-dapp', '@ddn/asset-dao']
 }

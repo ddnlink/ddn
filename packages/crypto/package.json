@@ -24,6 +24,6 @@
     "@ddn/crypto-sm": "^2.2.3"
   },
   "author": "",
-  "license": "MIT",
+  "license": "AGPL 3.0",
   "gitHead": "0e408aa8284ccd776659503df9e35a079ee912d6"
 }

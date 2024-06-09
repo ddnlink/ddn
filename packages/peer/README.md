@@ -35,6 +35,6 @@ $ yarn test
 
 ## License
 
-The MIT License (MIT)
+The AGPL 3.0 License (AGPL 3.0)
 
 Copyright (c) 2016-2019 DDN.link. All rights reserved. See License.txt in the project root for license information.

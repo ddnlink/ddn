@@ -13,7 +13,7 @@
   "bugs": {
     "url": "http://github.com/ddnlink/ddn/issues"
   },
-  "license": "MIT",
+  "license": "AGPL 3.0",
   "files": [
     "bin",
     "lib",

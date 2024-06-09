@@ -19,7 +19,7 @@
     ".ddnrc.js"
   ],
   "author": "wangxm",
-  "license": "MIT",
+  "license": "AGPL 3.0",
   "dependencies": {
     "@ddn/asset-base": "^2.2.3",
     "@ddn/utils": "^2.2.3",

@@ -19,7 +19,7 @@
     ".ddnrc.js"
   ],
   "author": "wly",
-  "license": "MIT",
+  "license": "AGPL 3.0",
   "dependencies": {
     "@ddn/asset-base": "^2.2.3",
     "@ddn/crypto": "^2.2.3",

@@ -34,7 +34,7 @@
       "email": "softwaiter@126.com"
     }
   ],
-  "license": "MIT",
+  "license": "AGPL 3.0",
   "engines": {
     "node": ">=10.21.0"
   },
@@ -42,7 +42,11 @@
     "start": "cross-env NODE_ENV=development node app.js",
     "test": "./node_modules/.bin/mocha -r intelli-espower-loader test/**/*.test.js",
     "clear": "rm db/contracts/* && rm db/*.db && rm logs/*.log",
-    "build": "cross-env NODE_ENV=production ./node_modules/.bin/gulp linux-build-main",
+    "clear:testnet": "rm -rf db/testnet/* && rm -rf logs/testnet/*",
+    "clear:localnet": "rm -rf db/localnet/* && rm -rf logs/localnet/*",
+    "test:localnet": "./node_modules/.bin/mocha -r intelli-espower-loader test/localnet/**/*.test.js",
+    "build:dev": "cross-env NODE_ENV=development ./node_modules/.bin/gulp linux-build-main -w",
+    "build:prod": "cross-env NODE_ENV=production ./node_modules/.bin/gulp linux-build-main",
     "build-testnet": "./node_modules/.bin/gulp linux-build-test",
     "build-testnet-mac": "./node_modules/.bin/gulp mac-build-test",
     "build-localnet": "./node_modules/.bin/gulp linux-build-local"

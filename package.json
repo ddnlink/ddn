@@ -1,6 +1,6 @@
 {
   "name": "ddn",
-  "version": "3.6.4",
+  "version": "3.6.21",
   "private": true,
   "repository": {
     "type": "git",
@@ -26,7 +26,10 @@
     "init": "sh ./scripts/init.sh",
     "start": "NODE_ENV=development node ./scripts/startPeer.js",
     "bootstrap": "lerna bootstrap",
-    "build": "node ./scripts/initCryptoDependent.js && father-build -w",
+    "build:dev": "NODE_ENV=development node ./scripts/initCryptoDependent.js && father-build -w",
+    "build:prod": "NODE_ENV=production node ./scripts/initCryptoDependent.js && father-build",
+    "build:watch": "node ./scripts/initCryptoDependent.js && father-build -w",
+    "build:docker": "node ./scripts/initCryptoDependent.js && father-build --docker",
     "changelog": "conventional-changelog -p angular -i CHANGELOG.md -w",
     "chore:update-deps": "sh ./scripts/reinstall_deps.sh",
     "clean": "lerna clean -y",
@@ -58,12 +61,10 @@
       "email": "softwaiter@126.com"
     }
   ],
-  "license": "MIT",
-  "engines": {
-    "node": ">=10.21.0"
-  },
+  "license": "AGPL 3.0",
   "workspaces": [
     "packages/*",
+    "pro-packages/*",
     "examples/*"
   ],
   "devDependencies": {

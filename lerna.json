@@ -1,4 +1,5 @@
 {
+  "version": "independent",
   "changelog": {
     "labels": {
       "pr(enhancement)": ":improvement: Enhancement",
@@ -11,16 +12,24 @@
     "cacheDir": ".changelog"
   },
   "packages": [
-    "packages/*"
+    "packages/*",
+    "pro-packages/*",
+    "examples/*"
   ],
-  "version": "2.3.0",
   "publishConfig": {
     "access": "public"
   },
   "command": {
     "publish": {
       "git-tag-version": false,
-      "push": false
+      "push": false,
+      "npmClient": "npm",
+      "ignoreChanges": [
+        "**/*.md",
+        "**/test/**"
+      ],
+      "message": "chore(release): publish",
+      "registry": "https://registry.npmjs.org"
     }
   },
   "useWorkspaces": true,

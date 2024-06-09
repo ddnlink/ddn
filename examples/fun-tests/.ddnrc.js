@@ -2,7 +2,7 @@
  *  Created by Imfly on Sun Dec 29 2019 15:57:56
  *
  *  Copyright (c) 2019 DDN FOUNDATION. All rights reserved.
- *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *  Licensed under the AGPL 3.0 License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
 module.exports = {

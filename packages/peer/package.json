@@ -39,7 +39,7 @@
       "email": "softwaiter@126.com"
     }
   ],
-  "license": "MIT",
+  "license": "AGPL 3.0",
   "engines": {
     "node": ">=8.6.0"
   },

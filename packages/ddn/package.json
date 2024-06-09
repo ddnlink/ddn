@@ -18,7 +18,7 @@
         "lib"
     ],
     "author": "HuoDing <hd@qq.com>",
-    "license": "MIT",
+    "license": "AGPL 3.0",
     "dependencies": {
         "@ddn/contract": "^0.3.2",
         "@ddn/crypto": "^2.2.3",

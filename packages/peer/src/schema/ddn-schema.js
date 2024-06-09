@@ -2,7 +2,7 @@
  *  Created by wangxm on Mon Mar 13 2019 8:52:48
  *
  *  Copyright (c) 2019 DDN.link. All rights reserved.
- *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *  Licensed under the AGPL 3.0 License. See License.txt in the project root for license information.
  *-------------------------------------------------------------------------------------------- */
 
 /**

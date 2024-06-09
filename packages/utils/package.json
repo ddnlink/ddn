@@ -14,13 +14,14 @@
     "url": "http://github.com/ddnlink/ddn/issues"
   },
   "files": [
-    "lib"
+    "lib",
+    "dist"
   ],
   "dependencies": {
     "bignumber.js": "^7.2.1",
     "request-promise": "^4.2.6"
   },
   "author": "wly",
-  "license": "MIT",
+  "license": "AGPL 3.0",
   "gitHead": "0e408aa8284ccd776659503df9e35a079ee912d6"
 }

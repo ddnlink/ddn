@@ -2,7 +2,7 @@
  *  Created by wxx on Sun May 06 2017 11:39:6
  *
  *  Copyright (c) 2018 DDN FOUNDATION. All rights reserved.
- *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *  Licensed under the AGPL 3.0 License. See License.txt in the project root for license information.
  *-------------------------------------------------------------------------------------------- */
 /**
  * 这是资产模型的基类

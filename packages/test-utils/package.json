@@ -15,7 +15,7 @@
     "url": "http://github.com/ddnlink/ddn/issues"
   },
   "author": "limsbase",
-  "license": "MIT",
+  "license": "AGPL 3.0",
   "dependencies": {
     "@ddn/core": "^2.2.3",
     "@ddn/utils": "^2.2.3"

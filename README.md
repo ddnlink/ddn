@@ -81,6 +81,6 @@ Please visit [CONTRIBUTING](./docs/guide/contributing.md)
 
 ## License
 
-The MIT License (MIT)
+The AGPL 3.0 License (AGPL 3.0)
 
-Copyright (c) 2016-2020 DDN FOUNDATION. All rights reserved. See License.txt in the project root for license information.
+Copyright (c) 2016-2024 DDN FOUNDATION. All rights reserved. See License.txt in the project root for license information.

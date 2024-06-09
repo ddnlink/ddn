@@ -8,7 +8,7 @@
 </h1>
 
 <p align="center">
-  <a href="https://github.com/ddnlink/ddn/blob/master/LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="GitHub license"></a>
+  <a href="https://github.com/ddnlink/ddn/blob/master/LICENSE"><img src="https://img.shields.io/badge/license-AGPL 3.0-blue.svg" alt="GitHub license"></a>
   <a href="https://www.npmjs.com/package/ddn"><img src="https://img.shields.io/npm/v/ddn.svg?style=flat" alt="npm version"></a>
   <a href="https://www.npmjs.com/package/ddn"><img src="https://img.shields.io/npm/dm/ddn.svg?style=flat" alt="Downloads"></a>
   <a href="https://github.com/ddnlink/ddn/actions"><img src="https://github.com/ddnlink/ddn/workflows/Node.js%20CI/badge.svg" alt="Build Status"></a>
@@ -84,6 +84,6 @@ DDN, 是一个成熟的企业级区块链系统，已经服务于版权存证、
 
 ## 协议
 
-The MIT License (MIT)
+The AGPL 3.0 License (AGPL 3.0)
 
-版权 (c) 2016-2020 DDN基金会。权限受保护。请查看授权文件License.txt获取更多授权信息。
+版权 (c) 2016-2024 DDN基金会。权限受保护。请查看授权文件License.txt获取更多授权信息。

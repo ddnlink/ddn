@@ -39,13 +39,13 @@ screenshot
 .eslintcache
 
 # packages
-/packages/asset-aob
 /packages/*/node_modules
 /packages/*/lib
 /packages/*/dist
 /packages/**/node_modules/.cache
 /packages/**/.docz
 /packages/**/package-lock\.json
+/pro-packages
 
 # settings
 config/deploy
