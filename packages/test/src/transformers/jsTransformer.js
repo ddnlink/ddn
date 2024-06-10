@@ -4,7 +4,7 @@ const { compatDirname } = require('umi-utils')
 
 const cwd = process.cwd()
 
-module.exports = babelJest.createTransformer({
+module.exports = babelJest.default.createTransformer({
   presets: [
     require.resolve('@babel/preset-typescript'),
     [
@@ -21,21 +21,9 @@ module.exports = babelJest.createTransformer({
       {
         alias: {
           // Projects don't need to install react, react-dom and enzyme
-          react: compatDirname(
-            'react/package',
-            cwd,
-            dirname(require.resolve('react/package.json'))
-          ),
-          'react-dom': compatDirname(
-            'react-dom/package',
-            cwd,
-            dirname(require.resolve('react-dom/package.json'))
-          ),
-          enzyme: compatDirname(
-            'enzyme/package.json',
-            cwd,
-            dirname(require.resolve('enzyme/package.json'))
-          ),
+          react: compatDirname('react/package', cwd, dirname(require.resolve('react/package.json'))),
+          'react-dom': compatDirname('react-dom/package', cwd, dirname(require.resolve('react-dom/package.json'))),
+          enzyme: compatDirname('enzyme/package.json', cwd, dirname(require.resolve('enzyme/package.json'))),
           'enzyme-adapter-react-16': compatDirname(
             'enzyme-adapter-react-16/package.json',
             cwd,
