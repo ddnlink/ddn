@@ -1,52 +1,52 @@
 {
-    "name": "@ddn/ddn",
-    "preferGlobal": true,
-    "version": "2.3.0",
-    "description": "A Command line tool to manage ddn",
-    "main": "./lib/index.js",
-    "scripts": {
-        "test": "echo \"Error: no test specified\" && exit 0"
-    },
-    "keywords": [
-        "ddn",
-        "cli"
-    ],
-    "bin": {
-        "ddn": "./bin/ddn"
-    },
-    "files": [
-        "lib"
-    ],
-    "author": "HuoDing <hd@qq.com>",
-    "license": "AGPL 3.0",
-    "dependencies": {
-        "@ddn/contract": "^0.3.2",
-        "@ddn/crypto": "^2.2.3",
-        "@ddn/node-sdk": "^2.3.0",
-        "@ddn/utils": "^2.2.3",
-        "async": "1.5.2",
-        "bytebuffer": "^4.0.0",
-        "fs-extra": "0.30.0",
-        "gift": "0.6.1",
-        "handlebars-helpers": "^0.10.0",
-        "inquirer": "^7.0.3",
-        "moment": "^2.29.1",
-        "ora": "^4.0.3",
-        "request": "^2.62.0",
-        "rmdir": "^1.1.0",
-        "shelljs": "^0.8.4",
-        "symbols": "^0.0.6",
-        "valid-url": "1.0.9",
-        "y18n": "^5.0.2",
-        "yargs": "^16.0.3"
-    },
-    "bugs": {
-        "url": "https://github.com/ddnlink/ddn/issues"
-    },
-    "repository": {
-        "type": "git",
-        "url": "https://github.com/ddnlink/ddn/tree/master/packages/ddn"
-    },
-    "homepage": "https://github.com/ddnlink/ddn/tree/master/packages/ddn",
-    "gitHead": "0e408aa8284ccd776659503df9e35a079ee912d6"
+  "name": "@ddn/ddn",
+  "preferGlobal": true,
+  "version": "2.4.0",
+  "description": "A Command line tool to manage ddn",
+  "main": "./lib/index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 0"
+  },
+  "keywords": [
+    "ddn",
+    "cli"
+  ],
+  "bin": {
+    "ddn": "./bin/ddn"
+  },
+  "files": [
+    "lib"
+  ],
+  "author": "HuoDing <hd@qq.com>",
+  "license": "AGPL 3.0",
+  "dependencies": {
+    "@ddn/contract": "^0.3.2",
+    "@ddn/crypto": "^2.4.0",
+    "@ddn/node-sdk": "^2.4.0",
+    "@ddn/utils": "^2.4.0",
+    "async": "1.5.2",
+    "bytebuffer": "^4.0.0",
+    "fs-extra": "0.30.0",
+    "gift": "0.6.1",
+    "handlebars-helpers": "^0.10.0",
+    "inquirer": "^7.0.3",
+    "moment": "^2.29.1",
+    "ora": "^4.0.3",
+    "request": "^2.62.0",
+    "rmdir": "^1.1.0",
+    "shelljs": "^0.8.4",
+    "symbols": "^0.0.6",
+    "valid-url": "1.0.9",
+    "y18n": "^5.0.2",
+    "yargs": "^16.0.3"
+  },
+  "bugs": {
+    "url": "https://github.com/ddnlink/ddn/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ddnlink/ddn/tree/master/packages/ddn"
+  },
+  "homepage": "https://github.com/ddnlink/ddn/tree/master/packages/ddn",
+  "gitHead": "0e408aa8284ccd776659503df9e35a079ee912d6"
 }

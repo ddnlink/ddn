@@ -44,7 +44,6 @@ screenshot
 /packages/*/dist
 /packages/**/node_modules/.cache
 /packages/**/.docz
-/packages/**/package-lock\.json
 /pro-packages
 
 # settings
