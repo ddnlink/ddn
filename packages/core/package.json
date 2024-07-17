@@ -1,6 +1,6 @@
 {
   "name": "@ddn/core",
-  "version": "2.4.2",
+  "version": "2.4.3",
   "description": "DDN core.",
   "main": "./lib/index.js",
   "module": "./dist/index.esm.js",
