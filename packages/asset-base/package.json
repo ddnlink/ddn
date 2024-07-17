@@ -1,6 +1,6 @@
 {
   "name": "@ddn/asset-base",
-  "version": "2.4.0",
+  "version": "2.4.1",
   "description": "DDN资产基类相关信息",
   "main": "./lib/index.js",
   "module": "./dist/index.esm.js",
@@ -20,7 +20,7 @@
   "author": "wangxm",
   "license": "AGPL 3.0",
   "dependencies": {
-    "@ddn/utils": "^2.4.0",
+    "@ddn/utils": "^2.4.1",
     "lodash": "^4.17.15"
   },
   "gitHead": "19193adc96f65c66ec27939a33c999f1a7f92472"
