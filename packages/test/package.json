@@ -19,7 +19,7 @@
     "lib",
     "src"
   ],
-  "gitHead": "7241f5ec978f652ea15eb59e01a33d92bdff34a3",
+  "gitHead": "19193adc96f65c66ec27939a33c999f1a7f92472",
   "devDependencies": {
     "@babel/core": "^7.8.0",
     "@babel/plugin-syntax-function-bind": "^7.24.7",
