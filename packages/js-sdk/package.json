@@ -2,8 +2,8 @@
   "name": "@ddn/js-sdk",
   "version": "2.2.3",
   "description": "DDN Node.js SDK",
-  "main": "lib/index.js",
-  "module": "dist/index.esm.js",
+  "main": "./lib/index.js",
+  "module": "./dist/index.esm.js",
   "files": [
     "lib",
     "dist",

@@ -1,0 +1,23 @@
+{
+    "env": {
+        "commonjs": true,
+        "es6": true,
+        "node": true,
+        "jest": true,
+        "browser": true // 如果不配置browser，window就会被eslint报undefined的错
+    },
+    "extends": [
+        "standard", // "eslint:recommended" //  "airbnb-base" //
+        // "plugin:prettier/recommended", // 重写冲突部分
+        "prettier/standard"
+    ],
+    "parserOptions": {
+        "ecmaVersion": 2018,
+        "sourceType": "module"
+    },
+    "rules": {
+        "camelcase": "off",
+				"no-unused-expressions": "off",
+				"standard/no-callback-literal": [0, ["cb", "callback"]]
+    }
+}

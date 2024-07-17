@@ -46,43 +46,49 @@ class Program {
       options.configObject.publicIp = System.getPublicIp()
     }
 
-    this._context = new Context()
-    await this._context.init(options)
+    const ctx = new Context()
+    await ctx.init(options)
 
-    this._context.runtime.state = runtimeState.Pending
-    this._context.runtime.loaded = false
+    ctx.runtime.state = runtimeState.Pending
+    ctx.runtime.loaded = false
 
     // 区块核心处理模块
-    this._context.runtime.block = Block.singleton(this._context)
+    ctx.runtime.block = Block.singleton(ctx)
     // 交易核心处理模块
-    this._context.runtime.transaction = Transaction.singleton(this._context)
+    ctx.runtime.transaction = Transaction.singleton(ctx)
     // 账户核心处理模块
-    this._context.runtime.account = Account.singleton(this._context)
+    ctx.runtime.account = Account.singleton(ctx)
     // multisignature
-    this._context.runtime.multisignature = MultiSignature.singleton(this._context)
+    ctx.runtime.multisignature = MultiSignature.singleton(ctx)
     // Slot
-    this._context.runtime.slot = Slot.singleton(this._context)
+    ctx.runtime.slot = Slot.singleton(ctx)
     // Delegate
-    this._context.runtime.delegate = Delegate.singleton(this._context)
+    ctx.runtime.delegate = Delegate.singleton(ctx)
     // Round
-    this._context.runtime.round = Round.singleton(this._context)
+    ctx.runtime.round = Round.singleton(ctx)
     // Consensus
-    this._context.runtime.consensus = Consensus.singleton(this._context)
+    ctx.runtime.consensus = Consensus.singleton(ctx)
     // Peer
-    this._context.runtime.peer = Peer.singleton(this._context)
+    ctx.runtime.peer = Peer.singleton(ctx)
     // Data Query
-    this._context.runtime.dataquery = DataQuery.singleton(this._context)
+    ctx.runtime.dataquery = DataQuery.singleton(ctx)
     // Energy
-    this._context.runtime.energy = Energy.singleton(this._context)
+    ctx.runtime.energy = Energy.singleton(ctx)
     // Compiler
-    this._context.runtime.compiler = new Compiler()
+    ctx.runtime.compiler = new Compiler()
     // negotiate
-    this._context.runtime.dvm = new DVM({
-      dataDir: path.join(this._context.baseDir, '/db/contracts'),
-      logDir: path.join(this._context.baseDir, '/logs/'),
+    ctx.runtime.dvm = new DVM({
+      dataDir: path.join(ctx.baseDir, '/db/contracts'),
+      logDir: path.join(ctx.baseDir, '/logs/'),
       logLevel: options.configObject.logLevel,
       isDev: process.env.NODE_ENV !== 'production'
     })
+
+    // 启用新版本
+    this.ctx = ctx
+
+    // 兼容旧版本 imfly 20240701
+    this._context = this.ctx
 
     // 锁文件，存储当前运行进程的ID
     this._pid_file = path.join(options.baseDir, 'ddn.pid')
@@ -95,7 +101,7 @@ class Program {
    * 文件锁，保证系统只能运行一份
    */
   _checkProcessState () {
-    if (this._context.isDaemonMode) {
+    if (this.ctx.isDaemonMode) {
       try {
         var fd = fs.openSync(this._pid_file, 'wx')
         fs.writeSync(fd, process.pid)
@@ -129,14 +135,14 @@ class Program {
    * 升级数据库结构
    */
   async _applyDatabaseUpgrade () {
-    return await dbUpgrade.upgrade(this._context)
+    return await dbUpgrade.upgrade(this.ctx)
   }
 
   /**
    * 校验创世区块的数据
    */
   async _checkGenesisBlock () {
-    const block = this._context.genesisblock
+    const block = this.ctx.genesisblock
 
     let payloadBytes = ''
     let payloadLength = 0
@@ -148,7 +154,7 @@ class Program {
     }
 
     const payloadHash = DdnCrypto.createHash(Buffer.from(payloadBytes))
-    const id = await this._context.runtime.block.getId(block)
+    const id = await this.ctx.runtime.block.getId(block)
     assert(payloadLength === block.payload_length, 'Unexpected payloadLength')
     assert(payloadHash.toString('hex') === block.payload_hash, 'Unexpected payloadHash')
     assert(id === block.id, 'Unexpected block id')
@@ -165,9 +171,9 @@ class Program {
     options.configObject = extend(true, defaultConfig, options.configObject)
 
     process.once('cleanup', async () => {
-      this._context.logger.info('Cleaning up...')
+      this.ctx.logger.info('Cleaning up...')
       await this._beforeClose()
-      await this._context.close()
+      await this.ctx.close()
       this._resetProcessState()
       process.exit(1)
     })
@@ -178,7 +184,7 @@ class Program {
 
     process.once('exit', () => {
       process.emit('cleanup')
-      this._context.logger.info('process exited')
+      this.ctx.logger.info('process exited')
     })
 
     process.once('SIGINT', () => {
@@ -190,7 +196,7 @@ class Program {
     })
 
     process.on('uncaughtException', err => {
-      this._context.logger.fatal('uncaughtException', { message: err.message, stack: err.stack })
+      this.ctx.logger.fatal('uncaughtException', { message: err.message, stack: err.stack })
       process.emit('cleanup')
     })
 
@@ -221,48 +227,48 @@ class Program {
       process.exit(1)
     }
 
-    if (!this._context.config.publicIp) {
-      this._context.logger.warn('Failed to get public ip, block forging may not work!')
+    if (!this.ctx.config.publicIp) {
+      this.ctx.logger.warn('Failed to get public ip, block forging may not work!')
     }
 
     // 启动dvm
-    await this._context.runtime.dvm.run()
-    // const contracts = await this._context.dao.findList('contract', { where: { state: 0 } })
-    // await this._context.runtime.dvm.loadContracts(contracts.map(c => c.id))
+    await this.ctx.runtime.dvm.run()
+    // const contracts = await this.ctx.dao.findList('contract', { where: { state: 0 } })
+    // await this.ctx.runtime.dvm.loadContracts(contracts.map(c => c.id))
     // dvm 就緒回調函數
     this._dvmReady()
 
     // 初始化创世区块
-    await this._context.runtime.block.handleGenesisBlock()
+    await this.ctx.runtime.block.handleGenesisBlock()
 
     // 初始化账户以及余额
     try {
       // TODO next optimize initAccountsAndBalances like onInitAccountsAndBalances use
-      await this._context.runtime.account.initAccountsAndBalances()
+      await this.ctx.runtime.account.initAccountsAndBalances()
       // init asset banlance when start program
-      await this._context.runtime.transaction.execAssetFunc('onInitAccountsAndBalances')
+      await this.ctx.runtime.transaction.execAssetFunc('onInitAccountsAndBalances')
     } catch (err) {
-      this._context.logger.error('Failed to load blockchain', System.getErrorMsg(err))
+      this.ctx.logger.error('Failed to load blockchain', System.getErrorMsg(err))
       return process.exit(1)
     }
 
     // 启动准备（节点）
-    await this._context.runtime.peer.prepare()
+    await this.ctx.runtime.peer.prepare()
 
     // 启动准备（Round）
-    await this._context.runtime.round.prepare()
+    await this.ctx.runtime.round.prepare()
 
     // 启动准备（受托人）
-    await this._context.runtime.delegate.prepare()
+    await this.ctx.runtime.delegate.prepare()
 
     // 启动节点网络服务
-    this._context.runtime.httpserver = await HttpServer.newServer(this._context).start()
+    this.ctx.runtime.httpserver = await HttpServer.newServer(this.ctx).start()
 
     // 系统准备完毕，进入待命状态
-    if (this._context.isDaemonMode) {
-      this._context.logger.info('DDN server started as daemon ...')
+    if (this.ctx.isDaemonMode) {
+      this.ctx.logger.info('DDN server started as daemon ...')
     } else {
-      this._context.logger.info('DDN Start Successfully!')
+      this.ctx.logger.info('DDN Start Successfully!')
     }
 
     await this._bindReady()
@@ -280,20 +286,20 @@ class Program {
     // 启动区块铸造任务
     await this.startForgeBlockTask()
 
-    this._context.runtime.loaded = true
+    this.ctx.runtime.loaded = true
   }
 
   async _bindReady () {
-    // if (this._context.runtime.loaded) {
+    // if (this.ctx.runtime.loaded) {
     // 通知资产系统已就绪事件
-    await this._context.runtime.transaction.execAssetFunc('onBind')
+    await this.ctx.runtime.transaction.execAssetFunc('onBind')
     // }
   }
 
   async _blockchainReady () {
-    if (!this._blockchainReadyFired && this._context.runtime.state === runtimeState.Ready) {
+    if (!this._blockchainReadyFired && this.ctx.runtime.state === runtimeState.Ready) {
       // 通知资产系统已就绪事件
-      await this._context.runtime.transaction.execAssetFunc('onBlockchainReady')
+      await this.ctx.runtime.transaction.execAssetFunc('onBlockchainReady')
       // 块加载完成
 
       this._blockchainReadyFired = true
@@ -304,27 +310,28 @@ class Program {
 
   // lifeCycle function
   async _configWillLoad (options) {
-    if ((options.lifeCycle || {}).configWillLoad) await this._context.configWillLoad()
+    if ((options.lifeCycle || {}).configWillLoad) await this.ctx.configWillLoad()
   }
 
   async _configLoaded () {
-    if (this._context.configLoaded) await this._context.configLoaded()
+    if (this.ctx.configLoaded) await this.ctx.configLoaded()
   }
 
   async _assetsLoaded () {
-    if (this._context.assetsLoaded) await this._context.assetsLoaded()
+    if (this.ctx.assetsLoaded) await this.ctx.assetsLoaded()
   }
 
   async _dvmReady () {
-    if (this._context.dvmReady) await this._context.dvmReady()
+    if (this.ctx.dvmReady) await this.ctx.dvmReady()
   }
 
+  // fixme: 上下文ctx 未提供 appReady(), 该方法默认空实现 imfly 20240630
   async _appReady () {
-    if (this._context.appReady) await this._context.appReady()
+    if (this.ctx.appReady) await this.ctx.appReady()
   }
 
   async _beforeClose () {
-    if (this._context.beforeClose) await this._context.beforeClose()
+    if (this.ctx.beforeClose) await this.ctx.beforeClose()
   }
 
   /**
@@ -332,9 +339,9 @@ class Program {
    */
   async startSignaturesSyncTask () {
     try {
-      await this._context.runtime.peer.syncSignatures()
+      await this.ctx.runtime.peer.syncSignatures()
     } catch (err) {
-      this._context.logger.warn('The signatures sync task error: ' + err)
+      this.ctx.logger.warn('The signatures sync task error: ' + err)
     }
 
     setTimeout(() => {
@@ -347,13 +354,13 @@ class Program {
    */
   async startUnconfirmedTransactionSyncTask () {
     try {
-      if (this._context.runtime.state === runtimeState.Syncing) {
+      if (this.ctx.runtime.state === runtimeState.Syncing) {
         return
       }
 
-      await this._context.runtime.peer.syncUnconfirmedTransactions()
+      await this.ctx.runtime.peer.syncUnconfirmedTransactions()
     } catch (err) {
-      this._context.logger.warn('The unconfirmed transaction sync task error: ' + err)
+      this.ctx.logger.warn('The unconfirmed transaction sync task error: ' + err)
     }
 
     setTimeout(() => {
@@ -365,46 +372,49 @@ class Program {
    * 同步节点区块数据（轮询）
    */
   async startBlockDataSyncTask () {
+    this.ctx.logger.warn('startBlockDataSyncTask enter...')
     const next = () => {
       setTimeout(() => {
         this.startBlockDataSyncTask()
       }, 1000 * 10)
     }
-    const peer = await this._context.runtime.peer.p2p.getPeer()
+    const peer = await this.ctx.runtime.peer.p2p.getPeer()
 
-    // this._context.logger.warn('-----startBlockDataSyncTask------', peer)
+    this.ctx.logger.warn('startBlockDataSyncTask get peer: ', peer)
+
     if (!peer) {
-      this._context.logger.debug('change state is ready')
-      this._context.runtime.state = runtimeState.Ready
+      this.ctx.logger.debug('Change state to \'ready\'')
+      this.ctx.runtime.state = runtimeState.Ready
       await this._blockchainReady()
       next()
       return
     }
+
     try {
-      if (this._context.runtime.state === runtimeState.Syncing) {
+      if (this.ctx.runtime.state === runtimeState.Syncing) {
         next()
         return
       }
 
-      const lastBlock = this._context.runtime.block.getLastBlock()
-      const lastSlot = this._context.runtime.slot.getSlotNumber(lastBlock.timestamp)
-      if (this._context.runtime.slot.getNextSlot() - lastSlot < 3) {
+      const lastBlock = this.ctx.runtime.block.getLastBlock()
+      const lastSlot = this.ctx.runtime.slot.getSlotNumber(lastBlock.timestamp)
+      if (this.ctx.runtime.slot.getNextSlot() - lastSlot < 3) {
         next()
         return
       }
-      this._context.runtime.state = runtimeState.Syncing
-      this._context.logger.debug('SyncBlocks enter')
-      const success = await this._context.runtime.peer.syncBlocks()
-      this._context.logger.debug('SyncBlocks outer')
+      this.ctx.runtime.state = runtimeState.Syncing
+      this.ctx.logger.debug('SyncBlocks enter')
+      const success = await this.ctx.runtime.peer.syncBlocks()
+      this.ctx.logger.debug('SyncBlocks outer')
       if (success) {
-        this._context.runtime.state = runtimeState.Ready
+        this.ctx.runtime.state = runtimeState.Ready
         await this._blockchainReady()
       } else {
-        this._context.logger.debug('SyncBlocks not complete change state pending')
-        this._context.runtime.state = runtimeState.Pending
+        this.ctx.logger.debug('SyncBlocks not complete change state pending')
+        this.ctx.runtime.state = runtimeState.Pending
       }
     } catch (err) {
-      this._context.logger.error('The block sync task error: ' + err)
+      this.ctx.logger.error('The block sync task error: ' + err)
     }
 
     next()
@@ -415,54 +425,54 @@ class Program {
    */
   async startForgeBlockTask () {
     await (async () => {
-      if (this._context.runtime.state !== runtimeState.Ready) {
+      if (this.ctx.runtime.state !== runtimeState.Ready) {
         return
       }
 
-      if (!this._context.runtime.delegate.isForgeEnabled()) {
-        this._context.logger.trace('Loop:', 'forging disabled')
+      if (!this.ctx.runtime.delegate.isForgeEnabled()) {
+        this.ctx.logger.trace('Loop:', 'forging disabled')
         return
       }
 
-      if (!this._context.runtime.delegate.hasValidDelegates()) {
-        this._context.logger.trace('Loop:', 'no delegates')
+      if (!this.ctx.runtime.delegate.hasValidDelegates()) {
+        this.ctx.logger.trace('Loop:', 'no delegates')
         return
       }
 
-      const currentSlot = this._context.runtime.slot.getSlotNumber()
+      const currentSlot = this.ctx.runtime.slot.getSlotNumber()
 
-      const lastBlock = this._context.runtime.block.getLastBlock()
-      if (currentSlot === this._context.runtime.slot.getSlotNumber(lastBlock.timestamp)) {
-        this._context.logger.trace('Loop:', 'lastBlock is in the same slot')
+      const lastBlock = this.ctx.runtime.block.getLastBlock()
+      if (currentSlot === this.ctx.runtime.slot.getSlotNumber(lastBlock.timestamp)) {
+        this.ctx.logger.trace('Loop:', 'lastBlock is in the same slot')
         return
       }
 
-      if (Date.now() % (this._context.constants.interval * 1000) > (this._context.constants.interval * 1000) / 2) {
-        this._context.logger.trace('Loop:', 'maybe too late to collect votes')
+      if (Date.now() % (this.ctx.constants.interval * 1000) > (this.ctx.constants.interval * 1000) / 2) {
+        this.ctx.logger.trace('Loop:', 'maybe too late to collect votes')
         return
       }
 
-      const forgeDelegateInfo = await this._context.runtime.delegate.getForgeDelegateWithCurrentTime(
+      const forgeDelegateInfo = await this.ctx.runtime.delegate.getForgeDelegateWithCurrentTime(
         currentSlot,
         bignum.plus(lastBlock.height, 1)
       )
       if (forgeDelegateInfo === null) {
-        this._context.logger.trace('Loop:', 'skipping slot')
+        this.ctx.logger.trace('Loop:', 'skipping slot')
         return
       }
 
       await new Promise(resolve => {
-        this._context.sequence.add(
+        this.ctx.sequence.add(
           async cb => {
             if (
-              this._context.runtime.slot.getSlotNumber(forgeDelegateInfo.time) ===
-                this._context.runtime.slot.getSlotNumber() &&
-              this._context.runtime.block.getLastBlock().timestamp < forgeDelegateInfo.time
+              this.ctx.runtime.slot.getSlotNumber(forgeDelegateInfo.time) ===
+                this.ctx.runtime.slot.getSlotNumber() &&
+              this.ctx.runtime.block.getLastBlock().timestamp < forgeDelegateInfo.time
             ) {
               try {
-                await this._context.runtime.block.generateBlock(forgeDelegateInfo.keypair, forgeDelegateInfo.time)
+                await this.ctx.runtime.block.generateBlock(forgeDelegateInfo.keypair, forgeDelegateInfo.time)
               } catch (err) {
-                this._context.logger.error('Forged new block failed: ' + System.getErrorMsg(err))
+                this.ctx.logger.error('Forged new block failed: ' + System.getErrorMsg(err))
                 cb('Forged new block failed: ' + err) // Added: 2020.9.4
               }
             }
@@ -471,7 +481,7 @@ class Program {
           },
           err => {
             if (err) {
-              this._context.logger.error('Failed generate block within slot:', err)
+              this.ctx.logger.error('Failed generate block within slot:', err)
             }
 
             resolve()

@@ -3,6 +3,7 @@
   "version": "2.2.3",
   "description": "DDN core.",
   "main": "./lib/index.js",
+  "module": "./dist/index.esm.js",
   "keywords": [
     "ddn",
     "core"
@@ -11,7 +12,8 @@
   "homepage": "https://github.com/ddnlink/ddn/tree/master/packages/core#readme",
   "license": "AGPL 3.0",
   "files": [
-    "lib"
+    "lib",
+    "dist"
   ],
   "repository": {
     "type": "git",

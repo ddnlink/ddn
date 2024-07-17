@@ -10,8 +10,8 @@
   "author": "imfly <kubying@qq.com>",
   "homepage": "https://github.com/ddnlink/ddn/tree/master/packages/crypto#readme",
   "license": "AGPL 3.0",
-  "main": "lib/index.js",
-  "module": "dist/index.esm.js",
+  "main": "./lib/index.js",
+  "module": "./dist/index.esm.js",
   "files": [
     "lib",
     "dist"

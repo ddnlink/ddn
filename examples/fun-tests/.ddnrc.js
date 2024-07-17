@@ -18,7 +18,6 @@ module.exports = {
   payloadLimitSize: '8mb',
   clientDriftSeconds: 5,
   p2pPort: 9001,
-  crypto: '@ddn/crypto-nacl',
   /**
    * About Api
    */
@@ -28,7 +27,10 @@ module.exports = {
     }
   },
   peers: {
-    list: [],
+    list: [
+      { ip: '127.0.0.1', port: '9002' },
+      { ip: '127.0.0.1', port: '9003' },
+    ],
     blackList: [],
     options: {
       timeout: 4000
@@ -36,8 +38,8 @@ module.exports = {
   },
   forging: {
     secret: [
-      'account cycle reflect retreat donor once mansion quote staff airport zero enable',
-      'please tragic gesture distance immense supreme amused weasel auto bag glad rate',
+      // 'account cycle reflect retreat donor once mansion quote staff airport zero enable',
+      // 'please tragic gesture distance immense supreme amused weasel auto bag glad rate',
       'roast minimum leave they there charge blast grace gown faculty hood aware',
       'perfect age spell digital pretty engage hope tattoo mimic network outdoor mesh',
       'plunge cave taste cargo village use art conduct aerobic hard obvious zone',
@@ -228,5 +230,6 @@ module.exports = {
    *  "@ddn/asset-aob"
    * ]
    */
-  assets: ['@ddn/asset-evidence', '@ddn/asset-dapp', '@ddn/asset-aob']
+  assets: ['@ddn/asset-evidence', '@ddn/asset-dapp', '@ddn/asset-aob'],
+  crypto: '@ddn/crypto-nacl' // 绿化钠 @ddn/crypto-nacl ，国密 @ddn/crypto-sm
 }

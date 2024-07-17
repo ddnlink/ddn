@@ -5,7 +5,7 @@
  *  Licensed under the AGPL 3.0 License. See License.txt in the project root for license information.
  *-------------------------------------------------------------------------------------------- */
 
-import ddn from './constants.ddn'
+import ddn from './constants.testnet'
 
 let constants = ddn
 

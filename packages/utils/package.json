@@ -2,8 +2,8 @@
   "name": "@ddn/utils",
   "version": "2.2.3",
   "description": "DDN utils.",
-  "main": "lib/index.js",
-  "module": "dist/index.esm.js",
+  "main": "./lib/index.js",
+  "module": "./dist/index.esm.js",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/ddnlink/ddn.git",

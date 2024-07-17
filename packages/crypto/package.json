@@ -2,8 +2,8 @@
   "name": "@ddn/crypto",
   "version": "2.2.3",
   "description": "this is Adaptation",
-  "main": "lib/index.js",
-  "module": "dist/index.esm.js",
+  "main": "./lib/index.js",
+  "module": "./dist/index.esm.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },

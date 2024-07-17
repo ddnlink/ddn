@@ -1,7 +1,12 @@
-/**
- * Peer
- * wangxm   2019-01-14
+/*
+ * @Author: imfly
+ * @Email: kubying@foxmail.com
+ * @Date: 2024-06-29 23:08:40
+ * @Last Modified by:   imfly
+ * @Last Modified time: 2024-06-29 23:09:19
+ * @Description: Peer of DDN
  */
+
 import path from 'path'
 import { P2P } from '@ddn/p2p'
 import Router from './peer-router'

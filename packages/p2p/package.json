@@ -1,0 +1,53 @@
+{
+  "name": "@ddn/p2p",
+  "version": "1.3.0",
+  "description": "The nodejs implementation of DDN P2P protocol",
+  "main": "dist/index.js",
+  "module": "dist/index.esm.js",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "father-build",
+    "prod": "father-build",
+    "test": "jest",
+    "lint": "eslint --ext .js ."
+  },
+  "keywords": [
+    "ddn",
+    "node",
+    "p2p"
+  ],
+  "author": "Tailor",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "http://github.com/ddnlink/ddn/tree/master/packages/node-sdk"
+  },
+  "homepage": "http://github.com/ddnlink/ddn/tree/master/packages/node-sdk",
+  "bugs": {
+    "url": "http://github.com/ddnlink/ddn/issues"
+  },
+  "dependencies": {
+    "socks5-client": "^1.2.8"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.15.0",
+    "@babel/preset-env": "^7.15.0",
+    "@types/jest": "^23.3.2",
+    "@types/lodash": "^4.14.116",
+    "@types/node": "^10.12.26",
+    "babel-jest": "^27.0.6",
+    "eslint": "^7.11.0",
+    "eslint-config-airbnb-base": "^14.2.0",
+    "eslint-config-prettier": "^6.12.0",
+    "eslint-config-standard": "^14.1.1",
+    "eslint-plugin-import": "^2.21.2",
+    "eslint-plugin-node": "^11.1.0",
+    "eslint-plugin-prettier": "^3.1.4",
+    "eslint-plugin-promise": "^4.2.1",
+    "eslint-plugin-standard": "^4.0.1",
+    "father-build": "1.19.2",
+    "jest": "^27.0.6"
+  }
+}

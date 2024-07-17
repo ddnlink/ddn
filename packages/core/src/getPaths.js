@@ -1,8 +1,8 @@
-import { join } from 'path'
-import { existsSync, statSync } from 'fs'
+import path from 'path'
+import fs from 'fs'
 
 function test (path) {
-  return existsSync(path) && statSync(path).isDirectory()
+  return fs.existsSync(path) && fs.statSync(path).isDirectory()
 }
 
 // interface IOpts {
@@ -18,37 +18,37 @@ export default function (opts) {
   if (process.env.PUBLIC_PATH) {
     publicPath = process.env.PUBLIC_PATH
   } else {
-    if (test(join(cwd, 'src/public'))) {
+    if (test(path.join(cwd, 'src/public'))) {
       publicPath = 'src/public'
     }
-    if (test(join(cwd, 'public'))) {
+    if (test(path.join(cwd, 'public'))) {
       publicPath = 'public'
     }
   }
 
-  const absPagesPath = join(cwd, publicPath)
-  const absSrcPath = join(absPagesPath, '../')
+  const absPagesPath = path.join(cwd, publicPath)
+  const absSrcPath = path.join(absPagesPath, '../')
 
   const envAffix = process.env.NODE_ENV === 'development' ? '' : '-production'
   const tmpDirPath = process.env.DDN_TEMP_DIR
     ? `${process.env.DDN_TEMP_DIR}${envAffix}`
     : `${publicPath}/.ddn${envAffix}`
 
-  const absTmpDirPath = join(cwd, tmpDirPath)
+  const absTmpDirPath = path.join(cwd, tmpDirPath)
 
   return {
     cwd,
     outputPath,
-    absOutputPath: join(cwd, outputPath),
-    absNodeModulesPath: join(cwd, 'node_modules'),
+    absOutputPath: path.join(cwd, outputPath),
+    absNodeModulesPath: path.join(cwd, 'node_modules'),
     publicPath,
     absPagesPath,
     absSrcPath,
     tmpDirPath,
     absTmpDirPath,
-    absRouterJSPath: join(absTmpDirPath, 'router.js'),
-    absLibraryJSPath: join(absTmpDirPath, 'ddn.js'),
-    absRegisterSWJSPath: join(absTmpDirPath, 'registerServiceWorker.js'),
-    absPageDocumentPath: join(absPagesPath, 'document.ejs')
+    absRouterJSPath: path.join(absTmpDirPath, 'router.js'),
+    absLibraryJSPath: path.join(absTmpDirPath, 'ddn.js'),
+    absRegisterSWJSPath: path.join(absTmpDirPath, 'registerServiceWorker.js'),
+    absPageDocumentPath: path.join(absPagesPath, 'document.ejs')
   }
 }

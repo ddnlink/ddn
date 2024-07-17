@@ -65,17 +65,16 @@ function getCmds (osName, net) {
     }
 
     result.push(format('cp config/genesisBlock.json %s/config/', fullpath))
+    result.push(format('cp constants.js %s/config/', fullpath))
   } else {
-    // result.push(format('cp config.json %s/', fullpath));
     result.push(format('cp config/genesisBlock.json %s/config/', fullpath))
-    result.push(format('cp third_party/sqlite3.exe %s/', fullpath))
+    // result.push(format('cp third_party/sqlite3.exe %s/', fullpath))
   }
 
   if (osName !== 'win') {
     result.push(format('cp `which node` %s/bin/', fullpath))
   }
 
-  // result.push(format('cp -r public/dist %s/public/', fullpath));
   result.push(format('cd %s && npm install --production', fullpath))
   result.push(format('cd %s/.. && tar zcf %s.tar.gz %s', fullpath, dir, dir))
 

@@ -1,5 +1,5 @@
 {
-  "version": "3.6.23",
+  "version": "2.3.0",
   "changelog": {
     "labels": {
       "pr(enhancement)": ":improvement: Enhancement",
@@ -8,7 +8,7 @@
       "pr(dependency)": ":deciduous_tree: Dependency",
       "pr(chore)": ":turtle: Chore"
     },
-    "repo": "imfly/ddn",
+    "repo": "ddnlink/ddn",
     "cacheDir": ".changelog"
   },
   "packages": [
@@ -32,6 +32,5 @@
       "registry": "https://registry.npmjs.org"
     }
   },
-  "useWorkspaces": true,
-  "npmClient": "yarn"
+  "npmClient": "npm"
 }

@@ -49,6 +49,7 @@ screenshot
 
 # settings
 config/deploy
+config/mainnet/*
 **/**/config.mainnet.js
 **/**/config.local.js
 **/**/.ddnrc.local.js

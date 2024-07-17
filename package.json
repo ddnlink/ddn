@@ -1,6 +1,6 @@
 {
   "name": "ddn",
-  "version": "3.6.23",
+  "version": "3.7.0",
   "private": true,
   "repository": {
     "type": "git",
@@ -22,9 +22,6 @@
     "encryption"
   ],
   "scripts": {
-    "init": "sh ./scripts/init.sh",
-    "start": "NODE_ENV=development node ./scripts/startPeer.js",
-    "bootstrap": "lerna bootstrap",
     "build:dev": "NODE_ENV=development node ./scripts/initCryptoDependent.js && father-build -w",
     "build:prod": "NODE_ENV=production node ./scripts/initCryptoDependent.js && father-build",
     "build:watch": "node ./scripts/initCryptoDependent.js && father-build -w",
@@ -54,22 +51,7 @@
     }
   },
   "author": "DDN <support@ddn.link>",
-  "contributors": [
-    {
-      "name": "imfly",
-      "email": "kubying@foxmail.com"
-    },
-    {
-      "name": "wangxm",
-      "email": "softwaiter@126.com"
-    }
-  ],
   "license": "AGPL 3.0",
-  "workspaces": [
-    "packages/*",
-    "pro-packages/*",
-    "examples/*"
-  ],
   "devDependencies": {
     "@babel/plugin-transform-classes": "^7.10.4",
     "@typescript-eslint/eslint-plugin": "^3.3.0",
@@ -86,14 +68,15 @@
     "eslint-plugin-prettier": "^3.1.4",
     "eslint-plugin-promise": "^4.2.1",
     "eslint-plugin-standard": "^4.0.1",
-    "father-build": "1.22.3",
+    "father-build": "^1.18.1",
     "husky": "^4.3.0",
-    "lerna": "^3.18.1",
+    "lerna": "^8.1.5",
     "lint-staged": "^10.4.0",
     "prettier": "^2.1.2",
     "rollup-plugin-node-builtins": "^2.1.2",
     "rollup-plugin-node-globals": "^1.4.0",
-    "test": "^3.3.0"
+    "test": "^3.3.0",
+    "typescript": "^3.3.0"
   },
   "husky": {
     "hooks": {
@@ -107,7 +90,15 @@
     ],
     "*.js": "eslint --fix --ext .js"
   },
+  "workspaces": [
+    "packages/*",
+    "pro-packages/*",
+    "examples/*"
+  ],
   "publishConfig": {
     "access": "public"
+  },
+  "engines": {
+    "node": ">=16"
   }
 }

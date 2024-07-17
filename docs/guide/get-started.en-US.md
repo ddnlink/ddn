@@ -12,7 +12,7 @@ More infomation please visit our [official website](http://www.ddn.net) or [ddn-
 
 - nodejs v8+
 - npm 5.3+
-- node-gyp v3.6.2+
+- node-gyp v3.12.2+
 - sqlite v3.8.2+
 - mysql 5.0+
 - g++
