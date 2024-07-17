@@ -1,6 +1,6 @@
 {
   "name": "@ddn/core",
-  "version": "2.4.2",
+  "version": "2.4.0",
   "description": "DDN core.",
   "main": "./lib/index.js",
   "module": "./dist/index.esm.js",
@@ -38,5 +38,5 @@
   "devDependencies": {
     "umi-types": "0.5.3"
   },
-  "gitHead": "a79440469a7d3b577af0e547adfb0121c0da516b"
+  "gitHead": "49cd676b57932718800bfb9242b455c16a299a83"
 }
