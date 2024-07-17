@@ -1,6 +1,6 @@
 {
   "name": "@ddn/p2p",
-  "version": "2.4.0",
+  "version": "2.4.3",
   "description": "The nodejs implementation of DDN P2P protocol",
   "main": "dist/index.js",
   "module": "dist/index.esm.js",
