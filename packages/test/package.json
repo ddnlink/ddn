@@ -1,6 +1,6 @@
 {
   "name": "@ddn/test",
-  "version": "2.4.1",
+  "version": "2.4.2",
   "bin": {
     "test": "./bin/test.js"
   },
@@ -19,7 +19,7 @@
     "lib",
     "src"
   ],
-  "gitHead": "19193adc96f65c66ec27939a33c999f1a7f92472",
+  "gitHead": "a79440469a7d3b577af0e547adfb0121c0da516b",
   "devDependencies": {
     "@babel/core": "^7.8.0",
     "@babel/plugin-syntax-function-bind": "^7.24.7",
