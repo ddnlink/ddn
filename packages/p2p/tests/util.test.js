@@ -1,12 +1,11 @@
+/* eslint-disable eqeqeq */
 import util from 'util'
 import { checkUrl, parseUrl, isBinary, isText } from '../src/util'
 
 describe('util tool test', () => {
-  beforeAll(async () => {
-  })
+  beforeAll(async () => {})
 
-  afterAll(async () => {
-  })
+  afterAll(async () => {})
 
   it('checkUrl method test ', async () => {
     const url1 = checkUrl('p2p://localhost/')
@@ -22,7 +21,10 @@ describe('util tool test', () => {
     try {
       checkUrl({ host: 'localhost', port: 80 })
     } catch (err) {
-      expect(err.message).toBe('Must specify a non-empty string, but instead got: ' + util.inspect({ host: 'localhost', port: 80 }, { depth: null }))
+      expect(err.message).toBe(
+        'Must specify a non-empty string, but instead got: ' +
+          util.inspect({ host: 'localhost', port: 80 }, { depth: null })
+      )
     }
     try {
       checkUrl('a/b?a=1&b=2')
@@ -37,12 +39,16 @@ describe('util tool test', () => {
     try {
       checkUrl('http://localhost:8080/b?a=1&b=2')
     } catch (err) {
-      expect(err.message).toBe('Must specify protocol to p2p:// or start with /, but instead got: ' + 'http://localhost:8080/b?a=1&b=2')
+      expect(err.message).toBe(
+        'Must specify protocol to p2p:// or start with /, but instead got: ' + 'http://localhost:8080/b?a=1&b=2'
+      )
     }
     try {
       checkUrl('https://localhost:8080/b?a=1&b=2')
     } catch (err) {
-      expect(err.message).toBe('Must specify protocol to p2p:// or start with /, but instead got: ' + 'https://localhost:8080/b?a=1&b=2')
+      expect(err.message).toBe(
+        'Must specify protocol to p2p:// or start with /, but instead got: ' + 'https://localhost:8080/b?a=1&b=2'
+      )
     }
   })
 
@@ -70,9 +76,9 @@ describe('util tool test', () => {
     expect(typeof {} === 'object').toBe(true)
     expect(typeof [] === 'object').toBe(true)
     expect(typeof Buffer.from('') === 'object').toBe(true)
-    expect(typeof (new (class {})()) === 'object').toBe(true)
-    expect(typeof (new Map()) === 'object').toBe(true)
-    expect(typeof (new Set()) === 'object').toBe(true)
+    expect(typeof new (class {})() === 'object').toBe(true)
+    expect(typeof new Map() === 'object').toBe(true)
+    expect(typeof new Set() === 'object').toBe(true)
 
     expect(undefined == 0).toBe(false)
     expect(0 == null).toBe(false)
@@ -149,17 +155,22 @@ describe('util tool test', () => {
     expect(isBinary(() => {})).toBe(false)
     expect(isBinary(new Map())).toBe(false)
     expect(isBinary(new Set())).toBe(false)
-    expect(isBinary(new class {}())).toBe(false)
+    expect(isBinary(new (class {})())).toBe(false)
     expect(isBinary('')).toBe(false)
     expect(isBinary('')).toBe(false)
     expect(isBinary('""')).toBe(false)
     expect(isBinary("''")).toBe(false)
     expect(isBinary('')).toBe(false)
     expect(isBinary('""')).toBe(false)
-    expect(isBinary('\'\'')).toBe(false)
+    expect(isBinary("''")).toBe(false)
     expect(isBinary('hello')).toBe(false)
     expect(isBinary([{ a: 1 }])).toBe(false)
-    expect(isBinary([[1, 2], [3, 4]])).toBe(false)
+    expect(
+      isBinary([
+        [1, 2],
+        [3, 4]
+      ])
+    ).toBe(false)
     expect(isBinary(0)).toBe(false)
     expect(isBinary(false)).toBe(false)
     expect(isBinary(null)).toBe(false)
@@ -181,12 +192,17 @@ describe('util tool test', () => {
     expect(isText(() => {})).toBe(false)
     expect(isText(new Map())).toBe(false)
     expect(isText(new Set())).toBe(false)
-    expect(isText(new class {}())).toBe(false)
+    expect(isText(new (class {})())).toBe(false)
     expect(isText(arr)).toBe(false)
     expect(isText(arr1)).toBe(false)
     expect(isText(buf)).toBe(false)
     expect(isText([{ a: 1 }])).toBe(false)
-    expect(isText([[1, 2], [3, 4]])).toBe(false)
+    expect(
+      isText([
+        [1, 2],
+        [3, 4]
+      ])
+    ).toBe(false)
     expect(isText(0)).toBe(false)
     expect(isText(false)).toBe(false)
     expect(isText(undefined)).toBe(false)
@@ -197,7 +213,7 @@ describe('util tool test', () => {
     expect(`${''}` === '').toBe(true)
     expect(isText('')).toBe(true)
     expect(isText('')).toBe(true)
-    expect(isText('\'\'')).toBe(true)
+    expect(isText("''")).toBe(true)
     expect(isText('""')).toBe(true)
     expect(isText(`${''}`)).toBe(true)
     expect(isText(`${''}`)).toBe(true)
