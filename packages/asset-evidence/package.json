@@ -1,6 +1,6 @@
 {
   "name": "@ddn/asset-evidence",
-  "version": "2.4.4",
+  "version": "2.4.0",
   "description": "DDN evidence",
   "main": "./lib/index.js",
   "module": "./dist/index.esm.js",
@@ -21,9 +21,9 @@
   "author": "wangxm",
   "license": "AGPL 3.0",
   "dependencies": {
-    "@ddn/asset-base": "^2.4.4",
-    "@ddn/utils": "^2.4.4",
+    "@ddn/asset-base": "^2.4.0",
+    "@ddn/utils": "^2.4.0",
     "bytebuffer": "^5.0.1"
   },
-  "gitHead": "0e408aa8284ccd776659503df9e35a079ee912d6"
+  "gitHead": "7241f5ec978f652ea15eb59e01a33d92bdff34a3"
 }

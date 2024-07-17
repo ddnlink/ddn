@@ -1,6 +1,6 @@
 {
   "name": "@ddn/utils",
-  "version": "2.4.4",
+  "version": "2.4.0",
   "description": "DDN utils.",
   "main": "./lib/index.js",
   "module": "./dist/index.esm.js",
@@ -23,5 +23,5 @@
   },
   "author": "wly",
   "license": "AGPL 3.0",
-  "gitHead": "0e408aa8284ccd776659503df9e35a079ee912d6"
+  "gitHead": "7241f5ec978f652ea15eb59e01a33d92bdff34a3"
 }

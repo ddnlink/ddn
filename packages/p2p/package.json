@@ -1,6 +1,6 @@
 {
   "name": "@ddn/p2p",
-  "version": "2.4.4",
+  "version": "2.4.0",
   "description": "The nodejs implementation of DDN P2P protocol",
   "main": "dist/index.js",
   "module": "dist/index.esm.js",
@@ -49,5 +49,6 @@
     "eslint-plugin-standard": "^4.0.1",
     "father-build": "1.19.2",
     "jest": "^27.0.6"
-  }
+  },
+  "gitHead": "7241f5ec978f652ea15eb59e01a33d92bdff34a3"
 }

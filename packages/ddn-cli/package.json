@@ -1,7 +1,7 @@
 {
-  "name": "@ddn/ddn",
+  "name": "@ddn/ddn-cli",
   "preferGlobal": true,
-  "version": "2.4.4",
+  "version": "2.4.0",
   "description": "A Command line tool to manage ddn",
   "main": "./lib/index.js",
   "scripts": {
@@ -21,9 +21,9 @@
   "license": "AGPL 3.0",
   "dependencies": {
     "@ddn/contract": "^0.3.2",
-    "@ddn/crypto": "^2.4.4",
-    "@ddn/node-sdk": "^2.4.4",
-    "@ddn/utils": "^2.4.4",
+    "@ddn/crypto": "^2.4.0",
+    "@ddn/node-sdk": "^2.4.0",
+    "@ddn/utils": "^2.4.0",
     "async": "1.5.2",
     "bytebuffer": "^4.0.0",
     "fs-extra": "0.30.0",
@@ -48,5 +48,5 @@
     "url": "https://github.com/ddnlink/ddn/tree/master/packages/ddn"
   },
   "homepage": "https://github.com/ddnlink/ddn/tree/master/packages/ddn",
-  "gitHead": "0e408aa8284ccd776659503df9e35a079ee912d6"
+  "gitHead": "7241f5ec978f652ea15eb59e01a33d92bdff34a3"
 }

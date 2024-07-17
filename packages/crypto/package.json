@@ -1,6 +1,6 @@
 {
   "name": "@ddn/crypto",
-  "version": "2.4.4",
+  "version": "2.4.0",
   "description": "this is Adaptation",
   "main": "./lib/index.js",
   "module": "./dist/index.esm.js",
@@ -19,11 +19,11 @@
     "url": "https://github.com/ddnlink/ddn/tree/master/packages/crypto"
   },
   "dependencies": {
-    "@ddn/core": "^2.4.4",
-    "@ddn/crypto-nacl": "^2.4.4",
-    "@ddn/crypto-sm": "^2.4.4"
+    "@ddn/core": "^2.4.0",
+    "@ddn/crypto-nacl": "^2.4.0",
+    "@ddn/crypto-sm": "^2.4.0"
   },
   "author": "",
   "license": "AGPL 3.0",
-  "gitHead": "0e408aa8284ccd776659503df9e35a079ee912d6"
+  "gitHead": "7241f5ec978f652ea15eb59e01a33d92bdff34a3"
 }
