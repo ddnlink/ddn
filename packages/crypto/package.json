@@ -1,7 +1,7 @@
 {
   "name": "@ddn/crypto",
-  "version": "2.4.3",
-  "description": "this is Adaptation",
+  "version": "2.4.6",
+  "description": "Crypto Adaptation",
   "main": "./lib/index.js",
   "module": "./dist/index.esm.js",
   "scripts": {
@@ -25,5 +25,5 @@
   },
   "author": "",
   "license": "AGPL 3.0",
-  "gitHead": "49cd676b57932718800bfb9242b455c16a299a83"
+  "gitHead": "3f5aef8e697748180be42f047a2053e46a7afd43"
 }

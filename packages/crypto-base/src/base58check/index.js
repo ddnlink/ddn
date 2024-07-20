@@ -25,7 +25,9 @@ function decodeRaw (buffer) {
     (checksum[1] ^ newChecksum[1]) |
     (checksum[2] ^ newChecksum[2]) |
     (checksum[3] ^ newChecksum[3])
-  ) { return }
+  ) {
+    return
+  }
 
   return payload
 }
@@ -45,8 +47,4 @@ function decode (string) {
   return payload
 }
 
-export default {
-  encode: encode,
-  decode: decode,
-  decodeUnsafe: decodeUnsafe
-}
+export { encode, decode, decodeUnsafe }

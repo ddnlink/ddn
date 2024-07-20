@@ -1,22 +1,33 @@
 version: '3'
-
-services:
-  peer:
+services: 
+  ddn_peer:
     container_name: "${APP_ID}-peer"
-    image: node:20.15-alpine3.20
-    # command: /bin/bash -c "apt-get update && apt-get install -y nginx"
-    ports:
-      - "${APP_PORT}:8001"
+    build:
+      context: .
+      dockerfile: Dockerfile
+    depends_on:
+      - ddn_sqlite
+      # - ddn_postgres
     volumes:
-      - ../examples/fun-tests:/var/www/ddn
+      - ../:/root/ddn/
     networks:
       - ddnnet
-    # links:
-      # - postgres
-      # - redis
+    ports:
+      - "${APP_PORT}:${APP_PORT}"
     restart: unless-stopped
 
-  # redis:
+  ddn_sqlite:
+    container_name: "${APP_ID}-sqlite"
+    image: nouchka/sqlite3:latest
+    stdin_open: true
+    tty: true
+    volumes:
+      - ./db/sqlite:/root/db/
+    networks:
+      - ddnnet
+    restart: unless-stopped
+
+  # ddn_redis:
   #   container_name: "${APP_ID}-redis"
   #   image: "redis:alpine"
   #   environment:
@@ -27,7 +38,7 @@ services:
   #     - ddnnet
   #   restart: unless-stopped
 
-  # postgres:
+  # ddn_postgres:
   #   container_name: "${APP_ID}-postgres"
   #   image: postgres:13
   #   environment:
@@ -37,7 +48,7 @@ services:
   #   ports:
   #     - "5432:5432"
   #   volumes:
-  #     - ./postgres/data:/var/lib/postgresql/data
+  #     - ./db/postgres/data:/var/lib/postgresql/data
   #   networks:
   #     - ddnnet
   #   restart: unless-stopped

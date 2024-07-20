@@ -11,7 +11,7 @@ import {
   addAffix,
   getConfigPaths,
   cleanConfigRequireCache
-} from '../lib/getUserConfig'
+} from '../src/getUserConfig'
 
 const fixtures = winPath(`${__dirname}/fixtures/getUserConfig`)
 

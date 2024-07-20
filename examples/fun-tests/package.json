@@ -1,6 +1,6 @@
 {
   "name": "ddn-starter",
-  "version": "2.4.3",
+  "version": "3.7.0",
   "main": "./app.js",
   "private": true,
   "repository": {
@@ -56,6 +56,9 @@
     "@ddn/asset-dapp": "^2.4.3",
     "@ddn/asset-evidence": "^2.4.3",
     "@ddn/core": "^2.4.3",
+    "@ddn/crypto": "^2.4.3",
+    "@ddn/crypto-nacl": "^2.4.3",
+    "@ddn/crypto-sm": "^2.4.3",
     "@ddn/peer": "^2.4.3",
     "@ddn/utils": "^2.4.3",
     "commander": "2.6.0",

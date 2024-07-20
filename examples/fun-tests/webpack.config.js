@@ -1,8 +1,8 @@
-var path = require('path')
+// var path = require('path')
 var nodeExternals = require('webpack-node-externals')
 var webpack = require('webpack')
 var _ = require('lodash')
-var UglifyJsPlugin = require('uglifyjs-webpack-plugin')
+// var UglifyJsPlugin = require('uglifyjs-webpack-plugin')
 
 // loaders配置
 var getLoaders = function (env) {
@@ -21,7 +21,6 @@ var getLoaders = function (env) {
     //     }
     //   }
     // }
-
     // {
     //   test: /\.(proto)$/,
     //   use: [
@@ -46,16 +45,14 @@ var getPlugins = function (env) {
     // 线上模式的配置，去除依赖中重复的插件/压缩js/排除报错的插件
     plugins = _.union(defaultPlugins, [
       new webpack.ProvidePlugin({ _require_native_: '_require_native_' }),
-      new webpack.optimize.DedupePlugin(),
-      new UglifyJsPlugin()
+      new webpack.optimize.DedupePlugin()
+      // new UglifyJsPlugin()
 
       // Todo: webpack自带的UglifyJsPlugin不起作用？
       // new webpack.optimize.UglifyJsPlugin()
     ])
   } else {
-    plugins = _.union(defaultPlugins, [
-      new webpack.ProvidePlugin({ _require_native_: '_require_native_' })
-    ])
+    plugins = _.union(defaultPlugins, [new webpack.ProvidePlugin({ _require_native_: '_require_native_' })])
   }
 
   return plugins

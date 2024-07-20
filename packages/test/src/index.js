@@ -1,5 +1,5 @@
 import { runCLI } from '@jest/core'
-import { options as CliOptions } from 'jest-cli/build/cli/args'
+import { options as CliOptions } from './jestCliOptions'
 import { join } from 'path'
 import { existsSync } from 'fs'
 

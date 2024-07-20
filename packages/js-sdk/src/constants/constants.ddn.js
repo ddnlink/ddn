@@ -37,8 +37,6 @@ export default {
   maxGasLimit: 10000000,
   maxCodeSize: 32768,
 
-  crypto: '@ddn/crypto-nacl',
-
   rewardRatio: 0.2,
   milestones: [
     '500000000', // Initial Reward      Bignum update

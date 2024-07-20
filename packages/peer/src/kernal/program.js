@@ -8,6 +8,8 @@ import fs from 'fs'
 import extend from 'extend2'
 import * as DdnCrypto from '@ddn/crypto'
 import { bignum, runtimeState } from '@ddn/utils'
+import { DVM, Compiler } from '@ddn/contract'
+
 import { System } from '../utils/system'
 import { logger } from '../utils/logger'
 
@@ -25,7 +27,6 @@ import Energy from '../helpers/energy'
 import dbUpgrade from '../db/db-upgrade'
 import HttpServer from '../network/http-server'
 import MultiSignature from './consensus/multisignature'
-import { DVM, Compiler } from '@ddn/contract'
 
 import defaultConfig from '../config.default.js'
 
@@ -383,7 +384,7 @@ class Program {
     this.ctx.logger.warn('startBlockDataSyncTask get peer: ', peer)
 
     if (!peer) {
-      this.ctx.logger.debug('Change state to \'ready\'')
+      this.ctx.logger.debug("Change state to 'ready'")
       this.ctx.runtime.state = runtimeState.Ready
       await this._blockchainReady()
       next()
@@ -465,8 +466,7 @@ class Program {
         this.ctx.sequence.add(
           async cb => {
             if (
-              this.ctx.runtime.slot.getSlotNumber(forgeDelegateInfo.time) ===
-                this.ctx.runtime.slot.getSlotNumber() &&
+              this.ctx.runtime.slot.getSlotNumber(forgeDelegateInfo.time) === this.ctx.runtime.slot.getSlotNumber() &&
               this.ctx.runtime.block.getLastBlock().timestamp < forgeDelegateInfo.time
             ) {
               try {

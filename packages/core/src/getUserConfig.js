@@ -4,13 +4,6 @@ import assert from 'assert'
 import extend from 'extend2'
 import winPath from './winPath'
 
-// import { IConfig } from 'umi-types'
-// interface IOpts {
-//     cwd?: string;
-//     defaultConfig?: IConfig;
-//     onError?: Function;
-// }
-
 export function getConfigFile (cwd) {
   const files = process.env.DDN_CONFIG_FILE
     ? process.env.DDN_CONFIG_FILE.split(',').filter(v => v && v.trim())
@@ -80,7 +73,7 @@ export function getConfigByConfigFile (configFile, opts = {}) {
   return mergeConfigs(...configs)
 }
 
-// Use DDN_ENV to add yoursef config, e.g: DDN_ENV=prod config.prod.js
+// Use DDN_ENV to add yourself config, e.g: DDN_ENV=prod config.prod.js
 export function getConfigPaths (cwd) {
   const env = process.env.DDN_ENV
   return [

@@ -1,41 +1,24 @@
 import crypto from 'crypto'
-import path from 'path'
-// import {
-//   nacl,
-//   getKeys,
-//   getId,
-//   getHash,
-//   createHash,
-//   sign,
-//   secondSign,
-//   verifyBytes,
-//   getBytes,
-//   generateAddress,
-//   isAddress,
-//   generateSecret, // 测试和前端用,重构： generatePhasekey() -> generateSecret()
-//   isValidSecret,
-//   verify,
-//   verifySecondSignature
-// } from '@ddn/crypto'
+import * as DdnCrypto from '@ddn/crypto'
 
 import { constants } from '../config'
 import { getFee } from '../fees'
 
-const constantsFile = path.resolve(__dirname, '..', '..', './constants.js')
-let userConstantsFile, cryptoModule
-try {
-  userConstantsFile = require(constantsFile)
-} catch (error) {
-  userConstantsFile = {}
-}
-if (!userConstantsFile.crypto) {
-  // userConstantsFile.crypto = '@ddn/crypto-nacl'
-  cryptoModule = require('@ddn/crypto-nacl')
-} else if (userConstantsFile.crypto === '@ddn/crypto-nacl') {
-  cryptoModule = require('@ddn/crypto-nacl')
-} else if (userConstantsFile.crypto === '@ddn/crypto-sm') {
-  cryptoModule = require('@ddn/crypto-sm')
-}
+// const constantsFile = path.resolve(__dirname, '..', '..', './constants.js')
+// let userConstantsFile, cryptoModule
+// try {
+//   userConstantsFile = require(constantsFile)
+// } catch (error) {
+//   userConstantsFile = {}
+// }
+// if (!userConstantsFile.crypto) {
+//   // userConstantsFile.crypto = '@ddn/crypto-nacl'
+//   cryptoModule = require('@ddn/crypto-nacl')
+// } else if (userConstantsFile.crypto === '@ddn/crypto-nacl') {
+//   cryptoModule = require('@ddn/crypto-nacl')
+// } else if (userConstantsFile.crypto === '@ddn/crypto-sm') {
+//   cryptoModule = require('@ddn/crypto-sm')
+// }
 const {
   nacl,
   getKeys,
@@ -52,8 +35,7 @@ const {
   isValidSecret,
   verify,
   verifySecondSignature
-} = cryptoModule
-
+} = DdnCrypto
 // const Buffer = require('safe-buffer').Buffer
 
 const fixedPoint = constants.fixedPoint

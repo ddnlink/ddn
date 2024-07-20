@@ -1,6 +1,5 @@
 var path = require('path')
 var util = require('util')
-var moment = require('moment')
 var gulp = require('gulp')
 var shell = require('gulp-shell')
 var replace = require('gulp-replace')
@@ -10,16 +9,16 @@ var packageFile = require('./package')
 // var UglifyJsPlugin = require('uglifyjs-webpack-plugin')
 
 var format = util.format
-var buildTime = moment().format('HH:mm:ss DD/MM/YYYY')
+// var buildTime = '2024' // moment().format('HH:mm:ss DD/MM/YYYY')
 
 function build (osName, net) {
   var dir = packageFile.name + '-' + osName + '-' + packageFile.version + '-' + net
   var fullpath = path.join(__dirname, 'build', dir)
 
   return webpack(require('./webpack.config.js')(fullpath), function () {
-    gulp.src(path.join(fullpath, 'app.js'))
+    gulp
+      .src(path.join(fullpath, 'app.js'))
       .pipe(replace('localnet', net))
-      .pipe(replace('development', buildTime))
       .pipe(gulp.dest(fullpath))
       .pipe(shell(getCmds(osName, net)))
   })
@@ -29,25 +28,30 @@ function buildSource (net) {
   var dir = packageFile.name + '-' + 'linux' + '-' + packageFile.version + '-' + net
   var fullpath = path.join(__dirname, 'build', dir)
 
-  return gulp.src('app.js')
-    .pipe(webpack({
-      output: {
-        filename: 'app.js'
-      },
-      target: 'node',
-      context: __dirname,
-      node: {
-        __filename: true,
-        __dirname: true
-      },
-      externals: [nodeExternals()],
-      plugins: [
-        // new UglifyJsPlugin()
-      ]
-    }))
-    .pipe(replace('localnet', net))
-    .pipe(replace('development', buildTime))
-    .pipe(gulp.dest(fullpath))
+  return (
+    gulp
+      .src('app.js')
+      .pipe(
+        webpack({
+          output: {
+            filename: 'app.js'
+          },
+          target: 'node',
+          context: __dirname,
+          node: {
+            __filename: false,
+            __dirname: false
+          },
+          externals: [nodeExternals()],
+          plugins: [
+            // new UglifyJsPlugin()
+          ]
+        })
+      )
+      .pipe(replace('localnet', net))
+      // .pipe(replace('development', buildTime))
+      .pipe(gulp.dest(fullpath))
+  )
 }
 
 function getCmds (osName, net) {
@@ -56,7 +60,7 @@ function getCmds (osName, net) {
 
   var result = []
   result.push(format('cd %s && mkdir -p public dapps tmp logs bin config', fullpath))
-  result.push(format('cp -r package.json ddnd init .ddnrc.js %s', fullpath))
+  result.push(format('cp -r package.json ddnd init .ddnrc.mainnet.js %s', fullpath))
   if (net !== 'localnet') {
     if (osName === 'mac') {
       result.push(format('sed -i "" "s/testnet/%s/g" %s/ddnd', net, fullpath))
@@ -65,7 +69,7 @@ function getCmds (osName, net) {
     }
 
     result.push(format('cp config/genesisBlock.json %s/config/', fullpath))
-    result.push(format('cp constants.js %s/config/', fullpath))
+    result.push(format('cp constants.mainnet.js %s/', fullpath))
   } else {
     result.push(format('cp config/genesisBlock.json %s/config/', fullpath))
     // result.push(format('cp third_party/sqlite3.exe %s/', fullpath))
