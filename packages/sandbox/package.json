@@ -2,16 +2,18 @@
   "name": "@ddn/sandbox",
   "version": "2.4.3",
   "description": "ddn sandbox which is used to run sidechain dapps",
-  "main": "./lib/index.js",
+  "author": "HuoDing <huo.ding@qq.com>",
+  "license": "AGPL 3.0",
+  "main": "./dist/index.js",
+  "types": "dist/index.d.ts",
   "files": [
-    "lib"
+    "dist"
   ],
   "scripts": {
-    "test": "./node_modules/.bin/mocha",
-    "build": "gulp"
+    "build": "father build",
+    "dev": "father dev",
+    "test": "jest"
   },
-  "author": "HuoDing <huo.ding@qq.com>",
-  "license": "ISC",
   "dependencies": {
     "vm2": "^3.8.2"
   },

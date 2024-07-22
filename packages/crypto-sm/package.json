@@ -10,10 +10,9 @@
   "author": "imfly <kubying@qq.com>",
   "homepage": "https://github.com/ddnlink/ddn/tree/master/packages/crypto#readme",
   "license": "AGPL 3.0",
-  "main": "./lib/index.js",
-  "module": "./dist/index.esm.js",
+  "main": "./dist/index.js",
+  "types": "dist/index.d.ts",
   "files": [
-    "lib",
     "dist"
   ],
   "repository": {
@@ -24,7 +23,8 @@
     "access": "public"
   },
   "scripts": {
-    "test": "echo \"Error: run tests from root\" && exit 1"
+    "build": "father build",
+    "dev": "father dev"
   },
   "bugs": {
     "url": "https://github.com/ddnlink/ddn/issues"

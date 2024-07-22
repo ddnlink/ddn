@@ -13,9 +13,11 @@ if (args.version) {
   process.exit(0)
 }
 
-require('../lib').default({
-  ...args
-}).catch(e => {
-  console.error(e)
-  process.exit(1)
-})
+require('../dist')
+  .default({
+    ...args
+  })
+  .catch(e => {
+    console.error(e)
+    process.exit(1)
+  })

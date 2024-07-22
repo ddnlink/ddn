@@ -2,12 +2,15 @@
   "name": "@ddn/node-sdk",
   "version": "2.4.3",
   "description": "DDN Node.js SDK",
-  "main": "./lib/index.js",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
   "files": [
-    "lib",
-    "dist"
+    "dist",
+    ".ddnrc.js"
   ],
   "scripts": {
+    "build": "father build",
+    "dev": "father dev",
     "test": "mocha test"
   },
   "keywords": [

@@ -2,8 +2,8 @@
   "name": "@ddn/asset-evidence",
   "version": "2.4.3",
   "description": "DDN evidence",
-  "main": "./lib/index.js",
-  "module": "./dist/index.esm.js",
+  "main": "./dist/index.js",
+  "types": "dist/index.d.ts",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/ddnlink/ddn.git",
@@ -14,12 +14,15 @@
     "url": "http://github.com/ddnlink/ddn/issues"
   },
   "files": [
-    "lib",
     "dist",
     ".ddnrc.js"
   ],
   "author": "wangxm",
   "license": "AGPL 3.0",
+  "scripts": {
+    "build": "father build",
+    "dev": "father dev"
+  },
   "dependencies": {
     "@ddn/asset-base": "^2.4.3",
     "@ddn/utils": "^2.4.3",

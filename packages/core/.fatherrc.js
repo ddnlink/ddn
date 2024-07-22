@@ -1,8 +1,5 @@
-// export default {
-//   target: 'node',
-//   cjs: { type: 'babel', lazy: true },
-//   disableTypeCheck: true,
-// };
-export default {
-  esm: 'rollup'
-}
+import {defineConfig} from 'father'
+
+export default defineConfig({
+  extends: '../../.fatherrc.base.ts'
+})

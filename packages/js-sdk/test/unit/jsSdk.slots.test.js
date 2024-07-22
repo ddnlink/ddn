@@ -1,6 +1,6 @@
 import Debug from 'debug'
 import { node } from '../ddn-js'
-import slots from '../../lib/time/slots'
+import slots from '../../src/time/slots'
 
 const debug = Debug('debug')
 const expect = node.expect
@@ -16,7 +16,16 @@ describe('slots.js', () => {
   })
 
   it('should have properties', () => {
-    const properties = ['interval', 'delegates', 'getTime', 'getRealTime', 'getSlotNumber', 'getSlotTime', 'getNextSlot', 'getLastSlot']
+    const properties = [
+      'interval',
+      'delegates',
+      'getTime',
+      'getRealTime',
+      'getSlotNumber',
+      'getSlotTime',
+      'getNextSlot',
+      'getLastSlot'
+    ]
     properties.forEach(property => {
       expect(slots).to.have.property(property)
     })

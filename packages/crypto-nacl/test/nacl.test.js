@@ -1,10 +1,10 @@
 import nacl from 'tweetnacl'
 import crypto from 'crypto'
 import Tester from '@ddn/test-utils'
-import * as DdnCrypto from '../lib'
 
 import Debug from 'debug'
 import { Buffer } from 'buffer'
+import * as DdnCrypto from '../src'
 
 const debug = Debug('debug')
 const expect = Tester.expect

@@ -6,7 +6,7 @@
  *-------------------------------------------------------------------------------------------- */
 import { node } from './ddn-js'
 import BigNumber from 'bignumber.js'
-import myBignumber from '../lib/bignumber.js'
+import myBignumber from '../src/bignumber.js'
 
 const expect = node.expect
 

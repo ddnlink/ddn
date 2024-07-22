@@ -1,18 +1,19 @@
 {
   "name": "@ddn/js-sdk",
   "version": "2.4.3",
-  "description": "DDN Node.js SDK",
-  "main": "./lib/index.js",
-  "module": "./dist/index.esm.js",
+  "description": "DDN browser js SDK",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
   "files": [
-    "lib",
     "dist",
-    "build"
+    "build",
+    ".ddnrc.js"
   ],
   "scripts": {
     "test": "mocha test",
-    "build": "yarn build:dev & yarn build:prod",
-    "build:custom": "DDN_ENV=custom yarn build:custom:dev & yarn build:custom:prod",
+    "build": "father build",
+    "build:old": "pnpm build:dev & pnpm build:prod",
+    "build:custom": "DDN_ENV=custom pnpm build:custom:dev & pnpm build:custom:prod",
     "build:dev": "browserify index.js > ./build/index.browserify.js",
     "build:prod": "browserify index.js -p tinyify > ./build/index.browserify.min.js",
     "build:custom:dev": "browserify index.js > ./build/ddn-js-sdk.custom.js",

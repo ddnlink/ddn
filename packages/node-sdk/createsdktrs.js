@@ -1,4 +1,4 @@
-const nodeSdk = require('./lib').default
+const nodeSdk = require('./src').default
 const node = {
   keypair: {
     publicKey: 'b2c06f9ea640e545a8ee895b5b2353c9da2f5d62bee23a5ed7af6e0cbd74bcb9',

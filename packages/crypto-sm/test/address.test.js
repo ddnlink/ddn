@@ -2,7 +2,7 @@ import Debug from 'debug'
 import sha256 from 'fast-sha256'
 import RIPEMD160 from 'ripemd160'
 
-import * as crypto from '../lib'
+import * as crypto from '../src'
 import base58check from '@ddn/crypto-base'
 
 const debug = Debug('debug')
@@ -10,7 +10,6 @@ const debug = Debug('debug')
 const tokenPrefix = 'D'
 
 function isAddress (address) {
-  debug('crypto: ', crypto)
   return crypto.isAddress(address, tokenPrefix)
 }
 
@@ -76,11 +75,10 @@ describe('address', () => {
       // 6. 在上述转码后的前直接添加前缀（比如：D)
       const address = tokenPrefix + strBase58
 
-      expect(kp.publicKey).toEqual('1c4fd85dc2a0752864d1454bdc37a9e7f9a09fa2c83f1f8d4da9d9bfdd38ed65') // 2be3d7a21dd9715d949c58910b38d01a063cfe8159320aa426b2249a6aaf1340
-      expect(address).toEqual('DLNxuHtMwn7MrmcSmatFLHb9YPgfZ5uxMr') //
-
-      // kp.publicKey = "50e18b1d5ee084680fbc5cc34cdc4aaa1c4fe23662a3376c8bf5b33d3b16c4ae"
-      // address: DEbAEaup5irkiKx2C4KDDDSXQmE4CK9hQ7
+      expect(kp.publicKey).toEqual(
+        '041cea82005bf3c04694c03df736f2cafdc6e13d454511dada1fa3ee8b1abe2ae977f1ad1a4b5ed6421847205ae5291eb7f71f1eb93ea426804a2bf620c8352c8d'
+      ) // 1c4fd85dc2a0752864d1454bdc37a9e7f9a09fa2c83f1f8d4da9d9bfdd38ed65 2be3d7a21dd9715d949c58910b38d01a063cfe8159320aa426b2249a6aaf1340
+      expect(address).toEqual('DwMyKw11tiyQNzhmt1zwMSKSfr6Ni5wPy') //
     })
 
     it('Normal address should be ok', done => {
@@ -95,13 +93,18 @@ describe('address', () => {
     it('should generate address by publicKey', function () {
       const kp = crypto.getKeys('secret')
       const address = crypto.generateAddress(kp.publicKey, tokenPrefix)
+      expect(address).toEqual('DHSx41SrKuyRALssgpvttem34tcCHZNPBe') // DFAZqQx6BxVyW63EqfZQBZYa1CTg7qH3oJ
 
       const kp2 = crypto.getKeys('enter boring shaft rent essence foil trick vibrant fabric quote indoor output')
       const address2 = crypto.generateAddress(kp2.publicKey, tokenPrefix)
+
+      debug('kp2.publicKey', kp2.publicKey)
       debug('address2', address2)
-      expect(kp2.publicKey).toStrictEqual('daeee33def7eef0c7ba06ec66eda7204437ba88ace8f04e4a6aa4d7bfbd18bc1')
-      expect(address2).toEqual('DC5kJzMdNDhrnupWX2NGafzMoiwdHiySBe')
-      expect(address).toEqual('DFAZqQx6BxVyW63EqfZQBZYa1CTg7qH3oJ')
+
+      expect(kp2.publicKey).toStrictEqual(
+        '0410d15cb4a3747d9bcf6339ef7b1d8462e86da595e7da3f4dd17bb1b7e3b43cf9c67e41a439ec1ddae15e697b71bbfa2c4f662fce5105fc21c404df9ddae513f7'
+      ) // daeee33def7eef0c7ba06ec66eda7204437ba88ace8f04e4a6aa4d7bfbd18bc1
+      expect(address2).toEqual('D7WWq2DW83nx7KfCAbTkWrdy3XxfUhcPUp')
     })
   })
 })

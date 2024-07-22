@@ -5,8 +5,8 @@
  *  Licensed under the AGPL 3.0 License. See License.txt in the project root for license information.
  *-------------------------------------------------------------------------------------------- */
 import BigNumber from 'bignumber.js'
-import myBignumber from '../lib/bignumber.js'
 import Big from 'big.js'
+import myBignumber from '../src/bignumber.js'
 
 describe('bignumber benchmarks', function () {
   const COUNT = 50000
