@@ -1,5 +1,5 @@
 packages:
   - 'packages/*'
+  - "pro-packages/*"
   - 'examples/*'
   - 'scripts'
-  - 'docs'

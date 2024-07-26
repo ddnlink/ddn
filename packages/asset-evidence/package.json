@@ -24,8 +24,8 @@
     "dev": "father dev"
   },
   "dependencies": {
-    "@ddn/asset-base": "^2.4.3",
-    "@ddn/utils": "^2.4.3",
+    "@ddn/asset-base": "workspace:*",
+    "@ddn/utils": "workspace:*",
     "bytebuffer": "^5.0.1"
   },
   "gitHead": "3f5aef8e697748180be42f047a2053e46a7afd43"

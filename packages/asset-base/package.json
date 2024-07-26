@@ -23,7 +23,7 @@
     "dev": "father dev"
   },
   "dependencies": {
-    "@ddn/utils": "^2.4.3",
+    "@ddn/utils": "workspace:*",
     "lodash": "^4.17.15"
   },
   "publishConfig": {

@@ -30,7 +30,8 @@
     "url": "https://github.com/ddnlink/ddn/issues"
   },
   "dependencies": {
-    "@ddn/crypto-base": "^2.4.3",
+    "@ddn/crypto-base": "workspace:*",
+    "@ddn/utils": "workspace:*",
     "bitcore-mnemonic": "^8.20.5",
     "bytebuffer": "^5.0.1",
     "crypto": "^1.0.1",
@@ -38,9 +39,6 @@
     "ripemd160": "^2.0.2",
     "safe-buffer": "^5.2.1",
     "tweetnacl": "^1.0.2"
-  },
-  "devDependencies": {
-    "@ddn/utils": "^2.4.3"
   },
   "gitHead": "3f5aef8e697748180be42f047a2053e46a7afd43"
 }

@@ -48,8 +48,11 @@ class Program {
     }
 
     const ctx = new Context()
+
+    // 将配置信息保存到上下文
     await ctx.init(options)
 
+    // 将运行时选项保存到运行时上下文
     ctx.runtime.state = runtimeState.Pending
     ctx.runtime.loaded = false
 
@@ -85,7 +88,7 @@ class Program {
       isDev: process.env.NODE_ENV !== 'production'
     })
 
-    // 启用新版本
+    // 新版本使用 ctx 作为上下文
     this.ctx = ctx
 
     // 兼容旧版本 imfly 20240701

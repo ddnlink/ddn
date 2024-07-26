@@ -2,14 +2,14 @@
  * 系统启动入口
  * wangxm   2018-12-25
  */
-const packageFile = require('./package.json')
+const packageFile = require('../package.json')
 
 const command = require('commander')
 const path = require('path')
 const fs = require('fs')
 const DdnCore = require('@ddn/core')
 const DdnPeer = require('@ddn/peer').default
-const constants = require('./constants')
+const constants = require('../constants')
 
 /**
  * 整理系统配置文件生成输入参数
@@ -30,7 +30,7 @@ function genOptions () {
     .option('--base <dir>', 'Base directory')
     .parse(process.argv)
 
-  const baseDir = command.base || path.resolve(__dirname, './')
+  const baseDir = command.base || path.resolve(__dirname, '../')
 
   let genesisblockFile = path.join(baseDir, 'config', 'genesisBlock.json')
   if (command.genesisblock) {

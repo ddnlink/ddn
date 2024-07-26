@@ -102,32 +102,32 @@ importers:
   examples/fun-tests:
     dependencies:
       '@ddn/asset-aob':
-        specifier: ^1.2.2
+        specifier: 1.2.3
         version: 1.2.3
       '@ddn/asset-dapp':
-        specifier: ^2.4.3
-        version: 2.4.3(@babel/core@7.24.9)(bitcore-lib@8.25.47)
+        specifier: workspace:*
+        version: link:../../packages/asset-dapp
       '@ddn/asset-evidence':
-        specifier: ^2.4.3
-        version: 2.4.3(request@2.88.2)
+        specifier: workspace:*
+        version: link:../../packages/asset-evidence
       '@ddn/core':
-        specifier: ^2.4.3
-        version: 2.4.3(@babel/core@7.24.9)
+        specifier: workspace:*
+        version: link:../../packages/core
       '@ddn/crypto':
-        specifier: ^2.4.3
-        version: 2.4.6(@babel/core@7.24.9)(bitcore-lib@8.25.47)
+        specifier: workspace:*
+        version: link:../../packages/crypto
       '@ddn/crypto-nacl':
-        specifier: ^2.4.3
-        version: 2.4.3(bitcore-lib@8.25.47)
+        specifier: workspace:*
+        version: link:../../packages/crypto-nacl
       '@ddn/crypto-sm':
-        specifier: ^2.4.3
-        version: 2.4.3(bitcore-lib@8.25.47)
+        specifier: workspace:*
+        version: link:../../packages/crypto-sm
       '@ddn/peer':
-        specifier: ^2.4.3
-        version: 2.4.3(@babel/core@7.24.9)(bitcore-lib@8.25.47)(webpack@3.12.0)
+        specifier: workspace:*
+        version: link:../../packages/peer
       '@ddn/utils':
-        specifier: ^2.4.3
-        version: 2.4.3(request@2.88.2)
+        specifier: workspace:*
+        version: link:../../packages/utils
       commander:
         specifier: 2.6.0
         version: 2.6.0
@@ -191,7 +191,7 @@ importers:
         version: 2.4.3(@babel/core@7.24.9)
       '@ddn/peer':
         specifier: ^2.3.0
-        version: 2.4.3(@babel/core@7.24.9)(bitcore-lib@8.25.47)(webpack@3.12.0)
+        version: 2.4.3(@babel/core@7.24.9)(webpack@3.12.0)
       '@ddn/utils':
         specifier: ^2.2.3
         version: 2.4.3(request@2.88.2)
@@ -258,7 +258,7 @@ importers:
         version: 2.4.3(@babel/core@7.24.9)
       '@ddn/peer':
         specifier: ^2.3.0
-        version: 2.4.3(@babel/core@7.24.9)(bitcore-lib@8.25.47)(webpack@3.12.0)
+        version: 2.4.3(@babel/core@7.24.9)(webpack@3.12.0)
       '@ddn/utils':
         specifier: ^2.2.3
         version: 2.4.3(request@2.88.2)
@@ -312,8 +312,8 @@ importers:
   packages/asset-base:
     dependencies:
       '@ddn/utils':
-        specifier: ^2.4.3
-        version: 2.4.3(request@2.88.2)
+        specifier: workspace:*
+        version: link:../utils
       lodash:
         specifier: ^4.17.15
         version: 4.17.21
@@ -321,17 +321,17 @@ importers:
   packages/asset-dapp:
     dependencies:
       '@ddn/asset-base':
-        specifier: ^2.4.3
-        version: 2.4.3(request@2.88.2)
+        specifier: workspace:*
+        version: link:../asset-base
       '@ddn/crypto':
-        specifier: ^2.4.3
-        version: 2.4.6(@babel/core@7.24.9)(bitcore-lib@8.25.47)
+        specifier: workspace:*
+        version: link:../crypto
       '@ddn/sandbox':
-        specifier: ^2.4.3
-        version: 2.4.3
+        specifier: workspace:*
+        version: link:../sandbox
       '@ddn/utils':
-        specifier: ^2.4.3
-        version: 2.4.3(request@2.88.2)
+        specifier: workspace:*
+        version: link:../utils
       async:
         specifier: ^2.6.1
         version: 2.6.4
@@ -351,11 +351,11 @@ importers:
   packages/asset-evidence:
     dependencies:
       '@ddn/asset-base':
-        specifier: ^2.4.3
-        version: 2.4.3(request@2.88.2)
+        specifier: workspace:*
+        version: link:../asset-base
       '@ddn/utils':
-        specifier: ^2.4.3
-        version: 2.4.3(request@2.88.2)
+        specifier: workspace:*
+        version: link:../utils
       bytebuffer:
         specifier: ^5.0.1
         version: 5.0.1
@@ -396,14 +396,14 @@ importers:
   packages/crypto:
     dependencies:
       '@ddn/core':
-        specifier: ^2.4.3
-        version: 2.4.3(@babel/core@7.24.9)
+        specifier: workspace:*
+        version: link:../core
       '@ddn/crypto-nacl':
-        specifier: ^2.4.3
-        version: 2.4.3(bitcore-lib@8.25.47)
+        specifier: workspace:*
+        version: link:../crypto-nacl
       '@ddn/crypto-sm':
-        specifier: ^2.4.3
-        version: 2.4.3(bitcore-lib@8.25.47)
+        specifier: workspace:*
+        version: link:../crypto-sm
 
   packages/crypto-base:
     dependencies:
@@ -417,8 +417,11 @@ importers:
   packages/crypto-nacl:
     dependencies:
       '@ddn/crypto-base':
-        specifier: ^2.4.3
-        version: 2.4.3
+        specifier: workspace:*
+        version: link:../crypto-base
+      '@ddn/utils':
+        specifier: workspace:*
+        version: link:../utils
       bitcore-mnemonic:
         specifier: ^8.20.5
         version: 8.25.47(bitcore-lib@8.25.47)
@@ -440,19 +443,18 @@ importers:
       tweetnacl:
         specifier: ^1.0.2
         version: 1.0.3
-    devDependencies:
-      '@ddn/utils':
-        specifier: ^2.4.3
-        version: 2.4.3(request@2.88.2)
 
   packages/crypto-sm:
     dependencies:
       '@ddn/crypto-base':
-        specifier: ^2.4.3
-        version: 2.4.3
+        specifier: workspace:*
+        version: link:../crypto-base
       '@ddn/sm-crypto':
-        specifier: ^0.0.5
+        specifier: 0.0.5
         version: 0.0.5
+      '@ddn/utils':
+        specifier: workspace:*
+        version: link:../utils
       bitcore-mnemonic:
         specifier: ^8.20.5
         version: 8.25.47(bitcore-lib@8.25.47)
@@ -471,25 +473,21 @@ importers:
       safe-buffer:
         specifier: ^5.2.1
         version: 5.2.1
-    devDependencies:
-      '@ddn/utils':
-        specifier: ^2.4.3
-        version: 2.4.3(request@2.88.2)
 
   packages/ddn-cli:
     dependencies:
       '@ddn/contract':
-        specifier: ^0.3.2
-        version: 0.3.3
+        specifier: workspace:*
+        version: link:../../pro-packages/contract
       '@ddn/crypto':
-        specifier: ^2.4.3
-        version: 2.4.6(@babel/core@7.24.9)(bitcore-lib@8.25.47)
+        specifier: workspace:*
+        version: link:../crypto
       '@ddn/node-sdk':
-        specifier: ^2.4.3
-        version: 2.4.3(@babel/core@7.24.9)(bitcore-lib@8.25.47)(request@2.88.2)(webpack@5.93.0)
+        specifier: workspace:*
+        version: link:../node-sdk
       '@ddn/utils':
-        specifier: ^2.4.3
-        version: 2.4.3(request@2.88.2)
+        specifier: workspace:*
+        version: link:../utils
       async:
         specifier: 1.5.2
         version: 1.5.2
@@ -539,23 +537,20 @@ importers:
   packages/js-sdk:
     dependencies:
       '@ddn/core':
-        specifier: ^2.4.3
-        version: 2.4.3(@babel/core@7.24.9)
+        specifier: workspace:*
+        version: link:../core
       '@ddn/crypto-nacl':
-        specifier: ^2.4.3
-        version: 2.4.3(bitcore-lib@8.25.47)
+        specifier: workspace:*
+        version: link:../crypto-nacl
       '@ddn/crypto-sm':
-        specifier: ^2.4.3
-        version: 2.4.3(bitcore-lib@8.25.47)
+        specifier: workspace:*
+        version: link:../crypto-sm
       '@ddn/utils':
-        specifier: ^2.4.3
-        version: 2.4.3(request@2.88.2)
+        specifier: workspace:*
+        version: link:../utils
       JSONStream:
         specifier: ^1.3.1
         version: 1.3.5
-      bitcore-mnemonic:
-        specifier: ^8.20.5
-        version: 8.25.47(bitcore-lib@8.25.47)
       buffer:
         specifier: ^4.7.0
         version: 4.9.2
@@ -591,32 +586,32 @@ importers:
   packages/node-sdk:
     dependencies:
       '@ddn/asset-aob':
-        specifier: ^1.2.1
-        version: 1.2.3
+        specifier: workspace:*
+        version: link:../../pro-packages/asset-aob
       '@ddn/asset-base':
-        specifier: ^2.4.3
-        version: 2.4.3(request@2.88.2)
+        specifier: workspace:*
+        version: link:../asset-base
       '@ddn/asset-dao':
         specifier: ^1.2.1
         version: 1.2.2(@babel/core@7.18.2)(@types/babel__core@7.20.5)(bitcore-lib@8.25.47)(request@2.88.2)(webpack@5.93.0)
       '@ddn/asset-dapp':
-        specifier: ^2.4.3
-        version: 2.4.3(@babel/core@7.18.2)(bitcore-lib@8.25.47)
+        specifier: workspace:*
+        version: link:../asset-dapp
       '@ddn/asset-evidence':
-        specifier: ^2.4.3
-        version: 2.4.3(request@2.88.2)
+        specifier: workspace:*
+        version: link:../asset-evidence
       '@ddn/core':
-        specifier: ^2.4.3
-        version: 2.4.3(@babel/core@7.18.2)
+        specifier: workspace:*
+        version: link:../core
       '@ddn/crypto':
-        specifier: ^2.4.3
-        version: 2.4.6(@babel/core@7.18.2)(bitcore-lib@8.25.47)
+        specifier: workspace:*
+        version: link:../crypto
       '@ddn/crypto-nacl':
-        specifier: ^2.4.3
-        version: 2.4.3(bitcore-lib@8.25.47)
+        specifier: workspace:*
+        version: link:../crypto-nacl
       '@ddn/utils':
-        specifier: ^2.4.3
-        version: 2.4.3(request@2.88.2)
+        specifier: workspace:*
+        version: link:../utils
       JSONStream:
         specifier: ^1.3.1
         version: 1.3.5
@@ -640,8 +635,8 @@ importers:
         version: 1.0.3
     devDependencies:
       '@ddn/test-utils':
-        specifier: ^2.4.3
-        version: 2.4.3(@babel/core@7.18.2)(request@2.88.2)
+        specifier: workspace:*
+        version: link:../test-utils
       rollup-plugin-replace:
         specifier: ^2.2.0
         version: 2.2.0
@@ -950,11 +945,11 @@ importers:
   packages/test-utils:
     dependencies:
       '@ddn/core':
-        specifier: ^2.4.3
-        version: 2.4.3(@babel/core@7.24.9)
+        specifier: workspace:*
+        version: link:../core
       '@ddn/utils':
-        specifier: ^2.4.3
-        version: 2.4.3(request@2.88.2)
+        specifier: workspace:*
+        version: link:../utils
     devDependencies:
       chai:
         specifier: ^4.2.0
@@ -974,6 +969,136 @@ importers:
       request-promise:
         specifier: ^4.2.6
         version: 4.2.6(request@2.88.2)
+
+  pro-packages/asset-aob:
+    dependencies:
+      '@ddn/asset-base':
+        specifier: workspace:*
+        version: link:../../packages/asset-base
+      '@ddn/crypto':
+        specifier: workspace:*
+        version: link:../../packages/crypto
+      '@ddn/utils':
+        specifier: workspace:*
+        version: link:../../packages/utils
+      assert:
+        specifier: ^2.0.0
+        version: 2.1.0
+      async:
+        specifier: ^2.6.1
+        version: 2.6.4
+      bytebuffer:
+        specifier: ^5.0.1
+        version: 5.0.1
+      lodash:
+        specifier: ^4.17.15
+        version: 4.17.21
+      mathjs:
+        specifier: ^5.4.0
+        version: 5.10.3
+      sequelize:
+        specifier: ^4.42.0
+        version: 4.44.4
+
+  pro-packages/contract:
+    dependencies:
+      '@ddn/contract-types':
+        specifier: 0.3.0
+        version: 0.3.0
+      acorn:
+        specifier: 6.1.0
+        version: 6.1.0
+      acorn-bigint:
+        specifier: 0.3.1
+        version: 0.3.1(acorn@6.1.0)
+      escodegen-bigint:
+        specifier: 1.11.0
+        version: 1.11.0
+      estraverse:
+        specifier: 4.2.0
+        version: 4.2.0
+      level:
+        specifier: ^8.0.0
+        version: 8.0.1
+      lodash:
+        specifier: ^4.17.11
+        version: 4.17.21
+      resolve:
+        specifier: ^1.10.0
+        version: 1.22.8
+      subleveldown:
+        specifier: ^6.0.1
+        version: 6.0.1
+      tracer:
+        specifier: 0.9.1
+        version: 0.9.1
+      tweetnacl:
+        specifier: ^1.0.2
+        version: 1.0.3
+      typescript:
+        specifier: ^3.3.0
+        version: 3.9.10
+      uglify-es:
+        specifier: ^3.3.9
+        version: 3.3.9
+    devDependencies:
+      '@babel/core':
+        specifier: ^7.15.0
+        version: 7.24.9
+      '@babel/preset-env':
+        specifier: ^7.15.0
+        version: 7.24.8(@babel/core@7.24.9)
+      '@types/jest':
+        specifier: ^23.3.2
+        version: 23.3.14
+      '@types/lodash':
+        specifier: ^4.14.116
+        version: 4.17.7
+      '@types/node':
+        specifier: ^10.12.26
+        version: 10.17.60
+      babel-jest:
+        specifier: ^27.0.6
+        version: 27.5.1(@babel/core@7.24.9)
+      eslint:
+        specifier: ^7.11.0
+        version: 7.32.0
+      eslint-config-airbnb-base:
+        specifier: ^14.2.0
+        version: 14.2.1(eslint-plugin-import@2.29.1(@typescript-eslint/parser@3.10.1(eslint@7.32.0)(typescript@3.9.10))(eslint@7.32.0))(eslint@7.32.0)
+      eslint-config-prettier:
+        specifier: ^6.12.0
+        version: 6.15.0(eslint@7.32.0)
+      eslint-config-standard:
+        specifier: ^14.1.1
+        version: 14.1.1(eslint-plugin-import@2.29.1(@typescript-eslint/parser@3.10.1(eslint@7.32.0)(typescript@3.9.10))(eslint@7.32.0))(eslint-plugin-node@11.1.0(eslint@7.32.0))(eslint-plugin-promise@4.3.1)(eslint-plugin-standard@4.1.0(eslint@7.32.0))(eslint@7.32.0)
+      eslint-plugin-import:
+        specifier: ^2.21.2
+        version: 2.29.1(@typescript-eslint/parser@3.10.1(eslint@7.32.0)(typescript@3.9.10))(eslint@7.32.0)
+      eslint-plugin-node:
+        specifier: ^11.1.0
+        version: 11.1.0(eslint@7.32.0)
+      eslint-plugin-prettier:
+        specifier: ^3.1.4
+        version: 3.4.1(eslint-config-prettier@6.15.0(eslint@7.32.0))(eslint@7.32.0)(prettier@2.8.8)
+      eslint-plugin-promise:
+        specifier: ^4.2.1
+        version: 4.3.1
+      eslint-plugin-standard:
+        specifier: ^4.0.1
+        version: 4.1.0(eslint@7.32.0)
+      jest:
+        specifier: ^27.0.6
+        version: 27.5.1(ts-node@7.0.1)
+      ts-jest:
+        specifier: ^23.1.4
+        version: 23.10.5(jest@27.5.1(ts-node@7.0.1))
+      ts-loader:
+        specifier: ^4.1.0
+        version: 4.5.0
+      ts-node:
+        specifier: ^7.0.1
+        version: 7.0.1
 
 packages:
 
@@ -2095,9 +2220,6 @@ packages:
 
   '@ddn/crypto@2.4.6':
     resolution: {integrity: sha512-xS1cCqp+SqvnAV8Z3ZKuU+ApwAI72XX3GU7QN3/YHSMXZ1QNzrtRioaUfKZL0I+MVWnLvEWOhsQajjA7NHyozg==}
-
-  '@ddn/node-sdk@2.4.3':
-    resolution: {integrity: sha512-3T0Qe27Cy9DUdZlzltFduVVr2YDc9kIYp7HdIRkYEDdMlu43uZK4ThOx9q0zqCdo1o7b4e79WRSEQ6y++9DdzA==}
 
   '@ddn/p2p@2.4.3':
     resolution: {integrity: sha512-Qa15NfLtvTs11TvOCglwKQ1627IiZkKzJt3CghQIKYcZh6E3dZIYrscZcHUqDaurgahbcdW8EZ3tJZjDmZUxKQ==}
@@ -4925,6 +5047,10 @@ packages:
     engines: {node: ^6 || ^7 || ^8 || ^9 || ^10 || ^11 || ^12 || >=13.7}
     hasBin: true
 
+  bs-logger@0.2.6:
+    resolution: {integrity: sha512-pd8DCoxmbgc7hyPKOvxtqNcjYoOsABPQdcCUjGp3d42VR2CX1ORhk2A87oqqu5R1kk+76nsxZupkmyd+MVtCog==}
+    engines: {node: '>= 6'}
+
   bs58@4.0.1:
     resolution: {integrity: sha512-Ok3Wdf5vOIlBrgCvTq96gBkJw+JUEzdBgyaza5HLtPm7yTHkjRy8+JzNyHF7BHa0bNWOQIp3m5YF0nnFcOIKLw==}
 
@@ -6255,6 +6381,10 @@ packages:
     resolution: {integrity: sha512-EjePK1srD3P08o2j4f0ExnylqRs5B9tJjcp9t1krH2qRi8CCdsYfwe9JgSLurFBWwq4uOlipzfk5fHNvwFKr8Q==}
     engines: {node: ^14.15.0 || ^16.10.0 || >=18.0.0}
 
+  diff@3.5.0:
+    resolution: {integrity: sha512-A46qtFgd+g7pDZinpnwiRJtxbC1hpgf0uzP3iG89scHk0AUC7A1TGxf5OiiOUv/JMZR8GOt8hL900hV0bOy5xA==}
+    engines: {node: '>=0.3.1'}
+
   diff@4.0.2:
     resolution: {integrity: sha512-58lmxKSA4BNyLz+HHMUzlOEpg09FV+ev6ZMe3vJihgdxzgcwZ8VoEEPmALCZG9LmqfVoNMMKpttIYTVG6uDY7A==}
     engines: {node: '>=0.3.1'}
@@ -6857,10 +6987,6 @@ packages:
   estraverse@4.2.0:
     resolution: {integrity: sha512-VHvyaGnJy+FuGfcfaM7W7OZw4mQiKW73jPHwQXx2VnMSUBajYmytOT5sKEfsBvNPtGX6YDwcrGDz2eocoHg0JA==}
     engines: {node: '>=0.10.0'}
-
-  estraverse@4.3.0:
-    resolution: {integrity: sha512-39nnKffWz8xN1BU/2c79n9nB9HDzo0niYUqx6xyqUnyoAnQyyWpOTdZEeiCch8BBu515t4wp9ZmgVfVhn9EBpw==}
-    engines: {node: '>=4.0'}
 
   estraverse@5.3.0:
     resolution: {integrity: sha512-MMdARuVEQziNTeJD8DgMqmhwR11BRQ/cBP+pLtYdSTnf3MIO8fFeiINEbX36ZdNlfU/7A9f3gUw49B3oQsvwBA==}
@@ -13633,6 +13759,17 @@ packages:
   trough@1.0.5:
     resolution: {integrity: sha512-rvuRbTarPXmMb79SmzEp8aqXNKcK+y0XaB298IXueQ8I2PsrATcPBCSPyK/dDNa2iWOhKlfNnOjdAOTBU/nkFA==}
 
+  ts-jest@23.10.5:
+    resolution: {integrity: sha512-MRCs9qnGoyKgFc8adDEntAOP64fWK1vZKnOYU1o2HxaqjdJvGqmkLCPCnVq1/If4zkUmEjKPnCiUisTrlX2p2A==}
+    engines: {node: '>= 6'}
+    hasBin: true
+    peerDependencies:
+      jest: '>=22 <24'
+
+  ts-loader@4.5.0:
+    resolution: {integrity: sha512-ihgVaSmgrX4crGV4n7yuoHPoCHbDzj9aepCZR9TgIx4SgJ9gdnB6xLHgUBb7bsFM/f0K6x9iXa65KY/Fu1Klkw==}
+    engines: {node: '>=6.11.5'}
+
   ts-loader@8.4.0:
     resolution: {integrity: sha512-6nFY3IZ2//mrPc+ImY3hNWx1vCHyEhl6V+wLmL4CZcm6g1CqX7UKrkc6y0i4FwcfOhxyMPCfaEvh20f4r9GNpw==}
     engines: {node: '>=10.0.0'}
@@ -13653,6 +13790,11 @@ packages:
         optional: true
       '@swc/wasm':
         optional: true
+
+  ts-node@7.0.1:
+    resolution: {integrity: sha512-BVwVbPJRspzNh2yfslyT1PSbl5uIk03EZlb493RKHN4qej/D06n1cEhjlOJG69oFsE7OT8XjpTUcYf6pKTLMhw==}
+    engines: {node: '>=4.2.0'}
+    hasBin: true
 
   tsconfig-paths@3.15.0:
     resolution: {integrity: sha512-2Ac2RgzDe/cn48GvOe3M+o82pEFewD3UPbyoUHHdKasHwJKjds4fLXWf/Ux5kATBKN20oaFGu+jbElp1pos0mg==}
@@ -14521,6 +14663,9 @@ packages:
     resolution: {integrity: sha512-r3vXyErRCYJ7wg28yvBY5VSoAF8ZvlcW9/BwUzEtUsjvX/DKs24dIkuwjtuprwJJHsbyUbLApepYTR1BN4uHrg==}
     engines: {node: '>= 6'}
 
+  yargs-parser@10.1.0:
+    resolution: {integrity: sha512-VCIyR1wJoEBZUqk5PA+oOBF6ypbwh5aNB3I50guxAL/quggdfs4TtNHQrSazFA3fYZ+tEqfs0zIGlv0c/rgjbQ==}
+
   yargs-parser@13.1.1:
     resolution: {integrity: sha512-oVAVsHz6uFrg3XQheFII8ESO2ssAf9luWuAd6Wexsu4F3OtIW0o8IribPXYrD4WC24LWtPrJlGy87y5udK+dxQ==}
 
@@ -14572,6 +14717,10 @@ packages:
 
   yeast@0.1.2:
     resolution: {integrity: sha512-8HFIh676uyGYP6wP13R/j6OJ/1HwJ46snpvzE7aHAN3Ryqh2yX6Xox2B4CUmTwwOIzlG3Bs7ocsP5dZH/R1Qbg==}
+
+  yn@2.0.0:
+    resolution: {integrity: sha512-uTv8J/wiWTgUTg+9vLTi//leUl5vDQS6uii/emeTb2ssY7vl6QWf2fFbIIGjnhjvbdKlU0ed7QPgY1htTC86jQ==}
+    engines: {node: '>=4'}
 
   yn@3.1.1:
     resolution: {integrity: sha512-Ux4ygGWsu2c7isFWe8Yu1YluJmqVhxqK2cLXNQA5AcC3QfbGNpM7fu0Y8b/z16pXLnFxZYvWhd3fhBY9DLmC6Q==}
@@ -17337,14 +17486,6 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@babel/preset-typescript@7.3.3(@babel/core@7.18.2)':
-    dependencies:
-      '@babel/core': 7.18.2
-      '@babel/helper-plugin-utils': 7.24.8
-      '@babel/plugin-transform-typescript': 7.24.8(@babel/core@7.18.2)
-    transitivePeerDependencies:
-      - supports-color
-
   '@babel/preset-typescript@7.3.3(@babel/core@7.24.9)':
     dependencies:
       '@babel/core': 7.24.9
@@ -17368,16 +17509,6 @@ snapshots:
       find-cache-dir: 2.1.0
       lodash: 4.17.21
       make-dir: 2.1.0
-      pirates: 4.0.6
-      source-map-support: 0.5.21
-
-  '@babel/register@7.4.4(@babel/core@7.18.2)':
-    dependencies:
-      '@babel/core': 7.18.2
-      core-js: 3.1.4
-      find-cache-dir: 2.1.0
-      lodash: 4.17.21
-      mkdirp: 0.5.6
       pirates: 4.0.6
       source-map-support: 0.5.21
 
@@ -17591,7 +17722,7 @@ snapshots:
       - supports-color
       - webpack
 
-  '@ddn/asset-dao@1.2.2(@babel/core@7.24.9)(bitcore-lib@8.25.47)(request@2.88.2)(webpack@3.12.0)':
+  '@ddn/asset-dao@1.2.2(@babel/core@7.24.9)(request@2.88.2)(webpack@3.12.0)':
     dependencies:
       '@babel/plugin-transform-classes': 7.24.8(@babel/core@7.24.9)
       '@ddn/asset-base': 1.2.0(request@2.88.2)
@@ -17608,22 +17739,6 @@ snapshots:
       - request
       - supports-color
       - webpack
-
-  '@ddn/asset-dapp@2.4.3(@babel/core@7.18.2)(bitcore-lib@8.25.47)':
-    dependencies:
-      '@ddn/asset-base': 2.4.3(request@2.88.2)
-      '@ddn/crypto': 2.4.6(@babel/core@7.18.2)(bitcore-lib@8.25.47)
-      '@ddn/sandbox': 2.4.3
-      '@ddn/utils': 2.4.3(request@2.88.2)
-      async: 2.6.4
-      bytebuffer: 5.0.1
-      decompress-zip: 0.2.2
-      request: 2.88.2
-      valid-url: 1.0.9
-    transitivePeerDependencies:
-      - '@babel/core'
-      - bitcore-lib
-      - supports-color
 
   '@ddn/asset-dapp@2.4.3(@babel/core@7.24.9)(bitcore-lib@8.25.47)':
     dependencies:
@@ -17666,22 +17781,6 @@ snapshots:
       tweetnacl: 1.0.3
       typescript: 3.9.10
       uglify-es: 3.3.9
-
-  '@ddn/core@2.4.3(@babel/core@7.18.2)':
-    dependencies:
-      '@babel/preset-typescript': 7.3.3(@babel/core@7.18.2)
-      '@babel/register': 7.4.4(@babel/core@7.18.2)
-      '@umijs/error-code-map': 1.0.1
-      chalk: 2.4.2
-      extend2: 1.0.0
-      marked: 0.6.2
-      marked-terminal: 3.2.0(marked@0.6.2)
-      os-locale: 4.0.0
-      signale: 1.4.0
-      slash2: 2.0.0
-    transitivePeerDependencies:
-      - '@babel/core'
-      - supports-color
 
   '@ddn/core@2.4.3(@babel/core@7.24.9)':
     dependencies:
@@ -17768,16 +17867,6 @@ snapshots:
     transitivePeerDependencies:
       - bitcore-lib
 
-  '@ddn/crypto@2.4.6(@babel/core@7.18.2)(bitcore-lib@8.25.47)':
-    dependencies:
-      '@ddn/core': 2.4.3(@babel/core@7.18.2)
-      '@ddn/crypto-nacl': 2.4.3(bitcore-lib@8.25.47)
-      '@ddn/crypto-sm': 2.4.3(bitcore-lib@8.25.47)
-    transitivePeerDependencies:
-      - '@babel/core'
-      - bitcore-lib
-      - supports-color
-
   '@ddn/crypto@2.4.6(@babel/core@7.24.9)(bitcore-lib@8.25.47)':
     dependencies:
       '@ddn/core': 2.4.3(@babel/core@7.24.9)
@@ -17788,41 +17877,15 @@ snapshots:
       - bitcore-lib
       - supports-color
 
-  '@ddn/node-sdk@2.4.3(@babel/core@7.24.9)(bitcore-lib@8.25.47)(request@2.88.2)(webpack@5.93.0)':
-    dependencies:
-      '@ddn/asset-aob': 1.2.3
-      '@ddn/asset-base': 2.4.3(request@2.88.2)
-      '@ddn/asset-dao': 1.2.2(@babel/core@7.24.9)(@types/babel__core@7.20.5)(bitcore-lib@8.25.47)(request@2.88.2)(webpack@5.93.0)
-      '@ddn/asset-dapp': 2.4.3(@babel/core@7.24.9)(bitcore-lib@8.25.47)
-      '@ddn/asset-evidence': 2.4.3(request@2.88.2)
-      '@ddn/core': 2.4.3(@babel/core@7.24.9)
-      '@ddn/crypto': 2.4.6(@babel/core@7.24.9)(bitcore-lib@8.25.47)
-      '@ddn/crypto-nacl': 2.4.3(bitcore-lib@8.25.47)
-      '@ddn/utils': 2.4.3(request@2.88.2)
-      JSONStream: 1.3.5
-      buffer: 4.9.2
-      bytebuffer: 5.0.1
-      long: 4.0.0
-      ripemd160: 2.0.2
-      through2: 2.0.5
-      tweetnacl: 1.0.3
-    transitivePeerDependencies:
-      - '@babel/core'
-      - '@types/babel__core'
-      - bitcore-lib
-      - request
-      - supports-color
-      - webpack
-
   '@ddn/p2p@2.4.3':
     dependencies:
       socks5-client: 1.2.8
 
-  '@ddn/peer@2.4.3(@babel/core@7.24.9)(bitcore-lib@8.25.47)(webpack@3.12.0)':
+  '@ddn/peer@2.4.3(@babel/core@7.24.9)(webpack@3.12.0)':
     dependencies:
       '@ddn/asset-aob': 1.2.3
       '@ddn/asset-base': 2.4.3(request@2.88.2)
-      '@ddn/asset-dao': 1.2.2(@babel/core@7.24.9)(bitcore-lib@8.25.47)(request@2.88.2)(webpack@3.12.0)
+      '@ddn/asset-dao': 1.2.2(@babel/core@7.24.9)(request@2.88.2)(webpack@3.12.0)
       '@ddn/asset-dapp': 2.4.3(@babel/core@7.24.9)(bitcore-lib@8.25.47)
       '@ddn/asset-evidence': 2.4.3(request@2.88.2)
       '@ddn/contract': 0.3.3
@@ -17888,15 +17951,6 @@ snapshots:
   '@ddn/sm-crypto@0.0.5':
     dependencies:
       jsbn: 1.1.0
-
-  '@ddn/test-utils@2.4.3(@babel/core@7.18.2)(request@2.88.2)':
-    dependencies:
-      '@ddn/core': 2.4.3(@babel/core@7.18.2)
-      '@ddn/utils': 2.4.3(request@2.88.2)
-    transitivePeerDependencies:
-      - '@babel/core'
-      - request
-      - supports-color
 
   '@ddn/test-utils@2.4.3(@babel/core@7.24.9)(request@2.88.2)':
     dependencies:
@@ -18248,6 +18302,43 @@ snapshots:
       graceful-fs: 4.2.11
       jest-changed-files: 27.5.1
       jest-config: 27.5.1(ts-node@10.9.2(@types/node@10.17.60)(typescript@4.9.5))
+      jest-haste-map: 27.5.1
+      jest-message-util: 27.5.1
+      jest-regex-util: 27.5.1
+      jest-resolve: 27.5.1
+      jest-resolve-dependencies: 27.5.1
+      jest-runner: 27.5.1
+      jest-runtime: 27.5.1
+      jest-snapshot: 27.5.1
+      jest-util: 27.5.1
+      jest-validate: 27.5.1
+      jest-watcher: 27.5.1
+      micromatch: 4.0.7
+      rimraf: 3.0.2
+      slash: 3.0.0
+      strip-ansi: 6.0.1
+    transitivePeerDependencies:
+      - bufferutil
+      - canvas
+      - supports-color
+      - ts-node
+      - utf-8-validate
+
+  '@jest/core@27.5.1(ts-node@7.0.1)':
+    dependencies:
+      '@jest/console': 27.5.1
+      '@jest/reporters': 27.5.1
+      '@jest/test-result': 27.5.1
+      '@jest/transform': 27.5.1
+      '@jest/types': 27.5.1
+      '@types/node': 10.17.60
+      ansi-escapes: 4.3.2
+      chalk: 4.1.2
+      emittery: 0.8.1
+      exit: 0.1.2
+      graceful-fs: 4.2.11
+      jest-changed-files: 27.5.1
+      jest-config: 27.5.1(ts-node@7.0.1)
       jest-haste-map: 27.5.1
       jest-message-util: 27.5.1
       jest-regex-util: 27.5.1
@@ -20812,14 +20903,6 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  axios@1.7.2:
-    dependencies:
-      follow-redirects: 1.15.6
-      form-data: 4.0.0
-      proxy-from-env: 1.1.0
-    transitivePeerDependencies:
-      - debug
-
   axios@1.7.2(debug@4.1.1):
     dependencies:
       follow-redirects: 1.15.6(debug@4.1.1)
@@ -21842,6 +21925,10 @@ snapshots:
       node-releases: 2.0.17
       update-browserslist-db: 1.1.0(browserslist@4.23.2)
 
+  bs-logger@0.2.6:
+    dependencies:
+      fast-json-stable-stringify: 2.1.0
+
   bs58@4.0.1:
     dependencies:
       base-x: 3.0.10
@@ -22034,13 +22121,13 @@ snapshots:
       core-js: 2.6.12
       deep-equal: 1.1.2
       espurify: 1.8.1
-      estraverse: 4.3.0
+      estraverse: 4.2.0
 
   call-matcher@2.0.0:
     dependencies:
       deep-equal: 1.1.2
       espurify: 2.1.1
-      estraverse: 4.3.0
+      estraverse: 4.2.0
 
   caller-callsite@2.0.0:
     dependencies:
@@ -23414,6 +23501,8 @@ snapshots:
 
   diff-sequences@29.6.3: {}
 
+  diff@3.5.0: {}
+
   diff@4.0.2: {}
 
   diffie-hellman@5.0.3:
@@ -23628,7 +23717,7 @@ snapshots:
 
   empower-assert@1.1.0:
     dependencies:
-      estraverse: 4.3.0
+      estraverse: 4.2.0
 
   encodeurl@1.0.2: {}
 
@@ -24061,7 +24150,7 @@ snapshots:
   escodegen-bigint@1.11.0:
     dependencies:
       esprima: 3.1.3
-      estraverse: 4.3.0
+      estraverse: 4.2.0
       esutils: 2.0.3
       optionator: 0.8.3
     optionalDependencies:
@@ -24070,7 +24159,7 @@ snapshots:
   escodegen@1.14.3:
     dependencies:
       esprima: 4.0.1
-      estraverse: 4.3.0
+      estraverse: 4.2.0
       esutils: 2.0.3
       optionator: 0.8.3
     optionalDependencies:
@@ -24089,7 +24178,7 @@ snapshots:
       es6-map: 0.1.5
       es6-weak-map: 2.0.3
       esrecurse: 4.3.0
-      estraverse: 4.3.0
+      estraverse: 4.2.0
 
   eslint-config-airbnb-base@14.2.1(eslint-plugin-import@2.29.1(@typescript-eslint/parser@3.10.1(eslint@7.32.0)(typescript@3.9.10))(eslint@7.32.0))(eslint@7.32.0):
     dependencies:
@@ -24190,7 +24279,7 @@ snapshots:
   eslint-scope@5.1.1:
     dependencies:
       esrecurse: 4.3.0
-      estraverse: 4.3.0
+      estraverse: 4.2.0
 
   eslint-utils@2.1.0:
     dependencies:
@@ -24277,7 +24366,7 @@ snapshots:
       empower-assert: 1.1.0
       escodegen: 1.14.3
       espower: 2.1.2
-      estraverse: 4.3.0
+      estraverse: 4.2.0
       merge-estraverse-visitors: 1.0.0
       multi-stage-sourcemap: 0.2.1
       path-is-absolute: 1.0.1
@@ -24291,7 +24380,7 @@ snapshots:
       escope: 3.6.0
       espower-location-detector: 1.0.0
       espurify: 1.8.1
-      estraverse: 4.3.0
+      estraverse: 4.2.0
       source-map: 0.5.7
       type-name: 2.0.2
 
@@ -24322,8 +24411,6 @@ snapshots:
       estraverse: 5.3.0
 
   estraverse@4.2.0: {}
-
-  estraverse@4.3.0: {}
 
   estraverse@5.3.0: {}
 
@@ -24996,8 +25083,6 @@ snapshots:
     dependencies:
       inherits: 2.0.4
       readable-stream: 2.3.8
-
-  follow-redirects@1.15.6: {}
 
   follow-redirects@1.15.6(debug@4.1.1):
     optionalDependencies:
@@ -26898,6 +26983,27 @@ snapshots:
       - ts-node
       - utf-8-validate
 
+  jest-cli@27.5.1(ts-node@7.0.1):
+    dependencies:
+      '@jest/core': 27.5.1(ts-node@7.0.1)
+      '@jest/test-result': 27.5.1
+      '@jest/types': 27.5.1
+      chalk: 4.1.2
+      exit: 0.1.2
+      graceful-fs: 4.2.11
+      import-local: 3.1.0
+      jest-config: 27.5.1(ts-node@7.0.1)
+      jest-util: 27.5.1
+      jest-validate: 27.5.1
+      prompts: 2.4.2
+      yargs: 16.2.0
+    transitivePeerDependencies:
+      - bufferutil
+      - canvas
+      - supports-color
+      - ts-node
+      - utf-8-validate
+
   jest-cli@29.7.0(@types/node@10.17.60)(ts-node@10.9.2(@types/node@10.17.60)(typescript@3.9.10)):
     dependencies:
       '@jest/core': 29.7.0(ts-node@10.9.2(@types/node@10.17.60)(typescript@3.9.10))
@@ -26945,6 +27051,40 @@ snapshots:
       strip-json-comments: 3.1.1
     optionalDependencies:
       ts-node: 10.9.2(@types/node@10.17.60)(typescript@4.9.5)
+    transitivePeerDependencies:
+      - bufferutil
+      - canvas
+      - supports-color
+      - utf-8-validate
+
+  jest-config@27.5.1(ts-node@7.0.1):
+    dependencies:
+      '@babel/core': 7.24.9
+      '@jest/test-sequencer': 27.5.1
+      '@jest/types': 27.5.1
+      babel-jest: 27.5.1(@babel/core@7.24.9)
+      chalk: 4.1.2
+      ci-info: 3.9.0
+      deepmerge: 4.3.1
+      glob: 7.2.3
+      graceful-fs: 4.2.11
+      jest-circus: 27.5.1
+      jest-environment-jsdom: 27.5.1
+      jest-environment-node: 27.5.1
+      jest-get-type: 27.5.1
+      jest-jasmine2: 27.5.1
+      jest-regex-util: 27.5.1
+      jest-resolve: 27.5.1
+      jest-runner: 27.5.1
+      jest-util: 27.5.1
+      jest-validate: 27.5.1
+      micromatch: 4.0.7
+      parse-json: 5.2.0
+      pretty-format: 27.5.1
+      slash: 3.0.0
+      strip-json-comments: 3.1.1
+    optionalDependencies:
+      ts-node: 7.0.1
     transitivePeerDependencies:
       - bufferutil
       - canvas
@@ -27550,6 +27690,18 @@ snapshots:
       '@jest/core': 27.5.1(ts-node@10.9.2(@types/node@10.17.60)(typescript@4.9.5))
       import-local: 3.1.0
       jest-cli: 27.5.1(ts-node@10.9.2(@types/node@10.17.60)(typescript@4.9.5))
+    transitivePeerDependencies:
+      - bufferutil
+      - canvas
+      - supports-color
+      - ts-node
+      - utf-8-validate
+
+  jest@27.5.1(ts-node@7.0.1):
+    dependencies:
+      '@jest/core': 27.5.1(ts-node@7.0.1)
+      import-local: 3.1.0
+      jest-cli: 27.5.1(ts-node@7.0.1)
     transitivePeerDependencies:
       - bufferutil
       - canvas
@@ -28669,7 +28821,7 @@ snapshots:
 
   merge-estraverse-visitors@1.0.0:
     dependencies:
-      estraverse: 4.3.0
+      estraverse: 4.2.0
 
   merge-source-map@1.0.4:
     dependencies:
@@ -29369,7 +29521,7 @@ snapshots:
       '@yarnpkg/lockfile': 1.1.0
       '@yarnpkg/parsers': 3.0.0-rc.46
       '@zkochan/js-yaml': 0.0.7
-      axios: 1.7.2
+      axios: 1.7.2(debug@4.1.1)
       chalk: 4.1.2
       cli-cursor: 3.1.0
       cli-spinners: 2.6.1
@@ -33265,6 +33417,29 @@ snapshots:
 
   trough@1.0.5: {}
 
+  ts-jest@23.10.5(jest@27.5.1(ts-node@7.0.1)):
+    dependencies:
+      bs-logger: 0.2.6
+      buffer-from: 1.1.2
+      fast-json-stable-stringify: 2.1.0
+      jest: 27.5.1(ts-node@7.0.1)
+      json5: 2.2.3
+      make-error: 1.3.6
+      mkdirp: 0.5.6
+      resolve: 1.22.8
+      semver: 5.7.2
+      yargs-parser: 10.1.0
+
+  ts-loader@4.5.0:
+    dependencies:
+      chalk: 2.4.2
+      enhanced-resolve: 4.5.0
+      loader-utils: 1.4.2
+      micromatch: 3.1.10(supports-color@4.5.0)
+      semver: 5.7.2
+    transitivePeerDependencies:
+      - supports-color
+
   ts-loader@8.4.0(typescript@4.9.5)(webpack@3.12.0):
     dependencies:
       chalk: 4.1.2
@@ -33321,6 +33496,17 @@ snapshots:
       v8-compile-cache-lib: 3.0.1
       yn: 3.1.1
     optional: true
+
+  ts-node@7.0.1:
+    dependencies:
+      arrify: 1.0.1
+      buffer-from: 1.1.2
+      diff: 3.5.0
+      make-error: 1.3.6
+      minimist: 1.2.8
+      mkdirp: 0.5.6
+      source-map-support: 0.5.21
+      yn: 2.0.0
 
   tsconfig-paths@3.15.0:
     dependencies:
@@ -33564,7 +33750,7 @@ snapshots:
       call-matcher: 2.0.0
       deep-equal: 1.1.2
       espurify: 2.1.1
-      estraverse: 4.3.0
+      estraverse: 4.2.0
       esutils: 2.0.3
       object-assign: 4.1.1
 
@@ -34318,6 +34504,10 @@ snapshots:
 
   yaml@1.10.2: {}
 
+  yargs-parser@10.1.0:
+    dependencies:
+      camelcase: 4.1.0
+
   yargs-parser@13.1.1:
     dependencies:
       camelcase: 5.3.1
@@ -34422,6 +34612,8 @@ snapshots:
   year@0.2.1: {}
 
   yeast@0.1.2: {}
+
+  yn@2.0.0: {}
 
   yn@3.1.1: {}
 

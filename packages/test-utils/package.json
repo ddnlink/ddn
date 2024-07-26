@@ -23,8 +23,8 @@
     "test": "jest"
   },
   "dependencies": {
-    "@ddn/core": "^2.4.3",
-    "@ddn/utils": "^2.4.3"
+    "@ddn/core": "workspace:*",
+    "@ddn/utils": "workspace:*"
   },
   "devDependencies": {
     "chai": "^4.2.0",
