@@ -30,7 +30,7 @@ function defaultOnError (e) {
   console.error(e)
 }
 
-export function requireFile (f, opts = {}) {
+export async function requireFile (f, opts = {}) {
   if (!existsSync(f)) {
     return {}
   }
@@ -38,7 +38,7 @@ export function requireFile (f, opts = {}) {
   const { onError = defaultOnError } = opts
   let ret = {}
   try {
-    ret = require(f) || {} // eslint-disable-line
+    ret = (await import(f)) || {} // eslint-disable-line
   } catch (e) {
     onError(e, f)
   }
@@ -50,7 +50,7 @@ export function mergeConfigs (...configs) {
   return extend(true, ...configs)
 }
 
-export function getConfigByConfigFile (configFile, opts = {}) {
+export async function getConfigByConfigFile (configFile, opts = {}) {
   const ddnEnv = process.env.DDN_ENV
   const isDev = process.env.NODE_ENV === 'development'
   const { defaultConfig, onError } = opts
@@ -63,11 +63,11 @@ export function getConfigByConfigFile (configFile, opts = {}) {
    */
   const configs = [
     defaultConfig,
-    requireFile(configFile, requireOpts),
-    ddnEnv && requireFile(addAffix(configFile, ddnEnv), requireOpts),
-    isDev && requireFile(addAffix(configFile, 'testnet'), requireOpts),
-    isDev && requireFile(addAffix(configFile, 'local'), requireOpts),
-    !isDev && requireFile(addAffix(configFile, 'mainnet'), requireOpts)
+    await requireFile(configFile, requireOpts),
+    ddnEnv && (await requireFile(addAffix(configFile, ddnEnv), requireOpts)),
+    isDev && (await requireFile(addAffix(configFile, 'testnet'), requireOpts)),
+    isDev && (await requireFile(addAffix(configFile, 'local'), requireOpts)),
+    !isDev && (await requireFile(addAffix(configFile, 'mainnet'), requireOpts))
   ]
 
   return mergeConfigs(...configs)
@@ -106,12 +106,12 @@ export function cleanConfigRequireCache (cwd) {
  * 主配置文件而生效。
  * @param opts {cwd: cwd, defaultConfig: config.default.js }
  */
-export function getUserConfig (opts = {}) {
+export async function getUserConfig (opts = {}) {
   const { cwd, defaultConfig } = opts
   const absConfigFile = getConfigFile(cwd)
 
   if (absConfigFile) {
-    return getConfigByConfigFile(absConfigFile, {
+    return await getConfigByConfigFile(absConfigFile, {
       defaultConfig
     })
   } else {

@@ -1,5 +1,7 @@
+const a = require('@ddn/asset-evidence/.ddnrc.js')
+
 class AssetUtils {
-  static loadFromObject (assetPlugins) {
+  static async loadFromObject (assetPlugins) {
     const assets = {
       transConfigs: [],
       transTypeValues: [],
@@ -8,15 +10,21 @@ class AssetUtils {
 
     for (const p in assetPlugins) {
       const currAsset = assetPlugins[p]
+      console.log('a', a)
+
+      console.log('currAsset.........: ', currAsset) // @ddn/asset-evidence/.ddnrc.js
+      // console.log("currAsset.........: ", require.resolve(currAsset)); // @ddn/asset-evidence/.ddnrc.js
       if (currAsset) {
         let assetConfig
         try {
           assetConfig = require(`${currAsset}/.ddnrc.js`)
         } catch (error) {
+          // console.log(`The asset extends error: ${currAsset} has no configure .ddnrc.js.`)
           throw new Error(`The asset extends error: ${currAsset} has no configure .ddnrc.js.`)
         }
 
         const assetTransactions = assetConfig.transactions
+        console.log('assetTransactions.........: ', assetTransactions)
 
         if (assetTransactions && assetTransactions.length > 0) {
           assetTransactions.forEach(currTrans => {
@@ -95,6 +103,7 @@ class AssetUtils {
 
     for (const p in assetPluginsJson) {
       const currAsset = assetPluginsJson[p]
+
       if (currAsset) {
         const assetTransactions = currAsset.transactions
 
@@ -129,9 +138,10 @@ class AssetUtils {
     return this
   }
 
-  static loadFromFile (file) {
-    const assetPlugins = require(file)
-    return this.loadFromObject(assetPlugins)
+  // fixme: 该方法未使用 imfly 2024.7.26
+  static async loadFromFile (file) {
+    const assetPlugins = await import(file)
+    return await this.loadFromObject(assetPlugins)
   }
 
   static getTypeValue (typeName) {

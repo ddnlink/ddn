@@ -1,4 +1,5 @@
-const extend = require('extend')
+import extend from 'extend'
+import express from 'express'
 
 function map (root, config) {
   const router = this
@@ -29,7 +30,7 @@ function map (root, config) {
  * @returns {*}
  */
 const Router = function () {
-  const router = require('express').Router()
+  const router = express.Router()
 
   // router.use(function (req, res, next) {
   //   res.header("Access-Control-Allow-Origin", "*");

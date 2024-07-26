@@ -4,11 +4,11 @@
   "description": "Crypto Adaptation",
   "main": "./dist/index.js",
   "types": "dist/index.d.ts",
-  "keywords": [
-    "crypto"
-  ],
   "files": [
     "dist"
+  ],
+  "keywords": [
+    "crypto"
   ],
   "repository": {
     "type": "git",

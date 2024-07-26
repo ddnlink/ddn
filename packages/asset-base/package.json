@@ -2,10 +2,12 @@
   "name": "@ddn/asset-base",
   "version": "2.4.3",
   "description": "DDN资产基类相关信息",
-  "main": "./dist/index.js",
+
+  "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "files": [
-    "dist"
+    "dist",
+    "compiled"
   ],
   "repository": {
     "type": "git",

@@ -49,6 +49,9 @@ class Program {
 
     const ctx = new Context()
 
+    // 新版本使用 ctx 作为上下文
+    this.ctx = ctx
+
     // 将配置信息保存到上下文
     await ctx.init(options)
 
@@ -87,9 +90,6 @@ class Program {
       logLevel: options.configObject.logLevel,
       isDev: process.env.NODE_ENV !== 'production'
     })
-
-    // 新版本使用 ctx 作为上下文
-    this.ctx = ctx
 
     // 兼容旧版本 imfly 20240701
     this._context = this.ctx

@@ -54,7 +54,7 @@ class Context {
     this.ddnSchema = DdnSchema.singleton()
 
     // 资产插件配置对象
-    this.assetPlugins = Asset.Utils.loadFromObject(options.configObject.assets)
+    this.assetPlugins = await Asset.Utils.loadFromObject(options.configObject.assets)
 
     // 二进制序列化对象
     const protoFile = path.resolve(__dirname, '../..', 'protos', 'ddn.proto')

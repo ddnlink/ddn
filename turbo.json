@@ -9,9 +9,6 @@
                 "dist/**"
             ]
         },
-        "build:extra": {
-            "cache": false
-        },
         "dev": {
             "cache": false
         },
@@ -26,14 +23,9 @@
         "NODE_ENV"
     ],
     "globalDependencies": [
-        ".env",
-        ".ddnrc.js",
         "tsconfig.base.json",
         "tsconfig.json",
         "jest.config.ts",
-        ".father.base.ts",
-        "jest.config.ts",
         ".father.base.ts"
-    ],
-    "ui": "tui"
+    ]
 }
