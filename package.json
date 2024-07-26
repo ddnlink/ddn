@@ -34,14 +34,12 @@
     "lint-staged": "lint-staged",
     "lint-staged:js": "eslint --ext .js",
     "prettier": "prettier --write ./packages/**/src/**/**/* ./packages/**/test/**/**/*",
-
     "build:dev": "NODE_ENV=development node ./scripts/initCryptoDependent.js && father build -w",
     "build:watch": "node ./scripts/initCryptoDependent.js && father build -w",
     "build:docker": "node ./scripts/initCryptoDependent.js && father build --docker",
     "changelog": "conventional-changelog -p angular -i CHANGELOG.md -w",
     "chore:update-deps": "sh ./scripts/reinstall_deps.sh",
     "clean": "lerna clean -y",
-
     "docker:start": "docker compose -f ./docker/docker-compose.yml --env-file ./docker/.env start",
     "docker:stop": "docker compose -f ./docker/docker-compose.yml --env-file ./docker/.env stop",
     "docker:up": "docker compose -f ./docker/docker-compose.yml --env-file ./docker/.env up -d",
@@ -112,5 +110,6 @@
   "engines": {
     "node": ">=16.14",
     "pnpm": "^9.6.0"
-  }
+  },
+  "packageManager": "pnpm@9.6.0"
 }
