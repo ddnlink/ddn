@@ -1,2 +1,2 @@
-const a = require('@ddn/asset-evidence/.ddnrc.js')
+import a from './config.js'
 console.log('a', a)

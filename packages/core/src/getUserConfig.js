@@ -4,6 +4,15 @@ import assert from 'assert'
 import extend from 'extend2'
 import winPath from './winPath'
 
+/**
+ * 获取指定目录下的配置文件
+ * 如果环境变量 DDN_CONFIG_FILE 存在，通常是 .ddnrc.* 系列文件，将使用它的值来确定配置文件。否则，将检查默认的配置文件名列表。
+ * 可以通过逗号分隔配置文件名列表，并且可以通过配置环境变量来指定配置文件。
+ *
+ * @param {string} cwd - 当前工作路径
+ * @returns {string|undefined} - 如果找到配置文件，返回配置文件的完整路径；否则返回 undefined
+ * @throws {Error} 如果找到多个配置文件，抛出错误
+ */
 export function getConfigFile (cwd) {
   const files = process.env.DDN_CONFIG_FILE
     ? process.env.DDN_CONFIG_FILE.split(',').filter(v => v && v.trim())
@@ -52,22 +61,22 @@ export function mergeConfigs (...configs) {
 
 export async function getConfigByConfigFile (configFile, opts = {}) {
   const ddnEnv = process.env.DDN_ENV
-  const isDev = process.env.NODE_ENV === 'development'
+  const isProd = process.env.NODE_ENV === 'production' // 默认是 false，即便 process.env.NODE_ENV 不提供
   const { defaultConfig, onError } = opts
 
   const requireOpts = { onError }
 
   /**
-   * development: config.local.* and config.testnet.*;
-   * other: mainnet
+   * development:  config.testnet.* and config.local.*;
+   * production: mainnet
    */
   const configs = [
     defaultConfig,
     await requireFile(configFile, requireOpts),
     ddnEnv && (await requireFile(addAffix(configFile, ddnEnv), requireOpts)),
-    isDev && (await requireFile(addAffix(configFile, 'testnet'), requireOpts)),
-    isDev && (await requireFile(addAffix(configFile, 'local'), requireOpts)),
-    !isDev && (await requireFile(addAffix(configFile, 'mainnet'), requireOpts))
+    !isProd && (await requireFile(addAffix(configFile, 'testnet'), requireOpts)),
+    !isProd && (await requireFile(addAffix(configFile, 'local'), requireOpts)),
+    isProd && (await requireFile(addAffix(configFile, 'mainnet'), requireOpts))
   ]
 
   return mergeConfigs(...configs)

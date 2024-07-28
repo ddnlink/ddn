@@ -420,7 +420,6 @@ export class P2P {
    * @returns pipe
    */
   async getPeer (node) {
-    self.logger.warn('getPeer ................', typeof node)
     return !node ? this.inventory.getRandomPeer() : node
   }
 

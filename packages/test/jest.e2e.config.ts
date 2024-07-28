@@ -11,6 +11,6 @@ export default {
     '<rootDir>/test/.+/fixtures'
   ],
   moduleNameMapper: {
-    'test-utils': '<rootDir>/test/lib/testUtils.ts'
+    'test-utils': '<rootDir>/test/dist/testUtils.ts'
   }
 } as Config.InitialOptions

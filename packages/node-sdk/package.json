@@ -31,7 +31,7 @@
   "dependencies": {
     "@ddn/asset-aob": "workspace:*",
     "@ddn/asset-base": "workspace:*",
-    "@ddn/asset-dao": "^1.2.1",
+    "@ddn/asset-dao": "workspace:*",
     "@ddn/asset-dapp": "workspace:*",
     "@ddn/asset-evidence": "workspace:*",
     "@ddn/core": "workspace:*",

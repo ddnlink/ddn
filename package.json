@@ -22,8 +22,8 @@
     "encryption"
   ],
   "scripts": {
-    "dev:turbo": "turbo dev",
-    "build:turbo": "turbo build",
+    "dev": "turbo dev --force",
+    "build": "turbo build",
     "build:prod": "pnpm --filter ddn-starter build",
     "clean:turbo": "rimraf .turbo",
     "test": "./packages/test/bin/test.js",
@@ -76,7 +76,7 @@
     "eslint-plugin-promise": "^4.2.1",
     "eslint-plugin-standard": "^4.0.1",
     "father": "^4.4.5",
-    "husky": "^4.3.0",
+    "husky": "^8.0.3",
     "lerna": "^8.1.5",
     "lint-staged": "^10.4.0",
     "prettier": "^2.1.2",
@@ -99,16 +99,11 @@
     ],
     "*.js": "eslint --fix"
   },
-  "workspaces": [
-    "packages/*",
-    "pro-packages/*",
-    "examples/*"
-  ],
   "publishConfig": {
     "access": "public"
   },
   "engines": {
-    "node": ">=16.14",
-    "pnpm": "^9.6.0"
-  }
+    "node": ">=16.14"
+  },
+  "packageManager": "pnpm@9.6.0"
 }

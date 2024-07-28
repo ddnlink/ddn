@@ -38,6 +38,8 @@ import defaultConfig from '../config.default.js'
  * https://segmentfault.com/q/1010000012789448
  */
 process.env.UV_THREADPOOL_SIZE = 20 // max: 128
+process.env.DDN_ENV = null // prod, dev, custom
+process.env.NODE_ENV = 'development'
 
 class Program {
   async _init (options) {
@@ -47,50 +49,50 @@ class Program {
       options.configObject.publicIp = System.getPublicIp()
     }
 
-    const ctx = new Context()
-
-    // 新版本使用 ctx 作为上下文
-    this.ctx = ctx
-
+    this.ctx = new Context()
     // 将配置信息保存到上下文
-    await ctx.init(options)
+    await this.ctx.init(options)
 
     // 将运行时选项保存到运行时上下文
-    ctx.runtime.state = runtimeState.Pending
-    ctx.runtime.loaded = false
+    this.ctx.runtime.state = runtimeState.Pending
+    this.ctx.runtime.loaded = false
 
     // 区块核心处理模块
-    ctx.runtime.block = Block.singleton(ctx)
+    this.ctx.runtime.block = Block.singleton(this.ctx)
     // 交易核心处理模块
-    ctx.runtime.transaction = Transaction.singleton(ctx)
+    this.ctx.runtime.transaction = Transaction.singleton(this.ctx)
     // 账户核心处理模块
-    ctx.runtime.account = Account.singleton(ctx)
+    this.ctx.runtime.account = Account.singleton(this.ctx)
     // multisignature
-    ctx.runtime.multisignature = MultiSignature.singleton(ctx)
+    this.ctx.runtime.multisignature = MultiSignature.singleton(this.ctx)
     // Slot
-    ctx.runtime.slot = Slot.singleton(ctx)
+    this.ctx.runtime.slot = Slot.singleton(this.ctx)
     // Delegate
-    ctx.runtime.delegate = Delegate.singleton(ctx)
+    this.ctx.runtime.delegate = Delegate.singleton(this.ctx)
     // Round
-    ctx.runtime.round = Round.singleton(ctx)
+    this.ctx.runtime.round = Round.singleton(this.ctx)
     // Consensus
-    ctx.runtime.consensus = Consensus.singleton(ctx)
+    this.ctx.runtime.consensus = Consensus.singleton(this.ctx)
     // Peer
-    ctx.runtime.peer = Peer.singleton(ctx)
+    this.ctx.runtime.peer = Peer.singleton(this.ctx)
     // Data Query
-    ctx.runtime.dataquery = DataQuery.singleton(ctx)
+    this.ctx.runtime.dataquery = DataQuery.singleton(this.ctx)
     // Energy
-    ctx.runtime.energy = Energy.singleton(ctx)
+    this.ctx.runtime.energy = Energy.singleton(this.ctx)
     // Compiler
-    ctx.runtime.compiler = new Compiler()
+    this.ctx.runtime.compiler = new Compiler()
     // negotiate
-    ctx.runtime.dvm = new DVM({
-      dataDir: path.join(ctx.baseDir, '/db/contracts'),
-      logDir: path.join(ctx.baseDir, '/logs/'),
+    this.ctx.runtime.dvm = new DVM({
+      dataDir: path.join(this.ctx.baseDir, '/db/contracts'),
+      logDir: path.join(this.ctx.baseDir, '/logs/'),
       logLevel: options.configObject.logLevel,
       isDev: process.env.NODE_ENV !== 'production'
     })
 
+    // console.log('configObject', options.configObject);
+
+    // 初始化配置信息
+    this.ctx.config = extend(true, {}, defaultConfig, options.configObject)
     // 兼容旧版本 imfly 20240701
     this._context = this.ctx
 

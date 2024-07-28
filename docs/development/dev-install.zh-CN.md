@@ -3,11 +3,11 @@
 
 ## 开发环境
 
-- 安装 [Node.js](http://nodejs.org/en/) 建议使用最新版
-- 安装 [Yarn](https://yarnpkg.com/zh-Hans/) 1.15.2+
-- jest 27.0.0 以上 (必须，否则无法运行测试)
-- father-build 1.22.3 （必须，没有必要，暂时不升级到 father4）
-
+- [Node.js](http://nodejs.org/en/) 建议使用最新版
+- [pnpm] （必须，负责多包管理的安装、发布等）
+- turbo  （必须，负责多包管理的任务执行）
+- fathe4 （必须，负责打包、编译）
+- jest    (必须，负责测试)
 
 ## Docker环境
 
@@ -92,7 +92,7 @@ $ apt update
 
 2. 安装依赖
 
-这里我们需要安装 vim, git, curl, wget 等常用命令，以及 nodejs 和 yarn 等依赖。
+这里我们需要安装 vim, git, curl, wget 等常用命令，以及 nodejs 和 pnpm 等依赖。
 
 ```shell
 $ apt install -y vim git curl wget
@@ -106,9 +106,9 @@ $ apt install -y vim git curl wget
 $ curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | bash
 
 # 安装 node
-$ nvm install 16.13.1
+$ nvm install 20.13.1
 
-# 安装 yarn
-$ npm install -g yarn
+# 安装 pnpm
+$ npm install -g pnpm
 ```
 

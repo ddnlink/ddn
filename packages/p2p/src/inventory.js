@@ -139,6 +139,8 @@ export class Inventory {
   }
 
   getAllPeers () {
+    this.logger.debug('getAllPeers starting...')
+
     const result = []
     this.peers.forEach(peer => {
       if (peer.status !== Peer.STATUS.disable) {
@@ -150,6 +152,8 @@ export class Inventory {
   }
 
   getRandomPeer () {
+    this.logger.debug('getRandomPeer starting...')
+
     const peers = this.getAllPeers()
     const rnd = Math.floor(Math.random() * peers.length)
     this.logger.debug('Random peer pos: ', rnd, peers.length)

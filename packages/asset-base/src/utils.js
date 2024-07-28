@@ -1,5 +1,3 @@
-const a = require('@ddn/asset-evidence/.ddnrc.js')
-
 class AssetUtils {
   static async loadFromObject (assetPlugins) {
     const assets = {
@@ -10,21 +8,20 @@ class AssetUtils {
 
     for (const p in assetPlugins) {
       const currAsset = assetPlugins[p]
-      console.log('a', a)
-
-      console.log('currAsset.........: ', currAsset) // @ddn/asset-evidence/.ddnrc.js
-      // console.log("currAsset.........: ", require.resolve(currAsset)); // @ddn/asset-evidence/.ddnrc.js
+      // console.log(require.main)
+      // console.log(require.resolve.paths('.'))
+      // console.log(module.filename)
+      // console.log(module.paths)
       if (currAsset) {
-        let assetConfig
+        let asset
         try {
-          assetConfig = require(`${currAsset}/.ddnrc.js`)
+          asset = require(`${currAsset}`)
         } catch (error) {
           // console.log(`The asset extends error: ${currAsset} has no configure .ddnrc.js.`)
-          throw new Error(`The asset extends error: ${currAsset} has no configure .ddnrc.js.`)
+          throw new Error(`The asset extends error: ${currAsset} not found.`)
         }
 
-        const assetTransactions = assetConfig.transactions
-        console.log('assetTransactions.........: ', assetTransactions)
+        const assetTransactions = asset.default.config.transactions
 
         if (assetTransactions && assetTransactions.length > 0) {
           assetTransactions.forEach(currTrans => {

@@ -3,7 +3,7 @@
  * @Email: kubying@foxmail.com
  * @Date: 2024-06-29 23:08:40
  * @Last Modified by:   Someone
- * @Last Modified time: 2024-07-25 16:09:23
+ * @Last Modified time: 2024-07-28 18:28:52
  * @Description: Peer of DDN
  */
 
@@ -33,6 +33,7 @@ class Peer {
     this.router = new Router(context)
 
     const { nethash, peers, p2pPort, publicIp } = this.ctx.config
+
     this.p2p = new P2P({
       port: p2pPort,
       host: publicIp,
