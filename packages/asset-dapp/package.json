@@ -31,7 +31,7 @@
     "async": "^2.6.1",
     "bytebuffer": "^5.0.1",
     "decompress-zip": "^0.2.2",
-    "request": "^2.88.0",
+    "request": "^2.88.2",
     "valid-url": "^1.0.9"
   },
   "gitHead": "3f5aef8e697748180be42f047a2053e46a7afd43"

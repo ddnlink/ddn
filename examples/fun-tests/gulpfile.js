@@ -4,6 +4,7 @@ var gulp = require('gulp')
 var shell = require('gulp-shell')
 var replace = require('gulp-replace')
 var webpack = require('webpack')
+var webpackStream = require('webpack-stream')
 var nodeExternals = require('webpack-node-externals')
 var packageFile = require('./package')
 // var UglifyJsPlugin = require('uglifyjs-webpack-plugin')
@@ -17,11 +18,35 @@ function build (osName, net) {
 
   return webpack(require('./webpack.config.js')(fullpath), function () {
     gulp
-      .src(path.join(fullpath, 'app.js'))
+      .src(path.join(__dirname, 'app.js'))
       .pipe(replace('localnet', net))
+      .pipe(replace('testnet', net))
       .pipe(gulp.dest(fullpath))
       .pipe(shell(getCmds(osName, net)))
   })
+}
+
+function getCmds (osName, net) {
+  var dir = packageFile.name + '-' + osName + '-' + packageFile.version + '-' + net
+  var fullpath = path.join(__dirname, 'build', dir)
+
+  var result = []
+  result.push(format('cd %s && mkdir -p public dapps tmp logs bin config', fullpath))
+  result.push(format('cp -r package.json ddnd init .ddnrc.mainnet.js %s', fullpath))
+  if (net !== 'localnet') {
+    result.push(format('cp config/genesisBlock.json %s/config/', fullpath))
+    result.push(format('cp constants.mainnet.js %s/', fullpath))
+  } else {
+    result.push(format('cp config/genesisBlock.json %s/config/', fullpath))
+  }
+
+  if (osName !== 'win') {
+    result.push(format('cp `which node` %s/bin/', fullpath))
+  }
+
+  result.push(format('cd %s && npm install --production', fullpath))
+  result.push(format('cd %s/.. && tar zcf %s.tar.gz %s', fullpath, dir, dir))
+  return result
 }
 
 function buildSource (net) {
@@ -30,9 +55,10 @@ function buildSource (net) {
 
   return (
     gulp
-      .src('app.js')
+      .src('./app.js')
       .pipe(
-        webpack({
+        webpackStream({
+          mode: 'production',
           output: {
             filename: 'app.js'
           },
@@ -52,37 +78,6 @@ function buildSource (net) {
       // .pipe(replace('development', buildTime))
       .pipe(gulp.dest(fullpath))
   )
-}
-
-function getCmds (osName, net) {
-  var dir = packageFile.name + '-' + osName + '-' + packageFile.version + '-' + net
-  var fullpath = path.join(__dirname, 'build', dir)
-
-  var result = []
-  result.push(format('cd %s && mkdir -p public dapps tmp logs bin config', fullpath))
-  result.push(format('cp -r package.json ddnd init .ddnrc.mainnet.js %s', fullpath))
-  if (net !== 'localnet') {
-    if (osName === 'mac') {
-      result.push(format('sed -i "" "s/testnet/%s/g" %s/ddnd', net, fullpath))
-    } else {
-      result.push(format('sed -i "s/testnet/%s/g" %s/ddnd', net, fullpath))
-    }
-
-    result.push(format('cp config/genesisBlock.json %s/config/', fullpath))
-    result.push(format('cp constants.mainnet.js %s/', fullpath))
-  } else {
-    result.push(format('cp config/genesisBlock.json %s/config/', fullpath))
-    // result.push(format('cp third_party/sqlite3.exe %s/', fullpath))
-  }
-
-  if (osName !== 'win') {
-    result.push(format('cp `which node` %s/bin/', fullpath))
-  }
-
-  result.push(format('cd %s && npm install --production', fullpath))
-  result.push(format('cd %s/.. && tar zcf %s.tar.gz %s', fullpath, dir, dir))
-
-  return result
 }
 
 gulp.task('build-src-main', function (done) {

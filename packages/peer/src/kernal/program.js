@@ -38,8 +38,6 @@ import defaultConfig from '../config.default.js'
  * https://segmentfault.com/q/1010000012789448
  */
 process.env.UV_THREADPOOL_SIZE = 20 // max: 128
-process.env.DDN_ENV = null // prod, dev, custom
-process.env.NODE_ENV = 'development'
 
 class Program {
   async _init (options) {

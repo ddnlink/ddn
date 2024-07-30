@@ -63,9 +63,9 @@
     "ajv": "^6.3.0",
     "array.prototype.find": "^2.1.0",
     "array.prototype.findindex": "^2.0.2",
-    "async": "1.5.2",
+    "async": "^2.6.1",
     "body-parser": "^1.16.0",
-    "bytebuffer": "5.0.1",
+    "bytebuffer": "^5.0.1",
     "chai-to-assert": "^1.0.0",
     "change-case": "3.0.0",
     "colors": "^1.4.0",
@@ -96,9 +96,9 @@
     "socket.io": "^2.2.0",
     "sqlite3": "^5.0.0",
     "systeminformation": "^5.9.8",
-    "tracer": "^0.8.11",
+    "tracer": "0.9.1",
     "util-extend": "1.0.3",
-    "valid-url": "1.0.9"
+    "valid-url": "^1.0.9"
   },
   "gitHead": "3f5aef8e697748180be42f047a2053e46a7afd43"
 }

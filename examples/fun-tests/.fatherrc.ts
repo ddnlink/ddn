@@ -52,12 +52,6 @@
 import {defineConfig} from 'father'
 
 export default defineConfig({
-  // umd: {
-  //   entry: 'app.js', // 默认构建入口文件
-  //   platform: 'node', // 默认构建为 Browser 环境的产物
-  //   output: 'build',
-  //   sourcemap: true,
-  // },
   cjs: {
     platform: 'node',
     output: 'build'

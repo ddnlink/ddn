@@ -24,7 +24,7 @@
   "scripts": {
     "dev": "turbo dev --force",
     "build": "turbo build",
-    "build:prod": "pnpm --filter ddn-starter build",
+    "build:prod": "pnpm --filter ddn-starter build:prod",
     "clean:turbo": "rimraf .turbo",
     "test": "./packages/test/bin/test.js",
     "test:custom": "DDN_ENV=custom ./packages/test/bin/test.js",
@@ -39,14 +39,16 @@
     "build:docker": "node ./scripts/initCryptoDependent.js && father build --docker",
     "changelog": "conventional-changelog -p angular -i CHANGELOG.md -w",
     "chore:update-deps": "sh ./scripts/reinstall_deps.sh",
-    "clean": "lerna clean -y",
+    "clean": "lerna clean -y &&  find . -name 'node_modules' -type d -prune -exec rm -rf '{}' +",
     "docker:start": "docker compose -f ./docker/docker-compose.yml --env-file ./docker/.env start",
     "docker:stop": "docker compose -f ./docker/docker-compose.yml --env-file ./docker/.env stop",
     "docker:up": "docker compose -f ./docker/docker-compose.yml --env-file ./docker/.env up -d",
     "docker:down": "docker compose -f ./docker/docker-compose.yml --env-file ./docker/.env down",
     "doc:dev": "DDN_ENV=docs dumi dev",
     "doc:build": "DDN_ENV=docs dumi build",
-    "doc:deploy": "DDN_ENV=docs deploy website"
+    "doc:deploy": "DDN_ENV=docs deploy website",
+    "pkg:fix": "manypkg fix",
+    "postinstall": "manypkg check"
   },
   "config": {
     "commitizen": {
@@ -55,17 +57,42 @@
   },
   "author": "DDN <support@ddn.link>",
   "license": "AGPL 3.0",
-  "devDependencies": {
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged"
+    }
+  },
+  "lint-staged": {
+    "**/*.{ts,txs,js,jsx,less}": [
+      "prettier --write",
+      "git add"
+    ],
+    "*.js": "eslint --fix"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "engines": {
+    "node": ">=16.14"
+  },
+  "packageManager": "pnpm@9.6.0",
+  "dependencies": {
     "@babel/plugin-transform-classes": "^7.10.4",
+    "@ddn/asset-aob": "^1.2.3",
+    "@ddn/asset-dao": "^1.2.2",
+    "@ddn/asset-dapp": "^2.4.3",
+    "@ddn/asset-evidence": "^2.4.3",
     "@ddn/test": "^2.4.3",
     "@jest/transform": "^29.7.0",
-    "@types/jest": "^29.5.12",
+    "@manypkg/cli": "^0.21.4",
+    "@types/jest": "^23.3.2",
     "@types/node": "^10.12.26",
     "@typescript-eslint/eslint-plugin": "^3.3.0",
     "@typescript-eslint/parser": "^3.3.0",
     "conventional-changelog": "^3.1.21",
     "conventional-changelog-cli": "^2.2.2",
     "dumi": "^1.0.3",
+    "esbuild": "^0.23.0",
     "eslint": "^7.11.0",
     "eslint-config-airbnb-base": "^14.2.0",
     "eslint-config-prettier": "^6.12.0",
@@ -87,23 +114,20 @@
     "turbo": "^2.0.9",
     "typescript": "^3.9.10"
   },
-  "husky": {
-    "hooks": {
-      "pre-commit": "lint-staged"
+  "//": "下面是 pnpm 独有的配置",
+  "pnpm": {
+    "executionEnv": {
+      "nodeVersion": "20.13.1"
+    },
+    "peerDependencyRules": {
+      "ignoreMissing": [
+        "webpack",
+        "eslint"
+      ]
+    },
+    "//": "对于多版本的情况，使用下面的方式统一覆盖为一个版本，因为很多第三方包你是无法限定其版本的",
+    "overrides": {
+      "resolve": "1.22.8"
     }
-  },
-  "lint-staged": {
-    "**/*.{ts,txs,js,jsx,less}": [
-      "prettier --write",
-      "git add"
-    ],
-    "*.js": "eslint --fix"
-  },
-  "publishConfig": {
-    "access": "public"
-  },
-  "engines": {
-    "node": ">=16.14"
-  },
-  "packageManager": "pnpm@9.6.0"
+  }
 }

@@ -9,7 +9,7 @@ const path = require('path')
 const fs = require('fs')
 const DdnCore = require('@ddn/core')
 const DdnPeer = require('@ddn/peer').default
-const constants = require('../constants')
+const constants = require('../constants.mainnet')
 
 /**
  * 整理系统配置文件生成输入参数

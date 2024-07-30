@@ -45,7 +45,7 @@ var getPlugins = function (env) {
     // 线上模式的配置，去除依赖中重复的插件/压缩js/排除报错的插件
     plugins = _.union(defaultPlugins, [
       new webpack.ProvidePlugin({ _require_native_: '_require_native_' }),
-      new webpack.optimize.DedupePlugin()
+      // new webpack.optimize.DedupePlugin()
       // new UglifyJsPlugin()
 
       // Todo: webpack自带的UglifyJsPlugin不起作用？
@@ -62,8 +62,10 @@ module.exports = function (fullpath) {
   var env = process.env.NODE_ENV
 
   return {
+    mode: 'production',
+
     entry: {
-      app: './app.js'
+      main: './app.js'
     },
     output: {
       path: fullpath,
