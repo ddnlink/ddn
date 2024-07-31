@@ -43,6 +43,9 @@
     "y18n": "^5.0.2",
     "yargs": "^16.0.3"
   },
+  "publishConfig": {
+    "access": "public"
+  },
   "bugs": {
     "url": "https://github.com/ddnlink/ddn/issues"
   },
