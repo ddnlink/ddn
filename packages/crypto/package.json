@@ -1,6 +1,6 @@
 {
   "name": "@ddn/crypto",
-  "version": "2.4.6",
+  "version": "2.4.7",
   "description": "Crypto Adaptation",
   "main": "./dist/index.js",
   "types": "dist/index.d.ts",

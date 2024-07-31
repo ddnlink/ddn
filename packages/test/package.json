@@ -1,6 +1,6 @@
 {
   "name": "@ddn/test",
-  "version": "2.4.3",
+  "version": "2.4.4",
   "repository": {
     "type": "git",
     "url": "http://github.com/ddnlink/ddn/tree/master/packages/test"

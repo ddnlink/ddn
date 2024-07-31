@@ -1,6 +1,6 @@
 {
   "name": "@ddn/crypto-base",
-  "version": "2.4.3",
+  "version": "2.4.4",
   "description": "this is crypto common plugin",
   "main": "./dist/index.js",
   "types": "dist/index.d.ts",

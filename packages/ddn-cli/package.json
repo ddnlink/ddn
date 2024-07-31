@@ -1,7 +1,7 @@
 {
   "name": "@ddn/ddn-cli",
   "preferGlobal": true,
-  "version": "2.4.3",
+  "version": "2.4.4",
   "description": "A Command line tool to manage ddn",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

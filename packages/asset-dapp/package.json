@@ -1,6 +1,6 @@
 {
   "name": "@ddn/asset-dapp",
-  "version": "2.4.3",
+  "version": "2.4.4",
   "description": "this is asset-dapp package",
   "main": "./dist/index.js",
   "types": "dist/index.d.ts",
