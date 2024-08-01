@@ -1,6 +1,6 @@
 {
   "name": "@ddn/asset-dapp",
-  "version": "2.4.4",
+  "version": "2.4.5",
   "description": "this is asset-dapp package",
   "main": "./dist/index.js",
   "types": "dist/index.d.ts",
@@ -24,10 +24,10 @@
     "dev": "father dev"
   },
   "dependencies": {
-    "@ddn/asset-base": "workspace:*",
-    "@ddn/crypto": "workspace:*",
-    "@ddn/sandbox": "workspace:*",
-    "@ddn/utils": "workspace:*",
+    "@ddn/asset-base": "workspace:^",
+    "@ddn/crypto": "workspace:^",
+    "@ddn/sandbox": "workspace:^",
+    "@ddn/utils": "workspace:^",
     "async": "^2.6.1",
     "bytebuffer": "^5.0.1",
     "decompress-zip": "^0.2.2",

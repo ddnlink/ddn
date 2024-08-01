@@ -1,6 +1,6 @@
 {
   "name": "@ddn/crypto",
-  "version": "2.4.7",
+  "version": "2.4.8",
   "description": "Crypto Adaptation",
   "main": "./dist/index.js",
   "types": "dist/index.d.ts",
@@ -19,9 +19,9 @@
     "dev": "father dev"
   },
   "dependencies": {
-    "@ddn/core": "workspace:*",
-    "@ddn/crypto-nacl": "workspace:*",
-    "@ddn/crypto-sm": "workspace:*"
+    "@ddn/core": "workspace:^",
+    "@ddn/crypto-nacl": "workspace:^",
+    "@ddn/crypto-sm": "workspace:^"
   },
   "author": "",
   "license": "AGPL 3.0",

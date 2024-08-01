@@ -1,6 +1,6 @@
 {
   "name": "@ddn/asset-evidence",
-  "version": "2.4.4",
+  "version": "2.4.5",
   "description": "DDN evidence",
   "repository": {
     "type": "git",
@@ -24,8 +24,8 @@
     ".ddnrc.js"
   ],
   "dependencies": {
-    "@ddn/asset-base": "workspace:*",
-    "@ddn/utils": "workspace:*",
+    "@ddn/asset-base": "workspace:^",
+    "@ddn/utils": "workspace:^",
     "bytebuffer": "^5.0.1"
   },
   "gitHead": "3f5aef8e697748180be42f047a2053e46a7afd43"

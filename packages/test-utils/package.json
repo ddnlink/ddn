@@ -1,6 +1,6 @@
 {
   "name": "@ddn/test-utils",
-  "version": "2.4.4",
+  "version": "2.4.5",
   "description": "Test utils for DDN",
   "repository": {
     "type": "git",
@@ -23,8 +23,8 @@
     "test": "jest"
   },
   "dependencies": {
-    "@ddn/core": "workspace:*",
-    "@ddn/utils": "workspace:*"
+    "@ddn/core": "workspace:^",
+    "@ddn/utils": "workspace:^"
   },
   "devDependencies": {
     "chai": "^4.2.0",

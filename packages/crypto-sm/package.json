@@ -1,6 +1,6 @@
 {
   "name": "@ddn/crypto-sm",
-  "version": "2.4.4",
+  "version": "2.4.5",
   "description": "Crypto for DDN",
   "keywords": [
     "crypto",
@@ -30,9 +30,9 @@
     "url": "https://github.com/ddnlink/ddn/issues"
   },
   "dependencies": {
-    "@ddn/crypto-base": "workspace:*",
+    "@ddn/crypto-base": "workspace:^",
     "@ddn/sm-crypto": "0.0.5",
-    "@ddn/utils": "workspace:*",
+    "@ddn/utils": "workspace:^",
     "bitcore-mnemonic": "^8.20.5",
     "bytebuffer": "^5.0.1",
     "crypto": "^1.0.1",
