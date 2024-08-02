@@ -42,19 +42,16 @@ export function getConfigFile (cwd) {
 export function getConstantsFile (cwd) {
   const files = process.env.CONSTANTS_FILE
     ? process.env.CONSTANTS_FILE.split(',').filter(v => v && v.trim())
-    : ['constants.ts', 'constants.js', 'config/constants.ts', 'config/constants.js']
+    : ['config/constants.ts', 'config/constants.js', 'constants.ts', 'constants.js']
 
   // const validFiles = files.filter(f => {})
   const validFiles = files.filter(f => existsSync(join(cwd, f)))
 
-  // assert(
-  //   validFiles.length <= 1,
-  //   `Multiple config files (${validFiles.join(', ')}) were detected, please keep only one.`
-  // )
+  assert(
+    validFiles.length <= 1,
+    `Multiple config files (${validFiles.join(', ')}) were detected, please keep only one.`
+  )
 
-  if (validFiles.length <= 1) {
-    throw Error(`Multiple config files (${validFiles.join(', ')}) were detected, please keep only one.`)
-  }
   if (validFiles[0]) {
     return winPath(join(cwd, validFiles[0]))
   }
