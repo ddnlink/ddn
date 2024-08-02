@@ -1,4 +1,4 @@
 import getPaths from './getPaths'
-import { getUserConfig, requireFile, mergeConfigs } from './getUserConfig'
+import { getUserConfig, getUserConstants, requireFile, mergeConfigs } from './getUserConfig'
 
-export { getPaths, getUserConfig, requireFile, mergeConfigs }
+export { getPaths, getUserConfig, getUserConstants, requireFile, mergeConfigs }

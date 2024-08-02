@@ -52,7 +52,7 @@
     "build-localnet": "./node_modules/.bin/gulp linux-build-local"
   },
   "dependencies": {
-    "@ddn/asset-aob": "^1.2.3",
+    "@ddn/asset-aob": "workspace:^",
     "@ddn/asset-base": "workspace:^",
     "@ddn/asset-dao": "workspace:^",
     "@ddn/asset-dapp": "workspace:^",

@@ -9,7 +9,6 @@ const path = require('path')
 const fs = require('fs')
 const DdnCore = require('@ddn/core')
 const DdnPeer = require('@ddn/peer').default
-const constants = require('./constants.mainnet')
 
 /**
  * 整理系统配置文件生成输入参数
@@ -48,7 +47,6 @@ async function genOptions () {
   configObject.version = packageFile.version
   configObject.basedir = baseDir
   configObject.buildVersion = packageFile.version
-  configObject.net = process.env.NET || 'testnet'
   configObject.publicDir = path.join(baseDir, 'public')
   configObject.dappsDir = command.dapps || path.join(baseDir, 'dapps')
   if (command.port) {
@@ -80,6 +78,12 @@ async function genOptions () {
   if (command.reindex) {
     configObject.loading.verifyOnLoading = true
   }
+
+  // 获取用户配置的常量，依赖于用户的配置
+  const constants = await DdnCore.getUserConstants({ cwd: baseDir, net: configObject.net })
+
+  console.log('configObject:', configObject)
+  console.log('constants: ', constants)
 
   return {
     baseDir,
