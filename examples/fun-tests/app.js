@@ -82,8 +82,8 @@ async function genOptions () {
   // 获取用户配置的常量，依赖于用户的配置
   const constants = await DdnCore.getUserConstants({ cwd: baseDir, net: configObject.net })
 
-  console.log('configObject:', configObject)
-  console.log('constants: ', constants)
+  // console.log('configObject:', configObject)
+  // console.log('constants: ', constants)
 
   return {
     baseDir,

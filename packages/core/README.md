@@ -4,9 +4,9 @@
 
 ## 配置文件
 
-DDN 允许在 `.ddnrc.t|js` ，`config/config.json` 或 `config/config.t|js`（五选一，`.ddnrc.t|js` 优先），以及基于该配置的 `constants.t|js`,  `config/constants.t|js`(四选一，`constants.t|js`优先) 中进行配置，支持 ES6 语法。
+DDN 允许在 `.ddnrc.t|js` ，`config/config.json` 或 `config/config.t|js`（五选一，`.ddnrc.t|js` 优先），以及基于该配置的 `constants.t|js`,  `config/constants.t|js`(四选一，必须有一个，`constants.t|js`优先) 中进行配置，支持 ES6 语法。
 
-**注意**：不要将上述配置混合使用，按照优先级，只能保留一个。
+**注意**：不要将上述配置混合使用，按照优先级，**有且只能有一个**。
 
 > 为简化说明，后续文档里只会出现 `.ddnrc.js`。
 

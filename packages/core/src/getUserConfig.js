@@ -47,10 +47,14 @@ export function getConstantsFile (cwd) {
   // const validFiles = files.filter(f => {})
   const validFiles = files.filter(f => existsSync(join(cwd, f)))
 
-  assert(
-    validFiles.length <= 1,
-    `Multiple config files (${validFiles.join(', ')}) were detected, please keep only one.`
-  )
+  // assert(
+  //   validFiles.length <= 1,
+  //   `Multiple config files (${validFiles.join(', ')}) were detected, please keep only one.`
+  // )
+
+  if (validFiles.length <= 1) {
+    throw Error(`Multiple config files (${validFiles.join(', ')}) were detected, please keep only one.`)
+  }
   if (validFiles[0]) {
     return winPath(join(cwd, validFiles[0]))
   }
@@ -94,6 +98,7 @@ export function mergeConfigs (...configs) {
 export async function getConfigByConfigFile (configFile, opts = {}) {
   const ddnEnv = process.env.DDN_ENV
   const isProd = process.env.NODE_ENV === 'production' // 默认是 false，即便 process.env.NODE_ENV 不提供
+  const isDev = process.env.NODE_ENV === 'development' // 默认是 false，即便 process.env.NODE_ENV 不提供
   const { defaultConfig, onError } = opts
 
   const requireOpts = { onError }
@@ -108,7 +113,7 @@ export async function getConfigByConfigFile (configFile, opts = {}) {
   const configs = [
     defaultConfig,
     await requireFile(configFile, requireOpts),
-    !isProd && (await requireFile(addAffix(configFile, 'testnet'), requireOpts)),
+    isDev && (await requireFile(addAffix(configFile, 'testnet'), requireOpts)),
     ddnEnv && (await requireFile(addAffix(configFile, ddnEnv), requireOpts)),
     !isProd && (await requireFile(addAffix(configFile, 'local'), requireOpts)),
     isProd && (await requireFile(addAffix(configFile, 'mainnet'), requireOpts))
@@ -119,8 +124,8 @@ export async function getConfigByConfigFile (configFile, opts = {}) {
 
 export async function getConstantsByFile (constantsFile, opts = {}) {
   const { defaultConstants, onError, net } = opts
-  console.log('net', net)
   const isMainnet = net === 'mainnet'
+  const isTestnet = net === 'testnet'
   const ddnEnv = process.env.DDN_ENV
 
   const requireOpts = { onError }
@@ -135,7 +140,7 @@ export async function getConstantsByFile (constantsFile, opts = {}) {
   const configs = [
     defaultConstants,
     await requireFile(constantsFile, requireOpts),
-    !isMainnet && (await requireFile(addAffix(constantsFile, 'testnet'), requireOpts)),
+    isTestnet && (await requireFile(addAffix(constantsFile, 'testnet'), requireOpts)),
     ddnEnv && (await requireFile(addAffix(constantsFile, ddnEnv), requireOpts)),
     !isMainnet && (await requireFile(addAffix(constantsFile, 'local'), requireOpts)),
     isMainnet && (await requireFile(addAffix(constantsFile, 'mainnet'), requireOpts))

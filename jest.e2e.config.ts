@@ -1,7 +1,7 @@
-import {Config, createConfig} from 'umi/test'
+// import {Config, createConfig} from 'umi/test'
 
 export default {
-  ...createConfig(),
+  // ...createConfig(),
   preset: 'jest-playwright-preset',
   setupFilesAfterEnv: ['expect-playwright'],
   testMatch: ['**/*.e2e.ts'],
@@ -13,4 +13,4 @@ export default {
   moduleNameMapper: {
     'test-utils': '<rootDir>/test/dist/testUtils.ts'
   }
-} as Config.InitialOptions
+}

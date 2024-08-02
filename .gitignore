@@ -61,3 +61,6 @@ examples/peer*
 # .ddnrc.js
 
 .turbo
+.pnpm-store
+.husky
+.github

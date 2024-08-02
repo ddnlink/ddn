@@ -1,5 +1,7 @@
 export default {
-  testMatch: ['**/*.test.(t|j)s(x)?'], // testMatch: ['<rootDir>/packages/*/test/**/*.test.(t|j)s(x)?'],
+  bail: 1,
+  verbose: true,
+  testMatch: ['<rootDir>/packages/**/*/test/**/*.test.(t|j)s(x)?'],
   modulePathIgnorePatterns: ['<rootDir>/packages/.+/compiled', '<rootDir>/packages/.+/fixtures'],
   transformIgnorePatterns: ['/node_modules/', '/compiled/'],
   collectCoverageFrom: [
@@ -12,11 +14,10 @@ export default {
   testPathIgnorePatterns: [
     '/node_modules/',
     '<rootDir>/config/', // in case of config.test.ts
-    '<rootDir>/mock/',
-    '<rootDir>/.ddnrc.test.ts'
+    '<rootDir>/mock/'
   ],
   transform: {
-    '^.+\\.(t|j)sx?$': 'esbuild-jest'
+    '^.+\\.(t|j)sx?$': 'jest-esm-transformer'
   },
   moduleNameMapper: {
     '^.+\\.(css|less|sass|scss|stylus)$': require.resolve('identity-obj-proxy')
