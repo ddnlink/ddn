@@ -1,7 +1,7 @@
 export default {
   bail: 1,
   verbose: true,
-  testMatch: ['<rootDir>/packages/**/*/test/**/*.test.(t|j)s(x)?'],
+  testMatch: ['<rootDir>/**/*/test/**/*.test.(t|j)s(x)?', '<rootDir>/**/*/tests/**/*.test.(t|j)s(x)?'],
   modulePathIgnorePatterns: ['<rootDir>/packages/.+/compiled', '<rootDir>/packages/.+/fixtures'],
   transformIgnorePatterns: ['/node_modules/', '/compiled/'],
   collectCoverageFrom: [

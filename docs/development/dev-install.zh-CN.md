@@ -27,7 +27,7 @@ $ docker pull ubuntu:22.04
 这里我们使用的是 ubuntu 22.04 版本，如果你是其他版本的，自行修改镜像名称。另外，一定要使用 -it 选项，否则无法进入交互模式。同时，-v 选项挂载本地 ddn 代码到容器内，方便后续操作。
 
 ```bash
-$ docker run -d -it --name ddn-mainnet -v /Users/imfly/projects/DDN/ddn:/root/ddn ubuntu:22.04 
+$ docker run -d -it -p 8001:8001 -p 8000:8000 --name ddn-starter -v /path/to/ddn:/ddn/mainnet -v /path/to/ddn-starter:/ddn/starter ubuntu:22.04 
 ```
 
 这样，一个 ubuntu 运行环境就搭建起来了。
@@ -40,7 +40,7 @@ $ docker run -d -it --name ddn-mainnet -v /Users/imfly/projects/DDN/ddn:/root/dd
 当然，你也可以使用下面的命令，进入容器：
 
 ```bash
-$ docker exec -it ddn-mainnet /bin/bash
+$ docker exec -it ddn-starter /bin/bash
 ```
 
 这样，在不离开 IDE 编辑器的情况下，就能执行命令了，就行在本地电脑操作 ubuntu 的体验一样。
@@ -60,6 +60,17 @@ $ yarn install
 
 网上有人提供了解决方法，使用 echo 命令向/etc/apt/sources.list添加更新源：
 
+
+在更新源之前，先备份一下：
+
+```shell
+# 备份
+$ cp /etc/apt/sources.list /etc/apt/sources.list.bak
+
+# 执行更新
+$ apt update
+```
+
 ```shell
 # 向/etc/apt/sources.list添加清华的源
 echo 'deb http://mirrors.tuna.tsinghua.edu.cn/ubuntu/ jammy main restricted universe multiverse' >> /etc/apt/sources.list && \
@@ -78,15 +89,6 @@ echo 'deb http://mirrors.aliyun.com/ubuntu/ jammy-backports main restricted univ
 echo 'deb-src http://mirrors.aliyun.com/ubuntu/ jammy-backports main restricted universe multiverse' >> /etc/apt/sources.list
 ```
 
-在更新源之前，先备份一下：
-
-```shell
-# 备份
-$ cp /etc/apt/sources.list /etc/apt/sources.list.bak
-
-# 执行更新
-$ apt update
-```
 
 **特别注意**：这里遇到过一个非常奇葩的问题，在更新源的过程中，千万不要开启代理，否则会找不到地址，出现“没有签名”、“无法访问”等错误。我就因为这个问题，折腾了很久。
 

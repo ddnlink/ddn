@@ -4,8 +4,8 @@
  *  Copyright (c) 2019 DDN FOUNDATION. All rights reserved.
  *  Licensed under the AGPL 3.0 License. See License.txt in the project root for license information.
  *-------------------------------------------------------------------------------------------- */
-const Sequelize = require('sequelize')
-const Op = Sequelize.Op
+// const Sequelize = require('sequelize')
+// const Op = Sequelize.Op
 
 module.exports = {
   /**
@@ -168,54 +168,54 @@ module.exports = {
    * Database options
    * https://sequelize.org/master/class/lib/sequelize.js~Sequelize.html#instance-constructor-constructor
    * */
-  database: {
-    database: process.env.DBNAME || 'ddn',
-    username: process.env.DBUSERNAME || 'root',
-    password: process.env.DBPASSWORD || 'root', // Please use process.env.DBPASSWORD
+  // database: {
+  //   database: process.env.DBNAME || 'ddn',
+  //   username: process.env.DBUSERNAME || 'root',
+  //   password: process.env.DBPASSWORD || 'root', // Please use process.env.DBPASSWORD
 
-    options: {
-      // the sql dialect of the database
-      // currently supported: 'mysql', 'sqlite', 'postgres', 'mssql'
-      dialect: 'sqlite',
+  //   options: {
+  //     // the sql dialect of the database
+  //     // currently supported: 'mysql', 'sqlite', 'postgres', 'mssql'
+  //     dialect: 'sqlite',
 
-      // custom host; default: localhost
-      host: '127.0.0.1',
+  //     // custom host; default: localhost
+  //     host: '127.0.0.1',
 
-      // custom port; default: dialect default
-      // port: 12345,
+  //     // custom port; default: dialect default
+  //     // port: 12345,
 
-      pool: {
-        maxactive: 1,
-        max: 5,
-        min: 0,
-        idle: 20000,
-        acquire: 20000
-      },
-      logging: console.log,
+  //     pool: {
+  //       maxactive: 1,
+  //       max: 5,
+  //       min: 0,
+  //       idle: 20000,
+  //       acquire: 20000
+  //     },
+  //     logging: console.log,
 
-      // SQLite only
-      storage: 'db/blockchain.db',
-      transactionType: 'IMMEDIATE',
+  //     // SQLite only
+  //     storage: 'db/blockchain.db',
+  //     transactionType: 'IMMEDIATE',
 
-      // Sequelize will warn you if you're using the default aliases and not limiting them
-      // https://sequelize.org/master/manual/querying.html#operators-aliases
-      operatorsAliases: {
-        $and: Op.and,
-        $or: Op.or,
-        $eq: Op.eq,
-        $gt: Op.gt,
-        $lt: Op.lt,
-        $lte: Op.lte,
-        $like: Op.like,
-        $in: Op.in,
-        $is: Op.is,
-        $gte: Op.gte,
-        $between: Op.between,
-        $not: Op.not,
-        $contains: Op.contains
-      }
-    }
-  },
+  //     // Sequelize will warn you if you're using the default aliases and not limiting them
+  //     // https://sequelize.org/master/manual/querying.html#operators-aliases
+  //     operatorsAliases: {
+  //       $and: Op.and,
+  //       $or: Op.or,
+  //       $eq: Op.eq,
+  //       $gt: Op.gt,
+  //       $lt: Op.lt,
+  //       $lte: Op.lte,
+  //       $like: Op.like,
+  //       $in: Op.in,
+  //       $is: Op.is,
+  //       $gte: Op.gte,
+  //       $between: Op.between,
+  //       $not: Op.not,
+  //       $contains: Op.contains
+  //     }
+  //   }
+  // },
 
   /**
    * 扩展资产插件，对于区块链而言就是资产包，所以使用 assets
