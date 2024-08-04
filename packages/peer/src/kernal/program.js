@@ -107,9 +107,7 @@ class Program {
   _checkProcessState () {
     if (this.ctx.isDaemonMode) {
       try {
-        var fd = fs.openSync(this._pid_file, 'wx')
-        fs.writeSync(fd, process.pid)
-        fs.closeSync(fd)
+        fs.writeFileSync(this._pid_file, process.pid.toString(), { flag: 'wx' })
       } catch (err) {
         console.log('Failed: DDN server already started')
         process.exit(1)
