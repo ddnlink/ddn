@@ -40,7 +40,9 @@ More infomation please visit our [official website](http://www.ddn.net) , [docs]
 - [x] **Multi function**, payment, certificate storage, AOB, DAPP, etc;
 - [x] **Multi industry**, currently covering copyright protection, electronic medicine, food safety, anti-counterfeiting traceability and other fields
 - [x] **Visual deployment**, you can customize your own blockchain by clicking the mouse and publish it to the peer server, please access <http://ui.ddn.net>;
-- [ ] **Docker**, tod support mainstream deployment methods such as docker;
+- [x] **Docker**, tod support mainstream deployment methods such as docker;
+- [x] **Tutorial**, based on the latest version, a new tutorial for blockchain development is launched;
+- [x] **More cases**, please visit the official website，<https://ddn.net>
 - [ ] More...
 
 ## Architect
