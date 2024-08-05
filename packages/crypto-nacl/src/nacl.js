@@ -1,10 +1,15 @@
 /**
- * 该方法为加密算法涉及到的基础方法，如果更换其他的密码学算法，请注意实现下面的方法
+ * 该文件为加密算法涉及到的基础方法，如果更换其他的密码学算法，请注意实现下面的方法
  */
 import nacl from 'tweetnacl'
 import { getBytes } from './bytes'
+import sha256 from 'fast-sha256'
 
-// hex 不包含 asset 字段
+/**
+ * 该方法用于生成交易Id，仅包含核心交易字段信息。所以，在调用本方法之前，要过滤掉系统生成的字段。
+ * @param {object} transaction 交易体
+ * @returns 16进制的Hash值（不包含 asset 字段）
+ */
 async function getId (transaction) {
   const hash = await getHash(transaction)
   return hash.toString('hex')
@@ -61,7 +66,6 @@ async function secondSign (transaction, { privateKey }) {
   return bufToHex(signature)
 }
 
-// 验证，TODO trs重构： peer/src/kernal/transaction.js  2020.5.3
 /**
  * 该方法验证使用私钥签名的字节信息是否正确，参数公钥与私钥对应，即：私钥签名的信息，公钥可以验证通过
  * @param {hash} bytes 字节流 hash 值
@@ -98,18 +102,20 @@ function verifyHash (hash, signature, publicKey) {
  * @param {boolean} skipSignature 跳过签名
  * @param {boolean} skipSecondSignature 跳过二次签名
  */
-async function getHash (trs, skipSignature, skipSecondSignature) {
-  const bytes = getBytes(trs, skipSignature, skipSecondSignature)
+function getHash (trs, skipSignature, skipSecondSignature, skipId) {
+  const bytes = getBytes(trs, skipSignature, skipSecondSignature, skipId)
   return createHash(bytes)
 }
 
 /**
  * 使用中注意 data 格式，默认是unit8Arrary，如果是涉密字段（经过 buffer、签名、加密的字段）都是可以直接使用的，不然就要对其简单处理 Buffer.from(data)
+ * nacl.hash 底层使用512 生成长度为64 unit8Arrary，sha256 生成长度为32 unit8Arrary
  * 返回值为 Buffer
  * @param {String}  data 需要 hash 的数据，格式为 unit8Arrary, 这里的方法与 crypto.createHash('sha256').update(strBuffer).digest() 相似，结果不同
  */
 function createHash (data) {
-  return Buffer.from(nacl.hash(data))
+  // console.log(nacl.hash(data),sha256(data))
+  return Buffer.from(sha256(data))
 }
 
 function bufToHex (data) {

@@ -9,7 +9,7 @@ export default {
 
     try {
       const publicKey = Buffer.from(str, 'hex')
-      return publicKey.length === 32
+      return publicKey.length === 32 || publicKey.length === 65 // 32为氯化钠，65为国密sm2
     } catch (e) {
       return false
     }

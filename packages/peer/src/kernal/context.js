@@ -4,9 +4,9 @@
  */
 import path from 'path'
 import fs from 'fs'
-import DdnUtils from '@ddn/utils'
 import Asset from '@ddn/asset-base'
 import Bus from '../utils/bus'
+import System from '../utils/system'
 import protobuf from '../utils/protobuf'
 import Sequence from '../utils/sequence'
 import Address from '../helpers/address'
@@ -18,7 +18,7 @@ import DdnSchema from '../schema/ddn-schema'
 class Context {
   async init (options) {
     if (!options.configObject.publicIp) {
-      options.configObject.publicIp = DdnUtils.system.getPublicIp()
+      options.configObject.publicIp = System.getPublicIp()
     }
 
     this.isDaemonMode = options.isDaemonMode
@@ -54,10 +54,13 @@ class Context {
     this.ddnSchema = DdnSchema.singleton()
 
     // 资产插件配置对象
-    this.assetPlugins = Asset.Utils.loadFromObject(options.configObject.assets)
+    this.assetPlugins = await Asset.Utils.loadFromObject(options.configObject.assets)
 
     // 二进制序列化对象
     const protoFile = path.resolve(__dirname, '../..', 'protos', 'ddn.proto')
+
+    console.log('protoFile', protoFile);
+
     if (!fs.existsSync(protoFile)) {
       console.error('Failed: DDN proto file does not exists.')
       process.exit(1)
@@ -94,6 +97,9 @@ class Context {
 
     // 运行时核心逻辑处理模块组
     this.runtime = {}
+
+    // 程序生命周期函數
+    this.lifeCycle = options.lifeCycle || {}
   }
 
   async _buildProtobuf (protoFile) {

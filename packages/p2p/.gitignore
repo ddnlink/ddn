@@ -1,0 +1,58 @@
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+
+# dependencies
+node_modules
+# roadhog-api-doc ignore
+/src/utils/request-temp.js
+_roadhog-api-doc
+
+# production
+/dist
+dist.*
+/lib
+lib.*
+/.vscode
+.changelog
+build
+.docz
+.umi
+
+# misc
+.DS_Store
+npm-debug.log*
+yarn-error.log
+lerna-debug.log*
+
+/coverage
+.idea
+; yarn.lock
+; package-lock.json
+*bak
+.vscode
+
+# visual studio code
+.history
+*.log
+functions/*
+.temp/**
+
+# screenshot
+screenshot
+.firebase
+.eslintcache
+
+# settings
+config/deploy
+**/**/config.mainnet.js
+**/**/config.local.js
+**/**/.ddnrc.local.js
+*.db
+*.db-journal
+
+# custom
+**/**/*.hbl.js
+**/**/*.custom.js
+examples/peer*
+.ddnrc.js
+/tests/data
+/tests/logs

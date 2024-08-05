@@ -27,10 +27,8 @@ function main () {
   })
 
   const _entry = path.join(dappPath, 'init.js')
-  let _code = null
   //  console.log('_entry',_entry)
   if (fs.existsSync(_entry)) {
-    _code = (fs.readFileSync(_entry)).toString()
     var script = new VMScript(fs.readFileSync(_entry))
     try {
       const res = vm.run(script)

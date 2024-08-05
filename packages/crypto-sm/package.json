@@ -1,0 +1,44 @@
+{
+  "name": "@ddn/crypto-sm",
+  "version": "2.4.5",
+  "description": "Crypto for DDN",
+  "keywords": [
+    "crypto",
+    "ddn",
+    "blockchain"
+  ],
+  "author": "imfly <kubying@qq.com>",
+  "homepage": "https://github.com/ddnlink/ddn/tree/master/packages/crypto#readme",
+  "license": "AGPL 3.0",
+  "main": "./dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ddnlink/ddn/tree/master/packages/crypto-nacl"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build": "father build",
+    "dev": "father dev"
+  },
+  "bugs": {
+    "url": "https://github.com/ddnlink/ddn/issues"
+  },
+  "dependencies": {
+    "@ddn/crypto-base": "workspace:^",
+    "@ddn/sm-crypto": "0.0.5",
+    "@ddn/utils": "workspace:^",
+    "bitcore-mnemonic": "^8.20.5",
+    "bytebuffer": "^5.0.1",
+    "crypto": "^1.0.1",
+    "fast-sha256": "^1.3.0",
+    "ripemd160": "^2.0.2",
+    "safe-buffer": "^5.2.1"
+  },
+  "gitHead": "3f5aef8e697748180be42f047a2053e46a7afd43"
+}

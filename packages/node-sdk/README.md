@@ -33,3 +33,23 @@ Note：Please copy `constants` to folder `config` in your project, and copy `.dd
 ```
 $ yarn build
 ```
+
+## Test 测试
+
+测试用例在`test`文件夹下，运行测试需要在工程目录下，使用`yarn test`执行，可以执行整个测试
+
+```
+$ yarn test
+```
+
+如果需要更细致的测试，比如：测试 AoB 资产，请使用：
+
+```
+$ yarn test nodeSdk.aob.test.js // 测试aob模块
+```
+
+如果需要了解更细致的信息，请使用 debug ，例如：
+
+```
+$ DEBUG=debug_name yarn test nodeSdk.aob.test.js // debug_name 是测试文件里，通过 debug('debug_name') 定义的。
+```

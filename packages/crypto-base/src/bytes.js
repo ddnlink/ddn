@@ -11,7 +11,7 @@ function getBytes (data, skipSignature, skipSecondSignature, skipId) {
   return getBytesForBeforeHeight(transaction, skipSignature, skipSecondSignature, skipId)
 }
 function getBytesForBeforeHeight (data, skipSignature, skipSecondSignature, skipId) {
-  const bb = new ByteBuffer(null, true)
+  const bb = new ByteBuffer(128, true)
   data = objKeySort(data)
   if (skipSignature) {
     delete data.signature
@@ -23,6 +23,10 @@ function getBytesForBeforeHeight (data, skipSignature, skipSecondSignature, skip
   // 去掉id字段
   if (!skipId && data.id) {
     delete data.id
+  }
+  // 去掉signatures字段(dapp提现操作会额外加入该字段，没有存储只有认证)
+  if (data.signatures) {
+    delete data.signatures
   }
   getAsset(bb, data)
   getObjectBytes(bb, data)
@@ -63,7 +67,7 @@ function getObjectBytes (bb, data) {
       continue
     }
     if (typeof value === 'string') {
-      bb.writeIString(value)
+      bb.writeString(value)
     } else if (typeof value === 'number') {
       bb.writeInt(value)
     } else if (typeof value === 'object') {

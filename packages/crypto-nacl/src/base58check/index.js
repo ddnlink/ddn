@@ -12,10 +12,7 @@ function sha256x2 (buffer) {
 // Encode a buffer as a base58-check encoded string
 function encode (payload) {
   const checksum = sha256x2(payload)
-  return base58.encode(Buffer.concat([
-    payload,
-    checksum
-  ], payload.length + 4))
+  return base58.encode(Buffer.concat([payload, checksum], payload.length + 4))
 }
 
 function decodeRaw (buffer) {
@@ -23,10 +20,12 @@ function decodeRaw (buffer) {
   const checksum = buffer.slice(-4)
   const newChecksum = sha256x2(payload)
 
-  if (checksum[0] ^ newChecksum[0] |
-    checksum[1] ^ newChecksum[1] |
-    checksum[2] ^ newChecksum[2] |
-    checksum[3] ^ newChecksum[3]) return
+  if (
+    (checksum[0] ^ newChecksum[0]) |
+    (checksum[1] ^ newChecksum[1]) |
+    (checksum[2] ^ newChecksum[2]) |
+    (checksum[3] ^ newChecksum[3])
+  ) { return }
 
   return payload
 }

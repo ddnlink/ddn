@@ -2,8 +2,8 @@ module.exports = {
   title: 'DDN',
   mode: 'site',
   hash: true,
-  favicon: 'http://testnet.ddn.link/static/ddnlogo.b8ab60d5.png',
-  logo: 'http://testnet.ddn.link/static/ddnlogo.b8ab60d5.png',
+  favicon: 'http://testnet.ddn.net/static/ddnlogo.b8ab60d5.png',
+  logo: 'http://testnet.ddn.net/static/ddnlogo.b8ab60d5.png',
   navs: {
     'en-US': [
       null,
@@ -38,7 +38,7 @@ module.exports = {
       },
       {
         title: 'Frame extension',
-        children: ['guide/crypto', 'guide/cryptoDevelop', 'guide/asset', 'guide/app/dapp']
+        children: ['guide/crypto', 'guide/cryptoDevelop', 'guide/asset', 'guide/contract']
       },
       {
         title: 'Core development',
@@ -70,7 +70,7 @@ module.exports = {
       },
       {
         title: '框架扩展',
-        children: ['guide/crypto', 'guide/asset', 'guide/app/dapp']
+        children: ['guide/crypto', 'guide/asset', 'guide/contract']
       },
       {
         title: '底层开发',

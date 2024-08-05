@@ -2,7 +2,7 @@
  * passed
  */
 import Debug from 'debug'
-import { node } from '../ddn-js'
+import { node } from '../node-sdk'
 const constants = node.constants
 
 const debug = Debug('debug')

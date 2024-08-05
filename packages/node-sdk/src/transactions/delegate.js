@@ -6,7 +6,7 @@ import { config, constants } from '../config'
 
 async function createDelegate (username, secret, secondSecret) {
   const keys = crypto.getKeys(secret)
-  const fee = bignum.multiply(constants.net.fees.delegate, constants.fixedPoint)
+  const fee = bignum.multiply(constants.fees.delegate, constants.fixedPoint)
 
   const transaction = {
     type: assetTypes.DELEGATE,

@@ -1,7 +1,7 @@
 /*
  * @Author: shuai
  * @Date: 2018-11-13 11:34:49
- * @Last Modified by: mikey.zhaopeng
+
  * @Last Modified time: 2020-02-13 22:48:39
  */
 import Sequelize from 'sequelize'
@@ -20,7 +20,7 @@ export default connection => {
         allowNull: false
       },
       block_height: {
-        type: Sequelize.INTEGER,
+        type: Sequelize.BIGINT,
         allowNull: false
       },
       type: {

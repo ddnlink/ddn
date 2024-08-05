@@ -1,0 +1,4 @@
+packages:
+  - 'packages/*'
+  - "pro-packages/*"
+  - 'examples/*'

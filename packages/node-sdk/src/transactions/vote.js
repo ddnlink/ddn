@@ -6,7 +6,7 @@ import { config, constants } from '../config'
 
 async function createVote (keyList, secret, secondSecret) {
   const keys = crypto.getKeys(secret)
-  const fee = DdnUtils.bignum.multiply(constants.net.fees.vote, constants.fixedPoint)
+  const fee = DdnUtils.bignum.multiply(constants.fees.vote, constants.fixedPoint)
 
   const transaction = {
     type: DdnUtils.assetTypes.VOTE,

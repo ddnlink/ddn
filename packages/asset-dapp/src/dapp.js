@@ -215,6 +215,21 @@ class Dapp extends Asset.Base {
     return trs
   }
 
+  async objectNormalize (trs) {
+    let assetObj = await this.getAssetObject(trs)
+    assetObj = Object.assign({}, assetObj)
+    const validateErrors = await this.ddnSchema.validateDappInTransfer(assetObj)
+    if (validateErrors) {
+      this.logger.error(
+        `Failed to normalize Dapp: ${trs.type} ${validateErrors[0].schemaPath} ${validateErrors[0].message}`
+      )
+      this.logger.debug(`Failed to normalize Dapp asset: ${trs}`)
+      throw new Error(`Failed to normalize Dapp: ${validateErrors[0].schemaPath} ${validateErrors[0].message}`)
+    }
+
+    return trs
+  }
+
   async getBytes (trs) {
     const { dapp } = trs.asset
     let buf = Buffer.from([])
@@ -769,7 +784,7 @@ class Dapp extends Asset.Base {
         try {
           const dappPath = path.join(self.dappsPath, id)
           const dappPublicPath = path.resolve(dappPath, 'public')
-          const dappPublicDist = path.resolve(dappPublicPath, 'dist')
+          // const dappPublicDist = path.resolve(dappPublicPath, 'dist')
           // if (fs.existsSync(dappPublicDist)) {
           //   res.render(`${dappPublicDist}/index.html`)
           // } else {
@@ -1742,10 +1757,11 @@ class Dapp extends Asset.Base {
       `SELECT t.id as id, lower(hex(t.senderPublicKey)) as senderPublicKey, t.amount as amount, dt.currency as currency, dt.amount as amount2 FROM trs t 
     inner join blocks b on t.blockId = b.id and t.type = ? 
     inner join intransfer dt on dt.transactionId = t.id and dt.dappId = ?
-    ${req.body.lastTransactionId
+    ${
+      req.body.lastTransactionId
         ? 'where b.height > (select height from blocks ib inner join trs it on ib.id = it.blockId and it.id = ?) '
         : ''
-      }
+    }
     order by b.height`,
       {
         replacements
@@ -1765,6 +1781,7 @@ class Dapp extends Asset.Base {
         const tr = await modules.transactions.receiveTransactions([trs])
         cb(null, tr)
       } catch (error) {
+        self.logger.debug('submitOutTransfer', error)
         cb(error)
       }
     }, callback)

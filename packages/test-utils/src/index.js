@@ -2,7 +2,7 @@
  *  Created by DDN Team on Thu Mar 15 2017 9:37:56
  *
  *  Copyright (c) 2019 DDN Foundation. All rights reserved.
- *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *  Licensed under the AGPL 3.0 License. See License.txt in the project root for license information.
  *-------------------------------------------------------------------------------------------- */
 
 import chai, { expect } from 'chai'
@@ -72,7 +72,7 @@ export class TestUtil {
     this.port = config.port
 
     this.api = supertest(`${this.baseUrl}/api`)
-    this.peer = supertest(`${this.baseUrl}/peer`)
+    this.peer = supertest(`${this.baseUrl}/api`)
 
     this.normalizer = config.normalizer || 100000000 // Use this to convert DDN amount to normal value
     this.blockTime = config.blockTime || 10000 // Block time in miliseconds
@@ -211,7 +211,7 @@ export class TestUtil {
   }
 
   submitTransaction (trs, cb) {
-    this.peer
+    this.api
       .post('/transactions')
       .set('Accept', 'application/json')
       .set('version', this.version)

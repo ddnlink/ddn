@@ -2,7 +2,7 @@
  *  Created by DDN Team on Wed Mar 28 2018 9:28:20
  *
  *  Copyright (c) 2019 DDN Foundation. All rights reserved.
- *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *  Licensed under the AGPL 3.0 License. See License.txt in the project root for license information.
  *-------------------------------------------------------------------------------------------- */
 import ByteBuffer from 'bytebuffer'
 import DdnUtils from '@ddn/utils'

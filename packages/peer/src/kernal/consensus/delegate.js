@@ -99,7 +99,7 @@ class Delegate {
         if (account.is_delegate) {
           this._myDelegateKeypairs[account.publicKey] = delegateKeypairs[account.publicKey] // wxm block database
           this._myDelegateNum++
-          this.logger.info(`Forging enabled on account: ${account.address}`)
+          this.logger.trace(`Forging enabled on account: ${account.address}`)
         } else {
           this.logger.info(`Delegate with this public key not found: ${account.publicKey}`) // wxm block database
         }
@@ -261,7 +261,7 @@ class Delegate {
       throw err
     }
 
-    const seedSource = await this.runtime.round.getRound(height).toString()
+    const seedSource = (await this.runtime.round.getRound(height)).toString()
     // wxm 对查询返回的受托人列表进行乱序处理
     // let currentSeed = nacl.hash(Buffer.from(seedSource))
     let currentSeed = createHash(Buffer.from(seedSource))
@@ -274,7 +274,6 @@ class Delegate {
       }
       currentSeed = createHash(Buffer.from(currentSeed))
     }
-
     return truncDelegateList
   }
 

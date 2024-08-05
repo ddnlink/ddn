@@ -1,8 +1,7 @@
-// import base58check from './base58check'
-import  base58check from '@ddn/crypto-base'
+import base58check from '@ddn/crypto-base'
 import RIPEMD160 from 'ripemd160'
 // import base58checkcheck from './base58checkcheck'
-import { createHash } from './nacl'
+import { createHash, getHash } from './nacl'
 /**
  * TODO: 太简单，需要添加更多可验证信息
  * 字符串形式的地址，不再支持纯数字地址；
@@ -14,7 +13,7 @@ import { createHash } from './nacl'
  * 6. 检验前缀的合法性（根据主网参数校验），注意大小写。
  * Note: address.slice(0, -4) === address.slice(0, address.length - 4)
  */
-function isAddress(address, tokenPrefix) {
+function isAddress (address, tokenPrefix) {
   if (typeof address !== 'string') {
     return false
   }
@@ -27,7 +26,7 @@ function isAddress(address, tokenPrefix) {
   return true
 }
 
-function generateAddress(publicKey, tokenPrefix) {
+function generateAddress (publicKey, tokenPrefix) {
   if (typeof publicKey === 'string') {
     publicKey = Buffer.from(publicKey, 'hex')
   }
@@ -37,4 +36,10 @@ function generateAddress(publicKey, tokenPrefix) {
   return tokenPrefix + base58check.encode(h2)
 }
 
-export { RIPEMD160, generateAddress, isAddress }
+function generateContractAddress (contract, tokenPrefix) {
+  const h1 = getHash(contract, true, true, true)
+  const h2 = new RIPEMD160().update(h1).digest() // fixme: 2020.9.20 这里的参数只能使用 string ？
+  return tokenPrefix + base58check.encode(h2)
+}
+
+export { RIPEMD160, generateAddress, generateContractAddress, isAddress }

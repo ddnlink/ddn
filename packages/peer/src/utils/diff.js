@@ -2,11 +2,10 @@
  *  Created by DDN Team on Wed Mar 14 2017 16:9:11
  *
  *  Copyright (c) 2019 DDN Foundation. All rights reserved.
- *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *  Licensed under the AGPL 3.0 License. See License.txt in the project root for license information.
  *-------------------------------------------------------------------------------------------- */
 
 export default {
-
   /**
    * 充值变更操作
    * @param {array} diff 变更内容的数组，格式为 ['+publicKey1', '-publicKey2'] 比如：['+aswbs...sfefs', '-sfsfesbfee...fegf']

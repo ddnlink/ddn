@@ -6,6 +6,7 @@ import delegate from './transactions/delegate'
 import signature from './transactions/signature'
 import transaction from './transactions/transaction'
 import vote from './transactions/vote'
+import contract from './transactions/contract'
 import username from './transactions/username'
 import multisignature from './transactions/multisignature'
 import dapp from './transactions/dapp'
@@ -15,10 +16,11 @@ import dao from './transactions/dao'
 import exchange from './transactions/exchange'
 import coupon from './transactions/coupon'
 import assetPlugin from './transactions/asset-plugin'
-
+import init from './init'
 import { config, constants } from './config'
 
 export default {
+  init,
   config,
   constants,
 
@@ -35,6 +37,7 @@ export default {
   signature,
   transaction,
   vote,
+  contract,
   username,
   multisignature,
 

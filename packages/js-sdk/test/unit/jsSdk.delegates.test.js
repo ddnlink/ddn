@@ -16,7 +16,8 @@ const account2 = node.randomAccount()
 // 这是 sdk 接口方法，注册受托人
 describe('Registering a delegate', () => {
   it('Using invalid username. Should fail', done => {
-    node.api.post('/accounts/open')
+    node.api
+      .post('/accounts/open')
       .set('Accept', 'application/json')
       .set('version', node.version)
       .set('nethash', node.config.nethash)
@@ -26,21 +27,20 @@ describe('Registering a delegate', () => {
       })
       .expect('Content-Type', /json/)
       .expect(200)
-      .end((err, {
-        body
-      }) => {
+      .end((err, { body }) => {
         debug('invalid username, open user', body)
         node.expect(err).to.be.not.ok
 
         account.address = body.account.address
-        node.api.put('/transactions')
+        node.api
+          .put('/transactions')
           .set('Accept', 'application/json')
           .set('version', node.version)
           .set('nethash', node.config.nethash)
           .set('port', node.config.port)
           .send({
             secret: node.Gaccount.password,
-            amount: bignum.multiply(constants.net.fees.delegate, constants.fixedPoint),
+            amount: bignum.multiply(constants.fees.delegate, constants.fixedPoint),
             recipientId: account.address
           })
           .expect('Content-Type', /json/)
@@ -51,10 +51,14 @@ describe('Registering a delegate', () => {
 
             node.onNewBlock(async err => {
               node.expect(err).to.be.not.ok
-              const transaction = await DdnJS.delegate.createDelegate(crypto.randomBytes(64).toString('hex'), account.password)
-              transaction.fee = bignum.multiply(constants.net.fees.delegate, constants.fixedPoint)
+              const transaction = await DdnJS.delegate.createDelegate(
+                crypto.randomBytes(64).toString('hex'),
+                account.password
+              )
+              transaction.fee = bignum.multiply(constants.fees.delegate, constants.fixedPoint)
 
-              node.peer.post('/transactions')
+              node.peer
+                .post('/transactions')
                 .set('Accept', 'application/json')
                 .set('version', node.version)
                 .set('nethash', node.config.nethash)
@@ -64,9 +68,7 @@ describe('Registering a delegate', () => {
                 })
                 .expect('Content-Type', /json/)
                 .expect(200)
-                .end((err, {
-                  body
-                }) => {
+                .end((err, { body }) => {
                   debug('invalid username to registration delegate', body)
                   node.expect(err).to.be.not.ok
                   node.expect(body).to.have.property('success').to.be.false
@@ -78,10 +80,14 @@ describe('Registering a delegate', () => {
   })
 
   it('When account has no funds. Should fail', async done => {
-    const transaction = await DdnJS.delegate.createDelegate(node.randomDelegateName().toLowerCase(), node.randomPassword())
-    transaction.fee = bignum.multiply(constants.net.fees.delegate, constants.fixedPoint)
+    const transaction = await DdnJS.delegate.createDelegate(
+      node.randomDelegateName().toLowerCase(),
+      node.randomPassword()
+    )
+    transaction.fee = bignum.multiply(constants.fees.delegate, constants.fixedPoint)
 
-    node.peer.post('/transactions')
+    node.peer
+      .post('/transactions')
       .set('Accept', 'application/json')
       .set('version', node.version)
       .set('nethash', node.config.nethash)
@@ -91,9 +97,7 @@ describe('Registering a delegate', () => {
       })
       .expect('Content-Type', /json/)
       .expect(200)
-      .end((err, {
-        body
-      }) => {
+      .end((err, { body }) => {
         debug('no funds', body)
         node.expect(err).to.be.not.ok
         node.expect(body).to.have.property('success').to.be.false
@@ -104,7 +108,8 @@ describe('Registering a delegate', () => {
   it('When account has funds. Username is uppercase, Lowercase username already registered. Should fail', async done => {
     const transaction = await DdnJS.delegate.createDelegate(account.username.toUpperCase(), account2.password)
 
-    node.peer.post('/transactions')
+    node.peer
+      .post('/transactions')
       .set('Accept', 'application/json')
       .set('version', node.version)
       .set('nethash', node.config.nethash)
@@ -114,9 +119,7 @@ describe('Registering a delegate', () => {
       })
       .expect('Content-Type', /json/)
       .expect(200)
-      .end((err, {
-        body
-      }) => {
+      .end((err, { body }) => {
         debug('uppercase username', body)
         node.expect(err).to.be.not.ok
         node.expect(body).to.have.property('success').to.be.false
@@ -134,7 +137,8 @@ describe('Registering a delegate', () => {
 
     node.onNewBlock(err => {
       node.expect(err).to.be.not.ok
-      node.peer.post('/transactions')
+      node.peer
+        .post('/transactions')
         .set('Accept', 'application/json')
         .set('version', node.version)
         .set('nethash', node.config.nethash)
@@ -144,9 +148,7 @@ describe('Registering a delegate', () => {
         })
         .expect('Content-Type', /json/)
         .expect(200)
-        .end((err, {
-          body
-        }) => {
+        .end((err, { body }) => {
           debug('lowercase username', body)
           node.expect(err).to.be.not.ok
           node.expect(body).to.have.property('success').to.be.true
@@ -156,7 +158,8 @@ describe('Registering a delegate', () => {
   })
 
   it('Twice within the same block. Should fail', done => {
-    node.api.post('/accounts/open')
+    node.api
+      .post('/accounts/open')
       .set('Accept', 'application/json')
       .set('version', node.version)
       .set('nethash', node.config.nethash)
@@ -166,21 +169,20 @@ describe('Registering a delegate', () => {
       })
       .expect('Content-Type', /json/)
       .expect(200)
-      .end((err, {
-        body
-      }) => {
+      .end((err, { body }) => {
         node.expect(err).to.be.not.ok
 
         account2.address = body.account.address
         // console.log(account2);
-        node.api.put('/transactions')
+        node.api
+          .put('/transactions')
           .set('Accept', 'application/json')
           .set('version', node.version)
           .set('nethash', node.config.nethash)
           .set('port', node.config.port)
           .send({
             secret: node.Gaccount.password,
-            amount: bignum.multiply(constants.net.fees.delegate, constants.fixedPoint),
+            amount: bignum.multiply(constants.fees.delegate, constants.fixedPoint),
             recipientId: account2.address
           })
           .expect('Content-Type', /json/)
@@ -195,7 +197,8 @@ describe('Registering a delegate', () => {
               account2.username = node.randomDelegateName().toLowerCase()
               const transaction = await DdnJS.delegate.createDelegate(account2.username, account2.password)
 
-              node.peer.post('/transactions')
+              node.peer
+                .post('/transactions')
                 .set('Accept', 'application/json')
                 .set('version', node.version)
                 .set('nethash', node.config.nethash)
@@ -205,9 +208,7 @@ describe('Registering a delegate', () => {
                 })
                 .expect('Content-Type', /json/)
                 .expect(200)
-                .end(async (err, {
-                  body
-                }) => {
+                .end(async (err, { body }) => {
                   debug('Twice 1', body)
                   node.expect(err).to.be.not.ok
 
@@ -216,7 +217,8 @@ describe('Registering a delegate', () => {
                   account2.username = node.randomDelegateName().toLowerCase()
                   const transaction2 = await DdnJS.delegate.createDelegate(account2.username, account2.password)
 
-                  node.peer.post('/transactions')
+                  node.peer
+                    .post('/transactions')
                     .set('Accept', 'application/json')
                     .set('version', node.version)
                     .set('nethash', node.config.nethash)
@@ -226,9 +228,7 @@ describe('Registering a delegate', () => {
                     })
                     .expect('Content-Type', /json/)
                     .expect(200)
-                    .end((err, {
-                      body
-                    }) => {
+                    .end((err, { body }) => {
                       debug('Twice 2', body)
                       node.expect(err).to.be.not.ok
 

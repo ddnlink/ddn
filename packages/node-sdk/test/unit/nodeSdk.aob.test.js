@@ -14,7 +14,7 @@ async function createTransfer (address, amount, secret) {
 //   return await DdnJS.assetPlugin.createPluginAsset(type, asset, secret, secondSecret)
 // }
 
-jest.setTimeout(50000)
+jest.setTimeout(11000)
 
 describe('AOB Test', () => {
   // 先创建两个发行商账户
@@ -28,7 +28,7 @@ describe('AOB Test', () => {
   debug('issuerName', issuerName)
 
   // 开始前，得把发行商账号 IssuerAccount 注册到链上(登录一下即可)
-  beforeAll((done) => {
+  beforeAll(() => {
     node.api.post('/accounts/open')
       .set('Accept', 'application/json')
       .set('version', node.version)
@@ -45,13 +45,11 @@ describe('AOB Test', () => {
         expect(body).to.have.property('success').to.be.true
         IssuerAccount1.address = body.account.address
         IssuerAccount1.publicKey = body.account.publicKey
-
-        done()
       })
   })
 
   // 注册发行商要花钱
-  beforeAll(async (done) => {
+  beforeAll(async () => {
     // 转账给它
     const transaction = await createTransfer(IssuerAccount1.address, node.randomCoin(), node.Gaccount.password)
 
@@ -75,7 +73,7 @@ describe('AOB Test', () => {
         expect(body).to.have.property('success').to.be.true
         expect(body).to.have.property('transactionId').to.be.a('string')
 
-        done()
+        // done()
       })
   })
 
@@ -109,7 +107,7 @@ describe('AOB Test', () => {
         })
     })
 
-    it('with the same name again, Should be fail', async (done) => {
+    it('with the same name again, Should be fail', async () => {
       await node.onNewBlockAsync()
 
       const transaction = await DdnJS.aob.createIssuer(issuerName, 'An issuer', IssuerAccount2.password)
@@ -135,11 +133,11 @@ describe('AOB Test', () => {
           expect(body).to.have.property('success').to.be.false
           expect(body).to.have.property('error').to.contain('Issuer name/issuer_id already exists')
 
-          done()
+          // done()
         })
     })
 
-    it('with the same IssuerAccount1 again, Should be fail', async (done) => {
+    it('with the same IssuerAccount1 again, Should be fail', async () => {
       await node.onNewBlockAsync()
 
       const transaction = await DdnJS.aob.createIssuer(issuerName2, 'An issuer', IssuerAccount1.password)
@@ -164,11 +162,11 @@ describe('AOB Test', () => {
           expect(body).to.have.property('success').to.be.false
           expect(body).to.have.property('error').to.contain('Issuer name/issuer_id already exists')
 
-          done()
+          // done()
         })
     })
 
-    it('with IssuerAccount2 who no money, Should be fail', async (done) => {
+    it('with IssuerAccount2 who no money, Should be fail', async () => {
       await node.onNewBlockAsync()
 
       const transaction = await DdnJS.aob.createIssuer(issuerName2, 'An issuer', IssuerAccount2.password)
@@ -193,7 +191,7 @@ describe('AOB Test', () => {
           expect(body).to.have.property('success').to.be.false
           expect(body).to.have.property('error').to.contain('Insufficient balance')
 
-          done()
+          // done()
         })
     })
   })
@@ -228,7 +226,7 @@ describe('AOB Test', () => {
   // 2. 注册资产 比如：DDN.CNY
   let currency // 名字本就是 assetName;
   describe('Register Asset', () => {
-    it('Should be ok', async (done) => {
+    it('Should be ok', async () => {
       // 必须有 发行商(并且与IssuerAccount1对应)
       currency = issuerName + '.' + node.randomIssuerName('', 3).toUpperCase()
       debug('Asset currency', currency)
@@ -255,14 +253,14 @@ describe('AOB Test', () => {
           expect(err).to.be.not.ok
           expect(body).to.have.property('success').to.be.true
 
-          done()
+          // done()
         })
     })
   })
 
   // 3. 发行资产，即增加市场流通数量
   describe('Add asset issues', () => {
-    it('Should be ok', async (done) => {
+    it('Should be ok', async () => {
       // 等 1 次确认
       await node.onNewBlockAsync()
 
@@ -287,15 +285,13 @@ describe('AOB Test', () => {
 
           expect(err).to.be.not.ok
           expect(body).to.have.property('success').to.be.true
-
-          done()
         })
     })
   })
 
   // 4. 资产转账
   describe('Transfer Issue', () => {
-    it('Should be ok', async (done) => {
+    it('Should be ok', async () => {
       // 等 1 次确认
       await node.onNewBlockAsync()
 
@@ -322,13 +318,11 @@ describe('AOB Test', () => {
 
           expect(err).to.be.not.ok
           expect(body).to.have.property('success').to.be.true
-
-          done()
         })
     })
 
     // 资产交易
-    it('Insufficient AoB balance should be fail', async (done) => {
+    it('Insufficient AoB balance should be fail', async () => {
       // 等 1 次确认
       await node.onNewBlockAsync()
 
@@ -356,8 +350,6 @@ describe('AOB Test', () => {
           expect(err).to.be.not.ok
           expect(body).to.have.property('success').to.be.false
           expect(body).to.have.property('error').to.contain('Insufficient')
-
-          done()
         })
     })
   })

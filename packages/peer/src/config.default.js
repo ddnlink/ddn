@@ -2,7 +2,7 @@
  *  Created by Imfly on Sun Dec 29 2019 15:57:56
  *
  *  Copyright (c) 2019 DDN FOUNDATION. All rights reserved.
- *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *  Licensed under the AGPL 3.0 License. See License.txt in the project root for license information.
  *-------------------------------------------------------------------------------------------- */
 import Sequelize from 'sequelize'
 const Op = Sequelize.Op
@@ -237,5 +237,6 @@ export default {
    *  "@ddn/asset-aob"
    * ]
    */
-  assets: ['@ddn/asset-evidence', '@ddn/asset-aob', '@ddn/asset-dapp', '@ddn/asset-dao']
+  assets: ['@ddn/asset-evidence', '@ddn/asset-aob', '@ddn/asset-dapp', '@ddn/asset-dao'],
+  crypto: '@ddn/crypto-nacl' // 绿化钠 @ddn/crypto-nacl ，国密 @ddn/crypto-sm
 }

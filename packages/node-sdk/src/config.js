@@ -1,9 +1,12 @@
 import { getUserConfig, requireFile, mergeConfigs } from '@ddn/core'
 import path from 'path'
+import Debug from 'debug'
 
 import Asset from '@ddn/asset-base'
 import defaultConstants from './constants.default'
 import defaultConfig from './ddnrc.default'
+
+const debug = Debug('debug')
 
 const baseDir = path.resolve(process.cwd(), './')
 const userConfig = getUserConfig({ cwd: baseDir })
@@ -17,22 +20,24 @@ export const config = mergeConfigs(defaultConfig, userConfig)
  * 请将对应网络的 常量文件 拷贝到你的项目的 config 文件夹下
  */
 const constantsFile = path.resolve(process.cwd(), './config/constants.js')
+
+debug('constantsFile', constantsFile)
+
 const userConstants = requireFile(constantsFile)
 
-const constantsMerge = mergeConfigs(defaultConstants, userConstants)
-constantsMerge.net = constantsMerge[config.net]
-
-export const constants = constantsMerge
+export const constants = mergeConfigs(defaultConstants, userConstants)
 
 /**
  * 用于初始化 Sdk 的 插件
  */
-function addAssets () {
+async function addAssets () {
   if (config.nethash !== constants.nethash) {
-    throw new Error(`Your nethash ${config.nethash} or ${constants.nethash} is invalid, Please set it again!`)
+    throw new Error(
+      `Your nethash ${config.nethash} and ${constants.nethash} are inconsistent, please adjust them in the config/constants.js or .ddnrc.js file！`
+    )
   }
 
-  Asset.Utils.loadFromObject(config.assets)
+  await Asset.Utils.loadFromObject(config.assets)
 }
 
 addAssets()

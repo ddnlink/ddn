@@ -2,7 +2,7 @@
  *  Created by DDN Team on Tue Apr 10 2017 16:22:31
  *
  *  Copyright (c) 2019 DDN Foundation. All rights reserved.
- *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *  Licensed under the AGPL 3.0 License. See License.txt in the project root for license information.
  *-------------------------------------------------------------------------------------------- */
 
 import EventEmitter from 'events'

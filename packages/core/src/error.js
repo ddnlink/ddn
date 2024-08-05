@@ -3,13 +3,13 @@ import signale from 'signale'
 import marked from 'marked'
 import TerminalRenderer from 'marked-terminal'
 import { existsSync, writeFileSync } from 'fs'
+// 支持内部框架扩展 error code map
+import ERROR_CODE_MAP from '@umijs/error-code-map'
+import osLocale from 'os-locale'
 
 marked.setOptions({
   renderer: new TerminalRenderer()
 })
-
-// 支持内部框架扩展 error code map
-const ERROR_CODE_MAP = require(process.env.ERROR_CODE_MAP_PATH || '@umijs/error-code-map')
 
 export class DdnError extends Error {
   constructor (opts, ...params) {
@@ -53,7 +53,6 @@ export function printDdnError (e, opts = {}) {
     console.error(`\n${chalk.bgRed.black(' ERROR ')} ${chalk.red(e.message || message)}`)
   }
 
-  const osLocale = require('os-locale')
   const lang = osLocale.sync()
 
   if (lang === 'zh-CN') {
@@ -63,12 +62,7 @@ export function printDdnError (e, opts = {}) {
   }
 
   if (!detailsOnly && e.stack) {
-    console.error(
-      `${chalk.bgRed.black(' STACK ')}\n\n${e.stack
-        .split('\n')
-        .slice(1)
-        .join('\n')}`
-    )
+    console.error(`${chalk.bgRed.black(' STACK ')}\n\n${e.stack.split('\n').slice(1).join('\n')}`)
   }
 
   // 将错误信息输出到文件

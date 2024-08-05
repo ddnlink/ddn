@@ -10,7 +10,7 @@ sidebar_label: Peer upgrade Mainnet
 
 ### 1.1 目前命令行正在更新维护，暂时只支持手动升级
 
-如果您当前运行的版本低于2.0.4,您可以按照以下步骤升级,首先确保服务器上的node版本为v8.17.0
+如果您当前运行的版本低于2.0.6,您可以按照以下步骤升级,首先确保服务器上的node版本为v8.17.0
 
 ```
 # 检查版本
@@ -23,10 +23,10 @@ $ node --version # 输出： v8.17
 
 ```
 # 主网（mainnet）程序下载：
-$ wget http://releases.ddn.link/2.0.4/ddn-linux-2.0.4-mainnet.tar.gz
+$ wget http://releases.ddn.link/2.0.6/ddn-linux-2.0.6-mainnet.tar.gz
 
 # 解压
-$ tar zxvf ddn-linux-2.0.4-mainnet.tar.gz
+$ tar zxvf ddn-linux-2.0.6-mainnet.tar.gz
 ```
 
 ### 1.3 停止旧版的程序
@@ -39,12 +39,12 @@ $ cd ~/your/path/ddn-linux-oldVersion-mainnet
 $ ./ddnd stop
 ```
 
-### 1.4 复制旧版程序的config.json和blockchain.db到解压后的ddn-linux-2.0.4-mainnet的目录下
+### 1.4 复制旧版程序的config.json和blockchain.db到解压后的ddn-linux-2.0.6-mainnet的目录下
 
 ```
-$ cp ~/your/path/ddn-linux-oldVersion-mainnet/config.json ~/your/path/ddn-linux-2.0.4-mainnet/
+$ cp ~/your/path/ddn-linux-oldVersion-mainnet/config.json ~/your/path/ddn-linux-2.0.6-mainnet/
 
-$ cp ~/your/path/ddn-linux-oldVersion-mainnet/blockchain.db ~/your/path/ddn-linux-2.0.4-mainnet/
+$ cp ~/your/path/ddn-linux-oldVersion-mainnet/blockchain.db ~/your/path/ddn-linux-2.0.6-mainnet/
 ```
 **注意**：`对于早期的节点用户，强烈建议更新config.json里面的同步节点列表具体请参考`[主网节点安装2.4.2配置可访问的节点](./peer-install-mainnet#configure)
 
@@ -106,11 +106,11 @@ $ node app.js
 
 # 控制台输出
 app.js:1 DDN started: 0.0.0.0:8000 
-/worker/ddn3/build/ddn-linux-2.0.4-mainnet/node_modules/_bindings@1.5.0@bindings/bindings.js:121
+/worker/ddn3/build/ddn-linux-2.0.6-mainnet/node_modules/_bindings@1.5.0@bindings/bindings.js:121
         throw e;
         ^
 
-Error: The module '/worker/ddn3/build/ddn-linux-2.0.4-mainnet/node_modules/_ed25519@0.0.4@ed25519/build/Release/ed25519.node'
+Error: The module '/worker/ddn3/build/ddn-linux-2.0.6-mainnet/node_modules/_ed25519@0.0.4@ed25519/build/Release/ed25519.node'
 was compiled against a different Node.js version using
 NODE_MODULE_VERSION 57. This version of Node.js requires
 NODE_MODULE_VERSION 64. Please try re-compiling or re-installing

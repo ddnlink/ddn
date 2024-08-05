@@ -61,7 +61,8 @@ async function createOrg (org, secret, second_secret) {
     feeBase = 800
   } else if (olen === 5) {
     feeBase = 1600
-  } else { // length <= 4
+  } else {
+    // length <= 4
     feeBase = 999999 // not allow
   }
 
@@ -94,7 +95,7 @@ async function createOrg (org, secret, second_secret) {
 
 async function createTransfer (address, amount, secret, second_secret) {
   const keys = crypto.getKeys(secret)
-  const fee = DdnUtils.bignum.multiply(constants.net.fees.dao_exchange, constants.fixedPoint)
+  const fee = DdnUtils.bignum.multiply(constants.fees.dao_exchange, constants.fixedPoint)
   const transaction = {
     type: DdnUtils.assetTypes.TRANSFER,
     nethash: config.nethash,
@@ -120,7 +121,7 @@ async function createTransfer (address, amount, secret, second_secret) {
 async function createConfirmation (trsAmount, confirmation, secret, second_secret) {
   const keys = crypto.getKeys(secret)
 
-  if (typeof (confirmation) !== 'object') {
+  if (typeof confirmation !== 'object') {
     throw new Error('The first argument should be a object!')
   }
 
@@ -144,7 +145,7 @@ async function createConfirmation (trsAmount, confirmation, secret, second_secre
     throw new Error('Invalid state format')
   }
 
-  let fee = DdnUtils.bignum.multiply(constants.net.fees.dao_confirmation, constants.fixedPoint)
+  let fee = DdnUtils.bignum.multiply(constants.fees.dao_confirmation, constants.fixedPoint)
   if (confirmation.state === 0) {
     fee = '0'
   }
@@ -188,7 +189,7 @@ async function createConfirmation (trsAmount, confirmation, secret, second_secre
 async function createContribution (contribution, secret, second_secret) {
   const keys = crypto.getKeys(secret)
 
-  if (typeof (contribution) !== 'object') {
+  if (typeof contribution !== 'object') {
     throw new Error('The first argument should be a object!')
   }
 
@@ -208,7 +209,7 @@ async function createContribution (contribution, secret, second_secret) {
     throw new Error('Invalid url format')
   }
 
-  const fee = DdnUtils.bignum.multiply(constants.net.fees.dao_contribution, constants.fixedPoint)
+  const fee = DdnUtils.bignum.multiply(constants.fees.dao_contribution, constants.fixedPoint)
   // contribution.sender_address = contribution.sender_address
   // contribution.received_address = contribution.received_address
   const transaction = {

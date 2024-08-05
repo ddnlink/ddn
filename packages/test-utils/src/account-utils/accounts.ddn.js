@@ -1,23 +1,23 @@
 // 节点账号
 const Daccount = {
-  address: 'D8BVJ2MH1wjfJpyXeFHRo2j9Ddbgh6uFcA',
-  publicKey: '21363828620b7bc308ac6a0fce494ab8d77065d11d999b6e3af649f01bc2b8e3',
-  password: 'nut crater mean palace awful feel mandate winter convince account noise wrestle'
+  address: 'D4iAZbfiEUA3cnMi3Yu6rNPQNX3dts93LW',
+  publicKey: '5358f786b1e89b762987c9763fca6c379e00da68aa0f55bb94b49789d71b7387',
+  password: 'twin lucky fame cart square helmet alley tuna relief cave spike energy'
 }
 
 // 空账号
 const Eaccount = {
-  address: 'DGJepzhD9FkjhQVmyVTphwJAYn7HuqRdJc',
-  publicKey: '155a780f875a3c384c1a0856e36b2de7e145a9738e72f9a75a85d26a16471757',
-  password: 'park pact screen wreck walnut outside liberty very rabbit permit sentence text'
+  address: 'DPAR3bfTUAW3g65yEHLHHAcCbWbqt8iZaT',
+  publicKey: '1931c9b25455aff0c826cf6e24965b0338f78c8adbe85b363252d14693ef1857',
+  password: 'latin artwork call cube version ostrich spirit trumpet orient other pitch candy'
 }
 
 // 总账号
 const Gaccount = {
-  address: 'DC5kJzMdNDhrnupWX2NGafzMoiwdHiySBe',
-  password: 'enter boring shaft rent essence foil trick vibrant fabric quote indoor output',
-  publicKey: 'daeee33def7eef0c7ba06ec66eda7204437ba88ace8f04e4a6aa4d7bfbd18bc1',
-  balance: '10000000000000000'
+  balance: '1000000000000000000',
+  publicKey: '452a1bb4e2351b869582843ded62889dcb5c412ea264f4803f0ca991141c3016',
+  address: 'D9W3XQVzsNLHPovS7Ziwy8zVVGShh2jDtj',
+  password: 'vendor device hollow two glad vibrant off toe short where talent upper'
 }
 
 export default {

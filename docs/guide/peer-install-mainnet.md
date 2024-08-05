@@ -94,7 +94,7 @@ $ chmod u+x init/*.sh && chmod 755 ddnd && ./ddnd configure # 主要是安装sql
 $ wget http://releases.ddn.link/snapshots/db-20201120.tar.gz
 
 # 国内下载，国内用户建议使用下面的下载地址
-$ wget http://36.133.121.235/snapshots/db-20201120.tar.gz
+$ wget http://files.ddn.net/db-20201120.tar.gz
 
 # 解压
 $ tar zxvf db-20201120.tar.gz

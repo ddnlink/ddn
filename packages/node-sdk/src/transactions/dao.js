@@ -95,7 +95,7 @@ async function createOrg (org, secret, second_secret) {
 
 async function createTransfer (address, amount, secret, second_secret) {
   const keys = crypto.getKeys(secret)
-  const fee = bignum.multiply(constants.net.fees.dao_exchange, constants.fixedPoint)
+  const fee = bignum.multiply(constants.fees.dao_exchange, constants.fixedPoint)
   const transaction = {
     type: DdnUtils.assetTypes.TRANSFER,
     nethash: config.nethash,
@@ -145,7 +145,7 @@ async function createConfirmation (trsAmount, confirmation, secret, second_secre
     throw new Error('Invalid state format')
   }
 
-  let fee = bignum.multiply(constants.net.fees.dao_confirmation, constants.fixedPoint)
+  let fee = bignum.multiply(constants.fees.dao_confirmation, constants.fixedPoint)
   if (confirmation.state === 0) {
     fee = '0'
   }
@@ -209,7 +209,7 @@ async function createContribution (contribution, secret, second_secret) {
     throw new Error('Invalid url format')
   }
   contribution.url = (contribution.url + '').toLowerCase()
-  const fee = bignum.multiply(constants.net.fees.dao_contribution, constants.fixedPoint)
+  const fee = bignum.multiply(constants.fees.dao_contribution, constants.fixedPoint)
   // contribution.sender_address = contribution.sender_address
   // contribution.received_address = contribution.received_address
   const transaction = {
@@ -254,7 +254,7 @@ async function createExchange (trsopt, exchange, secret, secondSecret) {
     throw new Error('Invalid org_id format')
   }
 
-  const fee = bignum.multiply(constants.net.fees.exchange, constants.fixedPoint)
+  const fee = bignum.multiply(constants.fees.exchange, constants.fixedPoint)
 
   const transaction = Object.assign(
     {

@@ -34,7 +34,7 @@ async function createPluginAsset (trsType, assetInfo, secret, secondSecret) {
 
   // 计算资产费用
   // fixme: 这里的 fee 应该与对应的 trsType 对应，不然就是默认 send 交易费用
-  // const fee = assetInfo.fee || constants.net.fees.transfer;
+  // const fee = assetInfo.fee || constants.fees.transfer;
   // delete assetInfo.fee;
   if (assetInfo.fee) {
     transaction.fee = assetInfo.fee

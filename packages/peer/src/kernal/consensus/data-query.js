@@ -64,6 +64,7 @@ class DataQuery {
         ['fee', 't_fee'],
         ['signature', 't_signature'],
         ['sign_signature', 't_signSignature'],
+        ['signatures', 't_signatures'],
         ['args', 't_args'],
         ['message', 't_message'],
         ['timestamp', 't_timestamp'],
@@ -194,6 +195,30 @@ class DataQuery {
     })
   }
 
+  async loadContractWithTransactionIds (transactionIds) {
+    if (!transactionIds || !transactionIds.length) {
+      throw new Error('Invalid params: transactionIds')
+    }
+    return await this.dao.findList('contract', {
+      where: {
+        transaction_id: {
+          $in: transactionIds
+        }
+      },
+      attributes: [
+        ['id', 'c_id'],
+        ['name', 'c_name'],
+        ['desc', 'c_desc'],
+        ['owner', 'c_owner'],
+        ['gas_limit', 'c_gas_limit'],
+        ['version', 'c_version'],
+        ['code', 'c_code'],
+        ['timestamp', 'c_timestamp'],
+        ['transaction_id', 't_id']
+      ]
+    })
+  }
+
   async loadDappsWithTransactionIds (transactionIds) {
     if (!transactionIds || !transactionIds.length) {
       throw new Error('Invalid params: transactionIds')
@@ -277,6 +302,7 @@ class DataQuery {
         const voteTrsIds = []
         const signatureTrsIds = []
         const multiSignatureTrsIds = []
+        const contractTrsIds = []
         const dappTrsIds = []
         const dappIntransferTrsIds = []
         const dappOuttransferTrsIds = []
@@ -306,6 +332,9 @@ class DataQuery {
               }
               if (trsItem.t_type === DdnUtils.assetTypes.MULTISIGNATURE) {
                 multiSignatureTrsIds.push(trsItem.t_id)
+              }
+              if (trsItem.t_type === DdnUtils.assetTypes.CONTRACT) {
+                contractTrsIds.push(trsItem.t_id)
               }
               if (trsItem.t_type === DdnUtils.assetTypes.DAPP) {
                 dappTrsIds.push(trsItem.t_id)
@@ -362,6 +391,12 @@ class DataQuery {
         if (multiSignatureTrsIds.length > 0) {
           const multisignaturesRows = await this.loadMultiSignaturesWithTransactionIds(multiSignatureTrsIds)
           combineBlockData(multisignaturesRows)
+        }
+
+        // 合约资产数据
+        if (contractTrsIds.length > 0) {
+          const rows = await this.loadContractWithTransactionIds(contractTrsIds)
+          combineBlockData(rows)
         }
 
         // //Dapp交易数据
@@ -425,6 +460,7 @@ class DataQuery {
           ['fee', 't_fee'],
           ['signature', 't_signature'],
           ['sign_signature', 't_signSignature'],
+          ['signatures', 't_signatures'],
           ['args', 't_args'],
           ['message', 't_message'],
           ['timestamp', 't_timestamp'],
@@ -462,6 +498,7 @@ class DataQuery {
       const voteTrsIds = []
       const signatureTrsIds = []
       const multiSignatureTrsIds = []
+      const contractTrsIds = []
       const dappTrsIds = []
       const dappIntransferTrsIds = []
       const dappOuttransferTrsIds = []
@@ -483,6 +520,9 @@ class DataQuery {
         }
         if (trsItem.t_type === DdnUtils.assetTypes.MULTISIGNATURE) {
           multiSignatureTrsIds.push(trsItem.t_id)
+        }
+        if (trsItem.t_type === DdnUtils.assetTypes.CONTRACT) {
+          contractTrsIds.push(trsItem.t_id)
         }
         if (trsItem.t_type === DdnUtils.assetTypes.DAPP) {
           dappTrsIds.push(trsItem.t_id)
@@ -529,6 +569,12 @@ class DataQuery {
       if (multiSignatureTrsIds.length > 0) {
         const multisignaturesRows = await this.loadMultiSignaturesWithTransactionIds(multiSignatureTrsIds)
         combineTransactionData(multisignaturesRows)
+      }
+
+      // 合约交易数据
+      if (contractTrsIds.length > 0) {
+        const contractsRows = await this.loadContractWithTransactionIds(contractTrsIds)
+        combineTransactionData(contractsRows)
       }
 
       // //Dapp交易数据
@@ -578,7 +624,7 @@ class DataQuery {
   }
 
   async loadAssetsWithDappChainCondition ({ dapp_id, seq, type, limit = 1000, offset = 0 }) {
-    const where = { str2: dapp_id, transaction_type: type }
+    const where = { str6: dapp_id, transaction_type: type }
     // let limit = 1000
     // let offset = 0
     let orders = null
@@ -589,7 +635,7 @@ class DataQuery {
       offset = 0
       orders = [[Sequelize.literal('str5-0'), 'DESC']]
     }
-    console.log('where', where)
+
     const assetData = await this.dao.findList('trs_asset', {
       where,
       limit,

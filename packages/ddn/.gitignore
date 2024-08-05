@@ -1,7 +1,0 @@
-.DS_Store
-.idea/
-*.log
-genesisBlock.json
-node_modules
-package-lock.json
-genesis.json

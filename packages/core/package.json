@@ -1,17 +1,18 @@
 {
   "name": "@ddn/core",
-  "version": "0.2.15",
+  "version": "2.4.8",
   "description": "DDN core.",
-  "main": "./lib/index.js",
+  "main": "./dist/index.js",
+  "types": "dist/index.d.ts",
   "keywords": [
     "ddn",
     "core"
   ],
   "author": "imfly <kubying@qq.com>",
   "homepage": "https://github.com/ddnlink/ddn/tree/master/packages/core#readme",
-  "license": "MIT",
+  "license": "AGPL 3.0",
   "files": [
-    "lib"
+    "dist"
   ],
   "repository": {
     "type": "git",
@@ -21,19 +22,21 @@
   "bugs": {
     "url": "https://github.com/ddnlink/ddn/issues"
   },
+  "scripts": {
+    "build": "father build",
+    "dev": "father dev"
+  },
   "dependencies": {
     "@babel/preset-typescript": "7.3.3",
     "@babel/register": "7.4.4",
     "@umijs/error-code-map": "^1.0.0",
     "chalk": "2.4.2",
-    "extend2": "1.0.0",
+    "extend2": "^1.0.0",
     "marked": "0.6.2",
     "marked-terminal": "3.2.0",
     "os-locale": "^4.0.0",
     "signale": "1.4.0",
     "slash2": "2.0.0"
   },
-  "devDependencies": {
-    "umi-types": "0.5.3"
-  }
+  "gitHead": "3f5aef8e697748180be42f047a2053e46a7afd43"
 }

@@ -1,19 +1,29 @@
 {
   "name": "@ddn/crypto",
-  "version": "0.4.1",
-  "description": "this is Adaptation",
-  "main": "lib/index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
+  "version": "2.4.8",
+  "description": "Crypto Adaptation",
+  "main": "./dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
   "keywords": [
     "crypto"
   ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ddnlink/ddn/tree/master/packages/crypto"
+  },
+  "scripts": {
+    "build": "father build",
+    "dev": "father dev"
+  },
   "dependencies": {
-    "@ddn/crypto-nacl": "^0.4.1",
-    "@ddn/core": "^0.2.15"
-    
+    "@ddn/core": "workspace:^",
+    "@ddn/crypto-nacl": "workspace:^",
+    "@ddn/crypto-sm": "workspace:^"
   },
   "author": "",
-  "license": "ISC"
+  "license": "AGPL 3.0",
+  "gitHead": "3f5aef8e697748180be42f047a2053e46a7afd43"
 }

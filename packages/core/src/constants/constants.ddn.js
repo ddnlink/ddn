@@ -10,7 +10,7 @@ module.exports = {
   fixedPoint: 10 ** 8,
   totalAmount: '1000000000000000000',
   foundAddress: 'DLjrrVwnmMXstcAYVjcrpwyYb3kY1ehABU',
-  walletUrl: 'http://wallet.ddn.link',
+  walletUrl: 'http://wallet.ddn.net',
   enableMoreLockTypes: true,
 
   interval: 10, // 10ms

@@ -38,15 +38,15 @@ function toLocalBuffer (buf) {
 async function getFee (transaction) {
   switch (transaction.type) {
     case assetTypes.TRANSFER: // Normal
-      return bignum.multiply(constants.net.fees.transfer, constants.fixedPoint)
+      return bignum.multiply(constants.fees.transfer, constants.fixedPoint)
     case assetTypes.SIGNATURE: // Signature
-      return bignum.multiply(constants.net.fees.signature, constants.fixedPoint)
+      return bignum.multiply(constants.fees.signature, constants.fixedPoint)
     case assetTypes.DELEGATE: // Delegate
-      return bignum.multiply(constants.net.fees.delegate, constants.fixedPoint)
+      return bignum.multiply(constants.fees.delegate, constants.fixedPoint)
     case assetTypes.VOTE: // Vote
-      return bignum.multiply(constants.net.fees.vote, constants.fixedPoint)
+      return bignum.multiply(constants.fees.vote, constants.fixedPoint)
     default: {
-      let fee = constants.net.fees.transfer
+      let fee = constants.fees.transfer
       if (Asset.Utils.isTypeValueExists(transaction.type)) {
         const trans = Asset.Utils.getTransactionByTypeValue(transaction.type)
         const TransCls = require(trans.package).default[trans.name]

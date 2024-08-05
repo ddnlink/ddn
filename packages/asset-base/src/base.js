@@ -2,7 +2,7 @@
  *  Created by wxx on Sun May 06 2017 11:39:6
  *
  *  Copyright (c) 2018 DDN FOUNDATION. All rights reserved.
- *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *  Licensed under the AGPL 3.0 License. See License.txt in the project root for license information.
  *-------------------------------------------------------------------------------------------- */
 /**
  * 这是资产模型的基类
@@ -70,7 +70,9 @@ const _assetFiledRules = {
 class AssetBase {
   constructor (context, transactionConfig) {
     Object.assign(this, context)
-    this._context = context
+    this.ctx = context
+    // 兼容旧版本
+    this._context = this.ctx
 
     this._transactionConfig = transactionConfig
   }
@@ -239,7 +241,7 @@ class AssetBase {
    * @param {*} assetName
    */
   async getAssetInstanceByName (assetName) {
-    return AssetUtils.getAssetInstanceByName(this._context, assetName)
+    return AssetUtils.getAssetInstanceByName(this.ctx, assetName)
   }
 
   // 资产模块相关方法
@@ -353,7 +355,7 @@ class AssetBase {
       if (assetTrans) {
         // Fixme: 2020.5.31 这里没有 npm i 相关的包，require 不到，所以尽量不要提供 Asset 参数
         const AssetCls = require(assetTrans.package)[assetTrans.name]
-        assetInst = new AssetCls(this._context, assetTrans)
+        assetInst = new AssetCls(this.ctx, assetTrans)
       }
     }
 
@@ -537,7 +539,7 @@ class AssetBase {
       }
       if (assetTrans) {
         const AssetCls = require(assetTrans.package)[assetTrans.name]
-        assetInst = new AssetCls(this._context, assetTrans)
+        assetInst = new AssetCls(this.ctx, assetTrans)
       }
     }
     // 解析obj
@@ -599,7 +601,7 @@ class AssetBase {
       }
       if (assetTrans) {
         const AssetCls = require(assetTrans.package)[assetTrans.name]
-        assetInst = new AssetCls(this._context, assetTrans)
+        assetInst = new AssetCls(this.ctx, assetTrans)
       }
     }
 

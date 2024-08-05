@@ -4,9 +4,9 @@ export default {
   tokenPrefix: 'D',
   maxAmount: 100 * 10 ** 8,
   fixedPoint: 10 ** 8,
-  totalAmount: '1000000000000000000',
+  totalAmount: '10000000000000000',
   foundAddress: 'DLjrrVwnmMXstcAYVjcrpwyYb3kY1ehABU', // Please protect its private key
-  walletUrl: 'http://wallet.ddn.link',
+  walletUrl: 'http://wallet.ddn.net',
   enableMoreLockTypes: true,
 
   interval: 10, // 10ms

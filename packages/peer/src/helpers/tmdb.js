@@ -2,7 +2,7 @@
  *  Created by DDN Team on Wed Mar 14 2017 16:13:1
  *
  *  Copyright (c) 2019 DDN Foundation. All rights reserved.
- *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *  Licensed under the AGPL 3.0 License. See License.txt in the project root for license information.
  *-------------------------------------------------------------------------------------------- */
 
 const LOG_ADD_PATH = 1
@@ -10,7 +10,7 @@ const LOG_SET_VALUE = 2
 
 class Tmdb {
   constructor (map) {
-    this.map = (map instanceof Map ? map : new Map())
+    this.map = map instanceof Map ? map : new Map()
     this.log = []
   }
 

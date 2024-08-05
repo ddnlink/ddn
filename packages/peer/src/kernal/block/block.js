@@ -2,14 +2,15 @@
  * 区块数据核心处理逻辑和方法
  * wangxm   2018-12-27
  */
-import os from 'os'
-import ip from 'ip'
+// import os from 'os'
+// import ip from 'ip'
 import assert from 'assert'
 
 // import ByteBuffer from 'bytebuffer'
 import * as DdnCrypto from '@ddn/crypto'
 // import { nacl } from '@ddn/crypto'
-import { runtimeState, system, bignum } from '@ddn/utils'
+import { runtimeState, bignum } from '@ddn/utils'
+import { System } from '../../utils/system'
 import BlockStatus from './block-status'
 
 let _singleton
@@ -59,68 +60,6 @@ class Block {
 
   getBytes (block) {
     return DdnCrypto.getBytes(block, true, true)
-    // const size =
-    //   4 + // version (int)
-    //   4 + // timestamp (int)
-    //   64 + // previousBlock 64
-    //   4 + // numberOfTransactions (int)
-    //   64 + // totalAmount (long)
-    //   64 + // totalFee (long)
-    //   64 + // reward (long)
-    //   4 + // payloadLength (int)
-    //   32 + // payloadHash
-    //   32 + // generatorPublicKey
-    //   64 // blockSignature or unused
-    // const bb = new ByteBuffer(size, true)
-    // const {
-    //   version,
-    //   timestamp,
-    //   previous_block,
-    //   number_of_transactions,
-    //   total_amount,
-    //   total_fee,
-    //   reward,
-    //   payload_length,
-    //   payload_hash,
-    //   generator_public_key,
-    //   block_signature
-    // } = block
-    // bb.writeInt(version)
-    // bb.writeInt(timestamp)
-
-    // if (previous_block) {
-    //   bb.writeString(previous_block)
-    // } else {
-    //   bb.writeString('0')
-    // }
-
-    // bb.writeInt(number_of_transactions)
-    // bb.writeString(total_amount.toString())
-    // bb.writeString(total_fee.toString())
-    // bb.writeString(reward.toString())
-
-    // bb.writeInt(payload_length)
-
-    // const payloadHashBuffer = Buffer.from(payload_hash, 'hex')
-    // for (let i = 0; i < payloadHashBuffer.length; i++) {
-    //   bb.writeByte(payloadHashBuffer[i])
-    // }
-
-    // const generatorPublicKeyBuffer = Buffer.from(generator_public_key, 'hex')
-    // for (let i = 0; i < generatorPublicKeyBuffer.length; i++) {
-    //   bb.writeByte(generatorPublicKeyBuffer[i])
-    // }
-
-    // if (block_signature) {
-    //   const blockSignatureBuffer = Buffer.from(block_signature, 'hex')
-    //   for (let i = 0; i < blockSignatureBuffer.length; i++) {
-    //     bb.writeByte(blockSignatureBuffer[i])
-    //   }
-    // }
-
-    // bb.flip()
-
-    // return bb.toBuffer()
   }
 
   getHash (block) {
@@ -302,7 +241,8 @@ class Block {
     const blockTransactions = []
     let payloadBytes = ''
 
-    for (const transaction of transactions) {
+    for (const trs of transactions) {
+      const transaction = this.runtime.transaction.deepCloneTransaction(trs)
       const bytes = DdnCrypto.getBytes(transaction)
       if (size + bytes.length > this.constants.maxPayloadLength) {
         break
@@ -470,7 +410,7 @@ class Block {
     this.logger.debug('receiveNewPropose start.')
     if (this.runtime.state !== runtimeState.Ready) {
       this.logger.debug(
-        `receive new propose ,prepare is not ready ,state: ${this.runtime.state}, Ready: ${runtimeState.Ready}`
+        `receive new propose, prepare is not ready, state: ${this.runtime.state}, Ready: ${runtimeState.Ready}`
       )
       return
     }
@@ -515,7 +455,7 @@ class Block {
             try {
               await this.runtime.peer.broadcast.broadcastNewPropose(propose)
             } catch (err) {
-              this.logger.error(`Broadcast new propose failed: ${system.getErrorMsg(err)}`)
+              this.logger.error(`Broadcast new propose failed: ${System.getErrorMsg(err)}`)
             }
           })
 
@@ -528,42 +468,29 @@ class Block {
               const votes = this.runtime.consensus.createVotes(activeKeypairs, propose)
               this.logger.debug(`send votes height ${votes.height} id ${votes.id} sigatures ${votes.signatures.length}`)
 
-              const replyData = {
-                api: '/votes',
-                method: 'POST',
-                data: votes,
-                peer: {
-                  id: 1,
-                  version: this.config.verstion,
-                  os: os.platform() + os.release(),
-                  clock: null
-                }
-              }
-
               const from = propose.address
               const pos = from.indexOf(':')
+              let host, port
               if (pos >= 0) {
                 const fromIp = from.substring(0, pos)
                 const fromPort = from.substring(pos + 1)
-                replyData.peer.ip = ip.toLong(fromIp)
-                replyData.peer.port = parseInt(fromPort)
+                host = fromIp
+                port = parseInt(fromPort)
               } else {
-                replyData.peer.ip = ip.toLong(from)
-                replyData.peer.port = 80
+                host = from
+                port = 80
               }
 
               // 向提议请求节点回复本机授权
               let res
               setImmediate(async () => {
                 try {
-                  res = await this.runtime.peer.request(replyData)
-                  if (res.body.success === false) {
-                    this.logger.debug(`Replay propose request fail ${JSON.stringify(res.body.message)}.`)
+                  res = await this.runtime.peer.p2p.post('/vote', votes, { host, port })
+                  if (!res.body.success) {
+                    this.logger.debug(`Reply propose request fail ${JSON.stringify(res.body.message)}.`)
                   }
                 } catch (err) {
-                  if (err) {
-                    this.logger.error(`Replay propose request failed: ${system.getErrorMsg(err)}`)
-                  }
+                  this.logger.error(`Reply propose request failed: ${System.getErrorMsg(err)}`)
                 }
               })
 
@@ -579,6 +506,7 @@ class Block {
         },
         err => {
           if (err) {
+            this.logger.error('receiveNewPropose error: ', err)
             reject(err)
           }
           this.logger.debug('receivePropose finished')
@@ -626,9 +554,8 @@ class Block {
               throw new Error(`Apply unconfirmed ${err.toString()}`)
             } finally {
               await this.runtime.transaction.removeUnconfirmedTransaction(transaction.id)
+              applyedTrsIdSet.add(transaction.id)
             }
-
-            applyedTrsIdSet.add(transaction.id)
           }
 
           this.logger.debug('apply block ok')
@@ -650,10 +577,19 @@ class Block {
           this.logger.debug('save block ok')
         })
 
-        // 出错但回滚成功
-        if (result) throw new Error(result)
+        this.logger.debug('Apply block transaction result: ', result)
+        if (result) {
+          // found errors but rollback success
+          const lastHeight = await this.runtime.dvm.getLastHeight()
+          if (lastHeight >= 0) {
+            await this.runtime.dvm.rollback(this._lastBlock.height)
+          }
+          // throw new Error(result)
+          return
+        }
+        this.runtime.dvm.commit(block.height)
 
-        this.logger.debug(`The dao.transaction is finished, err: ${result} `)
+        this.logger.debug('The dao.transaction is finished.')
         this.setLastBlock(block)
 
         this._blockCache = {}
@@ -673,9 +609,9 @@ class Block {
               await this.runtime.peer.broadcast.broadcastNewBlock(block, votes)
               await this.runtime.transaction.execAssetFunc('onNewBlock', block, votes)
             } catch (err) {
-              this.logger.error(`Broadcast new block failed: ${system.getErrorMsg(err)}`)
+              this.logger.error(`Broadcast new block failed: ${System.getErrorMsg(err)}`)
               // TODO: 2020.8.30 检查该处是否抛出错误
-              // throw new Error(`Broadcast new block failed: ${system.getErrorMsg(err)}`)
+              // throw new Error(`Broadcast new block failed: ${System.getErrorMsg(err)}`)
             }
           })
         }
@@ -1099,7 +1035,7 @@ class Block {
         throw new Error('No public ip')
       }
 
-      const serverAddr = `${this.config.publicIp}:${this.config.port}`
+      const serverAddr = `${this.config.publicIp}:${this.config.p2pPort}`
 
       let propose
       try {
@@ -1116,8 +1052,8 @@ class Block {
         try {
           await this.runtime.peer.broadcast.broadcastNewPropose(propose)
         } catch (err) {
-          this.logger.error(`Broadcast new propose failed: ${system.getErrorMsg(err)}`)
-          throw new Error(`Broadcast new propose failed: ${system.getErrorMsg(err)}`)
+          this.logger.error(`Broadcast new propose failed: ${System.getErrorMsg(err)}`)
+          throw new Error(`Broadcast new propose failed: ${System.getErrorMsg(err)}`)
         }
       })
     }

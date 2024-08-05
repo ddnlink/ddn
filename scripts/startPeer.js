@@ -1,3 +1,13 @@
+/*
+ * @Author: imfly 
+ * @Email: kubying@foxmail.com
+ * @Date: 2024-06-29 20:08:42 
+ * @Last Modified by: imfly
+ * @Last Modified time: 2024-06-29 20:11:59
+ * @Description: Peer start
+ * @Deprecated Update lerna to lastest，don`t use this script ageain.
+ */
+
 const { fork } = require('child_process');
 const { join } = require('path');
 

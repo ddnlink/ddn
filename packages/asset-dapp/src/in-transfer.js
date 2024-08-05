@@ -11,7 +11,7 @@ class InTransfer extends Asset.Base {
   async propsMapping () {
     return [
       {
-        field: 'str2',
+        field: 'str6',
         prop: 'dapp_id',
         required: true
       },
@@ -118,6 +118,23 @@ class InTransfer extends Asset.Base {
         // })
       }
     }
+  }
+
+  async objectNormalize (trs) {
+    let assetObj = await this.getAssetObject(trs)
+    assetObj = Object.assign({}, assetObj)
+    const validateErrors = await this.ddnSchema.validateDapp(assetObj)
+    if (validateErrors) {
+      this.logger.error(
+        `Failed to normalize Dapp in transfer: ${trs.type} ${validateErrors[0].schemaPath} ${validateErrors[0].message}`
+      )
+      this.logger.debug(`Failed to normalize Dapp in transfer asset: ${trs}`)
+      throw new Error(
+        `Failed to normalize Dapp in transfer: ${validateErrors[0].schemaPath} ${validateErrors[0].message}`
+      )
+    }
+
+    return trs
   }
 
   async getBytes (trs) {

@@ -10,7 +10,7 @@ module.exports = {
   fixedPoint: 10 ** 8,
   totalAmount: '1000000000000000000',
   foundAddress: 'DLjrrVwnmMXstcAYVjcrpwyYb3kY1ehABU',
-  walletUrl: 'http://wallet.ddn.link',
+  walletUrl: 'http://wallet.testnet.ddn.net',
   enableMoreLockTypes: true,
 
   interval: 10, // 10ms
@@ -31,7 +31,12 @@ module.exports = {
   maxConfirmations: 77 * 100,
   confirmationLength: 77,
   maxTxsPerBlock: 500,
-  crypto: '@ddn/crypto-nacl',
+
+  energyPerDDN: 10000,
+  gasPrice: 1,
+  maxGasLimit: 10000000,
+  maxCodeSize: 32768,
+
   testnet: {
     rewardRatio: 0.2,
     milestones: [
@@ -70,6 +75,10 @@ module.exports = {
       dapp: '100',
       dapp_out: '0.1',
       dapp_in: '0.1',
+
+      // contract
+      contract: '1.0',
+      contract_transfer: '0.1',
 
       // todo: 测试中提供的费用
       username: '0.1',
@@ -124,6 +133,10 @@ module.exports = {
       dapp: '100',
       dapp_out: '0.1',
       dapp_in: '0.1',
+
+      // contract
+      contract: '1.0',
+      contract_transfer: '0.1',
 
       // todo: 测试中提供的费用
       username: '0.1',

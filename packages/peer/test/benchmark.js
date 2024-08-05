@@ -2,7 +2,7 @@
  *  Created by DDN Team on Wed Mar 14 2017 22:29:23
  *
  *  Copyright (c) 2019 DDN Foundation. All rights reserved.
- *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *  Licensed under the AGPL 3.0 License. See License.txt in the project root for license information.
  *-------------------------------------------------------------------------------------------- */
 
 const crypto = require('crypto')
@@ -50,12 +50,9 @@ describe('benchmarks', function () {
       timestamp: 0,
       senderPublicKey: '9a5b9e40d9da50731c38b806da63a5186f8809afc0f7058c7da28d443d6e0b35',
       func: 'core.transfer',
-      args: [
-        'CNY',
-        '100000000000000',
-        'A8QCwz5Vs77UGX9YqBg9kJ6AZmsXQBC8vj'
-      ],
-      signature: '2bc08b74ad066e93b55bc5f1d8bbaf7e85aed8f67471569616c321f141568b4eabe09cc77176e06e43cb214aa41c0015afc87532f9d6533601b85b52ab47430d',
+      args: ['CNY', '100000000000000', 'A8QCwz5Vs77UGX9YqBg9kJ6AZmsXQBC8vj'],
+      signature:
+        '2bc08b74ad066e93b55bc5f1d8bbaf7e85aed8f67471569616c321f141568b4eabe09cc77176e06e43cb214aa41c0015afc87532f9d6533601b85b52ab47430d',
       id: '387f53fbce1710155ffd99492682d560e4ba69364bea5e8a7b52c49cf1ddeb95'
     }
     const payloadHash = crypto.createHash('sha256')
@@ -82,7 +79,8 @@ describe('benchmarks', function () {
           timestamp: 0,
           senderPublicKey: '9a5b9e40d9da50731c38b806da63a5186f8809afc0f7058c7da28d443d6e0b35',
           func: 'core.transfer',
-          signature: '2bc08b74ad066e93b55bc5f1d8bbaf7e85aed8f67471569616c321f141568b4eabe09cc77176e06e43cb214aa41c0015afc87532f9d6533601b85b52ab47430d',
+          signature:
+            '2bc08b74ad066e93b55bc5f1d8bbaf7e85aed8f67471569616c321f141568b4eabe09cc77176e06e43cb214aa41c0015afc87532f9d6533601b85b52ab47430d',
           id: '387f53fbce1710155ffd99492682d560e4ba69364bea5e8a7b52c49cf1ddeb95'
         }
       })

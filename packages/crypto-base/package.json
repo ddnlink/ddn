@@ -1,15 +1,28 @@
 {
   "name": "@ddn/crypto-base",
-  "version": "1.0.0",
+  "version": "2.4.5",
   "description": "this is crypto common plugin",
-  "main": "lib/index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+  "main": "./dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ddnlink/ddn/tree/master/packages/crypto-base"
   },
   "author": "creazy",
-  "license": "ISC",
+  "license": "AGPL 3.0",
+  "scripts": {
+    "build": "father build",
+    "dev": "father dev"
+  },
   "dependencies": {
     "bytebuffer": "^5.0.1",
     "fast-sha256": "^1.3.0"
-  }
+  },
+  "gitHead": "3f5aef8e697748180be42f047a2053e46a7afd43"
 }

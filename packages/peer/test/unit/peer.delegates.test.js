@@ -29,7 +29,8 @@ beforeAll(async () => {
 // 注册受托人，没有费用失败
 describe('PUT /delegates without funds', () => {
   it('Using valid parameters. Should fail', done => {
-    node.api.put('/delegates')
+    node.api
+      .put('/delegates')
       .set('Accept', 'application/json')
       .send({
         secret: Raccount.password,
@@ -51,7 +52,8 @@ describe('PUT /delegates without funds', () => {
 // 投票，没钱不好使
 describe('PUT /votes without funds', () => {
   it('When upvoting. Should fail', done => {
-    node.api.post('/accounts/open')
+    node.api
+      .post('/accounts/open')
       .set('Accept', 'application/json')
       .send({
         secret: Raccount.password
@@ -69,7 +71,8 @@ describe('PUT /votes without funds', () => {
 
         node.onNewBlock(err => {
           node.expect(err).to.be.not.ok
-          node.api.put('/votes')
+          node.api
+            .put('/votes')
             .set('Accept', 'application/json')
             .send({
               secret: Raccount.password,
@@ -92,7 +95,8 @@ describe('PUT /votes without funds', () => {
   it('When downvoting. Should fail', done => {
     node.onNewBlock(err => {
       node.expect(err).be.not.ok
-      node.api.put('/votes')
+      node.api
+        .put('/votes')
         .set('Accept', 'application/json')
         .send({
           secret: Raccount.password,
@@ -117,7 +121,8 @@ describe('PUT /votes with funds', () => {
   const randomCoin = node.randomCoin()
 
   beforeAll(done => {
-    node.api.put('/transactions')
+    node.api
+      .put('/transactions')
       .set('Accept', 'application/json')
       .send({
         secret: node.Gaccount.password,
@@ -141,7 +146,8 @@ describe('PUT /votes with funds', () => {
     node.onNewBlock(err => {
       node.expect(err).to.be.not.ok
 
-      node.api.post('/accounts/open')
+      node.api
+        .post('/accounts/open')
         .set('Accept', 'application/json')
         .send({
           secret: Raccount.password
@@ -163,7 +169,8 @@ describe('PUT /votes with funds', () => {
     const votedDelegate = `'+${node.Eaccount.publicKey}','+${node.Eaccount.publicKey}'`
     node.onNewBlock(err => {
       node.expect(err).be.not.ok
-      node.api.put('/votes')
+      node.api
+        .put('/votes')
         .set('Accept', 'application/json')
         .send({
           secret: Raccount.password,
@@ -186,7 +193,8 @@ describe('PUT /votes with funds', () => {
     const votedDelegate = `'-${node.Eaccount.publicKey}','-${node.Eaccount.publicKey}'`
     node.onNewBlock(err => {
       node.expect(err).be.not.ok
-      node.api.put('/votes')
+      node.api
+        .put('/votes')
         .set('Accept', 'application/json')
         .send({
           secret: Raccount.password,
@@ -210,7 +218,8 @@ describe('PUT /votes with funds', () => {
 
     node.onNewBlock(err => {
       node.expect(err).be.not.ok
-      node.api.put('/votes')
+      node.api
+        .put('/votes')
         .set('Accept', 'application/json')
         .send({
           secret: Raccount.password,
@@ -230,7 +239,8 @@ describe('PUT /votes with funds', () => {
   }, 50000)
 
   it('When upvoting. Should be ok', done => {
-    node.api.put('/votes')
+    node.api
+      .put('/votes')
       .set('Accept', 'application/json')
       .send({
         secret: Raccount.password,
@@ -246,7 +256,9 @@ describe('PUT /votes with funds', () => {
         node.expect(body.transaction.type).to.equal(node.AssetTypes.VOTE)
         node.expect(body.transaction.amount).to.equal('0')
         node.expect(body.transaction.senderPublicKey).to.equal(Raccount.publicKey)
-        node.expect(body.transaction.fee).to.equal(bignum.multiply(node.constants.net.fees.vote, node.constants.fixedPoint).toString())
+        node
+          .expect(body.transaction.fee)
+          .to.equal(bignum.multiply(node.constants.net.fees.vote, node.constants.fixedPoint).toString())
 
         done()
       })
@@ -255,7 +267,8 @@ describe('PUT /votes with funds', () => {
   it('When upvoting again from same account. Should fail', done => {
     node.onNewBlock(err => {
       node.expect(err).be.not.ok
-      node.api.put('/votes')
+      node.api
+        .put('/votes')
         .set('Accept', 'application/json')
         .send({
           secret: Raccount.password,
@@ -278,7 +291,8 @@ describe('PUT /votes with funds', () => {
   it('When downvoting. Should be ok', done => {
     node.onNewBlock(err => {
       node.expect(err).to.be.not.ok
-      node.api.put('/votes')
+      node.api
+        .put('/votes')
         .set('Accept', 'application/json')
         .send({
           secret: Raccount.password,
@@ -294,7 +308,9 @@ describe('PUT /votes with funds', () => {
           node.expect(body.transaction.type).to.equal(node.AssetTypes.VOTE)
           node.expect(body.transaction.amount).to.equal('0')
           node.expect(body.transaction.senderPublicKey).to.equal(Raccount.publicKey)
-          node.expect(body.transaction.fee).to.equal(bignum.multiply(node.constants.net.fees.vote, node.constants.fixedPoint).toString())
+          node
+            .expect(body.transaction.fee)
+            .to.equal(bignum.multiply(node.constants.net.fees.vote, node.constants.fixedPoint).toString())
 
           done()
         })
@@ -304,7 +320,8 @@ describe('PUT /votes with funds', () => {
   it('When downvoting again from same account. Should fail', done => {
     node.onNewBlock(err => {
       node.expect(err).be.not.ok
-      node.api.put('/votes')
+      node.api
+        .put('/votes')
         .set('Accept', 'application/json')
         .send({
           secret: Raccount.password,
@@ -325,7 +342,8 @@ describe('PUT /votes with funds', () => {
   }, 50000)
 
   it('When upvoting using a blank pasphrase. Should fail', done => {
-    node.api.put('/votes')
+    node.api
+      .put('/votes')
       .set('Accept', 'application/json')
       .send({
         secret: '',
@@ -343,7 +361,8 @@ describe('PUT /votes with funds', () => {
   })
 
   it('When downvoting using a blank pasphrase. Should fail', done => {
-    node.api.put('/votes')
+    node.api
+      .put('/votes')
       .set('Accept', 'application/json')
       .send({
         secret: '',
@@ -362,7 +381,8 @@ describe('PUT /votes with funds', () => {
 
   it('When upvoting without any delegates. Should fail', done => {
     node.onNewBlock(() => {
-      node.api.put('/votes')
+      node.api
+        .put('/votes')
         .set('Accept', 'application/json')
         .send({
           secret: Raccount.password,
@@ -382,7 +402,8 @@ describe('PUT /votes with funds', () => {
 
   it('When downvoting without any delegates. Should fail', done => {
     node.onNewBlock(() => {
-      node.api.put('/votes')
+      node.api
+        .put('/votes')
         .set('Accept', 'application/json')
         .send({
           secret: Raccount.password,
@@ -401,7 +422,8 @@ describe('PUT /votes with funds', () => {
   })
 
   it('Without any delegates. Should fail', function (done) {
-    node.api.put('/votes')
+    node.api
+      .put('/votes')
       .set('Accept', 'application/json')
       .send({
         secret: Raccount.password,
@@ -424,7 +446,8 @@ describe('PUT /delegates to regist with funds', () => {
   const randomCoin = node.randomCoin()
 
   beforeAll(done => {
-    node.api.post('/accounts/open')
+    node.api
+      .post('/accounts/open')
       .set('Accept', 'application/json')
       .send({
         secret: R2account.password
@@ -442,7 +465,8 @@ describe('PUT /delegates to regist with funds', () => {
 
         node.onNewBlock(err => {
           node.expect(err).to.be.not.ok
-          node.api.put('/transactions')
+          node.api
+            .put('/transactions')
             .set('Accept', 'application/json')
             .send({
               secret: node.Gaccount.password,
@@ -468,7 +492,8 @@ describe('PUT /delegates to regist with funds', () => {
     beforeAll(done => {
       node.onNewBlock(err => {
         node.expect(err).to.be.not.ok
-        node.api.post('/accounts/open')
+        node.api
+          .post('/accounts/open')
           .set('Accept', 'application/json')
           .send({
             secret: R2account.password
@@ -488,7 +513,8 @@ describe('PUT /delegates to regist with funds', () => {
   })
 
   it('Using blank pasphrase. Should fail', done => {
-    node.api.put('/delegates')
+    node.api
+      .put('/delegates')
       .set('Accept', 'application/json')
       .send({
         secret: '',
@@ -506,7 +532,8 @@ describe('PUT /delegates to regist with funds', () => {
   })
 
   it('Using invalid pasphrase. Should fail', function (done) {
-    node.api.put('/delegates')
+    node.api
+      .put('/delegates')
       .set('Accept', 'application/json')
       .send({
         secret: [],
@@ -524,7 +551,8 @@ describe('PUT /delegates to regist with funds', () => {
   })
 
   it('Using invalid username. Should fail', function (done) {
-    node.api.put('/delegates')
+    node.api
+      .put('/delegates')
       .set('Accept', 'application/json')
       .send({
         secret: Raccount.password,
@@ -542,7 +570,8 @@ describe('PUT /delegates to regist with funds', () => {
   })
 
   it('Using username longer than 20 characters. Should fail', function (done) {
-    node.api.put('/delegates')
+    node.api
+      .put('/delegates')
       .set('Accept', 'application/json')
       .send({
         secret: Raccount.password,
@@ -560,7 +589,8 @@ describe('PUT /delegates to regist with funds', () => {
   })
 
   it('Using blank username. Should fail', function (done) {
-    node.api.put('/delegates')
+    node.api
+      .put('/delegates')
       .set('Accept', 'application/json')
       .send({
         secret: Raccount.password,
@@ -572,7 +602,10 @@ describe('PUT /delegates to regist with funds', () => {
         debug('blank username, fail', JSON.stringify(body))
         node.expect(err).be.not.ok
         node.expect(body).to.have.property('success').to.be.false
-        node.expect(body).to.have.property('error').to.match(/^Username is undefined/)
+        node
+          .expect(body)
+          .to.have.property('error')
+          .to.match(/^Username is undefined/)
         done()
       })
   })
@@ -580,7 +613,8 @@ describe('PUT /delegates to regist with funds', () => {
   it(`Using uppercase username: ${R2account.username}. Should be ok and delegate should be registered in lower case`, done => {
     node.onNewBlock(err => {
       node.expect(err).be.not.ok
-      node.api.put('/delegates')
+      node.api
+        .put('/delegates')
         .set('Accept', 'application/json')
         .send({
           secret: R2account.password,
@@ -593,7 +627,9 @@ describe('PUT /delegates to regist with funds', () => {
           node.expect(err).be.not.ok
           node.expect(body).to.have.property('success').to.be.true
           node.expect(body).to.have.property('transaction').that.is.an('object')
-          node.expect(body.transaction.fee).to.equal(bignum.multiply(node.constants.net.fees.delegate, node.constants.fixedPoint).toString())
+          node
+            .expect(body.transaction.fee)
+            .to.equal(bignum.multiply(node.constants.net.fees.delegate, node.constants.fixedPoint).toString())
           node.expect(body.transaction.asset.delegate.username).to.equal(R2account.username.toLowerCase())
           node.expect(body.transaction.asset.delegate.publicKey).to.equal(R2account.publicKey)
           node.expect(body.transaction.type).to.equal(node.AssetTypes.DELEGATE)
@@ -607,7 +643,8 @@ describe('PUT /delegates to regist with funds', () => {
   it('Using same account. Should fail', done => {
     node.onNewBlock(err => {
       node.expect(err).to.be.not.ok
-      node.api.put('/delegates')
+      node.api
+        .put('/delegates')
         .set('Accept', 'application/json')
         .send({
           secret: Raccount.password,
@@ -628,11 +665,15 @@ describe('PUT /delegates to regist with funds', () => {
   it(`Using existing username but different case: ${R2account.username}. Should fail`, done => {
     node.onNewBlock(err => {
       node.expect(err).to.be.not.ok
-      debug('R2account', JSON.stringify({
-        secret: R2account.password,
-        username: R2account.username
-      }))
-      node.api.put('/delegates')
+      debug(
+        'R2account',
+        JSON.stringify({
+          secret: R2account.password,
+          username: R2account.username
+        })
+      )
+      node.api
+        .put('/delegates')
         .set('Accept', 'application/json')
         .send({
           secret: R2account.password,
@@ -658,7 +699,8 @@ describe('GET /delegates', () => {
     const offset = 0
 
     const noParameterUrl = `/delegates?limit=${limit}&offset=${offset}&orderBy=vote:asc`
-    node.api.get(noParameterUrl)
+    node.api
+      .get(noParameterUrl)
       .set('Accept', 'application/json')
       .expect('Content-Type', /json/)
       .expect(200)
@@ -697,7 +739,8 @@ describe('GET /delegates', () => {
     const limit = 20
     const offset = 10
 
-    node.api.get(`/delegates?limit=${limit}&offset=${offset}&orderBy=rate:desc`)
+    node.api
+      .get(`/delegates?limit=${limit}&offset=${offset}&orderBy=rate:desc`)
       .set('Accept', 'application/json')
       .expect('Content-Type', /json/)
       .expect(200)
@@ -731,7 +774,8 @@ describe('GET /delegates', () => {
     const limit = 'invalid'
     const offset = 'invalid'
 
-    node.api.get(`/delegates?limit=${limit}&offset=${offset}&orderBy=invalid`)
+    node.api
+      .get(`/delegates?limit=${limit}&offset=${offset}&orderBy=invalid`)
       .set('Accept', 'application/json')
       .expect('Content-Type', /json/)
       .expect(200)
@@ -747,7 +791,8 @@ describe('GET /delegates', () => {
 
 describe('GET /delegates/count', () => {
   it('Should be ok', done => {
-    node.api.get('/delegates/count')
+    node.api
+      .get('/delegates/count')
       .set('Accept', 'application/json')
       .expect('Content-Type', /json/)
       .expect(200)
@@ -764,14 +809,17 @@ describe('GET /delegates/count', () => {
 // 仅提供检索某地址（账户）或公钥下的账户所投的票
 describe('GET /votes', () => {
   beforeAll(done => {
-    debug(JSON.stringify({
-      Raccountsecret: Raccount.password,
-      R2accountdelegates: ['+' + R2account.publicKey]
-    }))
+    debug(
+      JSON.stringify({
+        Raccountsecret: Raccount.password,
+        R2accountdelegates: ['+' + R2account.publicKey]
+      })
+    )
 
     node.onNewBlock(err => {
       node.expect(err).to.be.not.ok
-      node.api.put('/votes')
+      node.api
+        .put('/votes')
         .set('Accept', 'application/json')
         .send({
           secret: Raccount.password,
@@ -790,7 +838,8 @@ describe('GET /votes', () => {
   })
 
   it('Using no params. Should fail', done => {
-    node.api.get('/votes')
+    node.api
+      .get('/votes')
       .set('Accept', 'application/json')
       .expect('Content-Type', /json/)
       .expect(200)
@@ -805,7 +854,8 @@ describe('GET /votes', () => {
   })
 
   it('Using no address. Should fail', done => {
-    node.api.get('/votes?address=')
+    node.api
+      .get('/votes?address=')
       .set('Accept', 'application/json')
       .expect('Content-Type', /json/)
       .expect(200)
@@ -814,13 +864,16 @@ describe('GET /votes', () => {
         node.expect(err).be.not.ok
         node.expect(body).to.have.property('success').be.false
         node.expect(body).to.have.property('error')
-        node.expect(body.error).to.include('Invalid parameters: #/properties/address/minLength should NOT be shorter than 1 characters')
+        node
+          .expect(body.error)
+          .to.include('Invalid parameters: #/properties/address/minLength should NOT be shorter than 1 characters')
         done()
       })
   })
 
   it('Using invalid address. Should fail', done => {
-    node.api.get('/votes?address=NotAaddress')
+    node.api
+      .get('/votes?address=NotAaddress')
       .set('Accept', 'application/json')
       .expect('Content-Type', /json/)
       .expect(200)
@@ -829,13 +882,14 @@ describe('GET /votes', () => {
         node.expect(err).be.not.ok
         node.expect(body).to.have.property('success').to.be.false
         node.expect(body).to.have.property('error')
-        node.expect(body.error).to.include('Invalid address getAccount')
+        node.expect(body.error).to.include('Invalid address or publicKey getAccount')
         done()
       })
   })
 
   it('Using Gaccount address. Should be ok', done => {
-    node.api.get(`/votes?address=${node.Gaccount.address}`)
+    node.api
+      .get(`/votes?address=${node.Gaccount.address}`)
       .set('Accept', 'application/json')
       .expect('Content-Type', /json/)
       .expect(200)
@@ -857,7 +911,8 @@ describe('GET /votes', () => {
 
   it('Using valid address. Should be ok', async done => {
     await node.onNewBlockAsync()
-    node.api.get(`/votes?address=${Raccount.address}`)
+    node.api
+      .get(`/votes?address=${Raccount.address}`)
       .set('Accept', 'application/json')
       .expect('Content-Type', /json/)
       .expect(200)
@@ -880,7 +935,8 @@ describe('GET /votes', () => {
   })
 
   it('Using no publicKey. Should fail', done => {
-    node.api.get('/votes?publicKey=')
+    node.api
+      .get('/votes?publicKey=')
       .set('Accept', 'application/json')
       .expect('Content-Type', /json/)
       .expect(200)
@@ -889,13 +945,16 @@ describe('GET /votes', () => {
         node.expect(err).be.not.ok
         node.expect(body).to.have.property('success').be.false
         node.expect(body).to.have.property('error')
-        node.expect(body.error).to.include('Invalid parameters: #/properties/publicKey/minLength should NOT be shorter than 1 characters')
+        node
+          .expect(body.error)
+          .to.include('Invalid parameters: #/properties/publicKey/minLength should NOT be shorter than 1 characters')
         done()
       })
   })
 
   it('Using invalid publicKey. Should fail', done => {
-    node.api.get('/votes?publicKey=NotAPublicKey')
+    node.api
+      .get('/votes?publicKey=NotAPublicKey')
       .set('Accept', 'application/json')
       .expect('Content-Type', /json/)
       .expect(200)
@@ -911,7 +970,8 @@ describe('GET /votes', () => {
 
   it('Using valid publicKey. Should be ok', async done => {
     await node.onNewBlockAsync()
-    node.api.get(`/votes?publicKey=${Raccount.publicKey}`)
+    node.api
+      .get(`/votes?publicKey=${Raccount.publicKey}`)
       .set('Accept', 'application/json')
       .expect('Content-Type', /json/)
       .expect(200)

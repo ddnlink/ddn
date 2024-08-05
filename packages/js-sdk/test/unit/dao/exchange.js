@@ -1,7 +1,7 @@
 // no pass
 import Debug from 'debug'
 import DdnUtil from '@ddn/utils'
-import {DdnJS, node} from '../../ddn-js'
+import { DdnJS, node } from '../../ddn-js'
 
 const debug = Debug('debug')
 
@@ -15,7 +15,7 @@ const exchangePrice = '700000000'
 jest.setTimeout(50000)
 
 export const Exchange = () => {
-  async function openAccount(account) {
+  async function openAccount (account) {
     await new Promise((resolve, reject) => {
       node.api
         .post('/accounts/open')
@@ -26,7 +26,7 @@ export const Exchange = () => {
         })
         .expect('Content-Type', /json/)
         .expect(200)
-        .end((err, {body}) => {
+        .end((err, { body }) => {
           debug(JSON.stringify(body))
 
           if (err) {
@@ -49,7 +49,7 @@ export const Exchange = () => {
     })
   }
 
-  async function sendDDN({address}, coin) {
+  async function sendDDN ({ address }, coin) {
     await node.onNewBlockAsync()
 
     const result = await new Promise((resolve, reject) => {
@@ -68,7 +68,7 @@ export const Exchange = () => {
         })
         .expect('Content-Type', /json/)
         .expect(200)
-        .end((err, {body}) => {
+        .end((err, { body }) => {
           debug(JSON.stringify(body))
 
           if (err) {
@@ -108,7 +108,7 @@ export const Exchange = () => {
         .set('nethash', node.config.nethash)
         .set('port', node.config.port)
         .expect(200)
-        .end((err, {body}) => {
+        .end((err, { body }) => {
           debug('getOrgIdUrl', getOrgIdUrl, JSON.stringify(body))
           node.expect(err).to.be.not.ok
           node.expect(body).to.have.property('success').to.be.true
@@ -134,7 +134,7 @@ export const Exchange = () => {
         exchange,
         node.Gaccount.password
       ) // 41
-      node.peer
+      node.api
         .post('/transactions')
         .set('Accept', 'application/json')
         .set('version', node.version)
@@ -145,7 +145,7 @@ export const Exchange = () => {
         })
         .expect('Content-Type', /json/)
         .expect(200)
-        .end((err, {body}) => {
+        .end((err, { body }) => {
           debug('exchange with state = 0, ok', JSON.stringify(body))
 
           node.expect(err).to.be.not.ok
@@ -178,7 +178,7 @@ export const Exchange = () => {
         exchange,
         Account1.password
       )
-      node.peer
+      node.api
         .post('/transactions')
         .set('Accept', 'application/json')
         .set('version', node.version)
@@ -189,7 +189,7 @@ export const Exchange = () => {
         })
         .expect('Content-Type', /json/)
         .expect(200)
-        .end((err, {body}) => {
+        .end((err, { body }) => {
           debug('exchange with state = 1, ok', JSON.stringify(body))
 
           node.expect(err).to.be.not.ok
@@ -215,7 +215,7 @@ export const Exchange = () => {
       )
       debug('exchange to buy again, fail, transaction', transaction)
 
-      node.peer
+      node.api
         .post('/transactions')
         .set('Accept', 'application/json')
         .set('version', node.version)
@@ -226,7 +226,7 @@ export const Exchange = () => {
         })
         .expect('Content-Type', /json/)
         .expect(200)
-        .end((err, {body}) => {
+        .end((err, { body }) => {
           debug('exchange with state = 1 again, fail', JSON.stringify(body))
 
           node.expect(err).to.be.not.ok

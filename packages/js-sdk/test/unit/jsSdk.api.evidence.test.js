@@ -21,33 +21,31 @@ describe('Test createEvidence', () => {
     const ipid = node.randomIpId()
 
     debug(`beforeAll ipid: ${ipid}`)
-
     evidence = {
-      ipid: ipid,
       title: node.randomUsername(),
       description: `${ipid} has been evidence.`,
-      hash: 'f082022ee664008a1f15d62514811dfd',
+      hash: `f082022ee664${new Date().getTime()}`,
+      short_hash: `f08202${new Date().getTime()}`,
       author: 'Evanlai',
       size: '2448kb',
       type: 'html',
-      url: 'dat://f76e1e82cf4eab4bf173627ff93662973c6fab110c70fb0f86370873a9619aa6+18/public/test.html',
-      tags: 'world,cup,test'
+      source_address: 'dat://f76e1e82cf4eab4bf173627ff93662973c6fab110c70fb0f86370873a9619aa6+18/public/test.html',
+      tags: 'world,cup,test',
+      metadata: 'world,cup,test'
     }
 
-    const ipid2 = node.randomIpId()
+    // const ipid2 = node.randomIpId()
     evidence2 = {
-      ipid: ipid2,
       title: node.randomUsername(),
       description: `${ipid} has been evidence.`,
-      hash: 'f082022ee664008a1f15d62514811dfd',
+      hash: `f082022e664${new Date().getTime()}`,
+      short_hash: `f0802${new Date().getTime()}`,
       author: 'Evanlai',
       size: '2448kb',
       type: 'html',
-      url: 'dat://f76e1e82cf4eab4bf173627ff93662973c6fab110c70fb0f86370873a9619aa6+18/public/test.html',
+      source_address: 'dat://f76e1e82cf4eab4bf173627ff93662973c6fab110c70fb0f86370873a9619aa6+18/public/test.html',
       tags: 'world,cup,test',
-      ext: 'china',
-      ext1: 12345,
-      ext2: new Date()
+      metadata: 'world,cup,test'
     }
 
     node.expect(evidence).to.be.not.equal(evidence2)
@@ -56,11 +54,13 @@ describe('Test createEvidence', () => {
     done()
   })
 
-  it('CreateEvidence Should be ok', async (done) => {
+  it('CreateEvidence Should be ok', async done => {
+    evidence.address = node.Gaccount.address
     transaction = await createEvidence(evidence, node.Gaccount.password)
     debug(`transaction: ${JSON.stringify(transaction)}`)
 
-    node.peer.post('/transactions')
+    node.api
+      .post('/transactions')
       .set('Accept', 'application/json')
       .set('version', node.version)
       .set('nethash', node.config.nethash)
@@ -70,37 +70,82 @@ describe('Test createEvidence', () => {
       })
       .expect('Content-Type', /json/)
       .expect(200)
-      .end((err, {
-        body
-      }) => {
+      .end((err, { body }) => {
         debug('CreateEvidence: ', JSON.stringify(body))
         node.expect(err).to.be.not.ok
         node.expect(body).to.have.property('success').to.be.true
         done()
       })
   })
+  it('CreateEvidence Should not be ok with excess field', async done => {
+    evidence.address = node.Gaccount.address
+    evidence.data = node.Gaccount.address
+    transaction = await createEvidence(evidence, node.Gaccount.password)
+    debug(`transaction: ${JSON.stringify(transaction)}`)
 
-  it('Get /evidences/ipid/:ipid should be ok', async done => {
+    node.api
+      .post('/transactions')
+      .set('Accept', 'application/json')
+      .set('version', node.version)
+      .set('nethash', node.config.nethash)
+      .set('port', node.config.port)
+      .send({
+        transaction
+      })
+      .expect('Content-Type', /json/)
+      .expect(200)
+      .end((err, { body }) => {
+        debug('CreateEvidence: ', JSON.stringify(body))
+        node.expect(err).to.be.not.ok
+        node.expect(body).to.have.property('success').to.be.not.ok
+        done()
+      })
+  })
+
+  it('CreateEvidence Should  be ok with lack field', async done => {
+    evidence.address = node.Gaccount.address
+    delete evidence.description
+    transaction = await createEvidence(evidence, node.Gaccount.password)
+    debug(`transaction: ${JSON.stringify(transaction)}`)
+
+    node.api
+      .post('/transactions')
+      .set('Accept', 'application/json')
+      .set('version', node.version)
+      .set('nethash', node.config.nethash)
+      .set('port', node.config.port)
+      .send({
+        transaction
+      })
+      .expect('Content-Type', /json/)
+      .expect(200)
+      .end((err, { body }) => {
+        debug('CreateEvidence: ', JSON.stringify(body))
+        node.expect(err).to.be.not.ok
+        node.expect(body).to.have.property('success').to.be.not.ok
+        done()
+      })
+  })
+
+  it('Get /evidences/short_hash/:short_hash should be ok', async done => {
     // debug(`onNewBlock: ${ipid}`)
     // await node.onNewBlockAsync()
     node.onNewBlock(err => {
       debug('onNewBlock 2..')
 
       node.expect(err).to.be.not.ok
-      debug(`/evidences/ipid/${evidence.ipid}`, evidence.ipid)
+      debug(`/evidences/short_hash/${evidence.short_hash}`, evidence.short_hash)
 
-      node.api.get(`/evidences/ipid/${evidence.ipid}`)
+      node.api
+        .get(`/evidences/short_hash/${evidence.short_hash}`)
         .set('Accept', 'application/json')
         .set('version', node.version)
         .set('nethash', node.config.nethash)
         .set('port', node.config.port)
         .expect('Content-Type', /json/)
         .expect(200)
-        .end((err, {
-          body
-        }) => {
-          debug(`/evidences/ipid/${evidence.ipid}`, JSON.stringify(body))
-
+        .end((err, { body }) => {
+          debug(`/evidences/short_hash/${evidence.short_hash}`, JSON.stringify(body))
           node.expect(err).to.be.not.ok
           node.expect(body).to.have.property('success').to.be.true
           node.expect(body).to.have.property('result').not.null
@@ -108,7 +153,7 @@ describe('Test createEvidence', () => {
           node.expect(body.result).to.have.property('transaction_id')
 
           node.expect(body.result.transaction_type).to.equal(transaction.type)
-          node.expect(body.result.ipid).to.equal(evidence.ipid)
+          node.expect(body.result.short_hash).to.equal(evidence.short_hash)
 
           done()
         })
@@ -116,10 +161,12 @@ describe('Test createEvidence', () => {
   })
 
   describe('Asset puglin Test', () => {
-    it('POST peers/transactions, Should be ok', async (done) => {
+    it('POST peers/transactions, Should be ok', async done => {
+      evidence2.address = node.Gaccount.address
       const transaction = await createPluginAsset(DdnUtils.assetTypes.EVIDENCE, evidence2, node.Gaccount.password)
 
-      node.peer.post('/transactions')
+      node.api
+        .post('/transactions')
         .set('Accept', 'application/json')
         .set('version', node.version)
         .set('nethash', node.config.nethash)
@@ -129,9 +176,7 @@ describe('Test createEvidence', () => {
         })
         .expect('Content-Type', /json/)
         .expect(200)
-        .end((err, {
-          body
-        }) => {
+        .end((err, { body }) => {
           debug('Asset puglin body: ', JSON.stringify(body))
           node.expect(err).to.be.not.ok
           node.expect(body).have.property('success').be.true

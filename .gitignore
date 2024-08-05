@@ -23,8 +23,6 @@ lerna-debug.log*
 
 /coverage
 .idea
-yarn.lock
-package-lock.json
 *bak
 .vscode
 
@@ -45,10 +43,11 @@ screenshot
 /packages/*/dist
 /packages/**/node_modules/.cache
 /packages/**/.docz
-/packages/**/package-lock\.json
+/pro-packages
 
 # settings
 config/deploy
+config/mainnet/*
 **/**/config.mainnet.js
 **/**/config.local.js
 **/**/.ddnrc.local.js
@@ -60,3 +59,8 @@ config/deploy
 **/**/*.custom.js
 examples/peer*
 # .ddnrc.js
+
+.turbo
+.pnpm-store
+.husky
+.github

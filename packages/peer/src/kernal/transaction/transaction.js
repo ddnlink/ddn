@@ -3,7 +3,8 @@
  * wangxm   2018-12-28
  */
 import extend from 'util-extend'
-import DdnUtils from '@ddn/utils'
+import { bignum, assetTypes } from '@ddn/utils'
+import { System } from '../../utils/system'
 import * as DdnCrypto from '@ddn/crypto'
 import { getId } from '@ddn/crypto'
 import Assets from '../../assets'
@@ -42,7 +43,6 @@ class Transaction {
    * 删除交易
    * @param {*} trsId
    */
-
   async deleteTransaction ({ trsId, dbTrans }) {
     return await this.dao.remove('tr', { where: { id: trsId }, transaction: dbTrans })
   }
@@ -60,7 +60,7 @@ class Transaction {
   }
 
   async create (data) {
-    const { type, sender, keypair, requester, message, args, second_keypair } = data
+    const { type, sender, keypair, requester, message, second_keypair, args } = data
     if (!this._assets.hasType(type)) {
       throw new Error(`Unknown transaction type 1 ${type}`)
     }
@@ -74,29 +74,28 @@ class Transaction {
     }
 
     let trs = {
-      type: type,
-      amount: '0',
+      type,
       nethash: this.config.nethash,
+      amount: '0',
       senderPublicKey: sender.publicKey,
       requester_public_key: requester ? requester.publicKey.toString('hex') : null, // 仅适用于多重签名
       timestamp: this.runtime.slot.getTime(),
       asset: {},
-      message: message,
-      args: args
+      message,
+      args
     }
 
     trs = await this._assets.call(trs.type, 'create', data, trs) // 对应各个 asset 交易类型的 async create(data, trs) 方法
+    trs.fee = `${await this._assets.call(trs.type, 'calculateFee', trs, sender)}`
 
-    // trs.signature = await DdnCrypto.sign(trs, data.keypair);
     trs.signature = await DdnCrypto.sign(trs, keypair)
     if (sender.second_signature && second_keypair) {
       trs.sign_signature = await DdnCrypto.sign(trs, second_keypair)
-      // trs.sign_signature = await DdnCrypto.sign(trs, data.second_keypair);
     }
 
-    trs.id = await getId(trs)
+    this.logger.debug('Created trs is ', trs)
 
-    trs.fee = `${await this._assets.call(trs.type, 'calculateFee', trs, sender)}`
+    trs.id = await getId(trs)
 
     return trs
   }
@@ -111,7 +110,7 @@ class Transaction {
         delete trs[p]
       }
     }
-
+    trs = Object.assign({}, trs)
     const validateErrors = await this.ddnSchema.validateTransaction(trs)
     if (validateErrors) {
       this.logger.error(
@@ -147,7 +146,7 @@ class Transaction {
       signature: trs.signature,
       sign_signature: trs.sign_signature,
       signatures: trs.signatures ? trs.signatures.join(',') : null,
-      args: JSON.stringify(trs.args) || null,
+      args: trs.args,
       message: trs.message || null
     }
 
@@ -176,13 +175,13 @@ class Transaction {
         requester_public_key: raw.t_requesterPublicKey, // wxm block database
         senderId: raw.t_senderId, // wxm block database
         recipientId: raw.t_recipientId, // wxm block database
-        amount: `${raw.t_amount}`, // DdnUtils.bignum update parseInt(raw.t_amount),
-        fee: `${raw.t_fee}`, // DdnUtils.bignum update parseInt(raw.t_fee),
+        amount: `${raw.t_amount}`, // bignum update parseInt(raw.t_amount),
+        fee: `${raw.t_fee}`, // bignum update parseInt(raw.t_fee),
         signature: raw.t_signature,
         sign_signature: raw.t_signSignature, // wxm block database
         signatures: raw.t_signatures ? raw.t_signatures.split(',') : null,
         confirmations: raw.confirmations,
-        args: raw.t_args ? JSON.parse(raw.t_args) : null,
+        args: raw.t_args,
         message: raw.t_message,
         asset: {}
       }
@@ -204,11 +203,11 @@ class Transaction {
     if (!this._assets.hasType(trs.type)) {
       throw new Error(`Unknown transaction type 5 ${trs.type}`)
     }
-    if (trs.type === DdnUtils.assetTypes.DAPP_OUT) {
+    if (trs.type === assetTypes.DAPP_OUT) {
       //
       return await this._assets.call(trs.type, 'undo', trs, block, sender, dbTrans)
     }
-    const amount = DdnUtils.bignum.plus(trs.amount, trs.fee)
+    const amount = bignum.plus(trs.amount, trs.fee)
 
     const sender1 = await this.runtime.account.merge(
       sender.address,
@@ -257,11 +256,11 @@ class Transaction {
     // wxm TODO
     // 此处应该使用this._assets方法（transaction.type）来做判断
     // fixme: 2020.4.22 这里是 dapp 的交易，转移到别处？
-    if (transaction.type === DdnUtils.assetTypes.DAPP_OUT) {
+    if (transaction.type === assetTypes.DAPP_OUT) {
       return await this._assets.call(transaction.type, 'undoUnconfirmed', transaction, sender, dbTrans)
     }
 
-    const amount = DdnUtils.bignum.plus(transaction.amount, transaction.fee).toString()
+    const amount = bignum.plus(transaction.amount, transaction.fee).toString()
     this.balanceCache.addNativeBalance(sender.address, amount)
 
     await this.runtime.account.merge(
@@ -306,7 +305,7 @@ class Transaction {
     if (
       !trs.requester_public_key &&
       sender.second_signature &&
-      !DdnUtils.bignum.isEqualTo(sender.second_signature, 0) &&
+      !bignum.isEqualTo(sender.second_signature, 0) &&
       !trs.sign_signature &&
       trs.block_id !== this.genesisblock.id
     ) {
@@ -316,7 +315,7 @@ class Transaction {
 
     if (
       !trs.requester_public_key &&
-      (!sender.second_signature || DdnUtils.bignum.isEqualTo(sender.second_signature, 0)) &&
+      (!sender.second_signature || bignum.isEqualTo(sender.second_signature, 0)) &&
       trs.sign_signature &&
       trs.sign_signature.length > 0
     ) {
@@ -327,7 +326,7 @@ class Transaction {
     if (
       trs.requester_public_key &&
       requester.second_signature &&
-      !DdnUtils.bignum.isEqualTo(requester.second_signature, 0) &&
+      !bignum.isEqualTo(requester.second_signature, 0) &&
       !trs.sign_signature
     ) {
       // wxm block database
@@ -336,7 +335,7 @@ class Transaction {
 
     if (
       trs.requester_public_key &&
-      (!requester.second_signature || DdnUtils.bignum.isEqualTo(requester.second_signature, 0)) &&
+      (!requester.second_signature || bignum.isEqualTo(requester.second_signature, 0)) &&
       trs.sign_signature &&
       trs.sign_signature.length > 0
     ) {
@@ -344,19 +343,19 @@ class Transaction {
       throw new Error('Requester account does not have a second signature')
     }
     // wxm 这个逻辑应该去掉，不应该这么使用序号特殊处理，如果必须，应该是用assetTypes.type枚举
-    if (trs.type === DdnUtils.assetTypes.DAPP_OUT) {
+    if (trs.type === assetTypes.DAPP_OUT) {
       return await this._assets.call(trs.type, 'applyUnconfirmed', trs, sender, dbTrans)
     }
-    const amount = DdnUtils.bignum.plus(trs.amount, trs.fee)
-    if (DdnUtils.bignum.isLessThan(sender.u_balance, amount) && trs.block_id !== this.genesisblock.id) {
+    const amount = bignum.plus(trs.amount, trs.fee)
+    if (bignum.isLessThan(sender.u_balance, amount) && trs.block_id !== this.genesisblock.id) {
       // wxm block database
       throw new Error(`Insufficient balance: ${sender.address}`)
     }
-    this.balanceCache.addNativeBalance(sender.address, DdnUtils.bignum.minus(0, amount))
+    this.balanceCache.addNativeBalance(sender.address, bignum.minus(0, amount))
     const accountInfo = await this.runtime.account.merge(
       sender.address,
       {
-        u_balance: DdnUtils.bignum.minus(0, amount)
+        u_balance: bignum.minus(0, amount)
       },
       dbTrans
     )
@@ -406,23 +405,21 @@ class Transaction {
     }
 
     // todo: 2020.6.25 特殊 asset 的处理
-    if (trs.type === DdnUtils.assetTypes.DAPP_OUT) {
+    if (trs.type === assetTypes.DAPP_OUT) {
       return this._assets.call(trs.type, 'apply', trs, block, sender, dbTrans)
     }
 
-    const amount = DdnUtils.bignum.plus(trs.amount, trs.fee)
+    const amount = bignum.plus(trs.amount, trs.fee)
 
-    if (trs.block_id !== this.genesisblock.id && DdnUtils.bignum.isLessThan(sender.balance, amount)) {
+    if (trs.block_id !== this.genesisblock.id && bignum.isLessThan(sender.balance, amount)) {
       // wxm block database
       throw new Error(`apply, insufficient balance: ${sender.balance}`)
-      // this.logger.info(`apply, insufficient balance: ${sender.balance}`)
-      // return
     }
 
     const accountInfo = await this.runtime.account.merge(
       sender.address,
       {
-        balance: DdnUtils.bignum.minus(0, amount),
+        balance: bignum.minus(0, amount),
         block_id: block.id, // wxm block database
         round: await this.runtime.round.getRound(block.height)
       },
@@ -468,17 +465,14 @@ class Transaction {
       throw new Error(`Unknown transaction type 10 ${trs.type}`)
     }
     // TODO creazy 验证交易id时，程序会在交易体中添加下面几个字段，所以要去掉，保持和sdk生成交易体时有同样的数据
-    const trss = { ...trs }
-    if (trss.senderId) {
-      delete trss.senderId
+    const transaction = this.deepCloneTransaction(trs)
+
+    // sdk生成交易体加密时没有senderId字段，验证时去掉
+    if (transaction.senderId) {
+      delete transaction.senderId
     }
-    if (trss.block_height) {
-      delete trss.block_height
-    }
-    if (trss.block_id) {
-      delete trss.block_id
-    }
-    const txId = await getId(trss)
+
+    const txId = await getId(transaction)
 
     // 确保客户端传入id，这里仅做验证
     if (typeof trs.id === 'undefined' || trs.id !== txId) {
@@ -519,7 +513,7 @@ class Transaction {
         throw new Error('Ignoring already confirmed transaction')
       }
     } catch (err) {
-      this.logger.error('Database error')
+      this.logger.error('Database error', err)
       throw new Error('Database error')
     }
 
@@ -559,7 +553,7 @@ class Transaction {
         try {
           await this.runtime.peer.broadcast.broadcastUnconfirmedTransaction(transaction)
         } catch (err) {
-          this.logger.error(`Broadcast unconfirmed transaction failed: ${DdnUtils.system.getErrorMsg(err)}`)
+          this.logger.error(`Broadcast unconfirmed transaction failed: ${System.getErrorMsg(err)}`)
         }
       })
     }
@@ -616,18 +610,14 @@ class Transaction {
     if (!signature) {
       return false
     }
+
+    const transaction = this.deepCloneTransaction(trs)
+
     // sdk生成交易体加密时没有senderId字段，验证时去掉
-    const transaction = { ...trs }
     if (transaction.senderId) {
       delete transaction.senderId
     }
-    // TODO creazy 铸块时会再次进行交易验证，这时交易会多处下面两个字段
-    if (transaction.block_height) {
-      delete transaction.block_height
-    }
-    if (transaction.block_id) {
-      delete transaction.block_id
-    }
+
     const hash = await DdnCrypto.getHash(transaction, true, true)
     const result = DdnCrypto.verifyHash(hash, signature, publicKey)
 
@@ -652,7 +642,7 @@ class Transaction {
         isLockedType &&
         sender.lock_height &&
         lastBlock &&
-        DdnUtils.bignum.isLessThanOrEqualTo(DdnUtils.bignum.plus(lastBlock.height, 1), sender.lock_height)
+        bignum.isLessThanOrEqualTo(bignum.plus(lastBlock.height, 1), sender.lock_height)
       ) {
         throw new Error('Account is locked')
       }
@@ -672,34 +662,15 @@ class Transaction {
     if (!trs.nethash) {
       throw new Error("Transaction's nethash property is required.")
     }
-    // const newTransaction = { ...trs }
-    // if (newTransaction.height) {
-    //   delete newTransaction.height
-    // }
-    // if (newTransaction.block_id) {
-    //   delete newTransaction.block_id
-    // }
-    // if (newTransaction.block_height) {
-    //   delete newTransaction.block_height
-    // }
-    // if (newTransaction.asset) {
-    //   for (const key in newTransaction.asset) {
-    //     if (Object.hasOwnProperty.call(newTransaction.asset, key)) {
-    //       const element = newTransaction.asset[key]
-    //       delete element.transaction_type
-    //       delete element.transaction_id
-    //       delete element.timestamp
-    //     }
-    //   }
-    // }
-    const newTransaction = this.deepCloneTransaction(trs)
+
+    // const newTransaction = this.deepCloneTransaction(trs)
     // Verify signature
     let valid = false
     if (trs.requester_public_key) {
       // wxm block database
-      valid = await this.verifySignature(newTransaction, trs.signature, trs.requester_public_key) // wxm block database
+      valid = await this.verifySignature(trs, trs.signature, trs.requester_public_key) // wxm block database
     } else {
-      valid = await this.verifySignature(newTransaction, trs.signature, trs.senderPublicKey)
+      valid = await this.verifySignature(trs, trs.signature, trs.senderPublicKey)
     }
     if (!valid) {
       throw new Error('Failed to verify requester or sender signature, 5')
@@ -746,7 +717,7 @@ class Transaction {
 
     // wxm TODO
     // 此处应该用this._assets.方法（trs.type） 来判断是否能够进入下面处理
-    if (trs.signatures && trs.type !== DdnUtils.assetTypes.DAPP_OUT) {
+    if (trs.signatures && trs.type !== assetTypes.DAPP_OUT) {
       // 13 ?
       for (let d = 0; d < trs.signatures.length; d++) {
         let verify = false
@@ -755,13 +726,13 @@ class Transaction {
           if (trs.requester_public_key && multisignatures[s] === trs.requester_public_key) {
             continue
           }
-
           if (await this.verifySignature(trs, trs.signatures[d], multisignatures[s])) {
             verify = true
           }
         }
 
         if (!verify) {
+          console.log('trs: ', trs)
           throw new Error(`Failed to verify multisignature: ${trs.id}`)
         }
       }
@@ -777,17 +748,14 @@ class Transaction {
     const fee = `${await this._assets.call(trs.type, 'calculateFee', trs, sender)}`
 
     // trs 需要加密签名，所以从客户端传来的 trs 必须包含 fee 字段，但又不能让用户随意填写，因此这里需要再次计算并验证
-    if (!DdnUtils.bignum.isEqualTo(trs.fee, fee)) {
+    if (!bignum.isEqualTo(trs.fee, fee)) {
       throw new Error(`Invalid transaction fee: trs.fee: ${trs.fee}, asset.fee: ${fee}`)
     }
 
     // amount 需要整理成 正整数 形式，不包含科学计数法和点号，范围在 0 ~ totalAmount 之间
     if (
-      DdnUtils.bignum.isLessThan(trs.amount, 0) ||
-      DdnUtils.bignum.isGreaterThan(
-        trs.amount,
-        DdnUtils.bignum.multiply(this.constants.maxAmount, this.constants.fixedPoint)
-      ) ||
+      bignum.isLessThan(trs.amount, 0) ||
+      bignum.isGreaterThan(trs.amount, bignum.multiply(this.constants.maxAmount, this.constants.fixedPoint)) ||
       `${trs.amount}`.includes('.') ||
       `${trs.amount}`.includes('e')
     ) {
@@ -819,13 +787,7 @@ class Transaction {
     if (transaction.senderId) {
       delete transaction.senderId
     }
-    // // TODO creazy 铸块时会再次进行交易验证，这时交易会多处下面两个字段
-    // if (transaction.block_height) {
-    //   delete transaction.block_height
-    // }
-    // if (transaction.block_id) {
-    //   delete transaction.block_id
-    // }
+
     const hash = await DdnCrypto.getHash(transaction, false, true)
     const result = DdnCrypto.verifyHash(hash, sign_signature, publicKey)
 
@@ -859,9 +821,9 @@ class Transaction {
           delete element.transaction_type
           delete element.transaction_id
           delete element.timestamp
-          // if(element.quantity){
-          //   delete element.quantity
-          // }
+          if (element.deposit_sequence) {
+            delete element.deposit_sequence
+          }
         }
       }
     }

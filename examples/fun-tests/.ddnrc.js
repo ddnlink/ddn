@@ -2,7 +2,7 @@
  *  Created by Imfly on Sun Dec 29 2019 15:57:56
  *
  *  Copyright (c) 2019 DDN FOUNDATION. All rights reserved.
- *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *  Licensed under the AGPL 3.0 License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
 module.exports = {
@@ -17,7 +17,7 @@ module.exports = {
   nethash: '0ab796cd',
   payloadLimitSize: '8mb',
   clientDriftSeconds: 5,
-
+  p2pPort: 9001,
   /**
    * About Api
    */
@@ -27,7 +27,10 @@ module.exports = {
     }
   },
   peers: {
-    list: [],
+    list: [
+      { ip: '127.0.0.1', port: '9002' },
+      { ip: '127.0.0.1', port: '9003' },
+    ],
     blackList: [],
     options: {
       timeout: 4000
@@ -35,107 +38,107 @@ module.exports = {
   },
   forging: {
     secret: [
-      'board bless spy vague knee extend chair impact unique cycle three soup',
-      'index half curve expose front inquiry weapon hurt utility gas action float',
-      'title cabin grain buddy sorry shuffle office crater measure version anchor piece',
-      'oak olympic habit soda elite skill carpet purse squeeze mouse salad admit',
-      'pilot sun age machine topple wave essence night black black vehicle denial',
-      'develop laptop chuckle extend course umbrella divorce tomorrow unaware noise cradle kiss',
-      'upon poem cat soldier sort humor used harbor prison pass wait cousin',
-      'local pelican kiss safe question inject more hat outdoor creek gun enemy',
-      'evil submit wood alley crop thought version pitch mother jungle cage alien',
-      'ritual leader regular end champion fatigue shoot stomach color royal alter ill',
-      'dutch end midnight hen leave rude night replace present check duck cupboard',
-      'dolphin enrich violin young favorite proof obey grab position lens elbow ticket',
-      'shiver source solve traffic poverty bind much drama common final fold dune',
-      'shell judge avoid someone bind message comfort electric hard sadness curious allow',
-      'double wrap foot setup scrub luggage tape column cloth picnic lecture good',
-      'confirm wait spider quit opinion print ill cushion net weather finish repeat',
-      'monitor door team usage void depart useful frame shaft must neither capable',
-      'plate stock sudden scrap finish lemon fatigue leaf yellow prosper pony near',
-      'work bar farm sustain ozone hamster warfare behave flavor symptom cable future',
-      'foot all enrich fresh soul lottery drive own vote web fan scrub',
-      'damage reason artist castle damage exclude list walnut icon twice later coin',
-      'hood grid juice innocent arrange tool option chapter gorilla vocal nerve boil',
-      'trip wrestle trade oyster timber hybrid goddess myself light you defy enjoy',
-      'arena session pumpkin inspire planet assist brand topic kid glove discover ceiling',
-      'embark razor relax engage deer unfold snow tail trade simple ranch hover',
-      'artefact snake buddy gun merge leg elbow door cotton now put inspire',
-      'symptom coconut bounce enrich bike scene divorce input since ivory oblige top',
-      'worry garlic detail truth weather sure skin kidney photo large issue raven',
-      'donate agree crop spawn join social often between garden shift will theme',
-      'pistol mention keen bean butter glass reunion grow umbrella damage napkin hour',
-      'guide liquid wild torch approve wink venue wealth during weird loyal industry',
-      'glory fee season sustain trick hold cat seed nose destroy miss exhaust',
-      'coin when equip indicate arctic mistake wreck property priority stuff feed birth',
-      'boring canyon random frequent fog chief dignity best mango thumb velvet never',
-      'vintage wine arch require motor amount neither scan skin coin ginger bottom',
-      'animal sudden moon soccer tide alcohol air vessel connect put invite field',
-      'oval roof pioneer prize hour capable recipe trend index uncover cabbage forest',
-      'pioneer attitude parent moon decrease grab garment twice dolphin man merge fashion',
-      'eager panel music letter obtain mad guide chunk scan reject hope special',
-      'father mesh this beauty dragon believe globe action mouse job squeeze sentence',
-      'rally simple work excite fold account sunny siren parent coil enact zero',
-      'depth witness tired truck motion spawn iron decide enjoy clump industry swing',
-      'net grid scheme resource faith shaft cactus medal elbow task vintage pyramid',
-      'laptop beach mad walnut easy senior flush choose buddy reduce popular arena',
-      'one village neglect cover frame loop affair energy carpet deliver tonight road',
-      'bread nephew enrich priority settle opinion taste fence include canyon horror distance',
-      'crane impact cheap demand noodle smile possible smooth famous coconut aware caution',
-      'grunt sketch spread warfare divert lawn pattern live master artwork mammal erosion',
-      'solid supply put spin top begin jewel tribe kidney swim walk firm',
-      'proof flight slot human stick spring wheat abandon large nut ivory rebel',
-      'else cram rate flip secret cost pepper mail asthma laundry loyal spirit',
-      'volume taxi fuel season help lock spare swift stone engine artwork certain',
-      'sing legend heart regret convince stage rail siren estate fox castle index',
-      'choose choose chunk bulb educate lesson better concert envelope blouse cruel garbage',
-      'define glance move dress fancy horn era giggle health village glass faint',
-      'afford spin cliff planet chronic mouse toe address brush transfer very derive',
-      'group thing runway thumb bleak finish board ridge arctic pudding stumble setup',
-      'receive skate fall royal price virtual pilot shoot burger banner soft coral',
-      'rebel tobacco quality kangaroo satoshi giant horse craft drift peanut attract manage',
-      'person various guilt inherit glad future poet energy captain proof inquiry portion',
-      'nominee invest neutral stay couple jeans derive galaxy focus life section diary',
-      'behave cargo acoustic purchase roast arena peasant stomach news canoe absorb inmate',
-      'evoke ancient vote hair review budget siren now tray art chef coconut',
-      'split neck urban shy day swap often inspire now pig cruel holiday',
-      'supply sentence coast snake path lucky stone copy tribe agree issue ocean',
-      'library immune dizzy wide attack useless lava sun scrap unfair agent space',
-      'puzzle banana moral mad pipe random remain father rude ball tent road',
-      'orchard spare once quote venture hazard order fresh monster void lemon humble',
-      'spoil lend cry surge labor hair upgrade rather march draft coast pulp',
-      'polar cube aware shadow virus camp height absent toilet ceiling disease goddess',
-      'aerobic impose human amazing coin moon develop output palm bird draft place',
-      'door license present total solve must joy demand wise afford game narrow',
-      'smoke volume quality blur expand cool blush subject faculty only canvas charge',
-      'swing smoke grief universe stick duck carbon pride trash excess license gate',
-      'token acoustic observe project attract off nation strong update become connect aunt',
-      'foster click script ginger dilemma split humor resource region state rifle yellow',
-      'artist master physical awkward ride rare divorce access dance rocket exist march',
-      'water roast traffic tilt illegal space usage announce erase august surround noise',
-      'spatial venture mountain surprise doll embrace method material property point daring echo',
-      'buyer attend visit decade dinner dune stage gather such struggle library animal',
-      'vacant pull sustain nasty cruel inch toilet version tourist oblige weapon repeat',
-      'divert hammer analyst faculty scout athlete hint deliver claim noodle assume monitor',
-      'behind unhappy click grain put cute basic ankle main author strategy negative',
-      'improve bicycle token rifle wedding reason east athlete citizen sketch expose flip',
-      'brave limb pulse oak fragile feed thrive crystal analyst model opera giggle',
-      'fetch glad chronic thrive coach loud recycle brick canal puppy faith tube',
-      'shell cheap olympic silent below milk busy skirt nerve grape holiday write',
-      'warrior audit address veteran blossom twelve brave wait usage tiger dumb early',
-      'coral uncover belt pyramid animal glove strategy legal target two cable only',
-      'stick depth poverty front change annual prefer rescue topic pig clarify advance',
-      'avoid output pitch stone scan critic zero clap mask icon notable saddle',
-      'fruit bachelor rule chaos border sibling crowd stuff parent drip good finger',
-      'simple spring fame cover fatal pipe vivid glad view output make admit',
-      'uphold oak tool come delay document wise laundry ensure coil scale token',
-      'modify ocean taxi oppose impose clown anger blind fork robust loop shadow',
-      'twice hope arrange beauty family cloth defy adult balance view size blame',
-      'rabbit knife sight recall elite awake brain owner length frequent session skirt',
-      'rough critic company blast come hockey safe switch pepper video cost country',
-      'magnet outer dove captain wait spray bullet teach guide intact manage crane',
-      'punch increase rebuild round layer vacuum trend arrow jeans utility vehicle kingdom',
-      'move grow forward session demise shuffle swift ramp child scheme pulp expire'
+      // 'account cycle reflect retreat donor once mansion quote staff airport zero enable',
+      // 'please tragic gesture distance immense supreme amused weasel auto bag glad rate',
+      'roast minimum leave they there charge blast grace gown faculty hood aware',
+      'perfect age spell digital pretty engage hope tattoo mimic network outdoor mesh',
+      'plunge cave taste cargo village use art conduct aerobic hard obvious zone',
+      'edit lady control echo steel suggest smooth shed hybrid cushion length adjust',
+      'mask auction follow model sustain ramp van avoid off bright trend critic',
+      'badge kick kite december frequent vibrant move nothing know praise harvest genius',
+      'mountain broken quiz zoo slot shell paddle guide weekend labor battle gallery',
+      'claim thrive topple patient eye drink harsh explain human never trash barrel',
+      'reduce cook eyebrow kangaroo endless mass fatigue recipe trip health duck voice',
+      'loop flower volcano aware narrow bag token race conduct custom cabin pledge',
+      'alarm fantasy cactus coconut point veteran name silver raccoon believe size buzz',
+      'imitate legend busy uphold easily almost stumble danger ginger guitar snap shy',
+      'shoulder afraid armor soldier excite capable rebuild sport turtle chat clump also',
+      'van swift display example wolf gadget empty oval comfort used visa luxury',
+      'vehicle ship fold shaft inherit educate grit toilet nephew connect pulp thought',
+      'umbrella ladder among neutral come spice word almost insane fork drastic crowd',
+      'ball pretty gravity puzzle bird silver urge elegant leader arch link hospital',
+      'borrow powder flip marble kit bird lawn rapid defense adjust ill little',
+      'weasel virus dynamic stay useful margin there dad pelican surprise derive neutral',
+      'banana enrich promote eternal grant sugar renew either feel atom myself victory',
+      'auto orphan rebel skill media inspire trophy wreck track dinosaur traffic music',
+      'fog frost float once fiction tourist fringe promote basic hawk dumb slow',
+      'bachelor barely amateur park produce jeans soda ship valley proof owner unfold',
+      'ostrich person success label time sting need garment robot clever sing debris',
+      'east wheel capable flag topple admit dial crowd crater chef burger piece',
+      'weapon doctor cost chase mutual oppose sibling spider place floor payment van',
+      'current sauce hour surprise bacon race awake frown room length turkey live',
+      'first heart fabric health hurry tribe river ginger tomorrow venue ankle mixed',
+      'ridge illegal online picnic voyage ivory patient surround minute hazard ankle exclude',
+      'rabbit cable lift aunt various pyramid drink lecture region pelican evil badge',
+      'plastic ignore knee hill stand shift reason bright hint video make skill',
+      'lounge easily that measure vital hawk donkey mule notable quick giant bring',
+      'animal vote mule mention exhibit exchange merit tuition cinnamon area nuclear cook',
+      'wreck general bubble immense distance thing eyebrow rebuild leaf side burger ten',
+      'hungry just theme level tray sell text story notice ecology gather adjust',
+      'wrestle faith protect remember chronic lens hospital voice job tuition entry cave',
+      'crucial volume cycle glass drum direct feature news fee wealth sorry myself',
+      'runway creek master educate eternal venture half valid project loop tube make',
+      'exist robust nice obtain win minute cave science table length inform skull',
+      'banner meadow prefer crush topic remind warm cart label dog salmon finish',
+      'use because million level skirt dismiss noise effort funny decade camp balcony',
+      'across spatial wrap try water lunar rich birth coach describe give island',
+      'wife absorb draw lesson tragic suffer garment theory certain state acoustic during',
+      'casual pyramid exit kingdom fence brisk sentence tray equip mandate odor supply',
+      'merit roast opinion ticket today shoe street food traffic sniff census chase',
+      'trash clip train crazy round ill absorb that arrow trip hair security',
+      'clutch hold wise curious photo scrub notice float purchase click rare option',
+      'input strategy leaf there master violin feed reward casino pepper expand busy',
+      'nerve coral print flee cry onion patient now mail grid conduct novel',
+      'purpose swear bullet firm pipe rely among nest arctic depth noble card',
+      'sting tennis soft gain faint trouble long peanut ridge body domain element',
+      'fork fetch worth one roof lab dune glue wine timber game brother',
+      'column point apart major surround aware embody wire broccoli section need energy',
+      'model drive front snake goddess stick save broom stool crack vicious circle',
+      'toward pupil silent vintage advance leaf leave fashion access crucial tray distance',
+      'paddle pink pool exit swamp other say isolate train absorb abuse car',
+      'gospel west charge embark else smart chronic wreck ship own mixed oyster',
+      'elephant student ribbon joy place wrestle have maze behind route huge ladder',
+      'share much swarm latin coconut frozen install claim tumble trial ladder detect',
+      'sunset all trust conduct supreme service skirt pill orphan journey cotton response',
+      'figure oil senior amount dumb choice upgrade hundred tired crisp gold organ',
+      'copy also tide live replace select glance dirt roast real breeze because',
+      'spell elevator clever basket awesome gallery laugh truly illegal source escape spice',
+      'link maid raven source tuna volume tube parent possible faint wear cloth',
+      'embrace this man loan siege control unable fiber jeans future lawsuit entry',
+      'wide correct enemy energy senior million easy fantasy hand estate grab lizard',
+      'hat lecture spirit search message struggle parade average ticket enable mother type',
+      'pear render minor panther case prepare recipe double fold sadness wait icon',
+      'antenna emotion chest room smile cigar skirt globe minor actress vague round',
+      'popular guitar cigar code provide muffin square clown crisp canvas load giraffe',
+      'creek lift obvious boil daughter mixed hire evil major dream trick clarify',
+      'mirror distance erase cannon alone dinner pigeon famous topic license offer jump',
+      'hour share same trophy city program gown gossip gentle potato stay twenty',
+      'resist great congress urge glory uniform soul kiwi discover clarify boat bone',
+      'fault volume siege special duck sponsor awesome couch oxygen life blade frame',
+      'file join render entire execute piece man primary tail cute denial basket',
+      'husband minor video fancy owner educate spell cake solve twelve letter review',
+      'minimum venue trash girl tornado autumn fox toss spread ice glory problem',
+      'steel monitor fold bamboo soul cliff shallow flavor staff mixture nut crime',
+      'dignity anger capital impose solid group snack prevent across common shy this',
+      'anxiety scout property mind attend square text guilt erase carry core very',
+      'approve fork short country pull bright shaft sausage myself acquire toast narrow',
+      'panther trim credit silk unlock animal artist senior honey arctic prize zoo',
+      'swing kick fox sample arch mean pond ancient foam pride artwork print',
+      'unhappy easy eight upset party dance chronic claim flat save penalty artwork',
+      'always welcome cloud square stomach almost one three pudding army traffic trophy',
+      'main oval annual turn radar merge badge tuition junior afraid lottery lounge',
+      'frequent capable vehicle cash random bright innocent during citizen car castle mobile',
+      'cancel lawn topple mad swarm chuckle purity allow fringe immune must entry',
+      'circle vocal school rookie august novel tooth initial category field decade will',
+      'devote void mesh brother gorilla figure unfold base rent van boost always',
+      'fitness olympic famous artefact plate kiss song much hover powder mushroom husband',
+      'actual thought sell name memory memory host fancy congress future meadow prison',
+      'dutch exit motion rich grape sand radar solar add warrior ramp hood',
+      'labor erupt update observe life twice elder list slogan outdoor element weapon',
+      'other nothing opinion parent latin valid avocado actual soap reduce burden squeeze',
+      'twin lucky fame cart square helmet alley tuna relief cave spike energy',
+      'latin artwork call cube version ostrich spirit trumpet orient other pitch candy',
+      'remember slim wagon bread craft slogan off drift stage custom exclude olive'
     ],
     access: {
       whiteList: ['127.0.0.1']
@@ -163,34 +166,34 @@ module.exports = {
    * Database options
    * https://sequelize.org/master/class/lib/sequelize.js~Sequelize.html#instance-constructor-constructor
    * */
-  database: {
-    database: 'ddn',
-    username: 'root',
-    password: 'wawjr1314', // Please use process.env.DBPASSWORD
+  // database: {
+  //   database: 'ddn',
+  //   username: 'root',
+  //   password: 'wawjr1314', // Please use process.env.DBPASSWORD
 
-    options: {
-      // the sql dialect of the database
-      // currently supported: 'mysql', 'sqlite', 'postgres', 'mssql'
-      dialect: 'mysql',
+  //   options: {
+  //     // the sql dialect of the database
+  //     // currently supported: 'mysql', 'sqlite', 'postgres', 'mssql'
+  //     dialect: 'mysql',
 
-      // custom host; default: localhost
-      host: '127.0.0.1',
+  //     // custom host; default: localhost
+  //     host: '127.0.0.1',
 
-      // custom port; default: dialect default
-      // port: 12345,
+  //     // custom port; default: dialect default
+  //     // port: 12345,
 
-      pool: {
-        max: 10,
-        min: 1,
-        idle: 10000
-      }
+  //     pool: {
+  //       max: 10,
+  //       min: 1,
+  //       idle: 10000
+  //     }
 
-      // SQLite only
+  //     // SQLite only
 
-      // Sequelize will warn you if you're using the default aliases and not limiting them
-      // https://sequelize.org/master/manual/querying.html#operators-aliases
-    }
-  },
+  //     // Sequelize will warn you if you're using the default aliases and not limiting them
+  //     // https://sequelize.org/master/manual/querying.html#operators-aliases
+  //   }
+  // },
   // database: {
   //   database:  'ddn2',
   //   username:  'postgres',
@@ -227,5 +230,6 @@ module.exports = {
    *  "@ddn/asset-aob"
    * ]
    */
-  assets: ['@ddn/asset-evidence', '@ddn/asset-dapp']
+  assets: ['@ddn/asset-evidence', '@ddn/asset-dapp', '@ddn/asset-aob', '@ddn/asset-dao'],
+  crypto: '@ddn/crypto-nacl' // 绿化钠 @ddn/crypto-nacl ，国密 @ddn/crypto-sm
 }

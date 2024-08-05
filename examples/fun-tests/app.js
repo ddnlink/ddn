@@ -7,15 +7,13 @@ const packageFile = require('./package.json')
 const command = require('commander')
 const path = require('path')
 const fs = require('fs')
-const DdnCore = require('@ddn/core').default
+const DdnCore = require('@ddn/core')
 const DdnPeer = require('@ddn/peer').default
-const DdnUtils = require('@ddn/utils').default
-const constants = require('./constants')
 
 /**
  * 整理系统配置文件生成输入参数
  */
-function genOptions () {
+async function genOptions () {
   command
     .version(packageFile.version)
     .option('-p, --port <port>', 'Listening port number')
@@ -44,12 +42,11 @@ function genOptions () {
 
   const genesisblockObject = JSON.parse(fs.readFileSync(genesisblockFile, 'utf8'))
 
-  const configObject = DdnCore.getUserConfig({ cwd: baseDir })
+  const configObject = await DdnCore.getUserConfig({ cwd: baseDir })
 
   configObject.version = packageFile.version
   configObject.basedir = baseDir
-  configObject.buildVersion = 'development'
-  configObject.net = process.env.NET || 'testnet'
+  configObject.buildVersion = packageFile.version
   configObject.publicDir = path.join(baseDir, 'public')
   configObject.dappsDir = command.dapps || path.join(baseDir, 'dapps')
   if (command.port) {
@@ -82,6 +79,12 @@ function genOptions () {
     configObject.loading.verifyOnLoading = true
   }
 
+  // 获取用户配置的常量，依赖于用户的配置
+  const constants = await DdnCore.getUserConstants({ cwd: baseDir, net: configObject.net })
+
+  // console.log('configObject:', configObject)
+  // console.log('constants: ', constants)
+
   return {
     baseDir,
     configObject,
@@ -93,7 +96,7 @@ function genOptions () {
 
 async function main () {
   global._require_runtime_ = m => {
-    if (typeof (global._require_native_) === 'function') {
+    if (typeof global._require_native_ === 'function') {
       return global._require_native_(m)
     } else {
       return require(m).default || require(m) // 兼容 ESM
@@ -103,11 +106,11 @@ async function main () {
   let peer
 
   try {
-    const options = genOptions()
+    const options = await genOptions()
     peer = new DdnPeer()
     await peer.run(options)
   } catch (err) {
-    console.error(DdnUtils.system.getErrorMsg(err))
+    console.error(err)
 
     if (peer) {
       peer.destory()

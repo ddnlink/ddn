@@ -1,10 +1,12 @@
 import Debug from 'debug'
 import DdnUtils from '@ddn/utils'
-import {DdnJS, node} from '../../ddn-js'
+import { DdnJS, node } from '../../ddn-js'
+
+const expect = node.expect
 
 const debug = Debug('debug')
 
-async function createPluginAsset(type, asset, secret, secondSecret) {
+async function createPluginAsset (type, asset, secret, secondSecret) {
   return await DdnJS.assetPlugin.createPluginAsset(type, asset, secret, secondSecret)
 }
 
@@ -15,7 +17,7 @@ export const ACL = () => {
     const ASSET_NAME = `${ISSUER_NAME}.CNY`
     const MAX_AMOUNT = '100000'
 
-    async function registerIssuerAsync(name, desc, {password}) {
+    async function registerIssuerAsync (name, desc, { password }) {
       const trs = await DdnJS.aob.createIssuer(name, desc, password)
       const res = await node.submitTransactionAsync(trs)
       debug('register issuer response', res.body)
@@ -23,7 +25,7 @@ export const ACL = () => {
     }
 
     // 只能在注册的时候开启/关闭黑白名单
-    async function registerAssetWithAllowParameters(allowWriteoff, allowWhitelist, allowBlacklist) {
+    async function registerAssetWithAllowParameters (allowWriteoff, allowWhitelist, allowBlacklist) {
       const trs = await DdnJS.aob.createAsset(
         ASSET_NAME,
         'valid desc',
@@ -40,14 +42,14 @@ export const ACL = () => {
       return res
     }
 
-    async function writeoffAssetAsync(currency, {password}) {
+    async function writeoffAssetAsync (currency, { password }) {
       const trs = await DdnJS.aob.createFlags(currency, 2, 1, password)
       const res = await node.submitTransactionAsync(trs)
       debug('writeoff asset response', res.body)
       return res
     }
 
-    async function changeFlagsAsync(currency, flagType, flag, {password}) {
+    async function changeFlagsAsync (currency, flagType, flag, { password }) {
       const trs = await DdnJS.aob.createFlags(currency, flagType, flag, password)
 
       const res = await node.submitTransactionAsync(trs)
@@ -55,7 +57,7 @@ export const ACL = () => {
       return res
     }
 
-    async function updateAclAsync(currency, operator, flag, list, {password}) {
+    async function updateAclAsync (currency, operator, flag, list, { password }) {
       const trs = await DdnJS.aob.createAcl(currency, operator, flag, list, password)
       const res = await node.submitTransactionAsync(trs)
       debug('update acl response', res.body)
@@ -87,7 +89,7 @@ export const ACL = () => {
       const ISSUER_NAME = node.randomIssuerName()
       const ASSET_NAME = `${ISSUER_NAME}.CNY`
 
-      async function registerAssetWithAllowParameters(allowWriteoff, allowWhitelist, allowBlacklist) {
+      async function registerAssetWithAllowParameters (allowWriteoff, allowWhitelist, allowBlacklist) {
         const trs = await DdnJS.aob.createAsset(
           ASSET_NAME,
           'valid desc',
@@ -118,8 +120,8 @@ export const ACL = () => {
       expect(res.body.result.allow_writeoff).to.equal('0')
       expect(res.body.result.allow_whitelist).to.equal('0')
       expect(res.body.result.allow_blacklist).to.equal('0')
-
       // 开启注销或黑白名单功能
+      await node.onNewBlockAsync()
       res = await writeoffAssetAsync(ASSET_NAME, ISSUE_ACCOUNT)
       expect(res.body)
         .to.have.property('error')
@@ -151,7 +153,7 @@ export const ACL = () => {
       const currency = `${ISSUER_NAME}.CNY`
       const MAX_AMOUNT = '100000'
 
-      async function registerAssetWithAllowParameters(allowWriteoff, allowWhitelist, allowBlacklist) {
+      async function registerAssetWithAllowParameters (allowWriteoff, allowWhitelist, allowBlacklist) {
         const trs = await DdnJS.aob.createAsset(
           currency,
           'valid desc',
@@ -196,7 +198,7 @@ export const ACL = () => {
         // const transaction = await DdnJS.aob.createIssue(currency, "100000", IssuerAccount1.password);
         debug('Add issue transaction 2:', transaction)
 
-        node.peer
+        node.api
           .post('/transactions')
           .set('Accept', 'application/json')
           .set('version', node.version)
@@ -207,7 +209,7 @@ export const ACL = () => {
           })
           .expect('Content-Type', /json/)
           .expect(200)
-          .end((err, {body}) => {
+          .end((err, { body }) => {
             debug('Add issue 2', body)
 
             expect(err).to.be.not.ok
@@ -226,7 +228,7 @@ export const ACL = () => {
           flag_type: 1 // 黑白名单
         }
         const transaction = await createPluginAsset(DdnUtils.assetTypes.AOB_FLAG, obj, IssuerAccountWhitelist.password)
-        node.peer
+        node.api
           .post('/transactions')
           .set('Accept', 'application/json')
           .set('version', node.version)
@@ -237,7 +239,7 @@ export const ACL = () => {
           })
           .expect('Content-Type', /json/)
           .expect(200)
-          .end((err, {body}) => {
+          .end((err, { body }) => {
             debug('take on whitelist ok', body)
 
             expect(err).be.not.ok
@@ -247,7 +249,7 @@ export const ACL = () => {
           })
       })
 
-      // 不在白名单里，所以没有权限
+      // // 不在白名单里，所以没有权限
       it('Transfer outside whitelist firstly, Should be fail', async done => {
         await node.onNewBlockAsync()
 
@@ -267,7 +269,7 @@ export const ACL = () => {
         // var transaction = DdnJS.aob.createTransfer(randomCurrencName(), "10", IssuerAccountWhitelist.address, "测试转账", IssuerAccountWhitelist.password);
         debug('transaction', transaction)
 
-        node.peer
+        node.api
           .post('/transactions')
           .set('Accept', 'application/json')
           .set('version', node.version)
@@ -278,7 +280,7 @@ export const ACL = () => {
           })
           .expect('Content-Type', /json/)
           .expect(200)
-          .end((err, {body}) => {
+          .end((err, { body }) => {
             debug('No permission fail', body)
 
             expect(err).to.be.not.ok
@@ -298,16 +300,16 @@ export const ACL = () => {
           list: [node.Daccount.address].join(',')
         }
         const transaction = await createPluginAsset(63, obj, IssuerAccountWhitelist.password) // AobAcl - 63
-        node.peer
+        node.api
           .post('/transactions')
           .set('Accept', 'application/json')
           .set('version', node.version)
           .set('nethash', node.config.nethash)
           .set('port', node.config.port)
-          .send({transaction})
+          .send({ transaction })
           .expect('Content-Type', /json/)
           .expect(200)
-          .end((err, {body}) => {
+          .end((err, { body }) => {
             debug('add to whitelist ok', body)
 
             expect(err).be.not.ok
@@ -329,16 +331,16 @@ export const ACL = () => {
         }
 
         const transaction = await createPluginAsset(65, obj, IssuerAccountWhitelist.password)
-        node.peer
+        node.api
           .post('/transactions')
           .set('Accept', 'application/json')
           .set('version', node.version)
           .set('nethash', node.config.nethash)
           .set('port', node.config.port)
-          .send({transaction})
+          .send({ transaction })
           .expect('Content-Type', /json/)
           .expect(200)
-          .end((err, {body}) => {
+          .end((err, { body }) => {
             debug('Transfer in whitelist', body)
             expect(err).be.not.ok
 
@@ -357,16 +359,16 @@ export const ACL = () => {
         }
         const transaction = await createPluginAsset(63, obj, IssuerAccountWhitelist.password)
 
-        node.peer
+        node.api
           .post('/transactions')
           .set('Accept', 'application/json')
           .set('version', node.version)
           .set('nethash', node.config.nethash)
           .set('port', node.config.port)
-          .send({transaction})
+          .send({ transaction })
           .expect('Content-Type', /json/)
           .expect(200)
-          .end((err, {body}) => {
+          .end((err, { body }) => {
             debug('Delete from whitelist', body)
 
             expect(err).be.not.ok
@@ -389,16 +391,16 @@ export const ACL = () => {
 
         const transaction = await createPluginAsset(65, obj, IssuerAccountWhitelist.password)
 
-        node.peer
+        node.api
           .post('/transactions')
           .set('Accept', 'application/json')
           .set('version', node.version)
           .set('nethash', node.config.nethash)
           .set('port', node.config.port)
-          .send({transaction})
+          .send({ transaction })
           .expect('Content-Type', /json/)
           .expect(200)
-          .end((err, {body}) => {
+          .end((err, { body }) => {
             debug('Transfer outside whitelist', body)
 
             expect(err).be.not.ok
@@ -418,7 +420,7 @@ export const ACL = () => {
         }
         const transaction = await createPluginAsset(DdnUtils.assetTypes.AOB_FLAG, obj, IssuerAccountWhitelist.password)
 
-        node.peer
+        node.api
           .post('/transactions')
           .set('Accept', 'application/json')
           .set('version', node.version)
@@ -429,7 +431,7 @@ export const ACL = () => {
           })
           .expect('Content-Type', /json/)
           .expect(200)
-          .end((err, {body}) => {
+          .end((err, { body }) => {
             debug('Take off whitelist', body)
 
             expect(err).be.not.ok
@@ -451,16 +453,16 @@ export const ACL = () => {
 
         const transaction = await createPluginAsset(65, obj, IssuerAccountWhitelist.password)
 
-        node.peer
+        node.api
           .post('/transactions')
           .set('Accept', 'application/json')
           .set('version', node.version)
           .set('nethash', node.config.nethash)
           .set('port', node.config.port)
-          .send({transaction})
+          .send({ transaction })
           .expect('Content-Type', /json/)
           .expect(200)
-          .end((err, {body}) => {
+          .end((err, { body }) => {
             debug(body)
 
             expect(err).be.not.ok

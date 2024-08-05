@@ -17,7 +17,7 @@ export default connection =>
         allowNull: false
       },
       block_height: {
-        type: Sequelize.INTEGER, // 原类型:INT
+        type: Sequelize.BIGINT, // 原类型:INT
         allowNull: false
       },
       previous_block: {

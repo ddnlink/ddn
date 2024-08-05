@@ -3,7 +3,7 @@
  */
 import { node } from '../ddn-js'
 
-import Tmdb from '../../lib/helpers/tmdb'
+import Tmdb from '../../src/helpers/tmdb'
 
 describe('tmdb', () => {
   it('normal test', done => {

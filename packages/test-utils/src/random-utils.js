@@ -16,9 +16,9 @@ function randomProperty (obj, needKey) {
   }
 }
 
-// Randomizes DDN amount
+// Randomizes DDN amount (between 10 and 1万)
 function randomCoin () {
-  return `${Math.floor(Math.random() * (10000 * 100000000)) + 1000 * 100000000}`
+  return `${Math.floor(Math.random() * (10000)) + 10}`
 }
 
 // Dao

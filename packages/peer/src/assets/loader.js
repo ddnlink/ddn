@@ -2,8 +2,8 @@
  * 资产加载注册器
  * @Author: wangxm
  * @Date: 2018-12-28 11:08:30
- * @Last Modified by: mikey.zhaopeng
- * @Last Modified time: 2020-04-12 20:34:41
+ * @Last Modified by: Someone
+ * @Last Modified time: 2024-07-27 15:58:34
  */
 
 import DdnUtils from '@ddn/utils'
@@ -13,6 +13,7 @@ import Delegate from './system/delegate'
 import Vote from './system/vote'
 import Multisignatures from './system/multisignature'
 import Lock from './system/lock'
+import SC from './contract'
 
 import Router from './router'
 
@@ -107,12 +108,11 @@ class Loader {
     assetsPackageList.map(async packageName => {
       let assetModels
       try {
-        assetModels = global._require_runtime_(`${packageName}/lib/define-models`) || []
+        assetModels = global._require_runtime_(`${packageName}/dist/define-models`) || []
       } catch (err) {
         this.logger.info(`${packageName} 资产包不包含自定义数据模型内容。`)
         return
       }
-
       if (assetModels) {
         try {
           for (const model of assetModels) {
@@ -148,6 +148,11 @@ class Loader {
 
     const lock = new Lock(this._context)
     this._registerAsset(assetTypes.LOCK, lock)
+
+    const contract = new SC.Contract(this._context)
+    this._registerAsset(assetTypes.CONTRACT, contract)
+    const contractTransfer = new SC.ContractTransfer(this._context)
+    this._registerAsset(assetTypes.CONTRACT_TRANSFER, contractTransfer)
 
     await this._attachAssetPlugins()
     await this._addAsesstModels()

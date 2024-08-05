@@ -1,4 +1,4 @@
-const ddn = require('./config.ddn')
+const ddn = require('./config.testnet')
 
 // 默认是输出 ddn-docs
 let config = ddn

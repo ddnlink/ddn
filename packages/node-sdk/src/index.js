@@ -9,6 +9,7 @@ import vote from './transactions/vote'
 import username from './transactions/username'
 import multisignature from './transactions/multisignature'
 import dapp from './transactions/dapp'
+import contract from './transactions/contract'
 import aob from './transactions/aob'
 import evidence from './transactions/evidence'
 import dao from './transactions/dao'
@@ -39,6 +40,8 @@ export default {
 
   // dapp
   dapp,
+
+  contract,
 
   // aob
   aob,

@@ -1,4 +1,5 @@
 {
+  "version": "2.4.5",
   "changelog": {
     "labels": {
       "pr(enhancement)": ":improvement: Enhancement",
@@ -7,22 +8,18 @@
       "pr(dependency)": ":deciduous_tree: Dependency",
       "pr(chore)": ":turtle: Chore"
     },
-    "repo": "imfly/ddn",
+    "repo": "ddnlink/ddn",
     "cacheDir": ".changelog"
-  },
-  "packages": [
-    "packages/*"
-  ],
-  "version": "independent",
-  "publishConfig": {
-    "access": "public"
   },
   "command": {
     "publish": {
       "git-tag-version": false,
-      "push": false
+      "push": false,
+      "npmClient": "npm",
+      "ignoreChanges": ["**/*.md", "**/test/**"],
+      "message": "chore(release): publish",
+      "registry": "https://registry.npmjs.org"
     }
   },
-  "useWorkspaces": true,
-  "npmClient": "yarn"
+  "npmClient": "pnpm"
 }

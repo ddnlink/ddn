@@ -3,7 +3,7 @@ import sha256 from 'fast-sha256'
 import crypto from 'crypto'
 import { Buffer } from 'buffer'
 import Debug from 'debug'
-import ddnCrypto from '@ddn/crypto'
+import * as ddnCrypto from '@ddn/crypto'
 import { DdnJS, node } from '../ddn-js'
 
 const debug = Debug('debug')
@@ -16,10 +16,7 @@ describe('crypto', () => {
   describe('#sha256.hash', function () {
     it("sha256.hash is crypto.createHash('sha256') ", () => {
       const str = 'data'
-      const h1 = crypto
-        .createHash('sha256')
-        .update(str)
-        .digest()
+      const h1 = crypto.createHash('sha256').update(str).digest()
 
       const h2 = Buffer.from(sha256.hash(Buffer.from(str)))
       const h3 = sha256.hash(Buffer.from(str))
@@ -84,7 +81,8 @@ describe('crypto', () => {
     })
 
     it('signature should be 64', () => {
-      const sign = 'a803070ed9ce06792363f7601c1e45ead7f7d5293455c64da95ad0fc635c82aaeb5dd21cae6afc1fe50a36049f890c047efb3b2480bc32d4904440ebc371f205'
+      const sign =
+        'a803070ed9ce06792363f7601c1e45ead7f7d5293455c64da95ad0fc635c82aaeb5dd21cae6afc1fe50a36049f890c047efb3b2480bc32d4904440ebc371f205'
       const str = Buffer.from(sign, 'hex')
       debug('str', str)
       expect(str.length).toEqual(64)

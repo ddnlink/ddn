@@ -13,7 +13,7 @@ class OutTransfer extends Asset.Base {
   async propsMapping () {
     return [
       {
-        field: 'str2',
+        field: 'str6',
         prop: 'dapp_id',
         required: true
       },
@@ -122,6 +122,23 @@ class OutTransfer extends Asset.Base {
     return trs
   }
 
+  async objectNormalize (trs) {
+    let assetObj = await this.getAssetObject(trs)
+    assetObj = Object.assign({}, assetObj)
+    const validateErrors = await this.ddnSchema.validateDappOutTransfer(assetObj)
+    if (validateErrors) {
+      this.logger.error(
+        `Failed to normalize Dapp out transfer: ${trs.type} ${validateErrors[0].schemaPath} ${validateErrors[0].message}`
+      )
+      this.logger.debug(`Failed to normalize Dapp out transfer asset: ${trs}`)
+      throw new Error(
+        `Failed to normalize Dapp out transfer: ${validateErrors[0].schemaPath} ${validateErrors[0].message}`
+      )
+    }
+
+    return trs
+  }
+
   async verifySignature (trs) {
     const transfer = await this.getAssetObject(trs)
     // TODO 这里做签名认证，但是为什么取不到dapp呢？？？？？
@@ -165,13 +182,16 @@ class OutTransfer extends Asset.Base {
     if (!trs.signatures || trs.signatures.length !== dapp.unlock_delegates) {
       throw new Error('Invalid signature number')
     }
-
+    const transaction = JSON.parse(JSON.stringify(trs))
+    if (transaction.senderId) {
+      delete transaction.senderId
+    }
     let validSignatureNumber = 0
-    const bytes = DdnCrypto.getBytes(trs, true, true)
+    const bytes = DdnCrypto.getBytes(transaction, true, true)
     try {
       for (const i in trs.signatures) {
         for (const j in dapp.delegates) {
-          if (await this.runtime.transaction.verifyBytes(bytes, trs.signatures[i], dapp.delegates[j])) {
+          if (await DdnCrypto.verifyBytes(bytes, trs.signatures[i], dapp.delegates[j])) {
             validSignatureNumber++
             break
           }

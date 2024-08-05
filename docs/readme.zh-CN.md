@@ -17,7 +17,7 @@ features:
   - icon: https://gw.alipayobjects.com/zos/bmw-prod/d1ee0c6f-5aed-4a45-a507-339a4bfe076c/k7bjsocq_w144_h144.png
     title: 为企业而生
     desc: 健全的应用生态，面向文化创意、版权保护、食品安全、检验检测、智慧旅游、金融科技、电子医疗、新能源等众多落地场景
-footer: Open-source MIT Licensed | Copyright © 2019-2020<br />Powered by DDN FOUNDATION
+footer: Open-source AGPL 3.0 Licensed | Copyright © 2019-2020<br />Powered by DDN FOUNDATION
 ---
 
 ## 轻松上手

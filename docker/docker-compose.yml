@@ -1,0 +1,58 @@
+version: '3'
+services: 
+  ddn_peer:
+    container_name: "${APP_ID}-peer"
+    build:
+      context: .
+      dockerfile: Dockerfile
+    depends_on:
+      - ddn_sqlite
+      # - ddn_postgres
+    volumes:
+      - ../:/root/ddn/
+    networks:
+      - ddnnet
+    ports:
+      - "${APP_PORT}:${APP_PORT}"
+    restart: unless-stopped
+
+  ddn_sqlite:
+    container_name: "${APP_ID}-sqlite"
+    image: nouchka/sqlite3:latest
+    stdin_open: true
+    tty: true
+    volumes:
+      - ./db/sqlite:/root/db/
+    networks:
+      - ddnnet
+    restart: unless-stopped
+
+  # ddn_redis:
+  #   container_name: "${APP_ID}-redis"
+  #   image: "redis:alpine"
+  #   environment:
+  #     TZ: "Asia/Shanghai"
+  #   ports:
+  #     - "6379:6379"
+  #   networks:
+  #     - ddnnet
+  #   restart: unless-stopped
+
+  # ddn_postgres:
+  #   container_name: "${APP_ID}-postgres"
+  #   image: postgres:13
+  #   environment:
+  #     POSTGRES_DATABASE: "${DB_DATABASE}"
+  #     POSTGRES_USER: "${DB_USERNAME}"
+  #     POSTGRES_PASSWORD: "${DB_PASSWORD}"
+  #   ports:
+  #     - "5432:5432"
+  #   volumes:
+  #     - ./db/postgres/data:/var/lib/postgresql/data
+  #   networks:
+  #     - ddnnet
+  #   restart: unless-stopped
+
+networks:
+  ddnnet:
+    driver: bridge

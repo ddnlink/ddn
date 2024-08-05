@@ -22,7 +22,7 @@ DDN系统的所有写操作都是通过发起一个交易来完成的。
 
 POST接口规格如下：
 payload为@ddn/node-sdk创建出来的交易数据
-接口地址：/peer/transactions
+接口地址：/api/transactions
 请求方式：post
 支持格式：json
 公用变量：
@@ -81,7 +81,7 @@ console.log(JSON.stringify(trs))
 ```
 将生成的交易数据以transaction为key，放入json，调用上链接口提交，注册资产发行商IssuerName
 ```sh
-curl --location --request POST 'http://127.0.0.1:8001/peer/transactions' \
+curl --location --request POST 'http://127.0.0.1:8001/api/transactions' \
 --header 'Content-Type: application/json' \
 --header 'nethash: 0ab796cd' \
 --header 'version: 3.0' \
@@ -169,7 +169,7 @@ console.log(JSON.stringify(trs))
 ```
 将生成的交易数据以transaction为key，放入json，调用上链接口提交，注册资产IssuerName.CNY
 ```sh
-curl --location --request POST 'http://127.0.0.1:8001/peer/transactions' \
+curl --location --request POST 'http://127.0.0.1:8001/api/transactions' \
 --header 'Content-Type: application/json' \
 --header 'nethash: 0ab796cd' \
 --header 'version: 3.0' \
@@ -233,7 +233,7 @@ console.log(JSON.stringify(trs))
 {"type":11,"amount":0,"fee":10000000,"recipientId":null,"senderPublicKey":"fafcd01f6b813fdeb3c086e60bc7fa9bfc8ef70ae7be47ce0ac5d06e7b1a8575","timestamp":19400996,"asset":{"aobFlags":{"currency":"IssuerName.CNY","flagType":1,"flag":1}},"signature":"b96fb3d1456e1f26357109cc24d82834eb9a4687f29e69c374bbb1d534568336e148cac52f213aa4d2a69185092f8e1143b49ec4b8048cd9b3af4e20f6ba0b08","signSignature":"b37c77ebebe90341346be2aefe1e12bd7403e5d8f4d6e8f04630190b3e09494a28820da0ffd5f9ff011033aa6d70fc9bb4c159a4493be3b18fd7ff470103570d"}
 
 // 将生成的交易数据通过post发送给server，将acl改为白名单模式
-curl -H "Content-Type: application/json" -H "nethash:0ab796cd" -H "version:''" -k -X POST -d '{"transaction":{"type":11,"amount":0,"fee":10000000,"recipientId":null,"senderPublicKey":"fafcd01f6b813fdeb3c086e60bc7fa9bfc8ef70ae7be47ce0ac5d06e7b1a8575","timestamp":19400996,"asset":{"aobFlags":{"currency":"IssuerName.CNY","flagType":1,"flag":1}},"signature":"b96fb3d1456e1f26357109cc24d82834eb9a4687f29e69c374bbb1d534568336e148cac52f213aa4d2a69185092f8e1143b49ec4b8048cd9b3af4e20f6ba0b08","signSignature":"b37c77ebebe90341346be2aefe1e12bd7403e5d8f4d6e8f04630190b3e09494a28820da0ffd5f9ff011033aa6d70fc9bb4c159a4493be3b18fd7ff470103570d"}}' 'http://127.0.0.1:8001/peer/transactions' && echo
+curl -H "Content-Type: application/json" -H "nethash:0ab796cd" -H "version:''" -k -X POST -d '{"transaction":{"type":11,"amount":0,"fee":10000000,"recipientId":null,"senderPublicKey":"fafcd01f6b813fdeb3c086e60bc7fa9bfc8ef70ae7be47ce0ac5d06e7b1a8575","timestamp":19400996,"asset":{"aobFlags":{"currency":"IssuerName.CNY","flagType":1,"flag":1}},"signature":"b96fb3d1456e1f26357109cc24d82834eb9a4687f29e69c374bbb1d534568336e148cac52f213aa4d2a69185092f8e1143b49ec4b8048cd9b3af4e20f6ba0b08","signSignature":"b37c77ebebe90341346be2aefe1e12bd7403e5d8f4d6e8f04630190b3e09494a28820da0ffd5f9ff011033aa6d70fc9bb4c159a4493be3b18fd7ff470103570d"}}' 'http://127.0.0.1:8001/api/transactions' && echo
 ```
 
 JSON返回示例：
@@ -268,7 +268,7 @@ console.log(JSON.stringify(trs))
 {"type":12,"amount":0,"fee":20000000,"recipientId":null,"senderPublicKey":"fafcd01f6b813fdeb3c086e60bc7fa9bfc8ef70ae7be47ce0ac5d06e7b1a8575","timestamp":19403125,"asset":{"aobAcl":{"currency":"IssuerName.CNY","operator":"+","flag":1,"list":["15745540293890213312"]}},"signature":"ad4060e04c1a12256de114e34499f8add24326753f1f8362991ee14aefc4c0fe90ff394d2db97e83770855a5688d463de00656fdd2d04604605cf3c04fdaca0e","signSignature":"63129c58b1b9fcce88cbe829f3104a10ab06037253e9b65feb50ce0d2bb988533b93e8edcad016a85675f9027758fc318cf899ca7ef161a95a8d8a055ae83a02"}
 
 // 将生成的交易数据通过post发送给server，把地址列表['15745540293890213312']增加到该白名单中，只修改名单列表，不修改acl模式，手续费0.2DDN
-curl -H "Content-Type: application/json" -H "nethash:0ab796cd" -H "version:''" -k -X POST -d '{"transaction":{"type":12,"amount":0,"fee":20000000,"recipientId":null,"senderPublicKey":"fafcd01f6b813fdeb3c086e60bc7fa9bfc8ef70ae7be47ce0ac5d06e7b1a8575","timestamp":19403125,"asset":{"aobAcl":{"currency":"IssuerName.CNY","operator":"+","flag":1,"list":["15745540293890213312"]}},"signature":"ad4060e04c1a12256de114e34499f8add24326753f1f8362991ee14aefc4c0fe90ff394d2db97e83770855a5688d463de00656fdd2d04604605cf3c04fdaca0e","signSignature":"63129c58b1b9fcce88cbe829f3104a10ab06037253e9b65feb50ce0d2bb988533b93e8edcad016a85675f9027758fc318cf899ca7ef161a95a8d8a055ae83a02"}}' 'http://127.0.0.1:8001/peer/transactions' && echo
+curl -H "Content-Type: application/json" -H "nethash:0ab796cd" -H "version:''" -k -X POST -d '{"transaction":{"type":12,"amount":0,"fee":20000000,"recipientId":null,"senderPublicKey":"fafcd01f6b813fdeb3c086e60bc7fa9bfc8ef70ae7be47ce0ac5d06e7b1a8575","timestamp":19403125,"asset":{"aobAcl":{"currency":"IssuerName.CNY","operator":"+","flag":1,"list":["15745540293890213312"]}},"signature":"ad4060e04c1a12256de114e34499f8add24326753f1f8362991ee14aefc4c0fe90ff394d2db97e83770855a5688d463de00656fdd2d04604605cf3c04fdaca0e","signSignature":"63129c58b1b9fcce88cbe829f3104a10ab06037253e9b65feb50ce0d2bb988533b93e8edcad016a85675f9027758fc318cf899ca7ef161a95a8d8a055ae83a02"}}' 'http://127.0.0.1:8001/api/transactions' && echo
 ```
 
 JSON返回示例：
@@ -331,7 +331,7 @@ console.log(JSON.stringify(trs))
 
 将其以transaction为key，放入json，调用上链接口提交
 ```sh
-curl --location --request POST 'http://127.0.0.1:8001/peer/transactions' \
+curl --location --request POST 'http://127.0.0.1:8001/api/transactions' \
 --header 'Content-Type: application/json' \
 --header 'nethash: 0ab796cd' \
 --header 'version: 3.0' \
@@ -412,7 +412,7 @@ console.log(JSON.stringify(trs))
 将其以transaction为key，放入json，调用上链接口提交
 ```sh
 # 给DKKHPvQb2A119LNicCQWLZQDFxhGVEY57a发送10.000 IssuerName.CNY资产
-curl --location --request POST 'http://127.0.0.1:8001/peer/transactions' \
+curl --location --request POST 'http://127.0.0.1:8001/api/transactions' \
 --header 'Content-Type: application/json' \
 --header 'nethash: 0ab796cd' \
 --header 'version: 3.0' \
@@ -470,7 +470,7 @@ var trs = DdnJS.aob.createFlags(currency, flagType, flag, secret, secondSecret)
 console.log(JSON.stringify(trs))
 {"type":11,"amount":0,"fee":10000000,"recipientId":null,"senderPublicKey":"fafcd01f6b813fdeb3c086e60bc7fa9bfc8ef70ae7be47ce0ac5d06e7b1a8575","timestamp":19488690,"asset":{"aobFlags":{"currency":"IssuerName.CNY","flagType":2,"flag":1}},"signature":"cbd656552417604704703e1236ec2bbed8eba6a2ccfcb54cc0b2d629c0a9d1335a264fc9f6dee1705f4a86c36a5ce2ba8e039d913a189b7c273c8ac0d9e3780c","signSignature":"3c7b91d03efeed2dc86e1f2301da60789751c1be8850460d8c66c0ae8f55ea27d26f0bc79541d74b4777d9b85c518c1c73c0284dbf3e826db0a686560e57a80b"}
 
-curl -H "Content-Type: application/json" -H "nethash:0ab796cd" -H "version:''" -k -X POST -d '{"transaction":{"type":11,"amount":0,"fee":10000000,"recipientId":null,"senderPublicKey":"fafcd01f6b813fdeb3c086e60bc7fa9bfc8ef70ae7be47ce0ac5d06e7b1a8575","timestamp":19488690,"asset":{"aobFlags":{"currency":"IssuerName.CNY","flagType":2,"flag":1}},"signature":"cbd656552417604704703e1236ec2bbed8eba6a2ccfcb54cc0b2d629c0a9d1335a264fc9f6dee1705f4a86c36a5ce2ba8e039d913a189b7c273c8ac0d9e3780c","signSignature":"3c7b91d03efeed2dc86e1f2301da60789751c1be8850460d8c66c0ae8f55ea27d26f0bc79541d74b4777d9b85c518c1c73c0284dbf3e826db0a686560e57a80b"}}' 'http://127.0.0.1:8001/peer/transactions' && echo
+curl -H "Content-Type: application/json" -H "nethash:0ab796cd" -H "version:''" -k -X POST -d '{"transaction":{"type":11,"amount":0,"fee":10000000,"recipientId":null,"senderPublicKey":"fafcd01f6b813fdeb3c086e60bc7fa9bfc8ef70ae7be47ce0ac5d06e7b1a8575","timestamp":19488690,"asset":{"aobFlags":{"currency":"IssuerName.CNY","flagType":2,"flag":1}},"signature":"cbd656552417604704703e1236ec2bbed8eba6a2ccfcb54cc0b2d629c0a9d1335a264fc9f6dee1705f4a86c36a5ce2ba8e039d913a189b7c273c8ac0d9e3780c","signSignature":"3c7b91d03efeed2dc86e1f2301da60789751c1be8850460d8c66c0ae8f55ea27d26f0bc79541d74b4777d9b85c518c1c73c0284dbf3e826db0a686560e57a80b"}}' 'http://127.0.0.1:8001/api/transactions' && echo
 ```
 
 JSON返回示例：
@@ -480,8 +480,8 @@ JSON返回示例：
 
 
 ### **2.1.8 其它接口**
-get /peer/all  //查找dapp peer
-get /peer/blocks/common //查找common block
+get /api/all  //查找dapp peer
+get /api/blocks/common //查找common block
 ...
 
 
@@ -551,7 +551,7 @@ JSON返回示例：
 
 请求示例：
 ```js
-curl -X GET -H "Content-Type: application/json"  'http://loc:8001/api/aob/issuers?offset=0&limit=1' && echo
+curl -X GET -H "Content-Type: application/json"  'http://localhost:8001/api/aob/issuers?offset=0&limit=1' && echo
 ```
 
 JSON返回示例：

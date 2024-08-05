@@ -2,7 +2,7 @@
  *  Created by DDN Team on Wed Mar 14 2017 16:11:41
  *
  *  Copyright (c) 2019 DDN Foundation. All rights reserved.
- *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *  Licensed under the AGPL 3.0 License. See License.txt in the project root for license information.
  *-------------------------------------------------------------------------------------------- */
 
 /**
@@ -54,7 +54,7 @@ class Sequence {
     if (task.args) {
       args = args.concat(task.args)
     }
-    task.worker.apply(task.worker, args)
+    task.worker.apply(task, args) // FIXME?
   }
 
   add (worker, args, done) {

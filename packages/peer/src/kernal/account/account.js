@@ -153,18 +153,26 @@ class Account {
     return account
   }
 
+  /**
+   * 可通过address, publicKey, username 查询账户
+   * @param {*} where
+   * @param {*} attributes
+   * @param {*} dbTrans
+   * @returns
+   */
   async getAccount (where, attributes, dbTrans) {
     const address = (where || {}).address
-    if (typeof address === 'string' && !this.isAddress(address)) {
-      this.logger.error('account address', address)
-      throw new Error('Invalid address getAccount')
+    const publicKey = (where || {}).publicKey
+    const username = (where || {}).username
+    if ((!address || typeof address !== 'string' || !this.isAddress(address)) && !publicKey && !username) {
+      this.logger.error('account address', address, 'or publicKey: ', publicKey)
+      throw new Error('Invalid address or publicKey getAccount')
     }
 
     // return await this.dao.findPage('mem_account', filter, limit || 1000, offset, false, fields || null, sort)
 
     const mem_account = await this.dao.findOne('mem_account', { where, attributes, transaction: dbTrans })
     if (!mem_account) return
-    console.log(mem_account, attributes)
     const delegates = await this.dao.findList('mem_accounts2delegate', {
       where: {
         account_id: mem_account.address

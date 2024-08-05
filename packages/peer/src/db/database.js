@@ -307,9 +307,17 @@ class DAO {
       offset: options.offset || 0
     }
 
-    const results = await modelInst.findAndCountAll(opts)
+    let total
+    let foundRows
+    if (opts.where && Object.keys(opts.where).length > 0) {
+      const results = await modelInst.findAndCountAll(opts)
+      foundRows = results.rows
+      total = results.count
+    } else {
+      foundRows = await modelInst.findAll(opts)
+      total = await modelInst.max('rowid')
+    }
     const jsonResults = []
-    const foundRows = results.rows
 
     for (let i = 0; i < foundRows.length; i++) {
       jsonResults.push(foundRows[i].toJSON())
@@ -317,7 +325,7 @@ class DAO {
 
     return {
       rows: jsonResults,
-      total: results.count
+      total: total
     }
   }
 

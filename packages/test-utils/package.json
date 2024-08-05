@@ -1,11 +1,7 @@
 {
   "name": "@ddn/test-utils",
-  "version": "0.2.1",
+  "version": "2.4.5",
   "description": "Test utils for DDN",
-  "main": "lib/index.js",
-  "files": [
-    "lib"
-  ],
   "repository": {
     "type": "git",
     "url": "http://github.com/ddnlink/ddn/tree/master/packages/test-utils"
@@ -15,14 +11,25 @@
     "url": "http://github.com/ddnlink/ddn/issues"
   },
   "author": "limsbase",
-  "license": "MIT",
+  "license": "AGPL 3.0",
+  "main": "./dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "father build",
+    "dev": "father dev",
+    "test": "jest"
+  },
   "dependencies": {
-    "@ddn/core": "^0.2.15",
-    "@ddn/utils": "^0.2.1"
+    "@ddn/core": "workspace:^",
+    "@ddn/utils": "workspace:^"
   },
   "devDependencies": {
     "chai": "^4.2.0",
     "request": "^2.88.2",
     "supertest": "^4.0.2"
-  }
+  },
+  "gitHead": "3f5aef8e697748180be42f047a2053e46a7afd43"
 }

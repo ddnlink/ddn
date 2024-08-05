@@ -6,7 +6,7 @@ const debug = Debug('debug')
 const expect = node.expect
 const Bignum = DdnUtils.bignum
 
-describe('Node SDK', () => {
+describe('js SDK', () => {
   describe('crypto.js', () => {
     const crypto = DdnJS.crypto
 
@@ -19,7 +19,19 @@ describe('Node SDK', () => {
     })
 
     it('should has properties', () => {
-      const properties = ['getBytes', 'getHash', 'getId', 'getFee', 'sign', 'secondSign', 'getKeys', 'generateAddress', 'verify', 'verifySecondSignature', 'fixedPoint']
+      const properties = [
+        'getBytes',
+        'getHash',
+        'getId',
+        'getFee',
+        'sign',
+        'secondSign',
+        'getKeys',
+        'generateAddress',
+        'verify',
+        'verifySecondSignature',
+        'fixedPoint'
+      ]
       properties.forEach(property => {
         expect(crypto).to.have.property(property)
       })
@@ -27,7 +39,6 @@ describe('Node SDK', () => {
 
     describe('#getBytes', () => {
       const getBytes = crypto.getBytes
-      let bytes = null
 
       it('should be ok', () => {
         expect(getBytes).to.be.ok
@@ -37,7 +48,7 @@ describe('Node SDK', () => {
         expect(getBytes).to.be.a('function')
       })
 
-      it('should return Buffer of simply transaction and buffer most be 117 length', async (done) => {
+      it('should return Buffer of simply transaction and buffer most be 117 length', async done => {
         const transaction = {
           nethash: '0ab796cd',
           type: 0,
@@ -46,20 +57,23 @@ describe('Node SDK', () => {
           timestamp: 141738,
           asset: {},
           senderPublicKey: '5d036a858ce89f844491762eb89e2bfbd50a4a0a0da658e4b2628b25b117ae09',
-          signature: '618a54975212ead93df8c881655c625544bce8ed7ccdfe6f08a42eecfb1adebd051307be5014bb051617baf7815d50f62129e70918190361e5d4dd4796541b0a',
+          signature:
+            '618a54975212ead93df8c881655c625544bce8ed7ccdfe6f08a42eecfb1adebd051307be5014bb051617baf7815d50f62129e70918190361e5d4dd4796541b0a',
           id: '13987348420913138422'
         }
 
-        bytes = await getBytes(transaction)
+        const bytes = await getBytes(transaction)
+        const bytes2 = await getBytes(transaction, true, true, true)
         debug('#getBytes first, bytes: ', bytes)
         expect(bytes).to.be.ok
         // expect(bytes).that.is.an("object");
         // expect(bytes.length).to.equal(117);
-        expect(bytes.length).to.equal(130)
+        expect(bytes.length).to.equal(229)
+        expect(bytes2.length).to.equal(121)
         done()
       })
 
-      it('should return Buffer of transaction with second signature and buffer most be 194 length', async (done) => {
+      it('should return Buffer of transaction with second signature and buffer most be 194 length', async done => {
         const transaction = {
           nethash: '0ab796cd',
           type: 0,
@@ -68,17 +82,21 @@ describe('Node SDK', () => {
           timestamp: 141738,
           asset: {},
           senderPublicKey: '5d036a858ce89f844491762eb89e2bfbd50a4a0a0da658e4b2628b25b117ae09',
-          signature: '618a54975212ead93df8c881655c625544bce8ed7ccdfe6f08a42eecfb1adebd051307be5014bb051617baf7815d50f62129e70918190361e5d4dd4796541b0a',
-          sign_signature: '618a54975212ead93df8c881655c625544bce8ed7ccdfe6f08a42eecfb1adebd051307be5014bb051617baf7815d50f62129e70918190361e5d4dd4796541b0a',
+          signature:
+            '618a54975212ead93df8c881655c625544bce8ed7ccdfe6f08a42eecfb1adebd051307be5014bb051617baf7815d50f62129e70918190361e5d4dd4796541b0a',
+          sign_signature:
+            '618a54975212ead93df8c881655c625544bce8ed7ccdfe6f08a42eecfb1adebd051307be5014bb051617baf7815d50f62129e70918190361e5d4dd4796541b0a',
           id: '13987348420913138422'
         }
 
-        bytes = await getBytes(transaction)
+        const bytes = await getBytes(transaction)
+        const bytes2 = await getBytes(transaction, true, true, true)
         debug('#getBytes secend, bytes:', bytes)
         expect(bytes).to.be.ok
         // expect(bytes).that.is.an("object");
         // expect(bytes.length).to.equal(181);
-        expect(bytes.length).to.equal(194)
+        expect(bytes.length).to.equal(357)
+        expect(bytes2.length).to.equal(121)
         done()
       })
     })
@@ -94,7 +112,7 @@ describe('Node SDK', () => {
         expect(getHash).to.be.a('function')
       })
 
-      it('should return Buffer and Buffer most be 32 bytes length', async (done) => {
+      it('should return Buffer and Buffer most be 32 bytes length', async done => {
         const transaction = {
           nethash: '0ab796cd',
           type: 0,
@@ -103,7 +121,8 @@ describe('Node SDK', () => {
           timestamp: 141738,
           asset: {},
           senderPublicKey: '5d036a858ce89f844491762eb89e2bfbd50a4a0a0da658e4b2628b25b117ae09',
-          signature: '618a54975212ead93df8c881655c625544bce8ed7ccdfe6f08a42eecfb1adebd051307be5014bb051617baf7815d50f62129e70918190361e5d4dd4796541b0a',
+          signature:
+            '618a54975212ead93df8c881655c625544bce8ed7ccdfe6f08a42eecfb1adebd051307be5014bb051617baf7815d50f62129e70918190361e5d4dd4796541b0a',
           id: '13987348420913138422'
         }
 
@@ -128,7 +147,7 @@ describe('Node SDK', () => {
         expect(getId).to.be.a('function')
       })
 
-      it('should return string id and be equal to 23e9d76cdaf4ad10c8f1a9a416a386ec5a19110c489b9ba0d9b00d5890fcfe92a060f28c19132f795c444ed7c2fc63c7e98bd855d67a46487db60df747c19830', async (done) => {
+      it('should return string id and be equal to 23e9d76cdaf4ad10c8f1a9a416a386ec5a19110c489b9ba0d9b00d5890fcfe92a060f28c19132f795c444ed7c2fc63c7e98bd855d67a46487db60df747c19830', async done => {
         const transaction = {
           nethash: '0ab796cd',
           type: 0,
@@ -137,13 +156,18 @@ describe('Node SDK', () => {
           timestamp: 141738,
           asset: {},
           senderPublicKey: '5d036a858ce89f844491762eb89e2bfbd50a4a0a0da658e4b2628b25b117ae09',
-          signature: '618a54975212ead93df8c881655c625544bce8ed7ccdfe6f08a42eecfb1adebd051307be5014bb051617baf7815d50f62129e70918190361e5d4dd4796541b0a'
+          signature:
+            '618a54975212ead93df8c881655c625544bce8ed7ccdfe6f08a42eecfb1adebd051307be5014bb051617baf7815d50f62129e70918190361e5d4dd4796541b0a'
         }
 
         const id = await getId(transaction)
         debug('#getId, id to hex:', id.toString('hex'))
 
-        expect(id).to.be.a('string').be.equal('23e9d76cdaf4ad10c8f1a9a416a386ec5a19110c489b9ba0d9b00d5890fcfe92a060f28c19132f795c444ed7c2fc63c7e98bd855d67a46487db60df747c19830')
+        expect(id)
+          .to.be.a('string')
+          .be.equal(
+            'a0136efe3623fb02509a3a75765db1950838c1bcb0bdf472db891ef08283b271d5d1e57e8dd58bd8577a7214c309450f5bd5155c26615491fa348bd39adc58fb'
+          )
         // expect(id).to.be.a("string").be.equal("f60a26da470b1dc233fd526ed7306c1d84836f9e2ecee82c9ec47319e0910474");
         done()
       })
@@ -160,7 +184,7 @@ describe('Node SDK', () => {
         expect(getFee).to.be.a('function')
       })
 
-      it('should return BigNumber', async (done) => {
+      it('should return BigNumber', async done => {
         const fee = await getFee({ amount: '100000', type: 0 }) // Bignum update
 
         debug('fee: ', fee)
@@ -169,28 +193,28 @@ describe('Node SDK', () => {
         done()
       })
 
-      it('should return 10000000', async (done) => {
+      it('should return 10000000', async done => {
         const fee = await getFee({ amount: '100000', type: 0 }) // Bignum update
         expect(Bignum.isBigNumber(fee)).to.be.true
         expect(fee.toString()).to.equal('10000000')
         done()
       })
 
-      it('should return 500000000', async (done) => {
+      it('should return 500000000', async done => {
         const fee = await getFee({ type: 1 })
         expect(Bignum.isBigNumber(fee)).to.be.true
         expect(fee.toString()).to.equal('500000000')
         done()
       })
 
-      it('should be equal 10000000000', async (done) => {
+      it('should be equal 10000000000', async done => {
         const fee = await getFee({ type: 2 })
         expect(Bignum.isBigNumber(fee)).to.be.true
         expect(fee.toString()).to.equal('10000000000')
         done()
       })
 
-      it('should be equal 10000000', async (done) => {
+      it('should be equal 10000000', async done => {
         const fee = await getFee({ type: 3 })
         debug('fee: ', fee)
         expect(Bignum.isBigNumber(fee)).to.be.true
@@ -237,7 +261,8 @@ describe('Node SDK', () => {
           timestamp: 141738,
           asset: {},
           senderPublicKey: '5d036a858ce89f844491762eb89e2bfbd50a4a0a0da658e4b2628b25b117ae09',
-          signature: '618a54975212ead93df8c881655c625544bce8ed7ccdfe6f08a42eecfb1adebd051307be5014bb051617baf7815d50f62129e70918190361e5d4dd4796541b0a'
+          signature:
+            '618a54975212ead93df8c881655c625544bce8ed7ccdfe6f08a42eecfb1adebd051307be5014bb051617baf7815d50f62129e70918190361e5d4dd4796541b0a'
         }
 
         transaction.id = await crypto.getId(transaction)
@@ -279,28 +304,7 @@ describe('Node SDK', () => {
         expect(keys).to.have.property('publicKey')
         expect(keys).to.have.property('privateKey')
         expect(keys.publicKey).to.be.a('string')
-
-        // .and.match(() => {
-        // 	try {
-        // 		Buffer.from(keys.publicKey, "hex");
-        // 	} catch (e) {
-        // 		return false;
-        // 	}
-
-        // 	return true;
-        // });
-
         expect(keys.privateKey).to.be.a('string')
-
-        // .and.match(() => {
-        // 	try {
-        // 		Buffer.from(keys.privateKey, "hex");
-        // 	} catch (e) {
-        // 		return false;
-        // 	}
-
-        // 	return true;
-        // });
       })
     })
 
@@ -318,7 +322,7 @@ describe('Node SDK', () => {
       it('should generate address by publicKey', () => {
         const keys = crypto.getKeys('secret')
         debug('generate address by publicKey', keys)
-        const address = generateAddress(keys.publicKey)
+        const address = generateAddress(keys.publicKey, 'D')
 
         expect(address).to.be.ok
         expect(address).to.be.a('string')
@@ -357,7 +361,7 @@ describe('Node SDK', () => {
       // expect(address).to.equal('D6hS16kpFkVZv1TaBCrZQ3Wt7Tawa7MjuA')
 
       const publicKeyBuffer = Buffer.from('7a91b9bfc0ea185bf3ade9d264da273f7fe19bf71008210b1d7239c82dd3ad20', 'hex')
-      const address2 = DdnJS.crypto.generateAddress(publicKeyBuffer)
+      const address2 = DdnJS.crypto.generateAddress(publicKeyBuffer, 'D')
       expect(address2).to.equal('D6hS16kpFkVZv1TaBCrZQ3Wt7Tawa7MjuA')
     })
   })
