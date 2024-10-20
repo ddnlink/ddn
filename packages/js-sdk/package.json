@@ -1,6 +1,6 @@
 {
   "name": "@ddn/js-sdk",
-  "version": "2.4.5",
+  "version": "2.5.1",
   "description": "DDN browser js SDK",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -12,11 +12,9 @@
   "scripts": {
     "test": "mocha test",
     "build": "father build",
-    "build:old": "pnpm build:dev & pnpm build:prod",
     "build:custom": "DDN_ENV=custom pnpm build:custom:dev & pnpm build:custom:prod",
     "build:dev": "browserify index.js > ./build/index.browserify.js",
-    "build:prod": "browserify index.js -p tinyify > ./build/index.browserify.min.js",
-    "build:custom:dev": "browserify index.js > ./build/ddn-js-sdk.custom.js",
+    "build:prod": "mkdir -p build && browserify index.js -p tinyify > ./build/ddn.min.js",
     "build:custom:prod": "browserify index.js -p tinyify > ./build/ddn-js-sdk.custom.min.js"
   },
   "keywords": [
@@ -35,9 +33,12 @@
     "url": "http://github.com/ddnlink/ddn/issues"
   },
   "dependencies": {
+    "@ddn/asset-base": "workspace:^",
     "@ddn/core": "workspace:^",
+    "@ddn/crypto": "workspace:^",
     "@ddn/crypto-nacl": "workspace:^",
     "@ddn/crypto-sm": "workspace:^",
+    "@ddn/test-utils": "workspace:^",
     "@ddn/utils": "workspace:^",
     "JSONStream": "^1.3.1",
     "buffer": "^4.7.0",

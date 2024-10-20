@@ -8,10 +8,7 @@ class AssetUtils {
 
     for (const p in assetPlugins) {
       const currAsset = assetPlugins[p]
-      // console.log(require.main)
-      // console.log(require.resolve.paths('.'))
-      // console.log(module.filename)
-      // console.log(module.paths)
+
       if (currAsset) {
         let asset
         try {

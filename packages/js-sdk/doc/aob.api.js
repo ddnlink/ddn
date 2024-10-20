@@ -8,9 +8,6 @@ var name = 'IssuerName'
 // 发行商描述
 var desc = 'IssuerDesc'
 
-// 先执行初始化
-DdnJS.init()
-
 // 构造交易数据
 DdnJS.aob
   .createIssuer(name, desc, secret)

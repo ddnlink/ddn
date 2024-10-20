@@ -38,18 +38,18 @@
     "node": ">=10.21.0"
   },
   "scripts": {
-    "dev": "cross-env NODE_ENV=development node --experimental-modules dist/index.js",
-    "start": "cross-env NODE_ENV=development node --experimental-modules app.js",
-    "test": "./node_modules/.bin/mocha test/**/*.test.js",
-    "clear": "rm db/contracts/* && rm db/*.db && rm logs/*.log",
-    "clear:testnet": "rm -rf db/testnet/* && rm -rf logs/testnet/*",
-    "clear:localnet": "rm -rf db/localnet/* && rm -rf logs/localnet/*",
-    "test:localnet": "./node_modules/.bin/mocha test/localnet/**/*.test.js",
+    "start": "cross-env NODE_ENV=development node --experimental-modules dist/index.js",
+    "dev": "cross-env NODE_ENV=development node --experimental-modules app.js",
     "build": "father build",
     "build:prod": "cross-env NODE_ENV=production ./node_modules/.bin/gulp linux-build-main",
     "build:src": "./node_modules/.bin/gulp build-src-main",
     "build-testnet": "./node_modules/.bin/gulp linux-build-test",
-    "build-localnet": "./node_modules/.bin/gulp linux-build-local"
+    "build-localnet": "./node_modules/.bin/gulp linux-build-local",
+    "test": "./node_modules/.bin/mocha test/**/*.test.js",
+    "clear": "rm db/contracts/* && rm db/*.db && rm logs/*.log",
+    "clear:testnet": "rm -rf db/testnet/* && rm -rf logs/testnet/*",
+    "clear:localnet": "rm -rf db/localnet/* && rm -rf logs/localnet/*",
+    "test:localnet": "./node_modules/.bin/mocha test/localnet/**/*.test.js"
   },
   "dependencies": {
     "@ddn/asset-aob": "workspace:^",

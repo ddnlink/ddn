@@ -64,7 +64,7 @@ export const ACL = () => {
       return res
     }
 
-    it('Invalid allow parameters', async done => {
+    it('Invalid allow parameters', async () => {
       let res = await registerAssetWithAllowParameters(-1, 1, 1)
       expect(res.body)
         .to.have.property('error')
@@ -79,12 +79,10 @@ export const ACL = () => {
       expect(res.body)
         .to.have.property('error')
         .to.match(/^Asset allowBlacklist is not valid form asset-aob/)
-
-      done()
     })
 
     // 仅仅改变 flag 是无法启用黑白名单的，需要在创建资产的时候就要决定是否开启
-    it('Flags modifing should be denied with special asset parameters', async done => {
+    it('Flags modifing should be denied with special asset parameters', async () => {
       const ISSUE_ACCOUNT = node.genNormalAccount()
       const ISSUER_NAME = node.randomIssuerName()
       const ASSET_NAME = `${ISSUER_NAME}.CNY`
@@ -112,7 +110,7 @@ export const ACL = () => {
 
       await node.onNewBlockAsync()
 
-      res = registerAssetWithAllowParameters(0, 0, 0)
+      res = await registerAssetWithAllowParameters(0, 0, 0)
       await node.onNewBlockAsync()
 
       res = await node.apiGetAsync(`/aob/assets/${ASSET_NAME}`)
@@ -142,9 +140,7 @@ export const ACL = () => {
       expect(res.body)
         .to.have.property('error')
         .to.match(/^Whitelist not allowed/)
-
-      done()
-    }, 50000) // 这里运行了多个 onNewBlockAsync 时间超过了 30s 所以必然超时（20000ms），只能修改时间
+    }) // 这里运行了多个 onNewBlockAsync 时间超过了 30s 所以必然超时（20000ms），只能修改时间
 
     // 白名单开关，开启白名单
     describe('use whitelist to set acl', () => {
@@ -184,7 +180,7 @@ export const ACL = () => {
       }, 50000)
 
       // 发行资产，即增加市场流通数量
-      it('Add asset issues, Should be ok', async done => {
+      it('Add asset issues, Should be ok', async () => {
         // 等 1 次确认
         await node.onNewBlockAsync()
 
@@ -209,17 +205,18 @@ export const ACL = () => {
           })
           .expect('Content-Type', /json/)
           .expect(200)
-          .end((err, { body }) => {
+          .then(({ body }) => {
             debug('Add issue 2', body)
 
-            expect(err).to.be.not.ok
             expect(body).to.have.property('success').to.be.true
-
-            done()
+          })
+          .catch(err => {
+            debug('Add issue 2 error', err)
+            expect(err).to.be.not.ok
           })
       })
 
-      it('take on whitelist, Should be ok', async done => {
+      it('take on whitelist, Should be ok', async () => {
         await node.onNewBlockAsync()
 
         const obj = {
@@ -239,18 +236,19 @@ export const ACL = () => {
           })
           .expect('Content-Type', /json/)
           .expect(200)
-          .end((err, { body }) => {
+          .then(({ body }) => {
             debug('take on whitelist ok', body)
 
-            expect(err).be.not.ok
             expect(body).to.have.property('success').to.be.true
-
-            done()
+          })
+          .catch(err => {
+            debug('take on whitelist error', err)
+            expect(err).be.not.ok
           })
       })
 
       // // 不在白名单里，所以没有权限
-      it('Transfer outside whitelist firstly, Should be fail', async done => {
+      it('Transfer outside whitelist firstly, Should be fail', async () => {
         await node.onNewBlockAsync()
 
         const obj = {
@@ -280,19 +278,19 @@ export const ACL = () => {
           })
           .expect('Content-Type', /json/)
           .expect(200)
-          .end((err, { body }) => {
+          .then(({ body }) => {
             debug('No permission fail', body)
-
-            expect(err).to.be.not.ok
 
             expect(body).to.have.property('success').to.be.false
             expect(body).to.have.property('error').equal('Permission not allowed.')
-
-            done()
+          })
+          .catch(err => {
+            debug('No permission fail error', err)
+            expect(err).to.be.not.ok
           })
       })
 
-      it(`Add ${node.Daccount.address} to whitelist, Should be ok`, async done => {
+      it(`Add ${node.Daccount.address} to whitelist, Should be ok`, async () => {
         const obj = {
           currency,
           flag: 1,
@@ -309,18 +307,18 @@ export const ACL = () => {
           .send({ transaction })
           .expect('Content-Type', /json/)
           .expect(200)
-          .end((err, { body }) => {
+          .then(({ body }) => {
             debug('add to whitelist ok', body)
 
-            expect(err).be.not.ok
-
             expect(body).to.have.property('success').to.be.true
-
-            done()
+          })
+          .catch(err => {
+            debug('add to whitelist error', err)
+            expect(err).be.not.ok
           })
       })
 
-      it('Transfer in whitelist, Should be ok', async done => {
+      it('Transfer in whitelist, Should be ok', async () => {
         await node.onNewBlockAsync()
 
         const obj = {
@@ -340,17 +338,18 @@ export const ACL = () => {
           .send({ transaction })
           .expect('Content-Type', /json/)
           .expect(200)
-          .end((err, { body }) => {
+          .then(({ body }) => {
             debug('Transfer in whitelist', body)
-            expect(err).be.not.ok
 
             expect(body).to.have.property('success').to.be.true
-
-            done()
+          })
+          .catch(err => {
+            debug('Transfer in whitelist error', err)
+            expect(err).be.not.ok
           })
       })
 
-      it('Delete from whitelist, Should be ok', async done => {
+      it('Delete from whitelist, Should be ok', async () => {
         const obj = {
           currency,
           flag: 1,
@@ -359,7 +358,7 @@ export const ACL = () => {
         }
         const transaction = await createPluginAsset(63, obj, IssuerAccountWhitelist.password)
 
-        node.api
+        const { body } = await node.api
           .post('/transactions')
           .set('Accept', 'application/json')
           .set('version', node.version)
@@ -368,18 +367,13 @@ export const ACL = () => {
           .send({ transaction })
           .expect('Content-Type', /json/)
           .expect(200)
-          .end((err, { body }) => {
-            debug('Delete from whitelist', body)
 
-            expect(err).be.not.ok
+        debug('Delete from whitelist', body)
 
-            expect(body).to.have.property('success').to.be.true
-
-            done()
-          })
+        expect(body).to.have.property('success').to.be.true
       })
 
-      it('Transfer outside whitelist, Should be fail again', async done => {
+      it('Transfer outside whitelist, Should be fail again', async () => {
         await node.onNewBlockAsync()
 
         const obj = {
@@ -391,7 +385,7 @@ export const ACL = () => {
 
         const transaction = await createPluginAsset(65, obj, IssuerAccountWhitelist.password)
 
-        node.api
+        const { body } = await node.api
           .post('/transactions')
           .set('Accept', 'application/json')
           .set('version', node.version)
@@ -400,19 +394,14 @@ export const ACL = () => {
           .send({ transaction })
           .expect('Content-Type', /json/)
           .expect(200)
-          .end((err, { body }) => {
-            debug('Transfer outside whitelist', body)
 
-            expect(err).be.not.ok
+        debug('Transfer outside whitelist', body)
 
-            expect(body).to.have.property('success').to.be.false
-            expect(body).to.have.property('error').equal('Permission not allowed.')
-
-            done()
-          })
+        expect(body).to.have.property('success').to.be.false
+        expect(body).to.have.property('error').equal('Permission not allowed.')
       })
 
-      it('Take off whitelist, Should be ok', async done => {
+      it('Take off whitelist, Should be ok', async () => {
         const obj = {
           currency,
           flag: 0, // 关闭
@@ -420,7 +409,7 @@ export const ACL = () => {
         }
         const transaction = await createPluginAsset(DdnUtils.assetTypes.AOB_FLAG, obj, IssuerAccountWhitelist.password)
 
-        node.api
+        const { body } = await node.api
           .post('/transactions')
           .set('Accept', 'application/json')
           .set('version', node.version)
@@ -431,17 +420,13 @@ export const ACL = () => {
           })
           .expect('Content-Type', /json/)
           .expect(200)
-          .end((err, { body }) => {
-            debug('Take off whitelist', body)
 
-            expect(err).be.not.ok
-            expect(body).to.have.property('success').to.be.true
+        debug('Take off whitelist', body)
 
-            done()
-          })
+        expect(body).to.have.property('success').to.be.true
       })
 
-      it('资产转账 Should be ok', async done => {
+      it('资产转账 Should be ok', async () => {
         await node.onNewBlockAsync()
 
         const obj = {
@@ -453,7 +438,7 @@ export const ACL = () => {
 
         const transaction = await createPluginAsset(65, obj, IssuerAccountWhitelist.password)
 
-        node.api
+        const { body } = await node.api
           .post('/transactions')
           .set('Accept', 'application/json')
           .set('version', node.version)
@@ -462,15 +447,10 @@ export const ACL = () => {
           .send({ transaction })
           .expect('Content-Type', /json/)
           .expect(200)
-          .end((err, { body }) => {
-            debug(body)
 
-            expect(err).be.not.ok
+        debug(body)
 
-            expect(body).to.have.property('success').to.be.true
-
-            done()
-          })
+        expect(body).to.have.property('success').to.be.true
       })
     })
   })

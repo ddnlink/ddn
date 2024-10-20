@@ -23,11 +23,9 @@
   ],
   "scripts": {
     "dev": "turbo dev --force",
-    "build": "turbo build",
+    "build": "turbo build  --force",
     "build:prod": "pnpm --filter ddn-starter build:prod",
-    "test": "./node_modules/.bin/test",
-    "test:custom": "DDN_ENV=custom ./packages/test/bin/test.js",
-    "jest": "node --experimental-vm-modules node_modules/jest/bin/jest.js",
+    "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js",
     "test:e2e": "jest --config jest.e2e.config.ts",
     "format": "pnpm lint:fix && pnpm prettier",
     "lint": "eslint --ext .js packages/**/src",
@@ -76,7 +74,6 @@
   "engines": {
     "node": ">=16.14"
   },
-  "packageManager": "pnpm@9.6.0",
   "dependencies": {
     "@babel/plugin-transform-classes": "^7.10.4",
     "@ddn/asset-aob": "^1.2.3",
@@ -134,5 +131,6 @@
     "overrides": {
       "resolve": "1.22.8"
     }
-  }
+  },
+  "packageManager": "pnpm@9.6.0"
 }

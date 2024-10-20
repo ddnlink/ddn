@@ -7,9 +7,6 @@ const password = 'enter boring shaft rent essence foil trick vibrant fabric quot
 // const secondPassword = 'erjimimashezhi001' // 不能使用？？
 const message = '' // 转账备注
 
-// 先执行初始化
-Ddnjs.init()
-
 // 其中password是在用户登录的时候记录下来的，secondPassword需要每次让用户输入
 // 可以通过user.secondPublicKey来判断用户是否有二级密码，如果没有，则不必输入，以下几个交易类型类似
 Ddnjs.transaction

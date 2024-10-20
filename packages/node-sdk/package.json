@@ -1,6 +1,6 @@
 {
   "name": "@ddn/node-sdk",
-  "version": "2.4.5",
+  "version": "2.4.6",
   "description": "DDN Node.js SDK",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -29,11 +29,6 @@
     "url": "http://github.com/ddnlink/ddn/issues"
   },
   "dependencies": {
-    "@ddn/asset-aob": "workspace:^",
-    "@ddn/asset-base": "workspace:^",
-    "@ddn/asset-dao": "workspace:^",
-    "@ddn/asset-dapp": "workspace:^",
-    "@ddn/asset-evidence": "workspace:^",
     "@ddn/core": "workspace:^",
     "@ddn/crypto": "workspace:^",
     "@ddn/crypto-nacl": "workspace:^",

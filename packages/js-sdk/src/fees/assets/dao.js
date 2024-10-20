@@ -1,5 +1,5 @@
 import DdnUtils from '@ddn/utils'
-import constants from '../../constants'
+import { constants } from '../../config'
 
 export default {
   daoOrg: async asset => {
