@@ -18,7 +18,8 @@ import { Cache } from './cache'
  *   options.routes: app process function map, like { 'GET /blocks': () => {} }.
  *   options.maxConnectSize: pool size, exceed this number new pipe not be kept.
  */
-export class P2P { // extends EventEmitter {
+export class P2P {
+  // extends EventEmitter {
   constructor (options) {
     // check if we have options
     options = options || {}
@@ -41,7 +42,7 @@ export class P2P { // extends EventEmitter {
     // Forward Information Base
     this.fib = new Cache()
     // remember open sockets
-    this.pool = new Cache({ max: this.maxConnectSize, clean: (pipe) => pipe.close() })
+    this.pool = new Cache({ max: this.maxConnectSize, clean: pipe => pipe.close() })
     this.inventory = new Inventory({ dbfile: options.dbfile, logger: this.logger })
   }
 
@@ -54,7 +55,7 @@ export class P2P { // extends EventEmitter {
     this.seeds.slice(0, this.maxConnectSize).forEach(seed => {
       if (seed.id === this.id) return
 
-      self.connect(seed.port, seed.ip).catch((err) => {
+      self.connect(seed.port, seed.ip).catch(err => {
         if (err.errno === 'ECONNREFUSED') {
           this.logger.debug(`connect to seed: ${seed.ip}:${seed.port} fail: ECONNREFUSED`)
         }
@@ -74,15 +75,18 @@ export class P2P { // extends EventEmitter {
   listen () {
     const self = this
     self._server = net.createServer()
-    self._server.listen({
-      port: this.port,
-      host: '0.0.0.0'
-    }, () => {
-      self.family = self._server.address().family
-      self.logger.debug(`P2P server start to listen port: ${self.port}`)
-    })
+    self._server.listen(
+      {
+        port: this.port,
+        host: '0.0.0.0'
+      },
+      () => {
+        self.family = self._server.address().family
+        self.logger.debug(`P2P server start to listen port: ${self.port}`)
+      }
+    )
 
-    self._server.on('connection', async (socket) => {
+    self._server.on('connection', async socket => {
       const pipe = self._createPipe({ socket, isOpen: true })
       try {
         const res = await pipe.request(Message.commands.VERSION)
@@ -123,7 +127,7 @@ export class P2P { // extends EventEmitter {
       // create a tcp connect
       const pipe = self._createPipe({ proxy })
 
-      pipe.open(port, host, (err) => {
+      pipe.open(port, host, err => {
         if (err) {
           const errMsg = err.errno === 'ECONNREFUSED' ? 'ECONNREFUSED' : err.message
           self.logger.warn(`connect to ${host}:${port} error: `, errMsg)
@@ -151,7 +155,9 @@ export class P2P { // extends EventEmitter {
     this.pool.set(pipe.id, pipe)
     this.inventory.add(peer)
 
-    this.logger.debug(`${this.port} success connect to peer: ${peer.host}:${peer.port} socket: ${pipe.socket.remotePort}`)
+    this.logger.debug(
+      `${this.port} success connect to peer: ${peer.host}:${peer.port} socket: ${pipe.socket.remotePort}`
+    )
   }
 
   /**
@@ -171,14 +177,14 @@ export class P2P { // extends EventEmitter {
 
     const self = this
     self.count = (self.count || 0) + 1
-    pipe.on('message', (msg) => {
+    pipe.on('message', msg => {
       self._processMessage(msg, pipe)
     })
-    pipe.on('close', (err) => {
+    pipe.on('close', err => {
       this.logger.warn('socket is closed: ', err)
       self._delPipe(pipe)
     })
-    pipe.on('error', (err) => {
+    pipe.on('error', err => {
       const errMsg = err.errno === 'ECONNREFUSED' ? 'ECONNREFUSED' : err.message
       this.logger.warn(`socket is error: ${self.count}`, errMsg)
       self._delPipe(pipe)
@@ -187,10 +193,10 @@ export class P2P { // extends EventEmitter {
   }
 
   /**
-  * Delegate the close server method to backend.
-  *
-  * @param callback
-  */
+   * Delegate the close server method to backend.
+   *
+   * @param callback
+   */
   close (callback) {
     clearInterval(this._discoverHandle)
     clearInterval(this._sortHandle)
@@ -273,7 +279,7 @@ export class P2P { // extends EventEmitter {
       const req = { body: msg.data, params, peer }
       const cmd = msg.cmd === Message.commands.PUSH ? Message.commands.POST : msg.cmd
       const reg = new RegExp(`^${Message.methods[cmd]}\\s*${pathname}$`, 'i')
-      const key = Object.keys(this.routes).find((path) => {
+      const key = Object.keys(this.routes).find(path => {
         return reg.test(path.trim())
       })
       // this.logger.debug(`got request to: ${key}, ${cmd}, ${pathname}`, reg)
@@ -414,7 +420,7 @@ export class P2P { // extends EventEmitter {
    * @returns pipe
    */
   async getPeer (node) {
-    return typeof node === 'undefined' ? this.inventory.getRandomPeer() : node
+    return !node ? this.inventory.getRandomPeer() : node
   }
 
   /**
@@ -434,7 +440,7 @@ export class P2P { // extends EventEmitter {
       const peers = res && res.data
       if (peers) {
         const self = this
-        peers.forEach((item) => {
+        peers.forEach(item => {
           const newPeer = new Peer(item)
           if (newPeer.id === self.id) return
           self.inventory.add(newPeer)
@@ -457,7 +463,7 @@ export class P2P { // extends EventEmitter {
       const self = this
       const peers = this.inventory.getAllPeers()
 
-      peers.map(async (peer) => {
+      peers.map(async peer => {
         if (!this.pool.has(peer.id)) {
           try {
             await this.connect(peer.port, peer.host)

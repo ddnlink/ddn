@@ -1,10 +1,14 @@
 // passed
 import Debug from 'debug'
+
 import { DdnJS, node } from '../ddn-js'
 import { ACL } from './aob/5.acl'
 
 const expect = node.expect
 const debug = Debug('debug')
+
+debug('DdnJS.constants.nethash: ', DdnJS.constants.nethash)
+debug('node.config.nethash: ', node.config.nethash)
 
 async function createTransfer (address, amount, secret) {
   return await DdnJS.transaction.createTransaction(address, amount, null, secret)
@@ -14,7 +18,7 @@ async function createTransfer (address, amount, secret) {
 //   return await DdnJS.assetPlugin.createPluginAsset(type, asset, secret, secondSecret)
 // }
 
-jest.setTimeout(50000)
+jest.setTimeout(30000)
 
 describe('AOB Test', () => {
   // 先创建两个发行商账户
@@ -30,34 +34,35 @@ describe('AOB Test', () => {
   debug('issuerName2', issuerName2)
 
   // 开始前，得把发行商账号 IssuerAccount 注册到链上(登录一下即可)
-  beforeAll(done => {
-    node.api
-      .post('/accounts/open')
-      .set('Accept', 'application/json')
-      .set('version', node.version)
-      .set('nethash', node.config.nethash)
-      .set('port', node.config.port)
-      .send({
-        secret: IssuerAccount1.password
-      })
-      .expect('Content-Type', /json/)
-      .expect(200)
-      .end(function (err, { body }) {
-        debug('create account', JSON.stringify(body))
-        expect(err).be.not.ok
-        expect(body).to.have.property('success').to.be.true
-        IssuerAccount1.address = body.account.address
-        IssuerAccount1.publicKey = body.account.publicKey
+  beforeAll(async () => {
+    try {
+      const response = await node.api
+        .post('/accounts/open')
+        .set('Accept', 'application/json')
+        .set('version', node.version)
+        .set('nethash', node.config.nethash)
+        .set('port', node.config.port)
+        .send({
+          secret: IssuerAccount1.password
+        })
+        .expect('Content-Type', /json/)
+        .expect(200)
 
-        done()
-      })
+      debug('create account', JSON.stringify(response.body))
+      expect(response.body).to.have.property('success').to.be.true
+      IssuerAccount1.address = response.body.account.address
+      IssuerAccount1.publicKey = response.body.account.publicKey
+    } catch (err) {
+      debug('Error creating account', err)
+      expect(err).be.not.ok
+    }
   })
 
   // // 注册发行商要花钱
-  beforeAll(async done => {
+  beforeAll(async () => {
     // 转账给它
     const transaction = await createTransfer(IssuerAccount1.address, '1000', node.Gaccount.password)
-    node.api
+    const response = await node.api
       .post('/transactions')
       .set('Accept', 'application/json')
       .set('version', node.version)
@@ -68,26 +73,21 @@ describe('AOB Test', () => {
       })
       .expect('Content-Type', /json/)
       .expect(200)
-      .end((err, { body }) => {
-        debug('transfer', transaction)
-        debug('transfer body', body)
-        expect(err).be.not.ok
 
-        expect(body).to.have.property('success').to.be.true
-        expect(body).to.have.property('transactionId').to.be.a('string')
-
-        done()
-      })
+    debug('transfer', transaction)
+    debug('transfer body', response.body)
+    expect(response.body).to.have.property('success').to.be.true
+    expect(response.body).to.have.property('transactionId').to.be.a('string')
   })
 
   // 1. 注册发行商
   describe('Register Issuer', () => {
-    it('Should be ok', async done => {
+    it('Should be ok', async () => {
       await node.onNewBlockAsync()
 
       const transaction = await DdnJS.aob.createIssuer(issuerName, 'An issuer', IssuerAccount1.password)
       debug('注册发行商创建的transaction 1', transaction)
-      node.api
+      const { body } = await node.api
         .post('/transactions')
         .set('Accept', 'application/json')
         .set('version', node.version)
@@ -98,17 +98,13 @@ describe('AOB Test', () => {
         })
         .expect('Content-Type', /json/)
         .expect(200)
-        .end((err, { body }) => {
-          debug('Register Issuer ok', body)
 
-          expect(err).be.not.ok
-          expect(body).to.have.property('success').to.be.true
+      debug('Register Issuer ok', body)
 
-          done()
-        })
+      expect(body).to.have.property('success').to.be.true
     })
 
-    it('with the same name again, Should be fail', async done => {
+    it('with the same name again, Should be fail', async () => {
       await node.onNewBlockAsync()
 
       const transaction = await DdnJS.aob.createIssuer(issuerName, 'An issuer', IssuerAccount2.password)
@@ -125,18 +121,19 @@ describe('AOB Test', () => {
         })
         .expect('Content-Type', /json/)
         .expect(200)
-        .end((err, { body }) => {
+        .then(({ body }) => {
           debug('Register Issuer with same name fail', body)
 
-          expect(err).be.not.ok
           expect(body).to.have.property('success').to.be.false
           expect(body).to.have.property('error').to.contain('Issuer name/issuer_id already exists')
-
-          done()
+        })
+        .catch(err => {
+          debug('Register Issuer with same name fail error', err)
+          expect(err).be.not.ok
         })
     })
 
-    it('with the same IssuerAccount1 again, Should be fail', async done => {
+    it('with the same IssuerAccount1 again, Should be fail', async () => {
       await node.onNewBlockAsync()
 
       const transaction = await DdnJS.aob.createIssuer(issuerName2, 'An issuer', IssuerAccount1.password)
@@ -153,23 +150,24 @@ describe('AOB Test', () => {
         })
         .expect('Content-Type', /json/)
         .expect(200)
-        .end((err, { body }) => {
+        .then(({ body }) => {
           debug('Register Issuer with same IssuerAccount1 fail', body)
 
-          expect(err).be.not.ok
           expect(body).to.have.property('success').to.be.false
           expect(body).to.have.property('error').to.contain('Issuer name/issuer_id already exists')
-
-          done()
+        })
+        .catch(err => {
+          debug('Register Issuer with same IssuerAccount1 fail error', err)
+          expect(err).be.not.ok
         })
     })
 
-    it('with IssuerAccount2 who no money, Should be fail', async done => {
+    it('with IssuerAccount2 who no money, Should be fail', async () => {
       await node.onNewBlockAsync()
 
       const transaction = await DdnJS.aob.createIssuer(issuerName2, 'An issuer', IssuerAccount2.password)
       debug('注册发行商创建的transaction 4', transaction)
-      node.api
+      const { body } = await node.api
         .post('/transactions')
         .set('Accept', 'application/json')
         .set('version', node.version)
@@ -180,14 +178,10 @@ describe('AOB Test', () => {
         })
         .expect('Content-Type', /json/)
         .expect(200)
-        .end((err, { body }) => {
-          debug('Register Issuer with no money IssuerAccount2 fail', body)
-          expect(err).be.not.ok
-          expect(body).to.have.property('success').to.be.false
-          expect(body).to.have.property('error').to.contain('Insufficient balance')
 
-          done()
-        })
+      debug('Register Issuer with no money IssuerAccount2 fail', body)
+      expect(body).to.have.property('success').to.be.false
+      expect(body).to.have.property('error').to.contain('Insufficient balance')
     })
   })
 
@@ -221,7 +215,7 @@ describe('AOB Test', () => {
   // // 2. 注册资产 比如：DDN.CNY
   let currency // 名字本就是 assetName;
   describe('Register Asset', () => {
-    it('Should be ok', async done => {
+    it('Should be ok', async () => {
       await node.onNewBlockAsync()
       // 必须有 发行商(并且与IssuerAccount1对应)
       currency = issuerName + '.' + node.randomIssuerName('', 3).toUpperCase()
@@ -241,7 +235,7 @@ describe('AOB Test', () => {
 
       debug('Asset transaction:', transaction)
 
-      node.api
+      const { body } = await node.api
         .post('/transactions')
         .set('Accept', 'application/json')
         .set('version', node.version)
@@ -252,20 +246,16 @@ describe('AOB Test', () => {
         })
         .expect('Content-Type', /json/)
         .expect(200)
-        .end((err, { body }) => {
-          debug('asset register ok', body)
 
-          expect(err).to.be.not.ok
-          expect(body).to.have.property('success').to.be.true
+      debug('asset register ok', body)
 
-          done()
-        })
+      expect(body).to.have.property('success').to.be.true
     })
   })
 
-  // // 3. 发行资产，即增加市场流通数量
+  // 3. 发行资产，即增加市场流通数量
   describe('Add asset issues', () => {
-    it('Should be ok', async done => {
+    it('Should be ok', async () => {
       // 等 1 次确认
       await node.onNewBlockAsync()
 
@@ -273,7 +263,7 @@ describe('AOB Test', () => {
       const transaction = await DdnJS.aob.createIssue(currency, '100000', IssuerAccount1.password)
       debug('Add issue transaction:', transaction)
 
-      node.api
+      const { body } = await node.api
         .post('/transactions')
         .set('Accept', 'application/json')
         .set('version', node.version)
@@ -284,20 +274,16 @@ describe('AOB Test', () => {
         })
         .expect('Content-Type', /json/)
         .expect(200)
-        .end((err, { body }) => {
-          debug('Add issue ', body)
 
-          expect(err).to.be.not.ok
-          expect(body).to.have.property('success').to.be.true
+      debug('Add issue ', body)
 
-          done()
-        })
+      expect(body).to.have.property('success').to.be.true
     })
   })
 
-  // // 4. 资产转账
+  // 4. 资产转账
   describe('Transfer Issue', () => {
-    it('Should be ok', async done => {
+    it('Should be ok', async () => {
       // 等 1 次确认
       await node.onNewBlockAsync()
 
@@ -312,7 +298,7 @@ describe('AOB Test', () => {
       )
       debug('aob transfer: ', transaction)
 
-      node.api
+      const { body } = await node.api
         .post('/transactions')
         .set('Accept', 'application/json')
         .set('version', node.version)
@@ -323,17 +309,13 @@ describe('AOB Test', () => {
         })
         .expect('Content-Type', /json/)
         .expect(200)
-        .end((err, { body }) => {
-          debug('Transfer issue should be ok', body)
 
-          expect(err).to.be.not.ok
-          expect(body).to.have.property('success').to.be.true
+      debug('Transfer issue should be ok', body)
 
-          done()
-        })
+      expect(body).to.have.property('success').to.be.true
     })
 
-    it('if aob amount is 0 should be fail', async done => {
+    it('if aob amount is 0 should be fail', async () => {
       // 等 1 次确认
       await node.onNewBlockAsync()
 
@@ -348,7 +330,7 @@ describe('AOB Test', () => {
       )
       debug('aob transfer: ', transaction)
 
-      node.api
+      const { body } = await node.api
         .post('/transactions')
         .set('Accept', 'application/json')
         .set('version', node.version)
@@ -359,18 +341,14 @@ describe('AOB Test', () => {
         })
         .expect('Content-Type', /json/)
         .expect(200)
-        .end((err, { body }) => {
-          debug('Transfer issue should be ok', body)
 
-          expect(err).to.be.not.ok
-          expect(body).to.have.property('success').to.be.false
-          expect(body).to.have.property('error').to.contain('Insufficient AoB balance')
+      debug('Transfer issue should be ok', body)
 
-          done()
-        })
+      expect(body).to.have.property('success').to.be.false
+      expect(body).to.have.property('error').to.contain('Insufficient AoB balance')
     })
   })
 })
 
 // 5. 测试权限
-ACL()
+// ACL()

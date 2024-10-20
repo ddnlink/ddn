@@ -1,9 +1,13 @@
 {
   "name": "@ddn/asset-dapp",
-  "version": "2.4.3",
+  "version": "2.4.5",
   "description": "this is asset-dapp package",
-  "main": "./lib/index.js",
-  "module": "./dist/index.esm.js",
+  "main": "./dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist",
+    ".ddnrc.js"
+  ],
   "repository": {
     "type": "git",
     "url": "git+https://github.com/ddnlink/ddn.git",
@@ -13,22 +17,21 @@
   "bugs": {
     "url": "http://github.com/ddnlink/ddn/issues"
   },
-  "files": [
-    "lib",
-    "dist",
-    ".ddnrc.js"
-  ],
   "author": "wly",
   "license": "AGPL 3.0",
+  "scripts": {
+    "build": "father build",
+    "dev": "father dev"
+  },
   "dependencies": {
-    "@ddn/asset-base": "^2.4.3",
-    "@ddn/crypto": "^2.4.3",
-    "@ddn/sandbox": "^2.4.3",
-    "@ddn/utils": "^2.4.3",
+    "@ddn/asset-base": "workspace:^",
+    "@ddn/crypto": "workspace:^",
+    "@ddn/sandbox": "workspace:^",
+    "@ddn/utils": "workspace:^",
     "async": "^2.6.1",
     "bytebuffer": "^5.0.1",
     "decompress-zip": "^0.2.2",
-    "request": "^2.88.0",
+    "request": "^2.88.2",
     "valid-url": "^1.0.9"
   },
   "gitHead": "3f5aef8e697748180be42f047a2053e46a7afd43"

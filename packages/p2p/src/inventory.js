@@ -24,7 +24,8 @@ export class Peer {
 
   setProxy (host, port) {
     this.proxy = {
-      host, port
+      host,
+      port
     }
   }
 
@@ -60,7 +61,7 @@ export class Inventory {
     this.peers = new Map()
     this.delayTime = options.delayTime || 3600
     this.tryTimes = options.tryTimes || 5
-    this.dbfile = options.dbfile || './peer.db'
+    this.dbfile = options.dbfile || '../peer.db'
     this.logger = options.logger || console
 
     if (fs.existsSync(this.dbfile)) {
@@ -138,15 +139,21 @@ export class Inventory {
   }
 
   getAllPeers () {
+    this.logger.debug('getAllPeers starting...')
+
     const result = []
-    this.peers.forEach((peer) => {
-      if (peer.status !== Peer.STATUS.disable) { result.push(peer) }
+    this.peers.forEach(peer => {
+      if (peer.status !== Peer.STATUS.disable) {
+        result.push(peer)
+      }
     })
-    this.logger.debug('All peers have : ', this.peers.length)
+    this.logger.debug('All peers have : ', this.peers, this.peers.length)
     return result
   }
 
   getRandomPeer () {
+    this.logger.debug('getRandomPeer starting...')
+
     const peers = this.getAllPeers()
     const rnd = Math.floor(Math.random() * peers.length)
     this.logger.debug('Random peer pos: ', rnd, peers.length)
@@ -156,7 +163,7 @@ export class Inventory {
   addMap (id) {
     const hasPeer = this.peers.has(id)
     if (hasPeer) {
-      this.peers.forEach((peer) => {
+      this.peers.forEach(peer => {
         if (peer.id === id) {
           peer.status = Peer.STATUS.ready
           peer.failCount = 0
@@ -180,7 +187,7 @@ export class Inventory {
   getNextHop (fib, count) {
     const peers = []
     const results = new Set()
-    this.peers.forEach((peer) => {
+    this.peers.forEach(peer => {
       if (peer.status !== Peer.STATUS.disable && !fib.includes(peer.id)) peers.push(peer)
     })
 

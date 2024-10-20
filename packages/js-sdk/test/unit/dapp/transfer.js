@@ -34,7 +34,6 @@ async function createTransfer (address, amount, secret, second_secret) {
 }
 
 async function registerDAppAsync (options, { password }) {
-  // DdnJS.init();
   options.fee = '10000000000'
   const dappData = await createPluginAsset(DdnUtils.assetTypes.DAPP, options, password)
   const res = await node.submitTransactionAsync(dappData)
@@ -43,7 +42,6 @@ async function registerDAppAsync (options, { password }) {
 }
 
 async function inTransferAsync (options, { password }) {
-  // DdnJS.init();
   const inTransferData = await createPluginAsset(DdnUtils.assetTypes.DAPP_IN, options, password)
   const res = await node.submitTransactionAsync(inTransferData)
   debug('in transfer response', res.body)
@@ -182,7 +180,6 @@ export const Transfer = () => {
       const issueAmount = '1000000000'
 
       // (1)加载插件
-      // DdnJS.init();
       // (2)注册资产商
       const issuer = {
         name: issuerName,

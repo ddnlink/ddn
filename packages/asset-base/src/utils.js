@@ -1,5 +1,5 @@
 class AssetUtils {
-  static loadFromObject (assetPlugins) {
+  static async loadFromObject (assetPlugins) {
     const assets = {
       transConfigs: [],
       transTypeValues: [],
@@ -8,15 +8,17 @@ class AssetUtils {
 
     for (const p in assetPlugins) {
       const currAsset = assetPlugins[p]
+
       if (currAsset) {
-        let assetConfig
+        let asset
         try {
-          assetConfig = require(`${currAsset}/.ddnrc.js`)
+          asset = require(`${currAsset}`)
         } catch (error) {
-          throw new Error(`The asset extends error: ${currAsset} has no configure .ddnrc.js.`)
+          // console.log(`The asset extends error: ${currAsset} has no configure .ddnrc.js.`)
+          throw new Error(`The asset extends error: ${currAsset} not found.`)
         }
 
-        const assetTransactions = assetConfig.transactions
+        const assetTransactions = asset.default.config.transactions
 
         if (assetTransactions && assetTransactions.length > 0) {
           assetTransactions.forEach(currTrans => {
@@ -95,6 +97,7 @@ class AssetUtils {
 
     for (const p in assetPluginsJson) {
       const currAsset = assetPluginsJson[p]
+
       if (currAsset) {
         const assetTransactions = currAsset.transactions
 
@@ -129,9 +132,10 @@ class AssetUtils {
     return this
   }
 
-  static loadFromFile (file) {
-    const assetPlugins = require(file)
-    return this.loadFromObject(assetPlugins)
+  // fixme: 该方法未使用 imfly 2024.7.26
+  static async loadFromFile (file) {
+    const assetPlugins = await import(file)
+    return await this.loadFromObject(assetPlugins)
   }
 
   static getTypeValue (typeName) {

@@ -1,7 +1,7 @@
-// import DdnJS from '../lib'
-// import { config, constants } from '../../../lib/config'
+// import DdnJS from '../src'
+// import { config, constants } from '../../../src/config'
 // import { expect } from 'chai'
-var config = require('../../../lib/config')
+var config = require('../../../src/config')
 // const fixtures = `${__dirname}/fixtures`
 
 console.log(config.assets)

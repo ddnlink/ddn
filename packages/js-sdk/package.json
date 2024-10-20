@@ -1,21 +1,20 @@
 {
   "name": "@ddn/js-sdk",
-  "version": "2.4.3",
-  "description": "DDN Node.js SDK",
-  "main": "./lib/index.js",
-  "module": "./dist/index.esm.js",
+  "version": "2.5.1",
+  "description": "DDN browser js SDK",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
   "files": [
-    "lib",
     "dist",
-    "build"
+    "build",
+    ".ddnrc.js"
   ],
   "scripts": {
     "test": "mocha test",
-    "build": "yarn build:dev & yarn build:prod",
-    "build:custom": "DDN_ENV=custom yarn build:custom:dev & yarn build:custom:prod",
+    "build": "father build",
+    "build:custom": "DDN_ENV=custom pnpm build:custom:dev & pnpm build:custom:prod",
     "build:dev": "browserify index.js > ./build/index.browserify.js",
-    "build:prod": "browserify index.js -p tinyify > ./build/index.browserify.min.js",
-    "build:custom:dev": "browserify index.js > ./build/ddn-js-sdk.custom.js",
+    "build:prod": "mkdir -p build && browserify index.js -p tinyify > ./build/ddn.min.js",
     "build:custom:prod": "browserify index.js -p tinyify > ./build/ddn-js-sdk.custom.min.js"
   },
   "keywords": [
@@ -34,17 +33,19 @@
     "url": "http://github.com/ddnlink/ddn/issues"
   },
   "dependencies": {
-    "@ddn/core": "^2.4.3",
-    "@ddn/crypto-nacl": "^2.4.3",
-    "@ddn/crypto-sm": "^2.4.3",
-    "@ddn/utils": "^2.4.3",
+    "@ddn/asset-base": "workspace:^",
+    "@ddn/core": "workspace:^",
+    "@ddn/crypto": "workspace:^",
+    "@ddn/crypto-nacl": "workspace:^",
+    "@ddn/crypto-sm": "workspace:^",
+    "@ddn/test-utils": "workspace:^",
+    "@ddn/utils": "workspace:^",
     "JSONStream": "^1.3.1",
-    "bitcore-mnemonic": "^8.20.5",
     "buffer": "^4.7.0",
     "bytebuffer": "^5.0.1",
-    "lodash": "^4.17.20",
+    "lodash": "^4.17.11",
     "long": "^4.0.0",
-    "ripemd160": "^2.0.1",
+    "ripemd160": "^2.0.2",
     "safe-buffer": "^5.2.1",
     "through2": "^2.0.3"
   },

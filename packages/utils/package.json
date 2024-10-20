@@ -1,9 +1,7 @@
 {
   "name": "@ddn/utils",
-  "version": "2.4.3",
+  "version": "2.4.5",
   "description": "DDN utils.",
-  "main": "./lib/index.js",
-  "module": "./dist/index.esm.js",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/ddnlink/ddn.git",
@@ -13,10 +11,16 @@
   "bugs": {
     "url": "http://github.com/ddnlink/ddn/issues"
   },
+  "main": "./dist/index.js",
+  "types": "dist/index.d.ts",
   "files": [
-    "lib",
     "dist"
   ],
+  "scripts": {
+    "build": "father build",
+    "dev": "father dev",
+    "test": "jest"
+  },
   "dependencies": {
     "bignumber.js": "^7.2.1",
     "request-promise": "^4.2.6"

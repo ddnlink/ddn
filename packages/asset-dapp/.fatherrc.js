@@ -1,4 +1,5 @@
-export default {
-  extraExternals: [ 'fs', 'path' ], 
-  esm: 'rollup',
-};
+import {defineConfig} from 'father'
+
+export default defineConfig({
+  extends: '../../.fatherrc.base.ts'
+})

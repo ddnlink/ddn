@@ -59,3 +59,8 @@ config/mainnet/*
 **/**/*.custom.js
 examples/peer*
 # .ddnrc.js
+
+.turbo
+.pnpm-store
+.husky
+.github

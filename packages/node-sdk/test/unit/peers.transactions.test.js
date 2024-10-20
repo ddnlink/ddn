@@ -7,7 +7,7 @@ import Debug from 'debug'
 import DdnUtils from '@ddn/utils'
 import { DdnJS, node } from '../ddn-js'
 
-import { requireFile } from '@ddn/core/lib/getUserConfig'
+import { requireFile } from '@ddn/core/dist/getUserConfig'
 
 const debug = Debug('debug')
 

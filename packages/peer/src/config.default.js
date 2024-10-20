@@ -237,5 +237,6 @@ export default {
    *  "@ddn/asset-aob"
    * ]
    */
-  assets: ['@ddn/asset-evidence', '@ddn/asset-aob', '@ddn/asset-dapp', '@ddn/asset-dao']
+  assets: ['@ddn/asset-evidence', '@ddn/asset-aob', '@ddn/asset-dapp', '@ddn/asset-dao'],
+  crypto: '@ddn/crypto-nacl' // 绿化钠 @ddn/crypto-nacl ，国密 @ddn/crypto-sm
 }

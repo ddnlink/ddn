@@ -1,4 +1,4 @@
-import constants from '../constants'
+import { constants } from '../config'
 
 const interval = constants.interval
 const delegates = constants.delegates

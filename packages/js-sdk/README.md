@@ -12,14 +12,21 @@ npm install @ddn/js-sdk --save
 
 ## Usage 使用
 
-只要基于 ES6 开发，Node.js或浏览器端都可以这样调用
+只要基于 ES6 开发，浏览器端可以这样调用
 
 ```
 // 初始化网络标示以及加密算法
 import DdnJS from '@ddn/js-sdk';
 // 加密算法 是['@ddn/crypto-nacl', '@ddn/crypto-sm']其中之一默认为@ddn/crypto-nacl
-// DdnJS.init('0ab796cd','@ddn/crypto-nacl) 这是默认值
-DdnJS.init('0ab796cd')
+
+// 默认的配置和常量是测试链的，想要修改自己的配置
+window.jsSdk.config = {
+    // code... 参考：.ddnrc.js 配置项
+}
+
+window.jsSdk.constants = {
+    // code... 参考：向链定制项目方获取
+}
 ```
 
 Please reference the [ddn http interface documents](https://github.com/ddnlink/ddn-docs/js-sdk-api.md)
@@ -30,8 +37,9 @@ Please reference the [ddn http interface documents](https://github.com/ddnlink/d
 
 ## Release 发布
 
-每次修改发布，请执行一次如下命令，以便打包 web 端文件`ddn.min.js`
+每次修改发布，请执行一次如下命令，**目前主流浏览器都支持 ES6 模块化，所以不需要使用 UMD 模块化，也不需要打包**
 
 ```
-$ yarn build
+$ cd /path/to/ddn
+$ pnpm build --filter @ddn/js-sdk
 ```

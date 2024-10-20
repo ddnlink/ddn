@@ -1,5 +1,5 @@
 import ByteBuffer from 'bytebuffer'
-import constants from '../../constants'
+import { constants } from '../../config'
 
 export default {
   dapp: async dapp => {

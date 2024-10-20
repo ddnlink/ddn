@@ -1,3 +1,30 @@
+
+# [3.7.0](https://github.com/ddnlink/ddn/compare/v2.4.3...v3.7.0) (2024-08-05)
+
+
+### Bug Fixes
+
+* DDN release ([68a53ed](https://github.com/ddnlink/ddn/commit/68a53ed12f798b36150d3549728f625b551a24cc))
+* set corepack disable to use pnpm ([ddbd1d0](https://github.com/ddnlink/ddn/commit/ddbd1d03e12f9c485c0a40c3ccde2ea73ea6eb2d))
+* update .fatherrc.js ([3f89b46](https://github.com/ddnlink/ddn/commit/3f89b46d47ea44f563781fcc5224efca81f5a7e4))
+* update @ddn/peer to write ddn.pid when isDaemonMode is true ([efd372a](https://github.com/ddnlink/ddn/commit/efd372add4bf4e6b9aab0fc1155407fe0caef5a4))
+* update ddn-cli ([4c73dfd](https://github.com/ddnlink/ddn/commit/4c73dfd3a297fd31ce06f736bfb35d329225baa3))
+* update require ([7c2d5ca](https://github.com/ddnlink/ddn/commit/7c2d5ca7b6d4313b2bec10572ccff233a5adcbe4))
+
+
+### Features
+
+* add access constans.*.js method to @ddn/core ([8c4c7bd](https://github.com/ddnlink/ddn/commit/8c4c7bd60dfa79aa8525455301ce1ef7f6a8fe36))
+* add jest to root, delete @ddn/test and update @ddn/core to add getConstants methods ([1ee95a3](https://github.com/ddnlink/ddn/commit/1ee95a3e3b39eddf6de05e7d2f7ee6781b4a69f1))
+* release @ddn/core 2.4.7 ([adf2ede](https://github.com/ddnlink/ddn/commit/adf2ede2a9a2ed965c6fbd61a45ba2b7794d425a))
+* release 2.4.4 ([fccdd34](https://github.com/ddnlink/ddn/commit/fccdd34039a437d24b3e104a7dea49af15b28e1c))
+* update @ddn/node-sdk for ddnrc.default.js erroo and jest config for pro-packages ([46eb734](https://github.com/ddnlink/ddn/commit/46eb73414712511bc330576c1bb0f2d5c149a04d))
+* update asset* from .ddnrc.js to config, and Update to father4 + turbo + pnpm all right ([0ed2838](https://github.com/ddnlink/ddn/commit/0ed283880ab8b3a1f7976534661f84d31313012a))
+* update docker, and crypto/crypto-base ([6ada849](https://github.com/ddnlink/ddn/commit/6ada849bede2f9838b66c20360fd6777992a0539))
+* update father, jest to lastest and pnpm, packing all packages to dist by esbuild ([f798e26](https://github.com/ddnlink/ddn/commit/f798e266f6fa1e616f914407a49b0c00b3367a20))
+* update to pack contract all right ([ec82cdd](https://github.com/ddnlink/ddn/commit/ec82cddc36de71f9e83d0db00b71ce321ed44694))
+
+
 ## [3.6.4](https://github.com/ddnlink/ddn/compare/v2.2.0...v3.6.4) (2022-08-06)
 
 

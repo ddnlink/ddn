@@ -4,21 +4,6 @@ import * as DdnCrypto from '@ddn/crypto'
 import { constants } from '../config'
 import { getFee } from '../fees'
 
-// const constantsFile = path.resolve(__dirname, '..', '..', './constants.js')
-// let userConstantsFile, cryptoModule
-// try {
-//   userConstantsFile = require(constantsFile)
-// } catch (error) {
-//   userConstantsFile = {}
-// }
-// if (!userConstantsFile.crypto) {
-//   // userConstantsFile.crypto = '@ddn/crypto-nacl'
-//   cryptoModule = require('@ddn/crypto-nacl')
-// } else if (userConstantsFile.crypto === '@ddn/crypto-nacl') {
-//   cryptoModule = require('@ddn/crypto-nacl')
-// } else if (userConstantsFile.crypto === '@ddn/crypto-sm') {
-//   cryptoModule = require('@ddn/crypto-sm')
-// }
 const {
   nacl,
   getKeys,

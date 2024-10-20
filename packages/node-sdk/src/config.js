@@ -30,12 +30,14 @@ export const constants = mergeConfigs(defaultConstants, userConstants)
 /**
  * 用于初始化 Sdk 的 插件
  */
-function addAssets () {
+async function addAssets () {
   if (config.nethash !== constants.nethash) {
-    throw new Error(`Your nethash ${config.nethash} and ${constants.nethash} are inconsistent, please adjust them in the config/constants.js or .ddnrc.js file！`)
+    throw new Error(
+      `Your nethash ${config.nethash} and ${constants.nethash} are inconsistent, please adjust them in the config/constants.js or .ddnrc.js file！`
+    )
   }
 
-  Asset.Utils.loadFromObject(config.assets)
+  await Asset.Utils.loadFromObject(config.assets)
 }
 
 addAssets()

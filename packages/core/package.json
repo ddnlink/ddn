@@ -1,9 +1,9 @@
 {
   "name": "@ddn/core",
-  "version": "2.4.3",
+  "version": "2.4.8",
   "description": "DDN core.",
-  "main": "./lib/index.js",
-  "module": "./dist/index.esm.js",
+  "main": "./dist/index.js",
+  "types": "dist/index.d.ts",
   "keywords": [
     "ddn",
     "core"
@@ -12,7 +12,6 @@
   "homepage": "https://github.com/ddnlink/ddn/tree/master/packages/core#readme",
   "license": "AGPL 3.0",
   "files": [
-    "lib",
     "dist"
   ],
   "repository": {
@@ -23,12 +22,16 @@
   "bugs": {
     "url": "https://github.com/ddnlink/ddn/issues"
   },
+  "scripts": {
+    "build": "father build",
+    "dev": "father dev"
+  },
   "dependencies": {
     "@babel/preset-typescript": "7.3.3",
     "@babel/register": "7.4.4",
     "@umijs/error-code-map": "^1.0.0",
     "chalk": "2.4.2",
-    "extend2": "1.0.0",
+    "extend2": "^1.0.0",
     "marked": "0.6.2",
     "marked-terminal": "3.2.0",
     "os-locale": "^4.0.0",
