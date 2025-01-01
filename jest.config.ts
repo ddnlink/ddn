@@ -5,6 +5,7 @@ export default {
   modulePathIgnorePatterns: ['<rootDir>/packages/.+/compiled', '<rootDir>/packages/.+/fixtures'],
   transformIgnorePatterns: ['/node_modules/', '/compiled/'],
   collectCoverageFrom: [
+    '**/*/node_modules/(?!(@ddn)/)',
     '**/src/**/*.{ts,tsx}',
     '!**/examples/**/*.{js,jsx,ts,tsx}',
     '!**/compiled/**/*.{js,jsx}',

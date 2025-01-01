@@ -24,6 +24,8 @@ class Round {
     this._rewardsByRound = {}
     this._delegatesByRound = {}
     // this._unDelegatesByRound = {}
+    this._transitioning = false;
+    this._lastStableHeight = 0;
   }
 
   async prepare () {
@@ -308,6 +310,168 @@ class Round {
       previousBlock
     })
     process.exit(1)
+  }
+
+  async switchRound(newRound) {
+    try {
+      this._transitioning = true;
+      
+      await this.waitForStability();
+      
+      this._lastStableHeight = await this.getCurrentHeight();
+      
+      const prevRound = this.currentRound;
+      this.currentRound = newRound;
+      
+      if (!await this.validateDelegateList(newRound)) {
+        throw new Error('受托人列表验证失败');
+      }
+      
+      await this.broadcastRoundSwitch(prevRound, newRound);
+      
+      await this.waitForNetworkConfirmation();
+      
+    } catch (err) {
+      await this.rollbackRoundSwitch();
+      throw err;
+    } finally {
+      this._transitioning = false;
+    }
+  }
+
+  async waitForStability() {
+    const MAX_WAIT = 10;
+    let attempts = 0;
+    
+    while (attempts < MAX_WAIT) {
+      if (await this.isNetworkStable()) {
+        return true;
+      }
+      await this.sleep(1000);
+      attempts++;
+    }
+    
+    throw new Error('网络状态不稳定，无法切换 round');
+  }
+
+  async isNetworkStable() {
+    const peers = await this.getPeerStatus();
+    const stablePeers = peers.filter(p => p.height === this.getCurrentHeight());
+    return stablePeers.length >= this.getMinimumPeers();
+  }
+
+  async getCurrentHeight() {
+    const lastBlock = await this.runtime.block.getLastBlock();
+    return lastBlock.height;
+  }
+
+  async validateDelegateList(round) {
+    try {
+      const delegates = await this.runtime.delegate.getDisorderDelegatePublicKeys(round);
+      
+      // 验证受托人数量
+      if (delegates.length !== this.constants.delegates) {
+        return false;
+      }
+      
+      // 验证受托人资格
+      for (const delegate of delegates) {
+        const account = await this.runtime.account.getAccountByPublicKey(delegate);
+        if (!account || !account.is_delegate) {
+          return false;
+        }
+      }
+      
+      return true;
+    } catch (err) {
+      this.logger.error('受托人列表验证失败:', err);
+      return false;
+    }
+  }
+
+  async broadcastRoundSwitch(prevRound, newRound) {
+    try {
+      const roundData = {
+        prevRound,
+        newRound,
+        height: await this.getCurrentHeight(),
+        timestamp: Date.now()
+      };
+      
+      await this.runtime.peer.broadcast('round/switch', roundData);
+    } catch (err) {
+      this.logger.error('广播轮次切换失败:', err);
+      throw err;
+    }
+  }
+
+  async waitForNetworkConfirmation() {
+    const CONFIRMATION_THRESHOLD = 0.8; // 80%节点确认阈值
+    const MAX_WAIT_TIME = 60000; // 最大等待时间60秒
+    const startTime = Date.now();
+    
+    while (Date.now() - startTime < MAX_WAIT_TIME) {
+      const peers = await this.getPeerStatus();
+      const confirmedPeers = peers.filter(p => p.round === this.currentRound);
+      
+      if (confirmedPeers.length / peers.length >= CONFIRMATION_THRESHOLD) {
+        return true;
+      }
+      
+      await this.sleep(1000);
+    }
+    
+    throw new Error('等待网络确认超时');
+  }
+
+  async rollbackRoundSwitch() {
+    try {
+      // 恢复到之前的轮次
+      this.currentRound = this._lastRound;
+      
+      // 重置高度
+      await this.runtime.block.setLastBlock(
+        await this.runtime.block.findOne({
+          height: this._lastStableHeight
+        })
+      );
+      
+      // 通知其他节点
+      await this.broadcastRoundSwitch(this.currentRound, this._lastRound);
+    } catch (err) {
+      this.logger.error('轮次切换回滚失败:', err);
+      throw err;
+    }
+  }
+
+  async getPeerStatus() {
+    try {
+      const peers = await this.runtime.peer.getRandomPeers();
+      const statuses = [];
+      
+      for (const peer of peers) {
+        try {
+          const status = await this.runtime.peer.getPeerStatus(peer);
+          statuses.push(status);
+        } catch (err) {
+          this.logger.warn(`获取节点 ${peer.ip} 状态失败:`, err);
+        }
+      }
+      
+      return statuses;
+    } catch (err) {
+      this.logger.error('获取节点状态失败:', err);
+      throw err;
+    }
+  }
+
+  getMinimumPeers() {
+    // 返回最小所需确认节点数(通常为总节点数的2/3)
+    return Math.ceil(this.constants.delegates * 2 / 3);
+  }
+
+  sleep(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
   }
 }
 

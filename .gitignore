@@ -60,6 +60,7 @@ config/mainnet/*
 examples/peer*
 # .ddnrc.js
 
+.cursorrules
 .turbo
 .pnpm-store
 .husky

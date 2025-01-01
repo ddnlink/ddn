@@ -28,8 +28,7 @@ module.exports = {
   },
   peers: {
     list: [
-      { ip: '127.0.0.1', port: '9002' },
-      { ip: '127.0.0.1', port: '9003' },
+      { ip: '127.0.0.1', port: '9001' },
     ],
     blackList: [],
     options: {
@@ -38,8 +37,8 @@ module.exports = {
   },
   forging: {
     secret: [
-      // 'account cycle reflect retreat donor once mansion quote staff airport zero enable',
-      // 'please tragic gesture distance immense supreme amused weasel auto bag glad rate',
+      'account cycle reflect retreat donor once mansion quote staff airport zero enable',
+      'please tragic gesture distance immense supreme amused weasel auto bag glad rate',
       'roast minimum leave they there charge blast grace gown faculty hood aware',
       'perfect age spell digital pretty engage hope tattoo mimic network outdoor mesh',
       'plunge cave taste cargo village use art conduct aerobic hard obvious zone',

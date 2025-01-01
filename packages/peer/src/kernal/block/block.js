@@ -12,6 +12,7 @@ import * as DdnCrypto from '@ddn/crypto'
 import { runtimeState, bignum } from '@ddn/utils'
 import { System } from '../../utils/system'
 import BlockStatus from './block-status'
+import BlockCache from './block-cache'
 
 let _singleton
 
@@ -28,14 +29,17 @@ class Block {
     this._context = context
 
     this._lastBlock = null
-    this._blockCache = {}
+    this._blockCache = new BlockCache({ 
+      maxSize: 1000, 
+      logger: this.logger 
+    })
 
     this._lastVoteTime = null
-
     this._lastPropose = null
     this._proposeCache = {}
 
     this._blockStatus = new BlockStatus(context)
+    this._isSyncing = false
   }
 
   async getCount (where) {
@@ -211,7 +215,7 @@ class Block {
       await this.serializeBlock2Db(block, dbTrans)
     } catch (err) {
       this.logger.error(`serializeBlock2Db fail ${err}`)
-      throw new Error(`serializeBlock2Db fail ${JSON.stringify(err)}`)
+      throw new Error(`serializeBlock2Db fail ${err}`)
     }
     if (block.transactions && block.transactions.length > 0) {
       for (let i = 0; i < block.transactions.length; i++) {
@@ -229,18 +233,17 @@ class Block {
   async createBlock (data) {
     const transactions = this._sortTransactions(data.transactions)
 
-    this.logger.debug('Height is being created!!')
     const nextHeight = data.previous_block ? bignum.plus(data.previous_block.height, 1).toString() : '1' // bignum update //wxm block database
     this.logger.debug(`Height is being created, nextHeight: ${nextHeight}`)
     const reward = this._blockStatus.calcReward(nextHeight)
 
     let totalFee = bignum.new(0)
     let totalAmount = bignum.new(0)
-    let size = 0
 
     const blockTransactions = []
     let payloadBytes = ''
 
+    let size = 0
     for (const trs of transactions) {
       const transaction = this.runtime.transaction.deepCloneTransaction(trs)
       const bytes = DdnCrypto.getBytes(transaction)
@@ -293,70 +296,74 @@ class Block {
   async receiveNewBlock (block, votes) {
     if (this.runtime.state !== runtimeState.Ready || !this.runtime.loaded) {
       this.logger.debug(
-        `prepare is not ready ,state: ${this.runtime.state}, Ready: ${runtimeState.Ready}, loaded: ${this.runtime.loaded}`
+        `Not ready to receive blocks, state: ${this.runtime.state}, Ready: ${runtimeState.Ready}, loaded: ${this.runtime.loaded}`
       )
       return
     }
 
-    if (this._blockCache[block.id]) {
-      this.logger.debug(`blockCache include block: ${block.id}`)
+    if (this._isSyncing) {
+      this.logger.debug('Currently syncing blocks, ignore new block')
       return
     }
-    this._blockCache[block.id] = true
+
+    if (this._blockCache.has(block.id)) {
+      this.logger.debug(`Block ${block.id} already in cache`)
+      return
+    }
+
+    // 添加到缓存
+    this._blockCache.add(block.id, block)
 
     await new Promise((resolve, reject) => {
       this.sequence.add(
         async cb => {
-          if (
-            block.previous_block === this._lastBlock.id &&
-            bignum.isEqualTo(bignum.plus(this._lastBlock.height, 1), block.height)
-          ) {
-            // wxm block database
-            this.logger.info(
-              `Received new block id: ${block.id} height: ${block.height} round: ${await this.runtime.round.getRound(
-                this.getLastBlock().height
-              )} slot: ${this.runtime.slot.getSlotNumber(block.timestamp)} reward: ${this.getLastBlock().reward}`
-            )
-            try {
+          try {
+            // 正常的下一个区块
+            if (block.previous_block === this._lastBlock.id && 
+                bignum.isEqualTo(bignum.plus(this._lastBlock.height, 1), block.height)) {
+              
+              this.logger.info(
+                `Received new block id: ${block.id} height: ${block.height} round: ${await this.runtime.round.getRound(
+                  this.getLastBlock().height
+                )} slot: ${this.runtime.slot.getSlotNumber(block.timestamp)} reward: ${this.getLastBlock().reward}`
+              )
+
               await this.processBlock(block, votes, true, true, true)
-            } catch (err) {
-              this.logger.error(`Received new block err: ${err}`)
+              cb()
+            } 
+            // 分叉情况1：同一高度，不同的前一个区块
+            else if (block.previous_block !== this._lastBlock.id && 
+                     bignum.isEqualTo(bignum.plus(this._lastBlock.height, 1), block.height)) {
+              
+              await this.handleFork(block, 1)
+              cb('Fork')
+            } 
+            // 分叉情况2：同一高度和前一个区块，但区块ID不同
+            else if (block.previous_block === this._lastBlock.previous_block && 
+                     bignum.isEqualTo(block.height, this._lastBlock.height) && 
+                     block.id !== this._lastBlock.id) {
+              
+              await this.handleFork(block, 2)
+              cb('Fork')
+            } 
+            // 区块高度不连续
+            else if (bignum.isGreaterThan(block.height, bignum.plus(this._lastBlock.height, 1))) {
+              this.logger.info(`Received discontinuous block height ${block.height}`)
+              await this.startSync(this._lastBlock.height)
+              cb()
+            } 
+            else {
+              cb()
             }
-            cb()
-          } else if (
-            block.previous_block !== this._lastBlock.id &&
-            bignum.isEqualTo(bignum.plus(this._lastBlock.height, 1), block.height)
-          ) {
-            // wxm block database
-            // } else if (block.previous_block !== this._lastBlock.id && this._lastBlock.height + 1 === block.height) { // wxm block database
-            // Fork: Same height but different previous block id
-            await this.runtime.delegate.fork(block, 1)
-
-            cb('Fork-1')
-          } else if (
-            block.previous_block === this._lastBlock.previous_block &&
-            bignum.isEqualTo(block.height, this._lastBlock.height) &&
-            block.id !== this._lastBlock.id
-          ) {
-            // wxm block database
-            // } else if (block.previous_block === this._lastBlock.previous_block && block.height === this._lastBlock.height && block.id !== this._lastBlock.id) { // wxm block database
-            // Fork: Same height and previous block id, but different block id
-            this.logger.error(`fork 2 block: ${block}, lastBlock: ${this._lastBlock}`)
-            await this.runtime.delegate.fork(block, 2)
-            cb('Fork-2')
-          } else if (bignum.isGreaterThan(block.height, bignum.plus(this._lastBlock.height, 1))) {
-            this.logger.info(`receive discontinuous block height ${block.height}`)
-
-            cb()
-          } else {
-            cb()
+          } catch (err) {
+            cb(err)
           }
         },
         err => {
           if (err) {
-            return reject(err)
+            reject(err)
+            return
           }
-
           resolve()
         }
       )
@@ -558,8 +565,6 @@ class Block {
             }
           }
 
-          this.logger.debug('apply block ok')
-
           if (isSaveBlock) {
             try {
               await this.saveBlock(block, dbTrans)
@@ -712,7 +717,6 @@ class Block {
 
     const expectedReward = this._blockStatus.calcReward(block.height)
 
-    // if (block.height !== 1 && !bignum.isEqualTo(expectedReward, block.reward)) {
     if (!bignum.isEqualTo(block.height, 1) && !bignum.isEqualTo(expectedReward, block.reward)) {
       throw new Error('Invalid block reward')
     }
@@ -754,8 +758,24 @@ class Block {
       throw new Error(`Invalid amount of block assets: ${block.id}`)
     }
 
-    let totalAmount = bignum.new(0)
+    this.caculateRound(block)
+    
+    if (votes) {
+      if (!bignum.isEqualTo(block.height, votes.height)) {
+        throw new Error('Votes height is not correct')
+      }
+      if (block.id !== votes.id) {
+        throw new Error('Votes id is not correct')
+      }
+      if (!votes.signatures || !this.runtime.consensus.hasEnoughVotesRemote(votes)) {
+        throw new Error('Votes signature is not correct')
+      }
+      await this.verifyBlockVotes(block, votes)
+    }
+  }
 
+  caculateRound(block) {
+    let totalAmount = bignum.new(0)
     let totalFee = bignum.new(0)
 
     let payloadBytes = ''
@@ -792,19 +812,6 @@ class Block {
 
     if (!bignum.isEqualTo(totalFee, block.total_fee)) {
       throw new Error(`Invalid total fee: ${block.id}`)
-    }
-
-    if (votes) {
-      if (!bignum.isEqualTo(block.height, votes.height)) {
-        throw new Error('Votes height is not correct')
-      }
-      if (block.id !== votes.id) {
-        throw new Error('Votes id is not correct')
-      }
-      if (!votes.signatures || !this.runtime.consensus.hasEnoughVotesRemote(votes)) {
-        throw new Error('Votes signature is not correct')
-      }
-      await this.verifyBlockVotes(block, votes)
     }
   }
 
@@ -1242,8 +1249,8 @@ class Block {
 
           try {
             const blocksData = await this.runtime.dataquery.queryFullBlockData(where, limit || 1, 0, [
-              ['height', 'asc']
-            ])
+              ['height', 'asc']]
+            )
 
             const blocks = await this._parseObjectFromFullBlocksData(blocksData)
             this.logger.debug('loadBlocksOffset blocks[0].height', blocks[0].height) // height is bignum 2020.8
@@ -1457,6 +1464,184 @@ class Block {
   getHeight (req, cb) {
     const lastBlock = this.runtime.block.getLastBlock()
     return cb(null, lastBlock && lastBlock.height ? lastBlock.height : '0')
+  }
+
+  /**
+   * 获取共同区块
+   * @param {Object} block 区块数据
+   * @returns {Promise<Object>} 共同区块
+   */
+  async getCommonBlock(block) {
+    try {
+      const minHeight = Math.max(1, block.height - 5)
+      const maxHeight = block.height
+      const blocks = await this.getBlocks(minHeight, maxHeight)
+      
+      for (const b of blocks) {
+        if (b.id === block.previous_block) {
+          return b
+        }
+      }
+      throw new Error(`Common block not found for block ${block.id} at height ${block.height}`)
+    } catch (err) {
+      this.logger.error('Failed to get common block:', err)
+      throw err
+    }
+  }
+
+  /**
+   * 回滚到指定区块
+   * @param {number} height 目标高度
+   */
+  async rollbackToBlock(height) {
+    try {
+      const currentBlock = this.getLastBlock()
+      if (currentBlock.height <= height) {
+        return
+      }
+
+      this.logger.warn(`Rolling back to block at height ${height} from ${currentBlock.height}`)
+      
+      await this.dao.transaction(async dbTrans => {
+        try {
+          // 回滚区块数据
+          await this.simpleDeleteAfterBlock(height)
+          
+          // 获取目标区块
+          const targetBlock = await this.dao.findOne('block', {
+            where: { height },
+            order: [['height', 'DESC']]
+          })
+          
+          if (!targetBlock) {
+            this.logger.error(`Target block at height ${height} not found`)
+            return
+          }
+
+          // 设置为最新区块
+          this.setLastBlock(targetBlock)
+          
+          // 清理缓存
+          this._blockCache.clear()
+          this._proposeCache = {}
+
+          this.logger.info(`Successfully rolled back to block at height ${height}`)
+        } catch (err) {
+          this.logger.error('Failed during rollback transaction:', err)
+          // 不抛出错误，让事务自动回滚
+          return
+        }
+      })
+    } catch (err) {
+      this.logger.error('Failed to rollback:', err)
+      // 记录错误但不中断程序
+      this.runtime.state = runtimeState.Rollback
+      // 可以触发一个回滚失败的事件，让其他模块知道
+      this.runtime.bus && this.runtime.bus.message('rollbackFailed', {
+        height,
+        error: err.message
+      })
+    }
+  }
+
+  /**
+   * 处理分叉
+   * @param {Object} block 区块数据
+   * @param {number} type 分叉类型
+   */
+  async handleFork(block, type) {
+    this.logger.warn({
+      fork: {
+        type,
+        height: block.height,
+        id: block.id,
+        previousBlock: block.previous_block,
+        timestamp: block.timestamp
+      },
+      currentBlock: {
+        height: this._lastBlock.height,
+        id: this._lastBlock.id,
+        previousBlock: this._lastBlock.previous_block,
+        timestamp: this._lastBlock.timestamp
+      }
+    }, 'Fork detected')
+
+    try {
+      // 通知委托人处理分叉
+      await this.runtime.delegate.fork(block, type)
+
+      // 获取共同区块
+      const commonBlock = await this.getCommonBlock(block)
+      if (!commonBlock) {
+        this.logger.error('Failed to find common block, will retry sync later')
+        return
+      }
+      
+      // 回滚到共同区块
+      await this.rollbackToBlock(commonBlock.height)
+      
+      // 清理缓存
+      this._blockCache.clear()
+      this._proposeCache = {}
+      
+      // 启动同步
+      await this.startSync(commonBlock.height)
+
+    } catch (err) {
+      this.logger.error('Fork handling failed:', err)
+      // 记录错误但不中断程序
+      this.runtime.state = runtimeState.Fork
+      // 可以触发一个分叉处理失败的事件
+      this.runtime.bus && this.runtime.bus.message('forkHandlingFailed', {
+        block,
+        type,
+        error: err.message
+      })
+      
+      // 设置一个定时器，稍后重试
+      setTimeout(() => {
+        this.startSync(this._lastBlock.height)
+          .catch(e => this.logger.error('Retry sync failed:', e))
+      }, 10000) // 10秒后重试
+    }
+  }
+
+  /**
+   * 启动同步
+   * @param {number} fromHeight 起始高度
+   */
+  async startSync(fromHeight) {
+    if (this._isSyncing) {
+      this.logger.debug('Already syncing blocks')
+      return
+    }
+
+    try {
+      this._isSyncing = true
+      this.logger.info(`Start syncing blocks from height ${fromHeight}`)
+      
+      // 获取可用节点
+      const peers = await this.runtime.peer.p2p.list()
+      if (!peers || peers.length === 0) {
+        throw new Error('No peers available for sync')
+      }
+
+      // 从其他节点同步区块
+      for (const peer of peers) {
+        try {
+          await this.runtime.loader.loadBlocksFromPeer(peer, fromHeight)
+          break
+        } catch (err) {
+          this.logger.warn(`Failed to sync blocks from peer ${peer.ip}:${peer.port}:`, err)
+          continue
+        }
+      }
+    } catch (err) {
+      this.logger.error('Failed to start sync:', err)
+      throw err
+    } finally {
+      this._isSyncing = false
+    }
   }
 }
 

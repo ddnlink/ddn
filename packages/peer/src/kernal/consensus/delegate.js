@@ -24,6 +24,9 @@ class Delegate {
     this._myDelegateNum = 0
 
     this._forgingEanbled = true
+
+    this._forkedRound = null;
+    this._recoveryMode = false;
   }
 
   /**
@@ -364,6 +367,236 @@ class Delegate {
       previous_block: block.previous_block,
       cause
     })
+  }
+
+  async handleFork(block, cause) {
+    try {
+      this._recoveryMode = true;
+      this._forkedRound = await this.getCurrentRound();
+      
+      // 记录分叉信息
+      await this.logger.warn(`检测到分叉: ${cause}, 高度: ${block.height}`);
+      
+      // 保存当前状态
+      const snapshot = await this.createStateSnapshot();
+      
+      // 尝试恢复到分叉点
+      await this.rollbackToBlock(block.height - 1);
+      
+      // 重新同步区块
+      await this.synchronizeFromPeers();
+      
+      // 如果恢复失败，使用快照恢复
+      if (!await this.isChainValid()) {
+        await this.restoreSnapshot(snapshot);
+      }
+
+      // 记录恢复结果
+      await this.logger.info(`分叉处理完成, 高度: ${block.height}`);
+
+    } catch (err) {
+      this.logger.error('分叉处理失败:', err);
+      throw err;
+    } finally {
+      this._recoveryMode = false;
+      this._forkedRound = null;
+    }
+  }
+
+  async cleanup() {
+    if (this._recoveryMode) {
+      await this.finalizeRecovery();
+    }
+    
+    // 确保清理所有状态
+    await this.saveConsensusState();
+    await this.notifyPeers();
+  }
+
+  async createStateSnapshot() {
+    try {
+      const currentState = {
+        height: await this.getCurrentHeight(),
+        round: this._forkedRound,
+        delegates: await this.getDelegatePublickKeysSortByVote(),
+        blocks: await this.getRecentBlocks(100), // 获取最近100个区块用于恢复
+        timestamp: Date.now()
+      };
+
+      // 保存快照到数据库
+      await this.dao.insert('snapshots', {
+        height: currentState.height,
+        snapshot: JSON.stringify(currentState),
+        created_at: new Date()
+      });
+
+      return currentState;
+    } catch (err) {
+      this.logger.error('创建状态快照失败:', err);
+      throw err;
+    }
+  }
+
+  async rollbackToBlock(height) {
+    try {
+      // 获取目标区块
+      const targetBlock = await this.runtime.block.findOne({
+        height: height
+      });
+
+      if (!targetBlock) {
+        throw new Error(`未找到高度为 ${height} 的区块`);
+      }
+
+      // 删除目标高度之后的区块
+      await this.dao.remove('blocks', {
+        where: {
+          height: {
+            $gt: height
+          }
+        }
+      });
+
+      // 重置内存中的状态
+      await this.runtime.block.setLastBlock(targetBlock);
+      
+      this.logger.info(`已回滚到区块高度: ${height}`);
+    } catch (err) {
+      this.logger.error('区块回滚失败:', err);
+      throw err;
+    }
+  }
+
+  async synchronizeFromPeers() {
+    try {
+      const peers = await this.runtime.peer.getRandomPeers();
+      if (!peers.length) {
+        throw new Error('没有可用的节点进行同步');
+      }
+
+      // 获取当前高度
+      const currentHeight = await this.getCurrentHeight();
+      
+      // 从每个节点获取区块并验证
+      for (const peer of peers) {
+        try {
+          const blocks = await this.runtime.peer.getBlocksFromPeer(peer, currentHeight);
+          await this.validateAndApplyBlocks(blocks);
+        } catch (err) {
+          this.logger.warn(`从节点 ${peer.ip} 同步失败:`, err);
+          continue;
+        }
+      }
+    } catch (err) {
+      this.logger.error('节点同步失败:', err);
+      throw err;
+    }
+  }
+
+  async isChainValid() {
+    try {
+      // 验证最近的100个区块
+      const recentBlocks = await this.getRecentBlocks(100);
+      
+      for (let i = 1; i < recentBlocks.length; i++) {
+        const currentBlock = recentBlocks[i];
+        const previousBlock = recentBlocks[i - 1];
+        
+        // 验证区块连续性
+        if (currentBlock.previous_block !== previousBlock.id) {
+          return false;
+        }
+        
+        // 验证区块签名
+        if (!this.verifyBlockSignature(currentBlock)) {
+          return false;
+        }
+      }
+      
+      return true;
+    } catch (err) {
+      this.logger.error('链验证失败:', err);
+      return false;
+    }
+  }
+
+  async restoreSnapshot(snapshot) {
+    try {
+      // 验证快照数据完整性
+      if (!snapshot || !snapshot.blocks || !snapshot.delegates) {
+        throw new Error('快照数据不完整');
+      }
+
+      // 回滚到快照高度
+      await this.rollbackToBlock(snapshot.height - 1);
+      
+      // 重新应用快照中的区块
+      await this.validateAndApplyBlocks(snapshot.blocks);
+      
+      // 恢复受托人列表
+      await this.restoreDelegateList(snapshot.delegates);
+      
+      this.logger.info(`已恢复到快照状态, 高度: ${snapshot.height}`);
+    } catch (err) {
+      this.logger.error('快照恢复失败:', err);
+      throw err;
+    }
+  }
+
+  async finalizeRecovery() {
+    try {
+      // 清理临时数据
+      await this.dao.remove('snapshots', {
+        where: {
+          created_at: {
+            $lt: new Date(Date.now() - 24 * 60 * 60 * 1000) // 删除24小时前的快照
+          }
+        }
+      });
+      
+      // 广播当前状态
+      await this.broadcastCurrentState();
+      
+      this.logger.info('恢复流程已完成');
+    } catch (err) {
+      this.logger.error('恢复流程终止失败:', err);
+      throw err;
+    }
+  }
+
+  async saveConsensusState() {
+    try {
+      const state = {
+        height: await this.getCurrentHeight(),
+        round: this._forkedRound,
+        lastBlock: await this.runtime.block.getLastBlock(),
+        timestamp: Date.now()
+      };
+      
+      await this.dao.insert('consensus_state', {
+        state: JSON.stringify(state),
+        created_at: new Date()
+      });
+    } catch (err) {
+      this.logger.error('保存共识状态失败:', err);
+      throw err;
+    }
+  }
+
+  async notifyPeers() {
+    try {
+      const currentState = {
+        height: await this.getCurrentHeight(),
+        round: this._forkedRound,
+        lastBlock: await this.runtime.block.getLastBlock()
+      };
+      
+      // 广播给所有节点
+      await this.runtime.peer.broadcast('consensus/state', currentState);
+    } catch (err) {
+      this.logger.error('节点通知失败:', err);
+      throw err;
+    }
   }
 }
 

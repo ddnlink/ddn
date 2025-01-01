@@ -24,8 +24,9 @@
   "scripts": {
     "dev": "turbo dev --force",
     "build": "turbo build  --force",
+    "build:watch": "turbo build -- --watch --force",
     "build:prod": "pnpm --filter ddn-starter build:prod",
-    "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js",
+    "test": "jest",
     "test:e2e": "jest --config jest.e2e.config.ts",
     "format": "pnpm lint:fix && pnpm prettier",
     "lint": "eslint --ext .js packages/**/src",
@@ -34,7 +35,6 @@
     "lint-staged:js": "eslint --ext .js",
     "prettier": "prettier --write ./packages/**/src/**/**/* ./packages/**/test/**/**/*",
     "build:dev": "NODE_ENV=development node ./scripts/initCryptoDependent.js && father build -w",
-    "build:watch": "node ./scripts/initCryptoDependent.js && father build -w",
     "build:docker": "node ./scripts/initCryptoDependent.js && father build --docker",
     "changelog": "conventional-changelog -p angular -i CHANGELOG.md -w",
     "chore:update-deps": "sh ./scripts/reinstall_deps.sh",
@@ -47,7 +47,9 @@
     "doc:build": "DDN_ENV=docs dumi build",
     "doc:deploy": "DDN_ENV=docs deploy website",
     "pkg:fix": "manypkg fix",
-    "postinstall": "manypkg check"
+    "postinstall": "manypkg check",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage"
   },
   "config": {
     "commitizen": {
@@ -115,22 +117,6 @@
     "ts-node": "^10.9.2",
     "turbo": "^2.0.9",
     "typescript": "^3.9.10"
-  },
-  "//": "下面是 pnpm 独有的配置",
-  "pnpm": {
-    "executionEnv": {
-      "nodeVersion": "20.13.1"
-    },
-    "peerDependencyRules": {
-      "ignoreMissing": [
-        "webpack",
-        "eslint"
-      ]
-    },
-    "//": "对于多版本的情况，使用下面的方式统一覆盖为一个版本，因为很多第三方包你是无法限定其版本的",
-    "overrides": {
-      "resolve": "1.22.8"
-    }
   },
   "packageManager": "pnpm@9.6.0"
 }

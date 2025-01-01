@@ -52,11 +52,7 @@
     "test:localnet": "./node_modules/.bin/mocha test/localnet/**/*.test.js"
   },
   "dependencies": {
-    "@ddn/asset-aob": "workspace:^",
     "@ddn/asset-base": "workspace:^",
-    "@ddn/asset-dao": "workspace:^",
-    "@ddn/asset-dapp": "workspace:^",
-    "@ddn/asset-evidence": "workspace:^",
     "@ddn/core": "workspace:^",
     "@ddn/crypto": "workspace:^",
     "@ddn/crypto-nacl": "workspace:^",

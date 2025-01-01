@@ -18,6 +18,10 @@ module.exports = {
   superPeers: 21,
   voters: 33,
   remoteVoters: 1,
+  minStablePeers: 2/3, // 最小稳定节点比例
+  maxRecoveryAttempts: 3, // 最大恢复尝试次数
+  roundSwitchTimeout: 30000, // round切换超时时间(ms)
+
   maxPayloadLength: 8 * 1024 * 1024,
   blockHeaderLength: 248,
   addressLength: 208,
