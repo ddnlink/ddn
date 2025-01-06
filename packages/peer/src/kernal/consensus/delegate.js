@@ -565,7 +565,7 @@ class Delegate {
 
   async synchronizeFromPeers() {
     try {
-      const peers = await this.runtime.peer.getRandomPeers();
+      const peers = await this.runtime.peer.getPeers();
       if (!peers.length) {
         throw new Error('没有可用的节点进行同步');
       }

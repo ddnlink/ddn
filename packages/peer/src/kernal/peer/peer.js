@@ -2,9 +2,11 @@
  * @Author: imfly
  * @Email: kubying@foxmail.com
  * @Date: 2024-06-29 23:08:40
- * @Last Modified by:   Someone
- * @Last Modified time: 2024-07-28 18:28:52
- * @Description: Peer of DDN
+ * @Last Modified by:   imfly
+ * @Last Modified time: 2025-01-06 17:28:52
+ * @Description: Peer of DDN, responsible for communication and data synchronization between nodes, 
+ * including p2p network communication, block synchronization, transaction synchronization, account 
+ * synchronization, etc.
  */
 
 import path from 'path'
@@ -55,6 +57,18 @@ class Peer {
   // TODO: this.running.peer.getVersion() -> this.running.peer.version()
   async version () {
     return this.config.version
+  }
+
+  async getPeers () {
+    return this.p2p.inventory.getAllPeers()
+  }
+
+  /**
+   * get a random pipe
+   * @returns pipe
+   */
+  async getPeer(id) {
+    return !id ? this.p2p.inventory.getRandomPeer() : this.p2p.inventory.get(id)
   }
 
   /**

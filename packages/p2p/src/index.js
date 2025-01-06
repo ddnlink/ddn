@@ -20,7 +20,7 @@ import { Cache } from './cache'
  */
 export class P2P {
   // extends EventEmitter {
-  constructor (options) {
+  constructor(options) {
     // check if we have options
     options = options || {}
     this.port = +options.port || 9001
@@ -50,36 +50,36 @@ export class P2P {
   /**
    * init this server
    */
-  prepare () {
+  prepare() {
     const self = this
-    this.listen()
-    this.seeds.slice(0, this.maxConnectSize).forEach(seed => {
-      if (seed.id === this.id) return
+    self.listen()
+    self.seeds.slice(0, self.maxConnectSize).forEach(seed => {
+      if (seed.id === self.id) return
 
       self.connect(seed.port, seed.ip).catch(err => {
         if (err.errno === 'ECONNREFUSED') {
-          this.logger.error(`connect to seed: ${seed.ip}:${seed.port} fail: ECONNREFUSED`)
+          self.logger.error(`connect to seed: ${seed.ip}:${seed.port} fail: ECONNREFUSED`)
         }
       })
     })
 
-    this._discoverHandle = setInterval(this._discover.bind(this), this.cycle)
-    this._sortHandle = setInterval(this._sortPeers.bind(this), this.cycle * 360)
+    self._discoverHandle = setInterval(self._discover.bind(self), self.cycle)
+    self._sortHandle = setInterval(self._sortPeers.bind(self), self.cycle * 360)
 
     // todo: 什么时候算 ready 了？这里是自己本身被监听了，其他都执行了，其他节点也都执行了，但成本与否并未确定 imfly 20240630
-    this.ready = true
+    self.ready = true
   }
 
   /**
    * listen to other peers connect event
    */
-  listen () {
+  listen() {
     const self = this
     self._server = net.createServer()
     self._server.listen(
       {
-        port: this.port,
-        host: this.host || '0.0.0.0'
+        port: self.port,
+        host: self.host || '0.0.0.0'
       },
       () => {
         self.family = self._server.address().family
@@ -108,12 +108,12 @@ export class P2P {
    * @param {*} proxy
    * @returns
    */
-  async connect (port, host, proxy) {
+  async connect(port, host, proxy) {
     const self = this
     return new Promise((resolve, reject) => {
       const peer = new Peer({ host, port })
       if (peer.id === self.id) {
-        this.logger.warn(`Should not connect self: ${host}:${port}`)
+        self.logger.warn(`Should not connect self: ${host}:${port}`)
         reject(new Error(`Should not connect to self: ${host}:${port}`))
         return
       }
@@ -142,14 +142,113 @@ export class P2P {
     })
   }
 
-  _delPipe (pipe) {
+  /**
+   * Delegate the close server method to backend.
+   *
+   * @param callback
+   */
+  close(callback) {
+    clearInterval(this._discoverHandle)
+    clearInterval(this._sortHandle)
+
+    // close the net port if exist
+    if (this._server) {
+      this._server.removeAllListeners('data')
+      this._server.close(callback)
+
+      this.pool.reset()
+
+      this.logger.debug({ action: 'close server' })
+    } else {
+      this.logger.debug({ action: 'close server', warning: 'server already closed' })
+    }
+  }
+
+  /**
+   * GET method request data from peer
+   * @param {*} api
+   * @param {*} params
+   * @param {*} node
+   * @returns
+   */
+  async get(api, params, node) {
+    return await this._request(Message.commands.GET, api, params, node)
+  }
+
+  /**
+   * POST method request data from peer
+   * @param {*} api
+   * @param {*} data
+   * @param {*} node
+   * @returns
+   */
+  async post(api, data, node) {
+    return await this._request(Message.commands.POST, api, data, node)
+  }
+
+  /**
+   * PUT method request data from peer
+   * @param {*} api
+   * @param {*} data
+   * @param {*} node
+   * @returns
+   */
+  async put(api, data, node) {
+    return await this._request(Message.commands.PUT, api, data, node)
+  }
+
+  /**
+   * DELETE method request data from peer
+   * @param {*} api
+   * @param {*} params
+   * @param {*} node
+   * @returns
+   */
+  async delete(api, params, node) {
+    return await this._request(Message.commands.DELETE, api, params, node)
+  }
+
+  /**
+   * broadcast data to all connected peer
+   * @param {*} api
+   * @param {*} data
+   */
+  broadcast(api, data, signature) {
+    if (typeof api === 'object') {
+      data = api.data
+      api = api.api
+    }
+    if (!api || !data) return
+    const self = this
+    const { type, checksum, size, payload } = Message.getMetadata(data)
+    const key = signature || checksum
+    const fib = this.fib.get(key) || [this.id]
+    const peers = this.inventory.getNextHop(fib, 11)
+    fib.push(...peers.map(peer => peer.id))
+    peers.forEach(async peer => {
+      try {
+        if (self.id === peer.id) return
+        if (!self.pool.has(peer.id)) {
+          await self.connect(peer.port, peer.host)
+        }
+
+        const pipe = self.pool.get(peer.id)
+        pipe.send(Message.commands.PUSH, payload, { fib, api, type, checksum, size, signature })
+      } catch (err) {
+        self.logger.error('broadcast data failed', err)
+        throw err
+      }
+    })
+  }
+
+  _delPipe(pipe) {
     if (!pipe.id) return
     this.pool.delete(pipe.id)
     this.inventory.disable(pipe.id)
     this.logger.debug(`success remove pipe from pool: ${pipe.id}`)
   }
 
-  _addPipe (pipe, peer) {
+  _addPipe(pipe, peer) {
     pipe.id = peer.id
     pipe.host = peer.host
     pipe.port = peer.port
@@ -166,7 +265,7 @@ export class P2P {
    * @param {*} socket
    * @returns
    */
-  _createPipe (options) {
+  _createPipe(options) {
     const opt = {
       version: this.version,
       nethash: this.nethash,
@@ -194,32 +293,10 @@ export class P2P {
   }
 
   /**
-   * Delegate the close server method to backend.
-   *
-   * @param callback
-   */
-  close (callback) {
-    clearInterval(this._discoverHandle)
-    clearInterval(this._sortHandle)
-
-    // close the net port if exist
-    if (this._server) {
-      this._server.removeAllListeners('data')
-      this._server.close(callback)
-
-      this.pool.reset()
-
-      this.logger.debug({ action: 'close server' })
-    } else {
-      this.logger.debug({ action: 'close server', warning: 'server already closed' })
-    }
-  }
-
-  /**
    * answer to the peer requesting
    * @param {*} data
    */
-  _response (pipe, data, serial) {
+  _response(pipe, data, serial) {
     try {
       pipe.send(Message.commands.RESPONSE, data, undefined, serial)
     } catch (err) {
@@ -236,9 +313,9 @@ export class P2P {
    * @param {*} node optional
    * @returns
    */
-  async _request (method, api, data, node) {
+  async _request(method, api, data, node) {
     try {
-      const peer = await this.getPeer(node)
+      const peer = !node ? this.inventory.getRandomPeer() : node
       if (!peer) {
         this.logger.warn('Not found valid peer', node)
         return
@@ -272,7 +349,7 @@ export class P2P {
     }
   }
 
-  async _callApi (msg, peer) {
+  async _callApi(msg, peer) {
     try {
       const meta = msg.meta || {}
       if (!meta.api) return { error: `404: route: ${meta.api} notfound` }
@@ -299,7 +376,7 @@ export class P2P {
    * @param {*} pipe
    * @returns
    */
-  async _processMessage (msg, pipe) {
+  async _processMessage(msg, pipe) {
     let peer = this.inventory.get(pipe.id)
     if (!peer || peer.status === Peer.STATUS.disable) {
       this.inventory.addMap(pipe.id)
@@ -340,94 +417,9 @@ export class P2P {
   }
 
   /**
-   * GET method request data from peer
-   * @param {*} api
-   * @param {*} params
-   * @param {*} node
-   * @returns
-   */
-  async get (api, params, node) {
-    return await this._request(Message.commands.GET, api, params, node)
-  }
-
-  /**
-   * POST method request data from peer
-   * @param {*} api
-   * @param {*} data
-   * @param {*} node
-   * @returns
-   */
-  async post (api, data, node) {
-    return await this._request(Message.commands.POST, api, data, node)
-  }
-
-  /**
-   * PUT method request data from peer
-   * @param {*} api
-   * @param {*} data
-   * @param {*} node
-   * @returns
-   */
-  async put (api, data, node) {
-    return await this._request(Message.commands.PUT, api, data, node)
-  }
-
-  /**
-   * DELETE method request data from peer
-   * @param {*} api
-   * @param {*} params
-   * @param {*} node
-   * @returns
-   */
-  async delete (api, params, node) {
-    return await this._request(Message.commands.DELETE, api, params, node)
-  }
-
-  /**
-   * broadcast data to all connected peer
-   * @param {*} api
-   * @param {*} data
-   */
-  broadcast (api, data, signature) {
-    if (typeof api === 'object') {
-      data = api.data
-      api = api.api
-    }
-    if (!api || !data) return
-    const self = this
-    const { type, checksum, size, payload } = Message.getMetadata(data)
-    const key = signature || checksum
-    const fib = this.fib.get(key) || [this.id]
-    const peers = this.inventory.getNextHop(fib, 11)
-    fib.push(...peers.map(peer => peer.id))
-    peers.forEach(async peer => {
-      try {
-        if (self.id === peer.id) return
-        if (!self.pool.has(peer.id)) {
-          await self.connect(peer.port, peer.host)
-        }
-
-        const pipe = self.pool.get(peer.id)
-        pipe.send(Message.commands.PUSH, payload, { fib, api, type, checksum, size, signature })
-      } catch (err) {
-        self.logger.error('broadcast data failed', err)
-        throw err
-      }
-    })
-  }
-
-  /**
-   * get a random pipe
-   * @returns pipe
-   */
-  async getPeer (node) {
-    return !node ? this.inventory.getRandomPeer() : node
-  }
-
-  /**
    * discover peer from any a peer
    */
-  async _discover () {
+  async _discover() {
     try {
       const peer = this.inventory.getRandomPeer()
 
@@ -459,7 +451,7 @@ export class P2P {
   /**
    * sort peer and verify the connection of inventory
    */
-  async _sortPeers () {
+  async _sortPeers() {
     try {
       const self = this
       const peers = this.inventory.getAllPeers()

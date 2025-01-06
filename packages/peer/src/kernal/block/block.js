@@ -1651,7 +1651,7 @@ class Block {
       this.logger.info(`Start syncing blocks from height ${fromHeight}`)
 
       // 获取可用节点
-      const peers = await this.runtime.peer.p2p.list()
+      const peers = await this.runtime.peer.getPeers()
       if (!peers || peers.length === 0) {
         throw new Error('No peers available for sync')
       }

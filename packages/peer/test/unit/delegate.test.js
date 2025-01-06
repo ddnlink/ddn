@@ -19,7 +19,7 @@ describe('Delegate', () => {
         setLastBlock: jest.fn()
       },
       peer: {
-        getRandomPeers: jest.fn(),
+        getPeers: jest.fn(),
         getBlocksFromPeer: jest.fn(),
         broadcast: jest.fn(),
         getPeerStatus: jest.fn()
@@ -125,18 +125,18 @@ describe('Delegate', () => {
       const mockPeers = [{ ip: '127.0.0.1' }]
       const mockBlocks = [{ height: 101 }]
       
-      mockRuntime.peer.getRandomPeers.mockResolvedValue(mockPeers)
+      mockRuntime.peer.getPeers.mockResolvedValue(mockPeers)
       mockRuntime.peer.getBlocksFromPeer.mockResolvedValue(mockBlocks)
       
       await delegate.synchronizeFromPeers()
       
-      expect(mockRuntime.peer.getRandomPeers).toHaveBeenCalled()
+      expect(mockRuntime.peer.getPeers).toHaveBeenCalled()
       expect(mockRuntime.peer.getBlocksFromPeer).toHaveBeenCalled()
       expect(delegate.validateAndApplyBlocks).toHaveBeenCalledWith(mockBlocks)
     })
 
     it('当没有可用节点时应该抛出错误', async () => {
-      mockRuntime.peer.getRandomPeers.mockResolvedValue([])
+      mockRuntime.peer.getPeers.mockResolvedValue([])
       
       await expect(delegate.synchronizeFromPeers()).rejects.toThrow('没有可用的节点进行同步')
     })

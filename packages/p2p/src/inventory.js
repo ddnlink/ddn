@@ -3,11 +3,12 @@ import crypto from 'crypto'
 /**
  * p2p peer
  * @param {*} host
- * @param {*} port: Local IP address to bind to, default is any.
+ * @param {*} port: Local IP address to bind to socket, default is any.
+ * @param {*} httpPort: Local IP address to bind to http, default is any.
  * @param {*} family: 4 = IPv4-only, 6 = IPv6-only, 0 = either (default).
  */
 export class Peer {
-  constructor ({ host, port, httpPort, family = 0 }) {
+  constructor({ host, port, httpPort, family = 0 }) {
     this.id = Peer.getId(`${host}:${port}`)
     this.host = host
     this.port = +port
@@ -19,18 +20,18 @@ export class Peer {
     this.failCount = 0
   }
 
-  static getId (data) {
+  static getId(data) {
     return crypto.createHash('md5').update(Buffer.from(data)).digest().toString('hex')
   }
 
-  setProxy (host, port) {
+  setProxy(host, port) {
     this.proxy = {
       host,
       port
     }
   }
 
-  setStatus () {
+  setStatus() {
     this.status = Peer.STATUS.pending
     this.delay = 0
     this.failCount = 0
@@ -57,7 +58,7 @@ Peer.STATUS = {
  *   options.dbfile: Filepath to persist the peers data.
  */
 export class Inventory {
-  constructor (options) {
+  constructor(options) {
     options = options || {}
     this.peers = new Map()
     this.delayTime = options.delayTime || 3600
@@ -74,38 +75,39 @@ export class Inventory {
     }
   }
 
-  has (id) {
-    return this.peers.has(id)
+  has(id) {
+    return this.peers.has(id);
   }
 
-  get (id) {
+  get(id) {
     return this.peers.get(id)
   }
 
-  add (peer) {
+  add(peer) {
+    this.logger.debug('Adding to inventory, peer is ', peer)
     if (!this.peers.has(peer.id)) this.peers.set(peer.id, new Peer(peer))
 
-    this.logger.debug('Peer is added to inventory, this.dbfile is ', this.dbfile)
+    this.logger.debug('Added to inventory, this.dbfile is ', this.dbfile)
     fs.writeFileSync(this.dbfile, JSON.stringify([...this.peers.values()]))
   }
 
-  update (peerId, data) {
-    const peer = this.peers.get(peerId)
+  update(id, data) {
+    const peer = this.peers.get(id)
     for (const key of data) {
       peer[key] = data[key]
     }
   }
 
-  remove (id) {
+  remove(id) {
     this.peers.delete(id)
     fs.writeFileSync(this.dbfile, JSON.stringify([...this.peers.values()]))
   }
 
-  flush () {
+  flush() {
     fs.writeFileSync(this.dbfile, JSON.stringify([...this.peers.values()]))
   }
 
-  disable (id) {
+  disable(id) {
     const peer = this.peers.get(id)
     if (!peer) return
 
@@ -120,7 +122,7 @@ export class Inventory {
     peer.delay = Date.now() + this.delayTime * 1000
   }
 
-  enable (id) {
+  enable(id) {
     const peer = this.peers.get(id)
     if (!peer) return
 
@@ -129,7 +131,7 @@ export class Inventory {
     peer.delay = 0
   }
 
-  enableAll () {
+  enableAll() {
     this.peers.forEach((peer, id) => {
       if (peer.status === Peer.STATUS.disable && Date.now() > peer.delay) {
         peer.status = Peer.STATUS.pending
@@ -139,7 +141,7 @@ export class Inventory {
     })
   }
 
-  getAllPeers () {
+  getAllPeers() {
     this.logger.debug('getAllPeers starting...')
 
     const result = []
@@ -148,11 +150,11 @@ export class Inventory {
         result.push(peer)
       }
     })
-    this.logger.debug('All peers have : ', this.peers.length)
+    this.logger.debug(`All enabled peers ${result.length} of all peers ${this.peers.size}`)
     return result
   }
 
-  getRandomPeer () {
+  getRandomPeer() {
     this.logger.debug('getRandomPeer starting...')
 
     const peers = this.getAllPeers()
@@ -161,7 +163,7 @@ export class Inventory {
     return [...peers.values()][rnd]
   }
 
-  addMap (id) {
+  addMap(id) {
     const hasPeer = this.peers.has(id)
     if (hasPeer) {
       this.peers.forEach(peer => {
@@ -185,7 +187,7 @@ export class Inventory {
     }
   }
 
-  getNextHop (fib, count) {
+  getNextHop(fib, count) {
     const peers = []
     const results = new Set()
     this.peers.forEach(peer => {

@@ -28,7 +28,7 @@ describe('Round', () => {
         setLastBlock: jest.fn()
       },
       peer: {
-        getRandomPeers: jest.fn(),
+        getPeers: jest.fn(),
         broadcast: jest.fn(),
         getPeerStatus: jest.fn()
       },

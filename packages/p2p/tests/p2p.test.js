@@ -2,6 +2,11 @@ import fs from 'fs'
 import path from 'path'
 import { P2P } from '../src'
 
+const fixturesDir = path.resolve(__dirname, 'fixtures')
+if (!fs.existsSync(fixturesDir)) {
+  fs.mkdirSync(fixturesDir, { recursive: true })
+}
+
 const routes = {
   'POST /tx': async ({ peer, body, params }) => { return 'received new tx: ' + body.toString() },
   'POST /block': async ({ peer, body }) => { return 'received new block: ' + body.toString() },
@@ -29,10 +34,25 @@ const routes = {
   }
 }
 
-const dbfile1 = path.resolve(__dirname, 'peer1.db')
-const dbfile2 = path.resolve(__dirname, 'peer2.db')
+const dbfile1 = path.resolve(__dirname, 'fixtures', 'peer1.txt')
+const dbfile2 = path.resolve(__dirname, 'fixtures', 'peer2.txt')
+
+// 修改初始化数据结构 - 使用简单对象
+const peers = new Map()
+const emptyPeers = JSON.stringify(peers)
+
+// 确保文件存在并写入初始数据
+if (!fs.existsSync(fixturesDir)) {
+  fs.mkdirSync(fixturesDir, { recursive: true })
+}
+
+fs.writeFileSync(dbfile1, emptyPeers)
+fs.writeFileSync(dbfile2, emptyPeers)
+
 const peer1 = new P2P({ port: 8001, host: '127.0.0.1', routes, timeout: 10000, dbfile: dbfile1 })
 const peer2 = new P2P({ port: 8002, host: '127.0.0.1', routes, timeout: 10000, dbfile: dbfile2 })
+
+// 然后再调用 prepare()
 peer1.prepare()
 peer2.prepare()
 

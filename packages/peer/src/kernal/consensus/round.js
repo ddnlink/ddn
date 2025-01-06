@@ -515,7 +515,7 @@ class Round {
 
   async getPeerStatus() {
     try {
-      const peers = await this.runtime.peer.getRandomPeers();
+      const peers = await this.runtime.peer.getPeers();
       const statuses = [];
 
       for (const peer of peers) {

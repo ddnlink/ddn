@@ -1,11 +1,24 @@
-# Start 3 peers (default)
-sh ./start_peers.sh
+# Multi Peers 环境
 
-# Start 5 peers
-sh ./start_peers.sh -n 5
+建议使用多节点环境进行开发测试
 
-# Shutdown 3 peers
-sh ./shutdown_peers.sh
+## 启动(重启) / 关闭 3 个节点
 
-# Shutdown 5 peers
-sh ./shutdown_peers.sh -n 5
+```sh
+$ sh ./start_peers.sh
+$ sh ./shutdown_peers.sh
+```
+
+## 启动(重启) / 关闭 5 个节点
+```sh
+$ sh ./start_peers.sh -n 5
+$ sh ./shutdown_peers.sh -n 5
+
+# 强制重新创建并启动 5 个节点
+$ sh ./start_peers.sh -n 5 -f 
+```
+
+## 查看节点状态
+```sh
+$ ddn d peerStat -H 127.0.0.1 -P 8004
+```

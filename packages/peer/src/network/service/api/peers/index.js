@@ -11,12 +11,12 @@ class RootRouter {
   }
 
   async queryPeers (filter) {
-    return this._context.runtime.peer.p2p.inventory.getAllPeers()
+    return this._context.runtime.peer.getPeers()
   }
 
   async get (req) {
     try {
-      const peers = this._context.runtime.peer.p2p.inventory.getAllPeers()
+      const peers = await this._context.runtime.peer.getPeers()
 
       return {
         success: true,
@@ -58,7 +58,7 @@ class RootRouter {
     }
 
     try {
-      const peers = this._context.runtime.peer.p2p.inventory.getAllPeers()
+      const peers = await this._context.runtime.peer.getPeers()
 
       const peer = peers.find(item => item.ip === query.ip && item.port === query.port)
 

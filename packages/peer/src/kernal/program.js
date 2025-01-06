@@ -380,7 +380,7 @@ class Program {
         this.startBlockDataSyncTask()
       }, 1000 * 10)
     }
-    const peer = await this.ctx.runtime.peer.p2p.getPeer()
+    const peer = await this.ctx.runtime.peer.getPeer()
 
     this.ctx.logger.warn('startBlockDataSyncTask get peer: ', peer)
 
