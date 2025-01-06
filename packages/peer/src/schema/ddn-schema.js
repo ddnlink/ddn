@@ -179,6 +179,12 @@ class DdnSchema {
     return await this.validate(peerSchema, org)
   }
 
+  async validateSnapshot(snapshot) {
+    const schemaFile = path.resolve(__dirname, './ddn-schemas/snapshot')
+    const snapshotSchema = global._require_runtime_(schemaFile)
+    return await this.validate(snapshotSchema, snapshot)
+  }
+
   /**
    * 根据schema格式校验data数据是否合法，合法返回null，否则返回错误对象
    * @param {*} schema

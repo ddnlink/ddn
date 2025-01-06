@@ -6,6 +6,7 @@ module.exports = {
   builder: {},
 
   handler: function (argv) {
+    console.log('ipStat： ', argv)
     init(argv)
     ipStat(argv)
   }

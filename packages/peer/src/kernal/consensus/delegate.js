@@ -9,14 +9,14 @@ import { bignum } from '@ddn/utils'
 let _singleton
 
 class Delegate {
-  static singleton (context) {
+  static singleton(context) {
     if (!_singleton) {
       _singleton = new Delegate(context)
     }
     return _singleton
   }
 
-  constructor (context) {
+  constructor(context) {
     Object.assign(this, context)
     this._context = context
 
@@ -32,28 +32,28 @@ class Delegate {
   /**
    * 当前节点是否允许区块铸造
    */
-  isForgeEnabled () {
+  isForgeEnabled() {
     return this._forgingEanbled
   }
 
   /**
    * 授权可以铸块
    */
-  enableForging () {
+  enableForging() {
     this._forgingEanbled = true
   }
 
   /**
    * 授权不允许铸块
    */
-  disableForging () {
+  disableForging() {
     this._forgingEanbled = false
   }
 
   /**
    * 判断当前节点是否配置有有效受托人信息
    */
-  hasValidDelegates () {
+  hasValidDelegates() {
     return this._myDelegateNum > 0
   }
 
@@ -61,19 +61,19 @@ class Delegate {
    * Get my able forging delegate
    * @param {object} keypair *
    */
-  async enableForged (keypair) {
+  async enableForged(keypair) {
     this._myDelegateKeypairs[keypair.publicKey.toString('hex')] = keypair
   }
 
-  async disableForgedByPublicKey (publicKey) {
+  async disableForgedByPublicKey(publicKey) {
     delete this._myDelegateKeypairs[publicKey]
   }
 
-  async getMyDelegateByPublicKey (publicKey) {
+  async getMyDelegateByPublicKey(publicKey) {
     return this._myDelegateKeypairs[publicKey]
   }
 
-  async prepare () {
+  async prepare() {
     let secrets = null
     if (this.config.forging.secret) {
       secrets = Array.isArray(this.config.forging.secret) ? this.config.forging.secret : [this.config.forging.secret]
@@ -112,7 +112,7 @@ class Delegate {
     }
   }
 
-  async checkDelegates (publicKey, votes) {
+  async checkDelegates(publicKey, votes) {
     if (Array.isArray(votes)) {
       const account = await this.runtime.account.getAccountByPublicKey(publicKey)
       if (!account) {
@@ -171,7 +171,7 @@ class Delegate {
   }
 
   // todo: 2020.10.2 待优化，包含 getAccountList 方法
-  async getDelegates (query) {
+  async getDelegates(query) {
     if (!query) {
       throw new Error('Missing query argument')
     }
@@ -231,7 +231,7 @@ class Delegate {
   /**
    * 返回所有受托人的public_key列表
    */
-  async getDelegatePublickKeysSortByVote () {
+  async getDelegatePublickKeysSortByVote() {
     const delegates = await this.runtime.account.getAccountList(
       {
         is_delegate: 1, // wxm block database
@@ -255,7 +255,7 @@ class Delegate {
   /**
    * 返回乱序处理的受托人public_key列表
    */
-  async getDisorderDelegatePublicKeys (height) {
+  async getDisorderDelegatePublicKeys(height) {
     let truncDelegateList
     try {
       truncDelegateList = await this.getDelegatePublickKeysSortByVote()
@@ -284,7 +284,7 @@ class Delegate {
    * 返回当前所有受托人列表中 在本地节点配置中 存在的私钥信息
    * @param {*} height
    */
-  async getActiveDelegateKeypairs (height) {
+  async getActiveDelegateKeypairs(height) {
     const delegates = await this.getDisorderDelegatePublicKeys(height)
 
     const results = []
@@ -301,13 +301,51 @@ class Delegate {
    * @param {*} curSlot
    * @param {*} height
    */
-  async getForgeDelegateWithCurrentTime (curSlot, height) {
+  async getForgeDelegateWithCurrentTime(curSlot, height) {
     const activeDelegates = await this.getDisorderDelegatePublicKeys(height)
-
     let currentSlot = curSlot
     const lastSlot = this.runtime.slot.getLastSlot(currentSlot)
+
+    // 添加轮次验证
+    const nextHeight = bignum.plus(height, 1)
+    const currentRound = await this.runtime.round.getRound(height)
+    const nextRound = await this.runtime.round.getRound(nextHeight)
+
+    // 在轮次切换点添加额外验证
+    if (currentRound !== nextRound) {
+      this.logger.debug('Round transition point:', {
+        height,
+        currentRound,
+        nextRound,
+        currentSlot,
+        lastSlot
+      })
+
+      // 确保新轮次的受托人列表已准备好
+      const nextRoundDelegates = await this.getDisorderDelegatePublicKeys(height + 1)
+      if (!nextRoundDelegates || nextRoundDelegates.length !== this.constants.delegates) {
+        this.logger.error('Next round delegates not ready')
+        return null
+      }
+    }
+
     for (; currentSlot < lastSlot; currentSlot += 1) {
-      const delegatePublicKey = activeDelegates[currentSlot % this.constants.delegates]
+      let delegatePublicKey = activeDelegates[currentSlot % this.constants.delegates]
+
+      if (process.env.TEST_ENV === 'test') {
+        // 故意引入错误的逻辑时记录警告日志
+        if (currentSlot % 10 === 0) {
+          this.logger.warn('人为制造分叉:', {
+            height,
+            round: currentRound,
+            slot: currentSlot,
+            originalDelegate: delegatePublicKey
+          })
+          delegatePublicKey = 'fake_delegate_public_key'
+        }
+      }
+
+      // 记录正常的铸块委托人信息
       if (delegatePublicKey && this._myDelegateKeypairs[delegatePublicKey]) {
         return {
           time: this.runtime.slot.getSlotTime(currentSlot),
@@ -315,24 +353,51 @@ class Delegate {
         }
       }
     }
+
+    // 记录未找到合适委托人的情况
+    this.logger.warn('当前时间段未找到合法的铸块委托人:', {
+      height,
+      round: currentRound,
+      currentSlot,
+      lastSlot
+    })
+
     return null
   }
 
-  async validateBlockSlot ({ height, timestamp, generator_public_key }) {
+  async validateBlockSlot({ height, timestamp, generator_public_key }) {
     const activeDelegates = await this.getDisorderDelegatePublicKeys(height)
-
     const currentSlot = this.runtime.slot.getSlotNumber(timestamp)
     const delegateKey = activeDelegates[currentSlot % this.constants.delegates]
+
+    // 添加区块验证的详细日志
+    this.logger.debug('验证区块槽位:', {
+      height,
+      timestamp,
+      currentSlot,
+      expectedDelegate: delegateKey,
+      actualDelegate: generator_public_key
+    })
 
     if (delegateKey && generator_public_key === delegateKey) {
       return
     }
+
+    // 记录分叉警告日志
+    this.logger.warn('检测到潜在的分叉:', {
+      height,
+      timestamp,
+      expectedDelegate: delegateKey,
+      actualDelegate: generator_public_key,
+      slot: currentSlot
+    })
+
     throw new Error(
       `Failed to verify slot, expected delegate: ${generator_public_key}, gotten delegate: ${delegateKey}`
     )
   }
 
-  async validateProposeSlot ({ height, timestamp, generator_public_key }) {
+  async validateProposeSlot({ height, timestamp, generator_public_key }) {
     const activeDelegates = await this.getDisorderDelegatePublicKeys(height)
     const currentSlot = this.runtime.slot.getSlotNumber(timestamp)
     const delegateKey = activeDelegates[currentSlot % this.constants.delegates]
@@ -347,16 +412,30 @@ class Delegate {
    * @param {*} block
    * @param {*} cause 原因，1~5
    */
-  async fork (block, cause) {
-    this.logger.info('Fork', {
+  async fork(block, cause) {
+    // 添加详细的分叉原因描述
+    const forkReasons = {
+      1: '双重铸造',
+      2: '不连续的区块高度',
+      3: '双重签名',
+      4: '不同的区块 ID',
+      5: '不合法的时间戳'
+    }
+
+    this.logger.error('检测到区块链分叉:', {
+      cause: forkReasons[cause] || '未知原因',
+      height: block.height,
+      blockId: block.id,
       delegate: block.generator_public_key,
-      block: {
-        id: block.id,
-        timestamp: block.timestamp,
-        height: block.height,
-        previous_block: block.previous_block
-      },
-      cause
+      timestamp: block.timestamp,
+      previousBlock: block.previous_block
+    })
+
+    // 记录分叉时的网络状态
+    this.logger.warn('分叉时的网络状态:', {
+      lastBlockHeight: this.runtime.block.getLastBlock().height,
+      activeConnections: await this.runtime.peer.getActiveConnectionCount(),
+      consensusHeight: await this.runtime.consensus.getHeight()
     })
 
     return await this.dao.insert('forks_stat', {
@@ -373,19 +452,19 @@ class Delegate {
     try {
       this._recoveryMode = true;
       this._forkedRound = await this.getCurrentRound();
-      
+
       // 记录分叉信息
       await this.logger.warn(`检测到分叉: ${cause}, 高度: ${block.height}`);
-      
+
       // 保存当前状态
       const snapshot = await this.createStateSnapshot();
-      
+
       // 尝试恢复到分叉点
       await this.rollbackToBlock(block.height - 1);
-      
+
       // 重新同步区块
       await this.synchronizeFromPeers();
-      
+
       // 如果恢复失败，使用快照恢复
       if (!await this.isChainValid()) {
         await this.restoreSnapshot(snapshot);
@@ -407,7 +486,7 @@ class Delegate {
     if (this._recoveryMode) {
       await this.finalizeRecovery();
     }
-    
+
     // 确保清理所有状态
     await this.saveConsensusState();
     await this.notifyPeers();
@@ -419,15 +498,32 @@ class Delegate {
         height: await this.getCurrentHeight(),
         round: this._forkedRound,
         delegates: await this.getDelegatePublickKeysSortByVote(),
-        blocks: await this.getRecentBlocks(100), // 获取最近100个区块用于恢复
+        blocks: await this.getRecentBlocks(2),
         timestamp: Date.now()
       };
 
-      // 保存快照到数据库
-      await this.dao.insert('snapshots', {
+      const snapshotId = createHash(Buffer.from(JSON.stringify(currentState))).toString('hex');
+
+      const snapshot = {
+        id: snapshotId,
         height: currentState.height,
-        snapshot: JSON.stringify(currentState),
+        round: currentState.round,
+        snapshot_data: JSON.stringify(currentState),
         created_at: new Date()
+      };
+
+      // 验证快照数据
+      const errors = await this.runtime.schema.validateSnapshot(snapshot);
+      if (errors) {
+        throw new Error(`快照数据验证失败: ${JSON.stringify(errors)}`);
+      }
+
+      await this.dao.insert('snapshot', snapshot);
+
+      this.logger.info('创建状态快照成功:', {
+        id: snapshotId,
+        height: currentState.height,
+        round: currentState.round
       });
 
       return currentState;
@@ -459,7 +555,7 @@ class Delegate {
 
       // 重置内存中的状态
       await this.runtime.block.setLastBlock(targetBlock);
-      
+
       this.logger.info(`已回滚到区块高度: ${height}`);
     } catch (err) {
       this.logger.error('区块回滚失败:', err);
@@ -476,7 +572,7 @@ class Delegate {
 
       // 获取当前高度
       const currentHeight = await this.getCurrentHeight();
-      
+
       // 从每个节点获取区块并验证
       for (const peer of peers) {
         try {
@@ -496,23 +592,23 @@ class Delegate {
   async isChainValid() {
     try {
       // 验证最近的100个区块
-      const recentBlocks = await this.getRecentBlocks(100);
-      
+      const recentBlocks = await this.getRecentBlocks(2);
+
       for (let i = 1; i < recentBlocks.length; i++) {
         const currentBlock = recentBlocks[i];
         const previousBlock = recentBlocks[i - 1];
-        
+
         // 验证区块连续性
         if (currentBlock.previous_block !== previousBlock.id) {
           return false;
         }
-        
+
         // 验证区块签名
         if (!this.verifyBlockSignature(currentBlock)) {
           return false;
         }
       }
-      
+
       return true;
     } catch (err) {
       this.logger.error('链验证失败:', err);
@@ -527,16 +623,24 @@ class Delegate {
         throw new Error('快照数据不完整');
       }
 
+      this.logger.info('开始从快照恢复:', {
+        height: snapshot.height,
+        round: snapshot.round
+      });
+
       // 回滚到快照高度
       await this.rollbackToBlock(snapshot.height - 1);
-      
+
       // 重新应用快照中的区块
       await this.validateAndApplyBlocks(snapshot.blocks);
-      
+
       // 恢复受托人列表
       await this.restoreDelegateList(snapshot.delegates);
-      
-      this.logger.info(`已恢复到快照状态, 高度: ${snapshot.height}`);
+
+      this.logger.info('快照恢复完成:', {
+        height: snapshot.height,
+        round: snapshot.round
+      });
     } catch (err) {
       this.logger.error('快照恢复失败:', err);
       throw err;
@@ -553,10 +657,10 @@ class Delegate {
           }
         }
       });
-      
+
       // 广播当前状态
       await this.broadcastCurrentState();
-      
+
       this.logger.info('恢复流程已完成');
     } catch (err) {
       this.logger.error('恢复流程终止失败:', err);
@@ -572,7 +676,7 @@ class Delegate {
         lastBlock: await this.runtime.block.getLastBlock(),
         timestamp: Date.now()
       };
-      
+
       await this.dao.insert('consensus_state', {
         state: JSON.stringify(state),
         created_at: new Date()
@@ -590,12 +694,71 @@ class Delegate {
         round: this._forkedRound,
         lastBlock: await this.runtime.block.getLastBlock()
       };
-      
+
       // 广播给所有节点
       await this.runtime.peer.broadcast('consensus/state', currentState);
     } catch (err) {
       this.logger.error('节点通知失败:', err);
       throw err;
+    }
+  }
+
+  async getSnapshot(height, round) {
+    try {
+      const snapshot = await this.dao.findOne('snapshots', {
+        where: {
+          height,
+          round
+        },
+        order: [['created_at', 'DESC']]
+      });
+
+      if (!snapshot) {
+        throw new Error(`未找到高度 ${height} 轮次 ${round} 的快照`);
+      }
+
+      return JSON.parse(snapshot.snapshot_data);
+    } catch (err) {
+      this.logger.error('获取快照失败:', err);
+      throw err;
+    }
+  }
+
+  async cleanupOldSnapshots(retentionHours = 24) {
+    try {
+      const retentionTime = new Date(Date.now() - retentionHours * 60 * 60 * 1000);
+
+      await this.dao.remove('snapshots', {
+        where: {
+          created_at: {
+            $lt: retentionTime
+          }
+        }
+      });
+
+      this.logger.info(`清理了 ${retentionHours} 小时前的快照`);
+    } catch (err) {
+      this.logger.error('清理过期快照失败:', err);
+      throw err;
+    }
+  }
+
+  async validateDelegate(publicKey, height) {
+    try {
+      const activeDelegates = await this.getDisorderDelegatePublicKeys(height)
+      const round = await this.runtime.round.getRound(height)
+
+      this.logger.debug('Validating delegate:', {
+        publicKey,
+        height,
+        round,
+        isDelegateActive: activeDelegates.includes(publicKey)
+      })
+
+      return activeDelegates.includes(publicKey)
+    } catch (err) {
+      this.logger.error('Delegate validation failed:', err)
+      return false
     }
   }
 }

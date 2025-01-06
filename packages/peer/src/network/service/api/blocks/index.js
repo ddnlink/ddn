@@ -11,9 +11,6 @@ class BlockService {
   }
 
   async get (req) {
-    if (this.runtime.state !== DdnUtils.runtimeState.Ready) {
-      throw new Error('Blockchain is loading')
-    }
 
     const query = Object.assign({}, req.body, req.query)
     // query.offset = Number(query.offset || 0)
@@ -142,9 +139,6 @@ class BlockService {
   }
 
   async getGet (req) {
-    if (this.runtime.state !== DdnUtils.runtimeState.Ready) {
-      throw new Error('Blockchain is loading')
-    }
 
     const query = Object.assign({}, req.body, req.query)
     const validateErrors = await this.ddnSchema.validate(
@@ -180,9 +174,6 @@ class BlockService {
   }
 
   async getFull (req) {
-    if (this.runtime.state !== DdnUtils.runtimeState.Ready) {
-      throw new Error('Blockchain is loading')
-    }
 
     const query = Object.assign({}, req.body, req.query)
     const validateErrors = await this.ddnSchema.validate(
@@ -218,18 +209,12 @@ class BlockService {
   }
 
   async getFee (req) {
-    if (this.runtime.state !== DdnUtils.runtimeState.Ready) {
-      throw new Error('Blockchain is loading')
-    }
 
     const fee = await this.runtime.block.calculateFee()
     return { success: true, fee }
   }
 
   async getGetMilestone (req) {
-    if (this.runtime.state !== DdnUtils.runtimeState.Ready) {
-      throw new Error('Blockchain is loading')
-    }
 
     const height = this.runtime.block.getLastBlock().height
     const milestone = this.runtime.block.getBlockStatus().calcMilestone(height)
@@ -237,9 +222,6 @@ class BlockService {
   }
 
   async getGetReward (req) {
-    if (this.runtime.state !== DdnUtils.runtimeState.Ready) {
-      throw new Error('Blockchain is loading')
-    }
 
     const height = this.runtime.block.getLastBlock().height
     const reward = this.runtime.block.getBlockStatus().calcReward(height)
@@ -247,9 +229,6 @@ class BlockService {
   }
 
   async getGetSupply (req) {
-    if (this.runtime.state !== DdnUtils.runtimeState.Ready) {
-      throw new Error('Blockchain is loading')
-    }
 
     const height = this.runtime.block.getLastBlock().height
     const supply = this.runtime.block.getBlockStatus().calcSupply(height)
@@ -262,9 +241,6 @@ class BlockService {
    * @param {*} req
    */
   async getGetHeight (req) {
-    if (this.runtime.state !== DdnUtils.runtimeState.Ready) {
-      throw new Error('Blockchain is loading')
-    }
 
     const lastBlock = this.runtime.block.getLastBlock()
     return {
@@ -279,9 +255,6 @@ class BlockService {
    * @param {*} req
    */
   async getHeight (req) {
-    if (this.runtime.state !== DdnUtils.runtimeState.Ready) {
-      throw new Error('Blockchain is loading')
-    }
 
     const lastBlock = this.runtime.block.getLastBlock()
     return {
@@ -291,9 +264,6 @@ class BlockService {
   }
 
   async getGetStatus (req) {
-    if (this.runtime.state !== DdnUtils.runtimeState.Ready) {
-      throw new Error('Blockchain is loading')
-    }
 
     const lastBlock = this.runtime.block.getLastBlock()
     const height = lastBlock.height

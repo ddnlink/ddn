@@ -545,210 +545,224 @@ class Account {
     const insert_object = {}
     const remove_object = {}
 
-    if (!address && diff.publicKey) {
-      address = this.generateAddressByPublicKey(diff.publicKey) // wxm block database
+    // 添加参数验证
+    if (!address && !diff.publicKey) {
+        throw new Error('Missing address or publicKey parameter');
     }
+
+    if (!address && diff.publicKey) {
+        address = this.generateAddressByPublicKey(diff.publicKey) // wxm block database
+    }
+
     // 把余额添加到缓存（map)
     if (diff.balance) {
-      this.balanceCache.addNativeBalance(address, diff.balance)
+        // 添加余额验证
+        const balance = DdnUtils.bignum.new(diff.balance);
+        if (DdnUtils.bignum.isNaN(balance)) {
+            throw new Error(`Invalid balance value: ${diff.balance} for address: ${address}`);
+        }
+        diff.balance = balance;
+        this.balanceCache.addNativeBalance(address, diff.balance)
     }
 
     try {
-      for (const value of this._editable) {
-        const trueValue = diff[value]
-        if (!trueValue) {
-          continue
+        for (const value of this._editable) {
+            const trueValue = diff[value]
+            if (!trueValue) {
+                continue
+            }
+
+            switch (this._fieldTypes[value]) {
+                case String:
+                    update[value] = trueValue
+                    break
+                case Number:
+                    // 增加数值验证
+                    if (DdnUtils.bignum.isNaN(DdnUtils.bignum.new(trueValue))) {
+                        throw new Error(
+                            `Invalid number while merging account: ${trueValue}, value: ${value}, address: ${address}`
+                        )
+                    }
+                    // trueValue 为正数并且不等0
+                    if (
+                        DdnUtils.bignum.isEqualTo(DdnUtils.bignum.abs(trueValue), trueValue) &&
+                        !DdnUtils.bignum.isZero(trueValue)
+                    ) {
+                        update[value] = this.dao.db_str(`${value} + ${DdnUtils.bignum.new(trueValue)}`)
+                    } else if (DdnUtils.bignum.isLessThan(trueValue, 0)) {
+                        update[value] = this.dao.db_str(`${value} ${DdnUtils.bignum.new(trueValue)}`)
+                    }
+                    // 字段为balance并且不等于0
+                    if (!DdnUtils.bignum.isZero(trueValue) && value === 'balance') {
+                        const mem_accounts2delegate = await this.dao.findOne('mem_accounts2delegate', {
+                            where: {
+                                account_id: address // wxm block database
+                            },
+                            transaction: dbTrans
+                        })
+
+                        if (mem_accounts2delegate && diff.block_id !== this.genesisblock.id) {
+                            // wxm async ok      genesisblock.block.id
+                            await this.dao.insert(
+                                'mem_round',
+                                {
+                                    address: address,
+                                    amount: trueValue.toString(),
+                                    delegate: mem_accounts2delegate.dependent_id, // wxm block database
+                                    block_id: diff.block_id, // wxm block database
+                                    round: diff.round.toString()
+                                },
+                                {
+                                    transaction: dbTrans
+                                }
+                            )
+                        }
+                    }
+                    break
+                case Array:
+                    // ... 保持原有Array处理逻辑不变
+                    if (Object.prototype.toString.call(trueValue[0]) === '[object Object]') {
+                        for (let i = 0; i < trueValue.length; i++) {
+                            const val = trueValue[i]
+                            if (val.action === '-') {
+                                delete val.action
+                                remove_object[value] = remove_object[value] || []
+                                remove_object[value].push(val)
+                            } else if (val.action === '+') {
+                                delete val.action
+                                insert_object[value] = insert_object[value] || []
+                                insert_object[value].push(val)
+                            } else {
+                                delete val.action
+                                insert_object[value] = insert_object[value] || []
+                                insert_object[value].push(val)
+                            }
+                        }
+                    } else {
+                        // ... 保持原有数组元素处理逻辑不变
+                        for (let i = 0; i < trueValue.length; i++) {
+                            const math = trueValue[i][0]
+                            let val = null
+                            if (math === '-') {
+                                val = trueValue[i].slice(1)
+                                remove[value] = remove[value] || []
+                                remove[value].push(val)
+                            } else if (math === '+') {
+                                val = trueValue[i].slice(1)
+                                insert[value] = insert[value] || []
+                                insert[value].push(val)
+                            } else {
+                                val = trueValue[i]
+                                insert[value] = insert[value] || []
+                                insert[value].push(val)
+                            }
+                            if (value === 'delegates') {
+                                const balanceField = 'balance'
+                                const mem_account = await this.dao.findOne('mem_account', {
+                                    where: {
+                                        address
+                                    },
+                                    transaction: dbTrans
+                                })
+
+                                if (mem_account) {
+                                    await this.dao.insert(
+                                        'mem_round',
+                                        {
+                                            address: address,
+                                            amount: (math || '+') + mem_account[balanceField].toString(),
+                                            delegate: val,
+                                            block_id: diff.block_id,
+                                            round: diff.round.toString()
+                                        },
+                                        {
+                                            transaction: dbTrans
+                                        }
+                                    )
+                                }
+                            }
+                        }
+                    }
+                    break
+            }
         }
 
-        switch (this._fieldTypes[value]) {
-          case String:
-            update[value] = trueValue
-            break
-          case Number:
-            if (DdnUtils.bignum.isNaN(trueValue)) {
-              throw new Error(
-                'Encountered invalid number while merging account: ' +
-                  trueValue +
-                  ', value: ' +
-                  value +
-                  ', address: ' +
-                  address
-              )
-            }
-            // trueValue 为正数并且不等0
-            if (
-              DdnUtils.bignum.isEqualTo(DdnUtils.bignum.abs(trueValue), trueValue) &&
-              !DdnUtils.bignum.isZero(trueValue)
-            ) {
-              update[value] = this.dao.db_str(`${value} + ${DdnUtils.bignum.new(trueValue)}`)
-            } else if (DdnUtils.bignum.isLessThan(trueValue, 0)) {
-              update[value] = this.dao.db_str(`${value} ${DdnUtils.bignum.new(trueValue)}`)
-            }
-            // 字段为balance并且不等于0
-            if (!DdnUtils.bignum.isZero(trueValue) && value === 'balance') {
-              const mem_accounts2delegate = await this.dao.findOne('mem_accounts2delegate', {
+        // ... 保持原有的数据库操作逻辑不变
+        const removeKeys = Object.keys(remove)
+        for (const el of removeKeys) {
+            await this.dao.remove('mem_accounts2' + el.substring(0, el.length - 1), {
                 where: {
-                  account_id: address // wxm block database
+                    dependent_id: {
+                        $in: remove[el]
+                    },
+                    account_id: address
                 },
                 transaction: dbTrans
-              })
+            })
+        }
 
-              if (mem_accounts2delegate && diff.block_id !== this.genesisblock.id) {
-                // wxm async ok      genesisblock.block.id
+        const insertKeys = Object.keys(insert)
+        for (const el of insertKeys) {
+            for (let i = 0; i < insert[el].length; i++) {
                 await this.dao.insert(
-                  'mem_round',
-                  {
-                    address: address,
-                    amount: trueValue.toString(),
-                    delegate: mem_accounts2delegate.dependent_id, // wxm block database
-                    block_id: diff.block_id, // wxm block database
-                    round: diff.round.toString()
-                  },
-                  {
-                    transaction: dbTrans
-                  }
-                )
-              }
-            }
-
-            break
-          case Array:
-            if (Object.prototype.toString.call(trueValue[0]) === '[object Object]') {
-              for (let i = 0; i < trueValue.length; i++) {
-                const val = trueValue[i]
-                if (val.action === '-') {
-                  delete val.action
-                  remove_object[value] = remove_object[value] || []
-                  remove_object[value].push(val)
-                } else if (val.action === '+') {
-                  delete val.action
-                  insert_object[value] = insert_object[value] || []
-                  insert_object[value].push(val)
-                } else {
-                  delete val.action
-                  insert_object[value] = insert_object[value] || []
-                  insert_object[value].push(val)
-                }
-              }
-            } else {
-              for (let i = 0; i < trueValue.length; i++) {
-                const math = trueValue[i][0]
-                let val = null
-                if (math === '-') {
-                  val = trueValue[i].slice(1)
-                  remove[value] = remove[value] || []
-                  remove[value].push(val)
-                } else if (math === '+') {
-                  val = trueValue[i].slice(1)
-                  insert[value] = insert[value] || []
-                  insert[value].push(val)
-                } else {
-                  val = trueValue[i]
-                  insert[value] = insert[value] || []
-                  insert[value].push(val)
-                }
-                if (value === 'delegates') {
-                  const balanceField = 'balance'
-                  // if (math === '-') {
-                  //   balanceField = '-balance';
-                  // }
-                  const mem_account = await this.dao.findOne('mem_account', {
-                    where: {
-                      address
+                    'mem_accounts2' + el.substring(0, el.length - 1),
+                    {
+                        account_id: address,
+                        dependent_id: insert[el][i]
                     },
-                    transaction: dbTrans
-                  })
-
-                  // this.logger.debug('FindOne account when merge, it is ', mem_account)
-
-                  if (mem_account) {
-                    await this.dao.insert(
-                      'mem_round',
-                      {
-                        address: address,
-                        amount: (math || '+') + mem_account[balanceField].toString(),
-                        delegate: val,
-                        block_id: diff.block_id, // wxm block database
-                        round: diff.round.toString()
-                      },
-                      {
+                    {
                         transaction: dbTrans
-                      }
-                    )
-                  }
-                }
-              }
+                    }
+                )
             }
-            break
         }
-      }
 
-      const removeKeys = Object.keys(remove)
-      for (const el of removeKeys) {
-        await this.dao.remove('mem_accounts2' + el.substring(0, el.length - 1), {
-          where: {
-            dependent_id: {
-              // wxm block database
-              $in: remove[el]
-            },
-            account_id: address // wxm block database
-          },
-          transaction: dbTrans
-        })
-      }
+        const removeObjectKeys = Object.keys(remove_object)
+        for (const el of removeObjectKeys) {
+            await this.dao.remove('mem_accounts2' + el.substring(0, el.length - 1), {
+                where: remove_object[el],
+                transaction: dbTrans
+            })
+        }
 
-      const insertKeys = Object.keys(insert)
-      for (const el of insertKeys) {
-        for (let i = 0; i < insert[el].length; i++) {
-          await this.dao.insert(
-            'mem_accounts2' + el.substring(0, el.length - 1),
-            {
-              account_id: address, // wxm block database
-              dependent_id: insert[el][i] // wxm block database
-            },
-            {
-              transaction: dbTrans
+        const insertObjectKeys = Object.keys(insert_object)
+        for (const el of insertObjectKeys) {
+            for (let i = 0; i < insert[el].length; i++) {
+                await this.dao.insert('mem_accounts2' + el.substring(0, el.length - 1), insert_object[el], {
+                    transaction: dbTrans
+                })
             }
-          )
         }
-      }
 
-      const removeObjectKeys = Object.keys(remove_object)
-      for (const el of removeObjectKeys) {
-        await this.dao.remove('mem_accounts2' + el.substring(0, el.length - 1), {
-          where: remove_object[el],
-          transaction: dbTrans
-        })
-      }
-
-      const insertObjectKeys = Object.keys(insert_object)
-      for (const el of insertObjectKeys) {
-        for (let i = 0; i < insert[el].length; i++) {
-          await this.dao.insert('mem_accounts2' + el.substring(0, el.length - 1), insert_object[el], {
-            transaction: dbTrans
-          })
+        const updateKeys = Object.keys(update)
+        if (updateKeys.length) {
+            await this.dao.update('mem_account', update, {
+                where: {
+                    address
+                },
+                transaction: dbTrans
+            })
         }
-      }
 
-      const updateKeys = Object.keys(update)
-      if (updateKeys.length) {
-        await this.dao.update('mem_account', update, {
-          where: {
-            address
-          },
-          transaction: dbTrans
-        })
-      }
-
-      return await this.getAccountByAddress(address)
+        return await this.getAccountByAddress(address)
     } catch (err) {
-      this.logger.error('!!!!!!! merge sql error: ' + err)
-      throw err
+        this.logger.error('!!!!!!! merge error:', {
+            message: err.message,
+            address,
+            diff,
+            stack: err.stack
+        });
+        throw err;
     }
   }
 
   async updateAccount (data, where, dbTrans) {
     return await this.dao.update('mem_account', data, { where, transaction: dbTrans })
+  }
+
+  async getAccountBalance(address) {
+    const account = await this.getAccountByAddress(address);
+    return account ? account.balance : 0;
   }
 }
 

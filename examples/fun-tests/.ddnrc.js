@@ -10,6 +10,7 @@ module.exports = {
    * About Peer
    */
   port: 8001,
+  p2pPort: 9001,
   address: '0.0.0.0',
   publicIp: '127.0.0.1',
   logLevel: 'debug',
@@ -17,7 +18,6 @@ module.exports = {
   nethash: '0ab796cd',
   payloadLimitSize: '8mb',
   clientDriftSeconds: 5,
-  p2pPort: 9001,
   /**
    * About Api
    */
@@ -28,7 +28,7 @@ module.exports = {
   },
   peers: {
     list: [
-      { ip: '127.0.0.1', port: '9001' },
+      { ip: '127.0.0.1', port: '9001', httpPort: '8001' }, { ip: '127.0.0.1', port: '9002', httpPort: '8002' }, { ip: '127.0.0.1', port: '9003', httpPort: '8003' }, { ip: '127.0.0.1', port: '9004', httpPort: '8004' }, { ip: '127.0.0.1', port: '9005', httpPort: '8005' }
     ],
     blackList: [],
     options: {

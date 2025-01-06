@@ -165,18 +165,15 @@ export class Pipe extends EventEmitter {
     return new Promise((resolve, reject) => {
       const serial = this.send(cmd, data, meta)
       const handle = setTimeout(() => {
-        // this.logger.warn(`---timeout for answer, serial: ${serial}, cmd: ${cmd} ${meta && meta.api} ${this.port}`)
         reject(new Error('request is timeout'))
       }, this.timeout)
 
       function response (err, res) {
         if (err) reject(err)
         clearTimeout(handle)
-        // this.logger.warn(`---success for answer, serial: ${serial}, cmd: ${cmd} ${meta && meta.api} ${this.port}`)
         resolve(res)
       }
 
-      // this.logger.warn(`---waiting for answer, serial: ${serial}, cmd: ${cmd} ${meta && meta.api} ${this.port}`)
       this._queue.set(serial, response.bind(this))
     })
   }

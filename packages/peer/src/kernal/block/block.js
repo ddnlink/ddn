@@ -17,23 +17,24 @@ import BlockCache from './block-cache'
 let _singleton
 
 class Block {
-  static singleton (context) {
+  static singleton(context) {
     if (!_singleton) {
       _singleton = new Block(context)
     }
     return _singleton
   }
 
-  constructor (context) {
+  constructor(context) {
     Object.assign(this, context)
     this._context = context
 
     this._lastBlock = null
-    this._blockCache = new BlockCache({ 
-      maxSize: 1000, 
-      logger: this.logger 
+    this._blockCache = new BlockCache({
+      maxSize: 1000,
+      logger: this.logger
     })
 
+    this._lastBlock = null
     this._lastVoteTime = null
     this._lastPropose = null
     this._proposeCache = {}
@@ -42,31 +43,31 @@ class Block {
     this._isSyncing = false
   }
 
-  async getCount (where) {
+  async getCount(where) {
     return await this.dao.count('block', { where })
   }
 
-  async calculateFee () {
+  async calculateFee() {
     return bignum.multiply(this.constants.net.fees.transfer, this.constants.fixedPoint).toString()
   }
 
-  getBlockStatus () {
+  getBlockStatus() {
     return this._blockStatus
   }
 
-  setLastBlock (block) {
+  setLastBlock(block) {
     this._lastBlock = block
   }
 
-  getLastBlock () {
+  getLastBlock() {
     return this._lastBlock
   }
 
-  getBytes (block) {
+  getBytes(block) {
     return DdnCrypto.getBytes(block, true, true)
   }
 
-  getHash (block) {
+  getHash(block) {
     const newBlock = { ...block }
     if (newBlock.transactions) {
       delete newBlock.transactions
@@ -76,7 +77,7 @@ class Block {
     // return nacl.hash(this.getBytes(block))
   }
 
-  async sign (block, { privateKey }) {
+  async sign(block, { privateKey }) {
     const newBlock = { ...block }
     if (newBlock.transactions) {
       delete newBlock.transactions
@@ -84,7 +85,7 @@ class Block {
     return await DdnCrypto.sign(newBlock, { privateKey })
   }
 
-  async getId (block) {
+  async getId(block) {
     const newBlock = { ...block }
     if (newBlock.transactions) {
       delete newBlock.transactions
@@ -92,7 +93,7 @@ class Block {
     return await DdnCrypto.getId(block)
   }
 
-  async objectNormalize (block) {
+  async objectNormalize(block) {
     for (const i in block) {
       if (block[i] === null || typeof block[i] === 'undefined') {
         delete block[i]
@@ -120,7 +121,7 @@ class Block {
   /**
    * 处理创世区块
    */
-  async handleGenesisBlock () {
+  async handleGenesisBlock() {
     const genesisblock = this.genesisblock
 
     try {
@@ -147,7 +148,7 @@ class Block {
   /**
    * 序列化区块数据到数据库（仅仅是区块数据本身一条数据记录，不处理其中的交易数据）
    */
-  async serializeBlock2Db (block, dbTrans) {
+  async serializeBlock2Db(block, dbTrans) {
     const newBlock = {
       id: block.id,
       height: block.height,
@@ -176,7 +177,7 @@ class Block {
    * 将数据对象序列化成区块JSON对象 dbRead
    * @param {*} data
    */
-  serializeDbData2Block (raw) {
+  serializeDbData2Block(raw) {
     if (!raw.b_id) {
       return null
     } else {
@@ -209,7 +210,7 @@ class Block {
    * @param {*} block
    * @param {*} dbTrans
    */
-  async saveBlock (block, dbTrans) {
+  async saveBlock(block, dbTrans) {
     this.logger.debug('saveBlock start!')
     try {
       await this.serializeBlock2Db(block, dbTrans)
@@ -230,7 +231,7 @@ class Block {
     return true
   }
 
-  async createBlock (data) {
+  async createBlock(data) {
     const transactions = this._sortTransactions(data.transactions)
 
     const nextHeight = data.previous_block ? bignum.plus(data.previous_block.height, 1).toString() : '1' // bignum update //wxm block database
@@ -293,7 +294,7 @@ class Block {
    * @param {*} block
    * @param {*} votes
    */
-  async receiveNewBlock (block, votes) {
+  async receiveNewBlock(block, votes) {
     if (this.runtime.state !== runtimeState.Ready || !this.runtime.loaded) {
       this.logger.debug(
         `Not ready to receive blocks, state: ${this.runtime.state}, Ready: ${runtimeState.Ready}, loaded: ${this.runtime.loaded}`
@@ -319,9 +320,9 @@ class Block {
         async cb => {
           try {
             // 正常的下一个区块
-            if (block.previous_block === this._lastBlock.id && 
-                bignum.isEqualTo(bignum.plus(this._lastBlock.height, 1), block.height)) {
-              
+            if (block.previous_block === this._lastBlock.id &&
+              bignum.isEqualTo(bignum.plus(this._lastBlock.height, 1), block.height)) {
+
               this.logger.info(
                 `Received new block id: ${block.id} height: ${block.height} round: ${await this.runtime.round.getRound(
                   this.getLastBlock().height
@@ -330,28 +331,28 @@ class Block {
 
               await this.processBlock(block, votes, true, true, true)
               cb()
-            } 
+            }
             // 分叉情况1：同一高度，不同的前一个区块
-            else if (block.previous_block !== this._lastBlock.id && 
-                     bignum.isEqualTo(bignum.plus(this._lastBlock.height, 1), block.height)) {
-              
+            else if (block.previous_block !== this._lastBlock.id &&
+              bignum.isEqualTo(bignum.plus(this._lastBlock.height, 1), block.height)) {
+
               await this.handleFork(block, 1)
               cb('Fork')
-            } 
+            }
             // 分叉情况2：同一高度和前一个区块，但区块ID不同
-            else if (block.previous_block === this._lastBlock.previous_block && 
-                     bignum.isEqualTo(block.height, this._lastBlock.height) && 
-                     block.id !== this._lastBlock.id) {
-              
+            else if (block.previous_block === this._lastBlock.previous_block &&
+              bignum.isEqualTo(block.height, this._lastBlock.height) &&
+              block.id !== this._lastBlock.id) {
+
               await this.handleFork(block, 2)
               cb('Fork')
-            } 
+            }
             // 区块高度不连续
             else if (bignum.isGreaterThan(block.height, bignum.plus(this._lastBlock.height, 1))) {
               this.logger.info(`Received discontinuous block height ${block.height}`)
               await this.startSync(this._lastBlock.height)
               cb()
-            } 
+            }
             else {
               cb()
             }
@@ -370,7 +371,7 @@ class Block {
     })
   }
 
-  async receiveVotes (votes) {
+  async receiveVotes(votes) {
     this.logger.debug('Receive votes start')
     if (this.runtime.state !== runtimeState.Ready) {
       return
@@ -413,7 +414,7 @@ class Block {
    * 接收其他节点铸造区块的授权申请提议，进行授权操作
    * @param {*} propose
    */
-  async receiveNewPropose (propose) {
+  async receiveNewPropose(propose) {
     this.logger.debug('receiveNewPropose start.')
     if (this.runtime.state !== runtimeState.Ready) {
       this.logger.debug(
@@ -530,7 +531,7 @@ class Block {
    * @param {*} isBroadcast 是否广播
    * @param {*} isSaveBlock 是否保存到数据库
    */
-  async applyBlock ({ block, votes, isBroadcast, isSaveBlock }) {
+  async applyBlock({ block, votes, isBroadcast, isSaveBlock }) {
     const applyedTrsIdSet = new Set()
 
     const doApplyBlock = async () => {
@@ -597,7 +598,6 @@ class Block {
         this.logger.debug('The dao.transaction is finished.')
         this.setLastBlock(block)
 
-        this._blockCache = {}
         this._proposeCache = {}
         this._lastVoteTime = null
 
@@ -668,7 +668,7 @@ class Block {
     })
   }
 
-  verifySignature (block) {
+  verifySignature(block) {
     // 接受到的block是protobuf 解密之后的，因为解密后的json是类似 Blcok{}这样，带个名称前缀，应该不是标准的json数据，所以使用Object.assign，这样数据就是{}
     block = Object.assign({}, block)
     const newBlock = { ...block }
@@ -696,7 +696,7 @@ class Block {
    * @param {object} block block data
    * @param {object}} votes votes
    */
-  async verifyBlock (block, votes) {
+  async verifyBlock(block, votes) {
     // TODO creazy 创建块时为什么id和height不再在createBlock中产生
     // try {
     //   block.id = await this.getId(block)
@@ -759,7 +759,7 @@ class Block {
     }
 
     this.caculateRound(block)
-    
+
     if (votes) {
       if (!bignum.isEqualTo(block.height, votes.height)) {
         throw new Error('Votes height is not correct')
@@ -815,7 +815,7 @@ class Block {
     }
   }
 
-  async verifyBlockVotes ({ height }, { height: votesHeight, id, signatures }) {
+  async verifyBlockVotes({ height }, { height: votesHeight, id, signatures }) {
     let delegatesList
     try {
       delegatesList = await this.runtime.delegate.getDisorderDelegatePublicKeys(height)
@@ -848,7 +848,7 @@ class Block {
    * @param {*} save
    * @param {*} verifyTrs
    */
-  async processBlock (block, votes, broadcast, save, verifyTrs) {
+  async processBlock(block, votes, broadcast, save, verifyTrs) {
     if (!this.runtime.loaded) {
       throw new Error('DDN is preparing')
     }
@@ -960,8 +960,33 @@ class Block {
    * @param {*} keypair
    * @param {*} timestamp
    */
-  async generateBlock (keypair, timestamp) {
+  async generateBlock(keypair, timestamp) {
     if (this.runtime.consensus.hasPendingBlock(timestamp)) {
+      this.logger.warn('Skipping block generation - pending block exists')
+      return
+    }
+
+    // 添加轮次切换检查
+    const currentHeight = bignum.plus(this._lastBlock.height, 1)
+    const nextHeight = bignum.plus(currentHeight, 1)
+    const currentRound = await this.runtime.round.getRound(currentHeight)
+    const nextRound = await this.runtime.round.getRound(nextHeight)
+
+    if (currentRound !== nextRound) {
+      this.logger.debug('Generating block at round transition:', {
+        height: currentHeight,
+        currentRound,
+        nextRound
+      })
+
+      // 确保轮次切换时的状态正确
+      await this.runtime.round.prepare()
+    }
+
+    // 验证受托人权限
+    const isValidDelegate = await this.runtime.delegate.validateDelegate(keypair.publicKey, currentHeight)
+    if (!isValidDelegate) {
+      this.logger.error('Invalid delegate for block generation')
       return
     }
 
@@ -999,11 +1024,16 @@ class Block {
       block = await this.createBlock({
         keypair,
         timestamp,
-        previous_block: this._lastBlock, // wxm block database
+        previous_block: this._lastBlock,
         transactions: ready
       })
+
+      // 生成成功后添加到缓存
+      if (block && block.id) {
+        this._blockCache.add(block.id, block)
+      }
+
     } catch (e) {
-      // this.logger.error('create block model ', e)
       throw new Error(`Create block model failed: ${e.toString()}`)
     }
 
@@ -1066,7 +1096,7 @@ class Block {
     }
   }
 
-  _sortTransactions (transactions) {
+  _sortTransactions(transactions) {
     return transactions.sort((a, b) => {
       if (a.type !== b.type) {
         if (a.type === 1) {
@@ -1094,7 +1124,7 @@ class Block {
    * 解析区块链完整数据（包括区块数据、交易数据和其他扩展交易数据）成JSON对象
    * @param {*} data
    */
-  async _parseObjectFromFullBlocksData (data) {
+  async _parseObjectFromFullBlocksData(data) {
     let blocks = {}
     const order = []
     for (let i = 0; i < data.length; i++) {
@@ -1131,7 +1161,7 @@ class Block {
     return blocks
   }
 
-  async _popLastBlock (oldLastBlock) {
+  async _popLastBlock(oldLastBlock) {
     const { id, height } = oldLastBlock
     return new Promise((resolve, reject) => {
       let previousBlock
@@ -1193,11 +1223,11 @@ class Block {
     })
   }
 
-  async deleteBlock ({ blockId, dbTrans }) {
+  async deleteBlock({ blockId, dbTrans }) {
     return await this.dao.remove('block', { where: { id: blockId }, transaction: dbTrans })
   }
 
-  async deleteBlocksBefore ({ height }) {
+  async deleteBlocksBefore({ height }) {
     const blocks = []
 
     while (bignum.isLessThan(height, this._lastBlock.height)) {
@@ -1216,7 +1246,7 @@ class Block {
     return blocks
   }
 
-  async simpleDeleteAfterBlock (blockId) {
+  async simpleDeleteAfterBlock(blockId) {
     const result = await this.dao.findOne('block', {
       where: {
         id: blockId
@@ -1235,7 +1265,7 @@ class Block {
     })
   }
 
-  async loadBlocksOffset (limit, offset, verify) {
+  async loadBlocksOffset(limit, offset, verify) {
     this.logger.debug(`loadBlockOffset limit: ${limit}, offset: ${offset}, verify: ${verify}`)
 
     return new Promise((resolve, reject) => {
@@ -1299,7 +1329,7 @@ class Block {
     })
   }
 
-  async queryBlockData (where, sorts, offset, limit, returnTotal) {
+  async queryBlockData(where, sorts, offset, limit, returnTotal) {
     const w = where || {}
     const s = sorts || null
     const o = offset || 0
@@ -1359,7 +1389,7 @@ class Block {
    * 根据id、height、hash任一属性，查询对应的区块数据，不包括包含的交易列表
    * @param {*} query
    */
-  async querySimpleBlockData (query) {
+  async querySimpleBlockData(query) {
     this.logger.debug('start querySimpleBlockData, query is ', query)
     const validateErrors = await this.ddnSchema.validate(
       {
@@ -1451,7 +1481,7 @@ class Block {
     })
   }
 
-  sandboxApi (call, args, cb) {
+  sandboxApi(call, args, cb) {
     // sandboxHelper.callMethod(shared, call, args, cb)
     if (typeof this[call] !== 'function') {
       return cb(`Function not found in module: ${call}`)
@@ -1461,7 +1491,7 @@ class Block {
     return this[call].apply(this, callArgs)
   }
 
-  getHeight (req, cb) {
+  getHeight(req, cb) {
     const lastBlock = this.runtime.block.getLastBlock()
     return cb(null, lastBlock && lastBlock.height ? lastBlock.height : '0')
   }
@@ -1476,7 +1506,7 @@ class Block {
       const minHeight = Math.max(1, block.height - 5)
       const maxHeight = block.height
       const blocks = await this.getBlocks(minHeight, maxHeight)
-      
+
       for (const b of blocks) {
         if (b.id === block.previous_block) {
           return b
@@ -1501,18 +1531,18 @@ class Block {
       }
 
       this.logger.warn(`Rolling back to block at height ${height} from ${currentBlock.height}`)
-      
+
       await this.dao.transaction(async dbTrans => {
         try {
           // 回滚区块数据
           await this.simpleDeleteAfterBlock(height)
-          
+
           // 获取目标区块
           const targetBlock = await this.dao.findOne('block', {
             where: { height },
             order: [['height', 'DESC']]
           })
-          
+
           if (!targetBlock) {
             this.logger.error(`Target block at height ${height} not found`)
             return
@@ -1520,7 +1550,7 @@ class Block {
 
           // 设置为最新区块
           this.setLastBlock(targetBlock)
-          
+
           // 清理缓存
           this._blockCache.clear()
           this._proposeCache = {}
@@ -1576,14 +1606,14 @@ class Block {
         this.logger.error('Failed to find common block, will retry sync later')
         return
       }
-      
+
       // 回滚到共同区块
       await this.rollbackToBlock(commonBlock.height)
-      
+
       // 清理缓存
       this._blockCache.clear()
       this._proposeCache = {}
-      
+
       // 启动同步
       await this.startSync(commonBlock.height)
 
@@ -1597,7 +1627,7 @@ class Block {
         type,
         error: err.message
       })
-      
+
       // 设置一个定时器，稍后重试
       setTimeout(() => {
         this.startSync(this._lastBlock.height)
@@ -1619,7 +1649,7 @@ class Block {
     try {
       this._isSyncing = true
       this.logger.info(`Start syncing blocks from height ${fromHeight}`)
-      
+
       // 获取可用节点
       const peers = await this.runtime.peer.p2p.list()
       if (!peers || peers.length === 0) {

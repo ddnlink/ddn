@@ -24,6 +24,7 @@ export class P2P {
     // check if we have options
     options = options || {}
     this.port = +options.port || 9001
+    this.httpPort = +options.httpPort || (this.port - 1000)
     this.host = options.host || '0.0.0.0'
     this.cycle = +options.cycle || 10000
     this.timeout = +options.timeout || 60000
@@ -57,7 +58,7 @@ export class P2P {
 
       self.connect(seed.port, seed.ip).catch(err => {
         if (err.errno === 'ECONNREFUSED') {
-          this.logger.debug(`connect to seed: ${seed.ip}:${seed.port} fail: ECONNREFUSED`)
+          this.logger.error(`connect to seed: ${seed.ip}:${seed.port} fail: ECONNREFUSED`)
         }
       })
     })
@@ -78,7 +79,7 @@ export class P2P {
     self._server.listen(
       {
         port: this.port,
-        host: '0.0.0.0'
+        host: this.host || '0.0.0.0'
       },
       () => {
         self.family = self._server.address().family
@@ -325,8 +326,8 @@ export class P2P {
         break
       }
       case Message.commands.VERSION: {
-        const { id, version, nethash, host, port, family } = this
-        const info = { id, version, nethash, host, port, family }
+        const { id, version, nethash, host, port, httpPort, family } = this
+        const info = { id, version, nethash, host, port, httpPort, family }
         this._response(pipe, info, msg.serial)
         break
       }

@@ -49,7 +49,7 @@ $ docker exec -it ddn-starter /bin/bash
 
 ```bash
 $ cd ddn
-$ yarn install
+$ pnpm install
 ```
 
 ### 常见问题
@@ -118,9 +118,15 @@ $ npm install -g pnpm
 
 1. 持续构建
 
+```bash
+$ pnpm build:watch
+```
 
 2. 本地运行
 
+```bash
+$ pnpm dev
+```
 
 3. 打包
 

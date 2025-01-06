@@ -5,19 +5,15 @@
 import { bignum } from '@ddn/utils'
 
 class RoundChanges {
-  constructor (context, round, back) {
+  constructor (context, round) {
     Object.assign(this, context)
-    this._context = context
+    this.runtime = context.runtime
+    this._CLUB_BONUS_RATIO = context.constants.net.rewardRatio
 
-    if (!back) {
-      this._roundFees = this.runtime.round._feesByRound[round] || 0
-      this._roundRewards = this.runtime.round._rewardsByRound[round] || []
-    } else {
+    if (round) {
       this._roundFees = this.runtime.round._unFeesByRound[round] || 0
       this._roundRewards = this.runtime.round._unRewardsByRound[round] || []
     }
-
-    this._CLUB_BONUS_RATIO = context.constants.net.rewardRatio
   }
 
   at (index) {

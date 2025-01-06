@@ -752,7 +752,6 @@ export {
   getContractStates,
   compileContract
 }
-
 //   program
 //     .command('setSecondsecret')
 //     .description('set second secret')
@@ -780,3 +779,4 @@ export {
 //     .option('-a, --args <args>', 'json array format')
 //     .option('-f, --fee <fee>', 'transaction fee')
 //     .action(dappTransaction)
+

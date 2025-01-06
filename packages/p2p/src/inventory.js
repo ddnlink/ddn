@@ -7,10 +7,11 @@ import crypto from 'crypto'
  * @param {*} family: 4 = IPv4-only, 6 = IPv6-only, 0 = either (default).
  */
 export class Peer {
-  constructor ({ host, port, family }) {
+  constructor ({ host, port, httpPort, family = 0 }) {
     this.id = Peer.getId(`${host}:${port}`)
     this.host = host
     this.port = +port
+    this.httpPort = +httpPort
     this.family = family
     this.status = Peer.STATUS.ready
 
@@ -147,7 +148,7 @@ export class Inventory {
         result.push(peer)
       }
     })
-    this.logger.debug('All peers have : ', this.peers, this.peers.length)
+    this.logger.debug('All peers have : ', this.peers.length)
     return result
   }
 

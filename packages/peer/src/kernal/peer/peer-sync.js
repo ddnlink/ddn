@@ -87,9 +87,9 @@ class PeerSync {
           attributes: ['previous_block']
         })
         this.logger.debug(
-          `peer-sync._addLackBlocks result.body.common.previous_block is ${result.body.common.previous_block}`
+          `result.body.common.previous_block is ${result.body.common.previous_block}`
         )
-        this.logger.debug(`peer-sync._addLackBlocks row.previous_block is ${row.previous_block}`)
+        this.logger.debug(`row.previous_block is ${row.previous_block}`)
         if (!row) {
           this.logger.error("Can't compare blocks")
           // FIXME: 2020.8.29 这里使用 reject 的流程是不一样的

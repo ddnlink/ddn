@@ -79,7 +79,7 @@ class DAO {
   }
 
   /**
-   * 此处用来保证代码中用到的全部是database导出的方法和对象
+   * 保证代码中用到的全部是database导出的方法和对象
    */
   static initFuncs (sequelize) {
     this.db_fn = Sequelize.fn
@@ -93,7 +93,7 @@ class DAO {
   }
 
   /**
-   * 此处用来保证代码中用到的全部是database导出的方法和对象
+   * 保证代码中用到的全部是database导出的方法和对象
    */
   static initConstants (sequelize) {
     this.db_OP = Sequelize.Op
