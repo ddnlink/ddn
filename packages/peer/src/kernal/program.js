@@ -454,10 +454,13 @@ class Program {
         return
       }
 
+      // 获取当前时间槽的铸造受托人信息
+      this.ctx.logger.debug(`Getting forge delegate info for slot ${currentSlot} and height ${bignum.plus(lastBlock.height, 1)}`)
       const forgeDelegateInfo = await this.ctx.runtime.delegate.getForgeDelegateWithCurrentTime(
         currentSlot,
         bignum.plus(lastBlock.height, 1)
       )
+      
       if (forgeDelegateInfo === null) {
         this.ctx.logger.trace('Loop:', 'skipping slot')
         return

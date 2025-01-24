@@ -563,6 +563,7 @@ class Delegate {
     }
   }
 
+  // fixme: 与 block.js 中的同步逻辑重复，需要重构 2025.1.21
   async synchronizeFromPeers() {
     try {
       const peers = await this.runtime.peer.getPeers();

@@ -222,8 +222,8 @@ export class P2P {
     const self = this
     const { type, checksum, size, payload } = Message.getMetadata(data)
     const key = signature || checksum
-    const fib = this.fib.get(key) || [this.id]
-    const peers = this.inventory.getNextHop(fib, 11)
+    const fib = self.fib.get(key) || [self.id]
+    const peers = self.inventory.getNextHop(fib, 11)
     fib.push(...peers.map(peer => peer.id))
     peers.forEach(async peer => {
       try {
@@ -253,7 +253,12 @@ export class P2P {
     pipe.host = peer.host
     pipe.port = peer.port
     this.pool.set(pipe.id, pipe)
-    this.inventory.add(peer)
+    
+    // 只在节点不存在时添加到 inventory
+    if (!this.inventory.get(peer.id)) {
+      this.logger.debug(`peer isn't exit, add peer to inventory: ${peer.host}:${peer.port}`)
+      this.inventory.add(peer)
+    }
 
     this.logger.debug(
       `${this.port} success connect to peer: ${peer.host}:${peer.port} socket: ${pipe.socket.remotePort}`
@@ -435,8 +440,13 @@ export class P2P {
         const self = this
         peers.forEach(item => {
           const newPeer = new Peer(item)
+          // 跳过自身节点
           if (newPeer.id === self.id) return
-          self.inventory.add(newPeer)
+          // 只在节点不存在时添加到 inventory
+          if (!self.inventory.get(newPeer.id)) {
+            self.logger.debug(`peer isn't exit, add peer to inventory: ${newPeer.host}:${newPeer.port}`)
+            self.inventory.add(newPeer)
+          }
         })
       }
 

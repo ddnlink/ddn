@@ -7,7 +7,8 @@
             ],
             "outputs": [
                 "dist/**"
-            ]
+            ],
+            "cache": true
         },
         "dev": {
             "cache": false
@@ -15,6 +16,47 @@
         "test": {
             "outputs": [
                 ".jest-cache/**"
+            ]
+        },
+        "@ddn/utils#build": {
+            "dependsOn": [],
+            "outputs": [
+                "dist/**"
+            ]
+        },
+        "@ddn/core#build": {
+            "dependsOn": [
+                "@ddn/utils#build"
+            ],
+            "outputs": [
+                "dist/**"
+            ]
+        },
+        "@ddn/crypto#build": {
+            "dependsOn": [
+                "@ddn/utils#build"
+            ],
+            "outputs": [
+                "dist/**"
+            ]
+        },
+        "@ddn/node-sdk#build": {
+            "dependsOn": [
+                "@ddn/utils#build",
+                "@ddn/crypto#build"
+            ],
+            "outputs": [
+                "dist/**"
+            ]
+        },
+        "@ddn/peer#build": {
+            "dependsOn": [
+                "@ddn/utils#build",
+                "@ddn/core#build",
+                "@ddn/crypto#build"
+            ],
+            "outputs": [
+                "dist/**"
             ]
         }
     },

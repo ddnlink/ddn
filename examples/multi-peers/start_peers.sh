@@ -9,18 +9,20 @@ TOTAL_SECRETS=101
 SECRET_START_LINE=40
 SECRET_END_LINE=140
 FORCE_MODE=false
+SPECIFIC_PEER=""
 
 # Help information
 show_help() {
     echo "Usage: $0 [options]"
     echo "Options:"
     echo "  -n <number>    Number of peers to start (default: 3)"
+    echo "  -p <name>     Specific peer name to start (e.g., peer-8001 or 8001)"
     echo "  -f            Force mode - delete existing peer directories and recreate"
     echo "  -h            Show this help message"
 }
 
 # Parse parameters
-while getopts "n:fh" opt; do
+while getopts "n:p:fh" opt; do
     case $opt in
         n)
             PEER_COUNT=$OPTARG
@@ -31,6 +33,20 @@ while getopts "n:fh" opt; do
             ;;
         f)
             FORCE_MODE=true
+            ;;
+        p)
+            # Convert simple port number to peer-PORT format if needed
+            if [[ "$OPTARG" =~ ^[0-9]+$ ]]; then
+                SPECIFIC_PEER="peer-$OPTARG"
+            else
+                SPECIFIC_PEER=$OPTARG
+            fi
+            
+            # Validate the peer name format
+            if [[ ! "$SPECIFIC_PEER" =~ ^peer-[0-9]+$ ]]; then
+                echo "Error: Peer name must be either a port number (e.g., 8001) or in format 'peer-PORT' (e.g., peer-8001)"
+                exit 1
+            fi
             ;;
         h)
             show_help
@@ -50,6 +66,22 @@ check_and_create_dirs() {
     if [ ! -d "$TEMPLATE_DIR" ]; then
         echo "Error: Template directory $TEMPLATE_DIR does not exist"
         exit 1
+    fi
+
+    if [ -n "$SPECIFIC_PEER" ]; then
+        local port=$(echo "$SPECIFIC_PEER" | grep -o '[0-9]\+')
+        local peer_dir="../peer-$port"
+        if [ "$FORCE_MODE" = true ] && [ -d "$peer_dir" ]; then
+            echo "Force mode enabled, removing directory $peer_dir..."
+            rm -rf "$peer_dir"
+        fi
+        if [ ! -d "$peer_dir" ]; then
+            echo "Creating peer directory: $peer_dir"
+            rsync -a "$TEMPLATE_DIR/" "$peer_dir"
+        elif [ "$FORCE_MODE" = false ]; then
+            echo "Directory $peer_dir already exists, skipping... (use -f to force recreate)"
+        fi
+        return
     fi
 
     # If force mode is enabled, remove existing peer directories
@@ -123,6 +155,28 @@ distribute_secrets() {
 
 # Prepare configuration files
 prepare_config_files() {
+    if [ -n "$SPECIFIC_PEER" ]; then
+        local port=$(echo "$SPECIFIC_PEER" | grep -o '[0-9]\+')
+        local peer_dir="../peer-$port"
+        if [ -f "$peer_dir/.config_prepared" ] && [ "$FORCE_MODE" != true ]; then
+            echo "Configuration already prepared for $peer_dir, skipping..."
+            return
+        fi
+        local http_port=$port
+        local p2p_port=$((P2P_BASE_PORT + (port - BASE_PORT)))
+        
+        # Update port configuration
+        sed -i.bak "s/port: ${BASE_PORT}/port: ${http_port}/" "$peer_dir/.ddnrc.js"
+        sed -i.bak "s/p2pPort: ${P2P_BASE_PORT}/p2pPort: ${p2p_port}/" "$peer_dir/.ddnrc.js"
+        
+        # Mark configuration as completed
+        touch "$peer_dir/.config_prepared"
+        
+        # Clean up backup files
+        rm -f "$peer_dir/.ddnrc.js.bak"
+        return
+    fi
+
     for i in $(seq 1 $PEER_COUNT); do
         local peer_dir="../peer-$((BASE_PORT + i - 1))"
         
@@ -205,6 +259,17 @@ start_peers() {
     # Save current directory
     CURRENT_DIR=$(pwd)
     
+    if [ -n "$SPECIFIC_PEER" ]; then
+        local port=$(echo "$SPECIFIC_PEER" | grep -o '[0-9]\+')
+        if [ -d "../$SPECIFIC_PEER" ]; then
+            start_single_peer "../$SPECIFIC_PEER"
+        else
+            echo "Error: Peer directory ../$SPECIFIC_PEER does not exist"
+            exit 1
+        fi
+        return
+    fi
+    
     for i in $(seq 1 $PEER_COUNT); do
         local peer_dir="../peer-$((BASE_PORT + i - 1))"
         echo "Starting peer in $peer_dir..."
@@ -212,31 +277,43 @@ start_peers() {
         # Change to node directory
         cd "$peer_dir" || exit
         
-        # Start node using relative path
-        node app.js --daemon
-        
-        if ! check_peer_health "$peer_dir"; then
-            echo "Failed to start peer in $peer_dir"
-            cd "$CURRENT_DIR"
-            local port=$((BASE_PORT + i - 1))
-            local pid=$(lsof -ti :$port)
-            if ps -p $pid > /dev/null; then
-                echo "Killing process $pid"
-                kill -9 $pid
-            fi
-            exit 1
-        fi
-        
-        # Return to original directory
-        cd "$CURRENT_DIR" || exit
-        
-        sleep 3
+                start_single_peer "$peer_dir"
     done
+}
+
+# Start a single peer
+start_single_peer() {
+    local peer_dir=$1
+    cd "$peer_dir" || exit
+    
+    # Start node using relative path
+    node app.js --daemon
+    
+    if ! check_peer_health "$peer_dir"; then
+        echo "Failed to start peer in $peer_dir"
+        cd "$CURRENT_DIR"
+        local port=$(echo "$peer_dir" | grep -o '[0-9]\+')
+        local pid=$(lsof -ti :$port)
+        if ps -p $pid > /dev/null; then
+            echo "Killing process $pid"
+            kill -9 $pid
+        fi
+        exit 1
+    fi
+    
+    # Return to original directory
+    cd "$CURRENT_DIR" || exit
+    
+    sleep 3
 }
 
 # Main process
 main() {
-    echo "Starting $PEER_COUNT peers..."
+    if [ -n "$SPECIFIC_PEER" ]; then
+        echo "Starting peer $SPECIFIC_PEER..."
+    else
+        echo "Starting $PEER_COUNT peers..."
+    fi
     
     # Check if required commands exist
     # if ! command -v jq &> /dev/null; then
@@ -250,8 +327,13 @@ main() {
     prepare_config_files
     start_peers
     
-    echo "All peers started successfully"
-    echo "To shutdown peers, run: sh ./shutdown_peers.sh -n $PEER_COUNT"
+    if [ -n "$SPECIFIC_PEER" ]; then
+        echo "Peer $SPECIFIC_PEER started successfully"
+        echo "To shutdown the peer, run: sh ./shutdown_peers.sh -p $SPECIFIC_PEER"
+    else
+        echo "All peers started successfully"
+        echo "To shutdown peers, run: sh ./shutdown_peers.sh -n $PEER_COUNT"
+    fi
 }
 
 # Execute main process
