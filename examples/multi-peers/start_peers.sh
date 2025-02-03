@@ -329,10 +329,10 @@ main() {
     
     if [ -n "$SPECIFIC_PEER" ]; then
         echo "Peer $SPECIFIC_PEER started successfully"
-        echo "To shutdown the peer, run: sh ./shutdown_peers.sh -p $SPECIFIC_PEER"
+        echo "To shutdown the peer, run: sh ./stop_peers.sh -p $SPECIFIC_PEER"
     else
         echo "All peers started successfully"
-        echo "To shutdown peers, run: sh ./shutdown_peers.sh -n $PEER_COUNT"
+        echo "To shutdown peers, run: sh ./stop_peers.sh -n $PEER_COUNT"
     fi
 }
 

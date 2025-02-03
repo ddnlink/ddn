@@ -37,6 +37,8 @@ class Block {
 
     this._blockStatus = new BlockStatus(context)
     this._isSyncing = false
+
+    this.processBlock = this.processBlock.bind(this);
   }
 
   async getCount(where) {
@@ -517,136 +519,164 @@ class Block {
   async applyBlock({ block, votes, isBroadcast, isSaveBlock }) {
     const applyedTrsIdSet = new Set()
 
-    const doApplyBlock = async () => {
-      this.logger.debug('doApplyBlock is starting')
-
-      const sortedTrs = this._sortTransactions(block.transactions)
-
-      try {
-        const result = await this.dao.transaction(async dbTrans => {
-          for (let i = 0; i < sortedTrs.length; i++) {
-            const transaction = sortedTrs[i]
-            const updatedAccountInfo = await this.runtime.account.setAccount(
-              {
-                publicKey: transaction.senderPublicKey,
-                isGenesis: bignum.isEqualTo(block.height, 1)
-              },
-              dbTrans
-            )
-            // 吴连有 todo 最好加事物，报uuid的错误是存储数据时取的dbTrans不对
-            const accountInfo = await this.runtime.account.getAccountByAddress(updatedAccountInfo.address, dbTrans)
-            const newAccountInfo = Object.assign({}, accountInfo, updatedAccountInfo)
-
-            try {
-              await this.runtime.transaction.applyUnconfirmed(transaction, newAccountInfo, dbTrans)
-              await this.runtime.transaction.apply(transaction, block, newAccountInfo, dbTrans)
-            } catch (err) {
-              this.logger.error(`Apply unconfirmed ${err.toString()}`)
-              throw new Error(`Apply unconfirmed ${err.toString()}`)
-            } finally {
-              await this.runtime.transaction.removeUnconfirmedTransaction(transaction.id)
-              applyedTrsIdSet.add(transaction.id)
-            }
-          }
-
-          if (isSaveBlock) {
-            try {
-              await this.saveBlock(block, dbTrans)
-            } catch (err) {
-              this.logger.error(`Save block fail ${err}`)
-              throw new Error(`Save block fail ${err}`)
-            }
-          }
-          try {
-            await this.runtime.round.tick(block, dbTrans)
-          } catch (error) {
-            this.logger.error(`tick error dbTrans rollback error: ${JSON.stringify(error)}`)
-            throw new Error(error)
-          }
-          this.logger.debug('save block ok')
-        })
-
-        this.logger.debug('Apply block transaction result: ', result)
-        if (result) {
-          // found errors but rollback success
-          const lastHeight = await this.runtime.dvm.getLastHeight()
-          if (lastHeight >= 0) {
-            await this.runtime.dvm.rollback(this._lastBlock.height)
-          }
-          // throw new Error(result)
-          return
-        }
-        this.runtime.dvm.commit(block.height)
-
-        this.logger.debug('The dao.transaction is finished.')
-        this.setLastBlock(block)
-
-        this._proposeCache = {}
-        this._lastVoteTime = null
-
-        this.oneoff.clear()
-        this.balanceCache.commit()
-        this.runtime.consensus.clearState()
-
-        if (isBroadcast) {
-          this.logger.info(`Block applied correctly with ${block.transactions.length} transactions`)
-          votes.signatures = votes.signatures.slice(0, 6)
-
-          setImmediate(async () => {
-            try {
-              await this.runtime.peer.broadcast.broadcastNewBlock(block, votes)
-              await this.runtime.transaction.execAssetFunc('onNewBlock', block, votes)
-            } catch (err) {
-              this.logger.error(`Broadcast new block failed: ${System.getErrorMsg(err)}`)
-              // TODO: 2020.8.30 检查该处是否抛出错误
-              // throw new Error(`Broadcast new block failed: ${System.getErrorMsg(err)}`)
-            }
-          })
-        }
-      } catch (err) {
-        // 出错且回滚失败
-        applyedTrsIdSet.clear() // wxm TODO 清除上面未处理的交易记录
-        this.balanceCache.rollback()
-
-        this.logger.error(`Rollback or commit error, apply block fail: ${err}`)
-        process.exit(1)
-      }
-    }
-
     try {
       await this.balancesSequence.addAsync(async () => {
-        const unconfirmedTrs = await this.runtime.transaction.getUnconfirmedTransactionList(true)
+        await this._handleUnconfirmedTransactions(applyedTrsIdSet)
         
-        try {
-          await this.runtime.transaction.undoUnconfirmedList()
-        } catch (err) {
-          this.logger.error('Failed to undo unconfirmed transactions', err)
-          throw err // 抛出错误而不是直接退出
-        }
-
         this.oneoff.clear()
 
         try {
-          await doApplyBlock()
+          await this._processBlockAndTransactions(block, votes, isBroadcast, isSaveBlock, applyedTrsIdSet)
         } catch (err) {
           this.logger.error(`Failed to apply block: ${err}`)
-          throw err // 抛出错误以便外层捕获
+          throw err
         }
 
-        const redoTrs = unconfirmedTrs.filter(item => !applyedTrsIdSet.has(item.id))
-        try {
-          await this.runtime.transaction.receiveTransactions(redoTrs)
-        } catch (err) {
-          this.logger.error('Failed to redo unconfirmed transactions', err)
-          // 这里的错误可以记录但不需要抛出，因为主要流程已经完成
-        }
+        await this._redoUnconfirmedTransactions(applyedTrsIdSet)
       })
 
       return true
     } catch (err) {
       this.logger.error('Failed to apply block:', err)
-      this.balanceCache.rollback() // 确保回滚
+      this.balanceCache.rollback()
       throw err
+    }
+  }
+
+  // 处理未确认交易
+  async _handleUnconfirmedTransactions(applyedTrsIdSet) {
+    const unconfirmedTrs = await this.runtime.transaction.getUnconfirmedTransactionList(true)
+    
+    try {
+      await this.runtime.transaction.undoUnconfirmedList()
+    } catch (err) {
+      this.logger.error('Failed to undo unconfirmed transactions', err)
+      throw err
+    }
+
+    return unconfirmedTrs
+  }
+
+  // 处理区块和交易
+  async _processBlockAndTransactions(block, votes, isBroadcast, isSaveBlock, applyedTrsIdSet) {
+    const sortedTrs = this._sortTransactions(block.transactions)
+
+    try {
+      const result = await this.dao.transaction(async dbTrans => {
+        await this._applyTransactions(sortedTrs, block, applyedTrsIdSet, dbTrans)
+
+        if (isSaveBlock) {
+          await this._saveBlockData(block, dbTrans)
+        }
+
+        await this._updateRoundData(block, dbTrans)
+      })
+
+      if (result) {
+        await this._handleFailedTransaction(block)
+        return
+      }
+
+      await this._updateBlockchainState(block, votes, isBroadcast)
+    } catch (err) {
+      applyedTrsIdSet.clear()
+      this.balanceCache.rollback()
+      this.logger.error(`Rollback or commit error, apply block fail: ${err}`)
+      process.exit(1)
+    }
+  }
+
+  // 应用交易
+  async _applyTransactions(transactions, block, applyedTrsIdSet, dbTrans) {
+    for (let i = 0; i < transactions.length; i++) {
+      const transaction = transactions[i]
+      const updatedAccountInfo = await this.runtime.account.setAccount(
+        {
+          publicKey: transaction.senderPublicKey,
+          isGenesis: bignum.isEqualTo(block.height, 1)
+        },
+        dbTrans
+      )
+      
+      const accountInfo = await this.runtime.account.getAccountByAddress(updatedAccountInfo.address, dbTrans)
+      const newAccountInfo = Object.assign({}, accountInfo, updatedAccountInfo)
+
+      try {
+        await this.runtime.transaction.applyUnconfirmed(transaction, newAccountInfo, dbTrans)
+        await this.runtime.transaction.apply(transaction, block, newAccountInfo, dbTrans)
+      } catch (err) {
+        this.logger.error(`Apply unconfirmed ${err.toString()}`)
+        throw new Error(`Apply unconfirmed ${err.toString()}`)
+      } finally {
+        await this.runtime.transaction.removeUnconfirmedTransaction(transaction.id)
+        applyedTrsIdSet.add(transaction.id)
+      }
+    }
+  }
+
+  // 保存区块数据
+  async _saveBlockData(block, dbTrans) {
+    try {
+      await this.saveBlock(block, dbTrans)
+    } catch (err) {
+      this.logger.error(`Save block fail ${err}`)
+      throw new Error(`Save block fail ${err}`)
+    }
+  }
+
+  // 更新轮次数据
+  async _updateRoundData(block, dbTrans) {
+    try {
+      await this.runtime.round.tick(block, dbTrans)
+    } catch (error) {
+      this.logger.error(`tick error dbTrans rollback error: ${JSON.stringify(error)}`)
+      throw new Error(error)
+    }
+  }
+
+  // 处理失败的交易
+  async _handleFailedTransaction(block) {
+    const lastHeight = await this.runtime.dvm.getLastHeight()
+    if (lastHeight >= 0) {
+      await this.runtime.dvm.rollback(this._lastBlock.height)
+    }
+  }
+
+  // 更新区块链状态
+  async _updateBlockchainState(block, votes, isBroadcast) {
+    this.runtime.dvm.commit(block.height)
+    this.setLastBlock(block)
+
+    this._proposeCache = {}
+    this._lastVoteTime = null
+
+    this.oneoff.clear()
+    this.balanceCache.commit()
+    this.runtime.consensus.clearState()
+
+    if (isBroadcast) {
+      this.logger.info(`Block applied correctly with ${block.transactions.length} transactions`)
+      votes.signatures = votes.signatures.slice(0, 6)
+
+      setImmediate(async () => {
+        try {
+          await this.runtime.peer.broadcast.broadcastNewBlock(block, votes)
+          await this.runtime.transaction.execAssetFunc('onNewBlock', block, votes)
+        } catch (err) {
+          this.logger.error(`Broadcast new block failed: ${System.getErrorMsg(err)}`)
+        }
+      })
+    }
+  }
+
+  // 重新应用未确认交易
+  async _redoUnconfirmedTransactions(applyedTrsIdSet) {
+    const unconfirmedTrs = await this.runtime.transaction.getUnconfirmedTransactionList(true)
+    const redoTrs = unconfirmedTrs.filter(item => !applyedTrsIdSet.has(item.id))
+    try {
+      await this.runtime.transaction.receiveTransactions(redoTrs)
+    } catch (err) {
+      this.logger.error('Failed to redo unconfirmed transactions', err)
     }
   }
 
