@@ -59,7 +59,7 @@ class Context {
     // 二进制序列化对象
     const protoFile = path.resolve(__dirname, '../..', 'protos', 'ddn.proto')
 
-    console.log('protoFile', protoFile);
+    // console.log('protoFile', protoFile);
 
     if (!fs.existsSync(protoFile)) {
       console.error('Failed: DDN proto file does not exists.')

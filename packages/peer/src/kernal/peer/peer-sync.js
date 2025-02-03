@@ -57,10 +57,6 @@ class PeerSync {
     const peerStr = peer ? `${ip.fromLong(peer.host)}:${peer.port}` : 'unknown'
     this.logger.info(`Looking for common block with ${peerStr}`)
 
-    // modules.blocks.getCommonBlock
-    // 2020.8.13 不要重复调用，前面传过来，
-    // const lastBlock = this.runtime.block.getLastBlock()
-
     let lastLackBlock = null
     let currProcessHeight = lastBlock.height
     while (!lastLackBlock && bignum.isGreaterThan(currProcessHeight, 1)) {
@@ -198,10 +194,11 @@ class PeerSync {
     let queryBlockId = blockId
     let loaded = false
     let count = 0
+    const limit = 200
 
     while (!loaded && count < 30) {
       count++
-      const res = await this.runtime.peer.p2p.get('/block', { lastBlockId: queryBlockId, limit: 200 }, peer)
+      const res = await this.runtime.peer.p2p.get('/block', { lastBlockId: queryBlockId, limit }, peer)
       let blocks = (res && res.body && res.body.blocks) || []
 
       if (blocks.length === 0) {
@@ -237,10 +234,11 @@ class PeerSync {
         } catch (err) {
           this.logger.error(`Failed to process block: ${err}`)
           if (err.message === 'DDN is preparing') {
-            // return setTimeout(() => {
-            //   _cloneBlocksFromPeer(peer, blockId)
-            // }, 10)
-            return
+            // DDN 正在准备中，等待一段时间后重试
+            await new Promise(resolve => setTimeout(resolve, 1000))
+            // 重试当前区块
+            j--
+            continue
           }
           this.logger.error(`Block is not valid, ban 60 min, block: ${block ? block.id : 'null'} `, peerStr)
           return null
@@ -248,7 +246,7 @@ class PeerSync {
 
         queryBlockId = block.id
         lastClonedBlock = block
-        this.logger.log(`Block ${block.id} loaded from ${peerStr} at`, block.height)
+        this.logger.info(`Block ${block.id} loaded from ${peerStr} at`, block.height)
       }
     }
 
@@ -278,7 +276,7 @@ class PeerSync {
         res.body
       )
       if (validateErrors) {
-        this.logger.log(
+        this.logger.error(
           `Failed to parse blockchain height: ${validateErrors[0].schemaPath} ${validateErrors[0].message}`
         )
         // 2020.8.28 添加返回结果
@@ -311,23 +309,39 @@ class PeerSync {
         return true
       }
     } else {
-      this.logger.log('Failed to get height from remote peer')
+      this.logger.error('Failed to get height from remote peer')
       return false
     }
   }
 
   async trySyncSignatures () {
     let res
-    try {
-      res = await this.runtime.peer.p2p.get('/signature')
-    } catch (err) {
-      this.logger.error(`Sync Signatures has error: ${err}`)
-      return
+    let retryCount = 0
+    const maxRetries = 3
+    const retryDelay = 1000 // 1秒延迟
+
+    while (retryCount < maxRetries) {
+      try {
+        res = await this.runtime.peer.p2p.get('/signature')
+        break
+      } catch (err) {
+        retryCount++
+        this.logger.error(`Sync Signatures attempt ${retryCount} failed: ${err}`)
+        
+        if (retryCount === maxRetries) {
+          this.logger.error(`Sync Signatures has error after ${maxRetries} attempts: ${err}`)
+          return
+        }
+        
+        await new Promise(resolve => setTimeout(resolve, retryDelay))
+      }
     }
 
     if (!res || !res.body || !res.body.success) {
       return
     }
+
+    const body = res.body
 
     const validateErrors = await this.ddnSchema.validate(
       {
@@ -340,7 +354,7 @@ class PeerSync {
         },
         required: ['signatures']
       },
-      res.body
+      body
     )
     if (validateErrors) {
       this.logger.error(`${validateErrors[0].schemaPath} ${validateErrors[0].message}`)
@@ -350,8 +364,8 @@ class PeerSync {
     return new Promise((resolve, reject) => {
       this.sequence.add(
         async cb => {
-          for (let i = 0; i < res.body.signatures.length; i++) {
-            const signature = res.body.signatures[i]
+          for (let i = 0; i < body.signatures.length; i++) {
+            const signature = body.signatures[i]
             for (let j = 0; j < signature.signatures; j++) {
               const s = signature.signatures[j]
               try {
@@ -379,7 +393,7 @@ class PeerSync {
   }
 
   /**
-   * 从随机节点同步未确认交易
+   * Synchronize unconfirmed transactions from random nodes
    */
   async trySyncUnconfirmedTransactions () {
     let res
@@ -413,27 +427,38 @@ class PeerSync {
     }
 
     const transactions = res.body.transactions
+    const validTransactions = []
+    
     for (let i = 0; i < transactions.length; i++) {
       try {
-        transactions[i] = await this.runtime.transaction.objectNormalize(transactions[i])
+        const normalizedTx = await this.runtime.transaction.objectNormalize(transactions[i])
+        validTransactions.push(normalizedTx)
       } catch (e) {
-        this.logger.log(`Transaction ${transactions[i] ? transactions[i].id : 'null'} is not valid`)
-        return
+        this.logger.warn(
+          `Transaction ${transactions[i] ? transactions[i].id : 'null'} is not valid: ${e.message}`
+        )
+        continue
       }
     }
 
+    if (validTransactions.length === 0) {
+      this.logger.debug('No valid transactions found')
+      return
+    }
+
     const trs = []
-    for (let i = 0; i < transactions.length; ++i) {
-      // fixme 2020.8.13
-      // if (!await this.runtime.transaction.hasUnconfirmedTransaction(transactions[i])) {
-      if (await this.runtime.transaction.hasUnconfirmedTransaction(transactions[i])) {
-        // fixme no promise 2020.8.17 这里应该退出整个函数还是for循环 AA
-        // return reject('Transaction already exists.')
-        throw new Error('Transaction already exists.')
-        // this.logger.error('Transaction already exists.')
-        // continue
+    for (let i = 0; i < validTransactions.length; ++i) {
+      try {
+        const hasUnconfirmed = await this.runtime.transaction.hasUnconfirmedTransaction(validTransactions[i]);
+        if (!hasUnconfirmed) {
+          trs.push(validTransactions[i]);
+        } else {
+          this.logger.debug(`Skipping existing unconfirmed transaction: ${validTransactions[i].id}`);
+        }
+      } catch (err) {
+        this.logger.error(`Error checking unconfirmed transaction: ${err.message}`);
+        continue;
       }
-      trs.push(transactions[i])
     }
 
     return new Promise((resolve, reject) => {

@@ -6,13 +6,13 @@
 
 ```sh
 $ sh ./start_peers.sh
-$ sh ./shutdown_peers.sh
+$ sh ./stop_peers.sh
 ```
 
 ## 启动(重启) / 关闭 5 个节点
 ```sh
 $ sh ./start_peers.sh -n 5
-$ sh ./shutdown_peers.sh -n 5
+$ sh ./stop_peers.sh -n 5
 
 # 强制重新创建并启动 5 个节点
 $ sh ./start_peers.sh -n 5 -f 
