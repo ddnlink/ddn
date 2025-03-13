@@ -39,7 +39,7 @@ monitor_peers() {
         
         if [ $unhealthy_count -gt 0 ]; then
             echo "发现 $unhealthy_count 个异常节点，准备重启..."
-            sh ./shutdown_peers.sh -n $PEER_COUNT
+            sh ./stop_peers.sh -n $PEER_COUNT
             sh ./clean_peers.sh -t db
             sh ./start_peers.sh -n $PEER_COUNT -f
         fi

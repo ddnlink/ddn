@@ -44,17 +44,39 @@ class Sequence {
     if (!task) {
       return setImmediate(cb)
     }
-    let args = [
-      (err, res) => {
-        // console.log(self.name + " sequence out " + task.counter + ' func ' + task.worker.name);
-        task.done && setImmediate(task.done, err, res)
-        setImmediate(cb)
+    
+    const doneHandler = (err, res) => {
+      if (task.done && !task._handled) {
+        task._handled = true
+        setImmediate(() => task.done(err, res))
       }
-    ]
-    if (task.args) {
-      args = args.concat(task.args)
+      setImmediate(cb)
     }
-    task.worker.apply(task, args) // FIXME?
+
+    try {
+      const result = task.worker.call(task, doneHandler)
+      
+      if (result && typeof result.then === 'function') {
+        result
+          .then(res => {
+            if (!task._handled) {
+              doneHandler(null, res)
+            }
+          })
+          .catch(err => {
+            if (!task._handled) {
+              doneHandler(err)
+            }
+          })
+      }
+      else if (result !== undefined && !task._handled) {
+        doneHandler(null, result)
+      }
+    } catch (err) {
+      if (!task._handled) {
+        doneHandler(err)
+      }
+    }
   }
 
   add (worker, args, done) {
@@ -68,13 +90,32 @@ class Sequence {
         task.args = args
       }
       task.counter = this.counter++
-      // console.log(this.name + " sequence in " + task.counter + ' func ' + worker.name);
       this.sequence.push(task)
     }
   }
 
   count () {
     return this.sequence.length
+  }
+
+  // Promise风格的API
+  addAsync(worker, args) {
+    return new Promise((resolve, reject) => {
+      this.add(
+        async (done) => {
+          try {
+            const result = await worker(...(args || []))
+            done(null, result)
+          } catch (err) {
+            done(err)
+          }
+        },
+        (err, res) => {
+          if (err) reject(err)
+          else resolve(res)
+        }
+      )
+    })
   }
 }
 
