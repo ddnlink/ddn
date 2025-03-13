@@ -5,7 +5,7 @@
  *  Licensed under the AGPL 3.0 License. See License.txt in the project root for license information.
  *-------------------------------------------------------------------------------------------- */
 
-import ddn from './constants.testnet'
+const ddn = require('./constants.testnet')
 
 let constants = ddn
 
@@ -14,4 +14,4 @@ if (process.env.DDN_ENV === 'custom') {
   constants = require('./constants.custom')
 }
 
-export default constants
+module.exports = constants

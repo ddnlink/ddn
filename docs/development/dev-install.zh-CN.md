@@ -119,12 +119,13 @@ $ npm install -g pnpm
 1. 持续构建
 
 ```bash
-$ pnpm build:watch
+$ pnpm build
 ```
 
 2. 本地运行
 
 ```bash
+$ cd examples/multi-peers
 $ pnpm dev
 ```
 

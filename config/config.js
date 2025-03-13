@@ -11,4 +11,4 @@ if (process.env.DDN_ENV === 'custom') {
   config = require('./config.custom')
 }
 
-export default config
+module.exports = config
