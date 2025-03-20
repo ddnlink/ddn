@@ -1,4 +1,4 @@
-import { init, getDelegateByUsername } from '../../plugins/api'
+import { init, getDelegateByUsername } from '../../plugins/delegate'
 
 module.exports = {
   command: 'getDelegateByUsername [username]',

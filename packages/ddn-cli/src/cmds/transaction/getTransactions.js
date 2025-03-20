@@ -1,4 +1,4 @@
-import { init, getTransactions } from '../../plugins/api'
+import { init, getTransactions } from '../../plugins/transaction'
 
 module.exports = {
   command: 'getTransactions',

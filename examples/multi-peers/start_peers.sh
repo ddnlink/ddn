@@ -2,12 +2,14 @@
 
 # Default settings
 PEER_COUNT=3
-TEMPLATE_DIR="../../examples/fun-tests"
+TEMPLATE_DIR="../../examples/fun-tests" # 主网使用 main-tests 模板
 BASE_PORT=8001
 P2P_BASE_PORT=9001
-TOTAL_SECRETS=101
-SECRET_START_LINE=40
-SECRET_END_LINE=140
+# 私钥处理
+TOTAL_SECRETS=24
+SECRET_START_LINE=40 # 针对 .ddnrc.js 文件，节点密钥的第一行位置: 40
+SECRET_END_LINE=63  # 针对 .ddnrc.js 文件，节点密钥的最后一行位置，101个节点为 140
+
 FORCE_MODE=false
 SPECIFIC_PEER=""
 
@@ -17,13 +19,22 @@ show_help() {
     echo "Options:"
     echo "  -n <number>    Number of peers to start (default: 3)"
     echo "  -p <name>     Specific peer name to start (e.g., peer-8001 or 8001)"
+    echo "  -m <network>  Network type (mainnet) to use main-tests template"
     echo "  -f            Force mode - delete existing peer directories and recreate"
     echo "  -h            Show this help message"
 }
 
 # Parse parameters
-while getopts "n:p:fh" opt; do
+while getopts "n:p:fm:h" opt; do
     case $opt in
+        m)
+            if [ "$OPTARG" = "mainnet" ]; then
+                TEMPLATE_DIR="../../examples/main-tests"
+            else
+                echo "Error: Invalid network type. Use 'mainnet' for mainnet template"
+                exit 1
+            fi
+            ;;
         n)
             PEER_COUNT=$OPTARG
             if ! [[ "$PEER_COUNT" =~ ^[0-9]+$ ]] || [ "$PEER_COUNT" -lt 1 ]; then
@@ -164,7 +175,7 @@ prepare_config_files() {
         fi
         local http_port=$port
         local p2p_port=$((P2P_BASE_PORT + (port - BASE_PORT)))
-        
+            
         # Update port configuration
         sed -i.bak "s/port: ${BASE_PORT}/port: ${http_port}/" "$peer_dir/.ddnrc.js"
         sed -i.bak "s/p2pPort: ${P2P_BASE_PORT}/p2pPort: ${p2p_port}/" "$peer_dir/.ddnrc.js"
@@ -294,9 +305,11 @@ start_single_peer() {
         cd "$CURRENT_DIR"
         local port=$(echo "$peer_dir" | grep -o '[0-9]\+')
         local pid=$(lsof -ti :$port)
-        if ps -p $pid > /dev/null; then
-            echo "Killing process $pid"
-            kill -9 $pid
+        if [ -n "$pid" ]; then
+            if ps -p $pid > /dev/null; then
+                echo "Killing process $pid"
+                kill -9 $pid
+            fi
         fi
         exit 1
     fi

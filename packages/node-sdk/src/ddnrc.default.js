@@ -16,7 +16,7 @@ module.exports = {
   publicIp: '',
   logLevel: 'error',
   net: 'testnet',
-  nethash: '0ab796cd',
+  nethash: 'm66gcvle',
   payloadLimitSize: '8mb',
   clientDriftSeconds: 5,
 

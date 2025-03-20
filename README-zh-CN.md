@@ -1,3 +1,6 @@
+该文件是ddn运行中的log信息，出现了跨越 Round 时的错误，请分析错误的原因，找到相关的代码，提出解决问题的方案。源码位置在 @packages 里，最相关的包是 @ddn/peer .
+
+
 <h1 align="center">
   <a href="https://ddn.net"><img src="https://avatars3.githubusercontent.com/u/34602359?s=200&v=4" alt="DDN Blockchain" width="200"></a>
   <br>

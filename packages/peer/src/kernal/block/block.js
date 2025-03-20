@@ -630,7 +630,14 @@ class Block {
       await this.runtime.round.tick(block, dbTrans)
     } catch (error) {
       this.logger.error(`tick error dbTrans rollback error: ${JSON.stringify(error)}`)
-      throw new Error(error)
+      try {
+        // 执行数据库事务回滚操作
+        await dbTrans.rollback();
+      } catch (error) {
+        // 记录详细错误信息
+        this.logger.error('Error rolling back database transaction:', error);
+      }
+      // throw new Error(error)
     }
   }
 

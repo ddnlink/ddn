@@ -1,0 +1,11 @@
+services:
+  ddn-dev:
+    build: .
+    container_name: ddn-dev
+    ports:
+      - "8001:8001"
+      - "9001:9001"
+    volumes:
+      - ../../:/root/ddn
+    tty: true
+    stdin_open: true

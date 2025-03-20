@@ -1,4 +1,4 @@
-import { init, getVotedDelegates } from '../../plugins/api'
+import { init, getVotedDelegates } from '../../plugins/delegate'
 
 module.exports = {
   command: 'getVotedDelegates [address]',

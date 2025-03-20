@@ -1,4 +1,4 @@
-import { init, registerDelegate } from '../../plugins/api'
+import { init, registerDelegate } from '../../plugins/delegate'
 
 module.exports = {
   command: 'registerDelegate',

@@ -1,4 +1,4 @@
-import { init, getDelegatesCount } from '../../plugins/api'
+import { init, getDelegatesCount } from '../../plugins/delegate'
 
 module.exports = {
   command: 'getDelegatesCount',

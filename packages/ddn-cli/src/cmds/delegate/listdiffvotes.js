@@ -1,4 +1,4 @@
-import { init, listdiffvotes } from '../../plugins/api'
+import { init, listdiffvotes } from '../../plugins/delegate'
 
 module.exports = {
   command: 'listdiffvotes',

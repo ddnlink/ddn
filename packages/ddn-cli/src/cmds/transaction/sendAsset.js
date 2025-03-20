@@ -1,4 +1,4 @@
-import { init, sendAsset } from '../../plugins/api'
+import { init, sendAsset } from '../../plugins/transaction'
 
 module.exports = {
   command: 'sendAsset',

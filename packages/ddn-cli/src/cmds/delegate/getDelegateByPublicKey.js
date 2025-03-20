@@ -1,4 +1,4 @@
-import { init, getDelegateByPublicKey } from '../../plugins/api'
+import { init, getDelegateByPublicKey } from '../../plugins/delegate'
 
 module.exports = {
   command: 'getDelegateByPublicKey [publickey]',

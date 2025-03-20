@@ -58,6 +58,7 @@ config/mainnet/*
 **/**/*.hbl.js
 **/**/*.custom.js
 examples/peer*
+examples/main-tests/
 # .ddnrc.js
 
 .cursorrules
@@ -65,3 +66,6 @@ examples/peer*
 .pnpm-store
 .husky
 .github
+
+# test
+/examples/main-tests

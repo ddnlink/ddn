@@ -3,10 +3,14 @@ import DdnUtils from '@ddn/utils'
 import crypto from '../utils/crypto'
 import slots from '../time/slots'
 import { config, constants } from '../config'
+import Debug from 'debug'
+const debug = Debug('debug')
 
 async function createVote (keyList, secret, secondSecret) {
   const keys = crypto.getKeys(secret)
   const fee = DdnUtils.bignum.multiply(constants.fees.vote, constants.fixedPoint)
+
+  debug("vote.js", `Creating a vote transaction with nethash ${config.nethash}`)
 
   const transaction = {
     type: DdnUtils.assetTypes.VOTE,

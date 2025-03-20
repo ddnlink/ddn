@@ -7,7 +7,7 @@ module.exports = {
   builder: {
     file: {
       alias: 'f',
-      describe: 'genesis accounts balance file'
+      describe: 'genesis accounts balance file, e.g: teams.txt'
     },
     secret: {
       alias: 's',

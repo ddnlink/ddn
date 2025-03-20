@@ -21,7 +21,7 @@ export const config = mergeConfigs(defaultConfig, userConfig)
  */
 const constantsFile = path.resolve(process.cwd(), './config/constants.js')
 
-debug('constantsFile', constantsFile)
+debug('node-sdk config.js', constantsFile)
 
 const userConstants = requireFile(constantsFile)
 

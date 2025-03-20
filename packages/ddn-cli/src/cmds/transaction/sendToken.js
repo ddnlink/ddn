@@ -1,9 +1,9 @@
-import { init, sendToken } from '../../plugins/api'
+import { init, sendToken } from '../../plugins/transaction'
 
 module.exports = {
   command: 'sendToken',
   aliases: 'st',
-  desc: 'Send token to some address',
+  desc: 'Send tokens to one address',
   builder: {
     secret: {
       alias: 'e',

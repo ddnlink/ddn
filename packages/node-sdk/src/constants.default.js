@@ -3,7 +3,7 @@
  * Note: Once the mainnet is online, this file can no longer be changed.
  */
 module.exports = {
-  nethash: '0ab796cd', // 标定该链的版本
+  nethash: 'm66gcvle', // 标定该链的版本
   tokenName: 'DDN',
   tokenPrefix: 'D',
   maxAmount: 100 * 10 ** 8,

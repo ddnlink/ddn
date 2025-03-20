@@ -1,4 +1,4 @@
-import { init, getVoters } from '../../plugins/api'
+import { init, getVoters } from '../../plugins/delegate'
 
 module.exports = {
   command: 'getVoters [publicKey]',

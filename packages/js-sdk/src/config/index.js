@@ -10,7 +10,7 @@ const debug = Debug('debug')
 let config = defaultConfig;
 let constants = defaultConstants;
 
-// 前端配置，可将其赋值给 window 变量
+// 前端自定义的配置，可将其赋值给 window.jsSdk.* 变量
 if (typeof window !== 'undefined' && window.jsSdk) {
     debug('window.jsSdk 存在。。。。')
     if (typeof (window.jsSdk.config) !== 'undefined') {

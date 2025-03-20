@@ -70,9 +70,9 @@ class InTransfer extends Asset.Base {
         throw new Error('Invalid transfer amount')
       }
 
-      const error = DdnUtils.amount.validate(inTransfer.amount)
-      if (error) {
-        throw error
+      const result = DdnUtils.amount.validate(inTransfer.amount)
+      if (!result.valid) {
+        throw result.message
       }
     } else {
       if (

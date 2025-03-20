@@ -555,7 +555,7 @@ class Account {
     }
 
     // 把余额添加到缓存（map)
-    if (diff.balance) {
+    if (typeof diff.balance === 'string') {
         // 添加余额验证
         const balance = DdnUtils.bignum.new(diff.balance);
         if (DdnUtils.bignum.isNaN(balance)) {

@@ -5,26 +5,14 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    depends_on:
-      - ddn_sqlite
-      # - ddn_postgres
+    # depends_on:
+    #   # - ddn_postgres
     volumes:
       - ../:/root/ddn/
     networks:
       - ddnnet
     ports:
       - "${APP_PORT}:${APP_PORT}"
-    restart: unless-stopped
-
-  ddn_sqlite:
-    container_name: "${APP_ID}-sqlite"
-    image: nouchka/sqlite3:latest
-    stdin_open: true
-    tty: true
-    volumes:
-      - ./db/sqlite:/root/db/
-    networks:
-      - ddnnet
     restart: unless-stopped
 
   # ddn_redis:

@@ -26,6 +26,8 @@ class Round {
     // this._unDelegatesByRound = {}
     this._transitioning = false;
     this._lastStableHeight = 0;
+    // 添加错误计数器
+    this._rewardsErrorCount = 0; 
   }
 
   async prepare() {
@@ -146,7 +148,7 @@ class Round {
       this._unFeesByRound = { ...this._feesByRound }
       this._unRewardsByRound = { ...this._rewardsByRound }
 
-      // 3. 特殊处理第一个区块
+      // 3. 特殊处理一个区块
       if (bignum.isEqualTo(block.height, 1)) {
         this.logger.debug('First block, skipping rewards')
         return true
@@ -205,62 +207,40 @@ class Round {
   // 处理轮次奖励
   async processRoundRewards(block, round, dbTrans) {
     try {
-      const changes = new RoundChanges(this, round)
       const delegates = this._delegatesByRound[round]
-
+      
       if (!delegates || !delegates.length) {
         this.logger.warn('No delegates in round:', round)
         return false
       }
+      const changes = new RoundChanges(this, round)
 
       // 处理每个受托人的奖励
       for (let i = 0; i < delegates.length; i++) {
-        const delegatePublicKey = delegates[i]
-        const balance = changes.at(i)
+        const delegatePublicKey = delegates[i];
+        const change = changes.at(i);
+        this.logger.debug('This change info of i:', i, change);
         
         this.logger.debug('Delegate balance info:', {
           delegatePublicKey,
-          balance: balance.balance,
-          fees: balance.fees,
-          rewards: balance.rewards
-        })
-
-        if (!balance || typeof balance.balance !== 'string' || bignum.isNaN(bignum.new(balance.balance))) {
-          this.logger.error('Invalid balance for delegate:', {
-            delegate: delegatePublicKey,
-            balance
-          })
-          continue
-        }
-
-        if (!balance.fees || bignum.isNaN(bignum.new(balance.fees)) ||
-            !balance.rewards || bignum.isNaN(bignum.new(balance.rewards))) {
-          this.logger.error('Invalid fees or rewards for delegate:', {
-            delegate: delegatePublicKey,
-            fees: balance.fees,
-            rewards: balance.rewards
-          })
-          continue
-        }
-
-        this.logger.debug('Updating balance for delegate:', {
-          delegate: delegatePublicKey,
-          balance: balance.balance
-        })
-
+          balance: change.balance,
+          fees: change.fees,
+          rewards: change.rewards
+        });
+    
         await this.runtime.account.merge(
           null,
           {
             publicKey: delegatePublicKey,
-            balance: balance.balance,
-            u_balance: balance.balance,
-            fees: balance.fees,
-            rewards: balance.rewards,
+            balance: change.balance,
+            u_balance: change.balance,
+            fees: change.fees,
+            rewards: change.rewards,
             block_id: block.id,
             round: round
           },
           dbTrans
-        )
+        );
       }
 
       // 处理基金会奖励
@@ -282,11 +262,31 @@ class Round {
         )
       }
 
+      // 奖励处理成功，重置错误计数器
+      this._rewardsErrorCount = 0; 
       return true
     } catch (err) {
+      // 错误计数器加 1
+      this._rewardsErrorCount++; 
       this.logger.error('Process round rewards error:', err)
+
+      if (this._rewardsErrorCount >= 5) {
+        // 达到 5 次错误，放弃铸块并触发同步
+        this.logger.warn('Reached 5 errors in processRoundRewards, triggering synchronization...');
+        this._rewardsErrorCount = 0; // 重置计数器
+        await this.triggerSynchronization(); // 触发同步操作
+      }
+
       throw err
     }
+  }
+
+  // 触发同步操作的方法
+  async triggerSynchronization() {
+    // 这里添加触发同步的具体逻辑
+    this.logger.info('Synchronization triggered.');
+    // 示例：调用同步方法
+    await this.ctx.runtime.peer.syncBlocks()
   }
 
   // 处理未参与铸块的受托人

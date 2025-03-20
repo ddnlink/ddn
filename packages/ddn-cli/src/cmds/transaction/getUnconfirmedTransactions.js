@@ -1,4 +1,4 @@
-import { init, getUnconfirmedTransactions } from '../../plugins/api'
+import { init, getUnconfirmedTransactions } from '../../plugins/transaction'
 
 module.exports = {
   command: 'getUnconfirmedTransactions',

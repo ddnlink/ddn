@@ -1,6 +1,6 @@
 {
   "name": "ddn",
-  "version": "3.7.2",
+  "version": "3.8.0",
   "private": true,
   "repository": {
     "type": "git",
@@ -38,7 +38,8 @@
     "build:docker": "node ./scripts/initCryptoDependent.js && father build --docker",
     "changelog": "conventional-changelog -p angular -i CHANGELOG.md -w",
     "chore:update-deps": "sh ./scripts/reinstall_deps.sh",
-    "clean": "pnpm store prune",
+    "clean": "rm -rf \"node_modules\" \"packages/**/node_modules\" && pnpm store prune",
+    "clean:cache": "rm -rf */**/node_modules/.cache",
     "docker:start": "docker compose -f ./docker/docker-compose.yml --env-file ./docker/.env start",
     "docker:stop": "docker compose -f ./docker/docker-compose.yml --env-file ./docker/.env stop",
     "docker:up": "docker compose -f ./docker/docker-compose.yml --env-file ./docker/.env up -d",

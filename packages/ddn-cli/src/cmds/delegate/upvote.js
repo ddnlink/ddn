@@ -1,4 +1,4 @@
-import { init, upvote } from '../../plugins/api'
+import { init, upvote } from '../../plugins/delegate'
 
 module.exports = {
   command: 'upvote',

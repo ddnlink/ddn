@@ -28,8 +28,8 @@ while getopts "n:t:f:h" opt; do
             ;;
         t)
             CLEAN_TYPE=$OPTARG
-            if [[ "$CLEAN_TYPE" != "db" && "$CLEAN_TYPE" != "log" && "$CLEAN_TYPE" != "all" ]]; then
-                echo "错误: 清理类型必须是 db、log 或 all"
+            if [[ "$CLEAN_TYPE" != "db" && "$CLEAN_TYPE" != "log" && "$CLEAN_TYPE" != "pid" && "$CLEAN_TYPE" != "all" ]]; then
+                echo "错误: 清理类型必须是 db、log、pid 或 all"
                 exit 1
             fi
             ;;
@@ -104,6 +104,13 @@ clean_logs() {
     echo "已清理日志文件: $peer_dir/logs/"
 }
 
+# 清理pid文件
+clean_pids() {
+    local peer_dir=$1
+    rm -f "$peer_dir/ddn.pid"
+    echo "已清理pid文件: $peer_dir/ddn.pid"
+}
+
 # 主要清理过程
 main() {
     echo "开始清理 $PEER_COUNT 个节点..."
@@ -126,9 +133,13 @@ main() {
                 "log")
                     clean_logs "$peer_dir"
                     ;;
+                "pid")
+                    clean_pids "$peer_dir"
+                    ;;
                 "all")
                     clean_db "$peer_dir"
                     clean_logs "$peer_dir"
+                    clean_pids "$peer_dir"
                     echo "已清理所有文件: $peer_dir"
                     ;;
             esac
