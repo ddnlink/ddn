@@ -1,7 +1,6 @@
 import { expect } from 'chai'
 import sinon from 'sinon'
 import Block from '../../src/kernal/block/block'
-import { runtimeState } from '@ddn/utils'
 
 describe('Block Fork Handling', () => {
   let block
@@ -25,7 +24,6 @@ describe('Block Fork Handling', () => {
     }
 
     mockRuntime = {
-      state: runtimeState.Ready,
       loaded: true,
       delegate: {
         fork: sinon.stub().resolves()
@@ -90,7 +88,7 @@ describe('Block Fork Handling', () => {
     })
 
     it('should ignore block when not ready', async () => {
-      mockRuntime.state = runtimeState.Syncing
+      // mockRuntime.state = runtimeState.Syncing
       await block.receiveNewBlock(mockBlock, [])
       expect(mockLogger.debug.calledWith(sinon.match(/Not ready to receive blocks/))).to.be.true
     })

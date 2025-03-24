@@ -1,5 +1,4 @@
 import assetTypes from './asset-types'
-import runtimeState from './runtime-states'
 import LimitCache from './limit-cache'
 import amount from './amount'
 import bignum from './bignumber'
@@ -10,7 +9,6 @@ export * from './random'
 export {
   LimitCache,
   assetTypes,
-  runtimeState,
   amount,
   bignum,
   BufferCache,
@@ -25,7 +23,6 @@ export {
 export default {
   LimitCache,
   assetTypes,
-  runtimeState,
   amount,
   bignum,
   BufferCache

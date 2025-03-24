@@ -5,10 +5,9 @@ PEER_COUNT=3
 TEMPLATE_DIR="../../examples/fun-tests" # 主网使用 main-tests 模板
 BASE_PORT=8001
 P2P_BASE_PORT=9001
-# 私钥处理
-TOTAL_SECRETS=24
+TOTAL_SECRETS=101 # 总密钥数量
 SECRET_START_LINE=40 # 针对 .ddnrc.js 文件，节点密钥的第一行位置: 40
-SECRET_END_LINE=63  # 针对 .ddnrc.js 文件，节点密钥的最后一行位置，101个节点为 140
+SECRET_END_LINE=$((SECRET_START_LINE + TOTAL_SECRETS - 1))  # 根据密钥数量计算结束行
 
 FORCE_MODE=false
 SPECIFIC_PEER=""
@@ -20,12 +19,13 @@ show_help() {
     echo "  -n <number>    Number of peers to start (default: 3)"
     echo "  -p <name>     Specific peer name to start (e.g., peer-8001 or 8001)"
     echo "  -m <network>  Network type (mainnet) to use main-tests template"
+    echo "  -s <number>    Total number of secrets (default: 101)"
     echo "  -f            Force mode - delete existing peer directories and recreate"
     echo "  -h            Show this help message"
 }
 
 # Parse parameters
-while getopts "n:p:fm:h" opt; do
+while getopts "n:p:fm:s:h" opt; do
     case $opt in
         m)
             if [ "$OPTARG" = "mainnet" ]; then
@@ -58,6 +58,14 @@ while getopts "n:p:fm:h" opt; do
                 echo "Error: Peer name must be either a port number (e.g., 8001) or in format 'peer-PORT' (e.g., peer-8001)"
                 exit 1
             fi
+            ;;
+        s)
+            TOTAL_SECRETS=$OPTARG
+            if ! [[ "$TOTAL_SECRETS" =~ ^[0-9]+$ ]] || [ "$TOTAL_SECRETS" -lt 1 ]; then
+                echo "Error: Secret count must be a positive number"
+                exit 1
+            fi
+            SECRET_END_LINE=$((SECRET_START_LINE + TOTAL_SECRETS - 1))
             ;;
         h)
             show_help

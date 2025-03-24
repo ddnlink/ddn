@@ -2,7 +2,6 @@
  * NetworkRouter接口
  * wangxm   2019-03-15
  */
-import { runtimeState } from '@ddn/utils'
 
 class NetworkRouter {
   constructor (context) {
@@ -25,7 +24,7 @@ class NetworkRouter {
 
     return {
       success: true,
-      ready: this.runtime.state === runtimeState.Ready,
+      ready: this.runtime.stateMachine.isReady(),
       height: this.runtime.block.getLastBlock().height,
       blocksCount: count
     }
@@ -42,7 +41,7 @@ class NetworkRouter {
 
     return {
       success: true,
-      syncing: this.runtime.state !== runtimeState.Ready,
+      syncing: !this.runtime.stateMachine.isReady(),
       blocks: blocks,
       height: this.runtime.block.getLastBlock().height
     }

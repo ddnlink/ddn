@@ -98,7 +98,35 @@ class Sequence {
     return this.sequence.length
   }
 
-  // Promise风格的API
+  /**
+   * Adds an asynchronous task to the queue (Promise-based API)
+   * 
+   * Features:
+   * - Queues work functions with arguments
+   * - Returns Promise for async/await or .then()/.catch() handling
+   * - Automatically resolves/rejects when task completes
+   * 
+   * @example
+   * // Using async/await
+   * try {
+   *   const result = await sequence.addAsync(async (param) => {
+   *     // Work logic here
+   *     return processedData;
+   *   }, [param]);
+   * } catch (err) {
+   *   // Handle error
+   * }
+   * 
+   * @example
+   * // Using Promise chain
+   * sequence.addAsync(workerFn, args)
+   *   .then(result => {})
+   *   .catch(err => {});
+   *
+   * @param {Function} worker - Async worker function to execute
+   * @param {Array} [args] - Arguments array for worker function (optional)
+   * @returns {Promise} Promise that resolves with worker's result or rejects with error
+   */
   addAsync(worker, args) {
     return new Promise((resolve, reject) => {
       this.add(

@@ -7,7 +7,6 @@ import path from 'path'
 import fs from 'fs'
 import extend from 'extend2'
 import * as DdnCrypto from '@ddn/crypto'
-import { bignum, runtimeState } from '@ddn/utils'
 import { DVM, Compiler } from '@ddn/contract'
 
 import { System } from '../utils/system'
@@ -28,6 +27,9 @@ import dbUpgrade from '../db/db-upgrade'
 import HttpServer from '../network/http-server'
 import MultiSignature from './consensus/multisignature'
 
+import { ForgeManager } from './peer/forge-manager';
+
+import StateMachine from '../utils/state-machine'
 import defaultConfig from '../config.default.js'
 
 /**
@@ -40,20 +42,24 @@ import defaultConfig from '../config.default.js'
 process.env.UV_THREADPOOL_SIZE = 20 // max: 128
 
 class Program {
-  async _init (options) {
+
+  // 在 _init 方法中初始化
+  async _init(options) {
     options.logger = logger(options)
 
     if (!options.configObject.publicIp) {
       options.configObject.publicIp = System.getPublicIp()
     }
 
+    // 初始化上下文
     this.ctx = new Context()
-    // 将配置信息保存到上下文
     await this.ctx.init(options)
 
-    // 将运行时选项保存到运行时上下文
-    this.ctx.runtime.state = runtimeState.Pending
+    // 初始化加载状态
     this.ctx.runtime.loaded = false
+
+    // 初始化运行时状态机
+    this.ctx.runtime.stateMachine = new StateMachine()
 
     // 区块核心处理模块
     this.ctx.runtime.block = Block.singleton(this.ctx)
@@ -99,12 +105,15 @@ class Program {
 
     // 节点列表同步任务的轮询间隔（3-1个轮询会执行一次同步）
     this._peerSyncCounter = 3
+
+    // 非运行时函数
+    this.forgeManager = new ForgeManager(this.ctx);
   }
 
   /**
    * 文件锁，保证系统只能运行一份
    */
-  _checkProcessState () {
+  _checkProcessState() {
     if (this.ctx.isDaemonMode) {
       try {
         fs.writeFileSync(this._pid_file, process.pid.toString(), { flag: 'wx' })
@@ -123,7 +132,7 @@ class Program {
   /**
    * 释放文件锁
    */
-  _resetProcessState () {
+  _resetProcessState() {
     try {
       if (fs.existsSync(this._pid_file)) {
         fs.unlinkSync(this._pid_file)
@@ -136,14 +145,14 @@ class Program {
   /**
    * 升级数据库结构
    */
-  async _applyDatabaseUpgrade () {
+  async _applyDatabaseUpgrade() {
     return await dbUpgrade.upgrade(this.ctx)
   }
 
   /**
    * 校验创世区块的数据
    */
-  async _checkGenesisBlock () {
+  async _checkGenesisBlock() {
     const block = this.ctx.genesisblock
 
     let payloadBytes = ''
@@ -164,7 +173,7 @@ class Program {
     return true
   }
 
-  async run (options) {
+  async run(options) {
     // 如果是后台模式，禁止输出
     if (options.isDaemonMode) {
       require('daemon')({ cwd: process.cwd() })
@@ -172,6 +181,91 @@ class Program {
     // 提供系统默认配置文件
     options.configObject = extend(true, defaultConfig, options.configObject)
 
+    // 配置加載之前回調函數
+    await this._configWillLoad(options)
+    // 初始化运行时上下文、核心模块等
+    await this._init(options)
+    // 配置加載完成回調函數
+    await this._configLoaded()
+
+    // 简化上下文
+    const ctx = this.ctx;
+
+    if (!ctx.config.publicIp) {
+      ctx.logger.warn('Failed to get public ip, block forging may not work!')
+    }
+
+    // 应用最新数据库升级
+    await this._applyDatabaseUpgrade()
+
+    // 验证创世区块数据是否合法
+    if (!(await this._checkGenesisBlock())) {
+      process.exit(1)
+    }
+
+    // 初始化创世区块
+    await ctx.runtime.block.handleGenesisBlock()
+
+    // 初始化账户以及余额
+    try {
+      // TODO next optimize initAccountsAndBalances like onInitAccountsAndBalances use
+      await ctx.runtime.account.initAccountsAndBalances()
+      // init asset banlance when start program
+      await ctx.runtime.transaction.execAssetFunc('onInitAccountsAndBalances')
+    } catch (err) {
+      ctx.logger.error('Failed to load blockchain', System.getErrorMsg(err))
+      return process.exit(1)
+    }
+
+    // 启动准备（节点）
+    await ctx.runtime.peer.prepare()
+
+    // 启动准备（Round）
+    await ctx.runtime.round.prepare()
+
+    // 启动准备（受托人）
+    await ctx.runtime.delegate.prepare()
+
+    // 启动dvm
+    await ctx.runtime.dvm.run()
+    // const contracts = await ctx.dao.findList('contract', { where: { state: 0 } })
+    // await ctx.runtime.dvm.loadContracts(contracts.map(c => c.id))
+    // dvm 就绪回調函數
+    this._dvmReady()
+
+    // 启动节点网络服务
+    ctx.runtime.httpserver = await HttpServer.newServer(ctx).start()
+
+    // 程序准备完毕
+    ctx.runtime.loaded = true
+    if (ctx.isDaemonMode) {
+      ctx.logger.info('DDN server started as daemon ...')
+    } else {
+      ctx.logger.info('DDN Start Successfully!')
+    }
+
+    // 启动各种服务
+    await this._bindReady()
+    // assets 加載完成回調函數
+    await this._assetsLoaded()
+    // 启动区块数据同步任务
+    await this.startBlockDataSyncTask()
+
+    // 启动区块未确认交易的同步任务
+    await this.startUnconfirmedTransactionSyncTask()
+
+    // 启动签名同步任务
+    await this.startSignaturesSyncTask()
+
+    // 启动区块铸造任务
+    await this.startForgeBlockTask()
+
+    // 启动监控
+    if (ctx.config.logLevel === 'debug') {
+      this._monitorRuntimeState() // 添加监控
+    }
+
+    // 添加全局事件处理
     process.once('cleanup', async () => {
       this.ctx.logger.info('Cleaning up...')
       await this._beforeClose()
@@ -209,137 +303,57 @@ class Program {
       }, 1000 * 60 * 30)
     }
 
-    // 配置加載之前回調函數
-    await this._configWillLoad(options)
-    // 初始化运行时上下文、核心模块等
-    await this._init(options)
-    // 配置加載完成回調函數
-    await this._configLoaded()
-
     // 文件锁，保证系统只能运行一份
     this._checkProcessState()
 
     process.stdin.resume()
-
-    // 应用最新数据库升级
-    await this._applyDatabaseUpgrade()
-
-    // 验证创世区块数据是否合法
-    if (!(await this._checkGenesisBlock())) {
-      process.exit(1)
-    }
-
-    if (!this.ctx.config.publicIp) {
-      this.ctx.logger.warn('Failed to get public ip, block forging may not work!')
-    }
-
-    // 启动dvm
-    await this.ctx.runtime.dvm.run()
-    // const contracts = await this.ctx.dao.findList('contract', { where: { state: 0 } })
-    // await this.ctx.runtime.dvm.loadContracts(contracts.map(c => c.id))
-    // dvm 就緒回調函數
-    this._dvmReady()
-
-    // 初始化创世区块
-    await this.ctx.runtime.block.handleGenesisBlock()
-
-    // 初始化账户以及余额
-    try {
-      // TODO next optimize initAccountsAndBalances like onInitAccountsAndBalances use
-      await this.ctx.runtime.account.initAccountsAndBalances()
-      // init asset banlance when start program
-      await this.ctx.runtime.transaction.execAssetFunc('onInitAccountsAndBalances')
-    } catch (err) {
-      this.ctx.logger.error('Failed to load blockchain', System.getErrorMsg(err))
-      return process.exit(1)
-    }
-
-    // 启动准备（节点）
-    await this.ctx.runtime.peer.prepare()
-
-    // 启动准备（Round）
-    await this.ctx.runtime.round.prepare()
-
-    // 启动准备（受托人）
-    await this.ctx.runtime.delegate.prepare()
-
-    // 启动节点网络服务
-    this.ctx.runtime.httpserver = await HttpServer.newServer(this.ctx).start()
-
-    // 系统准备完毕，进入待命状态
-    if (this.ctx.isDaemonMode) {
-      this.ctx.logger.info('DDN server started as daemon ...')
-    } else {
-      this.ctx.logger.info('DDN Start Successfully!')
-    }
-
-    await this._bindReady()
-    // assets 加載完成回調函數
-    await this._assetsLoaded()
-    // 启动区块数据同步任务
-    await this.startBlockDataSyncTask()
-
-    // 启动区块未确认交易的同步任务
-    await this.startUnconfirmedTransactionSyncTask()
-
-    // 启动签名同步任务
-    await this.startSignaturesSyncTask()
-
-    // 启动区块铸造任务
-    await this.startForgeBlockTask()
-
-    this.ctx.runtime.loaded = true
   }
 
-  async _bindReady () {
-    // if (this.ctx.runtime.loaded) {
+  async _bindReady() {
     // 通知资产系统已就绪事件
     await this.ctx.runtime.transaction.execAssetFunc('onBind')
-    // }
   }
 
-  async _blockchainReady () {
-    if (!this._blockchainReadyFired && this.ctx.runtime.state === runtimeState.Ready) {
-      // 通知资产系统已就绪事件
-      await this.ctx.runtime.transaction.execAssetFunc('onBlockchainReady')
-      // 块加载完成
+  async _blockchainReady() {
+    // 通知资产系统区块链已就绪
+    await this.ctx.runtime.transaction.execAssetFunc('onBlockchainReady')
+    // 块加载完成
+    this.ctx.runtime.stateMachine.transitionTo('Ready')
 
-      this._blockchainReadyFired = true
-      // 節點就緒回調函數
-      await this._appReady()
-    }
+    // 节点就绪生命周期函數
+    await this._appReady()
   }
 
   // lifeCycle function
-  async _configWillLoad (options) {
+  async _configWillLoad(options) {
     if ((options.lifeCycle || {}).configWillLoad) await this.ctx.configWillLoad()
   }
 
-  async _configLoaded () {
+  async _configLoaded() {
     if (this.ctx.configLoaded) await this.ctx.configLoaded()
   }
 
-  async _assetsLoaded () {
+  async _assetsLoaded() {
     if (this.ctx.assetsLoaded) await this.ctx.assetsLoaded()
   }
 
-  async _dvmReady () {
+  async _dvmReady() {
     if (this.ctx.dvmReady) await this.ctx.dvmReady()
   }
 
-  // fixme: 上下文ctx 未提供 appReady(), 该方法默认空实现 imfly 20240630
-  async _appReady () {
+  async _appReady() {
     if (this.ctx.appReady) await this.ctx.appReady()
   }
 
-  async _beforeClose () {
+  // lifeCycle function end
+  async _beforeClose() {
     if (this.ctx.beforeClose) await this.ctx.beforeClose()
   }
 
   /**
    * 签名同步任务（轮询）
    */
-  async startSignaturesSyncTask () {
+  async startSignaturesSyncTask() {
     try {
       await this.ctx.runtime.peer.syncSignatures()
     } catch (err) {
@@ -354,9 +368,9 @@ class Program {
   /**
    * 同步未确认交易（轮询）
    */
-  async startUnconfirmedTransactionSyncTask () {
+  async startUnconfirmedTransactionSyncTask() {
     try {
-      if (this.ctx.runtime.state === runtimeState.Syncing) {
+      if (this.ctx.runtime.stateMachine.isSyncing()) {
         return
       }
 
@@ -373,7 +387,7 @@ class Program {
   /**
    * 同步节点区块数据（轮询）
    */
-  async startBlockDataSyncTask () {
+  async startBlockDataSyncTask() {
     this.ctx.logger.warn('startBlockDataSyncTask enter...')
     const next = () => {
       setTimeout(() => {
@@ -381,127 +395,79 @@ class Program {
       }, 1000 * 10)
     }
     const peer = await this.ctx.runtime.peer.getPeer()
-
     this.ctx.logger.warn('startBlockDataSyncTask get peer: ', peer)
-
     if (!peer) {
       this.ctx.logger.debug("Change state to 'ready'")
-      this.ctx.runtime.state = runtimeState.Ready
-      await this._blockchainReady()
+      if (!this.ctx.runtime.stateMachine.isReady()) {
+        await this._blockchainReady()
+      }
+      // this.ctx.runtime.stateMachine.transitionTo('Ready')
+      // await this._blockchainReady()
       next()
       return
     }
 
     try {
-      if (this.ctx.runtime.state === runtimeState.Syncing) {
+      if (this.ctx.runtime.stateMachine.isSyncing()) {
         next()
         return
       }
 
       const lastBlock = this.ctx.runtime.block.getLastBlock()
       const lastSlot = this.ctx.runtime.slot.getSlotNumber(lastBlock.timestamp)
+
+      this.ctx.logger.debug('startBlockDataSyncTask state: ', {
+        state: this.ctx.runtime.stateMachine.current,
+        loaded: this.ctx.runtime.loaded,
+        lastSlot,
+        getNextSlot: this.ctx.runtime.slot.getNextSlot()
+      })
+
       if (this.ctx.runtime.slot.getNextSlot() - lastSlot < 3) {
         next()
         return
       }
-      this.ctx.runtime.state = runtimeState.Syncing
-      this.ctx.logger.debug('SyncBlocks enter')
+      this.ctx.runtime.stateMachine.transitionTo('Syncing')
       const success = await this.ctx.runtime.peer.syncBlocks()
-      this.ctx.logger.debug('SyncBlocks outer')
+
       if (success) {
-        this.ctx.runtime.state = runtimeState.Ready
         await this._blockchainReady()
       } else {
-        this.ctx.logger.debug('SyncBlocks not complete change state pending')
-        this.ctx.runtime.state = runtimeState.Pending
+        this.ctx.logger.debug('SyncBlocks doesnt complete, and change state to pending.')
+        this.ctx.runtime.stateMachine.transitionToPending()
       }
     } catch (err) {
       this.ctx.logger.error('The block sync task error: ' + err)
+      this.ctx.runtime.stateMachine.transitionToPending()
     }
-
     next()
+  }
+
+  // 添加状态监控
+  async _monitorRuntimeState() {
+    setInterval(() => {
+      this.ctx.logger.debug('Runtime State Report', {
+        state: this.ctx.runtime.stateMachine.current,
+        // loaded: this.ctx.runtime.loaded,
+        lastBlock: this.ctx.runtime.block.getLastBlock().height
+      })
+    }, 60 * 1000) // 每分钟记录状态
   }
 
   /**
    * 尝试铸造区块（轮询）
    */
-  async startForgeBlockTask () {
-    await (async () => {
-      if (this.ctx.runtime.state !== runtimeState.Ready) {
-        return
-      }
-
-      if (!this.ctx.runtime.delegate.isForgeEnabled()) {
-        this.ctx.logger.trace('Loop:', 'forging disabled')
-        return
-      }
-
-      if (!this.ctx.runtime.delegate.hasValidDelegates()) {
-        this.ctx.logger.trace('Loop:', 'no delegates')
-        return
-      }
-
-      const currentSlot = this.ctx.runtime.slot.getSlotNumber()
-
-      const lastBlock = this.ctx.runtime.block.getLastBlock()
-      if (currentSlot === this.ctx.runtime.slot.getSlotNumber(lastBlock.timestamp)) {
-        this.ctx.logger.trace('Loop:', 'lastBlock is in the same slot')
-        return
-      }
-
-      if (Date.now() % (this.ctx.constants.interval * 1000) > (this.ctx.constants.interval * 1000) / 2) {
-        this.ctx.logger.trace('Loop:', 'maybe too late to collect votes')
-        return
-      }
-
-      // 获取当前时间槽的铸造受托人信息
-      this.ctx.logger.debug(`Getting forge delegate info for slot ${currentSlot} and height ${bignum.plus(lastBlock.height, 1)}`)
-      const forgeDelegateInfo = await this.ctx.runtime.delegate.getForgeDelegateWithCurrentTime(
-        currentSlot,
-        bignum.plus(lastBlock.height, 1)
-      )
-      
-      if (forgeDelegateInfo === null) {
-        this.ctx.logger.trace('Loop:', 'skipping slot')
-        return
-      }
-
-      await new Promise(resolve => {
-        this.ctx.sequence.add(
-          async cb => {
-            if (
-              this.ctx.runtime.slot.getSlotNumber(forgeDelegateInfo.time) === this.ctx.runtime.slot.getSlotNumber() &&
-              this.ctx.runtime.block.getLastBlock().timestamp < forgeDelegateInfo.time
-            ) {
-              try {
-                await this.ctx.runtime.block.generateBlock(forgeDelegateInfo.keypair, forgeDelegateInfo.time)
-              } catch (err) {
-                this.ctx.logger.error('Forged new block failed: ' + System.getErrorMsg(err))
-                cb('Forged new block failed: ' + err) // Added: 2020.9.4
-              }
-            }
-
-            cb()
-          },
-          err => {
-            if (err) {
-              this.ctx.logger.error('Failed generate block within slot:', err)
-            }
-
-            resolve()
-          }
-        )
-      })
-    })()
-
-    setTimeout(() => {
-      this.startForgeBlockTask()
-    }, 100)
+  async startForgeBlockTask() {
+    await this.forgeManager.startForgeBlockTask();
   }
 
-  destory () {
+  // 销毁程序
+  destroy() {
     this._resetProcessState()
   }
 }
 
 export default Program
+
+
+

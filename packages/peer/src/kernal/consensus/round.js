@@ -377,7 +377,17 @@ class Round {
 
     this._feesByRound[round] = this._feesByRound[round] || 0
 
-    this._feesByRound[round] = bignum.minus(this._feesByRound[round], block.totalFee)
+    // 在累加手续费前添加校验
+    if (bignum.isNaN(block.totalFee)) {
+    this.logger.error('Invalid block totalFee:', block.totalFee);
+    throw new Error('Invalid block total fee');
+    }
+
+    // 修改 backwardTick 中的处理
+    this._feesByRound[round] = bignum.minus(
+    this._feesByRound[round] || '0', // 添加默认值
+    block.totalFee
+    ).toString();
 
     this._rewardsByRound[round] = this._rewardsByRound[round] || []
     this._rewardsByRound[round].pop()

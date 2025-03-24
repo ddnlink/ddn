@@ -49,7 +49,7 @@ class ContractService {
    * @returns
    */
   async get (req) {
-    if (this.runtime.state !== DdnUtils.runtimeState.Ready) {
+    if (!this.runtime.stateMachine.isReady()) {
       throw new Error('Blockchain is loading')
     }
 

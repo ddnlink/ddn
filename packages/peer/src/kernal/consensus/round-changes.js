@@ -6,16 +6,22 @@
 import { bignum } from '@ddn/utils'
 
 class RoundChanges {
+  // 在构造函数中添加日志
   constructor(ctx, round) {
     if (!ctx || !ctx.runtime || !ctx.constants) {
       throw new Error('Invalid ctx or runtime in RoundChanges constructor');
     }
     Object.assign(this, ctx);
+
     // this.runtime = ctx.runtime;
     // this.constants = ctx.constants;
     this._CLUB_BONUS_RATIO = ctx.constants.net.rewardRatio
     if (round) {
-      this._roundFees = this.runtime.round._unFeesByRound[round] || [];
+      this.logger.debug('Initializing RoundChanges for round', round, {
+        unFees: ctx.runtime.round._unFeesByRound[round],
+        unRewards: ctx.runtime.round._unRewardsByRound[round]
+      });
+      this._roundFees = this.runtime.round._unFeesByRound[round] || '0';
       this._roundRewards = this.runtime.round._unRewardsByRound[round] || [];
     }
   }
@@ -25,7 +31,7 @@ class RoundChanges {
    * @param {number} index - The index value.
    * @returns {Object} - An object containing fees, remaining fees, rewards, and total balance.
    */
-  at (index) {
+  at(index) {
     // Log debug information including club bonus ratio, round fees, round rewards at the specified index, and number of delegates.
     this.logger.debug('RoundChanges at index', index, ':', {
       _CLUB_BONUS_RATIO: this._CLUB_BONUS_RATIO,
@@ -96,7 +102,7 @@ class RoundChanges {
    * Get the club bonus based on round fees and rewards.
    * @returns {Object} - An object containing club bonus fees and rewards.
    */
-  getClubBonus () {
+  getClubBonus() {
     // Check if _roundFees is a valid number. If not, set it to '0'.
     if (bignum.isNaN(this._roundFees)) {
       this.logger.error('Invalid _roundFees value:', this._roundFees);

@@ -9,19 +9,19 @@ import { System } from '../../utils/system'
 let _singleton
 
 class PeerSync {
-  static singleton (context) {
+  static singleton(context) {
     if (!_singleton) {
       _singleton = new PeerSync(context)
     }
     return _singleton
   }
 
-  constructor (context) {
+  constructor(context) {
     Object.assign(this, context)
     this._context = context
   }
 
-  async _getIdSequence (height) {
+  async _getIdSequence(height) {
     const rows = await this.dao.findList('block', {
       where: {
         height: {
@@ -53,7 +53,7 @@ class PeerSync {
     }
   }
 
-  async _addLackBlocks (peer, lastBlock) {
+  async _addLackBlocks(peer, lastBlock) {
     const peerStr = peer ? `${ip.fromLong(peer.host)}:${peer.port}` : 'unknown'
     this.logger.info(`Looking for common block with ${peerStr}`)
 
@@ -124,7 +124,7 @@ class PeerSync {
       return process.exit(0)
     }
 
-    // rollback blocks TODO 这是要回滚那么分叉的区块
+    // rollback blocks TODO 这是要回滚分叉的区块
     if (lastLackBlock.id !== lastBlock.id) {
       try {
         const currentRound = await this.runtime.round.getRound(lastBlock.height)
@@ -170,7 +170,7 @@ class PeerSync {
       // TODO 最新缺失区块与最新区块 id 一致，这里仍然检索 200条，并循环处理 2020.8.8
       lastLackBlock = await this._cloneBlocksFromPeer(peer, lastLackBlock.id)
     } catch (err) {
-      this.logger.error(`Failed to load blocks, ban 60 min: ${peerStr}`, err)
+      this.logger.error(`Failed to load Lack blocks: ${peerStr}`, err)
     }
 
     try {
@@ -187,7 +187,7 @@ class PeerSync {
    * @param {object} peer peer object
    * @param {string} blockId block id
    */
-  async _cloneBlocksFromPeer (peer, blockId) {
+  async _cloneBlocksFromPeer(peer, blockId) {
     const peerStr = peer ? `${ip.fromLong(peer.host)}:${peer.port}` : 'unknown'
 
     let lastClonedBlock = null
@@ -225,7 +225,7 @@ class PeerSync {
         try {
           block = await this.runtime.block.objectNormalize(block)
         } catch (e) {
-          this.logger.error(`Failed to normalize block, ban 60 min, block: ${block ? block.id : 'null'} `, peerStr)
+          this.logger.error(`Failed to normalize block, block: ${block ? block.id : 'null'} `, peerStr)
           return null
         }
 
@@ -256,7 +256,7 @@ class PeerSync {
   /**
    * 从随机节点同步区块数据
    */
-  async trySyncBlockData () {
+  async trySyncBlockData() {
     let res = await this.runtime.peer.p2p.get('/height')
     if (!res) {
       return false
@@ -314,7 +314,7 @@ class PeerSync {
     }
   }
 
-  async trySyncSignatures () {
+  async trySyncSignatures() {
     let res
     let retryCount = 0
     const maxRetries = 3
@@ -327,12 +327,12 @@ class PeerSync {
       } catch (err) {
         retryCount++
         this.logger.error(`Sync Signatures attempt ${retryCount} failed: ${err}`)
-        
+
         if (retryCount === maxRetries) {
           this.logger.error(`Sync Signatures has error after ${maxRetries} attempts: ${err}`)
           return
         }
-        
+
         await new Promise(resolve => setTimeout(resolve, retryDelay))
       }
     }
@@ -395,7 +395,7 @@ class PeerSync {
   /**
    * Synchronize unconfirmed transactions from random nodes
    */
-  async trySyncUnconfirmedTransactions () {
+  async trySyncUnconfirmedTransactions() {
     let res
     try {
       res = await this.runtime.peer.p2p.get('/tx')
@@ -428,7 +428,7 @@ class PeerSync {
 
     const transactions = res.body.transactions
     const validTransactions = []
-    
+
     for (let i = 0; i < transactions.length; i++) {
       try {
         const normalizedTx = await this.runtime.transaction.objectNormalize(transactions[i])

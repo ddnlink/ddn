@@ -113,7 +113,7 @@ async function main () {
     console.error(err)
 
     if (peer) {
-      peer.destory()
+      peer.destroy()
     }
 
     process.exit(1)

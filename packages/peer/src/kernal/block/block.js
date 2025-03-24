@@ -5,7 +5,7 @@
 import assert from 'assert'
 
 import * as DdnCrypto from '@ddn/crypto'
-import { runtimeState, bignum } from '@ddn/utils'
+import { bignum } from '@ddn/utils'
 import { System } from '../../utils/system'
 import BlockStatus from './block-status'
 import BlockCache from './block-cache'
@@ -293,9 +293,9 @@ class Block {
    * @param {*} votes
    */
   async receiveNewBlock(block, votes) {
-    if (this.runtime.state !== runtimeState.Ready || !this.runtime.loaded) {
+    if (!this.runtime.stateMachine.isReady()) {
       this.logger.debug(
-        `Not ready to receive blocks, state: ${this.runtime.state}, Ready: ${runtimeState.Ready}, loaded: ${this.runtime.loaded}`
+        `Not ready to receive blocks, state: ${!this.runtime.stateMachine.current}, Ready: 2`
       )
       return
     }
@@ -364,7 +364,7 @@ class Block {
 
   async receiveVotes(votes) {
     this.logger.debug('Receive votes start')
-    if (this.runtime.state !== runtimeState.Ready) {
+    if (!this.runtime.stateMachine.isReady()) {
       return
     }
 
@@ -405,14 +405,14 @@ class Block {
   }
 
   /**
-   * 接收其他节点铸造区块的授权申请提议，进行授权操作
+   * 接收其他节点铸块投票
    * @param {*} propose
    */
   async receiveNewPropose(propose) {
     this.logger.debug('receiveNewPropose start.')
-    if (this.runtime.state !== runtimeState.Ready) {
+    if (!this.runtime.stateMachine.isReady()) {
       this.logger.debug(
-        `receive new propose, prepare is not ready, state: ${this.runtime.state}, Ready: ${runtimeState.Ready}`
+        `receive new propose, prepare is not ready, state: ${!this.runtime.stateMachine.current}, Ready: 2`
       )
       return
     }
@@ -522,7 +522,7 @@ class Block {
     try {
       await this.balancesSequence.addAsync(async () => {
         await this._handleUnconfirmedTransactions(applyedTrsIdSet)
-        
+
         this.oneoff.clear()
 
         try {
@@ -546,7 +546,7 @@ class Block {
   // 处理未确认交易
   async _handleUnconfirmedTransactions(applyedTrsIdSet) {
     const unconfirmedTrs = await this.runtime.transaction.getUnconfirmedTransactionList(true)
-    
+
     try {
       await this.runtime.transaction.undoUnconfirmedList()
     } catch (err) {
@@ -597,7 +597,7 @@ class Block {
         },
         dbTrans
       )
-      
+
       const accountInfo = await this.runtime.account.getAccountByAddress(updatedAccountInfo.address, dbTrans)
       const newAccountInfo = Object.assign({}, accountInfo, updatedAccountInfo)
 
@@ -723,7 +723,7 @@ class Block {
     //   throw new Error(`Failed to get block id: ${e.toString()}`)
     // }
     // block.height = bignum.plus(this._lastBlock.height, 1).toString()
-    
+
     // 显式声明验证预期高度 TODO：这里的逻辑与上面的不同，需要验证和测试 2025.2.1
     const expectedHeight = bignum.plus(this._lastBlock.height, 1).toString()
     if (!bignum.isEqualTo(block.height, expectedHeight)) {
@@ -885,6 +885,7 @@ class Block {
    */
   async processBlock(block, votes, broadcast, save, verifyTrs) {
     if (!this.runtime.loaded) {
+      this.logger.debug('processBlock this.runtime.loaded: ', this.runtime.loaded)
       throw new Error('DDN is preparing')
     }
 
@@ -1198,13 +1199,13 @@ class Block {
 
   async _popLastBlock(oldLastBlock) {
     const { id, height } = oldLastBlock
-  
+
     return new Promise((resolve, reject) => {
       this.balancesSequence.add(
         async cb => {
           try {
             this.logger.info(`Begin to pop block height: ${height}, id: ${id}`)
-  
+
             // 1. 验证并获取前一个区块
             const previousBlock = await this.runtime.dataquery.queryFullBlockData(
               { id: oldLastBlock.previous_block },
@@ -1212,69 +1213,69 @@ class Block {
               0,
               [['height', 'asc']]
             )
-  
+
             if (!previousBlock || !previousBlock.length) {
               throw new Error('Previous block not found')
             }
-  
+
             // 2. 规范化区块数据
             const blockNormalize = await this._parseObjectFromFullBlocksData(previousBlock)
             const normalizedPrevBlock = blockNormalize[0]
-  
+
             // 3. 验证区块连续性
             if (normalizedPrevBlock.height !== (height - 1).toString()) {
               throw new Error('Block height discontinuity detected')
             }
-  
+
             // 4. 处理交易回滚
             const transactions = this._sortTransactions(oldLastBlock.transactions).reverse()
-  
+
             // 5. 使用事务处理所有数据库操作
             await this.dao.transaction(async dbTrans => {
               try {
                 // 回滚交易
                 for (const transaction of transactions) {
                   this.logger.debug(`Undoing transaction: ${transaction.id}`)
-                  
+
                   const sender = await this.runtime.account.getAccountByPublicKey(
                     transaction.senderPublicKey,
                     dbTrans
                   )
-  
+
                   if (!sender) {
                     throw new Error(`Transaction sender not found: ${transaction.id}`)
                   }
-  
+
                   await this.runtime.transaction.undo(transaction, oldLastBlock, sender, dbTrans)
                   await this.runtime.transaction.undoUnconfirmed(transaction, dbTrans)
-                  await this.runtime.transaction.deleteTransaction({ 
-                    trsId: transaction.id, 
-                    dbTrans 
+                  await this.runtime.transaction.deleteTransaction({
+                    trsId: transaction.id,
+                    dbTrans
                   })
                 }
-  
+
                 // 回滚轮次数据
                 await this.runtime.round.backwardTick(oldLastBlock, normalizedPrevBlock, dbTrans)
-                
+
                 // 删除当前区块
                 await this.deleteBlock({ blockId: id, dbTrans })
-  
+
               } catch (err) {
                 this.logger.error('Transaction rollback failed:', err)
                 throw err // 触发事务回滚
               }
             })
-  
+
             // 6. 更新内存状态
             this.setLastBlock(normalizedPrevBlock)
-            
+
             // 7. 清理缓存
             if (this._blockCache) {
               this._blockCache.remove(id)
             }
-  
+
             cb(null, normalizedPrevBlock)
-  
+
           } catch (err) {
             this.logger.error('Block pop failed:', err)
             cb(err)
@@ -1522,7 +1523,6 @@ class Block {
   }
 
   sandboxApi(call, args, cb) {
-    // sandboxHelper.callMethod(shared, call, args, cb)
     if (typeof this[call] !== 'function') {
       return cb(`Function not found in module: ${call}`)
     }
@@ -1605,7 +1605,7 @@ class Block {
     } catch (err) {
       this.logger.error('Failed to rollback:', err)
       // 记录错误但不中断程序
-      this.runtime.state = runtimeState.Rollback
+      this.runtime.transitionTo('Rollback')
       // 可以触发一个回滚失败的事件，让其他模块知道
       this.runtime.bus && this.runtime.bus.message('rollbackFailed', {
         height,
@@ -1660,7 +1660,7 @@ class Block {
     } catch (err) {
       this.logger.error('Fork handling failed:', err)
       // 记录错误但不中断程序
-      this.runtime.state = runtimeState.Fork
+      this.runtime.stateMachine.transitionTo('Fork');
       // 可以触发一个分叉处理失败的事件
       this.runtime.bus && this.runtime.bus.message('forkHandlingFailed', {
         block,
