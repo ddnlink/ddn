@@ -58,5 +58,3 @@ export class System {
     return info
   }
 }
-
-export default System

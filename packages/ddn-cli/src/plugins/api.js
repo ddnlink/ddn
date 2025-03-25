@@ -3,8 +3,8 @@ import path from 'path'
 import * as DdnCrypto from '@ddn/crypto'
 import NodeSdk from '@ddn/node-sdk'
 import { Compiler, GasCounter } from '@ddn/contract'
-import Api from '../helpers/api'
-import blockHelper from '../helpers/block'
+import Api from '../utils/api'
+import blockHelper from '../utils/block'
 
 let globalOptions
 

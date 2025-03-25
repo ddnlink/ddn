@@ -3,7 +3,7 @@ import { bignum } from '@ddn/utils'
 import * as crypto from '@ddn/crypto'
 
 let _singleton
-class Energy {
+export class Energy {
   static singleton (context) {
     if (!_singleton) {
       _singleton = new Energy(context)
@@ -338,5 +338,3 @@ class Energy {
     }
   }
 }
-
-export default Energy

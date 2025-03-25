@@ -3,7 +3,7 @@
  * Core state machine class for managing runtime states
  * @class StateMachine
  */
-class StateMachine {
+export class StateMachine {
   // State enumeration
   static States = {
     /** Initial state, waiting for initialization */
@@ -84,5 +84,3 @@ class StateMachine {
     return this._state;
   }
 }
-
-export default StateMachine

@@ -15,7 +15,7 @@
  *
  * @param {config} config
  */
-class Sequence {
+export class Sequence {
   constructor (config) {
     const _default = {
       onWarning: null,
@@ -146,5 +146,3 @@ class Sequence {
     })
   }
 }
-
-export default Sequence

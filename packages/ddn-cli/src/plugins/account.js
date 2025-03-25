@@ -1,6 +1,6 @@
 import inquirer from 'inquirer'
 import * as crypto from '@ddn/crypto'
-import accountHelper from '../helpers/account.js'
+import accountHelper from '../utils/account.js'
 
 async function genPubkey () {
   const result = await inquirer.prompt([

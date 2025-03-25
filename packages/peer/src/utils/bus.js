@@ -23,7 +23,7 @@ import changeCase from 'change-case'
  * the same method(onBlockchainReady) for all modules of the system will be called
  *
  */
-class Bus extends EventEmitter {
+export class Bus extends EventEmitter {
   constructor () {
     super()
     this._subscribers = []
@@ -70,5 +70,3 @@ class Bus extends EventEmitter {
     this.emit(...arguments)
   }
 }
-
-export default Bus

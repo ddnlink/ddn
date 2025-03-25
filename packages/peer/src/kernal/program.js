@@ -9,27 +9,27 @@ import extend from 'extend2'
 import * as DdnCrypto from '@ddn/crypto'
 import { DVM, Compiler } from '@ddn/contract'
 
-import { System } from '../utils/system'
-import { logger } from '../utils/logger'
+import { System, Logger, Energy, StateMachine } from '../utils'
 
 import Context from './context'
 import Block from './block/block'
 import Transaction from './transaction/transaction'
 import Account from './account/account'
-import Slot from './consensus/slot'
-import Round from './consensus/round'
-import Delegate from './consensus/delegate'
-import Consensus from './consensus/consensus'
-import DataQuery from './consensus/data-query'
-import Peer from './peer/peer'
-import Energy from '../helpers/energy'
-import dbUpgrade from '../db/db-upgrade'
-import HttpServer from '../network/http-server'
-import MultiSignature from './consensus/multisignature'
+import {
+  Slot,
+  Round,
+  Delegate,
+  Consensus,
+  DataQuery,
+  MultiSignature
+} from './consensus'
 
+import Peer from './peer/peer'
 import { ForgeManager } from './peer/forge-manager';
 
-import StateMachine from '../utils/state-machine'
+import dbUpgrade from '../db/db-upgrade'
+import HttpServer from '../network/http-server'
+
 import defaultConfig from '../config.default.js'
 
 /**
@@ -45,7 +45,7 @@ class Program {
 
   // 在 _init 方法中初始化
   async _init(options) {
-    options.logger = logger(options)
+    options.logger = Logger(options)
 
     if (!options.configObject.publicIp) {
       options.configObject.publicIp = System.getPublicIp()

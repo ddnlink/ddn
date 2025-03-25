@@ -8,7 +8,7 @@
 import { bignum } from '@ddn/utils'
 import Tmdb from './tmdb.js'
 
-class BalanceManager {
+export class BalanceManager {
   constructor () {
     this.tmdb = new Tmdb()
   }
@@ -62,5 +62,3 @@ class BalanceManager {
     this.tmdb.commit()
   }
 }
-
-export default BalanceManager

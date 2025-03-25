@@ -5,12 +5,14 @@
 import path from 'path'
 import fs from 'fs'
 import Asset from '@ddn/asset-base'
-import Bus from '../utils/bus'
-import System from '../utils/system'
-import protobuf from '../utils/protobuf'
-import Sequence from '../utils/sequence'
-import Address from '../helpers/address'
-import BalanceManager from '../helpers/balance-manager'
+import {
+  Bus,
+  System,
+  Protobuf,
+  Sequence,
+  Address,
+  BalanceManager
+} from '../utils'
 import database from '../db/database'
 import dbParams from '../db/db-params'
 import DdnSchema from '../schema/ddn-schema'
@@ -104,7 +106,7 @@ class Context {
 
   async _buildProtobuf (protoFile) {
     return new Promise((resolve, reject) => {
-      protobuf(protoFile, this, (err, result) => {
+      Protobuf(protoFile, this, (err, result) => {
         if (err) {
           reject(err)
         } else {

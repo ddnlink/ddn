@@ -1,7 +1,7 @@
 import fs from 'fs'
 import path from 'path'
 import NodeSdk from '@ddn/node-sdk'
-import Api from '../helpers/api'
+import Api from '../utils/api'
 import { log } from 'console'
 
 let globalOptions

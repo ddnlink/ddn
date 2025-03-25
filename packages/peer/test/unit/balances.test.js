@@ -2,7 +2,7 @@
  * passed
  */
 import { node } from '../ddn-js'
-import BalanceManager from '../../src/helpers/balance-manager.js'
+import { BalanceManager } from '../../src/utils/balance-manager.js'
 
 describe('balance cache manager', () => {
   it('normal test', done => {

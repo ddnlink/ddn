@@ -18,7 +18,7 @@ function getConf (options) {
   }
 }
 
-function logger (config) {
+export function Logger (config) {
   const conf = getConf(config)
   const fun = process.env.NODE_ENV === 'production' ? 'dailyfile' : 'colorConsole'
   if (process.env.NODE_ENV !== 'production') {
@@ -31,5 +31,3 @@ function logger (config) {
   }
   return tracer[fun](conf)
 }
-
-export { logger }

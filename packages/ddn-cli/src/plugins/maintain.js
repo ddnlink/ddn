@@ -1,7 +1,7 @@
 import async from 'async'
 import request from 'request'
 import nodeSdk from '@ddn/node-sdk'
-import Api from '../helpers/api'
+import Api from '../utils/api'
 
 let globalOptions
 

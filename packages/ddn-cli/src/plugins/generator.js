@@ -11,8 +11,8 @@ import chalk from 'chalk'
 import ora from 'ora'
 import valid_url from 'valid-url'
 
-import accountHelper from '../helpers/account'
-import blockHelper from '../helpers/block'
+import accountHelper from '../utils/account'
+import blockHelper from '../utils/block'
 import { prompt } from '../utils/prompt'
 import handlebarHelpers from 'handlebars-helpers'
 const helpers = handlebarHelpers(['math', 'string', 'number'])

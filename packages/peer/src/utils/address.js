@@ -1,6 +1,6 @@
 import * as DdnCrypto from '@ddn/crypto'
 
-class Address {
+export class Address {
   constructor (tokenPrefix) {
     this.tokenPrefix = tokenPrefix
   }
@@ -18,5 +18,3 @@ class Address {
     return this.generateAddress(publicKey)
   }
 }
-
-export default Address

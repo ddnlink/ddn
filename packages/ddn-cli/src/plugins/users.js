@@ -1,7 +1,7 @@
 import fs from 'fs'
 import * as cryptoLib from '@ddn/crypto'
 
-import accountHelper from '../helpers/account.js'
+import accountHelper from '../utils/account.js'
 
 function writeFileSync (file, obj) {
   const content = typeof obj === 'string' ? obj : JSON.stringify(obj, null, 2)
