@@ -1,6 +1,6 @@
 {
   "name": "@ddn/sandbox",
-  "version": "2.4.5",
+  "version": "2.5.0",
   "description": "ddn sandbox which is used to run sidechain dapps",
   "author": "HuoDing <huo.ding@qq.com>",
   "license": "AGPL 3.0",

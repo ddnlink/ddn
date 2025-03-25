@@ -1,6 +1,6 @@
 {
   "name": "@ddn/asset-base",
-  "version": "2.4.5",
+  "version": "2.5.0",
   "description": "DDN资产基类相关信息",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

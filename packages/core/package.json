@@ -1,6 +1,6 @@
 {
   "name": "@ddn/core",
-  "version": "2.4.8",
+  "version": "2.5.0",
   "description": "DDN core.",
   "main": "./dist/index.js",
   "types": "dist/index.d.ts",

@@ -1,6 +1,6 @@
 {
   "name": "@ddn/node-sdk",
-  "version": "2.4.6",
+  "version": "2.5.0",
   "description": "DDN Node.js SDK",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
