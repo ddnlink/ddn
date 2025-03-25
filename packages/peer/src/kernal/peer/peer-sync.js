@@ -361,35 +361,17 @@ class PeerSync {
       return
     }
 
-    return new Promise((resolve, reject) => {
-      this.sequence.add(
-        async cb => {
-          for (let i = 0; i < body.signatures.length; i++) {
-            const signature = body.signatures[i]
-            for (let j = 0; j < signature.signatures; j++) {
-              const s = signature.signatures[j]
-              try {
-                await this.runtime.multisignature.processSignature({
-                  signature: s,
-                  transaction: signature.transaction
-                })
-              } catch (e) {
-                cb(e)
-              }
-            }
-          }
-
-          cb()
-        },
-        err => {
-          if (err) {
-            reject(err)
-          } else {
-            resolve()
-          }
+    return this.sequence.addAsync(async () => {
+      for (let i = 0; i < body.signatures.length; i++) {
+        const signature = body.signatures[i];
+        for (let j = 0; j < signature.signatures.length; j++) { 
+          await this.runtime.multisignature.processSignature({
+            signature: signature.signatures[j],
+            transaction: signature.transaction
+          });
         }
-      )
-    })
+      }
+    });
   }
 
   /**
@@ -461,25 +443,9 @@ class PeerSync {
       }
     }
 
-    return new Promise((resolve, reject) => {
-      this.balancesSequence.add(
-        async cb => {
-          try {
-            await this.runtime.transaction.receiveTransactions(trs)
-            cb()
-          } catch (e) {
-            cb(e)
-          }
-        },
-        err => {
-          if (err) {
-            reject(err)
-          } else {
-            resolve()
-          }
-        }
-      )
-    })
+    return this.balancesSequence.addAsync(async () => {
+      await this.runtime.transaction.receiveTransactions(trs);
+    });
   }
 }
 

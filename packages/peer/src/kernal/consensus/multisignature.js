@@ -18,38 +18,27 @@ class MultiSignature {
 
   async processSignature (tx) {
     const done = async () =>
-      new Promise((resolve, reject) => {
-        this.balancesSequence.add(
-          async cb => {
-            const transaction = await this.runtime.transaction.getUnconfirmedTransaction(tx.transaction)
-            if (!transaction) {
-              return reject(new Error('Transaction not found'))
-            }
+      this.balancesSequence.addAsync(async () => {
+        const transaction = await this.runtime.transaction.getUnconfirmedTransaction(tx.transaction)
+        if (!transaction) {
+          throw new Error('Transaction not found')
+        }
 
-            transaction.signatures = transaction.signatures || []
-            transaction.signatures.push(tx.signature)
+        transaction.signatures = transaction.signatures || []
+        transaction.signatures.push(tx.signature)
 
-            setImmediate(async () => {
-              try {
-                await this.runtime.peer.broadcast.broadcastNewSignature({
-                  signature: tx.signature,
-                  transaction: transaction.id
-                })
-              } catch (err) {
-                this.logger.error(`Broadcast new signature failed: ${System.getErrorMsg(err)}`)
-              }
+        setImmediate(async () => {
+          try {
+            await this.runtime.peer.broadcast.broadcastNewSignature({
+              signature: tx.signature,
+              transaction: transaction.id
             })
-
-            cb(null, transaction)
-          },
-          (err, transaction) => {
-            if (err) {
-              reject(err)
-            } else {
-              resolve(transaction)
-            }
+          } catch (err) {
+            this.logger.error(`Broadcast new signature failed: ${System.getErrorMsg(err)}`)
           }
-        )
+        })
+
+        return transaction
       })
 
     const transaction = await this.runtime.transaction.getUnconfirmedTransaction(tx.transaction)

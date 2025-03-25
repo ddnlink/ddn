@@ -73,73 +73,63 @@ class MultisignaturesRouter {
       }
     }
 
-    return new Promise((resolve, reject) => {
-      this.balancesSequence.add(
-        async cb => {
-          const publicKey = keypair.publicKey
+    return this.balancesSequence.addAsync(async () => {
+      const publicKey = keypair.publicKey;
 
-          let account
+      let account;
 
+      try {
+        account = await this.runtime.account.getAccountByPublicKey(publicKey);
+      } catch (err) {
+        throw err;
+      }
+
+      if (!account) {
+        throw new Error('Account ' + publicKey + ' not found');
+      }
+
+      // fixme: getAccountByPublicKey 方法已经处理
+      account.publicKey = publicKey;
+
+      if (account.second_signature && !body.secondSecret) {
+        throw new Error('Invalid second passphrase');
+      }
+
+      let second_keypair = null;
+      if (account.second_signature) {
+        second_keypair = DdnCrypto.getKeys(body.secondSecret);
+      }
+
+      try {
+        const transaction = await this.runtime.transaction.create({
+          type: assetTypes.MULTISIGNATURE,
+          sender: account,
+          keypair,
+          second_keypair,
+          min: body.min,
+          keysgroup: body.keysgroup,
+          lifetime: body.lifetime
+        });
+
+        const transactions = await this.runtime.transaction.receiveTransactions([transaction]);
+        
+        setImmediate(async () => {
           try {
-            account = await this.runtime.account.getAccountByPublicKey(publicKey) //
-          } catch (err) {
-            return cb(err)
+            await this.runtime.socketio.emit('multisignatures/change', {});
+          } catch (err2) {
+            this.logger.error('socket emit error: multisignatures/change', System.getErrorMsg(err2));
           }
+        });
 
-          if (!account) {
-            return cb('Account ' + publicKey + ' not found')
-          }
-
-          // fixme: getAccountByPublicKey 方法已经处理
-          account.publicKey = publicKey
-
-          if (account.second_signature && !body.secondSecret) {
-            return cb('Invalid second passphrase')
-          }
-
-          let second_keypair = null
-          if (account.second_signature) {
-            second_keypair = DdnCrypto.getKeys(body.secondSecret)
-          }
-
-          try {
-            const transaction = await this.runtime.transaction.create({
-              type: assetTypes.MULTISIGNATURE,
-              sender: account,
-              keypair,
-              second_keypair,
-              min: body.min,
-              keysgroup: body.keysgroup,
-              lifetime: body.lifetime
-            })
-
-            const transactions = await this.runtime.transaction.receiveTransactions([transaction])
-            cb(null, transactions)
-          } catch (e) {
-            this.logger.error('create multisignatures error', System.getErrorMsg(e))
-            return cb(e)
-          }
-        },
-        (err, transactions) => {
-          if (err) {
-            return reject(err)
-          } else {
-            setImmediate(async () => {
-              try {
-                await this.runtime.socketio.emit('multisignatures/change', {})
-              } catch (err2) {
-                this.logger.error('socket emit error: multisignatures/change', System.getErrorMsg(err2))
-              }
-            })
-
-            resolve({
-              success: true,
-              transactionId: transactions[0].id
-            })
-          }
-        }
-      )
-    })
+        return {
+          success: true,
+          transactionId: transactions[0].id
+        };
+      } catch (e) {
+        this.logger.error('create multisignatures error', System.getErrorMsg(e));
+        throw e;
+      }
+    });
   }
 
   async postSign (req) {
@@ -243,42 +233,31 @@ class MultisignaturesRouter {
       })
     }
 
-    return new Promise((resolve, reject) => {
-      this.balancesSequence.add(
-        async cb => {
-          const transaction = await this.runtime.transaction.getUnconfirmedTransaction(body.transactionId)
-          if (!transaction) {
-            return cb('Transaction not found')
-          }
+    return this.balancesSequence.addAsync(async () => {
+      const transaction = await this.runtime.transaction.getUnconfirmedTransaction(body.transactionId);
+      if (!transaction) {
+        throw new Error('Transaction not found');
+      }
 
-          transaction.signatures = transaction.signatures || []
-          transaction.signatures.push(sign)
+      transaction.signatures = transaction.signatures || [];
+      transaction.signatures.push(sign);
 
-          setImmediate(async () => {
-            try {
-              await this.runtime.peer.broadcast.broadcastNewSignature({
-                signature: sign,
-                transaction: transaction.id
-              })
-            } catch (err) {
-              this.logger.error(`Broadcast new signature failed: ${System.getErrorMsg(err)}`)
-            }
-          })
-
-          cb()
-        },
-        err => {
-          if (err) {
-            reject(err)
-          } else {
-            resolve({
-              success: true,
-              transactionId: transaction.id
-            })
-          }
+      setImmediate(async () => {
+        try {
+          await this.runtime.peer.broadcast.broadcastNewSignature({
+            signature: sign,
+            transaction: transaction.id
+          });
+        } catch (err) {
+          this.logger.error(`Broadcast new signature failed: ${System.getErrorMsg(err)}`);
         }
-      )
-    })
+      });
+
+      return {
+        success: true,
+        transactionId: transaction.id
+      };
+    });
   }
 
   async getPending (req) {

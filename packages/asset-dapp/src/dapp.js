@@ -1334,66 +1334,57 @@ class Dapp extends Asset.Base {
       }
     }
 
-    return new Promise((resolve, reject) => {
-      this.balancesSequence.add(
-        async cb => {
-          let account
-          try {
-            account = await this.runtime.account.getAccountByPublicKey(keypair.publicKey.toString('hex'))
-          } catch (e) {
-            return cb(e)
-          }
+    return this.balancesSequence.addAsync(async () => {
+      let account
+      try {
+        account = await this.runtime.account.getAccountByPublicKey(keypair.publicKey.toString('hex'))
+      } catch (e) {
+        throw e
+      }
 
-          if (!account) {
-            return cb('Account not found')
-          }
+      if (!account) {
+        throw new Error('Account not found')
+      }
 
-          if (account.second_signature && !body.secondSecret) {
-            return cb(new Error('Invalid second passphrase'))
-          }
+      if (account.second_signature && !body.secondSecret) {
+        throw new Error('Invalid second passphrase')
+      }
 
-          let second_keypair = null
-          if (account.secondSignature) {
-            second_keypair = DdnCrypto.getKeys(body.secondSecret)
-          }
+      let second_keypair = null
+      if (account.secondSignature) {
+        second_keypair = DdnCrypto.getKeys(body.secondSecret)
+      }
 
-          try {
-            const data = {
-              type: await this.getTransactionType(),
-              sender: account,
-              keypair,
-              second_keypair
-            }
-            const assetJsonName = await this.getAssetJsonName()
-            data[assetJsonName] = {
-              category: body.category,
-              name: body.name,
-              description: body.description,
-              tags: body.tags,
-              type: body.type,
-              link: body.link,
-              icon: body.icon,
-              delegates: body.delegates,
-              unlock_delegates: body.unlock_delegates
-            }
-
-            const transaction = await this.runtime.transaction.create(data)
-            const transactions = await this.runtime.transaction.receiveTransactions([transaction])
-
-            cb(null, transactions)
-          } catch (e) {
-            cb(e)
-          }
-        },
-        (err, transactions) => {
-          if (err) {
-            return reject(err)
-          }
-
-          resolve({ success: true, transactionId: transactions[0].id })
+      try {
+        const data = {
+          type: await this.getTransactionType(),
+          sender: account,
+          keypair,
+          second_keypair
         }
-      )
-    })
+        const assetJsonName = await this.getAssetJsonName()
+        data[assetJsonName] = {
+          category: body.category,
+          name: body.name,
+          description: body.description,
+          tags: body.tags,
+          type: body.type,
+          link: body.link,
+          icon: body.icon,
+          delegates: body.delegates,
+          unlock_delegates: body.unlock_delegates
+        }
+
+        const transaction = await this.runtime.transaction.create(data)
+        const transactions = await this.runtime.transaction.receiveTransactions([transaction])
+        return transactions
+      } catch (e) {
+        throw e
+      }
+    }).then(transactions => ({
+      success: true,
+      transactionId: transactions[0].id
+    }))
   }
 
   // 提供给 ddn-sandbox 的 modules 变量
@@ -1638,106 +1629,95 @@ class Dapp extends Asset.Base {
       return cb('Invalid address')
     }
 
-    self.balancesSequence.add(
-      async function (cb) {
-        if (body.multisigAccountPublicKey && body.multisigAccountPublicKey !== keypair.publicKey) {
-          try {
-            const account = await modules.accounts.getAccount({ publicKey: body.multisigAccountPublicKey })
-            if (!account) {
-              return cb('Multisignature account not found')
-            }
-
-            if (!account.multisignatures || !account.multisignatures) {
-              return cb('Account does not have multisignatures enabled')
-            }
-
-            if (account.multisignatures.indexOf(keypair.publicKey) < 0) {
-              return cb('Account does not belong to multisignature group')
-            }
-
-            const requester = await modules.accounts.getAccount({ publicKey: keypair.publicKey })
-
-            if (!requester || !requester.publicKey) {
-              return cb('Invalid requester')
-            }
-
-            if (requester.secondSignature && !body.secondSecret) {
-              return cb('Invalid second passphrase')
-            }
-
-            if (requester.publicKey === account.publicKey) {
-              return cb('Invalid requester')
-            }
-
-            let secondKeypair = null
-
-            if (requester.secondSignature) {
-              // let secondHash = crypto.createHash('sha256').update(body.secondSecret, 'utf8').digest();
-              // secondKeypair = ed.MakeKeypair(secondHash);
-              secondKeypair = DdnCrypto.getKeys(body.secondSecret)
-            }
-
-            const transaction = this.runtime.transaction.create({
-              type: assetTypes.DAPP_OUT,
-              amount: body.amount,
-              sender: account,
-              recipientId: body.recipientId,
-              keypair: keypair,
-              secondKeypair: secondKeypair,
-              requester: keypair,
-              dappId: req.dappId,
-              transactionId: body.transactionId
-            })
-            modules.transactions.receiveTransactions([transaction], cb)
-          } catch (err) {
-            return cb(err.toString())
-          }
-        } else {
-          try {
-            const account = await modules.accounts.getAccount({ publicKey: keypair.publicKey })
-            if (!account) {
-              return cb('Account not found')
-            }
-
-            if (account.secondSignature && !body.secondSecret) {
-              return cb('Invalid second passphrase')
-            }
-
-            let secondKeypair = null
-
-            if (account.secondSignature) {
-              // var secondHash = crypto.createHash('sha256').update(body.secondSecret, 'utf8').digest();
-              // secondKeypair = ed.MakeKeypair(secondHash);
-              secondKeypair = DdnCrypto.getKeys(body.secondSecret)
-            }
-
-            const transaction = modules.transactions.create({
-              type: assetTypes.DAPP_OUT,
-              amount: body.amount,
-              sender: account,
-              recipientId: body.recipientId,
-              keypair: keypair,
-              secondKeypair: secondKeypair,
-              dappId: req.dappId,
-              transactionId: body.transactionId
-            })
-
-            modules.transactions.receiveTransactions([transaction], cb)
-          } catch (err) {
-            if (err) {
-              return cb(err.toString())
-            }
-          }
-        }
-      },
-      function (err, transaction) {
-        if (err) {
-          return cb(err.toString())
+    self.balancesSequence.addAsync(async () => {
+      if (body.multisigAccountPublicKey && body.multisigAccountPublicKey !== keypair.publicKey) {
+        const account = await modules.accounts.getAccount({ publicKey: body.multisigAccountPublicKey })
+        if (!account) {
+          throw new Error('Multisignature account not found')
         }
 
-        cb(null, { transactionId: transaction[0].id })
+        if (!account.multisignatures) {
+          throw new Error('Account does not have multisignatures enabled')
+        }
+
+        if (!account.multisignatures.includes(keypair.publicKey)) {
+          throw new Error('Account does not belong to multisignature group')
+        }
+
+        const requester = await modules.accounts.getAccount({ publicKey: keypair.publicKey })
+        if (!requester?.publicKey) {
+          throw new Error('Invalid requester')
+        }
+
+        if (requester.secondSignature && !body.secondSecret) {
+          throw new Error('Invalid second passphrase')
+        }
+
+        if (requester.publicKey === account.publicKey) {
+          throw new Error('Invalid requester')
+        }
+
+        let secondKeypair = null
+        if (requester.secondSignature) {
+          secondKeypair = DdnCrypto.getKeys(body.secondSecret)
+        }
+
+        const transaction = this.runtime.transaction.create({
+          type: assetTypes.DAPP_OUT,
+          amount: body.amount,
+          sender: account,
+          recipientId: body.recipientId,
+          keypair,
+          secondKeypair,
+          requester: keypair,
+          dappId: req.dappId,
+          transactionId: body.transactionId
+        })
+
+        return new Promise((resolve, reject) => {
+          modules.transactions.receiveTransactions([transaction], (err, res) => {
+            err ? reject(err) : resolve(res)
+          })
+        })
+      } else {
+        const account = await modules.accounts.getAccount({ publicKey: keypair.publicKey })
+        if (!account) {
+          throw new Error('Account not found')
+        }
+
+        if (account.secondSignature && !body.secondSecret) {
+          throw new Error('Invalid second passphrase')
+        }
+
+        let secondKeypair = null
+        if (account.secondSignature) {
+          secondKeypair = DdnCrypto.getKeys(body.secondSecret)
+        }
+
+        const transaction = modules.transactions.create({
+          type: assetTypes.DAPP_OUT,
+          amount: body.amount,
+          sender: account,
+          recipientId: body.recipientId,
+          keypair,
+          secondKeypair,
+          dappId: req.dappId,
+          transactionId: body.transactionId
+        })
+
+        return new Promise((resolve, reject) => {
+          modules.transactions.receiveTransactions([transaction], (err, res) => {
+            err ? reject(err) : resolve(res)
+          })
+        })
       }
-    )
+    })
+    .then(transaction => {
+      return { transactionId: transaction[0].id }
+    })
+    .catch(err => {
+      throw new Error(err)
+    })
   }
 
   async getWithdrawalLastTransaction (req, cb) {
@@ -1772,19 +1752,24 @@ class Dapp extends Asset.Base {
   submitOutTransfer (req, callback) {
     const self = this
     const trs = req.body
-    self.balancesSequence.add(async function (cb) {
+    self.balancesSequence.addAsync(async function () {
       if (await modules.transactions.hasUnconfirmedTransaction(trs)) {
-        return cb('Already exists')
+        throw new Error('Already exists')
       }
       self.logger.debug('Submit outtransfer transaction ' + trs.id + ' from dapp ' + req.dappId)
       try {
-        const tr = await modules.transactions.receiveTransactions([trs])
-        cb(null, tr)
+        return await modules.transactions.receiveTransactions([trs])
       } catch (error) {
         self.logger.debug('submitOutTransfer', error)
-        cb(error)
+        throw error
       }
-    }, callback)
+    })
+    .then(transaction => {
+      return { transactionId: transaction[0].id }
+    })
+    .catch(err => {
+      throw new Error(err)
+    })
   }
 
   // TODO will delete or complete (要么完善这个方法，要么在侧链里去掉该方法的调用,这里是同步充值侧链token的方法需要完善)

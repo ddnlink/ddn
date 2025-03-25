@@ -1200,95 +1200,83 @@ class Block {
   async _popLastBlock(oldLastBlock) {
     const { id, height } = oldLastBlock
 
-    return new Promise((resolve, reject) => {
-      this.balancesSequence.add(
-        async cb => {
+    return this.balancesSequence.addAsync(async () => {
+      try {
+        this.logger.info(`Begin to pop block height: ${height}, id: ${id}`)
+
+        // 1. 验证并获取前一个区块
+        const previousBlock = await this.runtime.dataquery.queryFullBlockData(
+          { id: oldLastBlock.previous_block },
+          1,
+          0,
+          [['height', 'asc']]
+        )
+
+        if (!previousBlock || !previousBlock.length) {
+          throw new Error('Previous block not found')
+        }
+
+        // 2. 规范化区块数据
+        const blockNormalize = await this._parseObjectFromFullBlocksData(previousBlock)
+        const normalizedPrevBlock = blockNormalize[0]
+
+        // 3. 验证区块连续性
+        if (normalizedPrevBlock.height !== (height - 1).toString()) {
+          throw new Error('Block height discontinuity detected')
+        }
+
+        // 4. 处理交易回滚
+        const transactions = this._sortTransactions(oldLastBlock.transactions).reverse()
+
+        // 5. 使用事务处理所有数据库操作
+        await this.dao.transaction(async dbTrans => {
           try {
-            this.logger.info(`Begin to pop block height: ${height}, id: ${id}`)
+            // 回滚交易
+            for (const transaction of transactions) {
+              this.logger.debug(`Undoing transaction: ${transaction.id}`)
 
-            // 1. 验证并获取前一个区块
-            const previousBlock = await this.runtime.dataquery.queryFullBlockData(
-              { id: oldLastBlock.previous_block },
-              1,
-              0,
-              [['height', 'asc']]
-            )
+              const sender = await this.runtime.account.getAccountByPublicKey(
+                transaction.senderPublicKey,
+                dbTrans
+              )
 
-            if (!previousBlock || !previousBlock.length) {
-              throw new Error('Previous block not found')
-            }
-
-            // 2. 规范化区块数据
-            const blockNormalize = await this._parseObjectFromFullBlocksData(previousBlock)
-            const normalizedPrevBlock = blockNormalize[0]
-
-            // 3. 验证区块连续性
-            if (normalizedPrevBlock.height !== (height - 1).toString()) {
-              throw new Error('Block height discontinuity detected')
-            }
-
-            // 4. 处理交易回滚
-            const transactions = this._sortTransactions(oldLastBlock.transactions).reverse()
-
-            // 5. 使用事务处理所有数据库操作
-            await this.dao.transaction(async dbTrans => {
-              try {
-                // 回滚交易
-                for (const transaction of transactions) {
-                  this.logger.debug(`Undoing transaction: ${transaction.id}`)
-
-                  const sender = await this.runtime.account.getAccountByPublicKey(
-                    transaction.senderPublicKey,
-                    dbTrans
-                  )
-
-                  if (!sender) {
-                    throw new Error(`Transaction sender not found: ${transaction.id}`)
-                  }
-
-                  await this.runtime.transaction.undo(transaction, oldLastBlock, sender, dbTrans)
-                  await this.runtime.transaction.undoUnconfirmed(transaction, dbTrans)
-                  await this.runtime.transaction.deleteTransaction({
-                    trsId: transaction.id,
-                    dbTrans
-                  })
-                }
-
-                // 回滚轮次数据
-                await this.runtime.round.backwardTick(oldLastBlock, normalizedPrevBlock, dbTrans)
-
-                // 删除当前区块
-                await this.deleteBlock({ blockId: id, dbTrans })
-
-              } catch (err) {
-                this.logger.error('Transaction rollback failed:', err)
-                throw err // 触发事务回滚
+              if (!sender) {
+                throw new Error(`Transaction sender not found: ${transaction.id}`)
               }
-            })
 
-            // 6. 更新内存状态
-            this.setLastBlock(normalizedPrevBlock)
-
-            // 7. 清理缓存
-            if (this._blockCache) {
-              this._blockCache.remove(id)
+              await this.runtime.transaction.undo(transaction, oldLastBlock, sender, dbTrans)
+              await this.runtime.transaction.undoUnconfirmed(transaction, dbTrans)
+              await this.runtime.transaction.deleteTransaction({
+                trsId: transaction.id,
+                dbTrans
+              })
             }
 
-            cb(null, normalizedPrevBlock)
+            // 回滚轮次数据
+            await this.runtime.round.backwardTick(oldLastBlock, normalizedPrevBlock, dbTrans)
+
+            // 删除当前区块
+            await this.deleteBlock({ blockId: id, dbTrans })
 
           } catch (err) {
-            this.logger.error('Block pop failed:', err)
-            cb(err)
+            this.logger.error('Transaction rollback failed:', err)
+            throw err // 触发事务回滚
           }
-        },
-        (err, result) => {
-          if (err) {
-            reject(new Error(`Failed to pop block: ${err}`))
-          } else {
-            resolve(result)
-          }
+        })
+
+        // 6. 更新内存状态
+        this.setLastBlock(normalizedPrevBlock)
+
+        // 7. 清理缓存
+        if (this._blockCache) {
+          this._blockCache.remove(id)
         }
-      )
+
+        return normalizedPrevBlock // 替换 cb(null, normalizedPrevBlock)
+      } catch (err) {
+        this.logger.error('Block pop failed:', err)
+        throw err // 替换 cb(err)
+      }
     })
   }
 

@@ -219,7 +219,6 @@ class Round {
       for (let i = 0; i < delegates.length; i++) {
         const delegatePublicKey = delegates[i];
         const change = changes.at(i);
-        this.logger.debug('This change info of i:', i, change);
         
         this.logger.debug('Delegate balance info:', {
           delegatePublicKey,

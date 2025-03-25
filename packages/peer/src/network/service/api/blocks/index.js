@@ -117,25 +117,15 @@ class BlockService {
     const offset = query.offset
     const limit = query.limit
 
-    return new Promise((resolve, reject) => {
-      this.dbSequence.add(
-        async cb => {
-          try {
-            const result = await this.runtime.block.queryBlockData(where, sorts, offset, limit, true)
-            cb(null, result)
-          } catch (e) {
-            cb(e)
-          }
-        },
-        (err, result) => {
-          if (err) {
-            reject(err)
-          } else {
-            resolve(Object.assign({ success: true }, result))
-          }
-        }
-      )
-    })
+    return this.dbSequence.addAsync(
+      async () => {
+        return await this.runtime.block.queryBlockData(where, sorts, offset, limit, true)
+      }
+    ).then(result => {
+      return Object.assign({ success: true }, result);
+    }).catch(err => {
+      throw err;
+    });
   }
 
   async getGet (req) {

@@ -323,155 +323,143 @@ class TransactionService {
       }
     }
 
-    return new Promise((resolve, reject) => {
-      this.balancesSequence.add(
-        async cb => {
-          let recipient
+    try {
+      const transactions = await this.balancesSequence.addAsync(async () => {
+        let recipient
+        try {
+          recipient = await this.runtime.account.getAccountByAddress(body.recipientId)
+        } catch (err) {
+          throw err
+        }
+
+        const recipientId = recipient ? recipient.address : body.recipientId
+        if (!recipientId) {
+          throw new Error('Recipient not found')
+        }
+
+        if (body.multisigAccountPublicKey && body.multisigAccountPublicKey !== keypair.publicKey.toString('hex')) {
+          let account
           try {
-            recipient = await this.runtime.account.getAccountByAddress(body.recipientId)
+            account = await this.runtime.account.getAccountByPublicKey(body.multisigAccountPublicKey)
           } catch (err) {
-            return cb(err)
+            throw err
           }
 
-          const recipientId = recipient ? recipient.address : body.recipientId
-          if (!recipientId) {
-            return cb('Recipient not found')
+          if (!account) {
+            throw new Error('Multisignature account not found')
           }
 
-          if (body.multisigAccountPublicKey && body.multisigAccountPublicKey !== keypair.publicKey.toString('hex')) {
-            let account
-            try {
-              account = await this.runtime.account.getAccountByPublicKey(body.multisigAccountPublicKey)
-            } catch (err) {
-              return cb(err)
-            }
-
-            if (!account) {
-              return cb('Multisignature account not found')
-            }
-
-            if (!account.multisignatures) {
-              return cb('Account does not have multisignatures enabled')
-            }
-
-            if (!account.multisignatures.includes(keypair.publicKey.toString('hex'))) {
-              return cb('Account does not belong to multisignature group')
-            }
-
-            let requester
-            try {
-              requester = await this.runtime.account.getAccountByPublicKey(keypair.publicKey)
-            } catch (err) {
-              return cb(err)
-            }
-
-            if (!requester || !requester.publicKey) {
-              // wxm block database
-              return cb('Invalid requester')
-            }
-
-            if (
-              requester.second_signature &&
-              !DdnUtils.bignum.isEqualTo(requester.second_signature, 0) &&
-              !body.secondSecret
-            ) {
-              // wxm block database
-              return cb('Invalid second passphrase')
-            }
-
-            if (requester.publicKey === account.publicKey) {
-              // wxm block database
-              return cb('Invalid requester')
-            }
-
-            let second_keypair = null
-            if (requester.second_signature && !DdnUtils.bignum.isEqualTo(requester.second_signature, 0)) {
-              // wxm block database
-              second_keypair = DdnCrypto.getKeys(body.secondSecret)
-            }
-
-            try {
-              const transaction = await this.runtime.transaction.create({
-                type: DdnUtils.assetTypes.TRANSFER,
-                amount: body.amount,
-                sender: account, // 发送者是多重签名账号
-                recipientId: recipientId,
-                keypair,
-                requester: keypair, // 请求者是当前登录账号
-                second_keypair,
-                message: body.message
-              })
-              if (
-                global.assets &&
-                global.assets.transTypeNames[90] &&
-                this.constants.net.superviseIp === this.config.publicIp
-              ) {
-                await checkAndReport(transaction, this, cb, this.constants.net.superviseBaseUrl)
-              }
-              const transactions = await this.runtime.transaction.receiveTransactions([transaction])
-              cb(null, transactions)
-            } catch (err) {
-              cb(err)
-            }
-          } else {
-            this.logger.debug('publicKey is: ', keypair.publicKey.toString('hex'))
-
-            let account
-            try {
-              account = await this.runtime.account.getAccountByPublicKey(keypair.publicKey.toString('hex'))
-            } catch (err) {
-              return cb(err)
-            }
-            if (!account) {
-              return cb('Account not found')
-            }
-
-            if (account.second_signature && !body.secondSecret) {
-              return cb('Invalid second passphrase')
-            }
-
-            let second_keypair = null
-            if (account.second_signature) {
-              second_keypair = DdnCrypto.getKeys(body.secondSecret)
-            }
-
-            try {
-              const transaction = await this.runtime.transaction.create({
-                type: DdnUtils.assetTypes.TRANSFER,
-                amount: body.amount,
-                sender: account, // 发送者是当前登录账号，请求者为空
-                recipientId: recipientId,
-                keypair,
-                second_keypair,
-                message: body.message
-              })
-              // 判断配置@ddn/asset-supervise插件的并且publicip等于监管ip的才检测敏感词
-              if (
-                global.assets &&
-                global.assets.transTypeNames[90] &&
-                this.constants.net.superviseIp === this.config.publicIp
-              ) {
-                await checkAndReport(transaction, this, cb, this.constants.net.superviseBaseUrl)
-              }
-              const transactions = await this.runtime.transaction.receiveTransactions([transaction])
-              cb(null, transactions)
-            } catch (err) {
-              cb(err)
-            }
+          if (!account.multisignatures) {
+            throw new Error('Account does not have multisignatures enabled')
           }
-        },
-        (err, transaction) => {
-          if (err) {
-            reject(err)
-          } else {
-            resolve({
-              success: true,
-              transactionId: transaction[0].id
+
+          if (!account.multisignatures.includes(keypair.publicKey.toString('hex'))) {
+            throw new Error('Account does not belong to multisignature group')
+          }
+
+          let requester
+          try {
+            requester = await this.runtime.account.getAccountByPublicKey(keypair.publicKey)
+          } catch (err) {
+            throw err
+          }
+
+          if (!requester || !requester.publicKey) {
+            throw new Error('Invalid requester')
+          }
+
+          if (
+            requester.second_signature &&
+            !DdnUtils.bignum.isEqualTo(requester.second_signature, 0) &&
+            !body.secondSecret
+          ) {
+            throw new Error('Invalid second passphrase')
+          }
+
+          if (requester.publicKey === account.publicKey) {
+            throw new Error('Invalid requester')
+          }
+
+          let second_keypair = null
+          if (requester.second_signature && !DdnUtils.bignum.isEqualTo(requester.second_signature, 0)) {
+            second_keypair = DdnCrypto.getKeys(body.secondSecret)
+          }
+
+          try {
+            const transaction = await this.runtime.transaction.create({
+              type: DdnUtils.assetTypes.TRANSFER,
+              amount: body.amount,
+              sender: account,
+              recipientId: recipientId,
+              keypair,
+              requester: keypair,
+              second_keypair,
+              message: body.message
             })
+            if (
+              global.assets &&
+              global.assets.transTypeNames[90] &&
+              this.constants.net.superviseIp === this.config.publicIp
+            ) {
+              await checkAndReport(transaction, this, this.constants.net.superviseBaseUrl)
+            }
+            return await this.runtime.transaction.receiveTransactions([transaction])
+          } catch (err) {
+            throw err
+          }
+        } else {
+          this.logger.debug('publicKey is: ', keypair.publicKey.toString('hex'))
+
+          let account
+          try {
+            account = await this.runtime.account.getAccountByPublicKey(keypair.publicKey.toString('hex'))
+          } catch (err) {
+            throw err
+          }
+          if (!account) {
+            throw new Error('Account not found')
+          }
+
+          if (account.second_signature && !body.secondSecret) {
+            throw new Error('Invalid second passphrase')
+          }
+
+          let second_keypair = null
+          if (account.second_signature) {
+            second_keypair = DdnCrypto.getKeys(body.secondSecret)
+          }
+
+          try {
+            const transaction = await this.runtime.transaction.create({
+              type: DdnUtils.assetTypes.TRANSFER,
+              amount: body.amount,
+              sender: account,
+              recipientId: recipientId,
+              keypair,
+              second_keypair,
+              message: body.message
+            })
+            if (
+              global.assets &&
+              global.assets.transTypeNames[90] &&
+              this.constants.net.superviseIp === this.config.publicIp
+            ) {
+              await checkAndReport(transaction, this, this.constants.net.superviseBaseUrl)
+            }
+            return await this.runtime.transaction.receiveTransactions([transaction])
+          } catch (err) {
+            throw err
           }
         }
-      )
-    })
+      })
+
+      return {
+        success: true,
+        transactionId: transactions[0].id
+      }
+    } catch (err) {
+      throw err
+    }
   }
 
   async post ({ body }) {

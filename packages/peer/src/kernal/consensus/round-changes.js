@@ -46,7 +46,6 @@ class RoundChanges {
       this.logger.error('Invalid _roundFees value:', this._roundFees);
       // Throw an error.
       throw new Error('Invalid _roundFees value');
-      // this._roundFees = '0';
     }
     // Check if the round rewards at the specified index are a valid number.
     if (bignum.isNaN(this._roundRewards[index])) {
@@ -54,7 +53,6 @@ class RoundChanges {
       this.logger.error('Invalid _roundRewards value at index', index, ':', this._roundRewards[index]);
       // Throw an error.
       throw new Error('Invalid _roundRewards value');
-      // this._roundRewards[index] = '0';
     }
     // Check if the number of delegates is zero.
     if (this.constants.delegates === 0) {
@@ -81,21 +79,18 @@ class RoundChanges {
     // Calculate the rewards at the specified index.
     const rewards = bignum.floor(bignum.multiply(this._roundRewards[index], ratio)) || 0;
 
-    // Log debug information including fees, remaining fees, rewards, and total balance.
-    this.logger.debug('RoundChanges result at index', index, ':', {
-      fees: fees,
-      feesRemaining: feesRemaining,
-      rewards: rewards,
-      balance: bignum.plus(fees, rewards)
-    });
-
-    // Return the result object with all values converted to strings.
-    return {
+    const result = {
       fees: fees.toString(),
-      feesRemaining: feesRemaining.toString(),
+      feesRemaining: feesRemaining.toString(), // fixme: 未处理？ 20250325
       rewards: rewards.toString(),
       balance: bignum.plus(fees, rewards).toString()
     };
+
+    // Log debug information including fees, remaining fees, rewards, and total balance.
+    this.logger.debug('RoundChanges result at index', index, ':', result);
+
+    // Return the result object with all values converted to strings.
+    return result;
   }
 
   /**

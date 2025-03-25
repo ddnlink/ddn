@@ -267,114 +267,70 @@ class DelegatesRouter {
       }
     }
 
-    return new Promise((resolve, reject) => {
-      this.balancesSequence.add(
-        async cb => {
-          if (body.multisigAccountPublicKey && body.multisigAccountPublicKey !== keypair.publicKey) {
-            let account
-            try {
-              account = await this.runtime.account.getAccountByPublicKey(body.multisigAccountPublicKey)
-            } catch (err) {
-              return cb(err)
-            }
-
-            if (!account) {
-              return cb('Multisignature account not found')
-            }
-
-            if (!account.multisignatures || !account.multisignatures) {
-              return cb('Account does not have multisignatures enabled')
-            }
-
-            if (!account.multisignatures.includes(keypair.publicKey)) {
-              return cb('Account does not belong to multisignature group')
-            }
-
-            let requester
-            try {
-              requester = await this.runtime.account.getAccountByPublicKey(keypair.publicKey)
-            } catch (err) {
-              return cb(err)
-            }
-
-            if (!requester || !requester.publicKey) {
-              // wxm block database
-              return cb('Invalid requester')
-            }
-
-            if (requester.second_signature && !body.secondSecret) {
-              return cb('Invalid second passphrase')
-            }
-
-            if (requester.publicKey === account.publicKey) {
-              // wxm block database
-              return cb('Incorrect requester')
-            }
-
-            let second_keypair = null
-            if (requester.second_signature) {
-              second_keypair = DdnCrypto.getKeys(body.secondSecret)
-            }
-
-            try {
-              const transaction = await this.runtime.transaction.create({
-                type: assetTypes.DELEGATE,
-                username: body.username,
-                sender: account,
-                keypair,
-                second_keypair,
-                requester: keypair
-              })
-              const transactions = await this.runtime.transaction.receiveTransactions([transaction])
-              cb(null, transactions)
-            } catch (e) {
-              cb(e)
-            }
-          } else {
-            let account
-            try {
-              account = await this.runtime.account.getAccountByPublicKey(keypair.publicKey)
-            } catch (err) {
-              return cb(err)
-            }
-
-            if (!account) {
-              return cb('Account not found')
-            }
-
-            if (account.second_signature && !body.secondSecret) {
-              return cb('Invalid second passphrase')
-            }
-
-            let second_keypair = null
-            if (account.second_signature) {
-              second_keypair = DdnCrypto.getKeys(body.secondSecret)
-            }
-
-            try {
-              const transaction = await this.runtime.transaction.create({
-                type: assetTypes.DELEGATE,
-                username: body.username,
-                sender: account,
-                keypair,
-                second_keypair
-              })
-              const transactions = await this.runtime.transaction.receiveTransactions([transaction])
-              cb(null, transactions)
-            } catch (e) {
-              cb(e)
-            }
-          }
-        },
-        (err, transactions) => {
-          if (err) {
-            reject(err)
-          } else {
-            resolve({ success: true, transaction: transactions[0] })
-          }
+    return this.balancesSequence.addAsync(async () => {
+      if (body.multisigAccountPublicKey && body.multisigAccountPublicKey !== keypair.publicKey) {
+        const account = await this.runtime.account.getAccountByPublicKey(body.multisigAccountPublicKey)
+        
+        if (!account) {
+          throw new Error('Multisignature account not found')
         }
-      )
-    })
+        if (!account.multisignatures?.length) {
+          throw new Error('Account does not have multisignatures enabled')
+        }
+        if (!account.multisignatures.includes(keypair.publicKey)) {
+          throw new Error('Account does not belong to multisignature group')
+        }
+
+        const requester = await this.runtime.account.getAccountByPublicKey(keypair.publicKey)
+        if (!requester?.publicKey) {
+          throw new Error('Invalid requester')
+        }
+        if (requester.second_signature && !body.secondSecret) {
+          throw new Error('Invalid second passphrase')
+        }
+        if (requester.publicKey === account.publicKey) {
+          throw new Error('Incorrect requester')
+        }
+
+        const second_keypair = requester.second_signature 
+          ? DdnCrypto.getKeys(body.secondSecret)
+          : null
+
+        const transaction = await this.runtime.transaction.create({
+          type: assetTypes.DELEGATE,
+          username: body.username,
+          sender: account,
+          keypair,
+          second_keypair,
+          requester: keypair
+        })
+        return this.runtime.transaction.receiveTransactions([transaction])
+      }
+
+      const account = await this.runtime.account.getAccountByPublicKey(keypair.publicKey)
+      if (!account) {
+        throw new Error('Account not found')
+      }
+      if (account.second_signature && !body.secondSecret) {
+        throw new Error('Invalid second passphrase')
+      }
+
+      const second_keypair = account.second_signature
+        ? DdnCrypto.getKeys(body.secondSecret)
+        : null
+
+      const transaction = await this.runtime.transaction.create({
+        type: assetTypes.DELEGATE,
+        username: body.username,
+        sender: account,
+        keypair,
+        second_keypair
+      })
+      return this.runtime.transaction.receiveTransactions([transaction])
+    }).then(transactions => ({
+      success: true,
+      transaction: transactions[0]
+    }))
   }
 }
 
