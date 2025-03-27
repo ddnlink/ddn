@@ -3,14 +3,14 @@ import DdnUtils from '@ddn/utils'
 import crypto from '../utils/crypto'
 
 import slots from '../time/slots'
-import { config, constants } from '../config'
+import { constants }  from '../config'
 
 async function deploy (options, secret, secondSecret) {
   const keys = crypto.getKeys(secret)
 
   const fee = DdnUtils.bignum.multiply(constants.fees.contract, constants.fixedPoint)
 
-  const timestamp = slots.getTime() - config.clientDriftSeconds
+  const timestamp = slots.getTime() - 5
 
   const contract = {
     name: options.name,
@@ -24,7 +24,7 @@ async function deploy (options, secret, secondSecret) {
   // contract.code = options.code,
 
   const transaction = {
-    nethash: config.nethash,
+    nethash: constants.nethash,
     type: DdnUtils.assetTypes.CONTRACT,
     amount: '0',
     fee: `${fee}`,
@@ -53,7 +53,7 @@ async function pay (options, secret, secondSecret) {
 
   const fee = DdnUtils.bignum.multiply(constants.fees.contract_transfer, constants.fixedPoint)
 
-  const timestamp = slots.getTime() - config.clientDriftSeconds
+  const timestamp = slots.getTime() - 5
   const opts = {
     id: options.id,
     gas_limit: `${options.gasLimit || constants.maxGasLimit}`,
@@ -63,7 +63,7 @@ async function pay (options, secret, secondSecret) {
     args
   }
   const trs = {
-    nethash: config.nethash,
+    nethash: constants.nethash,
     amount: '0',
     fee: `${fee}`,
     recipientId: null,
@@ -89,7 +89,7 @@ async function send (options, secret, secondSecret) {
 
   const fee = DdnUtils.bignum.multiply(constants.fees.contract_transfer, constants.fixedPoint)
 
-  const timestamp = slots.getTime() - config.clientDriftSeconds
+  const timestamp = slots.getTime() - 5
   const opts = {
     id: options.id,
     gas_limit: `${options.gasLimit || constants.maxGasLimit}`,
@@ -97,7 +97,7 @@ async function send (options, secret, secondSecret) {
     args
   }
   const trs = {
-    nethash: config.nethash,
+    nethash: constants.nethash,
     amount: '0',
     fee: `${fee}`,
     recipientId: null,

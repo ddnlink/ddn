@@ -8,11 +8,11 @@ sidebar_label: DDN Js-SDK API
 
 ## **1 js-sdk说明**
 
-### **1.0 特别说明**
+### ** 2.5.\* ** 特别说明**
 
 本文档适用于开发浏览器或钱包等前端应用，如果您开发的服务端程序，请移步[`node-sdk`相关文档](./node-sdk-api.md)。
 
-除非特殊说明，本文档仅仅适合于 `DDN v3.0.0` 以后的版本，当前最新版本为 `DDN v3.5.0`。
+除非特殊说明，本文档仅仅适合于 `DDN v3.0.0` 以后的版本，当前最新版本为 `DDN v3.8.0`。
 
 文档示例，遵从`ES6`语法规范，特别地方会提示`ES5`语法，请注意辨别使用。`ES6`规范会大量使用异步方法，使用`async/await`方法调用。
 
@@ -24,11 +24,43 @@ sidebar_label: DDN Js-SDK API
 $ yarn add @ddn/js-sdk 或 npm install @ddn/js-sdk
 ```
 
+配置：
+
+```html
+  <script>
+    // 初始化
+    window.DdnJS = window.DdnJS || {};
+
+    // 默认的配置和常量是测试链的，想要修改自己的配置
+    window.DdnJS.config = {
+      net: 'testnet',
+      publicIp: 'localhost',
+      port: 8001
+    }
+
+    // 废弃了
+    window.DdnJS.constants = {
+        // code... 参考：向链定制项目方获取
+    }
+  </script>
+```
+
+在代码中动态配置：
+
+```js
+import DdnJS from '@ddn/js-sdk';
+const { setup } = DdnJS;
+
+// 这里可以覆盖默认配置
+const { config } = setup({
+  publicIp: '1.4.2.3',
+  port: '8000'
+})
+```
+
 使用：
 
 ```ts
-import DdnJS from '@ddn/js-sdk'
-
 const trs = await DdnJS.contract.deploy({name, desc, code, gasLimit, version}, keyStore.phaseKey, null);
 ```
 ### **1.2 说明**

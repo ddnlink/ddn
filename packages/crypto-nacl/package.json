@@ -10,7 +10,7 @@
   "author": "imfly <kubying@qq.com>",
   "homepage": "https://github.com/ddnlink/ddn/tree/master/packages/crypto#readme",
   "license": "AGPL 3.0",
-  "main": "./dist/index.js",
+  "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "files": [
     "dist"

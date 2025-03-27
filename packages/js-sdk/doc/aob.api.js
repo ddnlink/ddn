@@ -1,12 +1,16 @@
-var DdnJS = require('../src').default
+import * as DdnJS from '../dist/index.js'
+import config from './.ddnrc.js'
+// 配置测试网络
+DdnJS.setup(config)
+
 // 一级密码
-var secret = 'pact october wrap gain amazing spring biology allow skull aware laundry unhappy'
+const secret = 'pact october wrap gain amazing spring biology allow skull aware laundry unhappy'
 // 二级密码
-// var secondSecret = 'erjimima001'
+// const secondSecret = 'erjimima001'
 // 发行商名称,唯一标识
-var name = 'IssuerName'
+const name = 'IssuerName'
 // 发行商描述
-var desc = 'IssuerDesc'
+const desc = 'IssuerDesc'
 
 // 构造交易数据
 DdnJS.aob

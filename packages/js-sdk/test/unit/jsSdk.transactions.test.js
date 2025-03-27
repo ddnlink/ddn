@@ -7,15 +7,18 @@ import Debug from 'debug'
 import DdnUtils from '@ddn/utils'
 import { DdnJS, node } from '../ddn-js'
 
-import { requireFile } from '@ddn/core/dist/getUserConfig'
+import { constants }  from '../config'
+console.log('jsSdk.transaction.test config', config)
+console.log('jsSdk.transaction.test constants', constants)
 
 const debug = Debug('debug')
 
 const message = 'test'
 
+// todo: 直接加载
 // Node configuration
-const genesisblockFile = path.resolve(process.cwd(), './examples/fun-tests/config/genesisBlock.json')
-const genesisblock = requireFile(genesisblockFile)
+// const genesisblockFile = path.resolve(process.cwd(), './examples/fun-tests/config/genesisBlock.json')
+// const genesisblock = requireFile(genesisblockFile)
 
 describe('POST /peer/transactions', () => {
   it('Using valid transaction with wrong nethash in headers. Should fail', async done => {
@@ -40,7 +43,7 @@ describe('POST /peer/transactions', () => {
       .end((_err, { body }) => {
         debug(JSON.stringify(body))
         node.expect(body).to.have.property('success').to.be.false
-        node.expect(body.expected).to.equal(node.config.nethash)
+        node.expect(body.expected).to.equal(node.constants.nethash)
         done()
       })
   })
@@ -57,7 +60,7 @@ describe('POST /peer/transactions', () => {
       .post('/transactions')
       .set('Accept', 'application/json')
       .set('version', node.version)
-      .set('nethash', node.config.nethash)
+      .set('nethash', node.constants.nethash)
       .set('port', node.config.port)
       .send({
         transaction
@@ -77,7 +80,7 @@ describe('POST /peer/transactions', () => {
       .post('/transactions')
       .set('Accept', 'application/json')
       .set('version', node.version)
-      .set('nethash', node.config.nethash)
+      .set('nethash', node.constants.nethash)
       .set('port', node.config.port)
       .send({
         transaction
@@ -103,7 +106,7 @@ describe('POST /peer/transactions', () => {
       .post('/transactions')
       .set('Accept', 'application/json')
       .set('version', node.version)
-      .set('nethash', node.config.nethash)
+      .set('nethash', node.constants.nethash)
       .set('port', node.config.port)
       .send({
         transaction
@@ -126,7 +129,7 @@ describe('POST /peer/transactions', () => {
       .post('/transactions')
       .set('Accept', 'application/json')
       .set('version', node.version)
-      .set('nethash', node.config.nethash)
+      .set('nethash', node.constants.nethash)
       .set('port', node.config.port)
       .send({
         transaction
@@ -147,7 +150,7 @@ describe('POST /peer/transactions', () => {
       .post('/transactions')
       .set('Accept', 'application/json')
       .set('version', node.version)
-      .set('nethash', node.config.nethash)
+      .set('nethash', node.constants.nethash)
       .set('port', node.config.port)
       .send({
         transaction
@@ -175,7 +178,7 @@ describe('POST /peer/transactions', () => {
       .post('/transactions')
       .set('Accept', 'application/json')
       .set('version', node.version)
-      .set('nethash', node.config.nethash)
+      .set('nethash', node.constants.nethash)
       .set('port', node.config.port)
       .send({
         transaction
@@ -202,7 +205,7 @@ describe('POST /peer/transactions', () => {
       .post('/transactions')
       .set('Accept', 'application/json')
       .set('version', node.version)
-      .set('nethash', node.config.nethash)
+      .set('nethash', node.constants.nethash)
       .set('port', node.config.port)
       .send({
         transaction
@@ -229,7 +232,7 @@ describe('POST /peer/transactions', () => {
       .post('/transactions')
       .set('Accept', 'application/json')
       .set('version', node.version)
-      .set('nethash', node.config.nethash)
+      .set('nethash', node.constants.nethash)
       .set('port', node.config.port)
       .send({
         transaction
@@ -258,7 +261,7 @@ describe('POST /peer/transactions', () => {
       .post('/transactions')
       .set('Accept', 'application/json')
       .set('version', node.version)
-      .set('nethash', node.config.nethash)
+      .set('nethash', node.constants.nethash)
       .set('port', node.config.port)
       .send({
         transaction
@@ -283,7 +286,7 @@ describe('POST /peer/transactions', () => {
       .post('/transactions')
       .set('Accept', 'application/json')
       .set('version', node.version)
-      .set('nethash', node.config.nethash)
+      .set('nethash', node.constants.nethash)
       .set('port', node.config.port)
       .send({
         transaction
@@ -309,7 +312,7 @@ describe('POST /peer/transactions', () => {
       .post('/transactions')
       .set('Accept', 'application/json')
       .set('version', node.version)
-      .set('nethash', node.config.nethash)
+      .set('nethash', node.constants.nethash)
       .set('port', node.config.port)
       .send({
         transaction

@@ -1,12 +1,12 @@
 import DdnUtils from '@ddn/utils'
 import DdnCrypto from '../utils/crypto'
 import slots from '../time/slots'
-import { config, constants } from '../config'
+import { constants }  from '../config'
 
 const { bignum } = DdnUtils
 
 function getClientFixedTime () {
-  return slots.getTime() - config.clientDriftSeconds
+  return slots.getTime() - 5
 }
 
 async function createTransaction (asset, fee, type, recipientId, message, secret, secondSecret) {
@@ -14,7 +14,7 @@ async function createTransaction (asset, fee, type, recipientId, message, secret
 
   const transaction = {
     type,
-    nethash: config.nethash,
+    nethash: constants.nethash,
     amount: '0',
     fee: `${fee}`,
     recipientId: recipientId,
@@ -38,7 +38,7 @@ async function createTransaction (asset, fee, type, recipientId, message, secret
 export default {
   async createIssuer (name, desc, secret, secondSecret) {
     const keys = DdnCrypto.getKeys(secret)
-    const issuer_id = DdnCrypto.generateAddress(keys.publicKey, 'D')
+    const issuer_id = DdnCrypto.generateAddress(keys.publicKey, constants.tokenPrefix)
     const asset = {
       aobIssuer: {
         name,

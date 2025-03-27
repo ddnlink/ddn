@@ -4,6 +4,10 @@ import { DdnJS, node } from '../ddn-js'
 const debug = Debug('debug')
 const expect = node.expect
 
+import { constants }  from '../config'
+console.log('jsSdk.transaction.test config', config)
+console.log('jsSdk.transaction.test constants', constants)
+
 describe('transaction.js', () => {
   const transaction = DdnJS.transaction
 
@@ -27,7 +31,7 @@ describe('transaction.js', () => {
     //  DP2kJY3RweZU2jhYpnSbLbxVjgot95bUma 10000000000 asd enter boring shaft rent essence foil trick vibrant fabric quote indoor output
     it('should create transaction without second signature', async () => {
       trs = await createTransaction('DP2kJY3RweZU2jhYpnSbLbxVjgot95bUma', '1000', 'asd', 'enter boring shaft rent essence foil trick vibrant fabric quote indoor output')
-      debug('trs', trs)
+      debug('trs....', trs)
       expect(trs).to.be.ok
     })
 

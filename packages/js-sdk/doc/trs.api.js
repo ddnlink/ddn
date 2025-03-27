@@ -1,5 +1,5 @@
-const Ddnjs = require('../src').default
-// import ddn from "../src";
+// const Ddnjs = require('../src').default
+import Ddnjs from "../src/index.js";
 
 const targetAddress = 'D792yYKHLNSpsEoRT5c3whgmCq2VYpam55'
 const amount = 100 * 100000000 // 100 DDN

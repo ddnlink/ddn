@@ -1,4 +1,5 @@
-const DdnJS = require('./src').default
+// const DdnJS = require('./src').default
+import DdnJS from './dist'
 const keyPair = DdnJS.crypto.getKeys('idea goddess air mad cruel purity peasant ocean fly mammal spare space')
 const curAddress = DdnJS.crypto.generateAddress(keyPair.publicKey, 'D')
 const keyStore = {

@@ -16,12 +16,11 @@ import dao from './transactions/dao'
 import exchange from './transactions/exchange'
 import coupon from './transactions/coupon'
 import assetPlugin from './transactions/asset-plugin'
-import { config, constants } from './config'
+import { constants, setup } from './config'
 
 export default {
-  config, 
+  setup, 
   constants,
-
   // utils
   utils: {
     slots,

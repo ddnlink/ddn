@@ -36,7 +36,7 @@ export const Dao = () => {
           .post('/transactions')
           .set('Accept', 'application/json')
           .set('version', node.version)
-          .set('nethash', node.config.nethash)
+          .set('nethash', node.constants.nethash)
           .set('port', node.config.port)
           .send({
             transaction
@@ -66,7 +66,7 @@ export const Dao = () => {
           .post('/transactions')
           .set('Accept', 'application/json')
           .set('version', node.version)
-          .set('nethash', node.config.nethash)
+          .set('nethash', node.constants.nethash)
           .set('port', node.config.port)
           .send({
             transaction
@@ -157,7 +157,7 @@ export const Dao = () => {
             .get(`/dao/orgs/${org.org_id.toLowerCase()}`)
             .set('Accept', 'application/json')
             .set('version', node.version)
-            .set('nethash', node.config.nethash)
+            .set('nethash', node.constants.nethash)
             .set('port', node.config.port)
             .expect('Content-Type', /json/)
             .expect(200)
@@ -220,7 +220,7 @@ export const Dao = () => {
             .get(`/dao/orgs/${org.org_id.toLowerCase()}`)
             .set('Accept', 'application/json')
             .set('version', node.version)
-            .set('nethash', node.config.nethash)
+            .set('nethash', node.constants.nethash)
             .set('port', node.config.port)
             .expect('Content-Type', /json/)
             .expect(200)
@@ -375,7 +375,7 @@ export const Dao = () => {
           .get('/dao/orgs')
           .set('Accept', 'application/json')
           .set('version', node.version)
-          .set('nethash', node.config.nethash)
+          .set('nethash', node.constants.nethash)
           .set('port', node.config.port)
           .expect('Content-Type', /json/)
           .expect(200)
@@ -399,7 +399,7 @@ export const Dao = () => {
           .get('/dao/orgs?pagesize=10&pageindex=1')
           .set('Accept', 'application/json')
           .set('version', node.version)
-          .set('nethash', node.config.nethash)
+          .set('nethash', node.constants.nethash)
           .set('port', node.config.port)
           .expect('Content-Type', /json/)
           .expect(200)

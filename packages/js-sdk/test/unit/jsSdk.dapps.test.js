@@ -311,7 +311,7 @@ describe('PUT /dapps', () => {
     node.api.put('/dapps')
       .set('Accept', 'application/json')
       .set('version', node.version)
-      .set('nethash', node.config.nethash)
+      .set('nethash', node.constants.nethash)
       .set('port', node.config.port)
       .send({
         secret: Account1.password,

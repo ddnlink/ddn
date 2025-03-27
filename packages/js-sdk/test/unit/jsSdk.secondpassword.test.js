@@ -30,7 +30,7 @@ describe('Test second passphrase', () => {
         .post('/transactions')
         .set('Accept', 'application/json')
         .set('version', node.version)
-        .set('nethash', node.config.nethash)
+        .set('nethash', node.constants.nethash)
         .set('port', node.config.port)
         .send({
           transaction
@@ -49,7 +49,7 @@ describe('Test second passphrase', () => {
         .post('/accounts/open')
         .set('Accept', 'application/json')
         .set('version', node.version)
-        .set('nethash', node.config.nethash)
+        .set('nethash', node.constants.nethash)
         .set('port', node.config.port)
         .send({
           secret: account.password
@@ -63,7 +63,7 @@ describe('Test second passphrase', () => {
             .put('/transactions')
             .set('Accept', 'application/json')
             .set('version', node.version)
-            .set('nethash', node.config.nethash)
+            .set('nethash', node.constants.nethash)
             .set('port', node.config.port)
             .send({
               secret: node.Gaccount.password,
@@ -87,7 +87,7 @@ describe('Test second passphrase', () => {
                   .post('/transactions')
                   .set('Accept', 'application/json')
                   .set('version', node.version)
-                  .set('nethash', node.config.nethash)
+                  .set('nethash', node.constants.nethash)
                   .set('port', node.config.port)
                   .send({
                     transaction
@@ -114,7 +114,7 @@ describe('Test second passphrase', () => {
         .post('/accounts/open')
         .set('Accept', 'application/json')
         .set('version', node.version)
-        .set('nethash', node.config.nethash)
+        .set('nethash', node.constants.nethash)
         .set('port', node.config.port)
         .send({
           secret: account2.password
@@ -136,7 +136,7 @@ describe('Test second passphrase', () => {
         .post('/transactions')
         .set('Accept', 'application/json')
         .set('version', node.version)
-        .set('nethash', node.config.nethash)
+        .set('nethash', node.constants.nethash)
         .set('port', node.config.port)
         .send({
           transaction
@@ -158,7 +158,7 @@ describe('Test second passphrase', () => {
         .post('/transactions')
         .set('Accept', 'application/json')
         .set('version', node.version)
-        .set('nethash', node.config.nethash)
+        .set('nethash', node.constants.nethash)
         .set('port', node.config.port)
         .send({
           transaction
@@ -181,7 +181,7 @@ describe('Test second passphrase', () => {
         .post('/transactions')
         .set('Accept', 'application/json')
         .set('version', node.version)
-        .set('nethash', node.config.nethash)
+        .set('nethash', node.constants.nethash)
         .set('port', node.config.port)
         .send({
           transaction
@@ -202,7 +202,7 @@ describe('Test second passphrase', () => {
         .post('/transactions')
         .set('Accept', 'application/json')
         .set('version', node.version)
-        .set('nethash', node.config.nethash)
+        .set('nethash', node.constants.nethash)
         .set('port', node.config.port)
         .send({
           transaction

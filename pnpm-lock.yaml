@@ -344,12 +344,6 @@ importers:
 
   packages/js-sdk:
     dependencies:
-      '@ddn/asset-base':
-        specifier: workspace:^
-        version: link:../asset-base
-      '@ddn/core':
-        specifier: workspace:^
-        version: link:../core
       '@ddn/crypto':
         specifier: workspace:^
         version: link:../crypto

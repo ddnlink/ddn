@@ -1,7 +1,7 @@
 import DdnUtils from '@ddn/utils'
 import crypto from '../utils/crypto'
 import slots from '../time/slots'
-import { config, constants } from '../config'
+import { constants }  from '../config'
 
 /**
  * Create exchange transaction
@@ -25,13 +25,13 @@ async function createExchange (trsopt, exchange, secret, secondSecret) {
   const transaction = Object.assign(
     {
       type: DdnUtils.assetTypes.DAO_EXCHANGE,
-      nethash: config.nethash,
+      nethash: constants.nethash,
       amount: '0', // Bignum update
       fee: `${fee}`,
       recipientId: null,
       senderPublicKey: keys.publicKey,
       // senderPublicKey: keys.publicKey,
-      timestamp: slots.getTime() - config.clientDriftSeconds,
+      timestamp: slots.getTime() - 5,
       asset: {
         exchange
       }

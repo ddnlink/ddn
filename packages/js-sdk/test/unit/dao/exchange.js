@@ -105,7 +105,7 @@ export const Exchange = () => {
         .get(getOrgIdUrl)
         .set('Accept', 'application/json')
         .set('version', node.version)
-        .set('nethash', node.config.nethash)
+        .set('nethash', node.constants.nethash)
         .set('port', node.config.port)
         .expect(200)
         .end((err, { body }) => {
@@ -138,7 +138,7 @@ export const Exchange = () => {
         .post('/transactions')
         .set('Accept', 'application/json')
         .set('version', node.version)
-        .set('nethash', node.config.nethash)
+        .set('nethash', node.constants.nethash)
         .set('port', node.config.port)
         .send({
           transaction
@@ -182,7 +182,7 @@ export const Exchange = () => {
         .post('/transactions')
         .set('Accept', 'application/json')
         .set('version', node.version)
-        .set('nethash', node.config.nethash)
+        .set('nethash', node.constants.nethash)
         .set('port', node.config.port)
         .send({
           transaction
@@ -219,7 +219,7 @@ export const Exchange = () => {
         .post('/transactions')
         .set('Accept', 'application/json')
         .set('version', node.version)
-        .set('nethash', node.config.nethash)
+        .set('nethash', node.constants.nethash)
         .set('port', node.config.port)
         .send({
           transaction
@@ -246,7 +246,7 @@ export const Exchange = () => {
   //         node.api.get(getOrgIdUrl)
   //             .set("Accept", "application/json")
   //             .set("version", node.version)
-  //             .set("nethash", node.config.nethash)
+  //             .set("nethash", node.constants.nethash)
   //             .set("port", node.config.port)
   //             .expect(200)
   //             .end((err, {

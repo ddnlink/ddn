@@ -3,10 +3,8 @@
   "version": "2.5.5",
   "description": "DDN browser js SDK",
   "main": "dist/index.js",
-  "types": "dist/index.d.ts",
   "files": [
     "dist",
-    "build",
     ".ddnrc.js"
   ],
   "scripts": {
@@ -33,8 +31,6 @@
     "url": "http://github.com/ddnlink/ddn/issues"
   },
   "dependencies": {
-    "@ddn/asset-base": "workspace:^",
-    "@ddn/core": "workspace:^",
     "@ddn/crypto": "workspace:^",
     "@ddn/crypto-nacl": "workspace:^",
     "@ddn/crypto-sm": "workspace:^",

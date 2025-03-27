@@ -1,6 +1,21 @@
 import utils, { TestUtil } from '@ddn/test-utils'
 import DdnJS from '../'
-const { config, constants } = DdnJS
+import { log } from 'console'
+
+const mainnet_config = {
+  port: 8001,
+  address: '0.0.0.0',
+  nethash: 'm66gcvle',
+  publicIp: '',
+  logLevel: 'error',
+  net: 'testnet',
+  clientDriftSeconds: 5
+}
+
+const { config, constants } = DdnJS.setup(mainnet_config)
+
+log('ddn-js config', config)
+log('ddn-js constants', constants)
 
 const nodeApi = new TestUtil(config, constants)
 const node = Object.assign(nodeApi, utils)

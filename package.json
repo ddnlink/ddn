@@ -1,6 +1,6 @@
 {
   "name": "ddn",
-  "version": "3.8.0",
+  "version": "3.8.0-alpha.1",
   "private": true,
   "repository": {
     "type": "git",
@@ -38,8 +38,12 @@
     "build:docker": "node ./scripts/initCryptoDependent.js && father build --docker",
     "changelog": "conventional-changelog -p angular -i CHANGELOG.md -w",
     "chore:update-deps": "sh ./scripts/reinstall_deps.sh",
-    "clean": "rm -rf \"node_modules\" \"packages/**/node_modules\" \"pro-packages/**/node_modules\" && pnpm prune && pnpm store prune",
-    "clean:cache": "rm -rf */**/node_modules/.cache",
+    "clean": "pnpm clean:turbo && pnpm clean:history && pnpm cache && pnpm clean:dist && pnpm prune && pnpm store prune && pnpm clean:node_modules",
+    "clean:turbo": "rimraf .turbo */**/.turbo",
+    "clean:history": "rimraf .history */**/.history",
+    "clean:cache": "rimraf .cache */**/.cache",
+    "clean:dist": "rimraf */**/dist",
+    "clean:node_modules": "lerna clean --yes && rimraf node_modules",
     "docker:start": "docker compose -f ./docker/docker-compose.yml --env-file ./docker/.env start",
     "docker:stop": "docker compose -f ./docker/docker-compose.yml --env-file ./docker/.env stop",
     "docker:up": "docker compose -f ./docker/docker-compose.yml --env-file ./docker/.env up -d",

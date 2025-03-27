@@ -198,7 +198,7 @@ export const ACL = () => {
           .post('/transactions')
           .set('Accept', 'application/json')
           .set('version', node.version)
-          .set('nethash', node.config.nethash)
+          .set('nethash', node.constants.nethash)
           .set('port', node.config.port)
           .send({
             transaction
@@ -229,7 +229,7 @@ export const ACL = () => {
           .post('/transactions')
           .set('Accept', 'application/json')
           .set('version', node.version)
-          .set('nethash', node.config.nethash)
+          .set('nethash', node.constants.nethash)
           .set('port', node.config.port)
           .send({
             transaction
@@ -271,7 +271,7 @@ export const ACL = () => {
           .post('/transactions')
           .set('Accept', 'application/json')
           .set('version', node.version)
-          .set('nethash', node.config.nethash)
+          .set('nethash', node.constants.nethash)
           .set('port', node.config.port)
           .send({
             transaction
@@ -302,7 +302,7 @@ export const ACL = () => {
           .post('/transactions')
           .set('Accept', 'application/json')
           .set('version', node.version)
-          .set('nethash', node.config.nethash)
+          .set('nethash', node.constants.nethash)
           .set('port', node.config.port)
           .send({ transaction })
           .expect('Content-Type', /json/)
@@ -333,7 +333,7 @@ export const ACL = () => {
           .post('/transactions')
           .set('Accept', 'application/json')
           .set('version', node.version)
-          .set('nethash', node.config.nethash)
+          .set('nethash', node.constants.nethash)
           .set('port', node.config.port)
           .send({ transaction })
           .expect('Content-Type', /json/)
@@ -362,7 +362,7 @@ export const ACL = () => {
           .post('/transactions')
           .set('Accept', 'application/json')
           .set('version', node.version)
-          .set('nethash', node.config.nethash)
+          .set('nethash', node.constants.nethash)
           .set('port', node.config.port)
           .send({ transaction })
           .expect('Content-Type', /json/)
@@ -389,7 +389,7 @@ export const ACL = () => {
           .post('/transactions')
           .set('Accept', 'application/json')
           .set('version', node.version)
-          .set('nethash', node.config.nethash)
+          .set('nethash', node.constants.nethash)
           .set('port', node.config.port)
           .send({ transaction })
           .expect('Content-Type', /json/)
@@ -413,7 +413,7 @@ export const ACL = () => {
           .post('/transactions')
           .set('Accept', 'application/json')
           .set('version', node.version)
-          .set('nethash', node.config.nethash)
+          .set('nethash', node.constants.nethash)
           .set('port', node.config.port)
           .send({
             transaction
@@ -442,7 +442,7 @@ export const ACL = () => {
           .post('/transactions')
           .set('Accept', 'application/json')
           .set('version', node.version)
-          .set('nethash', node.config.nethash)
+          .set('nethash', node.constants.nethash)
           .set('port', node.config.port)
           .send({ transaction })
           .expect('Content-Type', /json/)

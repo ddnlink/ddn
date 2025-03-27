@@ -3,20 +3,22 @@ import DdnUtils from '@ddn/utils'
 
 import crypto from '../utils/crypto'
 import slots from '../time/slots'
-import { config, constants } from '../config'
+import { constants }  from '../config'
 
 async function createDApp (options, secret, secondSecret) {
   const keys = crypto.getKeys(secret)
 
+  console.log('dapps config', config);
+  
   const fee = DdnUtils.bignum.multiply(constants.fees.dapp, constants.fixedPoint)
   const transaction = {
-    nethash: config.nethash,
+    nethash: constants.nethash,
     type: DdnUtils.assetTypes.DAPP,
     amount: '0',
     fee: `${fee}`,
     recipientId: null,
     senderPublicKey: keys.publicKey,
-    timestamp: slots.getTime() - config.clientDriftSeconds,
+    timestamp: slots.getTime() - 5,
     asset: {
       dapp: {
         category: options.category,
@@ -72,9 +74,9 @@ function createInnerTransaction (options, secret) {
   let args = options.args
   if (args instanceof Array) args = JSON.stringify(args)
   const trs = {
-    // nethash: config.nethash,
+    // nethash: constants.nethash,
     fee: options.fee,
-    timestamp: slots.getTime() - config.clientDriftSeconds,
+    timestamp: slots.getTime() - 5,
     senderPublicKey: keys.publicKey,
     type: options.type,
     args

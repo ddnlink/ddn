@@ -63,7 +63,7 @@ describe('Test createEvidence', () => {
       .post('/transactions')
       .set('Accept', 'application/json')
       .set('version', node.version)
-      .set('nethash', node.config.nethash)
+      .set('nethash', node.constants.nethash)
       .set('port', node.config.port)
       .send({
         transaction
@@ -87,7 +87,7 @@ describe('Test createEvidence', () => {
       .post('/transactions')
       .set('Accept', 'application/json')
       .set('version', node.version)
-      .set('nethash', node.config.nethash)
+      .set('nethash', node.constants.nethash)
       .set('port', node.config.port)
       .send({
         transaction
@@ -112,7 +112,7 @@ describe('Test createEvidence', () => {
       .post('/transactions')
       .set('Accept', 'application/json')
       .set('version', node.version)
-      .set('nethash', node.config.nethash)
+      .set('nethash', node.constants.nethash)
       .set('port', node.config.port)
       .send({
         transaction
@@ -140,7 +140,7 @@ describe('Test createEvidence', () => {
         .get(`/evidences/short_hash/${evidence.short_hash}`)
         .set('Accept', 'application/json')
         .set('version', node.version)
-        .set('nethash', node.config.nethash)
+        .set('nethash', node.constants.nethash)
         .set('port', node.config.port)
         .expect('Content-Type', /json/)
         .expect(200)
@@ -169,7 +169,7 @@ describe('Test createEvidence', () => {
         .post('/transactions')
         .set('Accept', 'application/json')
         .set('version', node.version)
-        .set('nethash', node.config.nethash)
+        .set('nethash', node.constants.nethash)
         .set('port', node.config.port)
         .send({
           transaction

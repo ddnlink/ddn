@@ -20,7 +20,7 @@ describe('Registering a delegate', () => {
       .post('/accounts/open')
       .set('Accept', 'application/json')
       .set('version', node.version)
-      .set('nethash', node.config.nethash)
+      .set('nethash', node.constants.nethash)
       .set('port', node.config.port)
       .send({
         secret: account.password
@@ -36,7 +36,7 @@ describe('Registering a delegate', () => {
           .put('/transactions')
           .set('Accept', 'application/json')
           .set('version', node.version)
-          .set('nethash', node.config.nethash)
+          .set('nethash', node.constants.nethash)
           .set('port', node.config.port)
           .send({
             secret: node.Gaccount.password,
@@ -61,7 +61,7 @@ describe('Registering a delegate', () => {
                 .post('/transactions')
                 .set('Accept', 'application/json')
                 .set('version', node.version)
-                .set('nethash', node.config.nethash)
+                .set('nethash', node.constants.nethash)
                 .set('port', node.config.port)
                 .send({
                   transaction
@@ -90,7 +90,7 @@ describe('Registering a delegate', () => {
       .post('/transactions')
       .set('Accept', 'application/json')
       .set('version', node.version)
-      .set('nethash', node.config.nethash)
+      .set('nethash', node.constants.nethash)
       .set('port', node.config.port)
       .send({
         transaction
@@ -112,7 +112,7 @@ describe('Registering a delegate', () => {
       .post('/transactions')
       .set('Accept', 'application/json')
       .set('version', node.version)
-      .set('nethash', node.config.nethash)
+      .set('nethash', node.constants.nethash)
       .set('port', node.config.port)
       .send({
         transaction
@@ -141,7 +141,7 @@ describe('Registering a delegate', () => {
         .post('/transactions')
         .set('Accept', 'application/json')
         .set('version', node.version)
-        .set('nethash', node.config.nethash)
+        .set('nethash', node.constants.nethash)
         .set('port', node.config.port)
         .send({
           transaction
@@ -162,7 +162,7 @@ describe('Registering a delegate', () => {
       .post('/accounts/open')
       .set('Accept', 'application/json')
       .set('version', node.version)
-      .set('nethash', node.config.nethash)
+      .set('nethash', node.constants.nethash)
       .set('port', node.config.port)
       .send({
         secret: account2.password
@@ -178,7 +178,7 @@ describe('Registering a delegate', () => {
           .put('/transactions')
           .set('Accept', 'application/json')
           .set('version', node.version)
-          .set('nethash', node.config.nethash)
+          .set('nethash', node.constants.nethash)
           .set('port', node.config.port)
           .send({
             secret: node.Gaccount.password,
@@ -201,7 +201,7 @@ describe('Registering a delegate', () => {
                 .post('/transactions')
                 .set('Accept', 'application/json')
                 .set('version', node.version)
-                .set('nethash', node.config.nethash)
+                .set('nethash', node.constants.nethash)
                 .set('port', node.config.port)
                 .send({
                   transaction
@@ -221,7 +221,7 @@ describe('Registering a delegate', () => {
                     .post('/transactions')
                     .set('Accept', 'application/json')
                     .set('version', node.version)
-                    .set('nethash', node.config.nethash)
+                    .set('nethash', node.constants.nethash)
                     .set('port', node.config.port)
                     .send({
                       transaction: transaction2

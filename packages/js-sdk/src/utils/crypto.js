@@ -1,72 +1,44 @@
 import crypto from 'crypto'
 import * as DdnCrypto from '@ddn/crypto'
-
 import { constants } from '../config'
 import { getFee } from '../fees'
 
-const {
-  nacl,
-  getKeys,
-  getId,
-  getHash,
-  createHash,
-  sign,
-  secondSign,
-  verifyBytes,
-  getBytes,
-  generateAddress,
-  isAddress,
-  generateSecret, // 测试和前端用,重构： generatePhasekey() -> generateSecret()
-  isValidSecret,
-  verify,
-  verifySecondSignature
-} = DdnCrypto
-// const Buffer = require('safe-buffer').Buffer
+const { nacl, getKeys, getId, getHash, createHash, sign, secondSign, verifyBytes, getBytes, generateAddress, isAddress, generateSecret, isValidSecret, verify, verifySecondSignature } = DdnCrypto
 
 const fixedPoint = constants.fixedPoint
 
-function toLocalBuffer (buf) {
-  if (typeof window !== 'undefined') {
-    return new Uint8Array(buf.toArrayBuffer())
-  } else {
-    return buf.toBuffer()
-  }
+const toLocalBuffer = (buf) => {
+  return typeof window !== 'undefined' ? new Uint8Array(buf.toArrayBuffer()) : buf.toBuffer()
 }
 
-function signBytes (bytes, { privateKey }) {
+const signBytes = (bytes, { privateKey }) => {
   const hash = createHash(Buffer.from(bytes, 'hex'))
   const signature = nacl.sign.detached(hash, Buffer.from(privateKey, 'hex'))
   return Buffer.from(signature).toString('hex')
 }
 
-function generateMd5Hash (content) {
-  const md5 = crypto.createHash('md5')
-  const result = md5.update(content).digest('hex')
-  return result
+const generateMd5Hash = (content) => {
+  return crypto.createHash('md5').update(content).digest('hex')
 }
 
-// 注意接口变更说明
 export default {
   createHash,
   getBytes,
   getHash,
   getId,
   getFee,
-  sign, // 一致
-  secondSign, // 一致
-  getKeys, // 一致
-  generateAddress, // 测试和前端用 一致
+  sign,
+  secondSign,
+  getKeys,
+  generateAddress,
   isAddress,
-
-  // 验证
   verify,
   verifySecondSignature,
   verifyBytes,
-
-  fixedPoint, // 测试和前端用
+  fixedPoint,
   signBytes,
-  toLocalBuffer, // 测试和前端用
-  generateSecret, // 测试和前端用,重构： generatePhasekey() -> generateSecret()
+  toLocalBuffer,
+  generateSecret,
   isValidSecret,
-  generateMd5Hash // 测试和前端用
+  generateMd5Hash
 }

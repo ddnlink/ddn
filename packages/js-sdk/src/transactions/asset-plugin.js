@@ -1,4 +1,4 @@
-import Asset from '@ddn/asset-base'
+// import Asset from '@ddn/asset-base'
 import crypto from '../utils/crypto'
 import slots from '../time/slots'
 import { config } from '../config'
@@ -8,12 +8,12 @@ async function createPluginAsset (trsType, assetInfo, secret, secondSecret) {
 
   const transaction = {
     type: trsType,
-    nethash: config.nethash,
+    nethash: constants.nethash,
     amount: assetInfo.amount ? `${assetInfo.amount}` : '0',
     fee: '',
     recipientId: assetInfo.recipientId ? assetInfo.recipientId : null,
     senderPublicKey: keys.publicKey,
-    timestamp: slots.getTime() - config.clientDriftSeconds,
+    timestamp: slots.getTime() - 5,
     message: assetInfo.message ? `${assetInfo.message}` : null,
     asset: {}
   }
@@ -29,8 +29,9 @@ async function createPluginAsset (trsType, assetInfo, secret, secondSecret) {
     delete assetInfo.aobAmount
   }
 
-  const assetJsonName = Asset.Utils.getAssetJsonName(trsType)
-  transaction.asset[assetJsonName] = assetInfo
+  // fixme：去掉包操作
+  // const assetJsonName = Asset.Utils.getAssetJsonName(trsType)
+  // transaction.asset[assetJsonName] = assetInfo
 
   // 计算资产费用
   // fixme: 这里的 fee 应该与对应的 trsType 对应，不然就是默认 send 交易费用

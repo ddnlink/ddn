@@ -2,7 +2,7 @@ import DdnUtils from '@ddn/utils'
 
 import crypto from '../utils/crypto'
 import slots from '../time/slots'
-import { config, constants } from '../config'
+import { constants }  from '../config'
 
 const { bignum } = DdnUtils
 
@@ -71,12 +71,12 @@ async function createOrg (org, secret, second_secret) {
   }
   const transaction = {
     type: DdnUtils.assetTypes.DAO_ORG,
-    nethash: config.nethash,
+    nethash: constants.nethash,
     amount: '0',
     fee: bignum.multiply(feeBase, 100000000).toString(), // bignum update feeBase * 100000000,
     recipientId: null,
     senderPublicKey: keys.publicKey,
-    timestamp: slots.getTime() - config.clientDriftSeconds,
+    timestamp: slots.getTime() - 5,
     asset: {
       org
     }
@@ -98,12 +98,12 @@ async function createTransfer (address, amount, secret, second_secret) {
   const fee = DdnUtils.bignum.multiply(constants.fees.dao_exchange, constants.fixedPoint)
   const transaction = {
     type: DdnUtils.assetTypes.TRANSFER,
-    nethash: config.nethash,
+    nethash: constants.nethash,
     amount, // fixme 1000000000 ????
     fee: `${fee}`,
     recipientId: address,
     senderPublicKey: keys.publicKey,
-    timestamp: slots.getTime() - config.clientDriftSeconds
+    timestamp: slots.getTime() - 5
   }
 
   transaction.signature = await crypto.sign(transaction, keys)
@@ -158,12 +158,12 @@ async function createConfirmation (trsAmount, confirmation, secret, second_secre
 
   const transaction = {
     type: DdnUtils.assetTypes.DAO_CONFIRMATION,
-    nethash: config.nethash,
+    nethash: constants.nethash,
     amount: `${amount}`,
     fee: `${fee}`,
     recipientId,
     senderPublicKey: keys.publicKey,
-    timestamp: slots.getTime() - config.clientDriftSeconds,
+    timestamp: slots.getTime() - 5,
     asset: {
       daoConfirmation: confirmation
     }
@@ -214,13 +214,13 @@ async function createContribution (contribution, secret, second_secret) {
   // contribution.received_address = contribution.received_address
   const transaction = {
     type: DdnUtils.assetTypes.DAO_CONTRIBUTION,
-    nethash: config.nethash,
+    nethash: constants.nethash,
     amount: '0',
     fee: `${fee}`,
     recipientId: null,
     senderPublicKey: keys.publicKey,
     // senderPublicKey: keys.publicKey,
-    timestamp: slots.getTime() - config.clientDriftSeconds,
+    timestamp: slots.getTime() - 5,
     asset: {
       daoContribution: contribution
     }

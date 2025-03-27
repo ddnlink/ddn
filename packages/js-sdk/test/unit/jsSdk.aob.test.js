@@ -8,7 +8,7 @@ const expect = node.expect
 const debug = Debug('debug')
 
 debug('DdnJS.constants.nethash: ', DdnJS.constants.nethash)
-debug('node.config.nethash: ', node.config.nethash)
+debug('node.constants.nethash: ', node.constants.nethash)
 
 async function createTransfer (address, amount, secret) {
   return await DdnJS.transaction.createTransaction(address, amount, null, secret)
@@ -40,7 +40,7 @@ describe('AOB Test', () => {
         .post('/accounts/open')
         .set('Accept', 'application/json')
         .set('version', node.version)
-        .set('nethash', node.config.nethash)
+        .set('nethash', node.constants.nethash)
         .set('port', node.config.port)
         .send({
           secret: IssuerAccount1.password
@@ -66,7 +66,7 @@ describe('AOB Test', () => {
       .post('/transactions')
       .set('Accept', 'application/json')
       .set('version', node.version)
-      .set('nethash', node.config.nethash)
+      .set('nethash', node.constants.nethash)
       .set('port', node.config.port)
       .send({
         transaction
@@ -91,7 +91,7 @@ describe('AOB Test', () => {
         .post('/transactions')
         .set('Accept', 'application/json')
         .set('version', node.version)
-        .set('nethash', node.config.nethash)
+        .set('nethash', node.constants.nethash)
         .set('port', node.config.port)
         .send({
           transaction
@@ -114,7 +114,7 @@ describe('AOB Test', () => {
         .post('/transactions')
         .set('Accept', 'application/json')
         .set('version', node.version)
-        .set('nethash', node.config.nethash)
+        .set('nethash', node.constants.nethash)
         .set('port', node.config.port)
         .send({
           transaction
@@ -143,7 +143,7 @@ describe('AOB Test', () => {
         .post('/transactions')
         .set('Accept', 'application/json')
         .set('version', node.version)
-        .set('nethash', node.config.nethash)
+        .set('nethash', node.constants.nethash)
         .set('port', node.config.port)
         .send({
           transaction
@@ -171,7 +171,7 @@ describe('AOB Test', () => {
         .post('/transactions')
         .set('Accept', 'application/json')
         .set('version', node.version)
-        .set('nethash', node.config.nethash)
+        .set('nethash', node.constants.nethash)
         .set('port', node.config.port)
         .send({
           transaction
@@ -239,7 +239,7 @@ describe('AOB Test', () => {
         .post('/transactions')
         .set('Accept', 'application/json')
         .set('version', node.version)
-        .set('nethash', node.config.nethash)
+        .set('nethash', node.constants.nethash)
         .set('port', node.config.port)
         .send({
           transaction
@@ -267,7 +267,7 @@ describe('AOB Test', () => {
         .post('/transactions')
         .set('Accept', 'application/json')
         .set('version', node.version)
-        .set('nethash', node.config.nethash)
+        .set('nethash', node.constants.nethash)
         .set('port', node.config.port)
         .send({
           transaction
@@ -302,7 +302,7 @@ describe('AOB Test', () => {
         .post('/transactions')
         .set('Accept', 'application/json')
         .set('version', node.version)
-        .set('nethash', node.config.nethash)
+        .set('nethash', node.constants.nethash)
         .set('port', node.config.port)
         .send({
           transaction
@@ -334,7 +334,7 @@ describe('AOB Test', () => {
         .post('/transactions')
         .set('Accept', 'application/json')
         .set('version', node.version)
-        .set('nethash', node.config.nethash)
+        .set('nethash', node.constants.nethash)
         .set('port', node.config.port)
         .send({
           transaction

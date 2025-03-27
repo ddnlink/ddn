@@ -12,35 +12,16 @@ export default {
   port: 8001,
   address: '0.0.0.0',
   publicIp: '127.0.0.1',
-  logLevel: 'debug',
   net: 'testnet',
   nethash: '0ab796cd',
-  payloadLimitSize: '8mb',
   clientDriftSeconds: 5,
-  p2pPort: 9001,
-  /**
-   * About Api
-   */
-  peers: {
-    list: [
-      { ip: '127.0.0.1', port: '9002' },
-      { ip: '127.0.0.1', port: '9003' },
-    ],
-    blackList: [],
-    options: {
-      timeout: 4000
-    }
-  },
 
+  // plugins
   dapp: {
     masterpassword: 'xS5XaSoHsTEL',
     params: {}
   },
 
-  /**
-   * 扩展资产插件，对于区块链而言就是资产包，所以使用 assets
-   * 前端无法访问文件，所以直接使用 json 格式
-   */
   assets: {
     '@ddn/asset-evidence': {
       transactions: [

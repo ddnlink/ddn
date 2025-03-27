@@ -1,8 +1,6 @@
-import { constants } from '../config'
-
+import { constants }  from '../config'
 const interval = constants.interval
 const delegates = constants.delegates
-
 /**
  * 周期开始时间
  */

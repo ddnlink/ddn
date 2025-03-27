@@ -23,5 +23,6 @@ export default {
   moduleNameMapper: {
     '^.+\\.(css|less|sass|scss|stylus)$': require.resolve('identity-obj-proxy')
   },
+  testEnvironment: "jsdom",
   testTimeout: 30000
 }

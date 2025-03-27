@@ -1,9 +1,9 @@
 import crypto from '../utils/crypto'
 import { bignum, assetTypes } from '@ddn/utils'
 import slots from '../time/slots'
-import { config, constants } from '../config'
+import { constants }  from '../config'
 
-const nethash = config.nethash
+const nethash = constants.nethash
 
 async function createInTransfer (dappId, currency, amount, secret, secondSecret) {
   const keys = crypto.getKeys(secret)
@@ -16,7 +16,7 @@ async function createInTransfer (dappId, currency, amount, secret, secondSecret)
     fee: `${fee}`,
     recipientId: null,
     senderPublicKey: keys.publicKey,
-    timestamp: slots.getTime() - config.clientDriftSeconds,
+    timestamp: slots.getTime() - 5,
     asset: {
       in: {
         dapp_id: dappId,
@@ -52,7 +52,7 @@ async function createOutTransfer (recipientId, dappId, transactionId, currency, 
     fee: `${fee}`,
     recipientId: recipientId,
     senderPublicKey: keys.publicKey,
-    timestamp: slots.getTime() - config.clientDriftSeconds,
+    timestamp: slots.getTime() - 5,
     asset: {
       outTransfer: {
         dapp_id: dappId,

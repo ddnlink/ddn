@@ -14,17 +14,18 @@ npm install @ddn/js-sdk --save
 
 只要基于 ES6 开发，浏览器端可以这样调用
 
-```
+```es6
 // 初始化网络标示以及加密算法
 import DdnJS from '@ddn/js-sdk';
 // 加密算法 是['@ddn/crypto-nacl', '@ddn/crypto-sm']其中之一默认为@ddn/crypto-nacl
 
 // 默认的配置和常量是测试链的，想要修改自己的配置
-window.jsSdk.config = {
+window.DdnJS.config = {
     // code... 参考：.ddnrc.js 配置项
 }
 
-window.jsSdk.constants = {
+// 废弃了
+window.DdnJS.constants = {
     // code... 参考：向链定制项目方获取
 }
 ```
