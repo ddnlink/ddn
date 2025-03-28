@@ -1,6 +1,6 @@
 // no pass
 import Debug from 'debug'
-import DdnUtil from '@ddn/utils'
+import { assetTypes } from '../../../src/utils'
 import { DdnJS, node } from '../../ddn-js'
 
 const debug = Debug('debug')
@@ -130,7 +130,7 @@ export const Exchange = () => {
       }
 
       transaction = await DdnJS.assetPlugin.createPluginAsset(
-        DdnUtil.assetTypes.DAO_EXCHANGE,
+        assetTypes.DAO_EXCHANGE,
         exchange,
         node.Gaccount.password
       ) // 41
@@ -174,7 +174,7 @@ export const Exchange = () => {
       debug('exchange to buy ', exchange)
 
       transaction = await DdnJS.assetPlugin.createPluginAsset(
-        DdnUtil.assetTypes.DAO_EXCHANGE,
+        assetTypes.DAO_EXCHANGE,
         exchange,
         Account1.password
       )
@@ -209,7 +209,7 @@ export const Exchange = () => {
       exchange.recipientId = exchange.received_address
 
       transaction = await DdnJS.assetPlugin.createPluginAsset(
-        DdnUtil.assetTypes.DAO_EXCHANGE,
+        assetTypes.DAO_EXCHANGE,
         exchange,
         Account1.password
       )

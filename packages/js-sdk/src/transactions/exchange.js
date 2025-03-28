@@ -1,7 +1,7 @@
-import DdnUtils from '@ddn/utils'
-import crypto from '../utils/crypto'
-import slots from '../time/slots'
-import { constants }  from '../config'
+import { bignumber, assetTypes, slots } from '../utils'
+import * as crypto from '../crypto'
+import { setup } from '../config'
+const constants = setup().constants
 
 /**
  * Create exchange transaction
@@ -20,11 +20,11 @@ async function createExchange (trsopt, exchange, secret, secondSecret) {
     throw new Error('Invalid org_id format')
   }
 
-  const fee = DdnUtils.bignum.multiply(constants.fees.dao_exchange, constants.fixedPoint)
+  const fee = bignumber.multiply(constants.fees.dao_exchange, constants.fixedPoint)
 
   const transaction = Object.assign(
     {
-      type: DdnUtils.assetTypes.DAO_EXCHANGE,
+      type: assetTypes.DAO_EXCHANGE,
       nethash: constants.nethash,
       amount: '0', // Bignum update
       fee: `${fee}`,

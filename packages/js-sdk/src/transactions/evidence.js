@@ -1,8 +1,8 @@
-import DdnUtils from '@ddn/utils'
+import { bignumber, assetTypes, slots } from '../utils'
 
-import crypto from '../utils/crypto'
-import slots from '../time/slots'
-import { constants }  from '../config'
+import * as crypto from '../crypto'
+import { setup } from '../config'
+const constants = setup().constants
 
 /**
  * Create evidence transaction
@@ -27,10 +27,10 @@ async function createEvidence (evidence, secret, secondSecret) {
     throw new Error('Invalid type format')
   }
 
-  const fee = DdnUtils.bignum.multiply(constants.fees.evidence, constants.fixedPoint)
+  const fee = bignumber.multiply(constants.fees.evidence, constants.fixedPoint)
 
   const transaction = {
-    type: DdnUtils.assetTypes.EVIDENCE, // 10 -> 20
+    type: assetTypes.EVIDENCE, // 10 -> 20
     nethash: constants.nethash,
     amount: '0',
     fee: `${fee}`,

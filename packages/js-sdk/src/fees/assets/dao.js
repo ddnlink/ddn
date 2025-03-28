@@ -1,5 +1,6 @@
-import DdnUtils from '@ddn/utils'
-import { constants } from '../../config'
+import { bignumber } from '../../utils'
+import { setup } from '../../config'
+const constants = setup().constants
 
 export default {
   daoOrg: async asset => {
@@ -25,7 +26,7 @@ export default {
     if (asset.state === 1) {
       feeBase = parseInt(feeBase / 10, 10) // change info
     }
-    const result = DdnUtils.bignum.multiply(feeBase, constants.fixedPoint).toString()
+    const result = bignumber.multiply(feeBase, constants.fixedPoint).toString()
     console.log('daoOrg fee=', result)
     return result
   },
@@ -36,7 +37,7 @@ export default {
       feeBase = '0' // 拒绝稿件时手续费为0
     }
 
-    const result = DdnUtils.bignum.multiply(feeBase, constants.fixedPoint).toString()
+    const result = bignumber.multiply(feeBase, constants.fixedPoint).toString()
 
     return result
   },
@@ -46,7 +47,7 @@ export default {
       feeBase = '0' // 拒绝稿件时手续费为0
     }
 
-    const result = DdnUtils.bignum.multiply(feeBase, constants.fixedPoint).toString()
+    const result = bignumber.multiply(feeBase, constants.fixedPoint).toString()
 
     return result
   }

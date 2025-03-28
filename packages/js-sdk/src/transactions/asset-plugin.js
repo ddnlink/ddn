@@ -1,7 +1,7 @@
 // import Asset from '@ddn/asset-base'
-import crypto from '../utils/crypto'
-import slots from '../time/slots'
-import { config } from '../config'
+import * as crypto from '../crypto'
+import { getFee } from '../fees'
+import { slots } from '../utils'
 
 async function createPluginAsset (trsType, assetInfo, secret, secondSecret) {
   const keys = crypto.getKeys(secret)
@@ -41,7 +41,7 @@ async function createPluginAsset (trsType, assetInfo, secret, secondSecret) {
     transaction.fee = assetInfo.fee
     delete assetInfo.fee
   } else {
-    transaction.fee = await crypto.getFee(transaction)
+    transaction.fee = await getFee(transaction)
   }
 
   transaction.signature = await crypto.sign(transaction, keys)

@@ -1,8 +1,7 @@
-import DdnUtils from '@ddn/utils'
-
-import crypto from '../utils/crypto'
-import slots from '../time/slots'
-import { constants }  from '../config'
+import { bignumber, assetTypes, slots } from '../utils'
+import * as crypto from '../crypto'
+import { setup } from '../config'
+const constants = setup().constants
 
 function signTransaction (trs, secret) {
   const keys = crypto.getKeys(secret)
@@ -14,10 +13,10 @@ function signTransaction (trs, secret) {
 async function createMultisignature (keysgroup, lifetime, min, secret, secondSecret) {
   const keys = crypto.getKeys(secret)
 
-  const fee = DdnUtils.bignum.multiply(DdnUtils.bignum.plus(keysgroup.length, 1), 5, constants.fixedPoint).toString()
+  const fee = bignumber.multiply(bignumber.plus(keysgroup.length, 1), 5, constants.fixedPoint).toString()
 
   const transaction = {
-    type: DdnUtils.assetTypes.MULTISIGNATURE, // MULTISIGNATURE
+    type: assetTypes.MULTISIGNATURE, // MULTISIGNATURE
     nethash: constants.nethash,
     amount: '0', // Bignum update
     fee,

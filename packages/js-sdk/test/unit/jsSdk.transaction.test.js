@@ -4,7 +4,8 @@ import { DdnJS, node } from '../ddn-js'
 const debug = Debug('debug')
 const expect = node.expect
 
-import { constants }  from '../config'
+import { setup } from '../config'
+const constants = setup().constants
 console.log('jsSdk.transaction.test config', config)
 console.log('jsSdk.transaction.test constants', constants)
 

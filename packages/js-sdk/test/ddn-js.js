@@ -12,6 +12,7 @@ const mainnet_config = {
   clientDriftSeconds: 5
 }
 
+// todo: 确认一下，属性函数是否可以这样用
 const { config, constants } = DdnJS.setup(mainnet_config)
 
 log('ddn-js config', config)

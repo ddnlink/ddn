@@ -1,5 +1,5 @@
 import Debug from 'debug'
-import DdnUtils from '@ddn/utils'
+import { bignumber, assetTypes } from '../utils'
 import { DdnJS, node } from '../ddn-js'
 
 const debug = Debug('debug')
@@ -163,7 +163,7 @@ describe('Test createEvidence', () => {
   describe('Asset puglin Test', () => {
     it('POST peers/transactions, Should be ok', async done => {
       evidence2.address = node.Gaccount.address
-      const transaction = await createPluginAsset(DdnUtils.assetTypes.EVIDENCE, evidence2, node.Gaccount.password)
+      const transaction = await createPluginAsset(assetTypes.EVIDENCE, evidence2, node.Gaccount.password)
 
       node.api
         .post('/transactions')

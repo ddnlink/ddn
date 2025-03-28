@@ -8,7 +8,7 @@
             "outputs": [
                 "dist/**"
             ],
-            "cache": true
+            "cache": false
         },
         "dev": {
             "cache": false
@@ -54,6 +54,16 @@
                 "@ddn/utils#build",
                 "@ddn/core#build",
                 "@ddn/crypto#build"
+            ],
+            "outputs": [
+                "dist/**"
+            ]
+        },
+        "@ddn/asset-dao#build": {
+            "dependsOn": [
+                "@ddn/asset-base#build",
+                "@ddn/crypto#build",
+                "@ddn/utils#build"
             ],
             "outputs": [
                 "dist/**"

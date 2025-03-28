@@ -2,7 +2,7 @@
  * passed
  */
 import Debug from 'debug'
-import DdnUtils from '@ddn/utils'
+import { bignumber, assetTypes } from '../utils'
 import { DdnJS, node } from '../ddn-js'
 
 const debug = new Debug('debug')
@@ -55,7 +55,7 @@ describe('POST /peer/transactions', () => {
             node.expect(body).to.have.property('transactionId')
             if (body.success === true && body.transactionId !== null) {
               node.expect(body.transactionId).to.be.a('string')
-              voterAccount.amount = DdnUtils.bignum.plus(voterAccount.amount, randomCoin).toString()
+              voterAccount.amount = bignumber.plus(voterAccount.amount, randomCoin).toString()
             } else {
               debug('Sent: secret: ' + node.Gaccount.password + ', amount: ' + randomCoin + ', recipientId: ' + voterAccount.address)
               node.expect('TEST').to.equal('FAILED')

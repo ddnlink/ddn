@@ -1,6 +1,6 @@
 import Debug from 'debug'
 import { node } from '../ddn-js'
-import slots from '../../src/time/slots'
+import * as slots from '../../src/utils'
 
 const debug = Debug('debug')
 const expect = node.expect

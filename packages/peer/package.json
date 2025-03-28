@@ -82,7 +82,7 @@
     "lodash": "^4.17.11",
     "method-override": "^3.0.0",
     "mysql2": "^1.6.1",
-    "node-fetch": "^1.7.3",
+    "node-fetch": "2.6.9",
     "pg": "^8.6.0",
     "pg-hstore": "^2.3.3",
     "pluralize": "^8.0.0",

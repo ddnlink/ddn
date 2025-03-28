@@ -1,6 +1,6 @@
 // passed
 import Debug from 'debug'
-import DdnUtils from '@ddn/utils'
+import { bignumber, assetTypes } from '../utils'
 import { DdnJS, node } from '../../ddn-js'
 
 const debug = Debug('debug')
@@ -74,7 +74,7 @@ export const Contribution = () => {
       }
 
       transaction = await DdnJS.assetPlugin.createPluginAsset(
-        DdnUtils.assetTypes.DAO_CONTRIBUTION,
+        assetTypes.DAO_CONTRIBUTION,
         contribution,
         node.Daccount.password
       ) // 42
@@ -291,7 +291,7 @@ export const Contribution = () => {
         }
 
         transaction = await DdnJS.assetPlugin.createPluginAsset(
-          DdnUtils.assetTypes.DAO_CONFIRMATION,
+          assetTypes.DAO_CONFIRMATION,
           confirmation,
           node.Gaccount.password
         )

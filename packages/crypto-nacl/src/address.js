@@ -1,4 +1,4 @@
-import base58check from '@ddn/crypto-base'
+import base58check from './base58check'
 import RIPEMD160 from 'ripemd160'
 // import base58checkcheck from './base58checkcheck'
 import { createHash, getHash } from './nacl'

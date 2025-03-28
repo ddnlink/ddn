@@ -1,15 +1,15 @@
-import DdnUtils from '@ddn/utils'
+import { bignumber, assetTypes, slots } from '../utils'
 
-import crypto from '../utils/crypto'
-import slots from '../time/slots'
-import { constants }  from '../config'
+import * as crypto from '../crypto'
+import { setup } from '../config'
+const constants = setup().constants
 
 async function createVote (keyList, secret, secondSecret) {
   const keys = crypto.getKeys(secret)
-  const fee = DdnUtils.bignum.multiply(constants.fees.vote, constants.fixedPoint)
+  const fee = bignumber.multiply(constants.fees.vote, constants.fixedPoint)
 
   const transaction = {
-    type: DdnUtils.assetTypes.VOTE,
+    type: assetTypes.VOTE,
     nethash: constants.nethash,
     amount: '0',
     fee: `${fee}`,

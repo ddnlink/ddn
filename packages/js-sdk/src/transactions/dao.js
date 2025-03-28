@@ -1,10 +1,8 @@
-import DdnUtils from '@ddn/utils'
+import { bignumber, assetTypes, slots } from '../utils'
 
-import crypto from '../utils/crypto'
-import slots from '../time/slots'
-import { constants }  from '../config'
-
-const { bignum } = DdnUtils
+import * as crypto from '../crypto'
+import { setup } from '../config'
+const constants = setup().constants
 
 /**
  * Create org transaction
@@ -70,10 +68,10 @@ async function createOrg (org, secret, second_secret) {
     feeBase = parseInt(feeBase / 10)
   }
   const transaction = {
-    type: DdnUtils.assetTypes.DAO_ORG,
+    type: assetTypes.DAO_ORG,
     nethash: constants.nethash,
     amount: '0',
-    fee: bignum.multiply(feeBase, 100000000).toString(), // bignum update feeBase * 100000000,
+    fee: bignumber.multiply(feeBase, 100000000).toString(), // bignumber update feeBase * 100000000,
     recipientId: null,
     senderPublicKey: keys.publicKey,
     timestamp: slots.getTime() - 5,
@@ -95,9 +93,9 @@ async function createOrg (org, secret, second_secret) {
 
 async function createTransfer (address, amount, secret, second_secret) {
   const keys = crypto.getKeys(secret)
-  const fee = DdnUtils.bignum.multiply(constants.fees.dao_exchange, constants.fixedPoint)
+  const fee = bignumber.multiply(constants.fees.dao_exchange, constants.fixedPoint)
   const transaction = {
-    type: DdnUtils.assetTypes.TRANSFER,
+    type: assetTypes.TRANSFER,
     nethash: constants.nethash,
     amount, // fixme 1000000000 ????
     fee: `${fee}`,
@@ -145,7 +143,7 @@ async function createConfirmation (trsAmount, confirmation, secret, second_secre
     throw new Error('Invalid state format')
   }
 
-  let fee = DdnUtils.bignum.multiply(constants.fees.dao_confirmation, constants.fixedPoint)
+  let fee = bignumber.multiply(constants.fees.dao_confirmation, constants.fixedPoint)
   if (confirmation.state === 0) {
     fee = '0'
   }
@@ -157,7 +155,7 @@ async function createConfirmation (trsAmount, confirmation, secret, second_secre
   }
 
   const transaction = {
-    type: DdnUtils.assetTypes.DAO_CONFIRMATION,
+    type: assetTypes.DAO_CONFIRMATION,
     nethash: constants.nethash,
     amount: `${amount}`,
     fee: `${fee}`,
@@ -209,11 +207,11 @@ async function createContribution (contribution, secret, second_secret) {
     throw new Error('Invalid url format')
   }
 
-  const fee = DdnUtils.bignum.multiply(constants.fees.dao_contribution, constants.fixedPoint)
+  const fee = bignumber.multiply(constants.fees.dao_contribution, constants.fixedPoint)
   // contribution.sender_address = contribution.sender_address
   // contribution.received_address = contribution.received_address
   const transaction = {
-    type: DdnUtils.assetTypes.DAO_CONTRIBUTION,
+    type: assetTypes.DAO_CONTRIBUTION,
     nethash: constants.nethash,
     amount: '0',
     fee: `${fee}`,

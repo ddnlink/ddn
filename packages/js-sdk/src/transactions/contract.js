@@ -1,14 +1,13 @@
-import DdnUtils from '@ddn/utils'
+import { bignumber, assetTypes, slots } from '../utils'
 
-import crypto from '../utils/crypto'
-
-import slots from '../time/slots'
-import { constants }  from '../config'
+import * as crypto from '../crypto'
+import { setup } from '../config'
+const constants = setup().constants
 
 async function deploy (options, secret, secondSecret) {
   const keys = crypto.getKeys(secret)
 
-  const fee = DdnUtils.bignum.multiply(constants.fees.contract, constants.fixedPoint)
+  const fee = bignumber.multiply(constants.fees.contract, constants.fixedPoint)
 
   const timestamp = slots.getTime() - 5
 
@@ -25,7 +24,7 @@ async function deploy (options, secret, secondSecret) {
 
   const transaction = {
     nethash: constants.nethash,
-    type: DdnUtils.assetTypes.CONTRACT,
+    type: assetTypes.CONTRACT,
     amount: '0',
     fee: `${fee}`,
     recipientId: null,
@@ -51,7 +50,7 @@ async function pay (options, secret, secondSecret) {
   let args = options.args
   if (args instanceof Array) args = JSON.stringify(args)
 
-  const fee = DdnUtils.bignum.multiply(constants.fees.contract_transfer, constants.fixedPoint)
+  const fee = bignumber.multiply(constants.fees.contract_transfer, constants.fixedPoint)
 
   const timestamp = slots.getTime() - 5
   const opts = {
@@ -69,7 +68,7 @@ async function pay (options, secret, secondSecret) {
     recipientId: null,
     timestamp,
     senderPublicKey: keys.publicKey,
-    type: DdnUtils.assetTypes.CONTRACT_TRANSFER,
+    type: assetTypes.CONTRACT_TRANSFER,
     args: JSON.stringify(opts)
   }
   // console.log(trs)
@@ -87,7 +86,7 @@ async function send (options, secret, secondSecret) {
   let args = options.args
   if (args instanceof Array) args = JSON.stringify(args)
 
-  const fee = DdnUtils.bignum.multiply(constants.fees.contract_transfer, constants.fixedPoint)
+  const fee = bignumber.multiply(constants.fees.contract_transfer, constants.fixedPoint)
 
   const timestamp = slots.getTime() - 5
   const opts = {
@@ -103,7 +102,7 @@ async function send (options, secret, secondSecret) {
     recipientId: null,
     timestamp,
     senderPublicKey: keys.publicKey,
-    type: DdnUtils.assetTypes.CONTRACT_TRANSFER,
+    type: assetTypes.CONTRACT_TRANSFER,
     args: JSON.stringify(opts)
   }
   // console.log(trs)

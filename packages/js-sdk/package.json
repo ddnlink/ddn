@@ -9,9 +9,8 @@
   ],
   "scripts": {
     "test": "mocha test",
-    "build": "father build",
-    "build:custom": "DDN_ENV=custom pnpm build:custom:dev & pnpm build:custom:prod",
-    "build:dev": "browserify index.js > ./build/index.browserify.js",
+    "build": "DDN_NAME=ddn father build",
+    "build:dev": "mkdir -p build && browserify src/index.js > ./build/index.browserify.js",
     "build:prod": "mkdir -p build && browserify index.js -p tinyify > ./build/ddn.min.js",
     "build:custom:prod": "browserify index.js -p tinyify > ./build/ddn-js-sdk.custom.min.js"
   },
@@ -24,26 +23,20 @@
   "license": "AGPL 3.0",
   "repository": {
     "type": "git",
-    "url": "http://github.com/ddnlink/ddn/tree/master/packages/node-sdk"
+    "url": "http://github.com/ddnlink/ddn/tree/master/packages/js-sdk"
   },
-  "homepage": "http://github.com/ddnlink/ddn/tree/master/packages/node-sdk",
+  "homepage": "http://github.com/ddnlink/ddn/tree/master/packages/js-sdk",
   "bugs": {
     "url": "http://github.com/ddnlink/ddn/issues"
   },
   "dependencies": {
-    "@ddn/crypto": "workspace:^",
-    "@ddn/crypto-nacl": "workspace:^",
-    "@ddn/crypto-sm": "workspace:^",
-    "@ddn/test-utils": "workspace:^",
-    "@ddn/utils": "workspace:^",
-    "JSONStream": "^1.3.1",
+    "bignumber.js": "^7.2.1",
     "buffer": "^4.7.0",
     "bytebuffer": "^5.0.1",
+    "crypto-browserify": "^3.12.1",
     "lodash": "^4.17.11",
-    "long": "^4.0.0",
     "ripemd160": "^2.0.2",
-    "safe-buffer": "^5.2.1",
-    "through2": "^2.0.3"
+    "safe-buffer": "^5.2.1"
   },
   "npmFileMap": [
     {
@@ -54,6 +47,7 @@
     }
   ],
   "devDependencies": {
+    "@ddn/test-utils": "workspace:^",
     "browserify": "^13.1.0",
     "rollup-plugin-replace": "^2.2.0",
     "tinyify": "^2.5.2"

@@ -4,10 +4,11 @@
 import crypto from 'crypto'
 import path from 'path'
 import Debug from 'debug'
-import DdnUtils from '@ddn/utils'
+import { bignumber, assetTypes } from '../utils'
 import { DdnJS, node } from '../ddn-js'
 
-import { constants }  from '../config'
+import { setup } from '../config'
+const constants = setup().constants
 console.log('jsSdk.transaction.test config', config)
 console.log('jsSdk.transaction.test constants', constants)
 
@@ -248,7 +249,7 @@ describe('POST /peer/transactions', () => {
   })
 
   it('Using very larger than totalAmount and genesis block id. Should fail', async done => {
-    const largeAmount = DdnUtils.bignum.plus(node.constants.totalAmount, 1)
+    const largeAmount = bignumber.plus(node.constants.totalAmount, 1)
     const transaction = await DdnJS.transaction.createTransaction(
       node.Daccount.address,
       largeAmount,

@@ -1,14 +1,3 @@
-// 直接导出
-// module.exports = {
-//   // 以下为 esm 配置项启用时的默认值，有自定义需求时才需配置
-//   esm: {
-//     input: 'src', // 默认编译目录
-//     platform: 'browser', // 默认构建为 Browser 环境的产物
-//     transformer: 'babel', // 默认使用 babel 以提供更好的兼容性
-//     output: 'dist'
-//   }
-// }
-
 import {defineConfig} from 'father'
 
 export default defineConfig({
@@ -20,6 +9,9 @@ export default defineConfig({
   //   output: 'lib',
   //   // testEnvironment: 'jsdom'
   // }
+  define: {
+    'process.env.DDN_NAME': JSON.stringify(process.env.DDN_NAME),
+  },
   cjs: undefined,
   esm: {
     output: 'dist',

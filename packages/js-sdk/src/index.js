@@ -1,6 +1,4 @@
-import slots from './time/slots'
-import format from './time/format'
-import crypto from './utils/crypto'
+import * as crypto from './crypto'
 import transfer from './transactions/transfer'
 import delegate from './transactions/delegate'
 import signature from './transactions/signature'
@@ -16,16 +14,13 @@ import dao from './transactions/dao'
 import exchange from './transactions/exchange'
 import coupon from './transactions/coupon'
 import assetPlugin from './transactions/asset-plugin'
-import { constants, setup } from './config'
+import * as utils from './utils'
+import { setup } from './config'
 
 export default {
   setup, 
-  constants,
   // utils
-  utils: {
-    slots,
-    format
-  },
+  utils,
   crypto,
 
   // base

@@ -259,7 +259,7 @@ describe('AOB Test', () => {
       // 等 1 次确认
       await node.onNewBlockAsync()
 
-      // const transaction = await createPluginAsset(DdnUtils.assetTypes.AOB_ISSUE, asset, IssuerAccount1.password)
+      // const transaction = await createPluginAsset(assetTypes.AOB_ISSUE, asset, IssuerAccount1.password)
       const transaction = await DdnJS.aob.createIssue(currency, '100000', IssuerAccount1.password)
       debug('Add issue transaction:', transaction)
 
@@ -287,7 +287,7 @@ describe('AOB Test', () => {
       // 等 1 次确认
       await node.onNewBlockAsync()
 
-      // const transaction = await createPluginAsset(DdnUtils.assetTypes.AOB_TRANSFER, obj, IssuerAccount1.password)
+      // const transaction = await createPluginAsset(assetTypes.AOB_TRANSFER, obj, IssuerAccount1.password)
       const transaction = await DdnJS.aob.createTransfer(
         currency,
         '10',
@@ -319,7 +319,7 @@ describe('AOB Test', () => {
       // 等 1 次确认
       await node.onNewBlockAsync()
 
-      // const transaction = await createPluginAsset(DdnUtils.assetTypes.AOB_TRANSFER, obj, IssuerAccount1.password)
+      // const transaction = await createPluginAsset(assetTypes.AOB_TRANSFER, obj, IssuerAccount1.password)
       const transaction = await DdnJS.aob.createTransfer(
         currency,
         '10',

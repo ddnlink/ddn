@@ -95,6 +95,5 @@ export default {
         }
       ]
     }
-  },
-  crypto: '@ddn/crypto-nacl' // 绿化钠 @ddn/crypto-nacl ，国密 @ddn/crypto-sm
+  }
 }

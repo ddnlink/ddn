@@ -1,15 +1,17 @@
-import { bignum, assetTypes } from '@ddn/utils'
-import crypto from '@ddn/crypto'
-import slots from '../time/slots'
+import { bignumber, assetTypes, slots } from '../utils'
+import * as crypto from '../crypto'
 
-import { constants }  from '../config'
+import { setup } from '../config'
+const constants = setup().constants
+
+// console.log('crypto: ', crypto);
 
 function calculateFee (amount) {
   const min = constants.fees.transfer
 
-  const fee = bignum.multiply(amount, 0.0001).toFixed(0)
+  const fee = bignumber.multiply(amount, 0.0001).toFixed(0)
 
-  if (bignum.isLessThan(fee, min)) {
+  if (bignumber.isLessThan(fee, min)) {
     return min
   } else {
     return `${fee}`
@@ -17,8 +19,8 @@ function calculateFee (amount) {
 }
 
 async function createTransaction (recipientId, amount, message, secret, second_secret) {
-  const fee = bignum.multiply(constants.fees.transfer, constants.fixedPoint)
-  const amount2 = bignum.multiply(amount, constants.fixedPoint).toString() // 传来的 amount 原本就该是含精度的值
+  const fee = bignumber.multiply(constants.fees.transfer, constants.fixedPoint)
+  const amount2 = bignumber.multiply(amount, constants.fixedPoint).toString() // 传来的 amount 原本就该是含精度的值
   const transaction = {
     type: assetTypes.TRANSFER,
     nethash: constants.nethash,
@@ -30,6 +32,7 @@ async function createTransaction (recipientId, amount, message, secret, second_s
     asset: {}
   }
 
+  
   const keys = crypto.getKeys(secret)
   transaction.senderPublicKey = keys.publicKey
 
@@ -45,7 +48,7 @@ async function createTransaction (recipientId, amount, message, secret, second_s
 }
 
 async function createLock (height, secret, second_secret) {
-  const fee = bignum.multiply(constants.fees.lock, constants.fixedPoint)
+  const fee = bignumber.multiply(constants.fees.lock, constants.fixedPoint)
   const transaction = {
     type: 100, // TODO: update to string lock
     amount: '0',
@@ -56,7 +59,7 @@ async function createLock (height, secret, second_secret) {
     timestamp: slots.getTime() - 5,
     asset: {}
   }
-
+  console.log('crypto: ', crypto);
   const keys = crypto.getKeys(secret)
   transaction.senderPublicKey = keys.publicKey
 

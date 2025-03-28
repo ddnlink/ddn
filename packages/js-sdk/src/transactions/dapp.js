@@ -1,19 +1,16 @@
 import ByteBuffer from 'bytebuffer'
-import DdnUtils from '@ddn/utils'
-
-import crypto from '../utils/crypto'
-import slots from '../time/slots'
-import { constants }  from '../config'
+import { bignumber, assetTypes, slots } from '../utils'
+import * as crypto from '../crypto'
+import { setup } from '../config'
+const constants = setup().constants
 
 async function createDApp (options, secret, secondSecret) {
   const keys = crypto.getKeys(secret)
 
-  console.log('dapps config', config);
-  
-  const fee = DdnUtils.bignum.multiply(constants.fees.dapp, constants.fixedPoint)
+  const fee = bignumber.multiply(constants.fees.dapp, constants.fixedPoint)
   const transaction = {
     nethash: constants.nethash,
-    type: DdnUtils.assetTypes.DAPP,
+    type: assetTypes.DAPP,
     amount: '0',
     fee: `${fee}`,
     recipientId: null,

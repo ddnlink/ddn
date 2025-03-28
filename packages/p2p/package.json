@@ -18,7 +18,7 @@
     "p2p"
   ],
   "author": "Tailor",
-  "license": "MIT",
+  "license": "AGPL 3.0",
   "repository": {
     "type": "git",
     "url": "http://github.com/ddnlink/ddn/tree/master/packages/node-sdk"

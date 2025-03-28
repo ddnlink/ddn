@@ -3,7 +3,7 @@
  */
 import Debug from 'debug'
 import crypto from 'crypto'
-import DdnUtils from '@ddn/utils'
+import { bignumber, assetTypes } from '../utils'
 import { DdnJS, node } from '../ddn-js'
 
 const debug = Debug('debug')
@@ -69,7 +69,7 @@ describe('Test second passphrase', () => {
               secret: node.Gaccount.password,
 
               // Testing 1 delegate registration + 1 transaction sending 1DDN
-              amount: DdnUtils.bignum.plus(node.constants.fees.signature, 10000000000).toString(),
+              amount: bignumber.plus(node.constants.fees.signature, 10000000000).toString(),
               recipientId: account.address
             })
             .expect('Content-Type', /json/)

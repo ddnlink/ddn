@@ -11,10 +11,12 @@
   "bugs": {
     "url": "http://github.com/ddnlink/ddn/issues"
   },
-  "main": "./dist/index.js",
+  "module": "lib/index.js",
+  "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "files": [
-    "dist"
+    "dist",
+    "lib"
   ],
   "scripts": {
     "build": "father build",

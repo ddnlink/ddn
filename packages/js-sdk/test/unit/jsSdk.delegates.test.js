@@ -3,7 +3,7 @@
  */
 import Debug from 'debug'
 import crypto from 'crypto'
-import { bignum } from '@ddn/utils'
+import { bignumber } from '../utils'
 import { DdnJS, node } from '../ddn-js'
 
 const debug = Debug('debug')
@@ -40,7 +40,7 @@ describe('Registering a delegate', () => {
           .set('port', node.config.port)
           .send({
             secret: node.Gaccount.password,
-            amount: bignum.multiply(constants.fees.delegate, constants.fixedPoint),
+            amount: bignumber.multiply(constants.fees.delegate, constants.fixedPoint),
             recipientId: account.address
           })
           .expect('Content-Type', /json/)
@@ -55,7 +55,7 @@ describe('Registering a delegate', () => {
                 crypto.randomBytes(64).toString('hex'),
                 account.password
               )
-              transaction.fee = bignum.multiply(constants.fees.delegate, constants.fixedPoint)
+              transaction.fee = bignumber.multiply(constants.fees.delegate, constants.fixedPoint)
 
               node.peer
                 .post('/transactions')
@@ -84,7 +84,7 @@ describe('Registering a delegate', () => {
       node.randomDelegateName().toLowerCase(),
       node.randomPassword()
     )
-    transaction.fee = bignum.multiply(constants.fees.delegate, constants.fixedPoint)
+    transaction.fee = bignumber.multiply(constants.fees.delegate, constants.fixedPoint)
 
     node.peer
       .post('/transactions')
@@ -182,7 +182,7 @@ describe('Registering a delegate', () => {
           .set('port', node.config.port)
           .send({
             secret: node.Gaccount.password,
-            amount: bignum.multiply(constants.fees.delegate, constants.fixedPoint),
+            amount: bignumber.multiply(constants.fees.delegate, constants.fixedPoint),
             recipientId: account2.address
           })
           .expect('Content-Type', /json/)

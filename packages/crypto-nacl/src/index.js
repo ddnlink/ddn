@@ -5,7 +5,6 @@
  *  Licensed under the AGPL 3.0 License. See License.txt in the project root for license information.
  *-------------------------------------------------------------------------------------------- */
 
-import crypto from 'crypto'
 import base58check from './base58check'
 import { getBytes } from './bytes'
 
@@ -13,5 +12,6 @@ export * from './nacl'
 export * from './secret'
 export * from './address'
 export * from './verify'
+export * from './crypto'
 
-export { crypto, getBytes, base58check }
+export { getBytes, base58check }

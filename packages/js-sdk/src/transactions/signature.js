@@ -1,7 +1,7 @@
-import crypto from '../utils/crypto'
-import DdnUtils from '@ddn/utils'
-import slots from '../time/slots'
-import { constants }  from '../config'
+import * as crypto from '../crypto'
+import { bignumber, assetTypes, slots } from '../utils'
+import { setup } from '../config'
+const constants = setup().constants
 
 function signSignature (secondSecret) {
   const keys = crypto.getKeys(secondSecret)
@@ -18,9 +18,9 @@ async function createSignature (secret, secondSecret) {
 
   const signature = signSignature(secondSecret)
 
-  const fee = DdnUtils.bignum.multiply(constants.fees.signature, constants.fixedPoint)
+  const fee = bignumber.multiply(constants.fees.signature, constants.fixedPoint)
   const transaction = {
-    type: DdnUtils.assetTypes.SIGNATURE,
+    type: assetTypes.SIGNATURE,
     nethash: constants.nethash,
     amount: '0',
     fee: `${fee}`,

@@ -10,7 +10,7 @@
   "author": "imfly <kubying@qq.com>",
   "homepage": "https://github.com/ddnlink/ddn/tree/master/packages/crypto#readme",
   "license": "AGPL 3.0",
-  "main": "./dist/index.js",
+  "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "files": [
     "dist"
@@ -32,8 +32,7 @@
   "dependencies": {
     "@ddn/crypto-base": "workspace:^",
     "@ddn/sm-crypto": "0.0.5",
-    "@ddn/utils": "workspace:^",
-    "bitcore-mnemonic": "^8.20.5",
+    "bip39": "^3.1.0",
     "bytebuffer": "^5.0.1",
     "crypto": "^1.0.1",
     "fast-sha256": "^1.3.0",

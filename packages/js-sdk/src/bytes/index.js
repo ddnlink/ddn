@@ -4,7 +4,7 @@ import { getAsset } from '../utils/asset-util'
 
 let Buffer
 if (typeof Buffer === 'undefined') {
-  Buffer = require('buffer').Buffer
+  Buffer = require('safe-buffer').Buffer // 这是面向node.js的buffer，不是浏览器的buffer
 }
 
 async function getBytes (transaction, skipSignature, skipSecondSignature) {

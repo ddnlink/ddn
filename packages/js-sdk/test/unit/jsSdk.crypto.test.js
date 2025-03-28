@@ -1,10 +1,10 @@
 import Debug from 'debug'
-import DdnUtils from '@ddn/utils'
+import { bignumber, assetTypes } from '../utils'
 import { DdnJS, node } from '../ddn-js'
 
 const debug = Debug('debug')
 const expect = node.expect
-const Bignum = DdnUtils.bignum
+const Bignum = bignumber
 
 describe('js SDK', () => {
   describe('crypto.js', () => {
@@ -23,7 +23,7 @@ describe('js SDK', () => {
         'getBytes',
         'getHash',
         'getId',
-        'getFee',
+        'getFee', // fixme: 改了位置，记得修改
         'sign',
         'secondSign',
         'getKeys',

@@ -1,6 +1,6 @@
 // passed
 import Debug from 'debug'
-import DdnUtils from '@ddn/utils'
+import { assetTypes } from '../utils'
 import { DdnJS, node } from '../../ddn-js'
 
 const debug = Debug('debug')
@@ -26,7 +26,7 @@ export const Dao = () => {
 
         // const transaction = createOrg(orgs, Gaccount.password);
         const transaction = await DdnJS.assetPlugin.createPluginAsset(
-          DdnUtils.assetTypes.DAO_ORG,
+          assetTypes.DAO_ORG,
           orgs,
           Gaccount.password
         )

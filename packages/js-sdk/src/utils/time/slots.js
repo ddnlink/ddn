@@ -1,4 +1,6 @@
-import { constants }  from '../config'
+import { setup } from '../../config'
+const constants = setup().constants
+
 const interval = constants.interval
 const delegates = constants.delegates
 /**
@@ -56,7 +58,7 @@ function getLastSlot (nextSlot) {
   return nextSlot + delegates
 }
 
-export default {
+export {
   interval,
   delegates,
   getTime,

@@ -1,4 +1,4 @@
-import slots from './slots'
+import * as slots from './slots'
 
 function timeAgo (time) {
   const d = slots.beginEpochTime()
@@ -79,7 +79,7 @@ function fullTimestamp (time) {
   return `${d.getFullYear()}/${month}/${day} ${h}:${m}:${s}`
 }
 
-export default {
+export {
   timeAgo,
   fullTimestamp
 }

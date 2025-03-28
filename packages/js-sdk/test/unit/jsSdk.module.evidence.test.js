@@ -1,6 +1,6 @@
 // import Buffer from "buffer";
 import Debug from 'debug'
-import DdnUtils from '@ddn/utils'
+import { bignumber, assetTypes } from '../utils'
 import { DdnJS, node } from '../ddn-js'
 
 const debug = Debug('evidence')
@@ -55,8 +55,8 @@ describe('DDN evidence.js', () => {
         done()
       })
 
-      it('should have type as number and eqaul DdnUtils.assetTypes.EVIDENCE', (done) => {
-        expect(trs.type).to.be.a('number').be.equal(DdnUtils.assetTypes.EVIDENCE)
+      it('should have type as number and eqaul assetTypes.EVIDENCE', (done) => {
+        expect(trs.type).to.be.a('number').be.equal(assetTypes.EVIDENCE)
         done()
       })
 

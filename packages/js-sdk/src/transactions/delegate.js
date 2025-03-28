@@ -1,12 +1,11 @@
-import crypto from '../utils/crypto'
-import { bignum, assetTypes } from '@ddn/utils'
-
-import slots from '../time/slots'
-import { constants }  from '../config'
+import * as crypto from '../crypto'
+import { bignumber, assetTypes, slots } from '../utils'
+import { setup } from '../config'
+const constants = setup().constants
 
 async function createDelegate (username, secret, secondSecret) {
   const keys = crypto.getKeys(secret)
-  const fee = bignum.multiply(constants.fees.delegate, constants.fixedPoint)
+  const fee = bignumber.multiply(constants.fees.delegate, constants.fixedPoint)
 
   const transaction = {
     type: assetTypes.DELEGATE,

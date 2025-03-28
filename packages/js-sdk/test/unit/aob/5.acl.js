@@ -1,5 +1,5 @@
 import Debug from 'debug'
-import DdnUtils from '@ddn/utils'
+import { bignumber, assetTypes } from '../utils'
 import { DdnJS, node } from '../../ddn-js'
 
 const expect = node.expect
@@ -189,7 +189,7 @@ export const ACL = () => {
           aobAmount: '100000'
         }
 
-        const transaction = await createPluginAsset(DdnUtils.assetTypes.AOB_ISSUE, obj, IssuerAccountWhitelist.password)
+        const transaction = await createPluginAsset(assetTypes.AOB_ISSUE, obj, IssuerAccountWhitelist.password)
 
         // const transaction = await DdnJS.aob.createIssue(currency, "100000", IssuerAccount1.password);
         debug('Add issue transaction 2:', transaction)
@@ -224,7 +224,7 @@ export const ACL = () => {
           flag: 1, // 开启白名单
           flag_type: 1 // 黑白名单
         }
-        const transaction = await createPluginAsset(DdnUtils.assetTypes.AOB_FLAG, obj, IssuerAccountWhitelist.password)
+        const transaction = await createPluginAsset(assetTypes.AOB_FLAG, obj, IssuerAccountWhitelist.password)
         node.api
           .post('/transactions')
           .set('Accept', 'application/json')
@@ -259,7 +259,7 @@ export const ACL = () => {
         }
 
         const transaction = await createPluginAsset(
-          DdnUtils.assetTypes.AOB_TRANSFER,
+          assetTypes.AOB_TRANSFER,
           obj,
           IssuerAccountWhitelist.password
         )
@@ -407,7 +407,7 @@ export const ACL = () => {
           flag: 0, // 关闭
           flag_type: 1
         }
-        const transaction = await createPluginAsset(DdnUtils.assetTypes.AOB_FLAG, obj, IssuerAccountWhitelist.password)
+        const transaction = await createPluginAsset(assetTypes.AOB_FLAG, obj, IssuerAccountWhitelist.password)
 
         const { body } = await node.api
           .post('/transactions')

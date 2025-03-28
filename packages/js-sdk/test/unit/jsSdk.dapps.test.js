@@ -1,7 +1,7 @@
 
 // passed
 import Debug from 'debug'
-import DdnUtils from '@ddn/utils'
+import { bignumber, assetTypes } from '../utils'
 import { Transfer } from './dapp/transfer'
 import { node } from '../ddn-js'
 
@@ -20,8 +20,8 @@ let transactionCount = 0
 const transactionList = []
 
 // Used for calculating amounts
-let expectedFee = '0' // DdnUtils.bignum update
-let totalTxFee = '0' // DdnUtils.bignum update
+let expectedFee = '0' // bignumber update
+let totalTxFee = '0' // bignumber update
 
 // Create random accounts
 const Account1 = node.randomTxAccount()
@@ -219,9 +219,9 @@ beforeAll(done => {
         Account2.transactions.push(transactionCount)
         transactionCount += 1
 
-        // DdnUtils.bignum update
+        // bignumber update
         // totalTxFee += (expectedFee / node.normalizer);
-        totalTxFee = DdnUtils.bignum.plus(totalTxFee, DdnUtils.bignum.divide(expectedFee, node.normalizer))
+        totalTxFee = bignumber.plus(totalTxFee, bignumber.divide(expectedFee, node.normalizer))
 
         Account2.balance += randomCoin
         transactionList[transactionCount - 1] = {
@@ -229,8 +229,8 @@ beforeAll(done => {
           recipient: Account2.address,
           brutoSent: (randomCoin + expectedFee) / node.normalizer,
 
-          // DdnUtils.bignum update "fee": expectedFee / node.normalizer,
-          fee: DdnUtils.bignum.divide(expectedFee, node.normalizer),
+          // bignumber update "fee": expectedFee / node.normalizer,
+          fee: bignumber.divide(expectedFee, node.normalizer),
 
           nettoSent: randomCoin / node.normalizer,
           txId: body.transactionId,
