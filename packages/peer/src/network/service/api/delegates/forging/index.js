@@ -39,7 +39,7 @@ class ForgingRouter {
       success: true,
       fees: `${account.fees}`, // DdnUtils.bignum update
       rewards: `${account.rewards}`,
-      forged: DdnUtils.bignum.plus(account.fees, account.rewards).toString()
+      forged: DdnUtils.bignum.plus(account.fees, account.rewards).toFixed()
     }
   }
 

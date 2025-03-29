@@ -219,7 +219,7 @@ class DelegatesRouter {
   }
 
   async getFee () {
-    const fee = bignum.multiply(this.constants.net.fees.delegate, this.constants.fixedPoint).toString()
+    const fee = bignum.multiply(this.constants.net.fees.delegate, this.constants.fixedPoint).toFixed()
     return { success: true, fee }
   }
 

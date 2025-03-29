@@ -141,7 +141,7 @@ class PeerSync {
           } else {
             backHeight = bignum.minus(backHeight, bignum.modulo(backHeight, this.constants.delegates)).toString()
           }
-          this.logger.debug('rollback blocks querySimpleBlockData, backHeight: ', backHeight.toString())
+          this.logger.debug('rollback blocks querySimpleBlockData, backHeight: ', backHeight)
 
           const result = await this.runtime.block.querySimpleBlockData({ height: backHeight })
           if (result && result.block) {

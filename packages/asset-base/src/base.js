@@ -847,7 +847,7 @@ class AssetBase {
   async undo ({ id: trsId, amount, recipientId }, { id, height }, _, dbTrans) {
     if (DdnUtils.bignum.isGreaterThan(amount, 0)) {
       await this.runtime.account.setAccount({ address: recipientId }, dbTrans)
-      const amountStr = DdnUtils.bignum.minus(0, amount).toString()
+      const amountStr = DdnUtils.bignum.minus(0, amount).toFixed()
       await this.runtime.account.merge(
         recipientId,
         {

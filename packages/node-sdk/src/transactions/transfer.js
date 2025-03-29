@@ -26,9 +26,9 @@ async function createInTransfer (dappId, currency, amount, secret, secondSecret)
     }
   }
   if (currency === constants.tokenName) {
-    transaction.amount = bignum.multiply(amount, constants.fixedPoint).toString() // Bignum update Number(amount)
+    transaction.amount = bignum.multiply(amount, constants.fixedPoint).toFixed() // Bignum update Number(amount)
   } else {
-    transaction.asset.dappIn.amount = bignum.multiply(amount, constants.fixedPoint).toString()
+    transaction.asset.dappIn.amount = bignum.multiply(amount, constants.fixedPoint).toFixed()
   }
 
   transaction.signature = await crypto.sign(transaction, keys)

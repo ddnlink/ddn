@@ -20,7 +20,7 @@ function calculateFee (amount) {
 
 async function createTransaction (recipientId, amount, message, secret, second_secret) {
   const fee = bignumber.multiply(constants.fees.transfer, constants.fixedPoint)
-  const amount2 = bignumber.multiply(amount, constants.fixedPoint).toString() // 传来的 amount 原本就该是含精度的值
+  const amount2 = bignumber.multiply(amount, constants.fixedPoint).toFixed() // 传来的 amount 原本就该是含精度的值
   const transaction = {
     type: assetTypes.TRANSFER,
     nethash: constants.nethash,

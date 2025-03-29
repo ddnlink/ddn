@@ -80,10 +80,10 @@ class RoundChanges {
     const rewards = bignum.floor(bignum.multiply(this._roundRewards[index], ratio)) || 0;
 
     const result = {
-      fees: fees.toString(),
-      feesRemaining: feesRemaining.toString(), // fixme: 未处理？ 20250325
-      rewards: rewards.toString(),
-      balance: bignum.plus(fees, rewards).toString()
+      fees: fees.toFixed(),
+      feesRemaining: feesRemaining.toFixed(), // fixme: 未处理？ 20250325
+      rewards: rewards.toFixed(),
+      balance: bignum.plus(fees, rewards).toFixed()
     };
 
     // Log debug information including fees, remaining fees, rewards, and total balance.
@@ -131,8 +131,8 @@ class RoundChanges {
     }
 
     return {
-      fees: fees.toString(),
-      rewards: rewards.toString()
+      fees: fees.toFixed(),
+      rewards: rewards.toFixed()
     };
   }
 }

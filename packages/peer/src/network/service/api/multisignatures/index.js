@@ -437,7 +437,7 @@ class MultisignaturesRouter {
   async getFee () {
     return {
       success: true,
-      fee: bignum.multiply(this.constants.net.fees.multisignature, this.constants.fixedPoint).toString()
+      fee: bignum.multiply(this.constants.net.fees.multisignature, this.constants.fixedPoint).toFixed()
     }
   }
 }

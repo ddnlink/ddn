@@ -294,10 +294,12 @@ export class Energy {
       const meta = JSON.parse(record.metadata)
       const mtd = meta.methods.find(t => t.name === method)
       if (!!mtd.payable && !!currency && !!amount) {
-        if (amount !== undefined && amount !== null) {
-          amount = bignum.plus(amount, 0)
+        if (amount === null || amount === undefined) {
+          this.logger.error('Amount is null or undefined. Cannot proceed with the transfer.');
+          throw new Error('Amount is null or undefined');
         }
-        this.logger.info(`Transfer to contract ${amount} ${currency} transactions`)
+        amount = bignum.plus(amount, 0);
+        this.logger.info(`Transfer to contract ${amount} ${currency} transactions`);
         result = await this.runtime.dvm.payContract(
           gas_limit,
           ctx,
@@ -306,7 +308,7 @@ export class Energy {
           amount.toString(),
           currency,
           ...args
-        )
+        );
         if (result.success) {
           await this.transfer(
             contract_id,
@@ -317,7 +319,7 @@ export class Energy {
             trs.id,
             block,
             dbTrans
-          )
+          );
         }
       } else if (!mtd.payable) {
         this.logger.info(`Send to contract method: ${mtd.name}`)

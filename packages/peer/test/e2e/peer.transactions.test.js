@@ -540,7 +540,7 @@ describe('GET /transactions/get?id=', () => {
         const feeResult = bignum.isEqualTo(bignum.divide(body.transaction.fee, node.normalizer), transactionInCheck.fee)
         debug('body.transaction.amount', body.transaction.amount)
         debug('body.transaction.fee', body.transaction.fee)
-        debug('bignum.divide(body.transaction.fee, node.normalizer)', bignum.divide(body.transaction.fee, node.normalizer).toString())
+        debug('bignum.divide(body.transaction.fee, node.normalizer)', bignum.divide(body.transaction.fee, node.normalizer).toFixed())
         debug('transactionInCheck.fee', transactionInCheck.fee)
         node.expect(amountResult).to.be.true
         node.expect(feeResult).to.be.true
@@ -698,7 +698,7 @@ describe('PUT /signatures', () => {
           node.expect(body).to.have.property('success').to.be.true
           node.expect(body).to.have.property('transaction').that.is.an('object')
           if (body.success === true && body.transaction !== null) {
-            const fee = bignum.multiply(node.constants.net.fees.signature, node.constants.fixedPoint).toString()
+            const fee = bignum.multiply(node.constants.net.fees.signature, node.constants.fixedPoint).toFixed()
 
             // console.log(Account1)
             node.expect(body.transaction).to.have.property('type').to.equal(node.AssetTypes.SIGNATURE)

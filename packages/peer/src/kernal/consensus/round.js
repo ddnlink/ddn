@@ -27,7 +27,7 @@ class Round {
     this._transitioning = false;
     this._lastStableHeight = 0;
     // 添加错误计数器
-    this._rewardsErrorCount = 0; 
+    this._rewardsErrorCount = 0;
   }
 
   async prepare() {
@@ -136,7 +136,7 @@ class Round {
 
       // 2. 更新轮次数据：手续费、奖励、受托人，每个块都要先累积起来
       this._feesByRound[round] = this._feesByRound[round] || '0'
-      this._feesByRound[round] = bignum.plus(this._feesByRound[round], block.total_fee).toString()
+      this._feesByRound[round] = bignum.plus(this._feesByRound[round], block.total_fee).toFixed()
 
       this._rewardsByRound[round] = this._rewardsByRound[round] || []
       this._rewardsByRound[round].push(block.reward)
@@ -208,7 +208,7 @@ class Round {
   async processRoundRewards(block, round, dbTrans) {
     try {
       const delegates = this._delegatesByRound[round]
-      
+
       if (!delegates || !delegates.length) {
         this.logger.warn('No delegates in round:', round)
         return false
@@ -219,14 +219,14 @@ class Round {
       for (let i = 0; i < delegates.length; i++) {
         const delegatePublicKey = delegates[i];
         const change = changes.at(i);
-        
+
         this.logger.debug('Delegate balance info:', {
           delegatePublicKey,
           balance: change.balance,
           fees: change.fees,
           rewards: change.rewards
         });
-    
+
         await this.runtime.account.merge(
           null,
           {
@@ -245,7 +245,7 @@ class Round {
       // 处理基金会奖励
       const bonus = changes.getClubBonus()
       if (bonus && bonus.fees && bonus.rewards) {
-        const totalBalance = bignum.plus(bonus.fees, bonus.rewards).toString()
+        const totalBalance = bignum.plus(bonus.fees, bonus.rewards).toFixed()
         await this.runtime.account.merge(
           this.constants.foundAddress,
           {
@@ -262,11 +262,11 @@ class Round {
       }
 
       // 奖励处理成功，重置错误计数器
-      this._rewardsErrorCount = 0; 
+      this._rewardsErrorCount = 0;
       return true
     } catch (err) {
       // 错误计数器加 1
-      this._rewardsErrorCount++; 
+      this._rewardsErrorCount++;
       this.logger.error('Process round rewards error:', err)
 
       if (this._rewardsErrorCount >= 5) {
@@ -378,15 +378,15 @@ class Round {
 
     // 在累加手续费前添加校验
     if (bignum.isNaN(block.totalFee)) {
-    this.logger.error('Invalid block totalFee:', block.totalFee);
-    throw new Error('Invalid block total fee');
+      this.logger.error('Invalid block totalFee:', block.totalFee);
+      throw new Error('Invalid block total fee');
     }
 
     // 修改 backwardTick 中的处理
     this._feesByRound[round] = bignum.minus(
-    this._feesByRound[round] || '0', // 添加默认值
-    block.totalFee
-    ).toString();
+      this._feesByRound[round] || '0', // 添加默认值
+      block.totalFee
+    ).toFixed();
 
     this._rewardsByRound[round] = this._rewardsByRound[round] || []
     this._rewardsByRound[round].pop()

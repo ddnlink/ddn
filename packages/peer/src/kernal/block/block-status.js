@@ -35,15 +35,13 @@ class BlockStatus {
   }
 
   calcMilestone (height) {
-    const location = bignum.floor(
-      bignum.divide(this.parseHeight(bignum.minus(height, this._rewardOffset)), this._distance)
-    )
+    const location = bignum.floor(bignum.divide(this.parseHeight(bignum.minus(height, this._rewardOffset)), this._distance)).toFixed()
     const lastMile = this._milestones[this._milestones.length - 1]
 
     if (bignum.isGreaterThan(location, bignum.minus(this._milestones.length, 1))) {
       return this._milestones.lastIndexOf(lastMile)
     } else {
-      return location.toString()
+      return location
     }
   }
 
@@ -64,12 +62,12 @@ class BlockStatus {
 
     const milestone = this.calcMilestone(heightResult)
 
-    let supply = bignum.new(this.constants.totalAmount)
+    let supply = bignum.new(this.constants.totalAmount).toFixed()
 
     const rewards = []
 
     if (bignum.isLessThanOrEqualTo(heightResult, 0)) {
-      return supply.toString()
+      return supply
     }
 
     let amount = bignum.new(0)
@@ -79,18 +77,18 @@ class BlockStatus {
 
     for (var i = 0; i < this._milestones.length; i++) {
       if (milestone >= i) {
-        multiplier = bignum.new(this._milestones[i])
+        multiplier = bignum.new(this._milestones[i]).toString()
 
         if (bignum.isLessThanOrEqualTo(heightResult, 0)) {
           break // Rewards not started yet
         } else if (bignum.isLessThan(heightResult, this._distance)) {
-          amount = bignum.modulo(heightResult, this._distance)
+          amount = bignum.modulo(heightResult, this._distance).toFixed()
         } else {
-          amount = bignum.new(this._distance)
+          amount = bignum.new(this._distance).toFixed()
         }
-        rewards.push([amount.toString(), multiplier.toString()]) // bignum update
+        rewards.push([amount, multiplier]) // bignum update
 
-        heightResult = bignum.minus(heightResult, this._distance)
+        heightResult = bignum.minus(heightResult, this._distance).toFixed()
       } else {
         break // Milestone out of bounds
       }
@@ -110,7 +108,7 @@ class BlockStatus {
       supply = bignum.minus(supply, this._milestones[0])
     }
 
-    return supply.toString()
+    return supply.toFixed()
   }
 }
 

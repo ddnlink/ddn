@@ -46,7 +46,7 @@ class Block {
   }
 
   async calculateFee() {
-    return bignum.multiply(this.constants.net.fees.transfer, this.constants.fixedPoint).toString()
+    return bignum.multiply(this.constants.net.fees.transfer, this.constants.fixedPoint).toFixed()
   }
 
   getBlockStatus() {
@@ -201,7 +201,7 @@ class Block {
         confirmations: raw.b_confirmations
       }
       // fixme: 2020.8.12 bignum 的性能可能会影响块同步
-      block.totalForged = bignum.plus(block.total_fee, block.reward).toString()
+      block.totalForged = bignum.plus(block.total_fee, block.reward).toFixed()
 
       return block
     }
@@ -268,8 +268,8 @@ class Block {
     let block = {
       version: 0,
       height: bignum.plus(this._lastBlock.height, 1).toString(),
-      total_amount: totalAmount.toString(), // Bignum update
-      total_fee: totalFee.toString(), // Bignum update
+      total_amount: totalAmount.toFixed(), // Bignum update
+      total_fee: totalFee.toFixed(), // Bignum update
       reward: reward.toString(), // Bignum update
       payload_hash: payloadHash.toString('hex'),
       timestamp: data.timestamp,

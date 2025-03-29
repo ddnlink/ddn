@@ -232,12 +232,12 @@ class OutTransfer extends Asset.Base {
       // balanceExists = true;
     }
 
-    const newBalance = DdnUtils.bignum.plus(balance, amount)
+    const newBalance = DdnUtils.bignum.plus(balance, amount).toFixed()
     if (DdnUtils.bignum.isLessThan(newBalance, 0)) {
       throw new Error('Asset balance not enough')
     }
 
-    condition.balance = newBalance.toString()
+    condition.balance = newBalance
     return await this.dao.insertOrUpdate('mem_asset_balance', condition, { transaction: dbTrans })
   }
 
@@ -255,21 +255,22 @@ class OutTransfer extends Asset.Base {
     } else {
       await this.runtime.account.setAccount({ address: trs.recipientId }, dbTrans)
 
-      const amount = DdnUtils.bignum.new(transfer.amount) // DdnUtils.bignum update Number(transfer.amount);
+      const amount = DdnUtils.bignum.new(transfer.amount).toFixed() 
+      const round = (await this.runtime.round.getRound(block.height)).toString()
       await this.runtime.account.merge(
         trs.recipientId,
         {
           address: trs.recipientId, // wxm block database
-          balance: amount.toString(), // DdnUtils.bignum update
-          u_balance: amount.toString(), // DdnUtils.bignum update
+          balance: amount, // DdnUtils.bignum update
+          u_balance: amount, // DdnUtils.bignum update
           block_id: block.id, // wxm block database
-          round: await this.runtime.round.getRound(block.height)
+          round
         },
         dbTrans
       )
 
-      var minusSum = DdnUtils.bignum.minus(0, amount, trs.fee)
-      await this._updateAssetBalance(this.constants.tokenName, minusSum.toString(), transfer.dapp_id, dbTrans)
+      const minusSum = DdnUtils.bignum.minus(0, amount, trs.fee).toFixed()
+      await this._updateAssetBalance(this.constants.tokenName, minusSum, transfer.dapp_id, dbTrans)
     }
   }
 
@@ -287,16 +288,17 @@ class OutTransfer extends Asset.Base {
     } else {
       await this.runtime.account.setAccount({ address: trs.recipientId }, dbTrans)
 
-      const minusAmount = DdnUtils.bignum.minus(0, transfer.amount)
-      const sum = DdnUtils.bignum.plus(transfer.amount, trs.fee)
+      const minusAmount = DdnUtils.bignum.minus(0, transfer.amount).toFixed()
+      const round = (await this.runtime.round.getRound(block.height)).toString()
+      const sum = DdnUtils.bignum.plus(transfer.amount, trs.fee).toFixed()
       await this.runtime.account.merge(
         trs.recipientId,
         {
           address: trs.recipientId, // wxm block database
-          balance: minusAmount.toString(),
-          u_balance: minusAmount.toString(),
+          balance: minusAmount,
+          u_balance: minusAmount,
           block_id: block.id, // wxm block database
-          round: await this.runtime.round.getRound(block.height)
+          round
         },
         dbTrans
       )
@@ -320,7 +322,7 @@ class OutTransfer extends Asset.Base {
       this.balanceCache.addAssetBalance(
         transfer.dapp_id,
         transfer.currency,
-        DdnUtils.bignum.minus(0, amount).toString()
+        DdnUtils.bignum.minus(0, amount).toFixed()
       ) // DdnUtils.bignum update -amount
     } else {
       const ddnBalance = this.balanceCache.getAssetBalance(transfer.dapp_id, this.constants.tokenName) || 0
@@ -341,8 +343,8 @@ class OutTransfer extends Asset.Base {
     const transfer = await this.getAssetObject(trs)
     const fee = trs.fee
     if (transfer.currency === this.constants.tokenName) {
-      const amount = DdnUtils.bignum.plus(transfer.amount, fee)
-      this.balanceCache.addAssetBalance(transfer.dapp_id, transfer.currency, amount.toString())
+      const amount = DdnUtils.bignum.plus(transfer.amount, fee).toFixed()
+      this.balanceCache.addAssetBalance(transfer.dapp_id, transfer.currency, amount)
     } else {
       this.balanceCache.addAssetBalance(transfer.dapp_id, this.constants.tokenName, fee)
       this.balanceCache.addAssetBalance(transfer.dapp_id, transfer.currency, transfer.amount)

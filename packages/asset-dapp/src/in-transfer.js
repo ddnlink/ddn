@@ -173,12 +173,12 @@ class InTransfer extends Asset.Base {
       balance = row.balance
     }
 
-    const newBalance = DdnUtils.bignum.plus(balance, amount)
+    const newBalance = DdnUtils.bignum.plus(balance, amount).toFixed()
     if (DdnUtils.bignum.isLessThan(newBalance, 0)) {
       throw new Error('Asset balance not enough')
     }
 
-    condition.balance = newBalance.toString()
+    condition.balance = newBalance
     return await this.dao.insertOrUpdate('mem_asset_balance', condition, { transaction: dbTrans })
   }
 
@@ -218,11 +218,11 @@ class InTransfer extends Asset.Base {
     const transfer = await this.getAssetObject(trs)
     if (transfer.currency !== this.constants.tokenName) {
       const balance = this.balanceCache.getAssetBalance(sender.address, transfer.currency) || 0
-      const surplus = DdnUtils.bignum.minus(balance, transfer.amount)
+      const surplus = DdnUtils.bignum.minus(balance, transfer.amount).toFixed()
       if (DdnUtils.bignum.isLessThan(surplus, 0)) {
         throw new Error('Insufficient asset balance')
       }
-      this.balanceCache.setAssetBalance(sender.address, transfer.currency, surplus.toString())
+      this.balanceCache.setAssetBalance(sender.address, transfer.currency, surplus)
     }
   }
 

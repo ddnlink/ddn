@@ -18,7 +18,7 @@ export class BalanceManager {
   }
 
   setNativeBalance (address, balance) {
-    this.tmdb.set([address, 1], bignum.new(balance).toString())
+    this.tmdb.set([address, 1], bignum.new(balance).toFixed())
   }
 
   addNativeBalance (address, amount) {
@@ -28,7 +28,7 @@ export class BalanceManager {
     const keys = [address, 1]
     const balance = this.tmdb.get(keys) || '0'
 
-    this.tmdb.set(keys, bignum.plus(balance, amount).toString())
+    this.tmdb.set(keys, bignum.plus(balance, amount).toFixed())
   }
 
   getAssetBalance (address, currency) {
@@ -38,9 +38,9 @@ export class BalanceManager {
   setAssetBalance (address, currency, balance) {
     // bignum update
     // if (typeof balance === 'number') amount = String(balance)
-    // this.tmdb.set([address, currency], bignum(balance).toString())
+    // this.tmdb.set([address, currency], bignum(balance).toFixed())
 
-    this.tmdb.set([address, currency], bignum.new(balance).toString())
+    this.tmdb.set([address, currency], bignum.new(balance).toFixed())
   }
 
   addAssetBalance (address, currency, amount) {
@@ -51,7 +51,7 @@ export class BalanceManager {
     const balance = this.tmdb.get(keys) || '0'
 
     // bignum update
-    this.tmdb.set(keys, bignum.plus(balance, amount).toString())
+    this.tmdb.set(keys, bignum.plus(balance, amount).toFixed())
   }
 
   rollback () {

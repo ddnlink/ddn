@@ -44,7 +44,7 @@ export default {
         const trs = {
           type: assetTypes.TRANSFER,
           nethash,
-          amount: bignum.multiply(parts[1], 100000000).toString(),
+          amount: bignum.multiply(parts[1], 100000000).toFixed(),
           fee: '0',
           timestamp: 0,
           recipientId: parts[0], // wxm block database
@@ -58,7 +58,7 @@ export default {
           trs.message = message
         }
 
-        totalAmount = bignum.plus(totalAmount, trs.amount).toString()
+        totalAmount = bignum.plus(totalAmount, trs.amount).toFixed()
 
         trs.signature = await DdnCrypto.sign(trs, sender.keypair)
         trs.id = await DdnCrypto.getId(trs)
@@ -77,7 +77,7 @@ export default {
         senderPublicKey: sender.keypair.publicKey // wxm block database
       }
 
-      totalAmount = bignum.plus(totalAmount, balanceTransaction.amount).toString()
+      totalAmount = bignum.plus(totalAmount, balanceTransaction.amount).toFixed()
 
       balanceTransaction.signature = await DdnCrypto.sign(balanceTransaction, sender.keypair)
       balanceTransaction.id = await DdnCrypto.getId(balanceTransaction)

@@ -13,7 +13,7 @@ function signTransaction (trs, secret) {
 async function createMultisignature (keysgroup, lifetime, min, secret, secondSecret) {
   const keys = crypto.getKeys(secret)
 
-  const fee = bignumber.multiply(bignumber.plus(keysgroup.length, 1), 5, constants.fixedPoint).toString()
+  const fee = bignumber.multiply(bignumber.plus(keysgroup.length, 1), 5, constants.fixedPoint).toFixed()
 
   const transaction = {
     type: assetTypes.MULTISIGNATURE, // MULTISIGNATURE

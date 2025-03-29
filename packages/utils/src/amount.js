@@ -46,7 +46,7 @@ const amount = {
     // Convert the amount to a big number and divide by the divisor.
     const ba = bignum.new(amount).div(divisor);
     // Return the calculated result as a string.
-    return ba.toString();
+    return ba.toFixed();
   }
 }
 

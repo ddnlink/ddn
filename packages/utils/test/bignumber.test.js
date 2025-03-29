@@ -27,7 +27,7 @@ describe('bignumber benchmarks', function () {
       done()
     })
 
-    it('toString', function (done) {
+    it('toString and toFixed', function () {
       const block = {
         height: '15372423414152544454241414242342423554'
       }
@@ -35,8 +35,15 @@ describe('bignumber benchmarks', function () {
       const result1 = BigNumber(block.height).toString()
       const result2 = myBignumber.new(block.height).toString()
       const result3 = block.height.toString().toString()
-      console.log('result2: ', result1, result2, result3)
-      done()
+      console.log('result1: ', result1, result2, result3)
+
+      const result4 = BigNumber(block.height).toFixed()
+      const result5 = myBignumber.new(block.height).toFixed()
+      // 下面是错误的用法，因为 block.height 是字符串，不能使用 toFixed 方法
+      // "123".toFixed() // block.height.toFixed is not a function 
+      // const result6 = block.height.toFixed()
+      console.log('result2: ', result4, result5) //, result6
+      // done()
     })
 
     it('string + number, and string / number', function (done) {
@@ -49,7 +56,9 @@ describe('bignumber benchmarks', function () {
       const result1 = block.height / 2
       const result2 = myBignumber.new(block.height) - 1
       const result3 = block.height.toString().toString() % 2
-      const result4 = myBignumber.new(block.height) + 1 // + 为字符串连字符，一定注意 这种错误的用法
+
+      // + 为字符串连字符，一定注意 这种错误的用法
+      const result4 = myBignumber.new(block.height) + 1 
       console.log('result3: ', result0, result1, result2, result3, result4)
       expect(result0).to.be.equal('22222222225')
       expect(result00).to.be.equal('222222222241')

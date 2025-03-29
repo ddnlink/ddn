@@ -71,7 +71,7 @@ async function createOrg (org, secret, second_secret) {
     type: assetTypes.DAO_ORG,
     nethash: constants.nethash,
     amount: '0',
-    fee: bignumber.multiply(feeBase, 100000000).toString(), // bignumber update feeBase * 100000000,
+    fee: bignumber.multiply(feeBase, 100000000).toFixed(), // bignumber update feeBase * 100000000,
     recipientId: null,
     senderPublicKey: keys.publicKey,
     timestamp: slots.getTime() - 5,
