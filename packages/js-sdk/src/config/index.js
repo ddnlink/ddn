@@ -71,7 +71,7 @@ function setup(newConfig = {}) {
 
     // Initialize constants based on the environment variable
     let constants = process.env.DDN_NAME === 'ddn' ? constants_ddnnet : constants_devnet
-    constants = { ...constants, ...constants[config.net] } 
+    constants = { ...constants, ...constants[config.net || "mainnet"] } 
     // 保留吧
     // delete constants.mainnet
     // delete constants.testnet

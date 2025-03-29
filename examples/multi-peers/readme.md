@@ -66,7 +66,12 @@ $ tail -f ./logs/debug.log
 $ tail -f ./logs/dvm.log
 
 # 查看节点状态
-$ ddn d peerStat -H 127.0.0.1 -P 8004
+$ ddn d peerStat -H 127.0.0.1 -P 8001
 ```
 
 查看浏览器 http://127.0.0.1:8001/api/blocks/getHeight
+
+## FAQ
+
+1. 如果出现 `Error: listen EADDRINUSE: address already in use :::8001` 错误，说明端口已经被占用，需要修改端口号。
+2. 如果出现 Sandbox is not ready 错误，最可能是数据库初始化中出现问题，拷贝一个 blockchain.db 过来即可。

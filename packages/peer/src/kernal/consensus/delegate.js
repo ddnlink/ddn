@@ -322,7 +322,7 @@ class Delegate {
       })
 
       // 确保新轮次的受托人列表已准备好
-      const nextRoundDelegates = await this.getDisorderDelegatePublicKeys(height + 1)
+      const nextRoundDelegates = await this.getDisorderDelegatePublicKeys(bignum.plus(height, 1))
       if (!nextRoundDelegates || nextRoundDelegates.length !== this.constants.delegates) {
         this.logger.error('Next round delegates not ready')
         return null

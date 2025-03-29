@@ -167,6 +167,10 @@ class Block {
       return await this.dao.insert('block', newBlock, { transaction: dbTrans })
     } catch (err) {
       this.logger.error(`insert block fail: ${err.toString()}`)
+      if (err instanceof Sequelize.UniqueConstraintError) {
+        this.logger.warn(`Block ${block.id} already exists, skipping insertion`);
+        return; // 不抛出错误，继续执行
+      }
       throw new Error(`insert block fail: ${err.toString()}`)
     }
   }
@@ -1221,7 +1225,7 @@ class Block {
         const normalizedPrevBlock = blockNormalize[0]
 
         // 3. 验证区块连续性
-        if (normalizedPrevBlock.height !== (height - 1).toString()) {
+        if (!bignum.isEqualTo(normalizedPrevBlock.height, bignum.minus(height, 1).toString())) {
           throw new Error('Block height discontinuity detected')
         }
 

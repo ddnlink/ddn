@@ -20,7 +20,7 @@ import Router from './router'
 const { assetTypes } = DdnUtils
 
 class Loader {
-  constructor (context) {
+  constructor(context) {
     Object.assign(this, context)
     this._context = context
 
@@ -30,11 +30,11 @@ class Loader {
     this._router = new Router(this._context)
   }
 
-  _getAssetKey (type) {
+  _getAssetKey(type) {
     return `asset_${type}`
   }
 
-  _registerAsset (type, inst, assetName) {
+  _registerAsset(type, inst, assetName) {
     if (
       inst &&
       typeof inst.create === 'function' &&
@@ -63,7 +63,7 @@ class Loader {
   /**
    * 加载所有系统配置的资产插件
    */
-  async _attachAssetPlugins () {
+  async _attachAssetPlugins() {
     for (let i = 0; i < this.assetPlugins.getTransactionCount(); i++) {
       const transConfig = this.assetPlugins.getTransactionByIndex(i)
       const TransCls = global._require_runtime_(transConfig.package)[transConfig.name]
@@ -74,7 +74,7 @@ class Loader {
     }
   }
 
-  mountAssetApis (expressApp) {
+  mountAssetApis(expressApp) {
     this._router.mountAssetApis(expressApp)
   }
 
@@ -82,7 +82,7 @@ class Loader {
    * 根据资产配置名称获取资产实例
    * @param {*} assetName
    */
-  findInstanceByName (assetName) {
+  findInstanceByName(assetName) {
     if (assetName) {
       const keys = Object.getOwnPropertyNames(this._assetsNames)
       for (const p in keys) {
@@ -95,13 +95,21 @@ class Loader {
     return null
   }
 
-  async _addAsesstModels () {
-    const { dao } = this
-    const assetsPackageList = []
+  async _addAsesstModels() {
+    const { dao } = this;
+    const assetsPackageList = [];
+
+    // 首先添加系统内存表模型
+    // await dao.defineModel('mem_asset_balance', {
+    //     address: { type: Sequelize.STRING },
+    //     assetId: { type: Sequelize.STRING },
+    //     balance: { type: Sequelize.BIGINT }
+    // });
+
     for (let i = 0; i < this.assetPlugins.getTransactionCount(); i++) {
-      const trans = this.assetPlugins.getTransactionByIndex(i)
+      const trans = this.assetPlugins.getTransactionByIndex(i);
       if (!assetsPackageList.includes(trans.package)) {
-        assetsPackageList.push(trans.package)
+        assetsPackageList.push(trans.package);
       }
     }
 
@@ -130,7 +138,7 @@ class Loader {
     })
   }
 
-  async init () {
+  async init() {
     const transfer = new Transfer(this._context)
     this._registerAsset(assetTypes.TRANSFER, transfer)
 
@@ -158,12 +166,12 @@ class Loader {
     await this._addAsesstModels()
   }
 
-  hasType (type) {
+  hasType(type) {
     const key = this._getAssetKey(type)
     return !!this._assets[key]
   }
 
-  getAsset (type) {
+  getAsset(type) {
     if (this.hasType(type)) {
       const key = this._getAssetKey(type)
       return this._assets[key]
@@ -175,7 +183,7 @@ class Loader {
    * 在所有加载的扩展资产上执行指定方法
    * @param {*} funcName
    */
-  async execAssetFunc (funcName) {
+  async execAssetFunc(funcName) {
     const args = []
     for (let i = 1; i < arguments.length; i++) {
       args.push(arguments[i])
@@ -194,6 +202,28 @@ class Loader {
       }
     }
   }
+
+//   try {
+//   const asset = this.getAsset(assetName);
+//   if (!asset) {
+//     throw new Error(`Asset ${assetName} not found`);
+//   }
+
+//   // 添加数据模型检查
+//   if (funcName === 'onInitAccountsAndBalances' && !this.dao.isModelDefined('mem_asset_balance')) {
+//     await this.dao.defineModel('mem_asset_balance', {
+//       // 定义模型结构
+//       address: { type: Sequelize.STRING },
+//       assetId: { type: Sequelize.STRING },
+//       balance: { type: Sequelize.BIGINT }
+//     });
+//   }
+
+//   return await asset[funcName](...args);
+// } catch (err) {
+//   this.logger.error(`Error executing ${funcName} for ${assetName}: ${err.message}`);
+//   throw err;
+// }
 }
 
 export default Loader

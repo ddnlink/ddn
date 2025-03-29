@@ -39,7 +39,6 @@ class Lock {
       throw new Error('Invalid lock height')
     }
 
-    // bignum update if (sender.lockHeight && lastBlock.height + 1 <= sender.lockHeight)
     if (sender.lockHeight && bignum.isLessThanOrEqualTo(bignum.plus(lastBlock.height, 1), sender.lockHeight)) {
       throw new Error('Account is locked')
     }
@@ -61,13 +60,14 @@ class Lock {
 
   async apply ({ args }, block, { address }, dbTrans) {
     await this.runtime.account.setAccount(
-      {
-        address,
-        lock_height: args[0] // bignum update Number(trs.args[0])
-      },
-      dbTrans
+        {
+            address,
+            // 使用toFixed()确保高度值格式统一，避免后续处理中的类型问题
+            lock_height: bignum(args[0]).toFixed() 
+        },
+        dbTrans
     )
-  }
+}
 
   async undo (trs, block, { address }, dbTrans) {
     await this.runtime.account.setAccount(

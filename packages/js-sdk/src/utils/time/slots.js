@@ -7,6 +7,8 @@ const delegates = constants.delegates
  * 周期开始时间
  */
 function beginEpochTime () {
+  
+  
   return constants.beginDate
 }
 

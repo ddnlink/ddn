@@ -3,13 +3,6 @@ import { generateSecret, isValidSecret } from '../src/secret.js'
 
 // crypto.getRandomValues = crypto.randomBytes
 
-// describe('Mnemonic', () => {
-//   it('should generate a valid mnemonic', () => {
-//     const mnemonic = new Mnemonic(Mnemonic.Words.ENGLISH).toString()
-//     expect(bip39.validateMnemonic(mnemonic)).toBeTruthy()
-//   })
-// })
-
 describe('generateSecret', () => {
   it('should generate a secret with default parameters', () => {
     const secret = generateSecret()

@@ -220,8 +220,15 @@ class PeerSync {
       blocks = await this.runtime.block._parseObjectFromFullBlocksData(blocks)
 
       for (let j = 0; j < blocks.length; j++) {
-        let block = blocks[j]
-
+        let block = blocks[j];
+        
+        // 添加高度验证
+        const lastBlock = await this.runtime.block.getLastBlock();
+        if (!bignum.isEqualTo(block.height, bignum.plus(lastBlock.height, '1'))) {
+            this.logger.error(`Block height mismatch: expected ${bignum.plus(lastBlock.height, '1')}, got ${block.height}`);
+            continue; // 跳过这个区块
+        }
+        
         try {
           block = await this.runtime.block.objectNormalize(block)
         } catch (e) {

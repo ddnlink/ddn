@@ -196,7 +196,7 @@ class DAO {
    * @param {*} options {where} 更新条件，指定更新范围，参考Sequelize的Query查询定义https://sequelize.readthedocs.io/en/latest/docs/querying/?q=Sequelize.fn&check_keywords=yes&area=default#where
    * @param {*} options {transaction} 事务对象
    */
-  static async update (modelName, modelObj, options) {
+  static async update(modelName, modelObj, options) {
     const modelInst = this._getModel(modelName)
     if (!modelInst) {
       throw new Error(`Data model not defined: ${modelName}`)
@@ -208,8 +208,12 @@ class DAO {
     // TODO 如果不带where参数，启动时回报update peer error 缺少option where参数，别的方法应该也是这样
     const opts = {
       ...logOptions,
-      ...(options || { where: {} })
-    }
+      ...(options || { where: {} }),
+      conflict: {
+          target: ['id'], // 根据id字段检测冲突
+          update: ['height', 'timestamp'] // 冲突时更新这些字段
+      }
+    };
     const result = await modelInst.update(modelObj, opts)
     return result && result.length > 0 ? result[0] : 0
   }

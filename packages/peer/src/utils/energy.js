@@ -39,7 +39,7 @@ export class Energy {
   }
 
   async burningGas (gas, address, block, tid, dbTrans) {
-    const height = this.runtime.block.getLastBlock().height + 1
+    const height = bignum.plus(this.runtime.block.getLastBlock().height, 1).toFixed();
     const payAmount = this.gasToDDN(gas)
 
     this.logger.debug(`consume ${address} ${payAmount} DDN for transaction '${tid}'`)
