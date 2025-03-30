@@ -1,6 +1,6 @@
 {
   "name": "ddn-starter",
-  "version": "3.7.0",
+  "version": "3.8.0-alpha.1",
   "private": true,
   "repository": {
     "type": "git",
@@ -43,12 +43,12 @@
     "build": "father build",
     "build:prod": "cross-env NODE_ENV=production ./node_modules/.bin/gulp linux-build-main",
     "build:src": "./node_modules/.bin/gulp build-src-main",
-    "build-testnet": "./node_modules/.bin/gulp linux-build-test",
-    "build-localnet": "./node_modules/.bin/gulp linux-build-local",
+    "build:testnet": "./node_modules/.bin/gulp linux-build-test",
+    "build:localnet": "./node_modules/.bin/gulp linux-build-local",
     "test": "./node_modules/.bin/mocha test/**/*.test.js",
-    "clear": "rm db/contracts/* && rm db/*.db && rm logs/*.log",
-    "clear:testnet": "rm -rf db/testnet/* && rm -rf logs/testnet/*",
-    "clear:localnet": "rm -rf db/localnet/* && rm -rf logs/localnet/*",
+    "clean": "rm db/contracts/* && rm db/*.db && rm logs/*.log",
+    "clean:testnet": "rm -rf db/testnet/* && rm -rf logs/testnet/*",
+    "clean:localnet": "rm -rf db/localnet/* && rm -rf logs/localnet/*",
     "test:localnet": "./node_modules/.bin/mocha test/localnet/**/*.test.js"
   },
   "dependencies": {
