@@ -79,7 +79,7 @@
     "access": "public"
   },
   "engines": {
-    "node": ">=16.14"
+    "node": ">=14 <=18"
   },
   "dependencies": {
     "@babel/plugin-transform-classes": "^7.10.4",
@@ -118,5 +118,6 @@
     "ts-node": "^10.9.2",
     "turbo": "^2.0.9",
     "typescript": "^3.9.10"
-  }
+  },
+  "packageManager": "pnpm@9.6.0"
 }

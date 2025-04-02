@@ -20,8 +20,8 @@ apt-get install -y vim curl ntp wget git sudo lsof rsync sqlite3 ca-certificates
 curl --silent -o- https://gitee.com/mirrors/nvm/raw/v0.39.7/install.sh | bash
 export NVM_DIR="$HOME/.nvm"
 [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
-nvm install 20.15.1
-nvm alias default 20.15.1
+nvm install 18.20.8
+nvm alias default 18.20.8
 nvm use default
 
 npm install -g pnpm

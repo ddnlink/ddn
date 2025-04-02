@@ -19,7 +19,7 @@ export default {
   pkgs: [...headPkgs, ...otherPkgs, ...proPkgs, ...tailPkgs],
   doc: {
     themeConfig: {mode: 'light'},
-    base: '/doc'
+    base: '/docs'
   },
   extraBabelPlugins: [['@babel/plugin-transform-classes']]
 }

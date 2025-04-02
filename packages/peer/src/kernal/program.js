@@ -195,6 +195,11 @@ class Program {
       ctx.logger.warn('Failed to get public ip, block forging may not work!')
     }
 
+    // 先启动dvm，独立运行，为下面的程序做好准备
+    await ctx.runtime.dvm.run()
+    // dvm 就绪回調函數
+    this._dvmReady()
+    
     // 应用最新数据库升级
     await this._applyDatabaseUpgrade()
 
@@ -210,13 +215,14 @@ class Program {
     try {
       // TODO next optimize initAccountsAndBalances like onInitAccountsAndBalances use
       await ctx.runtime.account.initAccountsAndBalances()
+
       // init asset banlance when start program
       await ctx.runtime.transaction.execAssetFunc('onInitAccountsAndBalances')
+
     } catch (err) {
       ctx.logger.error('Failed to load blockchain', System.getErrorMsg(err))
       return process.exit(1)
     }
-
     // 启动准备（节点）
     await ctx.runtime.peer.prepare()
 
@@ -225,13 +231,6 @@ class Program {
 
     // 启动准备（受托人）
     await ctx.runtime.delegate.prepare()
-
-    // 启动dvm
-    await ctx.runtime.dvm.run()
-    // const contracts = await ctx.dao.findList('contract', { where: { state: 0 } })
-    // await ctx.runtime.dvm.loadContracts(contracts.map(c => c.id))
-    // dvm 就绪回調函數
-    this._dvmReady()
 
     // 启动节点网络服务
     ctx.runtime.httpserver = await HttpServer.newServer(ctx).start()

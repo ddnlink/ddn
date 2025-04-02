@@ -28,7 +28,7 @@ module.exports = {
   },
   peers: {
     list: [
-      { ip: '127.0.0.1', port: '9001', httpPort: '8001' }, { ip: '127.0.0.1', port: '9002', httpPort: '8002' }, { ip: '127.0.0.1', port: '9003', httpPort: '8003' }, { ip: '127.0.0.1', port: '9004', httpPort: '8004' }, { ip: '127.0.0.1', port: '9005', httpPort: '8005' }
+      { ip: '127.0.0.1', port: '9001', httpPort: '8001' }
     ],
     blackList: [],
     options: {
