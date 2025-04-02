@@ -3,6 +3,7 @@
  * wangxm   2018-12-27
  */
 import assert from 'assert'
+import Sequelize from 'sequelize'
 
 import * as DdnCrypto from '@ddn/crypto'
 import { bignum } from '@ddn/utils'
