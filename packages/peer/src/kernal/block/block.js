@@ -25,7 +25,6 @@ class Block {
     Object.assign(this, context)
     this._context = context
 
-    this._lastBlock = null
     this._blockCache = new BlockCache({
       maxSize: 1000,
       logger: this.logger

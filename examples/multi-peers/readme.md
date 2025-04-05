@@ -67,6 +67,7 @@ $ tail -f ./logs/dvm.log
 
 # 查看节点状态
 $ ddn d peerStat -H 127.0.0.1 -P 8001
+$ ddn d peerStat -H 117.78.45.44 -P 8000 -M
 ```
 
 查看浏览器 http://127.0.0.1:8001/api/blocks/getHeight

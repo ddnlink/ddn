@@ -181,25 +181,59 @@ class Program {
     // 提供系统默认配置文件
     options.configObject = extend(true, defaultConfig, options.configObject)
 
+    // 添加全局事件处理
+    process.once('cleanup', async () => {
+      this.ctx.logger.info('Cleaning up...')
+      await this._beforeClose()
+      await this.ctx.close()
+      this._resetProcessState()
+      process.exit(1)
+    })
+
+    process.once('SIGTERM', () => {
+      process.emit('cleanup')
+    })
+
+    process.once('exit', () => {
+      process.emit('cleanup')
+      this.ctx.logger.info('process exited')
+    })
+
+    process.once('SIGINT', () => {
+      process.emit('cleanup')
+    })
+
+    process.on('unhandledRejection', (reason, p) => {
+      console.log('Unhandled Rejection at: ', p, 'reason:', reason)
+    })
+
+    process.on('uncaughtException', err => {
+      this.ctx.logger.fatal('uncaughtException', { message: err.message, stack: err.stack })
+      process.emit('cleanup')
+    })
+
+    if (typeof gc === 'function') {
+      setInterval(() => {
+        // eslint-disable-next-line no-undef
+        gc()
+      }, 1000 * 60 * 30)
+    }
+
     // 配置加載之前回調函數
     await this._configWillLoad(options)
     // 初始化运行时上下文、核心模块等
     await this._init(options)
     // 配置加載完成回調函數
     await this._configLoaded()
+    
+    // 文件锁，保证系统只能运行一份
+    this._checkProcessState()
+
+    process.stdin.resume()
 
     // 简化上下文
     const ctx = this.ctx;
 
-    if (!ctx.config.publicIp) {
-      ctx.logger.warn('Failed to get public ip, block forging may not work!')
-    }
-
-    // 先启动dvm，独立运行，为下面的程序做好准备
-    await ctx.runtime.dvm.run()
-    // dvm 就绪回調函數
-    this._dvmReady()
-    
     // 应用最新数据库升级
     await this._applyDatabaseUpgrade()
 
@@ -208,6 +242,15 @@ class Program {
       process.exit(1)
     }
 
+    if (!ctx.config.publicIp) {
+      ctx.logger.warn('Failed to get public ip, block forging may not work!')
+    }
+
+    // 启动dvm，独立运行
+    await ctx.runtime.dvm.run()
+    // dvm 就绪回調函數
+    this._dvmReady()
+    
     // 初始化创世区块
     await ctx.runtime.block.handleGenesisBlock()
 
@@ -259,53 +302,12 @@ class Program {
     // 启动区块铸造任务
     await this.startForgeBlockTask()
 
+    ctx.runtime.loaded = true
+
     // 启动监控
-    if (ctx.config.logLevel === 'debug') {
+    if (process.env.NODE_ENV === 'development') {
       this._monitorRuntimeState() // 添加监控
     }
-
-    // 添加全局事件处理
-    process.once('cleanup', async () => {
-      this.ctx.logger.info('Cleaning up...')
-      await this._beforeClose()
-      await this.ctx.close()
-      this._resetProcessState()
-      process.exit(1)
-    })
-
-    process.once('SIGTERM', () => {
-      process.emit('cleanup')
-    })
-
-    process.once('exit', () => {
-      process.emit('cleanup')
-      this.ctx.logger.info('process exited')
-    })
-
-    process.once('SIGINT', () => {
-      process.emit('cleanup')
-    })
-
-    process.on('unhandledRejection', (reason, p) => {
-      console.log('Unhandled Rejection at: ', p, 'reason:', reason)
-    })
-
-    process.on('uncaughtException', err => {
-      this.ctx.logger.fatal('uncaughtException', { message: err.message, stack: err.stack })
-      process.emit('cleanup')
-    })
-
-    if (typeof gc === 'function') {
-      setInterval(() => {
-        // eslint-disable-next-line no-undef
-        gc()
-      }, 1000 * 60 * 30)
-    }
-
-    // 文件锁，保证系统只能运行一份
-    this._checkProcessState()
-
-    process.stdin.resume()
   }
 
   async _bindReady() {
@@ -437,7 +439,7 @@ class Program {
       }
     } catch (err) {
       this.ctx.logger.error('The block sync task error: ' + err)
-      this.ctx.runtime.stateMachine.transitionToPending()
+      // this.ctx.runtime.stateMachine.transitionToPending()
     }
     next()
   }
@@ -447,7 +449,7 @@ class Program {
     setInterval(() => {
       this.ctx.logger.debug('Runtime State Report', {
         state: this.ctx.runtime.stateMachine.current,
-        // loaded: this.ctx.runtime.loaded,
+        loaded: this.ctx.runtime.loaded,
         lastBlock: this.ctx.runtime.block.getLastBlock().height
       })
     }, 60 * 1000) // 每分钟记录状态

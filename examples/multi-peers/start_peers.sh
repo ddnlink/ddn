@@ -217,7 +217,8 @@ prepare_config_files() {
         for j in $(seq 1 $PEER_COUNT); do
             # Exclude self
             if [ $j -ne $i ]; then
-                peers_list="${peers_list}{ ip: '127.0.0.1', port: '$((P2P_BASE_PORT + j - 1))', httpPort: '$((BASE_PORT + j - 1))' }, "
+                peers_list="${peers_list}{ ip: '127.0.0.1', port: '$((P2P_BASE_PORT + j - 1))' }, "
+                # peers_list="${peers_list}{ ip: '127.0.0.1', port: '$((P2P_BASE_PORT + j - 1))', httpPort: '$((BASE_PORT + j - 1))' }, "
             fi
         done
         

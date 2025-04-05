@@ -70,7 +70,6 @@
     "esbuild": "^0.23.1",
     "fs-extra": "0.30.0",
     "lodash": "^4.17.21",
-    "uglifyjs-webpack-plugin": "^2.2.0",
     "which": "^5.0.0"
   }
 }

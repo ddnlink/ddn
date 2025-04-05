@@ -1,6 +1,6 @@
 {
   "name": "@ddn/ddn-cli",
-  "version": "2.5.0",
+  "version": "2.5.1",
   "description": "A Command line tool to manage ddn",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -23,6 +23,9 @@
   "author": "HuoDing <hd@qq.com>",
   "license": "AGPL 3.0",
   "dependencies": {
+    "@ddn/asset-base": "workspace:^",
+    "@ddn/asset-dapp": "workspace:^",
+    "@ddn/asset-evidence": "workspace:^",
     "@ddn/contract": "workspace:^",
     "@ddn/crypto": "workspace:^",
     "@ddn/node-sdk": "workspace:^",
