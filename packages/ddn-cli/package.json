@@ -17,7 +17,6 @@
   },
   "files": [
     "bin",
-    ".ddnrc.js",
     "dist"
   ],
   "author": "HuoDing <hd@qq.com>",

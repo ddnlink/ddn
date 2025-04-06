@@ -24,18 +24,18 @@
   "scripts": {
     "dev": "turbo dev --force",
     "build": "turbo build  --force --no-cache",
-    "build:cached": "turbo run build --force",
-    "build:prod": "pnpm --filter ddn-starter build:prod",
+    "build:dev": "NODE_ENV=development node ./scripts/initCryptoDependent.js && father build -w",
+    "build:docker": "node ./scripts/initCryptoDependent.js && father build --docker",
     "test": "jest",
     "test:e2e": "jest --config jest.e2e.config.ts",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage",
     "format": "pnpm lint:fix && pnpm prettier",
     "lint": "eslint --ext .js packages/**/src",
     "lint:fix": "eslint --fix --ext .js packages/**/src",
     "lint-staged": "lint-staged",
     "lint-staged:js": "eslint --ext .js",
     "prettier": "prettier --write ./packages/**/src/**/**/* ./packages/**/test/**/**/*",
-    "build:dev": "NODE_ENV=development node ./scripts/initCryptoDependent.js && father build -w",
-    "build:docker": "node ./scripts/initCryptoDependent.js && father build --docker",
     "changelog": "conventional-changelog -p angular -i CHANGELOG.md -w",
     "chore:update-deps": "sh ./scripts/reinstall_deps.sh",
     "clean": "pnpm clean:turbo && pnpm clean:history && pnpm clean:cache && pnpm clean:dist && pnpm store prune && pnpm clean:node_modules",
@@ -52,9 +52,7 @@
     "doc:build": "DDN_ENV=docs dumi build",
     "doc:deploy": "DDN_ENV=docs deploy website",
     "pkg:fix": "manypkg fix",
-    "postinstall": "manypkg check",
-    "test:watch": "jest --watch",
-    "test:coverage": "jest --coverage"
+    "postinstall": "manypkg check"
   },
   "config": {
     "commitizen": {
@@ -118,6 +116,5 @@
     "ts-node": "^10.9.2",
     "turbo": "^2.0.9",
     "typescript": "^3.9.10"
-  },
-  "packageManager": "pnpm@9.6.0"
+  }
 }

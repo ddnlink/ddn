@@ -79,7 +79,7 @@ export class P2P {
     self._server.listen(
       {
         port: self.port,
-        host: self.host || '0.0.0.0'
+        host: '0.0.0.0' // note: 这里不使用 self.host，因为 self.host 大概率是 publicIp，有些云主机没有绑定网卡
       },
       () => {
         self.family = self._server.address().family
