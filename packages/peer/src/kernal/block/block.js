@@ -1112,11 +1112,11 @@ class Block {
         throw new Error('No public ip')
       }
 
-      const serverAddr = `${this.config.publicIp}:${this.config.p2pPort}`
+      const p2pAddr = `${this.config.publicIp}:${this.config.p2pPort}`
 
       let propose
       try {
-        propose = await this.runtime.consensus.createPropose(keypair, block, serverAddr)
+        propose = await this.runtime.consensus.createPropose(keypair, block, p2pAddr)
       } catch (e) {
         throw new Error(`Failed to create propose: ${e.toString()}`)
       }

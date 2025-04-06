@@ -26,9 +26,9 @@ function resultHandler (cb) {
 class Api {
   constructor (options) {
     this.options = options || {}
-    this.mainnet = this.options.mainnet || 'testnet'
+    this.isMainnet = this.options.mainnet === 'mainnet' || false
     this.host = this.options.host || '127.0.0.1'
-    this.port = this.options.port || (this.mainnet ? 8000 : 8001)
+    this.port = this.options.port || (this.isMainnet ? 8000 : 8001)
     this.baseUrl = `http://${this.host}:${this.port}`
     this.nethash = NodeSdk.constants.nethash
   }

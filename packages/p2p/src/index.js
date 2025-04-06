@@ -23,7 +23,7 @@ export class P2P {
   constructor(options) {
     // check if we have options
     options = options || {}
-    this.port = +options.port || 9001
+    this.port = +options.port || 9000
     this.httpPort = +options.httpPort || (this.port - 1000)
     this.host = options.host || '0.0.0.0'
     this.cycle = +options.cycle || 10000

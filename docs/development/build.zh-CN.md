@@ -49,3 +49,18 @@ https://cloud.tencent.com/developer/article/2030300
 由于commonjs的导出模块并非是live binding的，所以导致一旦出现了commonjs的循环引用，则将其转换成esm就会出问题
 同步的动态require几乎无法转换为esm，如果将其转换为top-level的import，根据import的语义，bundler需要将同步require的内容进行hoist，但是这与同步require相违背，因此动态require也很难处理
 cjs2esm的复杂性，导致该转换算法十分复杂，导致一旦业务里包含了很多cjs的模块，rollup其编译性能就会急剧下降，这在编译一些库的时候可能不是大问题，但是用于大型业务的开发，其编译速度难以接受。
+
+## 发布
+
+```bash
+$ pnpm login // 登录
+
+$ pnpm version patch // 升级版本号
+$ pnpm version minor // 升级版本号
+$ pnpm version major // 升级版本号
+
+$ pnpm publish --access public -no-git-checks --dry-run // 测试
+$ pnpm publish --access public -no-git-checks // 正式发布
+
+$ npm deprecate @ddn/contract@0.4.1 "This version is deprecated, please upgrade to 0.4.2 or higher"
+```
