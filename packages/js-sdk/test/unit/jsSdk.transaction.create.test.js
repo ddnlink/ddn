@@ -1,13 +1,9 @@
+// All passed
 import Debug from 'debug'
-import { DdnJS, node } from '../ddn-js'
+import { DdnJS, node, constants } from '../ddn-js'
 
 const debug = Debug('debug')
 const expect = node.expect
-
-import { setup } from '../config'
-const constants = setup().constants
-console.log('jsSdk.transaction.test config', config)
-console.log('jsSdk.transaction.test constants', constants)
 
 describe('transaction.js', () => {
   const transaction = DdnJS.transaction
@@ -55,15 +51,6 @@ describe('transaction.js', () => {
 
       it('should have senderPublicKey as hex string', () => {
         expect(trs.senderPublicKey).to.be.a('string')
-        // .and.match(() => {
-        // 	try {
-        // 		Buffer.from(trs.senderPublicKey, "hex")
-        // 	} catch (e) {
-        // 		return false;
-        // 	}
-
-        // 	return true;
-        // })
       })
 
       it('should have recipientId as string and to be equal 58191285901858109', () => {
@@ -71,7 +58,8 @@ describe('transaction.js', () => {
       })
 
       it('should have amount as number and eqaul to 1000', () => {
-        expect(trs.amount).to.be.a('string').to.equal('1000')
+        const amount = DdnJS.utils.bignumber.divide(trs.amount, constants.fixedPoint).toString()
+        expect(amount).to.be.a('string').to.equal('1000')
       })
 
       it('should have empty asset object', () => {
@@ -84,15 +72,6 @@ describe('transaction.js', () => {
 
       it('should have signature as hex string', () => {
         expect(trs.signature).to.be.a('string')
-        // .and.match(() => {
-        // 	try {
-        // 		Buffer.from(trs.signature, "hex")
-        // 	} catch (e) {
-        // 		return false;
-        // 	}
-
-        // 	return true;
-        // })
       })
 
       it('should be signed correctly', async () => {
@@ -142,15 +121,6 @@ describe('transaction.js', () => {
 
       it('should have senderPublicKey as hex string', () => {
         expect(trs.senderPublicKey).to.be.a('string')
-        // .and.match(() => {
-        // 	try {
-        // 		Buffer.from(trs.senderPublicKey, "hex")
-        // 	} catch (e) {
-        // 		return false;
-        // 	}
-
-        // 	return true;
-        // })
       })
 
       it('should have recipientId as string and to be equal 58191285901858109', () => {
@@ -158,7 +128,8 @@ describe('transaction.js', () => {
       })
 
       it('should have amount as string and eqaul to 1000', () => {
-        expect(trs.amount).to.be.a('string').to.equal('1000')
+        const amount = DdnJS.utils.bignumber.divide(trs.amount, constants.fixedPoint).toString()
+        expect(amount).to.be.a('string').to.equal('1000')
       })
 
       it('should have empty asset object', () => {
@@ -171,28 +142,10 @@ describe('transaction.js', () => {
 
       it('should have signature as hex string', () => {
         expect(trs.signature).to.be.a('string')
-        // .and.match(() => {
-        // 	try {
-        // 		Buffer.from(trs.signature, "hex")
-        // 	} catch (e) {
-        // 		return false;
-        // 	}
-
-        // 	return true;
-        // })
       })
 
       it('should have sign_signature as hex string', () => {
         expect(trs.sign_signature).to.be.a('string')
-        // .to.match(() => {
-        // 	try {
-        // 		Buffer.from(trs.sign_signature, "hex");
-        // 	} catch (e) {
-        // 		return false;
-        // 	}
-
-        // 	return true;
-        // });
       })
 
       it('should be signed correctly', async () => {

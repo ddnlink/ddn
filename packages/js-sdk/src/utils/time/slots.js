@@ -4,11 +4,10 @@ const constants = setup().constants
 const interval = constants.interval
 const delegates = constants.delegates
 /**
- * 周期开始时间
+ * 链开始时间，有关时间戳的错误，基本上就是这里的值获取错误导致的
+ * @returns {Date} 开始时间
  */
 function beginEpochTime () {
-  
-  
   return constants.beginDate
 }
 

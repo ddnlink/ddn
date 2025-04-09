@@ -34,13 +34,14 @@ class Peer {
     this._peerUpdatings = []
     this.router = new Router(context)
 
-    const { nethash, peers, p2pPort, port, publicIp } = this.ctx.config
+    const { nethash, peers, p2pPort, port, publicIp, version } = this.ctx.config
 
     this.p2p = new P2P({
       port: p2pPort,
       httpPort: port,
       host: publicIp,
       nethash,
+      version,  // 统一版本号
       seeds: peers.list,
       dbfile: path.join(this.ctx.baseDir, '/db/peer.db'),
       routes: this.router.routes,

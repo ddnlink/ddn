@@ -533,6 +533,9 @@ class TransactionService {
       }
     }
 
+    this.logger.debug(`Post transaction, transaction is ${JSON.stringify(transaction)}`)
+    this.logger.debug(`Post transaction, result is ${JSON.stringify(result)}`)
+
     return result
   }
 

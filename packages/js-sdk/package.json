@@ -1,6 +1,6 @@
 {
   "name": "@ddn/js-sdk",
-  "version": "2.5.5",
+  "version": "2.5.6",
   "description": "DDN browser js SDK",
   "main": "dist/index.js",
   "files": [
@@ -9,7 +9,8 @@
   ],
   "scripts": {
     "test": "mocha test",
-    "build": "DDN_NAME=ddn father build",
+    "build:ddn": "DDN_NAME=ddn father build",
+    "build": "DDN_NAME=dev father build",
     "build:dev": "mkdir -p build && browserify src/index.js > ./build/index.browserify.js",
     "build:prod": "mkdir -p build && browserify index.js -p tinyify > ./build/ddn.min.js",
     "build:custom:prod": "browserify index.js -p tinyify > ./build/ddn-js-sdk.custom.min.js"

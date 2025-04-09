@@ -260,7 +260,7 @@ class Transaction {
       return await this._assets.call(transaction.type, 'undoUnconfirmed', transaction, sender, dbTrans)
     }
 
-    const amount = bignum.plus(transaction.amount, transaction.fee).toString()
+    const amount = bignum.plus(transaction.amount, transaction.fee).toFixed()
     this.balanceCache.addNativeBalance(sender.address, amount)
 
     await this.runtime.account.merge(

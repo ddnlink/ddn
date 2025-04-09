@@ -1,6 +1,6 @@
 {
   "name": "@ddn/peer",
-  "version": "2.5.4",
+  "version": "2.5.5",
   "description": "DDN Peer.",
   "repository": {
     "type": "git",
@@ -94,7 +94,7 @@
     "sequelize": "^5.21.3",
     "shelljs": "^0.8.5",
     "socket.io": "^2.2.0",
-    "sqlite3": "^5.0.0",
+    "sqlite3": "^5.1.7",
     "systeminformation": "^5.9.8",
     "tracer": "0.9.1",
     "util-extend": "1.0.3",

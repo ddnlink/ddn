@@ -7,17 +7,18 @@
 class RootRouter {
   constructor (context) {
     Object.assign(this, context)
-    this._context = context
+    this.ctx = context
   }
 
   async queryPeers (filter) {
-    return this._context.runtime.peer.getPeers()
+    return this.ctx.runtime.peer.getPeers()
   }
 
   async get (req) {
     try {
-      const peers = await this._context.runtime.peer.getPeers()
-
+      const peers = await this.ctx.runtime.peer.getPeers()
+      this.ctx.logger.debug(`get peers: ${JSON.stringify(peers)}`)
+      
       return {
         success: true,
         peers: peers,
@@ -58,7 +59,7 @@ class RootRouter {
     }
 
     try {
-      const peers = await this._context.runtime.peer.getPeers()
+      const peers = await this.ctx.runtime.peer.getPeers()
 
       const peer = peers.find(item => item.ip === query.ip && item.port === query.port)
 

@@ -223,7 +223,8 @@ export class P2P {
     const { type, checksum, size, payload } = Message.getMetadata(data)
     const key = signature || checksum
     const fib = self.fib.get(key) || [self.id]
-    const peers = self.inventory.getNextHop(fib, 11)
+    // 使用优质节点进行广播
+    const peers = this.inventory.getNextHop(fib, 11).filter(peer => peer.failCount < this.inventory.tryTimes / 2) // 额外过滤低质量节点
     fib.push(...peers.map(peer => peer.id))
     peers.forEach(async peer => {
       try {
@@ -253,7 +254,7 @@ export class P2P {
     pipe.host = peer.host
     pipe.port = peer.port
     this.pool.set(pipe.id, pipe)
-    
+
     // 只在节点不存在时添加到 inventory
     if (!this.inventory.get(peer.id)) {
       this.logger.debug(`peer isn't exit, add peer to inventory: ${peer.host}:${peer.port}`)
@@ -320,33 +321,50 @@ export class P2P {
    */
   async _request(method, api, data, node) {
     try {
-      const peer = !node ? this.inventory.getRandomPeer() : node
-      if (!peer) {
-        this.logger.warn('Not found valid peer', node)
-        return
-        // throw new Error('Not found valid peer')
-      }
+      // 创建排除集合，避免重复请求失败节点
+      const excludeIds = new Set()
+      let retryCount = 0
+      let peer
 
-      const { id, host, port } = peer
-      if (!id && (!host || !port)) {
-        this.logger.warn(`The peer is not valid: ${host}:${port}`)
-        return
-        // throw new Error(`The peer is not valid: ${host}:${port}`)
-      }
-      if (this.host === host && this.port === port) {
-        this.logger.warn(`Should not request to yourself: ${host}:${port}`)
-        return
-      }
-      const pipe = await this.connect(port, host)
-      if (!pipe) {
-        this.logger.warn(`Pipe connect to ${host}:${port} failed.`)
-        return
-      }
-      const msg = await pipe.request(method, data, { api })
-      if (!this.pool.has(pipe.id)) {
-        pipe.close()
-      }
-      return { peer, body: msg.data }
+      do {
+        peer = !node ? this.inventory.getSmartRandomPeer(excludeIds) : node
+        if (!peer) {
+          this.logger.warn('Not found valid peer')
+          return
+        }
+
+        // 将当前peer加入排除集合，避免下次重试时再次选择
+        excludeIds.add(peer.id)
+
+        try {
+          const { id, host, port } = peer
+          if (!id && (!host || !port)) {
+            this.logger.warn(`The peer is not valid: ${host}:${port}`)
+            return
+            // throw new Error(`The peer is not valid: ${host}:${port}`)
+          }
+          if (this.host === host && this.port === port) {
+            this.logger.warn(`Should not request to yourself: ${host}:${port}`)
+            return
+          }
+          const pipe = await this.connect(port, host)
+          if (!pipe) {
+            this.logger.warn(`Pipe connect to ${host}:${port} failed.`)
+            return
+          }
+          const msg = await pipe.request(method, data, { api })
+          if (!this.pool.has(pipe.id)) {
+            pipe.close()
+          }
+          return { peer, body: msg.data }
+        } catch (err) {
+          retryCount++
+          if (retryCount >= 3) {
+            throw err
+          }
+        }
+      } while (retryCount < 3)
+
     } catch (err) {
       const errMsg = err.errno === 'ECONNREFUSED' ? 'ECONNREFUSED' : err.message
       this.logger.warn('request data error: ', errMsg)
@@ -408,7 +426,7 @@ export class P2P {
         break
       }
       case Message.commands.VERSION: {
-        const { id, version, nethash, host, port, httpPort, family } = this
+        const { id, version, nethash, host, port, httpPort = this.httpPort, family } = this
         const info = { id, version, nethash, host, port, httpPort, family }
         this._response(pipe, info, msg.serial)
         break
@@ -426,7 +444,8 @@ export class P2P {
    */
   async _discover() {
     try {
-      const peer = this.inventory.getRandomPeer()
+      // 保持可靠性优先，但不排除已连接节点（发现需要与已连接节点交互）
+      const peer = this.inventory.getReliablePeers(1)[0] || this.inventory.getRandomPeer()
 
       if (!peer || this.id === peer.id) return
       if (!this.pool.has(peer.id)) {
@@ -462,11 +481,11 @@ export class P2P {
    * sort peer and verify the connection of inventory
    */
   async _sortPeers() {
+    const self = this
     try {
-      const self = this
-      const peers = this.inventory.getAllPeers()
-
-      peers.map(async peer => {
+      // 优先处理健康节点
+      const healthyPeers = this.inventory.getHealthyPeers()
+      healthyPeers.forEach(async peer => {
         if (!this.pool.has(peer.id)) {
           try {
             await this.connect(peer.port, peer.host)

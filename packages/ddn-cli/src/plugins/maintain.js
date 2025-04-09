@@ -50,10 +50,12 @@ async function peerStat (argv) {
       return
     }
 
+    console.log('正在请求 peers:', peers)
+
     // 并行获取所有节点的高度
     const heightPromises = peers.map(async peer => {
       // 使用 httpPort，如果没有则从 port 计算
-      const httpPort = peer.httpPort || (peer.port - 1000)
+      const httpPort = peer.httpPort || 8000
       
       try {
         const url = `http://${peer.host}:${httpPort}/api/blocks/getHeight`

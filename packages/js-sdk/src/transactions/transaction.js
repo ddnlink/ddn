@@ -19,7 +19,7 @@ function calculateFee (amount) {
 }
 
 async function createTransaction (recipientId, amount, message, secret, second_secret) {
-  const fee = bignumber.multiply(constants.fees.transfer, constants.fixedPoint)
+  const fee = bignumber.multiply(constants.fees.transfer, constants.fixedPoint).toFixed()
   const amount2 = bignumber.multiply(amount, constants.fixedPoint).toFixed() // 传来的 amount 原本就该是含精度的值
   const transaction = {
     type: assetTypes.TRANSFER,
@@ -59,7 +59,7 @@ async function createLock (height, secret, second_secret) {
     timestamp: slots.getTime() - 5,
     asset: {}
   }
-  console.log('crypto: ', crypto);
+  // console.log('crypto: ', crypto);
   const keys = crypto.getKeys(secret)
   transaction.senderPublicKey = keys.publicKey
 

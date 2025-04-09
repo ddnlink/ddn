@@ -1,6 +1,6 @@
 {
   "name": "ddn",
-  "version": "3.8.0",
+  "version": "3.8.0.alpha.1",
   "private": true,
   "repository": {
     "type": "git",
@@ -52,7 +52,7 @@
     "doc:build": "DDN_ENV=docs dumi build",
     "doc:deploy": "DDN_ENV=docs deploy website",
     "pkg:fix": "manypkg fix",
-    "postinstall": "manypkg check"
+    "postinstall": "manypkg check && node scripts/copy-sqlite3.js"
   },
   "config": {
     "commitizen": {
@@ -81,6 +81,8 @@
   },
   "dependencies": {
     "@babel/plugin-transform-classes": "^7.10.4",
+    "@ddn/ddn-cli": "2.5.2",
+    "@ddn/js-sdk": "link:packages/js-sdk",
     "@jest/transform": "^29.7.0",
     "@manypkg/cli": "^0.21.4",
     "@types/jest": "^23.3.2",
@@ -116,5 +118,6 @@
     "ts-node": "^10.9.2",
     "turbo": "^2.0.9",
     "typescript": "^3.9.10"
-  }
+  },
+  "packageManager": "pnpm@10.7.1"
 }

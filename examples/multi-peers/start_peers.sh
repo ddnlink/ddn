@@ -217,8 +217,8 @@ prepare_config_files() {
         for j in $(seq 1 $PEER_COUNT); do
             # Exclude self
             if [ $j -ne $i ]; then
-                peers_list="${peers_list}{ ip: '127.0.0.1', port: '$((P2P_BASE_PORT + j - 1))' }, "
-                # peers_list="${peers_list}{ ip: '127.0.0.1', port: '$((P2P_BASE_PORT + j - 1))', httpPort: '$((BASE_PORT + j - 1))' }, "
+                # peers_list="${peers_list}{ ip: '127.0.0.1', port: '$((P2P_BASE_PORT + j - 1))' }, "
+                peers_list="${peers_list}{ ip: '127.0.0.1', port: '$((P2P_BASE_PORT + j - 1))', httpPort: '$((BASE_PORT + j - 1))' }, "
             fi
         done
         
@@ -307,7 +307,7 @@ start_single_peer() {
     cd "$peer_dir" || exit
     
     # Start node using relative path
-    node app.js --daemon
+    node --experimental-vm-modules app.js --daemon
     
     if ! check_peer_health "$peer_dir"; then
         echo "Failed to start peer in $peer_dir"

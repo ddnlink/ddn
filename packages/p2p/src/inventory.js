@@ -8,14 +8,16 @@ import crypto from 'crypto'
  * @param {*} family: 4 = IPv4-only, 6 = IPv6-only, 0 = either (default).
  */
 export class Peer {
-  constructor({ host, port, httpPort, family = 0 }) {
+  constructor({ host, port, httpPort = null, family = 0 }) {
+    // 增加端口有效性校验
+    if (!host || !port) throw new Error('Invalid peer configuration: host and port are required')
+
     this.id = Peer.getId(`${host}:${port}`)
     this.host = host
     this.port = +port
-    this.httpPort = +httpPort
+    this.httpPort = (httpPort !== null && !isNaN(httpPort)) ? +httpPort : null
     this.family = family
     this.status = Peer.STATUS.ready
-
     this.delay = 0
     this.failCount = 0
   }
@@ -44,11 +46,12 @@ Peer.STATUS = {
   ready: 2
 }
 
-// Peer.FAMILY = {
-//   IPv4: 4,
-//   IPv6: 6,
-//   either: 0,
-// }
+// fixme: 这个属性可能不需要
+Peer.FAMILY = {
+  IPv4: 4,
+  IPv6: 6,
+  either: 0,
+}
 
 /**
  * peer list
@@ -84,11 +87,22 @@ export class Inventory {
   }
 
   add(peer) {
-    this.logger.debug('Adding to inventory, peer is ', peer)
-    if (!this.peers.has(peer.id)) this.peers.set(peer.id, new Peer(peer))
-
-    this.logger.debug('Added to inventory, this.dbfile is ', this.dbfile)
-    fs.writeFileSync(this.dbfile, JSON.stringify([...this.peers.values()]))
+    try {
+      this.logger.debug('Adding to inventory, peer is ', peer)
+      if (!this.peers.has(peer.id)) {
+        // 确保创建新Peer时包含所有必要字段
+        const newPeer = new Peer({
+          host: peer.host,
+          port: peer.port,
+          httpPort: peer.httpPort || null,
+          family: peer.family || Peer.FAMILY.either
+        })
+        this.peers.set(peer.id, newPeer)
+      }
+      this._persistPeers()
+    } catch (err) {
+      this.logger.error('Failed to add peer:', err)
+    }
   }
 
   update(id, data) {
@@ -113,13 +127,36 @@ export class Inventory {
 
     peer.status = Peer.STATUS.disable
     peer.failCount = +peer.failCount + 1
-    if (peer.failCount > this.tryTimes) {
-      this.logger.debug('exceed max try times, remove the peer:', peer.host, peer.port)
+
+    // 增加强制删除条件：连续失败超过阈值或延迟时间过长
+    if (peer.failCount > this.tryTimes ||
+      (peer.delay > 0 && Date.now() - peer.delay > this.delayTime * 1000 * 3)) {
+      this.logger.debug('Removing problematic peer:', peer.host, peer.port)
       this.remove(id)
       return
     }
 
     peer.delay = Date.now() + this.delayTime * 1000
+    this._persistPeers()
+  }
+
+  // 新增私有方法处理持久化逻辑
+  _persistPeers() {
+    try {
+      const peersData = [...this.peers.values()].map(peer => ({
+        id: peer.id,
+        host: peer.host,
+        port: peer.port,
+        httpPort: peer.httpPort,
+        family: peer.family,
+        status: peer.status,
+        failCount: peer.failCount,
+        delay: peer.delay
+      }))
+      fs.writeFileSync(this.dbfile, JSON.stringify(peersData))
+    } catch (err) {
+      this.logger.error('Failed to persist peers:', err)
+    }
   }
 
   enable(id) {
@@ -147,6 +184,7 @@ export class Inventory {
     const result = []
     this.peers.forEach(peer => {
       if (peer.status !== Peer.STATUS.disable) {
+        // this.logger.debug(` peer is  ${JSON.stringify(peer)}`)
         result.push(peer)
       }
     })
@@ -158,32 +196,42 @@ export class Inventory {
     this.logger.debug('getRandomPeer starting...')
 
     const peers = this.getAllPeers()
+    if (peers.length === 0) {
+      this.logger.debug('No available peers')
+      return null
+    }
     const rnd = Math.floor(Math.random() * peers.length)
     this.logger.debug('Random peer pos: ', rnd, peers.length)
-    return [...peers.values()][rnd]
+    return peers[rnd]
   }
 
+  // 修改addMap方法确保数据完整性
   addMap(id) {
-    const hasPeer = this.peers.has(id)
-    if (hasPeer) {
-      this.peers.forEach(peer => {
-        if (peer.id === id) {
-          peer.status = Peer.STATUS.ready
-          peer.failCount = 0
-          peer.delay = 0
+    try {
+      const hasPeer = this.peers.has(id)
+      if (hasPeer) {
+        const peer = this.peers.get(id)
+        peer.status = Peer.STATUS.ready
+        peer.failCount = 0
+        peer.delay = 0
+      } else {
+        const peers = JSON.parse(fs.readFileSync(this.dbfile))
+        let peer = peers.find(item => item.id === id)
+        if (!peer) {
+          const rnd = Math.floor(Math.random() * peers.length)
+          peer = peers[rnd]
         }
-      })
-    } else {
-      const peers = JSON.parse(fs.readFileSync(this.dbfile))
-      let peer = peers.find(item => item.id === id)
-      // 可能不存在，不存在就随机在库里取一条加入连接池
-      if (!peer) {
-        const rnd = Math.floor(Math.random() * peers.length)
-        peer = peers[rnd]
+        // 确保从数据库加载的peer包含所有必要字段
+        this.peers.set(peer.id, new Peer({
+          host: peer.host,
+          port: peer.port,
+          httpPort: peer.httpPort,
+          family: peer.family
+        }))
       }
-      this.peers.set(peer.id, new Peer(peer))
-      // this.logger.debug('Peer is added to inventory by map, this.dbfile is ', this.dbfile)
-      // fs.writeFileSync(this.dbfile, JSON.stringify([...this.peers.values()]))
+      this._persistPeers()
+    } catch (err) {
+      this.logger.error('Failed to add peer by map:', err)
     }
   }
 
@@ -200,5 +248,134 @@ export class Inventory {
       results.add(peers[rnd])
     }
     return [...results]
+  }
+
+  /**
+   * 检查节点健康状态
+   * @param {string} id 节点ID
+   * @returns {boolean} 是否健康
+   */
+  isHealthy(id) {
+    const peer = this.get(id);
+    if (!peer) return false;
+    return peer.status === Peer.STATUS.ready &&
+      peer.failCount < this.tryTimes &&
+      (peer.delay === 0 || Date.now() < peer.delay);
+  }
+
+  /**
+   * 获取健康节点列表
+   * @returns {Array} 健康节点数组
+   */
+  getHealthyPeers() {
+    const result = [];
+    this.peers.forEach(peer => {
+      if (this.isHealthy(peer.id)) {
+        result.push(peer);
+      }
+    });
+    return result;
+  }
+
+  /**
+   * 获取节点统计信息
+   * @returns {Object} 统计信息对象
+   */
+  getStats() {
+    let total = 0;
+    let ready = 0;
+    let pending = 0;
+    let disabled = 0;
+
+    this.peers.forEach(peer => {
+      total++;
+      if (peer.status === Peer.STATUS.ready) ready++;
+      else if (peer.status === Peer.STATUS.pending) pending++;
+      else disabled++;
+    });
+
+    return {
+      total,
+      ready,
+      pending,
+      disabled,
+      healthRate: total > 0 ? (ready / total).toFixed(2) : 0
+    };
+  }
+
+  /**
+   * 节流式持久化，避免频繁写入
+   */
+  _setupPersistThrottle() {
+    let pending = false
+    return () => {
+      if (!pending) {
+        pending = true
+        setTimeout(() => {
+          this._persistPeersSync()
+          pending = false
+        }, 1000) // 1秒节流
+      }
+    }
+  }
+
+  /**
+   * 改进的随机选择方法，避免短时间内重复选择同一节点
+   * 
+   * const usedIds = new Set(['peer1', 'peer2']);
+   * const randomPeer = inventory.getSmartRandomPeer(usedIds);
+   *
+   * @param {Set} [excludeIds] 需要排除的节点ID集合
+   * @returns {Peer|null} 随机节点
+   */
+  getSmartRandomPeer(excludeIds = new Set()) {
+    const peers = this.getAllPeers()
+      .filter(peer => !excludeIds.has(peer.id));
+
+    if (peers.length === 0) {
+      this.logger.debug('No available peers after exclusion');
+      return null;
+    }
+
+    const rnd = Math.floor(Math.random() * peers.length);
+    return peers[rnd];
+  }
+
+  /**
+   * 获取最可靠的节点（优先选择ready状态的节点）
+   * 
+   * const reliablePeer = inventory.getReliablePeers(1)[0];
+   * 
+   * @param {number} count 需要选择的节点数量
+   * @returns {Array} 可靠节点数组
+   */
+  getReliablePeers(count = 3) {
+    const peers = this.getAllPeers()
+      .sort((a, b) => {
+        // 优先选择ready状态的节点
+        if (a.status === Peer.STATUS.ready && b.status !== Peer.STATUS.ready) return -1;
+        if (a.status !== Peer.STATUS.ready && b.status === Peer.STATUS.ready) return 1;
+        // 其次按失败次数排序
+        return a.failCount - b.failCount;
+      });
+
+    return peers.slice(0, count);
+  }
+
+  /**
+   * 获取优质节点（失败次数少的节点）
+   * 
+   * 获取3个优质节点
+   * const qualityPeers = inventory.getQualityPeers(3);
+   
+   * @param {number} count 需要选择的节点数量
+   * @returns {Array} 优质节点数组
+   */
+  getQualityPeers(count = 3) {
+    const peers = this.getAllPeers()
+      .filter(peer => peer.failCount < this.tryTimes / 2) // 只选择失败次数少于阈值一半的节点
+      .sort((a, b) => a.failCount - b.failCount); // 按失败次数升序排序
+
+    return peers.slice(0, count);
   }
 }

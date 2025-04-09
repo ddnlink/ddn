@@ -221,7 +221,16 @@ class HttpServer {
         port = this.config.port
       }
 
-      this.logger.debug(`${method} ${url} from ${ip}:${port}`)
+      this.logger.debug(`${method} ${url} from ${ip}:${port} with nathash '${headers.nathash}'`)
+
+      // nethash验证
+      if (headers.nethash && headers.nethash !== this.constants.nethash) {
+        return res.json({
+          success: false,
+          error: 'Invalid nethash',
+          expected: this.config.nethash
+        })
+      }
 
       /* Instruct browser to deny display of <frame>, <iframe> regardless of origin.
        *
