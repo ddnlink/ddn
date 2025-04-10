@@ -1,6 +1,6 @@
 // import Buffer from "buffer";
 import Debug from 'debug'
-import { bignumber, assetTypes } from '../utils'
+import { bignumber, assetTypes } from '../../dist/utils'
 import { DdnJS, node } from '../ddn-js'
 
 const debug = Debug('evidence')
@@ -22,26 +22,23 @@ describe('DDN evidence.js', () => {
     const createEvidence = evidence.createEvidence
     let trs = null
 
-    it('should be a function', (done) => {
+    it('should be a function', () => {
       expect(createEvidence).to.be.a('function')
-      done()
     })
 
-    it('should create evidence without second signature', async (done) => {
-      const evidence = {
-        ipid: 'IPIDasdf20180501221md',
-        title: 'Evidencetitle',
-        hash: 'contenthash',
-        author: 'author1',
-        url: 'dat://helloworld/index.html',
-        tags: 'test, article',
-        size: '12',
-        type: 'html'
+    it('should create evidence without second signature', async () => {
+      const evidenceData = {
+        ipid: 'ipid',
+        title: 'title',
+        description: 'description',
+        hash: 'hash',
+        tags: 'tags',
+        type: 0,
+        size: 0,
+        url: 'url'
       }
-      trs = await createEvidence(evidence, 'secret')
-      debug('trs: ', trs)
+      trs = await createEvidence(evidenceData, node.Gaccount.password)
       expect(trs).to.be.ok
-      done()
     })
 
     describe('returned evidence', () => {

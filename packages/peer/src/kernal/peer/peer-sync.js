@@ -220,20 +220,48 @@ class PeerSync {
       blocks = await this.runtime.block._parseObjectFromFullBlocksData(blocks)
 
       for (let j = 0; j < blocks.length; j++) {
-        let block = blocks[j];
-        
-        // 添加高度验证
-        const lastBlock = await this.runtime.block.getLastBlock();
-        if (!bignum.isEqualTo(block.height, bignum.plus(lastBlock.height, '1'))) {
-            this.logger.error(`Block height mismatch: expected ${bignum.plus(lastBlock.height, '1')}, got ${block.height}`);
-            continue; // 跳过这个区块
+        let block = blocks[j]
+
+        // Get last block for validation
+        const lastBlock = this.runtime.block.getLastBlock()
+        if (!lastBlock) {
+          this.logger.error('Failed to get last block')
+          return
         }
-        
+
+        // 尽管本方法从创世区块开始同步，但仍然需要跳过创世区块
+        if (block === this.genesisblock) {
+          this.logger.error(`Invalid block data received from peer ${peerStr}:`, block)
+          continue
+        }
+
+        // 当前块，跳过
+        if (block.previous_block === lastBlock.previous_block && bignum.isEqualTo(block.height, lastBlock.height) && block.id === lastBlock.id) {
+          this.logger.debug(`The received is the current block, do nothing!`)
+          continue
+        }
+
+        const lessThan = bignum.new(block.height).minus(lastBlock.height)
+        this.logger.debug(`Got lastBlock.height = ${lastBlock.height}, block.height = ${block.height}`)
+    
+        if (bignum.isGreaterThanOrEqualTo(lessThan, 3)) {
+          this.logger.info(`Received discontinuous block height ${block.height}`)
+          await this.trySyncBlockData() 
+          return // 从头开始同步
+        }
+
+        // const expectedHeight = bignum.plus(lastBlock.height, 1)
+        // if (bignum.isGreaterThan(bignum.block.height, expectedHeight)) {
+        //   this.logger.info(`Received discontinuous block height ${block.height}`)
+        //   await this.trySyncBlockData() 
+        //   return 
+        // }
+
         try {
           block = await this.runtime.block.objectNormalize(block)
         } catch (e) {
           this.logger.error(`Failed to normalize block, block: ${block ? block.id : 'null'} `, peerStr)
-          return null
+          continue
         }
 
         try {
@@ -247,8 +275,8 @@ class PeerSync {
             j--
             continue
           }
-          this.logger.error(`Block is not valid, ban 60 min, block: ${block ? block.id : 'null'} `, peerStr)
-          return null
+          this.logger.error(`Block is not valid, block: ${block ? block.id : 'null'} `, peerStr)
+          continue
         }
 
         queryBlockId = block.id
@@ -371,7 +399,7 @@ class PeerSync {
     return this.sequence.addAsync(async () => {
       for (let i = 0; i < body.signatures.length; i++) {
         const signature = body.signatures[i];
-        for (let j = 0; j < signature.signatures.length; j++) { 
+        for (let j = 0; j < signature.signatures.length; j++) {
           await this.runtime.multisignature.processSignature({
             signature: signature.signatures[j],
             transaction: signature.transaction
@@ -457,3 +485,4 @@ class PeerSync {
 }
 
 export default PeerSync
+

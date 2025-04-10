@@ -16,12 +16,7 @@ function getBytes (data, skipSignature, skipSecondSignature, skipId) {
 
 // 系统需要 Uint8Array
 function arrayBufferToUnit8Array (byteBuffer) {
-  const unit8Buffer = new Uint8Array(byteBuffer.toArrayBuffer())
-  const buffer = []
-  for (let i = 0; i < unit8Buffer.length; i++) {
-    buffer[i] = unit8Buffer[i]
-  }
-  return Buffer.from(buffer)
+  return new Uint8Array(byteBuffer.toArrayBuffer())
 }
 
 function getBytesTobuffer (data, skipSignature, skipSecondSignature, skipId) {

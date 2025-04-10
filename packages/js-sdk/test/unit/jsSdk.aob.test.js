@@ -7,18 +7,12 @@ import { ACL } from './aob/5.acl'
 const expect = node.expect
 const debug = Debug('debug')
 
-debug('DdnJS.constants.nethash: ', DdnJS.constants.nethash)
+debug('node: ', node)
 debug('node.constants.nethash: ', node.constants.nethash)
 
 async function createTransfer (address, amount, secret) {
   return await DdnJS.transaction.createTransaction(address, amount, null, secret)
 }
-
-// async function createPluginAsset (type, asset, secret, secondSecret) {
-//   return await DdnJS.assetPlugin.createPluginAsset(type, asset, secret, secondSecret)
-// }
-
-jest.setTimeout(30000)
 
 describe('AOB Test', () => {
   // 先创建两个发行商账户

@@ -20,7 +20,7 @@ async function verify (transaction, senderPublicKey) {
   }
 
   const bytes = await getBytes(transaction, true, true)
-  return verifyBytes(bytes, transaction.signature, senderPublicKey)
+  return verifyBytes(new Uint8Array(bytes), transaction.signature, senderPublicKey)
 }
 
 /**
@@ -33,7 +33,7 @@ async function verifySecondSignature (transaction, publicKey) {
     return false
   }
   const bytes = await getBytes(transaction, false, true)
-  return verifyBytes(bytes, transaction.sign_signature, publicKey)
+  return verifyBytes(new Uint8Array(bytes), transaction.sign_signature, publicKey)
 }
 
 export {

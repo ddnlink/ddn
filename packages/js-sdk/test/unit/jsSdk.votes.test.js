@@ -2,7 +2,7 @@
  * passed
  */
 import Debug from 'debug'
-import { bignumber, assetTypes } from '../utils'
+import { bignumber, assetTypes } from '../../dist/utils'
 import { DdnJS, node } from '../ddn-js'
 
 const debug = new Debug('debug')

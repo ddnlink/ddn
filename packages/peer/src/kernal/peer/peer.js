@@ -61,7 +61,7 @@ class Peer {
   }
 
   async getPeers () {
-    return this.p2p.inventory.getAllPeers()
+    return this.p2p.inventory.getHealthyPeers()
   }
 
   /**
@@ -77,6 +77,13 @@ class Peer {
    */
   async syncBlocks () {
     return await PeerSync.singleton(this.ctx).trySyncBlockData()
+  }
+
+  /**
+   * 从指定节点的某个高度同步区块数据
+   */
+  async syncBlocksFromPeer (peer, fromHeight) {
+    return await PeerSync.singleton(this.ctx)._cloneBlocksFromPeer(peer, fromHeight)
   }
 
   async syncSignatures () {

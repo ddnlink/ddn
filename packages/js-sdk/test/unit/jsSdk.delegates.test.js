@@ -3,7 +3,7 @@
  */
 import Debug from 'debug'
 import crypto from 'crypto'
-import { bignumber } from '../utils'
+import { bignumber, assetTypes } from '../../dist/utils'
 import { DdnJS, node } from '../ddn-js'
 
 const debug = Debug('debug')

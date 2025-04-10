@@ -81,8 +81,6 @@
   },
   "dependencies": {
     "@babel/plugin-transform-classes": "^7.10.4",
-    "@ddn/ddn-cli": "2.5.2",
-    "@ddn/js-sdk": "link:packages/js-sdk",
     "@jest/transform": "^29.7.0",
     "@manypkg/cli": "^0.21.4",
     "@types/jest": "^23.3.2",

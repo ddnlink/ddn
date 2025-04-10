@@ -319,9 +319,17 @@ class Block {
 
     try {
       await this.sequence.addAsync(async () => {
-        // 正常的下一个区块
-        if (block.previous_block === this._lastBlock.id &&
-          bignum.isEqualTo(bignum.plus(this._lastBlock.height, 1), block.height)) {
+        // 接受的就是当前块，直接退出
+        if (block.previous_block === this._lastBlock.previous_block && bignum.isEqualTo(block.height, this._lastBlock.height) && block.id === this._lastBlock.id) {
+          this.logger.debug(`The received is the current block, do nothing!`)
+          return
+        }
+
+        // 下一个区块的高度
+        const expectedHeight = bignum.plus(this._lastBlock.height, 1)
+
+        // 正常情况：当前块的前一个块是当前块（lastBlock），并且高度+1
+        if (block.previous_block === this._lastBlock.id && bignum.isEqualTo(block.height, expectedHeight)) {
 
           this.logger.info(
             `Received new block id: ${block.id} height: ${block.height} round: ${await this.runtime.round.getRound(
@@ -333,29 +341,36 @@ class Block {
           return // 显式返回
         }
 
-        // 分叉情况处理
-        if (block.previous_block !== this._lastBlock.id &&
-          bignum.isEqualTo(bignum.plus(this._lastBlock.height, 1), block.height)) {
+        // 分叉情况1: 高度+1了，但是前一个块不是当前块
+        if (block.previous_block !== this._lastBlock.id && bignum.isEqualTo(block.height, expectedHeight)) {
           await this.handleFork(block, 1)
-          throw new Error('Fork:1') // 明确分叉类型
+          throw new Error('Fork:1') 
         }
 
-        if (block.previous_block === this._lastBlock.previous_block &&
-          bignum.isEqualTo(block.height, this._lastBlock.height) &&
-          block.id !== this._lastBlock.id) {
+        // 分叉情况2: 高度一样，前一个块是当前块的前一块，但是与当前块的id却不一样（说明不是同一个块）
+        if (block.previous_block === this._lastBlock.previous_block && bignum.isEqualTo(block.height, this._lastBlock.height) && block.id !== this._lastBlock.id) {
           await this.handleFork(block, 2)
-          throw new Error('Fork:2') // 明确分叉类型
+          throw new Error('Fork:2') 
         }
 
-        // 区块高度不连续
-        if (bignum.isGreaterThan(block.height, bignum.plus(this._lastBlock.height, 1))) {
+        // 分叉情况3: 区块高度不连续，或者说远大于+1的情况
+        if (bignum.isGreaterThan(block.height, expectedHeight)) {
           this.logger.info(`Received discontinuous block height ${block.height}`)
           await this.startSync(this._lastBlock.height)
           return // 显式返回
         }
 
+        this.logger.debug(`block.height: ${block.height}`)
+        this.logger.debug(`expectedHeight: ${expectedHeight}`)
+        this.logger.debug(`block.previous_block: ${block.previous_block}`)
+        this.logger.debug(`this._lastBlock.previous_block: ${this._lastBlock.previous_block}`)
+        this.logger.debug(`block.id: ${block.id}`)
+        this.logger.debug(`this._lastBlock.id: ${this._lastBlock.id}`)
+        this.logger.error(`Invalid block state: ${block.id} height: ${block.height}, previous_block: ${block.previous_block}, lastBlock: ${this._lastBlock.height}`)
+
         // 如果都不满足以上条件，说明区块无效
-        throw new Error('Invalid block state')
+        // throw new Error('Invalid block state')
+        return
       })
     } catch (err) {
       if (!err.message.startsWith('Fork:')) { // 更精确的错误判断
@@ -1651,7 +1666,7 @@ class Block {
       // 从其他节点同步区块
       for (const peer of peers) {
         try {
-          await this.runtime.loader.loadBlocksFromPeer(peer, fromHeight)
+          await this.runtime.peer.syncBlocksFromPeer(peer, fromHeight) 
           break
         } catch (err) {
           this.logger.warn(`Failed to sync blocks from peer ${peer.ip}:${peer.port}:`, err)

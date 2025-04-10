@@ -1,6 +1,6 @@
 import Debug from 'debug'
-import { bignumber, assetTypes } from '../utils'
-import { DdnJS, node } from '../ddn-js'
+import { bignumber, assetTypes } from '../../../dist/utils'
+import { DdnJS, node } from '../../ddn-js'
 
 const debug = Debug('debug')
 const expect = node.expect

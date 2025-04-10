@@ -12,7 +12,7 @@ import { getBytes } from './bytes'
  */
 async function getId (transaction) {
   const hash = await getHash(transaction)
-  return hash.toString('hex')
+  return Buffer.from(hash).toString('hex')
 }
 
 // 兼容处理
@@ -38,7 +38,9 @@ function getKeys (secret) {
  */
 async function sign (transaction, { privateKey }) {
   const hash = await getHash(transaction, true, true)
-  const signature = nacl.sign.detached(hash, Buffer.from(privateKey, 'hex'))
+  const privateKeyBuffer = Buffer.from(privateKey, 'hex')
+  const hashBuffer = new Uint8Array(hash)
+  const signature = nacl.sign.detached(hashBuffer, new Uint8Array(privateKeyBuffer))
 
   return bufToHex(signature)
 }
@@ -50,7 +52,9 @@ async function sign (transaction, { privateKey }) {
  * @param {object} param1 keypair.privateKey
  */
 function signWithHash (hash, { privateKey }) {
-  const signature = nacl.sign.detached(hash, Buffer.from(privateKey, 'hex'))
+  const privateKeyBuffer = Buffer.from(privateKey, 'hex')
+  const hashBuffer = new Uint8Array(hash)
+  const signature = nacl.sign.detached(hashBuffer, new Uint8Array(privateKeyBuffer))
   return bufToHex(signature)
 }
 
@@ -62,7 +66,9 @@ function signWithHash (hash, { privateKey }) {
  */
 async function secondSign (transaction, { privateKey }) {
   const hash = await getHash(transaction, false, true)
-  const signature = nacl.sign.detached(hash, Buffer.from(privateKey, 'hex'))
+  const privateKeyBuffer = Buffer.from(privateKey, 'hex')
+  const hashBuffer = new Uint8Array(hash)
+  const signature = nacl.sign.detached(hashBuffer, new Uint8Array(privateKeyBuffer))
   return bufToHex(signature)
 }
 
@@ -74,22 +80,24 @@ async function secondSign (transaction, { privateKey }) {
  */
 function verifyBytes (bytes, signature, publicKey) {
   // 保证字节类型
-  if (!(bytes instanceof Buffer)) {
-    bytes = Buffer.from(bytes)
+  if (!(bytes instanceof Uint8Array)) {
+    bytes = new Uint8Array(Buffer.from(bytes))
   }
 
   const hash = createHash(bytes)
+  const hashBuffer = new Uint8Array(hash)
 
-  const signatureBuffer = Buffer.from(signature, 'hex')
-  const publicKeyBuffer = Buffer.from(publicKey, 'hex')
-  const res = nacl.sign.detached.verify(hash, signatureBuffer, publicKeyBuffer)
+  const signatureBuffer = new Uint8Array(Buffer.from(signature, 'hex'))
+  const publicKeyBuffer = new Uint8Array(Buffer.from(publicKey, 'hex'))
+  const res = nacl.sign.detached.verify(hashBuffer, signatureBuffer, publicKeyBuffer)
   return res
 }
 
 function verifyHash (hash, signature, publicKey) {
-  const signatureBuffer = Buffer.from(signature, 'hex')
-  const publicKeyBuffer = Buffer.from(publicKey, 'hex')
-  const res = nacl.sign.detached.verify(hash, signatureBuffer, publicKeyBuffer)
+  const signatureBuffer = new Uint8Array(Buffer.from(signature, 'hex'))
+  const publicKeyBuffer = new Uint8Array(Buffer.from(publicKey, 'hex'))
+  const hashBuffer = new Uint8Array(hash)
+  const res = nacl.sign.detached.verify(hashBuffer, signatureBuffer, publicKeyBuffer)
   return res
 }
 
@@ -114,7 +122,10 @@ function getHash (trs, skipSignature, skipSecondSignature, skipId) {
  * @param {String}  data 需要 hash 的数据，格式为 unit8Arrary, 这里的方法与 crypto.createHash('sha256').update(strBuffer).digest() 相似，结果不同
  */
 function createHash (data) {
-  // console.log(nacl.hash(data),sha256(data))
+  // 确保输入是 Uint8Array 类型
+  if (!(data instanceof Uint8Array)) {
+    data = new Uint8Array(Buffer.from(data))
+  }
   return Buffer.from(sha256(data))
 }
 

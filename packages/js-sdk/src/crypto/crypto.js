@@ -6,8 +6,8 @@ export const toLocalBuffer = (buf) => {
 }
 
 export const signBytes = (bytes, { privateKey }) => {
-    const hash = crypto.createHash(Buffer.from(bytes, 'hex'))
-    const signature = nacl.sign.detached(hash, Buffer.from(privateKey, 'hex'))
+    const hash = crypto.createHash('sha256').update(bytes).digest();
+    const signature = nacl.sign.detached(new Uint8Array(hash), new Uint8Array(Buffer.from(privateKey, 'hex')));
     return Buffer.from(signature).toString('hex')
 }
 

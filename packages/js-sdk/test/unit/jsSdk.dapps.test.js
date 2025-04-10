@@ -1,11 +1,11 @@
 
 // passed
 import Debug from 'debug'
-import { bignumber, assetTypes } from '../utils'
+import { bignumber, assetTypes } from '../../dist/utils'
+import { DdnJS, node } from '../ddn-js'
 import { Transfer } from './dapp/transfer'
-import { node } from '../ddn-js'
 
-const debug = Debug('debug')
+const debug = Debug('debug')  
 
 const dappDemo = {
   icon: 'http://ebookchain.org/static/media/logo.5e78d8c2.png',
