@@ -2,7 +2,7 @@
 
 # Default settings
 BASE_PORT=8001
-PEER_COUNT=3
+PEER_COUNT=5
 SPECIFIC_PEER=""
 SPECIFIC_PORT=""
 
@@ -10,7 +10,7 @@ SPECIFIC_PORT=""
 show_help() {
     echo "Usage: $0 [options]"
     echo "Options:"
-    echo "  -n <number>    Number of peers to shutdown (default: 3)"
+    echo "  -n <number>    Number of peers to shutdown (default: 5)"
     echo "  -p <name>     Specific peer name to shutdown (e.g., peer-8001)"
     echo "  -h            Show this help message"
 }

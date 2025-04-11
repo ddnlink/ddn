@@ -46,7 +46,8 @@
   "scripts": {
     "build": "father build",
     "dev": "father dev",
-    "test": "jest"
+    "test": "jest",
+    "publish": "pnpm publish --no-git-checks --access public"
   },
   "dependencies": {
     "@ddn/asset-aob": "workspace:^",

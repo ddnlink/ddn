@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Default settings
-PEER_COUNT=3
+PEER_COUNT=5
 TEMPLATE_DIR="../../examples/fun-tests" # 主网使用 main-tests 模板
 BASE_PORT=8001
 P2P_BASE_PORT=9001
@@ -16,7 +16,7 @@ SPECIFIC_PEER=""
 show_help() {
     echo "Usage: $0 [options]"
     echo "Options:"
-    echo "  -n <number>    Number of peers to start (default: 3)"
+    echo "  -n <number>    Number of peers to start (default: 5)"
     echo "  -p <name>     Specific peer name to start (e.g., peer-8001 or 8001)"
     echo "  -m <network>  Network type (mainnet) to use main-tests template"
     echo "  -s <number>    Total number of secrets (default: 101)"

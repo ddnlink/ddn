@@ -1,6 +1,6 @@
 #!/bin/bash
 
-PEER_COUNT=3
+PEER_COUNT=5
 BASE_PORT=8001
 
 check_peer_status() {

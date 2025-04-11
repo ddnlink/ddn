@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # 默认设置
-PEER_COUNT=3
+PEER_COUNT=5
 BASE_PORT=8001
 CLEAN_TYPE="all"
 CLEAN_FILE=""
@@ -10,7 +10,7 @@ CLEAN_FILE=""
 show_help() {
     echo "用法: $0 [选项]"
     echo "选项:"
-    echo "  -n <数字>     要清理的节点数量 (默认: 3)"
+    echo "  -n <数字>     要清理的节点数量 (默认: 5)"
     echo "  -t <类型>     清理类型 (db|log|all, 默认: all)"
     echo "  -f <文件名>   指定要清理的文件 (debug|dvm|main|blockchain|peer)"
     echo "  -h           显示帮助信息"
