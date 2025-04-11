@@ -442,16 +442,26 @@ class Program {
 
       // 执行区块同步
       this.ctx.logger.info(`Starting block sync with peer ${peer.host}:${peer.port}`)
-      const success = await this.ctx.runtime.peer.syncBlocks()
+      const result = await this.ctx.runtime.peer.syncBlocks()
 
-      if (success) {
+      if (result) {
         this.ctx.logger.info('Block synchronization completed successfully')
         await this._blockchainReady()
         next(5) // 成功后可以稍微减少同步频率
       } else {
-        this.ctx.logger.warn('Block synchronization failed, changing state to pending')
-        this.ctx.runtime.stateMachine.transitionToPending()
-        next(15) // 失败后增加延迟，避免频繁重试
+        // 同步失败计数器
+        this._syncFailCount = (this._syncFailCount || 0) + 1
+
+        // 如果连续失败超过三次，才转换到 pending 状态
+        if (this._syncFailCount >= 3) {
+          this.ctx.logger.warn(`Block synchronization failed ${this._syncFailCount} times, changing state to pending`)
+          this.ctx.runtime.stateMachine.transitionToPending()
+          this._syncFailCount = 0 // 重置计数器
+          next(15) // 失败后增加延迟，避免频繁重试
+        } else {
+          this.ctx.logger.warn(`Block synchronization failed (attempt ${this._syncFailCount}), retrying...`)
+          next(5) // 尝试失败后稍微等待再重试
+        }
       }
     } catch (err) {
       this.ctx.logger.error(`Block sync task error: ${err.message || err}`)

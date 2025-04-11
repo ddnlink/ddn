@@ -344,13 +344,13 @@ class Block {
         // 分叉情况1: 高度+1了，但是前一个块不是当前块
         if (block.previous_block !== this._lastBlock.id && bignum.isEqualTo(block.height, expectedHeight)) {
           await this.handleFork(block, 1)
-          throw new Error('Fork:1') 
+          throw new Error('Fork:1')
         }
 
         // 分叉情况2: 高度一样，前一个块是当前块的前一块，但是与当前块的id却不一样（说明不是同一个块）
         if (block.previous_block === this._lastBlock.previous_block && bignum.isEqualTo(block.height, this._lastBlock.height) && block.id !== this._lastBlock.id) {
           await this.handleFork(block, 2)
-          throw new Error('Fork:2') 
+          throw new Error('Fork:2')
         }
 
         // 分叉情况3: 区块高度不连续，或者说远大于+1的情况
@@ -530,7 +530,8 @@ class Block {
 
   async _applyTransactions(transactions, block, dbTrans) {
     const applyedTrsIdSet = new Set();
-    
+    const failedTransactions = [];
+
     for (let i = 0; i < transactions.length; i++) {
       const transaction = transactions[i];
       const updatedAccountInfo = await this.runtime.account.setAccount(
@@ -540,20 +541,36 @@ class Block {
         },
         dbTrans
       );
-      
+
       const accountInfo = await this.runtime.account.getAccountByAddress(updatedAccountInfo.address, dbTrans);
       const newAccountInfo = Object.assign({}, accountInfo, updatedAccountInfo);
 
       try {
         await this.runtime.transaction.applyUnconfirmed(transaction, newAccountInfo, dbTrans);
         await this.runtime.transaction.apply(transaction, block, newAccountInfo, dbTrans);
+        applyedTrsIdSet.add(transaction.id);
       } catch (err) {
-        this.logger.error(`Apply unconfirmed ${err.toString()}`);
-        throw new Error(`Apply unconfirmed ${err.toString()}`);
+        // 检查是否是交易已确认的错误
+        if (err.toString().includes('The transaction has been confirmed')) {
+          this.logger.warn(`Transaction ${transaction.id} has already been confirmed, continuing with block processing`);
+          applyedTrsIdSet.add(transaction.id);
+        } else {
+          this.logger.error(`Failed to apply transaction ${transaction.id}: ${err.toString()}`);
+          failedTransactions.push({
+            id: transaction.id,
+            error: err.toString()
+          });
+          // 不抛出错误，继续处理其他交易
+        }
       } finally {
         await this.runtime.transaction.removeUnconfirmedTransaction(transaction.id);
-        applyedTrsIdSet.add(transaction.id);
       }
+    }
+
+    // 如果有失败的交易，记录日志但不中断区块应用
+    if (failedTransactions.length > 0) {
+      this.logger.warn(`Block ${block.id} applied with ${failedTransactions.length} failed transactions`);
+      this.logger.debug('Failed transactions:', failedTransactions);
     }
 
     return applyedTrsIdSet;
@@ -1666,7 +1683,7 @@ class Block {
       // 从其他节点同步区块
       for (const peer of peers) {
         try {
-          await this.runtime.peer.syncBlocksFromPeer(peer, fromHeight) 
+          await this.runtime.peer.syncBlocksFromPeer(peer, fromHeight)
           break
         } catch (err) {
           this.logger.warn(`Failed to sync blocks from peer ${peer.ip}:${peer.port}:`, err)

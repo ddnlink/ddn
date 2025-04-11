@@ -885,7 +885,9 @@ class AssetBase {
     const key = `${type}_${id}`
 
     if (this.oneoff.has(key)) {
-      throw new Error(`The transaction has been confirmed: ${id}.`)
+      // 不抛出错误，而是记录警告并继续执行
+      this.logger.warn(`Transaction ${id} has already been confirmed, but continuing processing.`)
+      return true
     }
 
     this.oneoff.set(key, true)

@@ -335,8 +335,27 @@ class PeerSync {
 
           // 检查 syncLastBlock 是否为 null
           if (syncLastBlock === null) {
-            this.logger.warn('Failed to sync blocks: syncLastBlock is null')
-            return false
+            this.logger.warn('Failed to sync blocks: syncLastBlock is null, attempting recovery...')
+
+            // 尝试从当前区块高度开始重新同步
+            try {
+              // 清理缓存和未确认交易
+              this.oneoff.clear()
+              await this.runtime.transaction.undoUnconfirmedList()
+
+              // 从当前区块高度重新同步
+              syncLastBlock = await this._cloneBlocksFromPeer(res.peer, lastBlock.id)
+
+              if (syncLastBlock === null) {
+                this.logger.error('Recovery attempt failed, still unable to sync blocks')
+                return false
+              }
+
+              this.logger.info('Recovery successful, blocks synchronized')
+            } catch (err) {
+              this.logger.error(`Recovery attempt failed: ${err.message || err}`)
+              return false
+            }
           }
 
           this.logger.debug(`Got syncLastBlock height: ${syncLastBlock ? syncLastBlock.height : 'undefined'}`)
