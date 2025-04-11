@@ -225,7 +225,7 @@ class Program {
     await this._init(options)
     // 配置加載完成回調函數
     await this._configLoaded()
-    
+
     // 文件锁，保证系统只能运行一份
     this._checkProcessState()
 
@@ -250,7 +250,7 @@ class Program {
     await ctx.runtime.dvm.run()
     // dvm 就绪回調函數
     this._dvmReady()
-    
+
     // 初始化创世区块
     await ctx.runtime.block.handleGenesisBlock()
 
@@ -389,59 +389,75 @@ class Program {
    * 同步节点区块数据（轮询）
    */
   async startBlockDataSyncTask() {
-    this.ctx.logger.warn('startBlockDataSyncTask enter...')
-    const next = () => {
+    this.ctx.logger.debug('startBlockDataSyncTask enter...')
+
+    // 定义下一次同步的调度函数
+    const next = (delay = 10) => {
       setTimeout(() => {
         this.startBlockDataSyncTask()
-      }, 1000 * 10)
+      }, 1000 * delay) // 默认10秒，可以根据情况调整延迟
     }
+
+    // 获取对等节点
     const peer = await this.ctx.runtime.peer.getPeer()
-    this.ctx.logger.warn('startBlockDataSyncTask get peer: ', peer)
     if (!peer) {
-      this.ctx.logger.debug("Change state to 'ready'")
+      this.ctx.logger.debug("No available peers, change state to 'ready'")
       if (!this.ctx.runtime.stateMachine.isReady()) {
         await this._blockchainReady()
       }
-      // this.ctx.runtime.stateMachine.transitionTo('Ready')
-      // await this._blockchainReady()
       next()
       return
     }
 
     try {
+      // 如果已经在同步中，避免重复同步
       if (this.ctx.runtime.stateMachine.isSyncing()) {
+        this.ctx.logger.debug('Already syncing, skip this round')
         next()
         return
       }
 
       const lastBlock = this.ctx.runtime.block.getLastBlock()
       const lastSlot = this.ctx.runtime.slot.getSlotNumber(lastBlock.timestamp)
+      const nextSlot = this.ctx.runtime.slot.getNextSlot()
+      const slotDiff = nextSlot - lastSlot
 
       this.ctx.logger.debug('startBlockDataSyncTask state: ', {
         state: this.ctx.runtime.stateMachine.current,
         loaded: this.ctx.runtime.loaded,
         lastSlot,
-        getNextSlot: this.ctx.runtime.slot.getNextSlot()
+        nextSlot,
+        slotDiff
       })
 
-      if (this.ctx.runtime.slot.getNextSlot() - lastSlot < 3) {
+      // 只有当时间槽差异足够大时才进行同步
+      if (slotDiff < 3) {
+        this.ctx.logger.debug(`Slot difference (${slotDiff}) too small, skip sync`)
         next()
         return
       }
+
+      // 转换状态为同步中
       this.ctx.runtime.stateMachine.transitionTo('Syncing')
+
+      // 执行区块同步
+      this.ctx.logger.info(`Starting block sync with peer ${peer.host}:${peer.port}`)
       const success = await this.ctx.runtime.peer.syncBlocks()
 
       if (success) {
+        this.ctx.logger.info('Block synchronization completed successfully')
         await this._blockchainReady()
+        next(5) // 成功后可以稍微减少同步频率
       } else {
-        this.ctx.logger.debug('SyncBlocks doesnt complete, and change state to pending.')
+        this.ctx.logger.warn('Block synchronization failed, changing state to pending')
         this.ctx.runtime.stateMachine.transitionToPending()
+        next(15) // 失败后增加延迟，避免频繁重试
       }
     } catch (err) {
-      this.ctx.logger.error('The block sync task error: ' + err)
-      // this.ctx.runtime.stateMachine.transitionToPending()
+      this.ctx.logger.error(`Block sync task error: ${err.message || err}`)
+      this.ctx.runtime.stateMachine.transitionToPending()
+      next(20) // 错误后增加更长的延迟
     }
-    next()
   }
 
   // 添加状态监控

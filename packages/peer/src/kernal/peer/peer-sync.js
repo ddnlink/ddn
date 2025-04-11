@@ -241,21 +241,23 @@ class PeerSync {
           continue
         }
 
-        const lessThan = bignum.new(block.height).minus(lastBlock.height)
+        const heightDiff = bignum.new(block.height).minus(lastBlock.height)
         this.logger.debug(`Got lastBlock.height = ${lastBlock.height}, block.height = ${block.height}`)
-    
-        if (bignum.isGreaterThanOrEqualTo(lessThan, 3)) {
-          this.logger.info(`Received discontinuous block height ${block.height}`)
-          await this.trySyncBlockData() 
-          return // 从头开始同步
+
+        if (bignum.isGreaterThanOrEqualTo(heightDiff, 3)) {
+          this.logger.info(`Received discontinuous block height ${block.height}, difference: ${heightDiff}`)
+          // 不要递归调用 trySyncBlockData，而是返回 null 表示需要重新同步
+          return null
         }
 
-        // const expectedHeight = bignum.plus(lastBlock.height, 1)
-        // if (bignum.isGreaterThan(bignum.block.height, expectedHeight)) {
-        //   this.logger.info(`Received discontinuous block height ${block.height}`)
-        //   await this.trySyncBlockData() 
-        //   return 
-        // }
+        // 检查区块高度是否连续
+        const expectedHeight = bignum.plus(lastBlock.height, 1).toString()
+        if (block.height !== expectedHeight) {
+          this.logger.info(`Expected block height ${expectedHeight}, but got ${block.height}`)
+          return null
+        }
+
+        // 已移动到上面并修改
 
         try {
           block = await this.runtime.block.objectNormalize(block)
@@ -292,59 +294,75 @@ class PeerSync {
    * 从随机节点同步区块数据
    */
   async trySyncBlockData() {
-    let res = await this.runtime.peer.p2p.get('/height')
-    if (!res) {
-      return false
-    }
-
-    if (res && res.body) {
-      const validateErrors = await this.ddnSchema.validate(
-        {
-          type: 'object',
-          properties: {
-            height: {
-              type: 'string'
-            }
-          },
-          required: ['height']
-        },
-        res.body
-      )
-      if (validateErrors) {
-        this.logger.error(
-          `Failed to parse blockchain height: ${validateErrors[0].schemaPath} ${validateErrors[0].message}`
-        )
-        // 2020.8.28 添加返回结果
+    try {
+      let res = await this.runtime.peer.p2p.get('/height')
+      if (!res) {
+        this.logger.error('Failed to get height: No response')
         return false
       }
 
-      const lastBlock = this.runtime.block.getLastBlock()
-      if (bignum.isLessThan(lastBlock.height, res.body.height)) {
-        let syncLastBlock = null
-
-        this.logger.debug(`Got lastBlock height is ${lastBlock.height}`)
-        if (lastBlock.id !== this.genesisblock.id) {
-          this.logger.debug('Must get syncLastBlock')
-          syncLastBlock = await this._addLackBlocks(res.peer, lastBlock)
-        } else {
-          syncLastBlock = await this._cloneBlocksFromPeer(res.peer, lastBlock.id)
+      if (res && res.body) {
+        const validateErrors = await this.ddnSchema.validate(
+          {
+            type: 'object',
+            properties: {
+              height: {
+                type: 'string'
+              }
+            },
+            required: ['height']
+          },
+          res.body
+        )
+        if (validateErrors) {
+          this.logger.error(
+            `Failed to parse blockchain height: ${validateErrors[0].schemaPath} ${validateErrors[0].message}`
+          )
+          return false
         }
-        this.logger.debug(`Got syncLastBlock: ${syncLastBlock}`)
-        if (syncLastBlock) {
-          res = await this.runtime.peer.p2p.get('/height')
-          if (res && res.body && bignum.new(syncLastBlock.height).eq(res.body.height)) {
-            return true
+
+        const lastBlock = this.runtime.block.getLastBlock()
+        if (bignum.isLessThan(lastBlock.height, res.body.height)) {
+          let syncLastBlock = null
+
+          this.logger.debug(`Got lastBlock height is ${lastBlock.height}, remote height is ${res.body.height}`)
+          if (lastBlock.id !== this.genesisblock.id) {
+            this.logger.debug('Must get syncLastBlock')
+            syncLastBlock = await this._addLackBlocks(res.peer, lastBlock)
           } else {
+            syncLastBlock = await this._cloneBlocksFromPeer(res.peer, lastBlock.id)
+          }
+
+          // 检查 syncLastBlock 是否为 null
+          if (syncLastBlock === null) {
+            this.logger.warn('Failed to sync blocks: syncLastBlock is null')
+            return false
+          }
+
+          this.logger.debug(`Got syncLastBlock height: ${syncLastBlock ? syncLastBlock.height : 'undefined'}`)
+
+          if (syncLastBlock) {
+            res = await this.runtime.peer.p2p.get('/height')
+            if (res && res.body && bignum.new(syncLastBlock.height).eq(res.body.height)) {
+              return true
+            } else {
+              this.logger.debug(`Height mismatch after sync: local=${syncLastBlock.height}, remote=${res.body ? res.body.height : 'unknown'}`)
+              return false
+            }
+          } else {
+            this.logger.warn('Failed to sync blocks: syncLastBlock is falsy')
             return false
           }
         } else {
-          return false
+          this.logger.debug(`No need to sync: local height ${lastBlock.height} >= remote height ${res.body.height}`)
+          return true
         }
       } else {
-        return true
+        this.logger.error('Failed to get height from remote peer: No body in response')
+        return false
       }
-    } else {
-      this.logger.error('Failed to get height from remote peer')
+    } catch (error) {
+      this.logger.error(`Error in trySyncBlockData: ${error.message || error}`)
       return false
     }
   }
