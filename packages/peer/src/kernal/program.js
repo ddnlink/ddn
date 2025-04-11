@@ -1,3 +1,4 @@
+
 /**
  * 主程序
  * wangxm   2018-12-27
@@ -447,7 +448,7 @@ class Program {
       if (result) {
         this.ctx.logger.info('Block synchronization completed successfully')
         await this._blockchainReady()
-        next(5) // 成功后可以稍微减少同步频率
+        next(15) // 成功后可以稍微减少同步频率
       } else {
         // 同步失败计数器
         this._syncFailCount = (this._syncFailCount || 0) + 1
@@ -457,7 +458,7 @@ class Program {
           this.ctx.logger.warn(`Block synchronization failed ${this._syncFailCount} times, changing state to pending`)
           this.ctx.runtime.stateMachine.transitionToPending()
           this._syncFailCount = 0 // 重置计数器
-          next(15) // 失败后增加延迟，避免频繁重试
+          next(20) // 失败后增加延迟，避免频繁重试
         } else {
           this.ctx.logger.warn(`Block synchronization failed (attempt ${this._syncFailCount}), retrying...`)
           next(5) // 尝试失败后稍微等待再重试
@@ -465,8 +466,20 @@ class Program {
       }
     } catch (err) {
       this.ctx.logger.error(`Block sync task error: ${err.message || err}`)
-      this.ctx.runtime.stateMachine.transitionToPending()
-      next(20) // 错误后增加更长的延迟
+      
+      // 使用与正常流程相同的失败计数逻辑
+      this._syncFailCount = (this._syncFailCount || 0) + 1
+      
+      if (this._syncFailCount >= 3) {
+        this.ctx.logger.warn(`Block synchronization failed ${this._syncFailCount} times due to error, changing state to pending`)
+        this.ctx.runtime.stateMachine.transitionToPending()
+        this._syncFailCount = 0 // 重置计数器
+        next(20) // 错误后增加更长的延迟
+      } else {
+        this.ctx.logger.warn(`Block synchronization error (attempt ${this._syncFailCount}), will retry...`)
+        next(5) // 尝试失败后稍微等待再重试
+      }
+      
     }
   }
 
