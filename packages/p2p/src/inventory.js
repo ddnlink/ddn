@@ -1,4 +1,5 @@
 import fs from 'fs'
+import path from 'path'
 import crypto from 'crypto'
 /**
  * p2p peer
@@ -8,18 +9,40 @@ import crypto from 'crypto'
  * @param {*} family: 4 = IPv4-only, 6 = IPv6-only, 0 = either (default).
  */
 export class Peer {
-  constructor({ host, port, httpPort = null, family = 0 }) {
-    // 增加端口有效性校验
-    if (!host || !port) throw new Error('Invalid peer configuration: host and port are required')
+  /**
+   * 创建一个新的 Peer 实例
+   * @param {Object} peerInfo - 节点信息对象
+   */
+  constructor(peerInfo) {
+    // 确保参数是一个对象
+    const peer = typeof peerInfo === 'object' ? peerInfo : {};
+    const { host, port, httpPort = 8000, family = 0 } = peer;
 
-    this.id = Peer.getId(`${host}:${port}`)
-    this.host = host
-    this.port = +port
-    this.httpPort = (httpPort !== null && !isNaN(httpPort)) ? +httpPort : null
-    this.family = family
-    this.status = Peer.STATUS.ready
-    this.delay = 0
-    this.failCount = 0
+    // 基本验证
+    if (!host || !port) {
+      throw new Error('Invalid peer configuration: host and port are required');
+    }
+
+    // 设置基本属性
+    this.host = host;
+    this.ip = peer.ip || host; // 兼容性处理
+
+    // 保持 port 的原始格式
+    this.port = typeof port === 'string' ? port : String(port);
+
+    // 处理 httpPort，确保存在且有效
+    this.httpPort = typeof httpPort === 'string' ? httpPort : String(httpPort);
+
+    // 设置其他属性
+    this.family = family;
+
+    // 设置状态，默认为 ready
+    this.status = peer.status !== undefined ? peer.status : Peer.STATUS.ready;
+    this.delay = peer.delay !== undefined ? peer.delay : 0;
+    this.failCount = peer.failCount !== undefined ? peer.failCount : 0;
+
+    // 生成唯一 ID
+    this.id = Peer.getId(`${this.host}:${this.port}`)
   }
 
   static getId(data) {
@@ -69,12 +92,37 @@ export class Inventory {
     this.dbfile = options.dbfile || '../peer.db'
     this.logger = options.logger || console
 
-    if (fs.existsSync(this.dbfile)) {
-      const peers = JSON.parse(fs.readFileSync(this.dbfile))
-      this.logger.debug('Peer is loaded from inventory, current dbfile is ', this.dbfile)
-      for (const peer of peers) {
-        this.peers.set(peer.id, peer)
+    // 确保目录存在
+    const dbDir = path.dirname(this.dbfile)
+    if (!fs.existsSync(dbDir)) {
+      try {
+        fs.mkdirSync(dbDir, { recursive: true })
+        this.logger.debug(`Created directory for peer database: ${dbDir}`)
+      } catch (err) {
+        this.logger.error(`Failed to create directory for peer database: ${dbDir}`, err)
       }
+    }
+
+    // 加载现有的 peers
+    if (fs.existsSync(this.dbfile)) {
+      try {
+        const data = fs.readFileSync(this.dbfile, 'utf8')
+        if (data && data.trim()) {
+          const peers = JSON.parse(data)
+          this.logger.debug(`Loaded ${peers.length} peers from inventory, current dbfile is ${this.dbfile}`)
+          for (const peer of peers) {
+            this.peers.set(peer.id, peer)
+          }
+        } else {
+          this.logger.debug(`Peer database file exists but is empty: ${this.dbfile}`)
+        }
+      } catch (err) {
+        this.logger.error(`Failed to load peer database: ${this.dbfile}`, err)
+      }
+    } else {
+      this.logger.debug(`Peer database file does not exist, will be created: ${this.dbfile}`)
+      // 初始化空数据库文件
+      this._persistPeers()
     }
   }
 
@@ -86,29 +134,71 @@ export class Inventory {
     return this.peers.get(id)
   }
 
-  add(peer) {
+  /**
+   * 添加新节点到库存中
+   * @param {Object} peerInfo - 节点信息
+   */
+  add(peerInfo) {
     try {
-      this.logger.debug('Adding to inventory, peer is ', peer)
-      if (!this.peers.has(peer.id)) {
-        // 确保创建新Peer时包含所有必要字段
-        const newPeer = new Peer({
-          host: peer.host,
-          port: peer.port,
-          httpPort: peer.httpPort || null,
-          family: peer.family || Peer.FAMILY.either
-        })
-        this.peers.set(peer.id, newPeer)
+      this.logger.debug('Adding to inventory, peer is ', peerInfo)
+
+      // 如果节点不存在，创建新节点
+      if (!this.peers.has(peerInfo.id)) {
+        // 创建新的 Peer 实例，使用完整的 peerInfo 对象
+        const newPeer = new Peer(peerInfo);
+        this.peers.set(newPeer.id, newPeer);
+        this.logger.debug(`Added new peer ${newPeer.host}:${newPeer.port} with httpPort ${newPeer.httpPort}`);
+      } else {
+        // 如果节点已存在，更新其信息
+        const existingPeer = this.peers.get(peerInfo.id);
+
+        // 更新 httpPort，如果它不存在或为 null
+        if ((!existingPeer.httpPort || existingPeer.httpPort === null) && peerInfo.httpPort) {
+          this.update(peerInfo.id, { httpPort: peerInfo.httpPort });
+        }
       }
+
+      // 持久化更新
       this._persistPeers()
     } catch (err) {
       this.logger.error('Failed to add peer:', err)
     }
   }
 
+  /**
+   * 更新节点信息
+   * @param {string} id - 节点ID
+   * @param {Object} data - 要更新的数据
+   */
   update(id, data) {
     const peer = this.peers.get(id)
-    for (const key of data) {
-      peer[key] = data[key]
+    if (!peer) return;
+
+    let modified = false;
+
+    // 使用 Object.entries 处理所有属性
+    for (const [key, value] of Object.entries(data)) {
+      // 特殊处理 httpPort
+      if (key === 'httpPort' && value !== undefined && value !== null) {
+        // 确保 httpPort 是字符串格式
+        const portStr = String(value);
+        const isValidPort = /^\d+$/.test(portStr) && Number(portStr) > 0;
+
+        if (isValidPort && peer[key] !== portStr) {
+          peer[key] = portStr;
+          modified = true;
+          this.logger.debug(`Updated httpPort for peer ${peer.host}:${peer.port} to ${portStr}`);
+        }
+      } else if (value !== undefined && peer[key] !== value) {
+        // 其他属性的常规更新
+        peer[key] = value;
+        modified = true;
+      }
+    }
+
+    // 只有在有修改时才持久化
+    if (modified) {
+      this._persistPeers();
     }
   }
 
@@ -140,22 +230,42 @@ export class Inventory {
     this._persistPeers()
   }
 
-  // 新增私有方法处理持久化逻辑
+  /**
+   * 将节点信息持久化到文件
+   * @private
+   */
   _persistPeers() {
     try {
+      // 确保目录存在
+      const dbDir = path.dirname(this.dbfile)
+      if (!fs.existsSync(dbDir)) {
+        fs.mkdirSync(dbDir, { recursive: true })
+        this.logger.debug(`Created directory for peer database: ${dbDir}`)
+      }
+
+      // 将所有节点信息序列化并保存
       const peersData = [...this.peers.values()].map(peer => ({
         id: peer.id,
         host: peer.host,
+        ip: peer.ip || peer.host,  // 确保兼容性
         port: peer.port,
         httpPort: peer.httpPort,
         family: peer.family,
         status: peer.status,
         failCount: peer.failCount,
         delay: peer.delay
-      }))
-      fs.writeFileSync(this.dbfile, JSON.stringify(peersData))
+      }));
+
+      // 写入文件
+      fs.writeFileSync(this.dbfile, JSON.stringify(peersData, null, 2))
+      this.logger.debug(`Persisted ${peersData.length} peers to ${this.dbfile}`);
+
+      // 如果没有节点，尝试从配置中加载种子节点
+      if (peersData.length === 0) {
+        this.logger.debug('No peers in inventory, consider adding seed nodes manually');
+      }
     } catch (err) {
-      this.logger.error('Failed to persist peers:', err)
+      this.logger.error(`Failed to persist peers to ${this.dbfile}:`, err)
     }
   }
 
@@ -169,7 +279,7 @@ export class Inventory {
   }
 
   enableAll() {
-    this.peers.forEach((peer, id) => {
+    this.peers.forEach(peer => {
       if (peer.status === Peer.STATUS.disable && Date.now() > peer.delay) {
         peer.status = Peer.STATUS.pending
         peer.failCount = 0
@@ -221,10 +331,11 @@ export class Inventory {
           const rnd = Math.floor(Math.random() * peers.length)
           peer = peers[rnd]
         }
-        // 确保从数据库加载的peer包含所有必要字段
+        // 确保从数据库加载的peer包含所有必要字段，并保持原始格式
         this.peers.set(peer.id, new Peer({
           host: peer.host,
           port: peer.port,
+          // 保持 httpPort 的原始格式
           httpPort: peer.httpPort,
           family: peer.family
         }))
@@ -312,7 +423,7 @@ export class Inventory {
       if (!pending) {
         pending = true
         setTimeout(() => {
-          this._persistPeersSync()
+          this._persistPeers()
           pending = false
         }, 1000) // 1秒节流
       }
@@ -321,7 +432,7 @@ export class Inventory {
 
   /**
    * 改进的随机选择方法，避免短时间内重复选择同一节点
-   * 
+   *
    * const usedIds = new Set(['peer1', 'peer2']);
    * const randomPeer = inventory.getSmartRandomPeer(usedIds);
    *
@@ -343,9 +454,9 @@ export class Inventory {
 
   /**
    * 获取最可靠的节点（优先选择ready状态的节点）
-   * 
+   *
    * const reliablePeer = inventory.getReliablePeers(1)[0];
-   * 
+   *
    * @param {number} count 需要选择的节点数量
    * @returns {Array} 可靠节点数组
    */
@@ -364,10 +475,10 @@ export class Inventory {
 
   /**
    * 获取优质节点（失败次数少的节点）
-   * 
+   *
    * 获取3个优质节点
    * const qualityPeers = inventory.getQualityPeers(3);
-   
+
    * @param {number} count 需要选择的节点数量
    * @returns {Array} 优质节点数组
    */

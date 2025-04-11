@@ -20,21 +20,46 @@ import { Cache } from './cache'
  */
 export class P2P {
   // extends EventEmitter {
+  /**
+   * 创建 P2P 实例
+   * @param {Object} options - 配置选项
+   */
   constructor(options) {
-    // check if we have options
+    // 确保选项是一个对象
     options = options || {}
-    this.port = +options.port || 9000
-    this.httpPort = +options.httpPort || (this.port - 1000)
+
+    // 设置基本属性
+    this.port = typeof options.port === 'string' ? options.port : String(+options.port || 9000)
+    this.httpPort = typeof options.httpPort === 'string' ? options.httpPort : String(+options.httpPort || 8000)
     this.host = options.host || '0.0.0.0'
+
+    // 设置其他属性
     this.cycle = +options.cycle || 10000
     this.timeout = +options.timeout || 60000
     this.version = options.version || 'v1'
     this.nethash = options.nethash || '0ab796cd'
     this.family = options.family
-    this.seeds = options.seeds || [] // 来自于配置文件，比如：.ddnrc.js 的 peers.list
     this.routes = options.routes || {}
     this.maxConnectSize = +options.maxConnectSize || 8
     this.logger = options.logger || console
+
+    // 处理 seeds，确保每个 seed 都是完整的 peer 对象
+    this.seeds = (options.seeds || []).map(seed => {
+      // 如果 seed 没有 httpPort，计算一个默认值
+      if (!seed.httpPort && seed.port) {
+        seed.httpPort = String(Number(seed.port) - 1000);
+        // 确保端口合理
+        if (Number(seed.httpPort) < 1000) {
+          seed.httpPort = '8000';
+        }
+      }
+
+      // 确保 ip 和 host 字段存在
+      seed.ip = seed.ip || seed.host;
+      seed.host = seed.host || seed.ip;
+
+      return seed;
+    })
 
     // fixme: 什么时候为 true ？
     this.ready = false
@@ -50,15 +75,79 @@ export class P2P {
   /**
    * init this server
    */
+  /**
+   * 初始化 P2P 网络
+   */
   prepare() {
     const self = this
     self.listen()
-    self.seeds.slice(0, self.maxConnectSize).forEach(seed => {
-      if (seed.id === self.id) return
 
-      self.connect(seed.port, seed.ip).catch(err => {
+    // 打印 seeds 列表
+    self.logger.debug(`Seeds list: ${JSON.stringify(self.seeds)}`)
+
+    // 先将种子节点添加到 inventory
+    if (self.seeds && self.seeds.length > 0) {
+      self.logger.debug(`Adding ${self.seeds.length} seed nodes to inventory`)
+
+      self.seeds.forEach(seed => {
+        self.logger.debug(`Processing seed: ${JSON.stringify(seed)}`)
+
+        // 确保关键属性存在
+        if (!seed.host && !seed.ip) {
+          self.logger.warn('Seed without host or ip, skipping')
+          return
+        }
+
+        if (!seed.port) {
+          self.logger.warn(`Seed without port: ${seed.host || seed.ip}, skipping`)
+          return
+        }
+
+        // 生成 ID
+        if (!seed.id) {
+          seed.id = Peer.getId(`${seed.host || seed.ip}:${seed.port}`)
+          self.logger.debug(`Generated ID for seed: ${seed.id}`)
+        }
+
+        // 跳过自身
+        if (seed.id === self.id) {
+          self.logger.debug(`Skipping self seed: ${seed.id}`)
+          return
+        }
+
+        // 创建完整的 Peer 对象
+        try {
+          const peer = new Peer({
+            ...seed,
+            host: seed.host || seed.ip,
+            ip: seed.ip || seed.host
+          })
+
+          self.logger.debug(`Created peer from seed: ${JSON.stringify(peer)}`)
+
+          // 添加到 inventory
+          self.inventory.add(peer)
+        } catch (err) {
+          self.logger.error(`Failed to create peer from seed: ${JSON.stringify(seed)}`, err)
+        }
+      })
+    } else {
+      self.logger.warn('No seed nodes found in configuration')
+    }
+
+    // 连接到种子节点
+    const seedPeers = self.inventory.getAllPeers().slice(0, self.maxConnectSize)
+    self.logger.debug(`Connecting to ${seedPeers.length} seed peers`)
+
+    seedPeers.forEach(peer => {
+      if (peer.id === self.id) return
+
+      // 直接传递完整的 peer 对象
+      self.connect(peer).catch(err => {
         if (err.errno === 'ECONNREFUSED') {
-          self.logger.error(`connect to seed: ${seed.ip}:${seed.port} fail: ECONNREFUSED`)
+          self.logger.error(`connect to seed: ${peer.ip || peer.host}:${peer.port} fail: ECONNREFUSED`)
+        } else {
+          self.logger.error(`connect to seed: ${peer.ip || peer.host}:${peer.port} fail:`, err.message)
         }
       })
     })
@@ -108,30 +197,81 @@ export class P2P {
    * @param {*} proxy
    * @returns
    */
-  async connect(port, host, proxy) {
+  /**
+   * 连接到远程节点
+   * @param {Object|string} peerOrPort - 节点对象或端口号
+   * @param {string} [hostOrNull] - 主机地址（如果第一个参数是端口号）
+   * @param {Object} [proxyOrNull] - 代理配置（可选）
+   * @returns {Promise<Pipe>} 连接管道
+   */
+  async connect(peerOrPort, hostOrNull, proxyOrNull) {
     const self = this
     return new Promise((resolve, reject) => {
-      const peer = new Peer({ host, port })
-      if (peer.id === self.id) {
-        self.logger.warn(`Should not connect self: ${host}:${port}`)
-        reject(new Error(`Should not connect to self: ${host}:${port}`))
-        return
+      let peerInfo;
+
+      // 处理不同的调用方式
+      if (typeof peerOrPort === 'object') {
+        // 如果第一个参数是对象，则它是完整的 peer 对象
+        peerInfo = peerOrPort;
+      } else {
+        // 兼容旧的调用方式：connect(port, host, proxy)
+        const port = peerOrPort;
+        const host = hostOrNull;
+        const proxy = proxyOrNull;
+
+        // 创建一个完整的 peer 对象
+        peerInfo = { host, port };
+
+        // 尝试从 seeds 中找到匹配的节点的 httpPort
+        const matchingSeed = self.seeds.find(seed =>
+          (seed.ip === host || seed.host === host) &&
+          (seed.port === port || String(seed.port) === String(port)));
+
+        if (matchingSeed && matchingSeed.httpPort) {
+          peerInfo.httpPort = matchingSeed.httpPort;
+          self.logger.debug(`Found httpPort ${peerInfo.httpPort} for ${host}:${port} from seeds`);
+        } else {
+          // 如果在 seeds 中找不到，则计算一个默认值
+          peerInfo.httpPort = String(Number(port) - 1000);
+          // 确保端口合理
+          if (Number(peerInfo.httpPort) < 1000) {
+            peerInfo.httpPort = '8000';
+          }
+          self.logger.debug(`Using calculated httpPort ${peerInfo.httpPort} for ${host}:${port}`);
+        }
+
+        // 设置代理（如果有）
+        if (proxy) {
+          peerInfo.proxy = proxy;
+        }
       }
+
+      // 创建 Peer 实例
+      const peer = new Peer(peerInfo);
+
+      // 检查是否是自身
+      if (peer.id === self.id) {
+        self.logger.warn(`Should not connect self: ${peer.host}:${peer.port}`);
+        reject(new Error(`Should not connect to self: ${peer.host}:${peer.port}`));
+        return;
+      }
+
+      // 检查是否已经连接
       if (self.pool.has(peer.id)) {
-        resolve(self.pool.get(peer.id))
-        return
+        resolve(self.pool.get(peer.id));
+        return;
       }
       // if(this.pool.size >= this.maxConnectSize) {
       //   this.logger.debug(`pool is up to maxConnectSize: ${this.maxConnectSize} `)
       //   reject(`pool is up to maxConnectSize: ${this.maxConnectSize} `)
       // }
       // create a tcp connect
-      const pipe = self._createPipe({ proxy })
+      const pipe = self._createPipe({ proxy: peerInfo.proxy })
 
-      pipe.open(port, host, err => {
+      pipe.open(peer.port, peer.host, err => {
         if (err) {
           const errMsg = err.errno === 'ECONNREFUSED' ? 'ECONNREFUSED' : err.message
-          self.logger.warn(`connect to ${host}:${port} error: `, errMsg)
+          self.logger.warn(`connect to ${peer.host}:${peer.port} error: `, errMsg)
           self.inventory.disable(peer.id)
           reject(err)
           return
@@ -230,7 +370,8 @@ export class P2P {
       try {
         if (self.id === peer.id) return
         if (!self.pool.has(peer.id)) {
-          await self.connect(peer.port, peer.host)
+          // 直接传递完整的 peer 对象
+          await self.connect(peer)
         }
 
         const pipe = self.pool.get(peer.id)
@@ -253,12 +394,20 @@ export class P2P {
     pipe.id = peer.id
     pipe.host = peer.host
     pipe.port = peer.port
+    pipe.httpPort = peer.httpPort // 添加 httpPort 属性
     this.pool.set(pipe.id, pipe)
 
     // 只在节点不存在时添加到 inventory
     if (!this.inventory.get(peer.id)) {
-      this.logger.debug(`peer isn't exit, add peer to inventory: ${peer.host}:${peer.port}`)
+      this.logger.debug(`peer isn't exit, add peer to inventory: ${peer.host}:${peer.port} with httpPort: ${peer.httpPort}`)
       this.inventory.add(peer)
+    } else {
+      // 如果节点已存在，但没有 httpPort，则更新它
+      const existingPeer = this.inventory.get(peer.id)
+      if ((!existingPeer.httpPort || existingPeer.httpPort === null) && peer.httpPort) {
+        this.logger.debug(`Updating httpPort for existing peer: ${peer.host}:${peer.port} to ${peer.httpPort}`)
+        this.inventory.update(peer.id, { httpPort: peer.httpPort })
+      }
     }
 
     this.logger.debug(
@@ -347,7 +496,8 @@ export class P2P {
             this.logger.warn(`Should not request to yourself: ${host}:${port}`)
             return
           }
-          const pipe = await this.connect(port, host)
+          // 使用完整的 peer 对象
+          const pipe = await this.connect(peer)
           if (!pipe) {
             this.logger.warn(`Pipe connect to ${host}:${port} failed.`)
             return
@@ -444,29 +594,99 @@ export class P2P {
    */
   async _discover() {
     try {
+      // 如果没有节点，先尝试从 seeds 中加载
+      if (this.inventory.getAllPeers().length === 0) {
+        this.logger.debug('No peers in inventory, adding seed nodes')
+        // 将种子节点添加到 inventory
+        this.seeds.forEach(seed => {
+          if (!seed.id) {
+            seed.id = Peer.getId(`${seed.host || seed.ip}:${seed.port}`)
+          }
+
+          // 跳过自身
+          if (seed.id === this.id) return
+
+          const peer = new Peer(seed)
+          this.inventory.add(peer)
+        })
+      }
+
       // 保持可靠性优先，但不排除已连接节点（发现需要与已连接节点交互）
       const peer = this.inventory.getReliablePeers(1)[0] || this.inventory.getRandomPeer()
 
-      if (!peer || this.id === peer.id) return
-      if (!this.pool.has(peer.id)) {
-        await this.connect(peer.port, peer.host)
+      if (!peer || this.id === peer.id) {
+        this.logger.debug('No suitable peer found for discovery')
+        return
       }
 
+      // 如果节点不在连接池中，先连接
+      if (!this.pool.has(peer.id)) {
+        this.logger.debug(`Connecting to peer for discovery: ${peer.host || peer.ip}:${peer.port}`)
+        try {
+          // 直接传递完整的 peer 对象
+          await this.connect(peer)
+        } catch (err) {
+          this.logger.error(`Failed to connect to peer for discovery: ${peer.host || peer.ip}:${peer.port}`, err.message)
+          return
+        }
+      }
+
+      // 获取节点的连接管道
       const pipe = this.pool.get(peer.id)
+      if (!pipe) {
+        this.logger.error(`Pipe not found for peer: ${peer.host || peer.ip}:${peer.port}`)
+        return
+      }
+
+      // 请求节点列表
+      this.logger.debug(`Requesting inventory from peer: ${peer.host || peer.ip}:${peer.port}`)
       const res = await pipe.request(Message.commands.INVENTORY)
       const peers = res && res.data
-      if (peers) {
+
+      if (peers && Array.isArray(peers)) {
+        this.logger.debug(`Received ${peers.length} peers from ${peer.host || peer.ip}:${peer.port}`)
         const self = this
+
+        // 处理每个返回的节点
         peers.forEach(item => {
-          const newPeer = new Peer(item)
+          // 确保关键属性存在
+          if (!item.host && !item.ip) {
+            self.logger.warn('Received peer without host or ip, skipping')
+            return
+          }
+
+          if (!item.port) {
+            self.logger.warn(`Received peer without port: ${item.host || item.ip}, skipping`)
+            return
+          }
+
+          // 创建完整的 peer 对象
+          const newPeer = new Peer({
+            ...item,
+            host: item.host || item.ip,
+            ip: item.ip || item.host
+          })
+
           // 跳过自身节点
           if (newPeer.id === self.id) return
+
           // 只在节点不存在时添加到 inventory
           if (!self.inventory.get(newPeer.id)) {
-            self.logger.debug(`peer isn't exit, add peer to inventory: ${newPeer.host}:${newPeer.port}`)
+            self.logger.debug(`Adding new peer to inventory: ${newPeer.host}:${newPeer.port} with httpPort: ${newPeer.httpPort}`)
             self.inventory.add(newPeer)
+          } else {
+            // 如果节点已存在，更新其信息
+            const existingPeer = self.inventory.get(newPeer.id)
+
+            // 检查是否需要更新 httpPort
+            if ((!existingPeer.httpPort || existingPeer.httpPort === '0') && newPeer.httpPort) {
+              self.logger.debug(`Updating httpPort for existing peer: ${newPeer.host}:${newPeer.port} to ${newPeer.httpPort}`)
+              self.inventory.update(newPeer.id, { httpPort: newPeer.httpPort })
+            }
           }
         })
+      } else {
+        this.logger.debug(`No peers received from ${peer.host || peer.ip}:${peer.port}`)
       }
 
       this.inventory.flush()
@@ -488,7 +708,7 @@ export class P2P {
       healthyPeers.forEach(async peer => {
         if (!this.pool.has(peer.id)) {
           try {
-            await this.connect(peer.port, peer.host)
+            await this.connect(peer)
             const pipe = this.pool.get(peer.id)
             let time = await pipe.ping()
             for (let i = 0; i < 3; i++) {

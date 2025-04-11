@@ -4,8 +4,8 @@
  * @Date: 2024-06-29 23:08:40
  * @Last Modified by:   imfly
  * @Last Modified time: 2025-01-06 17:28:52
- * @Description: Peer of DDN, responsible for communication and data synchronization between nodes, 
- * including p2p network communication, block synchronization, transaction synchronization, account 
+ * @Description: Peer of DDN, responsible for communication and data synchronization between nodes,
+ * including p2p network communication, block synchronization, transaction synchronization, account
  * synchronization, etc.
  */
 
@@ -36,17 +36,37 @@ class Peer {
 
     const { nethash, peers, p2pPort, port, publicIp, version } = this.ctx.config
 
-    this.p2p = new P2P({
+    // 创建本节点的完整配置
+    const p2pConfig = {
+      // 基本配置
       port: p2pPort,
       httpPort: port,
       host: publicIp,
       nethash,
-      version,  // 统一版本号
-      seeds: peers.list,
+      version,
+
+      // 处理 seeds（peers.list），确保每个节点都是完整的 peer 对象
+      seeds: peers.list.map(peer => ({
+        // 保留原有属性
+        ...peer,
+
+        // 确保关键属性存在
+        ip: peer.ip || peer.host,
+        host: peer.host || peer.ip,
+        port: peer.port,
+
+        // 如果没有 httpPort，计算一个默认值
+        httpPort: peer.httpPort || String(Number(peer.port) - 1000)
+      })),
+
+      // 其他配置
       dbfile: path.join(this.ctx.baseDir, '/db/peer.db'),
       routes: this.router.routes,
       logger: this.logger
-    })
+    };
+
+    // 创建 P2P 实例
+    this.p2p = new P2P(p2pConfig)
 
     this.broadcast = PeerBroadcast.singleton(this.ctx)
   }
