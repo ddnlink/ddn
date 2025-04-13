@@ -1,6 +1,6 @@
 {
   "name": "@ddn/p2p",
-  "version": "2.5.2",
+  "version": "2.5.3",
   "description": "The nodejs implementation of DDN P2P protocol",
   "main": "dist/index.js",
   "files": [
@@ -10,7 +10,8 @@
     "build": "father build",
     "dev": "father dev",
     "test": "jest",
-    "lint": "eslint --ext .js ."
+    "lint": "eslint --ext .js .",
+    "release": "pnpm publish --no-git-checks --access public"
   },
   "keywords": [
     "ddn",

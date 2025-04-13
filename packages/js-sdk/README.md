@@ -30,7 +30,7 @@ window.DdnJS.constants = {
 }
 ```
 
-Please reference the [ddn http interface documents](https://github.com/ddnlink/ddn-docs/js-sdk-api.md)
+Please reference the [DDN http interface documents](https://github.com/ddnlink/ddn-docs/js-sdk-api.md)
 
 ## Develop 开发
 
@@ -40,7 +40,12 @@ Please reference the [ddn http interface documents](https://github.com/ddnlink/d
 
 每次修改发布，请执行一次如下命令，**目前主流浏览器都支持 ES6 模块化，所以不需要使用 UMD 模块化，也不需要打包**
 
-```
-$ cd /path/to/ddn
+```sh
+# 生产网络 DDN_NAME=ddn
+$ cd /path/to/ddn/
 $ pnpm build --filter @ddn/js-sdk
+
+# 测试网络 DDN_NAME=dev
+$ cd /path/to/ddn/packages/js-sdk
+$ pnpm build:dev # 生成测试网络的sdk
 ```

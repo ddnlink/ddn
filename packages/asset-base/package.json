@@ -1,6 +1,6 @@
 {
   "name": "@ddn/asset-base",
-  "version": "2.5.0",
+  "version": "2.5.1",
   "description": "DDN资产基类相关信息",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -21,7 +21,8 @@
   "license": "AGPL 3.0",
   "scripts": {
     "build": "father build",
-    "dev": "father dev"
+    "dev": "father dev",
+    "release": "pnpm publish --no-git-checks --access public"
   },
   "dependencies": {
     "@ddn/utils": "workspace:^",

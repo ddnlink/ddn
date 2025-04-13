@@ -1,20 +1,26 @@
 {
   "name": "@ddn/js-sdk",
-  "version": "2.5.7",
+  "version": "2.5.8",
   "description": "DDN browser js SDK",
   "main": "dist/index.js",
+  "module": "build/index.js",
+  "exports": {
+    ".": {
+      "import": "./build/index.js",
+      "require": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
   "files": [
     "dist",
+    "build",
     ".ddnrc.js"
   ],
   "scripts": {
     "test": "mocha test",
-    "build:ddn": "DDN_NAME=ddn father build",
-    "build": "DDN_NAME=dev father build",
-    "build:dev": "mkdir -p build && browserify src/index.js > ./build/index.browserify.js",
-    "build:prod": "mkdir -p build && browserify index.js -p tinyify > ./build/ddn.min.js",
-    "build:custom:prod": "browserify index.js -p tinyify > ./build/ddn-js-sdk.custom.min.js",
-    "publish": "pnpm publish --no-git-checks --access public"
+    "build": "DDN_NAME=ddn father build",
+    "build:dev": "DDN_NAME=dev father build",
+    "release": "pnpm publish --no-git-checks --access public"
   },
   "keywords": [
     "ddn",
@@ -40,9 +46,20 @@
     "ripemd160": "^2.0.2",
     "safe-buffer": "^5.2.1"
   },
+  "browser": {
+    "crypto": "crypto-browserify",
+    "stream": "stream-browserify",
+    "buffer": "buffer"
+  },
   "npmFileMap": [
     {
       "basePath": "/dist/",
+      "files": [
+        "*.js"
+      ]
+    },
+    {
+      "basePath": "/build/",
       "files": [
         "*.js"
       ]
@@ -52,6 +69,7 @@
     "@ddn/test-utils": "workspace:^",
     "browserify": "^13.1.0",
     "rollup-plugin-replace": "^2.2.0",
+    "stream-browserify": "^3.0.0",
     "tinyify": "^2.5.2"
   },
   "gitHead": "3f5aef8e697748180be42f047a2053e46a7afd43"

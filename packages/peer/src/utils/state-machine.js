@@ -30,6 +30,11 @@ export class StateMachine {
   /** Constructor: initialize to Pending state */
   constructor() {
     this._state = StateMachine.States.Pending
+    this._stateChangeTime = Date.now()
+    this._stateHistory = [{
+      state: 'Pending',
+      timestamp: this._stateChangeTime
+    }]
   }
 
   /**
@@ -50,7 +55,23 @@ export class StateMachine {
       const toState = this._getStateName(newState);
       throw new Error(`Invalid state transition from ${fromState} to ${toState}`);
     }
+
+    // 记录状态变更
+    const oldState = this._state;
     this._state = newState;
+    this._stateChangeTime = Date.now();
+
+    // 记录状态变更历史
+    this._stateHistory.push({
+      from: this._getStateName(oldState),
+      to: this._getStateName(newState),
+      timestamp: this._stateChangeTime
+    });
+
+    // 保持历史记录在合理范围内
+    if (this._stateHistory.length > 100) {
+      this._stateHistory = this._stateHistory.slice(-100);
+    }
   }
 
   // Semantic transition methods
@@ -82,5 +103,29 @@ export class StateMachine {
    */
   get current() {
     return this._state;
+  }
+
+  /**
+   * 获取当前状态持续时间（毫秒）
+   * @returns {number} 状态持续时间
+   */
+  getStateDuration() {
+    return Date.now() - this._stateChangeTime;
+  }
+
+  /**
+   * 获取状态变更历史
+   * @returns {Array} 状态变更历史记录
+   */
+  getStateHistory() {
+    return [...this._stateHistory];
+  }
+
+  /**
+   * 获取上一次状态变更时间
+   * @returns {number} 上次状态变更时间戳
+   */
+  getLastStateChangeTime() {
+    return this._stateChangeTime;
   }
 }

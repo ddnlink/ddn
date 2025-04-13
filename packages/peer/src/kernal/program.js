@@ -11,6 +11,7 @@ import * as DdnCrypto from '@ddn/crypto'
 import { DVM, Compiler } from '@ddn/contract'
 
 import { System, Logger, Energy, StateMachine } from '../utils'
+import { bignum } from '@ddn/utils'
 
 import Context from './context'
 import Block from './block/block'
@@ -106,6 +107,17 @@ class Program {
 
     // 节点列表同步任务的轮询间隔（3-1个轮询会执行一次同步）
     this._peerSyncCounter = 3
+
+    // 初始化同步状态标记
+    this._activeSyncInProgress = false
+    this._lastStateChangeTime = Date.now()
+    this._syncFailCount = 0
+
+    // 将 startBlockDataSyncTask 方法添加到 runtime 对象中，供其他模块使用
+    const self = this;
+    this.ctx.runtime.startBlockDataSyncTask = function() {
+      return self.startBlockDataSyncTask();
+    }
 
     // 非运行时函数
     this.forgeManager = new ForgeManager(this.ctx);
@@ -317,10 +329,11 @@ class Program {
   }
 
   async _blockchainReady() {
-    // 通知资产系统区块链已就绪
-    await this.ctx.runtime.transaction.execAssetFunc('onBlockchainReady')
     // 块加载完成
     this.ctx.runtime.stateMachine.transitionTo('Ready')
+
+    // 通知资产系统区块链已就绪
+    await this.ctx.runtime.transaction.execAssetFunc('onBlockchainReady')
 
     // 节点就绪生命周期函數
     await this._appReady()
@@ -399,23 +412,50 @@ class Program {
       }, 1000 * delay) // 默认10秒，可以根据情况调整延迟
     }
 
+    // 检查是否长时间处于非Ready状态，如果是则尝试恢复
+    if (!this.ctx.runtime.stateMachine.isReady() && !this.ctx.runtime.stateMachine.isSyncing()) {
+      const lastStateChangeTime = this._lastStateChangeTime || 0
+      const currentTime = Date.now()
+
+      // 如果处于Pending状态超过5分钟，尝试恢复到Syncing状态
+      if (this.ctx.runtime.stateMachine.isPending() &&
+          (currentTime - lastStateChangeTime > 5 * 60 * 1000)) {
+        this.ctx.logger.warn('System has been in Pending state for too long, attempting recovery')
+        try {
+          // 尝试转换到Syncing状态
+          this.ctx.runtime.stateMachine.transitionTo('Syncing')
+          this._lastStateChangeTime = currentTime
+          this._syncFailCount = 0 // 重置失败计数
+        } catch (err) {
+          this.ctx.logger.error(`Failed to transition from Pending to Syncing: ${err.message}`)
+        }
+      }
+    }
+
     // 获取对等节点
     const peer = await this.ctx.runtime.peer.getPeer()
     if (!peer) {
       this.ctx.logger.debug("No available peers, change state to 'ready'")
       if (!this.ctx.runtime.stateMachine.isReady()) {
         await this._blockchainReady()
+        this._lastStateChangeTime = Date.now() // 记录状态变更时间
       }
       next()
       return
     }
 
     try {
-      // 如果已经在同步中，避免重复同步
-      if (this.ctx.runtime.stateMachine.isSyncing()) {
-        this.ctx.logger.debug('Already syncing, skip this round')
+      // 检查是否有实际的同步操作正在进行
+      // 使用 _activeSyncInProgress 标志而不仅仅依赖状态机状态
+      if (this._activeSyncInProgress === true) {
+        this.ctx.logger.debug('Active sync operation already in progress, skip this round')
         next()
         return
+      }
+
+      // 即使状态是 Syncing，如果没有实际的同步操作，也应该启动同步
+      if (this.ctx.runtime.stateMachine.isSyncing()) {
+        this.ctx.logger.debug('State is Syncing but no active sync operation, proceeding with sync')
       }
 
       const lastBlock = this.ctx.runtime.block.getLastBlock()
@@ -440,25 +480,46 @@ class Program {
 
       // 转换状态为同步中
       this.ctx.runtime.stateMachine.transitionTo('Syncing')
+      this._lastStateChangeTime = Date.now() // 记录状态变更时间
+
+      // 标记正在进行实际的同步操作
+      this._activeSyncInProgress = true
 
       // 执行区块同步
       this.ctx.logger.info(`Starting block sync with peer ${peer.host}:${peer.port}`)
-      const result = await this.ctx.runtime.peer.syncBlocks()
+      let result;
+      try {
+        result = await this.ctx.runtime.peer.syncBlocks()
+      } finally {
+        // 无论同步成功还是失败，都要清除标记
+        this._activeSyncInProgress = false
+      }
 
       if (result) {
         this.ctx.logger.info('Block synchronization completed successfully')
         await this._blockchainReady()
-        next(15) // 成功后可以稍微减少同步频率
+        this._lastStateChangeTime = Date.now() // 记录状态变更时间
+        this._syncFailCount = 0 // 重置失败计数
+        next(15) // 成功后也要继续循环同步，但间隔可以长一些
       } else {
         // 同步失败计数器
         this._syncFailCount = (this._syncFailCount || 0) + 1
 
-        // 如果连续失败超过三次，才转换到 pending 状态
+        // 如果连续失败超过三次，才考虑转换状态
         if (this._syncFailCount >= 3) {
-          this.ctx.logger.warn(`Block synchronization failed ${this._syncFailCount} times, changing state to pending`)
-          this.ctx.runtime.stateMachine.transitionToPending()
-          this._syncFailCount = 0 // 重置计数器
-          next(20) // 失败后增加延迟，避免频繁重试
+          // 如果当前高度小于一定值（例如200），保持在Syncing状态而不是转为Pending
+          const currentHeight = this.ctx.runtime.block.getLastBlock().height
+          if (bignum.isLessThan(currentHeight, 200)) {
+            this.ctx.logger.warn(`Block synchronization failed ${this._syncFailCount} times, but keeping Syncing state due to low height (${currentHeight})`)
+            this._syncFailCount = 1 // 减少计数而不是重置，保持一定的失败记忆
+            next(10) // 稍微延长重试间隔
+          } else {
+            this.ctx.logger.warn(`Block synchronization failed ${this._syncFailCount} times, changing state to pending`)
+            this.ctx.runtime.stateMachine.transitionToPending()
+            this._lastStateChangeTime = Date.now() // 记录状态变更时间
+            this._syncFailCount = 0 // 重置计数器
+            next(20) // 失败后增加延迟，避免频繁重试
+          }
         } else {
           this.ctx.logger.warn(`Block synchronization failed (attempt ${this._syncFailCount}), retrying...`)
           next(5) // 尝试失败后稍微等待再重试
@@ -466,32 +527,132 @@ class Program {
       }
     } catch (err) {
       this.ctx.logger.error(`Block sync task error: ${err.message || err}`)
-      
+
       // 使用与正常流程相同的失败计数逻辑
       this._syncFailCount = (this._syncFailCount || 0) + 1
-      
+
       if (this._syncFailCount >= 3) {
-        this.ctx.logger.warn(`Block synchronization failed ${this._syncFailCount} times due to error, changing state to pending`)
-        this.ctx.runtime.stateMachine.transitionToPending()
-        this._syncFailCount = 0 // 重置计数器
-        next(20) // 错误后增加更长的延迟
+        // 同样检查高度，低高度时保持Syncing状态
+        const currentHeight = this.ctx.runtime.block.getLastBlock().height
+        if (bignum.isLessThan(currentHeight, 200)) {
+          this.ctx.logger.warn(`Block synchronization error ${this._syncFailCount} times, but keeping Syncing state due to low height (${currentHeight})`)
+          this._syncFailCount = 1 // 减少计数而不是重置
+          next(10) // 稍微延长重试间隔
+        } else {
+          this.ctx.logger.warn(`Block synchronization failed ${this._syncFailCount} times due to error, changing state to pending`)
+          this.ctx.runtime.stateMachine.transitionToPending()
+          this._lastStateChangeTime = Date.now() // 记录状态变更时间
+          this._syncFailCount = 0 // 重置计数器
+          next(20) // 错误后增加更长的延迟
+        }
       } else {
         this.ctx.logger.warn(`Block synchronization error (attempt ${this._syncFailCount}), will retry...`)
         next(5) // 尝试失败后稍微等待再重试
       }
-      
     }
   }
 
-  // 添加状态监控
+  // 添加状态监控和恢复机制
   async _monitorRuntimeState() {
+    // 记录上次区块高度和状态变更时间
+    let lastHeight = this.ctx.runtime.block.getLastBlock().height;
+    let lastStateChangeTime = Date.now();
+    let stuckCounter = 0;
+
     setInterval(() => {
+      const currentState = this.ctx.runtime.stateMachine.current;
+      const stateName = this.ctx.runtime.stateMachine._getStateName(currentState);
+      const currentHeight = this.ctx.runtime.block.getLastBlock().height;
+      const currentTime = Date.now();
+      const timeSinceLastChange = currentTime - (this._lastStateChangeTime || lastStateChangeTime);
+
+      // 记录运行状态
       this.ctx.logger.debug('Runtime State Report', {
-        state: this.ctx.runtime.stateMachine.current,
+        state: stateName,
+        stateCode: currentState,
         loaded: this.ctx.runtime.loaded,
-        lastBlock: this.ctx.runtime.block.getLastBlock().height
-      })
-    }, 60 * 1000) // 每分钟记录状态
+        lastBlock: currentHeight,
+        timeSinceLastStateChange: Math.floor(timeSinceLastChange / 1000) + 's'
+      });
+
+      // 检测是否长时间处于非Ready状态
+      if (!this.ctx.runtime.stateMachine.isReady() && timeSinceLastChange > 10 * 60 * 1000) { // 10分钟
+        this.ctx.logger.warn(`System has been in ${stateName} state for ${Math.floor(timeSinceLastChange / 60000)} minutes`);
+
+        // 如果在Pending状态停留超过10分钟，尝试恢复到Syncing状态
+        if (this.ctx.runtime.stateMachine.isPending()) {
+          this.ctx.logger.warn('Attempting recovery from long-standing Pending state to Syncing state');
+          try {
+            // 只有当没有正在进行的同步时才尝试恢复
+            if (!this._activeSyncInProgress) {
+              this.ctx.runtime.stateMachine.transitionTo('Syncing');
+              this._lastStateChangeTime = currentTime;
+              // 触发同步任务，但不设置 _activeSyncInProgress 标记
+              // 因为该标记应该由 startBlockDataSyncTask 方法自己设置
+              setImmediate(() => this.ctx.runtime.startBlockDataSyncTask());
+            } else {
+              this.ctx.logger.debug('Active sync already in progress, skipping recovery attempt');
+            }
+          } catch (err) {
+            this.ctx.logger.error(`Failed to recover from Pending state: ${err.message}`);
+          }
+        }
+      }
+
+      // 检测区块高度是否长时间未变化
+      if (currentHeight === lastHeight) {
+        stuckCounter++;
+
+        // 如果连续5次检测区块高度未变（约5分钟），尝试恢复
+        if (stuckCounter >= 5) {
+          this.ctx.logger.warn(`Block height stuck at ${currentHeight} for ${stuckCounter} checks. Current state: ${stateName}`);
+
+          // 如果当前是Ready状态但区块高度未变，尝试切换到Syncing状态
+          if (this.ctx.runtime.stateMachine.isReady()) {
+            this.ctx.logger.warn('Attempting to transition from Ready to Syncing due to stuck block height');
+            try {
+              // 只有当没有正在进行的同步时才尝试恢复
+              if (!this._activeSyncInProgress) {
+                this.ctx.runtime.stateMachine.transitionTo('Syncing');
+                this._lastStateChangeTime = currentTime;
+                // 触发同步任务
+                setImmediate(() => this.ctx.runtime.startBlockDataSyncTask());
+                stuckCounter = 0; // 重置计数器
+              } else {
+                this.ctx.logger.debug('Active sync already in progress, skipping recovery attempt');
+              }
+            } catch (err) {
+              this.ctx.logger.error(`Failed to transition to Syncing state: ${err.message}`);
+            }
+          }
+          // 如果当前是Pending状态且区块高度未变，尝试切换到Syncing状态
+          else if (this.ctx.runtime.stateMachine.isPending()) {
+            this.ctx.logger.warn('Attempting to transition from Pending to Syncing due to stuck block height');
+            try {
+              // 只有当没有正在进行的同步时才尝试恢复
+              if (!this._activeSyncInProgress) {
+                this.ctx.runtime.stateMachine.transitionTo('Syncing');
+                this._lastStateChangeTime = currentTime;
+                // 触发同步任务
+                setImmediate(() => this.ctx.runtime.startBlockDataSyncTask());
+                stuckCounter = 0; // 重置计数器
+              } else {
+                this.ctx.logger.debug('Active sync already in progress, skipping recovery attempt');
+              }
+            } catch (err) {
+              this.ctx.logger.error(`Failed to transition to Syncing state: ${err.message}`);
+            }
+          }
+        }
+      } else {
+        // 区块高度变化了，重置计数器
+        stuckCounter = 0;
+        lastHeight = currentHeight;
+      }
+
+      // 更新上次状态变更时间
+      lastStateChangeTime = this._lastStateChangeTime || lastStateChangeTime;
+    }, 60 * 1000); // 每分钟检查一次
   }
 
   /**

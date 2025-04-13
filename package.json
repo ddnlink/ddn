@@ -22,7 +22,7 @@
     "encryption"
   ],
   "scripts": {
-    "dev": "turbo dev --force",
+    "dev": "ddn-scripts peers:start",
     "build": "turbo build  --force --no-cache",
     "build:dev": "NODE_ENV=development node ./scripts/initCryptoDependent.js && father build -w",
     "build:docker": "node ./scripts/initCryptoDependent.js && father build --docker",

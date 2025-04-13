@@ -45,15 +45,24 @@ function setup(newConfig = {}) {
     let config = {};
 
     // Merge with global configuration (window.DdnJS.config)
-    if (typeof window === 'undefined') {
-        throw new Error('Please use this program in a browser or other front-end environment')
-    }
-    if (window.jsSdk || window.JsSdk) {
-        console.log('Note: window.jsSdk or window.JsSdk has been removed. Please use DdnJS.');
-    }
-    if (window.DdnJS && window.DdnJS.config) {
-        config = { ...config, ...window.DdnJS.config };
-        debug('merged with global DdnJS.config:', config);
+    // Check if we're in a browser environment
+    const isBrowser = typeof window !== 'undefined';
+    
+    if (isBrowser) {
+        // Handle legacy SDK references
+        if (window.jsSdk || window.JsSdk) {
+            console.log('Note: window.jsSdk or window.JsSdk has been removed. Please use DdnJS.');
+        }
+        
+        // Merge with global configuration if available
+        if (window.DdnJS && window.DdnJS.config) {
+            config = { ...config, ...window.DdnJS.config };
+            debug('merged with global DdnJS.config:', config);
+        }
+    } else {
+        // In Node.js environment, we can use environment variables or other config sources
+        debug('Running in Node.js environment');
+        // We don't throw an error anymore, allowing Node.js usage
     }
 
     // Merge initial configuration with defaults

@@ -297,11 +297,50 @@ class Block {
    * @param {*} votes
    */
   async receiveNewBlock(block, votes) {
+    // 检查当前状态
+    const currentState = this.runtime.stateMachine.current;
+    const stateName = this.runtime.stateMachine._getStateName(currentState);
+
+    // 如果不是Ready状态，记录日志并检查是否可以继续处理
     if (!this.runtime.stateMachine.isReady()) {
       this.logger.debug(
-        `Not ready to receive blocks, state: ${!this.runtime.stateMachine.current}, Ready: 2`
+        `Current state is ${stateName} (${currentState}), not Ready (2) when receiving block ${block.height}`
       )
-      return
+
+      // 如果是处于Pending状态，但收到的区块高度比当前区块高得多，则尝试切换到Syncing状态
+      if (this.runtime.stateMachine.isPending()) {
+        const lastBlock = this.getLastBlock();
+        const heightDiff = bignum.minus(block.height, lastBlock.height);
+
+        if (bignum.isGreaterThan(heightDiff, 5)) {
+          this.logger.warn(`Received block with height ${block.height} while in Pending state, current height is ${lastBlock.height}. Attempting to transition to Syncing state.`);
+          try {
+            this.runtime.stateMachine.transitionTo('Syncing');
+            // 不直接调用 startSync，而是使用 runtime 中的 startBlockDataSyncTask 方法
+            // 这样可以确保同步状态标记的正确设置
+            setImmediate(() => {
+              // 如果 runtime 中有 startBlockDataSyncTask 方法，则使用它
+              if (this.runtime && typeof this.runtime.startBlockDataSyncTask === 'function') {
+                this.runtime.startBlockDataSyncTask();
+              } else {
+                // 如果无法访问该方法，则回退到直接调用 startSync
+                this.logger.warn('runtime.startBlockDataSyncTask not available, falling back to startSync');
+                this.startSync(lastBlock.height);
+              }
+            });
+          } catch (err) {
+            this.logger.error(`Failed to transition to Syncing state: ${err.message}`);
+            return;
+          }
+        } else {
+          // 如果高度差异不大，仍然跳过
+          return;
+        }
+      } else if (!this.runtime.stateMachine.isSyncing()) {
+        // 如果不是Pending也不是Syncing，则跳过
+        return;
+      }
+      // 如果是Syncing状态，则继续处理
     }
 
     if (this._isSyncing) {
@@ -383,8 +422,34 @@ class Block {
 
   async receiveVotes(votes) {
     this.logger.debug('Receive votes start')
+
+    // 检查当前状态
+    const currentState = this.runtime.stateMachine.current;
+    const stateName = this.runtime.stateMachine._getStateName(currentState);
+
     if (!this.runtime.stateMachine.isReady()) {
-      return
+      this.logger.debug(`Current state is ${stateName} (${currentState}), not Ready (2) when receiving votes`)
+
+      // 如果在Pending状态下收到投票，尝试恢复到Ready状态
+      if (this.runtime.stateMachine.isPending()) {
+        // 检查投票的区块高度与当前区块高度的差异
+        const lastBlock = this.getLastBlock();
+        const pendingBlock = this.runtime.consensus.getPendingBlock();
+
+        if (pendingBlock && bignum.isEqualTo(pendingBlock.height, bignum.plus(lastBlock.height, 1))) {
+          this.logger.warn(`Received votes for next block while in Pending state. Attempting to transition to Ready state.`);
+          try {
+            this.runtime.stateMachine.transitionTo('Ready');
+          } catch (err) {
+            this.logger.error(`Failed to transition to Ready state: ${err.message}`);
+            return;
+          }
+        } else {
+          return;
+        }
+      } else {
+        return;
+      }
     }
 
     try {
@@ -429,11 +494,35 @@ class Block {
    */
   async receiveNewPropose(propose) {
     this.logger.debug('receiveNewPropose start.')
+
+    // 检查当前状态
+    const currentState = this.runtime.stateMachine.current;
+    const stateName = this.runtime.stateMachine._getStateName(currentState);
+
     if (!this.runtime.stateMachine.isReady()) {
       this.logger.debug(
-        `receive new propose, prepare is not ready, state: ${!this.runtime.stateMachine.current}, Ready: 2`
+        `Current state is ${stateName} (${currentState}), not Ready (2) when receiving propose for height ${propose.height}`
       )
-      return
+
+      // 如果在Pending状态下收到提议，并且提议的高度是当前高度+1，尝试恢复到Ready状态
+      if (this.runtime.stateMachine.isPending()) {
+        const lastBlock = this.getLastBlock();
+        const expectedHeight = bignum.plus(lastBlock.height, 1).toString();
+
+        if (bignum.isEqualTo(propose.height, expectedHeight)) {
+          this.logger.warn(`Received propose for next block (height ${propose.height}) while in Pending state. Attempting to transition to Ready state.`);
+          try {
+            this.runtime.stateMachine.transitionTo('Ready');
+          } catch (err) {
+            this.logger.error(`Failed to transition to Ready state: ${err.message}`);
+            return;
+          }
+        } else {
+          return;
+        }
+      } else {
+        return;
+      }
     }
 
     if (this._proposeCache[propose.hash]) {
