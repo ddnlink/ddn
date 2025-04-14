@@ -1,6 +1,16 @@
 # @DDN/core
 
-用于对 DDN 区块链 相关的配置等相关的基本操作，让系统支持 .ddnrc.js、constants.js 等根据环境不同的配置文件
+用于对 DDN 区块链 相关的配置等相关的基本操作，让系统支持 .ddnrc.js、constants.js 等根据环境不同的配置文件，以及提供统一的错误处理机制。
+
+## 功能
+
+- **配置管理**：支持多环境配置文件
+- **错误处理**：提供统一的错误处理机制，包括错误类、错误码、错误格式化等功能
+- **工具函数**：提供常用的工具函数
+
+## 错误处理
+
+DDN Core 提供了一套完整的错误处理机制，详细文档请参考：[DDN 错误处理指南](./docs/guide.md)
 
 ## 配置文件
 
@@ -61,7 +71,7 @@ export default {
 // .ddnrc.js
 export default { a: 1, b: 2 };
 
-// DDN_ENV=cloud -> .ddnrc.cloud.js 
+// DDN_ENV=cloud -> .ddnrc.cloud.js
 export default { b: 'cloud', c: 'cloud' };
 
 // .ddnrc.local.js
