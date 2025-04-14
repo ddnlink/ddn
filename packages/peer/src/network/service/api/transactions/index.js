@@ -1,6 +1,19 @@
 import * as DdnCrypto from '@ddn/crypto'
 import DdnUtils, { LimitCache, checkAndReport, superviseTrs } from '@ddn/utils'
 
+// 实现一个健壮的错误处理函数
+function getErrorMsg(err) {
+  if (!err) return 'Unknown error';
+  if (err.message) return err.message;
+  if (typeof err === 'string') return err;
+  if (err.toString && typeof err.toString === 'function' && err.toString() !== '[object Object]') return err.toString();
+  try {
+    return JSON.stringify(err);
+  } catch (e) {
+    return 'Error object cannot be stringified';
+  }
+}
+
 /**
  * TransactionService 接口
  * wangxm   2019-03-21
@@ -526,10 +539,12 @@ class TransactionService {
       }
     } catch (err) {
       this._invalidTrsCache.set(transaction.id, true)
-      this.logger.warn(`Receive invalid transaction, transaction is ${JSON.stringify(transaction)}, ${err.message}`)
+      this.logger.debug(`Transaction error details: ${JSON.stringify(err, Object.getOwnPropertyNames(err))}`)
+      const errorMessage = getErrorMsg(err)
+      this.logger.warn(`Receive invalid transaction, transaction is ${JSON.stringify(transaction)}, error: ${errorMessage}`)
       result = {
         success: false,
-        error: err.message ? err.message : err
+        error: errorMessage
       }
     }
 

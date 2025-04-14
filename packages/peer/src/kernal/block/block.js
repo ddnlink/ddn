@@ -110,7 +110,7 @@ class Block {
       }
     } catch (e) {
       this.logger.error(e)
-      throw Error(e.toString())
+      throw Error(e.message || e.toString())
     }
 
     return block
@@ -166,12 +166,12 @@ class Block {
     try {
       return await this.dao.insert('block', newBlock, { transaction: dbTrans })
     } catch (err) {
-      this.logger.error(`insert block fail: ${err.toString()}`)
+      this.logger.error(`insert block fail: ${err.message || err.toString()}`)
       if (err instanceof Sequelize.UniqueConstraintError) {
         this.logger.warn(`Block ${block.id} already exists, skipping insertion`);
         return; // 不抛出错误，继续执行
       }
-      throw new Error(`insert block fail: ${err.toString()}`)
+      throw new Error(`insert block fail: ${err.message || err.toString()}`)
     }
   }
 
@@ -285,7 +285,7 @@ class Block {
       block.id = await this.getId(block)
     } catch (e) {
       this.logger.error(e)
-      throw new Error(e.toString())
+      throw new Error(e.message || e.toString())
     }
 
     return block
@@ -644,10 +644,10 @@ class Block {
           this.logger.warn(`Transaction ${transaction.id} has already been confirmed, continuing with block processing`);
           applyedTrsIdSet.add(transaction.id);
         } else {
-          this.logger.error(`Failed to apply transaction ${transaction.id}: ${err.toString()}`);
+          this.logger.error(`Failed to apply transaction ${transaction.id}: ${err.message || err.toString()}`);
           failedTransactions.push({
             id: transaction.id,
-            error: err.toString()
+            error: err.message || err.toString()
           });
           // 不抛出错误，继续处理其他交易
         }

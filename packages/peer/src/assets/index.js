@@ -4,6 +4,24 @@
  */
 import Loader from './loader'
 
+/**
+ * 处理错误对象，确保能够提取有用的错误信息
+ * @param {*} err 错误对象
+ * @returns {string} 格式化后的错误信息
+ */
+function getErrorMsg(err) {
+  if (!err) return 'Unknown error';
+  if (err instanceof Error) return err.message;
+  if (typeof err === 'string') return err;
+  if (err && err.message) return err.message;
+  if (err && err.toString && typeof err.toString === 'function' && err.toString() !== '[object Object]') return err.toString();
+  try {
+    return JSON.stringify(err);
+  } catch (e) {
+    return 'Unknown error object';
+  }
+}
+
 let _singleton
 
 class Assets {
@@ -71,7 +89,13 @@ class Assets {
       for (let i = 2; i < arguments.length; i++) {
         args.push(arguments[i])
       }
-      return await asset[method](...args)
+      try {
+        return await asset[method](...args)
+      } catch (err) {
+        // 确保错误对象有正确的格式
+        this.logger.debug(`Asset method ${method} error: ${JSON.stringify(err, Object.getOwnPropertyNames(err))}`)
+        throw new Error(getErrorMsg(err))
+      }
     }
     return null
   }

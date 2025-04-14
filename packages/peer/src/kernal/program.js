@@ -479,7 +479,19 @@ class Program {
       }
 
       // 转换状态为同步中
-      this.ctx.runtime.stateMachine.transitionTo('Syncing')
+      try {
+        this.ctx.runtime.stateMachine.transitionTo('Syncing')
+      } catch (err) {
+        // 如果状态转换失败，但已经在Syncing状态，可以继续
+        if (this.ctx.runtime.stateMachine.isSyncing()) {
+          this.ctx.logger.debug('Already in Syncing state, continuing with sync operation')
+        } else {
+          this.ctx.logger.error(`Failed to transition to Syncing state: ${err.message}`)
+          next(5)
+          return
+        }
+      }
+
       this._lastStateChangeTime = Date.now() // 记录状态变更时间
 
       // 标记正在进行实际的同步操作
@@ -490,6 +502,9 @@ class Program {
       let result;
       try {
         result = await this.ctx.runtime.peer.syncBlocks()
+      } catch (err) {
+        this.ctx.logger.error(`Sync blocks error: ${err.message}`)
+        result = false
       } finally {
         // 无论同步成功还是失败，都要清除标记
         this._activeSyncInProgress = false

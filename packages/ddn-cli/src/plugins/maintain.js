@@ -1,6 +1,6 @@
 import async from 'async'
 import request from 'request'
-import nodeSdk from '@ddn/node-sdk'
+import jsSdk from '@ddn/js-sdk'
 import Api from '../utils/api'
 
 let globalOptions
@@ -39,7 +39,7 @@ async function peerStat (argv) {
 
     // 获取节点列表
     const response = await makeRequest(`${baseUrl}/api/peers`)
-    
+
     if (!response || !response.success) {
       throw new Error('获取节点列表失败')
     }
@@ -50,19 +50,17 @@ async function peerStat (argv) {
       return
     }
 
-    console.log('正在请求 peers:', peers)
-
     // 并行获取所有节点的高度
     const heightPromises = peers.map(async peer => {
       // 使用 httpPort，如果没有则从 port 计算
       const httpPort = peer.httpPort || 8000
-      
+
       try {
         const url = `http://${peer.host}:${httpPort}/api/blocks/getHeight`
         console.log('正在请求:', url)
-        
+
         const body = await makeRequest(url)
-        
+
         if (!body || !body.success) {
           console.log(`${peer.host}:${httpPort} 响应错误:`, body)
           return null
@@ -88,7 +86,7 @@ async function peerStat (argv) {
       const heights = validResults.map(r => r.height)
       const maxHeight = Math.max(...heights)
       const minHeight = Math.min(...heights)
-      
+
       console.log('\n统计信息:')
       console.log(`总节点数: ${peers.length}`)
       console.log(`响应节点数: ${validResults.length}`)
@@ -167,8 +165,9 @@ function delegateStat () {
           d.balance / 100000000,
           b ? b.height : '',
           b ? b.id : '',
-          nodeSdk.utils.format.fullTimestamp(b ? b.timestamp : ''),
-          nodeSdk.utils.format.timeAgo(b ? b.timestamp : ''))
+          // 初始化 jsSdk 并获取 utils
+          jsSdk.utils.format.fullTimestamp(b ? b.timestamp : ''),
+          jsSdk.utils.format.timeAgo(b ? b.timestamp : ''))
       }
     })
   })

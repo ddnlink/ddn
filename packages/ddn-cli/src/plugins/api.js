@@ -1,7 +1,7 @@
 import fs from 'fs'
 import path from 'path'
 import * as DdnCrypto from '@ddn/crypto'
-import NodeSdk from '@ddn/node-sdk'
+import JsSdk from '@ddn/js-sdk'
 import { Compiler, GasCounter } from '@ddn/contract'
 import Api from '../utils/api'
 import blockHelper from '../utils/block'
@@ -111,7 +111,9 @@ function getPeers (options) {
 
 
 async function setSecondSecret (options) {
-  const trs = await NodeSdk.signature.createSignature(options.secret, options.newSecondSecret)
+  // 初始化 JsSdk
+  JsSdk.init()
+  const trs = await JsSdk.signature.createSignature(options.secret, options.newSecondSecret)
   getApi().broadcastTransaction(trs, function (err, result) {
     console.log(err || result.transactionId)
   })
@@ -129,7 +131,9 @@ async function registerDapp (options) {
   }
 
   const dapp = JSON.parse(fs.readFileSync(options.metafile, 'utf8'))
-  const trs = await NodeSdk.dapp.createDApp(dapp, options.secret, options.secondSecret)
+  // 初始化 JsSdk
+  JsSdk.init()
+  const trs = await JsSdk.dapp.createDApp(dapp, options.secret, options.secondSecret)
   getApi().broadcastTransaction(trs, function (err, result) {
     console.log(err || result.transactionId)
   })
@@ -141,7 +145,9 @@ async function deposit (options) {
     currency: options.currency,
     amount: options.amount
   }
-  const trs = await NodeSdk.assetPlugin.createPluginAsset(12, dapp, options.secret, options.secondSecret)
+  // 初始化 JsSdk
+  JsSdk.init()
+  const trs = await JsSdk.assetPlugin.createPluginAsset(12, dapp, options.secret, options.secondSecret)
   //   const trs = NodeSdk.transfer.createInTransfer(options.dapp, options.currency, options.amount, options.secret, options.secondSecret)
   getApi().broadcastTransaction(trs, function (err, result) {
     console.log(err || result.transactionId)
@@ -149,7 +155,9 @@ async function deposit (options) {
 }
 
 function dappTransaction (options) {
-  const trs = NodeSdk.dapp.createInnerTransaction(
+  // 初始化 JsSdk
+  JsSdk.init()
+  const trs = JsSdk.dapp.createInnerTransaction(
     {
       fee: options.fee,
       type: Number(options.type),
@@ -163,7 +171,9 @@ function dappTransaction (options) {
 }
 
 async function lock (options) {
-  const trs = await NodeSdk.transaction.createLock(options.height, options.secret, options.secondSecret)
+  // 初始化 JsSdk
+  JsSdk.init()
+  const trs = await JsSdk.transaction.createLock(options.height, options.secret, options.secondSecret)
   getApi().broadcastTransaction(trs, function (err, result) {
     console.log(err || result.transactionId)
   })
@@ -190,7 +200,9 @@ async function getTransactionBytes (options) {
     return
   }
 
-  const buff = await NodeSdk.crypto.getBytes(trs, true, true)
+  // 初始化 JsSdk
+  JsSdk.init()
+  const buff = await JsSdk.crypto.getBytes(trs, true, true)
   const hex = buff.toString('hex')
   console.log(hex)
 }
@@ -203,7 +215,9 @@ async function getTransactionId (options) {
     console.log('Invalid transaction format')
     return
   }
-  const trsId = await NodeSdk.crypto.getId(trs)
+  // 初始化 JsSdk
+  JsSdk.init()
+  const trsId = await JsSdk.crypto.getId(trs)
   console.log(trsId)
 }
 
@@ -217,7 +231,9 @@ async function getBlockPayloadHash (options) {
   }
   let payloadBytes = ''
   for (let i = 0; i < block.transactions.length; ++i) {
-    payloadBytes += await NodeSdk.crypto.getBytes(block.transactions[i])
+    // 初始化 JsSdk
+    JsSdk.init()
+    payloadBytes += await JsSdk.crypto.getBytes(block.transactions[i])
   }
   const payloadHash = DdnCrypto.createHash(Buffer.from(payloadBytes))
 
@@ -264,7 +280,9 @@ async function deployContract (options) {
 
   const code = options.code || fs.readFileSync(options.file, 'utf8')
   const opts = { name: options.name, desc: options.desc, gasLimit: options.gas, version: options.ver, code }
-  const trs = await NodeSdk.contract.deploy(opts, options.secret, options.secondSecret)
+  // 初始化 JsSdk
+  JsSdk.init()
+  const trs = await JsSdk.contract.deploy(opts, options.secret, options.secondSecret)
   console.log(trs)
   getApi().broadcastTransaction(trs, function (err, result) {
     console.log(err || result)
@@ -305,7 +323,9 @@ async function sendContract (options) {
     args
   }
 
-  const trs = await NodeSdk.contract.send(opts, options.secret, options.secondSecret)
+  // 初始化 JsSdk
+  JsSdk.init()
+  const trs = await JsSdk.contract.send(opts, options.secret, options.secondSecret)
   console.log(trs)
   getApi().broadcastTransaction(trs, function (err, result) {
     console.log(err || result)
@@ -347,7 +367,9 @@ async function payContract (options) {
     method: options.method,
     args
   }
-  const trs = await NodeSdk.contract.pay(opts, options.secret, options.secondSecret)
+  // 初始化 JsSdk
+  JsSdk.init()
+  const trs = await JsSdk.contract.pay(opts, options.secret, options.secondSecret)
   console.log(trs)
   getApi().broadcastTransaction(trs, function (err, result) {
     console.log(err || result)
@@ -505,7 +527,9 @@ async function compileContract (options) {
 }
 
 function verifyBytes (options) {
-  console.log(NodeSdk.crypto.verifyBytes(options.bytes, options.signature, options.publicKey))
+  // 初始化 JsSdk
+  JsSdk.init()
+  console.log(JsSdk.crypto.verifyBytes(options.bytes, options.signature, options.publicKey))
 }
 
 export {

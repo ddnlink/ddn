@@ -14,7 +14,7 @@ const mainnet_config = {
 }
 
 // todo: 确认一下，属性函数是否可以这样用
-const { config, constants } = DdnJS.setup(mainnet_config)
+const { config, constants } = DdnJS.init(mainnet_config)
 
 console.log('ddn-js config', config)
 console.log('ddn-js constants', constants)

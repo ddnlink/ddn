@@ -5,7 +5,7 @@ import request from 'request'
 import accountHelper from '../utils/account.js'
 import dappHelper from '../utils/dapp.js'
 import { prompt } from '../utils/prompt'
-import NodeSdk from '@ddn/node-sdk'
+import JsSdk from '@ddn/js-sdk'
 import { getApi } from './api'
 
 function bip39Validator (input) {
@@ -139,7 +139,9 @@ async function depositDapp () {
     // }
   )
 
-  var trs = await NodeSdk.transfer.createInTransfer(
+  // 初始化 JsSdk
+  JsSdk.init()
+  var trs = await JsSdk.transfer.createInTransfer(
     result.dapp_id,
     result.currency,
     result.amount,

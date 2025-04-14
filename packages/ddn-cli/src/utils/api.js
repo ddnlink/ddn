@@ -1,6 +1,6 @@
 /* eslint-disable standard/no-callback-literal */
 import request from 'request'
-import NodeSdk from '@ddn/node-sdk'
+import JsSdk from '@ddn/js-sdk'
 
 function resultHandler (cb) {
   return (err, res, body) => {
@@ -30,7 +30,9 @@ class Api {
     this.host = this.options.host || '127.0.0.1'
     this.port = this.options.port || (this.isMainnet ? 8000 : 8001)
     this.baseUrl = `http://${this.host}:${this.port}`
-    this.nethash = NodeSdk.constants.nethash
+    // 初始化 JsSdk 并获取 constants
+    const { constants } = JsSdk.init()
+    this.nethash = constants.nethash
   }
 
   get (path, params, cb) {

@@ -254,6 +254,27 @@ class PeerSync {
         const expectedHeight = bignum.plus(lastBlock.height, 1).toString()
         if (block.height !== expectedHeight) {
           this.logger.info(`Expected block height ${expectedHeight}, but got ${block.height}`)
+
+          // 如果收到的区块高度小于当前高度，尝试找到共同区块并回滚
+          if (bignum.isLessThan(block.height, lastBlock.height)) {
+            this.logger.warn(`Received block with lower height (${block.height}) than current (${lastBlock.height}). Attempting to find common block and rollback.`)
+
+            try {
+              // 尝试找到共同区块
+              const commonBlock = await this.runtime.block.getCommonBlock(block)
+              if (commonBlock) {
+                this.logger.info(`Found common block at height ${commonBlock.height}. Rolling back to this height.`)
+                await this.runtime.block.rollbackToBlock(commonBlock.height)
+
+                // 重置当前循环，重新处理当前区块
+                j--;
+                continue;
+              }
+            } catch (err) {
+              this.logger.error(`Failed to handle lower height block: ${err.message}`)
+            }
+          }
+
           return null
         }
 

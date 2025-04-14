@@ -23,8 +23,8 @@
   ],
   "scripts": {
     "dev": "ddn-scripts peers:start",
-    "build": "turbo build  --force --no-cache",
-    "build:dev": "NODE_ENV=development node ./scripts/initCryptoDependent.js && father build -w",
+    "build": "NODE_ENV=production DDN_NAME=ddn turbo build --force --no-cache",
+    "build:dev": "NODE_ENV=development turbo build --force --no-cache",
     "build:docker": "node ./scripts/initCryptoDependent.js && father build --docker",
     "test": "jest",
     "test:e2e": "jest --config jest.e2e.config.ts",

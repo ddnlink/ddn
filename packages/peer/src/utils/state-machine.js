@@ -21,7 +21,7 @@ export class StateMachine {
   // State transition rules
   static TRANSITIONS = {
     [this.States.Pending]: [this.States.Ready, this.States.Syncing, this.States.Rollback],
-    [this.States.Syncing]: [this.States.Ready, this.States.Pending, this.States.Fork],
+    [this.States.Syncing]: [this.States.Ready, this.States.Pending, this.States.Fork, this.States.Syncing],
     [this.States.Ready]: [this.States.Syncing, this.States.Fork, this.States.Rollback],
     [this.States.Rollback]: [this.States.Ready, this.States.Syncing],
     [this.States.Fork]: [this.States.Syncing, this.States.Ready]
@@ -47,6 +47,16 @@ export class StateMachine {
       newState = StateMachine.States[newState];
       if (newState === undefined) {
         throw new Error(`Invalid state name: ${newState}`);
+      }
+    }
+
+    // 如果是相同状态转换，特殊处理
+    if (this._state === newState) {
+      // 对于 Syncing 状态，允许重新进入同步状态
+      if (this._state === StateMachine.States.Syncing) {
+        // 只更新时间戳，不抛出错误
+        this._stateChangeTime = Date.now();
+        return;
       }
     }
 

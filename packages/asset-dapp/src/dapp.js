@@ -10,6 +10,11 @@ import valid_url from 'valid-url'
 import ByteBuffer from 'bytebuffer'
 import dappCategory from './dapp/dapp-category.js'
 
+// 实现一个简单的错误处理函数
+function getErrorMsg(err) {
+  return err.message ? err.message : err.toString();
+}
+
 const WITNESS_CLUB_DAPP_NAME = 'DDN-FOUNDATION'
 
 const _dappInstalling = {}
@@ -399,7 +404,7 @@ class Dapp extends Asset.Base {
         const result = await self.postUninstallDapp(req, res)
         res.json(result)
       } catch (err) {
-        res.json({ success: false, error: err.message || err.toString() })
+        res.json({ success: false, error: getErrorMsg(err) })
       }
     })
 
@@ -408,7 +413,7 @@ class Dapp extends Asset.Base {
         const result = await self.postLaunchDapp(req, res)
         res.json(result)
       } catch (err) {
-        res.json({ success: false, error: err.message || err.toString() })
+        res.json({ success: false, error: getErrorMsg(err) })
       }
     })
 
@@ -417,7 +422,7 @@ class Dapp extends Asset.Base {
         const result = await self.getLaunchDappLastError(req, res)
         res.json(result)
       } catch (err) {
-        res.json({ success: false, error: err.message || err.toString() })
+        res.json({ success: false, error: getErrorMsg(err) })
       }
     })
 
@@ -426,7 +431,7 @@ class Dapp extends Asset.Base {
         const result = await self.postStopDapp(req, res)
         res.json(result)
       } catch (err) {
-        res.json({ success: false, error: err.message || err.toString() })
+        res.json({ success: false, error: getErrorMsg(err) })
       }
     })
 
@@ -439,7 +444,7 @@ class Dapp extends Asset.Base {
 
         return res.json({ success: true, installing: ids })
       } catch (err) {
-        res.json({ success: false, error: err.message || err.toString() })
+        res.json({ success: false, error: getErrorMsg(err) })
       }
     })
 
@@ -1539,8 +1544,8 @@ class Dapp extends Asset.Base {
   // Shared
   async getGenesis (req) {
     const rows = await this.dao.execSql(
-      `SELECT b.height as height, b.id as id, GROUP_CONCAT(m.dependentId) as multisignature, t.senderId as authorId FROM trs t 
-    inner join blocks b on t.blockId = b.id and t.id = ? 
+      `SELECT b.height as height, b.id as id, GROUP_CONCAT(m.dependentId) as multisignature, t.senderId as authorId FROM trs t
+    inner join blocks b on t.blockId = b.id and t.id = ?
     left outer join mem_accounts2multisignatures m on m.accountId = t.senderId and t.id = ?`,
       {
         replacements: [req.dappId, req.dappId]
@@ -1734,8 +1739,8 @@ class Dapp extends Asset.Base {
     const replacements = [assetTypes.DAPP_IN, req.dappId]
     if (req.body.lastTransactionId) replacements.push(req.body.lastTransactionId)
     return await this.dao.execSql(
-      `SELECT t.id as id, lower(hex(t.senderPublicKey)) as senderPublicKey, t.amount as amount, dt.currency as currency, dt.amount as amount2 FROM trs t 
-    inner join blocks b on t.blockId = b.id and t.type = ? 
+      `SELECT t.id as id, lower(hex(t.senderPublicKey)) as senderPublicKey, t.amount as amount, dt.currency as currency, dt.amount as amount2 FROM trs t
+    inner join blocks b on t.blockId = b.id and t.type = ?
     inner join intransfer dt on dt.transactionId = t.id and dt.dappId = ?
     ${
       req.body.lastTransactionId

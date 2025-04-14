@@ -27,7 +27,7 @@
     "@ddn/asset-evidence": "workspace:^",
     "@ddn/contract": "workspace:^",
     "@ddn/crypto": "workspace:^",
-    "@ddn/node-sdk": "workspace:^",
+    "@ddn/js-sdk": "workspace:^",
     "@ddn/utils": "workspace:^",
     "async": "^2.6.1",
     "bytebuffer": "^5.0.1",

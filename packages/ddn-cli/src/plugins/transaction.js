@@ -1,6 +1,6 @@
 import fs from 'fs'
 import path from 'path'
-import NodeSdk from '@ddn/node-sdk'
+import JsSdk from '@ddn/js-sdk'
 import Api from '../utils/api'
 
 let globalOptions
@@ -23,7 +23,7 @@ function getUnconfirmedTransactions (options) {
       console.log(err || pretty(result.transactions))
     })
   }
-  
+
   function getTransactions (options) {
     const params = {
       blockId: options.blockId,
@@ -42,23 +42,25 @@ function getUnconfirmedTransactions (options) {
       console.log(err || pretty(result.transactions))
     })
   }
-  
+
   function getTransaction (id) {
     const params = { id: id }
     getApi().get('/api/transactions/get', params, function (err, result) {
       console.log(err || pretty(result.transaction))
     })
   }
-  
+
   async function sendToken (options) {
-    const trs = await NodeSdk.transaction.createTransaction(
+    // 初始化 JsSdk
+    JsSdk.init()
+    const trs = await JsSdk.transaction.createTransaction(
       options.to,
       options.amount + '',
       options.message,
       options.secret,
       options.secondSecret
     )
-  
+
     getApi().broadcastTransaction(trs, function (err, result) {
       console.log(err || result.transactionId)
     })
@@ -71,13 +73,15 @@ function getUnconfirmedTransactions (options) {
         const lines = fs.readFileSync(accountsFile, 'utf8').split('\n')
         for (const i in lines) {
           const parts = lines[i].split(', ')
-  
+
           if (parts.length !== 2) {
             console.error(`Invalid recipient balance format ${lines[i]}`)
             break
           }
-  
-        const trs = await NodeSdk.transaction.createTransaction(
+
+        // 初始化 JsSdk
+        JsSdk.init()
+        const trs = await JsSdk.transaction.createTransaction(
             parts[0],
             parts[1] + '',
             '',
@@ -86,14 +90,14 @@ function getUnconfirmedTransactions (options) {
           )
 
           console.log(`Sending ${parts[1]} DDN to ${parts[0]}， trs: `, JSON.stringify(trs.nethash))
-        
+
           getApi().broadcastTransaction(trs, function (err, result) {
             console.log(err || result.transactionId)
           })
         }
       }
   }
-  
+
   async function sendAsset (options) {
     const obj = {
       recipientId: options.to,
@@ -101,8 +105,10 @@ function getUnconfirmedTransactions (options) {
       aobAmount: options.amount + '',
       message: options.message
     }
-    const trs = await NodeSdk.assetPlugin.createPluginAsset(65, obj, options.secret, options.secondSecret)
-  
+    // 初始化 JsSdk
+    JsSdk.init()
+    const trs = await JsSdk.assetPlugin.createPluginAsset(65, obj, options.secret, options.secondSecret)
+
     getApi().broadcastTransaction(trs, function (err, result) {
       console.log(err || result.transactionId)
     })

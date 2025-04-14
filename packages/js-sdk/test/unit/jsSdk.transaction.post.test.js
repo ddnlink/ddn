@@ -9,8 +9,8 @@ import { DdnJS, node } from '../ddn-js'
 
 // import { setup } from '../'
 // const constants = setup().constants
-// console.log('jsSdk.transaction.test config', config)
-// console.log('jsSdk.transaction.test constants', constants)
+console.log('jsSdk.transaction.test config', node.config)
+console.log('jsSdk.transaction.test constants', node.constants)
 
 const debug = Debug('debug')
 

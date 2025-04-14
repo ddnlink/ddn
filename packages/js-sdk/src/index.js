@@ -15,10 +15,11 @@ import exchange from './transactions/exchange'
 import coupon from './transactions/coupon'
 import assetPlugin from './transactions/asset-plugin'
 import * as utils from './utils'
-import { setup } from './config'
+import { init, setup } from './config'
 
 export default {
-  setup, 
+  init,
+  setup, // 为了向后兼容保留
   // utils
   utils,
   crypto,

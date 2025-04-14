@@ -1,6 +1,11 @@
 import Asset from '@ddn/asset-base'
 import DdnUtils from '@ddn/utils'
 
+// 实现一个简单的错误处理函数
+function getErrorMsg(err) {
+  return err.message ? err.message : err.toString();
+}
+
 class Evidence extends Asset.Base {
   // eslint-disable-next-line no-useless-constructor
   constructor (context, transactionConfig) {
@@ -30,7 +35,7 @@ class Evidence extends Asset.Base {
         const result = await this.queryAsset({ short_hash: req.params.short_hash }, null, false, 1)
         res.json({ success: true, result: result[0] })
       } catch (err) {
-        res.json({ success: false, error: err.message || err.toString() })
+        res.json({ success: false, error: getErrorMsg(err) })
       }
     })
     router.get('/address/:address', async (req, res) => {
@@ -38,7 +43,7 @@ class Evidence extends Asset.Base {
         const result = await this.queryAsset({ address: req.params.address }, null, false, 1)
         res.json({ success: true, result })
       } catch (err) {
-        res.json({ success: false, error: err.message || err.toString() })
+        res.json({ success: false, error: getErrorMsg(err) })
       }
     })
     // 根据type统计数据，根据时间过滤
@@ -61,7 +66,7 @@ class Evidence extends Asset.Base {
         })
         res.json({ success: true, result })
       } catch (err) {
-        res.json({ success: false, error: err.message || err.toString() })
+        res.json({ success: false, error: getErrorMsg(err) })
       }
     })
     // 根据author统计数据，根据时间过滤

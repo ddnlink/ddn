@@ -9,6 +9,24 @@ import * as DdnCrypto from '@ddn/crypto'
 import { getId } from '@ddn/crypto'
 import Assets from '../../assets'
 
+/**
+ * 处理错误对象，确保能够提取有用的错误信息
+ * @param {*} err 错误对象
+ * @returns {string} 格式化后的错误信息
+ */
+function getErrorMsg(err) {
+  if (!err) return 'Unknown error';
+  if (err instanceof Error) return err.message;
+  if (typeof err === 'string') return err;
+  if (err && err.message) return err.message;
+  if (err && err.toString && typeof err.toString === 'function' && err.toString() !== '[object Object]') return err.toString();
+  try {
+    return JSON.stringify(err);
+  } catch (e) {
+    return 'Unknown error object';
+  }
+}
+
 let _singleton
 
 class Transaction {
@@ -450,7 +468,7 @@ class Transaction {
     } catch (err) {
       await this.removeUnconfirmedTransaction(transaction.id)
       this.logger.debug('Add unconfirmed transaction fail, the tran is removted')
-      throw new Error(`Add unconfirmed transaction, ${err}`)
+      throw new Error(`Add unconfirmed transaction, ${getErrorMsg(err)}`)
     }
   }
 
@@ -505,7 +523,11 @@ class Transaction {
     }
     trs.senderId = sender.address // wxm block database
 
-    trs = await this._assets.call(trs.type, 'process', trs, sender)
+    try {
+      trs = await this._assets.call(trs.type, 'process', trs, sender)
+    } catch (err) {
+      throw new Error(`Asset process failed: ${getErrorMsg(err)}`)
+    }
 
     try {
       const count = await this.dao.count('tr', { where: { id: trs.id } })
@@ -525,35 +547,69 @@ class Transaction {
       throw new Error('No transaction to process!')
     }
     if (!transaction.id) {
-      transaction.id = await getId(transaction)
+      try {
+        transaction.id = await getId(transaction)
+      } catch (err) {
+        throw new Error(`Failed to get transaction ID: ${getErrorMsg(err)}`)
+      }
     }
     // Check transaction indexes
     if (this._unconfirmedTransactionsIdIndex[transaction.id] !== undefined) {
       throw new Error(`Transaction ${transaction.id} already exists, ignoring...`)
     }
 
-    await this.runtime.account.setAccount({
-      publicKey: transaction.senderPublicKey
-    })
-    const sender = await this.runtime.account.getAccountByPublicKey(transaction.senderPublicKey, dbTrans)
+    try {
+      await this.runtime.account.setAccount({
+        publicKey: transaction.senderPublicKey
+      })
+    } catch (err) {
+      throw new Error(`Failed to set account: ${getErrorMsg(err)}`)
+    }
+
+    let sender
+    try {
+      sender = await this.runtime.account.getAccountByPublicKey(transaction.senderPublicKey, dbTrans)
+    } catch (err) {
+      throw new Error(`Failed to get sender account: ${getErrorMsg(err)}`)
+    }
 
     let requester
     if (transaction.requester_public_key && sender && sender.multisignatures && sender.multisignatures.length) {
       // wxm block database
-      requester = await this.runtime.account.getAccountByPublicKey(transaction.requester_public_key, dbTrans)
-      if (!requester) {
-        throw new Error('Invalid requester')
+      try {
+        requester = await this.runtime.account.getAccountByPublicKey(transaction.requester_public_key, dbTrans)
+        if (!requester) {
+          throw new Error('Invalid requester')
+        }
+      } catch (err) {
+        throw new Error(`Failed to get requester account: ${getErrorMsg(err)}`)
       }
     }
-    transaction = await this.process(transaction, sender, requester)
-    await this.verify(transaction, sender, requester)
-    await this.addUnconfirmedTransaction(transaction, sender)
+
+    try {
+      transaction = await this.process(transaction, sender, requester)
+    } catch (err) {
+      throw new Error(`Failed to process transaction: ${getErrorMsg(err)}`)
+    }
+
+    try {
+      await this.verify(transaction, sender, requester)
+    } catch (err) {
+      throw new Error(`Failed to verify transaction: ${getErrorMsg(err)}`)
+    }
+
+    try {
+      await this.addUnconfirmedTransaction(transaction, sender)
+    } catch (err) {
+      // 这里不需要再包装错误，因为addUnconfirmedTransaction已经处理了错误格式
+      throw err
+    }
     if (broadcast) {
       setImmediate(async () => {
         try {
           await this.runtime.peer.broadcast.broadcastUnconfirmedTransaction(transaction)
         } catch (err) {
-          this.logger.error(`Broadcast unconfirmed transaction failed: ${System.getErrorMsg(err)}`)
+          this.logger.error(`Broadcast unconfirmed transaction failed: ${getErrorMsg(err)}`)
         }
       })
     }
@@ -770,7 +826,12 @@ class Transaction {
       })
       throw new Error('Invalid transaction timestamp')
     }
-    return await this._assets.call(trs.type, 'verify', trs, sender)
+    try {
+      return await this._assets.call(trs.type, 'verify', trs, sender)
+    } catch (err) {
+      this.logger.debug(`Asset verify failed: ${JSON.stringify(err, Object.getOwnPropertyNames(err))}`)
+      throw new Error(`Asset verify failed: ${getErrorMsg(err)}`)
+    }
   }
 
   // TODO: 与 @ddn/crypto 同名方法不同

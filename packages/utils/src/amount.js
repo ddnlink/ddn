@@ -2,8 +2,8 @@ import bignum from './bignumber'
 
 const amount = {
   /**
-   * Validate the validity of an amount.
-   * @param {string} amount - The amount to validate, should be a string.
+   * Validate the validity of an amount. 
+   * @param {string} amount - The amount to validate, should be a string or a number.
    * @returns {Object} - An object containing validation result and message.
    *  - valid: {boolean} - Whether the validation passed.
    *  - message: {string} - Error message if validation fails.
@@ -27,7 +27,7 @@ const amount = {
       return { valid: false, message: 'Invalid amount range' };
     }
     // All checks passed, return validation success.
-    return { valid: true, message: '' };
+    return { valid: true, message: 'Amount is valid!' };
   },
 
   /**

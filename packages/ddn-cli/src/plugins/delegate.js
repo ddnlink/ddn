@@ -1,6 +1,6 @@
 import fs from 'fs'
 import path from 'path'
-import NodeSdk from '@ddn/node-sdk'
+import JsSdk from '@ddn/js-sdk'
 import Api from '../utils/api'
 import { log } from 'console'
 
@@ -69,7 +69,9 @@ function getDelegateByUsername(username) {
 }
 
 async function registerDelegate(options) {
-    const trs = await NodeSdk.delegate.createDelegate(options.username, options.secret, options.secondSecret)
+    // 初始化 JsSdk
+    JsSdk.init()
+    const trs = await JsSdk.delegate.createDelegate(options.username, options.secret, options.secondSecret)
     getApi().broadcastTransaction(trs, function (err, result) {
         console.log(err || result.transactionId)
     })
@@ -81,7 +83,9 @@ async function registerDelegates(options) {
     if (file && fs.existsSync(file)) {
         const fileObject = require(file)
         fileObject['Accounts'].forEach(async (item) => {
-            const trs = await NodeSdk.delegate.createDelegate(item.username, item.secret, item.secondSecret)
+            // 初始化 JsSdk
+            JsSdk.init()
+            const trs = await JsSdk.delegate.createDelegate(item.username, item.secret, item.secondSecret)
 
             getApi().broadcastTransaction(trs, function (err, result) {
                 console.log(`Registed ${item.username} success!`)
@@ -156,7 +160,9 @@ async function vote(secret, publicKeys, op, secondSecret) {
     const votes = publicKeys.split(',').map(function (el) {
         return op + el
     })
-    const trs = await NodeSdk.vote.createVote(votes, secret, secondSecret)
+    // 初始化 JsSdk
+    JsSdk.init()
+    const trs = await JsSdk.vote.createVote(votes, secret, secondSecret)
     getApi().broadcastTransaction(trs, function (err, result) {
         console.log(err || result.transactionId)
     })
@@ -172,7 +178,9 @@ function upvotes(options) {
     if (file && fs.existsSync(file)) {
         const delegates = require(file)
         const publicKeys = delegates['Accounts'].map((item) => {
-            return NodeSdk.crypto.getKeys(item.secret).publicKey
+            // 初始化 JsSdk
+            JsSdk.init()
+            return JsSdk.crypto.getKeys(item.secret).publicKey
         })
         console.log("publicKeys: ", publicKeys)
 
