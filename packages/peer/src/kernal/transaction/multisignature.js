@@ -3,7 +3,7 @@ import { System } from '../../utils/system'
 
 let _singleton
 
-class MultiSignature {
+export class MultiSignature {
   static singleton (context) {
     if (!_singleton) {
       _singleton = new MultiSignature(context)

@@ -15,15 +15,14 @@ import { bignum } from '@ddn/utils'
 
 import Context from './context'
 import Block from './block/block'
-import Transaction from './transaction/transaction'
+import { Transaction, MultiSignature } from './transaction'
 import Account from './account/account'
 import {
   Slot,
   Round,
   Delegate,
   Consensus,
-  DataQuery,
-  MultiSignature
+  DataQuery
 } from './consensus'
 
 import Peer from './peer/peer'
@@ -115,7 +114,7 @@ class Program {
 
     // 将 startBlockDataSyncTask 方法添加到 runtime 对象中，供其他模块使用
     const self = this;
-    this.ctx.runtime.startBlockDataSyncTask = function() {
+    this.ctx.runtime.startBlockDataSyncTask = function () {
       return self.startBlockDataSyncTask();
     }
 
@@ -417,9 +416,9 @@ class Program {
       const lastStateChangeTime = this._lastStateChangeTime || 0
       const currentTime = Date.now()
 
-      // 如果处于Pending状态超过5分钟，尝试恢复到Syncing状态
+      // 如果处于Pending状态超过3分钟，尝试恢复到Syncing状态
       if (this.ctx.runtime.stateMachine.isPending() &&
-          (currentTime - lastStateChangeTime > 5 * 60 * 1000)) {
+        (currentTime - lastStateChangeTime > 3 * 60 * 1000)) {
         this.ctx.logger.warn('System has been in Pending state for too long, attempting recovery')
         try {
           // 尝试转换到Syncing状态

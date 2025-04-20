@@ -1,5 +1,4 @@
-import { setup } from '../../config'
-const constants = setup().constants
+import { constants } from '../../config'
 
 const interval = constants.interval
 const delegates = constants.delegates

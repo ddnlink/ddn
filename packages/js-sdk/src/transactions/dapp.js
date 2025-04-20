@@ -1,8 +1,7 @@
 import ByteBuffer from 'bytebuffer'
 import { bignumber, assetTypes, slots } from '../utils'
 import * as crypto from '../crypto'
-import { setup } from '../config'
-const constants = setup().constants
+import { constants } from '../config'
 
 async function createDApp (options, secret, secondSecret) {
   const keys = crypto.getKeys(secret)

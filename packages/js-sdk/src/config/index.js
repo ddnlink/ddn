@@ -1,11 +1,14 @@
 import _ from 'lodash'
 import Debug from 'debug'
-
-import constants_devnet from './constants.dev'
-import constants_ddnnet from './constants.ddn'
-import defaultConfig from './ddnrc'
-
 const debug = Debug('debug')
+
+// DDN Devnet 
+import constants_devnet from './constants.dev'
+import config_devnet from './ddnrc.dev'
+
+// DDN Mainnet
+import constants_ddnnet from './constants.ddn'
+import config_ddnnet from './ddnrc.ddn'
 
 /**
  * Initialize SDK configuration
@@ -42,6 +45,7 @@ const debug = Debug('debug')
  * console.log(config.net); // 'mainnet'
  */
 function init(newConfig = {}) {
+    let defaultConfig = process.env.DDN_NAME && process.env.DDN_NAME === 'ddn' ? config_ddnnet : config_devnet
     let config = {};
 
     // Merge with global configuration (window.DdnJS.config)
@@ -59,42 +63,10 @@ function init(newConfig = {}) {
             config = { ...config, ...window.DdnJS.config };
             debug('merged with global DdnJS.config:', config);
         }
-    } else {
-        // In Node.js environment, we can use environment variables or other config sources
-        debug('Running in Node.js environment');
-        // We don't throw an error anymore, allowing Node.js usage
-
-        // 从环境变量中获取网络类型
-        if (process.env.DDN_NET) {
-            debug('Using network from DDN_NET env:', process.env.DDN_NET);
-            // 将环境变量中的网络类型存储到临时变量中，稍后合并到配置中
-            config.net = process.env.DDN_NET;
-        }
     }
 
     // Merge initial configuration with defaults
     config = { ...defaultConfig, ...config, ...newConfig }
-
-    // Environment variable injection (process.env.DDN_CONFIG)
-    if (process.env.DDN_NET) {
-        // 确保 DDN_NET 环境变量有最高优先级
-        config.net = process.env.DDN_NET;
-        debug('Applied DDN_NET environment variable:', config.net);
-    }
-
-    if (process.env.DDN_CONFIG && process.env.DDN_CONFIG !== 'undefined') {
-        try {
-            const envConfig = JSON.parse(process.env.DDN_CONFIG);
-            Object.assign(config, envConfig);
-
-            // 如果同时设置了 DDN_NET 和 DDN_CONFIG，确保 DDN_NET 优先
-            if (process.env.DDN_NET) {
-                config.net = process.env.DDN_NET;
-            }
-        } catch (e) {
-            throw e
-        }
-    }
 
     debug('Final merged config:', config)
 
@@ -112,6 +84,4 @@ function init(newConfig = {}) {
 }
 
 // 为了向后兼容，保留 setup 方法
-const setup = init;
-
-export { init, setup }
+export const { config, constants } = init();

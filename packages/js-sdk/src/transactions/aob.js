@@ -1,14 +1,11 @@
+import DEBUG from 'debug'
 import { bignumber, assetTypes, slots } from '../utils'
 import * as DdnCrypto from '../crypto'
-import { setup } from '../config'
-const constants = setup(
+import { constants } from '../config'
 
-  {
-    net: 'mainnet',
-  }
-).constants
+const debug = DEBUG('debug');
 
-console.log('aob.js createTransaction constants: ', constants)
+// debug('aob.js createTransaction constants: ', constants)
 
 function getClientFixedTime () {
   return slots.getTime() - 5

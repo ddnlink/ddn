@@ -10,6 +10,9 @@ const fs = require('fs')
 const DdnCore = require('@ddn/core')
 const DdnPeer = require('@ddn/peer').default
 
+// 默认为开发环境
+process.env.NODE_ENV = process.env.NODE_ENV || 'developmment'
+
 /**
  * 整理系统配置文件生成输入参数
  */

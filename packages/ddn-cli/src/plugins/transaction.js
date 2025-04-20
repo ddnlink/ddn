@@ -52,7 +52,7 @@ function getUnconfirmedTransactions (options) {
 
   async function sendToken (options) {
     // 初始化 JsSdk
-    JsSdk.init()
+    
     const trs = await JsSdk.transaction.createTransaction(
       options.to,
       options.amount + '',
@@ -80,7 +80,7 @@ function getUnconfirmedTransactions (options) {
           }
 
         // 初始化 JsSdk
-        JsSdk.init()
+        
         const trs = await JsSdk.transaction.createTransaction(
             parts[0],
             parts[1] + '',
@@ -106,7 +106,7 @@ function getUnconfirmedTransactions (options) {
       message: options.message
     }
     // 初始化 JsSdk
-    JsSdk.init()
+    
     const trs = await JsSdk.assetPlugin.createPluginAsset(65, obj, options.secret, options.secondSecret)
 
     getApi().broadcastTransaction(trs, function (err, result) {

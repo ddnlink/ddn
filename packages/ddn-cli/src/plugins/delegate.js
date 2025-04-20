@@ -70,7 +70,7 @@ function getDelegateByUsername(username) {
 
 async function registerDelegate(options) {
     // 初始化 JsSdk
-    JsSdk.init()
+    
     const trs = await JsSdk.delegate.createDelegate(options.username, options.secret, options.secondSecret)
     getApi().broadcastTransaction(trs, function (err, result) {
         console.log(err || result.transactionId)
@@ -84,7 +84,7 @@ async function registerDelegates(options) {
         const fileObject = require(file)
         fileObject['Accounts'].forEach(async (item) => {
             // 初始化 JsSdk
-            JsSdk.init()
+            
             const trs = await JsSdk.delegate.createDelegate(item.username, item.secret, item.secondSecret)
 
             getApi().broadcastTransaction(trs, function (err, result) {
@@ -161,7 +161,7 @@ async function vote(secret, publicKeys, op, secondSecret) {
         return op + el
     })
     // 初始化 JsSdk
-    JsSdk.init()
+    
     const trs = await JsSdk.vote.createVote(votes, secret, secondSecret)
     getApi().broadcastTransaction(trs, function (err, result) {
         console.log(err || result.transactionId)
@@ -179,7 +179,7 @@ function upvotes(options) {
         const delegates = require(file)
         const publicKeys = delegates['Accounts'].map((item) => {
             // 初始化 JsSdk
-            JsSdk.init()
+            
             return JsSdk.crypto.getKeys(item.secret).publicKey
         })
         console.log("publicKeys: ", publicKeys)

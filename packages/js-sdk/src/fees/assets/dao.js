@@ -1,6 +1,5 @@
 import { bignumber } from '../../utils'
-import { setup } from '../../config'
-const constants = setup().constants
+import { constants } from '../../config'
 
 export default {
   daoOrg: async asset => {

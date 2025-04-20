@@ -54,36 +54,6 @@ class VotesRouter {
       throw new Error('Account not found')
     }
 
-    // const mem_accounts = await new Promise((reslove, reject) => {
-    //   this.dao.findPage('mem_account', {where: filter, limit: limit || 1000, offset, attributes: fields, order: sort}, (err, data) => {
-    //     if (err) {
-    //       return reject(err)
-    //     }
-
-    //     reslove(data)
-    //   })
-    // })
-    // const mem_account_ids = mem_accounts.map(({ address }) => address)
-    // const delegates = await new Promise((reslove, reject) => {
-    //   this.dao.findListByGroup('mem_accounts2delegate', {
-    //     account_id: {
-    //       $in: mem_account_ids
-    //     } // wxm block database
-    //   }, {
-    //     limit: mem_account_ids.length,
-    //     offset: 0,
-    //     group: ['account_id'],
-    //     attributes: [
-    //       [this.dao.db_fnGroupConcat('dependent_id'), 'delegates'], 'account_id'
-    //     ]
-    //   }, (err, data) => {
-    //     if (err) {
-    //       return reject(err)
-    //     }
-    //     reslove(data)
-    //   }) 100 0000 0000 0000 0000
-    // })
-
     if (account.delegates) {
       const delegates = await this.runtime.account.getAccountList(
         {

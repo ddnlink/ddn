@@ -140,7 +140,7 @@ async function depositDapp () {
   )
 
   // 初始化 JsSdk
-  JsSdk.init()
+  
   var trs = await JsSdk.transfer.createInTransfer(
     result.dapp_id,
     result.currency,

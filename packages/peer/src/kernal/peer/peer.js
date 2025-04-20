@@ -12,7 +12,7 @@
 import path from 'path'
 import { P2P } from '@ddn/p2p'
 import Router from './peer-router'
-import PeerSync from './peer-sync'
+import { BlockSync, TransactionSync, SignatureSync } from './peer-sync'
 import PeerBroadcast from './peer-broadcast'
 
 let _singleton
@@ -96,25 +96,39 @@ class Peer {
    * 从随机节点同步区块数据
    */
   async syncBlocks () {
-    return await PeerSync.singleton(this.ctx).trySyncBlockData()
+    return await BlockSync.singleton(this.ctx).syncBlockData()
   }
 
   /**
    * 从指定节点的某个高度同步区块数据
    */
   async syncBlocksFromPeer (peer, fromHeight) {
-    return await PeerSync.singleton(this.ctx)._cloneBlocksFromPeer(peer, fromHeight)
+    return await BlockSync.singleton(this.ctx)._cloneBlocksFromPeer(peer, fromHeight)
   }
 
   async syncSignatures () {
-    return await PeerSync.singleton(this.ctx).trySyncSignatures()
+    return await SignatureSync.singleton(this.ctx).syncSignatures()
   }
 
   /**
    * 从随机节点同步未确认交易
    */
   async syncUnconfirmedTransactions () {
-    return await PeerSync.singleton(this.ctx).trySyncUnconfirmedTransactions()
+    return await TransactionSync.singleton(this.ctx).syncUnconfirmedTransactions()
+  }
+
+  /**
+   * 获取当前活跃连接数
+   * @returns {number} 活跃连接数
+   */
+  async getActiveConnectionCount () {
+    try {
+      const peers = await this.getPeers()
+      return peers ? peers.length : 0
+    } catch (err) {
+      this.logger.error(`获取活跃连接数失败: ${err.message}`)
+      return 0
+    }
   }
 
   // Sidechains

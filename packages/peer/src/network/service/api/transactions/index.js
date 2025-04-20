@@ -491,6 +491,16 @@ class TransactionService {
       }
     }
 
+    // 如果传入的是字符串形式的交易数据
+    if (typeof body === 'string') {
+      body = JSON.parse(body)
+    }
+
+    // 如果传入的是直接的交易对象，将其包装在 transaction 字段中
+    if (!body.transaction && (body.type !== undefined || body.amount !== undefined)) {
+      body = { transaction: body }
+    }
+
     if (typeof body.transaction === 'string') {
       body.transaction = this.protobuf.decodeTransaction(Buffer.from(body.transaction, 'base64'))
     }

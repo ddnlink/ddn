@@ -1,7 +1,6 @@
 import * as crypto from '../crypto'
 import { bignumber, assetTypes, slots } from '../utils'
-import { setup } from '../config'
-const constants = setup().constants
+import { constants } from '../config'
 
 async function createUsername (name, secret, secondSecret) {
   const keys = crypto.getKeys(secret)

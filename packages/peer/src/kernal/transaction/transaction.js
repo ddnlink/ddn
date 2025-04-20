@@ -29,7 +29,7 @@ function getErrorMsg(err) {
 
 let _singleton
 
-class Transaction {
+export class Transaction {
   static singleton (context) {
     if (!_singleton) {
       _singleton = new Transaction(context)
@@ -478,6 +478,28 @@ class Transaction {
     return result
   }
 
+  /**
+   * 获取指定地址的所有未确认交易
+   * @param {string} address 账户地址
+   * @returns {Array} 未确认交易列表
+   */
+  async getUnconfirmedTransactionsByAddress (address) {
+    if (!address) {
+      return []
+    }
+
+    const result = []
+
+    for (let i = 0; i < this._unconfirmedTransactions.length; i++) {
+      const transaction = this._unconfirmedTransactions[i]
+      if (transaction !== false && transaction.senderId === address) {
+        result.push(transaction)
+      }
+    }
+
+    return result
+  }
+
   async process (trs, sender) {
     if (!this._assets.hasType(trs.type)) {
       throw new Error(`Unknown transaction type 10 ${trs.type}`)
@@ -627,26 +649,6 @@ class Transaction {
 
     return transactions
   }
-
-  /// ///// TODO: delete it /////////////////////////////////
-  // async sign (trs, { privateKey }) {
-  //   // const hash = await this.getHash(trs, true, true)
-  //   // const signature = nacl.sign.detached(hash, Buffer.from(privateKey, 'hex'))
-  //   // return Buffer.from(signature).toString('hex')
-  //   return await DdnCrypto.sign(trs, { privateKey })
-  //   // return await DdnCrypto.sign(trs, { privateKey })
-  // }
-
-  // async multisign (trs, { privateKey }) {
-  //   // const hash = await this.getHash(trs, true, true)
-  //   // const signature = nacl.sign.detached(hash, Buffer.from(privateKey, 'hex'))
-  //   // return Buffer.from(signature).toString('hex')
-  // }
-
-  // async getHash (trs, skipSignature, skipSecondSignature) {
-  //   const bytes = await DdnCrypto.getBytes(trs, skipSignature, skipSecondSignature)
-  //   return Buffer.from(nacl.hash(bytes))
-  // }
 
   // TODO: 注意使用 @ddn/crypto 的对应方法重构 2020.5.3
   async verifyBytes (bytes, signature, publicKey) {

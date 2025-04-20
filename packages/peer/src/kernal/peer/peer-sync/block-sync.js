@@ -1,17 +1,17 @@
 /**
- * Peer Sync
- * wangxm   2019-01-15
+ * Block Sync
+ * 负责处理区块的同步操作
  */
 import ip from 'ip'
 import { bignum } from '@ddn/utils'
-import { System } from '../../utils/system'
+import { System } from '../../../utils/system'
 
 let _singleton
 
-class PeerSync {
+export class BlockSync {
   static singleton(context) {
     if (!_singleton) {
-      _singleton = new PeerSync(context)
+      _singleton = new BlockSync(context)
     }
     return _singleton
   }
@@ -246,7 +246,7 @@ class PeerSync {
 
         if (bignum.isGreaterThanOrEqualTo(heightDiff, 3)) {
           this.logger.info(`Received discontinuous block height ${block.height}, difference: ${heightDiff}`)
-          // 不要递归调用 trySyncBlockData，而是返回 null 表示需要重新同步
+          // 不要递归调用 syncBlockData，而是返回 null 表示需要重新同步
           return null
         }
 
@@ -314,7 +314,7 @@ class PeerSync {
   /**
    * 从随机节点同步区块数据
    */
-  async trySyncBlockData() {
+  async syncBlockData() {
     try {
       let res = await this.runtime.peer.p2p.get('/height')
       if (!res) {
@@ -358,14 +358,24 @@ class PeerSync {
           if (syncLastBlock === null) {
             this.logger.warn('Failed to sync blocks: syncLastBlock is null, attempting recovery...')
 
-            // 尝试从当前区块高度开始重新同步
             try {
               // 清理缓存和未确认交易
               this.oneoff.clear()
               await this.runtime.transaction.undoUnconfirmedList()
 
-              // 从当前区块高度重新同步
-              syncLastBlock = await this._cloneBlocksFromPeer(res.peer, lastBlock.id)
+              // 获取当前最新区块
+              const lastBlock = this.runtime.block.getLastBlock()
+
+              // 尝试从更早的区块开始同步
+              const earlierBlockHeight = bignum.minus(lastBlock.height, 10).toString() // 回退10个区块
+              const earlierBlock = await this.dao.findOne('block', {
+                where: { height: earlierBlockHeight }
+              });
+
+              if (earlierBlock) {
+                this.logger.info(`Attempting to sync from earlier block at height ${earlierBlockHeight}`)
+                syncLastBlock = await this._cloneBlocksFromPeer(res.peer, earlierBlock.id)
+              }
 
               if (syncLastBlock === null) {
                 this.logger.error('Recovery attempt failed, still unable to sync blocks')
@@ -402,145 +412,26 @@ class PeerSync {
         return false
       }
     } catch (error) {
-      this.logger.error(`Error in trySyncBlockData: ${error.message || error}`)
+      this.logger.error(`Error in syncBlockData: ${error.message || error}`)
       return false
     }
   }
 
-  async trySyncSignatures() {
-    let res
-    let retryCount = 0
-    const maxRetries = 3
-    const retryDelay = 1000 // 1秒延迟
-
-    while (retryCount < maxRetries) {
-      try {
-        res = await this.runtime.peer.p2p.get('/signature')
-        break
-      } catch (err) {
-        retryCount++
-        this.logger.error(`Sync Signatures attempt ${retryCount} failed: ${err}`)
-
-        if (retryCount === maxRetries) {
-          this.logger.error(`Sync Signatures has error after ${maxRetries} attempts: ${err}`)
-          return
-        }
-
-        await new Promise(resolve => setTimeout(resolve, retryDelay))
-      }
-    }
-
-    if (!res || !res.body || !res.body.success) {
-      return
-    }
-
-    const body = res.body
-
-    const validateErrors = await this.ddnSchema.validate(
-      {
-        type: 'object',
-        properties: {
-          signatures: {
-            type: 'array',
-            uniqueItems: true
-          }
-        },
-        required: ['signatures']
-      },
-      body
-    )
-    if (validateErrors) {
-      this.logger.error(`${validateErrors[0].schemaPath} ${validateErrors[0].message}`)
-      return
-    }
-
-    return this.sequence.addAsync(async () => {
-      for (let i = 0; i < body.signatures.length; i++) {
-        const signature = body.signatures[i];
-        for (let j = 0; j < signature.signatures.length; j++) {
-          await this.runtime.multisignature.processSignature({
-            signature: signature.signatures[j],
-            transaction: signature.transaction
-          });
-        }
-      }
-    });
-  }
-
   /**
-   * Synchronize unconfirmed transactions from random nodes
+   * 启动区块同步任务（轮询）
+   * @param {number} interval 同步间隔，单位为秒，默认为10秒
    */
-  async trySyncUnconfirmedTransactions() {
-    let res
+  async startSyncTask(interval = 10) {
     try {
-      res = await this.runtime.peer.p2p.get('/tx')
+      await this.syncBlockData()
     } catch (err) {
-      this.logger.error(`Sync UnconfirmedTransactions has error: ${err}`)
-      return
+      this.logger.warn(`The block sync task error: ${err.message || err}`)
     }
 
-    if (!res || !res.body) {
-      return
-    }
-
-    const validateErrors = await this.ddnSchema.validate(
-      {
-        type: 'object',
-        properties: {
-          transactions: {
-            type: 'array',
-            uniqueItems: true
-          }
-        },
-        required: ['transactions']
-      },
-      res.body
-    )
-    if (validateErrors) {
-      this.logger.error(validateErrors[0].message)
-      return
-    }
-
-    const transactions = res.body.transactions
-    const validTransactions = []
-
-    for (let i = 0; i < transactions.length; i++) {
-      try {
-        const normalizedTx = await this.runtime.transaction.objectNormalize(transactions[i])
-        validTransactions.push(normalizedTx)
-      } catch (e) {
-        this.logger.warn(
-          `Transaction ${transactions[i] ? transactions[i].id : 'null'} is not valid: ${e.message}`
-        )
-        continue
-      }
-    }
-
-    if (validTransactions.length === 0) {
-      this.logger.debug('No valid transactions found')
-      return
-    }
-
-    const trs = []
-    for (let i = 0; i < validTransactions.length; ++i) {
-      try {
-        const hasUnconfirmed = await this.runtime.transaction.hasUnconfirmedTransaction(validTransactions[i]);
-        if (!hasUnconfirmed) {
-          trs.push(validTransactions[i]);
-        } else {
-          this.logger.debug(`Skipping existing unconfirmed transaction: ${validTransactions[i].id}`);
-        }
-      } catch (err) {
-        this.logger.error(`Error checking unconfirmed transaction: ${err.message}`);
-        continue;
-      }
-    }
-
-    return this.balancesSequence.addAsync(async () => {
-      await this.runtime.transaction.receiveTransactions(trs);
-    });
+    setTimeout(() => {
+      this.startSyncTask(interval)
+    }, 1000 * interval)
   }
 }
 
-export default PeerSync
-
+export default BlockSync

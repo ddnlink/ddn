@@ -64,7 +64,6 @@ class Vote {
   }
 
   async apply ({ asset }, { id, height }, { address }, dbTrans) {
-    // this.logger.debug('votes.js 67 vote apply merge address', asset)
     await this.runtime.account.merge(
       address,
       {

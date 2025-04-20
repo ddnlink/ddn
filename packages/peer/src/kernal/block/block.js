@@ -969,6 +969,7 @@ class Block {
    * @param {*} verifyTrs
    */
   async processBlock(block, votes, broadcast, save, verifyTrs) {
+        
     if (!this.runtime.loaded) {
       this.logger.debug('processBlock this.runtime.loaded: ', this.runtime.loaded)
       throw new Error('DDN is preparing')
@@ -1003,11 +1004,11 @@ class Block {
         throw new Error(`Block already exists: ${block.id}`)
       }
 
-      try {
-        await this.runtime.delegate.validateBlockSlot(block)
-      } catch (err) {
+      // 验证区块槽位
+      const isValidSlot = await this.runtime.delegate.validateBlockSlot(block)
+      if (!isValidSlot) {
         await this.runtime.delegate.fork(block, 3)
-        throw new Error(`Can't verify slot: ${err}`)
+        throw new Error(`Can't verify slot for block ${block.id}`)
       }
 
       this.logger.debug('verify block slot ok')
@@ -1607,6 +1608,37 @@ class Block {
   getHeight(req, cb) {
     const lastBlock = this.runtime.block.getLastBlock()
     return cb(null, lastBlock && lastBlock.height ? lastBlock.height : '0')
+  }
+
+  /**
+   * 获取指定高度范围内的区块
+   * @param {number} minHeight 最小高度
+   * @param {number} maxHeight 最大高度
+   * @returns {Promise<Array>} 区块数组
+   */
+  async getBlocks(minHeight, maxHeight) {
+    try {
+      const where = {
+        height: {
+          $gte: minHeight,
+          $lte: maxHeight
+        }
+      }
+
+      const rows = await this.dao.findList('block', {
+        where,
+        order: [['height', 'ASC']]
+      })
+
+      if (!rows || rows.length === 0) {
+        return []
+      }
+
+      return rows
+    } catch (err) {
+      this.logger.error(`Failed to get blocks from ${minHeight} to ${maxHeight}: ${err.message}`)
+      throw err
+    }
   }
 
   /**

@@ -1,7 +1,6 @@
 import * as crypto from '../crypto'
 import { bignumber, assetTypes, slots } from '../utils'
-import { setup } from '../config'
-const constants = setup().constants
+import { constants } from '../config'
 
 const nethash = constants.nethash
 

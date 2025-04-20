@@ -48,8 +48,7 @@ class DelegatesRouter {
           },
           limit: {
             type: 'integer',
-            minimum: 0,
-            maximum: this.constants.delegates
+            minimum: 0
           },
           offset: {
             type: 'integer',

@@ -1,8 +1,7 @@
 import { bignumber, assetTypes } from '../utils'
 import assetGetFees from './assets'
 import { getAsset } from '../utils/asset-util'
-import { setup } from '../config'
-const constants = setup().constants
+import { constants } from '../config'
 
 async function getFee (transaction) {
   switch (transaction.type) {

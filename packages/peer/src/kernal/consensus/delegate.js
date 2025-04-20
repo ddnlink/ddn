@@ -365,6 +365,14 @@ class Delegate {
     return null
   }
 
+  /**
+   * 验证区块槽位
+   * @param {Object} params 参数对象
+   * @param {string} params.height 区块高度
+   * @param {number} params.timestamp 时间戳
+   * @param {string} params.generator_public_key 生成者公钥
+   * @returns {Promise<boolean>} 验证结果，true 表示验证通过，false 表示验证失败
+   */
   async validateBlockSlot({ height, timestamp, generator_public_key }) {
     const activeDelegates = await this.getDisorderDelegatePublicKeys(height)
     const currentSlot = this.runtime.slot.getSlotNumber(timestamp)
@@ -379,9 +387,13 @@ class Delegate {
       actualDelegate: generator_public_key
     })
 
+    // 如果受托人一致，验证通过
     if (delegateKey && generator_public_key === delegateKey) {
-      return
+      return true
     }
+
+    // 检查是否是已知的受托人
+    const isKnownDelegate = await this.isDelegatePublicKey(generator_public_key)
 
     // 记录分叉警告日志
     this.logger.warn('检测到潜在的分叉:', {
@@ -389,12 +401,17 @@ class Delegate {
       timestamp,
       expectedDelegate: delegateKey,
       actualDelegate: generator_public_key,
-      slot: currentSlot
+      slot: currentSlot,
+      isKnownDelegate
     })
 
-    throw new Error(
-      `Failed to verify slot, expected delegate: ${generator_public_key}, gotten delegate: ${delegateKey}`
+    // 记录验证失败的错误信息
+    this.logger.error(
+      `槽位验证失败, 期望的受托人: ${delegateKey}, 实际的受托人: ${generator_public_key}`
     )
+
+    // 返回 false 表示验证失败
+    return false
   }
 
   async validateProposeSlot({ height, timestamp, generator_public_key }) {
@@ -432,20 +449,108 @@ class Delegate {
     })
 
     // 记录分叉时的网络状态
+    let activeConnections = 0
+    try {
+      activeConnections = await this.runtime.peer.getActiveConnectionCount()
+    } catch (err) {
+      this.logger.error(`获取活跃连接数失败: ${err.message}`)
+    }
+
+    let consensusHeight = 0
+    try {
+      consensusHeight = await this.runtime.consensus.getHeight()
+    } catch (err) {
+      this.logger.error(`获取共识高度失败: ${err.message}`)
+    }
+
     this.logger.warn('分叉时的网络状态:', {
       lastBlockHeight: this.runtime.block.getLastBlock().height,
-      activeConnections: await this.runtime.peer.getActiveConnectionCount(),
-      consensusHeight: await this.runtime.consensus.getHeight()
+      activeConnections,
+      consensusHeight
     })
 
-    return await this.dao.insert('forks_stat', {
-      delegate_public_key: block.generator_public_key,
-      block_timestamp: block.timestamp,
-      block_id: block.id,
-      block_height: block.height,
-      previous_block: block.previous_block,
-      cause
-    })
+    // 记录分叉信息到数据库
+    try {
+      return await this.dao.insert('forks_stat', {
+        delegate_public_key: block.generator_public_key,
+        block_timestamp: block.timestamp,
+        block_id: block.id,
+        block_height: block.height,
+        previous_block: block.previous_block,
+        cause
+      })
+    } catch (err) {
+      this.logger.error(`记录分叉信息失败: ${err.message}`)
+    }
+  }
+
+  /**
+   * 清理重复签名导致的问题
+   * @private
+   * @param {Object} block 分叉区块
+   */
+  async _cleanupDuplicateSignatures(block) {
+    try {
+      // 获取区块中的交易
+      const transactions = await this.dao.findList('tr', {
+        where: {
+          block_id: block.id
+        }
+      })
+
+      if (!transactions || transactions.length === 0) {
+        this.logger.warn('未找到分叉区块中的交易')
+        return
+      }
+
+      // 查找多重签名交易
+      for (const trs of transactions) {
+        if (trs.type === assetTypes.MULTISIGNATURE || trs.signatures) {
+          this.logger.info(`尝试清理交易 ${trs.id} 的重复签名`)
+
+          // 查找相同发送者的其他未确认交易
+          if (trs.senderId) {
+            const senderTrs = await this.runtime.transaction.getUnconfirmedTransactionsByAddress(trs.senderId)
+
+            if (senderTrs && senderTrs.length > 0) {
+              this.logger.info(`发现发送者 ${trs.senderId} 的 ${senderTrs.length} 个未确认交易`)
+
+              // 检查是否有重复的多重签名交易
+              for (const otherTrs of senderTrs) {
+                if (otherTrs.signatures && otherTrs.signatures.some(sig => trs.signatures && trs.signatures.includes(sig))) {
+                  this.logger.warn(`发现重复签名交易: ${otherTrs.id}`)
+                  await this.runtime.transaction.removeUnconfirmedTransaction(otherTrs.id)
+                }
+              }
+            }
+          }
+        }
+      }
+    } catch (err) {
+      this.logger.error(`清理重复签名失败: ${err.message}`)
+      throw err
+    }
+  }
+
+  /**
+   * 检查公钥是否属于已知的受托人
+   * @param {string} publicKey 公钥
+   * @returns {Promise<boolean>} 是否是受托人
+   */
+  async isDelegatePublicKey(publicKey) {
+    try {
+      // 在mem_account表中查找具有该公钥且is_delegate=1的账户
+      const delegates = await this.dao.findList('mem_account', {
+        where: {
+          publicKey: publicKey,
+          is_delegate: 1
+        }
+      })
+      return delegates && delegates.length > 0
+    } catch (err) {
+      this.logger.error(`检查受托人公钥失败: ${err.message}`)
+      return false
+    }
   }
 
   async handleFork(block, cause) {
@@ -465,14 +570,19 @@ class Delegate {
       // 重新同步区块
       await this.synchronizeFromPeers();
 
+      // 确保状态机恢复到正确状态
+      // if (this.runtime.stateMachine && this.runtime.stateMachine.isPending()) {
+        this.logger.info('将状态从Pending恢复到Syncing');
+        this.runtime.stateMachine.transitionTo('Syncing');
+      // }
+
       // 如果恢复失败，使用快照恢复
       if (!await this.isChainValid()) {
         await this.restoreSnapshot(snapshot);
       }
 
       // 记录恢复结果
-      await this.logger.info(`分叉处理完成, 高度: ${block.height}`);
-
+      this.logger.info(`分叉处理完成, 高度: ${block.height}`);
     } catch (err) {
       this.logger.error('分叉处理失败:', err);
       throw err;
@@ -564,6 +674,20 @@ class Delegate {
   }
 
   // fixme: 与 block.js 中的同步逻辑重复，需要重构 2025.1.21
+  /**
+   * 获取当前区块链高度
+   * @returns {Promise<number>} 当前区块链高度
+   */
+  async getCurrentHeight() {
+    try {
+      const lastBlock = this.runtime.block.getLastBlock();
+      return lastBlock ? lastBlock.height : 0;
+    } catch (err) {
+      this.logger.error(`获取当前高度失败: ${err.message}`);
+      throw err;
+    }
+  }
+
   async synchronizeFromPeers() {
     try {
       const peers = await this.runtime.peer.getPeers();
@@ -587,6 +711,42 @@ class Delegate {
     } catch (err) {
       this.logger.error('节点同步失败:', err);
       throw err;
+    }
+  }
+
+  /**
+   * 获取最近的区块数据
+   * @param {number} count 获取的区块数量
+   * @returns {Promise<Array>} 区块数组
+   */
+  async getRecentBlocks(count = 10) {
+    try {
+      const lastBlock = this.runtime.block.getLastBlock();
+      if (!lastBlock) {
+        return [];
+      }
+
+      const minHeight = Math.max(1, bignum.minus(lastBlock.height, count - 1).toNumber());
+      const maxHeight = lastBlock.height;
+
+      return await this.runtime.block.getBlocks(minHeight, maxHeight);
+    } catch (err) {
+      this.logger.error(`获取最近区块失败: ${err.message}`);
+      throw err;
+    }
+  }
+
+  /**
+   * 验证区块签名
+   * @param {Object} block 区块数据
+   * @returns {boolean} 验证结果
+   */
+  verifyBlockSignature(block) {
+    try {
+      return this.runtime.block.verifySignature(block);
+    } catch (err) {
+      this.logger.error(`验证区块签名失败: ${err.message}`);
+      return false;
     }
   }
 
@@ -614,6 +774,69 @@ class Delegate {
     } catch (err) {
       this.logger.error('链验证失败:', err);
       return false;
+    }
+  }
+
+  /**
+   * 验证并应用区块
+   * @param {Array} blocks 区块数组
+   * @returns {Promise<boolean>} 应用结果
+   */
+  async validateAndApplyBlocks(blocks) {
+    if (!blocks || !blocks.length) {
+      return true;
+    }
+
+    try {
+      for (const block of blocks) {
+        // 验证区块
+        if (!await this.runtime.block.objectNormalize(block)) {
+          this.logger.error(`区块格式验证失败: ${block.id}`);
+          return false;
+        }
+
+        // 应用区块
+        await this.runtime.block.processBlock(block, null, false, true, true);
+        this.logger.info(`应用区块成功: ${block.id}, 高度: ${block.height}`);
+      }
+      return true;
+    } catch (err) {
+      this.logger.error(`验证和应用区块失败: ${err.message}`);
+      return false;
+    }
+  }
+
+  /**
+   * 恢复受托人列表
+   * @param {Array} delegates 受托人公钥列表
+   * @returns {Promise<void>}
+   */
+  async restoreDelegateList(delegates) {
+    try {
+      // 这里只是记录日志，实际上受托人列表是从数据库中动态计算的
+      this.logger.info(`恢复受托人列表，共 ${delegates.length} 个受托人`);
+    } catch (err) {
+      this.logger.error(`恢复受托人列表失败: ${err.message}`);
+      throw err;
+    }
+  }
+
+  /**
+   * 广播当前状态
+   * @returns {Promise<void>}
+   */
+  async broadcastCurrentState() {
+    try {
+      const currentState = {
+        height: await this.getCurrentHeight(),
+        lastBlock: this.runtime.block.getLastBlock().id
+      };
+
+      await this.runtime.peer.broadcast('chain/state', currentState);
+      this.logger.info('广播当前状态成功');
+    } catch (err) {
+      this.logger.error(`广播当前状态失败: ${err.message}`);
+      throw err;
     }
   }
 

@@ -31,8 +31,7 @@ class Api {
     this.port = this.options.port || (this.isMainnet ? 8000 : 8001)
     this.baseUrl = `http://${this.host}:${this.port}`
     // 初始化 JsSdk 并获取 constants
-    const { constants } = JsSdk.init()
-    this.nethash = constants.nethash
+    this.nethash = JsSdk.config.nethash
   }
 
   get (path, params, cb) {

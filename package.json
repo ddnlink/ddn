@@ -22,7 +22,8 @@
     "encryption"
   ],
   "scripts": {
-    "dev": "ddn-scripts peers:start",
+    "dev": "ddn-bin peers:start",
+    "dev:one": "ddn-bin peers:start -n 1",
     "build": "NODE_ENV=production DDN_NAME=ddn turbo build --force --no-cache",
     "build:dev": "NODE_ENV=development turbo build --force --no-cache",
     "build:docker": "node ./scripts/initCryptoDependent.js && father build --docker",
@@ -39,6 +40,8 @@
     "changelog": "conventional-changelog -p angular -i CHANGELOG.md -w",
     "chore:update-deps": "sh ./scripts/reinstall_deps.sh",
     "clean": "pnpm clean:turbo && pnpm clean:history && pnpm clean:cache && pnpm clean:dist && pnpm store prune && pnpm clean:node_modules",
+    "clean:logs": "ddn-bin peers:clean -c log pid -f peer",
+    "clean:peer:all": "ddn-bin peers:clean",
     "clean:turbo": "rimraf .turbo */**/.turbo",
     "clean:history": "rimraf .history */**/.history",
     "clean:cache": "rimraf .cache */**/.cache",
@@ -81,6 +84,7 @@
   },
   "dependencies": {
     "@babel/plugin-transform-classes": "^7.10.4",
+    "@ddn/bin": "^0.0.1",
     "@jest/transform": "^29.7.0",
     "@manypkg/cli": "^0.21.4",
     "@types/jest": "^23.3.2",

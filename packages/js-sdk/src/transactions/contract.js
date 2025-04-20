@@ -1,8 +1,7 @@
 import { bignumber, assetTypes, slots } from '../utils'
 
 import * as crypto from '../crypto'
-import { setup } from '../config'
-const constants = setup().constants
+import { constants } from '../config'
 
 async function deploy (options, secret, secondSecret) {
   const keys = crypto.getKeys(secret)

@@ -32,26 +32,6 @@ class Consensus {
 
   getProposeHash (propose) {
     return createHash(DdnCrypto.getBytes(propose, true, true))
-    // const bytes = new ByteBuffer()
-
-    // bytes.writeString(propose.height)
-    // bytes.writeString(propose.id)
-
-    // const generatorPublicKeyBuffer = Buffer.from(propose.generator_public_key, 'hex') // wxm block database
-    // for (let i = 0; i < generatorPublicKeyBuffer.length; i++) {
-    //   bytes.writeByte(generatorPublicKeyBuffer[i])
-    // }
-
-    // bytes.writeInt(propose.timestamp)
-
-    // const parts = propose.address.split(':')
-    // assert(parts.length === 2)
-    // bytes.writeInt(ip.toLong(parts[0]))
-    // bytes.writeInt(Number(parts[1]))
-
-    // bytes.flip()
-
-    // return createHash(bytes.toBuffer())
   }
 
   async createPropose (keypair, { generator_public_key, height, id, timestamp }, address) {
@@ -71,15 +51,6 @@ class Consensus {
   }
 
   acceptPropose (propose) {
-    // {
-    //   height: '13',
-    //   id: '149be5d39cf0e6a8aeb16e1d0eb27636786b18b34e50e4d4f0b0f4dd3100d42aa446d47dcaf38e3cd91341f515e8a2b39f71a59b2e341d01f5e54c94707d3639',
-    //   timestamp: 104895420,
-    //   generator_public_key: 'a8ac0f8e0793d5c9b84b53796ee2879701c00807f6a18c04dfa827a15f59cc15',
-    //   address: '127.0.0.1:8000',
-    //   hash: 'e857ea94cabe9810aa937db5b4abd704c1038f876c03ddcbe0c6263a441f0aee4acca62fee8eef7d8961e98655b3896a36d22b8f6340279c867e5d98f3baf8e0',
-    //   signature: '886f206f3a15719fd334e721e48624392d9f7fa0bbe23dd60addf5d01b525dc5664cd7ff505dc1588345677a7dd11e10eec42f783481ad4e7a549e66bed8930a'
-    // }
     const newPropose = {
       height: propose.height,
       id: propose.id,
@@ -243,6 +214,31 @@ class Consensus {
    */
   hasEnoughVotesRemote (votes) {
     return votes && votes.signatures && votes.signatures.length >= this.constants.remoteVoters
+  }
+
+  /**
+   * 获取当前共识高度
+   * @returns {string} 当前共识高度（字符串形式）
+   */
+  async getHeight() {
+    try {
+      // 如果有待处理的区块，返回其高度
+      if (this._pendingBlock && this._pendingBlock.height) {
+        // 直接返回字符串形式的高度，不进行解析
+        return this._pendingBlock.height.toString();
+      }
+
+      // 否则返回当前区块链高度
+      const lastBlock = this.runtime.block.getLastBlock();
+      if (lastBlock && lastBlock.height) {
+        // 使用 bignum 处理高度并返回字符串
+        return lastBlock.height.toString();
+      }
+      return '0';
+    } catch (err) {
+      this.logger.error(`获取共识高度失败: ${err.message}`);
+      return '0';
+    }
   }
 }
 
