@@ -440,6 +440,293 @@ class MultisignaturesRouter {
       fee: bignum.multiply(this.constants.net.fees.multisignature, this.constants.fixedPoint).toFixed()
     }
   }
+
+  /**
+   * 获取交易的签名进度和状态
+   * 
+   * get /api/multisignatures/signatureProgress?transactionId=交易ID
+   * 
+   * @param {*} req 请求对象，包含交易ID
+   * @returns {Object} 包含交易签名进度的对象 
+   * 
+   * Object 包含信息：
+   *   - 交易基本信息（ID、类型、发送者）
+   *   - 所需签名数和当前签名数
+   *   - 已签名的账户列表
+   *   - 待签名的账户列表
+   *   - 签名进度百分比
+   *   - 交易是否已准备好执行
+   *   - 交易过期时间和是否已过期
+   */
+  async getSignatureProgress(req) {
+    const query = Object.assign({}, req.body, req.query)
+    const validateErrors = await this.ddnSchema.validate(
+      {
+        type: 'object',
+        properties: {
+          transactionId: {
+            type: 'string'
+          }
+        },
+        required: ['transactionId']
+      },
+      query
+    )
+    if (validateErrors) {
+      return {
+        success: false,
+        error: `Validation error: ${validateErrors[0].schemaPath} ${validateErrors[0].message}`
+      }
+    }
+
+    try {
+      // 获取未确认的交易
+      const transaction = await this.runtime.transaction.getUnconfirmedTransaction(query.transactionId)
+      if (!transaction) {
+        return {
+          success: false,
+          error: 'Transaction not found or already confirmed'
+        }
+      }
+
+      // 获取交易发送者账户
+      const sender = await this.runtime.account.getAccountByAddress(transaction.senderId)
+      if (!sender) {
+        return {
+          success: false,
+          error: 'Sender account not found'
+        }
+      }
+
+      // 计算签名进度
+      let requiredSignatures = 0
+      let currentSignatures = 0
+      let signers = []
+      let pendingSigners = []
+      
+      // 处理多重签名资产类型交易
+      if (transaction.type === assetTypes.MULTISIGNATURE) {
+        requiredSignatures = transaction.asset.multisignature.min
+        currentSignatures = transaction.signatures ? transaction.signatures.length : 0
+        
+        // 获取已签名的公钥列表
+        const signedPublicKeys = []
+        if (transaction.signatures && transaction.signatures.length > 0) {
+          for (const signature of transaction.signatures) {
+            for (const publicKey of transaction.asset.multisignature.keysgroup.map(key => key.substring(1))) {
+              try {
+                const newTrs = JSON.parse(JSON.stringify(transaction))
+                delete newTrs.senderId
+                const verify = await DdnCrypto.verifyBytes(DdnCrypto.getBytes(newTrs, false, false), signature, publicKey)
+                if (verify) {
+                  signedPublicKeys.push(publicKey)
+                  break
+                }
+              } catch (e) {
+                this.logger.error('Verify signature error:', System.getErrorMsg(e))
+              }
+            }
+          }
+        }
+        
+        // 获取已签名和待签名的账户信息
+        for (const key of transaction.asset.multisignature.keysgroup) {
+          const publicKey = key.substring(1)
+          try {
+            const account = await this.runtime.account.getAccountByPublicKey(publicKey)
+            if (signedPublicKeys.includes(publicKey)) {
+              signers.push({
+                address: account ? account.address : 'Unknown',
+                publicKey
+              })
+            } else {
+              pendingSigners.push({
+                address: account ? account.address : 'Unknown',
+                publicKey
+              })
+            }
+          } catch (e) {
+            this.logger.error('Get account error:', System.getErrorMsg(e))
+            pendingSigners.push({
+              address: 'Unknown',
+              publicKey
+            })
+          }
+        }
+      } else {
+        // 处理普通多重签名交易
+        if (!sender.multisignatures || !sender.multisignatures.length) {
+          return {
+            success: false,
+            error: 'Not a multisignature account'
+          }
+        }
+        
+        requiredSignatures = sender.multimin || 0
+        currentSignatures = transaction.signatures ? transaction.signatures.length : 0
+        
+        // 获取已签名的公钥列表
+        const signedPublicKeys = []
+        if (transaction.signatures && transaction.signatures.length > 0) {
+          for (const signature of transaction.signatures) {
+            for (const publicKey of sender.multisignatures) {
+              try {
+                const newTrs = JSON.parse(JSON.stringify(transaction))
+                delete newTrs.senderId
+                const verify = await DdnCrypto.verifyBytes(DdnCrypto.getBytes(newTrs, false, false), signature, publicKey)
+                if (verify) {
+                  signedPublicKeys.push(publicKey)
+                  break
+                }
+              } catch (e) {
+                this.logger.error('Verify signature error:', System.getErrorMsg(e))
+              }
+            }
+          }
+        }
+        
+        // 获取已签名和待签名的账户信息
+        for (const publicKey of sender.multisignatures) {
+          try {
+            const account = await this.runtime.account.getAccountByPublicKey(publicKey)
+            if (signedPublicKeys.includes(publicKey)) {
+              signers.push({
+                address: account ? account.address : 'Unknown',
+                publicKey
+              })
+            } else {
+              pendingSigners.push({
+                address: account ? account.address : 'Unknown',
+                publicKey
+              })
+            }
+          } catch (e) {
+            this.logger.error('Get account error:', System.getErrorMsg(e))
+            pendingSigners.push({
+              address: 'Unknown',
+              publicKey
+            })
+          }
+        }
+      }
+
+      // 计算交易过期时间
+      let expirationTime = null
+      if (transaction.type === assetTypes.MULTISIGNATURE) {
+        const lifetime = transaction.asset.multisignature.lifetime * 3600 // 小时转秒
+        expirationTime = transaction.timestamp + lifetime
+      } else if (sender.multilifetime) {
+        const lifetime = sender.multilifetime * 3600 // 小时转秒
+        expirationTime = transaction.timestamp + lifetime
+      }
+
+      // 检查交易是否已过期
+      const currentTime = this.runtime.slot.getTime()
+      const isExpired = expirationTime && currentTime > expirationTime
+
+      return {
+        success: true,
+        transaction: {
+          id: transaction.id,
+          type: transaction.type,
+          senderId: transaction.senderId,
+          requiredSignatures,
+          currentSignatures,
+          signers,
+          pendingSigners,
+          progress: requiredSignatures > 0 ? (currentSignatures / requiredSignatures) * 100 : 0,
+          isReady: currentSignatures >= requiredSignatures,
+          expirationTime,
+          isExpired
+        }
+      }
+    } catch (err) {
+      this.logger.error('Failed to get signature progress: ', System.getErrorMsg(err))
+      return {
+        success: false,
+        error: System.getErrorMsg(err)
+      }
+    }
+  }
+
+  /**
+   * 获取用户已签名的交易
+   * 
+   * get /api/multisignatures/signatures?publicKey=用户公钥
+   * 
+   * @param {*} req 请求对象，包含用户公钥
+   * @returns {Object} 包含已签名交易列表的对象
+   */
+  async getSignatures(req) {
+    const query = Object.assign({}, req.body, req.query)
+    const validateErrors = await this.ddnSchema.validate(
+      {
+        type: 'object',
+        properties: {
+          publicKey: {
+            type: 'string',
+            format: 'publicKey'
+          }
+        },
+        required: ['publicKey']
+      },
+      query
+    )
+    if (validateErrors) {
+      return {
+        success: false,
+        error: `Validation error: ${validateErrors[0].schemaPath} ${validateErrors[0].message}`
+      }
+    }
+
+    try {
+      // 获取所有未确认的交易
+      let transactions = await this.runtime.transaction.getUnconfirmedTransactionList()
+      
+      // 筛选出用户已签名的交易
+      const signedTransactions = []
+      
+      for (let i = 0; i < transactions.length; i++) {
+        const transaction = transactions[i]
+        
+        // 检查交易是否有签名
+        if (transaction.signatures && transaction.signatures.length > 0) {
+          let isSigned = false
+          
+          // 验证用户是否已对该交易签名
+          for (const signature of transaction.signatures) {
+            try {
+              const verify = await this.runtime.transaction.verifySignature(
+                transaction, 
+                signature, 
+                query.publicKey
+              )
+              
+              if (verify) {
+                isSigned = true
+                break
+              }
+            } catch (e) {
+              this.logger.error('/multisignatures/signatures verify fail, error is ', System.getErrorMsg(e))
+            }
+          }
+          
+          // 如果用户已签名，添加到结果中
+          if (isSigned) {
+            signedTransactions.push(transaction)
+          }
+        }
+      }
+      
+      return {
+        success: true,
+        transactions: signedTransactions
+      }
+    } catch (err) {
+      this.logger.error('Failed to get signatures: ', System.getErrorMsg(err))
+      throw err
+    }
+  }
 }
 
 export default MultisignaturesRouter

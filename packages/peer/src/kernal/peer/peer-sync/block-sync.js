@@ -8,7 +8,11 @@ import { System } from '../../../utils/system'
 
 let _singleton
 
+// 静态变量跟踪同步状态
+
 export class BlockSync {
+  // 静态属性，跟踪同步状态
+  static _syncInProgress = false;
   static singleton(context) {
     if (!_singleton) {
       _singleton = new BlockSync(context)
@@ -229,9 +233,10 @@ export class BlockSync {
           return
         }
 
-        // 尽管本方法从创世区块开始同步，但仍然需要跳过创世区块
-        if (block === this.genesisblock) {
-          this.logger.error(`Invalid block data received from peer ${peerStr}:`, block)
+        // 处理高度为1的区块（创世区块）
+        if (bignum.isEqualTo(block.height, '1')) {
+          // 程序启动时已经验证过创世区块，这里只需要跳过即可
+          this.logger.debug(`Skipping block with height 1, genesis block is already verified during startup`)
           continue
         }
 
@@ -259,7 +264,21 @@ export class BlockSync {
           if (bignum.isLessThan(block.height, lastBlock.height)) {
             this.logger.warn(`Received block with lower height (${block.height}) than current (${lastBlock.height}). Attempting to find common block and rollback.`)
 
+            // 如果高度差异过大，可能是完全不同的链或者需要大规模回滚
+            const heightDiff = bignum.minus(lastBlock.height, block.height)
+            if (bignum.isGreaterThan(heightDiff, '1000')) {
+              this.logger.warn(`Height difference too large (${heightDiff}), skipping block`)
+              continue
+            }
+
             try {
+              // 如果是高度为1的区块（创世区块），特殊处理
+              if (bignum.isEqualTo(block.height, '1')) {
+                // 程序启动时已经验证过创世区块，这里只需要跳过即可
+                this.logger.debug(`Skipping block with height 1, genesis block is already verified during startup`)
+                continue;
+              }
+
               // 尝试找到共同区块
               const commonBlock = await this.runtime.block.getCommonBlock(block)
               if (commonBlock) {
@@ -269,9 +288,22 @@ export class BlockSync {
                 // 重置当前循环，重新处理当前区块
                 j--;
                 continue;
+              } else {
+                // 如果没有找到共同区块，但高度差异不大，尝试跳过该区块
+                this.logger.warn(`No common block found for block at height ${block.height}, skipping`)
+                continue
               }
             } catch (err) {
+              // 检查是否是创世区块相关错误
+              if (err.message && (err.message.includes('genesis block') || err.message.includes('Genesis block'))) {
+                this.logger.debug(`Genesis block related error: ${err.message}, skipping block`)
+                // 跳过该区块
+                continue;
+              }
+
               this.logger.error(`Failed to handle lower height block: ${err.message}`)
+              // 如果处理失败，跳过该区块
+              continue
             }
           }
 
@@ -315,10 +347,19 @@ export class BlockSync {
    * 从随机节点同步区块数据
    */
   async syncBlockData() {
+    // 使用静态变量跟踪同步状态，防止多个同步任务冲突
+    if (BlockSync._syncInProgress) {
+      this.logger.debug('Another sync operation is already in progress, skipping')
+      return false
+    }
+
+    BlockSync._syncInProgress = true
+
     try {
       let res = await this.runtime.peer.p2p.get('/height')
       if (!res) {
         this.logger.error('Failed to get height: No response')
+        BlockSync._syncInProgress = false
         return false
       }
 
@@ -367,7 +408,9 @@ export class BlockSync {
               const lastBlock = this.runtime.block.getLastBlock()
 
               // 尝试从更早的区块开始同步
-              const earlierBlockHeight = bignum.minus(lastBlock.height, 10).toString() // 回退10个区块
+              // 确保不会回退到负数高度
+              const blockHeight = bignum.new(lastBlock.height)
+              const earlierBlockHeight = bignum.isLessThanOrEqualTo(blockHeight, '10') ? '1' : bignum.minus(blockHeight, '10').toString() // 回退10个区块
               const earlierBlock = await this.dao.findOne('block', {
                 where: { height: earlierBlockHeight }
               });
@@ -409,11 +452,18 @@ export class BlockSync {
         }
       } else {
         this.logger.error('Failed to get height from remote peer: No body in response')
+        BlockSync._syncInProgress = false
         return false
       }
     } catch (error) {
       this.logger.error(`Error in syncBlockData: ${error.message || error}`)
+      BlockSync._syncInProgress = false
       return false
+    } finally {
+      // 确保在所有情况下都重置同步状态标志
+      setTimeout(() => {
+        BlockSync._syncInProgress = false
+      }, 5000) // 延迟5秒重置，防止短时间内重复触发
     }
   }
 

@@ -410,6 +410,10 @@ export class P2P {
       }
     }
 
+    // 连接成功后，将节点状态设置为 ready
+    this.inventory.update(peer.id, { status: Peer.STATUS.ready })
+    this.logger.debug(`Peer ${peer.host}:${peer.port} connection successful, status set to ready`)
+
     this.logger.debug(
       `${this.port} success connect to peer: ${peer.host}:${peer.port} socket: ${pipe.socket.remotePort}`
     )
@@ -551,9 +555,18 @@ export class P2P {
    */
   async _processMessage(msg, pipe) {
     let peer = this.inventory.get(pipe.id)
-    if (!peer || peer.status === Peer.STATUS.disable) {
+    if (!peer) {
+      // 如果节点不存在，添加到库存
       this.inventory.addMap(pipe.id)
       peer = this.inventory.get(pipe.id)
+    } else if (peer.status === Peer.STATUS.disable) {
+      // 如果节点被禁用，重新启用并设置为 ready 状态
+      this.inventory.update(peer.id, { status: Peer.STATUS.ready, failCount: 0, delay: 0 })
+      this.logger.debug(`Re-enabled peer ${peer.host}:${peer.port}, status set to ready`)
+    } else if (peer.status === Peer.STATUS.pending) {
+      // 如果节点处于 pending 状态，设置为 ready
+      this.inventory.update(peer.id, { status: Peer.STATUS.ready })
+      this.logger.debug(`Peer ${peer.host}:${peer.port} status updated from pending to ready`)
     }
     switch (msg.cmd) {
       case Message.commands.PUSH: {
@@ -606,8 +619,14 @@ export class P2P {
           // 跳过自身
           if (seed.id === this.id) return
 
+          // 创建新节点，初始状态为 pending
           const peer = new Peer(seed)
           this.inventory.add(peer)
+
+          // 尝试连接该节点
+          this.connect(peer).catch(err => {
+            this.logger.warn(`Failed to connect to seed node ${peer.host}:${peer.port}: ${err.message}`)
+          })
         })
       }
 

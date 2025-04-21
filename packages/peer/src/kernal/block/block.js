@@ -969,7 +969,7 @@ class Block {
    * @param {*} verifyTrs
    */
   async processBlock(block, votes, broadcast, save, verifyTrs) {
-        
+
     if (!this.runtime.loaded) {
       this.logger.debug('processBlock this.runtime.loaded: ', this.runtime.loaded)
       throw new Error('DDN is preparing')
@@ -1648,7 +1648,27 @@ class Block {
    */
   async getCommonBlock(block) {
     try {
-      const minHeight = Math.max(1, block.height - 5)
+      // 如果是高度为1的区块（创世区块），特殊处理
+      if (bignum.isEqualTo(block.height, '1')) {
+        // 程序启动时已经验证过创世区块，这里不应该再次处理
+        this.logger.warn(`Received request to find common block for genesis block, which should be handled elsewhere`)
+        throw new Error(`Cannot find common block for genesis block`)
+      }
+
+      // 如果不是创世区块，先尝试直接查找匹配的前一个区块
+      if (block.previous_block) {
+        const previousBlock = await this.dao.findOne('block', {
+          where: { id: block.previous_block }
+        })
+
+        if (previousBlock) {
+          return previousBlock
+        }
+      }
+
+      // 如果直接查找失败，则在一个范围内查找
+      const blockHeight = bignum.new(block.height)
+      const minHeight = bignum.isLessThanOrEqualTo(blockHeight, '5') ? '1' : bignum.minus(blockHeight, '5').toString()
       const maxHeight = block.height
       const blocks = await this.getBlocks(minHeight, maxHeight)
 
@@ -1657,6 +1677,20 @@ class Block {
           return b
         }
       }
+
+      // 如果还是找不到，尝试在更大范围内查找
+      if (bignum.isGreaterThan(block.height, '1')) {
+        const extendedMinHeight = bignum.isLessThanOrEqualTo(blockHeight, '30') ? '1' : bignum.minus(blockHeight, '30').toString()
+        const extendedMaxHeight = bignum.minus(minHeight, '1').toString()
+        const extendedBlocks = await this.getBlocks(extendedMinHeight, extendedMaxHeight)
+
+        for (const b of extendedBlocks) {
+          if (b.id === block.previous_block) {
+            return b
+          }
+        }
+      }
+
       throw new Error(`Common block not found for block ${block.id} at height ${block.height}`)
     } catch (err) {
       this.logger.error('Failed to get common block:', err)

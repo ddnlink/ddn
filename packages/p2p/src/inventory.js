@@ -36,8 +36,8 @@ export class Peer {
     // 设置其他属性
     this.family = family;
 
-    // 设置状态，默认为 ready
-    this.status = peer.status !== undefined ? peer.status : Peer.STATUS.ready;
+    // 设置状态，默认为 pending，等待连接验证后再设置为 ready
+    this.status = peer.status !== undefined ? peer.status : Peer.STATUS.pending;
     this.delay = peer.delay !== undefined ? peer.delay : 0;
     this.failCount = peer.failCount !== undefined ? peer.failCount : 0;
 
@@ -292,27 +292,46 @@ export class Inventory {
     this.logger.debug('getAllPeers starting...')
 
     const result = []
+    let readyCount = 0
+    let pendingCount = 0
+
     this.peers.forEach(peer => {
       if (peer.status !== Peer.STATUS.disable) {
         // this.logger.debug(` peer is  ${JSON.stringify(peer)}`)
         result.push(peer)
+
+        // 统计不同状态的节点数量
+        if (peer.status === Peer.STATUS.ready) {
+          readyCount++
+        } else if (peer.status === Peer.STATUS.pending) {
+          pendingCount++
+        }
       }
     })
-    this.logger.debug(`All enabled peers ${result.length} of all peers ${this.peers.size}`)
+
+    this.logger.debug(`All enabled peers ${result.length} of all peers ${this.peers.size} (ready: ${readyCount}, pending: ${pendingCount})`)
     return result
   }
 
   getRandomPeer() {
     this.logger.debug('getRandomPeer starting...')
 
-    const peers = this.getAllPeers()
-    if (peers.length === 0) {
-      this.logger.debug('No available peers')
+    // 只获取状态为 ready 的节点
+    const readyPeers = [];
+    this.peers.forEach(peer => {
+      if (peer.status === Peer.STATUS.ready) {
+        readyPeers.push(peer);
+      }
+    });
+
+    if (readyPeers.length === 0) {
+      this.logger.debug('No available ready peers')
       return null
     }
-    const rnd = Math.floor(Math.random() * peers.length)
-    this.logger.debug('Random peer pos: ', rnd, peers.length)
-    return peers[rnd]
+
+    const rnd = Math.floor(Math.random() * readyPeers.length)
+    this.logger.debug('Random peer pos: ', rnd, readyPeers.length)
+    return readyPeers[rnd]
   }
 
   // 修改addMap方法确保数据完整性
@@ -321,24 +340,41 @@ export class Inventory {
       const hasPeer = this.peers.has(id)
       if (hasPeer) {
         const peer = this.peers.get(id)
-        peer.status = Peer.STATUS.ready
+        // 如果节点已存在，将其状态设置为 pending，等待连接验证
+        peer.status = Peer.STATUS.pending
         peer.failCount = 0
         peer.delay = 0
+        this.logger.debug(`Updated existing peer ${peer.host}:${peer.port} status to pending`)
       } else {
-        const peers = JSON.parse(fs.readFileSync(this.dbfile))
-        let peer = peers.find(item => item.id === id)
-        if (!peer) {
-          const rnd = Math.floor(Math.random() * peers.length)
-          peer = peers[rnd]
+        try {
+          // 尝试从数据库加载节点
+          const peers = JSON.parse(fs.readFileSync(this.dbfile))
+          let peer = peers.find(item => item.id === id)
+          if (!peer) {
+            // 如果找不到指定节点，随机选择一个
+            if (peers.length > 0) {
+              const rnd = Math.floor(Math.random() * peers.length)
+              peer = peers[rnd]
+              this.logger.debug(`Could not find peer with id ${id}, using random peer ${peer.host}:${peer.port}`)
+            } else {
+              throw new Error('No peers available in database')
+            }
+          }
+
+          // 创建新节点，初始状态为 pending
+          const newPeer = new Peer({
+            host: peer.host,
+            port: peer.port,
+            httpPort: peer.httpPort,
+            family: peer.family,
+            status: Peer.STATUS.pending // 显式设置状态为 pending
+          })
+
+          this.peers.set(peer.id, newPeer)
+          this.logger.debug(`Added new peer ${newPeer.host}:${newPeer.port} with status pending`)
+        } catch (err) {
+          this.logger.error(`Failed to load peers from database: ${err.message}`)
         }
-        // 确保从数据库加载的peer包含所有必要字段，并保持原始格式
-        this.peers.set(peer.id, new Peer({
-          host: peer.host,
-          port: peer.port,
-          // 保持 httpPort 的原始格式
-          httpPort: peer.httpPort,
-          family: peer.family
-        }))
       }
       this._persistPeers()
     } catch (err) {
