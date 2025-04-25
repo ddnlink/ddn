@@ -29,7 +29,7 @@ class Peer {
     Object.assign(this, context)
     this.ctx = context
     this._context = context
-    
+
     // 添加初始化标志
     this._prepared = false
 
@@ -72,6 +72,9 @@ class Peer {
     this.p2p = new P2P(p2pConfig)
 
     this.broadcast = PeerBroadcast.singleton(this.ctx)
+
+    // 初始化区块同步实例
+    this.blockSync = BlockSync.singleton(this.ctx)
   }
 
   async prepare() {
@@ -80,19 +83,19 @@ class Peer {
       this.ctx.logger.debug('Peer network already prepared, skipping...')
       return true
     }
-    
+
     this.ctx.logger.info('Preparing peer network...')
-    
+
     try {
       // 确保P2P实例已准备就绪
       await this.p2p.prepare()
-      
+
       // 添加一个延迟，确保节点服务完全启动
       await new Promise(resolve => setTimeout(resolve, 5000))
-      
+
       // 标记为已初始化
       this._prepared = true
-      
+
       this.ctx.logger.info('Peer network prepared successfully')
       return true
     } catch (err) {
@@ -129,7 +132,7 @@ class Peer {
    */
   async syncBlocks() {
     try {
-      return await BlockSync.singleton(this.ctx).syncBlockData()
+      return await this.blockSync.syncBlockData()
     } catch (err) {
       this.ctx.logger.error(`Failed to sync blocks: ${err.message}`)
       // 同步失败不应该影响程序运行
@@ -142,7 +145,7 @@ class Peer {
    */
   async syncBlocksFromPeer(peer, fromHeight) {
     try {
-      return await BlockSync.singleton(this.ctx)._cloneBlocksFromPeer(peer, fromHeight)
+      return await this.blockSync._cloneBlocksFromPeer(peer, fromHeight)
     } catch (err) {
       this.ctx.logger.error(`Failed to sync blocks from peer ${peer.host}:${peer.port}: ${err.message}`)
       return false

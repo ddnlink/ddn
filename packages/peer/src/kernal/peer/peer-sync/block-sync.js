@@ -24,6 +24,13 @@ export class BlockSync {
   constructor(context) {
     Object.assign(this, context)
     this._context = context
+
+    // 恢复模式相关属性
+    this._recoveryMode = false
+    this._recoveryAttempts = 0
+    this._maxRecoveryAttempts = 5
+    this._syncFailCount = 0
+    this._activeSyncInProgress = false
   }
 
   async _getIdSequence(height) {
@@ -523,6 +530,364 @@ export class BlockSync {
       setTimeout(() => {
         BlockSync._syncInProgress = false
       }, 5000) // 延迟5秒重置，防止短时间内重复触发
+    }
+  }
+
+  /**
+   * 同步节点区块数据（轮询）
+   * 从program.js移动过来的方法
+   */
+  async startBlockDataSyncTask() {
+    this.logger.debug('startBlockDataSyncTask enter...')
+
+    // 定义下一次同步的调度函数
+    const next = (delay = 10) => {
+      setTimeout(() => {
+        this.startBlockDataSyncTask()
+      }, 1000 * delay)
+    }
+
+    // 检查是否有实际的同步操作正在进行
+    if (this._activeSyncInProgress) {
+      this.logger.debug('Active sync operation already in progress, skip this round')
+      next()
+      return
+    }
+
+    // 获取可用节点
+    const peer = await this.runtime.peer.getPeer()
+    if (!peer) {
+      this.logger.warn('No available peers for sync')
+      // 如果没有可用节点，尝试转换到Ready状态，这样可以当单节点运行
+      if (!this.runtime.stateMachine.isReady()) {
+        try {
+          // 直接使用状态机转换到Ready状态
+          this.runtime.stateMachine.transitionTo('Ready')
+          this.logger.info('Transitioned to Ready state for single node operation')
+        } catch (err) {
+          this.logger.error(`Failed to transition to Ready state: ${err.message}`)
+        }
+      }
+      next(30) // 延长重试间隔
+      return
+    }
+
+    try {
+      // 标记正在进行实际的同步操作
+      this._activeSyncInProgress = true
+
+      // 获取当前区块信息
+      const lastBlock = this.runtime.block.getLastBlock()
+      const currentHeight = lastBlock.height
+
+      // 获取远程节点高度
+      let remoteHeight;
+      try {
+        const res = await this.runtime.peer.p2p.get('/height', {}, peer);
+        if (res && res.body && res.body.height) {
+          remoteHeight = res.body.height;
+        }
+      } catch (err) {
+        this.logger.warn(`Failed to get remote height: ${err.message}`);
+        // 即使获取高度失败，也继续尝试同步
+      }
+
+      // 记录同步检查信息
+      this.logger.info(`Checking if sync needed with peer ${peer.host}:${peer.port}, local height: ${currentHeight}, remote height: ${remoteHeight || 'unknown'}`);
+
+      // 使用专门的方法检查是否需要同步
+      const syncCheck = this._checkNeedSync(lastBlock, remoteHeight);
+      const needSync = syncCheck.needSync;
+
+      // 只有在需要同步时才暂停和恢复锻造
+      if (needSync) {
+        // 暂停锻造过程
+        const wasForgeEnabled = this.runtime.delegate.isForgeEnabled();
+        if (wasForgeEnabled) {
+          this.runtime.delegate.disableForging();
+          this.logger.debug('Temporarily disabled forging during sync');
+        }
+
+        try {
+          // 执行实际的同步操作
+          if (this._recoveryMode) {
+            await this._performRecoverySync(peer, lastBlock);
+          } else {
+            // 正常模式下执行同步
+            await this._performNormalSync(peer);
+          }
+        } finally {
+          // 恢复锻造过程
+          if (wasForgeEnabled) {
+            this.runtime.delegate.enableForging();
+            this.logger.debug('Re-enabled forging after sync');
+          }
+        }
+      }
+    } catch (err) {
+      this.logger.error(`Block synchronization error: ${err.message}`);
+      this._syncFailCount = (this._syncFailCount || 0) + 1;
+
+      // 处理连续失败
+      if (this._syncFailCount >= 3) {
+        this.logger.warn(`Block synchronization failed ${this._syncFailCount} times, entering recovery mode`);
+        this._recoveryMode = true;
+        this._recoveryAttempts = 0;
+      }
+    } finally {
+      // 无论同步成功还是失败，都要清除标记
+      this._activeSyncInProgress = false;
+      next(this._recoveryMode ? 30 : 10); // 恢复模式下使用更长的间隔
+    }
+  }
+
+  /**
+   * 执行恢复模式同步
+   * 从program.js移动过来的方法
+   * @param {Object} peer 目标节点
+   * @param {Object} lastBlock 当前最新区块
+   */
+  async _performRecoverySync(peer, lastBlock) {
+    this.logger.info(`Syncing in recovery mode (attempt ${this._recoveryAttempts + 1}/${this._maxRecoveryAttempts})`);
+
+    try {
+      // 清理缓存和未确认交易
+      this.oneoff.clear();
+      await this.runtime.transaction.undoUnconfirmedList();
+
+      // 计算回退高度，每次尝试回退更多区块
+      const backSteps = Math.min(10 * (this._recoveryAttempts + 1), 100); // 最多回退100个区块
+      const targetHeight = Math.max(1, lastBlock.height - backSteps); // 不低于高度1
+
+      // 获取目标区块
+      const targetBlock = await this.dao.findOne('block', {
+        where: { height: targetHeight.toString() }
+      });
+
+      if (!targetBlock) {
+        throw new Error(`Could not find block at height ${targetHeight} for recovery`);
+      }
+
+      this.logger.info(`Recovery: Starting sync from block at height ${targetHeight}`);
+
+      // 使用目标区块ID开始同步
+      const syncLastBlock = await this.runtime.peer.syncBlocksFromPeer(peer, targetBlock.id);
+
+      // 检查同步结果
+      if (syncLastBlock) {
+        // 同步成功
+        const newLastBlock = this.runtime.block.getLastBlock();
+        this.logger.info(`Recovery successful: Block height changed from ${lastBlock.height} to ${newLastBlock.height}`);
+
+        // 如果高度增加，退出恢复模式
+        if (bignum.isGreaterThan(newLastBlock.height, lastBlock.height)) {
+          this._recoveryMode = false;
+          this._recoveryAttempts = 0;
+          this.logger.info('Exiting recovery mode');
+
+          // 尝试转换到Ready状态
+          if (!this.runtime.stateMachine.isReady()) {
+            try {
+              this.runtime.stateMachine.transitionTo('Ready');
+              this.logger.info('Transitioned to Ready state after successful sync');
+            } catch (err) {
+              this.logger.error(`Failed to transition to Ready state: ${err.message}`);
+            }
+          }
+        } else {
+          // 高度没有增加，增加恢复尝试次数
+          this._recoveryAttempts++;
+          this.logger.warn(`Recovery did not increase block height, attempt ${this._recoveryAttempts}/${this._maxRecoveryAttempts}`);
+        }
+      } else {
+        // 同步失败
+        this._recoveryAttempts++;
+        this.logger.warn(`Recovery sync failed, attempt ${this._recoveryAttempts}/${this._maxRecoveryAttempts}`);
+
+        // 如果达到最大尝试次数，尝试更激进的恢复策略
+        if (this._recoveryAttempts >= this._maxRecoveryAttempts) {
+          this.logger.error(`Recovery failed after ${this._maxRecoveryAttempts} attempts, attempting more aggressive recovery`);
+
+          // 尝试清理数据库和状态
+          try {
+            // 使用已有的方法清理状态
+            this.runtime.consensus.clearState();
+
+            // 使用已有的方法回滚到目标高度
+            await this.runtime.block.rollbackToBlock(targetHeight);
+
+            this._recoveryAttempts = 0; // 重置尝试次数，给清理后的数据库一次机会
+            this.logger.info(`Aggressive recovery completed, will retry recovery`);
+          } catch (cleanupErr) {
+            this.logger.error(`Aggressive recovery failed: ${cleanupErr.message}`);
+            this._recoveryMode = false;
+            this._recoveryAttempts = 0;
+
+            // 转换到Ready状态，让系统尝试正常运行
+            if (!this.runtime.stateMachine.isReady()) {
+              try {
+                this.runtime.stateMachine.transitionTo('Ready');
+                this.logger.info('Transitioned to Ready state after recovery failure');
+              } catch (err) {
+                this.logger.error(`Failed to transition to Ready state: ${err.message}`);
+              }
+            }
+          }
+        }
+      }
+    } catch (err) {
+      // 处理特定类型的错误
+      if (err.message && err.message.includes('Block already exists')) {
+        this.logger.warn(`Recovery encountered 'Block already exists' error, attempting targeted cleanup`);
+
+        try {
+          // 尝试提取区块ID
+          const blockIdMatch = err.message.match(/Block already exists: ([a-f0-9]+)/);
+          if (blockIdMatch && blockIdMatch[1]) {
+            const blockId = blockIdMatch[1];
+
+            // 使用已有的方法删除特定区块
+            await this.runtime.block.simpleDeleteAfterBlock(blockId);
+
+            // 清理状态
+            this.runtime.consensus.clearState();
+
+            this.logger.info(`Targeted cleanup of block ${blockId} completed, will retry recovery`);
+
+            // 减少恢复尝试次数，给清理后的数据库一次机会
+            this._recoveryAttempts = Math.max(0, this._recoveryAttempts - 1);
+            return; // 直接返回，下次循环会重试
+          }
+        } catch (cleanupErr) {
+          this.logger.error(`Targeted block cleanup failed: ${cleanupErr.message}`);
+        }
+      }
+
+      this.logger.error(`Recovery sync error: ${err.message}`);
+      this._recoveryAttempts++;
+
+      // 如果达到最大尝试次数，退出恢复模式
+      if (this._recoveryAttempts >= this._maxRecoveryAttempts) {
+        this.logger.error(`Recovery failed after ${this._maxRecoveryAttempts} attempts due to errors, exiting recovery mode`);
+        this._recoveryMode = false;
+        this._recoveryAttempts = 0;
+
+        // 清理状态
+        this.runtime.consensus.clearState();
+
+        // 转换到Ready状态，让系统尝试正常运行
+        if (!this.runtime.stateMachine.isReady()) {
+          try {
+            this.runtime.stateMachine.transitionTo('Ready');
+            this.logger.info('Transitioned to Ready state after recovery error');
+          } catch (err) {
+            this.logger.error(`Failed to transition to Ready state: ${err.message}`);
+          }
+        }
+      }
+    }
+  }
+
+  /**
+   * 检查是否需要同步区块
+   * 此方法仅判断是否需要同步，不执行实际的同步操作
+   * 从program.js移动过来的方法
+   * @param {Object} lastBlock 当前最新区块
+   * @param {String|Number} remoteHeight 远程节点高度
+   * @returns {Object} 包含是否需要同步的标志和原因
+   */
+  _checkNeedSync(lastBlock, remoteHeight) {
+    // 获取当前区块和时间槽信息
+    const lastSlot = this.runtime.slot.getSlotNumber(lastBlock.timestamp);
+    const nextSlot = this.runtime.slot.getNextSlot();
+    const slotDiff = nextSlot - lastSlot;
+
+    // 计算高度差
+    const heightDiff = remoteHeight ? bignum.minus(remoteHeight, lastBlock.height) : 0;
+
+    // 判断是否需要同步的条件
+    const reasons = [];
+
+    // 条件1: 时间槽差距过大（可能表示本地节点长时间未更新）
+    if (slotDiff >= 3) {
+      reasons.push(`slot diff (${slotDiff}) >= 3`);
+    }
+
+    // 条件2: 高度差距过大（远程节点比本地节点高出5个以上区块）
+    if (bignum.isGreaterThan(heightDiff, 5)) {
+      reasons.push(`height diff (${heightDiff}) > 5`);
+    }
+
+    // 条件3: 如果处于恢复模式，总是需要同步
+    if (this._recoveryMode) {
+      reasons.push('in recovery mode');
+    }
+
+    const needSync = reasons.length > 0;
+
+    if (!needSync) {
+      this.logger.debug(`No need to sync: slot diff=${slotDiff}, height diff=${heightDiff}`);
+    } else {
+      this.logger.info(`Need to sync because: ${reasons.join(', ')}`);
+    }
+
+    return {
+      needSync,
+      reasons,
+      slotDiff,
+      heightDiff
+    };
+  }
+
+  /**
+   * 执行正常模式同步
+   * 此方法执行实际的同步操作，但不负责判断是否需要同步
+   * 从program.js移动过来的方法
+   * @param {Object} peer 目标节点
+   * @returns {Boolean} 是否成功执行了同步操作
+   */
+  async _performNormalSync(peer) {
+    // 执行区块同步
+    this.logger.info(`Starting normal sync with peer ${peer.host}:${peer.port}`);
+    let result;
+
+    try {
+      // 使用更可靠的同步方法
+      result = await this.runtime.peer.syncBlocks();
+
+      if (result) {
+        // 同步成功
+        this.logger.info('Block synchronization completed successfully');
+        this._syncFailCount = 0; // 重置失败计数
+
+        // 尝试转换到Ready状态
+        if (!this.runtime.stateMachine.isReady()) {
+          try {
+            this.runtime.stateMachine.transitionTo('Ready');
+            this.logger.info('Transitioned to Ready state after successful normal sync');
+          } catch (err) {
+            this.logger.error(`Failed to transition to Ready state: ${err.message}`);
+          }
+        }
+
+        return true; // 返回true表示成功执行了同步操作
+      } else {
+        // 同步失败或没有新区块
+        this.logger.debug('No new blocks found during sync');
+        this._syncFailCount = 0; // 重置失败计数，因为这不是真正的失败
+        return false; // 返回false表示没有执行实际的同步操作
+      }
+    } catch (err) {
+      // 处理特定类型的错误
+      if (err.message && err.message.includes('Block already exists')) {
+        this.logger.warn(`Sync encountered 'Block already exists' error, may need database cleanup`);
+        // 可以考虑添加数据库一致性检查
+      } else if (err.message && err.message.includes('Buffers length is not right')) {
+        this.logger.warn(`Sync encountered network buffer error, will retry with different peer`);
+        // 可以考虑标记当前节点为不可靠，下次选择不同节点
+      }
+
+      throw err; // 重新抛出错误，让外层处理
     }
   }
 
