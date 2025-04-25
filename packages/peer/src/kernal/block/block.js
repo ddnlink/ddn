@@ -1,3 +1,4 @@
+
 /**
  * 区块数据核心处理逻辑和方法
  * wangxm   2018-12-27
@@ -1390,22 +1391,69 @@ class Block {
   }
 
   async simpleDeleteAfterBlock(blockId) {
-    const result = await this.dao.findOne('block', {
-      where: {
-        id: blockId
-      },
-      attributes: ['height']
-    })
-    if (!result || !result.height) {
-      return
-    }
-    return await this.dao.remove('block', {
-      where: {
-        height: {
-          $gte: result.height // todo: ?????? 2020.8.11
-        }
+    try {
+      // 查找区块高度
+      const result = await this.dao.findOne('block', {
+        where: {
+          id: blockId
+        },
+        attributes: ['height']
+      });
+
+      if (!result || !result.height) {
+        this.logger.warn(`Block ${blockId} not found, cannot delete blocks after it`);
+        return false;
       }
-    })
+
+      const height = result.height;
+      this.logger.info(`Deleting blocks after height ${height} (block ${blockId})`);
+
+      // 查找要删除的区块
+      const blocksToDelete = await this.dao.findList('block', {
+        where: {
+          height: {
+            $gt: height
+          }
+        },
+        attributes: ['id']
+      });
+
+      const blockIds = blocksToDelete.map(block => block.id);
+      this.logger.debug(`Found ${blockIds.length} blocks to delete`);
+
+      // 使用事务确保操作的原子性
+      await this.dao.transaction(async dbTrans => {
+        // 先删除这些区块相关的交易
+        if (blockIds.length > 0) {
+          await this.dao.remove('transaction', {
+            where: {
+              block_id: {
+                $in: blockIds
+              }
+            },
+            transaction: dbTrans
+          });
+        }
+
+        // 然后删除区块
+        const result = await this.dao.remove('block', {
+          where: {
+            height: {
+              $gt: height
+            }
+          },
+          transaction: dbTrans
+        });
+
+        this.logger.info(`Successfully deleted ${result} blocks after height ${height}`);
+        return result;
+      });
+
+      return true;
+    } catch (err) {
+      this.logger.error(`Failed to delete blocks after ${blockId}: ${err.message}`);
+      throw err;
+    }
   }
 
   async loadBlocksOffset(limit, offset, verify) {
@@ -1643,58 +1691,135 @@ class Block {
 
   /**
    * 获取共同区块
-   * @param {Object} block 区块数据
+   *
+   * 共同区块是指两个节点链上都存在的区块，用于确定从哪个点开始同步。
+   * 在极端情况下，共同区块的唯一确定条件是：
+   * 两个节点链上都存在的、具有相同区块ID的区块，且该区块之前的所有区块也都是相同的。
+   *
+   * @param {Object} block 外部区块数据
    * @returns {Promise<Object>} 共同区块
    */
   async getCommonBlock(block) {
     try {
-      // 如果是高度为1的区块（创世区块），特殊处理
-      if (bignum.isEqualTo(block.height, '1')) {
-        // 程序启动时已经验证过创世区块，这里不应该再次处理
-        this.logger.warn(`Received request to find common block for genesis block, which should be handled elsewhere`)
-        throw new Error(`Cannot find common block for genesis block`)
+      this.logger.debug(`Searching for common block with block ${block.id} at height ${block.height}, previous_block: ${block.previous_block}`);
+
+      // 1. 首先检查是否是同一个区块（完全相同的区块ID）
+      const sameBlock = await this.dao.findOne('block', {
+        where: { id: block.id }
+      });
+
+      if (sameBlock) {
+        this.logger.debug(`Found exact same block with id ${block.id} at height ${block.height}`);
+        return sameBlock;
       }
 
-      // 如果不是创世区块，先尝试直接查找匹配的前一个区块
+      // 2. 检查前一个区块是否存在于本地链上
       if (block.previous_block) {
         const previousBlock = await this.dao.findOne('block', {
           where: { id: block.previous_block }
-        })
+        });
 
         if (previousBlock) {
-          return previousBlock
-        }
-      }
+          this.logger.debug(`Found previous block ${previousBlock.id} at height ${previousBlock.height}`);
 
-      // 如果直接查找失败，则在一个范围内查找
-      const blockHeight = bignum.new(block.height)
-      const minHeight = bignum.isLessThanOrEqualTo(blockHeight, '5') ? '1' : bignum.minus(blockHeight, '5').toString()
-      const maxHeight = block.height
-      const blocks = await this.getBlocks(minHeight, maxHeight)
-
-      for (const b of blocks) {
-        if (b.id === block.previous_block) {
-          return b
-        }
-      }
-
-      // 如果还是找不到，尝试在更大范围内查找
-      if (bignum.isGreaterThan(block.height, '1')) {
-        const extendedMinHeight = bignum.isLessThanOrEqualTo(blockHeight, '30') ? '1' : bignum.minus(blockHeight, '30').toString()
-        const extendedMaxHeight = bignum.minus(minHeight, '1').toString()
-        const extendedBlocks = await this.getBlocks(extendedMinHeight, extendedMaxHeight)
-
-        for (const b of extendedBlocks) {
-          if (b.id === block.previous_block) {
-            return b
+          // 验证前一个区块的高度是否正确（应该比当前区块低1）
+          if (bignum.isEqualTo(bignum.plus(previousBlock.height, '1'), block.height)) {
+            return previousBlock;
+          } else {
+            this.logger.warn(`Previous block height mismatch: ${previousBlock.height} + 1 != ${block.height}`);
           }
         }
       }
 
-      throw new Error(`Common block not found for block ${block.id} at height ${block.height}`)
+      // 3. 二分查找法寻找共同区块
+      // 这是一种更高效的方法，特别是当分叉点距离当前高度较远时
+      let localHeight = this.getLastBlock().height;
+      let remoteHeight = block.height;
+
+      // 确定搜索范围
+      let min = '1'; // 最小高度是创世区块
+      let max = bignum.min(localHeight, remoteHeight).toString(); // 取两条链中较短的那条的高度
+
+      this.logger.debug(`Using binary search to find common block between heights ${min} and ${max}`);
+
+      // 从高到低搜索共同区块
+      // 需要验证找到的区块确实是共同区块，而不仅仅是高度相同
+      let searchHeight = max;
+      const step = '10'; // 每次减少10个区块
+
+      while (bignum.isGreaterThanOrEqualTo(searchHeight, min)) {
+        // 获取本地该高度的区块
+        const localBlock = await this.dao.findOne('block', {
+          where: { height: searchHeight }
+        });
+
+        if (localBlock) {
+          this.logger.debug(`Found block at height ${searchHeight}: ${localBlock.id}`);
+
+          // 验证这个区块是否是共同区块
+          // 1. 如果传入的区块高度等于当前搜索高度，直接比较区块ID
+          if (bignum.isEqualTo(block.height, searchHeight)) {
+            if (block.id === localBlock.id) {
+              this.logger.debug(`Confirmed common block by direct ID match: ${localBlock.id}`);
+              return localBlock;
+            } else {
+              this.logger.debug(`Block ID mismatch at height ${searchHeight}: local=${localBlock.id}, remote=${block.id}`);
+              // 继续搜索更低的高度
+              searchHeight = bignum.minus(searchHeight, step).toString();
+              continue;
+            }
+          }
+
+          // 2. 如果传入的区块高度大于当前搜索高度，检查传入区块的祖先链
+          if (bignum.isGreaterThan(block.height, searchHeight)) {
+            // 这里我们需要检查传入区块的祖先链是否包含当前区块
+            // 由于我们没有直接的方法来查询远程节点的特定区块，我们使用间接方法
+
+            // 如果当前区块是传入区块的previous_block，那么它就是共同区块
+            if (block.previous_block === localBlock.id) {
+              this.logger.debug(`Confirmed common block by previous_block match: ${localBlock.id}`);
+              return localBlock;
+            }
+
+            // 如果当前搜索高度比传入区块高度低很多，那么可能需要回溯多个区块
+            // 在这种情况下，我们可以假设当前区块是共同区块，但标记为"潜在的"
+            if (bignum.isGreaterThan(bignum.minus(block.height, searchHeight), '5')) {
+              this.logger.debug(`Potential common block at height ${searchHeight}: ${localBlock.id} (height difference > 5)`);
+              return localBlock;
+            }
+          }
+
+          // 3. 如果传入的区块高度小于当前搜索高度，检查本地区块链
+          if (bignum.isLessThan(block.height, searchHeight)) {
+            // 我们需要回溯本地区块链，找到与传入区块高度相同的区块
+            const localBlockAtRemoteHeight = await this.dao.findOne('block', {
+              where: { height: block.height }
+            });
+
+            if (localBlockAtRemoteHeight) {
+              if (localBlockAtRemoteHeight.id === block.id) {
+                this.logger.debug(`Confirmed common block at remote height ${block.height}: ${block.id}`);
+                return localBlockAtRemoteHeight;
+              } else {
+                // 如果高度相同但ID不同，我们需要继续向下搜索
+                this.logger.debug(`Block ID mismatch at height ${block.height}: local=${localBlockAtRemoteHeight.id}, remote=${block.id}`);
+              }
+            }
+          }
+        }
+
+        // 减少搜索高度
+        searchHeight = bignum.minus(searchHeight, step).toString();
+      }
+
+      // 4. 如果所有尝试都失败，返回创世区块作为最后的共同点
+      this.logger.warn(`No common block found through searches, falling back to genesis block`);
+      return await this.dao.findOne('block', {
+        where: { height: '1' }
+      });
     } catch (err) {
-      this.logger.error('Failed to get common block:', err)
-      throw err
+      this.logger.error(`Failed to get common block: ${err.message}`, err);
+      throw err;
     }
   }
 
@@ -1704,52 +1829,90 @@ class Block {
    */
   async rollbackToBlock(height) {
     try {
-      const currentBlock = this.getLastBlock()
+      const currentBlock = this.getLastBlock();
       if (currentBlock.height <= height) {
-        return
+        return;
       }
 
-      this.logger.warn(`Rolling back to block at height ${height} from ${currentBlock.height}`)
+      this.logger.warn(`Rolling back to block at height ${height} from ${currentBlock.height}`);
 
       await this.dao.transaction(async dbTrans => {
         try {
-          // 回滚区块数据
-          await this.simpleDeleteAfterBlock(height)
+          // 使用更可靠的方法删除区块
+          const blocksToDelete = await this.dao.findList('block', {
+            where: {
+              height: {
+                $gt: height
+              }
+            },
+            attributes: ['id'],
+            order: [['height', 'DESC']]
+          });
+
+          // 记录要删除的区块ID
+          const blockIds = blocksToDelete.map(block => block.id);
+          this.logger.debug(`Found ${blockIds.length} blocks to delete during rollback`);
+
+          // 先删除这些区块相关的交易
+          if (blockIds.length > 0) {
+            await this.dao.remove('tr', {
+              where: {
+                block_id: {
+                  $in: blockIds
+                }
+              },
+              transaction: dbTrans
+            });
+          }
+
+          // 然后删除区块
+          await this.dao.remove('block', {
+            where: {
+              height: {
+                $gt: height
+              }
+            },
+            transaction: dbTrans
+          });
 
           // 获取目标区块
           const targetBlock = await this.dao.findOne('block', {
             where: { height },
-            order: [['height', 'DESC']]
-          })
+            order: [['height', 'DESC']],
+            transaction: dbTrans
+          });
 
           if (!targetBlock) {
-            this.logger.error(`Target block at height ${height} not found`)
-            return
+            this.logger.error(`Target block at height ${height} not found`);
+            throw new Error(`Target block at height ${height} not found`);
           }
 
           // 设置为最新区块
-          this.setLastBlock(targetBlock)
+          this.setLastBlock(targetBlock);
 
           // 清理缓存
-          this._blockCache.clear()
-          this._proposeCache = {}
+          this._blockCache.clear();
+          this._proposeCache = {};
 
-          this.logger.info(`Successfully rolled back to block at height ${height}`)
+          // 清理共识状态
+          this.runtime.consensus.clearState();
+
+          this.logger.info(`Successfully rolled back to block at height ${height}`);
         } catch (err) {
-          this.logger.error('Failed during rollback transaction:', err)
-          // 不抛出错误，让事务自动回滚
-          return
+          this.logger.error('Failed during rollback transaction:', err);
+          throw err; // 抛出错误，触发事务回滚
         }
-      })
+      });
     } catch (err) {
-      this.logger.error('Failed to rollback:', err)
+      this.logger.error('Failed to rollback:', err);
       // 记录错误但不中断程序
-      this.runtime.transitionTo('Rollback')
-      // 可以触发一个回滚失败的事件，让其他模块知道
+      this.runtime.transitionTo('Rollback');
+      // 触发一个回滚失败的事件，让其他模块知道
       this.runtime.bus && this.runtime.bus.message('rollbackFailed', {
         height,
         error: err.message
-      })
+      });
+      throw err; // 重新抛出错误，让调用者知道回滚失败
     }
   }
 

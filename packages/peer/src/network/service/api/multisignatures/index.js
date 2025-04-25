@@ -91,6 +91,45 @@ class MultisignaturesRouter {
       // fixme: getAccountByPublicKey 方法已经处理
       account.publicKey = publicKey;
 
+      // 检查账号是否已有多重签名
+      if (account.multisignatures && account.multisignatures.length > 0) {
+        return {
+          success: false,
+          error: '账号已启用多重签名，不能创建新的多重签名配置',
+          details: {
+            currentMultisig: {
+              min: account.multimin,
+              lifetime: account.multilifetime,
+              keysgroup: account.multisignatures
+            }
+          }
+        };
+      }
+
+      // 检查是否有未确认的多重签名交易
+      const pendingTxs = await this.runtime.transaction.getUnconfirmedTransactionList();
+      const accountPendingMultisigTxs = pendingTxs.filter(tx =>
+        tx.senderId === account.address &&
+        tx.type === assetTypes.MULTISIGNATURE
+      );
+
+      if (accountPendingMultisigTxs.length > 0) {
+        return {
+          success: false,
+          error: '账号有未确认的多重签名交易，请等待确认后再操作',
+          details: {
+            pendingTransactions: accountPendingMultisigTxs.map(tx => ({
+              id: tx.id,
+              min: tx.asset.multisignature.min,
+              lifetime: tx.asset.multisignature.lifetime,
+              keysgroup: tx.asset.multisignature.keysgroup,
+              signatures: tx.signatures ? tx.signatures.length : 0,
+              requiredSignatures: tx.asset.multisignature.keysgroup.length
+            }))
+          }
+        };
+      }
+
       if (account.second_signature && !body.secondSecret) {
         throw new Error('Invalid second passphrase');
       }
@@ -112,7 +151,7 @@ class MultisignaturesRouter {
         });
 
         const transactions = await this.runtime.transaction.receiveTransactions([transaction]);
-        
+
         setImmediate(async () => {
           try {
             await this.runtime.socketio.emit('multisignatures/change', {});
@@ -442,13 +481,112 @@ class MultisignaturesRouter {
   }
 
   /**
+   * 检查账号是否可以创建多重签名
+   *
+   * get /api/multisignatures/checkEligibility?address=账号地址
+   *
+   * @param {*} req 请求对象，包含账号地址
+   * @returns {Object} 包含账号是否可以创建多重签名的信息
+   */
+  async getCheckEligibility(req) {
+    const query = Object.assign({}, req.body, req.query)
+    const validateErrors = await this.ddnSchema.validate(
+      {
+        type: 'object',
+        properties: {
+          address: {
+            type: 'string'
+          },
+          publicKey: {
+            type: 'string',
+            format: 'publicKey'
+          }
+        },
+        required: ['address']
+      },
+      query
+    )
+    if (validateErrors) {
+      return {
+        success: false,
+        error: `Validation error: ${validateErrors[0].schemaPath} ${validateErrors[0].message}`
+      }
+    }
+
+    try {
+      // 获取账号信息
+      const account = await this.runtime.account.getAccountByAddress(query.address);
+
+      if (!account) {
+        return {
+          success: false,
+          error: '账号不存在'
+        };
+      }
+
+      // 检查是否已有多重签名
+      if (account.multisignatures && account.multisignatures.length > 0) {
+        return {
+          success: true,
+          eligible: false,
+          reason: '账号已启用多重签名，不能创建新的多重签名配置',
+          details: {
+            currentMultisig: {
+              min: account.multimin,
+              lifetime: account.multilifetime,
+              keysgroup: account.multisignatures
+            }
+          }
+        };
+      }
+
+      // 检查是否有未确认的多重签名交易
+      const pendingTxs = await this.runtime.transaction.getUnconfirmedTransactionList();
+      const accountPendingMultisigTxs = pendingTxs.filter(tx =>
+        tx.senderId === query.address &&
+        tx.type === assetTypes.MULTISIGNATURE
+      );
+
+      if (accountPendingMultisigTxs.length > 0) {
+        return {
+          success: true,
+          eligible: false,
+          reason: '账号有未确认的多重签名交易，请等待确认后再操作',
+          details: {
+            pendingTransactions: accountPendingMultisigTxs.map(tx => ({
+              id: tx.id,
+              min: tx.asset.multisignature.min,
+              lifetime: tx.asset.multisignature.lifetime,
+              keysgroup: tx.asset.multisignature.keysgroup,
+              signatures: tx.signatures ? tx.signatures.length : 0,
+              requiredSignatures: tx.asset.multisignature.keysgroup.length
+            }))
+          }
+        };
+      }
+
+      return {
+        success: true,
+        eligible: true,
+        message: '账号可以创建多重签名'
+      };
+    } catch (err) {
+      this.logger.error('检查账号多重签名资格失败: ', System.getErrorMsg(err));
+      return {
+        success: false,
+        error: System.getErrorMsg(err)
+      };
+    }
+  }
+
+  /**
    * 获取交易的签名进度和状态
-   * 
+   *
    * get /api/multisignatures/signatureProgress?transactionId=交易ID
-   * 
+   *
    * @param {*} req 请求对象，包含交易ID
-   * @returns {Object} 包含交易签名进度的对象 
-   * 
+   * @returns {Object} 包含交易签名进度的对象
+   *
    * Object 包含信息：
    *   - 交易基本信息（ID、类型、发送者）
    *   - 所需签名数和当前签名数
@@ -503,12 +641,12 @@ class MultisignaturesRouter {
       let currentSignatures = 0
       let signers = []
       let pendingSigners = []
-      
+
       // 处理多重签名资产类型交易
       if (transaction.type === assetTypes.MULTISIGNATURE) {
         requiredSignatures = transaction.asset.multisignature.min
         currentSignatures = transaction.signatures ? transaction.signatures.length : 0
-        
+
         // 获取已签名的公钥列表
         const signedPublicKeys = []
         if (transaction.signatures && transaction.signatures.length > 0) {
@@ -528,7 +666,7 @@ class MultisignaturesRouter {
             }
           }
         }
-        
+
         // 获取已签名和待签名的账户信息
         for (const key of transaction.asset.multisignature.keysgroup) {
           const publicKey = key.substring(1)
@@ -561,10 +699,10 @@ class MultisignaturesRouter {
             error: 'Not a multisignature account'
           }
         }
-        
+
         requiredSignatures = sender.multimin || 0
         currentSignatures = transaction.signatures ? transaction.signatures.length : 0
-        
+
         // 获取已签名的公钥列表
         const signedPublicKeys = []
         if (transaction.signatures && transaction.signatures.length > 0) {
@@ -584,7 +722,7 @@ class MultisignaturesRouter {
             }
           }
         }
-        
+
         // 获取已签名和待签名的账户信息
         for (const publicKey of sender.multisignatures) {
           try {
@@ -651,9 +789,9 @@ class MultisignaturesRouter {
 
   /**
    * 获取用户已签名的交易
-   * 
+   *
    * get /api/multisignatures/signatures?publicKey=用户公钥
-   * 
+   *
    * @param {*} req 请求对象，包含用户公钥
    * @returns {Object} 包含已签名交易列表的对象
    */
@@ -682,26 +820,26 @@ class MultisignaturesRouter {
     try {
       // 获取所有未确认的交易
       let transactions = await this.runtime.transaction.getUnconfirmedTransactionList()
-      
+
       // 筛选出用户已签名的交易
       const signedTransactions = []
-      
+
       for (let i = 0; i < transactions.length; i++) {
         const transaction = transactions[i]
-        
+
         // 检查交易是否有签名
         if (transaction.signatures && transaction.signatures.length > 0) {
           let isSigned = false
-          
+
           // 验证用户是否已对该交易签名
           for (const signature of transaction.signatures) {
             try {
               const verify = await this.runtime.transaction.verifySignature(
-                transaction, 
-                signature, 
+                transaction,
+                signature,
                 query.publicKey
               )
-              
+
               if (verify) {
                 isSigned = true
                 break
@@ -710,14 +848,14 @@ class MultisignaturesRouter {
               this.logger.error('/multisignatures/signatures verify fail, error is ', System.getErrorMsg(e))
             }
           }
-          
+
           // 如果用户已签名，添加到结果中
           if (isSigned) {
             signedTransactions.push(transaction)
           }
         }
       }
-      
+
       return {
         success: true,
         transactions: signedTransactions

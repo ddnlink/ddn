@@ -1,3 +1,4 @@
+
 /**
  * Block Sync
  * 负责处理区块的同步操作
@@ -264,47 +265,15 @@ export class BlockSync {
           if (bignum.isLessThan(block.height, lastBlock.height)) {
             this.logger.warn(`Received block with lower height (${block.height}) than current (${lastBlock.height}). Attempting to find common block and rollback.`)
 
-            // 如果高度差异过大，可能是完全不同的链或者需要大规模回滚
-            const heightDiff = bignum.minus(lastBlock.height, block.height)
-            if (bignum.isGreaterThan(heightDiff, '1000')) {
-              this.logger.warn(`Height difference too large (${heightDiff}), skipping block`)
-              continue
+            // 使用专门的方法处理回滚逻辑
+            const shouldContinue = await this._handlePotentialRollback(block, lastBlock, j);
+            if (shouldContinue) {
+              continue;
             }
 
-            try {
-              // 如果是高度为1的区块（创世区块），特殊处理
-              if (bignum.isEqualTo(block.height, '1')) {
-                // 程序启动时已经验证过创世区块，这里只需要跳过即可
-                this.logger.debug(`Skipping block with height 1, genesis block is already verified during startup`)
-                continue;
-              }
-
-              // 尝试找到共同区块
-              const commonBlock = await this.runtime.block.getCommonBlock(block)
-              if (commonBlock) {
-                this.logger.info(`Found common block at height ${commonBlock.height}. Rolling back to this height.`)
-                await this.runtime.block.rollbackToBlock(commonBlock.height)
-
-                // 重置当前循环，重新处理当前区块
-                j--;
-                continue;
-              } else {
-                // 如果没有找到共同区块，但高度差异不大，尝试跳过该区块
-                this.logger.warn(`No common block found for block at height ${block.height}, skipping`)
-                continue
-              }
-            } catch (err) {
-              // 检查是否是创世区块相关错误
-              if (err.message && (err.message.includes('genesis block') || err.message.includes('Genesis block'))) {
-                this.logger.debug(`Genesis block related error: ${err.message}, skipping block`)
-                // 跳过该区块
-                continue;
-              }
-
-              this.logger.error(`Failed to handle lower height block: ${err.message}`)
-              // 如果处理失败，跳过该区块
-              continue
-            }
+            // 如果_handlePotentialRollback返回false，表示已经处理了回滚并且需要重新处理当前区块
+            j--;
+            continue;
           }
 
           return null
@@ -341,6 +310,96 @@ export class BlockSync {
     }
 
     return lastClonedBlock
+  }
+
+  /**
+   * 处理潜在的区块回滚情况
+   * @param {Object} block 收到的区块
+   * @param {Object} lastBlock 当前最后一个区块
+   * @returns {Boolean} 如果应该跳过当前区块处理，返回true；如果已经处理了回滚，返回false
+   * @private
+   */
+  async _handlePotentialRollback(block, lastBlock) {
+    // 记录详细的调试信息，帮助诊断问题
+    this.logger.debug(`Analyzing potential rollback: received block height=${block.height}, id=${block.id}, current height=${lastBlock.height}, id=${lastBlock.id}`);
+
+    // 计算高度差
+    const heightDiff = bignum.minus(lastBlock.height, block.height);
+    this.logger.debug(`Height difference: ${heightDiff}`);
+
+    // 条件1: 如果高度差太大（超过50个区块），跳过该区块以避免极端回滚
+    const MAX_HEIGHT_DIFF = '50';
+    if (bignum.isGreaterThan(heightDiff, MAX_HEIGHT_DIFF)) {
+      this.logger.warn(`Height difference (${heightDiff}) exceeds maximum allowed (${MAX_HEIGHT_DIFF}). Skipping this block to avoid extreme rollback.`);
+      return true;
+    }
+
+    try {
+      // 尝试找到共同区块
+      this.logger.debug(`Attempting to find common block between current chain and block ${block.id} at height ${block.height}`);
+      const commonBlock = await this.runtime.block.getCommonBlock(block);
+
+      // 如果没有找到共同区块，记录详细信息并跳过
+      if (!commonBlock) {
+        this.logger.warn(`No common block found between current chain and block ${block.id}. This is unusual and may indicate network issues.`);
+
+        // 记录更多诊断信息
+        this.logger.debug(`Block details: ${JSON.stringify(block)}`);
+        this.logger.debug(`Last block details: ${JSON.stringify(lastBlock)}`);
+
+        // 尝试获取更多区块信息以帮助诊断
+        try {
+          const blockDetails = await this.runtime.block.getBlockById(block.id);
+          this.logger.debug(`Additional block details from DB: ${JSON.stringify(blockDetails || 'Not found in DB')}`);
+        } catch (err) {
+          this.logger.debug(`Failed to get additional block details: ${err.message}`);
+        }
+
+        return true;
+      }
+
+      this.logger.info(`Found common block: id=${commonBlock.id}, height=${commonBlock.height}`);
+
+      // 条件2: 如果共同区块高度太低（例如只有创世区块或接近创世区块），考虑跳过该区块而不是回滚
+      const MIN_COMMON_HEIGHT = '5';
+      const MIN_CURRENT_HEIGHT = '30';
+      if (bignum.isLessThanOrEqualTo(commonBlock.height, MIN_COMMON_HEIGHT) &&
+          bignum.isGreaterThan(lastBlock.height, MIN_CURRENT_HEIGHT)) {
+        this.logger.warn(`Common block at height ${commonBlock.height} is too low compared to current height ${lastBlock.height}. Skipping this block to avoid extreme rollback.`);
+        return true;
+      }
+
+      // 计算回滚的区块数量
+      const rollbackBlocks = bignum.minus(lastBlock.height, commonBlock.height);
+      this.logger.debug(`Need to rollback ${rollbackBlocks} blocks to reach common block`);
+
+      // 条件3: 如果需要回滚的区块数量太多，跳过该区块
+      const MAX_ROLLBACK_BLOCKS = '30';
+      if (bignum.isGreaterThan(rollbackBlocks, MAX_ROLLBACK_BLOCKS)) {
+        this.logger.warn(`Need to rollback ${rollbackBlocks} blocks, which exceeds maximum allowed (${MAX_ROLLBACK_BLOCKS}). Skipping this block to avoid extreme rollback.`);
+        return true;
+      }
+
+      // 执行回滚
+      this.logger.info(`Rolling back to common block at height ${commonBlock.height}`);
+      await this.runtime.block.rollbackToBlock(commonBlock.height);
+
+      // 清理状态
+      this.runtime.consensus.clearState();
+
+      // 返回false表示已经处理了回滚，应该重新处理当前区块
+      return false;
+    } catch (err) {
+      this.logger.error(`Error during rollback analysis: ${err.message}`, err);
+
+      // 记录更多诊断信息
+      if (err.stack) {
+        this.logger.debug(`Error stack: ${err.stack}`);
+      }
+
+      // 出错时跳过当前区块
+      return true;
+    }
   }
 
   /**

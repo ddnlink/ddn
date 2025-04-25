@@ -12,6 +12,7 @@ export default {
    * About Peer
    */
   port: 8001,
+  p2pPort: 9001, // P2P 通信端口，默认比 HTTP 端口大 1000
   address: '127.0.0.1',
   publicIp: '',
   logLevel: 'info',

@@ -68,6 +68,16 @@ class Program {
     // 初始化加载状态
     this.ctx.runtime.loaded = false
 
+    // 设置全局运行时对象，用于在其他模块中访问
+    global.DDN = {
+      runtime: this.ctx.runtime,
+      logger: this.ctx.logger
+    }
+
+    // 初始化活跃事务跟踪
+    this.ctx.runtime.activeTransactions = new Set()
+    this.ctx.runtime.isShuttingDown = false
+
     // 初始化运行时状态机
     this.ctx.runtime.stateMachine = new StateMachine()
 
@@ -205,32 +215,88 @@ class Program {
     // 添加全局事件处理
     process.once('cleanup', async () => {
       this.ctx.logger.info('Cleaning up...')
-      await this._beforeClose()
-      await this.ctx.close()
-      this._resetProcessState()
-      process.exit(1)
+
+      // 标记系统正在关闭，防止新的操作开始
+      this.ctx.runtime.isShuttingDown = true
+
+      try {
+        // 等待活跃事务完成
+        if (this.ctx.runtime.activeTransactions && this.ctx.runtime.activeTransactions.size > 0) {
+          this.ctx.logger.info(`Waiting for ${this.ctx.runtime.activeTransactions.size} active transactions to complete...`)
+
+          // 最多等待10秒
+          const maxWaitTime = 10000
+          const startTime = Date.now()
+
+          while (this.ctx.runtime.activeTransactions.size > 0 && (Date.now() - startTime) < maxWaitTime) {
+            await new Promise(resolve => setTimeout(resolve, 100))
+          }
+
+          if (this.ctx.runtime.activeTransactions.size > 0) {
+            this.ctx.logger.warn(`Forced shutdown with ${this.ctx.runtime.activeTransactions.size} active transactions`)
+          }
+        }
+
+        // 清理共识状态
+        if (this.ctx.runtime.consensus) {
+          await this.ctx.runtime.consensus.cleanup()
+        }
+
+        // 执行自定义清理
+        await this._beforeClose()
+
+        // 关闭数据库连接和其他资源
+        await this.ctx.close()
+      } catch (err) {
+        this.ctx.logger.error(`Error during cleanup: ${err.message}`, err)
+      } finally {
+        // 释放文件锁
+        this._resetProcessState()
+
+        // 正常退出，使用代码0而不是1
+        process.exit(0)
+      }
     })
 
     process.once('SIGTERM', () => {
+      this.ctx.logger.info('Received SIGTERM signal')
       process.emit('cleanup')
     })
 
     process.once('exit', () => {
-      process.emit('cleanup')
-      this.ctx.logger.info('process exited')
+      this.ctx.logger.info('Process exited')
     })
 
     process.once('SIGINT', () => {
+      this.ctx.logger.info('Received SIGINT signal')
       process.emit('cleanup')
     })
 
     process.on('unhandledRejection', (reason, p) => {
-      console.log('Unhandled Rejection at: ', p, 'reason:', reason)
+      this.ctx.logger.error('Unhandled Promise Rejection', {
+        promise: p.toString(),
+        reason: reason instanceof Error ? reason.stack : reason
+      })
+
+      // 不立即退出，记录错误但允许程序继续运行
+      // 严重错误会通过uncaughtException处理
     })
 
     process.on('uncaughtException', err => {
-      this.ctx.logger.fatal('uncaughtException', { message: err.message, stack: err.stack })
-      process.emit('cleanup')
+      this.ctx.logger.fatal('Uncaught Exception', {
+        message: err.message,
+        stack: err.stack,
+        code: err.code
+      })
+
+      // 只有在严重错误时才退出
+      const fatalErrors = ['EADDRINUSE', 'EACCES', 'ECONNREFUSED', 'ENOTFOUND', 'ETIMEDOUT']
+      if (err.code && fatalErrors.includes(err.code)) {
+        this.ctx.logger.fatal('Fatal error detected, initiating shutdown')
+        process.emit('cleanup')
+      } else {
+        this.ctx.logger.warn('Non-fatal error, continuing execution')
+      }
     })
 
     if (typeof gc === 'function') {
@@ -277,18 +343,15 @@ class Program {
 
     // 初始化账户以及余额
     try {
-      // TODO next optimize initAccountsAndBalances like onInitAccountsAndBalances use
       await ctx.runtime.account.initAccountsAndBalances()
-
-      // init asset banlance when start program
       await ctx.runtime.transaction.execAssetFunc('onInitAccountsAndBalances')
-
     } catch (err) {
       ctx.logger.error('Failed to load blockchain', System.getErrorMsg(err))
       return process.exit(1)
     }
-    // 启动准备（节点）
-    await ctx.runtime.peer.prepare()
+
+    // 启动节点网络服务
+    ctx.runtime.httpserver = await HttpServer.newServer(ctx).start()
 
     // 启动准备（Round）
     await ctx.runtime.round.prepare()
@@ -296,21 +359,33 @@ class Program {
     // 启动准备（受托人）
     await ctx.runtime.delegate.prepare()
 
-    // 启动节点网络服务
-    ctx.runtime.httpserver = await HttpServer.newServer(ctx).start()
-
     // 程序准备完毕
     ctx.runtime.loaded = true
     if (ctx.isDaemonMode) {
       ctx.logger.info('DDN server started as daemon ...')
     } else {
-      ctx.logger.info('DDN Start Successfully!')
+      ctx.logger.info('DDN server loaded successfully, preparing network...')
     }
+
+    // 延迟启动节点网络，确保其他服务已经准备就绪
+    // const self = this
+    // setTimeout(async () => {
+    //   // try {
+
+    //   // } catch (err) {
+    //   //   self.ctx.logger.error('Failed to start network services', System.getErrorMsg(err))
+    //   //   // 即使网络服务启动失败，也不要退出程序，保证单节点可以运行
+    //   // }
+    // }, 5000); // 延迟10秒启动网络服务
+
+    // 由于 prepare() 方法已经处理了重复调用的情况，这里可以直接调用
+    await this.ctx.runtime.peer.prepare()
 
     // 启动各种服务
     await this._bindReady()
     // assets 加載完成回調函數
     await this._assetsLoaded()
+
     // 启动区块数据同步任务
     await this.startBlockDataSyncTask()
 
@@ -323,7 +398,7 @@ class Program {
     // 启动区块铸造任务
     await this.startForgeBlockTask()
 
-    ctx.runtime.loaded = true
+    this.ctx.logger.info('DDN network services started successfully!')
 
     // 启动监控
     if (process.env.NODE_ENV === 'development') {
@@ -358,6 +433,9 @@ class Program {
 
   async _assetsLoaded() {
     if (this.ctx.assetsLoaded) await this.ctx.assetsLoaded()
+
+    // 网络消息处理已直接修改到 packages/p2p/src/message.js 中
+    this.ctx.logger.info('Using enhanced network message handling for large messages');
   }
 
   async _dvmReady() {
@@ -417,290 +495,321 @@ class Program {
     const next = (delay = 10) => {
       setTimeout(() => {
         this.startBlockDataSyncTask()
-      }, 1000 * delay) // 默认10秒，可以根据情况调整延迟
+      }, 1000 * delay)
     }
 
-    // 如果处于恢复模式，使用更保守的同步策略
-    if (this._recoveryMode) {
-      this.ctx.logger.info(`Syncing in recovery mode (attempt ${this._recoveryAttempts}/${this._maxRecoveryAttempts})`)
-
-      try {
-        // 尝试从更早的区块开始同步
-        const lastBlock = this.ctx.runtime.block.getLastBlock()
-        const earlierHeight = bignum.minus(lastBlock.height, 100).toString() // 回退100个区块
-
-        // 获取早期区块
-        const earlierBlock = await this.ctx.dao.findOne('block', {
-          where: { height: earlierHeight }
-        })
-
-        if (earlierBlock) {
-          this.ctx.logger.info(`Recovery: Starting sync from earlier block at height ${earlierHeight}`)
-
-          // 获取可用节点
-          const peer = await this.ctx.runtime.peer.getPeer()
-          if (!peer) {
-            this.ctx.logger.error('No available peers for recovery sync')
-            next(30) // 延长重试间隔
-            return
-          }
-
-          // 使用早期区块ID开始同步
-          const syncLastBlock = await this.ctx.runtime.peer.syncBlocksFromPeer(peer, earlierBlock.id)
-
-          // 如果同步成功，重置恢复模式
-          if (syncLastBlock) {
-            this._recoveryMode = false
-            this._recoveryAttempts = 0
-            this.ctx.logger.info('Recovery successful, exiting recovery mode')
-
-            // 检查同步后的高度是否增加
-            const newLastBlock = this.ctx.runtime.block.getLastBlock()
-            if (bignum.isGreaterThan(newLastBlock.height, lastBlock.height)) {
-              this.ctx.logger.info(`Block height increased from ${lastBlock.height} to ${newLastBlock.height} during recovery`)
-
-              // 如果状态是Syncing，尝试转换到Ready
-              if (this.ctx.runtime.stateMachine.isSyncing()) {
-                try {
-                  await this._blockchainReady()
-                } catch (err) {
-                  this.ctx.logger.error(`Failed to transition to Ready state: ${err.message}`)
-                }
-              }
-            }
-          } else {
-            this.ctx.logger.warn('Recovery sync attempt failed, will retry')
-            this._recoveryAttempts++
-
-            // 如果达到最大尝试次数，退出恢复模式
-            if (this._recoveryAttempts >= this._maxRecoveryAttempts) {
-              this.ctx.logger.error(`Recovery failed after ${this._maxRecoveryAttempts} attempts, exiting recovery mode`)
-              this._recoveryMode = false
-              this._recoveryAttempts = 0
-            }
-          }
-        } else {
-          this.ctx.logger.error(`Could not find block at height ${earlierHeight} for recovery`)
-          this._recoveryAttempts++
-        }
-      } catch (err) {
-        this.ctx.logger.error(`Recovery sync failed: ${err.message}`)
-        this._recoveryAttempts++
-
-        // 如果达到最大尝试次数，退出恢复模式
-        if (this._recoveryAttempts >= this._maxRecoveryAttempts) {
-          this.ctx.logger.error(`Recovery failed after ${this._maxRecoveryAttempts} attempts, exiting recovery mode`)
-          this._recoveryMode = false
-          this._recoveryAttempts = 0
-        }
-      }
-
-      // 继续下一次同步
-      next(30) // 恢复模式下使用更长的间隔
+    // 检查是否有实际的同步操作正在进行
+    if (this._activeSyncInProgress) {
+      this.ctx.logger.debug('Active sync operation already in progress, skip this round')
+      next()
       return
     }
 
-    // 以下是原有的代码...
-    // 检查是否长时间处于非Ready状态，如果是则尝试恢复
-    if (!this.ctx.runtime.stateMachine.isReady() && !this.ctx.runtime.stateMachine.isSyncing()) {
-      const lastStateChangeTime = this._lastStateChangeTime || 0
-      const currentTime = Date.now()
-
-      // 如果处于Pending状态超过3分钟，尝试恢复到Syncing状态
-      if (this.ctx.runtime.stateMachine.isPending() &&
-        (currentTime - lastStateChangeTime > 3 * 60 * 1000)) {
-        this.ctx.logger.warn('System has been in Pending state for too long, attempting recovery')
-        try {
-          // 尝试转换到Syncing状态
-          this.ctx.runtime.stateMachine.transitionTo('Syncing')
-          this._lastStateChangeTime = currentTime
-          this._syncFailCount = 0 // 重置失败计数
-        } catch (err) {
-          this.ctx.logger.error(`Failed to transition from Pending to Syncing: ${err.message}`)
-        }
-      }
-    }
-
-    // 获取对等节点
+    // 获取可用节点
     const peer = await this.ctx.runtime.peer.getPeer()
     if (!peer) {
-      // 如果没有可用节点，检查当前区块高度
-      const lastBlock = this.ctx.runtime.block.getLastBlock()
-      const currentHeight = lastBlock.height
-
-      // 如果区块高度足够高，可以考虑设置为 ready 状态
-      if (currentHeight > 100) {
-        this.ctx.logger.debug(`No available peers, but block height (${currentHeight}) is sufficient, changing state to 'ready'`)
-        if (!this.ctx.runtime.stateMachine.isReady()) {
-          await this._blockchainReady()
-          this._lastStateChangeTime = Date.now() // 记录状态变更时间
-        }
-      } else {
-        // 如果区块高度低，保持 pending 状态并继续尝试连接
-        this.ctx.logger.warn(`No available peers and block height (${currentHeight}) is low, staying in current state and retrying`)
-
-        // 尝试重新连接种子节点
+      this.ctx.logger.warn('No available peers for sync')
+      // 如果没有可用节点，尝试转换到Ready状态，这样可以当单节点运行
+      if (!this.ctx.runtime.stateMachine.isReady()) {
         try {
-          await this.ctx.runtime.peer.prepare()
+          await this._blockchainReady()
         } catch (err) {
-          this.ctx.logger.error(`Failed to reconnect to seed nodes: ${err.message}`)
+          this.ctx.logger.error(`Failed to transition to Ready state: ${err.message}`)
         }
       }
-
-      // 无论如何，都要继续循环
-      next(5) // 缩短重试间隔为5秒
+      next(30) // 延长重试间隔
       return
     }
 
     try {
-      // 检查是否有实际的同步操作正在进行
-      // 使用 _activeSyncInProgress 标志而不仅仅依赖状态机状态
-      if (this._activeSyncInProgress === true) {
-        this.ctx.logger.debug('Active sync operation already in progress, skip this round')
-        next()
-        return
-      }
-
-      // 即使状态是 Syncing，如果没有实际的同步操作，也应该启动同步
-      if (this.ctx.runtime.stateMachine.isSyncing()) {
-        this.ctx.logger.debug('State is Syncing but no active sync operation, proceeding with sync')
-      }
-
-      // 获取当前区块和时间槽信息
-      const lastBlock = this.ctx.runtime.block.getLastBlock()
-      const lastSlot = this.ctx.runtime.slot.getSlotNumber(lastBlock.timestamp)
-      const nextSlot = this.ctx.runtime.slot.getNextSlot()
-      const slotDiff = nextSlot - lastSlot
-
-      this.ctx.logger.debug('startBlockDataSyncTask state: ', {
-        state: this.ctx.runtime.stateMachine.current,
-        loaded: this.ctx.runtime.loaded,
-        lastSlot,
-        nextSlot,
-        slotDiff
-      })
-
-      // 只有当时间槽差异足够大时才进行同步
-      if (slotDiff < 3) {
-        this.ctx.logger.debug(`Slot difference (${slotDiff}) too small, skip sync`)
-        next()
-        return
-      }
-
-      // 转换状态为同步中
-      try {
-        this.ctx.runtime.stateMachine.transitionTo('Syncing')
-      } catch (err) {
-        // 如果状态转换失败，但已经在Syncing状态，可以继续
-        if (this.ctx.runtime.stateMachine.isSyncing()) {
-          this.ctx.logger.debug('Already in Syncing state, continuing with sync operation')
-        } else {
-          this.ctx.logger.error(`Failed to transition to Syncing state: ${err.message}`)
-          next(5)
-          return
-        }
-      }
-
-      this._lastStateChangeTime = Date.now() // 记录状态变更时间
-
       // 标记正在进行实际的同步操作
       this._activeSyncInProgress = true
 
-      // 执行区块同步
-      this.ctx.logger.info(`Starting block sync with peer ${peer.host}:${peer.port}`)
-      let result;
+      // 获取当前区块信息
+      const lastBlock = this.ctx.runtime.block.getLastBlock()
+      const currentHeight = lastBlock.height
+
+      // 获取远程节点高度
+      let remoteHeight;
       try {
-        result = await this.ctx.runtime.peer.syncBlocks()
+        const res = await this.ctx.runtime.peer.p2p.get('/height', {}, peer);
+        if (res && res.body && res.body.height) {
+          remoteHeight = res.body.height;
+        }
       } catch (err) {
-        this.ctx.logger.error(`Sync blocks error: ${err.message}`)
-        result = false
-      } finally {
-        // 无论同步成功还是失败，都要清除标记
-        this._activeSyncInProgress = false
+        this.ctx.logger.warn(`Failed to get remote height: ${err.message}`);
+        // 即使获取高度失败，也继续尝试同步
       }
 
-      if (result) {
-        this.ctx.logger.info('Block synchronization completed successfully')
-        await this._blockchainReady()
-        this._lastStateChangeTime = Date.now() // 记录状态变更时间
-        this._syncFailCount = 0 // 重置失败计数
-        next(15) // 成功后也要继续循环同步，但间隔可以长一些
-      } else {
-        // 同步失败计数器
-        this._syncFailCount = (this._syncFailCount || 0) + 1
+      // 记录同步检查信息
+      this.ctx.logger.info(`Checking if sync needed with peer ${peer.host}:${peer.port}, local height: ${currentHeight}, remote height: ${remoteHeight || 'unknown'}`);
 
-        // 如果连续失败超过三次，才考虑转换状态
-        if (this._syncFailCount >= 3) {
-          // 如果当前高度小于一定值（例如200），保持在Syncing状态而不是转为Pending
-          const currentHeight = this.ctx.runtime.block.getLastBlock().height
-          if (bignum.isLessThan(currentHeight, 200)) {
-            this.ctx.logger.warn(`Block synchronization failed ${this._syncFailCount} times, but keeping Syncing state due to low height (${currentHeight})`)
-            this._syncFailCount = 1 // 减少计数而不是重置，保持一定的失败记忆
-            next(10) // 稍微延长重试间隔
+      // 使用专门的方法检查是否需要同步
+      const syncCheck = this._checkNeedSync(lastBlock, remoteHeight);
+      const needSync = syncCheck.needSync;
+
+      // 只有在需要同步时才暂停和恢复锻造
+      if (needSync) {
+        // 暂停锻造过程
+        const wasForgeEnabled = this.ctx.runtime.delegate.isForgeEnabled();
+        if (wasForgeEnabled) {
+          this.ctx.runtime.delegate.disableForging();
+          this.ctx.logger.debug('Temporarily disabled forging during sync');
+        }
+
+        try {
+          // 执行实际的同步操作
+          if (this._recoveryMode) {
+            await this._performRecoverySync(peer, lastBlock);
           } else {
-            // 如果高度较高，尝试更激进的恢复策略
-            this.ctx.logger.warn(`Block synchronization failed ${this._syncFailCount} times, attempting recovery`)
-
-            // 检查是否已经尝试过恢复
-            if (this._recoveryMode && this._recoveryAttempts >= this._maxRecoveryAttempts) {
-              this.ctx.logger.error(`Recovery attempts exhausted (${this._recoveryAttempts}/${this._maxRecoveryAttempts}), changing state to pending`)
-              this.ctx.runtime.stateMachine.transitionToPending()
-              this._lastStateChangeTime = Date.now()
-              this._recoveryMode = false
-              this._recoveryAttempts = 0
-              next(60) // 更长的延迟
-              return
-            }
-
-            // 尝试清理缓存和未确认交易
-            try {
-              this.oneoff.clear()
-              await this.ctx.runtime.transaction.undoUnconfirmedList()
-
-              // 设置恢复标志，下次同步时使用更保守的策略
-              this._recoveryMode = true
-              this._recoveryAttempts++
-
-              this.ctx.logger.info(`Entering recovery mode (attempt ${this._recoveryAttempts}/${this._maxRecoveryAttempts})`)
-
-              // 保持在 Syncing 状态，但增加延迟
-              next(30)
-            } catch (err) {
-              this.ctx.logger.error(`Recovery attempt failed: ${err.message}`)
-              // 如果恢复失败，才转换到 Pending 状态
-              this.ctx.runtime.stateMachine.transitionToPending()
-              this._lastStateChangeTime = Date.now()
-              next(60) // 更长的延迟
-            }
+            // 正常模式下执行同步
+            await this._performNormalSync(peer);
           }
-        } else {
-          this.ctx.logger.warn(`Block synchronization failed (attempt ${this._syncFailCount}), will retry...`)
-          next(5) // 尝试失败后稍微等待再重试
+        } finally {
+          // 恢复锻造过程
+          if (wasForgeEnabled) {
+            this.ctx.runtime.delegate.enableForging();
+            this.ctx.logger.debug('Re-enabled forging after sync');
+          }
         }
       }
     } catch (err) {
-      this._activeSyncInProgress = false
-      this._syncFailCount = (this._syncFailCount || 0) + 1
-      this.ctx.logger.error(`Block synchronization error: ${err.message}`)
+      this.ctx.logger.error(`Block synchronization error: ${err.message}`);
+      this._syncFailCount = (this._syncFailCount || 0) + 1;
 
+      // 处理连续失败
       if (this._syncFailCount >= 3) {
-        // 同样检查高度，低高度时保持Syncing状态
-        const currentHeight = this.ctx.runtime.block.getLastBlock().height
-        if (bignum.isLessThan(currentHeight, 200)) {
-          this.ctx.logger.warn(`Block synchronization error ${this._syncFailCount} times, but keeping Syncing state due to low height (${currentHeight})`)
-          this._syncFailCount = 1 // 减少计数而不是重置
-          next(10) // 稍微延长重试间隔
+        this.ctx.logger.warn(`Block synchronization failed ${this._syncFailCount} times, entering recovery mode`);
+        this._recoveryMode = true;
+        this._recoveryAttempts = 0;
+      }
+    } finally {
+      // 无论同步成功还是失败，都要清除标记
+      this._activeSyncInProgress = false;
+      next(this._recoveryMode ? 30 : 10); // 恢复模式下使用更长的间隔
+    }
+  }
+
+  // 新增方法：执行恢复模式同步
+  async _performRecoverySync(peer, lastBlock) {
+    this.ctx.logger.info(`Syncing in recovery mode (attempt ${this._recoveryAttempts + 1}/${this._maxRecoveryAttempts})`);
+
+    try {
+      // 清理缓存和未确认交易
+      this.ctx.oneoff.clear();
+      await this.ctx.runtime.transaction.undoUnconfirmedList();
+
+      // 计算回退高度，每次尝试回退更多区块
+      const backSteps = Math.min(10 * (this._recoveryAttempts + 1), 100); // 最多回退100个区块
+      const targetHeight = Math.max(1, lastBlock.height - backSteps); // 不低于高度1
+
+      // 获取目标区块
+      const targetBlock = await this.ctx.dao.findOne('block', {
+        where: { height: targetHeight.toString() }
+      });
+
+      if (!targetBlock) {
+        throw new Error(`Could not find block at height ${targetHeight} for recovery`);
+      }
+
+      this.ctx.logger.info(`Recovery: Starting sync from block at height ${targetHeight}`);
+
+      // 使用目标区块ID开始同步
+      const syncLastBlock = await this.ctx.runtime.peer.syncBlocksFromPeer(peer, targetBlock.id);
+
+      // 检查同步结果
+      if (syncLastBlock) {
+        // 同步成功
+        const newLastBlock = this.ctx.runtime.block.getLastBlock();
+        this.ctx.logger.info(`Recovery successful: Block height changed from ${lastBlock.height} to ${newLastBlock.height}`);
+
+        // 如果高度增加，退出恢复模式
+        if (bignum.isGreaterThan(newLastBlock.height, lastBlock.height)) {
+          this._recoveryMode = false;
+          this._recoveryAttempts = 0;
+          this.ctx.logger.info('Exiting recovery mode');
+
+          // 尝试转换到Ready状态
+          if (!this.ctx.runtime.stateMachine.isReady()) {
+            await this._blockchainReady();
+          }
         } else {
-          this.ctx.logger.warn(`Block synchronization failed ${this._syncFailCount} times due to error, changing state to pending`)
-          this.ctx.runtime.stateMachine.transitionToPending()
-          this._lastStateChangeTime = Date.now() // 记录状态变更时间
-          this._syncFailCount = 0 // 重置计数器
-          next(20) // 错误后增加更长的延迟
+          // 高度没有增加，增加恢复尝试次数
+          this._recoveryAttempts++;
+          this.ctx.logger.warn(`Recovery did not increase block height, attempt ${this._recoveryAttempts}/${this._maxRecoveryAttempts}`);
         }
       } else {
-        this.ctx.logger.warn(`Block synchronization error (attempt ${this._syncFailCount}), will retry...`)
-        next(5) // 尝试失败后稍微等待再重试
+        // 同步失败
+        this._recoveryAttempts++;
+        this.ctx.logger.warn(`Recovery sync failed, attempt ${this._recoveryAttempts}/${this._maxRecoveryAttempts}`);
+
+        // 如果达到最大尝试次数，尝试更激进的恢复策略
+        if (this._recoveryAttempts >= this._maxRecoveryAttempts) {
+          this.ctx.logger.error(`Recovery failed after ${this._maxRecoveryAttempts} attempts, attempting more aggressive recovery`);
+
+          // 尝试清理数据库和状态
+          try {
+            // 使用已有的方法清理状态
+            this.ctx.runtime.consensus.clearState();
+
+            // 使用已有的方法回滚到目标高度
+            await this.ctx.runtime.block.rollbackToBlock(targetHeight);
+
+            this._recoveryAttempts = 0; // 重置尝试次数，给清理后的数据库一次机会
+            this.ctx.logger.info(`Aggressive recovery completed, will retry recovery`);
+          } catch (cleanupErr) {
+            this.ctx.logger.error(`Aggressive recovery failed: ${cleanupErr.message}`);
+            this._recoveryMode = false;
+            this._recoveryAttempts = 0;
+
+            // 转换到Ready状态，让系统尝试正常运行
+            if (!this.ctx.runtime.stateMachine.isReady()) {
+              await this._blockchainReady();
+            }
+          }
+        }
       }
+    } catch (err) {
+      // 处理特定类型的错误
+      if (err.message && err.message.includes('Block already exists')) {
+        this.ctx.logger.warn(`Recovery encountered 'Block already exists' error, attempting targeted cleanup`);
+
+        try {
+          // 尝试提取区块ID
+          const blockIdMatch = err.message.match(/Block already exists: ([a-f0-9]+)/);
+          if (blockIdMatch && blockIdMatch[1]) {
+            const blockId = blockIdMatch[1];
+
+            // 使用已有的方法删除特定区块
+            await this.ctx.runtime.block.simpleDeleteAfterBlock(blockId);
+
+            // 清理状态
+            this.ctx.runtime.consensus.clearState();
+
+            this.ctx.logger.info(`Targeted cleanup of block ${blockId} completed, will retry recovery`);
+
+            // 减少恢复尝试次数，给清理后的数据库一次机会
+            this._recoveryAttempts = Math.max(0, this._recoveryAttempts - 1);
+            return; // 直接返回，下次循环会重试
+          }
+        } catch (cleanupErr) {
+          this.ctx.logger.error(`Targeted block cleanup failed: ${cleanupErr.message}`);
+        }
+      }
+
+      this.ctx.logger.error(`Recovery sync error: ${err.message}`);
+      this._recoveryAttempts++;
+
+      // 如果达到最大尝试次数，退出恢复模式
+      if (this._recoveryAttempts >= this._maxRecoveryAttempts) {
+        this.ctx.logger.error(`Recovery failed after ${this._maxRecoveryAttempts} attempts due to errors, exiting recovery mode`);
+        this._recoveryMode = false;
+        this._recoveryAttempts = 0;
+
+        // 清理状态
+        this.ctx.runtime.consensus.clearState();
+
+        // 转换到Ready状态，让系统尝试正常运行
+        if (!this.ctx.runtime.stateMachine.isReady()) {
+          await this._blockchainReady();
+        }
+      }
+    }
+  }
+
+  /**
+   * 检查是否需要同步区块
+   * 此方法仅判断是否需要同步，不执行实际的同步操作
+   * @param {Object} lastBlock 当前最新区块
+   * @param {String|Number} remoteHeight 远程节点高度
+   * @returns {Object} 包含是否需要同步的标志和原因
+   */
+  _checkNeedSync(lastBlock, remoteHeight) {
+    // 获取当前区块和时间槽信息
+    const lastSlot = this.ctx.runtime.slot.getSlotNumber(lastBlock.timestamp);
+    const nextSlot = this.ctx.runtime.slot.getNextSlot();
+    const slotDiff = nextSlot - lastSlot;
+
+    // 计算高度差
+    const heightDiff = remoteHeight ? bignum.minus(remoteHeight, lastBlock.height) : 0;
+
+    // 判断是否需要同步的条件
+    const reasons = [];
+
+    // 条件1: 时间槽差距过大（可能表示本地节点长时间未更新）
+    if (slotDiff >= 3) {
+      reasons.push(`slot diff (${slotDiff}) >= 3`);
+    }
+
+    // 条件2: 高度差距过大（远程节点比本地节点高出5个以上区块）
+    if (bignum.isGreaterThan(heightDiff, 5)) {
+      reasons.push(`height diff (${heightDiff}) > 5`);
+    }
+
+    // 条件3: 如果处于恢复模式，总是需要同步
+    if (this._recoveryMode) {
+      reasons.push('in recovery mode');
+    }
+
+    const needSync = reasons.length > 0;
+
+    if (!needSync) {
+      this.ctx.logger.debug(`No need to sync: slot diff=${slotDiff}, height diff=${heightDiff}`);
+    } else {
+      this.ctx.logger.info(`Need to sync because: ${reasons.join(', ')}`);
+    }
+
+    return {
+      needSync,
+      reasons,
+      slotDiff,
+      heightDiff
+    };
+  }
+
+  /**
+   * 执行正常模式同步
+   * 此方法执行实际的同步操作，但不负责判断是否需要同步
+   * @param {Object} peer 目标节点
+   * @returns {Boolean} 是否成功执行了同步操作
+   */
+  async _performNormalSync(peer) {
+    // 执行区块同步
+    this.ctx.logger.info(`Starting normal sync with peer ${peer.host}:${peer.port}`);
+    let result;
+
+    try {
+      // 使用更可靠的同步方法
+      result = await this.ctx.runtime.peer.syncBlocks();
+
+      if (result) {
+        // 同步成功
+        this.ctx.logger.info('Block synchronization completed successfully');
+        this._syncFailCount = 0; // 重置失败计数
+
+        // 尝试转换到Ready状态
+        if (!this.ctx.runtime.stateMachine.isReady()) {
+          await this._blockchainReady();
+        }
+
+        return true; // 返回true表示成功执行了同步操作
+      } else {
+        // 同步失败或没有新区块
+        this.ctx.logger.debug('No new blocks found during sync');
+        this._syncFailCount = 0; // 重置失败计数，因为这不是真正的失败
+        return false; // 返回false表示没有执行实际的同步操作
+      }
+    } catch (err) {
+      // 处理特定类型的错误
+      if (err.message && err.message.includes('Block already exists')) {
+        this.ctx.logger.warn(`Sync encountered 'Block already exists' error, may need database cleanup`);
+        // 可以考虑添加数据库一致性检查
+      } else if (err.message && err.message.includes('Buffers length is not right')) {
+        this.ctx.logger.warn(`Sync encountered network buffer error, will retry with different peer`);
+        // 可以考虑标记当前节点为不可靠，下次选择不同节点
+      }
+
+      throw err; // 重新抛出错误，让外层处理
     }
   }
 
@@ -811,12 +920,85 @@ class Program {
    * 尝试铸造区块（轮询）
    */
   async startForgeBlockTask() {
+    this.ctx.logger.debug(`startForgeBlockTask is starting...`);
     await this.forgeManager.startForgeBlockTask();
   }
 
   // 销毁程序
   destroy() {
     this._resetProcessState()
+  }
+
+  // 清理特定区块
+  async _cleanupSpecificBlock(blockId) {
+    this.ctx.logger.info(`Attempting to clean up specific block: ${blockId}`);
+
+    // 查找区块
+    const block = await this.ctx.dao.findOne('block', {
+      where: { id: blockId }
+    });
+
+    if (!block) {
+      this.ctx.logger.warn(`Block ${blockId} not found in database, nothing to clean up`);
+      return;
+    }
+
+    // 删除区块相关的交易
+    await this.ctx.dao.remove('transaction', {
+      where: { block_id: blockId }
+    });
+
+    // 删除区块
+    await this.ctx.dao.remove('block', {
+      where: { id: blockId }
+    });
+
+    this.ctx.logger.info(`Successfully cleaned up block ${blockId}`);
+  }
+
+  // 清理高于指定高度的所有区块
+  async _cleanupDatabase(targetHeight) {
+    this.ctx.logger.info(`Attempting to clean up database above height ${targetHeight}`);
+
+    // 查找所有高于目标高度的区块
+    const blocks = await this.ctx.dao.findAll('block', {
+      where: {
+        height: {
+          $gt: targetHeight.toString()
+        }
+      },
+      attributes: ['id']
+    });
+
+    if (!blocks || blocks.length === 0) {
+      this.ctx.logger.warn(`No blocks found above height ${targetHeight}, nothing to clean up`);
+      return;
+    }
+
+    this.ctx.logger.info(`Found ${blocks.length} blocks to clean up above height ${targetHeight}`);
+
+    // 获取所有区块ID
+    const blockIds = blocks.map(block => block.id);
+
+    // 删除这些区块相关的交易
+    await this.ctx.dao.remove('transaction', {
+      where: {
+        block_id: {
+          $in: blockIds
+        }
+      }
+    });
+
+    // 删除这些区块
+    await this.ctx.dao.remove('block', {
+      where: {
+        id: {
+          $in: blockIds
+        }
+      }
+    });
+
+    this.ctx.logger.info(`Successfully cleaned up ${blocks.length} blocks above height ${targetHeight}`);
   }
 }
 

@@ -399,25 +399,55 @@ class Account {
     }
   }
 
-  // 重建账户和余额信息（根据已有区块信息）
-  async repairAccounts (count, verify) {
+  /**
+   * 重建账户和余额信息（根据已有区块信息）
+   * @param {number} count 区块总数
+   * @param {boolean} verify 是否验证区块
+   * @param {number} startHeight 开始修复的高度，默认为0（从创世区块开始）
+   * @param {boolean} clearAccounts 是否清空账户表，默认为true
+   */
+  async repairAccounts (count, verify, startHeight = 0, clearAccounts = true) {
     if (typeof count === 'undefined') {
       count = await this.runtime.block.getCount()
     }
 
-    await this.dao.clear('mem_account', true)
-    await this.dao.clear('mem_round', true)
-    await this.dao.clear('mem_accounts2u_delegate', true)
+    // 如果指定了开始高度，并且不是从头开始修复，则不清空账户表
+    if (clearAccounts) {
+      this.logger.info(`Clearing account tables for full repair from height ${startHeight}`)
+      await this.dao.clear('mem_account', true)
+      await this.dao.clear('mem_round', true)
+      await this.dao.clear('mem_accounts2u_delegate', true)
 
-    const sql = 'INSERT INTO mem_accounts2u_delegates SELECT * FROM mem_accounts2delegates;'
-    await this.dao.execSql(sql)
+      const sql = 'INSERT INTO mem_accounts2u_delegates SELECT * FROM mem_accounts2delegates;'
+      await this.dao.execSql(sql)
+    } else {
+      this.logger.info(`Performing partial repair from height ${startHeight} without clearing accounts`)
+    }
 
-    let offset = 0
+    let offset = startHeight
     const limit = Number(this.config.loading.loadPerIteration) || 1000
     verify = verify || this.config.loading.verifyOnLoading
 
     try {
-      this.runtime.block.setLastBlock(null)
+      // 如果是从头开始修复，则设置最后区块为null
+      if (startHeight === 0) {
+        this.runtime.block.setLastBlock(null)
+      } else {
+        // 如果是从中间某个高度开始修复，则需要先获取该高度的前一个区块
+        const previousHeight = Math.max(0, startHeight - 1)
+        const previousBlock = await this.dao.findOne('block', {
+          where: { height: previousHeight.toString() },
+          order: [['height', 'DESC']]
+        })
+
+        if (previousBlock) {
+          this.runtime.block.setLastBlock(previousBlock)
+        } else {
+          this.logger.warn(`Could not find block at height ${previousHeight}, starting from genesis block`)
+          this.runtime.block.setLastBlock(null)
+          offset = 0 // 重置偏移量为0
+        }
+      }
 
       while (count >= offset) {
         if (count > 1) {
@@ -430,7 +460,7 @@ class Account {
 
       await this.cacheAllAccountBalances()
 
-      this.logger.info('repairAccounts is ok, Blockchain ready')
+      this.logger.info(`repairAccounts is ok (from height ${startHeight}), Blockchain ready`)
     } catch (err) {
       this.logger.error('loadBlocksOffset', err)
 
@@ -449,31 +479,20 @@ class Account {
     }
   }
 
-  // 检查钱包账户数据完整性
-  async checkAccounts (count) {
-    // try {
-    //   const result = await this.dao.update(
-    //     'mem_account',
-    //     {
-    //       u_is_delegate: this.dao.db_str('is_delegate'), // wxm block database
-    //       u_second_signature: this.dao.db_str('second_signature'), // wxm block database
-    //       u_username: this.dao.db_str('username'),
-    //       u_balance: this.dao.db_str('balance'),
-    //       u_delegates: this.dao.db_str('delegates'),
-    //       u_multisignatures: this.dao.db_str('multisignatures')
-    //     },
-    //     {
-    //       where: {}
-    //     }
-    //   )
-    //   this.logger.debug('checkAccounts result', result)
-    // } catch (err) {
-    //   this.logger.error(err)
-    //   this.logger.info('Failed to verify db integrity 1')
-    //   await this.repairAccounts(count, true)
-    //   return
-    // }
+  /**
+   * 检查钱包账户数据完整性
+   * @param {number} count 区块总数
+   * @param {boolean} forceFullRepair 是否强制执行完整修复，默认为false
+   */
+  async checkAccounts (count, forceFullRepair = false) {
+    // 如果强制执行完整修复，则直接从头开始修复
+    if (forceFullRepair) {
+      this.logger.info('Forced full repair requested, rebuilding accounts from genesis block')
+      await this.repairAccounts(count, true)
+      return
+    }
 
+    // 检查是否有账户缺少block_id
     let count2, err2
     try {
       count2 = await this.dao.count('mem_account', {
@@ -489,13 +508,65 @@ class Account {
     }
 
     if (err2 || count2 > 0) {
-      this.logger.error(err2 || 'Encountered missing block, looks like node went down during block processing')
-      this.logger.info('Failed to verify db integrity 2')
+      this.logger.error(err2 || `Encountered ${count2} accounts with missing block_id, looks like node went down during block processing`)
 
+      // 尝试找出最后一个有效的区块高度
+      try {
+        // 获取最后一个有效的区块高度
+        const lastValidBlock = await this.dao.findOne('block', {
+          attributes: ['height'],
+          order: [['height', 'DESC']]
+        })
+
+        if (lastValidBlock) {
+          const lastHeight = parseInt(lastValidBlock.height)
+
+          // 获取最后一个有效的账户记录的区块高度
+          const lastValidAccountBlock = await this.dao.findOne('mem_account', {
+            attributes: ['block_id'],
+            where: {
+              block_id: {
+                $ne: null
+              }
+            },
+            order: [['rowid', 'DESC']]
+          })
+
+          if (lastValidAccountBlock && lastValidAccountBlock.block_id) {
+            // 查找该区块的高度
+            const accountBlock = await this.dao.findOne('block', {
+              attributes: ['height'],
+              where: {
+                id: lastValidAccountBlock.block_id
+              }
+            })
+
+            if (accountBlock) {
+              const accountBlockHeight = parseInt(accountBlock.height)
+
+              // 如果账户记录的区块高度比最后一个有效区块高度小，则从账户记录的区块高度开始修复
+              if (accountBlockHeight < lastHeight) {
+                this.logger.info(`Last valid account block height: ${accountBlockHeight}, last valid block height: ${lastHeight}`)
+                this.logger.info(`Performing incremental repair from height ${accountBlockHeight}`)
+
+                // 从账户记录的区块高度开始修复，不清空账户表
+                await this.repairAccounts(count, true, accountBlockHeight, false)
+                return
+              }
+            }
+          }
+        }
+      } catch (findErr) {
+        this.logger.error('Error finding last valid block height:', findErr)
+      }
+
+      // 如果无法确定最后一个有效的区块高度，则执行完整修复
+      this.logger.info('Failed to determine last valid block height, performing full repair')
       await this.repairAccounts(count, true)
       return
     }
 
+    // 检查是否有受托人账户
     let count3, err3
     try {
       count3 = await this.dao.count('mem_account', {
@@ -508,28 +579,55 @@ class Account {
     }
 
     if (err3 || count3 === 0) {
-      this.logger.error(err3 || 'No delegates, reload database')
-      this.logger.info('Failed to verify db integrity 3')
+      this.logger.error(err3 || 'No delegates found in accounts, reload database')
+      this.logger.info('Failed to verify db integrity: no delegates')
 
+      // 这种情况通常表明账户表完全损坏，需要完整修复
       await this.repairAccounts(count, true)
       return
     }
 
+    // 尝试加载最后一个区块
     try {
       const verify = this.config.loading.verifyOnLoading
       await this.runtime.block.loadBlocksOffset(1, count, verify)
     } catch (err) {
       this.logger.error(err || 'Unable to load last block')
-      this.logger.info('Failed to verify db integrity 4')
+      this.logger.info('Failed to verify db integrity: cannot load last block')
 
+      // 尝试找出最后一个有效的区块高度
+      try {
+        // 获取最后一个有效的区块高度
+        const lastValidBlock = await this.dao.findOne('block', {
+          attributes: ['height'],
+          where: {
+            height: {
+              $lt: count.toString() // 查找比当前高度小的最大高度
+            }
+          },
+          order: [['height', 'DESC']]
+        })
+
+        if (lastValidBlock) {
+          const lastHeight = parseInt(lastValidBlock.height)
+          this.logger.info(`Found last valid block at height ${lastHeight}, performing incremental repair`)
+
+          // 从最后一个有效的区块高度开始修复，不清空账户表
+          await this.repairAccounts(count, true, lastHeight, false)
+          return
+        }
+      } catch (findErr) {
+        this.logger.error('Error finding last valid block height:', findErr)
+      }
+
+      // 如果无法确定最后一个有效的区块高度，则执行完整修复
       await this.repairAccounts(count, true)
+      return
     }
 
-    // wxm TODO  此处旧代码是直接cacheAllAccountBalances，但是如果block区块内容改动过，是不会发现的，感觉还是应该repaireAccounts，但是repaireAccounts每次重启会重新遍历区块数据，数据太大会导致启动消耗很多时间
-    // await this.repairAccounts(count, true)
+    // 如果所有检查都通过，只需要更新账户余额缓存
     await this.cacheAllAccountBalances()
-
-    this.logger.info('checkAccounts is ok, Blockchain ready')
+    this.logger.info('Account integrity check passed, blockchain ready')
   }
 
   /**

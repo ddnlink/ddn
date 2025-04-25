@@ -48,7 +48,7 @@ class HttpServer {
     this._app.options('*', cors())
 
     this._http_server = http.createServer(this._app)
-    this._http_io = socketio(this._server)
+    this._http_io = socketio(this._http_server)
 
     if (this.config.ssl.enabled) {
       const privateKey = fs.readFileSync(this.config.ssl.options.key)

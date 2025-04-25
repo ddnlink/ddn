@@ -1,6 +1,7 @@
 import fs from 'fs'
 import path from 'path'
 import crypto from 'crypto'
+import { EventEmitter } from 'events'
 /**
  * p2p peer
  * @param {*} host
@@ -83,8 +84,9 @@ Peer.FAMILY = {
  *   options.tryTimes: Retry times before remove it.
  *   options.dbfile: Filepath to persist the peers data.
  */
-export class Inventory {
+export class Inventory extends EventEmitter {
   constructor(options) {
+    super()
     options = options || {}
     this.peers = new Map()
     this.delayTime = options.delayTime || 3600
@@ -110,19 +112,50 @@ export class Inventory {
         if (data && data.trim()) {
           const peers = JSON.parse(data)
           this.logger.debug(`Loaded ${peers.length} peers from inventory, current dbfile is ${this.dbfile}`)
+
+          // 检查并重置节点状态
+          const currentTime = Date.now()
+          let resetCount = 0
+
           for (const peer of peers) {
+            // 重置过期的delay值和异常的状态
+            if (peer.delay > currentTime + this.delayTime * 1000 * 2) {
+              peer.delay = 0
+              resetCount++
+            }
+
+            // 如果失败次数过多，重置为0
+            if (peer.failCount >= this.tryTimes) {
+              peer.failCount = 0
+              resetCount++
+            }
+
+            // 将状态设置为 pending，等待重新验证
+            if (peer.status !== Peer.STATUS.pending) {
+              peer.status = Peer.STATUS.pending
+              resetCount++
+            }
+
+            // 添加到节点集合
             this.peers.set(peer.id, peer)
+          }
+
+          if (resetCount > 0) {
+            this.logger.info(`Reset ${resetCount} problematic peer states during loading`)
+            // 注意：不在这里持久化，等待与配置文件节点合并后再持久化
           }
         } else {
           this.logger.debug(`Peer database file exists but is empty: ${this.dbfile}`)
         }
       } catch (err) {
         this.logger.error(`Failed to load peer database: ${this.dbfile}`, err)
+        // 如果加载失败，记录错误但不立即创建新文件
+        // 等待与配置文件节点合并后再创建
+        this.logger.warn(`Will create new peer database after merging with config peers`)
       }
     } else {
-      this.logger.debug(`Peer database file does not exist, will be created: ${this.dbfile}`)
-      // 初始化空数据库文件
-      this._persistPeers()
+      this.logger.debug(`Peer database file does not exist, will be created after connecting to config peers`)
+      // 注意：不在这里创建空文件，等待与配置文件节点合并后再创建
     }
   }
 
@@ -226,7 +259,10 @@ export class Inventory {
       return
     }
 
-    peer.delay = Date.now() + this.delayTime * 1000
+    // 设置合理的延迟时间，最长不超过 1 小时
+    const maxDelay = Math.min(this.delayTime, 3600) * 1000 // 最长 1 小时
+    peer.delay = Date.now() + maxDelay
+    this.logger.debug(`Disabled peer ${peer.host}:${peer.port} for ${maxDelay/1000} seconds due to failure`)
     this._persistPeers()
   }
 
@@ -279,13 +315,53 @@ export class Inventory {
   }
 
   enableAll() {
+    let enabledCount = 0
+    let resetCount = 0
+    const currentTime = Date.now()
+    let shouldPersist = false
+
     this.peers.forEach(peer => {
-      if (peer.status === Peer.STATUS.disable && Date.now() > peer.delay) {
+      // 如果节点被禁用但延迟时间已过，重新启用
+      if (peer.status === Peer.STATUS.disable && currentTime > peer.delay) {
         peer.status = Peer.STATUS.pending
         peer.failCount = 0
         peer.delay = 0
+        enabledCount++
+        shouldPersist = true
+      }
+
+      // 如果延迟时间设置得过长，重置它
+      if (peer.delay > currentTime + this.delayTime * 1000 * 2) {
+        peer.delay = 0
+        resetCount++
+        shouldPersist = true
+      }
+
+      // 如果失败次数过多但还没有被删除，重置它
+      if (peer.failCount >= this.tryTimes) {
+        peer.failCount = 0
+        resetCount++
+        shouldPersist = true
+      }
+
+      // 如果节点处于 pending 状态超过一定时间，尝试重新连接
+      if (peer.status === Peer.STATUS.pending && !peer._lastPendingTime) {
+        peer._lastPendingTime = currentTime
+      } else if (peer.status === Peer.STATUS.pending &&
+                 (currentTime - peer._lastPendingTime > 5 * 60 * 1000)) { // 5分钟
+        // 重置计时器
+        peer._lastPendingTime = currentTime
+        // 触发重新连接事件
+        this.emit('reconnect', peer)
       }
     })
+
+    if (enabledCount > 0 || resetCount > 0) {
+      this.logger.info(`Enabled ${enabledCount} peers, reset ${resetCount} problematic states`)
+      if (shouldPersist) {
+        this._persistPeers()
+      }
+    }
   }
 
   getAllPeers() {
@@ -451,6 +527,32 @@ export class Inventory {
   }
 
   /**
+   * 获取节点统计信息
+   * @returns {Object} 统计信息对象
+   */
+  getStats() {
+    let total = 0;
+    let ready = 0;
+    let pending = 0;
+    let disabled = 0;
+
+    this.peers.forEach(peer => {
+      total++;
+      if (peer.status === Peer.STATUS.ready) ready++;
+      else if (peer.status === Peer.STATUS.pending) pending++;
+      else disabled++;
+    });
+
+    return {
+      total,
+      ready,
+      pending,
+      disabled,
+      healthRate: total > 0 ? (ready / total).toFixed(2) : 0
+    };
+  }
+
+  /**
    * 节流式持久化，避免频繁写入
    */
   _setupPersistThrottle() {
@@ -502,6 +604,7 @@ export class Inventory {
         // 优先选择ready状态的节点
         if (a.status === Peer.STATUS.ready && b.status !== Peer.STATUS.ready) return -1;
         if (a.status !== Peer.STATUS.ready && b.status === Peer.STATUS.ready) return 1;
+
         // 其次按失败次数排序
         return a.failCount - b.failCount;
       });

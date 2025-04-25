@@ -1,4 +1,4 @@
-import { init, delegateStat } from '../../plugins/maintain'
+import { init, delegateStat } from '../../plugins/delegate'
 
 module.exports = {
   command: 'delegateStat',

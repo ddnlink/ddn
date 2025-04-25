@@ -1,8 +1,8 @@
 import fs from 'fs'
 import path from 'path'
+import async from 'async'
 import JsSdk from '@ddn/js-sdk'
 import Api from '../utils/api'
-import { log } from 'console'
 
 let globalOptions
 
@@ -70,7 +70,7 @@ function getDelegateByUsername(username) {
 
 async function registerDelegate(options) {
     // 初始化 JsSdk
-    
+
     const trs = await JsSdk.delegate.createDelegate(options.username, options.secret, options.secondSecret)
     getApi().broadcastTransaction(trs, function (err, result) {
         console.log(err || result.transactionId)
@@ -84,7 +84,7 @@ async function registerDelegates(options) {
         const fileObject = require(file)
         fileObject['Accounts'].forEach(async (item) => {
             // 初始化 JsSdk
-            
+
             const trs = await JsSdk.delegate.createDelegate(item.username, item.secret, item.secondSecret)
 
             getApi().broadcastTransaction(trs, function (err, result) {
@@ -161,7 +161,7 @@ async function vote(secret, publicKeys, op, secondSecret) {
         return op + el
     })
     // 初始化 JsSdk
-    
+
     const trs = await JsSdk.vote.createVote(votes, secret, secondSecret)
     getApi().broadcastTransaction(trs, function (err, result) {
         console.log(err || result.transactionId)
@@ -179,7 +179,7 @@ function upvotes(options) {
         const delegates = require(file)
         const publicKeys = delegates['Accounts'].map((item) => {
             // 初始化 JsSdk
-            
+
             return JsSdk.crypto.getKeys(item.secret).publicKey
         })
         console.log("publicKeys: ", publicKeys)
@@ -198,6 +198,66 @@ function downvote(options) {
     vote(options.secret, options.publicKeys, '-', options.secondSecret)
 }
 
+function delegateStat() {
+    const api = getApi()
+    api.get('/api/delegates', {}, (err, { delegates }) => {
+        if (err) {
+            console.log('Failed to get delegates', err)
+            return
+        }
+        async.map(delegates, (delegate, next) => {
+            const params = {
+                generatorPublicKey: delegate.publicKey,
+                limit: 1,
+                offset: 0,
+                orderBy: 'height:desc'
+            }
+            api.get('/api/blocks', params, (err, { blocks }) => {
+                if (err) {
+                    next(err)
+                } else {
+                    next(null, {
+                        delegate,
+                        block: blocks[0]
+                    })
+                }
+            })
+        }, (err, delegates) => {
+            if (err) {
+                console.log('Failed to get forged block', err)
+                return
+            }
+            delegates = delegates.sort(function (l, r) {
+                if (!l.block) {
+                    return -1
+                }
+                if (!r.block) {
+                    return 1
+                }
+                return l.block.timestamp - r.block.timestamp
+            })
+            console.log('name\taddress\trate\tapproval\tproductivity\tproduced\tbalance\theight\tid\ttime')
+            for (const i in delegates) {
+                const d = delegates[i].delegate
+                const b = delegates[i].block
+                console.log('%s\t%s\t%d\t%s%%\t%s%%\t%d\t%d\t%s\t%s\t%s(%s)',
+                    d.username,
+                    d.address,
+                    d.rate,
+                    d.approval,
+                    d.productivity,
+                    d.producedblocks,
+                    d.balance / 100000000,
+                    b ? b.height : '',
+                    b ? b.id : '',
+                    // 初始化 JsSdk 并获取 utils
+                    JsSdk.utils.format.fullTimestamp(b ? b.timestamp : ''),
+                    JsSdk.utils.format.timeAgo(b ? b.timestamp : ''))
+            }
+        })
+    })
+}
+
 export {
     getApi,
     init,
@@ -212,5 +272,6 @@ export {
     listdiffvotes,
     upvote,
     upvotes,
-    downvote
+    downvote,
+    delegateStat
 }

@@ -427,13 +427,54 @@ class DAO {
     if (!sequelizeInst) {
       throw new Error('数据库未连接')
     }
+
+    // 检查系统是否正在关闭
+    if (global.DDN && global.DDN.runtime && global.DDN.runtime.isShuttingDown) {
+      throw new Error('系统正在关闭，无法启动新事务')
+    }
+
+    // 生成唯一的事务ID
+    const transactionId = Date.now() + '-' + Math.random().toString(36).substring(2, 15)
+
+    // 添加到活跃事务集合
+    if (global.DDN && global.DDN.runtime) {
+      if (!global.DDN.runtime.activeTransactions) {
+        global.DDN.runtime.activeTransactions = new Set()
+      }
+      global.DDN.runtime.activeTransactions.add(transactionId)
+
+      if (global.DDN.logger) {
+        global.DDN.logger.debug(`事务开始: ${transactionId}, 当前活跃事务: ${global.DDN.runtime.activeTransactions.size}`)
+      }
+    }
+
     const t = await sequelizeInst.transaction(logOptions)
     try {
       await func(t)
       await t.commit()
+
+      // 从活跃事务集合中移除
+      if (global.DDN && global.DDN.runtime && global.DDN.runtime.activeTransactions) {
+        global.DDN.runtime.activeTransactions.delete(transactionId)
+
+        if (global.DDN.logger) {
+          global.DDN.logger.debug(`事务提交: ${transactionId}, 剩余活跃事务: ${global.DDN.runtime.activeTransactions.size}`)
+        }
+      }
+
       return
     } catch (err) {
       await t.rollback()
+
+      // 从活跃事务集合中移除
+      if (global.DDN && global.DDN.runtime && global.DDN.runtime.activeTransactions) {
+        global.DDN.runtime.activeTransactions.delete(transactionId)
+
+        if (global.DDN.logger) {
+          global.DDN.logger.debug(`事务回滚: ${transactionId}, 剩余活跃事务: ${global.DDN.runtime.activeTransactions.size}`)
+        }
+      }
+
       return 'rollback success err: ' + err
     }
   }

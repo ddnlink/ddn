@@ -127,221 +127,221 @@ describe('AOB Test', () => {
         })
     })
 
-    // it('with the same IssuerAccount1 again, Should be fail', async () => {
-    //   await node.onNewBlockAsync()
+    it('with the same IssuerAccount1 again, Should be fail', async () => {
+      await node.onNewBlockAsync()
 
-    //   const transaction = await DdnJS.aob.createIssuer(issuerName2, 'An issuer', IssuerAccount1.password)
-    //   debug('注册发行商创建的transaction 3', transaction)
+      const transaction = await DdnJS.aob.createIssuer(issuerName2, 'An issuer', IssuerAccount1.password)
+      debug('注册发行商创建的transaction 3', transaction)
 
-    //   node.api
-    //     .post('/transactions')
-    //     .set('Accept', 'application/json')
-    //     .set('version', node.version)
-    //     .set('nethash', node.constants.nethash)
-    //     .set('port', node.config.port)
-    //     .send({
-    //       transaction
-    //     })
-    //     .expect('Content-Type', /json/)
-    //     .expect(200)
-    //     .then(({ body }) => {
-    //       debug('Register Issuer with same IssuerAccount1 fail', body)
+      node.api
+        .post('/transactions')
+        .set('Accept', 'application/json')
+        .set('version', node.version)
+        .set('nethash', node.constants.nethash)
+        .set('port', node.config.port)
+        .send({
+          transaction
+        })
+        .expect('Content-Type', /json/)
+        .expect(200)
+        .then(({ body }) => {
+          debug('Register Issuer with same IssuerAccount1 fail', body)
 
-    //       expect(body).to.have.property('success').to.be.false
-    //       expect(body).to.have.property('error').to.contain('Issuer name/issuer_id already exists')
-    //     })
-    //     .catch(err => {
-    //       debug('Register Issuer with same IssuerAccount1 fail error', err)
-    //       expect(err).be.not.ok
-    //     })
-    // })
+          expect(body).to.have.property('success').to.be.false
+          expect(body).to.have.property('error').to.contain('Issuer name/issuer_id already exists')
+        })
+        .catch(err => {
+          debug('Register Issuer with same IssuerAccount1 fail error', err)
+          expect(err).be.not.ok
+        })
+    })
 
-    // it('with IssuerAccount2 who no money, Should be fail', async () => {
-    //   await node.onNewBlockAsync()
+    it('with IssuerAccount2 who no money, Should be fail', async () => {
+      await node.onNewBlockAsync()
 
-    //   const transaction = await DdnJS.aob.createIssuer(issuerName2, 'An issuer', IssuerAccount2.password)
-    //   debug('注册发行商创建的transaction 4', transaction)
-    //   const { body } = await node.api
-    //     .post('/transactions')
-    //     .set('Accept', 'application/json')
-    //     .set('version', node.version)
-    //     .set('nethash', node.constants.nethash)
-    //     .set('port', node.config.port)
-    //     .send({
-    //       transaction
-    //     })
-    //     .expect('Content-Type', /json/)
-    //     .expect(200)
+      const transaction = await DdnJS.aob.createIssuer(issuerName2, 'An issuer', IssuerAccount2.password)
+      debug('注册发行商创建的transaction 4', transaction)
+      const { body } = await node.api
+        .post('/transactions')
+        .set('Accept', 'application/json')
+        .set('version', node.version)
+        .set('nethash', node.constants.nethash)
+        .set('port', node.config.port)
+        .send({
+          transaction
+        })
+        .expect('Content-Type', /json/)
+        .expect(200)
 
-    //   debug('Register Issuer with no money IssuerAccount2 fail', body)
-    //   expect(body).to.have.property('success').to.be.false
-    //   expect(body).to.have.property('error').to.contain('Insufficient balance')
-    // })
+      debug('Register Issuer with no money IssuerAccount2 fail', body)
+      expect(body).to.have.property('success').to.be.false
+      expect(body).to.have.property('error').to.contain('Insufficient balance')
+    })
   })
 
   // 1.1 检索发行商
-  // describe('Get issuers', () => {
-  //   it('Get issuers should be ok', async () => {
-  //     const [err, res] = await node.apiGetAsyncE('/aob/issuers')
+  describe('Get issuers', () => {
+    it('Get issuers should be ok', async () => {
+      const [err, res] = await node.apiGetAsyncE('/aob/issuers')
 
-  //     debug('get /aob/issuers/issuers response', err, res.body)
-  //     expect(err).to.not.ok
-  //     expect(res.body.success).to.be.true
-  //     if (res.body.data) {
-  //       expect(res.body.data.total).to.be.a('number')
-  //       expect(res.body.data.rows).to.be.instanceOf(Array)
-  //     }
-  //   })
+      debug('get /aob/issuers/issuers response', err, res.body)
+      expect(err).to.not.ok
+      expect(res.body.success).to.be.true
+      if (res.body.data) {
+        expect(res.body.data.total).to.be.a('number')
+        expect(res.body.data.rows).to.be.instanceOf(Array)
+      }
+    })
 
-  //   it('Get issuer by name should be ok', async () => {
-  //     const [err, res] = await node.apiGetAsyncE(`/aob/issuers/name/${issuerName}`)
-  //     debug('issuerName', issuerName)
-  //     debug('get /aob/issuers/name/:name response', err, res.body)
-  //     expect(err).to.not.ok
-  //     expect(res.body).to.have.property('result')
-  //     if (res.body.result) {
-  //       expect(res.body.result.name).to.equal(issuerName)
-  //       expect(res.body.result.issuer_id).to.equal(IssuerAccount1.address)
-  //     }
-  //   })
-  // })
+    it('Get issuer by name should be ok', async () => {
+      const [err, res] = await node.apiGetAsyncE(`/aob/issuers/name/${issuerName}`)
+      debug('issuerName', issuerName)
+      debug('get /aob/issuers/name/:name response', err, res.body)
+      expect(err).to.not.ok
+      expect(res.body).to.have.property('result')
+      if (res.body.result) {
+        expect(res.body.result.name).to.equal(issuerName)
+        expect(res.body.result.issuer_id).to.equal(IssuerAccount1.address)
+      }
+    })
+  })
 
-  // // // 2. 注册资产 比如：DDN.CNY
-  // let currency // 名字本就是 assetName;
-  // describe('Register Asset', () => {
-  //   it('Should be ok', async () => {
-  //     await node.onNewBlockAsync()
-  //     // 必须有 发行商(并且与IssuerAccount1对应)
-  //     currency = issuerName + '.' + node.randomIssuerName('', 3).toUpperCase()
-  //     debug('Asset currency', currency)
+  // // 2. 注册资产 比如：DDN.CNY
+  let currency // 名字本就是 assetName;
+  describe('Register Asset', () => {
+    it('Should be ok', async () => {
+      await node.onNewBlockAsync()
+      // 必须有 发行商(并且与IssuerAccount1对应)
+      currency = issuerName + '.' + node.randomIssuerName('', 3).toUpperCase()
+      debug('Asset currency', currency)
 
-  //     var transaction = await DdnJS.aob.createAsset(
-  //       currency,
-  //       'DDD新币种',
-  //       '100000000',
-  //       2,
-  //       '',
-  //       '0',
-  //       '0',
-  //       '0',
-  //       IssuerAccount1.password
-  //     )
+      var transaction = await DdnJS.aob.createAsset(
+        currency,
+        'DDD新币种',
+        '100000000',
+        2,
+        '',
+        '0',
+        '0',
+        '0',
+        IssuerAccount1.password
+      )
 
-  //     debug('Asset transaction:', transaction)
+      debug('Asset transaction:', transaction)
 
-  //     const { body } = await node.api
-  //       .post('/transactions')
-  //       .set('Accept', 'application/json')
-  //       .set('version', node.version)
-  //       .set('nethash', node.constants.nethash)
-  //       .set('port', node.config.port)
-  //       .send({
-  //         transaction
-  //       })
-  //       .expect('Content-Type', /json/)
-  //       .expect(200)
+      const { body } = await node.api
+        .post('/transactions')
+        .set('Accept', 'application/json')
+        .set('version', node.version)
+        .set('nethash', node.constants.nethash)
+        .set('port', node.config.port)
+        .send({
+          transaction
+        })
+        .expect('Content-Type', /json/)
+        .expect(200)
 
-  //     debug('asset register ok', body)
+      debug('asset register ok', body)
 
-  //     expect(body).to.have.property('success').to.be.true
-  //   })
-  // })
+      expect(body).to.have.property('success').to.be.true
+    })
+  })
 
-  // // 3. 发行资产，即增加市场流通数量
-  // describe('Add asset issues', () => {
-  //   it('Should be ok', async () => {
-  //     // 等 1 次确认
-  //     await node.onNewBlockAsync()
+  // 3. 发行资产，即增加市场流通数量
+  describe('Add asset issues', () => {
+    it('Should be ok', async () => {
+      // 等 1 次确认
+      await node.onNewBlockAsync()
 
-  //     // const transaction = await createPluginAsset(assetTypes.AOB_ISSUE, asset, IssuerAccount1.password)
-  //     const transaction = await DdnJS.aob.createIssue(currency, '100000', IssuerAccount1.password)
-  //     debug('Add issue transaction:', transaction)
+      // const transaction = await createPluginAsset(assetTypes.AOB_ISSUE, asset, IssuerAccount1.password)
+      const transaction = await DdnJS.aob.createIssue(currency, '100000', IssuerAccount1.password)
+      debug('Add issue transaction:', transaction)
 
-  //     const { body } = await node.api
-  //       .post('/transactions')
-  //       .set('Accept', 'application/json')
-  //       .set('version', node.version)
-  //       .set('nethash', node.constants.nethash)
-  //       .set('port', node.config.port)
-  //       .send({
-  //         transaction
-  //       })
-  //       .expect('Content-Type', /json/)
-  //       .expect(200)
+      const { body } = await node.api
+        .post('/transactions')
+        .set('Accept', 'application/json')
+        .set('version', node.version)
+        .set('nethash', node.constants.nethash)
+        .set('port', node.config.port)
+        .send({
+          transaction
+        })
+        .expect('Content-Type', /json/)
+        .expect(200)
 
-  //     debug('Add issue ', body)
+      debug('Add issue ', body)
 
-  //     expect(body).to.have.property('success').to.be.true
-  //   })
-  // })
+      expect(body).to.have.property('success').to.be.true
+    })
+  })
 
-  // // 4. 资产转账
-  // describe('Transfer Issue', () => {
-  //   it('Should be ok', async () => {
-  //     // 等 1 次确认
-  //     await node.onNewBlockAsync()
+  // 4. 资产转账
+  describe('Transfer Issue', () => {
+    it('Should be ok', async () => {
+      // 等 1 次确认
+      await node.onNewBlockAsync()
 
-  //     // const transaction = await createPluginAsset(assetTypes.AOB_TRANSFER, obj, IssuerAccount1.password)
-  //     const transaction = await DdnJS.aob.createTransfer(
-  //       currency,
-  //       '10',
-  //       node.Gaccount.address,
-  //       '主交易备注',
-  //       '资产交易备注',
-  //       IssuerAccount1.password
-  //     )
-  //     debug('aob transfer: ', transaction)
+      // const transaction = await createPluginAsset(assetTypes.AOB_TRANSFER, obj, IssuerAccount1.password)
+      const transaction = await DdnJS.aob.createTransfer(
+        currency,
+        '10',
+        node.Gaccount.address,
+        '主交易备注',
+        '资产交易备注',
+        IssuerAccount1.password
+      )
+      debug('aob transfer: ', transaction)
 
-  //     const { body } = await node.api
-  //       .post('/transactions')
-  //       .set('Accept', 'application/json')
-  //       .set('version', node.version)
-  //       .set('nethash', node.constants.nethash)
-  //       .set('port', node.config.port)
-  //       .send({
-  //         transaction
-  //       })
-  //       .expect('Content-Type', /json/)
-  //       .expect(200)
+      const { body } = await node.api
+        .post('/transactions')
+        .set('Accept', 'application/json')
+        .set('version', node.version)
+        .set('nethash', node.constants.nethash)
+        .set('port', node.config.port)
+        .send({
+          transaction
+        })
+        .expect('Content-Type', /json/)
+        .expect(200)
 
-  //     debug('Transfer issue should be ok', body)
+      debug('Transfer issue should be ok', body)
 
-  //     expect(body).to.have.property('success').to.be.true
-  //   })
+      expect(body).to.have.property('success').to.be.true
+    })
 
-  //   it('if aob amount is 0 should be fail', async () => {
-  //     // 等 1 次确认
-  //     await node.onNewBlockAsync()
+    it('if aob amount is 0 should be fail', async () => {
+      // 等 1 次确认
+      await node.onNewBlockAsync()
 
-  //     // const transaction = await createPluginAsset(assetTypes.AOB_TRANSFER, obj, IssuerAccount1.password)
-  //     const transaction = await DdnJS.aob.createTransfer(
-  //       currency,
-  //       '10',
-  //       node.Gaccount.address,
-  //       '主交易备注',
-  //       '资产交易备注',
-  //       IssuerAccount2.password
-  //     )
-  //     debug('aob transfer: ', transaction)
+      // const transaction = await createPluginAsset(assetTypes.AOB_TRANSFER, obj, IssuerAccount1.password)
+      const transaction = await DdnJS.aob.createTransfer(
+        currency,
+        '10',
+        node.Gaccount.address,
+        '主交易备注',
+        '资产交易备注',
+        IssuerAccount2.password
+      )
+      debug('aob transfer: ', transaction)
 
-  //     const { body } = await node.api
-  //       .post('/transactions')
-  //       .set('Accept', 'application/json')
-  //       .set('version', node.version)
-  //       .set('nethash', node.constants.nethash)
-  //       .set('port', node.config.port)
-  //       .send({
-  //         transaction
-  //       })
-  //       .expect('Content-Type', /json/)
-  //       .expect(200)
+      const { body } = await node.api
+        .post('/transactions')
+        .set('Accept', 'application/json')
+        .set('version', node.version)
+        .set('nethash', node.constants.nethash)
+        .set('port', node.config.port)
+        .send({
+          transaction
+        })
+        .expect('Content-Type', /json/)
+        .expect(200)
 
-  //     debug('Transfer issue should be ok', body)
+      debug('Transfer issue should be ok', body)
 
-  //     expect(body).to.have.property('success').to.be.false
-  //     expect(body).to.have.property('error').to.contain('Insufficient AoB balance')
-  //   })
-  // })
+      expect(body).to.have.property('success').to.be.false
+      expect(body).to.have.property('error').to.contain('Insufficient AoB balance')
+    })
+  })
 })
 
 // 5. 测试权限

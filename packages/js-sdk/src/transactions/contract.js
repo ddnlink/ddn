@@ -1,8 +1,27 @@
+/**
+ * 智能合约交易相关功能模块
+ *
+ * 提供创建智能合约部署、调用和支付的交易功能
+ */
+
 import { bignumber, assetTypes, slots } from '../utils'
 
 import * as crypto from '../crypto'
 import { constants } from '../config'
 
+/**
+ * 创建智能合约部署交易
+ *
+ * @param {Object} options - 合约部署选项
+ * @param {string} options.name - 合约名称
+ * @param {number} options.gasLimit - 合约执行的燃料上限，默认为constants.maxGasLimit
+ * @param {string} options.desc - 合约描述
+ * @param {string} options.version - 合约版本
+ * @param {string} options.code - 合约代码
+ * @param {string} secret - 发送者密钥
+ * @param {string} [secondSecret] - 发送者二级密钥（可选）
+ * @returns {Object} 创建的合约部署交易对象
+ */
 async function deploy (options, secret, secondSecret) {
   const keys = crypto.getKeys(secret)
 
@@ -44,6 +63,20 @@ async function deploy (options, secret, secondSecret) {
   return transaction
 }
 
+/**
+ * 创建向合约支付资产的交易
+ *
+ * @param {Object} options - 合约支付选项
+ * @param {string} options.id - 合约ID
+ * @param {number} options.gasLimit - 合约执行的燃料上限，默认为constants.maxGasLimit
+ * @param {string} options.amount - 支付金额
+ * @param {string} options.currency - 支付的资产类型
+ * @param {string} options.method - 调用的合约方法名
+ * @param {Array|string} options.args - 合约方法参数
+ * @param {string} secret - 发送者密钥
+ * @param {string} [secondSecret] - 发送者二级密钥（可选）
+ * @returns {Object} 创建的合约支付交易对象
+ */
 async function pay (options, secret, secondSecret) {
   const keys = crypto.getKeys(secret)
   let args = options.args
@@ -80,6 +113,18 @@ async function pay (options, secret, secondSecret) {
   return trs
 }
 
+/**
+ * 创建调用合约方法的交易（不包含资产转移）
+ *
+ * @param {Object} options - 合约调用选项
+ * @param {string} options.id - 合约ID
+ * @param {number} options.gasLimit - 合约执行的燃料上限，默认为constants.maxGasLimit
+ * @param {string} options.method - 调用的合约方法名
+ * @param {Array|string} options.args - 合约方法参数
+ * @param {string} secret - 发送者密钥
+ * @param {string} [secondSecret] - 发送者二级密钥（可选）
+ * @returns {Object} 创建的合约调用交易对象
+ */
 async function send (options, secret, secondSecret) {
   const keys = crypto.getKeys(secret)
   let args = options.args
@@ -114,6 +159,9 @@ async function send (options, secret, secondSecret) {
   return trs
 }
 
+/**
+ * 智能合约交易模块导出对象
+ */
 export default {
   deploy,
   send,

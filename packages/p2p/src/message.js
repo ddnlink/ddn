@@ -116,8 +116,12 @@ export class Message {
   }
 
   /**
+   * 解包网络消息
    *
-   * @param {*} data
+   * 增强版unpack方法，能够处理大型消息和分段数据
+   *
+   * @param {*} bufs 消息缓冲区
+   * @returns {Object} 解析后的消息对象
    */
   unpack (bufs) {
     // 如果大於最小包，繼續，否則返回
@@ -125,6 +129,7 @@ export class Message {
       this.logger.warn('Discard invalid bufs: ', bufs)
       return
     }
+
     // 找不到包頭， 返回
     if (!this._findHeader(bufs)) {
       this.logger.warn('Not found header', bufs)
@@ -133,16 +138,52 @@ export class Message {
 
     const header_size = this._header_size
     const packet_size = bufs.slice(header_size, header_size + 4).readUInt32LE()
+
     // 含有负载，如果缓存数据 < 包大小，返回，等待下次处理，此时不移动游標
     // 包大小 =  头 + 长度 + 序列号 + 命令 + 元數據長度 +   元數據    +  负载长度
     // 即大小 =  头 +  4  +    2   +  2   +     2     +  metasize   +   size
     if (bufs.length < packet_size) {
+      // 记录警告但不阻止处理，如果数据已经足够处理基本信息
       this.logger.warn(`Buffers length is not right, expect: ${packet_size}, get: ${bufs.length}`, bufs)
+
+      // 如果至少有足够的数据来读取命令和序列号
+      if (bufs.length >= header_size + 8) {
+        const serial = bufs.slice(header_size + 4, header_size + 6).readUInt16LE()
+        const cmd = bufs.slice(header_size + 6, header_size + 8).readUInt16LE()
+
+        // 如果是区块数据命令，尝试处理部分数据
+        if (cmd === Message.commands.INVENTORY || cmd === Message.commands.GET) {
+          this.logger.debug(`Attempting to process partial data for command ${cmd}`)
+
+          // 尝试读取元数据
+          if (bufs.length >= header_size + 10) {
+            const metastart = header_size + 10
+            const metaendPos = bufs.slice(header_size + 8, metastart).readUInt16LE()
+
+            // 如果有足够的数据读取元数据
+            if (bufs.length >= metaendPos) {
+              const metadata = bufs.slice(metastart, metaendPos)
+              try {
+                const meta = JSON.parse(metadata)
+
+                // 返回部分数据，标记为不完整
+                this.logger.debug(`Returning partial data for command ${cmd}`)
+                bufs.discard(bufs.length) // 丢弃所有数据，避免重复处理
+                return { serial, cmd, meta, partial: true }
+              } catch (e) {
+                this.logger.warn(`Failed to parse metadata: ${e.message}`)
+              }
+            }
+          }
+        }
+      }
+
       return
     }
 
     const serial = bufs.slice(header_size + 4, header_size + 6).readUInt16LE()
     const cmd = bufs.slice(header_size + 6, header_size + 8).readUInt16LE()
+
     // 如果负载为0， 直接返回
     if (packet_size <= this.minPacketSize) {
       bufs.discard(packet_size)
@@ -160,6 +201,7 @@ export class Message {
     if (!meta.size) {
       return { serial, cmd, meta }
     }
+
     const checksum_calc = Message.checksum(payload).toString('hex')
     if (meta.checksum !== checksum_calc) {
       this.logger.warn(`invalid data payload, checksum is not right, expected: ${meta.checksum}, but got: ${checksum_calc}`)

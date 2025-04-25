@@ -240,6 +240,26 @@ class Consensus {
       return '0';
     }
   }
+
+  /**
+   * 清理共识状态
+   * 在系统关闭时调用，确保所有状态被正确清理
+   */
+  async cleanup() {
+    try {
+      this.logger.debug('清理共识状态...');
+
+      // 清理待处理的区块和投票
+      this.clearState();
+
+      // 记录清理完成
+      this.logger.debug('共识状态清理完成');
+      return true;
+    } catch (err) {
+      this.logger.error(`清理共识状态失败: ${err.message}`);
+      return false;
+    }
+  }
 }
 
 export default Consensus

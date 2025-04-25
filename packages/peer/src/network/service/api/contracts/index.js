@@ -125,9 +125,9 @@ class ContractService {
 
     const offset = query.offset
     const limit = query.limit
-    // const attributes = ['id', 'name', 'owner', 'transaction_id', 'gas_limit', 'timestamp', 'version', 'desc']
+    const attributes = ['id', 'name', 'owner', 'transaction_id', 'gas_limit', 'timestamp', 'version', 'desc']
 
-    const result = await this.dao.findPage('contract', { where, order: sorts, offset, limit })
+    const result = await this.dao.findPage('contract', { where, order: sorts, offset, limit, attributes })
     return { success: true, rows: result.rows, totalCount: result.total }
   }
 

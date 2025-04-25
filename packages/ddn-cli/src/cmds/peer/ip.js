@@ -1,7 +1,8 @@
-import { init, ipStat } from '../../plugins/maintain'
+// fixme: delete it
+import { init, ipStat } from '../../plugins/peer'
 
 module.exports = {
-  command: 'ipStat',
+  command: 'ip',
   desc: 'analyze peer ip info',
   builder: {},
 

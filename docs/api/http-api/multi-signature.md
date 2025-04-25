@@ -1,3 +1,4 @@
+
 ---
 order: 9
 id: http-api-multi-signature
@@ -411,5 +412,49 @@ JSON返回示例：
             }
         }
     ]
+}
+```
+
+## 7. 检查账号是否可以创建多重签名
+接口地址：/api/multisignatures/checkEligibility
+请求方式：get
+支持格式：urlencoded
+请求参数说明：
+
+|名称	|类型   |必填 |说明              |
+|------ |-----  |---  |----              |
+|address|string |Y    |DDN账户地址       |
+
+返回参数说明：
+
+|名称	|类型   |说明              |
+|------ |-----  |----              |
+|success|boolean|请求是否成功      |
+|eligible|boolean|账号是否可以创建多重签名|
+|reason|string|如果不可创建，说明原因|
+|details|object|详细信息，包括当前多重签名配置或未确认交易|
+
+请求示例：
+```bash
+curl -k -X GET http://127.0.0.1:8001/api/multisignatures/checkEligibility?address=D5H4HXQLiYdHsHZpoE7zpYea6g6xNsQJvx
+```
+
+JSON返回示例：
+```js
+{
+    "success": true,
+    "eligible": false,
+    "reason": "Account already has a multisignature configuration",
+    "details": {
+        "currentMultisignature": {
+            "min": 2,
+            "lifetime": 3,
+            "keysgroup": [
+                "+daeee33def7eef0c7ba06ec66eda7204437ba88ace8f04e4a6aa4d7bfbd18bc1",
+                "+ab8c0af3b048dac4d32ad779f79c47948c2a0a0577b89ca7eba58ae321f04695"
+            ]
+        },
+        "pendingTransactions": []
+    }
 }
 ```

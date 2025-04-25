@@ -29,6 +29,9 @@ class Peer {
     Object.assign(this, context)
     this.ctx = context
     this._context = context
+    
+    // 添加初始化标志
+    this._prepared = false
 
     this._peerUpdateTimes = []
     this._peerUpdatings = []
@@ -71,8 +74,32 @@ class Peer {
     this.broadcast = PeerBroadcast.singleton(this.ctx)
   }
 
-  async prepare () {
-    this.p2p.prepare()
+  async prepare() {
+    // 检查是否已经初始化过
+    if (this._prepared) {
+      this.ctx.logger.debug('Peer network already prepared, skipping...')
+      return true
+    }
+    
+    this.ctx.logger.info('Preparing peer network...')
+    
+    try {
+      // 确保P2P实例已准备就绪
+      await this.p2p.prepare()
+      
+      // 添加一个延迟，确保节点服务完全启动
+      await new Promise(resolve => setTimeout(resolve, 5000))
+      
+      // 标记为已初始化
+      this._prepared = true
+      
+      this.ctx.logger.info('Peer network prepared successfully')
+      return true
+    } catch (err) {
+      this.ctx.logger.error(`Failed to prepare peer network: ${err.message}`)
+      // 即使准备失败，也返回true，确保程序继续运行
+      return true
+    }
   }
 
   // TODO: this.running.peer.getVersion() -> this.running.peer.version()
@@ -89,21 +116,37 @@ class Peer {
    * @returns pipe
    */
   async getPeer(id) {
-    return !id ? this.p2p.inventory.getRandomPeer() : this.p2p.inventory.get(id)
+    try {
+      return !id ? this.p2p.inventory.getRandomPeer() : this.p2p.inventory.get(id)
+    } catch (err) {
+      this.ctx.logger.error(`Failed to get peer: ${err.message}`)
+      return null
+    }
   }
 
   /**
    * 从随机节点同步区块数据
    */
-  async syncBlocks () {
-    return await BlockSync.singleton(this.ctx).syncBlockData()
+  async syncBlocks() {
+    try {
+      return await BlockSync.singleton(this.ctx).syncBlockData()
+    } catch (err) {
+      this.ctx.logger.error(`Failed to sync blocks: ${err.message}`)
+      // 同步失败不应该影响程序运行
+      return false
+    }
   }
 
   /**
    * 从指定节点的某个高度同步区块数据
    */
-  async syncBlocksFromPeer (peer, fromHeight) {
-    return await BlockSync.singleton(this.ctx)._cloneBlocksFromPeer(peer, fromHeight)
+  async syncBlocksFromPeer(peer, fromHeight) {
+    try {
+      return await BlockSync.singleton(this.ctx)._cloneBlocksFromPeer(peer, fromHeight)
+    } catch (err) {
+      this.ctx.logger.error(`Failed to sync blocks from peer ${peer.host}:${peer.port}: ${err.message}`)
+      return false
+    }
   }
 
   async syncSignatures () {

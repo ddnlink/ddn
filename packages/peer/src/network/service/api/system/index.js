@@ -28,7 +28,7 @@ class Systeminformation {
       item.size = item.size / byteToGbUnit
     })
     const perNet = await si.networkStats()
-    console.log(disk, fsSize)
+    // console.log(disk, fsSize)
     return {
       success: true,
       memory,

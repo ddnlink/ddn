@@ -13,7 +13,6 @@ export class ForgeManager {
             if (!this.shouldProceedWithForging()) return;
             const currentSlot = this.runtime.slot.getSlotNumber();
             const lastBlock = this.runtime.block.getLastBlock();
-
             if (this.isInvalidSlot(currentSlot, lastBlock)) return;
 
             try {
@@ -31,7 +30,6 @@ export class ForgeManager {
 
     shouldProceedWithForging() {
         const { stateMachine, delegate } = this.runtime;
-
         if (!stateMachine.isReady()) return false;
         if (!delegate.isForgeEnabled()) {
             this.logger.trace('Loop: Forging disabled');
@@ -66,6 +64,7 @@ export class ForgeManager {
     }
 
     async attemptBlockGeneration(delegateInfo) {
+        this.logger.debug('Block is generating...');
         await this.ctx.sequence.addAsync(async () => {
             const slotValid = this.runtime.slot.getSlotNumber(delegateInfo.time) ===
                 this.runtime.slot.getSlotNumber();
@@ -87,6 +86,8 @@ export class ForgeManager {
     }
 
     scheduleNextExecution() {
-        setTimeout(() => this.startForgeBlockTask(), 100);
+        // 使用更合理的调度间隔，避免过于频繁的检查
+        const interval = 100; // 将间隔从100毫秒增加到1000毫秒
+        setTimeout(() => this.startForgeBlockTask(), interval);
     }
 }
