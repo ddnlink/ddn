@@ -71,7 +71,7 @@ describe('PUT /multisignatures', () => {
     debug('\r\n')
 
     const transaction = await createTransfer(newMultiAccount.address, '100000000000', node.Gaccount.password)
-    node.peer.post('/transactions')
+    node.api.post('/transactions')
       .set('Accept', 'application/json')
       .set('version', node.version)
       .set('nethash', node.constants.nethash)

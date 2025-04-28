@@ -57,7 +57,7 @@ describe('Registering a delegate', () => {
               )
               transaction.fee = bignumber.multiply(constants.fees.delegate, constants.fixedPoint)
 
-              node.peer
+              node.api
                 .post('/transactions')
                 .set('Accept', 'application/json')
                 .set('version', node.version)
@@ -86,7 +86,7 @@ describe('Registering a delegate', () => {
     )
     transaction.fee = bignumber.multiply(constants.fees.delegate, constants.fixedPoint)
 
-    node.peer
+    node.api
       .post('/transactions')
       .set('Accept', 'application/json')
       .set('version', node.version)
@@ -108,7 +108,7 @@ describe('Registering a delegate', () => {
   it('When account has funds. Username is uppercase, Lowercase username already registered. Should fail', async done => {
     const transaction = await DdnJS.delegate.createDelegate(account.username.toUpperCase(), account2.password)
 
-    node.peer
+    node.api
       .post('/transactions')
       .set('Accept', 'application/json')
       .set('version', node.version)
@@ -137,7 +137,7 @@ describe('Registering a delegate', () => {
 
     node.onNewBlock(err => {
       node.expect(err).to.be.not.ok
-      node.peer
+      node.api
         .post('/transactions')
         .set('Accept', 'application/json')
         .set('version', node.version)
@@ -197,7 +197,7 @@ describe('Registering a delegate', () => {
               account2.username = node.randomDelegateName().toLowerCase()
               const transaction = await DdnJS.delegate.createDelegate(account2.username, account2.password)
 
-              node.peer
+              node.api
                 .post('/transactions')
                 .set('Accept', 'application/json')
                 .set('version', node.version)
@@ -217,7 +217,7 @@ describe('Registering a delegate', () => {
                   account2.username = node.randomDelegateName().toLowerCase()
                   const transaction2 = await DdnJS.delegate.createDelegate(account2.username, account2.password)
 
-                  node.peer
+                  node.api
                     .post('/transactions')
                     .set('Accept', 'application/json')
                     .set('version', node.version)

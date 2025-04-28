@@ -11,4 +11,4 @@ export * from './balance-manager';
 export * from './routes-map';
 
 // 验证器命名空间导出
-// export * as validator from './validator';
+export * from './validator';

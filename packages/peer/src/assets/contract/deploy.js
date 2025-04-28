@@ -164,23 +164,115 @@ class Contract {
   }
 
   async dbRead (raw) {
-    const contract = {
-      id: raw.c_id,
-      gas_limit: raw.c_gas_limit,
-      name: raw.c_name,
-      desc: raw.c_desc,
-      owner: raw.c_owner,
-      version: raw.c_version,
-      code: raw.c_code
+    if (!raw.asset_trs_id) {
+      return null
     }
+
+    // id等信息在 energy.js 里处理
+    const contract = {
+      name: raw.asset_str2,
+      owner: raw.asset_str3,
+      desc: raw.asset_str4,
+      version: raw.asset_str5,
+      gas_limit: raw.asset_int1
+    }
+
+    // 处理扩展JSON数据，获取代码
+    if (raw.asset_ext_json) {
+      try {
+        const jsonObj = JSON.parse(raw.asset_ext_json)
+        if (jsonObj.code) {
+          contract.code = jsonObj.code
+        }
+      } catch (err) {
+        this.logger.error("Can't parse contract asset extend data", err)
+      }
+    }
+
     return { contract }
   }
 
-  // 替换dbSave方法 ---wly
   /**
-   * 功能:新增一条contract数据
+   * 定义资产属性和字段的对应关系
    */
-  async dbSave (trs, dbTrans) {}
+  async propsMapping () {
+    return [
+      { field: 'str1', prop: 'id' },
+      { field: 'str2', prop: 'name' },
+      { field: 'str3', prop: 'owner' },
+      { field: 'str4', prop: 'desc' },
+      { field: 'str5', prop: 'version' },
+      { field: 'int1', prop: 'gas_limit' },
+      { field: 'str_ext', prop: 'code' }
+    ]
+  }
+
+  /**
+   * 将合约交易存储到数据库中
+   * @param {*} trs 交易对象
+   * @param {*} dbTrans 数据库事务
+   */
+  async dbSave (trs, dbTrans) {
+    try {
+      // 检查资产记录是否已存在
+      const existingAsset = await this.dao.findOne('trs_asset', {
+        where: { transaction_id: trs.id },
+        transaction: dbTrans
+      });
+      
+      if (existingAsset) {
+        this.logger.warn(`Asset for transaction ${trs.id} already exists, skipping`);
+        return existingAsset;
+      }
+      
+      const assetName = 'contract'
+      const asset = trs.asset[assetName]
+
+      const assetInst = {
+        transaction_id: trs.id,
+        transaction_type: trs.type,
+        timestamp: trs.timestamp
+      }
+
+      const jsonExtObj = {}
+      let hasJsonExt = false
+
+      // 将合约数据映射到trs_asset表的字段
+      assetInst.str1 = asset.id
+      assetInst.str2 = asset.name
+      assetInst.str3 = asset.owner
+      assetInst.str4 = asset.desc || ''
+      assetInst.str5 = asset.version
+      assetInst.int1 = asset.gas_limit
+
+      // 将代码存储到扩展JSON中
+      hasJsonExt = true
+      jsonExtObj.code = asset.code
+
+      // 保存到trs_asset表
+      let result = await this.dao.insert('trs_asset', assetInst, { transaction: dbTrans })
+
+      // 保存扩展数据到trs_asset_ext表
+      if (hasJsonExt) {
+        const assetExtInst = {
+          transaction_id: trs.id,
+          json_ext: JSON.stringify(jsonExtObj)
+        }
+
+        result = await this.dao.insert('trs_asset_ext', assetExtInst, { transaction: dbTrans })
+      }
+
+      return result
+    } catch (err) {
+      if (this.isRecordExistsError(err)) {
+        this.logger.warn(`Asset for transaction ${trs.id} already exists (detected from error), skipping`);
+        return { transaction_id: trs.id }; // 返回一个最小化的资产对象
+      }
+      
+      // 其他错误需要抛出
+      throw err;
+    }
+  }
 
   async ready ({ signatures }, { multisignatures, multimin }) {
     if (Array.isArray(multisignatures) && multisignatures.length) {

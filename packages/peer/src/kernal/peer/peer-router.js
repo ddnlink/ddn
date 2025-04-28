@@ -90,6 +90,7 @@ class Router {
       }
 
       this.logger.log(`Received transaction ${transaction.id} from peer ${peer.host}:${peer.port}`)
+      // 这里不需要跳过验证，因为从其他节点接收的交易需要验证
       const transactions = await this.runtime.transaction.receiveTransactions([transaction])
       if (transactions && transactions.length > 0) {
         result.transactionId = transactions[0].id

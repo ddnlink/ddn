@@ -1,3 +1,4 @@
+
 import assert from 'assert'
 import { bignum } from '@ddn/utils'
 import * as crypto from '@ddn/crypto'
@@ -40,36 +41,59 @@ export class Energy {
 
   async burningGas (gas, address, block, tid, dbTrans) {
     const height = bignum.plus(this.runtime.block.getLastBlock().height, 1).toFixed();
-    const payAmount = this.gasToDDN(gas)
-
-    this.logger.debug(`consume ${address} ${payAmount} DDN for transaction '${tid}'`)
-    if (payAmount <= 0) return null
-    const account = await this.runtime.account.getAccountByAddress(address)
-    if (!account) throw new Error('Account is not found')
-    if (payAmount > account.balance) throw new Error('Insufficient balance')
+    const payAmount = this.gasToDDN(gas);
+    
+    this.logger.debug(`consume ${address} ${payAmount} DDN for transaction '${tid}'`);
+    if (payAmount <= 0) return null;
+    
+    // 检查是否已经消耗过gas
+    const existingRecord = await this.dao.findOne('burning', {
+      where: { tid },
+      transaction: dbTrans
+    });
+    
+    if (existingRecord) {
+      this.logger.debug(`Gas already consumed for transaction '${tid}', skipping`);
+      return null;
+    }
+    
+    const account = await this.runtime.account.getAccountByAddress(address);
+    if (!account) throw new Error('Account is not found');
+    if (payAmount > account.balance) throw new Error('Insufficient balance');
+    
     await this.runtime.account.merge(
       address,
       {
         balance: bignum.minus(0, payAmount),
-        block_id: block.id, // wxm block database
+        block_id: block.id,
         round: await this.runtime.round.getRound(block.height)
       },
       dbTrans
-    )
-    await this.dao.insert(
-      'burning',
-      {
-        tid,
-        height,
-        ddn: payAmount,
-        address
-      },
-      {
-        transaction: dbTrans
+    );
+    
+    try {
+      await this.dao.insert(
+        'burning',
+        {
+          tid,
+          height,
+          ddn: payAmount,
+          address
+        },
+        {
+          transaction: dbTrans
+        }
+      );
+    } catch (err) {
+      // 如果是唯一约束错误，说明记录已存在，可以忽略
+      if (err.message.includes('UNIQUE constraint failed')) {
+        this.logger.debug(`Burning record for transaction '${tid}' already exists`);
+      } else {
+        throw err;
       }
-    )
-
-    return null
+    }
+    
+    return null;
   }
 
   async handleResult (contractId, result, trs, block, payer, dbTrans) {
@@ -168,79 +192,105 @@ export class Energy {
   }
 
   async deploy (trs, block, sender, dbTrans) {
-    const last = this.runtime.block.getLastBlock()
-    const lastBlock = {
-      id: last.id,
-      height: last.height,
-      payloadHash: last.payload_hash,
-      prevBlockId: last.previous_block,
-      miner: last.generator_public_key,
-      timestamp: last.timestamp
-    }
-    const currentBlock = {
-      id: block.id,
-      height: block.height,
-      payloadHash: block.payload_hash,
-      prevBlockId: block.previous_block,
-      miner: block.generator_public_key,
-      timestamp: block.timestamp
-    }
-    const senderInfo = {
-      username: sender.username,
-      address: sender.address,
-      publicKey: sender.publicKey,
-      second_public_key: sender.second_public_key,
-      balance: sender.balance
-    }
-    const ctx = { senderId: sender.address, tx: trs, block: currentBlock, lastBlock, sender: senderInfo }
+    try {
+      const last = this.runtime.block.getLastBlock()
+      const lastBlock = {
+        id: last.id,
+        height: last.height,
+        payloadHash: last.payload_hash,
+        prevBlockId: last.previous_block,
+        miner: last.generator_public_key,
+        timestamp: last.timestamp
+      }
+      const currentBlock = {
+        id: block.id,
+        height: block.height,
+        payloadHash: block.payload_hash,
+        prevBlockId: block.previous_block,
+        miner: block.generator_public_key,
+        timestamp: block.timestamp
+      }
+      const senderInfo = {
+        username: sender.username,
+        address: sender.address,
+        publicKey: sender.publicKey,
+        second_public_key: sender.second_public_key,
+        balance: sender.balance
+      }
+      const ctx = { senderId: sender.address, tx: trs, block: currentBlock, lastBlock, sender: senderInfo }
 
-    const { name, gas_limit, owner, desc, version, code } = trs.asset.contract
-    const id = await crypto.generateContractAddress(
-      { name, gas_limit, owner, desc, version, code },
-      this.constants.tokenPrefix
-    )
-
-    this.logger.info(`Deploy smart contract id: ${id}, name: ${name}`)
-
-    const publishResult = await this.runtime.dvm.deployContract(gas_limit, ctx, id, name, code)
-    this.logger.debug(publishResult)
-    this.logger.info(`Deploy smart contract id: ${id}, success: ${publishResult.success}`)
-    const resultData = publishResult.data
-    if (publishResult.success) {
-      await this.dao.insert(
-        'contract',
-        {
-          ...trs.asset.contract,
-          id,
-          transaction_id: trs.id,
-          timestamp: trs.timestamp,
-          state: 0,
-          metadata: JSON.stringify(resultData)
-        },
-        {
-          transaction: dbTrans
-        }
+      const { name, gas_limit, owner, desc, version, code } = trs.asset.contract
+      const id = await crypto.generateContractAddress(
+        { name, gas_limit, owner, desc, version, code },
+        this.constants.tokenPrefix
       )
+
+      this.logger.info(`Deploy smart contract id: ${id}, name: ${name}`)
+
+      const publishResult = await this.runtime.dvm.deployContract(gas_limit, ctx, id, name, code)
+      this.logger.debug(publishResult)
+      this.logger.info(`Deploy smart contract id: ${id}, success: ${publishResult.success}`)
+      
+      // 即使部署失败，也要记录结果并消耗gas
+      await this.handleResult(id, publishResult, trs, block.height, sender.address, dbTrans)
+      
+      // 只有在部署成功时才创建合约记录
+      if (publishResult.success) {
+        await this.dao.insert(
+          'contract',
+          {
+            ...trs.asset.contract,
+            id,
+            transaction_id: trs.id,
+            timestamp: trs.timestamp,
+            state: 0,
+            metadata: JSON.stringify(publishResult.data || {})
+          },
+          {
+            transaction: dbTrans
+          }
+        )
+        
+        // 创建合约账户
+        const data = {
+          address: id,
+          u_is_delegate: 0,
+          is_delegate: 0,
+          vote: 0
+        }
+        
+        if (name) {
+          data.u_username = null
+          data.username = name
+        }
+        await this.runtime.account.setAccount(data)
+      }
+      
+      return publishResult
+    } catch (err) {
+      // 记录错误但不抛出，让交易处理继续
+      this.logger.error(`Contract deployment error: ${err.message}`, err)
+      
+      // 确保消耗gas
+      try {
+        await this.burningGas(gas_limit, sender.address, block, trs.id, dbTrans)
+      } catch (gasErr) {
+        // 如果是唯一约束错误，说明gas已经被消耗，可以忽略
+        if (!gasErr.message.includes('UNIQUE constraint failed')) {
+          throw gasErr
+        }
+      }
+      
+      // 记录失败结果
+      const failResult = {
+        success: false,
+        error: err.message,
+        gas: gas_limit
+      }
+      
+      await this.handleResult(id, failResult, trs, block.height, sender.address, dbTrans)
+      return failResult
     }
-    publishResult.data = undefined
-
-    await this.handleResult(id, publishResult, trs, block.height, sender.address, dbTrans)
-
-    // create contract account
-    const data = {
-      address: id,
-      u_is_delegate: 0, // wxm block database
-      is_delegate: 0, // wxm block database
-      vote: 0
-    }
-
-    if (name) {
-      data.u_username = null
-      data.username = name
-    }
-    this.runtime.account.setAccount(data)
-
-    // return publishResult
   }
 
   async execute (trs, block, sender, dbTrans) {

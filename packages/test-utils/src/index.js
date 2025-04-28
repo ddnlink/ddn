@@ -72,7 +72,7 @@ export class TestUtil {
     this.port = config.port
 
     this.api = supertest(`${this.baseUrl}/api`)
-    this.peer = supertest(`${this.baseUrl}/api`)
+    this.peer = supertest(`${this.baseUrl}/peer`)
 
     this.normalizer = config.normalizer || 100000000 // Use this to convert DDN amount to normal value
     this.blockTime = config.blockTime || 10000 // Block time in miliseconds

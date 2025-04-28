@@ -1,5 +1,7 @@
+
 import * as DdnCrypto from '@ddn/crypto'
-import DdnUtils, { LimitCache, checkAndReport, superviseTrs } from '@ddn/utils'
+import DdnUtils, { bignum, LimitCache, checkAndReport, superviseTrs } from '@ddn/utils'
+import { validateTransaction, validateContractTransaction } from '../../../../utils'
 
 // 实现一个健壮的错误处理函数
 function getErrorMsg(err) {
@@ -19,14 +21,223 @@ function getErrorMsg(err) {
  * wangxm   2019-03-21
  */
 class TransactionService {
-  constructor (context) {
+  constructor(context) {
     Object.assign(this, context)
     this._context = context
 
     this._invalidTrsCache = new LimitCache()
   }
 
-  async get (req) {
+  // 这个是所有交易的入口，获得的是交易体
+  async post({ body }) {
+  
+    // 确保响应始终为JSON格式
+    const jsonResponse = (success, data = {}, error = null) => {
+      const response = { success };
+      if (success) {
+        Object.assign(response, data);
+      } else {
+        response.error = error || 'Unknown error';
+      }
+      return response;
+    };
+
+
+    // 检查区块链是否准备好接收交易
+    try {
+      const lastBlock = await this.runtime.block.getLastBlock();
+      const lastSlot = this.runtime.slot.getSlotNumber(lastBlock.timestamp);
+
+      if (this.runtime.slot.getNextSlot() - lastSlot >= 12) {
+        this.logger.error('Blockchain is not ready', {
+          getNextSlot: this.runtime.slot.getNextSlot(),
+          lastSlot,
+          lastBlockHeight: lastBlock.height
+        });
+        return jsonResponse(false, null, 'Blockchain is not ready');
+      }
+    } catch (blockchainErr) {
+      this.logger.error('Error checking blockchain readiness', {
+        error: blockchainErr.message,
+        stack: blockchainErr.stack
+      });
+      return jsonResponse(false, null, 'Error checking blockchain readiness');
+    }
+
+    // 处理不同格式的输入
+    // 如果传入的是直接的交易对象，将其包装在 transaction 字段中
+    if (!body.transaction && body.type !== undefined) {
+      body = { transaction: body };
+    }
+
+    // 如果没有交易数据，返回错误
+    if (!body.transaction) {
+      return jsonResponse(false, null, 'Missing transaction data');
+    }
+
+    // 验证基本字段
+    const validateErrors = await this.ddnSchema.validate(
+      {
+        type: 'object',
+        properties: {
+          id: {
+            type: 'string'
+          },
+          nethash: {
+            type: 'string'
+          },
+          type: {
+            type: 'integer',
+            minimum: 0,
+            maximum: 100
+          },
+          senderPublicKey: {
+            type: 'string',
+            format: 'publicKey'
+          },
+          amount: {
+            type: 'string'
+          },
+          fee: {
+            type: 'string'
+          },
+          signature: {
+            type: 'string'
+          },
+          timestamp: {
+            type: 'integer'
+          }
+        },
+        required: ['id', 'nethash', 'type', 'senderPublicKey', 'signature', 'timestamp']
+      },
+      body.transaction
+    )
+    if (validateErrors) {
+      throw new Error(`Invalid parameters: ${validateErrors[0].schemaPath} ${validateErrors[0].message}`)
+    }
+
+    // 尝试规范化交易对象
+    let transaction;
+    try {
+      transaction = await this.runtime.transaction.objectNormalize(body.transaction);
+      transaction.asset = transaction.asset || {};
+    } catch (normalizeErr) {
+      this.logger.error('Transaction normalization error', {
+        error: normalizeErr.message,
+        transaction: JSON.stringify(body.transaction)
+      });
+      return jsonResponse(false, null, `Transaction normalization error: ${normalizeErr.message}`);
+    }
+
+    // 确保交易有ID
+    if (!transaction.id) {
+      try {
+        transaction.id = await DdnCrypto.getId(transaction);
+      } catch (idErr) {
+        this.logger.error('Failed to generate transaction ID', {
+          error: idErr.message,
+          transaction: JSON.stringify(transaction)
+        });
+        return jsonResponse(false, null, `Failed to generate transaction ID: ${idErr.message}`);
+      }
+    }
+
+    // 对缓存的非法交易直接返回
+    if (this._invalidTrsCache.has(transaction.id)) {
+      this.logger.debug(`The transaction ${transaction.id} is invalid, don't commit it again.`);
+      return jsonResponse(false, null, `The transaction ${transaction.id} is invalid, don't commit it again.`);
+    }
+
+    // 创建验证上下文
+    const validationContext = {
+      runtime: this.runtime,
+      logger: this.logger,
+      dao: this.dao,
+      constants: this.constants
+    };
+
+    // 根据交易类型选择不同的验证方法
+    let isValid = false;
+    try {
+      if (transaction.type === DdnUtils.assetTypes.CONTRACT) { // 合约交易
+        isValid = await validateContractTransaction(transaction, validationContext);
+      } else {
+        isValid = await validateTransaction(transaction, validationContext);
+      }
+    } catch (validationErr) {
+      // 记录详细的错误信息
+      this.logger.error(`Transaction validation error: ${validationErr.message}`, {
+        transaction: transaction.id,
+        type: transaction.type,
+        error: validationErr.stack
+      });
+
+      // 返回JSON格式的错误信息
+      return jsonResponse(false, null, `Transaction validation failed: ${validationErr.message}`);
+    }
+
+    // 如果验证失败，返回错误
+    if (!isValid) {
+      this._invalidTrsCache.set(transaction.id, true);
+      this.logger.warn(`Invalid transaction rejected: ${transaction.id}`);
+      return jsonResponse(false, null, 'Transaction validation failed');
+    }
+
+    // 处理交易
+    try {
+      // 检查交易是否已经在未确认交易池中
+      if (await this.runtime.transaction.hasUnconfirmedTransaction(transaction)) {
+        return jsonResponse(false, null, `The transaction ${transaction.id} is in process already..`);
+      }
+
+      // 接收交易，不跳过验证
+      const transactions = await this.runtime.transaction.receiveTransactions([transaction]);
+
+      if (transactions && transactions.length > 0) {
+        // 记录交易处理成功
+        this.logger.info(`Transaction accepted: ${transaction.id}, type: ${transaction.type}`);
+        return jsonResponse(true, { transactionId: transactions[0].id });
+      } else {
+        // 交易被接受但未返回有效交易列表
+        this.logger.warn(`Transaction ${transaction.id} was processed but not returned as valid`);
+
+        // 获取发送者账户
+        let sender;
+        try {
+          sender = await this.runtime.account.getAccountByPublicKey(transaction.senderPublicKey);
+        } catch (err) {
+          // 如果无法获取发送者账户，使用一般性错误消息
+          return jsonResponse(false, null, 'Transaction validation failed: Unable to verify sender account');
+        }
+
+        // 检查常见的验证错误
+        let errorMessage = 'Transaction validation failed';
+
+        // 检查发送者ID
+        if (transaction.senderId && sender && transaction.senderId !== sender.address) {
+          errorMessage = `Transaction validation failed: Invalid sender ID (expected ${sender.address}, got ${transaction.senderId})`;
+        }
+
+        // 检查余额
+        const amount = bignum.plus(transaction.amount, transaction.fee);
+        if (sender && bignum.isLessThan(sender.balance, amount)) {
+          errorMessage = `Transaction validation failed: Insufficient balance (${sender.balance} < ${amount})`;
+        }
+
+        return jsonResponse(false, null, errorMessage);
+      }
+    } catch (processErr) {
+      // 记录错误并缓存无效交易
+      this._invalidTrsCache.set(transaction.id, true);
+      this.logger.debug(`Transaction error details: ${JSON.stringify(processErr, Object.getOwnPropertyNames(processErr))}`);
+      const errorMessage = getErrorMsg(processErr);
+      this.logger.warn(`Receive invalid transaction, transaction is ${JSON.stringify(transaction)}, error: ${errorMessage}`);
+      return jsonResponse(false, null, errorMessage);
+    }
+
+  }
+
+  async get(req) {
     const query = Object.assign({}, req.body, req.query)
     // query.offset = Number(query.offset || 0)
     // query.limit = Number(query.limit || 100)
@@ -234,7 +445,7 @@ class TransactionService {
     }
   }
 
-  async getGet (req) {
+  async getGet(req) {
     const query = Object.assign({}, req.body, req.query)
     const validateErrors = await this.ddnSchema.validate(
       {
@@ -281,7 +492,7 @@ class TransactionService {
     }
   }
 
-  async put (req) {
+  async put(req) {
     const body = req.body
     const validateErrors = await this.ddnSchema.validate(
       {
@@ -409,6 +620,21 @@ class TransactionService {
               second_keypair,
               message: body.message
             })
+
+            // 创建验证上下文
+            const validationContext = {
+              runtime: this.runtime,
+              logger: this.logger,
+              dao: this.dao,
+              constants: this.constants
+            }
+
+            // 验证交易
+            const isValid = await validateTransaction(transaction, validationContext)
+            if (!isValid) {
+              throw new Error('Transaction validation failed')
+            }
+
             if (
               global.assets &&
               global.assets.transTypeNames[90] &&
@@ -416,7 +642,7 @@ class TransactionService {
             ) {
               await checkAndReport(transaction, this, this.constants.net.superviseBaseUrl)
             }
-            return await this.runtime.transaction.receiveTransactions([transaction])
+            return await this.runtime.transaction.receiveTransactions([transaction], true)
           } catch (err) {
             throw err
           }
@@ -452,6 +678,21 @@ class TransactionService {
               second_keypair,
               message: body.message
             })
+
+            // 创建验证上下文
+            const validationContext = {
+              runtime: this.runtime,
+              logger: this.logger,
+              dao: this.dao,
+              constants: this.constants
+            }
+
+            // 验证交易
+            const isValid = await validateTransaction(transaction, validationContext)
+            if (!isValid) {
+              throw new Error('Transaction validation failed')
+            }
+
             if (
               global.assets &&
               global.assets.transTypeNames[90] &&
@@ -459,7 +700,7 @@ class TransactionService {
             ) {
               await checkAndReport(transaction, this, this.constants.net.superviseBaseUrl)
             }
-            return await this.runtime.transaction.receiveTransactions([transaction])
+            return await this.runtime.transaction.receiveTransactions([transaction], true)
           } catch (err) {
             throw err
           }
@@ -475,95 +716,6 @@ class TransactionService {
     }
   }
 
-  async post ({ body }) {
-    const lastBlock = await this.runtime.block.getLastBlock()
-    const lastSlot = this.runtime.slot.getSlotNumber(lastBlock.timestamp)
-
-    if (this.runtime.slot.getNextSlot() - lastSlot >= 12) {
-      this.logger.error('Blockchain is not ready', {
-        getNextSlot: this.runtime.slot.getNextSlot(),
-        lastSlot,
-        lastBlockHeight: lastBlock.height
-      })
-      return {
-        success: false,
-        error: 'Blockchain is not ready'
-      }
-    }
-
-    // 如果传入的是字符串形式的交易数据
-    if (typeof body === 'string') {
-      body = JSON.parse(body)
-    }
-
-    // 如果传入的是直接的交易对象，将其包装在 transaction 字段中
-    if (!body.transaction && (body.type !== undefined || body.amount !== undefined)) {
-      body = { transaction: body }
-    }
-
-    if (typeof body.transaction === 'string') {
-      body.transaction = this.protobuf.decodeTransaction(Buffer.from(body.transaction, 'base64'))
-    }
-
-    let transaction
-    try {
-      transaction = await this.runtime.transaction.objectNormalize(body.transaction)
-      transaction.asset = transaction.asset || {}
-    } catch (e) {
-      this.logger.error('transaction parse error', {
-        raw: JSON.stringify(body),
-        trs: transaction,
-        error: e.message
-      })
-
-      return {
-        success: false,
-        error: e.message
-      }
-    }
-    if (!transaction.id) {
-      transaction.id = await DdnCrypto.getId(transaction)
-    }
-
-    // 对缓存的非法交易直接返回
-    if (this._invalidTrsCache.has(transaction.id)) {
-      this.logger.debug(`The transaction ${transaction.id} is invalid, don't commit it again.`)
-      return {
-        success: false,
-        error: `The transaction ${transaction.id} is invalid, don't commit it again.`
-      }
-    }
-
-    let result = {
-      success: true
-    }
-
-    try {
-      if (await this.runtime.transaction.hasUnconfirmedTransaction(transaction)) {
-        throw new Error(`The transaction ${transaction.id} is in process already..`)
-      }
-
-      const transactions = await this.runtime.transaction.receiveTransactions([transaction])
-      if (transactions && transactions.length > 0) {
-        result.transactionId = transactions[0].id
-      }
-    } catch (err) {
-      this._invalidTrsCache.set(transaction.id, true)
-      this.logger.debug(`Transaction error details: ${JSON.stringify(err, Object.getOwnPropertyNames(err))}`)
-      const errorMessage = getErrorMsg(err)
-      this.logger.warn(`Receive invalid transaction, transaction is ${JSON.stringify(transaction)}, error: ${errorMessage}`)
-      result = {
-        success: false,
-        error: errorMessage
-      }
-    }
-
-    this.logger.debug(`Post transaction, transaction is ${JSON.stringify(transaction)}`)
-    this.logger.debug(`Post transaction, result is ${JSON.stringify(result)}`)
-
-    return result
-  }
-
   /**
    * 功能:得到一定时间段内的每天的交易量
    * 参数:
@@ -571,7 +723,7 @@ class TransactionService {
    *      endTime:2019-6-4;默认为当前时间
    * 返回值:{ "success": true,"data": [{ "time": "2019-6-4", "count": 0 }]}
    */
-  async getSpell (req) {
+  async getSpell(req) {
     const query = req.query
     // 将时间换算成对应格式
     const formatDate = date => {

@@ -26,7 +26,7 @@ describe('Test second passphrase', () => {
   describe('Enabling second passphrase', () => {
     it('When accounts has no funds. Should fail', async done => {
       const transaction = await DdnJS.signature.createSignature(node.randomPassword(), node.randomPassword())
-      node.peer
+      node.api
         .post('/transactions')
         .set('Accept', 'application/json')
         .set('version', node.version)
@@ -83,7 +83,7 @@ describe('Test second passphrase', () => {
                 const transaction = await DdnJS.signature.createSignature(account.password, account.secondPassword)
                 debug('has funds ok', transaction)
 
-                node.peer
+                node.api
                   .post('/transactions')
                   .set('Accept', 'application/json')
                   .set('version', node.version)
@@ -132,7 +132,7 @@ describe('Test second passphrase', () => {
 
     it("When account doesn't have a second passphrase. Should fail", async done => {
       const transaction = await createTransfer(node.Eaccount.address, 1, node.Gaccount.password, account.secondPassword)
-      node.peer
+      node.api
         .post('/transactions')
         .set('Accept', 'application/json')
         .set('version', node.version)
@@ -154,7 +154,7 @@ describe('Test second passphrase', () => {
     it('Using blank second signature. Should fail', async done => {
       const transaction = await createTransfer(node.Eaccount.address, 1, account.password, '')
 
-      node.peer
+      node.api
         .post('/transactions')
         .set('Accept', 'application/json')
         .set('version', node.version)
@@ -177,7 +177,7 @@ describe('Test second passphrase', () => {
       const transaction = await createTransfer(node.Eaccount.address, 1, account.password, account2.secondPassword)
       transaction.sign_signature = crypto.randomBytes(64).toString('hex')
       transaction.id = await DdnJS.crypto.getId(transaction)
-      node.peer
+      node.api
         .post('/transactions')
         .set('Accept', 'application/json')
         .set('version', node.version)
@@ -198,7 +198,7 @@ describe('Test second passphrase', () => {
 
     it('Using valid second signature. Should be ok', async done => {
       const transaction = await createTransfer(node.Eaccount.address, 1, account.password, account.secondPassword)
-      node.peer
+      node.api
         .post('/transactions')
         .set('Accept', 'application/json')
         .set('version', node.version)

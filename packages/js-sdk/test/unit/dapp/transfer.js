@@ -286,7 +286,7 @@ export const Transfer = () => {
 
     it(`should be ok to transfer ${DAPP_CURRENCY} from app to account`, async done => {
       const transaction = await createTransfer(delegateAccounts[0].address, '50000000', node.Gaccount.password)
-      node.peer
+      node.api
         .post('/transactions')
         .set('Accept', 'application/json')
         .set('version', node.version)

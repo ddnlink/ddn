@@ -27,18 +27,24 @@ class DBUpgrade {
         .filter(ver => ver > (currVersion || 0))
       for (const ver of versionList) {
         const changeList = migrations[ver]
-        await _context.dao.transaction(async dbTrans => {
-          for (const command of changeList) {
-            if (!/^\s*$/.test(command)) {
-              await _context.dao.execSql(command, { transaction: dbTrans })
+        try {
+          await _context.dao.transaction(async dbTrans => {
+            for (const command of changeList) {
+              if (!/^\s*$/.test(command)) {
+                await _context.dao.execSql(command, { transaction: dbTrans })
+              }
             }
-          }
-          await _context.dbParams.set('version', ver, dbTrans)
-        })
+            await _context.dbParams.set('version', ver, dbTrans)
+          })
+          _context.logger.info(`数据库升级到版本 ${ver} 成功`)
+        } catch (transErr) {
+          _context.logger.error(`数据库升级到版本 ${ver} 失败: ${transErr.message || transErr}`)
+          throw transErr // 重新抛出错误，中断升级过程
+        }
       }
       return true
     } catch (err) {
-      _context.logger.error(err)
+      _context.logger.error(`数据库升级过程中发生错误: ${err.message || err}`)
       return false
     }
   }

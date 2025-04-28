@@ -273,7 +273,7 @@ export class BlockSync {
             this.logger.warn(`Received block with lower height (${block.height}) than current (${lastBlock.height}). Attempting to find common block and rollback.`)
 
             // 使用专门的方法处理回滚逻辑
-            const shouldContinue = await this._handlePotentialRollback(block, lastBlock, j);
+            const shouldContinue = this._handlePotentialRollback(block, lastBlock, j);
             if (shouldContinue) {
               continue;
             }
@@ -284,7 +284,7 @@ export class BlockSync {
           }
 
           return null
-        }
+          }
 
         // 已移动到上面并修改
 
@@ -578,6 +578,12 @@ export class BlockSync {
 
       // 获取当前区块信息
       const lastBlock = this.runtime.block.getLastBlock()
+      if (!lastBlock) {
+        this.logger.error('Failed to get last block, cannot proceed with sync')
+        next(30) // 延长重试间隔
+        return
+      }
+
       const currentHeight = lastBlock.height
 
       // 获取远程节点高度
@@ -610,11 +616,19 @@ export class BlockSync {
 
         try {
           // 执行实际的同步操作
+          let syncResult = false;
           if (this._recoveryMode) {
-            await this._performRecoverySync(peer, lastBlock);
+            syncResult = this._performRecoverySync(peer, lastBlock);
           } else {
             // 正常模式下执行同步
-            await this._performNormalSync(peer);
+            syncResult = this._performNormalSync(peer);
+          }
+
+          if (syncResult) {
+            this.logger.info('Sync operation completed successfully');
+            this._syncFailCount = 0; // 重置失败计数
+          } else {
+            this.logger.debug('Sync operation did not result in new blocks');
           }
         } finally {
           // 恢复锻造过程
@@ -646,9 +660,10 @@ export class BlockSync {
    * 从program.js移动过来的方法
    * @param {Object} peer 目标节点
    * @param {Object} lastBlock 当前最新区块
+   * @returns {Boolean} 是否成功执行了同步操作
    */
   async _performRecoverySync(peer, lastBlock) {
-    this.logger.info(`Syncing in recovery mode (attempt ${this._recoveryAttempts + 1}/${this._maxRecoveryAttempts})`);
+    this.logger.info(`Syncing in recovery mode (attempt ${this._recoveryAttempts + 1}/${this._maxRecoveryAttempts || 5})`);
 
     try {
       // 清理缓存和未确认交易
@@ -677,6 +692,11 @@ export class BlockSync {
       if (syncLastBlock) {
         // 同步成功
         const newLastBlock = this.runtime.block.getLastBlock();
+        if (!newLastBlock) {
+          this.logger.error('Failed to get new last block after sync');
+          return false;
+        }
+
         this.logger.info(`Recovery successful: Block height changed from ${lastBlock.height} to ${newLastBlock.height}`);
 
         // 如果高度增加，退出恢复模式
@@ -694,19 +714,22 @@ export class BlockSync {
               this.logger.error(`Failed to transition to Ready state: ${err.message}`);
             }
           }
+
+          return true; // 返回true表示同步成功
         } else {
           // 高度没有增加，增加恢复尝试次数
           this._recoveryAttempts++;
-          this.logger.warn(`Recovery did not increase block height, attempt ${this._recoveryAttempts}/${this._maxRecoveryAttempts}`);
+          this.logger.warn(`Recovery did not increase block height, attempt ${this._recoveryAttempts}/${this._maxRecoveryAttempts || 5}`);
+          return false; // 返回false表示同步未成功
         }
       } else {
         // 同步失败
         this._recoveryAttempts++;
-        this.logger.warn(`Recovery sync failed, attempt ${this._recoveryAttempts}/${this._maxRecoveryAttempts}`);
+        this.logger.warn(`Recovery sync failed, attempt ${this._recoveryAttempts}/${this._maxRecoveryAttempts || 5}`);
 
         // 如果达到最大尝试次数，尝试更激进的恢复策略
-        if (this._recoveryAttempts >= this._maxRecoveryAttempts) {
-          this.logger.error(`Recovery failed after ${this._maxRecoveryAttempts} attempts, attempting more aggressive recovery`);
+        if (this._recoveryAttempts >= (this._maxRecoveryAttempts || 5)) {
+          this.logger.error(`Recovery failed after ${this._recoveryAttempts} attempts, attempting more aggressive recovery`);
 
           // 尝试清理数据库和状态
           try {
@@ -718,6 +741,7 @@ export class BlockSync {
 
             this._recoveryAttempts = 0; // 重置尝试次数，给清理后的数据库一次机会
             this.logger.info(`Aggressive recovery completed, will retry recovery`);
+            return false; // 返回false表示本次同步未成功
           } catch (cleanupErr) {
             this.logger.error(`Aggressive recovery failed: ${cleanupErr.message}`);
             this._recoveryMode = false;
@@ -732,8 +756,11 @@ export class BlockSync {
                 this.logger.error(`Failed to transition to Ready state: ${err.message}`);
               }
             }
+            return false; // 返回false表示同步未成功
           }
         }
+
+        return false; // 返回false表示同步未成功
       }
     } catch (err) {
       // 处理特定类型的错误
@@ -756,7 +783,7 @@ export class BlockSync {
 
             // 减少恢复尝试次数，给清理后的数据库一次机会
             this._recoveryAttempts = Math.max(0, this._recoveryAttempts - 1);
-            return; // 直接返回，下次循环会重试
+            return false; // 返回false表示本次同步未成功
           }
         } catch (cleanupErr) {
           this.logger.error(`Targeted block cleanup failed: ${cleanupErr.message}`);
@@ -767,8 +794,8 @@ export class BlockSync {
       this._recoveryAttempts++;
 
       // 如果达到最大尝试次数，退出恢复模式
-      if (this._recoveryAttempts >= this._maxRecoveryAttempts) {
-        this.logger.error(`Recovery failed after ${this._maxRecoveryAttempts} attempts due to errors, exiting recovery mode`);
+      if (this._recoveryAttempts >= (this._maxRecoveryAttempts || 5)) {
+        this.logger.error(`Recovery failed after ${this._recoveryAttempts} attempts due to errors, exiting recovery mode`);
         this._recoveryMode = false;
         this._recoveryAttempts = 0;
 
@@ -785,6 +812,8 @@ export class BlockSync {
           }
         }
       }
+
+      return false; // 返回false表示同步未成功
     }
   }
 
@@ -882,9 +911,11 @@ export class BlockSync {
       if (err.message && err.message.includes('Block already exists')) {
         this.logger.warn(`Sync encountered 'Block already exists' error, may need database cleanup`);
         // 可以考虑添加数据库一致性检查
+        return false; // 返回false表示同步操作未成功完成
       } else if (err.message && err.message.includes('Buffers length is not right')) {
         this.logger.warn(`Sync encountered network buffer error, will retry with different peer`);
         // 可以考虑标记当前节点为不可靠，下次选择不同节点
+        return false; // 返回false表示同步操作未成功完成
       }
 
       throw err; // 重新抛出错误，让外层处理

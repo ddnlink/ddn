@@ -81,7 +81,7 @@ describe('POST /peer/transactions', () => {
         const transaction = await DdnJS.vote.createVote(votes, voterAccount.password)
         // debug('createVote transaction', transaction);
         if (transaction !== null) {
-          node.peer.post('/transactions')
+          node.api.post('/transactions')
             .set('Accept', 'application/json')
             .set('version', node.version)
             .set('nethash', node.constants.nethash)
@@ -108,7 +108,7 @@ describe('POST /peer/transactions', () => {
       node.expect(err).to.be.not.ok
 
       const transaction = await DdnJS.vote.createVote([`+${delegate1_pubKey}`], voterAccount.password)
-      node.peer.post('/transactions')
+      node.api.post('/transactions')
         .set('Accept', 'application/json')
         .set('version', node.version)
         .set('nethash', node.constants.nethash)
@@ -132,7 +132,7 @@ describe('POST /peer/transactions', () => {
     await node.onNewBlockAsync()
 
     const transaction = await DdnJS.vote.createVote([`-${delegate1_pubKey}`], voterAccount.password)
-    node.peer.post('/transactions')
+    node.api.post('/transactions')
       .set('Accept', 'application/json')
       .set('version', node.version)
       .set('nethash', node.constants.nethash)
@@ -157,7 +157,7 @@ describe('POST /peer/transactions', () => {
 
       const transaction = await DdnJS.vote.createVote([`-${delegate2_pubKey}`], voterAccount.password)
       debug('Removing votes, ok', JSON.stringify(transaction))
-      node.peer.post('/transactions')
+      node.api.post('/transactions')
         .set('Accept', 'application/json')
         .set('version', node.version)
         .set('nethash', node.constants.nethash)
@@ -173,7 +173,7 @@ describe('POST /peer/transactions', () => {
           debug('Sent POST /transactions with data:' + JSON.stringify(transaction) + '! Got reply:' + JSON.stringify(body))
           node.expect(body).to.have.property('success').to.be.true
           const transaction2 = await DdnJS.vote.createVote([`+${delegate2_pubKey}`], voterAccount.password)
-          node.peer.post('/transactions')
+          node.api.post('/transactions')
             .set('Accept', 'application/json')
             .set('version', node.version)
             .set('nethash', node.constants.nethash)
@@ -199,7 +199,7 @@ describe('POST /peer/transactions', () => {
     const transaction = await DdnJS.vote.createVote([`+${account.publicKey}`], account.password)
     node.onNewBlock(err => {
       node.expect(err).to.be.not.ok
-      node.peer.post('/transactions')
+      node.api.post('/transactions')
         .set('Accept', 'application/json')
         .set('version', node.version)
         .set('nethash', node.constants.nethash)
@@ -263,7 +263,7 @@ describe('POST /peer/transactions', () => {
               node.expect(err).to.be.not.ok
               account.username = node.randomDelegateName().toLowerCase()
               const transaction = await DdnJS.delegate.createDelegate(account.username, account.password)
-              node.peer.post('/transactions')
+              node.api.post('/transactions')
                 .set('Accept', 'application/json')
                 .set('version', node.version)
                 .set('nethash', node.constants.nethash)
@@ -288,7 +288,7 @@ describe('POST /peer/transactions', () => {
     const transaction = await DdnJS.vote.createVote([`+${delegate2_pubKey}`], account.password)
     node.onNewBlock(err => {
       node.expect(err).to.be.not.ok
-      node.peer.post('/transactions')
+      node.api.post('/transactions')
         .set('Accept', 'application/json')
         .set('version', node.version)
         .set('nethash', node.constants.nethash)

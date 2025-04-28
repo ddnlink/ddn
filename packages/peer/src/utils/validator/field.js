@@ -7,7 +7,7 @@
  * @param {*} thisArg Value used as this reference within rule callback calls.
  * @constructor
  */
-class Field {
+export class Field {
   constructor (validator, path, value, rules, thisArg) {
     this.isAsync = false
     this.hasError = false
@@ -74,15 +74,15 @@ class Field {
           accept = accept.call(thisArg, value)
         }
 
-        if (descriptor.accept) {
+        if (descriptor.accept && typeof descriptor.accept === 'function') {
           accept = descriptor.accept.call(thisArg, accept, value, this)
         }
 
-        if (descriptor.filter) {
+        if (descriptor.filter && typeof descriptor.filter === 'function') {
           value = this.value = descriptor.filter.call(thisArg, accept, value, this)
         }
 
-        if (descriptor.validate) {
+        if (descriptor.validate && typeof descriptor.validate === 'function') {
           result = descriptor.validate.call(thisArg, accept, value, this)
         }
 
@@ -132,7 +132,7 @@ class Field {
       this.validator.onValid(this)
     }
 
-    if (this.hasCallback) {
+    if (this.hasCallback && typeof this.callback === 'function') {
       this.callback(err, this.report, this.value)
       this.callback = null
     }
@@ -145,6 +145,12 @@ class Field {
   async (callback) {
     this.isAsync = true
     const self = this
+
+    if (typeof callback !== 'function') {
+      this.isAsync = false
+      return;
+    }
+
     callback(function (err) {
       if (arguments.length > 1) {
         self.value = arguments[1]
@@ -177,5 +183,3 @@ class Field {
     this.report.push(report)
   }
 }
-
-export default Field

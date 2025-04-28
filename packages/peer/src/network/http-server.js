@@ -96,7 +96,19 @@ class HttpServer {
     )
     this._app.use(
       bodyParser.json({
-        limit: this.config.payloadLimitSize
+        limit: this.config.payloadLimitSize,
+        // 添加错误处理
+        verify: (req, res, buf, encoding) => {
+          try {
+            JSON.parse(buf);
+          } catch (e) {
+            res.status(200).json({
+              success: false,
+              error: 'Invalid JSON: ' + e.message
+            });
+            throw new Error('Invalid JSON: ' + e.message);
+          }
+        }
       })
     )
     this._app.use(methodOverride())
@@ -114,6 +126,7 @@ class HttpServer {
    */
   _add404ErrorHandleMiddleware () {
     this._app.all('*', (req, res) => {
+      res.set('Content-Type', 'application/json')
       res.json({
         success: false,
         error: '404 error',
@@ -127,14 +140,63 @@ class HttpServer {
    * 拦截全部使用 next(err) 的错误信息。
    */
   _addErrorHandleMiddleware () {
+    // 捕获JSON解析错误
     this._app.use((err, req, res, next) => {
-      res.status(200)
+      if (err instanceof SyntaxError && err.status === 400 && 'body' in err) {
+        this.logger.error(`JSON Parse Error: ${err.message}`, {
+          path: req.path,
+          method: req.method,
+          error: err.stack
+        });
+
+        // 确保状态码为200（DDN约定）
+        res.status(200);
+
+        // 确保Content-Type为application/json
+        res.set('Content-Type', 'application/json');
+
+        return res.json({
+          success: false,
+          error: 'Invalid JSON format'
+        });
+      }
+      next(err);
+    });
+
+    // 添加一个通用的错误处理中间件，捕获所有错误
+    this._app.use((err, req, res, next) => {
+      this.logger.error(`API Error: ${err.message}`, {
+        path: req.path,
+        method: req.method,
+        error: err.stack
+      });
+
+      // 确保状态码为200（DDN约定）
+      res.status(200);
+
+      // 确保Content-Type为application/json
+      res.set('Content-Type', 'application/json');
+
+      // 返回JSON格式的错误信息
       res.json({
         success: false,
-        error: err.message,
-        raw: err
-      })
-    })
+        error: err.message || 'Internal server error'
+      });
+    });
+  }
+
+  /**
+   * 添加404错误处理中间件
+   * 必须在所有路由之后添加
+   */
+  _add404ErrorHandleMiddleware () {
+    // 添加404处理中间件
+    this._app.use((req, res, next) => {
+      res.status(200).json({
+        success: false,
+        error: `API endpoint not found: ${req.method} ${req.path}`
+      });
+    });
   }
 
   /**
@@ -189,6 +251,9 @@ class HttpServer {
     }
 
     this._app.use(({ url }, res, next) => {
+      // 为所有响应设置Content-Type为application/json
+      res.set('Content-Type', 'application/json');
+
       const parts = url.split('/')
       if (parts.length > 1) {
         if (parts[1] === 'peer') {
@@ -225,6 +290,7 @@ class HttpServer {
 
       // nethash验证
       if (headers.nethash && headers.nethash !== this.constants.nethash) {
+        res.set('Content-Type', 'application/json')
         return res.json({
           success: false,
           error: 'Invalid nethash',
@@ -378,17 +444,44 @@ class HttpServer {
       }
 
       if (method) {
-        router[method](`/${subPath}`, async (req, res) => {
+        router[method](`/${subPath}`, async (req, res, next) => {
           try {
+            // 记录请求信息
+            this.logger.debug(`Processing ${method.toUpperCase()} request to /${subPath}`, {
+              path: req.path,
+              method: req.method,
+              body: req.body
+            });
+
             const result = await inst[name](req)
-            res.json(result)
+
+            // 确保设置正确的Content-Type
+            res.set('Content-Type', 'application/json');
+
+            // 记录成功响应
+            this.logger.debug(`Successful response for ${method.toUpperCase()} /${subPath}`);
+
+            // 返回JSON格式的响应
+            return res.json(result);
           } catch (err) {
-            res.json({
+            // 记录错误信息
+            this.logger.error(`Error processing ${method.toUpperCase()} request to /${subPath}: ${err.message}`, {
+              path: req.path,
+              method: req.method,
+              body: req.body,
+              error: err.stack
+            });
+
+            // 确保设置正确的Content-Type
+            res.set('Content-Type', 'application/json');
+
+            // 返回JSON格式的错误信息
+            return res.json({
               success: false,
               error: err.message || err.toString()
-            })
+            });
           }
-        })
+        });
       }
     }
   }

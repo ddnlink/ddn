@@ -448,10 +448,11 @@ class DAO {
       }
     }
 
-    const t = await sequelizeInst.transaction(logOptions)
+    const dbTrans = await sequelizeInst.transaction(logOptions)
     try {
-      await func(t)
-      await t.commit()
+      // 执行事务函数并获取结果
+      const result = await func(dbTrans)
+      await dbTrans.commit()
 
       // 从活跃事务集合中移除
       if (global.DDN && global.DDN.runtime && global.DDN.runtime.activeTransactions) {
@@ -462,20 +463,22 @@ class DAO {
         }
       }
 
-      return
+      // 返回事务函数的结果
+      return result
     } catch (err) {
-      await t.rollback()
+      await dbTrans.rollback()
 
       // 从活跃事务集合中移除
       if (global.DDN && global.DDN.runtime && global.DDN.runtime.activeTransactions) {
         global.DDN.runtime.activeTransactions.delete(transactionId)
 
         if (global.DDN.logger) {
-          global.DDN.logger.debug(`事务回滚: ${transactionId}, 剩余活跃事务: ${global.DDN.runtime.activeTransactions.size}`)
+          global.DDN.logger.debug(`事务回滚: ${transactionId}, 剩余活跃事务: ${global.DDN.runtime.activeTransactions.size}, 错误: ${err.message || err}`)
         }
       }
 
-      return 'rollback success err: ' + err
+      // 抛出异常而不是返回错误信息
+      throw err
     }
   }
 

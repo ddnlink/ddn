@@ -1,20 +1,15 @@
 // Dependencies
-import utils from './utils.js'
+import { extend } from './utils'
 
 // Implementation
-import Field from './field.js'
-
-const extend = utils.extend
-
-export default Validator
-export { Field }
+import { Field } from './field'
 
 /**
  * Create validator. Options could have properties `forceAsync`, `skipMissed` and `rules`.
  * @param {object} options
  * @constructor
  */
-class Validator {
+export class Validator {
   constructor (options = {}) {
     this.hasError = false
 
@@ -61,7 +56,14 @@ class Validator {
   validate (value, rules, callback) {
     const self = this
 
-    const field = this.createField(null, value, rules)
+    // 处理第三个参数可能是上下文对象的情况
+    let thisArg = null;
+    if (callback && typeof callback !== 'function') {
+      thisArg = callback;
+      callback = null;
+    }
+
+    const field = this.createField(null, value, rules, thisArg)
     let async
     let finished
 
@@ -91,7 +93,12 @@ class Validator {
         return
       }
 
-      if (async || !callback || !self.forceAsync) {
+      if (typeof callback !== 'function') {
+        self.onEnd();
+        return;
+      }
+
+      if (async || !self.forceAsync) {
         self.onEnd()
         callback.call(self, err, report, output)
       } else {

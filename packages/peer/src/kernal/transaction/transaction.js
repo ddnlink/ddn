@@ -1,13 +1,14 @@
+
 /**
  * 交易核心方法和处理逻辑
  * wangxm   2018-12-28
  */
 import extend from 'util-extend'
 import { bignum, assetTypes } from '@ddn/utils'
-import { System } from '../../utils/system'
 import * as DdnCrypto from '@ddn/crypto'
 import { getId } from '@ddn/crypto'
 import Assets from '../../assets'
+import { validateTransaction, validateContractTransaction } from '../../utils/validator'
 
 /**
  * 处理错误对象，确保能够提取有用的错误信息
@@ -120,7 +121,7 @@ export class Transaction {
 
   async objectNormalize (trs) {
     if (!this._assets.hasType(trs.type)) {
-      throw Error(`Unknown transaction type 2 ${trs.type}`)
+      throw Error(`Unknown transaction type ${trs.type}`)
     }
 
     for (const p in trs) {
@@ -149,6 +150,7 @@ export class Transaction {
       throw Error(`Unknown transaction type 3 : ${trs.type}`)
     }
 
+    // 准备交易数据
     const newTrans = {
       id: trs.id,
       block_id: trs.block_id,
@@ -169,7 +171,7 @@ export class Transaction {
     }
 
     const result = await this.dao.insert('tr', newTrans, { transaction: dbTrans })
-    try {
+      try {
       await this._assets.call(trs.type, 'dbSave', trs, dbTrans)
     } catch (e) {
       this.logger.debug(`insert tr error trsId: ${newTrans.id}`)
@@ -502,55 +504,25 @@ export class Transaction {
 
   async process (trs, sender) {
     if (!this._assets.hasType(trs.type)) {
-      throw new Error(`Unknown transaction type 10 ${trs.type}`)
+      throw new Error(`Unknown transaction type ${trs.type}`)
     }
-    // TODO creazy 验证交易id时，程序会在交易体中添加下面几个字段，所以要去掉，保持和sdk生成交易体时有同样的数据
+    
+    // 1. 验证交易ID
     const transaction = this.deepCloneTransaction(trs)
-
-    // sdk生成交易体加密时没有senderId字段，验证时去掉
     if (transaction.senderId) {
       delete transaction.senderId
     }
-
+    
     const txId = await getId(transaction)
-
-    // 确保客户端传入id，这里仅做验证
     if (typeof trs.id === 'undefined' || trs.id !== txId) {
-      this.logger.debug('trs.id', trs.id)
-      this.logger.debug('txId', txId)
       throw new Error('Incorrect transaction id')
     }
-
+    
     if (!sender) {
       throw new Error('Invalid sender')
     }
-
-    // Verify that requester in multisignature
-    if (trs.requester_public_key) {
-      // wxm block database
-      if (!sender.multisignatures.includes(trs.requester_public_key)) {
-        // wxm block database
-        throw new Error('Failed to verify requester`s signature in multisignatures')
-      }
-
-      if (!(await this.verifySignature(trs, trs.signature, trs.requester_public_key))) {
-        // wxm block database
-        throw new Error('Failed to verify requester`s signature')
-      }
-    } else {
-      if (!(await this.verifySignature(trs, trs.signature, trs.senderPublicKey))) {
-        // wxm block database
-        throw new Error('Failed to verify senderPublicKey signature here.')
-      }
-    }
-    trs.senderId = sender.address // wxm block database
-
-    try {
-      trs = await this._assets.call(trs.type, 'process', trs, sender)
-    } catch (err) {
-      throw new Error(`Asset process failed: ${getErrorMsg(err)}`)
-    }
-
+ 
+    // 2. 检查交易是否已存在
     try {
       const count = await this.dao.count('tr', { where: { id: trs.id } })
       if (count) {
@@ -560,7 +532,14 @@ export class Transaction {
       this.logger.error('Database error', err)
       throw new Error('Database error')
     }
-
+ 
+    // 3. 调用资产特定的处理方法
+    try {
+      trs = await this._assets.call(trs.type, 'process', trs, sender)
+    } catch (err) {
+      throw new Error(`Asset process failed: ${getErrorMsg(err)}`)
+    }
+    
     return trs
   }
 
@@ -568,18 +547,23 @@ export class Transaction {
     if (!transaction) {
       throw new Error('No transaction to process!')
     }
+    
+    // 1. 确保交易有ID
     if (!transaction.id) {
-      try {
-        transaction.id = await getId(transaction)
-      } catch (err) {
+      // fixme: 这里大概率已经有交易ID了，不然这里生成的也不一定对（要保证所有必要字段都经过加密计算）
+      // try {
+      //   transaction.id = await getId(transaction)
+      // } catch (err) {
         throw new Error(`Failed to get transaction ID: ${getErrorMsg(err)}`)
-      }
+      // }
     }
-    // Check transaction indexes
+    
+    // 2. 检查交易是否已在未确认交易列表中
     if (this._unconfirmedTransactionsIdIndex[transaction.id] !== undefined) {
       throw new Error(`Transaction ${transaction.id} already exists, ignoring...`)
     }
-
+    
+    // 3. 获取发送者账户
     try {
       await this.runtime.account.setAccount({
         publicKey: transaction.senderPublicKey
@@ -587,13 +571,16 @@ export class Transaction {
     } catch (err) {
       throw new Error(`Failed to set account: ${getErrorMsg(err)}`)
     }
-
+    
     let sender
     try {
       sender = await this.runtime.account.getAccountByPublicKey(transaction.senderPublicKey, dbTrans)
     } catch (err) {
       throw new Error(`Failed to get sender account: ${getErrorMsg(err)}`)
     }
+
+    // 设置 senderId
+    transaction.senderId = sender.address;
 
     let requester
     if (transaction.requester_public_key && sender && sender.multisignatures && sender.multisignatures.length) {
@@ -637,17 +624,96 @@ export class Transaction {
     }
   }
 
-  async receiveTransactions (transactions) {
+  async receiveTransactions (transactions, skipValidation = false) {
     if (this._unconfirmedNumber > this.constants.maxTxsPerBlock) {
       throw new Error('Too many transactions')
     }
 
+    const validTransactions = [];
+    const rejectedTransactions = [];
+
     for (let i = 0; i < transactions.length; i++) {
-      const transaction = transactions[i]
-      await this.processUnconfirmedTransaction(transaction, true)
+      const transaction = transactions[i];
+
+      // 确保交易有ID
+      if (!transaction.id) {
+        try {
+          transaction.id = await getId(transaction);
+        } catch (err) {
+          this.logger.error(`Failed to generate transaction ID: ${getErrorMsg(err)}`);
+          rejectedTransactions.push({
+            transaction: transaction,
+            reason: `Failed to generate transaction ID: ${getErrorMsg(err)}`
+          });
+          continue;
+        }
+      }
+
+      try {
+        // 判断是否需要跳过验证
+        let isValid = skipValidation;
+
+        // 如果需要验证，则进行验证
+        if (!skipValidation) {
+          // 创建验证上下文
+          const context = {
+            runtime: this.runtime,
+            logger: this.logger,
+            dao: this.dao,
+            constants: this.constants
+          };
+
+          // 根据交易类型选择不同的验证方法
+          if (transaction.type === assetTypes.CONTRACT) { // 合约交易
+            isValid = await validateContractTransaction(transaction, context);
+          } else {
+            isValid = await validateTransaction(transaction, context);
+          }
+        }
+
+        if (isValid) {
+          try {
+            // 处理有效交易
+            await this.processUnconfirmedTransaction(transaction, true);
+            validTransactions.push(transaction);
+          } catch (processErr) {
+            this.logger.error(`Failed to process valid transaction: ${transaction.id}`, {
+              error: processErr.stack,
+              transaction: transaction
+            });
+            rejectedTransactions.push({
+              transaction: transaction,
+              reason: `Processing error: ${getErrorMsg(processErr)}`
+            });
+          }
+        } else {
+          this.logger.warn(`Invalid transaction rejected: ${transaction.id}`);
+          rejectedTransactions.push({
+            transaction: transaction,
+            reason: 'Transaction validation failed'
+          });
+        }
+      } catch (err) {
+        this.logger.warn(`Failed to process transaction: ${transaction.id}, reason: ${err.message}`);
+        rejectedTransactions.push({
+          transaction: transaction,
+          reason: `Validation error: ${getErrorMsg(err)}`
+        });
+      }
     }
 
-    return transactions
+    // 记录被拒绝的交易详情
+    if (rejectedTransactions.length > 0) {
+      this.logger.debug(`Rejected ${rejectedTransactions.length} transactions`, {
+        rejectedTransactions: rejectedTransactions.map(item => ({
+          id: item.transaction.id,
+          type: item.transaction.type,
+          reason: item.reason
+        }))
+      });
+    }
+
+    return validTransactions;
   }
 
   // TODO: 注意使用 @ddn/crypto 的对应方法重构 2020.5.3
@@ -684,17 +750,27 @@ export class Transaction {
 
   async verify (trs, sender, requester) {
     if (!this._assets.hasType(trs.type)) {
-      throw new Error(`Unknown transaction type 13 ${trs.type}`)
+      throw new Error(`Unknown transaction type ${trs.type}`)
     }
-
-    // Check sender
+    
+    // 1. 验证发送者
     if (!sender) {
       throw new Error('Invalid sender')
     }
-
+      
+    // 10. 验证发送者ID
+    if (trs.senderId && trs.senderId !== sender.address) {
+      this.logger.error('Invalid sender ID detected', {
+        transaction: trs.id,
+        providedSenderId: trs.senderId,
+        expectedSenderId: sender.address
+      });
+      throw new Error(`Invalid sender id: ${trs.id}`);
+    }
+    
+    // 2. 验证账户锁定状态
     if (this.constants.enableMoreLockTypes) {
       const lastBlock = this.runtime.block.getLastBlock()
-
       const isLockedType = await this._assets.isSupportLock(trs.type)
       if (
         isLockedType &&
@@ -705,52 +781,53 @@ export class Transaction {
         throw new Error('Account is locked')
       }
     }
-
+    
+    // 3. 验证请求者
     if (trs.requester_public_key) {
       if (!sender.multisignatures.includes(trs.requester_public_key)) {
-        throw new Error('Failed toverify requester multi signatures 4')
+        throw new Error('Failed to verify requester multi signatures')
       }
-
+      
       if (sender.publicKey !== trs.senderPublicKey) {
         throw new Error('Invalid public key')
       }
     }
-
-    // wxm 检查transaction是否有nethash属性
+    
+    // 4. 验证网络哈希
     if (!trs.nethash) {
       throw new Error("Transaction's nethash property is required.")
     }
-
-    // const newTransaction = this.deepCloneTransaction(trs)
-    // Verify signature
+    
+    if (trs.nethash !== this.config.nethash) {
+      throw new Error('Failed to verify nethash')
+    }
+    
+    // 5. 验证签名
     let valid = false
     if (trs.requester_public_key) {
-      // wxm block database
-      valid = await this.verifySignature(trs, trs.signature, trs.requester_public_key) // wxm block database
+      valid = await this.verifySignature(trs, trs.signature, trs.requester_public_key)
     } else {
       valid = await this.verifySignature(trs, trs.signature, trs.senderPublicKey)
     }
+    
     if (!valid) {
-      throw new Error('Failed to verify requester or sender signature, 5')
+      throw new Error('Failed to verify signature')
     }
-
-    if (trs.nethash && trs.nethash !== this.config.nethash) {
-      throw new Error('Failed to verify nethash')
-    }
-    // Verify second signature
+    
+    // 6. 验证二级签名
     if (!trs.requester_public_key && sender.second_signature) {
       valid = await this.verifySecondSignature(trs, sender.second_public_key)
       if (!valid) {
         throw new Error(`Failed to verify sender second signature: ${trs.id}`)
       }
     } else if (trs.requester_public_key && requester.second_signature) {
-      // wxm block database
-      valid = await this.verifySecondSignature(trs, requester.second_public_key) // wxm block database
+      valid = await this.verifySecondSignature(trs, requester.second_public_key)
       if (!valid) {
         throw new Error(`Failed to verify requester second signature: ${trs.id}`)
       }
     }
-    // Check that signatures unique
+    
+    // 7. 验证签名唯一性 - 检查交易内部的签名是否有重复
     if (trs.signatures && trs.signatures.length) {
       const signatures = trs.signatures.reduce((p, c) => {
         if (!p.includes(c)) p.push(c)
@@ -762,7 +839,8 @@ export class Transaction {
       }
     }
 
-    let multisignatures = sender.multisignatures || sender.u_multisignatures
+    // 8. 处理多重签名
+    let multisignatures = sender.multisignatures || sender.u_multisignatures || []
     if (multisignatures.length === 0) {
       if (trs.asset && trs.asset.multisignature && trs.asset.multisignature.keysgroup) {
         multisignatures = trs.asset.multisignature.keysgroup.map(key => key.slice(1))
@@ -772,14 +850,12 @@ export class Transaction {
     if (trs.requester_public_key) {
       multisignatures.push(trs.senderPublicKey)
     }
-
-    // wxm TODO
-    // 此处应该用this._assets.方法（trs.type） 来判断是否能够进入下面处理
+    
+    // 9. 验证多重签名
     if (trs.signatures && trs.type !== assetTypes.DAPP_OUT) {
-      // 13 ?
       for (let d = 0; d < trs.signatures.length; d++) {
         let verify = false
-
+        
         for (let s = 0; s < multisignatures.length; s++) {
           if (trs.requester_public_key && multisignatures[s] === trs.requester_public_key) {
             continue
@@ -788,29 +864,20 @@ export class Transaction {
             verify = true
           }
         }
-
+        
         if (!verify) {
-          console.log('trs: ', trs)
           throw new Error(`Failed to verify multisignature: ${trs.id}`)
         }
       }
     }
 
-    // Check sender
-    if (trs.senderId !== sender.address) {
-      // wxm block database
-      throw new Error(`Invalid sender id: ${trs.id}`)
-    }
-
-    // Calc fee
+    // 11. 验证费用
     const fee = `${await this._assets.call(trs.type, 'calculateFee', trs, sender)}`
-
-    // trs 需要加密签名，所以从客户端传来的 trs 必须包含 fee 字段，但又不能让用户随意填写，因此这里需要再次计算并验证
     if (!bignum.isEqualTo(trs.fee, fee)) {
       throw new Error(`Invalid transaction fee: trs.fee: ${trs.fee}, asset.fee: ${fee}`)
     }
-
-    // amount 需要整理成 正整数 形式，不包含科学计数法和点号，范围在 0 ~ totalAmount 之间
+    
+    // 12. 验证金额
     if (
       bignum.isLessThan(trs.amount, 0) ||
       bignum.isGreaterThan(trs.amount, bignum.multiply(this.constants.maxAmount, this.constants.fixedPoint)) ||
@@ -819,7 +886,8 @@ export class Transaction {
     ) {
       throw new Error(`Invalid transaction amount: ${trs.amount}`)
     }
-    // Check timestamp
+    
+    // 13. 验证时间戳
     if (this.runtime.slot.getSlotNumber(trs.timestamp) > this.runtime.slot.getSlotNumber()) {
       this.logger.error('Invalid transaction timestamp:', {
         o: trs.timestamp,
@@ -828,6 +896,8 @@ export class Transaction {
       })
       throw new Error('Invalid transaction timestamp')
     }
+    
+    // 14. 调用资产特定的验证方法
     try {
       return await this._assets.call(trs.type, 'verify', trs, sender)
     } catch (err) {

@@ -2,18 +2,6 @@ export default {
   type: 'object',
   additionalProperties: false, // 必须是下面的字段，不是会提示错误
   properties: {
-    id: {
-      type: 'string'
-    },
-    height: {
-      type: 'string'
-    },
-    block_height: {
-      type: 'string'
-    },
-    block_id: {
-      type: 'string'
-    },
     type: {
       type: 'integer'
     },
@@ -52,7 +40,7 @@ export default {
       type: 'object'
     },
     args: {
-      type: 'string'
+      type: 'array'
     },
     message: {
       type: 'string',
@@ -63,6 +51,15 @@ export default {
     },
     signatures: {
       type: 'array'
+    },
+    id: {
+      type: 'string'
+    },
+    block_id: {
+      type: 'string'
+    },
+    block_height: {
+      type: 'string'
     }
   },
   required: ['type', 'timestamp', 'senderPublicKey', 'signature']

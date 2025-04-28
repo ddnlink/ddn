@@ -1065,6 +1065,23 @@ class AssetBase {
    * 区块链启动成功后执行
    */
   async onBlockchainReady () {}
+
+  /**
+   * 检查错误是否是因为记录已存在
+   * @param {Error} err 错误对象
+   * @returns {boolean} 是否是"记录已存在"类型的错误
+   */
+  isRecordExistsError(err) {
+    if (!err || !err.message) return false;
+    
+    const errorMessage = err.message.toLowerCase();
+    return (
+      errorMessage.includes('unique constraint failed') || 
+      errorMessage.includes('already exists') ||
+      errorMessage.includes('duplicate key') ||
+      errorMessage.includes('duplicate entry')
+    );
+  }
 }
 
 export default AssetBase

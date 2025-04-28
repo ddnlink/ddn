@@ -89,6 +89,7 @@ export class TransactionSync {
     }
 
     return this.balancesSequence.addAsync(async () => {
+      // 这里不需要跳过验证，因为从其他节点同步的交易需要验证
       await this.runtime.transaction.receiveTransactions(trs);
     });
   }

@@ -7,10 +7,11 @@ import assert from 'assert'
 import Sequelize from 'sequelize'
 
 import * as DdnCrypto from '@ddn/crypto'
-import { bignum } from '@ddn/utils'
+import { bignum, assetTypes } from '@ddn/utils'
 import { System } from '../../utils/system'
 import BlockStatus from './block-status'
 import BlockCache from './block-cache'
+import { validateTransaction, validateContractTransaction } from '../../utils/validator'
 
 let _singleton
 
@@ -129,17 +130,19 @@ class Block {
       if (blockId) {
         return true
       }
-      const result = await this.dao.transaction(async dbTrans => {
-        await this.saveBlock(genesisblock, dbTrans)
-      })
-      if (result) {
-        // trasaction failed but rollback success
-        this.logger.error(result)
+
+      try {
+        await this.dao.transaction(async dbTrans => {
+          await this.saveBlock(genesisblock, dbTrans)
+        })
+        return true
+      } catch (transErr) {
+        // 事务失败
+        this.logger.error(`创世区块处理失败: ${transErr.message || transErr}`)
         process.exit(1)
       }
-      return true
     } catch (err) {
-      this.logger.error(err)
+      this.logger.error(`创世区块处理过程中发生错误: ${err.message || err}`)
       process.exit(1)
     }
   }
@@ -220,7 +223,7 @@ class Block {
     } catch (err) {
       this.logger.error(`serializeBlock2Db fail ${err}`)
       throw new Error(`serializeBlock2Db fail ${err}`)
-    }
+      }
     if (block.transactions && block.transactions.length > 0) {
       for (let i = 0; i < block.transactions.length; i++) {
         const transaction = block.transactions[i]
@@ -463,12 +466,27 @@ class Block {
 
         if (this.runtime.consensus.hasEnoughVotes(totalVotes)) {
           const block = this.runtime.consensus.getPendingBlock()
-          this.logger.debug(`receiveVotes getPendingBlock block.height = ${block.heigh}`)
+          if (!block) {
+            this.logger.error(`receiveVotes: 无法获取待处理区块，可能已被清理`)
+            return
+          }
+
+          this.logger.debug(`receiveVotes getPendingBlock block.height = ${block.height || 'undefined'}`)
 
           const height = block.height
           const id = block.id
 
           try {
+            // 检查区块是否已经存在
+            const existingBlock = await this.dao.findOne('block', {
+              where: { id: block.id }
+            })
+
+            if (existingBlock) {
+              this.logger.info(`区块 ${block.id} 已经存在，高度 ${block.height}，跳过处理`)
+              return
+            }
+
             await this.processBlock(block, totalVotes, true, true, false)
           } catch (err) {
             if (err) {
@@ -618,52 +636,95 @@ class Block {
     }
   }
 
+  /**
+   * 应用区块中的所有交易
+   * @param {Array} transactions 交易列表
+   * @param {Object} block 区块对象
+   * @param {Object} dbTrans 数据库事务对象
+   * @returns {Set} 成功应用的交易ID集合
+   */
   async _applyTransactions(transactions, block, dbTrans) {
-    const applyedTrsIdSet = new Set();
+    // 用于跟踪已应用的交易ID
+    const appliedTrsIdSet = new Set();
+    // 用于记录失败的交易及其错误信息
     const failedTransactions = [];
 
-    for (let i = 0; i < transactions.length; i++) {
-      const transaction = transactions[i];
-      const updatedAccountInfo = await this.runtime.account.setAccount(
-        {
-          publicKey: transaction.senderPublicKey,
-          isGenesis: bignum.isEqualTo(block.height, 1)
-        },
-        dbTrans
-      );
+    // 记录开始处理交易的时间，用于性能监控
+    const startTime = Date.now();
+    this.logger.debug(`开始应用区块 ${block.id} 中的 ${transactions.length} 个交易`);
 
-      const accountInfo = await this.runtime.account.getAccountByAddress(updatedAccountInfo.address, dbTrans);
-      const newAccountInfo = Object.assign({}, accountInfo, updatedAccountInfo);
-
+    // 遍历处理每个交易
+    for (const transaction of transactions) {
       try {
-        await this.runtime.transaction.applyUnconfirmed(transaction, newAccountInfo, dbTrans);
-        await this.runtime.transaction.apply(transaction, block, newAccountInfo, dbTrans);
-        applyedTrsIdSet.add(transaction.id);
-      } catch (err) {
-        // 检查是否是交易已确认的错误
-        if (err.toString().includes('The transaction has been confirmed')) {
-          this.logger.warn(`Transaction ${transaction.id} has already been confirmed, continuing with block processing`);
-          applyedTrsIdSet.add(transaction.id);
-        } else {
-          this.logger.error(`Failed to apply transaction ${transaction.id}: ${err.message || err.toString()}`);
-          failedTransactions.push({
-            id: transaction.id,
-            error: err.message || err.toString()
-          });
-          // 不抛出错误，继续处理其他交易
+        // 1. 确保发送者账户存在并获取账户信息
+        const updatedAccountInfo = await this.runtime.account.setAccount(
+          {
+            publicKey: transaction.senderPublicKey,
+            isGenesis: bignum.isEqualTo(block.height, 1)
+          },
+          dbTrans
+        );
+
+        const accountInfo = await this.runtime.account.getAccountByAddress(updatedAccountInfo.address, dbTrans);
+        const newAccountInfo = Object.assign({}, accountInfo, updatedAccountInfo);
+
+        // 2. 应用交易的未确认状态
+        try {
+          await this.runtime.transaction.applyUnconfirmed(transaction, newAccountInfo, dbTrans);
+        } catch (unconfirmedErr) {
+          this.logger.error(`应用交易未确认状态失败 ${transaction.id}: ${unconfirmedErr.message}`);
+          throw unconfirmedErr; // 重新抛出错误以便外层捕获
         }
+
+        // 3. 应用交易 - 交易应用层的容错处理
+        try {
+          await this.runtime.transaction.apply(transaction, block, newAccountInfo, dbTrans);
+          appliedTrsIdSet.add(transaction.id);
+          this.logger.debug(`成功应用交易 ${transaction.id}`);
+        } catch (applyErr) {
+          // 检查是否是交易已确认的错误
+          // 注意：这里是第三道防线，采用容错处理策略，确保区块链状态一致性
+          if (applyErr.toString().includes('The transaction has been confirmed')) {
+            this.logger.warn(`交易 ${transaction.id} 已经被确认，继续处理区块`);
+            appliedTrsIdSet.add(transaction.id);
+          } else {
+            this.logger.error(`应用交易失败 ${transaction.id}: ${applyErr.message || applyErr.toString()}`);
+            failedTransactions.push({
+              id: transaction.id,
+              error: applyErr.message || applyErr.toString()
+            });
+            // 不抛出错误，继续处理其他交易，保证区块应用的稳定性
+          }
+        }
+      } catch (err) {
+        this.logger.error(`处理交易 ${transaction.id} 时发生错误: ${err.message || err.toString()}`);
+        failedTransactions.push({
+          id: transaction.id,
+          error: err.message || err.toString()
+        });
       } finally {
-        await this.runtime.transaction.removeUnconfirmedTransaction(transaction.id);
+        // 4. 无论成功失败，都从未确认交易池中移除该交易
+        try {
+          await this.runtime.transaction.removeUnconfirmedTransaction(transaction.id);
+        } catch (removeErr) {
+          this.logger.warn(`从未确认交易池移除交易 ${transaction.id} 失败: ${removeErr.message}`);
+        }
       }
     }
 
+    // 记录处理时间
+    const processingTime = Date.now() - startTime;
+    this.logger.debug(`应用区块 ${block.id} 中的交易完成，耗时 ${processingTime}ms`);
+
     // 如果有失败的交易，记录日志但不中断区块应用
     if (failedTransactions.length > 0) {
-      this.logger.warn(`Block ${block.id} applied with ${failedTransactions.length} failed transactions`);
-      this.logger.debug('Failed transactions:', failedTransactions);
+      this.logger.warn(`区块 ${block.id} 应用了 ${transactions.length - failedTransactions.length} 个交易，${failedTransactions.length} 个交易失败`);
+      this.logger.debug('失败的交易:', failedTransactions);
+    } else {
+      this.logger.info(`区块 ${block.id} 的所有 ${transactions.length} 个交易都已成功应用`);
     }
 
-    return applyedTrsIdSet;
+    return appliedTrsIdSet;
   }
 
   async _saveBlockAndTick(block, isSaveBlock, dbTrans) {
@@ -708,7 +769,7 @@ class Block {
     });
   }
 
-  async _handleUnconfirmedTransactions(applyedTrsIdSet) {
+  async _handleUnconfirmedTransactions(appliedTrsIdSet) {
     const unconfirmedTrs = await this.runtime.transaction.getUnconfirmedTransactionList(true);
     try {
       await this.runtime.transaction.undoUnconfirmedList();
@@ -719,7 +780,7 @@ class Block {
 
     this.oneoff.clear();
 
-    const redoTrs = unconfirmedTrs.filter(item => !applyedTrsIdSet.has(item.id));
+    const redoTrs = unconfirmedTrs.filter(item => !appliedTrsIdSet.has(item.id));
     try {
       await this.runtime.transaction.receiveTransactions(redoTrs);
     } catch (err) {
@@ -727,28 +788,64 @@ class Block {
     }
   }
 
+  /**
+   * 应用区块到区块链
+   * @param {Object} options 应用区块的选项
+   * @param {Object} options.block 要应用的区块
+   * @param {Object} options.votes 区块的投票信息
+   * @param {boolean} options.isBroadcast 是否广播区块
+   * @param {boolean} options.isSaveBlock 是否保存区块到数据库
+   * @returns {Promise<void>}
+   */
   async applyBlock({ block, votes, isBroadcast, isSaveBlock }) {
     const doApplyBlock = async () => {
       this.logger.debug('doApplyBlock is starting');
       const sortedTrs = this._sortTransactions(block.transactions);
 
       try {
-        const result = await this.dao.transaction(async dbTrans => {
-          const applyedTrsIdSet = await this._applyTransactions(sortedTrs, block, dbTrans);
-          await this._saveBlockAndTick(block, isSaveBlock, dbTrans);
-          return applyedTrsIdSet;
-        });
+        let appliedTrsIdSet;
+        try {
+          appliedTrsIdSet = await this.dao.transaction(async dbTrans => {
+            const trsIdSet = await this._applyTransactions(sortedTrs, block, dbTrans);
+            await this._saveBlockAndTick(block, isSaveBlock, dbTrans);
+            return trsIdSet;
+          });
 
-        this.logger.debug('Apply block transaction result: ', result);
-        if (result) {
-          const lastHeight = await this.runtime.dvm.getLastHeight();
-          if (lastHeight >= 0) {
-            await this.runtime.dvm.rollback(this._lastBlock.height);
+          // 记录应用结果
+          if (appliedTrsIdSet && appliedTrsIdSet.size > 0) {
+            this.logger.debug(`区块 ${block.id} 交易应用结果: ${appliedTrsIdSet.size} 个交易成功`);
+          } else if (appliedTrsIdSet) {
+            this.logger.debug(`区块 ${block.id} 交易应用结果: 0 个交易 (空区块)`);
+          } else {
+            this.logger.error(`区块 ${block.id} 交易应用结果: 失败 (appliedTrsIdSet 为 null)`);
+          }
+        } catch (transErr) {
+          this.logger.error(`区块 ${block.id} 交易应用失败: ${transErr.message || transErr}`);
+          appliedTrsIdSet = null;
+        }
+
+        // 处理DVM（分布式虚拟机）状态
+        if (!appliedTrsIdSet) {
+          // 如果交易应用失败，回滚DVM状态
+          try {
+            const lastHeight = await this.runtime.dvm.getLastHeight();
+            if (lastHeight >= 0) {
+              await this.runtime.dvm.rollback(this._lastBlock.height);
+              this.logger.debug(`DVM回滚到高度 ${this._lastBlock.height} 成功`);
+            }
+          } catch (dvmErr) {
+            this.logger.error(`DVM回滚错误: ${dvmErr.message}`);
           }
           return;
         }
 
-        this.runtime.dvm.commit(block.height);
+        // 如果交易应用成功，提交DVM状态
+        try {
+          await this.runtime.dvm.commit(block.height);
+          this.logger.debug(`DVM提交到高度 ${block.height} 成功`);
+        } catch (dvmErr) {
+          this.logger.error(`DVM提交错误: ${dvmErr.message}`);
+        }
         this.logger.debug('The dao.transaction is finished.');
 
         await this._cleanupState(block);
@@ -759,7 +856,7 @@ class Block {
       } catch (err) {
         this.balanceCache.rollback();
         this.logger.error(`Rollback or commit error, apply block fail: ${err}`);
-        process.exit(1);
+          process.exit(1);
       }
     };
 
@@ -774,7 +871,7 @@ class Block {
   }
 
   verifySignature(block) {
-    // 接受到的block是protobuf 解密之后的，因为解密后的json是类似 Blcok{}这样，带个名称前缀，应该不是标准的json数据，所以使用Object.assign，这样数据就是{}
+    // 接受到的block是protobuf 解密之后的，因为解密后的json带名称前缀，不是标准的json数据，所以使用Object.assign，这样数据就是{}
     block = Object.assign({}, block)
     const newBlock = { ...block }
     let res = null
@@ -802,29 +899,11 @@ class Block {
    * @param {object}} votes votes
    */
   async verifyBlock(block, votes) {
-    // TODO creazy 创建块时为什么id和height不再在createBlock中产生
-    // try {
-    //   block.id = await this.getId(block)
-    // } catch (e) {
-    //   throw new Error(`Failed to get block id: ${e.toString()}`)
-    // }
-    // block.height = bignum.plus(this._lastBlock.height, 1).toString()
-
     // 显式声明验证预期高度 TODO：这里的逻辑与上面的不同，需要验证和测试 2025.2.1
     const expectedHeight = bignum.plus(this._lastBlock.height, 1).toString()
     if (!bignum.isEqualTo(block.height, expectedHeight)) {
       throw new Error(`Block height mismatch: expected ${expectedHeight}, got ${block.height}`)
     }
-
-    // 验证区块ID
-    // try {
-    //   const calculatedId = await this.getId(block)
-    //   if (block.id !== calculatedId) {
-    //     throw new Error(`Block ID mismatch: expected ${calculatedId}, got ${block.id}`)
-    //   }
-    // } catch (err) {
-    //   throw new Error(`Failed to verify block ID: ${err.message}`)
-    // }
 
     if (typeof this._lastBlock.height === 'undefined') {
       this.logger.debug(`verifyBlock, block: ${JSON.stringify(block)}, pre-block: ${JSON.stringify(this._lastBlock)}`)
@@ -983,7 +1062,7 @@ class Block {
       throw new Error(`Failed to normalize block: ${e.toString()}`)
     }
 
-    block.transactions = this._sortTransactions(block.transactions)
+    // block.transactions = this._sortTransactions(block.transactions)
 
     try {
       await this.verifyBlock(block, votes)
@@ -1015,54 +1094,95 @@ class Block {
       this.logger.debug('verify block slot ok')
 
       if (block.transactions && block.transactions.length) {
-        const trsIds = []
-        for (let i = 0; i < block.transactions.length; i++) {
-          const transaction = block.transactions[i]
-          trsIds.push(transaction.id)
-        }
+        // 1. 收集所有交易ID并一次性查询数据库
+        const trsIds = block.transactions.map(transaction => transaction.id);
 
-        let existsTrsIds = []
+        // 创建验证上下文（只创建一次）
+        const context = {
+          runtime: this.runtime,
+          logger: this.logger,
+          dao: this.dao,
+          constants: this.constants
+        };
+
+        // 2. 批量查询已存在的交易
+        let existingTransactions = new Map();
         if (trsIds.length > 0) {
           try {
-            existsTrsIds = await this.dao.findList('tr', {
+            const existsTrsIds = await this.dao.findList('tr', {
               where: {
                 id: {
                   $in: trsIds
                 }
               },
               attributes: ['id']
-            })
+            });
+
+            // 将结果转换为Map以便快速查找
+            existingTransactions = new Map(
+              existsTrsIds.map(item => [item.id, item])
+            );
+
+            this.logger.debug(`Found ${existingTransactions.size} existing transactions out of ${trsIds.length} in block ${block.id}`);
           } catch (err) {
-            throw new Error(`Failed to query transaction from db: ${err}`)
+            this.logger.error(`Failed to query transactions from database: ${err.message}`);
+            throw new Error(`Failed to query transactions from database: ${err.message}`);
           }
         }
 
-        for (let i = 0; i < block.transactions.length; i++) {
-          const transaction = block.transactions[i]
+        // 3. 处理每个交易
+        const validTransactions = [];
 
-          await this.runtime.account.setAccount({
-            publicKey: transaction.senderPublicKey
-          })
-          // TODO creazy 这里的交易都是经过验证的，而且到这里的交易都是合法合规的，没有必要重新获取id
-          if (!transaction.id) {
-            transaction.id = await DdnCrypto.getId(transaction) // 2020.5.18
-          }
-          transaction.block_id = block.id // wxm block database
+        for (const transaction of block.transactions) {
+          // 设置交易的区块ID
+          transaction.block_id = block.id;
 
-          const existsTrs = existsTrsIds.find(item => {
-            item.id === transaction.id
-          })
-          if (existsTrs) {
-            // wxy 这里如果库里存在一些交易就不存这个块吗？TODO
-            await this.runtime.transaction.removeUnconfirmedTransaction(transaction.id)
-            throw new Error(`Transaction already exists: ${transaction.id}`)
+          // 检查交易是否已存在 - 区块处理阶段的严格检查
+          // 注意：验证器层已有基础检查，这里是第二道防线，处理策略更严格
+          if (existingTransactions.has(transaction.id)) {
+            this.logger.warn(`Transaction ${transaction.id} already exists in the blockchain`);
+            await this.runtime.transaction.removeUnconfirmedTransaction(transaction.id);
+            throw new Error(`Transaction already exists: ${transaction.id}`);
           }
 
+          // 确保发送者账户存在
+          try {
+            await this.runtime.account.setAccount({
+              publicKey: transaction.senderPublicKey
+            });
+          } catch (err) {
+            this.logger.error(`Failed to set account for transaction ${transaction.id}: ${err.message}`);
+            throw new Error(`Failed to set account for transaction ${transaction.id}: ${err.message}`);
+          }
+
+          // 验证交易
           if (verifyTrs) {
-            const sender = await this.runtime.account.getAccountByPublicKey(transaction.senderPublicKey)
-            await this.runtime.transaction.verify(transaction, sender)
+            try {
+              // 根据交易类型选择不同的验证方法
+              let isValid;
+              if (transaction.type === assetTypes.CONTRACT) { // 合约交易
+                isValid = await validateContractTransaction(transaction, context);
+              } else {
+                isValid = await validateTransaction(transaction, context);
+              }
+
+              if (isValid) {
+                validTransactions.push(transaction);
+              } else {
+                this.logger.warn(`Invalid transaction in block: ${transaction.id}`);
+                throw new Error(`Invalid transaction in block: ${transaction.id}`);
+              }
+            } catch (err) {
+              this.logger.error(`Failed to verify transaction ${transaction.id}: ${err.message}`);
+              throw err;
+            }
+          } else {
+            validTransactions.push(transaction);
           }
         }
+
+        // 4. 更新区块的交易列表，只包含有效交易
+        block.transactions = validTransactions;
       }
 
       this.logger.debug('verify block transactions ok')
@@ -1121,6 +1241,15 @@ class Block {
       false,
       this.constants.maxTxsPerBlock
     )
+
+    // 创建验证上下文
+    const context = {
+      runtime: this.runtime,
+      logger: this.logger,
+      dao: this.dao,
+      constants: this.constants
+    };
+
     for (let i = 0; i < transactions.length; i++) {
       const transaction = transactions[i]
       const sender = await this.runtime.account.getAccountByPublicKey(transaction.senderPublicKey)
@@ -1131,8 +1260,20 @@ class Block {
 
       if (await this.runtime.transaction.ready(transaction, sender)) {
         try {
-          await this.runtime.transaction.verify(transaction, sender)
-          ready.push(transaction)
+          // 根据交易类型选择不同的验证方法
+          let isValid;
+          if (transaction.type === 11) { // 合约交易
+            isValid = await validateContractTransaction(transaction, context);
+          } else {
+            isValid = await validateTransaction(transaction, context);
+          }
+
+          if (isValid) {
+            ready.push(transaction);
+          } else {
+            this.logger.warn(`Transaction ${transaction.id} validation failed, removing from unconfirmed list`);
+            await this.runtime.transaction.removeUnconfirmedTransaction(transaction.id);
+          }
         } catch (err) {
           this.logger.error(`Failed to verify transaction ${transaction.id}`, err)
           await this.runtime.transaction.removeUnconfirmedTransaction(transaction.id)
@@ -1500,7 +1641,16 @@ class Block {
     }
   }
 
-  async queryBlockData(where, sorts, offset, limit, returnTotal) {
+  /**
+   * 查询区块数据
+   * @param {Object} where 查询条件
+   * @param {Array} sorts 排序条件
+   * @param {number} offset 偏移量
+   * @param {number} limit 限制数量
+   * @param {boolean} _returnTotal 是否返回总数（未使用）
+   * @returns {Promise<Array>} 区块数据列表
+   */
+  async queryBlockData(where, sorts, offset, limit, _returnTotal) {
     const w = where || {}
     const s = sorts || null
     const o = offset || 0
@@ -1653,7 +1803,13 @@ class Block {
     return this[call].apply(this, callArgs)
   }
 
-  getHeight(req, cb) {
+  /**
+   * 获取当前区块高度
+   * @param {Object} _req 请求对象（未使用）
+   * @param {Function} cb 回调函数
+   * @returns {*} 回调结果
+   */
+  getHeight(_req, cb) {
     const lastBlock = this.runtime.block.getLastBlock()
     return cb(null, lastBlock && lastBlock.height ? lastBlock.height : '0')
   }
@@ -1905,13 +2061,15 @@ class Block {
       });
     } catch (err) {
       this.logger.error('Failed to rollback:', err);
+      // todo: 是否需要添加状态机？
       // 记录错误但不中断程序
-      this.runtime.transitionTo('Rollback');
+      // this.runtime.transitionTo('Rollback');
+      // todo: 是否需要通知其他模块。
       // 触发一个回滚失败的事件，让其他模块知道
-      this.runtime.bus && this.runtime.bus.message('rollbackFailed', {
-        height,
-        error: err.message
-      });
+      // this.runtime.bus && this.runtime.bus.message('rollbackFailed', {
+      //   height,
+      //   error: err.message
+      // });
       throw err; // 重新抛出错误，让调用者知道回滚失败
     }
   }
