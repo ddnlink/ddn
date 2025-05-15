@@ -30,7 +30,7 @@ DDN智能合约是基于typescript（以下简称ts）裁剪定制而成，是ts
 
 - 与其他资产类似，合约是链上的一种资产类型，类型编码是11；
 - 交易体的asset字段是一个对象，其内容是{ contract: { name: '', desc: '', ...}}；
-- name, version, gas_limit, code为必填字段；
+- name, version, gasLimit, code为必填字段；
 - 合约代码由ts语法书写，必须是一个class，并且必须继承超类SmartContract，基本形式应该是这样：
 
 ```

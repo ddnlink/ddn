@@ -1,8 +1,7 @@
 /*
- * @Author:
- * @Date: 2018-11-13 11:34:49
-
- * @Last Modified time: 2020-02-13 22:48:39
+ * @Author: Tailor
+ * @Date: 2018-10-08 11:34:49
+ * @Last Modified time: 2023-03-22 16:48:39 
  */
 import Sequelize from 'sequelize'
 
@@ -19,37 +18,50 @@ export default connection => {
         type: Sequelize.STRING(50),
         allowNull: false
       },
-      transaction_id: {
+      transactionId: { // tid
         type: Sequelize.STRING(64),
         allowNull: false
       },
-      owner: {
-        type: Sequelize.STRING(64), // 原来是 BINARY(32)
+      address: {
+        type: Sequelize.STRING(64),
         allowNull: false
       },
-      gas_limit: {
+      ownerId: { // owner
+        type: Sequelize.STRING(64),
+        allowNull: false
+      },
+      consumeOwnerEnergy: {
         type: Sequelize.INTEGER,
-        allowNull: false
+        allowNull: false,
+        default: 0
       },
+      // gasLimit: {
+      //   type: Sequelize.INTEGER,
+      //   allowNull: false
+      // },
       desc: {
         type: Sequelize.STRING(256),
         allowNull: false
       },
       version: {
-        type: Sequelize.STRING(128), // 原来是 BINARY(64)
+        type: Sequelize.STRING(128), 
+        allowNull: false
+      },
+      vmVersion: {
+        type: Sequelize.STRING(128), 
         allowNull: false
       },
       state: {
-        type: Sequelize.STRING(32) // 原来是 BINARY(32)
+        type: Sequelize.STRING(32)
       },
       code: {
         type: Sequelize.TEXT
       },
       metadata: {
-        type: Sequelize.STRING(256) // 类型上不存在 VARCHAR
+        type: Sequelize.STRING(256) 
       },
       timestamp: {
-        type: Sequelize.INTEGER, // 原来是 INT
+        type: Sequelize.INTEGER, 
         allowNull: false
       }
     },
@@ -57,10 +69,10 @@ export default connection => {
       timestamps: false,
       indexes: [
         {
-          fields: ['transaction_id']
+          fields: ['transactionId']
         },
         {
-          fields: ['owner']
+          fields: ['ownerId']
         }
       ]
     }

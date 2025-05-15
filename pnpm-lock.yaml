@@ -38,6 +38,9 @@ importers:
       conventional-changelog-cli:
         specifier: ^2.2.2
         version: 2.2.2
+      cross-env:
+        specifier: ^7.0.3
+        version: 7.0.3
       dumi:
         specifier: ^1.0.3
         version: 1.1.54(react-dom@16.14.0(react@16.14.0))(react-router@5.2.0(react@16.14.0))(react@16.14.0)(typescript@3.9.10)
@@ -119,6 +122,10 @@ importers:
       typescript:
         specifier: ^3.9.10
         version: 3.9.10
+    devDependencies:
+      '@babel/plugin-transform-export-namespace-from':
+        specifier: ^7.27.1
+        version: 7.27.1(@babel/core@7.26.10)
 
   packages/asset-base:
     dependencies:
@@ -484,7 +491,7 @@ importers:
         version: 4.1.0(eslint@7.32.0)
       jest:
         specifier: ^27.0.6
-        version: 27.5.1(ts-node@10.9.2(@types/node@10.17.60)(typescript@5.4.2))
+        version: 27.5.1(ts-node@10.9.2(@types/node@10.17.60)(typescript@3.9.10))
 
   packages/peer:
     dependencies:
@@ -738,9 +745,12 @@ importers:
 
   pro-packages/contract:
     dependencies:
+      '@ddn/asset-base':
+        specifier: workspace:^
+        version: link:../../packages/asset-base
       '@ddn/contract-types':
-        specifier: 0.3.0
-        version: 0.3.0
+        specifier: workspace:^
+        version: link:../contract-types
       acorn:
         specifier: 6.1.0
         version: 6.1.0
@@ -781,9 +791,15 @@ importers:
       '@babel/core':
         specifier: ^7.15.0
         version: 7.26.10
+      '@babel/plugin-transform-export-namespace-from':
+        specifier: ^7.27.1
+        version: 7.27.1(@babel/core@7.26.10)
       '@babel/preset-env':
         specifier: ^7.15.0
         version: 7.26.9(@babel/core@7.26.10)
+      '@ddn/js-sdk':
+        specifier: ^2.0.0
+        version: link:../../packages/js-sdk
       '@types/jest':
         specifier: ^23.3.2
         version: 23.3.14
@@ -793,6 +809,9 @@ importers:
       '@types/node':
         specifier: ^10.12.26
         version: 10.17.60
+      axios:
+        specifier: ^0.21.1
+        version: 0.21.4
       babel-jest:
         specifier: ^27.0.6
         version: 27.5.1(@babel/core@7.26.10)
@@ -829,6 +848,9 @@ importers:
       jest:
         specifier: ^27.0.6
         version: 27.5.1(ts-node@10.9.2(@types/node@10.17.60)(typescript@3.9.10))
+      sqlite3:
+        specifier: ^5.1.7
+        version: 5.1.7
       ts-jest:
         specifier: ^23.1.4
         version: 23.10.5(jest@27.5.1(ts-node@10.9.2(@types/node@10.17.60)(typescript@3.9.10)))
@@ -838,6 +860,8 @@ importers:
       ts-node:
         specifier: ^10.9.2
         version: 10.9.2(@types/node@10.17.60)(typescript@3.9.10)
+
+  pro-packages/contract-types: {}
 
 packages:
 
@@ -1084,6 +1108,10 @@ packages:
 
   '@babel/helper-plugin-utils@7.26.5':
     resolution: {integrity: sha512-RS+jZcRdZdRFzMyr+wcsaqOmld1/EqTghfaBGQQd/WnRdzdlvSZ//kF7U8VQTxf1ynZ4cjUcYgjVGx13ewNPMg==}
+    engines: {node: '>=6.9.0'}
+
+  '@babel/helper-plugin-utils@7.27.1':
+    resolution: {integrity: sha512-1gn1Up5YXka3YYAHGKpbideQ5Yjf1tDa9qYcgysz+cNCXukyLl6DjPXhD3VRwSb8c0J9tA4b2+rHEZtc6R0tlw==}
     engines: {node: '>=6.9.0'}
 
   '@babel/helper-remap-async-to-generator@7.25.9':
@@ -1368,8 +1396,8 @@ packages:
     peerDependencies:
       '@babel/core': ^7.0.0-0
 
-  '@babel/plugin-transform-export-namespace-from@7.25.9':
-    resolution: {integrity: sha512-2NsEz+CxzJIVOPx2o9UsW1rXLqtChtLoVnwYHHiB04wS5sgn7mrV45fWMBX0Kk+ub9uXytVYfNP2HjbVbCB3Ww==}
+  '@babel/plugin-transform-export-namespace-from@7.27.1':
+    resolution: {integrity: sha512-tQvHWSZ3/jH2xuq/vZDy0jNn+ZdXJeM8gHvX4lnJmsc3+50yPlWdZXIc5ay+umX+2/tJIqHqiEqcJvxlmIvRvQ==}
     engines: {node: '>=6.9.0'}
     peerDependencies:
       '@babel/core': ^7.0.0-0
@@ -1730,9 +1758,6 @@ packages:
     resolution: {integrity: sha512-WWb70YoMySyXpS2ieSru43bCG+P6hu2YxAfDy6qwJpTEyJzrI2rl4h4QcE+ry4An7Ie60dS2SAw0zz0VusinuA==}
     engines: {node: '>=14.0.0'}
     hasBin: true
-
-  '@ddn/contract-types@0.3.0':
-    resolution: {integrity: sha512-hIhesRmtuuFeY3lO3zDA2qy3BMJ3S0Ys3tan0uHSymO+a0ioDMMtYKr4+4ocxr5KqlBag9/IfFosAf+drCJZZA==}
 
   '@ddn/sm-crypto@0.0.5':
     resolution: {integrity: sha512-W78S39/HfHv4eACRtzslQHdGSB88khs84zoPFWG6wuJsuUxbJHwUQA3Lv3yNPblwjF0zKsAblC/skeKKZqRMRg==}
@@ -4128,6 +4153,9 @@ packages:
     resolution: {integrity: sha512-0BfJq4NSfQXd+SkFdrvFbG7addhYSBA2mQwISr46pD6E5iqkWg02RAs8vyTT/j0RTnoYmeXauBuSv1qKwR179g==}
     deprecated: Critical security vulnerability fixed in v0.21.1. For more information, see https://github.com/axios/axios/pull/3410
 
+  axios@0.21.4:
+    resolution: {integrity: sha512-ut5vewkiu8jjGBdqpM44XxjuCjq9LAKeHVmoVfHVzy8eHgxxq8SbAVQNovDA8mVi05kP0Ea/n/UzcSHcTJQfNg==}
+
   axios@1.8.4:
     resolution: {integrity: sha512-eBSYY4Y68NNlHbHBMdeDmKNtDgXWhQsJcGqzO3iLUM0GraQFSS9cVgPX5I9b3lbdFKyYoAEGAZF1DwhTaljNAw==}
 
@@ -5102,6 +5130,11 @@ packages:
 
   create-require@1.1.1:
     resolution: {integrity: sha512-dcKFX3jn0MpIaXjisoRvexIJVEKzaq7z2rZKxf+MSr9TkdmHmsU4m2lcLojrj/FHl8mk5VxMmYA+ftRkP/3oKQ==}
+
+  cross-env@7.0.3:
+    resolution: {integrity: sha512-+/HKd6EgcQCJGh2PSjZuUitQBQynKor4wrFbRg4DtAgS1aWO+gU52xpH7M9ScGgXSYmAVS9bIJ8EzuaGw0oNAw==}
+    engines: {node: '>=10.14', npm: '>=6', yarn: '>=1'}
+    hasBin: true
 
   cross-spawn@5.1.0:
     resolution: {integrity: sha512-pTgQJ5KC0d2hcY8eyL1IzlBPYjTkyH72XRZPnLyKus2mBfNjQs3klqbJU2VILqZryAZUt9JOb3h/mWMy23/f5A==}
@@ -13137,6 +13170,8 @@ snapshots:
 
   '@babel/helper-plugin-utils@7.26.5': {}
 
+  '@babel/helper-plugin-utils@7.27.1': {}
+
   '@babel/helper-remap-async-to-generator@7.25.9(@babel/core@7.26.10)':
     dependencies:
       '@babel/core': 7.26.10
@@ -13437,10 +13472,10 @@ snapshots:
       '@babel/core': 7.26.10
       '@babel/helper-plugin-utils': 7.26.5
 
-  '@babel/plugin-transform-export-namespace-from@7.25.9(@babel/core@7.26.10)':
+  '@babel/plugin-transform-export-namespace-from@7.27.1(@babel/core@7.26.10)':
     dependencies:
       '@babel/core': 7.26.10
-      '@babel/helper-plugin-utils': 7.26.5
+      '@babel/helper-plugin-utils': 7.27.1
 
   '@babel/plugin-transform-for-of@7.26.9(@babel/core@7.26.10)':
     dependencies:
@@ -13709,7 +13744,7 @@ snapshots:
       '@babel/plugin-transform-duplicate-named-capturing-groups-regex': 7.25.9(@babel/core@7.26.10)
       '@babel/plugin-transform-dynamic-import': 7.25.9(@babel/core@7.26.10)
       '@babel/plugin-transform-exponentiation-operator': 7.26.3(@babel/core@7.26.10)
-      '@babel/plugin-transform-export-namespace-from': 7.25.9(@babel/core@7.26.10)
+      '@babel/plugin-transform-export-namespace-from': 7.27.1(@babel/core@7.26.10)
       '@babel/plugin-transform-for-of': 7.26.9(@babel/core@7.26.10)
       '@babel/plugin-transform-function-name': 7.25.9(@babel/core@7.26.10)
       '@babel/plugin-transform-json-strings': 7.25.9(@babel/core@7.26.10)
@@ -13914,8 +13949,6 @@ snapshots:
       - aws-crt
       - supports-color
       - typescript
-
-  '@ddn/contract-types@0.3.0': {}
 
   '@ddn/sm-crypto@0.0.5':
     dependencies:
@@ -14386,43 +14419,6 @@ snapshots:
       graceful-fs: 4.2.11
       jest-changed-files: 27.5.1
       jest-config: 27.5.1(ts-node@10.9.2(@types/node@10.17.60)(typescript@3.9.10))
-      jest-haste-map: 27.5.1
-      jest-message-util: 27.5.1
-      jest-regex-util: 27.5.1
-      jest-resolve: 27.5.1
-      jest-resolve-dependencies: 27.5.1
-      jest-runner: 27.5.1
-      jest-runtime: 27.5.1
-      jest-snapshot: 27.5.1
-      jest-util: 27.5.1
-      jest-validate: 27.5.1
-      jest-watcher: 27.5.1
-      micromatch: 4.0.8
-      rimraf: 3.0.2
-      slash: 3.0.0
-      strip-ansi: 6.0.1
-    transitivePeerDependencies:
-      - bufferutil
-      - canvas
-      - supports-color
-      - ts-node
-      - utf-8-validate
-
-  '@jest/core@27.5.1(ts-node@10.9.2(@types/node@10.17.60)(typescript@5.4.2))':
-    dependencies:
-      '@jest/console': 27.5.1
-      '@jest/reporters': 27.5.1
-      '@jest/test-result': 27.5.1
-      '@jest/transform': 27.5.1
-      '@jest/types': 27.5.1
-      '@types/node': 10.17.60
-      ansi-escapes: 4.3.2
-      chalk: 4.1.2
-      emittery: 0.8.1
-      exit: 0.1.2
-      graceful-fs: 4.2.11
-      jest-changed-files: 27.5.1
-      jest-config: 27.5.1(ts-node@10.9.2(@types/node@10.17.60)(typescript@5.4.2))
       jest-haste-map: 27.5.1
       jest-message-util: 27.5.1
       jest-regex-util: 27.5.1
@@ -16888,6 +16884,12 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
+  axios@0.21.4:
+    dependencies:
+      follow-redirects: 1.15.9
+    transitivePeerDependencies:
+      - debug
+
   axios@1.8.4:
     dependencies:
       follow-redirects: 1.15.9
@@ -18275,6 +18277,10 @@ snapshots:
       sha.js: 2.4.11
 
   create-require@1.1.1: {}
+
+  cross-env@7.0.3:
+    dependencies:
+      cross-spawn: 7.0.6
 
   cross-spawn@5.1.0:
     dependencies:
@@ -21392,27 +21398,6 @@ snapshots:
       - ts-node
       - utf-8-validate
 
-  jest-cli@27.5.1(ts-node@10.9.2(@types/node@10.17.60)(typescript@5.4.2)):
-    dependencies:
-      '@jest/core': 27.5.1(ts-node@10.9.2(@types/node@10.17.60)(typescript@5.4.2))
-      '@jest/test-result': 27.5.1
-      '@jest/types': 27.5.1
-      chalk: 4.1.2
-      exit: 0.1.2
-      graceful-fs: 4.2.11
-      import-local: 3.2.0
-      jest-config: 27.5.1(ts-node@10.9.2(@types/node@10.17.60)(typescript@5.4.2))
-      jest-util: 27.5.1
-      jest-validate: 27.5.1
-      prompts: 2.4.2
-      yargs: 16.2.0
-    transitivePeerDependencies:
-      - bufferutil
-      - canvas
-      - supports-color
-      - ts-node
-      - utf-8-validate
-
   jest-config@27.5.1(ts-node@10.9.2(@types/node@10.17.60)(typescript@3.9.10)):
     dependencies:
       '@babel/core': 7.26.10
@@ -21441,40 +21426,6 @@ snapshots:
       strip-json-comments: 3.1.1
     optionalDependencies:
       ts-node: 10.9.2(@types/node@10.17.60)(typescript@3.9.10)
-    transitivePeerDependencies:
-      - bufferutil
-      - canvas
-      - supports-color
-      - utf-8-validate
-
-  jest-config@27.5.1(ts-node@10.9.2(@types/node@10.17.60)(typescript@5.4.2)):
-    dependencies:
-      '@babel/core': 7.26.10
-      '@jest/test-sequencer': 27.5.1
-      '@jest/types': 27.5.1
-      babel-jest: 27.5.1(@babel/core@7.26.10)
-      chalk: 4.1.2
-      ci-info: 3.9.0
-      deepmerge: 4.3.1
-      glob: 7.2.3
-      graceful-fs: 4.2.11
-      jest-circus: 27.5.1
-      jest-environment-jsdom: 27.5.1
-      jest-environment-node: 27.5.1
-      jest-get-type: 27.5.1
-      jest-jasmine2: 27.5.1
-      jest-regex-util: 27.5.1
-      jest-resolve: 27.5.1
-      jest-runner: 27.5.1
-      jest-util: 27.5.1
-      jest-validate: 27.5.1
-      micromatch: 4.0.8
-      parse-json: 5.2.0
-      pretty-format: 27.5.1
-      slash: 3.0.0
-      strip-json-comments: 3.1.1
-    optionalDependencies:
-      ts-node: 10.9.2(@types/node@10.17.60)(typescript@5.4.2)
     transitivePeerDependencies:
       - bufferutil
       - canvas
@@ -21848,18 +21799,6 @@ snapshots:
       '@jest/core': 27.5.1(ts-node@10.9.2(@types/node@10.17.60)(typescript@3.9.10))
       import-local: 3.2.0
       jest-cli: 27.5.1(ts-node@10.9.2(@types/node@10.17.60)(typescript@3.9.10))
-    transitivePeerDependencies:
-      - bufferutil
-      - canvas
-      - supports-color
-      - ts-node
-      - utf-8-validate
-
-  jest@27.5.1(ts-node@10.9.2(@types/node@10.17.60)(typescript@5.4.2)):
-    dependencies:
-      '@jest/core': 27.5.1(ts-node@10.9.2(@types/node@10.17.60)(typescript@5.4.2))
-      import-local: 3.2.0
-      jest-cli: 27.5.1(ts-node@10.9.2(@types/node@10.17.60)(typescript@5.4.2))
     transitivePeerDependencies:
       - bufferutil
       - canvas
@@ -26728,25 +26667,6 @@ snapshots:
       typescript: 3.9.10
       v8-compile-cache-lib: 3.0.1
       yn: 3.1.1
-
-  ts-node@10.9.2(@types/node@10.17.60)(typescript@5.4.2):
-    dependencies:
-      '@cspotcode/source-map-support': 0.8.1
-      '@tsconfig/node10': 1.0.11
-      '@tsconfig/node12': 1.0.11
-      '@tsconfig/node14': 1.0.3
-      '@tsconfig/node16': 1.0.4
-      '@types/node': 10.17.60
-      acorn: 8.14.1
-      acorn-walk: 8.3.4
-      arg: 4.1.3
-      create-require: 1.1.1
-      diff: 4.0.2
-      make-error: 1.3.6
-      typescript: 5.4.2
-      v8-compile-cache-lib: 3.0.1
-      yn: 3.1.1
-    optional: true
 
   tsconfig-paths@3.15.0:
     dependencies:

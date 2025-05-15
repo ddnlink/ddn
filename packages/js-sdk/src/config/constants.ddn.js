@@ -9,6 +9,7 @@ module.exports = {
   nethash: 'm66gcvle', // 标定该链的版本
   tokenName: 'DDN',
   tokenPrefix: 'D',
+  contractPrefix: 'C',
   maxAmount: 24 * 10 ** 8,
   fixedPoint: 10 ** 8,
   totalAmount: '240000000000000000',
@@ -81,7 +82,8 @@ module.exports = {
 
       // contract
       contract: '1.0',
-      contract_transfer: '0.1',
+      contract_call: '0',
+      contract_pay: '0',
 
       // todo: 测试中提供的费用
       username: '0.1',
@@ -139,7 +141,8 @@ module.exports = {
 
     // contract
     contract: '1.0',
-    contract_transfer: '0.1',
+    contract_call: '0',
+    contract_pay: '0',
 
     // todo: 测试中提供的费用
     username: '0.1',

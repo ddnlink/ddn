@@ -1,4 +1,3 @@
-import assert from 'assert'
 import DdnUtils from '@ddn/utils'
 
 // due to contract sandbox always return json object
@@ -18,8 +17,10 @@ function BigintToString (obj) {
 
 function processResult (result) {
   BigintToString(result)
-  const { gas = 0, error, stateChangesHash, transaction_id, contract_id, data } = result
-  return { gas, error, stateChangesHash, transaction_id, data, contract_id, success: !!result.success }
+  const { gas = 0, error, stateChangesHash, transaction_id, contract_id, contractId, data } = result
+  // 使用contract_id或contractId，确保至少有一个值
+  const finalContractId = contract_id || contractId
+  return { gas, error, stateChangesHash, transaction_id, data, contract_id: finalContractId, success: !!result.success }
 }
 
 async function populateTrs (results, dao) {
@@ -123,12 +124,78 @@ class ContractService {
       }
     }
 
-    const offset = query.offset
-    const limit = query.limit
-    const attributes = ['id', 'name', 'owner', 'transaction_id', 'gas_limit', 'timestamp', 'version', 'desc']
+    const offset = query.offset || 0
+    const limit = query.limit || 10
+    const attributes = ['id', 'name', 'owner', 'transaction_id', 'gasLimit', 'timestamp', 'version', 'desc']
 
-    const result = await this.dao.findPage('contract', { where, order: sorts, offset, limit, attributes })
-    return { success: true, rows: result.rows, totalCount: result.total }
+    try {
+      // 首先尝试从contracts表查询，这里用单数模型的名称
+      const result = await this.dao.findPage('contract', { where, order: sorts, offset, limit, attributes })
+
+      // 如果没有数据，尝试从contract_result表查询
+      if (result.total === 0) {
+        // 构建查询条件
+        const contractWhere = {};
+
+        if (query.id) {
+          contractWhere.contract_id = query.id;
+        }
+        // 注意：name和owner字段在contract_result表中可能不存在，需要根据实际情况调整
+        // 这里暂时不添加这些条件
+
+        const contractResults = await this.dao.findPage('contract_result', {
+          where: contractWhere,
+          order: [['transaction_id', 'desc']],
+          offset,
+          limit
+        });
+
+        // 从contract_result数据构建合约数据
+        const rows = [];
+        for (const contractResult of contractResults.rows) {
+          // 获取关联的交易信息
+          const tx = await this.dao.findOne('tr', {
+            where: { id: contractResult.transaction_id }
+          });
+
+          if (tx && contractResult.contract_id) { // 确保有合约ID
+            const contract = {
+              id: contractResult.contract_id || '',
+              transaction_id: tx.id,
+              gas: contractResult.gas || 0,
+              timestamp: tx.timestamp,
+              success: contractResult.success
+            };
+
+            // 尝试从contract_transfer表获取更多信息
+            try {
+              const contractTransfer = await this.dao.findOne('contract_transfer', {
+                where: { transaction_id: tx.id }
+              });
+
+              if (contractTransfer) {
+                contract.transfer_info = {
+                  sender_id: contractTransfer.sender_id,
+                  recipient_id: contractTransfer.recipient_id,
+                  amount: contractTransfer.amount
+                };
+              }
+            } catch (e) {
+              this.logger.error('Error fetching contract_transfer:', e);
+            }
+
+            rows.push(contract);
+          }
+        }
+
+        return { success: true, rows, totalCount: rows.size }
+      }
+
+      return { success: true, rows: result.rows, totalCount: result.total }
+    } catch (err) {
+      this.logger.error('Error querying contracts:', err)
+      return { success: false, error: err.message }
+    }
   }
 
   /**
@@ -138,9 +205,188 @@ class ContractService {
    * desc, timestamp, metadata } }
    */
   async getGet (req) {
-    const contract = await this.dao.findOneByPrimaryKey('contract', req.query.id || req.params.id)
-    return { success: true, contract }
+    try {
+      const id = req.query.id || req.params.id;
+
+      // 首先尝试从contracts表查询
+      let contract = await this.dao.findOneByPrimaryKey('contract', id);
+
+      // 如果没有找到，尝试从contract_result表直接查询
+      if (!contract) {
+        // 查找合约结果
+        const contractResult = await this.dao.findOne('contract_result', {
+          where: { contract_id: id }
+        });
+
+        if (contractResult) {
+          // 获取关联的交易信息
+          const tx = await this.dao.findOne('tr', {
+            where: { id: contractResult.transaction_id }
+          });
+
+          if (tx) {
+            contract = {
+              id: contractResult.contract_id || '',
+              transaction_id: tx.id,
+              gas: contractResult.gas || 0,
+              timestamp: tx.timestamp,
+              success: contractResult.success
+            };
+
+            // 尝试从contract_transfer表获取更多信息
+            const contractTransfer = await this.dao.findOne('contract_transfer', {
+              where: { transaction_id: tx.id }
+            });
+
+            if (contractTransfer) {
+              contract.transfer_info = {
+                sender_id: contractTransfer.sender_id,
+                recipient_id: contractTransfer.recipient_id,
+                amount: contractTransfer.amount
+              };
+            }
+          }
+        }
+      }
+
+      return { success: true, contract };
+    } catch (err) {
+      this.logger.error('Error getting contract:', err);
+      return { success: false, error: err.message };
+    }
   }
+
+  /**
+   * Get contract by ID (/:id)
+   * @param req Request with contract ID in params
+   * @returns Contract details
+   */
+  async getId (req) {
+    try {
+      const id = req.params.id;
+      if (!id) {
+        return { success: false, error: 'Contract ID is required' };
+      }
+
+      // 首先尝试从contracts表查询
+      let contract = await this.dao.findOneByPrimaryKey('contract', id);
+
+      // 如果没有找到，尝试从contract_result表直接查询
+      if (!contract) {
+        // 查找合约结果
+        const contractResult = await this.dao.findOne('contract_result', {
+          where: { contract_id: id }
+        });
+
+        if (contractResult) {
+          // 获取关联的交易信息
+          const tx = await this.dao.findOne('tr', {
+            where: { id: contractResult.transaction_id }
+          });
+
+          if (tx) {
+            contract = {
+              id: contractResult.contract_id || '',
+              transaction_id: tx.id,
+              gas: contractResult.gas || 0,
+              timestamp: tx.timestamp,
+              success: contractResult.success
+            };
+
+            // 尝试从contract_transfer表获取更多信息
+            const contractTransfer = await this.dao.findOne('contract_transfer', {
+              where: { transaction_id: tx.id }
+            });
+
+            if (contractTransfer) {
+              contract.transfer_info = {
+                sender_id: contractTransfer.sender_id,
+                recipient_id: contractTransfer.recipient_id,
+                amount: contractTransfer.amount
+              };
+            }
+          }
+        }
+      }
+
+      if (!contract) {
+        return { success: false, error: `Contract with ID ${id} not found` };
+      }
+
+      return { success: true, contract };
+    } catch (err) {
+      this.logger.error(`Error getting contract by ID: ${err.message}`, err);
+      return { success: false, error: err.message };
+    }
+  }
+
+  /**
+   * Get contract by ID (/:id)
+   * 这个方法会被映射为 GET /api/contracts/:id
+   * @param req Request with contract ID in params
+   * @returns Contract details
+   */
+  // async getId (req) {
+  //   try {
+  //     const id = req.params.id;
+  //     if (!id) {
+  //       return { success: false, error: 'Contract ID is required' };
+  //     }
+
+  //     this.logger.debug(`Getting contract by ID: ${id}`);
+
+  //     // 首先尝试从contracts表查询
+  //     let contract = await this.dao.findOneByPrimaryKey('contract', id);
+
+  //     // 如果没有找到，尝试从contract_result表直接查询
+  //     if (!contract) {
+  //       this.logger.debug(`Contract not found in contract table, trying contract_result table for ID: ${id}`);
+  //       // 查找合约结果
+  //       const contractResult = await this.dao.findOne('contract_result', {
+  //         where: { contract_id: id }
+  //       });
+
+  //       if (contractResult) {
+  //         // 获取关联的交易信息
+  //         const tx = await this.dao.findOne('tr', {
+  //           where: { id: contractResult.transaction_id }
+  //         });
+
+  //         if (tx) {
+  //           contract = {
+  //             id: contractResult.contract_id || '',
+  //             transaction_id: tx.id,
+  //             gas: contractResult.gas || 0,
+  //             timestamp: tx.timestamp,
+  //             success: contractResult.success
+  //           };
+
+  //           // 尝试从contract_transfer表获取更多信息
+  //           const contractTransfer = await this.dao.findOne('contract_transfer', {
+  //             where: { transaction_id: tx.id }
+  //           });
+
+  //           if (contractTransfer) {
+  //             contract.transfer_info = {
+  //               sender_id: contractTransfer.sender_id,
+  //               recipient_id: contractTransfer.recipient_id,
+  //               amount: contractTransfer.amount
+  //             };
+  //           }
+  //         }
+  //       }
+  //     }
+
+  //     if (!contract) {
+  //       return { success: false, error: `Contract with ID ${id} not found` };
+  //     }
+
+  //     return { success: true, contract };
+  //   } catch (err) {
+  //     this.logger.error(`Error getting contract by ID: ${err.message}`, err);
+  //     return { success: false, error: err.message };
+  //   }
+  // }
 
   /**
    * Get contract metadata
@@ -149,10 +395,42 @@ class ContractService {
    * '/metadata'
    */
   async getMetadata (req) {
-    const { metadata } = await this.dao.findOneByPrimaryKey('contract', req.query.id || req.params.id, {
-      attributes: ['id', 'metadata']
-    })
-    return { success: true, metadata }
+    try {
+      const id = req.query.id || req.params.id;
+
+      // 首先尝试从contracts表查询
+      const contract = await this.dao.findOneByPrimaryKey('contract', id, {
+        attributes: ['id', 'metadata']
+      });
+
+      if (contract && contract.metadata) {
+        return { success: true, metadata: contract.metadata };
+      }
+
+      // 如果没有找到或没有metadata，尝试从contract_result表直接查询
+      const contractResult = await this.dao.findOne('contract_result', {
+        where: { contract_id: id }
+      });
+
+      if (contractResult) {
+        // 尝试从contract_result获取metadata
+        let metadata = '';
+        if (contractResult.data) {
+          try {
+            metadata = contractResult.data;
+          } catch (e) {
+            this.logger.error('Error getting metadata:', e);
+          }
+        }
+
+        return { success: true, metadata };
+      }
+
+      return { success: false, error: 'Contract metadata not found' };
+    } catch (err) {
+      this.logger.error('Error getting contract metadata:', err);
+      return { success: false, error: err.message };
+    }
   }
 
   /**
@@ -162,10 +440,42 @@ class ContractService {
    * '/code'
    */
   async getCode (req) {
-    const { code } = await this.dao.findOneByPrimaryKey('contract', req.query.id || req.params.id, {
-      attributes: ['id', 'code']
-    })
-    return { success: true, code }
+    try {
+      const id = req.query.id || req.params.id;
+
+      // 首先尝试从contracts表查询
+      const contract = await this.dao.findOneByPrimaryKey('contract', id, {
+        attributes: ['id', 'code']
+      });
+
+      if (contract && contract.code) {
+        return { success: true, code: contract.code };
+      }
+
+      // 如果没有找到或没有code，尝试从contract_result表直接查询
+      const contractResult = await this.dao.findOne('contract_result', {
+        where: { contract_id: id }
+      });
+
+      if (contractResult) {
+        // 尝试从contract_result获取code
+        let code = '';
+        if (contractResult.data) {
+          try {
+            code = contractResult.data;
+          } catch (e) {
+            this.logger.error('Error getting code:', e);
+          }
+        }
+
+        return { success: true, code };
+      }
+
+      return { success: false, error: 'Contract code not found' };
+    } catch (err) {
+      this.logger.error('Error getting contract code:', err);
+      return { success: false, error: err.message };
+    }
   }
 
   /**
@@ -213,7 +523,12 @@ class ContractService {
     const limit = query.limit ? Math.min(100, Number.parseInt(query.limit)) : 20
     // const order = query.order || 'ASC'
 
-    const result = await this.dao.findPage('contract_result', { where, offset, limit })
+    const result = await this.dao.findPage('contract_result', {
+      where,
+      offset,
+      limit,
+      order: [['timestamp', 'DESC']] 
+    })
 
     const rows = []
     for (const row of result.rows) {
@@ -250,51 +565,180 @@ class ContractService {
   }
 
   /**
-   * Query single send reult by transaction id,
+   * Query contract result by contract id or transaction id
    * @param id contract id
-   * @param transactionId transaction id
+   * @param transactionId transaction id (optional)
    * @returns query result { result: { transactionId, contractId, success, gas, error, stateChangesHash, transaction } }
    * '/result', async (
    */
   async getResult (req) {
-    const { params, query } = req
-    const id = params.id || query.id
-    const transactionId = params.transactionId || query.transactionId
-    assert(!!transactionId, 'Invalid transaction id')
-    const contract = await this.dao.findOneByPrimaryKey('contract', id, { attributes: ['id', 'name'] })
+    const { params, query } = req;
+    const id = params.id || query.id;
+    const transactionId = params.transactionId || query.transactionId;
 
-    let result = await this.dao.findOne('contract_result', { where: { transactionId } })
-    assert(result, `send result not found (transactionId = ${transactionId})`)
-    const record = processResult(result)
-    const resultWithTransactions = await populateTrs([record], this.dao)
+    this.logger.debug(`Getting contract result for contract ID: ${id}, transaction ID: ${transactionId}`);
 
-    result = resultWithTransactions[0]
-    const transaction = result && result.transaction
-    if (transaction && transaction.type === DdnUtils.assetTypes.CONTRACT) {
-      // assert(transaction.args && id === transaction.args.id, `Invalid contract id ${id}`)
-    } else {
-      assert(contract && contract.id === result.contractId, `Invalid contract id ${id}`)
+    // 参数验证
+    if (!id && !transactionId) {
+      return { success: false, error: 'Either contract ID or transaction ID is required' };
     }
 
-    return { success: true, result }
+    // 查询合约执行结果
+    let result;
+
+    try {
+      // 构建查询条件，同时考虑contract_id和contractId字段
+      let whereClause = {};
+
+      if (transactionId) {
+        // 如果提供了交易ID，优先使用交易ID查询
+        whereClause.transaction_id = transactionId;
+      }
+
+      if (id) {
+        // 使用OR条件同时查询contract_id和contractId字段
+        whereClause = {
+          ...whereClause,
+          contract_id: id
+        };
+      }
+
+      this.logger.debug(`Searching with where clause: ${JSON.stringify(whereClause)}`);
+
+      if (transactionId) {
+        // 查询单个结果
+        result = await this.dao.findOne('contract_result', { where: whereClause });
+
+        if (!result) {
+          this.logger.debug(`No result found with transaction_id: ${transactionId}, trying direct SQL query`);
+
+          // 尝试使用原始SQL查询，以便处理字段名不一致的问题
+          const rawResults = await this.dao.query(
+            'SELECT * FROM contract_result WHERE transaction_id = ?',
+            { replacements: [transactionId], type: this.dao.QueryTypes.SELECT }
+          );
+
+          if (rawResults && rawResults.length > 0) {
+            result = rawResults[0];
+          }
+        }
+
+        if (!result) {
+          return { success: false, error: `Contract result not found for transaction ID: ${transactionId}` };
+        }
+      } else {
+        // 查询最新结果
+        const results = await this.dao.findList('contract_result', {
+          where: whereClause,
+          order: [['timestamp', 'DESC']],
+          limit: 1
+        });
+
+        if (!results || results.length === 0) {
+          this.logger.debug(`No results found with contract_id: ${id}, trying direct SQL query`);
+
+          // 尝试使用原始SQL查询
+          const rawResults = await this.dao.query(
+            'SELECT * FROM contract_result WHERE contract_id = ? OR contractId = ? ORDER BY timestamp DESC LIMIT 1',
+            { replacements: [id, id], type: this.dao.QueryTypes.SELECT }
+          );
+
+          if (rawResults && rawResults.length > 0) {
+            result = rawResults[0];
+          } else {
+            return { success: false, error: `No results found for contract ID: ${id}` };
+          }
+        } else {
+          result = results[0];
+        }
+      }
+
+      // 处理结果
+      const record = processResult(result);
+      const resultWithTransactions = await populateTrs([record], this.dao);
+      result = resultWithTransactions[0];
+
+      // 如果需要，可以在这里获取合约信息
+      const contractId = result.contract_id || result.contractId;
+      if (contractId) {
+        const contract = await this.dao.findOneByPrimaryKey('contract', contractId, { attributes: ['id', 'name'] });
+        if (contract) {
+          result.contract_name = contract.name;
+        }
+      }
+
+      return { success: true, result };
+    } catch (err) {
+      this.logger.error(`Error getting contract result: ${err.message}`, err);
+      return { success: false, error: `Error retrieving contract result: ${err.message}` };
+    }
   }
 
   /**
    * Get state of contract
-   * @param id  contract id
-   * @param statePath  path of state, separated by '.' , eg: 'holding.0' => contract['holding'][0]
+   * @param contractName  contract name
+   * @param statePath  path of state, separated by '.'
    * @returns state value if primitive, else return count of children states
-   * '/states'
+   * '/api/contracts/{contractName}/states/{statePath}'
    */
   async getStates (req) {
-    const { params, query } = req
-    const id = params.id || query.id
-    const statePath = params.statePath || query.statePath
-    if (!statePath) throw new Error(`Invalid state path '${statePath}'`)
+    const { contractName, statePath } = req.params
+    if (!statePath) {
+      return { success: false, error: 'Invalid state path' }
+    }
 
-    const states = await this.runtime.dvm.queryState(id, String(statePath).split('.'))
-    BigintToString(states)
-    return { success: true, states }
+    try {
+      const result = await this.runtime.dvm.queryState(contractName, statePath.split('.'))
+      BigintToString(result)
+
+      let response
+      if (typeof result === 'object' && result !== null) {
+        if (Array.isArray(result)) {
+          response = result.length
+        } else {
+          response = Object.keys(result).length
+        }
+      } else {
+        response = result
+      }
+
+      return { success: true, result: response }
+    } catch (error) {
+      this.logger.error(`Error querying contract state: ${error.message}`, error)
+      return { success: false, error: error.message }
+    }
+  }
+
+  /**
+   * Get constant value of contract
+   * @param contractName  contract name
+   * @param methodName  constant method name
+   * @returns constant method call result
+   * '/api/contracts/{contractName}/constant/{methodName}'
+   */
+  async postConstant (req) {
+    const { contractName, methodName } = req.params
+    const args = req.body
+
+    if (!Array.isArray(args)) {
+      return { success: false, error: 'Arguments should be an array' }
+    }
+
+    try {
+      const result = await this.runtime.dvm.getConstant(contractName, methodName, ...args)
+      BigintToString(result)
+      
+      // Check if the result is a valid JSON and its length
+      const jsonResult = JSON.stringify(result)
+      if (jsonResult.length >= 32 * 1024) {
+        return { success: false, error: 'Result exceeds maximum allowed length (32K)' }
+      }
+
+      return { success: true, result }
+    } catch (error) {
+      this.logger.error(`Error getting constant: ${error.message}`, error)
+      return { success: false, error: error.message }
+    }
   }
 
   /**
@@ -303,7 +747,7 @@ class ContractService {
    * @param method  constant method id
    * @param args arguments of method
    * @returns constant method call result
-   * '/call'
+   * 'api/contracts/call'
    */
   async postCall (req) {
     const { id, method, args } = req.body
@@ -312,7 +756,7 @@ class ContractService {
       throw new Error('Arguments should be array')
     }
 
-    const result = await this.runtime.dvm.callReadonly(id, method, ...methodArgs)
+    const result = await this.runtime.dvm.callContract(id, method, ...methodArgs)
     BigintToString(result)
     return { success: true, result }
   }

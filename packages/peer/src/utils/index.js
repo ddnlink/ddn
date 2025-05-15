@@ -1,7 +1,6 @@
 // 核心模块导出
 export * from './system';
 export * from './logger';
-export * from './energy';
 export * from './state-machine';
 export * from './bus';
 export { default as Protobuf } from './protobuf';

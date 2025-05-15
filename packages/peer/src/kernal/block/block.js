@@ -757,7 +757,21 @@ class Block {
 
   async _broadcastNewBlock(block, votes) {
     this.logger.info(`Block applied correctly with ${block.transactions.length} transactions`);
-    votes.signatures = votes.signatures.slice(0, 6);
+
+    // 确保 votes 是有效的对象
+    if (!votes || typeof votes !== 'object') {
+      this.logger.error('Invalid votes object for broadcast');
+      votes = { height: block.height, id: block.id, signatures: [] };
+    }
+
+    // 确保 signatures 是数组
+    if (!Array.isArray(votes.signatures)) {
+      this.logger.error('Invalid signatures array in votes');
+      votes.signatures = [];
+    } else {
+      // 限制签名数量，避免数据过大
+      votes.signatures = votes.signatures.slice(0, 6);
+    }
 
     setImmediate(async () => {
       try {
@@ -828,6 +842,7 @@ class Block {
         if (!appliedTrsIdSet) {
           // 如果交易应用失败，回滚DVM状态
           try {
+            // todo: 这个方法也可能取消了
             const lastHeight = await this.runtime.dvm.getLastHeight();
             if (lastHeight >= 0) {
               await this.runtime.dvm.rollback(this._lastBlock.height);
@@ -839,13 +854,14 @@ class Block {
           return;
         }
 
+        // fixme: 新代码取消了该方法，可以删除了
         // 如果交易应用成功，提交DVM状态
-        try {
-          await this.runtime.dvm.commit(block.height);
-          this.logger.debug(`DVM提交到高度 ${block.height} 成功`);
-        } catch (dvmErr) {
-          this.logger.error(`DVM提交错误: ${dvmErr.message}`);
-        }
+        // try {
+        //   await this.runtime.dvm.commit(block.height);
+        //   this.logger.debug(`DVM提交到高度 ${block.height} 成功`);
+        // } catch (dvmErr) {
+        //   this.logger.error(`DVM提交错误: ${dvmErr.message}`);
+        // }
         this.logger.debug('The dao.transaction is finished.');
 
         await this._cleanupState(block);

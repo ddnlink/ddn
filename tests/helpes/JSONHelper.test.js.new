@@ -1,0 +1,37 @@
+const { JSONHelper } = require('../../src/utils/json-helper')
+
+describe('JSONHelper test', () => {
+  beforeAll(async () => {
+  })
+
+  afterAll(async () => {
+  })
+
+  it('stringifyWithType test', async () => {
+    // let height = 2
+    const converter = (_, k, v) => `${_}_${k}`
+    const text1 = JSONHelper.stringifyWithType(10n)
+    const text2 = JSONHelper.stringifyWithType('hello')
+    const text3 = JSONHelper.stringifyWithType(5.32)
+    const text4 = JSONHelper.stringifyWithType(10n, converter)
+    const text5 = JSONHelper.stringifyWithType('hello', converter)
+    const text6 = JSONHelper.stringifyWithType({a: 5.32}, converter)
+    expect(text1).toBe('"I:10"')
+    expect(text2).toBe('"s:hello"')
+    expect(text3).toBe('5.32')
+    expect(text4).toBe('"s:_10"')
+    expect(text5).toBe('"s:_hello"')
+    // expect(text6).toBe('"s:a_5.32"')
+  })
+
+  it('parseWithType test', async () => {
+    // let height = 2
+    const val1 = JSONHelper.parseWithType('"I:10"')
+    const val2 = JSONHelper.parseWithType('"s:hello"')
+    const val3 = JSONHelper.parseWithType('5.32')
+    expect(val1).toBe(10n)
+    expect(val2).toBe('hello')
+    expect(val3).toBe(5.32)
+  })
+
+})

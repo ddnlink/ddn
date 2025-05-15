@@ -1,8 +1,7 @@
 /*
- * @Author:
- * @Date: 2018-11-13 11:34:49
-
- * @Last Modified time: 2020-02-13 22:48:39
+ * @Author: Tailor
+ * @Date: 2018-10-08 11:34:49
+ * @Last Modified time: 2023-03-22 16:48:39 
  */
 import Sequelize from 'sequelize'
 
@@ -10,46 +9,55 @@ export default connection => {
   return connection.define(
     'contract_transfer',
     {
-      contract_id: {
+      id: {
         type: Sequelize.STRING(64),
+        primaryKey: true,
         allowNull: true
       },
-      transaction_id: {
+      // contract_id: {
+      //   type: Sequelize.STRING(64),
+      //   allowNull: true
+      // },
+      transactionId: {
         type: Sequelize.STRING(64),
         allowNull: false
       },
-      block_height: {
+      height: { // block_height
         type: Sequelize.STRING(64),
         allowNull: false
       },
-      sender_id: {
+      senderId: {
         type: Sequelize.STRING(64),
         allowNull: false
       },
-      recipient_id: {
+      recipientId: {
         type: Sequelize.STRING(64),
         allowNull: true
       },
-      gas: {
-        type: Sequelize.INTEGER,
-        allowNull: true
-      },
+      // gas: {
+      //   type: Sequelize.INTEGER,
+      //   allowNull: true
+      // },
       amount: {
         type: Sequelize.STRING(50),
         allowNull: false
       },
       currency: {
         type: Sequelize.STRING(22)
+      },
+      timestamp: {
+        type: Sequelize.INTEGER,
+        allowNull: true
       }
     },
     {
       timestamps: false,
       indexes: [
         {
-          fields: ['contract_id']
+          fields: ['id']
         },
         {
-          fields: ['transaction_id']
+          fields: ['transactionId']
         }
       ]
     }

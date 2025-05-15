@@ -7,6 +7,7 @@ export default {
   nethash: '0ab796cd', // 标定该链的版本
   tokenName: 'DDN',
   tokenPrefix: 'D',
+  contractPrefix: 'C',
   maxAmount: 100 * 10 ** 8,
   fixedPoint: 10 ** 8,
   totalAmount: '1000000000000000000',
@@ -79,7 +80,8 @@ export default {
 
       // contract
       contract: '1.0',
-      contract_transfer: '0.1',
+      contract_call: '0',
+      contract_pay: '0',
 
       // todo: 测试中提供的费用
       username: '0.1',
@@ -137,7 +139,8 @@ export default {
 
       // contract
       contract: '1.0',
-      contract_transfer: '0.1',
+      contract_call: '0',
+      contract_pay: '0',
 
       // todo: 测试中提供的费用
       username: '0.1',

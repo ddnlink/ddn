@@ -1,4 +1,4 @@
-import { init, sendContract } from '../../plugins/api'
+import { init, callContract } from '../../plugins/api'
 
 module.exports = {
   command: 'send',
@@ -33,6 +33,6 @@ module.exports = {
 
   handler: function (argv) {
     init(argv)
-    sendContract(argv)
+    callContract(argv)
   }
 }

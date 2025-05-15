@@ -1,4 +1,4 @@
-import { init, deployContract } from '../../plugins/api'
+import { init, registerContract } from '../../plugins/api'
 
 module.exports = {
   command: 'deploy',
@@ -41,6 +41,6 @@ module.exports = {
 
   handler: function (argv) {
     init(argv)
-    deployContract(argv)
+    registerContract(argv)
   }
 }

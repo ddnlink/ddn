@@ -263,7 +263,7 @@ async function getBlockId (options) {
   console.log(await DdnCrypto.getId(bytes))
 }
 
-async function deployContract (options) {
+async function registerContract (options) {
   if (options.file && !fs.existsSync(options.file)) {
     console.error('Error: invalid params, contract file not exists')
     return
@@ -325,7 +325,7 @@ async function sendContract (options) {
 
   // 初始化 JsSdk
   
-  const trs = await JsSdk.contract.send(opts, options.secret, options.secondSecret)
+  const trs = await JsSdk.contract.transfer(opts, options.secret, options.secondSecret)
   console.log(trs)
   getApi().broadcastTransaction(trs, function (err, result) {
     console.log(err || result)
@@ -558,7 +558,7 @@ export {
   getBlockId,
   verifyBytes,
   registerDapp,
-  deployContract,
+  registerContract,
   payContract,
   sendContract,
   callContract,

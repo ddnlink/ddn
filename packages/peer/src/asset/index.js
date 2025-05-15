@@ -24,10 +24,10 @@ function getErrorMsg(err) {
 
 let _singleton
 
-class Assets {
+class Asset {
   static singleton (context) {
     if (!_singleton) {
-      _singleton = new Assets(context)
+      _singleton = new Asset(context)
     }
     return _singleton
   }
@@ -101,4 +101,4 @@ class Assets {
   }
 }
 
-export default Assets
+export default Asset

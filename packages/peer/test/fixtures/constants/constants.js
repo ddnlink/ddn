@@ -2,6 +2,7 @@ export default {
   nethash: '0ab796cd', // 标定该链的版本
   tokenName: 'DDN',
   tokenPrefix: 'D',
+  contractPrefix: 'C',
   maxAmount: 100 * 10 ** 8,
   fixedPoint: 10 ** 8,
   totalAmount: '10000000000000000',

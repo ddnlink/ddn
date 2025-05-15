@@ -93,6 +93,7 @@
     "@typescript-eslint/parser": "^3.3.0",
     "conventional-changelog": "^3.1.21",
     "conventional-changelog-cli": "^2.2.2",
+    "cross-env": "^7.0.3",
     "dumi": "^1.0.3",
     "esbuild": "^0.23.0",
     "eslint": "^7.11.0",
@@ -121,5 +122,8 @@
     "turbo": "^2.0.9",
     "typescript": "^3.9.10"
   },
-  "packageManager": "pnpm@10.7.1"
+  "packageManager": "pnpm@10.7.1",
+  "devDependencies": {
+    "@babel/plugin-transform-export-namespace-from": "^7.27.1"
+  }
 }

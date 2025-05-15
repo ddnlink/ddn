@@ -16,36 +16,69 @@ class Protobuf {
   }
 
   encodeBlock (block) {
-    const obj = extend(true, {}, block)
-    obj.payload_hash = Buffer.from(obj.payload_hash, 'hex') // wxm block database
-    obj.generator_public_key = Buffer.from(obj.generator_public_key, 'hex') // wxm block database
-    if (obj.block_signature) {
-      // wxm block database
-      obj.block_signature = Buffer.from(obj.block_signature, 'hex') // wxm block database
-    }
-    for (let i = 0; i < obj.transactions.length; ++i) {
-      this.transactionStringToBytes(obj.transactions[i])
-    }
+    try {
+      const obj = extend(true, {}, block)
+      obj.payload_hash = Buffer.from(obj.payload_hash, 'hex') // wxm block database
+      obj.generator_public_key = Buffer.from(obj.generator_public_key, 'hex') // wxm block database
+      if (obj.block_signature) {
+        // wxm block database
+        obj.block_signature = Buffer.from(obj.block_signature, 'hex') // wxm block database
+      }
 
-    // Note: 当顶级Namespace为空的时候，下面的调用等同于 this.root.lookup('Block').encode(obj).finish()
-    return this.root.Block.encode(obj).finish()
+      // 处理交易
+      for (let i = 0; i < obj.transactions.length; ++i) {
+        // 确保 args 字段是字符串
+        if (obj.transactions[i].args && Array.isArray(obj.transactions[i].args)) {
+          obj.transactions[i].args = JSON.stringify(obj.transactions[i].args);
+        }
+
+        this.transactionStringToBytes(obj.transactions[i])
+      }
+
+      // Note: 当顶级Namespace为空的时候，下面的调用等同于 this.root.lookup('Block').encode(obj).finish()
+      return this.root.Block.encode(obj).finish()
+    } catch (err) {
+      console.error(`Failed to encode block: ${err.message}`);
+      throw err;
+    }
   }
 
   decodeBlock (data) {
-    const obj = this.root.Block.decode(data)
+    try {
+      const obj = this.root.Block.decode(data)
 
-    // obj = toNumber(obj);
+      // obj = toNumber(obj);
 
-    obj.payload_hash = obj.payload_hash.toString('hex') // wxm block database
-    obj.generator_public_key = obj.generator_public_key.toString('hex') // wxm block database
-    if (obj.block_signature) {
-      // wxm block database
-      obj.block_signature = obj.block_signature.toString('hex') // wxm block database
+      obj.payload_hash = obj.payload_hash.toString('hex') // wxm block database
+      obj.generator_public_key = obj.generator_public_key.toString('hex') // wxm block database
+      if (obj.block_signature) {
+        // wxm block database
+        obj.block_signature = obj.block_signature.toString('hex') // wxm block database
+      }
+
+      // 处理交易
+      for (let i = 0; i < obj.transactions.length; ++i) {
+        this.transactionBytesToString(obj.transactions[i])
+
+        // 尝试将 args 字段从字符串转换回数组
+        if (obj.transactions[i].args && typeof obj.transactions[i].args === 'string') {
+          try {
+            // 检查是否是JSON数组
+            if (obj.transactions[i].args.startsWith('[') && obj.transactions[i].args.endsWith(']')) {
+              obj.transactions[i].args = JSON.parse(obj.transactions[i].args)
+            }
+          } catch (err) {
+            // 如果解析失败，保持原样
+            console.error(`Failed to parse args as JSON in transaction ${obj.transactions[i].id}: ${err.message}`)
+          }
+        }
+      }
+
+      return obj
+    } catch (err) {
+      console.error(`Failed to decode block: ${err.message}`);
+      throw err;
     }
-    for (let i = 0; i < obj.transactions.length; ++i) {
-      this.transactionBytesToString(obj.transactions[i])
-    }
-    return obj
   }
 
   encodeBlockPropose (propose) {
@@ -69,17 +102,59 @@ class Protobuf {
   }
 
   encodeBlockVotes (obj) {
-    for (const signature of obj.signatures) {
-      signature.key = Buffer.from(signature.key, 'hex')
-      signature.sig = Buffer.from(signature.sig, 'hex')
-    }
+    try {
+      // 确保 obj 是有效的对象
+      if (!obj || typeof obj !== 'object') {
+        throw new Error('Invalid block votes object');
+      }
 
-    const err = this.root.BlockVotes.verify(obj)
-    if (err) {
-      throw Error(err)
-    }
+      // 确保 signatures 是数组
+      if (!Array.isArray(obj.signatures)) {
+        obj.signatures = [];
+      }
 
-    return this.root.BlockVotes.encode(obj).finish()
+      // 创建一个新的 signatures 数组，只包含有效的签名
+      const validSignatures = [];
+
+      for (let i = 0; i < obj.signatures.length; i++) {
+        const signature = obj.signatures[i];
+
+        // 检查签名是否有效
+        if (signature && typeof signature === 'object' &&
+            typeof signature.key === 'string' &&
+            typeof signature.sig === 'string') {
+          try {
+            // 创建一个新的签名对象，避免修改原始对象
+            validSignatures.push({
+              key: Buffer.from(signature.key, 'hex'),
+              sig: Buffer.from(signature.sig, 'hex')
+            });
+          } catch (err) {
+            console.error(`Failed to convert signature at index ${i} to buffer: ${err.message}`);
+            // 跳过无效的签名
+          }
+        }
+      }
+
+      // 替换原始签名数组
+      obj.signatures = validSignatures;
+
+      const err = this.root.BlockVotes.verify(obj);
+      if (err) {
+        throw Error(err);
+      }
+
+      return this.root.BlockVotes.encode(obj).finish();
+    } catch (err) {
+      console.error(`Failed to encode block votes: ${err.message}`);
+      // 返回一个有效的但空的 BlockVotes 对象
+      const emptyVotes = {
+        height: obj.height || '0',
+        id: obj.id || '',
+        signatures: []
+      };
+      return this.root.BlockVotes.encode(emptyVotes).finish();
+    }
   }
 
   decodeBlockVotes (data) {
@@ -95,6 +170,12 @@ class Protobuf {
 
   encodeTransaction (trs) {
     const obj = extend(true, {}, trs)
+
+    // 确保 args 字段是字符串
+    if (obj.args && Array.isArray(obj.args)) {
+      obj.args = JSON.stringify(obj.args)
+    }
+
     this.transactionStringToBytes(obj)
 
     const err = this.root.Transaction.verify(obj)
@@ -108,58 +189,100 @@ class Protobuf {
   decodeTransaction (data) {
     const obj = this.root.Transaction.decode(data).toJSON()
     this.transactionBytesToString(obj)
+
+    // 尝试将 args 字段从字符串转换回数组
+    if (obj.args && typeof obj.args === 'string') {
+      try {
+        // 检查是否是JSON数组
+        if (obj.args.startsWith('[') && obj.args.endsWith(']')) {
+          obj.args = JSON.parse(obj.args)
+        }
+      } catch (err) {
+        // 如果解析失败，保持原样
+        console.error(`Failed to parse args as JSON: ${err.message}`)
+      }
+    }
+
     return obj
   }
 
   transactionStringToBytes (obj) {
-    obj.senderPublicKey = Buffer.from(obj.senderPublicKey, 'hex') // wxm block database
-    obj.signature = Buffer.from(obj.signature, 'hex')
-    if (obj.requester_public_key) {
-      // wxm block database
-      obj.requester_public_key = Buffer.from(obj.requester_public_key, 'hex') // wxm block database
-    }
-    if (obj.sign_signature) {
-      // wxm block database
-      obj.sign_signature = Buffer.from(obj.sign_signature, 'hex') // wxm block database
-    }
+    try {
+      // 确保 args 字段是字符串
+      if (obj.args && Array.isArray(obj.args)) {
+        obj.args = JSON.stringify(obj.args);
+      }
 
-    switch (obj.type) {
-      case DdnUtils.assetTypes.DELEGATE:
-        if (obj.asset.delegate) {
-          obj.asset.delegate.publicKey = Buffer.from(obj.asset.delegate.publicKey, 'hex') // wxm block database
-        }
-        break
-      case DdnUtils.assetTypes.SIGNATURE:
-        if (obj.asset.signature) {
-          obj.asset.signature.publicKey = Buffer.from(obj.asset.signature.publicKey, 'hex') // wxm block database
-        }
-        break
+      obj.senderPublicKey = Buffer.from(obj.senderPublicKey, 'hex') // wxm block database
+      obj.signature = Buffer.from(obj.signature, 'hex')
+      if (obj.requester_public_key) {
+        // wxm block database
+        obj.requester_public_key = Buffer.from(obj.requester_public_key, 'hex') // wxm block database
+      }
+      if (obj.sign_signature) {
+        // wxm block database
+        obj.sign_signature = Buffer.from(obj.sign_signature, 'hex') // wxm block database
+      }
+
+      switch (obj.type) {
+        case DdnUtils.assetTypes.DELEGATE:
+          if (obj.asset.delegate) {
+            obj.asset.delegate.publicKey = Buffer.from(obj.asset.delegate.publicKey, 'hex') // wxm block database
+          }
+          break
+        case DdnUtils.assetTypes.SIGNATURE:
+          if (obj.asset.signature) {
+            obj.asset.signature.publicKey = Buffer.from(obj.asset.signature.publicKey, 'hex') // wxm block database
+          }
+          break
+      }
+    } catch (err) {
+      console.error(`Failed to convert transaction string to bytes: ${err.message}`);
+      throw err;
     }
   }
 
   transactionBytesToString (obj) {
-    obj.senderPublicKey = Buffer.from(obj.senderPublicKey, 'base64').toString('hex') // obj.senderPublicKey.toString('hex');  //wxm block database
-    obj.signature = Buffer.from(obj.signature, 'base64').toString('hex') // obj.signature.toString('hex');
-    if (obj.requester_public_key) {
-      // wxm block database
-      obj.requester_public_key = Buffer.from(obj.requester_public_key, 'base64').toString('hex') // obj.requester_public_key.toString('hex');  //wxm block database
-    }
-    if (obj.sign_signature) {
-      // wxm block database
-      obj.sign_signature = Buffer.from(obj.sign_signature, 'base64').toString('hex') // obj.sign_signature.toString('hex');    //wxm block database
-    }
+    try {
+      obj.senderPublicKey = Buffer.from(obj.senderPublicKey, 'base64').toString('hex') // obj.senderPublicKey.toString('hex');  //wxm block database
+      obj.signature = Buffer.from(obj.signature, 'base64').toString('hex') // obj.signature.toString('hex');
+      if (obj.requester_public_key) {
+        // wxm block database
+        obj.requester_public_key = Buffer.from(obj.requester_public_key, 'base64').toString('hex') // obj.requester_public_key.toString('hex');  //wxm block database
+      }
+      if (obj.sign_signature) {
+        // wxm block database
+        obj.sign_signature = Buffer.from(obj.sign_signature, 'base64').toString('hex') // obj.sign_signature.toString('hex');    //wxm block database
+      }
 
-    switch (obj.type) {
-      case DdnUtils.assetTypes.DELEGATE:
-        if (obj.asset.delegate) {
-          obj.asset.delegate.publicKey = Buffer.from(obj.asset.delegate.publicKey, 'base64').toString('hex') // obj.asset.delegate.publicKey.toString('hex');  //wxm block database
+      // 尝试将 args 字段从字符串转换回数组
+      if (obj.args && typeof obj.args === 'string') {
+        try {
+          // 检查是否是JSON数组
+          if (obj.args.startsWith('[') && obj.args.endsWith(']')) {
+            obj.args = JSON.parse(obj.args)
+          }
+        } catch (err) {
+          // 如果解析失败，保持原样
+          console.error(`Failed to parse args as JSON: ${err.message}`)
         }
-        break
-      case DdnUtils.assetTypes.SIGNATURE:
-        if (obj.asset.signature) {
-          obj.asset.signature.publicKey = Buffer.from(obj.asset.signature.publicKey, 'base64').toString('hex') // obj.asset.signature.publicKey.toString('hex');    //wxm block database
-        }
-        break
+      }
+
+      switch (obj.type) {
+        case DdnUtils.assetTypes.DELEGATE:
+          if (obj.asset.delegate) {
+            obj.asset.delegate.publicKey = Buffer.from(obj.asset.delegate.publicKey, 'base64').toString('hex') // obj.asset.delegate.publicKey.toString('hex');  //wxm block database
+          }
+          break
+        case DdnUtils.assetTypes.SIGNATURE:
+          if (obj.asset.signature) {
+            obj.asset.signature.publicKey = Buffer.from(obj.asset.signature.publicKey, 'base64').toString('hex') // obj.asset.signature.publicKey.toString('hex');    //wxm block database
+          }
+          break
+      }
+    } catch (err) {
+      console.error(`Failed to convert transaction bytes to string: ${err.message}`);
+      // 不抛出错误，尽量保持原始对象
     }
   }
 }
@@ -178,9 +301,18 @@ export default (schemaFile, context, cb) => {
     const transCount = Asset.Utils.getTransactionCount()
     for (let i = 0; i < transCount; i++) {
       const assetTrans = Asset.Utils.getTransactionByIndex(i)
+
       if (assetTrans) {
         const assetJsonName = Asset.Utils.getAssetJsonName(assetTrans.type)
-        const TransCls = global._require_runtime_(assetTrans.package)[assetTrans.name]
+        // 获取交易类，兼容ESM和CommonJS
+        const TransModule = global._require_runtime_(assetTrans.package)
+        const TransCls = TransModule[assetTrans.name] || TransModule.default[assetTrans.name]
+
+        if (!TransCls || typeof TransCls !== 'function') {
+          console.error(`无法找到交易类: ${assetTrans.package}.${assetTrans.name}`)
+          continue; // 跳过这个资产类型
+        }
+
         const transInst = new TransCls(context) // wxm 此处传的都是null，必须保证propsMapping里不要用到这传入的context参数
         const props = await transInst.propsMapping()
         const fields = {}

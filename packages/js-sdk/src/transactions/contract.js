@@ -22,23 +22,25 @@ import { constants } from '../config'
  * @param {string} [secondSecret] - 发送者二级密钥（可选）
  * @returns {Object} 创建的合约部署交易对象
  */
-async function deploy (options, secret, secondSecret) {
+async function createContract (options, secret, secondSecret) {
   const keys = crypto.getKeys(secret)
 
   const fee = bignumber.multiply(constants.fees.contract, constants.fixedPoint)
 
   const timestamp = slots.getTime() - 5
+  const senderAddress = await crypto.generateAddress(keys.publicKey, constants.tokenPrefix)
+  const contractAddress = await crypto.generateContractAddress(`${options.name}_${senderAddress}`, constants.contractPrefix )
 
   const contract = {
     name: options.name,
-    gas_limit: +options.gasLimit || constants.maxGasLimit,
-    owner: await crypto.generateAddress(keys.publicKey, constants.tokenPrefix),
+    gasLimit: +options.gasLimit || constants.maxGasLimit,
+    ownerId: senderAddress,
+    address: contractAddress,
     desc: options.desc,
     version: options.version,
-    code: options.code
+    code: options.code,
+    consumeOwnerEnergy: options.consumeOwnerEnergy
   }
-
-  // contract.code = options.code,
 
   const transaction = {
     nethash: constants.nethash,
@@ -79,20 +81,41 @@ async function deploy (options, secret, secondSecret) {
  */
 async function pay (options, secret, secondSecret) {
   const keys = crypto.getKeys(secret)
-  let args = options.args
-  if (args instanceof Array) args = JSON.stringify(args)
 
-  const fee = bignumber.multiply(constants.fees.contract_transfer, constants.fixedPoint)
+  // 确保args是JSON字符串
+  let args = options.args
+  if (args instanceof Array) {
+    args = JSON.stringify(args)
+  } else if (typeof args === 'string') {
+    // 如果已经是字符串，尝试解析确保它是有效的JSON
+    try {
+      JSON.parse(args)
+    } catch (e) {
+      // 如果解析失败，说明不是有效的JSON，重新序列化
+      args = JSON.stringify(args)
+    }
+  } else if (args !== undefined && args !== null) {
+    // 其他类型也转为JSON字符串
+    args = JSON.stringify(args)
+  } else {
+    // 如果是undefined或null，使用空数组
+    args = '[]'
+  }
+
+  const fee = bignumber.multiply(constants.fees.contract_pay, constants.fixedPoint)
 
   const timestamp = slots.getTime() - 5
-  const opts = {
+
+  const contractPay = {
     id: options.id,
-    gas_limit: `${options.gasLimit || constants.maxGasLimit}`,
+    gasLimit: `${options.gasLimit || constants.maxGasLimit}`,
     amount: options.amount,
     currency: options.currency,
     method: options.method,
     args
   }
+
+  const opts = [options.id, `${options.gasLimit || constants.maxGasLimit}`, options.amount, options.currency, options.method, args]
   const trs = {
     nethash: constants.nethash,
     amount: '0',
@@ -100,8 +123,11 @@ async function pay (options, secret, secondSecret) {
     recipientId: null,
     timestamp,
     senderPublicKey: keys.publicKey,
-    type: assetTypes.CONTRACT_TRANSFER,
-    args: JSON.stringify(opts)
+    type: assetTypes.CONTRACT_PAY,
+    args: opts, // 直接使用数组格式，符合schema要求
+    asset: {
+      contractPay
+    }
   }
   // console.log(trs)
   trs.signature = await crypto.sign(trs, keys)
@@ -125,20 +151,39 @@ async function pay (options, secret, secondSecret) {
  * @param {string} [secondSecret] - 发送者二级密钥（可选）
  * @returns {Object} 创建的合约调用交易对象
  */
-async function send (options, secret, secondSecret) {
+async function transfer (options, secret, secondSecret) {
   const keys = crypto.getKeys(secret)
-  let args = options.args
-  if (args instanceof Array) args = JSON.stringify(args)
 
-  const fee = bignumber.multiply(constants.fees.contract_transfer, constants.fixedPoint)
+  // 确保args是JSON字符串
+  let args = options.args
+  if (args instanceof Array) {
+    args = JSON.stringify(args)
+  } else if (typeof args === 'string') {
+    // 如果已经是字符串，尝试解析确保它是有效的JSON
+    try {
+      JSON.parse(args)
+    } catch (e) {
+      // 如果解析失败，说明不是有效的JSON，重新序列化
+      args = JSON.stringify(args)
+    }
+  } else if (args !== undefined && args !== null) {
+    // 其他类型也转为JSON字符串
+    args = JSON.stringify(args)
+  } else {
+    // 如果是undefined或null，使用空数组
+    args = '[]'
+  }
+
+  const fee = bignumber.multiply(constants.fees.contract_call, constants.fixedPoint)
 
   const timestamp = slots.getTime() - 5
-  const opts = {
-    id: options.id,
-    gas_limit: `${options.gasLimit || constants.maxGasLimit}`,
-    method: options.method,
-    args
-  }
+  // const opts = {
+  //   id: options.id,
+  //   gasLimit: `${options.gasLimit || constants.maxGasLimit}`,
+  //   method: options.method,
+  //   args
+  // }
+  const opts = [options.id, `${options.gasLimit || constants.maxGasLimit}`, options.method, args]
   const trs = {
     nethash: constants.nethash,
     amount: '0',
@@ -147,7 +192,7 @@ async function send (options, secret, secondSecret) {
     timestamp,
     senderPublicKey: keys.publicKey,
     type: assetTypes.CONTRACT_TRANSFER,
-    args: JSON.stringify(opts)
+    args: opts // 直接使用数组格式，符合schema要求
   }
   // console.log(trs)
   trs.signature = await crypto.sign(trs, keys)
@@ -163,7 +208,7 @@ async function send (options, secret, secondSecret) {
  * 智能合约交易模块导出对象
  */
 export default {
-  deploy,
-  send,
+  createContract, // 原来的 deploy
+  transfer, // 原来的 send
   pay
 }

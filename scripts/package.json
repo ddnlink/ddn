@@ -1,0 +1,13 @@
+{
+  "name": "ddn-contract-test-scripts",
+  "version": "1.0.0",
+  "description": "Test scripts for DDN smart contracts",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "@ddn/js-sdk": "^2.0.0",
+    "axios": "^0.21.1"
+  }
+}

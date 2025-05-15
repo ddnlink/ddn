@@ -171,7 +171,7 @@ message AssetEvidence {
 
 message AssetContract {
   required string name = 1;
-  optional int32 gas_limit = 2;
+  optional int32 gasLimit = 2;
   required string owner = 3;
   required string desc = 4;
   required string version = 5;

@@ -18,7 +18,7 @@ async function deploy (options, secret, secondSecret) {
 
   const contract = {
     name: options.name,
-    gas_limit: +options.gasLimit || constants.maxGasLimit,
+    gasLimit: +options.gasLimit || constants.maxGasLimit,
     owner: await crypto.generateAddress(keys.publicKey, constants.tokenPrefix),
     desc: options.desc,
     version: options.version,
@@ -57,12 +57,12 @@ async function send (options, secret, secondSecret) {
   let args = options.args
   if (args instanceof Array) args = JSON.stringify(args)
 
-  const fee = DdnUtils.bignum.multiply(constants.fees.contract_transfer, constants.fixedPoint)
+  const fee = DdnUtils.bignum.multiply(constants.fees.contract_call, constants.fixedPoint)
 
   const timestamp = slots.getTime() - config.clientDriftSeconds
   const opts = {
     id: options.id,
-    gas_limit: `${options.gasLimit || constants.maxGasLimit}`,
+    gasLimit: `${options.gasLimit || constants.maxGasLimit}`,
     method: options.method,
     args
   }
@@ -91,12 +91,12 @@ async function pay (options, secret, secondSecret) {
   let args = options.args
   if (args instanceof Array) args = JSON.stringify(args)
 
-  const fee = DdnUtils.bignum.multiply(constants.fees.contract_transfer, constants.fixedPoint)
+  const fee = DdnUtils.bignum.multiply(constants.fees.contract_call, constants.fixedPoint)
 
   const timestamp = slots.getTime() - config.clientDriftSeconds
   const opts = {
     id: options.id,
-    gas_limit: `${options.gasLimit || constants.maxGasLimit}`,
+    gasLimit: `${options.gasLimit || constants.maxGasLimit}`,
     amount: options.amount,
     currency: options.currency,
     method: options.method,

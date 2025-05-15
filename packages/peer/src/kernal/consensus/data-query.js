@@ -210,7 +210,7 @@ class DataQuery {
         ['name', 'c_name'],
         ['desc', 'c_desc'],
         ['owner', 'c_owner'],
-        ['gas_limit', 'c_gas_limit'],
+        ['gasLimit', 'c_gasLimit'],
         ['version', 'c_version'],
         ['code', 'c_code'],
         ['timestamp', 'c_timestamp'],

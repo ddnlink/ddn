@@ -198,6 +198,7 @@ class Router {
     router.get('/all', this._assetAssetPluginApiList(type, null, assetInst))
     allApis.push('/')
 
+    // this.logger.info(`mounted asset api: ${allApis}`)
     return allApis
   }
 }

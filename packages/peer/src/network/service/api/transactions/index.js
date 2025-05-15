@@ -30,7 +30,7 @@ class TransactionService {
 
   // 这个是所有交易的入口，获得的是交易体
   async post({ body }) {
-  
+
     // 确保响应始终为JSON格式
     const jsonResponse = (success, data = {}, error = null) => {
       const response = { success };
@@ -75,47 +75,10 @@ class TransactionService {
       return jsonResponse(false, null, 'Missing transaction data');
     }
 
+    // 基本验证也会在 objectNormalize 中进行，这里删除吧，不要重复
     // 验证基本字段
-    const validateErrors = await this.ddnSchema.validate(
-      {
-        type: 'object',
-        properties: {
-          id: {
-            type: 'string'
-          },
-          nethash: {
-            type: 'string'
-          },
-          type: {
-            type: 'integer',
-            minimum: 0,
-            maximum: 100
-          },
-          senderPublicKey: {
-            type: 'string',
-            format: 'publicKey'
-          },
-          amount: {
-            type: 'string'
-          },
-          fee: {
-            type: 'string'
-          },
-          signature: {
-            type: 'string'
-          },
-          timestamp: {
-            type: 'integer'
-          }
-        },
-        required: ['id', 'nethash', 'type', 'senderPublicKey', 'signature', 'timestamp']
-      },
-      body.transaction
-    )
-    if (validateErrors) {
-      throw new Error(`Invalid parameters: ${validateErrors[0].schemaPath} ${validateErrors[0].message}`)
-    }
-
+    // const validateErrors = await this.ddnSchema.validate(
+   
     // 尝试规范化交易对象
     let transaction;
     try {
@@ -447,6 +410,10 @@ class TransactionService {
 
   async getGet(req) {
     const query = Object.assign({}, req.body, req.query)
+
+    // 记录请求参数
+    this.logger.debug(`Transaction getGet request with query:`, query);
+
     const validateErrors = await this.ddnSchema.validate(
       {
         type: 'object',
@@ -461,34 +428,95 @@ class TransactionService {
       query
     )
     if (validateErrors) {
+      this.logger.error(`Invalid transaction query parameters:`, validateErrors);
       throw new Error(`Invalid parameters: ${validateErrors[0].schemaPath} ${validateErrors[0].message}`)
     }
 
-    const rows = await this.runtime.dataquery.queryFullTransactionData(
-      {
-        id: query.id
-      },
-      1,
-      0,
-      null
-    )
-    if (rows && rows.length) {
-      const result = []
-      for (let i = 0; i < rows.length; i++) {
-        const row = rows[i]
-        const trs = await this.runtime.transaction.serializeDbData2Transaction(row)
-        result.push(trs)
+    try {
+      // 先检查未确认交易池
+      this.logger.debug(`Checking unconfirmed transaction pool for ID: ${query.id}`);
+      const unconfirmedTrs = await this.runtime.transaction.getUnconfirmedTransaction(query.id);
+      if (unconfirmedTrs) {
+        this.logger.debug(`Found transaction in unconfirmed pool: ${query.id}`);
+        return {
+          success: true,
+          transaction: unconfirmedTrs,
+          unconfirmed: true
+        };
       }
 
-      return {
-        success: true,
-        transaction:
-          global.assets && global.assets.transTypeNames[90]
-            ? await superviseTrs({ context: this._context, trs: result[0] })
-            : result[0]
+      // 查询数据库中的交易
+      this.logger.debug(`Querying database for transaction ID: ${query.id}`);
+      const rows = await this.runtime.dataquery.queryFullTransactionData(
+        {
+          id: query.id
+        },
+        1,
+        0,
+        null
+      )
+
+      if (rows && rows.length) {
+        this.logger.debug(`Found transaction in database: ${query.id}`);
+        const result = []
+        for (let i = 0; i < rows.length; i++) {
+          const row = rows[i]
+          try {
+            const trs = await this.runtime.transaction.serializeDbData2Transaction(row)
+            result.push(trs)
+          } catch (serializeErr) {
+            this.logger.error(`Error serializing transaction data:`, {
+              error: serializeErr.message,
+              stack: serializeErr.stack,
+              transactionId: query.id,
+              rowData: JSON.stringify(row)
+            });
+            throw new Error(`Error processing transaction data: ${serializeErr.message}`);
+          }
+        }
+
+        if (result.length > 0) {
+          let transaction = result[0];
+
+          // 应用监管过滤（如果需要）
+          if (global.assets && global.assets.transTypeNames[90]) {
+            try {
+              transaction = await superviseTrs({ context: this._context, trs: transaction });
+            } catch (superviseErr) {
+              this.logger.error(`Error applying transaction supervision:`, {
+                error: superviseErr.message,
+                transactionId: query.id
+              });
+            }
+          }
+
+          return {
+            success: true,
+            transaction: transaction
+          }
+        } else {
+          this.logger.warn(`Transaction data found but serialization returned empty result: ${query.id}`);
+          throw new Error('Transaction data could not be processed');
+        }
+      } else {
+        this.logger.warn(`Transaction not found in database: ${query.id}`);
+
+        // 检查交易是否存在但查询方式有问题
+        const rawCount = await this.dao.count('tr', { where: { id: query.id } });
+        if (rawCount > 0) {
+          this.logger.error(`Transaction exists in tr table but full query failed: ${query.id}, count: ${rawCount}`);
+          throw new Error('Transaction found but data retrieval failed');
+        }
+
+        throw new Error('Transaction not found');
       }
-    } else {
-      throw new Error('Transaction not found')
+    } catch (err) {
+      this.logger.error(`Error in getGet method:`, {
+        error: err.message,
+        stack: err.stack,
+        transactionId: query.id
+      });
+      throw err;
     }
   }
 

@@ -6,6 +6,7 @@ module.exports = {
   nethash: '0ab796cd', // 标定该链的版本
   tokenName: 'DDN',
   tokenPrefix: 'D',
+  contractPrefix: 'C',
   foundAddress: 'DLjrrVwnmMXstcAYVjcrpwyYb3kY1ehABU',
   walletUrl: 'http://wallet.ddn.link',
   enableMoreLockTypes: true,

@@ -161,6 +161,8 @@ class Loader {
     this._registerAsset(assetTypes.CONTRACT, contract)
     const contractTransfer = new SC.ContractTransfer(this._context)
     this._registerAsset(assetTypes.CONTRACT_TRANSFER, contractTransfer)
+    const contractPay = new SC.ContractPay(this._context)
+    this._registerAsset(assetTypes.CONTRACT_PAY, contractPay)
 
     await this._attachAssetPlugins()
     await this._addAsesstModels()

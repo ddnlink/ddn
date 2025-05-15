@@ -26,7 +26,7 @@ DDN智能合约是DDN区块链系统级的一类区块链资产，其内置的�
 
 - 与其他资产类似，合约是链上的一种资产类型，类型编码是11；
 - 交易体的asset字段是一个对象，其内容是{ contract: { name: '', desc: '', ...}}；
-- name, version, gas_limit, code为必填字段；
+- name, version, gasLimit, code为必填字段；
 - 合约代码由ts语法书写，具体语法请参考[智能合约参考](../guide/contract.zh-CN.md)：
 
 ```
@@ -84,7 +84,7 @@ const secret = 'wild corn coil lizard runway flower outside vicious diesel aim s
 const options = {
     name: 'test contract', // 合约名称
     desc: '合约描述',       // 合约描述
-    gas_limit: '100000',   // 本次交易消耗的最大gas
+    gasLimit: '100000',   // 本次交易消耗的最大gas
     owner: 'DM3j18U3zmW87HcwGPZviaRrnmZfhJmYoG', //合约所有者地址，默认是交易发起人
     version: 'v1.0',       // 合约代码版本
     code: '...' // 略, 合约的ts源代码，可以用fs.readFileSync('./contract.ts')的方式读取
@@ -108,7 +108,7 @@ console.log(JSON.stringify(trs))
         contract:
         { 
             name: 'test contract',
-            gas_limit: '100000',
+            gasLimit: '100000',
             owner: 'DM3j18U3zmW87HcwGPZviaRrnmZfhJmYoG',
             desc: 'test',
             version: 'v1.0',
@@ -138,7 +138,7 @@ curl --location --request POST 'http://127.0.0.1:8001/peer/transactions' \
         "asset": {
             "contract": {
 				"name": "test contract",
-				"gas_limit": 10000,
+				"gasLimit": 10000,
 				"owner": "DM3j18U3zmW87HcwGPZviaRrnmZfhJmYoG",
 				"desc": "合约描述",
 				"version": "1.0.0",
@@ -177,7 +177,7 @@ curl --location --request POST 'http://127.0.0.1:8001/peer/transactions' \
 
 const options = {
     id: 'xxxxxx',         // 合约地址，唯一标识
-    gas_limit: 10000,     // 本次调用最大可消耗的gas，不填默认为100000
+    gasLimit: 10000,     // 本次调用最大可消耗的gas，不填默认为100000
     method: 'pay',        // 合约方法名，合约代码中确实存在的方法
     amount: '1000',       // 金额，字符串类型的数字
     currency: 'DDN',      // token类型
@@ -185,7 +185,7 @@ const options = {
 
 // 构造交易数据
 const trs = DdnJS.contract.pay({
-		id, gas_limit, method, amount, currency
+		id, gasLimit, method, amount, currency
 	}, secret, secondSecret)
 console.log(JSON.stringify(trs))
 { 
@@ -199,7 +199,7 @@ console.log(JSON.stringify(trs))
     type: 12,
     args:
     [ { id: 'DAGatZMriKaUA7p3FzwHRamHMusdZ9Q8WS',
-        gas_limit: '10000000',
+        gasLimit: '10000000',
         amount: 1000,
         currency: 'DDN',
         method: 'pay',
@@ -260,14 +260,14 @@ JSON返回示例：
 
 const options = {
     id: 'xxxxxx',         // 合约地址，唯一标识
-    gas_limit: 10000,     // 本次调用最大可消耗的gas
+    gasLimit: 10000,     // 本次调用最大可消耗的gas
     method: 'transfer',   // 合约方法名，合约代码中确实存在的方法
     args: ['200', 'DDN'], // 方法变量，按照合约中方法参数顺序，以数组的形式提供
 }
 
 // 构造交易数据
-const trs = DdnJS.contract.send({
-		id, gas_limit, method, args
+const trs = DdnJS.contract.transfer({
+		id, gasLimit, method, args
 	}, secret, secondSecret)
 console.log(JSON.stringify(trs))
 {

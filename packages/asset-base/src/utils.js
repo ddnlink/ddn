@@ -193,6 +193,24 @@ class AssetUtils {
     return !!(global.assets && global.assets.transTypeNames[typeValue])
   }
 
+  /**
+   * 根据资产类型值获取对应的JSON属性名
+   * 
+   * 该方法将资产类型名称转换为驼峰命名的JSON属性名
+   * 
+   * @param {number} typeValue - 资产类型值
+   * @returns {string} 转换后的JSON属性名
+   * 
+   * @example
+   * // 假设typeValue为60，对应的资产类型名称为"aob-issuer"
+   * const jsonName = AssetUtils.getAssetJsonName(60);
+   * console.log(jsonName); // 输出: "aobIssuer"
+   * 
+   * @example
+   * // 假设typeValue为61，对应的资产类型名称为"aob_asset"
+   * const jsonName = AssetUtils.getAssetJsonName(61);
+   * console.log(jsonName); // 输出: "aobAsset"
+   */
   static getAssetJsonName(typeValue) {
     let result = ''
     const typeName = `${this.getTypeName(typeValue)}`

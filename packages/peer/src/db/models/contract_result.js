@@ -1,8 +1,7 @@
 /*
- * @Author:
- * @Date: 2018-11-13 11:34:49
- * @Last Modified by: mikey.zhaopeng
- * @Last Modified time: 2020-02-13 22:48:39
+ * @Author: Tailor
+ * @Date: 2018-10-08 11:34:49
+ * @Last Modified time: 2023-03-22 16:48:39 
  */
 import Sequelize from 'sequelize'
 
@@ -10,17 +9,17 @@ export default connection => {
   return connection.define(
     'contract_result',
     {
-      transaction_id: {
+      transactionId: {
         type: Sequelize.STRING(64),
         primaryKey: true,
         allowNull: false
       },
-      contract_id: {
+      contractId: {
         type: Sequelize.STRING(64),
         allowNull: false
       },
       success: {
-        type: Sequelize.INTEGER, // 原来是 BINARY(32)
+        type: Sequelize.INTEGER,
         allowNull: false
       },
       error: {
@@ -35,16 +34,20 @@ export default connection => {
       },
       data: {
         type: Sequelize.TEXT
+      },
+      timestamp: {
+        type: Sequelize.INTEGER,
+        allowNull: true
       }
     },
     {
       timestamps: false,
       indexes: [
         {
-          fields: ['transaction_id']
+          fields: ['transactionId']
         },
         {
-          fields: ['contract_id']
+          fields: ['contractId']
         }
       ]
     }

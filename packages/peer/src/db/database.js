@@ -1,6 +1,7 @@
 import path from 'path'
 import fs from 'fs'
 import Sequelize from 'sequelize'
+import AutoId from './utils/auto-id'
 
 const _sysModels = {}
 
@@ -55,6 +56,7 @@ class DAO {
 
   /**
    * 数据库初始化
+   * @param {*} dbSetting 数据库配置
    * @param {*} logger 日志对象
    */
   static async init (dbSetting, logger) {
@@ -74,7 +76,10 @@ class DAO {
     this.initConstants(sequelizeInst)
     this.initFuncs(sequelizeInst)
 
-    // FIXME: 这里返回this与返回DAO类都不报错，但返还DAO似乎更合理一些
+    // 初始化自增ID系统
+    this.autoId = new AutoId(this)
+    this.autoId.logger = logger // 传递日志对象
+
     return this
   }
 

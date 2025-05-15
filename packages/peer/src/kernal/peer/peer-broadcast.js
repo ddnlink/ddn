@@ -32,19 +32,71 @@ class PeerBroadcast {
    * @param {*} votes
    */
   async broadcastNewBlock (block, votes) {
-    const data = {
-      block: this.protobuf.encodeBlock(block).toString('base64'),
-      votes: this.protobuf.encodeBlockVotes(votes).toString('base64')
-    }
-    this.broadcast({ api: '/block', data })
-
-    setImmediate(async () => {
-      try {
-        await this.runtime.socketio.emit('blocks/change', {})
-      } catch (err) {
-        this.logger.error('socket emit error: blocks/change')
+    try {
+      // 确保 votes 是有效的对象
+      if (!votes || typeof votes !== 'object') {
+        this.logger.error('Invalid votes object for broadcast');
+        votes = { height: block.height, id: block.id, signatures: [] };
       }
-    })
+
+      // 确保 signatures 是数组
+      if (!Array.isArray(votes.signatures)) {
+        this.logger.error('Invalid signatures array in votes');
+        votes.signatures = [];
+      }
+
+      // 深拷贝以避免修改原始对象
+      let votesToBroadcast;
+      try {
+        votesToBroadcast = JSON.parse(JSON.stringify(votes));
+      } catch (jsonErr) {
+        this.logger.error(`Failed to clone votes object: ${jsonErr.message}`);
+        votesToBroadcast = { height: block.height, id: block.id, signatures: [] };
+      }
+
+      // 确保每个签名都有正确的格式
+      const validSignatures = [];
+      for (let i = 0; i < votesToBroadcast.signatures.length; i++) {
+        const signature = votesToBroadcast.signatures[i];
+        if (signature && typeof signature === 'object' &&
+            typeof signature.key === 'string' &&
+            typeof signature.sig === 'string') {
+          validSignatures.push(signature);
+        } else {
+          this.logger.warn(`Invalid signature at index ${i}, removing from broadcast`);
+        }
+      }
+
+      // 替换原始签名数组
+      votesToBroadcast.signatures = validSignatures;
+
+      // 限制签名数量，避免数据过大
+      if (votesToBroadcast.signatures.length > 6) {
+        votesToBroadcast.signatures = votesToBroadcast.signatures.slice(0, 6);
+      }
+
+      try {
+        const data = {
+          block: this.protobuf.encodeBlock(block).toString('base64'),
+          votes: this.protobuf.encodeBlockVotes(votesToBroadcast).toString('base64')
+        }
+
+        this.broadcast({ api: '/block', data });
+
+        setImmediate(async () => {
+          try {
+            await this.runtime.socketio.emit('blocks/change', {});
+          } catch (err) {
+            this.logger.error('socket emit error: blocks/change');
+          }
+        });
+      } catch (encodeErr) {
+        this.logger.error(`Failed to encode block or votes: ${encodeErr.message}`);
+      }
+    } catch (err) {
+      this.logger.error(`Failed to broadcast new block: ${err.message}`);
+      // 不抛出错误，避免中断区块处理流程
+    }
   }
 
   /**

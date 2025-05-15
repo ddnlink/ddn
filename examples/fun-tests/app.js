@@ -116,7 +116,7 @@ async function main () {
     console.error(err)
 
     if (peer) {
-      peer.destroy()
+      await peer.destroy()
     }
 
     process.exit(1)

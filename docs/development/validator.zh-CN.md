@@ -162,7 +162,7 @@ async function processTransaction(transaction) {
 ```javascript
 import { validateContractCode } from '@ddn/peer/src/utils/validator';
 
-async function deployContract(code) {
+async function registerContract(code) {
   const context = {
     runtime: this.runtime,
     logger: this.logger

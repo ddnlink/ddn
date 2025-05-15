@@ -9,9 +9,9 @@ import fs from 'fs'
 import extend from 'extend2'
 import * as DdnCrypto from '@ddn/crypto'
 import { DVM, Compiler } from '@ddn/contract'
+import { Energy } from '../asset/contract'
 
-import { System, Logger, Energy, StateMachine } from '../utils'
-import { bignum } from '@ddn/utils'
+import { System, Logger, StateMachine } from '../utils'
 
 import Context from './context'
 import Block from './block/block'
@@ -108,9 +108,21 @@ class Program {
     // negotiate
     this.ctx.runtime.dvm = new DVM({
       dataDir: path.join(this.ctx.baseDir, '/db/contracts'),
-      logDir: path.join(this.ctx.baseDir, '/logs/'),
+      logDir: path.join(this.ctx.baseDir, '/logs'),
       logLevel: options.configObject.logLevel,
-      isDev: process.env.NODE_ENV !== 'production'
+      isDev: process.env.NODE_ENV !== 'production',
+      // 添加日志级别配置
+      logLevelConfig: {
+        defaultLogLevel: options.configObject.logLevel === 'debug' ? 2 : 3, // debug:2, info:3
+        Compiler: 2, // 确保编译器日志级别为debug
+        ContractSandbox: 2
+      },
+      // 启用合约日志
+      enableContractLogger: true,
+      // 添加日志文件名
+      logFileName: 'contract',
+      // 传递主程序的logger
+      logger: this.ctx.logger
     })
 
     // console.log('configObject', options.configObject);
@@ -334,7 +346,7 @@ class Program {
     }
 
     // 启动dvm，独立运行
-    await ctx.runtime.dvm.run()
+    await ctx.runtime.dvm.connect()
     // dvm 就绪回調函數
     this._dvmReady()
 
@@ -606,8 +618,9 @@ class Program {
   }
 
   // 销毁程序
-  destroy() {
+  async destroy() {
     this._resetProcessState()
+    await this.ctx.runtime.dvm.disconnect()
   }
 }
 

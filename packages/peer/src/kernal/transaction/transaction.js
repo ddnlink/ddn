@@ -7,7 +7,7 @@ import extend from 'util-extend'
 import { bignum, assetTypes } from '@ddn/utils'
 import * as DdnCrypto from '@ddn/crypto'
 import { getId } from '@ddn/crypto'
-import Assets from '../../assets'
+import Asset from '../../asset'
 import { validateTransaction, validateContractTransaction } from '../../utils/validator'
 
 /**
@@ -31,14 +31,14 @@ function getErrorMsg(err) {
 let _singleton
 
 export class Transaction {
-  static singleton (context) {
+  static singleton(context) {
     if (!_singleton) {
       _singleton = new Transaction(context)
     }
     return _singleton
   }
 
-  constructor (context) {
+  constructor(context) {
     Object.assign(this, context)
     this._context = context
 
@@ -46,15 +46,15 @@ export class Transaction {
     this._unconfirmedTransactions = []
     this._unconfirmedTransactionsIdIndex = {}
 
-    this._assets = Assets.singleton(context)
+    this._asset = Asset.singleton(context)
   }
 
-  async execAssetFunc () {
+  async execAssetFunc() {
     const args = []
     for (let i = 0; i < arguments.length; i++) {
       args.push(arguments[i])
     }
-    await this._assets.execAssetFunc(...args)
+    await this._asset.execAssetFunc(...args)
   }
 
   /**
@@ -62,7 +62,7 @@ export class Transaction {
    * 删除交易
    * @param {*} trsId
    */
-  async deleteTransaction ({ trsId, dbTrans }) {
+  async deleteTransaction({ trsId, dbTrans }) {
     return await this.dao.remove('tr', { where: { id: trsId }, transaction: dbTrans })
   }
 
@@ -70,17 +70,17 @@ export class Transaction {
    * 根据资产配置名称获取资产实例
    * @param {*} assetName
    */
-  getAssetInstanceByName (assetName) {
-    return this._assets.findInstanceByName(assetName)
+  getAssetInstanceByName(assetName) {
+    return this._asset.findInstanceByName(assetName)
   }
 
-  mountAssetApis (expressApp) {
-    this._assets.mountAssetApis(expressApp)
+  mountAssetApis(expressApp) {
+    this._asset.mountAssetApis(expressApp)
   }
 
-  async create (data) {
+  async create(data) {
     const { type, sender, keypair, requester, message, second_keypair, args } = data
-    if (!this._assets.hasType(type)) {
+    if (!this._asset.hasType(type)) {
       throw new Error(`Unknown transaction type 1 ${type}`)
     }
 
@@ -104,8 +104,8 @@ export class Transaction {
       args
     }
 
-    trs = await this._assets.call(trs.type, 'create', data, trs) // 对应各个 asset 交易类型的 async create(data, trs) 方法
-    trs.fee = `${await this._assets.call(trs.type, 'calculateFee', trs, sender)}`
+    trs = await this._asset.call(trs.type, 'create', data, trs) // 对应各个 asset 交易类型的 async create(data, trs) 方法
+    trs.fee = `${await this._asset.call(trs.type, 'calculateFee', trs, sender)}`
 
     trs.signature = await DdnCrypto.sign(trs, keypair)
     if (sender.second_signature && second_keypair) {
@@ -119,8 +119,8 @@ export class Transaction {
     return trs
   }
 
-  async objectNormalize (trs) {
-    if (!this._assets.hasType(trs.type)) {
+  async objectNormalize(trs) {
+    if (!this._asset.hasType(trs.type)) {
       throw Error(`Unknown transaction type ${trs.type}`)
     }
 
@@ -135,19 +135,18 @@ export class Transaction {
       this.logger.error(
         `Failed to normalize transaction: ${trs.type} ${validateErrors[0].schemaPath} ${validateErrors[0].message}`
       )
-      this.logger.debug(`Failed to normalize transaction: ${trs}`)
       throw new Error(`Failed to normalize transaction: ${validateErrors[0].schemaPath} ${validateErrors[0].message}`)
     }
 
-    return await this._assets.call(trs.type, 'objectNormalize', trs)
+    return await this._asset.call(trs.type, 'objectNormalize', trs)
   }
 
   /**
    * 序列化单条交易数据到数据库
    */
-  async serializeTransaction2Db (trs, dbTrans) {
-    if (!this._assets.hasType(trs.type)) {
-      throw Error(`Unknown transaction type 3 : ${trs.type}`)
+  async serializeTransaction2Db(trs, dbTrans) {
+    if (!this._asset.hasType(trs.type)) {
+      throw Error(`Unknown transaction type: ${trs.type}`)
     }
 
     // 准备交易数据
@@ -166,22 +165,21 @@ export class Transaction {
       signature: trs.signature,
       sign_signature: trs.sign_signature,
       signatures: trs.signatures ? trs.signatures.join(',') : null,
-      args: trs.args,
+      args: Array.isArray(trs.args) || typeof trs.args === 'object' ? JSON.stringify(trs.args) : trs.args,
       message: trs.message || null
     }
 
-    const result = await this.dao.insert('tr', newTrans, { transaction: dbTrans })
-      try {
-      await this._assets.call(trs.type, 'dbSave', trs, dbTrans)
+    await this.dao.insert('tr', newTrans, { transaction: dbTrans })
+    try {
+      await this._asset.call(trs.type, 'dbSave', trs, dbTrans)
     } catch (e) {
       this.logger.debug(`insert tr error trsId: ${newTrans.id}`)
-      this.logger.debug(`insert tr error trsId: ${JSON.stringify(newTrans)}`)
+      this.logger.error(`insert tr error trsId: ${JSON.stringify(newTrans)}`)
       throw new Error(`Insert tr fail ${e.toString()}`)
     }
-    return result
   }
 
-  async serializeDbData2Transaction (raw) {
+  async serializeDbData2Transaction(raw) {
     if (!raw.t_id) {
       return null
     } else {
@@ -206,11 +204,11 @@ export class Transaction {
         asset: {}
       }
 
-      if (!this._assets.hasType(trs.type)) {
+      if (!this._asset.hasType(trs.type)) {
         throw Error(`Unknown transaction type 4 ${trs.type}`)
       }
 
-      const asset = await this._assets.call(trs.type, 'dbRead', raw)
+      const asset = await this._asset.call(trs.type, 'dbRead', raw)
       if (asset) {
         trs.asset = extend(trs.asset, asset)
       }
@@ -219,13 +217,13 @@ export class Transaction {
     }
   }
 
-  async undo (trs, block, sender, dbTrans) {
-    if (!this._assets.hasType(trs.type)) {
+  async undo(trs, block, sender, dbTrans) {
+    if (!this._asset.hasType(trs.type)) {
       throw new Error(`Unknown transaction type 5 ${trs.type}`)
     }
     if (trs.type === assetTypes.DAPP_OUT) {
       //
-      return await this._assets.call(trs.type, 'undo', trs, block, sender, dbTrans)
+      return await this._asset.call(trs.type, 'undo', trs, block, sender, dbTrans)
     }
     const amount = bignum.plus(trs.amount, trs.fee)
 
@@ -238,15 +236,15 @@ export class Transaction {
       },
       dbTrans
     )
-    await this._assets.call(trs.type, 'undo', trs, block, sender1, dbTrans)
+    await this._asset.call(trs.type, 'undo', trs, block, sender1, dbTrans)
   }
 
-  async getUnconfirmedTransaction (trsId) {
+  async getUnconfirmedTransaction(trsId) {
     const index = this._unconfirmedTransactionsIdIndex[trsId]
     return this._unconfirmedTransactions[index]
   }
 
-  async getUnconfirmedTransactionList (reverse, limit) {
+  async getUnconfirmedTransactionList(reverse, limit) {
     let result = []
 
     for (let i = 0; i < this._unconfirmedTransactions.length; i++) {
@@ -266,18 +264,18 @@ export class Transaction {
     return result
   }
 
-  async undoUnconfirmed (transaction, dbTrans) {
+  async undoUnconfirmed(transaction, dbTrans) {
     const sender = await this.runtime.account.getAccountByPublicKey(transaction.senderPublicKey, dbTrans)
     await this.removeUnconfirmedTransaction(transaction.id)
 
-    if (!this._assets.hasType(transaction.type)) {
+    if (!this._asset.hasType(transaction.type)) {
       throw new Error(`Unknown transaction type 6 ${transaction.type}`)
     }
     // wxm TODO
     // 此处应该使用this._assets方法（transaction.type）来做判断
     // fixme: 2020.4.22 这里是 dapp 的交易，转移到别处？
     if (transaction.type === assetTypes.DAPP_OUT) {
-      return await this._assets.call(transaction.type, 'undoUnconfirmed', transaction, sender, dbTrans)
+      return await this._asset.call(transaction.type, 'undoUnconfirmed', transaction, sender, dbTrans)
     }
 
     const amount = bignum.plus(transaction.amount, transaction.fee).toFixed()
@@ -290,10 +288,10 @@ export class Transaction {
       },
       dbTrans
     )
-    await this._assets.call(transaction.type, 'undoUnconfirmed', transaction, sender, dbTrans)
+    await this._asset.call(transaction.type, 'undoUnconfirmed', transaction, sender, dbTrans)
   }
 
-  async undoUnconfirmedList () {
+  async undoUnconfirmedList() {
     const ids = []
     for (let i = 0; i < this._unconfirmedTransactions.length; i++) {
       const transaction = this._unconfirmedTransactions[i]
@@ -305,7 +303,7 @@ export class Transaction {
     return ids
   }
 
-  async applyUnconfirmed (trs, sender, dbTrans) {
+  async applyUnconfirmed(trs, sender, dbTrans) {
     if (!sender && trs.block_id !== this.genesisblock.id) {
       // wxm block database
       throw new Error('Invalid block id')
@@ -318,7 +316,7 @@ export class Transaction {
         throw new Error('Invalid requester')
       }
     }
-    if (!this._assets.hasType(trs.type)) {
+    if (!this._asset.hasType(trs.type)) {
       throw new Error(`Unknown transaction type 7 ${trs.type}`)
     }
 
@@ -364,7 +362,7 @@ export class Transaction {
     }
     // wxm 这个逻辑应该去掉，不应该这么使用序号特殊处理，如果必须，应该是用assetTypes.type枚举
     if (trs.type === assetTypes.DAPP_OUT) {
-      return await this._assets.call(trs.type, 'applyUnconfirmed', trs, sender, dbTrans)
+      return await this._asset.call(trs.type, 'applyUnconfirmed', trs, sender, dbTrans)
     }
     const amount = bignum.plus(trs.amount, trs.fee)
     if (bignum.isLessThan(sender.u_balance, amount) && trs.block_id !== this.genesisblock.id) {
@@ -381,7 +379,7 @@ export class Transaction {
     )
     const newAccountInfo = Object.assign({}, sender, accountInfo) // wxm block database
     try {
-      await this._assets.call(trs.type, 'applyUnconfirmed', trs, newAccountInfo, dbTrans)
+      await this._asset.call(trs.type, 'applyUnconfirmed', trs, newAccountInfo, dbTrans)
     } catch (err) {
       this.balanceCache.addNativeBalance(newAccountInfo.address, amount)
       await this.runtime.account.merge(
@@ -395,8 +393,8 @@ export class Transaction {
     }
   }
 
-  async ready (trs, sender) {
-    if (!this._assets.hasType(trs.type)) {
+  async ready(trs, sender) {
+    if (!this._asset.hasType(trs.type)) {
       // throw Error(`Unknown transaction type 8 ${trs.type}`)
       this.logger.warn(`Unknown transaction type 8 ${trs.type}`)
       return false
@@ -407,11 +405,11 @@ export class Transaction {
       return false
     }
 
-    return await this._assets.call(trs.type, 'ready', trs, sender)
+    return await this._asset.call(trs.type, 'ready', trs, sender)
   }
 
-  async apply (trs, block, sender, dbTrans) {
-    if (!this._assets.hasType(trs.type)) {
+  async apply(trs, block, sender, dbTrans) {
+    if (!this._asset.hasType(trs.type)) {
       throw new Error(`Unknown transaction type 9 ${trs.type}`)
       // this.logger.info(`Unknown transaction type 9 ${trs.type}`)
       // return
@@ -426,7 +424,7 @@ export class Transaction {
 
     // todo: 2020.6.25 特殊 asset 的处理
     if (trs.type === assetTypes.DAPP_OUT) {
-      return this._assets.call(trs.type, 'apply', trs, block, sender, dbTrans)
+      return this._asset.call(trs.type, 'apply', trs, block, sender, dbTrans)
     }
 
     const amount = bignum.plus(trs.amount, trs.fee)
@@ -447,10 +445,10 @@ export class Transaction {
     )
     const newSender = Object.assign({}, sender, accountInfo) // wxm block database
 
-    await this._assets.call(trs.type, 'apply', trs, block, newSender, dbTrans)
+    await this._asset.call(trs.type, 'apply', trs, block, newSender, dbTrans)
   }
 
-  async removeUnconfirmedTransaction (id) {
+  async removeUnconfirmedTransaction(id) {
     if (this._unconfirmedTransactionsIdIndex[id] === undefined) {
       return
     }
@@ -460,7 +458,7 @@ export class Transaction {
     this._unconfirmedNumber--
   }
 
-  async addUnconfirmedTransaction (transaction, sender, dbTrans) {
+  async addUnconfirmedTransaction(transaction, sender, dbTrans) {
     try {
       await this.applyUnconfirmed(transaction, sender, dbTrans)
       this._unconfirmedTransactions.push(transaction)
@@ -474,7 +472,7 @@ export class Transaction {
     }
   }
 
-  async hasUnconfirmedTransaction ({ id }) {
+  async hasUnconfirmedTransaction({ id }) {
     const index = this._unconfirmedTransactionsIdIndex[id]
     const result = index !== undefined && this._unconfirmedTransactions[index] !== false
     return result
@@ -485,7 +483,7 @@ export class Transaction {
    * @param {string} address 账户地址
    * @returns {Array} 未确认交易列表
    */
-  async getUnconfirmedTransactionsByAddress (address) {
+  async getUnconfirmedTransactionsByAddress(address) {
     if (!address) {
       return []
     }
@@ -502,26 +500,26 @@ export class Transaction {
     return result
   }
 
-  async process (trs, sender) {
-    if (!this._assets.hasType(trs.type)) {
+  async process(trs, sender) {
+    if (!this._asset.hasType(trs.type)) {
       throw new Error(`Unknown transaction type ${trs.type}`)
     }
-    
+
     // 1. 验证交易ID
     const transaction = this.deepCloneTransaction(trs)
     if (transaction.senderId) {
       delete transaction.senderId
     }
-    
+
     const txId = await getId(transaction)
     if (typeof trs.id === 'undefined' || trs.id !== txId) {
       throw new Error('Incorrect transaction id')
     }
-    
+
     if (!sender) {
       throw new Error('Invalid sender')
     }
- 
+
     // 2. 检查交易是否已存在
     try {
       const count = await this.dao.count('tr', { where: { id: trs.id } })
@@ -532,37 +530,37 @@ export class Transaction {
       this.logger.error('Database error', err)
       throw new Error('Database error')
     }
- 
+
     // 3. 调用资产特定的处理方法
     try {
-      trs = await this._assets.call(trs.type, 'process', trs, sender)
+      trs = await this._asset.call(trs.type, 'process', trs, sender)
     } catch (err) {
       throw new Error(`Asset process failed: ${getErrorMsg(err)}`)
     }
-    
+
     return trs
   }
 
-  async processUnconfirmedTransaction (transaction, broadcast, dbTrans) {
+  async processUnconfirmedTransaction(transaction, broadcast, dbTrans) {
     if (!transaction) {
       throw new Error('No transaction to process!')
     }
-    
+
     // 1. 确保交易有ID
     if (!transaction.id) {
       // fixme: 这里大概率已经有交易ID了，不然这里生成的也不一定对（要保证所有必要字段都经过加密计算）
       // try {
       //   transaction.id = await getId(transaction)
       // } catch (err) {
-        throw new Error(`Failed to get transaction ID: ${getErrorMsg(err)}`)
+      throw new Error(`Failed to get transaction ID: ${getErrorMsg(err)}`)
       // }
     }
-    
+
     // 2. 检查交易是否已在未确认交易列表中
     if (this._unconfirmedTransactionsIdIndex[transaction.id] !== undefined) {
       throw new Error(`Transaction ${transaction.id} already exists, ignoring...`)
     }
-    
+
     // 3. 获取发送者账户
     try {
       await this.runtime.account.setAccount({
@@ -571,7 +569,7 @@ export class Transaction {
     } catch (err) {
       throw new Error(`Failed to set account: ${getErrorMsg(err)}`)
     }
-    
+
     let sender
     try {
       sender = await this.runtime.account.getAccountByPublicKey(transaction.senderPublicKey, dbTrans)
@@ -624,7 +622,7 @@ export class Transaction {
     }
   }
 
-  async receiveTransactions (transactions, skipValidation = false) {
+  async receiveTransactions(transactions, skipValidation = false) {
     if (this._unconfirmedNumber > this.constants.maxTxsPerBlock) {
       throw new Error('Too many transactions')
     }
@@ -717,7 +715,7 @@ export class Transaction {
   }
 
   // TODO: 注意使用 @ddn/crypto 的对应方法重构 2020.5.3
-  async verifyBytes (bytes, signature, publicKey) {
+  async verifyBytes(bytes, signature, publicKey) {
     return DdnCrypto.verifyBytes(bytes, signature, publicKey)
   }
 
@@ -727,8 +725,8 @@ export class Transaction {
    * @param {string} signature 签名
    * @param {string} publicKey 公钥
    */
-  async verifySignature (trs, signature, publicKey) {
-    if (!this._assets.hasType(trs.type)) {
+  async verifySignature(trs, signature, publicKey) {
+    if (!this._asset.hasType(trs.type)) {
       throw new Error(`Unknown transaction type 12 ${trs.type}`)
     }
     if (!signature) {
@@ -748,16 +746,16 @@ export class Transaction {
     return result
   }
 
-  async verify (trs, sender, requester) {
-    if (!this._assets.hasType(trs.type)) {
+  async verify(trs, sender, requester) {
+    if (!this._asset.hasType(trs.type)) {
       throw new Error(`Unknown transaction type ${trs.type}`)
     }
-    
+
     // 1. 验证发送者
     if (!sender) {
       throw new Error('Invalid sender')
     }
-      
+
     // 10. 验证发送者ID
     if (trs.senderId && trs.senderId !== sender.address) {
       this.logger.error('Invalid sender ID detected', {
@@ -767,11 +765,11 @@ export class Transaction {
       });
       throw new Error(`Invalid sender id: ${trs.id}`);
     }
-    
+
     // 2. 验证账户锁定状态
     if (this.constants.enableMoreLockTypes) {
       const lastBlock = this.runtime.block.getLastBlock()
-      const isLockedType = await this._assets.isSupportLock(trs.type)
+      const isLockedType = await this._asset.isSupportLock(trs.type)
       if (
         isLockedType &&
         sender.lock_height &&
@@ -781,27 +779,27 @@ export class Transaction {
         throw new Error('Account is locked')
       }
     }
-    
+
     // 3. 验证请求者
     if (trs.requester_public_key) {
       if (!sender.multisignatures.includes(trs.requester_public_key)) {
         throw new Error('Failed to verify requester multi signatures')
       }
-      
+
       if (sender.publicKey !== trs.senderPublicKey) {
         throw new Error('Invalid public key')
       }
     }
-    
+
     // 4. 验证网络哈希
     if (!trs.nethash) {
       throw new Error("Transaction's nethash property is required.")
     }
-    
+
     if (trs.nethash !== this.config.nethash) {
       throw new Error('Failed to verify nethash')
     }
-    
+
     // 5. 验证签名
     let valid = false
     if (trs.requester_public_key) {
@@ -809,11 +807,11 @@ export class Transaction {
     } else {
       valid = await this.verifySignature(trs, trs.signature, trs.senderPublicKey)
     }
-    
+
     if (!valid) {
       throw new Error('Failed to verify signature')
     }
-    
+
     // 6. 验证二级签名
     if (!trs.requester_public_key && sender.second_signature) {
       valid = await this.verifySecondSignature(trs, sender.second_public_key)
@@ -826,7 +824,7 @@ export class Transaction {
         throw new Error(`Failed to verify requester second signature: ${trs.id}`)
       }
     }
-    
+
     // 7. 验证签名唯一性 - 检查交易内部的签名是否有重复
     if (trs.signatures && trs.signatures.length) {
       const signatures = trs.signatures.reduce((p, c) => {
@@ -850,12 +848,12 @@ export class Transaction {
     if (trs.requester_public_key) {
       multisignatures.push(trs.senderPublicKey)
     }
-    
+
     // 9. 验证多重签名
     if (trs.signatures && trs.type !== assetTypes.DAPP_OUT) {
       for (let d = 0; d < trs.signatures.length; d++) {
         let verify = false
-        
+
         for (let s = 0; s < multisignatures.length; s++) {
           if (trs.requester_public_key && multisignatures[s] === trs.requester_public_key) {
             continue
@@ -864,7 +862,7 @@ export class Transaction {
             verify = true
           }
         }
-        
+
         if (!verify) {
           throw new Error(`Failed to verify multisignature: ${trs.id}`)
         }
@@ -872,11 +870,11 @@ export class Transaction {
     }
 
     // 11. 验证费用
-    const fee = `${await this._assets.call(trs.type, 'calculateFee', trs, sender)}`
+    const fee = `${await this._asset.call(trs.type, 'calculateFee', trs, sender)}`
     if (!bignum.isEqualTo(trs.fee, fee)) {
       throw new Error(`Invalid transaction fee: trs.fee: ${trs.fee}, asset.fee: ${fee}`)
     }
-    
+
     // 12. 验证金额
     if (
       bignum.isLessThan(trs.amount, 0) ||
@@ -886,7 +884,7 @@ export class Transaction {
     ) {
       throw new Error(`Invalid transaction amount: ${trs.amount}`)
     }
-    
+
     // 13. 验证时间戳
     if (this.runtime.slot.getSlotNumber(trs.timestamp) > this.runtime.slot.getSlotNumber()) {
       this.logger.error('Invalid transaction timestamp:', {
@@ -896,10 +894,10 @@ export class Transaction {
       })
       throw new Error('Invalid transaction timestamp')
     }
-    
+
     // 14. 调用资产特定的验证方法
     try {
-      return await this._assets.call(trs.type, 'verify', trs, sender)
+      return await this._asset.call(trs.type, 'verify', trs, sender)
     } catch (err) {
       this.logger.debug(`Asset verify failed: ${JSON.stringify(err, Object.getOwnPropertyNames(err))}`)
       throw new Error(`Asset verify failed: ${getErrorMsg(err)}`)
@@ -907,9 +905,9 @@ export class Transaction {
   }
 
   // TODO: 与 @ddn/crypto 同名方法不同
-  async verifySecondSignature (trs, publicKey) {
+  async verifySecondSignature(trs, publicKey) {
     const { type, sign_signature } = trs
-    if (!this._assets.hasType(type)) {
+    if (!this._asset.hasType(type)) {
       throw Error(`Unknown transaction type 14 ${type}`)
     }
 
@@ -934,7 +932,7 @@ export class Transaction {
    * @returns {object} trs处理后的交易体
    * @description 深度复制交易信息后并删除交易某些字段
    */
-  deepCloneTransaction (trs) {
+  deepCloneTransaction(trs) {
     const newTransaction = { ...trs }
     // if (newTransaction.height) {
     //   delete newTransaction.height

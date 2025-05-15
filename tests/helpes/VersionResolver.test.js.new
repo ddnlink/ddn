@@ -1,0 +1,17 @@
+const { VersionResolver } = require('../../src/utils/version-resolver')
+
+describe('VersionResolver test', () => {
+  beforeAll(async () => {
+  })
+
+  afterAll(async () => {
+  })
+
+  test('version test', async () => {
+    // let height = 2
+    const instance = VersionResolver.instance
+    expect(instance.moduleVersion).toBe('0.3.2')
+    expect(instance.significantVersion).toBe('0.3')
+  })
+
+})

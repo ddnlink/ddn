@@ -713,7 +713,7 @@ await DdnJS.assetPlugin.createPluginAsset(10, assetEvidence, secret, secondSecre
 const options = {
     name: 'test contract', // 合约名称
     desc: '合约描述',       // 合约描述
-    gas_limit: '100000',   // 本次交易消耗的最大gas
+    gasLimit: '100000',   // 本次交易消耗的最大gas
     owner: 'DM3j18U3zmW87HcwGPZviaRrnmZfhJmYoG', //合约所有者地址，默认是交易发起人
     version: 'v1.0',       // 合约代码版本
     code: '...' // 略, 合约的ts源代码，可以用fs.readFileSync('./contract.ts')的方式读取
@@ -734,7 +734,7 @@ console.log(JSON.stringify(trs))
 	"asset": {
 		"contract": {
 			"name": "test contract",
-			"gas_limit": 5000,
+			"gasLimit": 5000,
 			"owner": "D4g4BztXXU2vguNhx45qGSVB9GtSTp8329",
 			"desc": "test contract",
 			"version": "1.0.0",
@@ -764,7 +764,7 @@ curl --location --request POST 'http://127.0.0.1:8001/peer/transactions' \
         "asset": {
             "contract": {
 				"name": "test contract",
-				"gas_limit": 5000,
+				"gasLimit": 5000,
 				"owner": "D4g4BztXXU2vguNhx45qGSVB9GtSTp8329",
 				"desc": "test contract",
 				"version": "1.0.0",
@@ -802,12 +802,12 @@ curl --location --request POST 'http://127.0.0.1:8001/peer/transactions' \
 ```js
 const options = {
     id: 'xxxxxx',         // 合约地址，唯一标识
-    gas_limit: 10000,     // 本次调用最大可消耗的gas
+    gasLimit: 10000,     // 本次调用最大可消耗的gas
     method: 'transfer',   // 合约方法名，合约代码中确实存在的方法
     args: ['200', 'DDN'], // 方法变量，按照合约中方法参数顺序，以数组的形式提供
 }
 // 构造交易数据
-const trs = DdnJS.contract.send(options, secret)
+const trs = DdnJS.contract.transfer(options, secret)
 console.log(JSON.stringify(trs))
 {
     "type": DdnUtils.assetTypes.CONTRACT_TRANSFER, // 12

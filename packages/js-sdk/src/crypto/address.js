@@ -13,33 +13,30 @@ import { createHash, getHash } from './nacl'
  * 6. 检验前缀的合法性（根据主网参数校验），注意大小写。
  * Note: address.slice(0, -4) === address.slice(0, address.length - 4)
  */
-function isAddress (address, tokenPrefix) {
-  if (typeof address !== 'string') {
-    return false
-  }
-  if (!base58check.decodeUnsafe(address.slice(1))) {
-    return false
-  }
-  if ([tokenPrefix].indexOf(address[0]) === -1) {
-    return false
-  }
-  return true
-}
-
 function generateAddress (publicKey, tokenPrefix) {
   if (typeof publicKey === 'string') {
     publicKey = Buffer.from(publicKey, 'hex')
   }
   // const h1 = Buffer.from(nacl.hash(publicKey))
   const h1 = createHash(publicKey)
-  const h2 = new RIPEMD160().update(h1).digest() // fixme: 2020.9.20 这里的参数只能使用 string ？
+  const h2 = new RIPEMD160().update(h1).digest()
   return tokenPrefix + base58check.encode(h2)
 }
 
-function generateContractAddress (contract, tokenPrefix) {
-  const h1 = getHash(contract, true, true, true)
-  const h2 = new RIPEMD160().update(h1).digest() // fixme: 2020.9.20 这里的参数只能使用 string ？
-  return tokenPrefix + base58check.encode(h2)
+// 合约地址生成
+function generateContractAddress (info, contractPrefix) {
+  const h1 = createHash(info)
+  const h2 = new RIPEMD160().update(h1).digest()
+  return contractPrefix + base58check.encode(h2)
 }
 
-export { RIPEMD160, generateAddress, generateContractAddress, isAddress }
+function isAddress (address, tokenPrefix) {
+  return typeof address === 'string' && base58check.decodeUnsafe(address.slice(1)) && address[0] === tokenPrefix
+}
+
+function isContractAddress(address, contractPrefix) {
+  return typeof address === 'string' && base58check.decodeUnsafe(address.slice(1)) && address[0] === contractPrefix
+}
+
+
+export { RIPEMD160, generateAddress, generateContractAddress, isAddress, isContractAddress }
